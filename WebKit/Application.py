@@ -456,7 +456,7 @@ class Application(Configurable,CanContainer):
 		else:
 			return self._contexts.get(name, default)
 
-	def hasCookie(self, name):
+	def hasContext(self, name):
 		return self._contexts.has_key(name)
 
 	def setContext(self, name, value):
