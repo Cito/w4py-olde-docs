@@ -20,6 +20,8 @@ from MiscUtils.Configurable import Configurable
 
 _alltest_config = None
 
+_log = logging.getLogger(__name__)
+
 	
 class _AllTestsConfig( Configurable ):
 	'''
@@ -28,23 +30,46 @@ class _AllTestsConfig( Configurable ):
 	If individual tests need some configuration, put it here so it is easy for
 	a new user to configure all the tests in one place.
 	'''
+
+	_DEFAULT_CONFIG = '''
+{	# Edit this file to activate more tests
+
+	# Turn on tests that use MySQL?
+	'hasMysql' : False,
+
+	# If hasMysql is true, then these are used to connect:
+	'mysqlTestInfo' : {
+
+		'extraSysPath' : ['../SOMETHING/../MySQL-python-1.0.0/build/lib'],	# Where is MySQLdb lib located?
+		
+		'mysqlClient'   : '/usr/local/mysql/bin/mysql',
+		'database'      : 'test',  # Test case uses this, but UserManagerTest.mkmodel/Settings.config also defines it.
+
+		# This is passed to MySQLObjectStore()
+		'DatabaseArgs'   : {
+#			'host'    : 'localhost',
+#			'port'    : '3306',
+			'user'    : 'test',
+			'passwd'  : '',
+		},
+	}
+}
+'''
 	
 	def configFilename(self):
-		return os.path.join( os.path.dirname(__file__), 'AllTests.config')
+		theFilename = os.path.join( os.path.dirname(__file__), 'AllTests.config')
+		
+		# The first time we are run, write a new configuration file.
+		if not os.path.exists( theFilename ):
+			_log.info( ' Creating new configuration file at "%s".  You can customize it to run more tests.', theFilename )
+			fp= open(theFilename, 'w')
+			fp.write( _AllTestsConfig._DEFAULT_CONFIG )
+			fp.close()
+			
+		return theFilename
 		
 	def defaultConfig(self):
-		default = {
-			'mysql_test_info' : {
-				'has_mysql'      : True,
-				'mysql_client'   : '/usr/local/mysql/bin/mysql',
-# 				'machine'        : 'localhost',
-# 				'port'           : '3306',
- 				'database'       : 'test',
-# 				'user'           : 'test',
-# 				'password'       : '',
-				'extra_sys_path' : ['../../extern/MySQL-python-1.0.0/build/lib'],
-			}	# mysql_test_info
-		}
+		default = eval( _AllTestsConfig._DEFAULT_CONFIG )
 		return default
 
 
@@ -74,7 +99,7 @@ def checkAndAddPaths( listOfPaths ):
 			site.addsitedir( ap )
 		else:
 			numBadPaths = numBadPaths + 1
-			print 'WARNING: Could not find "%s".  Please edit "pythonPaths" in this script for your environment.' % ap
+			print 'WARNING: Trying to add paths to sys.path, but could not find "%s".' % ap
 	
 	return numBadPaths	# 0 = all were found
 	
@@ -112,6 +137,7 @@ if __name__ == '__main__':
 	if len(sys.argv) == 1:
 		testnames = alltestnames
 		verbosity = 2
+		logging.getLogger().setLevel( logging.INFO )
 		print '\n\nRunning All Webware Tests:'
 	else:
 		testnames = sys.argv[1:]
