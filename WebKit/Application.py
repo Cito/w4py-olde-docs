@@ -306,6 +306,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			# Error handling
 			'ShowDebugInfoOnErrors': 1,
 			'IncludeFancyTraceback': 0,
+			'IncludeEditLink':       0,
 			'FancyTracebackContext': 5,
 			'UserErrorMessage':      'The site is having technical difficulties with this page. An error has been logged, and the problem will be fixed as soon as possible. Sorry!',
 			'ErrorLogFilename':      'Logs/Errors.csv',
@@ -1076,9 +1077,14 @@ class Application(ConfigurableForServerSidePath, Object):
 		transaction.setServlet(inst)
 
 	def handleExceptionInTransaction(self, excInfo, transaction):
+		if self.setting('IncludeEditLink', 0):
+			req = transaction.request()
+			opt = {'editlink': req.adapterName() + "/Admin/EditFile"}
+		else:
+			opt = None
 		if self._exceptionHandlerClass is None:
 			self._exceptionHandlerClass = ExceptionHandler
-		self._exceptionHandlerClass(self, transaction, excInfo)
+		self._exceptionHandlerClass(self, transaction, excInfo, opt)
 
 	def handleException(self, excInfo=None):
 		"""Handle the exception by calling the configured ExceptinHandler.

@@ -72,7 +72,8 @@ class ExceptionHandler(Object):
 
 	## Init ##
 
-	def __init__(self, application, transaction, excInfo):
+	def __init__(self, application, transaction, excInfo,
+				 formatOptions=None):
 		Object.__init__(self)
 
 		# Keep references to the objects
@@ -84,6 +85,8 @@ class ExceptionHandler(Object):
 			self._res = self._tra.response()
 		else:
 			self._req = self._res = None
+
+		self._formatOptions = formatOptions
 
 		# Make some repairs, if needed. We use the transaction & response to get the error page back out
 		# @@ 2000-05-09 ce: Maybe a fresh transaction and response should always be made for that purpose
@@ -297,7 +300,7 @@ class ExceptionHandler(Object):
 	def writeTraceback(self):
 		self.writeTitle('Traceback')
 		self.write('<p> <i>%s</i>' % self.servletPathname())
-		self.write(HTMLForException(self._exc))
+		self.write(HTMLForException(self._exc, self._formatOptions))
 
 	def writeMiscInfo(self):
 		self.writeTitle('MiscInfo')
