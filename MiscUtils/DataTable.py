@@ -4,7 +4,9 @@ DataTable.py
 
 INTRODUCTION
 
-This class is useful for reading delimited text files which typically have well defined columns or fields with several rows each of which can be thought of as a record.
+This class is useful for reading delimited text files which typically
+have well defined columns or fields with several rows each of which can
+be thought of as a record.
 
 Using a DataTable can be as easy as using lists and dictionaries:
 
@@ -18,7 +20,8 @@ Or even:
 	for row in table:
 		print '%(name)s %(phoneNumber)s' % row
 
-The above print statement relies on the fact that rows can be treated like dictionaries, using the column headings as keys.
+The above print statement relies on the fact that rows can be treated
+like dictionaries, using the column headings as keys.
 
 You can also treat a row like an array:
 
@@ -34,34 +37,46 @@ COLUMNS
 Column headings can have a type specification like so:
 	name, age:int, zip:int
 
-Possible types include string, int, float and datetime. However, datetime is not well supported right now.
+Possible types include string, int, float and datetime. However,
+datetime is not well supported right now.
 
-String is assumed if no type is specified but you can set that assumption when you create the table:
+String is assumed if no type is specified but you can set that
+assumption when you create the table:
 
 		table = DataTable(headings, defaultType='float')
 
-Using types like int and float will cause DataTable to actually convert the string values read from a file to these types so that you can use them in natural operations. For example:
+Using types like int and float will cause DataTable to actually convert
+the string values read from a file to these types so that you can use
+them in natural operations. For example:
 
 	if row['age']>120:
 		self.flagData(row, 'age looks high')
 
-As you can see, each row can be accessed as a dictionary with keys according the column headings. Names are case sensitive.
+As you can see, each row can be accessed as a dictionary with keys
+according the column headings. Names are case sensitive.
 
 
 ADDING ROWS
 
-Like Python lists, data tables have an append() method. You can append TableRecords, or you pass a dictionary, list of object, in which case a TableRecord is created based on given values. See the method docs below for more details.
+Like Python lists, data tables have an append() method. You can append
+TableRecords, or you pass a dictionary, list of object, in which case a
+TableRecord is created based on given values. See the method docs below
+for more details.
 
 
 FILES
 
-By default, the files that DataTable reads from are expected to be comma-separated value files.
+By default, the files that DataTable reads from are expected to be
+comma-separated value files.
 
-Limited comments are supported: A comment is any line whose very first character is a #. This allows you to easily comment out lines in your data files without having to remove them.
+Limited comments are supported: A comment is any line whose very first
+character is a #. This allows you to easily comment out lines in your
+data files without having to remove them.
 
 Whitespace around field values is stripped.
 
-You can control all this behavior through the arguments found int he initializer and the various readSomething() methods:
+You can control all this behavior through the arguments found in the
+initializer and the various readSomething() methods:
 
 	...delimiter=',', allowComments=1, stripWhite=1
 
@@ -69,7 +84,8 @@ For example:
 
 	table = DataTable('foo.tabbed', delimiter='\t', allowComments=0, stripWhite=0)
 
-You should access these parameters by their name since additional ones could appear in the future, thereby changing the order.
+You should access these parameters by their name since additional ones
+could appear in the future, thereby changing the order.
 
 
 NON-FILE TABLES
@@ -93,24 +109,33 @@ COMMON USES
 
 * Servers can use data table to read and write log files.
 
-* Programs can keep configuration and other data in simple comma-separated text files and use DataTable to access them. For example, a web site could read it's sidebar links from such a file, thereby allowing people who don't know Python (or even HTML) to edit these links without having to understand other implementation parts of the site.
+* Programs can keep configuration and other data in simple comma-
+separated text files and use DataTable to access them. For example, a
+web site could read it's sidebar links from such a file, thereby
+allowing people who don't know Python (or even HTML) to edit these
+links without having to understand other implementation parts of the
+site.
 
 
 MORE DOCS
 
-Some of the methods in this module have worthwhile doc strings to look at.
+Some of the methods in this module have worthwhile doc strings to look
+at.
 
 
 TO DO
 
 * Better support for datetime.
-* Add error checking that a column name is not a number (which could cause problems).
-* _types and BlankValues aren't really packaged, advertised or documented for customization by the user of this module.
+* Add error checking that a column name is not a number (which could
+  cause problems).
+* _types and BlankValues aren't really packaged, advertised or
+  documented for customization by the user of this module.
 * DataTable:
 	* Parameterize the TextColumn class.
 	* Parameterize the TableRecord class.
 	* More list-like methods such as insert()
-	* writeFileNamed() is flawed: it doesn't write the table column type
+	* writeFileNamed() is flawed: it doesn't write the table column
+	  type
 	* Doesn't support quoted values and embedded commas
 	* Should it inherit from UserList?
 * Look for various @@ tags through out the code.
