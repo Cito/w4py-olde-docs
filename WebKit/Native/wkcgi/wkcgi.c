@@ -12,8 +12,8 @@
 
 
 int log_message(char * msg) {
-  //	printf (msg);
-	return 0;
+//  	fprintf (stderr, msg);
+ 	return 0;
 }
 
 
@@ -103,38 +103,48 @@ int main(char* argc, char* argv[]) {
 	int sock = 0;
 	DictHolder* dicts;
 	char msgbuf[500];
-	char* addrstr = /*"localhost";//*/ "127.0.0.1";
-	int port = 8086;
+	//	char* addrstr = /*"localhost";//*/ "127.0.0.1";
+	//	int port = 8086;
 	unsigned long addr;
 	EnvItem **envItems;
-	int retryattempts = 10;
-	int retrydelay = 1;
+	//	int retryattempts = 10;
+	//	int retrydelay = 1;
 	int retrycount = 30;
+	Configuration* config;
 
 #ifdef WIN32
 	winStartup();
 #endif
 
-	addr = resolve_host(addrstr);
+	config = malloc(sizeof(Configuration));
+	
+	GetConfiguration(config);
+	
+	//	retryattempts = config->retry_attempts;
+	//	retrydelay = config->retry_delay;
+	//	addrstr = config->host;
+	//	port = config->port;
+
+	addr = resolve_host(config->host);  //(addrstr);
 	log_message("Got addr translation");
 
 
 /*	while (sock < 0) {
-		sock = wksock_open(addr, port);
+		sock = wksock_open(addr, config->port);
 	}
 	*/
 
 	while (sock <= 0 ) {
-	  sock = wksock_open(addr, port);
-	  if (sock > 0 || (retrycount > retryattempts)) break;
+	  sock = wksock_open(addr, config->port);
+	  if (sock > 0 || (retrycount > config->retry_attempts)) break;
 	//	if (errno != EAGAIN) break;
-	  sprintf(msgbuf, "Couldn't connect to AppServer,attempt %i of %i", retrycount, retryattempts);
+	  sprintf(msgbuf, "Couldn't connect to AppServer,attempt %i of %i", retrycount, config->retry_attempts);
 	  log_message(msgbuf);
 	  retrycount++;
 #ifdef WIN32
-	  Sleep(retrydelay*100);
+	  Sleep(config->retry_delay*100);
 #else
-	  sleep(retrydelay);
+	  sleep(config->retry_delay);
 #endif
 	}
 
@@ -144,7 +154,7 @@ int main(char* argc, char* argv[]) {
 	dicts = createDicts(envItems);
 
 	freeEnviron(envItems);
-	
+
 	log_message("created dicts");
 
 
