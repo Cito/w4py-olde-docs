@@ -44,7 +44,8 @@ class MakeAppWorkDir:
 	Each step can be overridden in a derived class if needed.
 	"""
 
-	def __init__(self, webWareDir, workDir, verbose=1, sampleContext="MyContext"):
+	def __init__(self, webWareDir, workDir, verbose=1,
+		     sampleContext="Context", osType=None):
 		"""Initializer for MakeAppWorkDir.  Pass in at least the
 		Webware directory and the target working directory.  If you
 		pass None for sampleContext then the default context will the
@@ -63,7 +64,9 @@ class MakeAppWorkDir:
 		self._sample = sampleContext
 		if sampleContext is not None:
 			self._substVals["DEFAULT"] = sampleContext
-
+		if osType is None:
+			osType = os.name
+		self._osType = osType
 
 	def buildWorkDir(self):
 		"""These are all the (overridable) steps needed to make a new runtime direcotry."""
@@ -82,7 +85,6 @@ class MakeAppWorkDir:
 
 		theDirs = [ self._workDir,
 			    os.path.join(self._workDir, "Cache"),
-			    os.path.join(self._workDir, "Cans"),  # TODO: should this one be here?
 			    os.path.join(self._workDir, "Configs"),
 			    os.path.join(self._workDir, "ErrorMsgs"),
 			    os.path.join(self._workDir, "Logs"),
@@ -95,11 +97,6 @@ class MakeAppWorkDir:
 			else:
 				os.mkdir(aDir)
 				self.msg("\t%s created." % aDir)
-
-		# Copy the contents of the Cans directory from WebKit/Cans
-		for name in glob.glob(os.path.join(self._webKitDir, "Cans", "*.py")):
-			newname = os.path.join(self._workDir, "Cans", os.path.basename(name))
-			shutil.copyfile(name, newname)
 
 		self.msg("\n")
 
@@ -119,13 +116,14 @@ class MakeAppWorkDir:
 		Make a copy of any other necessary files in the new work dir.
 		"""
 		self.msg("Copying files.")
-		otherFiles = [("404Text.txt",   0),
-					  ("AppServer",     1),
-					  ("AppServer.bat", 1),
-					  ("Adapters/OneShot.cgi",   0),
-					  ("Adapters/WebKit.cgi",    0),
+		otherFiles = [("404Text.txt",   0, None),
+					  ("AppServer",     1, 'posix'),
+					  ("AppServer.bat", 1, 'nt'),
+					  ("Adapters/WebKit.cgi",    0, None),
 					  ]
-		for name, doChmod in otherFiles:
+		for name, doChmod, osType in otherFiles:
+			if osType and osType != self._osType:
+				continue
 			oldname = os.path.join(self._webKitDir, name)
 			newname = os.path.join(self._workDir, os.path.basename(name))
 			self.msg("\t%s" % newname)
@@ -143,16 +141,18 @@ class MakeAppWorkDir:
 		scripts.
 		"""
 		self.msg("Creating launcher scripts.")
-		scripts = [ ("Launch.py", _Launch_py),
-			        ("NTService.py", _NTService_py),
+		scripts = [ ("Launch.py", _Launch_py, None),
+			        ("NTService.py", _NTService_py, 'nt'),
 			    ]
-		for name, template in scripts:
+		for name, template, osType in scripts:
+			if osType and osType != self._osType:
+				continue
 			filename = os.path.join(self._workDir, name)
 			open(filename, "w").write(template % self._substVals)
 			os.chmod(filename, 0755)
 			self.msg("\t%s created." % filename)
 
-		for name in ["OneShot.cgi", "WebKit.cgi"]:
+		for name in ["WebKit.cgi"]:
 			filename = os.path.join(self._workDir, name)
 			content = open(filename).readlines()
 			output  = open(filename, "wt")
