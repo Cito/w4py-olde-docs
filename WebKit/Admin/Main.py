@@ -47,6 +47,7 @@ class Main(AdminPage):
 		self.menuItem('Activity log', 'Access', self.fileSize('ActivityLogFilename'))
 		self.menuItem('Error log', 'Errors', self.fileSize('ErrorLogFilename'))
 		self.menuItem('Show config', 'Config')
+		self.menuItem('Servlet cache by path', 'ServletCacheByPath')
 		self.endMenu()
 
 	def startMenu(self):
