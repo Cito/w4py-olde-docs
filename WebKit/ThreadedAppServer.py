@@ -98,23 +98,32 @@ class ThreadedAppServer(AppServer):
 				self.requestQueue.put(rh)
 
 	def threadloop(self):
-		while self.running:
-			try:
-				rh=self.requestQueue.get()
-				if rh == None: #None means time to quit
-					break
-
-				rh.handleRequest()
-				rh.close()
+		self.initThread()
+		try:
+			while self.running:
 				try:
-					self.rhQueue.put(rh)
-				except Queue.Full:
-					print ">> rhQueue Full"
-					pass				#do I want this?
-##				sys.stdout.write(".")
-##				sys.stdout.flush()
-			except Queue.Empty:
-				pass
+					rh=self.requestQueue.get()
+					if rh == None: #None means time to quit
+						break
+					rh.handleRequest()
+					rh.close()
+					try:
+						self.rhQueue.put(rh)
+					except Queue.Full:
+						#print ">> rhQueue Full"
+						pass				#do I want this?
+				except Queue.Empty:
+					pass
+		finally:
+			self.delThread()
+
+	def initThread(self):
+		''' Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. '''
+		pass
+
+	def delThread(self):
+		''' Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. '''
+		pass
 
 	def shutDown(self):
 		self._shuttingDown = 1
