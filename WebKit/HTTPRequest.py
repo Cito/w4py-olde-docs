@@ -3,6 +3,7 @@ from Request import Request
 from WebUtils.Cookie import Cookie
 import cgi
 from types import ListType
+import os
 
 
 class HTTPRequest(Request):
@@ -216,6 +217,13 @@ class HTTPRequest(Request):
 					self._serverRootPath = self._serverRootPath + "../"
 				else: break
 		return self._serverRootPath
+
+	def fsPath(self):
+		""" The filesystem path of the request, using the webserver's docroot"""
+		docroot = self._environ['DOCUMENT_ROOT']
+		requri = self._environ['REQUEST_URI'][1:]#strip leading / 
+		fspath = os.path.join(docroot,requri)
+		return fspath
 
 
 
