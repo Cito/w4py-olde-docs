@@ -179,9 +179,15 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		print
 
 		try:
+			# First try the working dir
 			self._404Page = open(os.path.join(self._serverSidePath,"404Text.txt"),"r").read()
 		except:
-			self._404Page = """404 Error<p>File Not Found: %s"""
+			try:
+				# Then try the directory this file is located in
+				self._404Page = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "404Text.txt"),"r").read()
+			except:
+				# Fall back on a simple string
+				self._404Page = """404 Error<p>File Not Found: %s"""
 
 ### End __init__
 

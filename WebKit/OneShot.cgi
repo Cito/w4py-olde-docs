@@ -18,6 +18,8 @@ try:
 	webKitDir = os.path.join(WebwareDir, 'WebKit')
 	if AppWorkDir is None:
 		AppWorkDir = webKitDir
+	else:
+		sys.path.insert(1, AppWorkDir)
 
 	import WebKit.OneShotAdapter
 	WebKit.OneShotAdapter.main(AppWorkDir)

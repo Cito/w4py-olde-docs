@@ -49,17 +49,9 @@ FUTURE
 	  mechanism.
 """
 
-# Fix the current working directory -- this gets initialized incorrectly
-# for some reason when run as an NT service.
-import os
-try:
-	os.chdir(os.path.abspath(os.path.dirname(__file__)))
-except:
-	pass
-
 import win32serviceutil
 import win32service
-import sys, time
+import os, sys, time, cStringIO
 
 class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 	_svc_name_ = 'WebKit'
@@ -67,13 +59,13 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 
 	def __init__(self, args):
 		win32serviceutil.ServiceFramework.__init__(self, args)
-		### Make all output go nowhere.  Otherwise, print statements cause
-		### the service to crash, believe it or not.
-		### For debugging, you can instead open up real files, if
-		### necessary.
-		sys.stdout = open('nul', 'w')
-		sys.stderr = open('nul', 'w')
 		self.server = None
+		# Fix the current working directory -- this gets initialized incorrectly
+		# for some reason when run as an NT service.
+		try:
+			os.chdir(os.path.abspath(os.path.dirname(__file__)))
+		except:
+			pass
 
 	def SvcStop(self):
 		# Before we do anything, tell the SCM we are starting the stop process
@@ -86,11 +78,26 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 
 	def SvcDoRun(self):
 		try:
+			# Temporarily suck up stdout and stderr into a cStringIO
+			stdoutAndStderr = cStringIO.StringIO()
+			sys.stdout = sys.stderr = stdoutAndStderr
+			# Import the ThreadedAppServer
 			if '' not in sys.path:
 				sys.path = [''] + sys.path
 			os.chdir(os.pardir)
 			from WebKit.ThreadedAppServer import ThreadedAppServer
-			self.server = ThreadedAppServer()
+			self.server = ThreadedAppServer(self.workDir())
+			# Now switch the output to the logfile specified in the appserver's config
+			# setting "NTServiceLogFilename"
+			if self.server.hasSetting('NTServiceLogFilename'):
+				sys.stdout = sys.stderr = open(self.server.setting('NTServiceLogFilename'), 'a+')
+				sys.stdout.write('-' * 68 + '\n')
+				sys.stdout.write(stdoutAndStderr.getvalue())
+			else:
+				# Make all output go nowhere.  Otherwise, print statements cause
+				# the service to crash, believe it or not.
+				sys.stdout = sys.stderr = open('nul', 'w')
+			del stdoutAndStderr
 			self.server.mainloop()
 			self.server.shutDown()
 		except Exception, e: #Need to kill the Sweeper thread somehow
@@ -106,6 +113,9 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 				self.server.running=0
 				self.server.shutDown()
 			raise
+
+	def workDir(self):
+		return None
 
 if __name__=='__main__':
 	win32serviceutil.HandleCommandLine(ThreadedAppServerService)

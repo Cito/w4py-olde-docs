@@ -146,6 +146,7 @@ class MakeAppWorkDir:
 		"""
 		self.msg("Creating launcher scripts.")
 		scripts = [ ("Launch.py", _Launch_py),
+			        ("NTService.py", _NTService_py),
 			    ]
 		for name, template in scripts:
 			filename = os.path.join(self._workDir, name)
@@ -157,7 +158,7 @@ class MakeAppWorkDir:
 			filename = os.path.join(self._workDir, name)
 			content = open(filename).readlines()
 			output  = open(filename, "wt")
- 			for line in content:
+			for line in content:
 				s = string.split(line)
 				if s and s[0] == 'WebwareDir' and s[2] == 'None':
 					line = "WebwareDir = '%(WEBWARE)s'\n" % self._substVals
@@ -259,6 +260,35 @@ def main(args):
 
 if __name__=='__main__':
 	main(sys.argv)
+"""
+
+#----------------------------------------------------------------------
+# A template for the NTService script
+
+_NTService_py = """\
+import os, re, sys, win32serviceutil
+
+# settings
+appWorkPath = '%(WORKDIR)s'
+webwarePath = '%(WEBWARE)s'
+serviceName = 'WebKit'
+serviceDisplayName = 'WebKit App Server'
+
+# ensure Webware is on sys.path
+sys.path.insert(0, webwarePath)
+
+# Construct customized version of ThreadedAppServerService that uses our
+# specified service name, service display name, and working dir
+from WebKit.ThreadedAppServerService import ThreadedAppServerService
+class NTService(ThreadedAppServerService):
+	_svc_name_ = serviceName
+	_svc_display_name_ = serviceDisplayName
+	def workDir(self):
+		return appWorkPath
+
+# Handle the command-line args
+if __name__=='__main__':
+	win32serviceutil.HandleCommandLine(NTService)
 """
 
 #----------------------------------------------------------------------
