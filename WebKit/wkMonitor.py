@@ -48,7 +48,7 @@ maxStartTime = 120
 
 cfg = open("Configs/AppServer.config")
 cfg = eval(cfg.read())
-addr = ((cfg['Host'],cfg['Port']))
+addr = ((cfg['Host'],cfg['Port']-1))
 
 debug = 0
 
@@ -56,13 +56,14 @@ debug = 0
 def createServer():
 	"""Unix only, after forking"""
 	print "Starting Server"
-	AsyncThreadedAppServer.main()
+	AsyncThreadedAppServer.main(1)
 
 
 def startupCheck():
 	"""
 	Make sure the AppServer starts up correctly.
 	"""
+	global debug
 	count = 0
 	while 1: #give the server a chance to start
 		if checkServer(0):
@@ -85,6 +86,7 @@ def startServer(killcurrent = 1):
 	Start the AppServer.
 	"""
 	global srvpid
+	global debug
 	if os.name == 'posix':
 		if killcurrent:
 			os.kill(srvpid,signal.SIGQUIT)
@@ -97,9 +99,9 @@ def startServer(killcurrent = 1):
 		if killcurrent:
 			win32process.TerminateProcess(srvpid,0)
 		print "Starting %s" % appserver
-		srvpid = os.spawnve(os.P_NOWAIT, pythonexec, [pythonexec,appserver],os.environ)
+		srvpid = os.spawnve(os.P_NOWAIT, pythonexec, [pythonexec,appserver,"-monitor"],os.environ)
 	else:
-		print "I don't recognize your OS!\nSorry, but I must quit.\n You can run the AppServer b y itself, though!"
+		print "I don't recognize your OS!\nSorry, but I must quit.\n You can run the AppServer by itself, though!"
 		sys.exit(0)
 	
 	
@@ -108,21 +110,22 @@ def checkServer(restart = 1):
 	"""
 	Send a check request to the AppServer.  If restart is 1, then
 	attempt to restart the server if we can't connect to it.
-	This function needs more thought, b/c this will kill a server that is
-	running but is VERY busy.
 
-A good fix:
-Have this communicate with the AppServer on a port different than the standard (maybe -1).  That way it won't get blocked if a busy server reaches it's maximum connection queue.
-	
+	This function could also be used to see how busy an AppServer is by measuring the delay in
+	getting a response when using the standard port.
 	"""
+	global debug
 	try:
+		sts = time.time()
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect(addr)
 		s.send("STATUS")
 		s.shutdown(1)
 		resp = s.recv(9)#up to 1 billion requests!
+		monwait = time.time() - sts
 		if debug:
 			print "Processed %s Requests" % resp
+			print "Delay %s" % monwait
 		return 1
 	except:
 		if restart:
@@ -134,6 +137,7 @@ Have this communicate with the AppServer on a port different than the standard (
 
 
 def main():
+	global debug
 	startServer(0)
 	startupCheck()
 	
@@ -141,12 +145,15 @@ def main():
 		try: 
 			time.sleep(interval)
 			checkServer()
-		except Exception , e:
-			print e
+			if debug:
+				print "Checking Server"
+		except:
+			print "Exiting Monitor"
 			if os.name == 'posix':
 				print "Killing AppServer"
 				os.kill(srvpid,signal.SIGQUIT)
 			else:
+				print "Killing AppServer"
 				win32process.TerminateProcess(srvpid,0)
 			sys.exit()
 		

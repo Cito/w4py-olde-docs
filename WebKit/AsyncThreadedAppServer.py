@@ -250,11 +250,43 @@ class RequestHandler(asyncore.dispatcher):
 	def log(self, message):
 		pass
 
+class Monitor(asyncore.dispatcher):
+	"""
+	This is a dispatch class that handles requests on the monitor port.
+	"""
 
+	def __init__(self, server):
+		self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+		addr = ((server.address()[0],server.address()[1]-1))
+		self.bind(addr)
+		self.listen(5)
+		self.server = server
 
-def main():
+	def handle_accept(self):
+		rh = None
+		try:
+			rh=self.server.rhQueue.get_nowait()
+		except Queue.Empty:
+			if self.server.rhCreateCount < self.server._maxRHCount:
+				rh = RequestHandler(self.server)
+				self.server.rhCreateCount = self.server.rhCreateCount + 1
+			else:
+				print "Refusing Connection"
+				return
+		conn,addr = self.accept()
+		conn.setblocking(0)
+		rh.activate(conn)
+
+	def log(self, message):
+		pass
+
+		
+
+def main(monitor = 0):
 	try:
 		server = AsyncThreadedAppServer()
+		if monitor:
+			monitor = Monitor(server)
 		asyncore.loop()
 	except Exception, e: #Need to kill the Sweeper thread somehow
 		print e
@@ -263,7 +295,13 @@ def main():
 		server.shutDown()
 		del server
 		sys.exit()
+		raise Exception()
 
 
 if __name__=='__main__':
-	main()
+	import sys
+	if len(sys.argv) > 1 and sys.argv[1] == "-monitor":
+		print "Using Monitor"
+		main(1)
+	else:
+		main(0)
