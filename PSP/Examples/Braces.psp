@@ -19,12 +19,13 @@ return "Braces Test"
 <p>
 <h1 align=center>Braces Test</h1>
 <p>
+<!--
 <table bgcolor='black' width='100%' border=0  cellspacing=0 align=center>
 <tr><td></td></tr>
 <tr><td align=center><font color='white' size=+6><b>Testing</b></font></td></tr>
 <tr><td align=center><font color='red' size=+4><b>Experimental</b></font></td></tr>
 </table>
-
+-->
 <p>
 <p>Dave Wallace (dwallace@delanet.com) has written a module that will convert python code that uses braces for indentation into properly whitespace indented python syntax.  This is pretty nifty, and very useful for PSP.  
 <p>  The whitespace significance in python syntax is difficult in PSP because HTML is the exact opposite.  Whitespace doesn't matter, and neither do carriage-returns or anything else.  So that makes the melding of Python and HTML a challenge.<p>
@@ -43,3 +44,4 @@ I'm number <%=i%>  <br>
 
 <p>Click on ViewSource over on the left to see the source for this page.
 <p><p>
+
