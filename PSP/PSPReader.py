@@ -156,6 +156,13 @@ class PSPReader:
 		lines = handle.readlines() #(self, reader, linearray, fileid, includestack, stream):
 		#mark = Mark(self, lines, fileid, None, stream, self._ctxt.getBaseUri(),encoding)
 
+		z=0
+		for i in lines:
+			lines[z]=string.replace(i,'\r\n','\n')
+			z=z+1
+		
+		stream=string.join(lines,'')
+
 		if self.current == None:
 			#self.current = mark
 			self.current = mark = Mark(self,lines, fileid, stream, self._ctxt.getBaseUri(),encoding)
@@ -238,10 +245,10 @@ class PSPReader:
 			return
 			# I may have broken something here. I changed the first line above to <= from < and took out the below 5/20/00
 		prog = len(self.current.linearray[self.current.row]) - self.current.col
-			# if prog == length:  #I'm gonna have off by 1 errs, try to handle it
-			#    self.advanceLine()
-			# return
-		while prog < length:
+		#if prog == length:  #I'm gonna have off by 1 errs, try to handle it
+		#	self.advanceLine()
+		#	return
+		while prog < length: 
 			self.advanceLine()
 			if prog + len(self.current.linearray[self.current.row]) > length :
 				self.current.col = length - prog
@@ -289,10 +296,10 @@ class PSPReader:
 
     
 
-    def peekChar(self,cnt=0):
+    def peekChar(self,cnt=1):
 		#print self.current.cursor,'\n'
 		if self.hasMoreInput():
-			return self.current.stream[self.current.cursor+cnt]
+			return self.current.stream[self.current.cursor:self.current.cursor+cnt]
 		raise "EndofStream"
 
     def skipSpaces(self):
@@ -310,6 +317,8 @@ class PSPReader:
 		return chars
 
     def hasMoreInput(self):
+		#print self.current.linearray[self.current.row]
+		#print 'hasmorein->',self.current.cursor,' ',len(self.current.stream)
 		if self.current.cursor >= len(self.current.stream):
 			while self.popFile():
 				if self.current.cursor < len(self.current.stream) :
