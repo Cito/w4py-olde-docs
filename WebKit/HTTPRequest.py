@@ -282,12 +282,10 @@ class HTTPRequest(Request):
 	_pvars = ('_absolutepath', '_serverSidePath', '_serverSideContextPath',
 		  '_adapterName')
 
-		
-	def printstate(self,msg=""):
-		print "** request state **",msg
-		print self.getstate()
-
 	def getstate(self):
+		"""
+		Debugging and testing code. This will likely be removed in the future.
+		"""
 		rv = []
 		env = self._environ
 		for key in self._evars:
