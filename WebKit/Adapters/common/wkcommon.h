@@ -5,6 +5,7 @@
 #include <ctype.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
 #ifdef WIN32
 #include <winsock.h>
 #include <io.h>
@@ -17,6 +18,10 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <errno.h>
+#ifdef __APPLE__
+#include <netinet/in.h>
+#include <nameser.h>
+#endif
 #include <resolv.h>
 #endif
 
