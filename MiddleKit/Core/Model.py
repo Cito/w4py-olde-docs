@@ -51,7 +51,9 @@ class Model(Configurable):
 		self._name = None
 		self.readParents()
 		self.klasses().read(os.path.join(filename, 'Classes.csv'))
+		self.awakeFromRead()
 
+	def awakeFromRead(self):
 		# create containers for all klasses, uniqued by name
 		models = list(self._searchOrder)
 		models.reverse()
@@ -75,14 +77,19 @@ class Model(Configurable):
 		self._allKlassesByName = byName
 		self._allKlassesInOrder = inOrder
 
-	def readParents(self):
+		self._klasses.awakeFromRead()
+
+
+	def readParents(self, parentFilenames=None):
 		"""
 		Reads the parent models of the current model, as
 		specified in the 'Inherit' setting.
 
 		The attributes _parents and _searchOrder are set.
 		"""
-		for filename in self.setting('Inherit', []):
+		if parentFilenames is None:
+			parentFilenames = self.setting('Inherit', [])
+		for filename in parentFilenames:
 			filename = os.path.abspath(os.path.join(os.path.dirname(self._filename), filename))
 			if self._allModelsByFilename.has_key(filename):
 				model = self._allModelsByFilename[filename]

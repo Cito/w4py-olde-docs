@@ -92,9 +92,11 @@ class Klasses(ModelObject, UserDict):
 					pyClass = self._model.coreClass(pyClassName)
 					klass.addAttr(pyClass(row))
 
-		self.awakeFromRead()
-
 	def awakeFromRead(self):
+		"""
+		Performs further initialization.
+		Expected to be invoked by the model.
+		"""
 		for klass in self._klasses:
 			klass.awakeFromRead()
 
