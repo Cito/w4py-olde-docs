@@ -1,6 +1,6 @@
 # MiscUtils package
 # Webware for Python
-# See ../README
+# See Documentation/MiscUtils.py
 
 __all__ = ['CSV', 'DataTable', 'NamedValueAccess']
 
@@ -14,7 +14,7 @@ def InstallInWebKit(appServer):
 # Beef up UserDict with the NamedValueAccess base class and custom versions of
 # hasValueForKey() and valueForKey(). This all means that UserDict's (such as
 # os.environ) are key/value accessible.
-# @@ 2000-05-07 ce: This is duplicated from CGIWrapper.py.
+# @@ 2000-05-07 ce: CGIWrapper.py duplicates this.
 from UserDict import UserDict
 import NamedValueAccess
 if not NamedValueAccess.NamedValueAccess in UserDict.__bases__:
