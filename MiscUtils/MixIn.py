@@ -20,7 +20,7 @@ if hasattr(sys, 'version_info') and sys.version_info[0]>=2:
 
 		If makeAncestor is 1, then a different technique is employed: the mixInClass is made the first base class of the pyClass. You probably don't need to use this and if you do, be aware that your mix-in can no longer override attributes/methods in pyClass.
 
-		If mixInSuperMethods is 1, then support will be enabled for you to be able to call the original or 
+		If mixInSuperMethods is 1, then support will be enabled for you to be able to call the original or
 		"parent" method from the mixed-in method.  This is done like so:
 
 		    class MyMixInClass:
@@ -58,7 +58,8 @@ if hasattr(sys, 'version_info') and sys.version_info[0]>=2:
 
 			# Install the mix-in methods into the class
 			for name in dir(mixInClass):
-				if not name.startswith('__'): # skip private members
+				# skip private members, but not __repr__ et al:
+				if not (name.startswith('__') and not name.endswith('__')) and name not in readOnlyNames:
 					member = getattr(mixInClass, name)
 
 					if type(member) is MethodType and mixInSuperMethods:
@@ -68,3 +69,5 @@ if hasattr(sys, 'version_info') and sys.version_info[0]>=2:
 					if type(member) is MethodType:
 						member = member.im_func
 					setattr(pyClass, name, member)
+
+readOnlyNames = '__doc__'.split()
