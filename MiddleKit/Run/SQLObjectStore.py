@@ -5,7 +5,7 @@ from MiscUtils import NoDefault
 from MiscUtils import Funcs as funcs
 
 from MiddleObject import MiddleObject
-from ObjectStore import ObjectStore
+from ObjectStore import ObjectStore, UnknownObjectError
 from ObjectKey import ObjectKey
 from MiscUtils.MixIn import MixIn
 from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
@@ -136,7 +136,7 @@ class SQLObjectStore(ObjectStore):
 		count = len(objects)
 		if count==0:
 			if default is NoDefault:
-				raise Exception, 'Unknown object.'
+				raise UnknownObjectError, 'aClass = %r, serialNum = %r' % (aClass, serialNum)
 			else:
 				return default
 		else:

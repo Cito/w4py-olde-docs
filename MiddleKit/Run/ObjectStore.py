@@ -9,6 +9,11 @@ from MiddleKit.Core.Klass import Klass as BaseKlass
 	# will try to mix it in.
 
 
+class UnknownObjectError(LookupError):
+	''' This is the exception returned by store.fetchObject() if the specified object cannot be found (unless you also passed in a default value in which case that value is returned). '''
+	pass
+
+
 class ObjectStore(ModelUser):
 	'''
 	NOT IMPLEMENTED:
@@ -109,7 +114,8 @@ class ObjectStore(ModelUser):
 
 	## Fetching ##
 
-	def fetchObject(self, className, serialNum):
+	def fetchObject(self, className, serialNum, default=NoDefault):
+		''' Subclasses should raise UnknownObjectError if an object with the given className and serialNum does not exist, unless a default value was passed in, in which case that value should be returned. '''
 		raise SubclassResponsibilityError
 
 	def fetchObjectsOfClass(self, className, isDeep=1):
