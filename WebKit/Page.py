@@ -20,15 +20,13 @@ class Page(HTTPServlet):
 
 	def awake(self, transaction):
 		HTTPServlet.awake(self, transaction)
-		# @@ 2000-05-08 ce: move these up to Servlet?
-		self._transaction  = transaction
-		self._response = transaction.response()
-		self._request  = transaction.request()
-		self._session  = None #don't create unless needed
-		assert self._transaction  is not None
-		assert self._response is not None
-		assert self._request  is not None
-		# @@ 2000-05-08 ce: yes/no: assert self._session is not None
+		self._transaction = transaction
+		self._response    = transaction.response()
+		self._request     = transaction.request()
+		self._session     = None  # don't create unless needed
+		assert self._transaction is not None
+		assert self._response    is not None
+		assert self._request     is not None
 
 	def respondToGet(self, transaction):
 		''' Invokes _respond() to handle the transaction. '''
