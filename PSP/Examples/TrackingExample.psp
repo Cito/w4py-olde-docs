@@ -7,7 +7,7 @@ The real usefullness of this system is in either long running server side proces
 
 <p>Here is a list of the pages you have been to that are tracking compatible:<br>
 
-<% locationCan = self.getCan("locationCan","LocationCan","session")
+<% locationCan = self.getCan("locationCan","WebKit.Cans.LocationCan","session")
 locationCan.addLocation(req.pathInfo())
 for i in locationCan.locationList():%>
 <p><b><%= i %></b>
