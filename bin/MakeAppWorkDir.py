@@ -7,9 +7,8 @@
 #
 #----------------------------------------------------------------------
 
-"""
+"""\
 MakeAppWorkDir.py
-
 
 INTRODUCTION
 
@@ -29,9 +28,12 @@ python MakeAppWorkDir.py [OPTIONS] SomeDir
 OPTIONS:
 -c SampleContextName    "SampleContextName" will be used for the pre-
                         installed context.  (Default "MyContext")
+-d SampleContextDir     The directory where the context will be located
+                        (so you can place the context outside of the
+			workdir).
 --cvsignore             .cvsignore files will be added
--l or --library         A lib/ directory will be added, which will
-                        added to the Python the path for the AppServer
+-l Dir                  You may specify this option multiple times; all
+   or --library Dir     directories you give will be added to sys.path.
 """
 
 #----------------------------------------------------------------------
@@ -51,8 +53,11 @@ class MakeAppWorkDir:
 	"""
 
 	def __init__(self, webWareDir, workDir, verbose=1,
-		     sampleContext="MyContext", osType=None,
-		     addCVSIgnore=0, makeLibrary=0):
+		     sampleContext="MyContext",
+		     contextDir='',
+		     osType=None,
+		     addCVSIgnore=0,
+		     libraryDirs=None):
 		"""Initializer for MakeAppWorkDir.  Pass in at least the
 		Webware directory and the target working directory.  If you
 		pass None for sampleContext then the default context will the
@@ -68,11 +73,20 @@ class MakeAppWorkDir:
 		    "WORKDIR": string.replace(self._workDir,	'\\', '/'),
 		    "DEFAULT": "%s/Examples" % string.replace(self._webKitDir,	'\\', '/'),
 		    }
-		if makeLibrary:
-			self._substVals['libraryPath'] = 'sys.path.append(%s)\n' % repr(os.path.join(self._substVals['WORKDIR'], 'lib'))
+		if libraryDirs:
+			expandedLibraryDirs = []
+			for dir in libraryDirs:
+				dir = os.path.join(self._substVals['WORKDIR'], dir)
+				expandedLibraryDirs.append(dir)
+				if not os.path.exists(dir):
+					os.makedirs(dir)
+					open(os.path.join(dir, '__init__.py'), 'w').write('#\n')
+					
+			self._substVals['libraryPath'] = 'sys.path.extend(%r)\n' % expandedLibraryDirs
 		else:
 			self._substVals['libraryPath'] = ''
 		self._sample = sampleContext
+		self._contextDir = contextDir
 		if sampleContext is not None:
 			self._substVals["DEFAULT"] = sampleContext
 		self._substVals['executable'] = sys.executable
@@ -80,7 +94,6 @@ class MakeAppWorkDir:
 			osType = os.name
 		self._osType = osType
 		self._addCVSIgnore = addCVSIgnore
-		self._makeLibrary = makeLibrary
 
 	def buildWorkDir(self):
 		"""These are all the (overridable) steps needed to make a new runtime direcotry."""
@@ -88,9 +101,8 @@ class MakeAppWorkDir:
 		self.copyConfigFiles()
 		self.copyOtherFiles()
 		self.makeLauncherScripts()
-		self.makeDefaultContext()
-		if self._makeLibrary:
-			self.makeLibrary()
+		if self._sample is not None:
+			self.makeDefaultContext()
 		if self._addCVSIgnore:
 			self.addCVSIgnore()
 		self.printCompleted()
@@ -205,36 +217,46 @@ class MakeAppWorkDir:
 		"""
 		Make a very simple context for the newbie user to play with.
 		"""
-		if self._sample is not None:
-			self.msg("Creating default context.")
-			name = os.path.join(self._workDir, self._sample)
-			if not os.path.exists(name):
-				os.mkdir(name)
-			name2 = os.path.join(name, 'Main.py')
+		self.msg("Creating default context.")
+		if self._contextDir:
+			contextDir = os.path.join(self._workDir, self._contextDir or self._sample)
+			if contextDir.startswith(self._workDir):
+				configDir = contextDir[len(self._workDir):]
+				while configDir.startswith('/'):
+					configDir = configDir[1:]
+			else:
+				configDir = contextDir
+		if not os.path.exists(contextDir):
+			os.makedirs(contextDir)
+		name2 = os.path.join(contextDir, 'Main.py')
+		if not os.path.exists(name2):
 			open(name2, "w").write(_Main_py % self._substVals)
-			name2 = os.path.join(name, '__init__.py')
+		name2 = os.path.join(contextDir, '__init__.py')
+		if not os.path.exists(name2):
 			open(name2, "w").write(_init_py)
 
-			self.msg("Updating config for default context.")
-			filename = os.path.join(self._workDir, "Configs", "Application.config")
-			content = open(filename).readlines()
-			output  = open(filename, "wt")
-			for line in content:
-				pos = string.find(line, "##MAWD")
-				if pos != -1:
-					line = "\t\t\t\t\t\t\t '%(CTX)s':     '%(CTX)s',\n"\
-							"\t\t\t\t\t\t\t 'default':       '%(CTX)s',\n"\
-							% {'CTX' : self._sample}
-
+		self.msg("Updating config for default context.")
+		filename = os.path.join(self._workDir, "Configs", 'Application.config')
+		content = open(filename).readlines()
+		if content and content[0].strip().startswith('{'):
+			isDict = 1
+		else:
+			isDict = 0
+		output  = open(filename, "wt")
+		for line in content:
+			pos = string.find(line, "##MAWD")
+			if pos == -1:
 				output.write(line)
+				continue
+			if isDict:
+				output.write("\t\t\t\t\t\t\t '%(CTX)s':     '%(CTXDir)s',\n"\
+					     "\t\t\t\t\t\t\t 'default':       '%(CTX)s',\n"\
+					     % {'CTX' : self._sample,
+						'CTXDir': configDir})
+			else:
+				output.write("Contexts[%r] = %r\n" % (self._sample, configDir))
+				output.write("Contexts['default'] = %r\n" % self._sample)
 		self.msg("\n")
-
-	def makeLibrary(self):
-		print "Creating lib/ library directory."
-		os.mkdir(os.path.join(self._workDir, 'lib'))
-		f = open(os.path.join(self._workDir, 'lib', '__init__.py'), 'w')
-		f.write('#')
-		f.close()
 
 	def addCVSIgnore(self):
 		print "Creating .cvsignore files."
@@ -407,8 +429,9 @@ class Main(Page):
 if __name__ == "__main__":
 	targetDir = None
 	contextName = 'MyContext'
+	contextDir = ''
 	addCVSIgnore = 0
-	makeLibrary = 0
+	libraryDirs = []
 	args = sys.argv[1:]
 	# lame little command-line handler
 	while args:
@@ -417,15 +440,28 @@ if __name__ == "__main__":
 			args = args[1:]
 			continue
 		if args[0] == '-c':
-			if len(args) < 2:
+			if len(args) < 2 or args[1].startswith('-'):
+				print "Bad option: %s" % args[0]
 				print __doc__
-				sys.exit(1)
+				sys.exit(2)
 			contextName = args[1]
 			args = args[2:]
 			continue
+		if args[0] == '-d':
+			if len(args) < 2 or args[1].startswith('-'):
+				print "Bad option: %s" % args[0]
+				print __doc__
+				sys.exit(2)
+			contextDir = args[1]
+			args = args[2:]
+			continue
 		if args[0] in ['-l', '--library']:
-			makeLibrary = 1
-			args = args[1:]
+			if len(args) < 2 or args[1].startswith('-'):
+				print "Bad option: %s" % args[0]
+				print __doc__
+				sys.exit(2)
+			libraryDirs.append(args[1])
+			args = args[2:]
 			continue
 		if not targetDir and not args[0].startswith('-'):
 			targetDir = args[0]
@@ -436,6 +472,7 @@ if __name__ == "__main__":
 		print __doc__
 		sys.exit(1)
 	if not targetDir:
+		print "Give a target directory"
 		print __doc__
 		sys.exit(1)
 
@@ -445,7 +482,8 @@ if __name__ == "__main__":
 
 	mawd = MakeAppWorkDir(webWareDir, targetDir,
 	                      sampleContext=contextName,
+			      contextDir=contextDir,
 			      addCVSIgnore=addCVSIgnore,
-			      makeLibrary=makeLibrary)
+			      libraryDirs=libraryDirs)
 	mawd.buildWorkDir()
 

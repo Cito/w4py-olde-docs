@@ -75,7 +75,12 @@ class Configurable:
 		return {}
 
 	def configFilename(self):
-		""" Returns the filename by which users can override the configuration. Subclasses must override to specify a name. Returning None is valid, in which case no user config file will be loaded. """
+		"""
+		Returns the filename by which users can override the
+		configuration. Subclasses must override to specify a
+		name. Returning None is valid, in which case no user
+		config file will be loaded."""
+		
 		raise AbstractError, self.__class__
 
 	def configName(self):
@@ -105,19 +110,30 @@ class Configurable:
 			return {}
 		else:
 			contents = file.read()
+			isDict = contents.strip().startswith('{')
 			file.close()
 			modloader.watchFile(filename)
 			replacements = self.configReplacementValues()
-			if replacements:
+			if replacements and isDict:
 				try:
 					contents = contents % replacements
 				except:
 					raise ConfigurationError, 'Unable to embed replacement text in %s.' % self.configFilename()
 
+			evalContext = replacements.copy()
+			evalContext['True'] = 1==1
+			evalContext['False'] = 1==0
 			try:
-				config = eval(contents, {})
-			except:
-				raise ConfigurationError, 'Invalid configuration file, %s.' % self.configFilename()
+				if isDict:
+					config = eval(contents, evalContext)
+				else:
+					exec contents in evalContext
+					config = evalContext
+					for name in config.keys():
+						if name.startswith('_'):
+							del config[name]
+			except Exception, e:
+				raise ConfigurationError, 'Invalid configuration file, %s (%s).' % (self.configFilename(), e)
 			if type(config) is not DictType:
 				raise ConfigurationError, 'Invalid type of configuration. Expecting dictionary, but got %s.'  % type(config)
 			return config
