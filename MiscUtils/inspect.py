@@ -216,6 +216,7 @@ def getsourcefile(object):
     for path in sys.path:
         if os.path.exists(os.path.join(path, filename)):
             return os.path.join(path, filename)
+    return None  # file was not found.
 
 def getabsfile(object):
     """Return an absolute path to the source or compiled file for an object.
@@ -586,7 +587,9 @@ def getframeinfo(frame, context=1):
     if not isframe(frame):
         raise TypeError, 'arg is not a frame or traceback object'
 
-    filename = getsourcefile(frame)
+    # prefer to give filename the actual source file but if
+    # it does not exist, return the filename.
+    filename = getsourcefile(frame) or getfile(frame)
     lineno = getlineno(frame)
     if context > 0:
         start = lineno - 1 - context/2

@@ -332,6 +332,10 @@ class ExceptionHandler(Object):
 				self.write(ExpansiveHTMLForException(context=self.setting('FancyTracebackContext')))
 			except:
 				self.write('Unable to generate a fancy traceback! (uncaught exception)')
+				try:
+					self.write(HTMLForException(sys.exc_info()))
+				except:
+					self.write('<br>Unable to even generate a normal traceback of the exception in fancy traceback!')
 
 	def saveErrorPage(self, html):
 		''' Saves the given HTML error page for later viewing by the developer, and returns the filename used. '''
