@@ -198,7 +198,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 				self.have_request = 1
 				print "have get request"
 				self.server.requestQueue.put(self)
-				self.shutdown(0)
+				#self.shutdown(0)
 			elif string.lower(self.reqtype) == "post":
 				#find content length
 				for i in self.request_data:
@@ -247,6 +247,12 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			sys.stdout.flush()
 
 	def close(self):
+		try:
+			self.shutdown(1)
+		except:
+			pass
+		print "Closing"
+		asyncore.dispatcher.close(self)
 		self.active = 0
 		self.have_request = 0
 		self.have_response = 0
@@ -256,7 +262,6 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		self.request_data=[]
 		self.haveheader=0
 		self.datalength=0
-		asyncore.dispatcher.close(self)
 		self.server.rhQueue.put(self)
 
 	def log(self, message):
