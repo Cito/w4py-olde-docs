@@ -386,11 +386,11 @@ class ParseEventHandler:
 		self._writer.println('trans = self._transaction')
 		self._writer.println(ResponseObject+ ' = trans.response()')
 		self._writer.println('req = trans.request()')
-		self._writer.println('self._%s( %s )\n' % (self._baseMethod, ResponseObject) )
+		self._writer.println('self._%s( %s, req, trans )\n' % (self._baseMethod, ResponseObject) )
 		
 		# Put the real output code in a function that is doesn't need a 'transaction' for unit tests.
 		self._writer.popIndent()
-		self._writer.println('def _%s( self, %s ):' % (self._baseMethod, ResponseObject))
+		self._writer.println('def _%s( self, %s, req=None, trans=None ):' % (self._baseMethod, ResponseObject))
 		self._writer.pushIndent()
 		self._writer.println('"""I take a file-like object.  I am useful for unit testing."""')
 		self._writer.println('_formatter = %s' % self._formatter)
