@@ -95,9 +95,8 @@ class Page(HTTPServlet):
 			   req.field('_action_', None) == action or \
 			   (req.hasField('_action_%s.x' % action) and \
 			    req.hasField('_action_%s.y' % action)):
-				if self._actionSet().has_key(action):
-					self.handleAction(action)
-					return
+				self.handleAction(action)
+				return
 
 		self.defaultAction()
 
