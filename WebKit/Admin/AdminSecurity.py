@@ -32,7 +32,8 @@ else:
 				# They are logging out.  Clear all session variables.
 				session.values().clear()
 				request.fields()['extra'] = 'You have been logged out.'
-				app.forwardRequestFast(trans, 'LoginPage')
+				app.forward(trans, 'LoginPage')
+				return
 			elif request.hasField('login') and request.hasField('username') and request.hasField('password'):
 				# They are logging in.  Clear session
 				session.values().clear()
@@ -46,7 +47,8 @@ else:
 				else:
 					# Failed login attempt; have them try again
 					request.fields()['extra'] = 'Login failed.  Please try again. (And make sure cookies are enabled.)'
-					app.forwardRequestFast(trans, 'LoginPage')
+					app.forward(trans, 'LoginPage')
+					return
 			# They aren't logging in; are they already logged in?
 			elif session.value('authenticated_user_admin', None):
 				# They are already logged in; write the HTML for this page.
@@ -54,7 +56,8 @@ else:
 			else:
 				# They need to log in.
 				session.values().clear()
-				app.forwardRequestFast(trans, 'LoginPage')
+				app.forward(trans, 'LoginPage')
+				return
 
 		def isValidUserAndPassword(self, username, password):
 			# Replace this with a database lookup, or whatever you're using for
