@@ -165,6 +165,7 @@ class Application(Configurable):
 		return {
 			'PrintConfigAtStartUp': 1,
 			'ServletsDir':          'Examples',
+			'ExtensionsToIgnore':	['.pyc', '.pyo', '.py~', '.bak'],
 			'LogActivity':          1,
 			'ActivityLogFilename':  'Logs/Activity.csv',
 			'ActivityLogColumns':   ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'],
@@ -506,8 +507,6 @@ class Application(Configurable):
 		self._cacheDictLock.release()
 
 
-
-
 	def createServletInTransaction(self, transaction):
 		# Get the path
 		path = transaction.request().serverSidePath()
@@ -599,6 +598,14 @@ class Application(Configurable):
 
 			if os.path.splitext(ssPath)[1]=='':
 				filenames = glob(ssPath+'.*')
+
+				# Ignore files with extensions we don't care about
+				ignoreExts = self.setting('ExtensionsToIgnore')
+				for i in range(len(filenames)):
+					if os.path.splitext(filenames[i])[1] in ignoreExts:
+						filenames[i] = None
+				filenames = filter(lambda filename: filename!=None, filenames)
+
 				if len(filenames)==1:
 					ssPath = filenames[0]
 				else:
