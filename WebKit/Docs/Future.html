@@ -8,8 +8,8 @@
 <body>
 
 <h1>WebKit Future Work</h1>
-Version 0.5
-<br>Webware for Python 0.5
+Version 0.6
+<br>Webware for Python 0.6
 
 
 <a name=Future><h2>Future Work/Limitations</h2></a>
@@ -20,10 +20,14 @@ Version 0.5
 
 <p> The numbers below are mostly for reference, although longer term items tend to be pushed towards the bottom.
 
+<p> <i>Warning:</i> This list hasn't been seriously combed over in some time. It may be out of date.
 
 <a name=KnownBugs><h3>Known Bugs</h3></a>
 
 <ol>
+	<li> The Admin servlets <i>Activity log</i> and <i>Error log</i>, in particular, sometimes fail. This is actually due to a bug in MiscUtils.DataTable which doesn't always read valid CSV files. Multiple patches have already been submitted for this.
+	<li> The <i>stop</i> command for the <i>webkit</i> "rc" script does not work.
+	<li> There is one report that indicates that Application.serverSidePath() may be broken when using MakeAppWorkDir.
 	<li> Contexts do not have separate name spaces.
 	<li> The ListBox example does not take kindly to a Refresh/Reload after a delete operation. In essence, you are telling the ListBox to delete the same object twice.
 	<li> Problems have been reported with cookies on MS IE for the Mac.
