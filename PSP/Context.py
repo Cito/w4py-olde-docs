@@ -88,7 +88,7 @@ class PSPCLContext(PSPContext):
 	This class provides all the information necessary during the parsing and page generation steps of the PSP compilation
 	process.'''
 	
-	def __init__(self, pspfile, trans):
+	def __init__(self, pspfile, trans=None):
 		#self._transactrion = trans #I don't think I need this
 		self._baseUri, self._pspfile = os.path.split(pspfile)
 		self._fullpath = pspfile#os.path.join(path,pspfile)#trans.application().pathForServletInTransaction(trans)

@@ -54,19 +54,30 @@ self.write(i)%>&nbsp;
 <% end %>
 <% end %>
 
-
-
+<hr>
+<b>Unix system info.</b>
 <table bgcolor = 'blue'>
-<%for i in os.uname():
-	res.write('<tr><td><font color="white">'+str(i)+'</font></td></tr>')
-res.write('<tr><td>'+req.pathInfo()+'</td></tr>')
+<% if os.name == 'posix':
+	for i in os.uname():
+		res.write('<tr><td><font color="white">'+str(i)+'</font></td></tr>')
 %>
-</font>
 </table>
+<hr>
+<p><b>Path Info: <%=req.pathInfo()%>
+<hr>
+<p><b>Environment Variables</b>
+<p><table>
+<%
+for i in os.environ.keys():
+	res.write("<tr><td><font color='red'>"+str(i)+'</font></td><td><font color="blue">'+os.environ[i]+'</font></td></tr>')
+%>
+</table>
+<hr>
+
+
 <br><%=  time.ctime(time.time())%>
 <%-- Comment check --%>
 <!-- Comment Check -->
-
 <psp:method name="testing" params="val">
 self._response.write('<br>boo\n')
 self._response.write(val)
