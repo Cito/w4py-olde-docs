@@ -9,19 +9,19 @@
 	-->
 	</style>
 
-	<title>WebKit 0.8 beta 3 Release Notes</title>
+	<title>WebKit  0.8  Release Notes</title>
 </head>
 
 <body>
 
-<h1>WebKit 0.8 beta 3 Release Notes</h1>
-Version 0.8 beta 3
-<br>Webware for Python 0.8 beta 3
+<h1>WebKit  0.8  Release Notes</h1>
+Version  0.8 
+<br>Webware for Python  0.8 
 
 
 <a name=Introduction><h2>Introduction</h2></a>
 <ul>
-	<li> Version 0.8 beta 3 was released on 02/04/2003.
+	<li> Version  0.8  was released on February 9, 2003 .
 </ul>
 
 <h2>Major Changes</h2>
@@ -169,6 +169,8 @@ We don't track every change to the interface, but here are some notables:
 	<li> Fixed another rare problem that could eventually cause a servlet to hang until another request for that servlet came in.  Like the above problem, it is provoked by multiple simultaneous requests for the same servlet, but only if it happens hundreds or thousands of times.
 	<li> Fixed SessionFileStore to fail safely and call the applications exception handler on a pickling error. <b>Note: While using the currently supported SessionStore settings, sessions may not contain data which can not be pickled, such as open files, or database connections. Doing so will generate an error when attempting to save the session to disk.</b>
 	<li> Fixed PSP so that it works with Python 2.3.
+	<li> Use of the optional mx.DateTime module for cookie expiration in HTTPResponse was broken, and has been removed from this release.
+	<li> Removed the Docs context from the default Application.config.  It has failed to load for some time now, and should probably be fixed to reference the main Webware Docs, rather than the WebKit Docs.
 
 </ul>
 

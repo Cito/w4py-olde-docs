@@ -2,29 +2,13 @@
 <html>
   <head>
     <link rel=stylesheet href="StyleSheet.css" type="text/css">
-    <title>Webware for Python 0.8 beta 3 Release Notes</title>
+    <title>Webware for Python 0.8 Release Notes</title>
   </head>
 
   <body>
 
 
-    <h1>Webware for Python 0.8 beta 3 Release Notes</h1>
-<ul>
-<li> Fix so PSP works with python 2.3a1.
-</ul>
-
-    <h2>Webware for Python 0.8 beta 2 Release Notes</h2>
-
-<ul>
-<li> Includes an Apache 2 mod_webkit adapter, and pre-compiled DLL for windows.
-<li> Fixed a problem where escapes in PSP source were not being processed correctly.
-<li> Restored 0.7 behavior of Page.writeDocType() to output 4.01 Transitional. 
-     See the <a href="../WebKit/Docs/RelNotes-0.8.html">release notes</a> for more info.
-<li> Upgraded documentation
-</ul>
-
-    <h2>Webware for Python 0.8 beta 1 Release Notes</h2>
-
+    <h1>Webware for Python 0.8 Release Notes</h1>
 <ul>
 <li> All adapters have been moved to Webware/WebKit/Adapters
 <li> LRWPAdapter added, for use with the 
@@ -34,12 +18,17 @@
      defaults to "/") and security flag.  The expire time can
      be set with constants "ONCLOSE", "NOW", or "NEVER"; or 
      you can give an integer timestamp, tuple of integers (as
-     used in the time module), DateTime object, DateTimeDelta
-     object, or string identifier (like "+1w" for 1 week in the 
-     future).
+     used in the time module), or string identifier (like 
+     "+1w" for 1 week in the future).
 <li> Added an <i>experimental</i> HTTPAdapter.py which serves directly as an HTTP server.
 <li> Added an optional AutoReload setting to enable reloading the server
      whenever source files, including servlets and PSP files are changed.
+<li> Fix so PSP works with python 2.3a1.
+<li> Includes an Apache 2 mod_webkit adapter, and pre-compiled DLL for windows.
+<li> Fixed a problem where escapes in PSP source were not being processed correctly.
+<li> Restored 0.7 behavior of Page.writeDocType() to output 4.01 Transitional. 
+     See the <a href="../WebKit/Docs/RelNotes-0.8.html">release notes</a> for more info.
+<li> Upgraded documentation
 <li> Improvements to profilling.
 <li> Numerous bug fixes.
 </ul>

@@ -57,12 +57,16 @@ Posix systems::
     $ ./AppServer
 
 The AppServer has to be running anytime you want to access a
-Webware application or example.  (There are scripts to run it
-automatically, see `webkit init script`_)
+Webware application or example.  The last line of the instructions
+above is a simple way to start the AppServer in the console window
+you are working in.  (There are scripts to run it
+automatically at boot up, see `webkit init script`_).
 
-You should now be able to go to your browser and open up
-http://localhost/cgi-bin/wkcgi.cgi -- the wkcgi.cgi program connects
-to the AppServer -- Webware isn't a CGI script, but a small CGI script
+You should now be able to go to your browser and open up the URL 
+for wkcgi.cgi. (see above where you copied wkcgi.  A typical URL
+might be http://localhost/cgi-bin/wkcgi.cgi).
+The wkcgi.cgi program connects to the AppServer -- 
+Webware isn't a CGI script, but a small CGI script
 can be used as a gateway to the AppServer (you can't normally connect
 to the AppServer itself).
 

@@ -1,7 +1,7 @@
 Beginner Tutorial
 ++++++++++++++++++
 
-Version 0.8 beta 3, Webware for Python
+Version 0.8, Webware for Python
 
 .. contents::
 

@@ -1,9 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="en">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.2.7: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.2.8: http://docutils.sourceforge.net/" />
 <title>WebKit Install Guide</title>
 <link rel="stylesheet" href="default.css" type="text/css" />
 </head>
@@ -131,11 +131,15 @@ $ cd ../..
 $ ./AppServer
 </pre>
 <p>The AppServer has to be running anytime you want to access a
-Webware application or example.  (There are scripts to run it
-automatically, see <a class="reference" href="#webkit-init-script">webkit init script</a>)</p>
-<p>You should now be able to go to your browser and open up
-<a class="reference" href="http://localhost/cgi-bin/wkcgi.cgi">http://localhost/cgi-bin/wkcgi.cgi</a> -- the wkcgi.cgi program connects
-to the AppServer -- Webware isn't a CGI script, but a small CGI script
+Webware application or example.  The last line of the instructions
+above is a simple way to start the AppServer in the console window
+you are working in.  (There are scripts to run it
+automatically at boot up, see <a class="reference" href="#webkit-init-script">webkit init script</a>).</p>
+<p>You should now be able to go to your browser and open up the URL 
+for wkcgi.cgi. (see above where you copied wkcgi.  A typical URL
+might be <a class="reference" href="http://localhost/cgi-bin/wkcgi.cgi">http://localhost/cgi-bin/wkcgi.cgi</a>).
+The wkcgi.cgi program connects to the AppServer -- 
+Webware isn't a CGI script, but a small CGI script
 can be used as a gateway to the AppServer (you can't normally connect
 to the AppServer itself).</p>
 <p>If you get an Internal Error, the most likely case is you can't run
@@ -493,8 +497,7 @@ interpreter (e.g., <tt class="literal"><span class="pre">#!/usr/local/bin/python
 configuration, and <tt class="literal"><span class="pre">WebKit.cgi</span></tt> should be able to find the host and
 port of the AppServer automatically.</p>
 <!-- Note: If you get Internal Error, always check the AppServer is
-running.
- -->
+running. -->
 </div>
 <div class="section" id="mod-webkit">
 <h3><a class="toc-backref" href="#id30" name="mod-webkit">mod_webkit</a></h3>
