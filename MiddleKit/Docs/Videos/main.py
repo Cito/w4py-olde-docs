@@ -1,8 +1,3 @@
-import os, sys
-home = os.environ['HOME']
-sys.path.insert(1, os.path.join(home, 'Projects/Webware'))
-sys.path.insert(1, os.path.join(home, 'Projects/StockAlerts/cvs/SA/Dev'))
-
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
 from Movie import Movie
 from Person import Person
