@@ -56,28 +56,29 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
         #self.asyn_thread = Thread(target=self.asynloop)
         #self.asyn_thread.start()
 
-        self.listen(1024) # @@ 2000-07-14 ce: hard coded constant should be a setting
+        self.listen(64) # @@ 2000-07-14 ce: hard coded constant should be a setting
         print "Ready\n"
 
 
     def handle_accept(self):
-        """
+		"""
         This is the function that starts the request processing cycle.  When asyncore senses a write on the main socket, it calls this function.  We then accept the connection, and hand it off to a RequestHandler instance by calling the RequestHandler instance's activate method.  When we call that activate method, the RH registers itself with asyncore by calling set_socket, so that asyncore now will include that socket, and thus the RH, in it's network select loop.
-        """
-        #print "Accepting"
-        conn,addr = self.accept()
-        conn.setblocking(0)
-        self._reqCount = self._reqCount+1
-        rh = None
-        try:
-            rh=self.rhQueue.get_nowait()
-        except Queue.Empty:
-            if self.rhCreateCount < self._maxRHCount:
-                rh = RequestHandler(self)
-                self.rhCreateCount = self.rhCreateCount + 1
-            else:
-                rh = self.rhQueue.get() #block
-        rh.activate(conn)
+		"""
+		rh = None
+		try:
+			rh=self.rhQueue.get_nowait()
+		except Queue.Empty:
+			if self.rhCreateCount < self._maxRHCount:
+				rh = RequestHandler(self)
+				self.rhCreateCount = self.rhCreateCount + 1
+			else:
+                #rh = self.rhQueue.get() #block - No Don't, cause then nothing else happens, we're frozen
+				print "Refusing Connection"
+				return
+		self._reqCount = self._reqCount+1
+		conn,addr = self.accept()
+		conn.setblocking(0)
+		rh.activate(conn)
 
     def readable(self):
         return self.accepting
