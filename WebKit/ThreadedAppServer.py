@@ -44,6 +44,11 @@ intLength = len(dumps(int(1)))
 
 server = None
 
+class NotEnoughDataError(Exception):
+	pass
+class ProtocolError(Exception):
+	pass
+
 class ThreadedAppServer(AppServer):
 	"""
 	`ThreadedAppServer` accepts incoming socket requests, spawns a
@@ -78,7 +83,7 @@ class ThreadedAppServer(AppServer):
 		# twice the number of threads we have:
 		self._requestQueue = Queue.Queue(self._maxServerThreads * 2)
 		self._addr = None
-		self._requestID = 1
+		self._requestID = 0
 
 		out = sys.stdout
 
@@ -497,7 +502,7 @@ class Handler:
 	def receiveDict(self):
 		"""
 		Utility function to receive a marshalled dictionary from
-		the socket.
+		the socket.  Returns None if the request was empty.
 		"""
 		chunk = ''
 		missing = intLength
@@ -505,7 +510,12 @@ class Handler:
 			block = self._sock.recv(missing)
 			if not block:
 				self._sock.close()
-				raise NotEnoughDataError, 'received only %d of %d bytes when receiving dictLength' % (len(chunk), intLength)
+				if len(chunk) == 0:
+					# We probably awakened due to awakeSelect being called.
+					return None
+				else:
+					# We got a partial request -- something went wrong.
+					raise NotEnoughDataError, 'received only %d of %d bytes when receiving dictLength' % (len(chunk), intLength)
 			chunk += block
 			missing = intLength - len(chunk)
 		dictLength = loads(chunk)
@@ -647,7 +657,9 @@ class AdapterHandler(Handler):
 
 		data = []
 		dict = self.receiveDict()
-		if dict and verbose and dict.has_key('environ'):
+		if not dict:
+			return
+		if verbose and dict.has_key('environ'):
 			requestURI = Funcs.requestURI(dict['environ'])
 			print requestURI
 		else:
@@ -773,9 +785,9 @@ def shutDown(arg1,arg2):
 	"""
 	Shut down the server.
 	"""
-	print "I AM HERE"
+##	print "I AM HERE"
 	global server
-	print "S", server
+##	print "S", server
 	print
 	print "Shutdown Called", time.asctime(time.localtime(time.time()))
 	if server:
