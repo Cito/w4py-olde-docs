@@ -24,7 +24,7 @@ class Page(HTTPServlet):
 		self._transaction  = transaction
 		self._response = transaction.response()
 		self._request  = transaction.request()
-		self._session  = transaction.session()
+		self._session  = None #don't create unless needed
 		assert self._transaction  is not None
 		assert self._response is not None
 		assert self._request  is not None
@@ -76,6 +76,8 @@ class Page(HTTPServlet):
 		return self._response
 
 	def session(self):
+		if not self._session:
+			self._session = self._transaction.session()
 		return self._session
 
 
@@ -160,7 +162,7 @@ class Page(HTTPServlet):
 		"""Gets a Can"""
 		storage = string.lower(storage)
 		if storage=="session":
-			container=self._transaction.session()
+			container=self.session()
 		elif storage=="request":
 			container=self._transaction.request()
 		elif storage=="application":

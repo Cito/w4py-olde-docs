@@ -25,6 +25,7 @@ class Servlet(Object):
 		Object.__init__(self)
 		self._serverSidePath = None
 		self._serverSideDir = None
+		self._session = None
 
 
 	## Access ##

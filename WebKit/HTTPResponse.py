@@ -127,7 +127,7 @@ class HTTPResponse(Response):
 
 	def recordSession(self, trans):
 		''' Invoked by deliver() to record the session id in the response (if a session exists). This implementation sets a cookie for that purpose. For people who don't like sweets, a future version could check a setting and instead of using cookies, could parse the HTML and update all the relevant URLs to include the session id (which implies a big performance hit). Or we could require site developers to always pass their URLs through a function which adds the session id (which implies pain). Personally, I'd rather just use cookies. You can experiment with different techniques by subclassing Session and overriding this method. Just make sure Application knows which "session" class to use. '''
-		sess = trans.session()
+		sess = trans._session
 		if sess:
 			self.setCookie('_SID_', sess.identifier())
 

@@ -331,7 +331,7 @@ class Application(Configurable,CanContainer):
 </html>''' % (newURL, newURL))
 
 	def serveURL(self, transaction):
-		session	 = self.createSessionForTransaction(transaction)
+		#session	 = self.createSessionForTransaction(transaction)
 		self.createServletInTransaction(transaction)
 		self.awake(transaction)
 		self.respond(transaction)
@@ -394,15 +394,18 @@ class Application(Configurable,CanContainer):
 	# @@ 2000-05-10 ce: should just send the message to the transaction and let it handle the rest.
 
 	def awake(self, transaction):
-		transaction.session().awake(transaction)
+		if transaction._session:
+			transaction.session().awake(transaction)
 		transaction.servlet().awake(transaction)
 
 	def respond(self, transaction):
-		transaction.session().respond(transaction)
+		if transaction._session:
+			transaction.session().respond(transaction)
 		transaction.servlet().respond(transaction)
 
 	def sleep(self, transaction):
-		transaction.session().sleep(transaction)
+		if transaction._session:
+			transaction.session().sleep(transaction)
 		transaction.servlet().sleep(transaction)
 
 
@@ -499,7 +502,7 @@ class Application(Configurable,CanContainer):
 			'request':	 transaction.request(),
 			'response':	transaction.response(),
 			'servlet':	 transaction.servlet(),
-			'session':	 transaction.session()
+			'session':	 transaction._session, #don't cause creation of session
 		})
 		for column in self.setting('ActivityLogColumns'):
 			try:
@@ -541,6 +544,7 @@ class Application(Configurable,CanContainer):
 		return response
 
 	def createSessionForTransaction(self, transaction):
+		#print "Creating Session"
 		sessId = transaction.request().sessionId()
 		session = None
 		if sessId:

@@ -33,6 +33,8 @@ class Transaction(Object):
 		self._response = response
 
 	def session(self):
+		if not self._session:
+			self._session = self._application.createSessionForTransaction(self)
 		return self._session
 	
 	def setSession(self, session):
