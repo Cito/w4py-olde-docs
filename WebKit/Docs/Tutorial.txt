@@ -1,0 +1,163 @@
+Beginner Tutorial
+++++++++++++++++++
+
+Version 0.7, Webware for Python 0.7
+
+.. contents::
+
+Synopsis
+========
+
+We present a tutorial on making a Webware script, and some guidance on turning that into a web application.
+
+Installation
+============
+
+This document does not cover the basic installation.  See the `Install Guide`_
+-- you should be able to open up the Examples context in Webware before you continue.
+
+.. _`Install Guide`: InstallGuide.html
+
+Setting Up Your Environment
+===========================
+
+Creating a Working Directory
+----------------------------
+
+We'll first set up a directory dedicated to your application.  Run this command::
+
+    $ cd ~
+    $ python /path/to/Webware/bin/MakeAppWorkDir.py -l --cvsignore \
+      -c context WebwareTest
+
+You'll now have a directory WebwareTest in your home directory (or of course you can put it in some other location).  Inside this directory will be several subdirectories and a couple files.  The only file we'll worry about is ``AppServer`` (or ``AppServer.bat`` if you're on Windows).  The directories of interest are ``context`` (that you specified with ``-c context``) where you'll be putting your servlets; ``Configs`` that holds some configuration files; and ``lib`` where you can put your non-servlet code.
+
+For more information about the working directory and setting up the file structure for your application, see `Application Development`_.
+
+.. _`Application Development`: ApplicationDevelopment.html
+
+Changing Webware Configuration
+------------------------------
+
+For the most part the configuration is fine, but we'll make a couple changes to make it easier to develop.  For more information on configuration see the `Configuration Guide`_.
+
+.. _`Configuration Guide`: Configuration.html
+
+In the file ``AppServer.config``, change this line::
+
+    # Original (default setting):
+        'AutoReload': 0,
+    # To:
+        'AutoReload': 1,
+
+This will cause the AppServer to restart if any loaded files are changed -- without this you may edit a file and your application won't see the updated version until you manually restart the AppServer.
+
+The other change you may want to make to allow you to use more interesting URLs.  In Application.config::
+
+    # Original (default setting):
+        'ExtraPathInfo': 0,
+    # To:
+        'ExtraPathInfo': 1,
+        
+Otherwise the settings should be appropriate for development.  (There are several you would want to change before deploying the application in a production environment).
+
+Creating and Understanding the Servlet
+======================================
+
+Webware's core concept for serving pages is the *servlet*.  This is a class that creates a response given a request.
+
+The core classes to understanding the servlet are ``Servlet``, ``HTTPServlet``, and ``Page``.  Also of interest would be the request (``Request`` and ``HTTPRequest``) and the response (``Response`` and ``HTTPResponse``) -- the ``HTTP-`` versions of these classes are more interesting.  There is also a ``Transaction`` object, which is solely a container for the request and response.
+
+While there are several levels you can work on while creating your servlet, in this tutorial we will work solely with subclassing the ``Page`` class.  This class defines a more high-level interface, appropriate for generating HTML (though it can be used with any content type).  It also provides a number of convenience methods.
+
+A Brief Introduction to the Servlet
+===================================
+
+Each servlet is a plain Python class.  There is no Webware magic (except perhaps for the level one *import module based on URL* spell).  PSP has more magic, but that's a topic for another day. (@@ ib: link to PSP doc)  An extremely simple servlet might look like::
+
+    from WebKit.Page import Page
+    
+    class MyServlet(Page):
+    
+        def title(self):
+            return 'My Sample Servlet'
+            
+        def writeContent(self):
+            self.write('Hello world!')
+            
+This would be placed in ``MyServlet.py``.  Webware will create a pool of ``MyServlet`` instances, which will be reused.  Servlets "write" the text of the response (like ``self.write("some text")``).  Webware calls the servlet like this:
+
+* An unused servlet is taken from the pool, or another servlet is created.
+* ``awake(transaction)`` is called.  This is a good place to set up data
+  for your servlet.  You can put information in instance variables for use later
+  on.  But be warned -- those instance variables will hang around potentially
+  for a long time if you don't delete them later (in ``sleep``).
+* Several low-level methods are called, which Page isolates you from.  We will
+  ignore these.
+* ``writeHTML()`` is called.  ``Page`` implements this just fine, but you
+  can override it if you want total control, or if you want to output something
+  other than HTML.
+* ``writeDocType()`` would write something like ``<!DOCTYPE HTML PUBLIC 
+  "-//W3C//DTD HTML 4.01 Transitional//EN"   
+  "http://www.w3.org/TR/html4/loose.dtd">``
+* The <head> section of the page is written.  ``title()`` gives the title, and
+  you probably want to override it.
+* ``writeStyleSheet()`` is called, if you want to write that or anything else in
+  the <head> section.
+* The <body> tag is written.  Have ``htBodyArgs()`` return anything you want in
+  the <body> tag (like ``onLoad="loadImages()"``)
+* ``writeBodyParts()`` is called, which you may want to override if you want
+  to create a template for other servlets.
+* ``writeContent()`` should write the main content for the page.  This is where
+  you do most of your display work.
+* The response is packaged up, the headers put on the front, cookies handled,
+  and it's sent to the browser.  This is all done for you.
+* ``sleep(transaction)`` is called.  This is where you should clean up anything
+  you might have set up earlier -- open files, open database connections, etc.
+  Often it's empty.
+* The servlet is placed back into the pool, to be used again.  This only happens
+  after the transaction is complete -- the servlet won't get reused any earlier.
+  
+You only have to override the portions that you want to.  It is not uncommon to only override the ``writeContent()`` method in a servlet, for instance.
+
+
+
+Each servlet is a class itself.  Behind the scenes Webware creates a pool of servlet instances for each servlet, and then reuses those servlets.  
+
+
+
+
+You will notice a servlet in your new context named ``Main.py``.  The Main (or index) servlet is like the ``index.html`` file -- it is used if no servlet name is given.  Here's the contents of that file::
+
+    from WebKit.Page import Page
+
+    class Main(Page):
+
+        def title(self):
+            return 'My Sample Context'
+
+        def writeContent(self):
+		    self.writeln('<h1>Welcome to Webware!</h1>')
+            self.writeln('''
+            This is a sample context generated for you and has purposly been
+            kept very simple to give you something to play with to get yourself
+            started.  The code that implements this page is located in
+            <b>%s</b>.
+            ''' % self.request().serverSidePath())
+
+            self.writeln('''
+            <p>
+            There are more examples and documentaion in the Webware
+            distribution, which you can get to from here:<p><ul>
+            ''')
+
+            adapterName = self.request().adapterName()
+            ctxs = self.application().contexts().keys()
+            ctxs = filter(lambda ctx: ctx!='default', ctxs)
+            ctxs.sort()
+            for ctx in ctxs:
+                self.writeln('<li><a href="%s/%s/">%s</a>' 
+                             % (adapterName, ctx, ctx))
+
+            self.writeln('</ul>')
+
