@@ -970,7 +970,6 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				return None
 			ssPath = filenames[0] # our path now includes the filename within the directory
 			if debug: print '>> discovered directory file = %s' % repr(ssPath)
-
 		elif os.path.splitext(ssPath)[1]=='':
 			# At this point we have a file (or a bad path)
 			filenames = self.filenamesForBaseName(ssPath, debug)
@@ -980,6 +979,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			else:
 				print 'WARNING: For %s, did not get precisely 1 filename: %s' % (urlPath, filenames)
 				return None
+		elif not os.path.exists(ssPath):
+			return None
+		else:
+			raise AssertionError, "Unexpected if-else fall through."
 
 		self._serverSidePathCacheByPath[urlPath] = ssPath
 
