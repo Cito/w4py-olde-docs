@@ -10,7 +10,7 @@ This technique comes in handy when style sheets won't go far enought. For exampl
 
 EXAMPLES
 
-For an example, see ../Documentation/StyleGuidelines.raw.
+For an example, see ../Docs/StyleGuidelines.raw.
 
 
 RULES
@@ -42,7 +42,7 @@ from types import *
 
 class Convention:
 	'''
-	This class is on the "raw-to-HTML" classes and is specifically for ../Documentation/StyleGuidelines.raw.
+	This class is on the "raw-to-HTML" classes and is specifically for ../Docs/StyleGuidelines.raw.
 	'''
 
 	def __init__(self, processor):

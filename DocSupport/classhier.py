@@ -189,13 +189,13 @@ class ClassHier:
 		links = []
 
 		# summary file
-		if os.path.exists('Documentation/Source/Summaries/%s.html' % filename):
+		if os.path.exists('Docs/Source/Summaries/%s.html' % filename):
 			links.append('<td> <a href="Summaries/%s.html">summary</a> </td>' % filename)
 		else:
 			links.append('<td> &nbsp; </td>')
 
 		# source file
-		docFilename = 'Documentation/Source/Files/%s.html' % filename
+		docFilename = 'Docs/Source/Files/%s.html' % filename
 		if os.path.exists(docFilename):
 			links.append('<td> <a href="Files/%s.html">source</a> </td>' % filename)
 		else:
