@@ -221,7 +221,7 @@ class RequestHandler(asyncore.dispatcher):
 		rawResponse = transaction.response().rawResponse()
 
 		for item in rawResponse['headers']:
-			self._buffer = self._buffer + item[0] + ":" + item[1] + "\n"
+			self._buffer = self._buffer + item[0] + ":" + str(item[1]) + "\n"
 		
 		self._buffer = self._buffer + "\n" + rawResponse['contents']
 		
