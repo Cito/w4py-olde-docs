@@ -93,7 +93,7 @@ class Model(Configurable):
 			e.printError(filename)
 			sys.exit(1)
 		dur = time.time() - start
-		print '%.2f seconds' % dur
+		sys.stderr.write('%.2f seconds\n' % dur)
 
 	def readKlassesInModelDir(self):
 		"""
