@@ -215,13 +215,13 @@ class Installer:
 
 	def fixPermissions(self):
 		if os.name=='posix':
-			print 'Fixing permissions on CGI scripts...'
+			print 'Setting permissions on CGI scripts...'
 			for comp in self._comps:
-				print '  %s...' % comp['name']
+				#print '  %s...' % comp['name']
 				for filename in glob('%s/*.cgi' % comp['filename']):
 					#if self._verbose: print '    %s...' % os.path.basename(filename)
 					cmd = 'chmod a+rx %s' % filename
-					print '    %s' % cmd
+					print '  %s' % cmd
 					os.system(cmd)
 			print
 
