@@ -5,25 +5,31 @@
 __all__ = ['Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error', 'Funcs', 'MixIn', 'NamedValueAccess', 'PropertiesObject', 'unittest']
 
 
-class SubclassResponsibilityError(NotImplementedError):
-	"""
-	This exception is raised by abstract methods in abstract classes. It
-	is a special case of NotImplementedError, that indicates that the
-	implementation won't be provided at that location in the future
-	--instead the subclass should provide it.
+try:
+	AbstractError  # Python might build this in some day.
+except NameError:
+	class AbstractError(NotImplementedError):
+		"""
+		This exception is raised by abstract methods in abstract classes. It
+		is a special case of NotImplementedError, that indicates that the
+		implementation won't ever be provided at that location in the future
+		--instead the subclass should provide it.
 
-	Typical usage:
+		Typical usage:
 
-	from MiscUtils import SubclassResponsibilityError
+			from MiscUtils import AbstractError
 
-	class Foo:
-		def bar(self):
-			raise SubclassResponsibilityError, self.__class__
+			class Foo:
+				def bar(self):
+					raise AbstractError, self.__class__
 
-	Note that added the self.__class__ makes the resulting exception
-	much more useful.
-	"""
-	pass
+		Note that added the self.__class__ makes the resulting exception
+		*much* more useful.
+		"""
+		pass
+
+# @@ 2002-11-10 ce: SubclassResponsibilityError is deprecated in favor of AbstractError, post 0.7
+SubclassResponsibilityError = AbstractError
 
 
 class NoDefault:

@@ -59,13 +59,13 @@ class SessionStore(Object):
 	## Dictionary-style access ##
 
 	def __len__(self):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def __getitem__(self, key):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def __setitem__(self, key, item):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def __delitem__(self, key):
 		"""
@@ -75,25 +75,25 @@ class SessionStore(Object):
 			if not sess.isExpired():
 				sess.expiring()
 		"""
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def has_key(self, key):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def keys(self):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def clear(self):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 
 	## Application support ##
 
 	def storeSession(self, session):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def storeAllSessions(self):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def cleanStaleSessions(self, task=None):
 		"""

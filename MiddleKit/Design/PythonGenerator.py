@@ -1,5 +1,5 @@
 from CodeGenerator import CodeGenerator
-from MiscUtils import SubclassResponsibilityError
+from MiscUtils import AbstractError
 from time import asctime, localtime, time
 import string
 import os, sys
@@ -195,7 +195,7 @@ class Attr:
 		Used by at least defaultValue().
 		Subclass responsibility.
 		"""
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def pyReadStoreDataStatement(self):
 		return None
@@ -370,7 +370,7 @@ class EnumAttr:
 class AnyDateTimeAttr:
 
 	def mxDateTimeTypeName(self):
-		raise SubclassResponsibilityError, self.__class__
+		raise AbstractError, self.__class__
 
 	def writePySetChecks(self, out):
 		Attr.writePySetChecks.im_func(self, out)

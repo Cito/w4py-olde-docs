@@ -10,7 +10,7 @@ The globals provided are:
 	* the modules, os, string, sys and time
 	* the root class, Object
 	* the package WebUtils
-	* the class SubclassResponsibilityError, an exception that methods in abstract classes often raise.
+	* the class AbstractError, an exception that methods in abstract classes often raise.
 """
 
 
@@ -24,7 +24,7 @@ except ImportError:
 from Object import Object
 import WebUtils
 from MiscUtils import NoDefault
-from MiscUtils import SubclassResponsibilityError
+from MiscUtils import AbstractError
 
 
 # @@ 2000-05-10 ce: Consider if all the following should be located in MiscUtils

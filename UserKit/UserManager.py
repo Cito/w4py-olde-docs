@@ -70,7 +70,7 @@ class UserManager:
 
 	@@ 2001-02-16 ce: Should we take out "User" in the names of the above 6 methods? Maybe it's redundant.
 
-	Subclasses of UserManager provide persistence such as to the file system or a MiddleKit store. Subclasses must implement all methods that raise SubclassResponsibilityError's. Subclasses typically override (while still invoking super) addUser().
+	Subclasses of UserManager provide persistence such as to the file system or a MiddleKit store. Subclasses must implement all methods that raise AbstractError's. Subclasses typically override (while still invoking super) addUser().
 
 	Subclasses should ensure "uniqueness" of users. For example, invoking any of the userForSomething() methods repeatedly should always return the same user instance for a given key. Without uniqueness, consistency issues could arise with users that are modified.
 
@@ -154,19 +154,19 @@ class UserManager:
 
 	def userForSerialNum(self, serialNum, default=NoDefault):
 		""" Returns the user with the given serialNum, pulling that user record into memory if needed. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def userForExternalId(self, externalId, default=NoDefault):
 		""" Returns the user with the given external id, pulling that user record into memory if needed. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def userForName(self, name, default=NoDefault):
 		""" Returns the user with the given name, pulling that user record into memory if needed. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def users(self):
 		""" Returns a list of all users (regardless of login status). """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def numActiveUsers(self):
 		""" Returns the number of active users, e.g., users that are logged in. """
@@ -174,10 +174,10 @@ class UserManager:
 
 	def activeUsers(self):
 		""" Returns a list of all active users. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def inactiveUsers(self):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 
 	## Logging in and out ##

@@ -5,7 +5,7 @@ if newPath not in sys.path:
 
 from MiscUtils.NamedValueAccess import \
 	NamedValueAccessError, valueForKey, valueForName, NamedValueAccess
-from MiscUtils import NoDefault, unittest
+from MiscUtils import AbstractError, NoDefault, unittest
 from UserDict import UserDict
 import types
 
@@ -97,7 +97,7 @@ class LookupTest(NamedValueAccessTest):
 		self.objs = map(lambda clazz: clazz(), self.classes)
 
 	def lookup(self, obj, key, default=NoDefault):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def checkBasicAccess(self):
 		"""

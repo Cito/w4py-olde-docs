@@ -1,3 +1,6 @@
+from MiscUtils import AbstractError
+
+
 class Task:
 
 	def __init__(self):
@@ -10,7 +13,7 @@ class Task:
 		Override this method for you own tasks. Long running tasks can periodically 
 		use the proceed() method to check if a task should stop. 
 		"""
-		raise SubclassResponsibilityError
+		raise AbstractError
 	
 		
 	## Utility method ##	

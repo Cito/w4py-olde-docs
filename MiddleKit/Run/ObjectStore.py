@@ -322,15 +322,15 @@ class ObjectStore(ModelUser):
 
 	def commitInserts(self):
 		""" Invoked by saveChanges() to insert any news objects add since the last save. Subclass responsibility. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def commitUpdates(self):
 		""" Invoked by saveChanges() to update the persistent store with any changes since the last save. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def commitDeletions(self):
 		""" Invoked by saveChanges() to delete from the persistent store any objects deleted since the last save. Subclass responsibility. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def revertChanges(self):
 		""" Discards all insertions and deletions, and restores changed objects to their original values. """
@@ -341,11 +341,11 @@ class ObjectStore(ModelUser):
 
 	def fetchObject(self, className, serialNum, default=NoDefault):
 		""" Subclasses should raise UnknownObjectError if an object with the given className and serialNum does not exist, unless a default value was passed in, in which case that value should be returned. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def fetchObjectsOfClass(self, className, isDeep=1):
 		""" Fetches all objects of a given class. If isDeep is 1, then all subclasses are also returned. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 
 	## Other ##

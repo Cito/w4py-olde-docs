@@ -1,7 +1,7 @@
 import sys, time
 from types import InstanceType, LongType, StringType
 
-from MiscUtils import NoDefault, SubclassResponsibilityError
+from MiscUtils import NoDefault, AbstractError
 from MiscUtils import Funcs as funcs
 
 from MiddleObject import MiddleObject
@@ -169,7 +169,7 @@ class SQLObjectStore(ObjectStore):
 
 		Subclass responsibility.
 		"""
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def readKlassIds(self):
 		"""
@@ -224,7 +224,7 @@ class SQLObjectStore(ObjectStore):
 	def retrieveLastInsertId(self, conn, cur):
 		""" Returns the id (typically a 32-bit int) of the last INSERT operation by this connection. Used by commitInserts() to get the correct serial number for the last inserted object.
 		Subclass responsibility. """
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def commitUpdates(self,allThreads=0):
 		for object in self._changedObjects.values(allThreads):
@@ -389,7 +389,7 @@ class SQLObjectStore(ObjectStore):
 		"""
 		Subclasses must override to return a newly created database connection.
 		"""
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def threadSafety(self):
 		return self.dbapiModule().threadsafety

@@ -36,16 +36,16 @@ class Response(Message):
 	## Output ##
 
 	def write(self, string):
-		raise SubclassResponsibilityError
+		raise AbstractError
 	
 	def isCommitted(self):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def deliver(self):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def reset(self):
-		raise SubclassResponsibilityError
+		raise AbstractError
 
 	def streamOut(self):
 		return self._strmOut
