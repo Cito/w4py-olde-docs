@@ -248,7 +248,23 @@ Version 0.1
 
 <p> An MK model can have configuration files inside it that affect things like code generation.
 
-<p> The only configuration file supported and used is <span class=filename>SQLGenerator.config</span>. The one setting currently supported is <span class=name>DropStatements</span> whose potential values are:
+<p> <span class=filename>Settings.config</span> currently has one setting, <span class=name>Package</span> that can be used to declare the package that your set of middle objects are contained by. This is useful for keeping your middle objects packaged away from other parts of your programs, thereby reducing the chances of a name conflict. This is the recommended way of using MK.
+
+<p> An example <a name=filename>Settings.config</a>:
+
+<pre>{
+    'Package': 'Middle',
+}</pre>
+
+<p> Your code would then import classes like so:
+
+<pre class=py>from Middle.Foo import Foo
+</pre>
+
+<p> Don't forget to put a <span class=filename>__init__.py</span> in the directory so that Python recognizes it as a package.
+
+
+<p> <span class=filename>SQLGenerator.config</span> has one setting: <span class=name>DropStatements</span> whose potential values are:
 
 <ul>
 	<li> database - This causes a DROP DATABASE to be used in <span class=filename>Create.sql</span>. This is the cleanest way to handle models and also the default.
