@@ -1,9 +1,0 @@
-{
-	'PrintConfigAtStartUp': 1,
-	'Verbose':              1,
-	'Host':					'127.0.0.1',
-	'Port':                 8086,
-	'PlugIns':              [],
-	'PlugInDirs':			['..'],
-	'ServerThreads':        10,
-}

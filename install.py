@@ -46,6 +46,7 @@ class Installer:
 		self.printHello()
 		self.detectComponents()
 		self.installDocs()
+		self.backupConfigs()
 		self.fixPermissions()
 		self.finished()
 		self.printGoodbye()
@@ -119,7 +120,7 @@ class Installer:
 	def createBrowsableSource(self):
 		''' Create HTML documents for class hierarchies, summaries, source files, etc. '''
 
-		print 'Creating browsable source...'
+		print 'Creating browsable source and summaries...'
 		self.requirePath('DocSupport')
 
 		for comp in self._comps:
@@ -208,6 +209,31 @@ class Installer:
 		ht.append('</table>')
 		ht = string.join(ht, '')
 		open(docsDir+'/FileList.html', 'w').write(ht)
+
+	def backupConfigs(self):
+		''' Copies *.config to *.config.default, if the .default files don't already exist. This allows the user to always go back to the default config file if needed (for troubleshooting for example). '''
+		print 'Backing up original config files...'
+		print '   ',
+		self._backupConfigs(os.curdir)
+		print
+
+	def _backupConfigs(self, dir):
+		wr = sys.stdout.write
+		for filename in os.listdir(dir):
+			fullPath = os.path.join(dir, filename)
+			if os.path.isdir(fullPath):
+				self._backupConfigs(fullPath)
+			elif filename[0]!='.' and \
+					os.path.splitext(filename)[1]=='.config':
+				backupName = fullPath + '.default'
+				if not os.path.exists(backupName):
+					contents = open(fullPath, 'rb').read()
+					open(backupName, 'wb').write(contents)
+					del contents
+					wr('.')
+				else:
+					wr('-')
+				sys.stdout.flush()
 
 	def fixPermissions(self):
 		if os.name=='posix':
