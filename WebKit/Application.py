@@ -733,8 +733,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			#					 On the other hand, that can always be done by providing a factory for '.*'
 		assert factory.uniqueness()=='file', '%s uniqueness is not supported.' % factory.uniqueness()
 
-		if not dir in sys.path:
-			sys.path.insert(0, dir)
+		# @@ 2001-05-10 gat: removed this because it allows 2 different copies of the same
+		# module to be imported, one as "foo" and one as "context.foo".
+		#if not dir in sys.path:
+		#	sys.path.insert(0, dir)
 		inst = factory.servletForTransaction(transaction)
 		assert inst is not None, 'Factory (%s) failed to create a servlet upon request.' % factory.name()
 
