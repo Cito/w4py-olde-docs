@@ -261,7 +261,6 @@ class TASASStreamOut(ASStreamOut):
 		self._socket = sock
 
 	def flush(self):
-		debug = 1
 		result = ASStreamOut.flush(self)
 		if result: ##a true return value means we can send
 			reslen = len(self._buffer)
@@ -407,7 +406,7 @@ def run(useMonitor = 0):
 		if useMonitor:
 			monitor_socket = Monitor(server)
 		else:
-			monitor = 0
+			monitor_socket = None
 
 		# On NT, run mainloop in a different thread because it's not safe for
 		# Ctrl-C to be caught while manipulating the queues.
