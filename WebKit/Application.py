@@ -300,7 +300,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		return self._webwareVersion
 
 	def webKitVersion(self):
-		return '1.0-pre'  # @@ 2002-02-26 ce: should pull from Properties.py
+		return '0.6a1'  # @@ 2002-02-26 ce: should pull from Properties.py
 
 	def version(self):
 		"""
@@ -467,7 +467,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 	def handleMissingPathSession(self,transaction):
 		'''
 		if UseAutomaticPathSessions is enabled in Application.config
-		we redirect the browser to a url with SID in path 
+		we redirect the browser to a url with SID in path
 		http://gandalf/a/_SID_=2001080221301877755/Examples/
 		_SID_ is extracted and removed from path in HTTPRequest.py
 
@@ -482,7 +482,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		if self.setting('Debug')['Sessions']:
 			print ">> [sessions] handling UseAutomaticPathSessions, redirecting to", url
 		transaction.response().sendRedirect(url)
-	
+
 	def handleGoodURL(self, transaction):
 		self.createServletInTransaction(transaction)
 		self.awake(transaction)
@@ -1145,7 +1145,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 		if debug: print "starting ssPath=%s, urlPath=%s " % (ssPath, urlPath)
 		goodindex = 0  #this marks the last point where the path exists
-		
+
 		index = string.find(ssPath, os.sep)
 		if index == -1: return ssPath, urlPath, extraURLInfo  ##bail if no seps found
 		if not index: index=1  #start with at least one character
@@ -1158,12 +1158,12 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			if debug: print "testing ", ssPath[:index]
 		if debug: print "quitting loop with goodindex= ",ssPath[:goodindex]
 
-		if index != -1: ##there is another slash, but we already know its invalid 
+		if index != -1: ##there is another slash, but we already know its invalid
 			if debug: print "last loop got an index of -1"
 			searchpath = ssPath[:index]
-		else:    #no more slashes, so the last element is either a file without an extension, or the real URL is a directory and the last piece is extraURLInfo 
+		else:    #no more slashes, so the last element is either a file without an extension, or the real URL is a directory and the last piece is extraURLInfo
 			searchpath = ssPath
-			
+
 
 		## Now test to see if the next element is a file without an extension
 		filenames = self.filenamesForBaseName(searchpath)
@@ -1176,12 +1176,12 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			if isdir(ssPath[:goodindex]):
 				extralen = extralen-1  ##leave the last slash on the path
 
-			
+
 
 		if extralen > 0:
 			urlPath, extraURLPath = urlPath[:-extralen] , urlPath[-extralen:]
 			ssPath = ssPath[:-extralen]
-			
+
 		if debug: print "processExtraURLPath returning %s, %s, %s" % ( ssPath, urlPath, extraURLPath )
 		return ssPath, urlPath, extraURLPath
 
