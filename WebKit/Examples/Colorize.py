@@ -48,7 +48,9 @@ class Colorize(Page):
 
 		py2html.main((None,'-stdout','-format:rawhtml','-files',filename))
 
-		res.write(myout.getvalue())
+		results = myout.getvalue()
+		results = string.replace(results, '\t', '    ')  # 4 spaces per tab
+		res.write(results)
 
 		sys.stdout=realout
 
