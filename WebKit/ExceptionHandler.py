@@ -60,7 +60,7 @@ class ExceptionHandler(Object):
 			app._exceptionHandlerClass = ExceptionHandler
 
 	You can also control the errors with settings in
-	``Application.config``	
+	``Application.config``
 	"""
 
 	hideValuesForFields = ['creditcard', 'credit card', 'cc', 'password', 'passwd']
@@ -81,7 +81,7 @@ class ExceptionHandler(Object):
 		completes the process -- the caller need not
 		do anything else.
 		"""
-		
+
 		Object.__init__(self)
 
 		# Keep references to the objects
@@ -134,11 +134,11 @@ class ExceptionHandler(Object):
 		"""
 		The full filesystem path for the servlet.
 		"""
-		
+
 		try:
 			return self._tra.request().serverSidePath()
 		except:
-			
+
 			return None
 
 	def basicServletName(self):
@@ -170,7 +170,7 @@ class ExceptionHandler(Object):
 		if self._res:
 			self._res.recordEndTime()
 			self._time = self._res.endTime()
-			
+
 		self.logExceptionToConsole()
 
 		# write the error page out to the response if available.
@@ -218,7 +218,7 @@ class ExceptionHandler(Object):
 		error has occurred.  Body of the message comes from
 		``UserErrorMessage`` setting.
 		"""
-		
+
 		return '''<html>
 	<head>
 		<title>Error</title>
@@ -237,7 +237,7 @@ class ExceptionHandler(Object):
 
 		Most of the contents are generated in `htmlDebugInfo`.
 		"""
-		
+
 		html = ['''
 <html>
 	<head>
@@ -258,7 +258,7 @@ class ExceptionHandler(Object):
 		current exception.  Calls `writeHTML`, which uses
 		``self.write(...)`` to add content.
 		"""
-		
+
 		self.html = []
 		self.writeHTML()
 		html = ''.join(self.html)
@@ -388,7 +388,7 @@ class ExceptionHandler(Object):
 		Writes the traceback, with most of the work done
 		by `WebUtils.HTMLForException.HTMLForException`
 		"""
-		
+
 		self.writeTitle('Traceback')
 		self.write('<p> <i>%s</i>' % self.servletPathname())
 		self.write(HTMLForException(self._exc, self._formatOptions))
@@ -398,7 +398,7 @@ class ExceptionHandler(Object):
 		Write a couple little pieces of information about
 		the environment.
 		"""
-		
+
 		self.writeTitle('MiscInfo')
 		info = {
 			'time':          asctime(localtime(self._time)),
@@ -417,7 +417,7 @@ class ExceptionHandler(Object):
 			self._tra.writeExceptionReport(self)
 		else:
 			self.writeTitle("No current Transaction")
-			
+
 
 	def writeEnvironment(self):
 		"""
@@ -441,7 +441,7 @@ class ExceptionHandler(Object):
 		"""
 		Writes a fancy traceback, using cgitb
 		"""
-		
+
 		if self.setting('IncludeFancyTraceback'):
 			self.writeTitle('Fancy Traceback')
 			try:
@@ -458,7 +458,7 @@ class ExceptionHandler(Object):
 		"""
 		Saves the given HTML error page for later viewing by
 		the developer, and returns the filename used.  """
-		
+
 		filename = self._app.serverSidePath(os.path.join(self.setting('ErrorMessagesDir'), self.errorPageFilename()))
 		f = open(filename, 'w')
 		f.write(html)
@@ -485,7 +485,7 @@ class ExceptionHandler(Object):
 		pathname, exception-name, exception-data,error report
 		filename) to the errors file (typically 'Errors.csv')
 		in CSV format. Invoked by `handleException`. """
-		
+
 		logline = (
 			asctime(localtime(self._time)),
 			self.basicServletName(),
@@ -499,7 +499,7 @@ class ExceptionHandler(Object):
 		else:
 			f = open(filename, 'w')
 			f.write('time,filename,pathname,exception name,exception data,error report filename\n')
-			
+
 		def fixElement(element):
 			element = str(element)
 			if string.find(element, ',') or string.find(element, '"'):
@@ -507,7 +507,7 @@ class ExceptionHandler(Object):
 				element = '"' + element + '"'
 			return element
 		logline = map(fixElement, logline)
-		
+
 		f.write(string.join(logline, ','))
 		f.write('\n')
 		f.close()
@@ -517,7 +517,7 @@ class ExceptionHandler(Object):
 		Emails the exception, either as an attachment, or in the
 		body of the mail.
 		"""
-		
+
 		message = StringIO.StringIO()
 		writer = MimeWriter.MimeWriter(message)
 
@@ -549,21 +549,21 @@ class ExceptionHandler(Object):
 				'the full HTML error report from WebKit is attached.\n\n'
 				)
 			traceback.print_exc(file=body)
-			
+
 			# now add htmlErrMsg
 			part = writer.nextpart()
 			part.addheader('Content-Transfer-Encoding', '7bit')
 			part.addheader('Content-Description', 'HTML version of WebKit error message')
 			body = part.startbody('text/html; name=WebKitErrorMsg.html')
 			body.write(htmlErrMsg)
-			
+
 			# finish off
 			writer.lastpart()
 		else:
 			writer.addheader('Content-Type', 'text/html; charset=us-ascii')
 			body = writer.startbody('text/html')
 			body.write(htmlErrMsg)
-			
+
 		# Send the message
 		server = smtplib.SMTP(self.setting('ErrorEmailServer'))
 		server.set_debuglevel(0)
@@ -580,7 +580,7 @@ class ExceptionHandler(Object):
 		Filters keys from a dict.  Currently ignores the
 		dictionary, and just filters based on the key.
 		"""
-		
+
 		return self.filterValue(value, key)
 
 	def filterTableValue(self, value, key, row, table):
@@ -638,7 +638,7 @@ def htTitle(name):
 	"""
 	Formats a `name` as a section title
 	"""
-	
+
 	return '''
 <p> <br> <table border=0 cellpadding=4 cellspacing=0 bgcolor=#A00000 width=100%%> <tr> <td align=center>
 	<font face="Tahoma, Arial, Helvetica" color=white> <b> %s </b> </font>
@@ -650,7 +650,7 @@ def osIdTable():
 	Returns a list of dictionaries contained id information such
 	as uid, gid, etc., all obtained from the os module. Dictionary
 	keys are ``"name"`` and ``"value"``. """
-		
+
 	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp', 'getpid',
 		 'getppid', 'getuid']
 	table = []

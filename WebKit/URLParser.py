@@ -77,7 +77,7 @@ class ContextParser(URLParser):
 	entire URL is passed to the default context's FileParser).
 
 	There is generally only one ContextParser, which can be
-	found as ``application.rootURLParser()``.  
+	found as ``application.rootURLParser()``.
 	"""
 
 	def __init__(self, app):
@@ -88,7 +88,7 @@ class ContextParser(URLParser):
 		In __init__ we take the ``Contexts`` setting from
 		Application.config and parse it slightly.
 		"""
-		
+
 		URLParser.__init__(self)
 
 		# need to set this here because we need for initialization,
@@ -100,7 +100,7 @@ class ContextParser(URLParser):
 		# names and context directories.  It is set by
 		# `addContext`.
 		self._contexts = {}
-		
+
 
 		# add all contexts except the default, which we save until
 		# the end
@@ -134,7 +134,7 @@ class ContextParser(URLParser):
 				self._defaultContext = 'default'
 
 	def resolveDefaultContext(self, name, dest):
-		""" 
+		"""
 		Figure out if the default context refers to an existing context,
 		the same directory as an existing context, or a unique directory.
 
@@ -154,7 +154,7 @@ class ContextParser(URLParser):
 			# The default context refers to another context,
 			# not a unique context.  Return the name of that context.
 			return dest
-			
+
 		elif contextDirs.has_key(self.absContextPath(dest)):
 			# The default context has the same directory
 			# as another context, so it's still not unique
@@ -246,7 +246,7 @@ class ContextParser(URLParser):
 		trans.request()._contextName = contextName
 		fpp = FileParser(self._contexts[contextName])
 		return fpp.parse(trans, rest)
-		
+
 class _FileParser(URLParser):
 	"""
 	FileParser dispatches to servlets in the filesystem, as well
@@ -298,12 +298,12 @@ class _FileParser(URLParser):
 		result = self.parseInit(trans, requestPath)
 		if result is not None:
 			return result
-			
+
 		assert not requestPath or requestPath.startswith('/'), \
 		       "Not what I expected: %s" % repr(requestPath)
 		if not requestPath or requestPath == '/':
 			return self.parseIndex(trans, requestPath)
-		
+
 		parts = requestPath[1:].split('/', 1)
 		nextPart = parts[0]
 		if len(parts) > 1:
@@ -482,7 +482,7 @@ class _FileParser(URLParser):
 		Get the __init__ module object for this FileParser's
 		directory.
 		"""
-		
+
 		try:
 			result = imp.find_module('__init__', [self._path])
 			if result is None:
@@ -544,7 +544,7 @@ class _FileParser(URLParser):
 		    this instance.  When instantiated, it will be passed
 		    *this* FileParser instance; the parser can use this to
 		    return control back to the FileParser after doing whatever
-		    it wants to do.  
+		    it wants to do.
 
 		    You may want to use a line like this to handle the names::
 
@@ -578,7 +578,7 @@ class _FileParser(URLParser):
 		mod = self._initModule
 
 		seen = trans._fileParserInitSeen.setdefault(self._path, {})
-		
+
 		if not seen.has_key('urlTransactionHook') \
 		       and hasattr(mod, 'urlTransactionHook'):
 			seen['urlTransactionHook'] = 1
@@ -646,7 +646,7 @@ class _FileParser(URLParser):
 
 		return None
 
-FileParser = ParamFactory(_FileParser)	
+FileParser = ParamFactory(_FileParser)
 
 class URLParameterParser(URLParser):
 	"""
@@ -683,7 +683,7 @@ class URLParameterParser(URLParser):
 		FileParser instance, which can actually find the
 		servlet.
 		"""
-		
+
 		parts = requestPath.split('/')
 		result = []
 		req = trans.request()
@@ -713,9 +713,9 @@ class ServletFactoryManagerClass:
 	def addServletFactory(self, factory):
 		"""
 		Servlet factories can add themselves with::
-		
+
 		    ServletFactoryManager.addServletFactory(factory)
-	    
+
 		The factory must have an `extensions` method, which should
 		return a list of extensions that the factory handles (like
 		``['.ht']``).  The special extension ``.*`` will match any
@@ -735,7 +735,7 @@ class ServletFactoryManagerClass:
 		"""
 		Gets a factory for a filename.
 		"""
-		
+
 		name, ext = os.path.splitext(path)
 		if self._factoryExtensions.has_key(ext):
 			return self._factoryExtensions[ext]
@@ -749,7 +749,7 @@ class ServletFactoryManagerClass:
 		Uses `factoryForFile` to find the factory, which
 		creates the servlet.
 		"""
-		
+
 		factory = self.factoryForFile(path)
 		return factory.servletForTransaction(trans)
 
@@ -768,7 +768,7 @@ def initApp(app):
 
 	global _globalApplication
 	_globalApplication = app
-	
+
 	from UnknownFileTypeServlet import UnknownFileTypeServletFactory
 	from ServletFactory import PythonServletFactory
 	for factory in [UnknownFileTypeServletFactory, PythonServletFactory]:

@@ -256,7 +256,7 @@ class ServletFactory(Object):
 				else:
 					if servlet.__class__ is theClass:
 						return servlet
-		
+
 		# Use a lock to prevent multiple simultaneous imports
 		# of the same module @@ ib 2004-06: Aren't imports
 		# threadsafe already?  Or maybe not, because we are
@@ -310,7 +310,7 @@ class PythonServletFactory(ServletFactory):
 
 	def extensions(self):
 		return ['.py']
-			
+
 	def loadClass(self, transaction, path):
 		name = os.path.splitext(os.path.split(path)[1])[0]
 		# Import the module as part of the context's package
@@ -332,4 +332,4 @@ class PythonServletFactory(ServletFactory):
 			       or isinstance(theClass, type)
 		assert issubclass(theClass, Servlet)
 		return theClass
-		
+
