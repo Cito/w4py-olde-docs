@@ -36,7 +36,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 	other than a direct correlation to the URL. Here is such an example:
 
 
-	from WebKit.AppServer import globalServer
+	from WebKit.AppServer import globalAppServer
 	from WebKit.UnknownFileTypeServlet import UnknownFileTypeServlet
 	import os
 
@@ -77,8 +77,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		HTTPServlet.__init__(self)
 		Configurable.__init__(self)
 		if application is None:
-			from WebKit.AppServer import globalServer
-			application = globalServer.application()
+			from WebKit.AppServer import globalAppServer
+			application = globalAppServer.application()
 			assert application is not None
 		self._application = application
 
