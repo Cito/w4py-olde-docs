@@ -30,7 +30,7 @@ import time
 import errno
 from WebUtils import Funcs
 
-debug = 1
+debug = 0
 
 DefaultConfig = {
 	'Port':                 8086,
