@@ -802,7 +802,8 @@ admin page, you will see a sidebar that links to all the contexts.
 Another way to look at contexts is a means for "directory
 partitioning". If you have two distinct web applications (for example,
 ``PythonTutor`` and ``DayTrader``), you will likely put each of these
-in their own context.
+in their own context (@@ should also mention reasons for running
+multiple appserver instances).
 
 Instead of adding your own contexts you may wish to use
 MakeAppWorkDir_, which will partition your application from the
@@ -933,7 +934,7 @@ unless the server is unresponsive to it.
 On UNIX if you don't have access to the terminal window of the app
 server (perhaps because you used rlogin, telnet or ssh to remotely
 access the machine), and "AppServer stop" doesn't work, you can use
-``ps -ax | grep AppServer`` to get the pid and ``kill <pid>`` to
+``ps -ax | grep ThreadedAppServer`` to get the pid and ``kill <pid>`` to
 effect a Control-C.
 
 Reloading Servlets
