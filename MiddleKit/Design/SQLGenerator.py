@@ -395,6 +395,7 @@ class Klass:
 		sqlAttrs = []
 		nonSQLAttrs = []
 		for attr in self.allAttrs():
+			attr.containingKlass = self   # as opposed to the declaring klass of the attr
 			if attr.hasSQLColumn():
 				sqlAttrs.append(attr)
 			else:
@@ -412,6 +413,9 @@ class Klass:
 		wr(');\n')
 		self.writeIndexSQLDefsAfterTable(wr)
 		wr('\n\n')
+		# cleanup
+		for attr in self.allAttrs():
+			attr.containingKlass = None
 
 	def primaryKeySQLDef(self, generator):
 		"""
@@ -480,6 +484,10 @@ class Attr:
 		return input
 
 	def writeCreateSQL(self, generator, out):
+		"""
+		The klass argument is the containing klass of the attribute which can be different than
+		the declaring klass.
+		"""
 		try:
 			if self.hasSQLColumn():
 				self.writeRealCreateSQLColumn(generator, out)
@@ -513,8 +521,7 @@ class Attr:
 				defaultSQL = ' ' + defaultSQL
 		else:
 			defaultSQL = ''
-		uniqueSQL = self.boolForKey('isUnique') and ' unique' or ''
-		out.write('\t%s %s%s%s%s' % (name, self.sqlTypeOrOverride(), uniqueSQL, notNullSQL, defaultSQL))
+		out.write('\t%s %s%s%s%s' % (name, self.sqlTypeOrOverride(), self.uniqueSQL(), notNullSQL, defaultSQL))
 
 	def writeAuxiliaryCreateTable(self, generator, out):
 		# most attribute types have no such beast
@@ -561,6 +568,12 @@ class Attr:
 		if not self._sqlColumnName:
 			self._sqlColumnName = self.name()
 		return self._sqlColumnName
+
+	def uniqueSQL(self):
+		"""
+		Returns the SQL to use within a column definition to make it unique.
+		"""
+		return self.boolForKey('isUnique') and ' unique' or ''
 
 
 class BoolAttr:
@@ -717,14 +730,20 @@ class ObjRefAttr:
 				notNull = self.sqlNullSpec()
 			classIdDefault = ' default %s' % self.targetKlass().id()
 			#   ^ this makes the table a little to easier to work with in some cases (you can often just insert the obj id)
-			targetKlass = self.targetKlass()
 			if self.get('Ref', None) or \
-			  (self.setting('GenerateSQLReferencesForObjRefsToSingleClasses', False) and len(targetKlass.subklasses())==0):
-				objIdRef = ' references %s(%s) ' % (targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
+			  (self.setting('GenerateSQLReferencesForObjRefsToSingleClasses', False) and len(self.targetKlass().subklasses())==0):
+			  	objIdRef = self.objIdReferences()
 			else:
 				objIdRef = ''
-			out.write('\t%s %s%s%s references _MKClassIds, /* %s */ \n' % (classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault, self.targetClassName()))
+			out.write('\t%s %s%s%s%s, /* %s */ \n' % (classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault, self.classIdReferences(), self.targetClassName()))
 			out.write('\t%s %s%s%s' % (objIdName, self.sqlTypeOrOverride(), notNull, objIdRef))
+
+	def classIdReferences(self):
+ 		return ' references _MKClassIds'
+
+	def objIdReferences(self):
+		targetKlass = self.targetKlass()
+		return ' references %s(%s) ' % (targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
 
 	def sqlForNone(self):
 		if self.setting('UseBigIntObjRefColumns', False):

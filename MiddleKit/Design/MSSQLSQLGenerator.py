@@ -4,6 +4,18 @@ from time import asctime, localtime, time
 import os, sys
 
 
+def cleanConstraintName(name):
+	assert name
+	name = name.replace('[', '')
+	name = name.replace(']', '')
+	assert '[' not in name, name
+	assert ',' not in name, name
+	if len(name)>128:
+		raise Exception("name is %i chars long, but MS SQL Server only supports 128. this case is no currently handled. name=%r" % (
+			len(name), name))
+	return name
+
+
 class MSSQLSQLGenerator(SQLGenerator):
 
 	def sqlSupportsDefaultValues(self):
@@ -141,8 +153,9 @@ class Klass:
 		'''
 		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
 		'''
-		z = '	%s int primary key not null identity(1, 1),\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
-		return z
+		constraintName = cleanConstraintName('PK__%s__%s' % (self.sqlTableName(), self.sqlSerialColumnName()))
+		return '	%s int constraint [%s] primary key not null identity(1, 1),\n' % (
+			self.sqlSerialColumnName().ljust(self.maxNameWidth()), constraintName)
 
 	def sqlTableName(self):
 		"""
@@ -155,8 +168,8 @@ class Klass:
 		for attr in self.allAttrs():
 			if attr.boolForKey('isIndexed') and attr.hasSQLColumn():
 				unique = self.boolForKey('isUnique') and ' unique' or ''
-				indexName = '%s_%s_index' % (self.name(), attr.name())
-				wr('create%s index %s on %s(%s);\n' % (
+				indexName = cleanConstraintName('IX__%s__%s' % (self.name(), attr.name()))
+				wr('create%s index [%s] on %s(%s);\n' % (
 					unique, indexName, self.sqlTableName(), attr.sqlColumnName()))
 		wr('\n')
 
@@ -184,6 +197,14 @@ class Attr:
 			self._sqlColumnName = self.name() # + self.sqlTypeSuffix()
 		return '[' + self._sqlColumnName + ']'
 
+	def uniqueSQL(self):
+		"""
+		Returns the SQL to use within a column definition to make it unique.
+		"""
+		if not self.boolForKey('isUnique'):
+			return ''
+		return ' constraint [UQ__%s__%s] unique' % (self.klass().name(), self.name())
+
 
 class DateTimeAttr:
 
@@ -207,6 +228,17 @@ class BoolAttr:
 		# @@
 		return 'bit'
 
+
+class EnumAttr:
+
+	def sqlType(self):
+		if self.usesExternalSQLEnums():
+			tableName, valueColName, nameColName = self.externalEnumsSQLNames()
+			constraintName = cleanConstraintName('FK__%s__%s__%s__%s' % (
+				self.containingKlass.sqlTableName(), self.sqlName(), tableName, valueColName))
+			return 'int constraint [%s] references %s(%s)' % (constraintName, tableName, valueColName)
+		else:
+			return self.nativeEnumSQLType()
 
 class LongAttr:
 
@@ -240,11 +272,26 @@ class ObjRefAttr:
 	def sqlType(self):
 		if self.setting('UseBigIntObjRefColumns', False):
 			if self.get('Ref', None):
-				return 'bigint foreign key references %(Type)s(%(Type)sId) ' % self
+				return 'bigint constraint %s foreign key references %(Type)s(%(Type)sId) ' % self
 			else:
 				return 'bigint /* relates to %s */ ' % self['Type']
 		else:
 			return 'int'
+
+	def classIdReferences(self):
+		classIdName = self.sqlName().split(',')[0]
+		constraintName = cleanConstraintName('FK__%s__%s___MKClassIds__id' % (self.containingKlass.sqlTableName(), classIdName))
+ 		return ' constraint [%s] references _MKClassIds' % constraintName
+
+	def objIdReferences(self):
+		targetKlass = self.targetKlass()
+		objIdName = self.sqlName().split(',')[1]
+		constraintName = 'FK__%s__%s__%s__%s' % (
+			self.containingKlass.sqlTableName(), objIdName, targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
+		constraintName = cleanConstraintName(constraintName)
+		return ' constraint [%s] references %s(%s) ' % (
+			constraintName, targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
+
 
 
 class ListAttr:
