@@ -244,13 +244,17 @@ in the code that PSP generates.
 PSP file through the standard <i>self.PSPMethodName(parameters)</i> syntax.
 <p>
 
+
+
 <h2>Include Tag - "<i>&lt;psp:include"</i></h2>
 <p>
 <p>The include tag pauses processing on the page and immediately passes the request on the the specified URL.  THe output of that URL will be inserted into the output stream, and then processing will continue on the original page.
 The main parameter is <i>path</i>, which should be set to the path to the resources to be included.  This will be relative to the current page, unless the path is specified as absolute by having the first character as "/". The path parameter can point to any valid url on this WebKit AppServer. This functionality is accomplshed using the WebKit Application's forwardRequestFast function, which means that the current Request, Response and Session objects will also be used by the URL to which this request is sent. 
 <p>
-<p><b>Example</b> - <i>&lt;psp:include file="myfile.html" &gt;</i>
+<p><b>Example</b> - <i>&lt;psp:include path="myfile.html" &gt;</i>
 <p>
+
+
 
 <h2>Insert Tag - "<i>&lt;psp:insert"</i></h2>
 <p>
