@@ -91,7 +91,7 @@ class OneShotAdapter(Adapter):
 		except:
 			import traceback
 
-			sys.stderr.write('[%s] [error] WebKitCGIAdaptor: Error while responding to request (unknown)\n' % (time.asctime(time.localtime(time.time()))))
+			sys.stderr.write('[%s] [error] WebKit.OneShotAdapter: Error while responding to request (unknown)\n' % (time.asctime(time.localtime(time.time()))))
 			sys.stderr.write('Python exception:\n')
 			traceback.print_exc(file=sys.stderr)
 

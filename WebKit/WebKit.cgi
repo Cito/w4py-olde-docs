@@ -10,13 +10,13 @@ try:
 		import os, sys
 		os.chdir(WebKitDir)
 		sys.path.insert(0, '.')
-	import CGIAdaptor
-	CGIAdaptor.main()
+	import CGIAdapter
+	CGIAdapter.main()
 except:
 	import string, sys, traceback
 	from time import asctime, localtime, time
 
-	sys.stderr.write('[%s] [error] WebKit: Error in adaptor\n' % asctime(localtime(time())))
+	sys.stderr.write('[%s] [error] WebKit: Error in adapter\n' % asctime(localtime(time())))
 	sys.stderr.write('Error while executing script\n')
 	traceback.print_exc(file=sys.stderr)
 

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 """
-FCGIAdapator.py
+FCGIAdapter.py
 
-FCGI Adaptor for the WebKit application environment.
+FCGI Adapter for the WebKit application environment.
 
 This script is started by the Web Server and is kept running.
 When a request comes through here, this script collects information
@@ -18,7 +18,7 @@ FastCGI Implementation by Jay Love. Based on threaded fcgi example "sz_fcgi" pro
 
 SETUP
 
-To use this adaptor, you must have a fastcgi capable web server.
+To use this adapter, you must have a fastcgi capable web server.
 
 For Apache, you'll need to add the following lines to your httpd.conf file, or
 put them in another file and include that file in httpd.conf
@@ -58,7 +58,7 @@ FCGI_MPXS_CONNS=0
 
 Do these need to be adjusted in order to realize the full benefits of FastCGI?
 
-(*) Has anyone measured the performance difference between CGIAdaptor and FCGIAdaptor? What are the results?
+(*) Has anyone measured the performance difference between CGIAdapter and FCGIAdapter? What are the results?
 
 JSL- It's twice as fast as straight CGI
 
@@ -102,7 +102,7 @@ addrfile=os.path.join(WebKitDir, _AddressFile)
 port = int(port)
 
 def HTMLEncode(s, codes=HTMLCodes):
-	""" Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdaptor independent of everything but standard Python.) """
+	""" Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdapter independent of everything but standard Python.) """
 	for code in codes:
 		s = string.replace(s, code[0], code[1])
 	return s
@@ -131,7 +131,7 @@ class FCGIAdapter(Adapter):
 
 			# Log the problem to stderr
 			stderr = fcg.req.err
-			stderr.write('[%s] [error] WebKitFCGIAdaptor: Error while responding to request (unknown)\n' % (
+			stderr.write('[%s] [error] WebKit.FCGIAdapter: Error while responding to request (unknown)\n' % (
 				time.asctime(time.localtime(time.time()))))
 			stderr.write('Python exception:\n')
 			traceback.print_exc(file=stderr)

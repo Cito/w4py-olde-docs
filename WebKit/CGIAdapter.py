@@ -1,7 +1,7 @@
 '''
-CGIAdapator.py
+CGIAdapter.py
 
-This is the CGI Adaptor for the WebKit AppServer.
+This is the CGI Adapter for the WebKit AppServer.
 
 This CGI script collects information about the request, puts it into a
 package, and then sends it to the WebKit application server over TCP/IP.
@@ -83,7 +83,7 @@ class CGIAdapter(Adapter):
         except:
             import traceback
 
-            sys.stderr.write('[%s] [error] WebKitCGIAdaptor: Error while responding to request (unknown)\n' % (time.asctime(time.localtime(time.time()))))
+            sys.stderr.write('[%s] [error] WebKit.CGIAdapter: Error while responding to request (unknown)\n' % (time.asctime(time.localtime(time.time()))))
             sys.stderr.write('Python exception:\n')
             traceback.print_exc(file=sys.stderr)
 
@@ -107,7 +107,7 @@ HTMLCodes = [
 ]
 
 def HTMLEncode(s, codes=HTMLCodes):
-    ''' Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdaptor independent of everything but standard Python.) '''
+    ''' Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdapter independent of everything but standard Python.) '''
     for code in codes:
         s = string.replace(s, code[0], code[1])
     return s

@@ -11,7 +11,7 @@ class HTTPRequest(Request):
 	'''
 	FUTURE
 		* How about some documentation?
-		* The "Information" section is a bit screwed up. Because the WebKit server adaptor is a CGI script, these values are oriented towards that rather than the servlet.
+		* The "Information" section is a bit screwed up. Because the WebKit server adapter is a CGI script, these values are oriented towards that rather than the servlet.
 	'''
 
 
@@ -21,7 +21,7 @@ class HTTPRequest(Request):
 		Request.__init__(self)
 		self._rawRequest = dict.copy()
 		if dict:
-			# Dictionaries come in from web server adaptors like the CGIAdaptor
+			# Dictionaries come in from web server adapters like the CGIAdapter
 			assert dict['format']=='CGI'
 			self._time    = dict['time']
 			self._environ = dict['environ']
@@ -181,12 +181,12 @@ class HTTPRequest(Request):
 	## Path ##
 
 	def urlPath(self):
-		''' Returns the URL path of the servlet sans host, adaptor and query string. For example, http://host/WebKit.cgi/Context/Servlet?x=1 yields '/Context/Servlet'. '''
+		''' Returns the URL path of the servlet sans host, adapter and query string. For example, http://host/WebKit.cgi/Context/Servlet?x=1 yields '/Context/Servlet'. '''
 		self._absolutepath = 0
-##		if self._environ.has_key('WK_URI'): #added by the adaptor
+##		if self._environ.has_key('WK_URI'): #added by the adapter
 ##			self._environ['PATH_INFO'] = self._environ['WK_URI']
 ##			return self._environ['WK_URI']
-		if self._environ.has_key('WK_ABSOLUTE'): #set by the adaptor, used by modpHandler
+		if self._environ.has_key('WK_ABSOLUTE'): #set by the adapter, used by modpHandler
 			self._absolutepath = 1
 			return self.fsPath()
 		return self._environ['PATH_INFO']
@@ -219,7 +219,7 @@ class HTTPRequest(Request):
 
 	def servletURI(self):
 		"""This is the URI of the servlet, without any query strings or extra path info"""
-		
+
 		sspath=self.serverSidePath()#ensure that extraURLPath has been stripped
 		pinfo=self.pathInfo()
 		if not self._extraURLPath:
@@ -236,7 +236,7 @@ class HTTPRequest(Request):
 			loc,curr = os.path.split(loc)
 			while 1:
 				loc,curr = os.path.split(loc)
-				if curr: 
+				if curr:
 					self._serverRootPath = self._serverRootPath + "../"
 				else: break
 		return self._serverRootPath
@@ -256,9 +256,9 @@ class HTTPRequest(Request):
 		ie: www.my.own.host.com/WebKit/TestPage.py
 		"""
 		host = self._environ['HTTP_HOST']
-		adaptor = self.adapterName()
+		adapter = self.adapterName()
 		path = self.urlPath()
-		return host+adaptor+path
+		return host+adapter+path
 
 	def serverURLDir(self):
 		"""

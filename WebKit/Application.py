@@ -132,7 +132,7 @@ class Application(Configurable, CanContainer, Object):
 
 		print
 
-##	def __del__(self):			
+##	def __del__(self):
 ##		self.shutDown()
 
 
@@ -153,7 +153,7 @@ class Application(Configurable, CanContainer, Object):
 		"""
 		print "Adding Can directory: %s" % newDir
 		self._canFactory.addCanDir(newDir)
-		
+
 	def addCan(self, ID, klass, *args, **kwargs):
 		instance = apply(self._canFactory.createCan,(klass,)+args,kwargs)
 		self.setCan(ID, instance)
@@ -349,7 +349,7 @@ class Application(Configurable, CanContainer, Object):
 		uri = string.split(transaction.request().uri(), '?')
 		uri[0] = uri[0] + '/'
 		newURL = string.join(uri, '?')
-		
+
 		res = transaction.response()
 		res.setHeader('Status', '301')
 		res.setHeader('Location', newURL)
@@ -884,9 +884,9 @@ class Application(Configurable, CanContainer, Object):
 
 		if debug: print '>> normalized ssPath =', repr(ssPath)
 
-		######### NEW-jsl-12/14/00 - ExtraURLPath routine #############	
+		######### NEW-jsl-12/14/00 - ExtraURLPath routine #############
 		extraURLPath=''
-		if self.setting('ExtraPathInfo'):	
+		if self.setting('ExtraPathInfo'):
 			#Search for extra path info style from left to right.
 			if debug: print "Checking for extra path info"
 			index=0 #start
@@ -943,7 +943,7 @@ class Application(Configurable, CanContainer, Object):
 			if cachePath is not None:
 				if debug: print '>> returning path from cache: %s' % repr(ssPath)
 				return cachePath
-			
+
 
 		if isdir(ssPath):
 			# URLs that map to directories need to have a trailing slash.
@@ -1013,7 +1013,7 @@ def noslash(s):
 
 def main(requestDict):
 	"""
-	Returns a raw reponse. This method is mostly used by OneShotAdaptor.py.
+	Returns a raw reponse. This method is mostly used by OneShotAdapter.py.
 	"""
 	from WebUtils.HTMLForException import HTMLForException
 	try:
@@ -1030,7 +1030,7 @@ def main(requestDict):
 # You can run Application as a main script, in which case it expects a single
 # argument which is a file containing a dictionary representing a request. This
 # technique isn't very popular as Application itself could raise exceptions
-# that aren't caught. See CGIAdaptor.py and AppServer.py for a better example of
+# that aren't caught. See CGIAdapter.py and AppServer.py for a better example of
 # how things should be done.
 if __name__=='__main__':
 	if len(sys.argv)!=2:

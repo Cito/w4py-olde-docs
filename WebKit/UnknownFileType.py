@@ -6,7 +6,7 @@ class UnknownFileTypeServletFactory(ServletFactory):
 	This is the factory for files of an unknown type (e.g., not .py, not .psp, etc.).
 
 	The servlet returned will simply redirect the client to a URL that does not include
-	the adaptor's filename.
+	the adapter's filename.
 	"""
 
 	def __init__(self,app):

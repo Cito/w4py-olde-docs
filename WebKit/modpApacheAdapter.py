@@ -1,9 +1,9 @@
 ###########################################
 # mod_python adapter to embed WebKit completely in Apache
-# 
+#
 # This implemetation is based on the standard mod_python handler
 # with a custom AppServer and some minor modifications.
-# 
+#
 #
 ##########################################
 
@@ -15,7 +15,7 @@ Here's how I set up my Apache conf:
    SetHandler python-program
    # add the directory that contains this file and the rest of WebKit.  This should be (path to Webware)/WebKit
    PythonPath "sys.path+['/path/to/WebKit']"
-   PythonHandler modpApacheAdaptor
+   PythonHandler modpApacheAdapter
    PythonDebug
 </Location>
 
@@ -135,7 +135,7 @@ class ModpApacheAdapter(ModPythonAdapter):
 	def __del__(self):
 		self.shutDown()
 		ModPythonAdapter.__del__(self)
-		
+
 	def handler(self, req):
 		global cleanup_registered
 		if not cleanup_registered:
@@ -149,7 +149,7 @@ class ModpApacheAdapter(ModPythonAdapter):
 			#   building the environment
 			env=apache.build_cgi_env(req)
 
-			# Fix up the path			
+			# Fix up the path
 			if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info
 
 			dict = {
@@ -161,7 +161,7 @@ class ModpApacheAdapter(ModPythonAdapter):
 			# Communicate with the app server
 			respdict = self._AppServer.dispatchRawRequest(dict).response().rawResponse()
 
-			# Respond back to Apache			
+			# Respond back to Apache
 			self.respond(req, respdict)
 
 		except:
@@ -178,16 +178,16 @@ class ModpApacheAdapter(ModPythonAdapter):
 			#   building the environment
 			env=apache.build_cgi_env(req)
 
-			# Special environment setup needed for psp handler			
+			# Special environment setup needed for psp handler
 			env['WK_ABSOLUTE']=1
 
-			# Fix up the path			
+			# Fix up the path
 			if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info
 
 			# Communicate with the app server
 			respdict = self._AppServer.dispatchRawRequest(dict).response().rawResponse()
 
-			# Respond back to Apache			
+			# Respond back to Apache
 			self.respond(req, respdict)
 
 		except:
