@@ -5,6 +5,12 @@ from TestCommon import *
 
 class Test:
 
+	## Init ##
+
+	def __init__(self):
+		pass
+
+
 	## Customization ##
 
 	def cmdLineDB(self):
