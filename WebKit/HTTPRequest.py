@@ -112,6 +112,9 @@ class HTTPRequest(Request):
 			dict[key] = self._cookies[key].value
 		self._cookies = dict
 
+		# Get session ID from cookie if available
+		self._cookieSession = self._cookies.get('_SID_', None)
+
 		self._transaction    = None
 		self._serverRootPath = ""
 		self._extraURLPath  = ""
@@ -583,6 +586,8 @@ class HTTPRequest(Request):
 	def hasPathSession(self):
 		return self._pathSession is not None
 	
+	def hasCookieSession(self):
+		return self._cookieSession is not None
 
 	## Inspection ##
 

@@ -482,12 +482,13 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		# @@ gtalvola: I'm guessing this is not the ideal place to put this code.  But, it works. 
 		if self.setting('UseAutomaticPathSessions'):
-			request_has_cookies = trans.request().environ().has_key('HTTP_COOKIE')
-			request_has_path_session = trans.request().hasPathSession() 
-			if request_has_cookies and request_has_path_session:
+			request = trans.request()
+			request_has_cookie_session = request.hasCookieSession()
+			request_has_path_session = request.hasPathSession() 
+			if request_has_cookie_session and request_has_path_session:
 				self.handleUnnecessaryPathSession(trans)
 				return
-			elif not request_has_cookies and not request_has_path_session:
+			elif not request_has_cookie_session and not request_has_path_session:
 				self.handleMissingPathSession(trans)
 				return
 
