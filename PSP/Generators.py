@@ -80,14 +80,12 @@ class CharDataGenerator(GenericGenerator):
 		self.chars = chars
 
 	def generate(self, writer, phase=None):
-		current=0
-		limit = len(self.chars)
-		#try this without any escaping
-		#self.chars = string.replace(self.chars,'\n','\\\\n')
-		#self.chars = string.replace(self.chars,'"','\\"')
-		#self.chars = string.replace(self.chars,'\t','\\\\t')
-		#self.chars = string.replace(self.chars, "'", "\\'")
+                # Quote any existing backslash so generated python will not interpret it when running.
+                self.chars = string.replace(self.chars, '\\', r'\\')
+
+                # quote any single quotes so it does not get confused with our triple-quotes
 		self.chars = string.replace(self.chars,'"',r'\"')
+
 		self.generateChunk(writer)
 
 	def generateChunk(self, writer, start=0, stop=None):
