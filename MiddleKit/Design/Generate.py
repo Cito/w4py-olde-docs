@@ -74,11 +74,13 @@ class Generate:
 
 		# Generate
 		if opt.has_key('sql'):
+			print 'Generating SQL...'
 			self.generate(
 				pyClass=opt['db']+'SQLGenerator',
 				model=opt['model'],
 				outdir=os.path.join(outdir, 'GeneratedSQL'))
 		if opt.has_key('py'):
+			print 'Generating Python...'
 			self.generate(
 				pyClass=opt['db']+'PythonGenerator',
 				model=opt['model'],
