@@ -24,7 +24,7 @@ updated without disturbing your applicaitons.
 
 COMMAND LINE USAGE
 
-	python makeappworkdir.py SomeDir
+	python MakeAppWorkDir.py SomeDir
 
 """
 
