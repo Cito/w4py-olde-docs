@@ -150,7 +150,7 @@ class PSPCLContext(PSPContext):
 	def resolveRelativeURI(self, uri):
 		"""This is used mainly for including files.  It simply returns the location relative to the base context
 		directory, ie Examples/.  If the filename has a leading /, it is assumed to be an absolute path. """
-		if uri[0] == '/':
+		if os.path.isabs(uri):
 			return uri
 		else:
 			return os.path.join(self._baseUri, uri)
