@@ -55,6 +55,13 @@ class SQLGenerator(CodeGenerator):
 		self._model.writeCreateSQL(self, dirname)
 		self._model.writeInsertSamplesSQL(self, dirname)
 
+	def sqlSupportsDefaultValues(self):
+		'''
+		Subclasses must override to return 1 or 0, indicating their SQL variant supports DEFAULT <value> in the CREATE statement.
+		Subclass responsibility.
+		'''
+		return SubclassResponsibility
+
 
 class ModelObject:
 
@@ -344,7 +351,11 @@ class Attr:
 	def _writeCreateSQL(self, generator, out):
 		if self.hasSQLColumn():
 			name = self.sqlName().ljust(self.maxNameWidth())
-			out.write('\t%s %s %s,\n' % (name, self.sqlType(), self.createDefaultSQL()))
+			if generator.sqlSupportsDefaultValues():
+				defaultSQL = self.createDefaultSQL()
+			else:
+				defaultSQL = ''
+			out.write('\t%s %s %s,\n' % (name, self.sqlType(), defaultSQL))
 		else:
 			out.write('\t/* %(Name)s %(Type)s - not a SQL column */\n' % self)
 

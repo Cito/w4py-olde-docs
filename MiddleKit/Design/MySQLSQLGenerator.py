@@ -2,7 +2,9 @@ from SQLGenerator import SQLGenerator
 
 
 class MySQLSQLGenerator(SQLGenerator):
-	pass
+
+	def sqlSupportsDefaultValues(self):
+		return 1
 
 
 class Klasses:
