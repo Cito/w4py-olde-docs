@@ -86,7 +86,10 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 
 	def SvcDoRun(self):
 		try:
-			from ThreadedAppServer import ThreadedAppServer
+			if '' not in sys.path:
+				sys.path = [''] + sys.path
+			os.chdir(os.pardir)
+			from WebKit.ThreadedAppServer import ThreadedAppServer
 			self.server = ThreadedAppServer()
 			self.server.mainloop()
 		except Exception, e: #Need to kill the Sweeper thread somehow
