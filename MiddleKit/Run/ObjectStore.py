@@ -78,6 +78,7 @@ class ObjectStore(ModelUser):
 		self._deletedObjects = []
 		self._changedObjects = {} # a set
 		self._newSerialNum   = -1
+		self._verboseDelete  =  0
 
 
 	## Settings ##
@@ -125,7 +126,7 @@ class ObjectStore(ModelUser):
 			if not noRecurse:
 				# Recursively add referenced objects to the store
 				object.addReferencedObjectsToStore(self)
-			
+
 			# 2000-10-07 ce: Decided not to allow keys for non-persisted objects
 			# Because the serial num, and therefore the key, will change
 			# upon saving.
@@ -135,37 +136,50 @@ class ObjectStore(ModelUser):
 			#	object.setKey(key)
 			#self._objects[key] = object
 
-	def deleteObject(self, object, checkOnly=0):
+	def deleteObject(self, object):
 		"""
 		Restrictions: The object must be contained in the store and obviously
-		you cannot remove it more than once.  If checkOnly is true, then
-		only do the check, don't actually change anything.
+		you cannot remove it more than once.
 		"""
 		# First check if the delete is possible.  Then do the actual delete.  This avoids partially deleting
 		# objects only to have an exception halt the process in the middle.
-		self.doDeleteObject(object, 1)
-		if not checkOnly:
-			self.doDeleteObject(object, 0)
-		
-	def doDeleteObject(self, object, checkOnly, cascaded=[]):
+		objectsToDel = []
+		detaches = []
+		self._deleteObject(object, objectsToDel, detaches)
+		self.willChange()
+		self._deletedObjects.extend(objectsToDel)
+		for obj in objectsToDel:
+			del self._objects[obj.key()]
+		for obj, attr in detaches:
+			setattr(obj, '_'+attr.name(), None)
+			# Can't use setValueForAttr() because that invokes the setter method which will raise an exception if the attribute is required.
+			#obj.setValueForAttr(attr, None)
+
+	def _deleteObject(self, object, objectsToDel, detaches, superobject=None):
 		"""
-		Do the work of deleting the object.  If checkOnly is true then only do the checks, don't actually delete anything.
-		If checkOnly is false then go ahead and delete, assuming all checks have already been done.
-		cascaded is a list of objects that have already been deleted higher up in a cascade-delete.
+		Compile the list of objects to be deleted. This is a recursive
+		method since deleting one object might be deleting others.
+
+		object       - the object to delete
+		objectsToDel - a running list of all objects to delete
+		detaches     - a running list of all detaches (eg, obj.attr=None)
+		superobject  - the object that was the cause of this invocation
 		"""
 		# Some basic assertions
 		assert self.hasObject(object)
 		assert object.key() is not None
 
-		if cascaded:
-			cascadeString = 'cascade-'
-			dueTo = ' due to deletion of ' + ', '.join(['%s.%d' % (o.klass().name(), o.serialNum()) for o in cascaded])
-		else:
-			cascadeString = dueTo = ''
-		if checkOnly:
+		v = self._verboseDelete
+
+		if v:
+			if superobject:
+				cascadeString = 'cascade-'
+				dueTo = ' due to deletion of %s.%i' % (superobject.klass().name(), superobject.serialNum())
+			else:
+				cascadeString = dueTo = ''
 			print 'checking %sdelete of %s.%d%s' % (cascadeString, object.klass().name(), object.serialNum(), dueTo)
-		else:
-			print '%sdeleting %s.%d%s' % (cascadeString, object.klass().name(), object.serialNum(), dueTo)
+
+		objectsToDel.append(object)
 
 		# Deal with all other objects that reference or are referenced by this object.  By default, you are not allowed
 		# to delete an object that has an ObjRef pointing to it.  But if the ObjRef has
@@ -180,7 +194,7 @@ class ObjectStore(ModelUser):
 		# Get the objects/attrs that reference this object
 		referencingObjectsAndAttrs = object.referencingObjectsAndAttrs()
 		# Remove from that list anything in the cascaded list
-		referencingObjectsAndAttrs = [(o,a) for o,a in referencingObjectsAndAttrs if o not in cascaded]
+		referencingObjectsAndAttrs = [(o,a) for o,a in referencingObjectsAndAttrs if o not in objectsToDel]
 
 		# Determine all referenced objects, constructing a list of (attr, referencedObject) tuples.
 		referencedAttrsAndObjects = []
@@ -193,7 +207,7 @@ class ObjectStore(ModelUser):
 				for obj in object.valueForAttr(attr):
 					referencedAttrsAndObjects.append((attr, obj))
 		# Remove from that list anything in the cascaded list
-		referencedAttrsAndObjects = [(a,o) for a,o in referencedAttrsAndObjects if o not in cascaded]
+		referencedAttrsAndObjects = [(a,o) for a,o in referencedAttrsAndObjects if o not in objectsToDel]
 
 		# Check for onDeleteOther=deny
 		badObjectsAndAttrs = []
@@ -227,32 +241,23 @@ class ObjectStore(ModelUser):
 		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
 			onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
 			if onDeleteOther == 'cascade':
-				self.doDeleteObject(referencingObject, checkOnly=checkOnly, cascaded=cascaded+[object])
+				self._deleteObject(referencingObject, objectsToDel, detaches, object)
 
 		# Check if it's possible to cascade-delete objects with onDeleteSelf=cascade
 		for referencedAttr, referencedObject in referencedAttrsAndObjects:
 			onDeleteSelf = referencedAttr.get('onDeleteSelf', 'detach')
 			if onDeleteSelf == 'cascade':
-				self.doDeleteObject(referencedObject, checkOnly=checkOnly, cascaded=cascaded+[object])
+				self._deleteObject(referencedObject, objectsToDel, detaches, object)
 
 		# Detach objects with onDeleteOther=detach
-		if not checkOnly:
-			for referencingObject, referencingAttr in referencingObjectsAndAttrs:
-				onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
-				if onDeleteOther == 'detach':
-					print 'setting %s.%d.%s to None' % (referencingObject.klass().name(), referencingObject.serialNum(), referencingAttr.name())
-					setattr(referencingObject, '_'+referencingAttr.name(), None)
-					# Can't use setValueForAttr() because that invokes the setter method which will raise an exception if the attribute is required.
-					#referencingObject.setValueForAttr(referencingAttr, None)
+		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
+			onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
+			if onDeleteOther == 'detach':
+				if v: print 'will set %s.%d.%s to None' % (referencingObject.klass().name(), referencingObject.serialNum(), referencingAttr.name())
+				detaches.append((referencingObject, referencingAttr))
 
 		# Detach objects with onDeleteSelf=detach
 		# This is actually a no-op.  There is nothing that needs to be set to zero.
-
-		# Ok, now that that's all taken care of, do the delete of this object.
-		if not checkOnly:
-			self.willChange()
-			self._deletedObjects.append(object)
-			del self._objects[object.key()]
 
 
 	## Changes ##
