@@ -110,9 +110,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		path = self.serverSidePath(path)
 		try:
 			plugIn = PlugIn(self, path)
-			result = plugIn.load()
-			if result:
-				print '    Plug-in %s cannot be loaded because:\n    %s' % (path, result)
+			willNotLoadReason = plugIn.load()
+			if willNotLoadReason:
+				print '    Plug-in %s cannot be loaded because:\n    %s' % (path, willNotLoadReason)
 				return None
 			plugIn.install()
 		except:
