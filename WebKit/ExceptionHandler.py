@@ -11,7 +11,7 @@ class ExceptionHandler(Object):
 	ExceptionHandler is a utility class for Application that is created
 	to handle a particular exception. The object is a one-shot deal.
 	After handling an exception, it should be removed.
-	
+
 	See the WebKit.html documentation for other information.
 	'''
 
@@ -20,7 +20,7 @@ class ExceptionHandler(Object):
 
 	def __init__(self, application, transaction, excInfo):
 		Object.__init__(self)
-		
+
 		# Keep references to the objects
 		self._app = application
 		self._tra = transaction
@@ -30,19 +30,19 @@ class ExceptionHandler(Object):
 			self._res = self._tra.response()
 		else:
 			self._req = self._res = None
-			
+
 		# Make some repairs, if needed. We use the transaction & response to get the error page back out
 		# @@ 2000-05-09 ce: Maybe a fresh transaction and response should always be made for that purpose
 		if self._res is None:
 			self._res = HTTPResponse()
 			self._tra.setResponse(self._res)
-		
+
 		# Get to work
 		self.work()
 
 
 	## Utilities ##
-	
+
 	def setting(self, name):
 		return self._app.setting(name)
 
@@ -64,7 +64,7 @@ class ExceptionHandler(Object):
 		else:
 			publicErrorPage = self.publicErrorPage()
 		self._res.write(publicErrorPage)
-		
+
 		privateErrorPage = None
 		if self.setting('SaveErrorMessages'):
 			privateErrorPage = self.privateErrorPage()
@@ -73,12 +73,12 @@ class ExceptionHandler(Object):
 			filename = ''
 
 		self.logExceptionToDisk(errorMsgFilename=filename)
-		
+
 		if self.setting('EmailErrors'):
 			if privateErrorPage is None:
 				privateErrorPage = self.privateErrorPage()
 			self.emailException(privateErrorPage)
-	
+
 	def logExceptionToConsole(self, stderr=sys.stderr):
 		''' Logs the time, servlet name and traceback to the console (typically stderr). This usually results in the information appearing in console/terminal from which AppServer was launched. '''
 		stderr.write('[%s] [error] WebKit: Error while executing script %s\n' % (
@@ -94,7 +94,7 @@ class ExceptionHandler(Object):
 	</body>
 </html>
 ''' % (htTitle('Error'), self.setting('UserErrorMessage'))
-		
+
 	def privateErrorPage(self):
 		''' Returns an HTML page intended for the developer with useful information such as the traceback. '''
 		html = ['''
@@ -115,10 +115,10 @@ class ExceptionHandler(Object):
 %s
 <p> <i>%s</i>
 ''' % (htTitle('Traceback'), self.servletPathname())]
-		
+
 		html.append(HTMLForException(self._exc))
 
-		html.extend([		
+		html.extend([
 			htTitle('Misc Info'),
 			HTMLForDictionary({
 				'time':          asctime(localtime(self._res.endTime())),
@@ -179,11 +179,11 @@ class ExceptionHandler(Object):
 		msg.append('\n')
 		msg.append(html)
 		msg = string.join(msg, '')
-		
+
 		# dbg code, in case you're having problems with your e-mail
 		# open('error-email-msg.text', 'w').write(msg)
 
-		# Send the message		
+		# Send the message
 		import smtplib
 		server = smtplib.SMTP(self.setting('ErrorEmailServer'))
 		server.set_debuglevel(0)
@@ -198,36 +198,37 @@ def htTitle(name):
 	<font face="Tahoma, Arial, Helvetica" color=white> <b> %s </b> </font>
 </td> </tr> </table>''' % name
 
+
 def osIdTable():
 	''' Returns a list of dictionaries contained id information such as uid, gid, etc.,
 		all obtained from the os module. Dictionary keys are 'name' and 'value'. '''
-	funcs = [os.getegid, os.geteuid, os.getgid, os.getpgrp, os.getpid, os.getppid, os.getuid]
+	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp', 'getpid', 'getppid', 'getuid']
 	table = []
-	for func in funcs:
-		value = func()
-		name = func.__name__[3:]
-		table.append({'name': name, 'value': value})
+	for funcName in funcs:
+		if hasattr(os, funcName):
+			value = getattr(os, funcName)()
+			table.append({'name': funcName, 'value': value})
 	return table
-	
+
 def htTable(listOfDicts, keys=None):
 	''' The listOfDicts parameter is expected to be a list of dictionaries whose keys are always the same.
 		This function returns an HTML string with the contents of the table.
 		If keys is None, the headings are taken from the first row in alphabetical order.
 		Returns an empty string if listOfDicts is none or empty.
 		Deficiencies: There's no way to influence the formatting or to use column titles that are different than the keys. '''
-	
+
 	if not listOfDicts:
 		return ''
-	
+
 	if keys is None:
 		keys = listOfDicts[0].keys()
 		keys.sort()
-	
+
 	s = '<table border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>\n<tr>'
 	for key in keys:
 		s = '%s<td><b>%s</b></td>' % (s, key)
 	s = s + '</tr>\n'
-	
+
 	for row in listOfDicts:
 		s = s + '<tr>'
 		for key in keys:
