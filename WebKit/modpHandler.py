@@ -13,7 +13,7 @@ Here's how I set up my Apache conf:
 <Location /wpy >
 	SetHandler python-program
    # add the directory that contains modpHandler.py
-	PythonPath "sys.path+['/devel/WEB/Webware/WebKit']"
+	PythonPath "sys.path+['/path/to/WebKit']"
    PythonHandler modpHandler
    PythonDebug
 </Location>
@@ -22,6 +22,14 @@ Make sure you set WEBWARE_ADDRESS_FILE below and now you can access
 your running AppServer with:
 
 http://localhost/wpy/Welcome
+
+
+You may also send all requests with a .psp extension to WebKit by adding these lines, outside
+of any location or dircetory.
+
+AddHandler python-program .psp
+PythonPath "sys.path+['/path/to/WebKit']"
+PythonHandler webkit_handler
 
 """
 
