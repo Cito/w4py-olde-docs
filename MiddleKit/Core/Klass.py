@@ -322,3 +322,27 @@ class Klass(UserDict, ModelObject):
 	def printWarnings(self, out):
 		for attr in self.attrs():
 			attr.printWarnings(out)
+
+
+	## Model support ##
+
+	def sortByDependency(self, sorter):
+		"""
+		Sort the klasses by their dependencies so that foreign key declarations work.
+		This method is for the implementation of model.allKlassesInDependencyOrder().
+		"""
+		if sorter.visitedKlasses.has_key(self):
+			return
+		sorter.visitedKlasses[self] = 1
+		if sorter.recordedKlasses.has_key(self):
+			return
+		from MiddleKit.Core.ObjRefAttr import ObjRefAttr
+		for attr in self.allAttrs():
+			if isinstance(attr, ObjRefAttr):
+				targetKlass = attr.targetKlass()
+				if targetKlass is not self and not sorter.visitedKlasses.has_key(targetKlass):
+					targetKlass.sortByDependency(sorter)  # recursive call
+		# end of the dependency road
+		if not sorter.recordedKlasses.has_key(self):
+			sorter.allKlasses.append(self)
+			sorter.recordedKlasses[self] = 1

@@ -280,6 +280,27 @@ class Model(Configurable):
 		"""
 		return self._allKlassesByName
 
+	def allKlassesInDependencyOrder(self):
+		"""
+		Returns a sequence of all the klasses in this model, in an
+		order such that klasses follow the klasses they refer to
+		(via obj ref attributes).
+		The typical use for such an order is to avoid SQL errors
+		about foregin keys referring to tables that do not exist.
+		"""
+		class Container:
+			pass
+		sorter = Container()
+		# Generate the CREATE TABLEs in the order that foreign keys requires.
+		sorter.allKlasses = []  # will be added in the correct order
+		sorter.recordedKlasses = {}  # a set for fast membership testing.
+		for klass in self._allKlassesInOrder:
+			sorter.visitedKlasses = {}
+			klass.sortByDependency(sorter)
+		allKlasses = sorter.allKlasses
+		assert len(allKlasses)==len(self._allKlassesInOrder)
+		return allKlasses
+
 	def pyClassForName(self, name):
 		"""
 		Returns the Python class for the given name, which must be

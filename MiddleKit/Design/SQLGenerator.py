@@ -8,11 +8,12 @@ from MiscUtils import CSVParser
 import string
 
 class SampleError:
+
 	def __init__(self,line,error):
 		self._line = line
 		self._error = error
 
-	def output(self,filename):
+	def write(self,filename):
 		print '%s:%d: %s' % ( filename, self._line, self._error )
 
 
@@ -94,21 +95,54 @@ class Model:
 		if self._filename is not None:
 			file = open(os.path.join(dirname, 'InsertSamples.sql'), 'w')
 			file.write('use %s;\n\n' % self.sqlDatabaseName())
-			self._klasses.writeDeleteAllRecords(generator, file)
+
+			if self.setting('DoNotSortSQLCreateStatementsByDependency', False):
+				allKlasses = self.allKlassesInOrder()
+			else:
+				allKlasses = self.allKlassesInDependencyOrder()
+
+			# delete the existing data
+			wr = file.write
+			if 0:
+				# Woops. Our only auxiliary table is _MKClassIds, which we
+				# *don't* want to delete. In the future we will likely
+				# have other aux tables for lists and relationships. When
+				# that happens, we'll need more granularity regarding
+				# aux tables.
+				names = self.auxiliaryTableNames()[:]
+				names.reverse()
+				for tableName in names:
+					wr('delete from %s;\n' % tableName)
+			reverseKlasses = allKlasses[:]
+			reverseKlasses.reverse()
+			for klass in reverseKlasses:
+				if not klass.isAbstract():
+					wr('delete from %s;\n' % klass.sqlTableName()) # dr 7-12-02: changed from klass.name()
+			wr('\n')
+
+			self._klassSamples = {}  # keyed by klass, value is list of SQL strings (comments or INSERT statements)
+
 			filenames = glob(os.path.join(self._filename, 'Sample*.csv'))
 			for filename in filenames:
 				lines = open(filename).readlines()
 				try:
 					self.writeInsertSamplesSQLForLines(lines, generator, file, filename)
 				except SampleError, s:
-					s.output( filename )
+					s.write(filename)
 					sys.exit(1)
+
+			# at this point the klassSamples dict has the collected samples for each klass
+			# write the samples file
+			for klass in allKlasses:
+				samples = self._klassSamples.get(klass)
+				if samples is not None:
+					for line in samples:
+						file.write(line)
 			file.close()
 
+			del self._klassSamples
+
 	def writeInsertSamplesSQLForLines(self, lines, generator, file, filename):
-		# @@ 2001-02-04 ce: this method is too long
-		#	break into additional methods
-		#	some of these methods may even go into other mix-ins
 		readColumns = 1
 		parse = CSVParser.CSVParser().parse
 		linenum = 0
@@ -131,8 +165,11 @@ class Model:
 					try:
 						klass = self.klass(klassName)
 					except KeyError:
-						raise SampleError( linenum, "Class '%s' has not been defined" % ( tableName ) )
-					file.write('\n\n/* %s */\n\n' % fields[0])
+						raise SampleError(linenum, "Class '%s' has not been defined" % tableName)
+					samples = self._klassSamples.get(klass, None)
+					if samples is None:
+						samples = self._klassSamples[klass] = []
+						samples.append('\n\n/* %s */\n\n' % klass.name())
 					tableName = klass.sqlTableName()
 					#print '>> table:', tableName
 					readColumns = 1
@@ -162,7 +199,7 @@ class Model:
 					try:
 						value = values[i]
 					except IndexError:
-						raise SampleError( linenum, "Couldn't find value for attribute '%s'" % attr.name() )
+						raise SampleError(linenum, "Couldn't find value for attribute '%s'" % attr.name())
 					values[i] = attr.sqlForSampleInput(value)
 					assert len(values[i])>0, repr(values[i])  # SQL value cannot be blank
 					i += 1
@@ -170,7 +207,7 @@ class Model:
 				#values = [self.valueFilter(value) for value in values]
 				values = ', '.join(values)
 				stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
-				file.write(stmt)
+				samples.append(stmt)
 			except:
 				print
 				print 'Samples error:'
@@ -181,6 +218,7 @@ class Model:
 					pass
 				print
 				raise
+
 
 	def areFieldsBlank(self, fields):
 		""" Utility method for writeInsertSamplesSQLForLines(). """
@@ -296,17 +334,7 @@ class Klasses:
 			# but if you're not careful, than foreign keys will cause "unknown table" errors
 			allKlasses = self._model.allKlassesInOrder()
 		else:
-			class Container:
-				pass
-			sorter = Container()
-			# Generate the CREATE TABLEs in the order that foreign keys requires.
-			sorter.allKlasses = []  # will be added in the correct order
-			sorter.recordedKlasses = {}  # a set for fast membership testing.
-			for klass in self._model.allKlassesInOrder():
-				sorter.visitedKlasses = {}
-				klass.sortByDependency(sorter)
-			allKlasses = sorter.allKlasses
-			assert len(allKlasses)==len(self._model.allKlassesInOrder())
+			allKlasses = self._model.allKlassesInDependencyOrder()
 
 		for klass in allKlasses:
 			klass.writeCreateSQL(self._sqlGenerator, out)
@@ -338,55 +366,12 @@ create table _MKClassIds (
 		out.write(self.listTablesSQL())
 		out.write('/* end of generated SQL */\n')
 
-	def writeDeleteAllRecords(self, generator, file):
-		"""
-		Writes a delete statement for each data table in the model. This is used for InsertSamples.sql to wipe out all data prior to inserting sample values.
-		SQL generators rarely have to customize this method.
-		"""
-		wr = file.write
-		if 0:
-			# Woops. Our only auxiliary table is _MKClassIds, which we
-			# *don't* want to delete. In the future we will likely
-			# have other aux tables for lists and relationships. When
-			# that happens, we'll need more granularity regarding
-			# aux tables.
-			names = self.auxiliaryTableNames()[:]
-			names.reverse()
-			for tableName in names:
-				wr('delete from %s;\n' % tableName)
-		klasses = self._model._allKlassesInOrder[:]
-		klasses.reverse()
-		for klass in klasses:
-			if not klass.isAbstract():
-				wr('delete from %s;\n' % klass.sqlTableName()) # dr 7-12-02: changed from klass.name()
-		wr('\n')
-
 
 
 import KlassSQLSerialColumnName
 
 
 class Klass:
-
-	def sortByDependency(self, sorter):
-		"""
-		Sort the klasses by their dependencies so that foreign key declarations work.
-		"""
-		if sorter.visitedKlasses.has_key(self):
-			return
-		sorter.visitedKlasses[self] = 1
-		if sorter.recordedKlasses.has_key(self):
-			return
-		from MiddleKit.Core.ObjRefAttr import ObjRefAttr
-		for attr in self.allAttrs():
-			if isinstance(attr, ObjRefAttr):
-				targetKlass = attr.targetKlass()
-				if targetKlass is not self and not sorter.visitedKlasses.has_key(targetKlass):
-					targetKlass.sortByDependency(sorter)  # recursive call
-		# end of the dependency road
-		if not sorter.recordedKlasses.has_key(self):
-			sorter.allKlasses.append(self)
-			sorter.recordedKlasses[self] = 1
 
 	def writeCreateSQL(self, generator, out):
 		for attr in self.attrs():
