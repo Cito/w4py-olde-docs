@@ -64,7 +64,7 @@ the following example:
 <FONT COLOR=black><B>from</B></FONT> time <FONT COLOR=black><B>import</B></FONT> time, strftime, localtime
 
 <FONT COLOR=black><B>class</B></FONT><A NAME="SimpleTask"><FONT COLOR=#AA00AA><B> SimpleTask</B></FONT></A>(Task):
-    <FONT COLOR=black><B>def</B></FONT><A NAME="run"><FONT COLOR=#AA00AA><B> run</B></FONT></A>(self, close):
+    <FONT COLOR=black><B>def</B></FONT><A NAME="run"><FONT COLOR=#AA00AA><B> run</B></FONT></A>(self):
       <FONT COLOR=black><B>print</B></FONT> self.name(), strftime(<FONT COLOR=#FF0000>"%H:%M:%S"</FONT>, localtime(time()))
 </pre>
 </td></tr></table>
@@ -85,28 +85,44 @@ by WebKit itself is found in <code>WebKit/Tasks/SessionTask.py</code>.
         Task.__init__(self)
         self._sessionstore = sessions
         
-    <FONT COLOR=black><B>def</B></FONT><A NAME="run"><FONT COLOR=#AA00AA><B> run</B></FONT></A>(self, close):
-        <FONT COLOR=black><B>if</B></FONT> <B>not</B> (close.isSet() or (<B>not</B> self.handle()._isRunning):
+    <FONT COLOR=black><B>def</B></FONT><A NAME="run"><FONT COLOR=#AA00AA><B> run</B></FONT></A>(self):
+        <FONT COLOR=black><B>if</B></FONT> self.proceed():
             self._sessionstore.cleanStaleSessions(self)
 </pre>
 </td></tr></table>
 
 <p>
-Here you see the use of the <code>close</code> Event variable in the <code>run()</code> method.
-<code>close</code> is set when the scheduler is stoped and should be checked periodically
-by long running tasks to decide if they want to terminate too. The same remark applies to
-<code>_isRunning</code> which indicates if somebody wants to stop a task by brute force
-during execution. It's better to let a task terminate though and use the <code>unregister()</code> 
-and <code>disable()</code> methods. The first really deletes the task after termination while 
-the second only disables it's rescheduling. You can still use it afterwards. 
+Here you see the <code>proceed()</code> method in action. It can be used by long running tasks 
+to check if they should terminate. This is the case when the scheduler or the task itself has been 
+stoped. The latter is achieved with a <code>stopTask()</code> call which is not recommented though.
+It's generally better to let the task finish and use the <code>unregister()</code>  and 
+<code>disable()</code> methods. The first really deletes the task after termination while 
+the second only disables it's rescheduling. You can still use it afterwards. Right now the implementation
+of <code>proceed()</code>
+
+<p>
+<table border=0 bgcolor="#eeeeee" width="100%"><tr><td>
+<pre>
+<FONT COLOR=black><B>def</B></FONT><A NAME="proceed"><FONT COLOR=#AA00AA><B> proceed</B></FONT></A>(self):
+    <FONT COLOR=#FF0000>"""
+    Should this task continue running? Should be called periodically 
+    by long tasks to check if the system wants them to exit.
+    Returns 1 if its OK to continue, 0 if it's time to quit.
+    """</FONT>
+    <FONT COLOR=black><B>return</B></FONT> <FONT COLOR=black><B>not</B></FONT>( self._close.isSet() <FONT COLOR=black><B>or</B></FONT> (<FONT COLOR=black><B>not</B></FONT> self._handle._isRunning) )     
+</pre>
+</td></tr></table>
 
 <P>
-The code above looks a little bit odd because in reality the <code>SessionTask</code> class 
-uses the <code>proceed()</code> method instead, which hides all implementation details.
-You should use it too! Another thing to remember about tasks is, that they know nothing about 
-scheduling, how often they will run  (periodically or just once) or if they are on hold. All 
-this is managed by the task wrapper class <code>TaskManager</code>, which will be discussed shortly. 
-Let's look at some more examples first.
+uses the <code>_close</code> Event variable, which was also available trough the <code>close()</code> method.
+Don't count on that in future versions, it will probably be removed. Just use <code>proceed()</code> instead 
+(take a look at <code>TaskKit/Tests/BasicTest.py</code>). Another API change after version 0.5 of Webware was 
+the removal of the <code>close</code> variable in <code>run()</code>. If you plan to make serious use of TaskKit 
+it's better to take the newest CVS snapshot of Webware, otherwise you will have to delete all occurences of 
+<code>close</code> afterwards. Another thing to remember about tasks is, that they know nothing about 
+scheduling, how often they will run (periodically or just once) or if they are on hold. All this is managed 
+by the task wrapper class <code>TaskManager</code>, which will be discussed shortly. Let's look at some more 
+examples first.
 
 <h2>Generating static pages</h2>
 
@@ -149,7 +165,7 @@ html = <FONT COLOR=#FF0000>'''&lt;html&gt;
         Task.__init__(self)
         self._filename = filename
         
-    <FONT COLOR=black><B>def</B></FONT><A NAME="run"><FONT COLOR=#AA00AA><B> run</B></FONT></A>(self, close):
+    <FONT COLOR=black><B>def</B></FONT><A NAME="run"><FONT COLOR=#AA00AA><B> run</B></FONT></A>(self):
         f = open(self._filename, <FONT COLOR=#FF0000>'w'</FONT>)
         now = asctime(localtime(time()))
         f.write( html % (<FONT COLOR=#FF0000>'Static Page'</FONT>,  now) )
@@ -290,8 +306,83 @@ kind of developments. You'll certainly read more about it in the future.
 </PRE>
 </td></tr></table>
 
+<p>
+<h2>The Scheduler</h2>
+
 <P>
-To be continued...
+Now it's time to take a closer look at the <code>Scheduler</code> class itself. As you have seen in the examples above, 
+writing tasks is only a matter of overloading the <code>run()</code> method in a derived class and adding it to the 
+scheduler with <code>addTimedAction, addActionOnDemand, addDailyAction</code> or <code>addPeriodicAction</code>.
+The scheduler will wrap the Task in a <code>TaskHandler</code> structure which knows all the scheduling details
+and add it to its <code>_scheduled</code> or <code>_onDemand</code> dictionaries. The latter is populated by
+<code>addActionOnDemand</code> and contains tasks which can be called any time by 
+<code>scheduler.runTaskNow('taskname')</code> as you can see in the following example. After that
+the task has gone.
+
+<p>
+<table border=0 bgcolor="#eeeeee" width="100%"><tr><td>
+<PRE>
+scheduler = Scheduler()
+scheduler.start()
+scheduler.addActionOnDemand(SimpleTask(), <FONT COLOR=#FF0000>'SimpleTask'</FONT>)
+sleep(5)
+<FONT COLOR=black><B>print</B></FONT> <FONT COLOR=#FF0000>"Demanding SimpleTask"</FONT>
+scheduler.runTaskNow(<FONT COLOR=#FF0000>'SimpleTask'</FONT>)
+sleep(5)
+scheduler.stop()
+</PRE>
+</td></tr></table>
+
+<p>
+If you need a task more than one time it's better to start it regularly with one of
+the <code>add*Action</code> methods first. It will be added to the <code>_scheduled</code>
+dictionary. If you do not need the task for a certain time disable it with 
+<code>scheduler.disableTask('taskname')</code> and enable it later with 
+<code>scheduler.enableTask('taskname')</code>. There are some more methods 
+(e.g. <code>demandTask(), stopTask(), ...</code>) in the <code>Scheduler</code> class 
+which are all documented by doc strings. Take a look at them and write your own examples
+to understand the methods (and maybe find bugs ;-)).
+
+<P>
+When a periodic task is scheduled it is added in a wrapped version to the 
+<code>_scheduled</code> dictionary first. The (most of the time sleeping) scheduler thread 
+always knows when to wake up and start the next task whose wrapper is moved to the 
+<code>_runnning</code> dictionary. After completion of the task thread the handle 
+reschedules the task by putting it back from <code>_running</code> to <code>_scheduled</code>),
+calculating the next execution time <code>nextTime</code> and possibly waking up the scheduler.
+It is important to know that you can manipulate the handle while the task is running, eg. change 
+the period or call <code>runOnCompletion</code> to request that a task be re-run after its 
+current completion. For normal use you will probably not need the handles at all, but the 
+more you want to manipulate the task execution, the more you will appreciate the TaskHandler API.
+You get all the available handles from the scheduler with the <code>running('taskname), 
+scheduled('taskname')</code> and <code>onDemand('taskname')</code> methods. 
+
+<P>
+In our last example which was contributed by Jay Love, who debugged, stress tested and contributed 
+a lot of refinements to TaskKit, you see how to write a period modifying Task. This is quite weird
+but shows the power of handle manipulations. The last thing to remember is, that the scheduler does
+not start a separate thread for each periodic task. It uses a thread for each task run instead and 
+at any time keeps the number of threads as small as possible. 
+
+<p>
+<table border=0 bgcolor="#eeeeee" width="100%"><tr><td>
+<PRE>
+<FONT COLOR=black><B>class</B></FONT><A NAME="SimpleTask"><FONT COLOR=#AA00AA><B> SimpleTask</B></FONT></A>(Task):
+
+    <FONT COLOR=black><B>def</B></FONT><A NAME="run"><FONT COLOR=#AA00AA><B> run</B></FONT></A>(self):
+        <FONT COLOR=black><B>if</B></FONT> self.proceed():
+            <FONT COLOR=black><B>print</B></FONT> self.name(), time()
+            <B>print</b> "Increasing period"
+            self.handle().setPeriod(self.handle().period()+2)
+        <FONT COLOR=black><B>else</B></FONT>:
+            <FONT COLOR=black><B>print</B></FONT> <FONT COLOR=#FF0000>"Should not proceed"</FONT>, self.name()
+</PRE>
+</td></tr></table>
+
+<p>
+As you can see the TaskKit framework is quite sophisticated and will hopefully be used by many people
+from the Python community. If you have further question, please feel free to ask them on the Webware
+mailing list. (last changes: 2. March 2001)
 
 <P>
 <TABLE BORDER=1 CELLSPACING=0 CELLPADDING=0 WIDTH="100%">
