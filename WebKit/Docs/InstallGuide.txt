@@ -88,7 +88,7 @@ Here's what to do on Windows::
     > cd \path\to\Webware
     > python install.py
     (enter password)
-    > copy WebKit\Adapters\wkcgi\WebKit.exe \path\to\cgi-bin
+    > copy WebKit\Adapters\wkcgi\wkcgi.exe \path\to\cgi-bin
     > cd WebKit
     > AppServer.bat
 
@@ -100,13 +100,13 @@ the AppServer.  The AppServer is a program that must be running
 anytime you want to access your servlets or PSP files.
 
 You should now be able to go to your browser and open up
-http://localhost/cgi-bin/WebKit.exe -- the WebKit.exe program connects
+http://localhost/cgi-bin/wkcgi.exe -- the wkcgi.exe program connects
 to the AppServer -- Webware isn't a CGI script, but a small CGI script
 can be used as a gateway to the AppServer (you can't normally connect
 to the AppServer itself).
 
 If you get an Internal Error, the most likely case is you can't run
-CGI scripts wherever you put WebKit.exe -- check your error logs.  If
+CGI scripts wherever you put wkcgi.exe -- check your error logs.  If
 it takes a long time to get an error message, or you get a message
 about not being able to connect to the AppServer, then you probably
 forgot to start the AppServer.
@@ -159,7 +159,7 @@ Apache is the best supported web server, both on Posix and Windows
 systems.  The mod_webkit_ is the fastest way to connect to
 Webware, and is only supported for Apache.  CGI is also available to
 Apache users through wkcgi_.  For Windows users compiled versions of
-mod_webkit and wkcgi (named ``WebKit.exe``) are also available.
+mod_webkit and wkcgi (named ``wkcgi.exe``) are also available.
 There are also other adapter options, see Adapters_.
 
 Most of the Webware developers use Apache.
@@ -180,7 +180,7 @@ This is lightly documented in
 http://support.microsoft.com/support/kb/articles/Q184/3/20.ASP
 
 `CGI adapter`_, written in C, is available in
-``WebKit/Adapters/wkcgi/WebKit.exe``.  The standard `Python CGI
+``WebKit/Adapters/wkcgi/wkcgi.exe``.  The standard `Python CGI
 adapter`_ also works, but you must either configure IIS to run Python
 CGI scripts, or you must use Gordon McMillan's Standalone utility
 (part of his Installer package) or some other program to create an
@@ -434,8 +434,8 @@ the persistent AppServer.
 
 .. _wkcgi:
 
-wkcgi, WebKit.exe
-~~~~~~~~~~~~~~~~~
+wkcgi
+~~~~~
 
 wkcgi is a CGI-based adapter written in C.  It's very small and is
 good at it's one and only job of connecting to the AppServer.  While a
