@@ -62,7 +62,6 @@ class Application(Configurable,CanContainer):
 		* 2000-04-09 ce: restoreSessionWithID:inTransaction:
 		* 2000-04-09 ce: pageWithNameForRequest/Transaction() (?)
 		* 2000-04-09 ce: port() and setPort() (?)
-		* 2000-04-09 ce: Adaptors (?)
 		* 2000-04-09 ce: Does request handling need to be embodied in a separate object?
 			  - Probably, as we may want request handlers for various file types.
 		* 2000-04-09 ce: Concurrent request handling (probably through multi-threading)
@@ -153,21 +152,27 @@ class Application(Configurable,CanContainer):
 		self._canFactory = CanFactory.CanFactory(self,os.path.join(os.getcwd(),'Cans'))
 
 	def startSessionSweeper(self):
-		self._sessSweepThread=Thread(None, self.sessionSweeper, 'SessionSweeper')
+		self._sessSweepThread=Thread(None, self.sweepSessionsContinuously, 'SessionSweeper')
 		self._sessSweepThread.start()
 
-	def sessionSweeper(self):
-		''' Invoked by __init__ via a new thread to clean out stale sessions in the background. '''
+	def sweepSessionsContinuously(self):
+		''' Invoked by __init__ via a new thread to clean out stale sessions in the background. This method doesn't exit until self.running is 0. '''
 		while self.running:
-			sessions = self._sessions
-			timeout = self.setting('SessionTimeout') * 60  # in seconds
-			assert timeout>=0
-			curTime = time.time()
-			for key in sessions.keys():
-				if (curTime - sessions[key].lastAccessTime()) > timeout:
-					del sessions[key]
-			time.sleep(timeout/10)
-			# @@ 2000-08-04 ce: make sweep interval or div factor a setting
+			self.sweepSessions()
+			try:
+				time.sleep(timeout/10)
+				# @@ 2000-08-04 ce: make sleep interval or div factor a setting
+			except IOError:
+				pass
+
+	def sweepSessions(self):
+		sessions = self._sessions
+		timeout = self.setting('SessionTimeout') * 60  # in seconds
+		assert timeout>=0
+		curTime = time.time()
+		for key in sessions.keys():
+			if (curTime - sessions[key].lastAccessTime()) > timeout:
+				del sessions[key]
 
 	# @@ 2000-08-04 ce: Once sessionSweeper() has matured, remove this method. No longer used.
 	def sweeperThreadFunc(self,sessions,timeout): #JSL, moved this here so I can control it better, later
@@ -283,9 +288,9 @@ class Application(Configurable,CanContainer):
 		return self.dispatchRequest(self.createRequestForDict(newRequestDict))
 
 	def dispatchRequest(self, request):
-		"""
-		Creates the transaction, session, response and servlet for the new request which is then dispatched. The transaction is returned.
-		"""
+		""" Creates the transaction, session, response and servlet for the new request which is then dispatched. The transaction is returned. """
+
+		assert request is not None
 		transaction = None
 		if request.value('_captureOut_', 0):
 			real_stdout = sys.stdout
@@ -299,9 +304,11 @@ class Application(Configurable,CanContainer):
 			if ssPath is None:
 				self.handleBadURL(transaction)
 			elif isdir(ssPath) and noslash(request.pathInfo()): # (*) see below
-				self.fixDirectoryURL(transaction)
+				self.handleDeficientDirectoryURL(transaction)
+			elif self.isSessionIdProblematic(request):
+				self.handleInvalidSession(transaction)
 			else:
-				self.serveURL(transaction)
+				self.handleGoodURL(transaction)
 
 			if request.value('_captureOut_', 0):
 				response.write('''<br><p><table><tr><td bgcolor=#EEEEEE>
@@ -338,7 +345,7 @@ class Application(Configurable,CanContainer):
 		# @@ 2000-06-26 ce: This error page is pretty primitive
 		# @@ 2000-06-26 ce: We should probably load a separate template file and display that
 
-	def fixDirectoryURL(self, transaction):
+	def handleDeficientDirectoryURL(self, transaction):
 		newURL = transaction.request().uri() + '/'
 		res = transaction.response()
 		res.setHeader('Status', '301')
@@ -353,7 +360,23 @@ class Application(Configurable,CanContainer):
 	</body>
 </html>''' % (newURL, newURL))
 
-	def serveURL(self, transaction):
+	def isSessionIdProblematic(self, request):
+		''' Returns 1 if there is a session id and it's not valid. Having no session id is not considered problematic. '''
+		sid = request.sessionId()
+		if sid is None:
+			return 0
+		else:
+			return not self._sessions.has_key(sid)
+
+	def handleInvalidSession(self, transaction):
+		res = transaction.response()
+		res.setCookie('_SID_', '')
+		res.write('''<html> <head> <title>Session expired</title> </head>
+			<body> <h1>Session Expired</h1>
+			<p> Your session has expired and all information related to your previous working session with this site has been cleared. <p> You may try this URL again by choosing Refresh/Reload, or revisit the front page. ''')
+		# @@ 2000-08-10 ce: This is a little cheesy. We could load a template...
+
+	def handleGoodURL(self, transaction):
 		#session	 = self.createSessionForTransaction(transaction)
 		self.createServletInTransaction(transaction)
 		self.awake(transaction)
@@ -679,7 +702,7 @@ class Application(Configurable,CanContainer):
 					cache['created'] = cache['created']-1
 			except Queue.Full: #full or blocked
 				pass
-				print '>> queue full for:',cache['path'] #do nothing, don't want to block queue for this
+				print '>> queue full for:', cache['path'] #do nothing, don't want to block queue for this
 
 ##			  print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
 
