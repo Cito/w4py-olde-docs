@@ -22,7 +22,7 @@ from WebUtils.HTMLForException import HTMLForException
 
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 
-from TaskKit.TaskManager import Scheduler
+from TaskKit.Scheduler import Scheduler
 
 class ApplicationError(Exception):
 	pass
@@ -165,7 +165,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		sweepinterval = self.setting('SessionTimeout')*60/10
 		tm.addPeriodicAction(time.time()+sweepinterval, sweepinterval, task, "SessionSweeper")
 		print "Session Sweeper started"
-		
+
 
 ##Can Stuff
 	def initializeCans(self):
