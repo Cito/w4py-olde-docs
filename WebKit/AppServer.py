@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-.. include:: AppServer
+.. inline:: AppServer
 """
 
 from Common import *
@@ -46,7 +46,8 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 	The distinction between `AppServer` and `Application` is somewhat
 	vague -- both are global singletons and both handle dispatching
-	requests.
+	requests.  `AppServer` works on a lower level, handling sockets
+	and threads.
 	"""
 
 	def __init__(self, path=None):

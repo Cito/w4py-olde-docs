@@ -5,15 +5,18 @@ import time
 import sys
 import select
 
-''' The purpose of this module is to notice changes to source files, including
-servlets, PSPs, templates or changes to the Webware source file themselves,
-and reload the server as necessary to pick up the changes.  
+"""
+This module defines `AutoReloadingAppServer`, a replacement for `AppServer`
+that adds a file-monitoring and restarting to the AppServer.  It's
+used mostly like::
 
-The server will also be restarted if a file which Webware _tried_ to import
-is modified.  This is so that changes to a file containing a syntax error 
-(which would have prevented it from being imported) will also cause the server 
-to restart.
-'''
+    from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
+
+Much of the actually polling and monitoring takes place in the
+`WebKit.ImportSpy` module.
+
+.. inline:: AutoReloadingAppServer
+"""
 
 # Attempt to use python-fam (fam = File Alteration Monitor) instead of polling
 # to see if files have changed.  If python-fam is not installed, we fall back
@@ -36,10 +39,20 @@ DefaultConfig = {
 
 class AutoReloadingAppServer(AppServer):
 
+	"""
+	This class adds functionality to `AppServer`, to notice
+	changes to source files, including servlets, PSPs, templates
+	or changes to the Webware source file themselves, and reload
+	the server as necessary to pick up the changes.
 
-	## AppServer methods which this class overrides
+	The server will also be restarted if a file which Webware
+	*tried* to import is modified.  This is so that changes to a
+	file containing a syntax error (which would have prevented it
+	from being imported) will also cause the server to restart.
+	"""
 
 	def __init__(self,path=None):
+		":ignore:"
 		AppServer.__init__(self,path)
 		self._autoReload = 0
 		self._shouldRestart = 0
@@ -51,11 +64,16 @@ class AutoReloadingAppServer(AppServer):
 				self.activateAutoReload()
 
 	def defaultConfig(self):
+		":ignore:"
 		conf = AppServer.defaultConfig(self)
 		conf.update(DefaultConfig)
 		return conf
 
 	def shutDown(self):
+		"""
+		Shuts down the monitoring thread (in addition to
+		normal shutdown procedure).
+		"""
 		print 'Stopping AutoReload Monitor'
 		sys.stdout.flush()
 		self._shuttingDown = 1
@@ -80,7 +98,8 @@ class AutoReloadingAppServer(AppServer):
 			t.start()
 
 	def deactivateAutoReload(self):
-		"""Tell the monitor thread to stop."""
+		"""Tell the monitor thread to stop (it's a request,
+		not a demand)."""
 		self._autoReload = 0
 		if haveFam:
 			# send a message down the pipe to wake up the monitor
@@ -98,36 +117,39 @@ class AutoReloadingAppServer(AppServer):
 	def restartIfNecessary(self):
 		"""
 		This should be called regularly to see if a restart is
-		required.
-
-		Tavis Rudd claims: "this method can only be called by
-		the main thread.  If a worker thread calls it, the
-		process will freeze up."
-
-		I've implemented it so that the ThreadedAppServer's
-		control thread calls this.  That thread is _not_ the
-		MainThread (the initial thread created by the Python
-		interpreter), but I've never encountered any problems.
-		Most likely Tavis meant a freeze would occur if a
-		_worker_ called this.
+		required.  The server can only restart from the main
+		thread, it other threads can't do the restart.  So this
+		polls to see if `shouldRestart` has been called.
 		"""
+
+		# Tavis Rudd claims: "this method can only be called by
+		# the main thread.  If a worker thread calls it, the
+		# process will freeze up."
+		#
+		# I've implemented it so that the ThreadedAppServer's
+		# control thread calls this.  That thread is _not_ the
+		# MainThread (the initial thread created by the Python
+		# interpreter), but I've never encountered any problems.
+		# Most likely Tavis meant a freeze would occur if a
+		# _worker_ called this.
+
 		if self._shouldRestart:
 			self.restart()
 
 	def restart(self):
-		"""Do the actual restart."""
+		"""Do the actual restart.  Call `shouldRestart` from
+		outside the class"""
 		self.initiateShutdown()
 		self._closeThread.join()
 		sys.stdout.flush()
 		sys.stderr.flush()
-		# calling execve() is problematic, since the file descriptors don't
-		# get closed by the OS.  This can result in leaked database connections.
-		# Instead, we exit with a special return code which is recognized by
-		# the AppServer script, which will restart us upon receiving that code.
+		# calling execve() is problematic, since the file
+		# descriptors don't get closed by the OS.  This can
+		# result in leaked database connections.  Instead, we
+		# exit with a special return code which is recognized
+		# by the AppServer script, which will restart us upon
+		# receiving that code.
 		sys.exit(3)
-
-	
-	## Callbacks
 
 	def monitorNewModule(self, filepath, mtime):
 		"""
@@ -137,7 +159,6 @@ class AutoReloadingAppServer(AppServer):
 		"""
 		self._requests.append(self._fc.monitorFile(filepath, filepath) )
 
-
 	## Internal methods
 
 	def shouldRestart(self):
@@ -145,6 +166,14 @@ class AutoReloadingAppServer(AppServer):
 		self._shouldRestart = 1
 
 	def fileMonitorThreadLoop(self, getmtime=os.path.getmtime):
+		"""
+		This the the main loop for the monitoring thread.
+		Runs in its own thread, polling the files for changes
+		directly (i.e., going through every file that's being
+		used and checking its last-modified time, seeing if
+		it's been changed since it was initially loaded)
+		"""
+		
 		pollInterval = self.setting('AutoReloadPollInterval')
 		while self._autoReload:
 			time.sleep(pollInterval)
@@ -162,6 +191,10 @@ class AutoReloadingAppServer(AppServer):
 		sys.stdout.flush()
 
 	def fileMonitorThreadLoopFAM(self, getmtime=os.path.getmtime):
+		"""
+		Monitoring thread loop, but using the FAM library.
+		"""
+		
 		modloader.notifyOfNewFiles(self.monitorNewModule)
 		self._fc = fc = _fam.open()
 
