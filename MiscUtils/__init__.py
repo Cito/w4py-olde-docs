@@ -2,7 +2,7 @@
 # Webware for Python
 # See Documentation/MiscUtils.py
 
-__all__ = ['CSV', 'DataTable', 'NamedValueAccess']
+__all__ = ['DataTable', 'NamedValueAccess']
 
 __version__ = '0.4'
 
