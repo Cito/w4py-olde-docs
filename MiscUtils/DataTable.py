@@ -201,6 +201,7 @@ TO DO
 
 import os, string, sys
 from CSVParser import CSVParser
+from CSVJoiner import joinCSVFields
 from string import join, replace, split, strip
 from types import *
 
@@ -508,7 +509,7 @@ class DataTable:
 
 		# write rows
 		for row in self._rows:
-			file.write(join(map(ValueWritingMapper, row), ','))
+			file.write(joinCSVFields(map(ValueWritingMapper, row)))
 			file.write('\n')
 
 	def commit(self):
