@@ -14,6 +14,8 @@ TO DO
 -----
 * cvs tagging didn't work last time
 * format these docs
+* details on updating web page
+* maybe procedures on cutting "release candidates"
 
 
 Final tweaking
@@ -41,14 +43,20 @@ Final testing
 
 Pack up
 -------
-cvs -q tag Release-VER
-cvs co -r Release-VER Webware
-tar czvf Webware-VER.tar.gz
+# Must be done on UNIX (or permissions are lost)
+# For CVS tagging only:  Use _ instead of .  No .:, or other symbols
+# For example,
+#    CVS_VER = 0_4
+#    VER = 0.4
+> cvs -q tag Release-CVS_VER
+> cvs co -r Release-CVS_VER Webware
+> # remove CVS/ and .cvsignore files
+> tar czvf Webware-VER.tar.gz
 
 
 Release on SourceForge
 ----------------------
-FTP to SourceForge.net -
+FTP to SourceForge.net:
 
 > ftp download.sourceforge.net
   > user: ftp
@@ -56,11 +64,11 @@ FTP to SourceForge.net -
   > cd incoming
   > bin
   > hash
-  > put Webware-<version>.tar.gz
+  > put Webware-VER.tar.gz
 
 or:
 
-> ncftpput -V download.sourceforge.net /incoming Webware-<version>.tar.gz
+> ncftpput -V download.sourceforge.net /incoming Webware-VER.tar.gz
 
 
 Log into www.sourceforge.net
@@ -74,27 +82,31 @@ Reference: "Making File Releases",
 
 Notify
 ------
+Update the web page at http://webware.sourceforge.net
+
 Review http://webware.sourceforge.net and make appropriate changes including
-version number.
+version number, project status, etc.
 
 Add a news item to the SourceForge project page
     https://sourceforge.net/project/?group_id=4866
 
 Announce on comp.lang.python
 
+Announce on mailing lists:
+	webware-announce@lists.sourceforge.net
+	python-web-modules@egroups.com
+	pywx@idyll.org
+
 Update on http://www.vex.net/parnassus
 
-Announce on mailing lists:
-	pywx@idyll.org
-	python-web-modules@egroups.com
-	webware-announce@lists.sourceforge.net
+http://www.crosswinds.net/~pboddie/Python/web_modules.html
 
-Review/search for other places where the announcement can be made
+Review/search for other places where the announcement can be made.
 
 
 Post
 ----
-Check that Parnassus was updated.
+Check that Parnassus and Web Modules were updated.
 
 Look for follow up messages on comp.lang.python
 
