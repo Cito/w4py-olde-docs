@@ -158,32 +158,14 @@ Release 0.4.1 on 10/05/2000
 <h2>Design Points</h2>
 
 <ul>
-	<li> Misc
-		<ul>
-		<li> Webware is pro-Python. These software components are not about Java, C++ or any other programming languages.
-		<li> The various software components are meant to be accessible in a stand alone fashion except in those cases where one component builds on another. That doesn't preclude the idea that the components can provide hooks for integration or even automatically integrate other components when their presence is detected.
-		<li> A clean, object-oriented style of development is used as much as possible.
-		<li> However, Webware components don't provide a special class for each type of HTML tag. It's generally easier and more efficient to use strings like '&lt;br&gt;&lt;hr&gt;' than to say something like 'BreakLine() + HorizontalRule()'.
-		<li> Documentation is meant to be of the highest caliber so that users can more quickly get up and running with Webware.
-		<li> All components are accompanied by examples (that also serve as tests).
-		<li> Over time, regression tests are created and expanded upon for each component.
-		<li> Although Webware includes more than one independent component, it's not intended to be a hodge-podge repository of any kind of web component written in Python. New components should fit into the 'feel' of what's there already and provide integration with other components whereever possible. The emphasis is on high-quality, object-oriented components (with the mild exception of the utility collections, MiscUtils and WebUtils).
-		</ul>
-	<li> Source Code Conventions
-		<ul>
-		<li>Misc
-			<ul>
-			<li> Tabs are used for source indentation and set to 4 spaces in width.
-			<li> Groups of methods are denoted by a preceding and trailing double pound sign. For example, <code><font color=darkblue>## Transactions ##</font></code>.
-			</ul>
-		<li> Naming Conventions
-			<ul>
-			<li> The suffix <em>Kit</em>, indicates an object-oriented framework.
-			<li> The suffix <em>Utils</em>, indicates a miscellaneous collection of functions, data and classes.
-			<li> The convention for naming methods is <code>name()</code> and <code>setName()</code> (as opposed to <code>getName()</code>, <code>setname()</code> or <code>set_name()</code>). Note that Python is inconsistent in this regard (<code>hasattr()</code>, <code>has_key()</code>), but it is ideal to pick a convention for a project and stick with it. The chosen convention for Webware is taken from Smalltalk and Objective-C and is fairly close to the Java convention.
-			<li> The convention for naming attributes, which are treated privately by other classes (but not necessarily by subclasses), is <code>_name</code>. The non-underscored name is reserved for the accessor method, as in <code>name()</code>.
-			</ul>
-		</ul>
+	<li> Webware is pro-Python. These software components are not about Java, C++ or any other programming languages.
+	<li> The various software components are meant to be accessible in a stand alone fashion except in those cases where one component builds on another. That doesn't preclude the idea that the components can provide hooks for integration or even automatically integrate other components when their presence is detected.
+	<li> A clean, object-oriented style of development is used as much as possible.
+	<li> However, Webware components don't provide a special class for each type of HTML tag. It's generally easier and more efficient to use strings like '&lt;br&gt;&lt;hr&gt;' than to say something like 'BreakLine() + HorizontalRule()'.
+	<li> Documentation is meant to be of the highest caliber so that users can more quickly get up and running with Webware.
+	<li> All components are accompanied by examples (that also serve as tests).
+	<li> Over time, regression tests are created and expanded upon for each component.
+	<li> Although Webware includes more than one independent component, it's not intended to be a hodge-podge repository of any kind of web component written in Python. New components should fit into the 'feel' of what's there already and provide integration with other components whereever possible. The emphasis is on high-quality, object-oriented components (with the mild exception of the utility collections, MiscUtils and WebUtils).
 </ul>
 
 
@@ -194,6 +176,14 @@ Release 0.4.1 on 10/05/2000
 	<li> <a href=RelNotes-0.4.html>Version 0.4</a>
 	<li> <a href=RelNotes-0.3.html>Version 0.3</a>
 	<li> <a href=RelNotes-0.2.html>Version 0.2</a>
+</ul>
+
+
+<h2>Other Docs</h2>
+
+<ul>
+	<li> <a href=StyleGuidelines.html>Style Guidelines</a>
+	<li> <a href=ReleaseProcedures.html>Release Procedures</a>
 </ul>
 
 
