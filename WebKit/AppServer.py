@@ -252,7 +252,7 @@ def main():
 		sys.exit()
 
 
-def stop():
+def stop(*args):
 	pidfile = os.path.join(os.path.dirname(__file__),"appserverpid.txt")
 	pid = int(open(pidfile,"r").read())
 	#now what for windows?

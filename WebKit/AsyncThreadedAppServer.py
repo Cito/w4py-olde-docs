@@ -430,25 +430,40 @@ signal.signal(signal.SIGTERM, shutDown)
 
 usage = """
 The AppServer is the main process of WebKit.  It handles requests for servlets from webservers.
-ThreadedAppServer takes the following command line arguments:
--stop:  Stop the currently running Apperver.
+AsyncThreadedAppServer takes the following command line arguments:
+stop:  Stop the currently running Apperver.
+daemon: run as a daemon
 If AppServer is called with no arguments, it will start the AppServer and record the pid of the process in appserverpid.txt
 """
 
 
 def main(args):
-	if len(args)>1:
-		if args[1] == "monitor":
+##	if len(args)>1:
+	monitor=0
+	function=run
+	daemon=0
+	
+	for i in args[1:]:
+		if i == "monitor":
 			print "Enabling Monitoring"
-			run(useMonitor=1)
-		elif args[1] == "stop":
+			monitor=1
+		elif i == "stop":
 			import AppServer
-			AppServer.stop()
+			function=AppServer.stop
+		elif i == "daemon":
+			daemon=1
 		else:
 			print usage
+
+	if 0:
+		import profile
+		profile.run("main()", "profile.txt")
 	else:
-		if 0:
-			import profile
-			profile.run("main()", "profile.txt")
-		else:
-			run(useMonitor=0)
+		if daemon:
+			if os.name == "posix":
+				pid=os.fork()
+				if pid:
+					sys.exit()
+			else:
+				print "daemon mode not available on your OS"
+		function(monitor)
