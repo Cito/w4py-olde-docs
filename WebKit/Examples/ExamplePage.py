@@ -22,10 +22,10 @@ class ExamplePage(SidebarPage):
 		#dir = self.request().serverSideDir()
 		dir = self.request().uriWebKitRoot() + 'Examples'
 		examples = eval(open('Examples/Examples.list').read())
-		for filename in map(lambda x: x+'.py', examples):
+		for name in examples:
 			script = {}
-			script['pathname'] = dir + '/' + filename
-			script['name']     = filename[:-3]
+			script['pathname'] = dir + '/' + name
+			script['name']     = name
 			scripts.append(script)
 		return scripts
 
