@@ -10,10 +10,10 @@ Be sure to run, in this directory:
 See the files:
 
 	_VERSION
-	_COPYRIGHT
-	Documentation/index.html
+	_COPYRIGHT_ET_AL
+	Docs/index.html
 
 
 And get more information and the latest version at:
 
-	http://webware.sourceforge.net
+	http://webware.sourceforge.net/
