@@ -316,7 +316,7 @@ class Page(HTTPServlet):
 
 	## Self utility ##
 
-	def getCan(self, ID, klass, storage,*args, **kargs):
+	def getCan(self, ID, klass, storage='request',*args, **kargs):
 		"""Gets a Can"""
 		storage = string.lower(storage)
 		if storage=="session":
