@@ -102,7 +102,7 @@ class CharDataGenerator(GenericGenerator):
 
 class ScriptGenerator(GenericGenerator):
     """generates scripts"""
-    def __init__(self, chars,attrs):
+    def __init__(self, chars, attrs):
 		GenericGenerator.__init__(self)	
 		self.chars = chars
 
@@ -215,33 +215,47 @@ class MethodEndGenerator(GenericGenerator):
 
 
 class IncludeGenerator(GenericGenerator):
-    """ Include files designated by the psp:include syntax. Not done yet, just
-    a raw dump for now."""
+    """ Include files designated by the psp:include syntax.
+	If the attribute static is set to true or 1, we include the file now, at compile time.
+	Otherwise, we use a function added to every PSP page name __includeFile, which reads the file at run time.
+	"""
     def __init__(self, attrs, param, ctxt):
 		GenericGenerator.__init__(self,ctxt)
 		self.attrs = attrs
 		self.param = param
+		self.static=1
+		self.scriptgen = None
 
 		self.page = attrs.get('file')
 		if self.page == None:
 			raise "No Page attribute in Include"
 		thepath=self._ctxt.resolveRelativeURI(self.page)
+
+
+		self.static = attrs.get('static', None)
+		if self.static == string.lower("true") or self.static == "1":
+			self.static=1
     
 		if not os.path.exists(thepath):
 			print self.page
 			raise "Invalid included file",thepath
 		self.page=thepath
 
+		if not self.static:
+			self.scriptgen = ScriptGenerator("self.__includeFile('%s')" % thepath, None)
+
     def generate(self, writer, phase=None):
 		""" JSP does this in the servlet.  I'm doing it here because I have triple quotes.
 		Note: res.write statements inflate the size of the resulting classfile when it is cached.
 		Cut down on those by using a single res.write on the whole file, after escaping any triple-double quotes."""
-		#data = open(self.page).readlines()
-		#for i in data:
-		#	writer.println('res.write("""'+i+'""")\n')
-		data = open(self.page).read()
-		data=string.replace(data,'"""',r'\"""')
-		writer.println('res.write("""'+data+'""")')
-		writer.println()
+
+		if self.static:
+			data = open(self.page).read()
+			data=string.replace(data,'"""',r'\"""')
+			writer.println('res.write("""'+data+'""")')
+			writer.println()
+		else:
+			self.scriptgen.generate(writer, phase)
+			
 		
 

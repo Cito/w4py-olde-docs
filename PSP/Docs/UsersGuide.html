@@ -1,6 +1,6 @@
 <html><head>
 <title> Python Server Pages for the Webware WebKit </title>
-<link rel=STYLESHEET href="StyleSheet.css" type="text/css">
+<!--<link rel=STYLESHEET href="StyleSheet.css" type="text/css"> -->
 </head>
 <body bgcolor='white'>
 <H1> Python Server Pages for Webware</h1>
@@ -59,7 +59,7 @@ of param="value" pairs.
 
 <p>Supported Directives include:
 <ul>
-<li><h2><b>Page Directive</b> - <i>"&lt;%@ page"</i></h2>
+<li><h3><b>Page Directive</b> - <i>"&lt;%@ page"</i></h3>
 <p>The page directive tells the PSP parser about special requirements of this page,
 or sets some optional output options for this page.  Directives set in <i>page</i> apply
 to the elements in the current PSP source file and to any included files.
@@ -123,7 +123,7 @@ override.
 <p><b>Example</b> - <i> &lt;%@ page indentSpaces="8" %$gt;</i>
 </ul>
 <p>
-<p><li><h2><b>Include Directive</b>- <i>&lt;%@ include</i></h2>
+<p><li><h3><b>Include Directive</b>- <i>&lt;%@ include</i></h3>
 <p>The include directive tells the parser to insert another file at this point in the page and to parse it for psp content.
 It is generally no problem to include an html file this way.  However, if you do not want your include file to be parsed,
 you may use the <i>&lt;psp:include</i> tag described below.
@@ -242,8 +242,10 @@ PSP file through the standard <i>self.PSPMethodName(parameters)</i> syntax.
 <h2>Include Tag - "<i>&lt;psp:include"</i></h2>
 <p>
 <p>The include tag inserts a file into the output stream that the psp page will produce, but does not parse that included file for psp content.
-The only parameter is <i>file</i>, which should be set to the filename to be included.  If the filename starts with a "/", it is
-assumed to be an absolute path.  If it doesn't start with a "/", the file path is assumed to be relative to the psp file.  The contents of the include file will not be escaped in any way except for triple-double-quotes ("""), which will be escaped.
+The main parameter is <i>file</i>, which should be set to the filename to be included.  If the filename starts with a "/", it is
+assumed to be an absolute path.  If it doesn't start with a "/", the file path is assumed to be relative to the psp file.  The contents of the include file will not be escaped in any way except for triple-double-quotes ("""), which will be escaped. 
+<p>At every request of this servlet, this file will be read from disk and sent along with the rest of the ouput of the page.
+<p> This tag accepts one additional parameter, "static", which can be set to "true" or "1".  Setting this attribute to true will cause the included file's contents to be embedded in the PSP class at generation time.  Any subsequent changes to the file will not be seen by the servlet. (This was the default behavior prior to PSP 0.4).
 <p>
 <p><b>Example</b> - <i>&lt;psp:include file="myfile.html" &gt;</i>
 <p>

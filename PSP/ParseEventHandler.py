@@ -315,6 +315,13 @@ class ParseEventHandler:
 			self._writer.println()
 			self._writer.popIndent()
 			self._writer.println()
+
+		self._writer.println('def __includeFile(self, filename):')
+		self._writer.pushIndent()
+		self._writer.println('self.write(open(filename).read())')
+		self._writer.popIndent()
+		self._writer.println()
+		
 		return
 
 	def generateInitPSP(self):
