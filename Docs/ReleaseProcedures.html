@@ -18,9 +18,7 @@ improve. Also, update these notes immediately following a release.
 
 
 <h2>To Do</h2>
-* merge notes on release candidates vs. final version
 * ReleaseHelper.py
-  * extract version from Properties.py rather than prompting for it
   * cvs tags
 * Add notes on download mirror
   scp Webware-VER.tar.gz esterbro@ebad.pair.com:public_html/python/webware/
@@ -43,54 +41,32 @@ improve. Also, update these notes immediately following a release.
   * Search webware-discuss and webware-devel archives for "update"
     in the subject, since the date of the last release.
 * Make sure the workspace is up to date and all files are checked in.
-  > cvs update
-  > cvs status > status.text
+  > cvs upd -dP
 * Skim through docs one final time
   * Make sure all the version numbers and release dates are correct.
 
 
-<h2>Cut release candidate</h2>
-# Must be done on UNIX (or permissions are lost)
+<h2>Prep release</h2>
+Releases often go alpha 1, alpha 2, beta 1, beta 2, ... with
+suffixes a1, a2, b1, b2 as in 0.6.1b1.
+
+Must be done on UNIX (or permissions are lost).
+
+For CVS tagging only:  Use _ instead of .  No .:, or other symbols
+For example,
+   VER = 0.4
+   CVS_VER = 0_4
+
 * Make sure Properties.py's version has an a1, a2, b1, or b2, etc.
 * Check out a copy and upload:
-  > cvs -z3 -d:pserver:anonymous@cvs.Webware.sourceforge.net:/cvsroot/webware co Webware
+  > cvs -z3 -d:ext:$USER@cvs.Webware.sourceforge.net:/cvsroot/webware co Webware
   > Webware/bin/ReleaseHelper.py
-* Download the release candidate, install and test
-  * Check that the right version show up in the WebKit examples, including rcX.
-* Announce:
-  * To:
-    * <a href=webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>
-    * <a href=python-web-modules@yahoogroups.com>python-web-modules@yahoogroups.com</a>
-  * ftp://webware.sourceforge.net/pub/webware/Webware-VERrcX.tar.gz
-  * Report all problems to webware-discuss@lists.sourceforge.net.
-    Please include all appropriate version numbers including Webware,
-    Python, web server, op sys, browser, database, etc. If running
-    the app server, please specify flavor (eg, ThreadedAppServer)
-    and adapter.
-  * Expected release date for X.Y is MONTH, DAY.
-  * Changes since last release date are:
-    * ...
-
-
-<h2>Prep release</h2>
-# Must be done on UNIX (or permissions are lost)
-# For CVS tagging only:  Use _ instead of .  No .:, or other symbols
-# For example,
-#    CVS_VER = 0_4
-#    VER = 0.4
-
-* Make sure all Properties.py "rcX" version components are removed.
-
-# From a workspace:
-> cvs -q tag Release-CVS_VER
-> cvs co -r Release-CVS_VER Webware
-> # remove CVS/ and .cvsignore files
-# @@ use 'cvs export' instead?
-> cd Webware
-> find . -name .cvsignore -exec rm {} \;
-> find . -name CVS -exec rm -rf {} \;
-> cd ..
-> tar czf Webware-VER.tar.gz Webware
+* Download the release, install and test
+  * Check that the right versions show up in the WebKit examples, including b1.
+* Tag the release
+  > cvs -q tag Release-CVS_VER
+* If you want to get a particular release:
+  > cvs co -r Release-CVS_VER Webware
 
 
 <h2>Release on SourceForge</h2>
@@ -140,13 +116,26 @@ FTP to SourceForge.net:
     > cd Webware
     > python install.py
 
+* Add a news item to the <a href=https://sourceforge.net/project/?group_id=4866>Webware Project Page</a> @ SourceForge
+
 
 <h2>Notify</h2>
 Create a new announcement text file containing the text for the
 general announcement, SourceForge news and freshmeat.net update. Use
 the previous releases as examples.
 
-[ ] Add a news item to the <a href=https://sourceforge.net/project/?group_id=4866>Webware Project Page</a> @ SourceForge
+
+For pre-releases, just the following:
+  * To: <a href=webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>
+  * http://prdownloads.sourceforge.net/webware/Webware-VER.tar.gz
+  * Report all problems to webware-discuss@lists.sourceforge.net.
+    Please include all appropriate version numbers including Webware,
+    Python, web server, op sys, browser, database, etc. If running
+    the app server, please specify flavor (eg, ThreadedAppServer)
+    and adapter.
+  * Expected release date for X.Y is MONTH, DAY.
+  * Changes since last release date are:
+    * ...
 
 Announce on mailing lists:
     [ ] <a href=mailto:python-list@python.org>python-list@python.org</a>
