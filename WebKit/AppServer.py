@@ -64,13 +64,6 @@ class AppServer(Configurable):
 		self.running = 0
 		self._app.shutDown()
 		del self._plugIns
-
-		# @@ 2000-07-10 ce Most of these should be in the app.
-		del self._app._factoryByExt
-		del self._app._factoryList
-		del self._app._server
-		if hasattr(self._app, '_sessSweepThread'):
-			del self._app._sessSweepThread
 		del self._app
 
 
