@@ -12,4 +12,4 @@ __version__='0.1'
 def InstallInWebKit(appServer):
 	app = appServer.application()
 	app.addServletFactory(PSPServletFactory(app))
-	app._Contexts['PSPExamples']=os.path.normpath('../PSP/Examples')
+	app.setContext('PSPExamples', os.path.normpath('../PSP/Examples'))
