@@ -92,6 +92,7 @@ set it to true to avoid ever getting an assertion failure.  </p>
 
 <h2>New Features</h2>
 <ul>
+	<li> MiddleKit now includes full support for PostgreSQL. <a href=UsersGuide.html#RDBMS>docs</a></a>
 	<li> You can specify a <b>SQLDefault</b> for attributes. <a href=UsersGuide.html#MT_SQLDefault>docs</a>
 	<li> For list references, you can specify the name of the "back reference" attribute explicitly.  This allows creation of recursive structures, such as trees. <a href=UsersGuide.html#DT_Recursive>docs</a>
 	<li> A setting called "DatabaseArgs" was added in which you can pass necessary arguments for establishing the database connection. <a href=UsersGuide.html#Configuration_DatabaseArgs>docs</a>
@@ -110,8 +111,9 @@ set it to true to avoid ever getting an assertion failure.  </p>
 
 	<li><b>Dump.py</b> is documented.
 
-	<li>When you delete an object, it is automatically removed from any list
-	attributes in other objects.
+	<li>When you delete an object, it is automatically removed from any list attributes in other objects.</li>
+
+	<li>There is a new setting called '<b>CacheObjectsForever</b>', which defaults to False.  If set to True, the object store will cache objects indefinitely, which, depending on the size of your database, can use a lot of memory (this is the behaviour of previous versions of MiddleKit).  If set to False, the object store uses "weak references" to cache the objects, which allows the Python garbage collector to collect an object as long as there are no other reachable references to that object.  This change is unlikely to interfere with existing applications, but you can always set 'CacheObjectsForever' to True to get the old behaviour if you want.
 </ul>
 
 

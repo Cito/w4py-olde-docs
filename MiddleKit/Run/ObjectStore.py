@@ -14,6 +14,7 @@ from MiddleKit.Core.ListAttr import ListAttr
 from PerThreadList import PerThreadList, NonThreadedList
 from PerThreadDict import PerThreadDict, NonThreadedDict
 import thread
+import weakref
 
 
 class UnknownObjectError(LookupError):
@@ -74,10 +75,8 @@ class ObjectStore(ModelUser):
 
 	def __init__(self):
 		self._model          = None
-		self._objects        = {} # keyed by ObjectKeys
 		self._newSerialNum   = -1
 		self._verboseDelete  =  0
-
 
 	def modelWasSet(self):
 		"""
@@ -95,7 +94,13 @@ class ObjectStore(ModelUser):
 			self._newObjects     = NonThreadedList()
 			self._deletedObjects = NonThreadedList()
 			self._changedObjects = NonThreadedDict()
+		self._objects        = self.emptyObjectCache()  # dict; keyed by ObjectKeys
 
+	def emptyObjectCache(self):
+		if self.setting('CacheObjectsForever', False):
+			return {}
+		else:
+			return weakref.WeakValueDictionary()
 
 	## Manipulating the objects in the store ##
 
@@ -356,7 +361,7 @@ class ObjectStore(ModelUser):
 		assert self._deletedObjects.isEmpty()
 		assert self._changedObjects.isEmpty()
 
-		self._objects        = {}
+		self._objects        = self.emptyObjectCache()
 		self._newSerialNum   = -1
 
 	def discardEverything(self):
@@ -372,7 +377,7 @@ class ObjectStore(ModelUser):
 			self._hasChanges     = {}
 		else:
 			self._hasChanges     = 0
-		self._objects        = {}
+		self._objects        = self.emptyObjectCache()
 		self._newObjects.clear()
 		self._deletedObjects.clear()
 		self._changedObjects.clear()

@@ -56,6 +56,15 @@ Version <!-- version --> X.Y <!-- /version -->
 
 <p> The benefits of a relational database include: data storage, concurrent access and 3rd party tools (such as report generators).
 
+<a name="RDBMS"<h2>RDBMS Support</h2></a>
+
+<p>MiddleKit can use any of the following databases as a back-end:
+	<ul>
+	<li><a href="http://www.mysql.com">MySQL</a> using the <a href="http://sourceforge.net/projects/mysql-python">mysqldb</a> database adaptor.</li>
+	<li><a href="http://www.postgresql.org">PostgreSQL</a> using the <a href="http://initd.org/software/initd/psycopg">psycopg</a> database adaptor.</li>
+	<li><a href="http://www.microsoft.com/sql/">Microsoft SQL Server</a> using the <a href="http://www.egenix.com/files/python/mxODBC.html">mxODBC</a> adaptor.</li>
+	</ul>
+</p>
 
 <a name=DataTypes><h2>Data Types</h2></a>
 
@@ -533,6 +542,11 @@ This setting has no effect on the visible behavior of MiddleKit; it only changes
 
 <pre>{
     'DropStatements': 'database',  # database, tables
+}</pre>
+
+<p> <a name=Configuration_CacheObjectsForever></a> The <span class=name>CacheObjectsForever</span> setting causes MiddleKit to retain references to each object it loads from the database indefinitely.  Depending on the amount of data in your database, this can use a lot of memory.  The CacheObjectsForever setting defaults to False, which causes MiddleKit to use "weak references" to cache objects.  This allows the Python garbage collector to collect an object when there are no other reachable references to the object.
+<pre>{
+    'CacheObjectsForever': True,  # keep objects in memory indefinitely
 }</pre>
 
 
