@@ -8,6 +8,12 @@ NO DOCS - this can all be more easily implemented by looking at
 sys.modules, along with select files (like config files).  It's fast
 to poll sys.modules, then we don't need this fanciness.
 
+jdh: I'm not sure.  The original implementation from Tavis used sys.modules
+like you say.  I implemented this to avoid having any polling at all,
+but perhaps it's not worth it.  I'm not sure if there were other
+factors in the design which pointed to this solution.
+
+
 This module helps save the filepath of every module which is imported.
 This is used by the `AutoReloadingAppServer` (see doc strings for more
 information) to restart the server if any source files change.
@@ -134,7 +140,7 @@ class ModuleLoader(ihooks.ModuleLoader):
 					pass
 			elif f and f not in fileList.keys():
 				# record the .py file corresponding to each '.pyc'
-				if f[-4:] == '.pyc':
+				if f[-4:].lower() in ['.pyc', '.pyo']:
 					f = f[:-1]
 				try:
 					if isfile(f):
