@@ -97,7 +97,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		self._servletCacheByPath = {}
 		self._serverSidePathCacheByPath = {}
 		self._cacheDictLock = Lock()
-		self._instanceCacheSize=10 # self._server.setting('ServerThreads') #CHANGED 6/21/00
+		self._instanceCacheSize = self._server.setting('ServerThreads')
 		self._canDirs = []
 
 		self.initializeCans()
@@ -110,9 +110,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		# ^ @@ 2000-05-03 ce: make this customizable at least through a method (that can be overridden) if not a config file (or both)
 
 ## TaskManager
-		self._taskmanager = Scheduler()
-		self._taskmanager.setDaemon(1)
-		self._taskmanager.start()
+		if self._server.isPersistent():
+			self._taskmanager = Scheduler()
+			self._taskmanager.setDaemon(1)
+			self._taskmanager.start()
 ## End TaskManager
 
 
@@ -145,6 +146,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		print 'Current directory:', os.getcwd()
 
 		self.running = 1
+		
 		if useSessionSweeper:
 			self.startSessionSweeper()
 
@@ -173,8 +175,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		@@ Overhaul by 0.4
 		"""
 		import CanFactory
-		self._canDirs.append("Cans")
 		self._canFactory = CanFactory.CanFactory(self)
+		self._canFactory.addCanDir("Cans")
 
 	def addCanDir(self, newDir):
 		"""

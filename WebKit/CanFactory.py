@@ -2,6 +2,7 @@
 import os
 import imp
 import sys
+import string
 
 class CanFactory:
 	"""Creates Cans on demand.  Looks only in the Cans directories.
@@ -15,29 +16,34 @@ class CanFactory:
 	def __init__(self, app):
 		self._canClasses={}
 		self._app = app
-	    #self.__CanDir = app.getCanDir()
-		self._canDirs=app._canDirs
+		self._canDirs = []
 		for i in self._canDirs:
 			if not i in sys.path:
 				sys.path.append(i)
 
 	def addCanDir(self, newdir):
-		#Nasty Hack
+		"""
+		Add the specified directory to the search path for Cans.
+		If the given directory is not an absolute path, it will be joined with the WebKit directory.
+		"""
+		if not os.path.isabs(newdir):
+			newdir = self._app.serverSidePath(newdir)
 		self._canDirs.append(newdir)
 		sys.path.append(newdir)
+		print "Help, I'm a HAAAACK! Find me in: ",  #jsl - fix before 0.5 release
+		print __file__
+
 
 
 	def createCan(self, canName, *args, **kwargs):
 		##Looks in the directories specified in the application.canDirs List
-		self._canDirs = self._app._canDirs
 		if self._canClasses.has_key(canName):
 			klass = self._canClasses[canName]
 		else:
-			self.canDirs = self._app._canDirs
-			res = imp.find_module(canName,self._canDirs)
+			res = imp.find_module(canName, self._canDirs)
 			mod = imp.load_module(canName, res[0], res[1], res[2])
 			klass = mod.__dict__[canName]
-			self._canClasses[canName]=klass
+			self._canClasses[canName]=klass				
 		
 		if len(args)==0 and len(kwargs)==0:
 			instance = klass()
