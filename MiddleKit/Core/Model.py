@@ -11,6 +11,7 @@ class Model(Configurable):
 	'''
 
 	def __init__(self, filename=None, customCoreClasses={}):
+		Configurable.__init__(self)
 		self._filename = None
 		self._coreClasses = customCoreClasses
 		self._klasses = None
