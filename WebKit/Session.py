@@ -1,7 +1,24 @@
 from Common import *
 import whrandom
-from time import localtime, time
+from time import localtime, time, sleep
 from CanContainer import *
+
+
+
+def Sweeper(sessions,timeout):
+	"""This function runs in a separate thread and clenas out stale sessions periodically.
+	It probably doesn't belong in this file"""
+	import sys
+	while 1:
+		print ">> Cleaning stale sessions"
+		currtime=time()
+		keys=sessions.keys()
+##		print ">> Current sessions: ", keys
+		for i in keys:
+			if (currtime - sessions[i].lastAccessTime()) > timeout:
+##				print "del session with refcnt=",sys.getrefcount(sessions[i])
+				del sessions[i]
+		sleep(30)#sleep for 30 seconds, should probably be 60 in production use
 
 
 class SessionError(Exception):
