@@ -318,10 +318,7 @@ class MiddleObject(NamedValueAccess):
 				getMethod = 0  # 0 is false, and indicates that the search was already done
 			self.klass()._getMethods[attr.name()] = getMethod
 		if getMethod:
-			try:
-				return getMethod(self)
-			except TypeError:
-				assert 0, 'getMethod=%r, self=%r, type(self)=%r' % (getMethod, self, type(self))
+			return getMethod(self)
 		else:
 			if default is NoDefault:
 				raise LookupError, attr['Name']
