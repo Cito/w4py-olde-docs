@@ -84,31 +84,96 @@ class Installer:
 		print
 
 	def createBrowsableSource(self):
-		''' Create colorized, HTML versions of the source. '''
+		''' Create HTML documents for class hierarchies, summaries, source files, etc. '''
+
 		print 'Creating browsable source...'
-		sys.path.insert(0, 'DocSupport')
-		import py2html
+		self.requirePath('DocSupport')
 
 		for comp in self._comps:
 			print '  %s...' % comp
 
-			dirName = '%s/Documentation/Source' % comp
-			if not os.path.exists(dirName):
-				if self._verbose: print '    Making %s...' % dirName
-				os.mkdir(dirName)
+			sourceDir = '%s/Documentation/Source' % comp
+			self.makeDir(sourceDir)
+
+			filesDir = sourceDir + '/Files'
+			self.makeDir(filesDir)
+
+			summariesDir = sourceDir + '/Summaries'
+			self.makeDir(summariesDir)
+
+			docsDir = sourceDir + '/Docs'  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
+			#self.makeDir(docsDir)
 
 			for filename in glob('%s/*.py' % comp):
-				targetName = '%s/Documentation/Source/%s.html' % (comp, os.path.basename(filename))
-				if self._verbose: print '    Creating %s...' % targetName
-				realout = sys.stdout
-				sys.stdout = StringIO()
-#				py2html.main([None, '-stdout', '-format:rawhtml', '-files', filename])
-				py2html.main([None, '-stdout', '-files', filename])
-				result = sys.stdout.getvalue()
-				result = replace(result, '\t', '    ')  # 4 spaces per tab
-				open(targetName, 'w').write(result)
-				sys.stdout = realout
+				self.createHighlightedSource(filename, filesDir)
+				self.createSummary(filename, summariesDir)
+				#self.createDocs(filename, docsDir)  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
+
+			self.createBrowsableClassHier(comp, sourceDir)
+			#self.createBrowsableFileList(comp, sourceDir)
 		print
+
+	def createHighlightedSource(self, filename, dir):
+		import py2html
+		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
+		if self._verbose: print '    Creating %s...' % targetName
+		realout = sys.stdout
+		sys.stdout = StringIO()
+#		py2html.main([None, '-stdout', '-format:rawhtml', '-files', filename])
+		py2html.main([None, '-stdout', '-files', filename])
+		result = sys.stdout.getvalue()
+		result = replace(result, '\t', '    ')  # 4 spaces per tab
+		open(targetName, 'w').write(result)
+		sys.stdout = realout
+
+	def createSummary(self, filename, dir):
+		from PySummary import PySummary
+		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
+		if self._verbose: print '    Creating %s...' % targetName
+		sum = PySummary()
+		sum.readConfig('DocSupport/PySummary.config')
+		sum.readFileNamed(filename)
+		html = sum.html()
+		open(targetName, 'w').write(html)
+
+	def createDocs(self, filename, dir):
+		from PySummary import PySummary
+		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
+		if self._verbose: print '    Creating %s...' % targetName
+		# @@ 2000-08-17 ce: use something like pydoc or gendoc here
+		raise NotImplementedError
+
+	def createBrowsableClassHier(self, filesDir, docsDir):
+		''' Create HTML class hierarchy listings of the source files. '''
+		from classhier import ClassHier
+
+		classHierName = os.path.join(os.getcwd(), docsDir, 'ClassHier.html')
+		listName = os.path.join(os.getcwd(), docsDir, 'ClassList.html')
+		saveDir = os.getcwd()
+		os.chdir(filesDir)
+		try:
+			ch = ClassHier()
+			# @@ 2000-08-17 ce:  whoa! look at that hard-coding!
+			ch.addFilesToIgnore(['zCookieEngine.py', 'WebKitSocketServer.py', '_on_hold_HierarchicalPage.py', 'fcgi.py'])
+			ch.readFiles('*.py')
+			ch.printHierForWeb(classHierName)
+			ch.printListForWeb(listName)
+		finally:
+			os.chdir(saveDir)
+
+	def createBrowsableFileList(self, filesDir, docsDir):
+		''' Create HTML list of the source files. '''
+		# @@ 2000-08-18 ce: not yet
+		fullnames = glob('%s/*.py' % filesDir)
+		filenames = map(lambda filename: os.path.basename(filename), fullnames)
+		filenames.sort()
+		ht = []
+		ht.append('<table cellpadding=2 cellspacing=0 style="font-family: Arial, Helvetica, sans-serif; font-size: 14;">\n')
+		for filename in filenames:
+			ht.append('<tr> <td> summary </td> <td> source </td> <td> %s </td> </tr>' % filename)
+		ht.append('</table>')
+		ht = string.join(ht, '')
+		open(docsDir+'/FileList.html', 'w').write(ht)
 
 	def fixPermissions(self):
 		if os.name=='posix':
@@ -143,6 +208,15 @@ Installation is finished.'''
 
 	def printKeyValue(self, key, value):
 		print '%12s: %s' % (key, value)
+
+	def makeDir(self, dirName):
+		if not os.path.exists(dirName):
+			if self._verbose: print '    Making %s...' % dirName
+			os.mkdir(dirName)
+
+	def requirePath(self, path):
+		if path not in sys.path:
+			sys.path.insert(1, path)
 
 
 if __name__=='__main__':

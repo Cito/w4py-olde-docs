@@ -6,6 +6,7 @@ A quick, hacky script to contruct a class hierarchy list from a set of python fi
 
 import os, re, string, string, sys, time
 from glob import glob
+from types import *
 
 
 def EmptyString(klass):
@@ -30,6 +31,9 @@ class Klass:
 		assert isinstance(klass, Klass)
 		if klass not in self._derived:
 			self._derived.append(klass)
+
+	def name(self):
+		return self._name
 
 	def filename(self):
 		return self._filename
@@ -147,22 +151,59 @@ class ClassHier:
 		for klass in roots:
 			klass.printHier(file=file)
 
-	def printForWeb(self, file=sys.stdout):
+	def printHierForWeb(self, file=sys.stdout):
+		if type(file) is StringType:
+			file = open(file, 'w')
+			close = 1
+		else:
+			close = 0
 		file.write('<table cellpadding=2 cellspacing=0 style="font-family: Arial, Helvetica, sans-serif; font-size: 14;">\n')
-		file.write('<tr><td><b>Source</b></td><td><b>Class</b></td><td><b>File</b></td></tr>\n')
+		file.write('<tr> <td><b>Summary</b></td> <td><b>Source</b></td> <td><b>Class</b></td> <td><b>File</b></td> </tr>\n')
 		roots = self.roots()
 		roots.sort(lambda a, b: cmp(a._name, b._name))
 		for klass in roots:
-			klass.printHier(file=file, prefix='<tr>', func=self.srcLink, indentString = '&nbsp;'*6, filenamePrefix='</td><td>', filenamePostfix='</td></tr>')
+			klass.printHier(file=file, prefix='<tr>', func=self.links, indentString = '&nbsp;'*6, filenamePrefix='</td><td>', filenamePostfix='</td></tr>\n')
 		file.write('</table>')
+		if close:
+			file.close()
 
-	def srcLink(self, klass):
+	def printListForWeb(self, file=sys.stdout):
+		if type(file) is StringType:
+			file = open(file, 'w')
+			close = 1
+		else:
+			close = 0
+		file.write('<table cellpadding=2 cellspacing=0 style="font-family: Arial, Helvetica, sans-serif; font-size: 14;">\n')
+		file.write('<tr> <td><b>Summary</b></td> <td><b>Source</b></td> <td><b>Class</b></td> <td><b>File</b></td> </tr>\n')
+		classes = self._klasses.values()
+		classes.sort(lambda a, b: cmp(a._name, b._name))
+		for klass in classes:
+			file.write('<tr> %s %s </td>  <td>%s</td> </tr>\n' % (self.links(klass), klass.name(), klass.filename()))
+		file.write('</table>')
+		if close:
+			file.close()
+
+	def links(self, klass):
 		''' In support of printForWeb(). '''
 		filename = klass.filename()
-		if os.path.exists('Documentation/Source/%s.html' % filename):
-			return '<td> <a href="Source/%s.html">source</a> </td> <td>' % filename
+		links = []
+
+		# summary file
+		if os.path.exists('Documentation/Source/Summaries/%s.html' % filename):
+			links.append('<td> <a href="Summaries/%s.html">summary</a> </td>' % filename)
 		else:
-			return '<td> &nbsp; </td> <td>'
+			links.append('<td> &nbsp; </td>')
+
+		# source file
+		docFilename = 'Documentation/Source/Files/%s.html' % filename
+		if os.path.exists(docFilename):
+			links.append('<td> <a href="Files/%s.html">source</a> </td>' % filename)
+		else:
+			links.append('<td> &nbsp; </td>')
+
+		# finish up
+		links.append('<td>')
+		return string.join(links, '')
 
 
 def main(args):
@@ -176,4 +217,3 @@ def main(args):
 
 if __name__=='__main__':
 	main(sys.argv[1:])
-	
