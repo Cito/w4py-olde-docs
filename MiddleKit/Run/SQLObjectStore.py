@@ -40,8 +40,12 @@ class UnknownSerialNumInfo:
 	def updateStmt(self):
 		assert self.sourceObject.serialNum!=0
 		assert self.targetObject.serialNum()!=0
+		sourceKlass = self.sourceObject._mk_klass
+		assert sourceKlass
+		sourceTableName = sourceKlass.sqlTableName()
+		sourceSqlIdName = sourceKlass.sqlIdName()
 		return 'update %s set %s=%s where %s=%s;' % (
-			self.tableName, self.fieldName, self.targetObject.sqlObjRef(), self.sqlIdName, self.sourceObject.serialNum())
+			sourceTableName, self.fieldName, self.targetObject.sqlObjRef(), sourceSqlIdName, self.sourceObject.serialNum())
 
 	def __repr__(self):
 		s = []
@@ -667,10 +671,8 @@ class ObjRefAttr:
 			assert isinstance(value, MiddleObject)
 			if value.serialNum()==0:
 				info = UnknownSerialNumInfo()
-				info.tableName = self.klass().sqlTableName()
 				info.fieldName = self.sqlColumnName()
 				info.targetObject = value
-				info.sqlIdName = self.klass().sqlIdName()
 				raise UnknownSerialNumberError(info)
 			else:
 				value = value.sqlObjRef()
