@@ -62,8 +62,8 @@ class StringAttr:
 			return 'longtext'
 		if max>255:
 			return 'text'
-		if self.has_key('Min') and self['Min']==max:
-			return 'char(%s)' % max
+		if self.has_key('Min') and self['Min'] and int(self['Min'])==max:
+				return 'char(%s)' % max
 		else:
 			return 'varchar(%s)' % max
 
