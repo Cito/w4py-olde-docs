@@ -62,6 +62,7 @@ def test(modelFilename):
 	removeGenFiles(klasses)
 	Generate().main('Generate.py --db MySQL --model '+modelFilename)
 	importPyClasses(klasses)
+	return model
 
 
 if __name__=='__main__':
