@@ -4,7 +4,7 @@ Funcs.py
 Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else.
 '''
 
-import os, string, time
+import md5, os, random, string, time
 
 
 def commas(number):
@@ -90,6 +90,18 @@ def timestamp(numSecs=None):
 	condensed = '%4i%02i%02i%02i%02i%02i' % tuple
 	dashed    = '%4i-%02i-%02i-%02i-%02i-%02i' % tuple
 	return locals()
+
+
+def uniqueId(forObject=None):
+	'''
+	Generates an opaque, identifier string that is practically guaranteed to be unique.
+	If an object is passed, then its id() is incorporated into the generation.
+	Relies on md5 and returns a 32 character long string.
+	'''
+	r = [time.time(), random.random(), os.times()]
+	if forObject is not None:
+		r.append(id(forObject))
+	return md5.new(str(r)).hexdigest()
 
 
 ### Deprecated

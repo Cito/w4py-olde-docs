@@ -44,9 +44,24 @@ def TestHostName():
 		'host type = %s, host = %s' % (type(host), repr(host))
 
 
+def TestUniqueId():
+	lastResult = None
+	for x in range(5):
+		result = uniqueId()
+		assert type(result) is type('')
+		assert len(result)==32
+		assert result!=lastResult
+
+		result = uniqueId(TestUniqueId)
+		assert type(result) is type('')
+		assert len(result)==32
+		assert result!=lastResult
+
+
 def Test():
 	TestCommas()
 	TestHostName()
+	TestUniqueId()
 
 
 if __name__=='__main__':
