@@ -37,8 +37,8 @@ class Configurable:
 	configFilename() and selectively override settings. The format of
 	the file is a Python dictionary.
 
-	Subclasses can also override userConfig() and get the user
-	configuration settings from another source.
+	Subclasses can also override userConfig() in order to obtain the
+	user configuration settings from another source.
 	'''
 
 	## Init ##
