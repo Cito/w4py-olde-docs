@@ -224,7 +224,8 @@ def uniqueId(forObject=None):
 def valueForString(s):
 	"""
 	For a given string, returns the most appropriate Pythonic value
-	such as None, a long, an int, a list, etc.
+	such as None, a long, an int, a list, etc. If none of those
+	make sense, then returns the string as-is.
 
 	"None", "True" and "False" are case-insensitive because there is
 	already too much case sensitivity in computing, damn it!
