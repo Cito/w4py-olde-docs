@@ -64,8 +64,3 @@ class Attr(UserDict, ModelObject):
 		'''
 		model = self.klass().klasses()._model
 		return model.setting(name, default)
-
-	def __setitem__(self, key, value):
-		if key=='Name':
-			assert value!='attr', "Attributes cannot be named 'attr'. That is reserved since Run.MiddleObject has an important attr() method."
-		UserDict.__setitem__(self, key, value)

@@ -220,7 +220,7 @@ class MiddleObject(NamedValueAccess):
 
 	## Accessing attributes by name ##
 
-	def attr(self, attrName, default=NoDefault):
+	def valueForKey(self, attrName, default=NoDefault):
 		'''
 		Returns the value of the named attribute by invoking its "get"
 		accessor method. You can use this when you want a value whose
@@ -245,7 +245,7 @@ class MiddleObject(NamedValueAccess):
 		else:
 			return method()
 
-	def setAttr(self, attrName, value):
+	def setValueForKey(self, attrName, value):
 		'''
 		Sets the value of the named attribute by invoking its "set"
 		accessor method. You can use this when you want a value whose
@@ -266,11 +266,18 @@ class MiddleObject(NamedValueAccess):
 			raise NameError, attrName
 		return method(value)
 
-	# @@ 2001-04-29 ce: We should probably do this as well:
-	# valueForKey = attr
+	def valueForAttr(self, attr, default=NoDefault):
+		return self.valueForKey(attr['Name'], default)
+
+	def setValueForAttr(self, attr, value):
+		return self.setValueForKey(attr['Name'], value)
+
+	# @@ 2001-07-10 ce: the old names
+	#attr = valueForKey
+	#setAttr = setValueForKey
 
 	# @@ 2001-04-29 ce: This is for backwards compatibility only:
 	# We can take out after the post 0.5.x version (e.g., 0.6 or 1.0)
 	# or after 4 months, whichever comes later.
-	_get = attr
-	_set = setAttr
+	_get = valueForKey
+	_set = setValueForKey
