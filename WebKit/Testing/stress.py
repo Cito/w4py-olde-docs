@@ -56,26 +56,40 @@ def usage():
 	sys.exit(1)
 
 
-def request(name, dict, host, port, bufsize):
-	''' Performs a single AppServer request including sending the request and receiving the response. '''
+def request(names, dicts, host, port, count, delay=0, slowconn=0):
+	'''
+	Performs a single AppServer request including sending the request and receiving the response.
+	slowconn simulates a slowed connection from the client.
+	'''
+	complete = 0
+	filecount = len(names)
+	totalbytes = 0
+	while complete < count:
+		i = randint(0, filecount-1)
+		# Taken from CGIAdaptor:
+		s = socket(AF_INET, SOCK_STREAM)
+		s.connect((host, port))
+		data = dumps(dicts[i])
+		s.send(dumps(len(data)))
+		s.send(data)
+		if delay and slowconn:
+			sleep(delay)
+		s.shutdown(1)
+		data = ''
+		while 1:
+			newdata = s.recv(8192)
+			if not newdata:
+				break
+			else:
+				data = data+newdata
+			#sys.stdout.write(data)
+		# END
+		if delay:
+			sleep(delay)
+		complete = complete +1
+		totalbuytes = totalbytes+len(data)
 
-	# Update the time stamp to now
-	dict['time'] = time()
-
-	# Taken from CGIAdaptor:
-	s = socket(AF_INET, SOCK_STREAM)
-	s.connect(host, port)
-	s.send(dumps(dict))
-	s.shutdown(1)
-	while 1:
-		data = s.recv(bufsize)
-		if not data:
-			break
-		#sys.stdout.write(data)
-	# END
-
-
-def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0):
+def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0, slowconn=0):
 	''' Executes a stress test on the AppServer according to the arguments. '''
 
 	# Taken from CGIAdaptor:
@@ -108,32 +122,20 @@ def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0)
 	print 'delay               = %0.02f' % delay
 	print 'sequential          =', sequential
 	print 'Running...'
-	while count<maxRequests:
-		if sequential:
-			i = randint(0, requestCount-1)
-			filename = requestFilenames[i]
-			dict = requestDicts[i]
-			request(filename, dict, host, port, bufsize)
-			count = count + 1
-		else:
-			threads = []
-			numRequests = randint(minParallelRequests, maxParallelRequests)
-			for i in range(numRequests):
-				i = randint(0, requestCount-1)
-				filename = requestFilenames[i]
-				dict = requestDicts[i]
-				thread = Thread(target=request, args=(filename, dict, host, port, bufsize))
-				thread.start()
-				threads.append(thread)
-				count = count + 1
-				if count==maxRequests:
-					break
-			# Wait til all threads are finished
-			for thread in threads:
-				thread.join()
-			threads = None
-		if delay:
-			sleep(delay)
+
+
+	threads = []
+	for i in range(maxParallelRequests):
+		num = randint(minParallelRequests, maxParallelRequests)
+		num = maxRequests/num
+		thread = Thread(target=request, args=(requestFilenames, requestDicts, host, port, num, delay, slowconn))
+		thread.start()
+		threads.append(thread)
+		count = count + num
+	# Wait till all threads are finished
+	for thread in threads:
+		thread.join()
+	threads = None
 	duration = time()-startTime
 	print 'count                = %d' % count
 	print 'duration             = %0.2f' % duration
