@@ -18,8 +18,8 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <errno.h>
-#ifdef __APPLE__
 #include <netinet/in.h>
+#ifdef __APPLE__
 #include <nameser.h>
 #endif
 #include <resolv.h>
