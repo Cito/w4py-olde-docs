@@ -30,8 +30,7 @@ class CanFactory:
 			newdir = self._app.serverSidePath(newdir)
 		self._canDirs.append(newdir)
 		sys.path.append(newdir)
-		print "Help, I'm a HAAAACK! Find me in: ",  #jsl - fix before 0.5 release
-		print __file__
+		# @@ 2002-02-26 ce: fix up this sys.path stuff
 
 
 
@@ -43,8 +42,8 @@ class CanFactory:
 			res = imp.find_module(canName, self._canDirs)
 			mod = imp.load_module(canName, res[0], res[1], res[2])
 			klass = mod.__dict__[canName]
-			self._canClasses[canName]=klass				
-		
+			self._canClasses[canName]=klass
+
 		if len(args)==0 and len(kwargs)==0:
 			instance = klass()
 		elif len(args)==0:
@@ -54,4 +53,4 @@ class CanFactory:
 		else:
 			instance = apply(klass,args,kwargs)
 		return instance
-	
+
