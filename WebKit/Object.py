@@ -1,7 +1,7 @@
 import sys
 
 try:
-	import MiddleKit
+	import WebUtils
 except:
 	sys.path.append('..')
 	import WebUtils
