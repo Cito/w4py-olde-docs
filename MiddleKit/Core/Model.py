@@ -77,7 +77,7 @@ class Model(Configurable):
 		shouldDeletePickle = 0
 		shouldUseCache = self.setting('UsePickledClassesCache', 1)
 		if shouldUseCache:
-			picklePath = os.path.join(self._filename, 'Classes.pickle.cache')
+			picklePath = csvPath + '.pickle.cache'
 			if os.path.exists(picklePath):
 				if os.path.getmtime(picklePath)<os.path.getmtime(csvPath):
 					shouldDeletePickle = 1
