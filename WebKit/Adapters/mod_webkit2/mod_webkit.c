@@ -363,7 +363,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
                             APR_BLOCK_READ, HUGE_STRING_LEN);
        
         if (rv != APR_SUCCESS) {
-            return rv;
+            return 2;
         }
 
         APR_BRIGADE_FOREACH(bucket, bb) {
@@ -441,7 +441,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
       apr_table_unset(r->headers_in, "Content-Length");
       
       ap_internal_redirect_handler(location, r);
-      return OK;
+      return 0;
     }
     else if (location && r->status == 200) {
       /* XX Note that if a script wants to produce its own Redirect
@@ -449,7 +449,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
        */
       discard_script_output(bb);
       apr_brigade_destroy(bb);
-      return HTTP_MOVED_TEMPORARILY;
+      return 0;
     }
     
     ap_pass_brigade(r->output_filters, bb);
