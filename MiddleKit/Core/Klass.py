@@ -1,7 +1,7 @@
 from UserDict import UserDict
 from ModelObject import ModelObject
 from MiscUtils import NoDefault
-import types
+from MiddleKit import StringTypes
 from MiddleKit.Core.ListAttr import ListAttr
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 
@@ -54,7 +54,7 @@ class Klass(UserDict, ModelObject):
 		# fill in UserDict with the contents of this dict
 		for key, value in dict.items():
 			# @@ 2001-02-21 ce: should we always strip string fields? Probably.
-			if type(value) is types.StringType and value.strip()=='':
+			if isinstance(value, StringTypes) and value.strip()=='':
 				value = None
 			self[key] = value
 

@@ -54,7 +54,7 @@ class ModelObject:
 
 	def writePy(self, generator, out=sys.stdout):
 		""" Writes the Python code to define a table for the class. The target can be a file or a filename. """
-		if type(out) is StringType:
+		if isinstance(out, StringTypes):
 			out = open(out, 'w')
 			close = 1
 		else:
@@ -349,7 +349,7 @@ class StringAttr:
 		Attr.writePySetChecks.im_func(self, out)
 		out.write('''\
 		if value is not None:
-			if type(value) is not types.StringType:
+			if not isinstance(value, types.StringType):
 				raise TypeError, 'expecting string type, but got value %r of type %r instead' % (value, type(value))
 ''')
 
@@ -363,7 +363,7 @@ class EnumAttr:
 		Attr.writePySetChecks.im_func(self, out)
 		out.write('''\
 		if value is not None:
-			if type(value) is not types.StringType:
+			if not isinstance(value, types.StringType):
 				raise TypeError, 'expecting string type for enum, but got value %%r of type %%r instead' %% (value, type(value))
 			attr = self.klass().lookupAttr('%s')
 			if not attr.hasEnum(value):
@@ -392,7 +392,7 @@ class AnyDateTimeAttr:
 			out.write('''\
 		# no DateTime, use strings
 		if value is not None:
-			if type(value) is not types.StringType:
+			if isinstance(value, StringTypes):
 				raise TypeError, 'expecting string type, but got value %r of type %r instead' % (value, type(value))
 ''')
 

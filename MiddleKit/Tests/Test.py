@@ -39,23 +39,24 @@ class Test:
 				self._modelName += '.mkmodel'
 			didFail = 0
 			try:
-				self.testDesign()
-				self.testEmpty()
-				self.insertSamples()
-				self.testSamples()
-				rmdir(workDir)
-				print '\n'
+				if self.canRun():
+					self.testDesign()
+					self.testEmpty()
+					self.insertSamples()
+					self.testSamples()
+					rmdir(workDir)
+					print '\n'
+				else:
+					didFail = '       skipped'
 			except RunError:
-				didFail = 1
+				didFail = '*** FAILED ***'
 			results.append((self._modelName, didFail))
 
 		# summarize the results of each test
 		print 'RESULTS'
 		print '-------'
-		for name, didFail in results:
-			if didFail:
-				outcome = '*** FAILED ***'
-			else:
+		for name, outcome in results:
+			if not outcome:
 				outcome = '     succeeded'
 			print outcome, name
 
@@ -74,7 +75,19 @@ class Test:
 				MKList MKObjRef MKObjRefReuse MKDelete MKDeleteMark
 				MKMultipleStores MKMultipleThreads
 				MKModelInh1 MKModelInh2 MKModelInh3
+				MKExcel
 			'''.split()
+
+	def canRun(self):
+		path = os.path.join(self._modelName, 'CanRun.py')
+		if os.path.exists(path):
+			file = open(path)
+			names = {}
+			exec file in names
+			assert names.has_key('CanRun'), 'expecting a CanRun() function'
+			return names['CanRun']()
+		else:
+			return 1
 
 	def testEmpty(self):
 		"""

@@ -1,8 +1,8 @@
 from CodeGenerator import *
 import os, sys
 from glob import glob
-from types import StringType
 from time import asctime, localtime, time
+from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import objRefJoin
 from MiscUtils import CSVParser
 import string
@@ -11,10 +11,10 @@ class SampleError:
 	def __init__(self,line,error):
 		self._line = line
 		self._error = error
-	
+
 	def output(self,filename):
 		print '%s:%d: %s' % ( filename, self._line, self._error )
-		
+
 
 class SQLGenerator(CodeGenerator):
 	"""
@@ -189,11 +189,11 @@ class Model:
 				else:
 					value = attr.sampleValue(value)
 #					print 'Attr: %s, Value: %s' % (attr,value)
-				if type(value) is not StringType:
+				if not isinstance(value, StringTypes):
 					print 'attr:', attr
 					print 'value:', value
 					print 'type of value:', type(value)
-					assert type(value) is StringType
+					assert isinstance(value, StringTypes)
 				assert value  # value cannot be blank
 				values[i] = value
 				i += 1
@@ -232,7 +232,7 @@ class Klasses:
 
 	def writeCreateSQL(self, generator, out):
 		""" Writes the SQL to define the tables for a set of classes. The target can be a file or a filename. """
-		if type(out) is StringType:
+		if isinstance(out, StringTypes):
 			out = open(out, 'w')
 			close = 1
 		else:
@@ -325,7 +325,7 @@ create table _MKClassIds (
 		values = []
 		for klass in self._model._allKlassesInOrder:
 			wr('insert into _MKClassIds (id, name) values ')
-			wr('\t(%s, %r);\n' % (klass.id(), klass.name()))
+			wr("\t(%s, '%s');\n" % (klass.id(), klass.name()))
 		wr('\n')
 
 
@@ -587,7 +587,7 @@ class StringAttr:
 			if 1:
 				# add spaces before and after, to prevent
 				# syntax error if value begins or ends with "
-				value = eval('""" '+str(value)+' """')  
+				value = eval('""" '+str(value)+' """')
 				value = repr(value[1:-1])	# trim off the spaces
 				value = value.replace('\\011', '\\t')
 				value = value.replace('\\012', '\\n')
@@ -646,7 +646,7 @@ class ListAttr:
 
 class PrimaryKey:
 	'''
-	This class is not a 'standard' attribute, but just a helper class for the 
+	This class is not a 'standard' attribute, but just a helper class for the
 	writeInsertSamplesSQLForLines method, in case the samples.csv file contains
 	a primary key column (i.e. the serial numbers are specified explicitly).
 	'''

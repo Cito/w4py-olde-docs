@@ -2,7 +2,7 @@
 
 __version__ = '0.2'
 
-__all__ = ['Core', 'Design', 'Run']
+__all__ = ['Core', 'Design', 'Run', 'StringTypes']
 
 import os
 
@@ -17,3 +17,9 @@ def InstallInWebKit(appServer):
 		app.addContext('MKBrowser', path)
 	else:
 		print 'WARNING: Cannot locate %s.' % path
+
+
+try:
+	from types import StringTypes
+except ImportError:
+	from types import StringType as StringTypes

@@ -1,5 +1,5 @@
 import sys, time
-from types import InstanceType, LongType, StringType
+from types import InstanceType, LongType
 
 from MiscUtils import NoDefault, AbstractError
 from MiscUtils import Funcs as funcs
@@ -10,6 +10,7 @@ from ObjectKey import ObjectKey
 from MiscUtils.MixIn import MixIn
 from MiscUtils.DBPool import DBPool
 from MiscUtils import CSVJoiner
+from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
 
 class SQLObjectStoreError(Exception): pass
@@ -500,7 +501,7 @@ class SQLObjectStore(ObjectStore):
 				fields = []
 				fields.append( str(obj.serialNum()))
 				for attr in attrs:
-					# jdh 2003-03-07: if the attribute is a dangling object reference, the value 
+					# jdh 2003-03-07: if the attribute is a dangling object reference, the value
 					# will be None.  This means that dangling references will _not_ be remembered
 					# across dump/generate/create/insert procedures.
 					method = getattr( obj, attr.pyGetName() )
@@ -746,6 +747,6 @@ class DateAttr:
 				print '>> type of value =', type(value)
 				print '>> value = %r' % value
 				print
-			if type(value) is not StringType:
+			if not isinstance(value, StringTypes):
 				value = str(value).split()[0]
 			return "'%s'" % value

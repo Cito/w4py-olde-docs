@@ -2,8 +2,8 @@ from MiscUtils.NamedValueAccess import NamedValueAccess
 from MiscUtils import NoDefault
 import ObjectStore
 import sys, types
+from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
-from types import StringType
 
 
 class MiddleObject(NamedValueAccess):
@@ -83,7 +83,7 @@ class MiddleObject(NamedValueAccess):
 		for i in xrange(len(cache)):
 			value = row[i+1]
 			setter = cache[i]
-			if isinstance(setter, StringType):
+			if isinstance(setter, StringTypes):
 				dict['_'+setter] = value
 			else:
 				# a method

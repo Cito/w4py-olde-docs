@@ -8,6 +8,7 @@ Generate.py
 
 import os, string, sys, types
 from getopt import getopt
+from MiddleKit import StringTypes
 
 
 def FixPathForMiddleKit(verbose=0):
@@ -135,11 +136,11 @@ class Generate:
 
 	def generate(self, pyClass, model, outdir):
 		""" Generates code using the given class, model and output directory. The pyClass may be a string, in which case a module of the same name is imported and the class extracted from that. The model may be a string, in which case it is considered a filename of a model. """
-		if type(pyClass) is types.StringType:
+		if isinstance(pyClass, StringTypes):
 			module = __import__(pyClass, globals())
 			pyClass = getattr(module, pyClass)
 		generator = pyClass()
-		if type(model) is types.StringType:
+		if isinstance(model, StringTypes):
 			generator.readModelFileNamed(model, havePythonClasses=0)
 		else:
 			generator.setModel(model)

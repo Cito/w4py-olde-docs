@@ -14,7 +14,7 @@ class ModelError(Exception):
 
 	def setLine(self, line):
 		self._line = line
-	
+
 	def printError(self,filename):
 		if self._line:
 			print '%s:%d: %s' % ( filename, self._line, self._error )
@@ -86,8 +86,14 @@ class Model(Configurable):
 		Reads the Classes.csv file, or the Classes.pickle.cache file as
 		appropriate.
 		"""
+		path = None
 		csvPath = os.path.join(self._filename, 'Classes.csv')
-		if not os.path.exists(csvPath):
+		if os.path.exists(csvPath):
+			path = csvPath
+		xlPath = os.path.join(self._filename, 'Classes.xls')
+		if os.path.exists(xlPath):
+			path = xlPath
+		if path is None:
 			open(csvPath) # to get a properly constructed IOError
 
 		# read the pickled version of Classes if possible
@@ -95,13 +101,13 @@ class Model(Configurable):
 		shouldUseCache = self.setting('UsePickledClassesCache', 1)
 		if shouldUseCache:
 			from MiscUtils.PickleCache import readPickleCache, writePickleCache
-			data = readPickleCache(csvPath, pickleVersion=1, source='MiddleKit')
+			data = readPickleCache(path, pickleVersion=1, source='MiddleKit')
 
 		# read the regular file if necessary
 		if data is None:
-			self.klasses().read(csvPath)
+			self.klasses().read(path)
 			if shouldUseCache:
-				writePickleCache(self._klasses, csvPath, pickleVersion=1, source='MiddleKit')
+				writePickleCache(self._klasses, path, pickleVersion=1, source='MiddleKit')
 		else:
 			self._klasses = data
 			self._klasses._model = self

@@ -1,8 +1,8 @@
 from ModelObject import ModelObject
 from UserDict import UserDict
-import types
 from MiscUtils import NoDefault
 import re
+from MiddleKit import StringTypes
 
 nameRE = re.compile(r'^([A-Za-z_][A-Za-z_0-9]*)$')
 
@@ -18,7 +18,7 @@ class Attr(UserDict, ModelObject):
 			if key=='Attribute':
 				key = 'Name'
 			# @@ 2001-02-21 ce: should we always strip string fields? Probably.
-			if type(value) is types.StringType and value.strip()=='':
+			if isinstance(value, StringTypes) and value.strip()=='':
 				value = None
 			self[key] = value
 		match = nameRE.match(self['Name'])
@@ -34,7 +34,7 @@ class Attr(UserDict, ModelObject):
 			req = 0
 		else:
 			req = self['isRequired']
-			if type(req) is types.StringType:
+			if isinstance(req, StringTypes):
 				req = req.lower()
 			if req in ['', None, 0, '0', 'false']:
 				req = 0

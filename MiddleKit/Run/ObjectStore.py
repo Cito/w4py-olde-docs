@@ -3,6 +3,7 @@ from types import ClassType, StringType
 from MiscUtils import NoDefault
 from MiscUtils.Funcs import safeDescription
 from ObjectKey import ObjectKey
+from MiddleKit import StringTypes
 from MiddleKit.Core.ModelUser import ModelUser
 from MiddleKit.Core.Klass import Klass as BaseKlass
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
@@ -419,7 +420,7 @@ class ObjectStore(ModelUser):
 		if not isinstance(aClass, BaseKlass):
 			if type(aClass) is ClassType:
 				aClass = self._model.klass(aClass.__name__)
-			elif type(aClass) is StringType:
+			elif isinstance(aClass, StringTypes):
 				aClass = self._model.klass(aClass)
 			else:
 				raise ValueError, 'Invalid class parameter. Pass a Klass, a name or a Python class. Type of aClass is %s. aClass is %s.' % (type(aClass), aClass)
