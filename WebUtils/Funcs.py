@@ -82,8 +82,8 @@ def requestURI(dict):
 	uri = dict.get('REQUEST_URI', None)
 	if uri==None:
 		uri = dict.get('SCRIPT_NAME', '') + dict.get('PATH_INFO', '')
-		query = dict.get('QUERY_STRING', None)
-		if query!=None:
+		query = dict.get('QUERY_STRING', '')
+		if query!='':
 			uri = uri + '?' + query
 	return uri
 
