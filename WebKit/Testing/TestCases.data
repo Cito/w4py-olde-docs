@@ -1,0 +1,33 @@
+# TestCases.data
+
+# This file is used by Testing/Main.py
+# Each line describes a test case.
+# Lines that are blank or begin with '#' are ignored.
+
+
+                       --> display Examples/Welcome
+/                      --> "
+/Welcome               --> "
+/Welcome/              --> "
+/Examples/Welcome      --> "
+/Examples/Welcome/     --> Error: 404 Not found
+/Examples              --> "
+/Examples/             --> "
+/Admin                 --> Show admin pages
+/Admin/                --> "
+/Testing/Dir/File.html --> display the file
+
+/Testing/EmbeddedServlet/Extra/Path/Info  --> *** not yet supported ***
+/Testing/EmbeddedServlet/Extra/Path/Info/ --> "
+
+/Testing/Dir \
+/Testing/Dir/File.html --> display
+
+/BadURL --> 404 Not Found
+/BadURL/ --> "
+/Examples/BadURL --> "
+/Examples/BadURL/ --> "
+
+/Examples \
+/Examples/Welcome \
+/Examples/Welcome     --> shows the Welcome page each time
