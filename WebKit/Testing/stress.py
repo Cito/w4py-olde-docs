@@ -28,6 +28,9 @@ stress() function.
 To capture additional '.rr' files, which contain raw request
 dictionaries, make use of the CGIAdaptor and uncomment the lines therein
 that save the raw requests.
+
+Caveat: HTTP cookies are blown away from the raw requests. Mostly due to
+the fact that they will contain stale session ids.
 '''
 
 
@@ -84,6 +87,8 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
 				data = data+newdata
 			#sys.stdout.write(data)
 		# END
+		if string.count(data, 'Session Expired'):
+			raise Exception, 'Session expired.'
 		if delay:
 			sleep(delay)
 		complete = complete +1
@@ -103,6 +108,12 @@ def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0,
 	# Get the requests from .rr files which are expected to contain raw request dictionaries
 	requestFilenames = glob('*.rr')
 	requestDicts = map(lambda filename: eval(open(filename).read()), requestFilenames)
+	# Kill the HTTP cookies, which typically have an invalid session id
+	# from when the raw requests were captured.
+	for dict in requestDicts:
+		environ = dict['environ']
+		if environ.has_key('HTTP_COOKIE'):
+			del environ['HTTP_COOKIE']
 	requestCount = len(requestFilenames)
 	count = 0
 
