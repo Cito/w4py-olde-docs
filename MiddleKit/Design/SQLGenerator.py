@@ -330,7 +330,7 @@ create table _MKClassIds (
 		klasses.reverse()
 		for klass in klasses:
 			if not klass.isAbstract():
-				wr('delete from %s;\n' % klass.name())
+				wr('delete from %s;\n' % klass.sqlTableName()) # dr 7-12-02: changed from klass.name()
 		wr('\n')
 
 
@@ -342,7 +342,7 @@ class Klass:
 			name = self.name()
 			wr = out.write
 			sqlIdName = self.sqlIdName()
-			wr('create table %s (\n' % name)
+			wr('create table %s (\n' % self.sqlTableName())
 			wr(self.primaryKeySQLDef(generator))
 			if generator.model().setting('DeleteBehavior', 'delete') == 'mark':
 				wr(self.deletedSQLDef(generator))
@@ -395,6 +395,15 @@ class Klass:
 				wr('\tindex (%s)' % attr.sqlName())
 		wr('\n')
 
+
+	def sqlTableName(self):
+		"""
+		Can be overiddent to allow for table names that do not conflict with SQL
+		reserved words. dr 08-08-2002 - MSSQL uses [tablename]
+		"""
+		return '%s' % self.name()
+
+
 class Attr:
 
 	def sqlName(self):
@@ -420,7 +429,7 @@ class Attr:
 			if self.isRequired():
 				notNullSQL = ' not null'
 			else:
-				notNullSQL = ''
+				notNullSQL = self.sqlNullSpec()
 			if generator.sqlSupportsDefaultValues():
 				defaultSQL = self.createDefaultSQL()
 				if defaultSQL:
@@ -430,6 +439,9 @@ class Attr:
 			out.write('\t%s %s%s%s' % (name, self.sqlType(), notNullSQL, defaultSQL))
 		else:
 			out.write('\t/* %(Name)s %(Type)s - not a SQL column */' % self)
+
+	def sqlNullSpec(self):
+		return ''
 
 	def createDefaultSQL(self):
 		default = self.get('Default', None)
@@ -446,6 +458,12 @@ class Attr:
 
 	def sqlType(self):
 		raise SubclassResponsibilityError
+
+	def sqlColumnName(self):
+		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
+		if not self._sqlColumnName:
+			self._sqlColumnName = self.name() # + self.sqlTypeSuffix()
+		return self._sqlColumnName
 
 
 class BoolAttr:
