@@ -120,44 +120,83 @@ This would be placed in ``MyServlet.py``.  Webware will create a pool of ``MySer
   
 You only have to override the portions that you want to.  It is not uncommon to only override the ``writeContent()`` method in a servlet, for instance.
 
+You'll notice a file ``context/Main.py`` in your working directory.  You can look at it to get a feel for what a servlet might look like.  (As an aside, a servlet called ``Main`` or ``index`` will be used analogous to the ``index.html`` file).  You can look at it for a place to start experimenting, but here we'll work on developing an entire (small) application, introducing the other concepts as we go along.
 
+A Photo Album
+=============
 
-Each servlet is a class itself.  Behind the scenes Webware creates a pool of servlet instances for each servlet, and then reuses those servlets.  
+If you look online, you'll see a huge number of web applications available for an online photo album.  The world needs one more!
 
+You will need the Python Imaging Library (@@ ib: link) installed for this example.  First we'll use it to find the sizes of the images, and later we will use it to create thumbnails.
 
+We'll develop the application in iterations -- the iterations are numbered in ``WebKit/Examples/PhotoAlbum/VersionX``.  
 
+Iteration 1: Displaying Files
+-----------------------------
 
-You will notice a servlet in your new context named ``Main.py``.  The Main (or index) servlet is like the ``index.html`` file -- it is used if no servlet name is given.  Here's the contents of that file::
+For the first iteration, we'll display files that you upload by hand.  We do this with two servlets -- one to show the entire album, and another for individual pictures.  First, the entire album::
 
     from WebKit.Page import Page
-
+    import os
+    import Image
+    dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "pics")
+    
     class Main(Page):
-
+    
         def title(self):
-            return 'My Sample Context'
+            # It's nice to give a real title, otherwise "Main" would
+            # be used.
+            return 'Photo Album'
 
         def writeContent(self):
-		    self.writeln('<h1>Welcome to Webware!</h1>')
-            self.writeln('''
-            This is a sample context generated for you and has purposly been
-            kept very simple to give you something to play with to get yourself
-            started.  The code that implements this page is located in
-            <b>%s</b>.
-            ''' % self.request().serverSidePath())
+            # We'll format these simpy, one thumbnail per line.
+            for filename in os.listdir(dir):
+                filename = os.path.join(dir, filename)
+                im = Image.open(filename)
+                x, y = im.size
+                # Here we figure out the scaled-down size of the image,
+                # so that we preserve the aspect ratio.  We'll use fake
+                # thumbnails, where the image is scaled down by the browser.
+                x = int(x * (100.0 / y))
+                y = 100
+                # note that we are just using % substitution to generate
+                # the HTML.  There's other ways, but this works well enough.
+                # We're linking to the View servlet which we'll show later.
+                # Notice we use urlEncode -- otherwise we'll encounter bugs
+                # if there's a file with an embedded space or other character
+                # in it.
+                self.write('<p><a href="View?filename=%s">'
+                           % self.urlEncode(filename))
+                self.write('<img src="../pics/%s" width="%i" height="%i">'
+                           % (self.urlEncode(filename), x, y))
+                self.write('</a></p>\n')
 
-            self.writeln('''
-            <p>
-            There are more examples and documentaion in the Webware
-            distribution, which you can get to from here:<p><ul>
-            ''')
+The servlet ``View`` takes one URL parameter of ``filename`` -- you can get the value of a URL parameter like ``self.field('filename')`` -- or, if you want a default value, you can use ``self.field('filename', defaultValue)``.  The ``field`` method is also in the ``HTTPRequest`` class, so you'll often see people do something like::
 
-            adapterName = self.request().adapterName()
-            ctxs = self.application().contexts().keys()
-            ctxs = filter(lambda ctx: ctx!='default', ctxs)
-            ctxs.sort()
-            for ctx in ctxs:
-                self.writeln('<li><a href="%s/%s/">%s</a>' 
-                             % (adapterName, ctx, ctx))
+    req = self.request()
+    self.write(req.field('username'))
 
-            self.writeln('</ul>')
+The ``Page`` class just provides a shortcut.  The individual images are viewed with this servlet::
 
+    from WebKit.Page import Page
+    import os
+    import Image
+    dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "pics")
+    
+    class View(Page):
+    
+        def title(self):
+            return 'View: %s' % self.htmlEncode(self.field('filename'))
+            
+        def writeContent(self):
+            filename = self.field('filename')
+            im = Image.open(os.path.join(dir, filename))
+            self.write('<center>')
+            self.write('<img src="../pics/%s" width="%i" height="%i">'
+                       % (self.urlEncode(filename), im.size[0], im.size[1]))
+            self.write('<br>\n')
+            self.write(filename)
+            self.write('<p>\n')
+            self.write('<a href="./">Return to Index</a>')
+            self.write('</center>')
+            

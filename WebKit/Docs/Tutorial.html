@@ -23,6 +23,10 @@
 </li>
 <li><a class="reference" href="#creating-and-understanding-the-servlet" id="id6" name="id6">Creating and Understanding the Servlet</a></li>
 <li><a class="reference" href="#a-brief-introduction-to-the-servlet" id="id7" name="id7">A Brief Introduction to the Servlet</a></li>
+<li><a class="reference" href="#a-photo-album" id="id8" name="id8">A Photo Album</a><ul>
+<li><a class="reference" href="#iteration-1-displaying-files" id="id9" name="id9">Iteration 1: Displaying Files</a></li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section" id="synopsis">
@@ -122,41 +126,82 @@ Often it's empty.</li>
 after the transaction is complete -- the servlet won't get reused any earlier.</li>
 </ul>
 <p>You only have to override the portions that you want to.  It is not uncommon to only override the <tt class="literal"><span class="pre">writeContent()</span></tt> method in a servlet, for instance.</p>
-<p>Each servlet is a class itself.  Behind the scenes Webware creates a pool of servlet instances for each servlet, and then reuses those servlets.</p>
-<p>You will notice a servlet in your new context named <tt class="literal"><span class="pre">Main.py</span></tt>.  The Main (or index) servlet is like the <tt class="literal"><span class="pre">index.html</span></tt> file -- it is used if no servlet name is given.  Here's the contents of that file:</p>
+<p>You'll notice a file <tt class="literal"><span class="pre">context/Main.py</span></tt> in your working directory.  You can look at it to get a feel for what a servlet might look like.  (As an aside, a servlet called <tt class="literal"><span class="pre">Main</span></tt> or <tt class="literal"><span class="pre">index</span></tt> will be used analogous to the <tt class="literal"><span class="pre">index.html</span></tt> file).  You can look at it for a place to start experimenting, but here we'll work on developing an entire (small) application, introducing the other concepts as we go along.</p>
+</div>
+<div class="section" id="a-photo-album">
+<h1><a class="toc-backref" href="#id8" name="a-photo-album">A Photo Album</a></h1>
+<p>If you look online, you'll see a huge number of web applications available for an online photo album.  The world needs one more!</p>
+<p>You will need the Python Imaging Library (&#64;&#64; ib: link) installed for this example.  First we'll use it to find the sizes of the images, and later we will use it to create thumbnails.</p>
+<p>We'll develop the application in iterations -- the iterations are numbered in <tt class="literal"><span class="pre">WebKit/Examples/PhotoAlbum/VersionX</span></tt>.</p>
+<div class="section" id="iteration-1-displaying-files">
+<h2><a class="toc-backref" href="#id9" name="iteration-1-displaying-files">Iteration 1: Displaying Files</a></h2>
+<p>For the first iteration, we'll display files that you upload by hand.  We do this with two servlets -- one to show the entire album, and another for individual pictures.  First, the entire album:</p>
 <pre class="literal-block">
 from WebKit.Page import Page
+import os
+import Image
+dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), &quot;pics&quot;)
 
 class Main(Page):
 
     def title(self):
-        return 'My Sample Context'
+        # It's nice to give a real title, otherwise &quot;Main&quot; would
+        # be used.
+        return 'Photo Album'
 
     def writeContent(self):
-                self.writeln('&lt;h1&gt;Welcome to Webware!&lt;/h1&gt;')
-        self.writeln('''
-        This is a sample context generated for you and has purposly been
-        kept very simple to give you something to play with to get yourself
-        started.  The code that implements this page is located in
-        &lt;b&gt;%s&lt;/b&gt;.
-        ''' % self.request().serverSidePath())
-
-        self.writeln('''
-        &lt;p&gt;
-        There are more examples and documentaion in the Webware
-        distribution, which you can get to from here:&lt;p&gt;&lt;ul&gt;
-        ''')
-
-        adapterName = self.request().adapterName()
-        ctxs = self.application().contexts().keys()
-        ctxs = filter(lambda ctx: ctx!='default', ctxs)
-        ctxs.sort()
-        for ctx in ctxs:
-            self.writeln('&lt;li&gt;&lt;a href=&quot;%s/%s/&quot;&gt;%s&lt;/a&gt;' 
-                         % (adapterName, ctx, ctx))
-
-        self.writeln('&lt;/ul&gt;')
+        # We'll format these simpy, one thumbnail per line.
+        for filename in os.listdir(dir):
+            filename = os.path.join(dir, filename)
+            im = Image.open(filename)
+            x, y = im.size
+            # Here we figure out the scaled-down size of the image,
+            # so that we preserve the aspect ratio.  We'll use fake
+            # thumbnails, where the image is scaled down by the browser.
+            x = int(x * (100.0 / y))
+            y = 100
+            # note that we are just using % substitution to generate
+            # the HTML.  There's other ways, but this works well enough.
+            # We're linking to the View servlet which we'll show later.
+            # Notice we use urlEncode -- otherwise we'll encounter bugs
+            # if there's a file with an embedded space or other character
+            # in it.
+            self.write('&lt;p&gt;&lt;a href=&quot;View?filename=%s&quot;&gt;'
+                       % self.urlEncode(filename))
+            self.write('&lt;img src=&quot;../pics/%s&quot; width=&quot;%i&quot; height=&quot;%i&quot;&gt;'
+                       % (self.urlEncode(filename), x, y))
+            self.write('&lt;/a&gt;&lt;/p&gt;\n')
 </pre>
+<p>The servlet <tt class="literal"><span class="pre">View</span></tt> takes one URL parameter of <tt class="literal"><span class="pre">filename</span></tt> -- you can get the value of a URL parameter like <tt class="literal"><span class="pre">self.field('filename')</span></tt> -- or, if you want a default value, you can use <tt class="literal"><span class="pre">self.field('filename',</span> <span class="pre">defaultValue)</span></tt>.  The <tt class="literal"><span class="pre">field</span></tt> method is also in the <tt class="literal"><span class="pre">HTTPRequest</span></tt> class, so you'll often see people do something like:</p>
+<pre class="literal-block">
+req = self.request()
+self.write(req.field('username'))
+</pre>
+<p>The <tt class="literal"><span class="pre">Page</span></tt> class just provides a shortcut.  The individual images are viewed with this servlet:</p>
+<pre class="literal-block">
+from WebKit.Page import Page
+import os
+import Image
+dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), &quot;pics&quot;)
+
+class View(Page):
+
+    def title(self):
+        return 'View: %s' % self.htmlEncode(self.field('filename'))
+        
+    def writeContent(self):
+        filename = self.field('filename')
+        im = Image.open(os.path.join(dir, filename))
+        self.write('&lt;center&gt;')
+        self.write('&lt;img src=&quot;../pics/%s&quot; width=&quot;%i&quot; height=&quot;%i&quot;&gt;'
+                   % (self.urlEncode(filename), im.size[0], im.size[1]))
+        self.write('&lt;br&gt;\n')
+        self.write(filename)
+        self.write('&lt;p&gt;\n')
+        self.write('&lt;a href=&quot;./&quot;&gt;Return to Index&lt;/a&gt;')
+        self.write('&lt;/center&gt;')
+</pre>
+</div>
 </div>
 </div>
 </body>
