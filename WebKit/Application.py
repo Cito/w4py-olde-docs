@@ -11,6 +11,7 @@ from types import FloatType
 from glob import glob
 import Queue
 from threading import Lock
+from CanContainer import *
 
 
 try:
@@ -45,7 +46,7 @@ if not KeyValueAccess in UserDict.__bases__:
 	setattr(UserDict, 'valueForKey', _UserDict_valueForKey)
 
 	
-class ApplicationError(Exception):
+class ApplicationError(Exception,CanContainer):
 	pass
 	
 		
@@ -136,6 +137,11 @@ class Application(Configurable):
 			self.printConfig()
 
 		print 'Current directory is', os.getcwd()
+
+		#JSL
+		import CanFactory
+		self._canFactory = CanFactory.CanFactory(self,os.path.join(os.getcwd(),'Cans'))
+		#JSL
 
 		
 	## Config ##

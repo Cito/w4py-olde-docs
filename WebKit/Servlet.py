@@ -61,3 +61,23 @@ class Servlet(Object):
 	def canBeReused(self):
 		''' Returns 0 or 1 to indicate if a single servlet instance can be reused. The default is 1, but subclasses con override to return 0. Keep in mind that performance may seriously be degraded if instances can't be reused. Also, there's no known good reasons not to reuse and instance. Remember the awake() and sleep() methods are invoked for every transaction. But just in case, your servlet can refuse to be reused. '''
 		return 1
+
+	def getCan(self, ID, klass, storage,trans,*args, **kargs):
+		""" Gets a Can, but requires that the transaction be passed in."""
+		storage = string.lower(storage)
+		if storage=="session":
+			container=trans.session()
+		elif storage=="request":
+			container=trans.request()
+		elif storage=="application":
+			container=trans.application()
+		else:
+			print storage
+			raise "Invalid Storage Parameter",storage
+
+		instance = container.getCan(ID)
+		if instance == None:
+			instance = apply(trans.application()._canFactory.createCan,(klass,)+args,kargs)
+			container.setCan(ID,instance)
+		return instance
+

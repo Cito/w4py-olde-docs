@@ -1,7 +1,8 @@
 from Common import *
+from CanContainer import *
 
 
-class Message(Object):
+class Message(Object,CanContainer):
 	'''
 	Message is the abstract, parent class for both Request and Response, and implements the behavior that is generic to both.
 

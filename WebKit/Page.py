@@ -160,3 +160,23 @@ class Page(HTTPServlet):
 			for action in self.actions():
 				self._actionDict[action] = 1
 		return self._actionDict
+
+	def getCan(self, ID, klass, storage,*args, **kargs):
+		"""Gets a Can"""
+		storage = string.lower(storage)
+		if storage=="session":
+			container=self._transaction.session()
+		elif storage=="request":
+			container=self._transaction.request()
+		elif storage=="application":
+			container=self._transaction.application()
+		else:
+			print storage
+			raise "Invalid Storage Parameter",storage
+
+		instance = container.getCan(ID)
+		if instance == None:
+			instance = apply(self._transaction.application()._canFactory.createCan,(klass,)+args,kargs)
+			container.setCan(ID,instance)
+		return instance
+

@@ -84,6 +84,18 @@ else:
 %> 
 --%>
 
+<p>Here is a list of the pages you have been to that are tracking compatible:<br>
+
+<% locationCan = self.getCan("locationCan","LocationCan","session")
+locationCan.addLocation(req.pathInfo())
+for i in locationCan.locationList():%>
+<p><b><%= i %></b>
+<% end %>
+
+<p>There's actually only one other page that is tracking compatible, <a href="TrackingExample.psp"> this one </a>
+
+
+
 </BODY>
 </HTML>
 
