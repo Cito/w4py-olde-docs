@@ -141,6 +141,7 @@ class HTTPRequest(Request):
 		return self._fields
 
 
+
 	## Cookies ##
 
 	def cookie(self, name, default=Tombstone):
@@ -156,6 +157,15 @@ class HTTPRequest(Request):
 	def cookies(self):
 		''' Returns a dictionary-style object of all Cookie objects the client sent with this request. '''
 		return self._cookies
+
+
+    ## Variables passed by server ##
+	def serverDictionary(self):
+		"""
+		Returns a dictionary with the data the web server gave us, like HTTP_HOST or
+		HTTP_USER_AGENT.
+		"""
+		return self._environ
 
 
 	## Sessions ##
