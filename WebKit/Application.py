@@ -840,18 +840,25 @@ class Application(ConfigurableForServerSidePath, Object):
 		if self._contexts.has_key(name):
 			print 'WARNING: Overwriting context %s (=%s) with %s' % (
 				repr(name), repr(self._contexts[name]), repr(dir))
-		__init__fileFound = 0
+			__contextInitialized = 1 # Assume already initialized.
+		else:
+			__contextInitialized = 0
+			
 		try:
 			importAsName = name
 			localdir, pkgname = os.path.split(dir)
-			if not sys.modules.has_key(importAsName):
+			if sys.modules.has_key(importAsName):
+				mod = sys.modules.get(importAsName)
+			else:
 				res = imp.find_module(pkgname, [localdir])
 				mod = imp.load_module(name, res[0], res[1], res[2])
-				__init__fileFound = 1
-		except ImportError:
-			pass
-		
-		if __init__fileFound and mod.__dict__.has_key('contextInitialize'):
+				__contextInitialized = 0  # overwriting context - re-initialize
+				
+		except ImportError,e:
+			print "Error loading context: %s: %s: dir=%s" % (name, e, dir)
+			return
+
+		if not __contextInitialized and mod.__dict__.has_key('contextInitialize'):
 			result = mod.__dict__['contextInitialize'](self,
 								   os.path.normpath(os.path.join(os.getcwd(),dir)))
 			if result != None and result.has_key('ContentLocation'):
