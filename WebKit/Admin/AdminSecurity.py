@@ -41,14 +41,14 @@ else:
 				password = request.field('password')
 				if self.isValidUserAndPassword(username, password) and request.field('loginid', 'nologin')==loginid:
 					# Success; log them in and send the page
-					session.setValue('authenticated_user', username)
+					session.setValue('authenticated_user_admin', username)
 					AdminPage.writeHTML(self)
 				else:
 					# Failed login attempt; have them try again
 					request.fields()['extra'] = 'Login failed.  Please try again.'
 					app.forwardRequestFast(trans, 'LoginPage')
 			# They aren't logging in; are they already logged in?
-			elif session.value('authenticated_user', None):
+			elif session.value('authenticated_user_admin', None):
 				# They are already logged in; write the HTML for this page.
 				AdminPage.writeHTML(self)
 			else:

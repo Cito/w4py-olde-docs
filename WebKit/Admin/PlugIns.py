@@ -1,7 +1,7 @@
-from AdminPage import AdminPage
+from AdminSecurity import AdminSecurity
 
 
-class PlugIns(AdminPage):
+class PlugIns(AdminSecurity):
 
 	def writeContent(self):
 		# @@ 2000-06-02 ce: We should allow a custom admin link for each plug-in (if it provides one)

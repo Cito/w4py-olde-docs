@@ -1,7 +1,7 @@
-from AdminPage import *
+from AdminSecurity import *
 from WebUtils import Funcs
 
-class Config(AdminPage):
+class Config(AdminSecurity):
 
 	def title(self):
 		return 'Config'

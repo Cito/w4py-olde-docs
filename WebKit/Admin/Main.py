@@ -1,9 +1,9 @@
 from time import time, localtime, gmtime, asctime
-from AdminPage import AdminPage
+from AdminSecurity import AdminSecurity
 import os
 
 
-class Main(AdminPage):
+class Main(AdminSecurity):
 
 	def title(self):
 		return 'Admin'

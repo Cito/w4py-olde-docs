@@ -15,7 +15,7 @@ class LoginPage(AdminPage):
 
 		self.write('''
 		<tr>
-			<td align="left">Please log in:</td>
+			<td align="left">Please log in to view Administration Pages.  The username is admin.  The password is set in the WebKit/Configs/Application.config file.</td>
 		</tr>
 		<tr>
 			<td>
