@@ -54,7 +54,7 @@ debug=0
 _adapter = None
 bufsize = 32*1024
 
-WEBWARE_ADDRESS_FILE='/data/Linux/python/Webware/WebKit/address.text'
+WEBWARE_ADDRESS_FILE='address.text'
 
 
 class ModPythonAdapter(Adapter):
