@@ -25,6 +25,20 @@ Version 0.5.1
 	<li> This is a bugfix release.
 </ul>
 
+<h2>API Changes</h2>
+
+<ul>
+
+	<li> <i> This change occurred in the last release (0.5), but was not documented in the release notes. We include it here as a reminder:</i>
+	<p>	The proper way to import modules from WebKit, such as Page, is by qualifying the module with <code>WebKit.</code> For example, this:
+<pre class=py>from Page import Page</pre>
+now becomes:
+<pre class=py>from WebKit.Page import Page</pre>
+If you previously had WebKit in your Python path please remove it.
+
+</ul>
+
+
 <h2>Bugfixes</h2>
 
 <ul>
@@ -40,6 +54,8 @@ Version 0.5.1
     <li> <span class=filename>Testing/stress.py</span> now works properly (by killing HTTP cookies, in the test requests, which contain stale session ids).
 
 	<li> The FastCGI adapter was not functional in the last release.  It works now.  However, we discovered in the process of fixing this that the FastCGI library we are using does not work on Windows.  We have no plans to rectify this situation at the moment.
+	
+	<li> Added some error checking for socket communications.
 </ul>
 
 
