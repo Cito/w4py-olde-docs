@@ -773,7 +773,7 @@ class Application(Configurable, CanContainer, Object):
 
 
 
-	def serverSidePathForRequest(self, request, debug=1):
+	def serverSidePathForRequest(self, request, debug=0):
 		"""
 		Returns what it says. This is a 'private' service method for use by HTTPRequest.
 		Returns None if there is no corresponding server side path for the URL.
