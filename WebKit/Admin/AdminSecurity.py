@@ -45,7 +45,7 @@ else:
 					AdminPage.writeHTML(self)
 				else:
 					# Failed login attempt; have them try again
-					request.fields()['extra'] = 'Login failed.  Please try again.'
+					request.fields()['extra'] = 'Login failed.  Please try again. (And make sure cookies are enabled.)'
 					app.forwardRequestFast(trans, 'LoginPage')
 			# They aren't logging in; are they already logged in?
 			elif session.value('authenticated_user_admin', None):

@@ -27,7 +27,7 @@ class SecurePage(ExamplePage, Configurable):
 	def __init__(self):
 		ExamplePage.__init__(self)
 		Configurable.__init__(self)
-	
+
 	def writeHTML(self):
 		# Check the configuration file to see if login is required.
 		if self.setting('RequireLogin'):
@@ -56,7 +56,7 @@ class SecurePage(ExamplePage, Configurable):
 					ExamplePage.writeHTML(self)
 				else:
 					# Failed login attempt; have them try again
-					request.fields()['extra'] = 'Login failed.  Please try again.'
+					request.fields()['extra'] = 'Login failed.  Please try again. (And make sure cookies are enabled.)'
 					app.forwardRequestFast(trans, 'LoginPage')
 			# They aren't logging in; are they already logged in?
 			elif self.getLoggedInUser():
@@ -76,7 +76,7 @@ class SecurePage(ExamplePage, Configurable):
 				session.values().clear()
 			# write the page
 			ExamplePage.writeHTML(self)
-	
+
 	def isValidUserAndPassword(self, username, password):
 		# Replace this with a database lookup, or whatever you're using for
 		# authentication...
