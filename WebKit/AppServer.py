@@ -18,6 +18,7 @@ FUTURE
 from Common import *
 from Configurable import Configurable
 from Application import Application
+from PlugIn import PlugIn
 from WebKitSocketServer import ThreadingTCPServer, ForkingTCPServer, TCPServer, BaseRequestHandler
 from marshal import loads
 import os, sys
@@ -135,48 +136,23 @@ class WebKitAppServer(Configurable):
 		''' Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. '''
 		return self._plugIns
 
-	def loadPlugIn(self, name, dir):
-		''' Loads the given plug-in. Used by loadPlugIns(). Really invokes _loadPlugIn() and catches exceptions in order to invoke self.error(). '''
+	def loadPlugIn(self, path):
+		''' Loads the given plug-in. Used by loadPlugIns(). '''
 		try:
-			self._loadPlugIn(name, dir)
+			plugIn = PlugIn(self, path)
+			self._plugIns.append(plugIn)
+			plugIn.load()
+			plugIn.install()
 		except:
 			import traceback
 			traceback.print_exc(file=sys.stderr)
-			self.error('Plug-in %s raised exception.' % name)
-
-	def _loadPlugIn(self, name, dir):
-		''' The "real" implementation of loadPlugIn(). '''
-		print 'Plug-in: %s in %s' % (name, dir)
-
-		# Update sys.path
-		if not dir in sys.path:
-			sys.path.append(dir)
-
-		# Import the package
-		plugIn = __import__(name, globals(), [], [])
-
-		# Add to our plugIns list
-		self._plugIns.append(plugIn)
-
-		# Install the package
-		if not hasattr(plugIn, 'InstallInWebKit'):
-			raise AppServerError, "Plug-in '%s' in '%s' has no InstallInWebKit() function." % (name, dir)
-		plugIn.InstallInWebKit(self)
+			self.error('Plug-in %s raised exception.' % path)
 
 	def loadPlugIns(self):
+		''' A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source. Plug-ins are loaded by AppServer at startup time, just before listening for requests. See the docs for PlugIn.py for more info. '''
 		# @@ 2000-05-21 ce: We should really have an AddPlugIns and RemovePlugIns setting
-		''' A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source.
-
-		* Plug-ins are loaded by AppServer at startup time, just before listening for requests.
-		* A plug-in is a Python package. Therefore, it is a directory containing an __init__.py file.
-		* The directory of the package is added to sys.path and the package is imported.
-		* The __init__.py must contain a function, InstallInWebKit(appServer). AppServer invokes this at start-up so that the plug-in can do what it needs to.
-		'''
-
-
-		for plugIn in self.setting('PlugIns'):
-			dir, name = os.path.split(plugIn)
-			self.loadPlugIn(name, dir)
+		for plugInPath in self.setting('PlugIns'):
+			self.loadPlugIn(plugInPath)
 
 
 	## Misc ##
