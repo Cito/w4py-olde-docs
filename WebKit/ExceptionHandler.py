@@ -66,12 +66,15 @@ class ExceptionHandler(Object):
 
 		self._res.recordEndTime()
 		self.logExceptionToConsole()
-		self._res.reset()
-		if self.setting('ShowDebugInfoOnErrors')==1:
-			publicErrorPage = self.privateErrorPage()
-		else:
-			publicErrorPage = self.publicErrorPage()
-		self._res.write(publicErrorPage)
+
+		if not self._res.isCommitted() or self._res.header('Content-type', None)=='text/html':
+			if not self._res.isCommitted():
+				self._res.reset()
+			if self.setting('ShowDebugInfoOnErrors')==1:
+				publicErrorPage = self.privateErrorPage()
+			else:
+				publicErrorPage = self.publicErrorPage()
+			self._res.write(publicErrorPage)
 
 		privateErrorPage = None
 		if self.setting('SaveErrorMessages'):
