@@ -6,7 +6,7 @@ class Config(AdminPage):
 	def title(self):
 		return 'Config'
 
-	def writeBody(self):
+	def writeContent(self):
 		self.heading('AppServer')
 		self.writeln(WebUtils.WebFuncs.HTMLForDictionary(self.application().server().config()))
 

@@ -47,7 +47,7 @@ class DumpCSV(AdminPage):
 	def title(self):
 		return 'View ' + self.shortFilename()
 
-	def writeBody(self):
+	def writeContent(self):
 		if not os.path.exists(self._filename):
 			self.writeln('<p> File does not exist.')
 			return

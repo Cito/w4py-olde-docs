@@ -16,7 +16,7 @@ class ServletCacheByPath(AdminPage):
 	def title(self):
 		return 'Servlet Cache by Path'
 
-	def writeBody(self):
+	def writeContent(self):
 		cache = self.application()._servletCacheByPath
 		self.writeln(htCache(cache))
 

@@ -3,7 +3,7 @@ from AdminPage import AdminPage
 
 class PlugIns(AdminPage):
 
-	def writeBody(self):
+	def writeContent(self):
 		# @@ 2000-06-02 ce: We should allow a custom admin link for each plug-in (if it provides one)
 		# @@ 2000-06-02 ce: We should have a link to the plug-in's docs
 		plugIns = self.application().server().plugIns()
