@@ -234,7 +234,7 @@ class Klasses:
 		kv(out, 'Cur dir', os.getcwd())
 		kv(out, 'Num classes', len(self._klasses))
 		wr('\nClasses:\n')
-		for klass in self._model._allKlassesInOrder:
+		for klass in self._model.allKlassesInOrder():
 			wr('\t%s\n' % klass.name())
 		wr('*/\n\n')
 
@@ -290,7 +290,25 @@ class Klasses:
 		# assign the class ids up-front, so that we can resolve forward object references
 		self.assignClassIds(generator)
 		self.writeClassIdsSQL(generator, out)
-		for klass in self._model._allKlassesInOrder:
+
+		if self._model.setting('DoNotSortSQLCreateStatementsByDependency', False):
+			# Generates the CREATE TABLEs in the order the classes were declared
+			# but if you're not careful, than foreign keys will cause "unknown table" errors
+			allKlasses = self._model.allKlassesInOrder()
+		else:
+			class Container:
+				pass
+			sorter = Container()
+			# Generate the CREATE TABLEs in the order that foreign keys requires.
+			sorter.allKlasses = []  # will be added in the correct order
+			sorter.recordedKlasses = {}  # a set for fast membership testing.
+			for klass in self._model.allKlassesInOrder():
+				sorter.visitedKlasses = {}
+				klass.sortByDependency(sorter)
+			allKlasses = sorter.allKlasses
+			assert len(allKlasses)==len(self._model.allKlassesInOrder())
+
+		for klass in allKlasses:
 			klass.writeCreateSQL(self._sqlGenerator, out)
 
 	def writeClassIdsSQL(self, generator, out):
@@ -349,6 +367,26 @@ import KlassSQLSerialColumnName
 
 
 class Klass:
+
+	def sortByDependency(self, sorter):
+		"""
+		Sort the klasses by their dependencies so that foreign key declarations work.
+		"""
+		if sorter.visitedKlasses.has_key(self):
+			return
+		sorter.visitedKlasses[self] = 1
+		if sorter.recordedKlasses.has_key(self):
+			return
+		from MiddleKit.Core.ObjRefAttr import ObjRefAttr
+		for attr in self.allAttrs():
+			if isinstance(attr, ObjRefAttr):
+				targetKlass = attr.targetKlass()
+				if targetKlass is not self and not sorter.visitedKlasses.has_key(targetKlass):
+					targetKlass.sortByDependency(sorter)  # recursive call
+		# end of the dependency road
+		if not sorter.recordedKlasses.has_key(self):
+			sorter.allKlasses.append(self)
+			sorter.recordedKlasses[self] = 1
 
 	def writeCreateSQL(self, generator, out):
 		for attr in self.attrs():
