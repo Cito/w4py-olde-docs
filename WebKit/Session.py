@@ -1,9 +1,9 @@
 from Common import *
-from MiscUtils.Funcs import uniqueId
+from MiscUtils.Funcs import uniqueId, hostName
 from time import localtime, time
-import socket
 
-_hostname = socket.gethostname()
+# Only compute this once, for improved speed.
+_hostname = hostName()
 
 class SessionError(Exception):
 	pass
