@@ -30,8 +30,10 @@ class Installer:
 	## Init ##
 
 	def __init__(self):
+		print "initing"
 		self._nameAndVer = strip(open('_VERSION').readlines()[0])
 		self._comps = []  # components
+		print "done initing"
 
 
 	## Running the installation ##
