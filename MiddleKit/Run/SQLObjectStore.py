@@ -1,6 +1,7 @@
 import sys, time
 from types import InstanceType, LongType
 
+from MiscUtils import NoDefault
 from MiscUtils import Funcs as funcs
 
 from MiddleObject import MiddleObject
@@ -8,10 +9,6 @@ from ObjectStore import ObjectStore
 from ObjectKey import ObjectKey
 from MiscUtils.MixIn import MixIn
 from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
-
-
-class _NoDefault:
-	pass
 
 
 class SQLObjectStore(ObjectStore):
@@ -129,7 +126,7 @@ class SQLObjectStore(ObjectStore):
 
 	## Fetching ##
 
-	def fetchObject(self, aClass, serialNum, default=_NoDefault):
+	def fetchObject(self, aClass, serialNum, default=NoDefault):
 		''' Fetches a single object of a specific class and serial number. TheClass can be a Klass object (from the MiddleKit object model), the name of the class (e.g., a string) or a Python class.
 		Raises an exception if theClass parameter is invalid, or the object cannot be located.
 		'''
@@ -138,7 +135,7 @@ class SQLObjectStore(ObjectStore):
 		objects = self.fetchObjectsOfClass(klass, where)
 		count = len(objects)
 		if count==0:
-			if default is _NoDefault:
+			if default is NoDefault:
 				raise Exception, 'Unknown object.'
 			else:
 				return default

@@ -1,9 +1,5 @@
 from ModelObject import ModelObject
-from string import split, strip
-
-
-class _NoDefault:
-	pass
+from MiscUtils import NoDefault
 
 
 class Klass(ModelObject):
@@ -121,20 +117,20 @@ class Klass(ModelObject):
 	def hasAttr(self, name):
 		return self._attrsByName.has_key(name)
 
-	def attr(self, name, default=_NoDefault):
+	def attr(self, name, default=NoDefault):
 		''' Returns the attribute with the given name. If no such attribute exists, an exception is raised unless a default was provided (which is then returned). '''
-		if default is _NoDefault:
+		if default is NoDefault:
 			return self._attrsByName[name]
 		else:
 			return self._attrsByName.get(name, default)
 
-	def lookupAttr(self, name, default=_NoDefault):
+	def lookupAttr(self, name, default=NoDefault):
 		if self._attrsByName.has_key(name):
 			return self._attrsByName[name]
 		if self._superklass:
 			return self._superklass.lookupAttr(name, default)
 		else:
-			if default is _NoDefault:
+			if default is NoDefault:
 				raise KeyError, name
 			else:
 				return default

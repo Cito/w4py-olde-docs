@@ -1,15 +1,12 @@
 import sys
 from types import ClassType, StringType
+from MiscUtils import NoDefault
 from ObjectKey import ObjectKey
 from MiddleKit.Core.ModelUser import ModelUser
 from MiddleKit.Core.Klass import Klass as BaseKlass
 	# ^^^ for use in _klassForClass() below
 	# Can't import as Klass or Core.ModelUser (our superclass)
 	# will try to mix it in.
-
-
-class _NoDefault:
-	pass
 
 
 class ObjectStore(ModelUser):
@@ -47,9 +44,9 @@ class ObjectStore(ModelUser):
 		else:
 			return self._objects.has_key(key)
 
-	def object(self, key, default=_NoDefault):
+	def object(self, key, default=NoDefault):
 		''' Returns an object from the store by it's given key. If no default is given and the object is not in the store, then an exception is raised. Note: This method doesn't currently fetch objects from the persistent store. '''
-		if default is _NoDefault:
+		if default is NoDefault:
 			return objects[key]
 		else:
 			return objects.get(key, default)
