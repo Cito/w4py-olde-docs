@@ -254,7 +254,8 @@ class Installer:
 
 	def compileModules(self):
 		import StringIO
-		print "Byte compiling all modules\n\tNote: a Python 1.5 installation will \n\tproduce some errors. They can be safely \n\tignored for basic operation.\n------------------------------------------\n"
+		print "Byte compiling all modules\n
+		------------------------------------------\n"
 		stdout = sys.stdout
 		stderr = sys.stderr
 		sys.stdout = StringIO.StringIO() #the compileall is a little verbose
