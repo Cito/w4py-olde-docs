@@ -172,12 +172,12 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 			self.requestQueue.put(None) #tells threads to exit, in addition to the self.running=0
 		for i in self.threadPool:
 			i.join()  #don't continue 'till we have all the threads
-		print "Socket Count: %s" % len(asyncore.socket_map)
+##		print "Socket Count: %s" % len(asyncore.socket_map)
 ##		for i in asyncore.socket_map.keys():
 ##			print asyncore.socket_map[i]
 		if len(asyncore.socket_map) > monitor+1:
 			time.sleep(5)  #try to allow for connections to close, but don't wait too long.  Sometimes, they never close?
-		print "Socket Count: %s" % len(asyncore.socket_map)
+##		print "Socket Count: %s" % len(asyncore.socket_map)
 		asyncore.close_all()
 		AppServer.shutDown(self)
 		print "AppServer: All Services have been shutdown"
@@ -298,7 +298,7 @@ class RequestHandler(asyncore.dispatcher):
 			self.close()
 			#For testing
 		else:
-			pass
+			MainRelease.release() #let's send the rest
 		if debug:
 			sys.stdout.write(".")
 			sys.stdout.flush()

@@ -114,6 +114,7 @@ class ThreadedAppServer(AppServer):
 				# we'll exit on the next loop
 				if v[0] == EINTR or v[0]==0: break
 				else: raise
+				
 			if not self.running:
 				return
 
