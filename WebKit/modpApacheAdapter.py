@@ -22,11 +22,11 @@ Here's how I set up my Apache conf:
 
 
 You may also send all requests with a .psp extension to WebKit by adding these lines, outside
-of any location or dircetory.
+of any location or directory.
 
 AddHandler python-program .psp
 PythonPath "sys.path+['/path/to/WebKit']"
-PythonHandler modpApacheAdaptor::pspHandler
+PythonHandler modpApacheAdapter::pspHandler
 
 
 Now, on to configuration issues.  The big one is that you need to set your Application.config to use 'File' as the session store.  The
@@ -98,8 +98,10 @@ class InProcessAppServer(AppServer):
 
 	def config(self):
 		"""
-		Returns the configuration of the object as a dictionary. This is a combination of defaultConfig() and userConfig(). This method caches the config.
-		This method is overridden because the default configuration uses a relative directory for the PlugInDir.  Since we don't know wehere we are, we need to
+		Returns the configuration of the object as a dictionary. This is a combination of
+		defaultConfig() and userConfig(). This method caches the config.
+		This method is overridden because the default configuration uses a relative directory
+		for the PlugInDir.  Since we don't know wehere we are, we need to
 		make sure that the PlugInDirs value includes the real Webware location.
 
 		"""
@@ -109,13 +111,36 @@ class InProcessAppServer(AppServer):
 #			self._config['PlugInDirs'].append(WebwareDir)
 		return self._config
 
+	def shutDown(self):
+		"""
+		We need to manually run the sweepSessions funcion at some point.
+		Unfortunately, this will only run it on Linux/UNIX with any regularity.  On Windows, processes
+		don't start and stop frequently (unless the OS crashes, so maybe its a moot point? :0), so
+		this won't be run often enough.
+		Anyone have a better idea?
+		"""
+		self._app.sweepSessions()
+		AppServer.shutDown(self)
+
+cleanup_registered = 0
 
 class ModpApacheAdapter(ModPythonAdapter):
 	def __init__(self):
 		Adapter.__init__(self)
 		self._AppServer=InProcessAppServer()
+
+	def shutDown(self, data):
+		self._AppServer.shutDown()
+
+	def __del__(self):
+		self.shutDown()
+		ModPythonAdapter.__del__(self)
 		
 	def handler(self, req):
+		global cleanup_registered
+		if not cleanup_registered:
+			req.server.register_cleanup(req._req, self.shutDown)
+			cleanup_registered=1
 		try:
 			# Get input
 			myInput = self.input(req)
