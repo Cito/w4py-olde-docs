@@ -73,13 +73,18 @@ CHANGES
 	* Increased rec buffer size from 8KB to 32KB
 	* Removed use of pr() for feeding app server results back to webserver. Figure that's slightly more efficient.
 	* Added notes about how I set this up with Apache to what was already there.
+
+*2001-03-14 jsl:
+    * Fixed problem with post data
+
 """
 
-if __name__=='__main__':
-	print 'There is no use for running this module from the command line.'
-	print 'See the doc string for information on usage.'
-	import sys
-	sys.exit(1)
+##"""Set WebKitDir to the directory where WebKit is located"""
+WebKitDir = '/data/Linux/python/Webware/WebKit'
+
+
+
+
 
 import fcgi, time
 from marshal import dumps, loads
@@ -90,8 +95,6 @@ import sys
 
 timestamp = time.time()
 
-"""Set WebKitDir to the directory where WebKit is located"""
-WebKitDir = ''
 
 _AddressFile='address.text'
 
@@ -103,43 +106,52 @@ HTMLCodes = [
 	['"', '&quot;'],
 ]
 
-##Do this once, not every time a request comes in!
-addrfile=os.path.join(WebKitDir, _AddressFile)
-(host, port) = string.split(open(addrfile).read(), ':')
-port = int(port)
-
-os.chdir(WebKitDir)
-sys.path.append(os.path.abspath(os.path.join(WebKitDir, "..")))
-# @@ 2001-03-13 ce: is the above line really necessary?
-
 def HTMLEncode(s, codes=HTMLCodes):
 	""" Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdapter independent of everything but standard Python.) """
 	for code in codes:
 		s = string.replace(s, code[0], code[1])
 	return s
 
+fcgi._startup()
+if not fcgi.isFCGI():
+	print "No FCGI Environment Available"
+	print "This module cannot be run from the command line"
+	sys.exit(1)
+
+
+
+addrfile=os.path.join(WebKitDir, _AddressFile)
+(host, port) = string.split(open(addrfile).read(), ':')
+port = int(port)
+
+os.chdir(WebKitDir)
+sys.path.append(os.path.abspath(os.path.join(WebKitDir, "..")))
+
 from Adapter import Adapter
 
 class FCGIAdapter(Adapter):
+	def run(self):
+		"""Block waiting for new request"""
+		while fcgi.isFCGI():
+			req=fcgi.FCGI()
+			self.FCGICallback(req)
 
-	def FCGICallback(self,fcg,env,form):
+	def FCGICallback(self,req):
 		"""This function is called whenever a request comes in"""
 		import sys
 
 		try:
 			# Transact with the app server
-			response = self.transactWithAppServer(env, form, host, port)
+			response = self.transactWithAppServer(req.env, req.inp.read(), host, port)
 
 			# deliver it!
-			write = fcg.req.out.write
-			write(response)
-			fcg.req.out.flush()
-
+			req.out.write(response)
+			req.out.flush()
 		except:
 			import traceback
 
 			# Log the problem to stderr
-			stderr = fcg.req.err
+			stderr = req.err
 			stderr.write('[%s] [error] WebKit.FCGIAdapter: Error while responding to request (unknown)\n' % (
 				time.asctime(time.localtime(time.time()))))
 			stderr.write('Python exception:\n')
@@ -149,29 +161,15 @@ class FCGIAdapter(Adapter):
 			output = apply(traceback.format_exception, sys.exc_info())
 			output = string.join(output, '')
 			output = HTMLEncode(output)
-			fcg.pr('''Content-type: text/html
+			self.pr('''Content-type: text/html
 
 <html><body>
 <p><pre>ERROR
 
 %s</pre>
 </body></html>\n''' % output)
-		fcg.finish()
+		req.Finish()
 		return
-
-_adapter = FCGIAdapter(WebKitDir)
-
-class WKFCGI:
-	"""This class handles calls from the web server"""
-	def __init__(self,func):
-		self.func=func
-
-	def run(self):
-		"""Block waiting for new request"""
-		while fcgi.isFCGI():
-			req=fcgi.FCGI()
-			self.req=req
-			self.func(self,req.env,str(req.inp))
 
 	#easy print function
 	def pr(self,*args):
@@ -186,10 +184,10 @@ class WKFCGI:
 			pass
 
 
-	def finish(self):
-	    """Finish and send all data back to the FCGI parent"""
-	    self.req.Finish()
 
-
-fcgiloop = WKFCGI(_adapter.FCGICallback)
+#print "Starting"	
+fcgiloop = FCGIAdapter(WebKitDir)
 fcgiloop.run()
+
+
+
