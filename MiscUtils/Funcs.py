@@ -4,6 +4,8 @@ Funcs.py
 Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else.
 '''
 
+import string
+
 
 def Commas(number):
 	''' Returns the given number as a string with commas to separate the thousands positions. The number can be a float, int, long or string. Returns None for None. '''
@@ -17,11 +19,11 @@ def Commas(number):
 	else:
 		i = len(number)
 	while 1:
-		i -= 3
+		i = i-3
 		if i<=0:
 			break
 		number[i:i] = [',']
-	return ''.join(number)
+	return string.join(number, '')
 
 
 def CharWrap(s, width, hanging=0):

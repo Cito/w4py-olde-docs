@@ -1,5 +1,6 @@
 import sys
 sys.path.insert(1, '..')
+import string
 from Funcs import *
 
 
@@ -17,7 +18,7 @@ def TestCommas():
 		1.15 '1.15'
 		12345.127 '12,345.127'
 	'''
-	tests = testSpec.split()
+	tests = string.split(testSpec)
 	count = len(tests)
 	i = 0
 	while i<count:
@@ -31,7 +32,7 @@ def TestCommas():
 		#print '%r yields %r' % (source, result)
 		assert Commas(source)==result
 
-		i += 2
+		i = i+2
 
 
 def Test():
