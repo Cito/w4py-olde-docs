@@ -3,6 +3,22 @@ Configuration Guide
 
 .. contents::
 
+Command Line Configuration
+==========================
+
+Each of these can be set in the ``.config`` files, but they can be overridden with the command line.  Run ``AppServer`` with switches in the form ``--ClassName.SettingName=value``, e.g. ``--AppServer.Port=1``
+
+The ``value`` is coerced into a Python type: if it starts with one of the characters ``({["'`` -- i.e., parenthesis (expression), dictionary, list, or string -- then the value with be eval'ed.  If it can be turned into an integer or float, then it will be converted, otherwise it will be left as a string.  Some examples:
+
+* ``1`` == 1
+* ``127.0.0.1`` == "127.0.0.1"
+* ``(10+2)`` == 12
+* ``{'a': 'b'}`` == {'a': 'b'}
+* ``{a: b}`` == *error*
+* ``[1, 'c', [2, 3]]`` == [1, 'c', [2, 3]]
+
+Be careful about special characters in the shell.  All the characters ``() [] ' "`` are special, and need to be quoted (with ``\`` or with single or double quotation marks).
+
 Application.config
 ==================
 
@@ -305,8 +321,9 @@ AppServer.config
 
 ``Host``:
     The host the server runs on.  There is little reason to change
-    this.  Default ``127.0.0.1``.  @@ ib: if no reason to change, why
-    do we have it?
+    this unless you have a machine with multiple network interfaces,
+    and you don't want Webware to listen on all interfaces.  
+    Default ``127.0.0.1``.  
 ``Port``:
     The port the application server listens to for requests from the
     adapter.  You cannot point a browser to this port.  You may wish

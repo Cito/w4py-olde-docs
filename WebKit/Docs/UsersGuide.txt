@@ -17,7 +17,7 @@ Feedback
 ========
 
 You can e-mail webware-discuss@lists.sourceforge.net to give feedback,
-discuss features and get help using WebKit.  If you have a bug to
+discuss features, and get help using WebKit.  If you have a bug to
 report, use the `bug tracker`_.
 
 .. _`bug tracker`:  http://sourceforge.net/tracker/?atid=104866&group_id=4866&func=browse
