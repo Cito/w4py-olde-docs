@@ -4,11 +4,11 @@ def test(store):
 	from MiscUtils.DataTable import DataTable
 
 	dataSource = '''
-b:int,i:int,l:long,f:float,s:string
-0,0,0,0,0
-0,0,0,0.0,0.0
-1,1,1,1,a
-0,-1,8589934592,-3.14,'x'
+b:int,i:int,l:long,f:float,s:string,d:int
+0,0,0,0,0,0
+0,0,0,0.0,0.0,0
+1,1,1,1,a,0
+0,-1,8589934592,-3.14,'x',0
 '''
 
 	data = DataTable()
@@ -18,7 +18,7 @@ b:int,i:int,l:long,f:float,s:string
 		print values
 
 		t = Thing()
-		for attr in list('bilfs'):
+		for attr in list('bilfsd'):
 			t._set(attr, values[attr])
 
 		store.addObject(t)
@@ -45,7 +45,7 @@ b:int,i:int,l:long,f:float,s:string
 
 		# Insert the fetched attributes
 		t2 = Thing()
-		for attr in list('bilfs'):
+		for attr in list('bilfsd'):
 			t2._set(attr, results[0]._get(attr))
 		store.addObject(t2)
 		store.saveChanges()

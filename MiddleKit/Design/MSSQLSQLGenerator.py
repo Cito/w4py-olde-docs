@@ -248,21 +248,6 @@ class BoolAttr:
 		# @@
 		return 'bit'
 
-class DecimalAttr:
-	def sqlType(self):
-
-		if not self['Max']:
-			length = 11
-		else:
-			length = self['Max']
-
-		if not self['numDecimalPlaces']:
-			precision = 3
-		else:
-			precision = self['numDecimalPlaces']
-
-		return 'decimal(%s,%s)' % (length,precision)
-
 
 class LongAttr:
 
@@ -274,7 +259,6 @@ class LongAttr:
 class StringAttr:
 
 	def sqlType(self):
-#		print 'ugh'
 		if not self['Max']:
 			return 'varchar(100) /* WARNING: NO LENGTH SPECIFIED */'
 		elif self['Min']==self['Max']:

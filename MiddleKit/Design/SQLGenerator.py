@@ -526,9 +526,21 @@ class FloatAttr:
 
 class DecimalAttr:
 
-	# @@ 2001-02-04 ce: complete this
-	#def sqlType(self):
-	#	return 'decimal'
+	def sqlType(self):
+		# the keys 'Precision' and 'Scale' are used because all the
+		# SQL docs I read say:  decimal(precision, scale)
+		precision = self.get('Precision', None)
+		if precision is None:
+			if self.klass().klasses()._model.setting('UseMaxForDecimalPrecision'):  # that setting is for backwards compatibility
+				precision = self.get('Max', None)
+				if not precision:
+					precision = None
+			if precision is None:
+				precision = 11
+		scale = self.get('Scale', None)
+		if scale is None:
+			scale = self.get('numDecimalPlaces', 3)
+		return 'decimal(%s,%s)' % (precision, scale)
 
 	def sampleValue(self, value):
 		return value

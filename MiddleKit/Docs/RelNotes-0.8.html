@@ -44,6 +44,9 @@ Version 0.8
 	<li> A new 'Database' setting in Settings.config. Set this if the model name isn't the same as the database name.
 	<li> Also, the database name can be passed via the constructor. See the <a href=UsersGuide.html#MT_DatabaseName>User's Guide</a> for more info.
 
+	<li> Support for the SQL 'decimal' type, previously found only in the MSSQL adapter, has been brought up to the generic SQL adapter level which means that MySQL inherits it. Use the attribute keys <span class=name>Precision</span> and <span class=name>Scale</span> to specify the precision and scale just like you see in SQL manuals: decimal(precision, scale).
+	<p> If (and only if!) you have "legacy" code from the old decimal support, you could enable the <span class=name>UseMaxForDecimalPrecision</span> setting. However, you might get fried down the road when MiddleKit starts enforcing min/max constraints on decimal types. (Getting fried implies you would have to edit/fix your model.)
+	
 	<li>
 <p> "Dangling obj refs" now print much more useful information. The old message:
 

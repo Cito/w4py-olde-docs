@@ -283,6 +283,8 @@ they are None, but it still complains if the klass ID is invalid.  MK should
 	[ ] Should __setattr__ invoke willChange() when changes really occur so that willChange() can be come a hook for subclasses (for example, to implement notifications which could then be used in a GUI environment)?
 
 	[ ] A potential optimization to help speed start up would be to pickle the Model inside the .mkmodel directory and use that pickle file in place of the .csv (provided the .csv mtime was older). We could do this silently similar to .pyc files. Note that the only speed up here is in start up time.
+	
+	[ ] It would make more sense if the Float type spewed a SQL decimal type in response to having "precision" and "scale" attributes. Then axe DecimalAttr (or at least deprecate it).
 
 </refinements/improvements>
 
