@@ -315,7 +315,11 @@ class _FileParser(URLParser):
 		else:
 			restPart = ''
 
-		names = self.filenamesForBaseName(os.path.join(self._path, nextPart))
+		baseName = os.path.join(self._path, nextPart)
+		if restPart and not self._extraPathInfo:
+			names = [baseName]
+		else:
+			names = self.filenamesForBaseName(baseName)
 
 		if len(names) > 1:
 			warnings.warn("More than one file matches %s in %s: %s"
