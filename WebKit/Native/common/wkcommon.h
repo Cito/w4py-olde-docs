@@ -12,6 +12,7 @@
 #include <time.h>
 #define EINTR WSAEINTR
 #define EAGAIN WSAEMFILE   //is this right????
+#define strcasecmp _stricmp
 #else
 #include <sys/socket.h>
 #include <netdb.h>
@@ -42,3 +43,5 @@ int wksock_open(unsigned long address, int port);
 unsigned long resolve_host(char *value);
 struct WFILE*  setup_WFILE();
 int freeWFILE(struct WFILE* wf); 
+Configuration* GetConfiguration(Configuration*);
+

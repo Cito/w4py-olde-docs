@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <sys/stat.h>
+#include "parsecfg.h"
 
 DictHolder* createDicts(EnvItem ** envItems) {
 
@@ -87,8 +88,6 @@ DictHolder* createDicts(EnvItem ** envItems) {
 	dictholder->int_dict = int_dict;
 	dictholder->whole_dict = whole_dict;
     //now we send it
-
-
 					
 	return dictholder;
 
@@ -222,7 +221,7 @@ int freeWFILE(struct WFILE* wf) {
 
 
 
-Configuration* GetConfiguration() {
+Configuration* GetConfiguration(Configuration* config) {
 
 	FILE* cfgfile;
 	struct stat statbuf;
@@ -233,7 +232,49 @@ Configuration* GetConfiguration() {
 	int mark=0;
 	int port;
 	char c;
+	//	Configuration* config;
+	int rv;
 
+	//	config = malloc(sizeof(Configuration));
+
+   
+	cfgStruct cfg[]={	/* this must be initialized */
+	/* parameter	             type		address of variable */
+	  {"Host",                   CFG_STRING,	&config->host  },
+	  {"Port",                   CFG_INT,       (int*)&(config->port)   },
+	  {"MaxConnectAttempts",	 CFG_INT,       (int*)&(config->retry_attempts)  },
+	  {"ConnectRetryDelay",		 CFG_INT,       (int*)&(config->retry_delay)  },
+	};
+
+
+
+
+	config->host = "localhost";
+	config->port = 8086;
+	config->retry_attempts = 10;
+	config->retry_delay = 1;
+
+	log_message("Trying to parse config file");
+
+   	rv = cfgParse(ConfigFilename, cfg, CFG_SIMPLE);
+
+	log_message(stderr,"Got config");
+
+	if(rv == -1) {
+	  fprintf(stderr,"Whoops, Couldn't get config info");
+	}
+
+//	fprintf(stderr, "Host: %s\n",config->host);
+//	fprintf(stderr, "Port: %i\n", config->port);
+
+//	fprintf(stderr, "Attempts: %i\n",config->retry_attempts);
+//	fprintf(stderr, "Delay: %i\n", config->retry_delay);
+
+
+
+	return config;
+
+	/*
 	result = stat(ConfigFilename, &statbuf);
 	size = statbuf.st_size;
 	if (size > 500) return NULL;
@@ -257,6 +298,10 @@ Configuration* GetConfiguration() {
 
 	port = atoi(portstr);
 
+	config->port = port;
+	config->host=host;
+
 	return NULL;
 
+	*/
 }

@@ -100,6 +100,10 @@ SOURCE=..\common\marshal.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\common\parsecfg.c
+# End Source File
+# Begin Source File
+
 SOURCE=.\wk_isapi.c
 # End Source File
 # Begin Source File
