@@ -201,6 +201,9 @@ class ThreadedAppServer(AppServer):
 				input, output, exc = select.select(
 					self._sockets.values(), [], [], timeout)
 			except select.error, v:
+				if not self.running:
+					return
+				input = []
 				if v[0] == EINTR or v[0]==0: break
 				else: raise
 
