@@ -152,7 +152,7 @@ class Klass(UserDict, ModelObject):
 		attr.setKlass(self)
 
 	def attrs(self):
-		''' Returns a list of all the klass' attributes. '''
+		""" Returns a list of all the klass' attributes not including inheritance. """
 		return self._attrsList
 
 	def hasAttr(self, name):
@@ -195,7 +195,9 @@ class Klass(UserDict, ModelObject):
 		return self._klasses
 
 	def setKlasses(self, klasses):
-		''' Sets the klasses object of the klass. This is the klass' owner. '''
+		"""
+		Sets the klasses object of the klass. This is the klass' owner.
+		"""
 		self._klasses = klasses
 
 
