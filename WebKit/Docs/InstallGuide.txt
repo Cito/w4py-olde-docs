@@ -961,6 +961,23 @@ after Apache.
 By default, the script is in runlevels 2-5 at start priority 75, stop
 priority 25.
 
+Debian
+~~~~~~
+
+Now put this script in ``/etc/init.d`` and do this::
+
+    # cd /etc/rc.d/init.d
+    # chmod a+rx webkit
+    # update-rc.d webkit defaults
+
+That takes care of getting it started for future boots, but this first
+time you need to jump start it::
+
+    # ./webkit start
+
+You can use update-rc.d to put this in at the right runlevels.  See
+``man update-rc.d`` for more information.
+
 Other Sytems
 ~~~~~~~~~~~~
 
