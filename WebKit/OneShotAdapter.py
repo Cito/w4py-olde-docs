@@ -88,8 +88,20 @@ class OneShotAdapter(Adapter):
 			if self.setting('ShowConsole'):
 				# show the contents of the console, but only if we
 				# are serving up an HTML file
+				headers=[]
+				entries=[]
+				endheaders = None
+				endheaders = string.find(rs._buffer,"\r\n\r\n")
+				if endheaders == None:
+					endheaders = string.find(rs._buffer,"\n\n")
+				if not endheaders:
+					print "No Headers Found"
+					return
+				headers = string.split(rs._buffer[:endheaders],"\n")
+				for i in headers:
+					entries.append(string.split(i,":"))
 				found = 0
-				for name, value in response['headers']:
+				for name, value in entries:
 					if name.lower()=='content-type':
 						found = 1
 						break
