@@ -344,19 +344,15 @@ def main(monitor = 0):
 		else:
 			server.mainloop(monitor)
 	except Exception, e: #Need to kill the Sweeper thread somehow
-		print e
+		import traceback
+		traceback.print_exc(file=sys.stderr)
+		#print e
+		print
 		print "Exiting AppServer"
-		if 0: #See the traceback from an exception
-			tb = sys.exc_info()
-			print tb[0]
-			print tb[1]
-			import traceback
-			traceback.print_tb(tb[2])
 		if server:
 			server.running=0
 			server.shutDown()
 		sys.exit()
-		raise Exception()
 
 
 if __name__=='__main__':
