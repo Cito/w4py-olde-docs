@@ -316,7 +316,7 @@ class HTTPResponse(Response):
 		Resets the response (such as headers, cookies and contents).
 		"""
 
-		assert self._committed == 0
+		assert self._committed == 0, "Cannot reset the response; it has already been sent."
 		self._headers = {}
 		self.setHeader('Content-type','text/html')
 		self._cookies = {}
