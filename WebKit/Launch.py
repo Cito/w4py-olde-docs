@@ -1,7 +1,9 @@
+#!/usr/bin/env python
+
 import os, sys
 
 def usage():
-	sys.stdout = sys.stderr
+#	sys.stdout = sys.stderr
 	print 'error: Launch.py (of WebKit)'
 	print 'usage: Launch.py SERVER ARGS'
 	sys.exit(1)
