@@ -393,10 +393,10 @@ class Application(Configurable,CanContainer):
 		transaction.respond()
 
 	def sleep(self, transaction):
+		transaction.sleep()
 		# Store the session
 		if transaction.hasSession():
 			self._sessions.storeSession(transaction.session())
-		transaction.sleep()
 
 
 	## Sessions ##
