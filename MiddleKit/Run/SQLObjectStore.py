@@ -929,7 +929,8 @@ class DateAttr:
 	def sqlForNonNone(self, value):
 		# We often get "YYYY-MM-DD HH:MM:SS" from mx's DateTime
 		# so we split on space and take the first value to
-		# work around that.
+		# work around that. This works fine with Python's
+		# date class (does no harm).
 		if 0:
 			print
 			print '>> type of value =', type(value)

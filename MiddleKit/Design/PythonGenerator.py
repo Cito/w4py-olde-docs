@@ -8,9 +8,16 @@ from MiddleKit.Core.ObjRefAttr import objRefJoin
 
 
 try:
-	from mx import DateTime
+	import datetime as nativeDateTime
 except ImportError:
-	DateTime = None
+	nativeDateTime = None
+
+try:
+	import mx.DateTime as mxDateTime
+except ImportError:
+	mxDateTime = None
+
+assert nativeDateTime is not None or mxDateTime is not None, "Cannot find Python's native datetime module or egenix's mx.DateTime module. You must have at least one."
 
 
 class PythonGenerator(CodeGenerator):
@@ -103,8 +110,10 @@ class Klass:
 	def writePyImports(self):
 		wr = self._pyOut.write
 		wr('import types\n')
-		if DateTime:
-			wr('from mx import DateTime\n')
+		if nativeDateTime:
+			wr('import datetime\n')
+		if mxDateTime:
+			wr('from mx import DateTime as mxDateTime\n')
 		supername = self.supername()
 		if supername=='MiddleObject':
 			wr('\n\nfrom MiddleKit.Run.MiddleObject import MiddleObject\n')
@@ -425,36 +434,54 @@ class EnumAttr:
 
 class AnyDateTimeAttr:
 
+	def nativeDateTimeTypeName(self):
+		raise AbstractError, self.__class__
+
 	def mxDateTimeTypeName(self):
 		raise AbstractError, self.__class__
 
 	def writePySetChecks(self, out):
 		Attr.writePySetChecks.im_func(self, out)
-		if DateTime:
-			out.write('''\
-		# have DateTime
+		out.write('''\
 		if value is not None:
-			if type(value) is type(''):
-				value = DateTime.DateTimeFrom(value)
-			if type(value) is not DateTime.%s:
-				raise TypeError, 'expecting %s type, but got value %%r of type %%r instead' %% (value, type(value))
-''' % (self.mxDateTimeTypeName(), self['Type']))
-		else:
-			out.write('''\
-		# no DateTime, use strings
-		if value is not None:
-			if isinstance(value, StringTypes):
-				raise TypeError, 'expecting string type, but got value %r of type %r instead' % (value, type(value))
 ''')
+		if mxDateTime:
+			# I don't see anything for parsing in Python's datetime module, so only
+			# mx.DateTime users get this convenience (which has been in MiddleKit
+			# for years):
+			out.write('''\
+			if isinstance(value, types.StringTypes):
+				value = mxDateTime.%s(value)
+''' % self.mxDateTimeTypeName().replace('Type', 'From'))
+		dateTimeTypes = []
+		if nativeDateTime:
+			dateTimeTypes.append('datetime.'+self.nativeDateTimeTypeName()) # python
+		if mxDateTime:
+			dateTimeTypes.append('mxDateTime.' + self.mxDateTimeTypeName()) # egenix
+		assert dateTimeTypes
+		if len(dateTimeTypes)>1:
+			dateTimeTypes = '(' + ', '.join(dateTimeTypes) + ')'
+		else:
+			dateTimeTypes = dateTimeTypes[0]
+		out.write('''
+			if not isinstance(value, %s):
+				raise TypeError, 'expecting %s type, but got value %%r of type %%r instead' %% (value, type(value))
+''' % (dateTimeTypes, self['Type']))
 
 
 class DateAttr:
+
+	def nativeDateTimeTypeName(self):
+		return 'date'
 
 	def mxDateTimeTypeName(self):
 		return 'DateTimeType'
 
 
 class TimeAttr:
+
+	def nativeDateTimeTypeName(self):
+		return 'time'
 
 	def mxDateTimeTypeName(self):
 		return 'DateTimeDeltaType'
@@ -463,15 +490,18 @@ class TimeAttr:
 		# additional check to also allow DateTime instances.  This is what
 		# comes back from the database for 'time' columns using PostgresSQL
 		# and the psycopg adapter.
-		if DateTime:
+		if mxDateTime:
 			out.write('''\
-		if type(value) is DateTime.DateTimeType:
-			value = DateTime.DateTimeDeltaFrom(value.time)
+		if isinstance(value, mxDateTime.DateTimeType):
+			value = mxDateTime.DateTimeDeltaFrom(value.time)
 ''')
 		TimeAttr.mixInSuperWritePySetChecks(self, out)
 
 
 class DateTimeAttr:
+
+	def nativeDateTimeTypeName(self):
+		return 'datetime'
 
 	def mxDateTimeTypeName(self):
 		return 'DateTimeType'

@@ -3,11 +3,18 @@ from Foo import Foo
 
 def test(store):
 	try:
-		from mx import DateTime
-		testObjects(store)
+		import datetime
+		testNativeDateTime(store)
 	except ImportError:
-		testStrings(store)
-		testNone(store)
+		pass
+
+	try:
+		from mx import DateTime
+		testMXDateTime(store)
+	except ImportError:
+		pass
+
+	testNone(store)
 
 
 def testStrings(store):
@@ -27,10 +34,36 @@ def testStrings(store):
 	store.saveChanges()
 
 
-def testObjects(store):
+def testNativeDateTime(store):
+	import datetime
+	print 'Testing with the native datetime module.'
+
+	d = datetime.date(2001, 6, 7)
+	t = datetime.time(12, 42)
+	dt = datetime.datetime(2001, 6, 7, 12, 42)
+
+	f = Foo()
+	f.setD(d)
+	f.setT(t)
+	f.setDt(dt)
+
+	storeFoo(store, f)
+
+	d = datetime.date(2002, 11, 11)
+	t = datetime.time(16, 04)
+	dt = datetime.datetime(2002, 11, 11, 16, 0)
+
+	f.setD(d)
+	f.setT(t)
+	f.setDt(dt)
+
+	store.saveChanges()
+
+
+def testMXDateTime(store):
 	import mx
 	from mx.DateTime import DateTimeFrom, TimeFrom
-	print 'Testing with DateTime module.'
+	print 'Testing with mx.DateTime module.'
 
 	d  = DateTimeFrom('2001-06-07')
 	t  = TimeFrom('12:42')
@@ -53,6 +86,13 @@ def testObjects(store):
 
 	store.saveChanges()
 
+	# test parsing of strings, a convenience feature when using mx.DateTime:
+	f.setD('2002-11-11')
+	f.setT('16:04')
+	f.setDt('2002-11-11 16:04')
+
+	store.saveChanges()
+
 
 def storeFoo(store, f):
 	store.addObject(f)
@@ -63,6 +103,8 @@ def storeFoo(store, f):
 	results = store.fetchObjectsOfClass(Foo)
 	assert len(results)==1
 #	results[0].dumpAttrs()
+
+	store.executeSQL('delete from Foo;')
 
 
 def testNone(store):
