@@ -45,6 +45,7 @@ class ServletFactory(Object):
 		"""
 		raise SubclassResponsibilityError
 
+
 	def importAsPackage(self, transaction, serverSidePathToImport):
 		"""
 		Imports the module at the given path in the proper package/subpackage for the current request.  For example, if the
@@ -60,6 +61,20 @@ class ServletFactory(Object):
 		path = request.serverSidePath()
 		contextPath = request.serverSideContextPath()
 		fullname = request.contextName()
+
+		## There is no context, so create a package name that is the same as the filesystem path
+		if fullname == None:
+			remainder = path
+			remainder = string.replace(remainder, '\\', '/')
+			remainder = string.split(remainder, '/')
+			moduleName = string.join(remainder,".")
+			if moduleName[0] == ".":
+				moduleName = moduleName[1:]
+			directory, contextDirName = os.path.split(serverSidePathToImport)
+			if debug: print moduleName, contextDirName, directory
+			filename = contextDirName[:string.rfind(contextDirName, '.')]
+			module = self._importModuleFromDirectory(moduleName, filename, directory) 
+			return module
 
 		# First, we'll import the context's package.
 		directory, contextDirName = os.path.split(contextPath)
@@ -97,6 +112,7 @@ class ServletFactory(Object):
 		If isPackageDir is true, then this function creates an empty __init__.py
 		if that file doesn't already exist.
 		"""
+		if debug: print fullModuleName, moduleName, directory
 		if not forceReload:
 			module = sys.modules.get(fullModuleName, None)
 			if module is not None:
