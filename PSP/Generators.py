@@ -220,8 +220,11 @@ class IncludeGenerator(GenericGenerator):
 	forwards the request to the specified page.
 	"""
 
+#	_theFunction = """
+#__pspincludepath = self.transaction().request().urlPathDir() + "%s"
+#self.transaction().application().includeURL(self.transaction(), __pspincludepath)
 	_theFunction = """
-__pspincludepath = self.transaction().request().urlPathDir() + "%s"
+__pspincludepath = "%s"
 self.transaction().application().includeURL(self.transaction(), __pspincludepath)
 """
 
