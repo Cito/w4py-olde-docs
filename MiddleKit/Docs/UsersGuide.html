@@ -28,6 +28,7 @@ Version 0.1
 <br> &nbsp; &nbsp; &nbsp; <a href="#DT_ObjRef">Object references</a>
 <br> <a href="#GeneratedPy"><font size=+1>Generated Python</font></a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#GP_addToBars">Lists: addToBars()</a>
+<br> <a href="#Configuration"><font size=+1>Configuration</font></a>
 <br> <a href="#MiscTopics"><font size=+1>Miscellaneous Topics</font></a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_IteratingAttrs">Iterating over attributes</a>
 <br> <a href="#RelatedLinks"><font size=+1>Related Links</font></a>
@@ -207,6 +208,24 @@ foo.addToBars(newBar)
 </ul>
 
 <p> You don't have to remember the details since this behavior is both supplied and what you would expected. Just remember to use the various addToBars() methods.
+
+
+<a name=Configuration><h2>Configuration</h2></a>
+
+<p> An MK model can have configuration files inside it that affect things like code generation.
+
+<p> The only configuration file supported and used is <span class=filename>SQLGenerator.config</a>. The one setting currently supported is <span class=name>DropStatements</span> whose potential values are:
+
+<ul>
+	<li> database - This causes a DROP DATABASE to be used in <span class=filename>Create.sql</span>. This is the cleanest way to handle models and also the default.
+	<li> tables - This assumes the database already exists and does a DROP TABLE for each table in the model. There is a small danger here that if you remove a class from a model, then its old SQL table will remain in the database. The main use for this setting is for database servers that are slow creating new databases. One user reported a 1 minute lag for Microsoft SQL Server 2000, which is too much of a lag when running the test suite.
+</ul>
+
+<p> An example <a name=filename>SQLGenerator.config</a>:
+
+<pre>{
+    'DropDatabases': 'database',  # database, tables
+}</pre>
 
 
 <a name=MiscTopics><h2>Miscellaneous Topics</h2></a>

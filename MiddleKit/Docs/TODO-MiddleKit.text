@@ -272,6 +272,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 <testing>
 
+	[ ] Now that we have configuration files (at least SQLGenerator.config) we need to run the entire test suite through all configuration options.
+
 	[ ] Add a test where certain columns in the object model are not required: Min, Max
 
 	[ ] Add a test where a model can be constructed in memory and then used to generate and use SQL and Python (like UserKit's test suite does)
@@ -279,6 +281,8 @@ If you have general comments or questions or contributions, please contact webwa
 	[ ] Update all the tests to use _get() and _set() (instead of directly using the accessor methods).
 
 	[ ] MKInheritance: Test inherited attributes for proper updates
+
+	[ ] We should probably drop each test database at the end of the test.
 
 	ObjRef tests
 	------------
