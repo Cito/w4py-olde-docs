@@ -48,7 +48,11 @@ class SessionFileStore(SessionStore):
 				file = open(filename)
 			except IOError:
 				raise KeyError, key
-			item = self.decoder()(file)
+			try:
+				item = self.decoder()(file)
+			except:
+				# Corrupt data; pretend it doesn't exist
+				raise KeyError, key
 			file.close()
 		finally:
 			self._lock.release()
