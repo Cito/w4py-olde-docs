@@ -140,7 +140,7 @@ class Session(Object, CanContainer):
 		Encode the session ID as a parameter to a url.
 		"""
 		import urlparse
-		sid = '__SID__' + self.identifier()
+		sid = '_SID_' + self.identifier()
 		url=list(urlparse.urlparse(url)) #make a list
 		if url[4] == '':
 			url.pop(4)

@@ -259,7 +259,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			'ActivityLogColumns':   ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'],
 			'SessionStore':         'Memory',  # can be File or Memory
 			'SessionTimeout':        60,  # minutes
-			'IgnoreInvalidSession': 0,
+			'IgnoreInvalidSession': 1,
+			'UseAutomaticPathSessions': 0,
 
 			# Error handling
 			'ShowDebugInfoOnErrors': 1,
@@ -341,6 +342,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				self.handleDeficientDirectoryURL(transaction)
 			elif self.isSessionIdProblematic(request):
 				self.handleInvalidSession(transaction)
+			elif self.setting('UseAutomaticPathSessions') and not request.hasPathSession():
+				self.handleMissingPathSession(transaction)
 			else:
 				self.handleGoodURL(transaction)
 
@@ -446,7 +449,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			# Delete the session ID cookie from the request, then handle the servlet
 			# as though there was no session
 			del transaction.request().cookies()['_SID_']
-			self.handleGoodURL(transaction)
+			if self.setting('UseAutomaticPathSessions'):
+				self.handleMissingPathSession(transaction)
+			else:
+				self.handleGoodURL(transaction)
 		else:
 			res.write('''<html> <head> <title>Session expired</title> </head>
 				<body> <h1>Session Expired</h1>
@@ -456,6 +462,25 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				''')
 			# @@ 2000-08-10 ce: This is a little cheesy. We could load a template...
 
+	def handleMissingPathSession(self,transaction):
+		'''
+		if UseAutomaticPathSessions is enabled in Application.config
+		we redirect the browser to a url with SID in path 
+		http://gandalf/a/_SID_=2001080221301877755/Examples/
+		_SID_ is extracted and removed from path in HTTPRequest.py
+
+		this is for convinient building of webapps that must not
+		depend on cookie support
+		'''
+		newSid = transaction.session().identifier()
+		request = transaction.request()
+		url = request.adapterName() + '/_SID_='+ newSid + '/' + request.pathInfo()
+		if request.queryString():
+			url +=  '?' + request.queryString()
+		if self.setting('Debug')['Sessions']:
+			print ">> [sessions] handling UseAutomaticPathSessions, redirecting to", url
+		transaction.response().sendRedirect(url)
+	
 	def handleGoodURL(self, transaction):
 		self.createServletInTransaction(transaction)
 		self.awake(transaction)

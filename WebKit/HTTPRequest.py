@@ -113,6 +113,21 @@ class HTTPRequest(Request):
 		self._serverRootPath = None
 		self._extraURLPath  = None
 
+		# try to get automatic path session
+		# if UseAutomaticPathSessions is enabled in Application.config
+		# Application.py redirects the browser to a url with SID in path 
+		# http://gandalf/a/_SID_=2001080221301877755/Examples/
+		# _SID_ is extracted and removed from path 
+		self._pathSession = None
+		if self._environ['PATH_INFO'][1:6] == '_SID_':
+			self._pathSession = self._environ['PATH_INFO'][7:].split('/',1)[0]
+			self._cookies['_SID_'] = self._pathSession
+			sidstring = '_SID_=' +  self._pathSession +'/'
+			self._environ['REQUEST_URI'] = self._environ['REQUEST_URI'].replace(sidstring,'')
+			self._environ['PATH_INFO'] = self._environ['PATH_INFO'].replace(sidstring,'')
+			self._environ['PATH_TRANSLATED'] = self._environ['PATH_TRANSLATED'].replace(sidstring,'')
+			assert(not self._environ.has_key('WK_URI')) # obsolete?
+
 		if debug: print "Done setting up request, found keys %s" % repr(self._fields.keys())
 
 	## Transactions ##
@@ -425,6 +440,9 @@ class HTTPRequest(Request):
 			print '>> sessionId: returning sid =', sid
 		return sid
 
+	def hasPathSession(self):
+		return self._pathSession is not None
+	
 
 	## Inspection ##
 

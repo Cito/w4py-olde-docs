@@ -275,9 +275,17 @@ Determines the amount of time (expressed in minutes) that passes before a user's
 
 <p><dl class=config>
 <dt class=config><span class=setting>IgnoreInvalidSession</span>
-&nbsp; <code> = 0</code></dt>
+&nbsp; <code> = 1</code></dt>
 <dd class=config>
 If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->. 
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>UseAutomaticPathSessions</span>
+&nbsp; <code> = 0</code></dt>
+<dd class=config>
+If true, then the app server will include the session ID in the URL by inserting a component of the form _SID_=8098302983 into the URL, and will parse the URL to determine the session ID.  This is useful for situations where you want to use sessions, but it has to work even if the users can't use cookies. 
 </dd>
 </dl></p>
 
@@ -326,6 +334,14 @@ When set to zero, the app server will not cache the instances that are created f
 &nbsp; <code> = 1</code></dt>
 <dd class=config>
 If true, then uncaught exceptions will not only display a message for the user, but debugging information for the developer as well. This includes the traceback, HTTP headers, form fields, environment and process ids. You will most likely want to turn this off when deploying the site for users.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>IncludeFancyTraceback</span>
+&nbsp; <code> = 0</code></dt>
+<dd class=config>
+If true, then display a fancy, detailed traceback at the end of the error page.  This makes use of a modified version of cgitb.py which is included with Webware.  The original version was written by Ka-Ping Yee and is available <a href="http://web.lfw.org/python/">here</a>.
 </dd>
 </dl></p>
 
