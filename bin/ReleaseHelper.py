@@ -109,6 +109,8 @@ class ReleaseHelper:
 		progPath = os.path.join(os.getcwd(), sys.argv[0])  # the location of this script
 		webwarePath = os.path.dirname(os.path.dirname(progPath))  # because we're in Webware/bin/
 		parentPath = os.path.dirname(webwarePath)  # where the tarball will land
+		if webwarePath not in sys.path:
+			sys.path.append(webwarePath)
 
 		self.chdir(webwarePath)
 		from MiscUtils.PropertiesObject import PropertiesObject
