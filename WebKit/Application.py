@@ -335,7 +335,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 	def handleBadURL(self, transaction):
 		res = transaction.response()
-		res.setHeader('Status', 404)
+		res.setHeader('Status', '404 Error')
 		res.write('<p> 404 Not found: %s' % transaction.request().uri())
 		# @@ 2000-06-26 ce: This error page is pretty primitive
 		# @@ 2000-06-26 ce: We should probably load a separate template file and display that
@@ -352,7 +352,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		newURL = string.join(uri, '?')
 
 		res = transaction.response()
-		res.setHeader('Status', '301')
+		res.setHeader('Status', '301 Redirect')
 		res.setHeader('Location', newURL)
 		res.write('''<html>
 	<head>

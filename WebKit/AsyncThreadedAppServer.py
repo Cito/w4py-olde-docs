@@ -247,7 +247,9 @@ class RequestHandler(asyncore.dispatcher):
 		rawResponse = transaction.response().rawResponse()
 
 		for item in rawResponse['headers']:
-			self._buffer = self._buffer + item[0] + ":" + str(item[1]) + "\n"
+			if string.lower(item[0]) == string.lower("Status"):
+				self._buffer = item[0] + ":" + str(item[1]) + self._buffer + "\n"
+			else: self._buffer = self._buffer + item[0] + ":" + str(item[1]) + "\n"
 
 		self._buffer = self._buffer + "\n" + rawResponse['contents']
 
