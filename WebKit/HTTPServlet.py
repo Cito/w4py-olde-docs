@@ -6,7 +6,7 @@ class HTTPServlet(Servlet):
 	'''
 	HTTPServlet implements the respond() method to invoke methods such as respondToGet() and respondToPut() depending on the type of HTTP request.
 	Current supported request are GET, POST, PUT, DELETE, OPTIONS and TRACE.
-	The dictionary _map contains the information about the types of requests and their corresponding methods.
+	The dictionary _methodForRequestType contains the information about the types of requests and their corresponding methods.
 
 	Note that HTTPServlet inherits awake() and respond() methods from Servlet and that subclasses may make use of these.
 
@@ -20,13 +20,13 @@ class HTTPServlet(Servlet):
 
 	def __init__(self):
 		Servlet.__init__(self)
-		self._map = {
+		self._methodForRequestType = {
 			'GET':     self.__class__.respondToGet,
 			'POST':    self.__class__.respondToPost,
 			'PUT':     self.__class__.respondToPut,
 			'DELETE':  self.__class__.respondToDelete,
 			'OPTIONS': self.__class__.respondToOptions,
-			'TRACE':   self.__class__.respondToTrace
+			'TRACE':   self.__class__.respondToTrace,
 		}
 
 
@@ -34,7 +34,7 @@ class HTTPServlet(Servlet):
 
 	def respond(self, trans):
 		''' Invokes the appropriate respondToSomething() method depending on the type of request (e.g., GET, POST, PUT, ...). '''
-		method = self._map[trans.request().method()]
+		method = self._methodForRequestType[trans.request().method()]
 		method(self, trans)
 
 	def respondToGet(self, trans):
