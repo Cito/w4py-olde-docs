@@ -9,7 +9,7 @@ class SessionError(Exception):
 
 
 class Session(Object):
-	'''
+	"""
 	All methods that deal with time stamps, such as creationTime(),
 	treat time as the number of seconds since January 1, 1970.
 
@@ -33,14 +33,18 @@ class Session(Object):
 		* invalidate()
 		* Sessions don't actually time out and invalidate themselves.
 		* Should this be called 'HTTPSession'?
-		* Should "numTransactions" be exposed as a method? Should it be common to all transaction objects that do the awake()-respond()-sleep() thing? And should there be an abstract super class to codify that?
-	'''
+		* Should "numTransactions" be exposed as a method? Should it
+		  be common to all transaction objects that do the
+		  awake()-respond()-sleep() thing? And should there be an
+		  abstract super class to codify that?
+	"""
 
 	## Init ##
 
 	def __init__(self, trans):
 		Object.__init__(self)
 		self._lastAccessTime  = self._creationTime = time()
+		self._isExpired       = 0
 		self._numTrans        = 0
 		self._values          = {}
 		self._timeout = trans.application().setting('SessionTimeout')*60
@@ -72,6 +76,13 @@ class Session(Object):
 		''' Returns a string that uniquely identifies the session. This method will create the identifier if needed. '''
 		return self._identifier
 
+	def isExpired(self):
+		"""
+		Returns true if the session has been previously expired.
+		See also: expiring()
+		"""
+		return self._isExpired
+
 	def isNew(self):
 		return self._numTrans<2
 
@@ -93,6 +104,7 @@ class Session(Object):
 		"""
 		self._lastAccessTime = 0
 		self._values = {}
+
 
 	## Values ##
 
@@ -129,7 +141,7 @@ class Session(Object):
 	def awake(self, trans):
 		''' Invoked during the beginning of a transaction, giving a Session an opportunity to perform any required setup. The default implementation updates the 'lastAccessTime'. '''
 		self._lastAccessTime = time()
-		self._numTrans = self._numTrans + 1
+		self._numTrans += 1
 
 	def respond(self, trans):
 		''' The default implementation does nothing, but could do something in the future. Subclasses should invoke super. '''
@@ -140,8 +152,12 @@ class Session(Object):
 		pass
 
 	def expiring(self):
-		""" Called when session is expired by the application. """
-		pass
+		"""
+		Called when session is expired by the application.
+		Subclasses should invoke super.
+		Session store __delitem__()s should invoke if not isExpired().
+		"""
+		self._isExpired = 1
 
 
 	## Utility ##

@@ -2,19 +2,38 @@ from Common import *
 
 
 class SessionStore(Object):
-	'''
-	SessionStores are dictionary-like objects used by Application to store session state. This class is abstract and it's up to the concrete subclass to implement several key methods that determine how sessions are stored (such as in memory, on disk or in a database).
+	"""
+	SessionStores are dictionary-like objects used by Application to
+	store session state. This class is abstract and it's up to the
+	concrete subclass to implement several key methods that determine
+	how sessions are stored (such as in memory, on disk or in a
+	database).
 
-	Subclasses often encode sessions for storage somewhere. In light of that, this class also defines methods encoder(), decoder() and setEncoderDecoder(). The encoder and decoder default to the load() and dump() functions of the cPickle or pickle module. However, using the setEncoderDecoder() method, you can use the functions from marshal (if appropriate) or your own encoding scheme. Subclasses should use encoder() and decoder() (and not pickle.load() and pickle.dump()).
+	Subclasses often encode sessions for storage somewhere. In light
+	of that, this class also defines methods encoder(), decoder() and
+	setEncoderDecoder(). The encoder and decoder default to the load()
+	and dump() functions of the cPickle or pickle module. However,
+	using the setEncoderDecoder() method, you can use the functions
+	from marshal (if appropriate) or your own encoding scheme.
+	Subclasses should use encoder() and decoder() (and not
+	pickle.load() and pickle.dump()).
 
-	Subclasses may rely on the attribute self._app to point to the application.
+	Subclasses may rely on the attribute self._app to point to the
+	application.
 
-	Subclasses should be named SessionFooStore since Application expects "Foo" to appear for the "SessionStore" setting and automatically prepends Session and appends Store. Currently, you will also need to add another import statement in Application.py. Search for SessionStore and you'll find the place.
+	Subclasses should be named SessionFooStore since Application
+	expects "Foo" to appear for the "SessionStore" setting and
+	automatically prepends Session and appends Store. Currently, you
+	will also need to add another import statement in Application.py.
+	Search for SessionStore and you'll find the place.
 
 	TO DO
 
-	* Should there be a check-in/check-out strategy for sessions to prevent concurrent requests on the same session? If so, that can probably be done at this level (as opposed to pushing the burden on various subclasses).
-	'''
+	* Should there be a check-in/check-out strategy for sessions to
+	  prevent concurrent requests on the same session? If so, that can
+	  probably be done at this level (as opposed to pushing the burden
+	  on various subclasses).
+	"""
 
 
 	## Init ##
@@ -49,6 +68,13 @@ class SessionStore(Object):
 		raise SubclassResponsibilityError
 
 	def __delitem__(self, key):
+		"""
+		Subclasses are responsible for expiring the session as well.
+		Something along the lines of:
+			sess = self[key]
+			if not sess.isExpired():
+				sess.expiring()
+		"""
 		raise SubclassResponsibilityError
 
 	def has_key(self, key):
@@ -77,7 +103,6 @@ class SessionStore(Object):
 		curTime = time.time()
 		for key, sess in self.items():
 			if (curTime - sess.lastAccessTime()) >= sess.timeout()  or  sess.timeout()==0:
-				sess.expiring()
 				del self[key]
 
 

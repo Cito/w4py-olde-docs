@@ -23,7 +23,6 @@ class SessionMemoryStore(SessionStore):
 				self[i] = filestore[i]
 
 
-
 	## Access ##
 
 	def __len__(self):
@@ -36,6 +35,9 @@ class SessionMemoryStore(SessionStore):
 		self._store[key] = item
 
 	def __delitem__(self, key):
+		sess = self[key]
+		if not sess.isExpired():
+			sess.expiring()
 		del self._store[key]
 
 	def has_key(self, key):

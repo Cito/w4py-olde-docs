@@ -7,7 +7,7 @@ debug = 0
 
 
 class SessionFileStore(SessionStore):
-	'''
+	"""
 	Stores the sessions on disk in the Sessions/ directory, one file
 	per session.
 
@@ -20,7 +20,7 @@ class SessionFileStore(SessionStore):
 
 	Note that the last two are not yet supported by WebKit (as of 0.4,
 	8/2000).
-	'''
+	"""
 
 
 	## Init ##
@@ -79,6 +79,9 @@ class SessionFileStore(SessionStore):
 		filename = self.filenameForKey(key)
 		if not os.path.exists(filename):
 			raise KeyError, key
+		sess = self[key]
+		if not sess.isExpired():
+			sess.expiring()
 		os.remove(filename)
 
 	def has_key(self, key):
