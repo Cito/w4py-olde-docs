@@ -54,11 +54,14 @@ class Test:
 		Run all TestEmpty*.py files in the model, in alphabetical order by name.
 		'''
 		names = glob(os.path.join(self._modelName, 'TestEmpty*.py'))
-		names.sort()
-		for name in names:
+		if names:
+			names.sort()
+			for name in names:
+				self.createDatabase()
+				self.testRun(os.path.basename(name), deleteData=0)
+		else:
 			self.createDatabase()
-			self.testRun(os.path.basename(name), deleteData=0)
-
+			
 	def testSamples(self):
 		self.testRun('TestSamples.py', deleteData=0)
 
