@@ -56,7 +56,7 @@ class OneShotAdapter(Adapter):
 			if os.name=='nt':
 				import msvcrt
 				msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
-				
+
 			dict = {
 				'format':  'CGI',
 				'time':    _timestamp,
@@ -88,16 +88,13 @@ class OneShotAdapter(Adapter):
 			if os.name=='nt':
 				import msvcrt
 				msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-				
+
 			write = sys.stdout.write
 			write(rs._buffer)
 
 			if self.setting('ShowConsole'):
 				# show the contents of the console, but only if we
 				# are serving up an HTML file
-				headers=[]
-				entries=[]
-				endheaders = None
 				endheaders = string.find(rs._buffer,"\r\n\r\n")
 				if endheaders == None:
 					endheaders = string.find(rs._buffer,"\n\n")
@@ -105,14 +102,15 @@ class OneShotAdapter(Adapter):
 					print "No Headers Found"
 					return
 				headers = string.split(rs._buffer[:endheaders],"\n")
+				entries = []
 				for i in headers:
-					entries.append(string.split(i,":"))
+					entries.append(string.split(i, ":"))
 				found = 0
 				for name, value in entries:
 					if name.lower()=='content-type':
 						found = 1
 						break
-				if found and value.lower()=='text/html':
+				if found and string.strip(string.lower(value))=='text/html':
 					self.showConsole(_console.getvalue())
 		except:
 			import traceback
