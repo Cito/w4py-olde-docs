@@ -176,7 +176,7 @@ class HTMLTag:
 		wr('%s<%s>\n' % (spacer, self._name))
 		for key, value in self._attrs.items():
 			wr('%s  %s = %s\n' % (spacer, key.ljust(12), value))
-		indent += 1
+		indent = indent+1
 		for child in self._children:
 			if isinstance(child, HTMLTag):
 				child.pprint(out, indent)
