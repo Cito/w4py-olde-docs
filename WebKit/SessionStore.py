@@ -69,6 +69,10 @@ class SessionStore(Object):
 	def storeAllSessions(self):
 		raise SubclassResponsibilityError
 
+	def cleanStaleSessions(self):
+		# @@ 2000-01-24 ce: We're missing the old logic from a previous version of Application that cleaned sessions.
+		pass
+
 
 	## Convenience methods ##
 
