@@ -40,12 +40,14 @@ class Test:
 			didFail = 0
 			try:
 				if self.canRun():
-					self.testDesign()
-					self.testEmpty()
-					self.insertSamples()
-					self.testSamples()
-					rmdir(workDir)
-					print '\n'
+					# support multiple config files for testing
+					configFilenames = glob(os.path.join(self._modelName, 'Settings*.config'))
+					if configFilenames:
+						configFilenames = [os.path.basename(p) for p in configFilenames]
+					else:
+						configFilenames = ['Settings.config']
+					for configFilename in configFilenames:
+						self.runCompletePath(configFilename)
 				else:
 					didFail = '       skipped'
 			except RunError:
@@ -89,6 +91,15 @@ class Test:
 		else:
 			return 1
 
+	def runCompletePath(self, configFilename='Settings.config'):
+		self._configFilename = configFilename
+		self.testDesign()
+		self.testEmpty()
+		self.insertSamples()
+		self.testSamples()
+		rmdir(workDir)
+		print '\n'
+
 	def testEmpty(self):
 		"""
 		Run all TestEmpty*.py files in the model, in alphabetical order by name.
@@ -108,12 +119,12 @@ class Test:
 	def testRun(self, pyFile, deleteData):
 		if os.path.exists(os.path.join(self._modelName, pyFile)):
 			print '%s:' % pyFile
-			self.run('python TestRun.py %s %s delete=%i' % (self._modelName, pyFile, deleteData))
+			self.run('python TestRun.py %s %s %s delete=%i' % (self._modelName, self._configFilename, pyFile, deleteData))
 		else:
 			print 'NO %s TO TEST.' % pyFile
 
 	def testDesign(self):
-		self.run('python TestDesign.py %s' % self._modelName)
+		self.run('python TestDesign.py %s %s' % (self._modelName, self._configFilename))
 
 	def createDatabase(self):
 		filename = workDir + '/GeneratedSQL/Create.sql'

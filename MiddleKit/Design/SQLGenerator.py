@@ -61,7 +61,9 @@ class SQLGenerator(CodeGenerator):
 		config.update({
 			'PreSQL': '',
 			'PostSQL': '',
-			'DropStatements': 'database'  # database, tables
+			'DropStatements': 'database',  # database, tables
+			'ExternalEnumsTableName': None, # '%(ClassName)s%(AttrName)sEnum'
+			'ExternalEnumsColumnName': 'name',  # could use %(ClassName)s and %(AttrName)s
 		})
 		return config
 
@@ -383,32 +385,37 @@ class Klass:
 
 	def writeCreateSQL(self, generator, out):
 		if not self.isAbstract():
-			name = self.name()
-			wr = out.write
-			sqlIdName = self.sqlIdName()
-			wr('create table %s (\n' % self.sqlTableName())
-			wr(self.primaryKeySQLDef(generator))
-			if generator.model().setting('DeleteBehavior', 'delete') == 'mark':
-				wr(self.deletedSQLDef(generator))
-			first = 1
-			sqlAttrs = []
-			nonSQLAttrs = []
-			for attr in self.allAttrs():
-				if attr.hasSQLColumn():
-					sqlAttrs.append(attr)
-				else:
-					nonSQLAttrs.append(attr)
-			for attr in sqlAttrs:
-				if first:
-					first = 0
-				else:
-					wr(',\n')
-				attr.writeCreateSQL(generator, out)
-			self.writeIndexSQLDefs(wr)
-			for attr in nonSQLAttrs:
-				attr.writeCreateSQL(generator, out)
-				wr('\n')
-			wr(');\n\n\n')
+			for attr in self.attrs():
+				attr.writeAuxiliaryCreateTable(generator, out)
+			self.writeCreateTable(generator, out)
+
+	def writeCreateTable(self, generator, out):
+		name = self.name()
+		wr = out.write
+		sqlIdName = self.sqlIdName()
+		wr('create table %s (\n' % self.sqlTableName())
+		wr(self.primaryKeySQLDef(generator))
+		if generator.model().setting('DeleteBehavior', 'delete') == 'mark':
+			wr(self.deletedSQLDef(generator))
+		first = 1
+		sqlAttrs = []
+		nonSQLAttrs = []
+		for attr in self.allAttrs():
+			if attr.hasSQLColumn():
+				sqlAttrs.append(attr)
+			else:
+				nonSQLAttrs.append(attr)
+		for attr in sqlAttrs:
+			if first:
+				first = 0
+			else:
+				wr(',\n')
+			attr.writeCreateSQL(generator, out)
+		self.writeIndexSQLDefs(wr)
+		for attr in nonSQLAttrs:
+			attr.writeCreateSQL(generator, out)
+			wr('\n')
+		wr(');\n\n\n')
 
 	def primaryKeySQLDef(self, generator):
 		"""
@@ -495,6 +502,10 @@ class Attr:
 				pass
 			print
 			raise
+
+	def writeAuxiliaryCreateTable(self, generator, out):
+		# most attribute types have no such beast
+		pass
 
 	def sqlNullSpec(self):
 		return ''
@@ -674,6 +685,52 @@ class ListAttr:
 		# @@ 2000-11-24 ce: need specific extension?
 		# @@ 2001-02-04 ce: ^^^ what does that mean???
 		raise Exception, 'Lists are implicit. They cannot have sample values.'
+
+
+class EnumAttr:
+
+	def sqlType(self):
+		if self.setting('ExternalEnumsTableName', None):
+			tableName, columnName = self.externalEnumsTableAndColumnName()
+			return 'int references %s(%sId)' % (tableName, tableName)
+		else:
+			return self.nativeEnumSQLType()
+
+	def nativeEnumSQLType(self):
+		maxLen = max([len(e) for e in self.enums()])
+		return 'varchar(%s)' % maxLen
+
+	def sampleValue(self, value):
+		if self.setting('ExternalEnumsTableName', None):
+			return self.intValueForString(value)
+		else:
+			assert value in self._enums, 'value = %r, enums = %r' % (value, self._enums)
+			return repr(value)
+
+	def externalEnumsTableAndColumnName(self):
+		values = {
+			'ClassName': self.klass().name(),
+			'AttrName':  self.name()[0].upper() + self.name()[1:],
+			'attrName':  self.name(),
+		}
+		tableName  = self.setting('ExternalEnumsTableName')  % values  # typical setting value is '%(ClassName)s%(AttrName)sEnum'. can use also use %(attrName)s for non-capped attr name
+		columnName = self.setting('ExternalEnumsColumnName') % values  # typical setting value is simply 'name'
+		return tableName, columnName
+
+	def writeAuxiliaryCreateTable(self, generator, out):
+		if self.setting('ExternalEnumsTableName', None):
+			tableName, columnName = self.externalEnumsTableAndColumnName()
+			out.write('create table %s (\n' % tableName)
+			out.write('\t%sId int not null primary key,\n' % tableName)
+			out.write('\t%s varchar(255)\n' % columnName)
+			out.write(');\n')
+
+			i = 0
+			sep = ''
+			for enum in self.enums():
+				out.write("insert into %(tableName)s (%(tableName)sId, %(columnName)s) values (%(i)i, '%(enum)s');\n" % locals())
+				i += 1
+			out.write('\n')
 
 
 class PrimaryKey:

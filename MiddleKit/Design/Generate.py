@@ -21,7 +21,7 @@ if sys.platform=='win32':
 class Generate:
 
 	def databases(self):
-		return ['MSSQL', 'MySQL', 'PostgreSQL' ]  # @@ 2000-10-19 ce: should build this dynamically
+		return ['MSSQL', 'MySQL', 'PostgreSQL']  # @@ 2000-10-19 ce: should build this dynamically
 
 	def main(self, args=sys.argv):
 		opt = self.options(args)
@@ -39,24 +39,28 @@ class Generate:
 			self.generate(
 				pyClass=opt['db']+'SQLGenerator',
 				model=opt['model'],
+				configFilename=opt.get('config'),
 				outdir=os.path.join(outdir, 'GeneratedSQL'))
 		if opt.has_key('py'):
 			print 'Generating Python...'
 			self.generate(
 				pyClass=opt['db']+'PythonGenerator',
 				model=opt['model'],
+				configFilename=opt.get('config'),
 				outdir=outdir)
 
 	def usage(self, errorMsg=None):
 		progName = os.path.basename(sys.argv[0])
 		if errorMsg:
 			print '%s: error: %s' % (progName, errorMsg)
-		print 'Usage: %s --db DBNAME --model FILENAME [--sql] [--py] [--outdir DIRNAME]' % progName
+		print 'Usage: %s --db DBNAME --model FILENAME [--sql] [--py] [--config FILENAME] [--outdir DIRNAME]' % progName
 		print '       %s -h | --help' % progName
 		print
 		print '       * Known databases include: %s' % ', '.join(self.databases())
 		print '       * If neither --sql nor --py are specified, both are generated.'
 		print '       * If --outdir is not specified, then the base filename (sans extension) is used.'
+		print '       * --config lets you specify a different config filename inside the model.'
+		print '         This is mostly useful for the regression test suite.'
 		print
 		sys.exit(1)
 
@@ -64,7 +68,7 @@ class Generate:
 		# Command line dissection
 		if type(args)==type(''):
 			args = args.split()
-		optPairs, files = getopt(args[1:], 'h', ['help', 'db=', 'model=', 'sql', 'py', 'outdir='])
+		optPairs, files = getopt(args[1:], 'h', ['help', 'db=', 'model=', 'sql', 'py', 'config=', 'outdir='])
 		if len(optPairs)<1:
 			self.usage('Missing options.')
 		if len(files)>0:
@@ -94,14 +98,14 @@ class Generate:
 
 		return opt
 
-	def generate(self, pyClass, model, outdir):
+	def generate(self, pyClass, model, configFilename, outdir):
 		""" Generates code using the given class, model and output directory. The pyClass may be a string, in which case a module of the same name is imported and the class extracted from that. The model may be a string, in which case it is considered a filename of a model. """
 		if isinstance(pyClass, StringTypes):
 			module = __import__(pyClass, globals())
 			pyClass = getattr(module, pyClass)
 		generator = pyClass()
 		if isinstance(model, StringTypes):
-			generator.readModelFileNamed(model, havePythonClasses=0)
+			generator.readModelFileNamed(model, configFilename=configFilename, havePythonClasses=0)
 		else:
 			generator.setModel(model)
 		generator.generate(outdir)

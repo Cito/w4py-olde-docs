@@ -360,11 +360,33 @@ class StringAttr:
 class EnumAttr:
 
 	def stringToValue(self, string):
-		return string
+		if self.setting('ExternalEnumsTableName', None):
+			return self.intValueForString(string)
+		else:
+			return string
 
 	def writePySetChecks(self, out):
 		Attr.writePySetChecks.im_func(self, out)
 		out.write('''\
+		global _%(name)sAttr
+		if _%(name)sAttr is None:
+			_%(name)sAttr = self.klass().lookupAttr('%(name)s')
+''' % {'name': self.name()})
+		if self.setting('ExternalEnumsTableName', None):
+			out.write('''
+		if value is not None:
+			if isinstance(value, types.StringType):
+				try:
+					value = _%(name)sAttr.intValueForString(value)
+				except KeyError:
+					raise ValueError, 'expecting one of %%r, but got %%r instead' %% (_%(name)sAttr.enums(), value)
+			elif not isinstance(value, (types.IntType, types.LongType)):
+				raise TypeError, 'expecting int type for enum, but got value %%r of type %%r instead' %% (value, type(value))
+			if not _%(name)sAttr.hasEnum(value):
+				raise ValueError, 'expecting one of %%r, but got %%r instead' %% (_%(name)sAttr.enums(), value)
+''' % {'name': self.name()})
+		else:
+			out.write('''
 		if value is not None:
 			if not isinstance(value, types.StringType):
 				raise TypeError, 'expecting string type for enum, but got value %%r of type %%r instead' %% (value, type(value))
@@ -372,7 +394,24 @@ class EnumAttr:
 			if not attr.hasEnum(value):
 				raise ValueError, 'expecting one of %%r, but got %%r instead' %% (attr.enums(), value)
 ''' % self.name())
-		# @@ 2001-07-11 ce: could optimize above code
+			# @@ 2001-07-11 ce: could optimize above code
+
+	def writePySetAssignment(self, write, name):
+		write('''
+		# set the attribute
+		origValue = self._%(name)s
+		self._%(name)s = value
+
+		# MiddleKit machinery
+		self._mk_changed = 1  # @@ original semantics, but I think this should be under "if not self._mk_initing..."
+		if not self._mk_initing and self._mk_serialNum>0 and value is not origValue:
+			# Record that it has been changed
+			if self._mk_changedAttrs is None:
+				self._mk_changedAttrs = {} # maps name to attribute
+			self._mk_changedAttrs['%(name)s'] = _%(name)sAttr  # changedAttrs is a set
+			# Tell ObjectStore it happened
+			self._mk_store.objectChanged(self)
+''' % {'name': name})
 
 
 class AnyDateTimeAttr:

@@ -33,10 +33,11 @@ class Model(Configurable):
 		# increment this if a non-compatible change is made in Klasses,
 		# Klass or Attr
 
-	def __init__(self, filename=None, classesFilename=None, customCoreClasses={}, rootModel=None, havePythonClasses=1):
+	def __init__(self, filename=None, classesFilename=None, configFilename=None, customCoreClasses={}, rootModel=None, havePythonClasses=1):
 		Configurable.__init__(self)
 		self._havePythonClasses = havePythonClasses
 		self._filename = None
+		self._configFilename = configFilename or 'Settings.config'
 		self._coreClasses = customCoreClasses
 		self._klasses = None
 		self._name = None
@@ -315,7 +316,7 @@ class Model(Configurable):
 		if self._filename is None:
 			return None
 		else:
-			return os.path.join(self._filename, 'Settings.config')
+			return os.path.join(self._filename, self._configFilename)
 
 	def defaultConfig(self):
 		return {

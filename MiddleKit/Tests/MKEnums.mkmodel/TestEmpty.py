@@ -10,7 +10,7 @@ def test(store):
 	results = store.fetchObjectsOfClass(Foo)
 	assert len(results)==1, 'len=%s, results=%s' % (len(results), results)
 
-	assert f.e()=='green', f.e()
+	assert f.e()=='green' or f.e()==1, f.e()
 
 	f = None
 	store.clear()
@@ -19,7 +19,7 @@ def test(store):
 	assert len(results)==1, 'len=%s, results=%s' % (len(results), results)
 	f = results[0]
 
-	assert f.e()=='green', f.e()
+	assert f.e()=='green' or f.e()==1, f.e()
 
 	f.setE(None)
 	store.saveChanges()
@@ -33,5 +33,7 @@ def test(store):
 		f.setE('wrong')
 	except ValueError:
 		pass
+	except:
+		assert 0, 'expecting a ValueError for invalid enums'
 	else:
 		assert 0, 'expecting a ValueError for invalid enums'

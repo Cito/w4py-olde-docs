@@ -1,4 +1,5 @@
 from Attr import Attr
+from types import StringType, IntType
 
 
 class EnumAttr(Attr):
@@ -11,12 +12,20 @@ class EnumAttr(Attr):
 		enums = [enum.strip() for enum in enums]
 		self._enums = enums
 		set = {}
+		i = 0
 		for enum in self._enums:
-			set[enum] = 1
+			set[enum] = i
+			i += 1
 		self._enumSet = set
 
 	def enums(self):
 		return self._enums
 
-	def hasEnum(self, name):
-		return self._enumSet.has_key(name)
+	def hasEnum(self, value):
+		if isinstance(value, StringType):
+			return self._enumSet.has_key(value)
+		else:
+			return value>=0 and value<len(self._enums)
+
+	def intValueForString(self, s):
+		return self._enumSet[s]

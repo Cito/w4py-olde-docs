@@ -22,7 +22,7 @@ def test(store):
 	sys.path.insert(1, os.path.abspath(os.pardir))
 	try:
 		from TestDesign import test as generate
-		model = generate('../MKBasic.mkmodel', workDir='WorkDir2') # toTestDir='../../', 
+		model = generate('../MKBasic.mkmodel', configFilename=None, workDir='WorkDir2') # toTestDir='../../',
 
 		diffStore = store.__class__(**dbArgs)
 		diffStore.setModel(model)
@@ -36,7 +36,7 @@ def test(store):
 		diffStore.saveChanges()
 		assert person.store() is diffStore, 'store=%r' % person.store()
 		assert diffStore is not newStore
-		
+
 		from TestCommon import rmdir
 		rmdir('WorkDir2')
 	finally:

@@ -7,4 +7,5 @@ class BasicTypeAttr(Attr):
 	"basic types":
 		bool, int, long, float and string
 	"""
+
 	pass

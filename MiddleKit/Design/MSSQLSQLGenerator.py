@@ -264,17 +264,6 @@ class StringAttr:
 				return 'varchar(%s)%s' % (int(self['Max']), ref)
 
 
-class EnumAttr:
-
-	def sqlType(self):
-		maxLen = max([len(e) for e in self.enums()])
-		return 'varchar(%s)' % maxLen
-
-	def sampleValue(self, value):
-		assert value in self._enums, 'value = %r, enums = %r' % (value, self._enums)
-		return repr(value)
-
-
 class ObjRefAttr:
 
 	def sqlType(self):

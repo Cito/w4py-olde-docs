@@ -51,6 +51,9 @@ class Attr(UserDict, ModelObject):
 		self._klass = klass
 
 	def klass(self):
+		"""
+		Returns the klass that this attribute is declared in and, therefore, belongs to.
+		"""
 		return self._klass
 
 	def pyGetName(self):
@@ -65,8 +68,12 @@ class Attr(UserDict, ModelObject):
 	def setting(self, name, default=NoDefault):
 		"""
 		Returns the value of a particular configuration setting taken
-		from the model. Perhaps a future version should ask the klass
-		and so on up the chain.
+		from the model.
+
+		Implementation note: Perhaps a future version should ask the
+		klass and so on up the chain.
 		"""
-		model = self.klass().klasses()._model
-		return model.setting(name, default)
+		return self.model().setting(name, default)
+
+	def model(self):
+		return self._klass.klasses()._model

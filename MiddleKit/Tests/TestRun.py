@@ -3,7 +3,7 @@ from TestCommon import *
 import MiddleKit.Run
 
 
-def test(filename, pyFilename, deleteData):
+def test(filename, configFilename, pyFilename, deleteData):
 	curDir = os.getcwd()
 	os.chdir(workDir)
 	try:
@@ -24,7 +24,7 @@ def test(filename, pyFilename, deleteData):
 		exec src in names
 		objectStoreClass = names['c']
 		store = objectStoreClass(**storeArgs)
-		store.readModelFileNamed(filename)
+		store.readModelFileNamed(filename, configFilename=configFilename)
 		assert store.model()._havePythonClasses # @@@@@@
 
 		# Clear the database
@@ -43,20 +43,20 @@ def test(filename, pyFilename, deleteData):
 		os.chdir(curDir)
 
 def usage():
-	print 'TestRun.py <model> <py file> [delete=0|1]'
+	print 'TestRun.py <model> <config file> <py file> [delete=0|1]'
 	print
 	sys.exit(1)
 
 def main():
-	if len(sys.argv)<3:
+	if len(sys.argv)<4:
 		usage()
 
 	modelFilename = sys.argv[1]
-	pyFilename = sys.argv[2]
+	configFilename = sys.argv[2]
+	pyFilename = sys.argv[3]
 	deleteData = 1
-
-	if len(sys.argv)==4:
-		delArg = sys.argv[3]
+	if len(sys.argv)>4:
+		delArg = sys.argv[4]
 		parts = delArg.split('=')
 		if len(parts)!=2 or parts[0]!='delete':
 			usage()
@@ -67,7 +67,7 @@ def main():
 	elif len(sys.argv)>4:
 		usage()
 
-	test(modelFilename, pyFilename, deleteData)
+	test(modelFilename, configFilename, pyFilename, deleteData)
 
 
 if __name__=='__main__':

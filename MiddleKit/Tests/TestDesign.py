@@ -19,7 +19,7 @@ def importPyClasses(klasses):
 		assert results.has_key(klassName)
 
 
-def test(modelFilename, workDir=workDir, toTestDir='../'):
+def test(modelFilename, configFilename, workDir=workDir, toTestDir='../'):
 	"""
 	modelFilename: the correct filename to the existing model
 	workDir:       the directory to remove and create and then put the
@@ -35,7 +35,12 @@ def test(modelFilename, workDir=workDir, toTestDir='../'):
 	os.mkdir(workDir)  # make a space for the files from this run
 
 	# Run generate, load the model, and import some classes
-	Generate().main('Generate.py --outdir %s --db %s --model %s' % (workDir, dbName, modelFilename))
+	command = os.path.normpath('../Design/Generate.py')
+	command += ' --outdir %s --db %s --model %s' % (workDir, dbName, modelFilename)
+	if configFilename:
+		command += ' --config ' + configFilename
+	print command
+	Generate().main(command)
 	curDir = os.getcwd()
 	os.chdir(workDir)
 	try:
@@ -44,7 +49,7 @@ def test(modelFilename, workDir=workDir, toTestDir='../'):
 			print 'listdir:', os.listdir('.')
 			print 'model path:', repr(toTestDir+modelFilename)
 			print 'sys.path', sys.path
-		model = Model(toTestDir+modelFilename)
+		model = Model(toTestDir+modelFilename, configFilename=configFilename)
 		importPyClasses(model.klasses())
 		return model
 	finally:
@@ -53,7 +58,7 @@ def test(modelFilename, workDir=workDir, toTestDir='../'):
 
 if __name__=='__main__':
 	try:
-		test(sys.argv[1])
+		test(sys.argv[1], sys.argv[2])
 	except:
 		import traceback
 		exc_info = sys.exc_info()

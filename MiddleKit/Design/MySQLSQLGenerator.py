@@ -43,15 +43,11 @@ class Klass:
 
 class EnumAttr:
 
-	def sqlType(self):
+	def nativeEnumSQLType(self):
 		enums = ['"%s"' % enum for enum in self.enums()]
 		enums = ', '.join(enums)
 		enums = 'enum(%s)' % enums
 		return enums
-
-	def sampleValue(self, value):
-		assert value in self._enums, 'value = %r, enums = %r' % (value, self._enums)
-		return repr(value)
 
 
 class StringAttr:
