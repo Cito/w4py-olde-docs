@@ -1432,6 +1432,10 @@ class Application(ConfigurableForServerSidePath, Object):
 				print "WARNING: More than one file matches basename %s (%s)" % (repr(os.path.join(currentPath, first)), filenames)
 				return None, None
 			else:
+				filename = self.findDirectoryIndex(currentPath)
+				if filename:
+					return (filename, '/' + string.join(parts[1:], '/'))
+
 				return None, None
 
 	def filenamesForBaseNameNew(self, baseName):
