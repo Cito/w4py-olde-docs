@@ -91,10 +91,13 @@ class Model:
 			name = self.name()
 		return name
 
+	def writeConnectToDatabase(self, generator, output, databasename):
+		output.write('use %s;\n\n' % databasename)
+
 	def writeInsertSamplesSQL(self, generator, dirname):
 		if self._filename is not None:
 			file = open(os.path.join(dirname, 'InsertSamples.sql'), 'w')
-			file.write('use %s;\n\n' % self.sqlDatabaseName())
+			self.writeConnectToDatabase(generator, file, self.sqlDatabaseName())
 
 			if self.setting('DoNotSortSQLCreateStatementsByDependency', False):
 				allKlasses = self.allKlassesInOrder()
