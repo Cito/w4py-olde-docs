@@ -127,6 +127,8 @@
 
 <p> Some styles prefix the retrieval method with <code>get</code>, but Webware does not for the sake of brevity and because there are methods for which it is not always clear if a <code>get</code> prefix would make sense.
 
+<p> Methods that return a boolean are prefixed with <code>is</code> to make their semantics more obvious. Examples include <code>app.isRunning()</code>, <code>user.isActive()</code> and <code>appServer.isPersistent()</code>.
+
 
 <a name=SynNaming_MethodCategories><h3>Method Categories</h3></a>
 
