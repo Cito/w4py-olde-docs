@@ -6,7 +6,7 @@ def InstallInWebKit(appServer):
 	pass
 
 
-def combineUserManagers(*classesOrNamesThereof):
+def combineManagerClasses(*classesOrNamesThereof):
 	'''
 	Given a list of "orthogonal" classes (or their names), that all inherit from UserManager, this function returns a new class that combines all of them. By "orthogonal" we mean that the features of the user manager are separate concerns and not dependent on each other.
 	Out of the box, UserKit provides custom user managers for:

@@ -311,8 +311,7 @@ class RoleUserManagerToFileTest(UserManagerToFileTest):
 
 	def setUp(self):
 		UserManagerToSomewhereTest.setUp(self)
-		from UserKit import combineUserManagers
-		umClass = combineUserManagers('UserManagerToFile', 'RoleUserManager')
+		umClass = UserKit.combineManagerClasses('UserManagerToFile', 'RoleUserManager')
 		self.mgr = umClass()
 		self.setUpUserDir(self.mgr)
 
