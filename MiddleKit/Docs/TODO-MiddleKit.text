@@ -104,6 +104,12 @@ If you have general comments or questions or contributions, please contact webwa
 
 <refinements/improvements>
 
+	[ ] optimization: we use unsigned ints for serial numbers in the database. Since they exceed the high end of a signed int in Python, they end up selected as longs, which are slower than ints. We should probably leave the SQL signed. 2 billion objects for one class is plenty for most apps.
+
+	[ ] implement model inheritance so that test cases can inherit other test case models
+
+	[ ] implement a test that spawns threads and hits the store hard enough to break the connection reuse problem
+
 	[ ] resolve issues about setting a MiddleObject's store
 	- this needs to be resolved really soon
 		- review EOF
@@ -196,6 +202,22 @@ specification."
 	[ ] Error checking: Classes.csv: the default value is a legal value. (for example, if type is int, the default must be a number. If type is enum, must be a legal enum.)
 
 	[ ] Consider breaking obj refs in the SQL tables into two fields so that non-MK entities, like stored procedures, can have a fighting chance of using them.
+		- is it confusing that each table (for a class) has a column "meId" which is only the serial number AND columns that are obj refs to other objects are also prefixed with Id even though they are 64-bit 2 element tuples
+		- one problem is that the programmer might be using server side queries.
+			- 'where userId=%s' % user.sqlObjRef()
+			- 'where userClass=%s and userId=%s' % (user.klass().id(), user.serialNum())
+		- can genericize this so that the technique could actually be changed, through configuration, without affecting code?
+		def fetchObjectsOfClass(self, aClass, clauses='', isDeep=1):
+		def fetchObjectsOfClass(self, aClass, query=None, clauses='', isDeep=1)
+			- what is query?
+			- something that gets translated to a WHERE clause
+			- might look different depending on the way MK has translated the obj model to SQL
+				- best example is obj references:
+					- 64-bit combo.
+					- 2 columns
+				- need full fledged grammar?
+					- parens, and, or, comparison
+		- 'where %s' % store.sqlMatchObjRef('user', user)
 
 	[ ] Optimization: Prefetching: Have a parameter for whether object refs should be selected in the original query or delayed/as needed (like we do now). Combine the selects into a single join and then spread the attribs out over all objects.
 
@@ -361,6 +383,8 @@ specification."
 
 
 <docs>
+
+	[ ] create an architecture document for developers
 
 	[ ] update doc strings
 
