@@ -20,7 +20,7 @@ from Configurable import Configurable
 from Application import Application
 from SocketServer import ThreadingTCPServer, ForkingTCPServer, TCPServer, BaseRequestHandler
 from marshal import loads
-import sys
+import os, sys
 
 
 
@@ -49,25 +49,25 @@ TCPServerMap = {
 class AppServerError(Exception):
 	pass
 
-	
+
 class WebKitAppServer(Configurable):
 	'''
 	Public Attrs - in the network server
 		* wkApp: A public object that points to the application object. This is used by the request handler.
-	
+
 	Private Attrs
 		* _addr:   The address of the server; a tuple containing server name and port.
 		* _app:    The single instance of the Application.
 		* _server: The TCP/IP server that takes the requests and dishes them out.
 	'''
-	
+
 	request_queue_size = 16  # @@ 2000-04-27 ce: clean up
 
 	## Init ##
 
 	def __init__(self):
 		Configurable.__init__(self)
-		
+
 		self._addr = None
 		self._plugIns = []
 
@@ -76,19 +76,19 @@ class WebKitAppServer(Configurable):
 		self._app = self.createApplication()
 		self.loadPlugIns()
 		self._server = self.createTCPServer()
-		
+
 		print 'OK'
 		print
 
 
 	## Configuration ##
-	
+
 	def defaultConfig(self):
 		return DefaultConfig
-	
+
 	def configFilename(self):
 		return 'Configs/AppServer.config'
-	
+
 
 	## Network Server ##
 
@@ -100,7 +100,7 @@ class WebKitAppServer(Configurable):
 		if self._addr is None:
 			self._addr = ('', self.setting('Port'))
 		return self._addr
-	
+
 	def createTCPServer(self):
 		''' Creates and returns a TCP server object from the Python SocketServer module. Used by __init__. '''
 		key = string.lower(self.setting('Multitasking'))[:3]
@@ -122,31 +122,38 @@ class WebKitAppServer(Configurable):
 		print 'WebKit and Webware are open source.'
 		print 'Please visit:  http://webware.sourceforge.net'
 		print
-		import os
-		print 'Process ID is :', os.getpid()
+		print 'Process id is', os.getpid()
+		print
 		if self.setting('PrintConfigAtStartUp'):
 			self.printConfig()
-	
+
 
 	## Plug-ins ##
 
 	def plugIns(self):
-		""" Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. """
+		''' Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. '''
 		return self._plugIns
 
 	def loadPlugIn(self, name, dir):
-		""" Loads the given plug-in. Used by loadPlugIns() """
+		''' Loads the given plug-in. Used by loadPlugIns(). Really invokes _loadPlugIn() and catches exceptions in order to invoke self.error(). '''
+		try:
+			self._loadPlugIn(name, dir)
+		except:
+			import traceback
+			traceback.print_exc(file=sys.stderr)
+			self.error('Plug-in %s raised exception.' % name)
+
+	def _loadPlugIn(self, name, dir):
+		''' The "real" implementation of loadPlugIn(). '''
 		print 'Plug-in: %s in %s' % (name, dir)
-			
+
 		# Update sys.path
-		if not dir in sys.path:	 
+		if not dir in sys.path:
 			sys.path.append(dir)
 
-		print '>>', sys.path
-		sys.stdout.flush()			
 		# Import the package
 		plugIn = __import__(name, globals(), [], [])
-			
+
 		# Add to our plugIns list
 		self._plugIns.append(plugIn)
 
@@ -154,31 +161,31 @@ class WebKitAppServer(Configurable):
 		if not hasattr(plugIn, 'InstallInWebKit'):
 			raise AppServerError, "Plug-in '%s' in '%s' has no InstallInWebKit() function." % (name, dir)
 		plugIn.InstallInWebKit(self)
-		
+
 	def loadPlugIns(self):
 		# @@ 2000-05-21 ce: We should really have an AddPlugIns and RemovePlugIns setting
-		""" A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source.
-		
+		''' A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source.
+
 		* Plug-ins are loaded by AppServer at startup time, just before listening for requests.
 		* A plug-in is a Python package. Therefore, it is a directory containing an __init__.py file.
 		* The directory of the package is added to sys.path and the package is imported.
 		* The __init__.py must contain a function, InstallInWebKit(appServer). AppServer invokes this at start-up so that the plug-in can do what it needs to.
-		"""
+		'''
 
 
 		for plugIn in self.setting('PlugIns'):
 			dir, name = os.path.split(plugIn)
-			self.loadPlugIn(name, dir)			
+			self.loadPlugIn(name, dir)
 
-		
+
 	## Misc ##
 
 	def setRequestQueueSize(self, value):
 		assert value>=1
 		self.__class__.request_queue_size = value
-	
+
 	def version(self):
-		return '0.2'
+		return '0.3'
 
 	def serve(self):
 		''' Starts serving requests and does so indefinitely. Sends serve_forever() to the TCP server. '''
@@ -189,19 +196,18 @@ class WebKitAppServer(Configurable):
 
 
 	## Warnings and Errors ##
-	
+
 	def warning(self, msg):
 		# @@ 2000-04-25 ce: would this be useful?
 		raise NotImplementedError
-		
+
 	def error(self, msg):
-		''' Flushes stdout and stderr, print the message to stderr and exits with code 1. '''
+		''' Flushes stdout and stderr, prints the message to stderr and exits with code 1. '''
 		sys.stdout.flush()
 		sys.stderr.flush()
-		sys.stdout = sys.stderr
-		print 'ERROR:', msg
-		sys.stdout.flush()
-		sys.exit(1)
+		sys.stderr.write('ERROR: %s\n' % msg)
+		sys.stderr.flush()
+		sys.exit(1)  # @@ 2000-05-29 ce: Doesn't work. Perhaps because of threads
 
 
 class RequestHandler(BaseRequestHandler):
@@ -237,7 +243,7 @@ class RequestHandler(BaseRequestHandler):
 
 			transaction = self.server.wkApp.dispatchRawRequest(dict)
 			results = transaction.response().contents()
-			
+
 			if verbose:
 				print 'about to send %d bytes' % len(results)
 			conn.send(results)
@@ -266,6 +272,6 @@ def main():
 		print "Exiting AppServer"
 		sys.exit()
 
-	
+
 if __name__=='__main__':
 	main()
