@@ -31,8 +31,6 @@ class AppServerError(Exception):
 
 
 class AppServer(Configurable):
-	"""
-	"""
 
 	## Init ##
 
@@ -142,11 +140,11 @@ class AppServer(Configurable):
 		print
 
 
-	## Misc ##
+	## Access ##
 
 	def version(self):
 		# @@ 2000-07-10 ce: Resolve this with the fooVersion() methods in Application
-		return '0.4 PRERELEASE'
+		return '0.4'
 
 	def application(self):
 		return self._app
@@ -158,6 +156,9 @@ class AppServer(Configurable):
 	def numRequests(self):
 		''' Return the number of requests received by this server since it was launched. '''
 		return self._reqCount
+
+	def isPersistent(self):
+		raise SubclassResponsibilityError
 
 
 	## Warnings and Errors ##

@@ -55,6 +55,10 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 	    print "Ready\n"
 
 
+	def isPersistent(self):
+		return 1
+
+
 	def handle_accept(self):
 		"""
 		This is the function that starts the request processing cycle.  When asyncore senses a write on the main socket, it calls this function.  We then accept the connection, and hand it off to a RequestHandler instance by calling the RequestHandler instance's activate method.  When we call that activate method, the RH registers itself with asyncore by calling set_socket, so that asyncore now will include that socket, and thus the RH, in it's network select loop.

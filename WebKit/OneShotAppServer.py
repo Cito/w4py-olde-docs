@@ -17,6 +17,9 @@ from Application import Application
 
 class OneShotAppServer(AppServer):
 
+	def isPersistent(self):
+		return 0
+
 	def createApplication(self):
 		return Application(server=self, useSessionSweeper=0)
 

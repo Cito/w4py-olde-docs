@@ -74,6 +74,8 @@ class ThreadedAppServer(AppServer):
 
 		self.mainsocket.listen(20) # @@ 2000-07-10 ce: hard coded constant should be a setting
 
+	def isPersistent(self):
+		return 1
 
 	def mainloop(self, timeout=1):
 
