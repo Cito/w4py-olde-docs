@@ -112,7 +112,7 @@ Version 0.1
 <p> We now want to run the MK Generate program to create the necessary Python and SQL code to support our application. Locate the Generate program, found in <span class=filename>MiddleKit/Design/</span>:
 
 <p> <table class=cmd><tr><td>
-&gt; <span class=typed>python /Webware/MiddleKit/Design/Generate.py</span> <br>
+&gt; <span class=typed>python /Projects/Webware/MiddleKit/Design/Generate.py</span> <br>
 generate.py: error: Missing options. <br>
 Usage: generate.py --db DBNAME --model FILENAME [--sql] [--py] [--outdir DIRNAME] <br>
        generate.py -h | --help  <br>
@@ -126,7 +126,7 @@ Usage: generate.py --db DBNAME --model FILENAME [--sql] [--py] [--outdir DIRNAME
 <p> Now try again with the database and model as arguments:
 
 <p> <table class=cmd><tr><td>
-&gt; <span class=typed>python /Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos</span> <br>
+&gt; <span class=typed>python /Projects/Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos</span> <br>
 Generating SQL... <br>
 Generating Python...
 </td></tr></table>
@@ -143,7 +143,7 @@ Generating Python...
 
 <p> UNIX: <table class=cmd><tr><td>
 &gt; <span class=typed>cat &gt; generate <br>
-python /Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos <br>
+python /Projects/Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos <br>
 ^D <br></span>
 > <span class=typed>chmod u+x generate</span> <br>
 > <span class=typed>generate</span> <br>
@@ -153,7 +153,7 @@ Generating Python...
 
 <p> Windows: <table class=cmd><tr><td>
 &gt; <span class=typed>copy con generate.bat <br>
-python /Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos <br>
+python /Projects/Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos <br>
 ^Z <br></span>
 > <span class=typed>generate</span> <br>
 Generating SQL... <br>
@@ -212,7 +212,7 @@ Generating Python...
 
 <p> <table class=cmd><tr><td>
 &gt; <span class=typed>generate</span> <br>
-python /Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos <br>
+python /Projects/Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos <br>
 Generating SQL... <br>
 Generating Python... <br>
 <br>
@@ -245,6 +245,18 @@ def main():
 if __name__=='__main__':
     main()
 </pre>
+
+<p> If you get an error that MiddleKit cannot be imported, make sure that <span class=filename>Webware/</span> is in your path. You can do this temporarily for your command line session by setting PYTHONPATH:
+
+<p> Windows and UNIX.csh:
+<table class=cmd><tr><td>
+> <span class=typed>set pythonpath=/Projects/Webware</span>
+</td></tr></table>
+
+<p> UNIX.sh:
+<table class=cmd><tr><td>
+> <span class=typed>pythonpath=/Projects/Webware</span>
+</td></tr></table>
 
 
 <a name=CreateObj><h2>Create a new object</h2></a>
