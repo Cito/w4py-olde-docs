@@ -1,15 +1,11 @@
 from Common import *
-import string, time, traceback, types, whrandom, sys
+import string, time, traceback, types, whrandom, sys, MimeWriter, smtplib, StringIO
 from time import asctime, localtime
 from MiscUtils.Funcs import dateForEmail
 from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict, htmlEncode
 from HTTPResponse import HTTPResponse
-from types import DictType
-import traceback
-import MimeWriter
-import smtplib
-import StringIO
+from types import DictType, StringType
 
 class singleton: pass
 
@@ -41,6 +37,14 @@ class ExceptionHandler(Object):
 
 	See the WebKit.html documentation for other information.
 	'''
+
+	maxValueLen = 20
+
+	hideValuesForFields = 'cc creditcard password passwd'.split()  # keep all lower case to support case insensitivity
+	if 0: # for testing
+		hideValuesForFields.extend('application uri http_accept userid'.split())
+
+	hiddenString = '*** hidden ***'
 
 
 	## Init ##
@@ -180,7 +184,7 @@ class ExceptionHandler(Object):
 		self.writeln(htTitle(s))
 
 	def writeDict(self, d):
-		self.writeln(htmlForDict(d))
+		self.writeln(htmlForDict(d, filterValueCallBack=self.filterDictValue))
 
 	def writeTable(self, listOfDicts, keys=None):
 		"""
@@ -190,8 +194,12 @@ class ExceptionHandler(Object):
 		from the first dictionary. If listOfDicts is "false", nothing
 		happens.
 
+		The keys and values are already considered to be HTML.
+
 		Caveat: There's no way to influence the formatting or to use
 		column titles that are different than the keys.
+
+		Note: Used by writeAttrs().
 		"""
 		if not listOfDicts:
 			return
@@ -209,7 +217,7 @@ class ExceptionHandler(Object):
 		for row in listOfDicts:
 			wr('<tr>')
 			for key in keys:
-				wr('<td bgcolor=#F0F0F0>%s</td>' % row[key])
+				wr('<td bgcolor=#F0F0F0>%s</td>' % self.filterTableValue(row[key], key, row, listOfDicts))
 			wr('</tr>\n')
 
 		wr('</table>')
@@ -218,8 +226,7 @@ class ExceptionHandler(Object):
 		"""
 		Writes the attributes of the object as given by attrNames.
 		Tries obj._name first, followed by obj.name(). Is resilient
-		regarding exceptions so as not to not ever spoil the
-		exception report.
+		regarding exceptions so as not to spoil the exception report.
 		"""
 		rows = []
 		for name in attrNames:
@@ -376,6 +383,36 @@ class ExceptionHandler(Object):
 		server.quit()
 
 
+	## Filtering Values ##
+
+	def filterDictValue(self, value, key, dict):
+		return self.filterValue(value, key)
+
+	def filterTableValue(self, value, key, row, table):
+		"""
+		Invoked by writeTable() to afford the opportunity to filter
+		the values written in tables. These values are already HTML
+		when they arrive here. Use the extra key, row and table
+		args as necessary.
+		"""
+		if row.has_key('attr') and key!='attr':
+			return self.filterValue(value, row['attr'])
+		else:
+			return self.filterValue(value, key)
+
+	def filterValue(self, value, key):
+		"""
+		This is the core filter method that is used in all filtering.
+		By default, it simply returns self.hiddenString if the key is
+		in self.hideValuesForField (case insensitive). Subclasses
+		could override for more elaborate filtering techniques.
+		"""
+		if key.lower() in self.hideValuesForFields:
+			return self.hiddenString
+		else:
+			return value
+
+
 	## Self utility ##
 
 	def repr(self, x):
@@ -385,7 +422,7 @@ class ExceptionHandler(Object):
 		This is a utility method for writeAttrs.
 		"""
 		if type(x) is DictType:
-			return htmlForDict(x)
+			return htmlForDict(x, filterValueCallBack=self.filterDictValue)
 		else:
 			return htmlEncode(repr(x))
 
