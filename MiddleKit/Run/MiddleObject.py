@@ -49,7 +49,6 @@ class MiddleObject(NamedValueAccess):
 		self._mk_changed         = 0
 		self._mk_initing         = 0
 		self._mk_inStore         = 0
-		self._mk_backObjRefAttrs = None
 
 	_mk_setCache = {}    # cache the various setFoo methods first by qualified class name
 
@@ -164,29 +163,6 @@ class MiddleObject(NamedValueAccess):
 			allAttrs[key] = getattr(self, attrName)
 		return allAttrs
 
-	def backObjRefAttrs(self):
-		"""
-		Returns a list of all ObjRefAttrs in the given object model that can
-		potentially refer to this object.  The list does NOT include attributes
-		inherited from superclasses.
-		"""
-		if self._mk_backObjRefAttrs is None:
-			backObjRefAttrs = []
-			# Construct targetKlasses = a list of this object's klass and all superklasses
-			targetKlasses = []
-			super = self.klass()
-			while super:
-				targetKlasses.append(super.name())
-				super = super.superklass()
-			# Look at all klasses in the model
-			for klass in self.store().model().allKlassesInOrder():
-				# find all ObjRefAttrs of this klass that refer to one of our targetKlasses
-				for attr in klass.attrs():
-					if isinstance(attr, ObjRefAttr) and attr.className() in targetKlasses:
-						backObjRefAttrs.append(attr)
-			self._mk_backObjRefAttrs = backObjRefAttrs
-		return self._mk_backObjRefAttrs
-
 	def referencingObjectsAndAttrs(self):
 		"""
 		Returns a list of tuples of (object, attr) for all objects that have
@@ -194,7 +170,7 @@ class MiddleObject(NamedValueAccess):
 		"""
 		referencingObjectsAndAttrs = []
 		selfSqlObjRef = self.sqlObjRef()
-		for backObjRefAttr in self.backObjRefAttrs():
+		for backObjRefAttr in self.klass().backObjRefAttrs():
 			objects = self.store().fetchObjectsOfClass(backObjRefAttr.klass(), **self.referencingObjectsAndAttrsFetchKeywordArgs(backObjRefAttr))
 			for object in objects:
 				assert object.valueForAttr(backObjRefAttr)==self

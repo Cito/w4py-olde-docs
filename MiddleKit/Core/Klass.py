@@ -22,6 +22,7 @@ class Klass(UserDict, ModelObject):
 		self._superklass = None
 		self._subklasses = []
 		self._pyClass = None
+		self._backObjRefAttrs = None
 
 		if dict is not None:
 			self.readDict(dict)
@@ -249,6 +250,29 @@ class Klass(UserDict, ModelObject):
 		if self._pyClass is None:
 			self._pyClass = self._klassContainer._model.pyClassForName(self.name())
 		return self._pyClass
+
+	def backObjRefAttrs(self):
+		"""
+		Returns a list of all ObjRefAttrs in the given object model that can
+		potentially refer to this object.  The list does NOT include attributes
+		inherited from superclasses.
+		"""
+		if self._backObjRefAttrs is None:
+			backObjRefAttrs = []
+			# Construct targetKlasses = a list of this object's klass and all superklasses
+			targetKlasses = {}
+			super = self
+			while super:
+				targetKlasses[super.name()] = super
+				super = super.superklass()
+			# Look at all klasses in the model
+			for klass in self._klassContainer._model.allKlassesInOrder():
+				# find all ObjRefAttrs of klass that refer to one of our targetKlasses
+				for attr in klass.attrs():
+					if isinstance(attr, ObjRefAttr) and targetKlasses.has_key(attr.className()):
+						backObjRefAttrs.append(attr)
+			self._backObjRefAttrs = backObjRefAttrs
+		return self._backObjRefAttrs
 
 
 	## As string ##
