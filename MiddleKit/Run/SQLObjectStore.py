@@ -8,6 +8,7 @@ from MiddleObject import MiddleObject
 from ObjectStore import ObjectStore, UnknownObjectError
 from ObjectKey import ObjectKey
 from MiscUtils.MixIn import MixIn
+from MiscUtils.DBPool import DBPool
 from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
 
 class SQLObjectStoreError(Exception): pass
@@ -68,6 +69,7 @@ class SQLObjectStore(ObjectStore):
 		self._sqlEcho   = None
 		self._sqlCount  = 0
 		self._pyClassForName = {}   # cache. see corresponding method
+		self._pool = None   # an optional DBPool
 
 	def modelWasSet(self):
 		'''
@@ -95,11 +97,11 @@ class SQLObjectStore(ObjectStore):
 
 
 	def setUpSQLEcho(self):
-		'''
+		"""
 		Sets up the SQL echoing/logging for the store according to the
 		setting 'SQLLog'. See the User's Guide for more info. Invoked by
 		modelWasSet().
-		'''
+		"""
 		setting = self.setting('SQLLog', None)
 		if setting==None or setting=={}:
 			self._sqlEcho = None
@@ -136,6 +138,11 @@ class SQLObjectStore(ObjectStore):
 			self._connection = self.newConnection()
 			self._connected = 1
 			self.readKlassIds()
+			poolSize = self.setting('SQLConnectionPoolSize', 0)
+			if poolSize:
+				args = self._dbArgs.copy()
+				args['db'] = self._model.sqlDatabaseName()
+				self._pool = DBPool(self.dbapiModule(), poolSize, **args)
 
 	def newConnection(self):
 		'''
@@ -151,7 +158,6 @@ class SQLObjectStore(ObjectStore):
 	def readKlassIds(self):
 		'''
 		Reads the klass ids from the SQL database. Invoked by connect().
-		'
 		'''
 		conn, cur = self.executeSQL('select id, name from _MKClassIds;')
 		klassesById = {}
@@ -338,7 +344,9 @@ class SQLObjectStore(ObjectStore):
 		if connection:
 			conn = connection
 		elif self._threaded:
-			if self._threadSafety is 1:
+			if self._pool:
+				conn = self._pool.getConnection()
+			elif self._threadSafety is 1:
 				conn = self.newConnection()
 			else: # safety = 2, 3
 				if not self._connected:
@@ -354,8 +362,7 @@ class SQLObjectStore(ObjectStore):
 
 	def newConnection(self):
 		'''
-		Subclasses must override to return the DB API module
-		used by the subclass.
+		Subclasses must override to return a newly created database connection.
 		'''
 		raise SubclassResponsibilityError
 

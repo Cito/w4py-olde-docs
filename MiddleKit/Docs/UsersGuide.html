@@ -295,6 +295,12 @@ This setting has no effect on the visible behavior of MiddleKit; it only changes
     'DeleteBehavior': 'mark',
 }</pre>
 
+<p> The <span class=name>SQLConnectionPoolSize</span> setting is used to create a <a href=../../MiscUtils/Docs/index.html>MiscUtils</a>.DBPool instance for use by the store. For DB API modules with a threadsafety of only 1 (such as MySQLdb), this is particularly useful (in one benchmark, the speed up was 15 - 20%). Simply set the size of the pool in order to have one created and used:
+
+<pre>{
+	'SQLConnectionPoolSize': 20,
+}</pre>
+
 <p> <span class=filename>SQLGenerator.config</span> has one setting: <span class=name>DropStatements</span> whose potential values are:
 
 <ul>
