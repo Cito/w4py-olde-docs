@@ -47,10 +47,10 @@ def main(args):
 	# go to Webware dir so that:
 	#   - importing packages like 'WebUtils' hits this Webware
 	#   - we cannot import WebKit modules without qualifying them
-	os.chdir(webwareDir)
+	os.chdir(webwarePath)
 
 	# Go!
-	launchWebKit(server, webKitDir, args[2:])
+	launchWebKit(server, webKitPath, args[2:])
 
 
 if __name__=='__main__':
