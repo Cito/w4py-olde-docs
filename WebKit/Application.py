@@ -365,7 +365,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		# @@ 2000-06-26 ce: we should have a more general solution for this
 		request.clearTransaction()
 		response.clearTransaction()
-		
+
 		return transaction
 
 	def handleBadURL(self, transaction):
@@ -607,7 +607,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 	def _setContext(self, name, value):#use addContext
 		if self._contexts.has_key(name):
 			print 'WARNING: Overwriting context %s (=%s) with %s' % (
-				repr(name), repr(self._contents[name]), repr(value))
+				repr(name), repr(self._contexts[name]), repr(value))
 		self._contexts[name] = value
 
 	def contexts(self):
@@ -616,7 +616,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 	def addContext(self, name, dir):
 		if self._contexts.has_key(name):
 			print 'WARNING: Overwriting context %s (=%s) with %s' % (
-				repr(name), repr(self._contents[name]), repr(value))
+				repr(name), repr(self._contexts[name]), repr(value))
 		try:
 			importAsName = name
 			localdir, pkgname = os.path.split(dir)
