@@ -83,6 +83,13 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
   you should configure your browser to run with 
   Webware/bin/editfile.py (and edit editfile.py so that it opens
   your editor).
+
+    <li> In WebKit.Page, removed use of the internal method _actionSet()
+	which cached the list of actions for the servlet.  This was redundant 
+	code, and its removal allows a servlet to use dynamic actions (i.e. to 
+	make the action list dependent on the permissions of the logged-in user).  
+	Note that _actionSet() is still used for "old-style" actions to maintain 
+	backwards compatibility.
 </ul>
 
 
