@@ -20,6 +20,11 @@ class Klass(UserDict, ModelObject):
 		self._superklass = None
 		self._subklasses = []
 		self._pyClass = None
+
+		# Used by MiddleKit.Run
+		self._getMethods = {}
+		self._setMethods = {}
+
 		if dict is not None:
 			self.readDict(dict)
 

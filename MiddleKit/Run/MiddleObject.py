@@ -275,20 +275,14 @@ class MiddleObject(NamedValueAccess):
 		If the attribute is not found, the default argument is returned
 		if specified, otherwise LookupError is raised with the attrName.
 		'''
-		try:
-			attr = self.klass().lookupAttr(attrName)
-		except KeyError:
-			method = None
+		attr = self.klass().lookupAttr(attrName, None)
+		if attr:
+			return self.valueForAttr(attr, default)
 		else:
-			pyGetName = attr.pyGetName()
-			method = getattr(self, pyGetName, None)
-		if method is None:
 			if default is NoDefault:
 				raise LookupError, attrName
 			else:
 				return default
-		else:
-			return method()
 
 	def setValueForKey(self, attrName, value):
 		'''
@@ -316,7 +310,23 @@ class MiddleObject(NamedValueAccess):
 		return method(value)
 
 	def valueForAttr(self, attr, default=NoDefault):
-		return self.valueForKey(attr['Name'], default)
+		getMethod = self.klass()._getMethods.get(attr.name(), None)
+		if getMethod is None:
+			pyGetName = attr.pyGetName()
+			getMethod = getattr(self.klass().pyClass(), pyGetName, None)
+			if getMethod is None:
+				getMethod = 0  # 0 is false, and indicates that the search was already done
+			self.klass()._getMethods[attr.name()] = getMethod
+		if getMethod:
+			try:
+				return getMethod(self)
+			except TypeError:
+				assert 0, 'getMethod=%r, self=%r, type(self)=%r' % (getMethod, self, type(self))
+		else:
+			if default is NoDefault:
+				raise LookupError, attr['Name']
+			else:
+				return default
 
 	def setValueForAttr(self, attr, value):
 		return self.setValueForKey(attr['Name'], value)
