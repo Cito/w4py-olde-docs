@@ -26,40 +26,40 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 	"""
 	"""
 	def __init__(self):
-	    AppServer.__init__(self)
+		AppServer.__init__(self)
 
-	    self._addr = None
-	    self._poolsize=self.setting('ServerThreads')
+		self._addr = None
+		self._poolsize=self.setting('ServerThreads')
 
-	    self.threadPool=[]
-	    self.requestQueue=Queue.Queue(self._poolsize*5) #5 times the number of threads we have
-	    self.rhQueue=Queue.Queue(0)#must be larger than requestQueue, just make it no limit, and limit the number that can be created
-	    self._maxRHCount = self._poolsize * 10
-	    self.rhCreateCount = 0
+		self.threadPool=[]
+		self.requestQueue=Queue.Queue(self._poolsize*5) #5 times the number of threads we have
+		self.rhQueue=Queue.Queue(0)#must be larger than requestQueue, just make it no limit, and limit the number that can be created
+		self._maxRHCount = self._poolsize * 10
+		self.rhCreateCount = 0
 
-	    self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
-	    addr = self.address()
-	    self.bind(addr)
-	    print "Listening on", addr
-	    open('address.text', 'w').write('%s:%d' % (addr[0], addr[1]))
+		self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+		addr = self.address()
+		self.bind(addr)
+		print "Listening on", addr
+		open('address.text', 'w').write('%s:%d' % (addr[0], addr[1]))
 
-	    self.running=1
+		self.running=1
 
-	    out = sys.stdout
-	    out.write('Creating %d threads' % self._poolsize)
-	    for i in range(self._poolsize): #change to threadcount
-		    t = Thread(target=self.threadloop)
-		    t.start()
-		    self.threadPool.append(t)
-		    out.write(".")
-		    out.flush()
-	    out.write("\n")
+		out = sys.stdout
+		out.write('Creating %d threads' % self._poolsize)
+		for i in range(self._poolsize): #change to threadcount
+			t = Thread(target=self.threadloop)
+			t.start()
+			self.threadPool.append(t)
+			out.write(".")
+			out.flush()
+		out.write("\n")
 
 	    #self.asyn_thread = Thread(target=self.asynloop)
 	    #self.asyn_thread.start()
 
-	    self.listen(64) # @@ 2000-07-14 ce: hard coded constant should be a setting
-	    print "Ready\n"
+		self.listen(64) # @@ 2000-07-14 ce: hard coded constant should be a setting
+		print "Ready\n"
 
 
 	def isPersistent(self):
@@ -314,7 +314,7 @@ def main(monitor = 0):
 		server = AsyncThreadedAppServer()
 		if monitor:
 			monitor = Monitor(server)
-		asyncore.loop(0.5)
+		asyncore.loop()
 	except Exception, e: #Need to kill the Sweeper thread somehow
 		print e
 		print "Exiting AppServer"
