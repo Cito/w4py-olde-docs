@@ -5,12 +5,12 @@ try:
 except:
 	sys.path.append('..')
 	import WebUtils
-from MiddleKit.KeyValueAccess import KeyValueAccess
+from MiscUtils.NamedValueAccess import NamedValueAccess
 
-class Object(KeyValueAccess):
+class Object(NamedValueAccess):
 	'''
 	Object is the root class for all classes in the WebKit.
-	
+
 	This is a placeholder for any future functionality that might be appropriate
 	for all objects in the framework.
 	'''
