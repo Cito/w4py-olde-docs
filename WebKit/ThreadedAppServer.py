@@ -159,7 +159,7 @@ class ThreadedAppServer(AppServer):
 				self.updateThreadUsage()
 
 			if threadCheck > threadCheckInterval:
-				if debug: print "Busy Threads: ", self.activeThreadCount()
+				if debug: print "\nBusy Threads: ", self.activeThreadCount()
 				threadCheck=0
 				self.manageThreadCount()
 			else: threadCheck = threadCheck+1
@@ -203,13 +203,16 @@ class ThreadedAppServer(AppServer):
 		if debug: print "Max Thread Use: ", max
 		if debug: print "ThreadCount: ", self.threadCount
 
-		if avg==0: return #we have no observations to use
+		if len(self.threadUseCounter) < 10: return #we have no observations to use
 
 		margin = self.threadCount / 4 #smoothing factor
 		if debug: print "margin=", margin
 
-		if avg == self.threadCount and self.threadCount < self.maxServerThreads:
-			self.spawnThread()
+		if avg > self.threadCount - margin and self.threadCount < self.maxServerThreads:
+			# Running low: double thread count
+			n = min(self.threadCount, self.maxServerThreads-self.threadCount)
+			for i in range(n):
+				self.spawnThread()
 		elif avg < self.threadCount - margin and self.threadCount > self.minServerThreads:
 			self.absorbThread()
 
@@ -226,11 +229,11 @@ class ThreadedAppServer(AppServer):
 	def absorbThread(self):
 		if debug: print "Absorbing Thread"
 		self.requestQueue.put(None)
-		self.threadCount = self.threadCount-1
 		for i in self.threadPool:
 			if not i.isAlive():
 				rv=i.join() #Don't need a timeout, it isn't alive
 				self.threadPool.remove(i)
+				self.threadCount = self.threadCount-1
 				if debug: print "Thread Absorbed, threadCount=", self.threadCount
 		self.threadUseCounter=[]
 
@@ -584,7 +587,7 @@ def run(useMonitor = 0, workDir=None):
 
 def shutDown(arg1,arg2):
 	global server
-	print "Shutdown Called"
+	print "Shutdown Called", time.asctime(time.localtime(time.time()))
 	if server:
 		server.initiateShutdown()
 	else:
