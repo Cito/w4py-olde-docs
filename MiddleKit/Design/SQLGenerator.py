@@ -114,13 +114,13 @@ class Model:
 			for filename in filenames:
 				lines = open(filename).readlines()
 				try:
-					self.writeInsertSamplesSQLForLines(lines, generator, file)
+					self.writeInsertSamplesSQLForLines(lines, generator, file, filename)
 				except SampleError, s:
 					s.output( filename )
 					sys.exit(1)
 			file.close()
 
-	def writeInsertSamplesSQLForLines(self, lines, generator, file):
+	def writeInsertSamplesSQLForLines(self, lines, generator, file, filename):
 		# @@ 2001-02-04 ce: this method is too long
 		#	break into additional methods
 		#	some of these methods may even go into other mix-ins
@@ -132,76 +132,89 @@ class Model:
 			try:
 				fields = parse(line)
 			except CSVParser.ParseError, err:
-				raise SampleError( linenum, 'Syntax error: %s' % err)
+				raise SampleError(linenum, 'Syntax error: %s' % err)
 			if fields is None:	# parser got embedded newline; continue with the next line
 				continue
 
-			if self.areFieldsBlank(fields):
-				continue  # skip blank lines
-			if fields[0] and str(fields[0])[0]=='#':
-				continue
-			if fields[0].endswith(' objects'):
-				tableName = fields[0].split()[0]
-				try:
-					klass = self.klass(tableName)
-				except KeyError:
-					raise SampleError( linenum, "Class '%s' has not been defined" % ( tableName ) )
-				file.write('\n\n/* %s */\n\n' % fields[0])
-				#print '>> table:', tableName
-				readColumns = 1
-				continue
-			if readColumns:
-				names = [name for name in fields if name]
-				attrs = []
-				for name in names:
-					if name == klass.sqlIdName():
-						attrs.append( PrimaryKey( name, klass ) )
-					else:
-						try:
-							attrs.append( klass.lookupAttr(name) )
-						except KeyError:
-							raise SampleError( linenum, "Class '%s' has no attribute '%s'" % ( klass.name(), name ) )
-				# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
+			try:
+				if self.areFieldsBlank(fields):
+					continue  # skip blank lines
+				if fields[0] and str(fields[0])[0]=='#':
+					continue
+				if fields[0].endswith(' objects'):
+					tableName = fields[0].split()[0]
+					try:
+						klass = self.klass(tableName)
+					except KeyError:
+						raise SampleError( linenum, "Class '%s' has not been defined" % ( tableName ) )
+					file.write('\n\n/* %s */\n\n' % fields[0])
+					#print '>> table:', tableName
+					readColumns = 1
+					continue
+				if readColumns:
+					names = [name for name in fields if name]
+					attrs = []
+					for name in names:
+						if name == klass.sqlIdName():
+							attrs.append(PrimaryKey(name, klass))
+						else:
+							try:
+								attrs.append(klass.lookupAttr(name))
+							except KeyError:
+								raise SampleError( linenum, "Class '%s' has no attribute '%s'" % ( klass.name(), name ) )
+					# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
+					for attr in attrs:
+						assert not attr.get('isDerived', 0)
+					colNames = [attr.sqlName() for attr in attrs]
+					#print '>> cols:', columns
+					colSql = ','.join(colNames)
+					readColumns = 0
+					continue
+				values = fields[:len(attrs)]
+				i = 0
 				for attr in attrs:
-					assert not attr.get('isDerived', 0)
-				colNames = [attr.sqlName() for attr in attrs]
-				#print '>> cols:', columns
-				colSql = ','.join(colNames)
-				readColumns = 0
-				continue
-			values = fields[:len(attrs)]
-			i = 0
-			for attr in attrs:
-				try:
-					value = values[i]
-				except IndexError:
-					raise SampleError( linenum, "Couldn't find value for attribute '%s'" % attr.name() )
-				value = value.strip()
-				#print '>> (%s, %s)' % (value, attr)
-				if value=='':
-					value = attr.get('Default', None)
-					if value is None:
+					try:
+						value = values[i]
+					except IndexError:
+						raise SampleError( linenum, "Couldn't find value for attribute '%s'" % attr.name() )
+					value = value.strip()
+					#print '>> (%s, %s)' % (value, attr)
+					if value=='':
+						value = attr.get('Default', None)
+						if value is None:
+							value = 'NULL'
+						else:
+							value = attr.sampleValue(value)
+					elif value.lower()=='none':
 						value = 'NULL'
 					else:
 						value = attr.sampleValue(value)
-				elif value.lower()=='none':
-					value = 'NULL'
-				else:
-					value = attr.sampleValue(value)
-#					print 'Attr: %s, Value: %s' % (attr,value)
-				if not isinstance(value, StringTypes):
-					print 'attr:', attr
-					print 'value:', value
-					print 'type of value:', type(value)
-					assert isinstance(value, StringTypes)
-				assert value  # value cannot be blank
-				values[i] = value
-				i += 1
-			#print
-			#values = [self.valueFilter(value) for value in values]
-			values = ', '.join(values)
-			stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
-			file.write(stmt)
+#						print 'Attr: %s, Value: %s' % (attr,value)
+					value = str(value)
+					if 0:
+						if not isinstance(value, StringTypes):
+							print 'attr:', attr
+							print 'value:', value
+							print 'type of value:', type(value)
+							assert isinstance(value, StringTypes), value
+					assert value  # value cannot be blank
+					values[i] = value
+					i += 1
+				#print
+				#values = [self.valueFilter(value) for value in values]
+				values = ', '.join(values)
+				stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
+				file.write(stmt)
+			except:
+				print
+				print 'Samples error:'
+				try:
+					print '%s:%s' % (filename, linenum)
+					print line
+				except:
+					pass
+				print
+				raise
 
 	def areFieldsBlank(self, fields):
 		""" Utility method for writeInsertSamplesSQLForLines(). """
@@ -455,21 +468,33 @@ class Attr:
 		return value
 
 	def writeCreateSQL(self, generator, out):
-		if self.hasSQLColumn():
-			name = self.sqlName().ljust(self.maxNameWidth())
-			if self.isRequired():
-				notNullSQL = ' not null'
+		try:
+			if self.hasSQLColumn():
+				name = self.sqlName().ljust(self.maxNameWidth())
+				if self.isRequired():
+					notNullSQL = ' not null'
+				else:
+					notNullSQL = self.sqlNullSpec()
+				if generator.sqlSupportsDefaultValues():
+					defaultSQL = self.createDefaultSQL()
+					if defaultSQL:
+						defaultSQL = ' ' + defaultSQL
+				else:
+					defaultSQL = ''
+				out.write('\t%s %s%s%s' % (name, self.sqlType(), notNullSQL, defaultSQL))
 			else:
-				notNullSQL = self.sqlNullSpec()
-			if generator.sqlSupportsDefaultValues():
-				defaultSQL = self.createDefaultSQL()
-				if defaultSQL:
-					defaultSQL = ' ' + defaultSQL
-			else:
-				defaultSQL = ''
-			out.write('\t%s %s%s%s' % (name, self.sqlType(), notNullSQL, defaultSQL))
-		else:
-			out.write('\t/* %(Name)s %(Type)s - not a SQL column */' % self)
+				out.write('\t/* %(Name)s %(Type)s - not a SQL column */' % self)
+		except:
+			print
+			print 'exception for attribute:'
+			print '%s.%s' % (self.klass().name(), self.name())
+			print
+			try:
+				print self
+			except:
+				pass
+			print
+			raise
 
 	def sqlNullSpec(self):
 		return ''
@@ -477,7 +502,7 @@ class Attr:
 	def createDefaultSQL(self):
 		default = self.get('Default', None)
 		if default is not None:
-			default = default.strip()
+			default = str(default).strip()
 			if default.lower()=='none':  # kind of redundant
 				default = None
 			return 'default ' + self.sampleValue(default)
@@ -504,14 +529,15 @@ class BoolAttr:
 		return 'bool'
 
 	def sampleValue(self, value):
-		value = value.upper()
-		if value=='FALSE' or value=='NO':
+		try:
+			value = value.upper()
+		except:
+			pass
+		if value in ('FALSE', 'NO', '0', '0.0', 0, 0.0):
 			value = 0
-		elif value=='TRUE' or value=='YES':
+		elif value in ('TRUE', 'YES', '1', '1.0', 1, 1.0):
 			value = 1
-		else:
-			value = int(value)  # will throw exception if value is weird
-		assert value==0 or value==1
+		assert value==0 or value==1, value
 		return str(value)
 
 
@@ -521,8 +547,13 @@ class IntAttr:
 		return 'int'
 
 	def sampleValue(self, value):
-		int(value) # raises exception if value is invalid
-		return value
+		if not isinstance(value, int):
+			value = str(value)
+			if value.endswith('.0'):
+				# numeric values from Excel-based models are always float
+				value = value[:-2]
+			int(value) # raises exception if value is invalid
+			return value
 
 
 class LongAttr:
@@ -644,16 +675,18 @@ class ListAttr:
 		# @@ 2001-02-04 ce: ^^^ what does that mean???
 		raise Exception, 'Lists are implicit. They cannot have sample values.'
 
+
 class PrimaryKey:
-	'''
+	"""
 	This class is not a 'standard' attribute, but just a helper class for the
 	writeInsertSamplesSQLForLines method, in case the samples.csv file contains
 	a primary key column (i.e. the serial numbers are specified explicitly).
-	'''
-	def __init__(self,name,klass):
+	"""
+
+	def __init__(self, name, klass):
 		self._name = name
 		self._klassid = klass.id()
-		self._props = {'isDerived':0}
+		self._props = {'isDerived': 0}
 
 	def name(self):
 		return self._name

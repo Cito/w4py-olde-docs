@@ -269,14 +269,17 @@ class %(name)s(%(superclassName)s):
 class BoolAttr:
 
 	def stringToValue(self, string):
-		string = string.upper()
-		if string=='TRUE' or string=='YES':
+		try:
+			string = string.upper()
+		except:
+			pass
+		if string in ('TRUE', 'YES', '1', '1.0', 1, 1.0):
 			value = 1
-		elif string=='FALSE' or string=='NO':
+		elif string in ('FALSE', 'NO', '0', '0.0', 0, 0.0):
 			value = 0
 		else:
 			value = int(string)
-		assert value==0 or value==1
+		assert value==0 or value==1, value
 		return value
 
 	def writePySetChecks(self, out):
