@@ -361,7 +361,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		try:
 			ssPath = request.serverSidePath()
-			if ssPath is None:
+			if ssPath is None or not os.path.exists(ssPath):
 				self.handleBadURL(transaction)
 			elif isdir(ssPath) and noslash(request.pathInfo()): # (*) see below
 				self.handleDeficientDirectoryURL(transaction)
