@@ -70,7 +70,7 @@ class Test:
 			self._modelNames = args[1:]
 		else:
 			self._modelNames = '''
-				MKBasic MKNone MKString MKDateTime MKDefaultMinMax
+				MKBasic MKNone MKString MKDateTime MKEnums MKDefaultMinMax
 				MKTypeValueChecking MKInheritance MKInheritanceAbstract
 				MKList MKObjRef MKObjRefReuse MKDelete MKDeleteMark
 				MKMultipleStores MKMultipleThreads
