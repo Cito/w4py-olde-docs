@@ -313,6 +313,26 @@ class Page(HTTPServlet):
 	def urlDecode(self, s):
 		return Funcs.urlDecode(s)
 
+	def forward(self, URL):
+		"""
+		Forwards this request to another servlet.  See Application.forward() for details.
+		The main difference is that here you don't have to pass in the transaction as the first argument.
+		"""
+		self.application().forward(self.transaction(), URL)
+
+	def includeURL(self, URL):
+		"""
+		Includes the response of another servlet in the current servlet's response.  See Application.includeURL() for details.
+		The main difference is that here you don't have to pass in the transaction as the first argument.
+		"""
+		self.application().includeURL(self.transaction(), URL)
+
+	def callMethodOfServlet(self, URL, *args, **kwargs):
+		"""
+		Call a method of another servlet.  See Application.callMethodOfServlet() for details.
+		The main difference is that here you don't have to pass in the transaction as the first argument.
+		"""
+		return self.application().callMethodOfServlet(self.transaction(), URL, *args, **kwargs)
 
 	## Self utility ##
 

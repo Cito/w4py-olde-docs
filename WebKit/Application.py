@@ -640,6 +640,54 @@ class Application(ConfigurableForServerSidePath, Object):
 		return self.includeURL(trans, url)
 
 
+	def callMethodOfServlet(self, trans, URL, method, *args, **kwargs):
+		"""
+		Enable a servlet to call a method of another servlet.  Note: the servlet's awake() is called,
+		then the method is called with the given arguments, then sleep() is called.  The result
+		of the method call is returned.
+		"""
+		req = trans.request()
+
+		# Save the current url path and servlet
+		currentPath = req.urlPath()
+		currentServlet = trans._servlet
+
+		# Construct the url path for the servlet we're calling
+		urlPath = req.urlPath()
+		if urlPath=='':
+			urlPath = '/' + URL
+		elif urlPath[-1]=='/':
+			urlPath = urlPath + URL
+		else:
+			lastSlash = string.rfind(urlPath, '/')
+			urlPath = urlPath[:lastSlash+1] + URL
+
+		# Modify the request to use the new URL path
+		req.setURLPath(urlPath)
+
+		# Add the current servlet as a parent
+		req.addParent(currentServlet)
+
+		# Get the new servlet
+		self.createServletInTransaction(trans)
+
+		# Awaken, call the method, and sleep
+		servlet = trans.servlet()
+		servlet.awake(trans)
+		result = getattr(servlet, method)(*args, **kwargs)
+		servlet.sleep(trans)
+
+		# Return the servlet instance to the queue
+		self.returnInstance(trans, trans.request().serverSidePath())
+
+		# Replace things like they were
+		req.setURLPath(currentPath)
+		req.popParent()
+		trans._servlet=currentServlet
+
+		# Done
+		return result
+	
 	## Transactions ##
 
 	def awake(self, transaction):
