@@ -2,4 +2,4 @@
 # Webware for Python
 # See ../README
 
-__all__ = ['CSV']
+__all__ = ['CSV', 'DataTable']
