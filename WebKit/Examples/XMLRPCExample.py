@@ -1,4 +1,4 @@
-from XMLRPCServlet import XMLRPCServlet
+from WebKit.XMLRPCServlet import XMLRPCServlet
 import operator
 
 class XMLRPCExample(XMLRPCServlet):
