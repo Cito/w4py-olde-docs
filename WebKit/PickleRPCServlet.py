@@ -1,8 +1,11 @@
 from RPCServlet import RPCServlet
 import sys, traceback, types
-from pickle import load, dumps
 from time import time
 from MiscUtils.PickleRPC import RequestError
+try:
+	from cPickle import dumps, load
+except ImportError:
+	from pickle import dumps, load
 
 
 class PickleRPCServlet(RPCServlet):

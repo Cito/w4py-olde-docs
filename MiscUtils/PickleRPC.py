@@ -117,7 +117,10 @@ xmlrpclib and then transformed from XML-orientation to Pickle-orientation.
 __version__ = 1   # version of PickleRPC protocol
 
 
-from pickle import dumps, load
+try:
+	from cPickle import dumps, load
+except ImportError:
+	from pickle import dumps, load
 
 
 class Error(Exception):
