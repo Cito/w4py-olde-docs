@@ -95,7 +95,7 @@ class Model(Configurable):
 						else:
 							file.close()
 							assert isinstance(dict, DictType), 'type=%r dict=%r' % (type(dict), dict)
-							for key in ('source', 'klasses', 'pickle version', 'python version'):
+							for key in ('source', 'data', 'pickle version', 'python version'):
 								assert dict.has_key(key)
 							if dict['source']!='MiddleKit':
 								shouldDeletePickle = 1
@@ -104,7 +104,7 @@ class Model(Configurable):
 							elif dict['python version']!=sys.version_info:
 								shouldDeletePickle = 1
 							else:
-								self._klasses = dict['klasses']
+								self._klasses = dict['data']
 								self._klasses._model = self
 								didReadPickle = 1
 
@@ -128,7 +128,7 @@ class Model(Configurable):
 				'source': 'MiddleKit',
 				'python version': sys.version_info,
 				'pickle version': self.pickleVersion,
-				'klasses': self._klasses,
+				'data': self._klasses,
 			}
 			try:
 				file = open(picklePath, 'w')
