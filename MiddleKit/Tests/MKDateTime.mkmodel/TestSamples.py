@@ -8,7 +8,10 @@ def test():
 	t  = '13:01'
 	dt = '2000-01-01 13:01'
 	try:
-		from DateTime import DateTimeFrom, DateTimeDeltaFrom
+		try:
+			from mx.DateTime import DateTimeFrom, DateTimeDeltaFrom
+		except ImportError:
+			from DateTime import DateTimeFrom, DateTimeDeltaFrom
 		print 'Testing with DateTime module.'
 		d  = DateTimeFrom(d)
 		t  = DateTimeDeltaFrom(t)
