@@ -77,7 +77,7 @@ class User:
 		if not fromMgr:
 			# Our manager needs to know about this
 			# So make sure we go through him
-			self.manager().login(self, password)
+			return self.manager().login(self, password)
 		else:
 			if password==self.password():
 				self._isActive = 1
