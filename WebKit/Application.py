@@ -152,12 +152,24 @@ class Application(Configurable,CanContainer):
 		import CanFactory
 		self._canFactory = CanFactory.CanFactory(self,os.path.join(os.getcwd(),'Cans'))
 
-
-
 	def startSessionSweeper(self):
-		self._sessSweepThread=Thread(None, self.sweeperThreadFunc, 'SessionSweeper', (self._sessions,self.setting('SessionTimeout')))
+		self._sessSweepThread=Thread(None, self.sessionSweeper, 'SessionSweeper')
 		self._sessSweepThread.start()
 
+	def sessionSweeper(self):
+		''' Invoked by __init__ via a new thread to clean out stale sessions in the background. '''
+		while self.running:
+			sessions = self._sessions
+			timeout = self.setting('SessionTimeout') * 60  # in seconds
+			assert timeout>=0
+			curTime = time.time()
+			for key in sessions.keys():
+				if (curTime - sessions[key].lastAccessTime()) > timeout:
+					del sessions[key]
+			time.sleep(timeout/10)
+			# @@ 2000-08-04 ce: make sweep interval or div factor a setting
+
+	# @@ 2000-08-04 ce: Once sessionSweeper() has matured, remove this method. No longer used.
 	def sweeperThreadFunc(self,sessions,timeout): #JSL, moved this here so I can control it better, later
 		"""
 		This function runs in a separate thread and cleans out stale sessions periodically.
@@ -183,7 +195,6 @@ class Application(Configurable,CanContainer):
 				# @@ 2000-08-03 ce: er, 2 secs? perhaps that and 'frequency' should be configurable
 			except IOError, e:
 				pass
-
 
 	def shutDown(self):
 		"""
