@@ -60,7 +60,7 @@ import MiddleKit
 class Generate:
 
 	def databases(self):
-		return ['MySQL']  # @@ 2000-10-19 ce: should build this dynamically
+		return ['MSSQL', 'MySQL']  # @@ 2000-10-19 ce: should build this dynamically
 
 	def main(self, args=sys.argv):
 		opt = self.options(args)
@@ -93,7 +93,7 @@ class Generate:
 		print 'Usage: %s --db DBNAME --model FILENAME [--sql] [--py] [--outdir DIRNAME]' % progName
 		print '       %s -h | --help' % progName
 		print
-		print '       * Known databases include: %s.' % ','.join(self.databases())
+		print '       * Known databases include: %s' % ', '.join(self.databases())
 		print '       * If neither --sql nor --py are specified, both are generated.'
 		print '       * If --outdir is not specified, then the base filename (sans extension) is used.'
 		print
