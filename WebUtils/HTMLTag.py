@@ -603,7 +603,7 @@ class HTMLReader(SGMLParser):
 		'html':   'canOnlyHave head body',
 		'head':   'cannotHave  html head body',
 		'body':   'cannotHave  html head body',
-		'table':  'canOnlyHave tr tbody a',  # a because in IE you can wrap a row in <a> to make the entire row clickable
+		'table':  'canOnlyHave tr thead tbody tfoot a',  # a because in IE you can wrap a row in <a> to make the entire row clickable
 		'tr':     'canOnlyHave th td',
 		'td':     'cannotHave  td tr',
 		'select': 'canOnlyHave option',
