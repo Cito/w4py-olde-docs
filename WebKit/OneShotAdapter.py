@@ -44,7 +44,12 @@ class OneShotAdapter(Adapter):
 	def run(self):
 
 		try:
-			myInput = sys.stdin.read()
+			myInput = ''
+			if os.environ.has_key('CONTENT_LENGTH'):
+				length = int(os.environ['CONTENT_LENGTH'])
+				if length:
+					myInput = sys.stdin.read(length)
+			#myInput = sys.stdin.read()
 
 			dict = {
 				'format':  'CGI',
@@ -62,16 +67,27 @@ class OneShotAdapter(Adapter):
 			appSvr = None
 
 			sys.stdout = _real_stdout
-			if os.name=='nt': # MS Windows: no special translation of end-of-lines
+			# MS Windows: no special translation of end-of-lines
+			if os.name=='nt':
 				import msvcrt
 				msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+
 			write = sys.stdout.write
 			for pair in response['headers']:
 				write('%s: %s\n' % pair)
 			write('\n')
 			write(response['contents'])
+
 			if self.setting('ShowConsole'):
-				self.showConsole(_console.getvalue())
+				# show the contents of the console, but only if we
+				# are serving up an HTML file
+				found = 0
+				for name, value in response['headers']:
+					if name.lower()=='content-type':
+						found = 1
+						break
+				if found and value.lower()=='text/html':
+					self.showConsole(_console.getvalue())
 		except:
 			import traceback
 
