@@ -326,6 +326,7 @@ class SQLObjectStore(ObjectStore):
 		Note that you can pass in a connection to force a particular one
 		to be used.
 		"""
+		sql = str(sql)  # Excel-based models yield Unicode strings which some db modules don't like
 		if aggressiveGC:
 			import gc
 			assert gc.isenabled()
@@ -471,6 +472,9 @@ class SQLObjectStore(ObjectStore):
 		"""
 		return dtd
 
+	def sqlNowCall(self):
+		return 'Now()'
+
 
 	## Debugging ##
 
@@ -600,8 +604,8 @@ class MiddleObjectMixIn:
 		"""
 		klass = self.klass()
 		assert klass is not None
-		if self.store().model().setting('DeleteBehavior', 'delete') == 'mark':
-			return 'update %s set deleted=Now() where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
+		if self.store().model().setting('DeleteBehavior', 'delete')=='mark':
+			return 'update %s set deleted=%s where %s=%d;' % (klass.sqlTableName(), self.store().sqlNowCall(), klass.sqlIdName(), self.serialNum())
 		else:
 			return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
 

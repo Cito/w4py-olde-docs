@@ -76,7 +76,7 @@ class SQLGenerator(CodeGenerator):
 		Subclasses must override to return 1 or 0, indicating their SQL variant supports DEFAULT <value> in the CREATE statement.
 		Subclass responsibility.
 		"""
-		return SubclassResponsibility
+		raise SubclassResponsibility
 
 
 class ModelObject:
@@ -408,7 +408,7 @@ class Klass:
 		Returns a one liner that becomes part of the CREATE statement for creating the deleted timestamp field of the table.
 		This is used if DeleteBehavior is set to "mark".
 		"""
-		return '    %s datetime,\n' % ('deleted'.ljust(self.maxNameWidth()))
+		return '    %s datetime null,\n' % ('deleted'.ljust(self.maxNameWidth()))
 
 	def sqlIdName(self):
 		name = self.name()

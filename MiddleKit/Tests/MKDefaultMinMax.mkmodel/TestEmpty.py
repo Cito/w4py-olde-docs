@@ -39,13 +39,13 @@ def test(store):
 	# uses the defaults specified in the object model.
 	# So we use some direct SQL here:
 	if getattr(store, 'executeSQL'):
-		store.executeSQL('insert into Foo (i) values (42);')
+		con, cur = store.executeSQL('insert into Foo (i) values (42);')
 		foo = store.fetchObjectsOfClass(Foo, clauses='where i=42')[0]
-		assert foo._get('b')==1
-		assert foo._get('l')==3
-		assert foo._get('f')==4
-		assert foo._get('s')=='5'
+		assert foo._get('b')==1, foo._get('b')
+		assert foo._get('l')==3, foo._get('l')
+		assert foo._get('f')==4, foo._get('f')
+		assert foo._get('s')=='5', foo._get('s')
 
 		store.executeSQL('insert into Foo (s) values (42);')
-		foo = store.fetchObjectsOfClass(Foo, clauses='where s="42"')[0]
+		foo = store.fetchObjectsOfClass(Foo, clauses="where s='42'")[0]
 		assert foo._get('i')==2

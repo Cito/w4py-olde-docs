@@ -79,6 +79,9 @@ class MSSQLObjectStore(SQLObjectStore):
 			dtd = DateTime.DateTime(1900, 1, 1) + dtd
 		return dtd
 
+	def sqlNowCall(self):
+		return 'GETDATE()'
+
 
 class Klass:
 

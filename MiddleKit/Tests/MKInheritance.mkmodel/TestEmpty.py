@@ -33,11 +33,11 @@ def test(store):
 	objs = store.fetchObjectsOfClass(One, isDeep=0)
 	assert len(objs)==1
 
-	objs = store.fetchObjectsOfClass(One, clauses='where a="1"')
+	objs = store.fetchObjectsOfClass(One, clauses="where a='1'")
 	assert len(objs)==1
 	assert objs[0].c()=='3'
 
-	objs = store.fetchObjectsOfClass(One, clauses='where a="2"')
+	objs = store.fetchObjectsOfClass(One, clauses="where a='2'")
 	assert len(objs)==0
 
 	objs = store.fetchObjectsOfClass(Two)

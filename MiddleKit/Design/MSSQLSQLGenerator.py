@@ -5,11 +5,9 @@ import os, sys
 
 
 class MSSQLSQLGenerator(SQLGenerator):
+
 	def sqlSupportsDefaultValues(self):
-		return 0 # I think it does but I do not know how it is implemented
-
-
-	pass
+		return 1 # I think it does but I do not know how it is implemented
 
 
 class Model:
@@ -79,7 +77,6 @@ class Klasses:
 
 	def writeClassIdsSQL(self, generator, out):
 		wr = out.write
-# If _MKClassIds table exists drop it before creating it again.
 		wr('''\
 
 if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[_MKClassIds]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
@@ -92,15 +89,9 @@ create table _MKClassIds (
 )\ngo
 ''')
 		wr('delete from _MKClassIds\n\n')
-		id = 1
 		for klass in self._klasses:
 			wr('insert into _MKClassIds (id, name) values\n')
-			name = klass.name()
-#			name = name.replace('[','')
-#			name = name.replace(']','')
-			wr ('\t(%s, %r)\n' % (id, name))
-			klass.setId(id)
-			id += 1
+			wr("\t(%s, '%s');\n" % (klass.id(), klass.name()))
 		wr('\ngo\n\n')
 
 
@@ -270,16 +261,19 @@ class StringAttr:
 					ref = '' # for some reason ref was none instead of ''
 				else:
 					ref = ' ' + ref
-				return 'varchar(%s)%s' % (self['Max'], ref)
+				return 'varchar(%s)%s' % (int(self['Max']), ref)
 
 
 class EnumAttr:
 
 	def sqlType(self):
-		enums = ['"%s"' % enum for enum in self.enums()]
-		enums = ', '.join(enums)
-		enums = 'enum(%s)' % enums
-		return enums
+		maxLen = max([len(e) for e in self.enums()])
+		return 'varchar(%s)' % maxLen
+
+	def sampleValue(self, value):
+		assert value in self._enums, 'value = %r, enums = %r' % (value, self._enums)
+		return repr(value)
+
 
 class ObjRefAttr:
 
