@@ -34,7 +34,7 @@ class MSSQLObjectStore(SQLObjectStore):
 		return int(self._cursor.fetchone()[0])
 
 
-def Klass:
+class Klass:
 
 	def sqlTableName(self):
 		'''
