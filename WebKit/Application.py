@@ -635,7 +635,7 @@ class Application(Configurable,CanContainer):
 			while strippedPath != '' and ssPath == None:
 				strippedPath,extra=os.path.split(strippedPath)
 				ssPath = self._serverSidePathCacheByPath.get(strippedPath, None)
-				if extraPathInfo != '': #avoid a trailing /
+				if extraPathInfo != '': #avoid a trailing os.sep
 					extraPathInfo=os.path.join(extra,extraPathInfo)
 				else: extraPathInfo=extra
 				
@@ -649,10 +649,9 @@ class Application(Configurable,CanContainer):
 			if urlPath[0]=='_':  # special administration scripts are denoted by a preceding underscore and are located with the app server. @@ 2000-05-19 ce: redesign this
 				ssPath = os.path.join(self.serverDir(), urlPath)
 			else:
-				restOfPath=''
 				#handle case of no /
-				if string.find(urlPath,'/') > -1: 
-					contextName,restOfPath = string.split(urlPath,'/',1)
+				if string.find(urlPath,os.sep) > -1: 
+					contextName,restOfPath = string.split(urlPath,os.sep,1) #is this OS specific????
 				else:
 					contextName = urlPath
 
