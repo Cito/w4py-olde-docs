@@ -25,6 +25,13 @@ class SidebarPage(Page):
 	'''
 
 
+	## Init ##
+
+	def __init__(self):
+		Page.__init__(self)
+		self._indentBase = '&nbsp; ' # used in menuItem()
+
+
 	## Content methods ##
 
 	def writeBodyParts(self):
@@ -86,16 +93,17 @@ class SidebarPage(Page):
 		self.writeln('<b>%s</b><br>' % title)
 		self._wroteHeading = 1
 
-	def menuItem(self, title, url=None, extra=None):
-		if extra:
-			extra = extra + ' '
+	def menuItem(self, title, url=None, suffix=None, indentLevel=1):
+		if suffix:
+			suffix = suffix + ' '
 		else:
-			extra = ''
+			suffix = ''
+		indent = self._indentBase*indentLevel
 		if url is not None:
-			self.writeln(' &nbsp; <a href="%s">%s</a> %s<br>' % (
-				url, title, extra))
+			self.writeln(' %s<a href="%s">%s</a> %s<br>' % (
+				indent, url, title, suffix))
 		else:
-			self.writeln(' &nbsp; %s %s<br>' % (title, extra))
+			self.writeln(' %s%s %s<br>' % (indent, title, suffix))
 
 	def endMenu(self):
 		self.writeln('</font></td></tr></table>')
