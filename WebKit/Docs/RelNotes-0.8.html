@@ -102,7 +102,14 @@ Version 0.8
 		self.endResponse()
 	# continue processing...</pre>
 
+	<li> New method Page.sendRedirectAndEnd(url) which does "self.response().sendRedirect(url); self.endResponse()".
+	
+	<li> Profiling the entire app server is now fairly easy to do. Read the doc string of Profiler.py.
+
 	<li> Fixed handling of POST'ed variables in the LoginPage.py example servlet.  (Thanks to Steve Freitas for the fix.)
+
+	<li> The singleton <span class=name>Tombstone</span> has been deprecated in favor of <span class=name>MiscUtils.NoDefault</span>.
+
 </ul>
 
 
