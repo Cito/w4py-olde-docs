@@ -60,8 +60,6 @@ class HTTPRequest(Request):
 			dict[key] = self._cookies[key].value
 		self._cookies = dict
 
-		self._serverSidePath = None
-		self._serverSideDir  = None
 		self._transaction    = None
 
 
@@ -157,8 +155,8 @@ class HTTPRequest(Request):
 
 	def serverSidePath(self):
 		''' Returns the complete, unambiguous server-side path for the request. '''
-		if self._serverSidePath is None:
-			path = self._environ['PATH_INFO'][1:] #This is the path after FCGIWebKit.py, ie Hello.py or Hello.psp
+		if not hasattr(self, '_serverSidePath'):
+			path = self._environ['PATH_INFO'][1:] # This is the path after the adapter name (for example, WebKit.cgi) i.e. Welcome.py
 			# The [1:] above strips the preceding '/' that we get with Apache 1.3
 			app = self._transaction.application()
 			self._serverSidePath = app.serverSidePathForRequest(self, path)
@@ -166,8 +164,8 @@ class HTTPRequest(Request):
 
 	def serverSideDir(self):
 		''' Returns the directory of the Servlet (as given through __init__()'s path). '''
-		if self._serverSideDir is None:
-			self._serverSideDir = os.path.split(self.serverSidePath())[0]
+		if not hasattr(self, '_serverSideDir'):
+			self._serverSideDir = os.path.dirname(self.serverSidePath())
 		return self._serverSideDir
 
 	def relativePath(self, joinPath):
