@@ -49,6 +49,31 @@ Version 0.8
 <ul>
 
 	<li> New setting 'ReportRPCExceptionsInWebKit': 1 means report exceptions in RPC servlets in the same way as exceptions in other servlets, i.e. in the logfiles, the error log, and/or by email.  0 means don't report the exceptions on the server side at all; this is useful if your RPC servlets are raising exceptions by design and you don't want to be notified.  Note that in release 0.7, there was no exception reporting on the server side in RPC servlets; if you want to get the same behavior in this release you'll have to set this setting to 0.
+
+	<li> New methods in HTTPRequest:
+		<ul>
+			<li><b>originalURLPath()</b> - Returns the URL path of the original servlet before any forwarding.
+			<li><b>siteRoot()</b> - Returns the URL path components necessary to get back home from the current location.
+				<p>Examples:
+				<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;''
+				<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'../'
+				<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'../../'
+				<p>You can use this as a prefix to a URL that you know is based off
+				the home location.  Any time you are in a servlet that may have been
+				forwarded to from another servlet at a different level,
+				you should prefix your URL's with this.  That is, if servlet "Foo/Bar"
+				forwards to "Qux", then the qux servlet should use siteRoot() to construct all
+				links to avoid broken links.  This works properly because this method
+				computes the path based on the original servlet, not the location of the
+				servlet that you have forwarded to.
+			<li><b>siteRootFromCurrentServlet()</b> - Similar to siteRoot() but instead, it returns the site root
+				relative to the current servlet, not the original servlet.
+			<li><b>servletPathFromSiteRoot()</b> - Returns the "servlet path" of this servlet relative to the siteRoot.  In
+				other words, everything after the name of the context (if present).
+				If you append this to the result of self.siteRoot() you get back to the
+				current servlet.  This is useful for saving the path to the current servlet
+				in a database, for example.
+		</ul>
 </ul>
 
 

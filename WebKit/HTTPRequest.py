@@ -141,6 +141,9 @@ class HTTPRequest(Request):
 
 		self._sessionExpired = 0
 
+		# Save the original urlPath.
+		self._originalURLPath = self.urlPath()
+
 		if debug: print "Done setting up request, found keys %s" % repr(self._fields.keys())
 
 
@@ -268,6 +271,10 @@ class HTTPRequest(Request):
 			return self.fsPath()
 		return self._environ['PATH_INFO']
 
+	def originalURLPath(self):
+		''' Returns the URL path of the _original_ servlet before any forwarding. '''
+		return self._originalURLPath
+		
 	def urlPathDir(self):
 		"""
 		Same as urlPath, but only gives the directory
@@ -374,7 +381,66 @@ class HTTPRequest(Request):
 			fullurl = fullurl[:string.rfind(fullurl,"/")+1]
 		return fullurl
 
+	def siteRoot(self):
+		"""
+		Returns the URL path components necessary to get back home from
+		the current location.
 
+		Examples:
+			''
+			'../'
+			'../../'
+
+		You can use this as a prefix to a URL that you know is based off
+		the home location.  Any time you are in a servlet that may have been
+		forwarded to from another servlet at a different level,
+		you should prefix your URL's with this.  That is, if servlet "Foo/Bar"
+		forwards to "Qux", then the qux servlet should use siteRoot() to construct all
+		links to avoid broken links.  This works properly because this method
+		computes the path based on the _original_ servlet, not the location of the
+		servlet that you have forwarded to.
+		"""
+		url = self.originalURLPath()[1:]
+		contextName = self.contextName() + '/'
+		if url.startswith(contextName):
+			url = url[len(contextName):]
+		numStepsBackward = len(url.split('/')) - 1
+		return '../' * numStepsBackward
+		
+	def siteRootFromCurrentServlet(self):
+		"""
+		Similar to siteRoot() but instead, it returns the site root
+		relative to the _current_ servlet, not the _original_ servlet.
+		"""
+		url = self.urlPath()[1:]
+		contextName = self.contextName() + '/'
+		if url.startswith(contextName):
+			url = url[len(contextName):]
+		numStepsBackward = len(url.split('/')) - 1
+		return '../' * numStepsBackward
+		
+	def servletPathFromSiteRoot(self):
+		"""
+		Returns the "servlet path" of this servlet relative to the siteRoot.  In
+		other words, everything after the name of the context (if present).
+		If you append this to the result of self.siteRoot() you get back to the
+		current servlet.  This is useful for saving the path to the current servlet
+		in a database, for example.
+		"""
+		urlPath = self.urlPath()
+		if urlPath[:1] == '/':
+			urlPath = urlPath[1:]
+		parts = urlPath.split('/')
+		newParts = []
+		for part in parts:
+			if part == '..':
+				if newParts:
+					newParts.pop()
+			else:
+				newParts.append(part)
+		if newParts[:1] == [self.contextName()]:
+			newParts[:1] = []
+		return '/'.join(newParts)
 
 	## Special ##
 
