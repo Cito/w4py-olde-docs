@@ -57,7 +57,7 @@ Version %(versionString)s
 <td valign=top>
 	<ul>
 		<li> <a href=http://www.python.org class=BigLink>Python</a> <br> (Python home page)
-		<li> <a href=http://www.corrt.com/info/pyisp-list.html class=BigLink>Python-friendly ISPs</a> <br> (find a host for your Python app)
+		<li> <a href=http://www.python.org/cgi-bin/moinmoin/PythonHosting class=BigLink>Python-friendly ISPs</a> <br> (find a host for your Python app)
 	</ul>
 </td>
 </tr>
