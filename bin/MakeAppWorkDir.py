@@ -24,7 +24,10 @@ updated without disturbing your applications.
 
 COMMAND LINE USAGE
 
-	python MakeAppWorkDir.py SomeDir
+	python MakeAppWorkDir.py [-c SampleContextName] SomeDir
+
+If SampleContextName is given that name will be used for the
+installed context.  Otherwise a context "MyContext" will be created.
 
 """
 
@@ -45,7 +48,7 @@ class MakeAppWorkDir:
 	"""
 
 	def __init__(self, webWareDir, workDir, verbose=1,
-		     sampleContext="Context", osType=None):
+		     sampleContext="MyContext", osType=None):
 		"""Initializer for MakeAppWorkDir.  Pass in at least the
 		Webware directory and the target working directory.  If you
 		pass None for sampleContext then the default context will the
@@ -341,14 +344,29 @@ class Main(Page):
 
 
 if __name__ == "__main__":
-	if len(sys.argv) != 2:
-		print __doc__
-		sys.exit(1)
+	targetDir = None
+	contextName = 'MyContext'
+	args = sys.argv[1:]
+	# lame little command-line handler
+	while args:
+		if args[0] == '-c':
+			if len(args) < 2:
+				print __doc__
+				sys.exit(1)
+			contextName = args[1]
+			args = args[2:]
+			continue
+		if targetDir:
+			print __doc__
+			sys.exit(1)
+		targetDir = args[0]
+		args = args[1:]
 
 	# this assumes that this script is still located in Webware/bin
 	p = os.path
 	webWareDir = p.abspath(p.join(p.dirname(sys.argv[0]), ".."))
 
-	mawd = MakeAppWorkDir(webWareDir, sys.argv[1])
+	mawd = MakeAppWorkDir(webWareDir, sys.argv[1],
+	                      sampleContext=contextName)
 	mawd.buildWorkDir()
 
