@@ -10,10 +10,10 @@ class AppControl(AdminSecurity):
 
 		action = self.request().field("action",None)
 		if action == None:
-			self.write( \
-		"""
-		<form method=post>
+			self.write( """
+		 <form method=post>
 		<table cellspacing = '0' cellpadding = '0'>
+		<tr><td><input type=submit name="action" value="Shutdown"</td></tr>
 		<tr>
 		<td><input type=submit name="action" value="ClearCache"></td>
 		<td>Clear the Servlet instance cache in Application and the class caches of each servlet factory</td>
@@ -63,4 +63,9 @@ class AppControl(AdminSecurity):
 					except Exception, e:
 						self.write("<br><font color='red'>Could not reload %s, error was %s</font>" % (i,e))
 			self.write("<p>Done")
-		
+
+		elif action == "Shutdown":
+			self.write("<B> Shutting down the Application server")
+			self.application()._server.initiateShutdown()
+			self.write("<p>Good Luck!</b>")
+			
