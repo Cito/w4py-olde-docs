@@ -17,9 +17,6 @@ from CanContainer import *
 
 from WebUtils.WebFuncs import HTMLEncode
 from WebUtils.HTMLForException import HTMLForException
-
-# @@ import MiscUtils
-# @@ from MiscUtils.NamedValueAccess import NamedValueAccess
 import MiscUtils.CSV
 
 
