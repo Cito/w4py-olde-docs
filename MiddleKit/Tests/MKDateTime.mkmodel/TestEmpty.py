@@ -21,13 +21,19 @@ def testStrings():
 
 	storeFoo(f)
 
+	f.setD('2002-11-11')
+	f.setT('16:04')
+	f.setDt('2002-11-11 16:04')
+
+	store.saveChanges()
+
 
 def testObjects():
-	from DateTime import DateTimeFrom
+	from DateTime import DateTimeFrom, TimeFrom
 	print 'Testing with DateTime module.'
 
 	d  = DateTimeFrom('2001-06-07')
-	t  = DateTimeFrom('12:42')
+	t  = TimeFrom('12:42')
 	dt = DateTimeFrom('2001-06-07 12:42')
 
 	f = Foo()
@@ -36,6 +42,16 @@ def testObjects():
 	f.setDt(dt)
 
 	storeFoo(f)
+
+	d  = DateTimeFrom('2002-11-11')
+	t  = TimeFrom('16:04')
+	dt = DateTimeFrom('2002-11-11 16:04')
+
+	f.setD(d)
+	f.setT(t)
+	f.setDt(dt)
+
+	store.saveChanges()
 
 
 def storeFoo(f):
@@ -46,11 +62,11 @@ def storeFoo(f):
 
 	results = store.fetchObjectsOfClass(Foo)
 	assert len(results)==1
-	results[0].dumpAttrs()
+#	results[0].dumpAttrs()
 
 
 def testNone():
-	print 'Testing with strings.'
+	print 'Testing None.'
 
 	store.executeSQL('delete from Foo;')
 
