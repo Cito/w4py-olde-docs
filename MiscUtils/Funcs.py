@@ -101,7 +101,15 @@ def uniqueId(forObject=None):
 	r = [time.time(), random.random(), os.times()]
 	if forObject is not None:
 		r.append(id(forObject))
-	return md5.new(str(r)).hexdigest()
+	md5object = md5.new(str(r))
+	try:
+		return md5object.hexdigest()
+	except AttributeError:
+		# Older versions of Python didn't have hexdigest, so we'll do it manually
+		hexdigest = []
+		for char in md5object.digest():
+			hexdigest.append('%02x' % ord(char))
+		return string.join(hexdigest, '')
 
 
 ### Deprecated

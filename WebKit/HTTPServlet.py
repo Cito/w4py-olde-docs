@@ -1,5 +1,6 @@
 from Common import *
 from Servlet import Servlet
+import string
 
 
 class HTTPServlet(Servlet):
@@ -31,7 +32,7 @@ class HTTPServlet(Servlet):
 		httpMethodName = trans.request().method()
 		method = self._methodForRequestType.get(httpMethodName, None)
 		if not method:
-			methName = 'respondTo' + httpMethodName.capitalize()
+			methName = 'respondTo' + string.capitalize(httpMethodName)
 			method = getattr(self, methName, self.notImplemented)
 		method(trans)
 
