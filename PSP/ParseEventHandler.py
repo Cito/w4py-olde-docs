@@ -250,20 +250,37 @@ class ParseEventHandler:
 ##		self._writer.popIndent()
 	
 	def generateDeclarations(self):
+		# The PSP "extends" directive allows you to use a shortcut -- if the module name
+		# is the same as the class name, you can say "Classname" instead of "ClassName.ClassName".
+		# But we can't tell right now which names are actually class names, and which
+		# names are really module names that contain a class of the same name.
+		# So we have to generate code that checks at runtime.
 		self._writer.println()
+		self._writer.println('import types')
+		self._writer.println('_baseClasses = []')
+		for baseClass in self._baseClasses:
+			className = string.split(baseClass, '.')[-1]
+			self._writer.println('if isinstance(%s, types.ModuleType):' % baseClass)
+			self._writer.pushIndent()
+			self._writer.println('_baseClasses.append(%s.%s)' % (baseClass, className))
+			self._writer.popIndent()
+			self._writer.println('else:')
+			self._writer.pushIndent()
+			self._writer.println('_baseClasses.append(%s)' % baseClass)
+			self._writer.popIndent()
+		self._writer.println()
+		# Now write the class line
 		self._writer.printChars('class ')
 		self._writer.printChars(self._ctxt.getServletClassName())
 		self._writer.printChars('(')
-		baselist = []
-		for baseClass in self._baseClasses:
-			if string.find(baseClass,'.')<0 and baseClass not in self._importedSymbols:
-				baselist.append(baseClass + '.' + baseClass)
-			else:
-				baselist.append(baseClass)
-		self._writer.printChars(string.join(baselist, ','))
+		for i in range(len(self._baseClasses)):
+			if i > 0:
+				self._writer.printChars(',')
+			self._writer.printChars('_baseClasses[%d]' % i)
 		self._writer.printChars('):')
 		#self._writer.printChars('('+self._baseClass+'):')
 		self._writer.printChars('\n')
+		
 		self._writer.pushIndent()
 		self._writer.println('def canBeThreaded(self):') # I Hope to take this out soon!
 		self._writer.pushIndent()
