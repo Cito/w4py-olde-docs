@@ -4,7 +4,16 @@ DataTable.py
 
 INTRODUCTION
 
-This class is useful for reading delimited text files which typically
+This class is useful for representing a table of data arranged by named
+columns, where each row in the table can be thought of as a record:
+
+	name   phoneNumber
+	------ -----------
+	Chuck  893-3498
+	Bill   893-0439
+	John   893-5901
+
+This data often comes from delimited text files which typically
 have well defined columns or fields with several rows each of which can
 be thought of as a record.
 
@@ -45,9 +54,9 @@ assumption when you create the table:
 
 		table = DataTable(headings, defaultType='float')
 
-Using types like int and float will cause DataTable to actually convert
-the string values read from a file to these types so that you can use
-them in natural operations. For example:
+Using types like int and float will cause DataTable to actually
+convert the string values (perhaps read from a file) to these types
+so that you can use them in natural operations. For example:
 
 	if row['age']>120:
 		self.flagData(row, 'age looks high')
@@ -59,7 +68,7 @@ according the column headings. Names are case sensitive.
 ADDING ROWS
 
 Like Python lists, data tables have an append() method. You can append
-TableRecords, or you pass a dictionary, list of object, in which case a
+TableRecords, or you pass a dictionary, list or object, in which case a
 TableRecord is created based on given values. See the method docs below
 for more details.
 
@@ -76,7 +85,7 @@ data files without having to remove them.
 Whitespace around field values is stripped.
 
 You can control all this behavior through the arguments found in the
-initializer and the various readSomething() methods:
+initializer and the various readFoo() methods:
 
 	...delimiter=',', allowComments=1, stripWhite=1
 
@@ -87,8 +96,13 @@ For example:
 You should access these parameters by their name since additional ones
 could appear in the future, thereby changing the order.
 
+If you are creating these text files, we recommend the
+comma-separated-value format, or CSV. This format is better defined
+than the tab delimited format, and can easily be edited and manipulated
+by popular spreadsheets and databases.
 
-NON-FILE TABLES
+
+TABLES FROM SCRATCH
 
 Here's an example that constructs a table from scratch:
 
@@ -103,11 +117,16 @@ QUERIES
 A simple query mechanism is supported for equality of fields:
 
 	matches = table.recordsEqualTo({'uid': 5})
+	if matches:
+		for match in matches:
+			print match
+	else:
+		print 'No matches.'
 
 
 COMMON USES
 
-* Servers can use data table to read and write log files.
+* Servers can use DataTable to read and write log files.
 
 * Programs can keep configuration and other data in simple comma-
 separated text files and use DataTable to access them. For example, a
@@ -120,15 +139,13 @@ site.
 MORE DOCS
 
 Some of the methods in this module have worthwhile doc strings to look
-at.
+at. See below.
 
 
 TO DO
 
 * Perhaps TableRecord should inherit UserList and UserDict and override methods as appropriate...?
 * Better support for datetime.
-* Add error checking that a column name is not a number (which could
-  cause problems).
 * _types and BlankValues aren't really packaged, advertised or
   documented for customization by the user of this module.
 * DataTable:
@@ -137,8 +154,9 @@ TO DO
 	* More list-like methods such as insert()
 	* writeFileNamed() is flawed: it doesn't write the table column
 	  type
-	* Doesn't support quoted values and embedded commas
 	* Should it inherit from UserList?
+* Add error checking that a column name is not a number (which could
+  cause problems).
 * Look for various @@ tags through out the code.
 
 '''
@@ -505,6 +523,8 @@ BlankValues = {
 
 class TableRecord:
 
+	## Init ##
+
 	def __init__(self, table, values=None):
 		'''
 		Dispatches control to one of the other init methods based on the type of values.  Values can be one of three things:
@@ -563,7 +583,7 @@ class TableRecord:
 				self._values.append(BlankValues[heading.type()])
 
 
-	## Access ##
+	## Accessing like a sequence or dictionary ##
 
 	def __len__(self):
 		return len(self._values)
@@ -602,3 +622,19 @@ class TableRecord:
 		for key in self.keys():
 			items.append((key, self[key]))
 		return items
+
+
+	## Additional access ##
+
+	def asList(self):
+		''' Returns a sequence whose values are the same at the record's and in the order defined by the table. '''
+		# It just so happens that our implementation already has this
+		return self._values[:]
+
+	def asDict(self):
+		''' Returns a dictionary whose key-values match the table record. '''
+		dict = {}
+		nameToIndexMap = self._nameToIndexMap
+		for key in nameToIndexMap.keys():
+			dict[key] = self._values[nameToIndexMap[key]]
+		return dict
