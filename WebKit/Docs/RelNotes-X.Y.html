@@ -47,10 +47,22 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 		This has been integrated into the UnknownFileType servlet for handling
 		static files.
 
-	<li>AppServer script detects -u (unbuffered output) and -O (optimize) 
+	<li> AppServer script detects -u (unbuffered output) and -O (optimize) 
 		parameters and passes them to python.  These parameters must precede 
 		any other parameters.  Other parameters will be passed to 
 		ThreadedAppServer normally.
+
+	<li> Configuration files can be written as Python modules
+	     instead of as python dictionaries.  Any global variables
+	     in the module are equivalent to top-level keys in the
+	     configuration dictionary.
+
+	<li> MakeAppWorkDir.py accepts options to point the default
+	     context to a location not inside the workdir, so you can
+	     keep your code completely separate from the workdir.  It
+	     also accepts options to add multiple application library
+	     dirs to the Python path.
+  
 </ul>
 
 
