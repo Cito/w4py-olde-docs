@@ -48,7 +48,7 @@ class Session(Object, CanContainer):
 
 		attempts = 0
 		while attempts<10000:
-			self._identifier = string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + str(whrandom.whrandom().randint(10000, 99999))
+			self._identifier = string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + str(whrandom.randint(10000, 99999))
 			if not trans.application().hasSession(self._identifier):
 				break
 			attempts = attempts + 1
