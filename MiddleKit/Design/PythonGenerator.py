@@ -111,13 +111,13 @@ class Klass:
 		if supername=='MiddleObject':
 			wr('\n\nfrom MiddleKit.Run.MiddleObject import MiddleObject\n')
 		else:
-			pkg = self.setting('Package', '')
+			pkg = self._klasses._model.setting('Package', '')
 			if pkg:
 				pkg += '.'
-			backPath = '../' * (pkg.count('.')+1)
+			backPath = repr('../' * (pkg.count('.')+1))
 			wr('''\
 import sys
-sys.path.insert(0, %(backpath)s)
+sys.path.insert(0, %(backPath)s)
 from %(pkg)s%(supername)s import %(supername)s
 del sys.path[0]
 
