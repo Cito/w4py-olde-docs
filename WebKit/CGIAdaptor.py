@@ -51,13 +51,15 @@ def main():
 		#
 		#counter = int(open('counter.text').read())
 		#counter = counter + 1
-		#open('counter.text', 'w').write(str(counter))		
+		#open('counter.text', 'w').write(str(counter))
 		#open('rr-%02d.rr' % counter, 'w').write(str(dict))
 
 		(host, port) = string.split(open('address.text').read(), ':')
+		if os.name=='nt' and host=='': # MS Windows doesn't like a blank host name
+			host = 'localhost'
 		port = int(port)
 		bufsize = 32*1024  # @@ 2000-04-26 ce: this should be configurable, also we should run some tests on different sizes
-		
+
 		s = socket(AF_INET, SOCK_STREAM)
 		s.connect(host, port)
 		s.send(dumps(dict))
@@ -70,12 +72,12 @@ def main():
 
 	except:
 		import traceback
-		
+
 		sys.stderr.write('[%s] [error] WebKitCGIAdaptor: Error while responding to request (unknown)\n' % (
 			time.asctime(time.localtime(time.time()))))
 		sys.stderr.write('Python exception:\n')
 		traceback.print_exc(file=sys.stderr)
-		
+
 		output = apply(traceback.format_exception, sys.exc_info())
 		output = string.join(output, '')
 		output = string.replace(output, '&', '&amp;')
