@@ -1,4 +1,5 @@
 from Common import *
+from MiscUtils.Funcs import excstr
 
 
 class Servlet(Object):
@@ -40,8 +41,19 @@ class Servlet(Object):
 		try:
 			trans.awake()
 			trans.respond()
-		finally:
-			trans.sleep()
+		except Exception, first:
+			try:
+				trans.sleep()
+			except Exception, second:
+				# The first exception is more important than the *second* one that comes from sleep()
+				# In fact, without this little trick the first exception gets hidden by the second
+				# which is often just a result of the first. Then you're stuck scratching your head
+				# wondering what the first might have been.
+				raise Exception('Two exceptions. first=%s; second=%s' % (excstr(first), excstr(second)))
+			else:
+				raise  # no problems with sleep() so raise the one and only exception
+		else:
+  			trans.sleep()
 
 	def runMethodForTransaction(self, trans, method, *args, **kw):
 		self.awake(trans)
