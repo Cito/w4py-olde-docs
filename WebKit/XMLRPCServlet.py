@@ -4,7 +4,13 @@
 # See Examples/XMLRPCExample.py for sample usage.
 #
 
-import sys, xmlrpclib, string, traceback
+# Sometimes xmlrpclib is installed as a package, sometimes not.  So we'll
+# make sure it works either way.
+try:
+	from xmlrpclib import xmlrpclib
+except ImportError:
+	import xmlrpclib
+import sys, string, traceback
 from HTTPServlet import HTTPServlet
 
 class XMLRPCServlet(HTTPServlet):
@@ -42,6 +48,8 @@ class XMLRPCServlet(HTTPServlet):
 				response = xmlrpclib.dumps(response, methodresponse=1)
 		except:
 			# internal error, report as HTTP server error
+			print 'XMLRPCServlet internal error'
+			print string.join(traceback.format_exception(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2]))
 			transaction.response().setStatus(500, 'Server Error')
 		else:
 			# got a valid XML RPC response
