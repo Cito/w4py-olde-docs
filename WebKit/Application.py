@@ -199,7 +199,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				self._404Page = """404 Error<p>File Not Found: %s"""
 
 		# @@ ISB 09/02: make this default or get rid of it eventually
-		if self.setting('UseNewPathAlgorithm', 0):
+		if self.setting('UseNewPathAlgorithm', 1):
 			print 'Using new path algorithm'
 			self.serverSideInfoForRequestOld = self.serverSideInfoForRequest
 			self.serverSideInfoForRequest = self.serverSideInfoForRequestNewAlgorithm
@@ -1409,7 +1409,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		for i in range(len(parts)):
 			url = string.join(parts[:-i], '/')
 			if cache.has_key(url):
-				return cache[url], string.join(parts[-i:], '/')
+				return cache[url], '/' + string.join(parts[-i:], '/')
 		currentPath = contextPath
 		while 1:
 			if not parts:
@@ -1427,7 +1427,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			if filenames:
 				if len(filenames) == 1:
 					return (filenames[0], 
-						'/'.join(parts[1:]))
+						'/' + string.join(parts[1:], '/'))
 				print "WARNING: More than one file matches basename %s (%s)" % (repr(os.path.join(currentPath, first)), filenames)
 				return None, None
 			else:
@@ -1439,11 +1439,13 @@ class Application(ConfigurableForServerSidePath, Object):
 		filenames = glob(baseName + "*")
 		good = []
 		toIgnore = self.setting('ExtensionsToIgnore')
-		toServer = self.setting('ExtensionsToServe')
+		toServe = self.setting('ExtensionsToServe')
 		for filename in filenames:
 			ext = os.path.splitext(filename)[1]
 			shortFilename = os.path.basename(filename)
 			if ext in toIgnore and filename != baseName:
+				continue
+			if toServe and ext not in toServe:
 				continue
 			for regex in self._filesToHideRegexes:
 				if regex.match(shortFilename):
@@ -1459,7 +1461,9 @@ class Application(ConfigurableForServerSidePath, Object):
 			good.append(filename)
 		if len(good) > 1 and self.setting('UseCascadingExtensions'):
 			for extension in self.setting('ExtensionCascadeOrder'):
-				if baseName + extension in good:
+				actualExtension = os.path.splitext(baseName)[1]
+				if baseName + extension in good \
+				   or extension == actualExtension:
 					return [baseName + extension]
 		return good
 
