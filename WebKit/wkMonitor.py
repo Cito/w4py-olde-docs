@@ -17,10 +17,15 @@ It should be possible on both Unix and Windows to monitor the AppServer process 
 1) The method used here, ie can it service requests?
 2) is the process still running?
 
-Item 2) lends itself to load balancing of some kind.
+Combining these with a timer lends itself to load balancing of some kind.
 
 
 """
+
+#These need to be filled in correctly on Windows
+pythonexec = "C:\progra~1\python\python"
+appserver = "e:\Linux\python\webware\webkit\AsyncThreadedAppServer.py"
+
 
 import AppServer
 import socket
@@ -36,15 +41,11 @@ import string
 #Windows Specific Section
 if os.name == 'nt':
 	import win32process
-#These need to be filled in correctly on Windows
-pythonexec = "C:\progra~1\python\python"
-appserver = "e:\Linux\python\webware\webkit\AsyncThreadedAppServer.py"
-
 
 
 srvpid = 0
-interval = 10  #add to config if this implementation is adopted
-maxStartTime = 120
+checkInterval = 10  #add to config if this implementation is adopted, seconds between checks
+maxStartTime = 120  #time to wait for a AppServer to start before killing it and trying again
 
 cfg = open("Configs/AppServer.config")
 cfg = eval(cfg.read())
