@@ -361,7 +361,7 @@ class Monitor:
 		self.server = server
 		self.port = server.monitorPort
 		self.insock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.insock.bind([server.address()[0],server.address()[1]-1])
+		self.insock.bind((server.address()[0],server.address()[1]-1))
 		self.insock.listen(1)
 		print "******** Listening to Monitor Socket ************"
 
@@ -612,7 +612,7 @@ def run(useMonitor = 0, workDir=None):
 					exitStatus = e.code
 
 			# Run the server thread
-			t = threading.Thread(target=windowsmainloop, args=(server, monitor))
+			t = threading.Thread(target=windowsmainloop, args=(server, monitor_socket))
 			t.start()
 			try:
 				while server.running:
