@@ -63,6 +63,11 @@ if pyVer is None  or  pyVer[0]<2:
 	raise Exception, 'HTMLTag requires Python 2.0 or greater.'
 
 
+runFast = 1
+	# if enabled, overrides some key SGMLParser methods for more speed.
+	# changing this has no effect once the module is imported (unless you reload())
+
+
 from sgmllib import SGMLParser
 from MiscUtils import NoDefault
 import types
@@ -617,6 +622,13 @@ class HTMLReader(SGMLParser):
 				assert isinstance(value, TagConfig), 'key=%r, value=%r' % (key, value)
 				config[key] = value
 		self._tagContainmentConfig = config
+
+
+	## Optimizations ##
+
+	if runFast:
+		finish_starttag = unknown_starttag
+		finish_endtag = unknown_endtag
 
 
 class TagConfig:
