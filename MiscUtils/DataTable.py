@@ -363,15 +363,15 @@ class DataTable:
 
 	## File I/O ##
 
-	def readFileNamed(self, filename, delimiter=',', allowComments=1, stripWhite=1):
+	def readFileNamed(self, filename, delimiter=',', allowComments=1, stripWhite=1, worksheet=1, row=1, column=1):
 		self._filename = filename
 		data = None
 		if self.usePickleCache:
 			from PickleCache import readPickleCache, writePickleCache
 			data = readPickleCache(filename, pickleVersion=1, source='MiscUtils.DataTable')
 		if data is None:
-			if self._filename.endswith('.xls'):
-				self.readExcel()
+			if self._filename.lower().endswith('.xls'):
+				self.readExcel(worksheet, row, column)
 			else:
 				file = open(self._filename, 'r')
 				self.readFile(file, delimiter, allowComments, stripWhite)
@@ -410,21 +410,19 @@ class DataTable:
 	def canReadExcel(self):
 		return canReadExcel()
 
-	def readExcel(self):
+	def readExcel(self, worksheet=1, row=1, column=1):
 		maxBlankRows = 10
 		numRowsToReadPerCall = 20
-
 		from win32com.client import Dispatch
 		xl = Dispatch("Excel.Application")
 		wb = xl.Workbooks.Open(os.path.abspath(self._filename))
 		try:
-			sh = wb.Worksheets(1)
-			sh.Cells(1, 1)
-
+			sh = wb.Worksheets(worksheet)
+			sh.Cells(row, column)
 			# determine max column
 			numCols = 1
 			while 1:
-				if sh.Cells(1, numCols).Value in [None, '']:
+				if sh.Cells(row, numCols).Value in [None, '']:
 					numCols -= 1
 					break
 				numCols += 1
@@ -440,7 +438,7 @@ class DataTable:
 			# read rows of data
 			maxCol = chr(ord('A') + numCols - 1)
 			haveReadHeadings = 0
-			rowNum = 1
+			rowNum = row
 			numBlankRows = 0
 			valuesBuffer = {}   # keyed by row number
 			while 1:
