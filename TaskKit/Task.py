@@ -8,10 +8,7 @@ class Task:
 	def run(self):
 		'''
 		Override this method for you own tasks. Long running tasks can periodically 
-		use the close() Event or the proceed() method to check if a task should stop. 
-		If you use close() then single task termination requests will be ignored. 
-		With proceed() you also take into account that somebody wants to stop a
-		specific task. In case of doubt use proceed().
+		use the proceed() method to check if a task should stop. 
 		'''
 		raise SubclassResponsibilityError
 	
@@ -24,7 +21,7 @@ class Task:
 		Should be called periodically by long tasks to check if the system wants them to exit.
 		Returns 1 if its OK to continue, 0 if its time to quit
 		"""
-		return (not self._close.isSet()) and  self._handle._isRunning
+		return self._handle._isRunning
 		
 		
 	## Attributes ##
@@ -45,12 +42,12 @@ class Task:
 		'''
 		return self._name
 
-	def close(self):
-		'''
-		The close Event is set when the scheduler stops. It can be used
-		in the run() method to check if a task should terminate too.
-		'''
-		return self._close	
+##	def close(self):
+##		'''
+##		The close Event is set when the scheduler stops. It can be used
+##		in the run() method to check if a task should terminate too.
+##		'''
+##		return self._close	
 			
 
 	## Private method ##
@@ -62,6 +59,5 @@ class Task:
 		'''
 		self._name = handle.name()
 		self._handle = handle
-		self._close = handle.closeEvent()
 		self.run()
 		handle.notifyCompletion()

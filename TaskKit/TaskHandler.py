@@ -132,9 +132,6 @@ class TaskHandler:
 	def name(self):
 		return self._name
 
-	def closeEvent(self):
-		return self._scheduler.closeEvent()
-
 	def startTime(self, newTime=None):
 		if newTime:
 			self._startTime = newTime

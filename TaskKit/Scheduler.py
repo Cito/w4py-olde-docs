@@ -31,7 +31,6 @@ class Scheduler(Thread):
 
 	def __init__(self, daemon=1):
 		Thread.__init__(self)
-		self._closeEvent = Event()
 		self._notifyEvent = Event()
 		self._nextTime = None
 		self._scheduled = {}
@@ -42,13 +41,6 @@ class Scheduler(Thread):
 
 
 	## Event Methods ##
-
-	def closeEvent(self):
-		"""
-		The close event is a scheduling mechanism
-		This function returns the close event.
-		"""
-		return self._closeEvent
 
 	def wait(self, seconds=None):
 		"""
@@ -314,6 +306,15 @@ class Scheduler(Thread):
 		handle.stop()
 		return 1
 
+
+	def stopAllTasks(self):
+		"""
+		Terminate all running tasks.
+		"""
+		for i in self._running.keys():
+			print "Stopping ",i
+			self.stopTask(i)
+
 	def disableTask(self, name):
 		"""
 		This method is provided to specify that a task be suspended. Suspended tasks will 
@@ -401,8 +402,9 @@ class Scheduler(Thread):
 		This method terminates the scheduler and its associated tasks.
 		"""
 		self._isRunning = 0
-##		self.notify()  #this isn't necessary with the below is it?
-		self._closeEvent.set()
+		self.notify()
+		self.stopAllTasks()
+
 
 
 	## Main Method ##
