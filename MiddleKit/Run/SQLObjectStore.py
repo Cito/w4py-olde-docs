@@ -481,29 +481,22 @@ class MiddleObjectMixIn:
 		are not yet resolved.
 		'''
 		klass = self.klass()
-		res = ['insert into %s (' % klass.sqlTableName()]
-		attrs = klass.allDataAttrs()
-		attrs = [attr for attr in attrs if attr.hasSQLColumn()]
-		fieldNames = [attr.sqlColumnName() for attr in attrs]
-		if len(fieldNames)==0:
-			fieldNames = [klass.sqlIdName()]
-		res.append(','.join(fieldNames))
-		res.append(') values (')
+		insertSQLStart, sqlAttrs = klass.insertSQLStart()
 		values = []
-		for attr in attrs:
+		sqlValueForName = self.sqlValueForName
+		append = values.append
+		for attr in sqlAttrs:
 			try:
-				value = self.sqlValueForName(attr.name())
+				value = sqlValueForName(attr.name())
 			except UnknownSerialNumberError, exc:
 				exc.info.sourceObject = self
 				unknowns.append(exc.info)
 				value = 'NULL'
-			values.append(value)
+			append(value)
 		if len(values)==0:
 			values = ['0']
 		values = ','.join(values)
-		res.append(values)
-		res.append(');')
-		return ''.join(res)
+		return insertSQLStart+values+');'
 
 	def sqlUpdateStmt(self):
 		'''
@@ -553,6 +546,7 @@ MixIn(MiddleObject, MiddleObjectMixIn)
 class Klass:
 
 	_fetchSQLStart = None  # help out the caching mechanism in fetchSQLStart()
+	_insertSQLStart = None  # help out the caching mechanism in fetchSQLStart()
 
 	def sqlTableName(self):
 		'''
@@ -576,6 +570,22 @@ class Klass:
 			self._fetchSQLStart = 'select %s from %s ' % (','.join(colNames), self.sqlTableName())
 		return self._fetchSQLStart
 
+	def insertSQLStart(self):
+		"""
+		Returns a tuple of insertSQLStart (a string) and sqlAttrs (a list).
+		"""
+		if self._insertSQLStart is None:
+			res = ['insert into %s (' % self.sqlTableName()]
+			attrs = self.allDataAttrs()
+			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
+			fieldNames = [attr.sqlColumnName() for attr in attrs]
+			if len(fieldNames)==0:
+				fieldNames = [self.sqlIdName()]
+			res.append(','.join(fieldNames))
+			res.append(') values (')
+			self._insertSQLStart = ''.join(res)
+			self._sqlAttrs = attrs
+		return self._insertSQLStart, self._sqlAttrs
 
 class Attr:
 
