@@ -402,7 +402,12 @@ def stop(*args, **kw):
 	Stop the AppServer (which may be in a different process).
 	"""
 	
-	pidfile = os.path.join(os.path.dirname(__file__),"appserverpid.txt")
+	if kw.has_key('workDir'):
+		# app directory
+		pidfile = os.path.join(kw['workDir'], "appserverpid.txt")
+	else:
+		# pidfile is in WebKit directory
+		pidfile = os.path.join(os.path.dirname(__file__),"appserverpid.txt")
 	pid = int(open(pidfile,"r").read())
 	#now what for windows?
 	if os.name == 'posix':
