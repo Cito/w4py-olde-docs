@@ -74,6 +74,15 @@ class Configurable:
 		''' Returns the filename by which users can override the configuration. Subclasses must override to specify a name. Returning None is valid, in which case no user config file will be loaded. '''
 		raise SubclassResponsibilityError()
 
+	def configReplacementValues(self):
+		"""
+		Returns a dictionary suitable for use with "string % dict"
+		that should be used on the text in the config file.  If an
+		empty dictionary (or None) is returned then no substitution
+		will be attempted.
+		"""
+		return {}
+
 	def userConfig(self):
 		''' Returns the user config overrides found in the optional config file, or {} if there is no such file. The config filename is taken from configFilename(). '''
 		try:
@@ -86,6 +95,13 @@ class Configurable:
 		else:
 			contents = file.read()
 			file.close()
+			replacements = self.configReplacementValues()
+			if replacements:
+				try:
+					contents = contents % replacements
+				except:
+					raise ConfigurationError, 'Unable to embed replacement text in %s.' % self.configFilename()
+
 			try:
 				config = eval(contents, {})
 			except:

@@ -511,8 +511,8 @@ def main(args=[]):
 			daemon=1
 		elif i == "start":
 			pass
-		elif i[:5] == "work=":
-			workDir = i[5:]
+		elif i[:8] == "workdir=":
+			workDir = i[8:]
 		else:
 			print usage
 

@@ -45,6 +45,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		if path is None:
 			path = os.path.dirname(__file__)  #os.getcwd()
 		self._serverSidePath = os.path.abspath(path)
+		self._webKitPath = os.path.abspath(os.path.dirname(__file__))
+		self._webwarePath = os.path.dirname(self._webKitPath)
+
 		self._verbose = self.setting('Verbose')
 		self._plugIns = []
 		self._reqCount = 0
@@ -111,6 +114,13 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 	def configFilename(self):
 		return self.serverSidePath('Configs/AppServer.config')
+
+	def configReplacementValues(self):
+		return {      # Since these strings will be eval'ed we need to double escape any backslashes
+			'WebwarePath' : string.replace(self._webwarePath, '\\', '\\\\'),
+			'WebKitPath'  : string.replace(self._webKitPath, '\\', '\\\\'),
+			'serverSidePath' : string.replace(self._serverSidePath, '\\', '\\\\'),
+			}
 
 
 	## Network Server ##
@@ -229,6 +239,12 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			return os.path.normpath(os.path.join(self._serverSidePath, path))
 		else:
 			return self._serverSidePath
+
+	def webwarePath(self):
+		return self._webwarePath
+
+	def webKitPath(self):
+		return self._webKitPath
 
 
 	## Warnings and Errors ##

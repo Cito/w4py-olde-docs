@@ -450,13 +450,12 @@ If AppServer is called with no arguments, it will start the AppServer and record
 
 
 def main(args):
-##	if len(args)>1:
 	monitor=0
 	function=run
 	daemon=0
 	workDir=None
 
-	for i in args[1:]:
+	for i in args:
 		if i == "monitor":
 			print "Enabling Monitoring"
 			monitor=1
@@ -465,8 +464,8 @@ def main(args):
 			function=AppServer.stop
 		elif i == "daemon":
 			daemon=1
-		elif i[:5] == "work=":
-			workDir = i[5:]
+		elif i[:8] == "workdir=":
+			workDir = i[8:]
 		else:
 			print usage
 

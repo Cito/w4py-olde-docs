@@ -291,6 +291,9 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 	def configFilename(self):
 		return self.serverSidePath('Configs/Application.config')
 
+	def configReplacementValues(self):
+		return self._server.configReplacementValues()
+
 
 	## Versions ##
 
@@ -298,8 +301,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		''' Returns the version of Webware as a string. '''
 		if not hasattr(self, '_webwareVersion'):
 			from MiscUtils.PropertiesObject import PropertiesObject
-			props = PropertiesObject(os.path.join(os.path.dirname(__file__),
-							      '../Properties.py'))
+			props = PropertiesObject(os.path.join(self.webwarePath(), 'Properties.py'))
 			self._webwareVersion = props['versionString']
 		return self._webwareVersion
 
@@ -614,6 +616,13 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			return os.path.normpath(os.path.join(self._serverSidePath, path))
 		else:
 			return self._serverSidePath
+
+	def webwarePath(self):
+		return self._server.webwarePath()
+
+	def webKitPath(self):
+		return self._server.webKitPath()
+
 
 	def name(self):
 		return sys.argv[0]
