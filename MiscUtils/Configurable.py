@@ -2,6 +2,8 @@ import string, sys, os
 from types import DictType
 from MiscUtils import AbstractError, NoDefault
 from WebKit.ImportSpy import modloader
+from Funcs import valueForString
+
 
 class ConfigurationError(Exception):
 	pass
@@ -145,27 +147,7 @@ def addCommandLineSetting(name, value):
 	it will override any settings in AppServer.config
 	"""
 	configName, settingName = string.split(name, '.', 1)
-	value = convertValue(value)
+	value = valueForString(value)
 	if not _settings.has_key(configName):
 		_settings[configName] = {}
 	_settings[configName][settingName] = value
-
-def convertValue(value):
-	"""
-	Takes a string and tries to convert it into a Python
-	type (integer, list, etc.) -- if nothing works, then it
-	leaves it as a string.
-	"""
-	if not value:
-		return ''
-	try:
-		return int(value)
-	except ValueError:
-		pass
-	try:
-		return float(value)
-	except ValueError:
-		pass
-	if value[0] in '[({"\'':
-		return eval(value)
-	return value
