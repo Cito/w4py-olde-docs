@@ -912,10 +912,8 @@ def main(requestDict):
 	from WebUtils.HTMLForException import HTMLForException
 	try:
 		assert type(requestDict) is type({})
-		from HTTPRequest import HTTPRequest
-		request = HTTPRequest(requestDict)
 		app = Application(useSessionSweeper=0)
-		return app.dispatchRequest(request).response().rawResponse()
+		return app.dispatchRawRequest(requestDict).response().rawResponse()
 	except:
 		return {
 			'headers': [('Content-type', 'text/html')],
