@@ -121,6 +121,7 @@ class Model:
 					attrs = [klass.lookupAttr(name) for name in names]
 				except KeyError:
 					print '>> KeyError'
+					print '>> name:', name
 					print '>> fields:', fields
 					print '>> names:', names
 					print '>> klass:', klass
