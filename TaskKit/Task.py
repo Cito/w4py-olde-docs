@@ -42,13 +42,6 @@ class Task:
 		'''
 		return self._name
 
-##	def close(self):
-##		'''
-##		The close Event is set when the scheduler stops. It can be used
-##		in the run() method to check if a task should terminate too.
-##		'''
-##		return self._close	
-			
 
 	## Private method ##
 
