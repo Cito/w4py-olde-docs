@@ -44,7 +44,7 @@
 <body>
 
 <h1>MiddleKit Quick Start</h1>
-Version 0.1
+Version 0.2
 <br>Webware for Python 0.5
 
 
@@ -53,11 +53,12 @@ Version 0.1
 
 <a name=ToC><h2>Table of Contents</h2></a>
 
-<p> <span class=ToC>
-<a href="#CreateObjModel"><font size=+1>Create an object model</font></a>
+<p><span class=ToC>
+     <a href="#CreateObjModel"><font size=+1>Create an object model</font></a>
 <br> <a href="#GenCode"><font size=+1>Generate code</font></a>
 <br> <a href="#CreateData"><font size=+1>Create sample data</font></a>
 <br> <a href="#CreateDB"><font size=+1>Create the database</font></a>
+<br> <a href="#CompleteDirStruct"><font size=+1>Complete the directory structure</font></a>
 <br> <a href="#SetUpStore"><font size=+1>Set up the store</font></a>
 <br> <a href="#CreateObj"><font size=+1>Create a new object</font></a>
 <br> <a href="#CreateMoreObjs"><font size=+1>Create more objects</font></a>
@@ -73,20 +74,22 @@ Version 0.1
 
 <p> Our example will be an application for tracking "videos", such as movies and TV series. Feel free to create your own application as you step through this guide to learn how to use MiddleKit (MK).
 
-<p> Note for Windows users: Our command line examples use forward slashes for the path names. You will have to use backslashes instead. In Python however, you can freely use forward slashes and probably should (since backslashes in Python are used for special character such as \n and \t).
+<p> Note for Windows users: Our command line examples use forward slashes for the path names. You will have to use backslashes instead. In Python however, you can freely use forward slashes and probably should (since backslashes in Python are used for special characters such as \n and \t).
 
-<p> Create the directory <span class=filename>Movies/</span> for the project:
+<p> Create the directories for the project:
 
 <p> <table class=cmd><tr><td>
-&gt; <span class=typed>mkdir Movies</span> <br>
-&gt; <span class=typed>cd Movies</span> <br>
+&gt; <span class=typed>mkdir Videos</span> <br>
+&gt; <span class=typed>cd Videos</span> <br>
+&gt; <span class=typed>mkdir Middle</span> <br>
+&gt; <span class=typed>cd Middle</span> <br>
 </td></tr></table>
 
-<p> You could create the required MK files by hand, but we'll use the included template instead. Copy <span class=filename>MiddleKit/Resources/Template.mkmodel</span> to <span class=filename>Movies/</span>. Note that MK models are directories containing additional files.
+<p> You could create the required MK files by hand, but we'll use the included template instead. Copy <span class=filename>MiddleKit/Resources/Template.mkmodel</span> to <span class=filename>Videos/Middle/</span> and rename it to <span class=filename>Videos.mkmodel</span>. Note that an MK model is specified by a directory that contains additional files.
 
-<p> You can edit the object model with popular spreadsheet programs such as Excel, StarOffice, etc. For new files, use the <span class=menuCmd>Save as...</span> command to choose the CSV or "comma-separated value" format. If necessary, you can create the file with a common text editor, but this kind of editing can become tedious without alignment of columns (which is what the spreadsheets give you).
+<p> You can edit the object model with popular spreadsheet programs such as Excel, StarOffice, etc. For new files, use the <span class=menuCmd>Save as...</span> command to choose the CSV or "comma-separated value" format. If necessary, you can create the file with a common text editor, but this method of editing becomes tedious because there is no column alignment (which is what the spreadsheet programs give you).
 
-<p> Open <span class=filename>Classes.csv</span> and edit it to become the following table. Or, you can open this from <span class=filename>MiddleKit/Docs/Videos/Videos.mkmodel/Classes.csv</span>.
+<p> Open <span class=filename>Classes.csv</span> and edit it to become the following table. Or, you can grab this from <span class=filename>MiddleKit/Docs/Videos/Middle/Videos.mkmodel/Classes.csv</span>.
 
 <p> <table class=dataTable>
 <tr class=dataTableHeading>
@@ -111,6 +114,19 @@ Version 0.1
 </table>
 
 
+<p> Create a <span class=filename>Settings.config</span> file inside <span class=filename>Videos.mkmodel/</span>:
+
+<pre class=py>
+{
+    'Package': 'Middle',
+    #'SQLLog': { 'File': 'mk-sql.log' },
+}
+</pre>
+
+<p> The <span class=name>Package</span> setting tells MiddleKit that we want the classes for our object model to reside in a package named <span class=filename>Middle</span>. Python packages are useful for putting related modules (and classes) in a logical group. This also prevents name collisions between the package modules and other modules that may be on your Python path. Note that we chose the name of the directory containing the model.
+
+<p> The <span class=name>SQLLog</span> setting is commented out above, but you can uncomment it in order to see all the SQL that MiddleKit executes at run time. You can also change the filename to be 'stdout' or 'stderr'.
+
 <a name=GenCode><h2>Generate code</h2></a>
 
 <p> We now want to run the MK Generate program to create the necessary Python and SQL code to support our application. Locate the Generate program, found in <span class=filename>MiddleKit/Design/</span>:
@@ -121,7 +137,7 @@ generate.py: error: Missing options. <br>
 Usage: generate.py --db DBNAME --model FILENAME [--sql] [--py] [--outdir DIRNAME] <br>
        generate.py -h | --help  <br>
  <br>
-       * Known databases include: MySQL. <br>
+       * Known databases include: MSSQL, MySQL <br>
        * If neither --sql nor --py are specified, both are generated. <br>
        * If --outdir is not specified, then the base filename (sans extension) is used. <br>
 &gt;
@@ -195,6 +211,8 @@ Generating Python...
 
 <p> You can see that in sample data, references to objects (sometimes called "obj refs", "references" or "pointers") are made by referring to the implicit serial number of the target object (1, 2, 3, ...).
 
+<p> Warning: If an obj ref attribute points to a base class that has subclasses (such as Video) you may need to qualify your sample data by specifying the exact class of the reference. For example, instead of simply a number, an obj ref could be Movie.2 or TVSeries.2.
+
 <p> Now run <span class=filename>generate</span> again. You will find a new file at <span class=filename>GeneratedSQL/InsertSamples.sql</span>.
 
 
@@ -234,17 +252,57 @@ mysql &lt; GeneratedSQL\InsertSamples.sql
 </td></tr></table>
 
 
+<a name=CompleteDirStruct><h2>Complete the directory structure</h2></a>
+
+<p> Let's write some Python code that uses the middle objects. We're going to put the code next door to the model by created a new <span class=filename>Command</span> directory.
+
+<p> <table class=cmd><tr><td>
+&gt; <span class=typed>cd Videos</span> <br>
+&gt; <span class=typed>mkdir Command</span> <br>
+&gt; <span class=typed>cd Command</span>
+</td></tr></table>
+
+<p> Create a file named <span class=filename>main.py</span>. Our file system now looks like this:
+
+<pre>
+    Videos/
+        Middle/
+            generate*
+            create*
+            insert*
+            Videos.mkmodel/
+                Classes.csv
+                Samples.csv
+                Settings.config
+            GeneratedPy/
+                GenVideo.py, GenMovie.py, ...
+            GeneratedSQL/
+                Create.sql
+                InsertSamples.sql
+                Info.text
+            Video.py
+            Movie.py
+            ...
+        Command/
+            main.py
+</pre>
+
+
 <a name=SetUpStore><h2>Set up the store</h2></a>
 
-<p> Let's write some Python code. Create a file named <span class=filename>main.py</span>. We'll first create an object store, which (largely) hides you from the database while allowing you to work in a fully object-oriented, Python-centric frame of mind.
+<p> We'll first create an object store, which (largely) hides you from the database while allowing you to work in a fully object-oriented, Python-centric frame of mind. Put this <span class=filename>main.py</span> file in the <span class=filename>Command/</span> directory:
 
 <pre class=py>
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
 
 def main():
+    # Gain access to our package
+    import os, sys
+    sys.path.insert(1, os.path.abspath(os.pardir))
+
     # Set up the store
     store = MySQLObjectStore(user='user', passwd='password')
-    store.readModelFileNamed('Videos')
+    store.readModelFileNamed('../Middle/Videos')
 
 if __name__=='__main__':
     main()
@@ -268,12 +326,17 @@ if __name__=='__main__':
 <p> Now create a new object. Augment <span class=name>main()</span> with this:
 <pre class=py>
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
-<b>from Movie import Movie</b>
+<b>from Middle.Movie import Movie</b>
 
 def main():
+    # Gain access to our package
+    import os, sys
+    sys.path.insert(1, os.path.abspath(os.pardir))
+
     # Set up the store
     store = MySQLObjectStore(user='user', passwd='password')
     store.readModelFileNamed('Videos')
+
 <b>    movie = Movie()
     movie.setTitle('The Terminator')
     movie.setRating('r')
@@ -322,7 +385,7 @@ if __name__=='__main__':
 
 <p> You can get a list of objects of a particular class returned to you as a list, like so:
 <pre class=py>
-    from Video import Video
+    from Middle.Video import Video
     videos = store.fetchObjectsOfClass(Video)
 </pre>
 

@@ -1,10 +1,14 @@
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
-from Movie import Movie
-from Person import Person
-from Role import Role
+from Middle.Movie import Movie
+from Middle.Person import Person
+from Middle.Role import Role
 
 
 def main():
+    # Gain access to our package
+    import os, sys
+    sys.path.insert(1, os.path.abspath(os.pardir))
+
 	# Set up the store
 #	store = MySQLObjectStore(user='user', passwd='password')
 	store = MySQLObjectStore()
