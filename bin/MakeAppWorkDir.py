@@ -14,12 +14,12 @@ MakeAppWorkDir.py
 INTRODUCTION
 
 This utility builds a directory tree that can be used as the current
-working directory of an instance of the WebKit applicaiton server.  By
-using a separate directory tree like this your applicaion can run
+working directory of an instance of the WebKit application server.  By
+using a separate directory tree like this your application can run
 without needing write access, etc. to the WebWare directory tree, and
 you can also run more than one application server at once using the
 same WebWare code.  This makes it easy to reuse and keep WebWare
-updated without disturbing your applicaitons.
+updated without disturbing your applications.
 
 
 COMMAND LINE USAGE
@@ -312,7 +312,7 @@ class Main(Page):
 	def title(self):
 		return 'My Sample Context'
 
-	def writeBody(self):
+	def writeContent(self):
 		self.writeln('<h1>Welcome to Webware!</h1>')
 		self.writeln('''
 		This is a sample context generated for you and has purposly been kept very simple
