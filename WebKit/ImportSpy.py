@@ -93,8 +93,6 @@ class ModuleLoader(ihooks.ModuleLoader):
 		elif pathname:
 			if isfile(pathname):
 				self.addToFileList(pathname)
-			else:
-				print 'LALA: ' + pathname
 
 # install our custom ModuleLoader.  Any subsequently-imported modules will
 # be noticed.
