@@ -41,6 +41,10 @@ class MySQLObjectStore(SQLObjectStore):
 	def dbapiModule(self):
 		return MySQLdb
 
+	def augmentDBArgsForPoolIfNeeded(self, args):
+		if not args.get('db'):
+			args['db'] = self._model.sqlDatabaseName()
+
 	def _executeSQL(self, cur, sql):
 		try:
 			cur.execute(sql)

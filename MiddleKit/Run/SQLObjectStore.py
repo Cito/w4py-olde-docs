@@ -172,9 +172,12 @@ class SQLObjectStore(ObjectStore):
 			poolSize = self.setting('SQLConnectionPoolSize', 0)
 			if poolSize:
 				args = self._dbArgs.copy()
-				if not args.get('db'):
-					args['db'] = self._model.sqlDatabaseName()
+				self.augmentDBArgsForPoolIfNeeded(args)
 				self._pool = DBPool(self.dbapiModule(), poolSize, **args)
+
+	def augmentDBArgsForPoolIfNeeded(self, args):
+		# see subclasses for examples
+		pass
 
 	def newConnection(self):
 		"""
@@ -468,8 +471,8 @@ class SQLObjectStore(ObjectStore):
 				return self.objRefDangles(objRef)
 
 	def objRefInMem(self, objRef):
-		""" Return the object corresponding to the given objref if and only 
-		if it has been loaded into memory.  If the object has never been 
+		""" Return the object corresponding to the given objref if and only
+		if it has been loaded into memory.  If the object has never been
 		fetched from the database, None is returned. """
 		assert type(objRef) is LongType, 'type=%r, objRef=%r' % (type(objRef), objRef)
 		if objRef==0:
