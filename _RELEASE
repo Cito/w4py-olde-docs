@@ -1,30 +1,44 @@
 Webware for Python
 Release Procedures
 
+@@ 2000-06-06 ce: to do: This should be an HTML file in Documentation/.
+The only text files we really need in the main dir are _README, _COPYRIGHT
+and _VERSION.
+
+@@ 2000-06-06 ce: These are the first release docs after creating the
+CVS repository on sourceforge. They have to get checked in before
+cutting the release, but then they could turn out to be wrong when the
+release is being cut. So take a big grain of salt.  ;-)
+
 
 Final tweaking
 --------------
 * Search for @@ in both source docs
 * Skim through docs one final time
+    * Make sure all the version numbers and dates are correct.
 
 
 Final testing
 -------------
 * Close all source files (to reduce the chances of making changes that
   go untested)
-* Run the 'clean' command in the Webware directory
-* Review 'ls -alR' to weed out stray files
+* Check out a _new_ copy of the repository.
 * Restart webserver
 * Restart web client
-* Test all CGI Wrapper examples
-* Test all WebKit examples
-    * When testing examples be sure to test links at bottom of page for
+* Test CGI Wrapper by trying all examples
+* Test WebKit
+	* Test _admin first. Check that viewing empty logs is handled gracefully.
+	* Test the examples.
+    * When testing examples, be sure to test links at bottom of page for
       things like viewing the source
+    * Run Testing/stress.py
 
 
 Pack up
--------	
-	Webware-<version>.tar.gz
+-------
+cvs -q tag Release-VER
+cvs co -r Release-VER Webware
+tar czvf Webware-VER.tar.gz
 
 
 Release on SourceForge
@@ -55,7 +69,8 @@ Reference: "Making File Releases",
 
 Notify
 ------
-Review http://webware.sourceforge.net and make appropriate changes including version number.
+Review http://webware.sourceforge.net and make appropriate changes including
+version number.
 
 Add a news item to the SourceForge project page
     https://sourceforge.net/project/?group_id=4866
@@ -79,3 +94,5 @@ Check that Parnassus was updated.
 Look for follow up messages on comp.lang.python
 
 Test drive the home page, project page and download.
+
+Check the download counter on SourceForge.
