@@ -20,7 +20,7 @@ class ObjRefZeroSerialNumError(ObjRefError): pass
 class ObjRefDanglesError(ObjRefError): pass
 
 
-aggressiveGC = 1
+aggressiveGC = 0
 
 
 class UnknownSerialNumberError(SQLObjectStoreError):
