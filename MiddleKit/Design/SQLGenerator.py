@@ -813,5 +813,5 @@ class PrimaryKey:
 	def get(self,key,default=0):
 		return self._props.get(key,default)
 
-	def sqlForNonNoneSampleInput(self, input):
+	def sqlForSampleInput(self, input):
 		return input
