@@ -75,10 +75,7 @@ class CGIAdapter(Adapter):
                 write(HTMLEncode(str(response)))
                 write('</body></html>')
             else:
-                for pair in response['headers']:
-                    write('%s: %s\n' % pair)
-                write('\n')
-                write(response['contents'])
+				write(response)
 
         except:
             import traceback

@@ -73,10 +73,8 @@ class OneShotAdapter(Adapter):
 				msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
 			write = sys.stdout.write
-			for pair in response['headers']:
-				write('%s: %s\n' % pair)
-			write('\n')
-			write(response['contents'])
+
+			write(response)
 
 			if self.setting('ShowConsole'):
 				# show the contents of the console, but only if we
