@@ -13,10 +13,13 @@ serverStartTime  = time()
 import cgi, os, string, sys, traceback, whrandom
 from types import *
 
+if '' not in sys.path:
+	sys.path.insert(0, '')
+
 try:
 	import WebUtils
 except:
-	sys.path.append('..')
+	sys.path.append(os.path.abspath('..'))
 	import WebUtils
 from WebUtils.HTMLForException import HTMLForException
 
