@@ -49,6 +49,12 @@ class SecurePage(ExamplePage, Configurable):
 				request.setField('extra', 'You have been logged out.')
 				request.setField('action', string.split(request.urlPath(), '/')[-1])
 				app.forward(trans, 'LoginPage')
+			elif request.isSessionExpired():
+				# Login page with a "logged out" message.
+				session.values().clear()
+				request.setField('extra', 'Your session has expired.')
+				request.setField('action', string.split(request.urlPath(), '/')[-1])
+				app.forward(trans, 'LoginPage')
 			elif request.hasField('login') and request.hasField('username') and request.hasField('password'):
 				# They are logging in.  Clear session
 				session.values().clear()
