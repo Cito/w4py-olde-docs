@@ -104,7 +104,7 @@ class ThreadedAppServer(AppServer):
 			raise
 		print "Listening on", serverAddress
 		f = open(self.serverSidePath(
-			'%s.txt' % handlerClass.protocolName), 'w')
+			'%s.text' % handlerClass.protocolName), 'w')
 		f.write('%s:%d' % (serverAddress[0], serverAddress[1]))
 		f.close()
 		self._sockets[serverAddress] = sock
