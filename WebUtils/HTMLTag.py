@@ -578,7 +578,7 @@ class HTMLReader(SGMLParser):
 
 	def close(self):
 		if len(self._tagStack)>0 and not (len(self._tagStack)==1 and self._usedFakeRootTag):
-			raise HTMLTagIncompleteError('line %i: tagStack = %r' % (self._lineNumber, self._tagStack), line=line, tagStack=repr(self._tagStack))
+			raise HTMLTagIncompleteError('line %i: tagStack = %r' % (self._lineNumber, self._tagStack), line=self._lineNumber, tagStack=repr(self._tagStack))
 		SGMLParser.close(self)
 
 
