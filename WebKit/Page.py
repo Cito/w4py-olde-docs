@@ -327,12 +327,12 @@ class Page(HTTPServlet):
 		"""
 		self.application().includeURL(self.transaction(), URL)
 
-	def callMethodOfServlet(self, URL, *args, **kwargs):
+	def callMethodOfServlet(self, URL, method, *args, **kwargs):
 		"""
 		Call a method of another servlet.  See Application.callMethodOfServlet() for details.
 		The main difference is that here you don't have to pass in the transaction as the first argument.
 		"""
-		return self.application().callMethodOfServlet(self.transaction(), URL, *args, **kwargs)
+		return apply(self.application().callMethodOfServlet, (self.transaction(), URL, method) + args, kwargs)
 
 	## Self utility ##
 
