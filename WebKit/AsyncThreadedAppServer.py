@@ -15,6 +15,12 @@ import socket
 import asyncore
 from WebUtils.WebFuncs import RequestURI
 
+try:
+	from select_trigger import trigger
+	MainTrigger=trigger()
+except:
+	MainTrigger = lambda:()
+
 
 class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 	"""
@@ -216,6 +222,8 @@ class RequestHandler(asyncore.dispatcher):
 		transaction._application=None
 		transaction.die()
 		del transaction
+		#trigger().pull_trigger()
+		MainTrigger.pull_trigger()
 
 	def activate(self, socket):
 		self.set_socket(socket)
@@ -229,8 +237,8 @@ class RequestHandler(asyncore.dispatcher):
 		"""
 		Always ready to write, otherwise we might have to wait for a timeout to be asked again
 		"""
-		return self.active
-		#return self.have_response
+		#return self.active
+		return self.have_response
 
 	def handle_connect(self):
 		pass
