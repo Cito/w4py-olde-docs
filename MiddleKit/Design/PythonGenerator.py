@@ -4,6 +4,11 @@ import string
 import os, sys
 from types import *
 
+try:
+	from mx import DateTime
+except ImportError:
+	DateTime = None
+
 
 class PythonGenerator(CodeGenerator):
 
@@ -107,6 +112,9 @@ class Klass:
 
 	def writePyImports(self):
 		wr = self._pyOut.write
+		wr('import types\n')
+		if DateTime:
+			wr('from mx import DateTime\n')
 		supername = self.supername()
 		if supername=='MiddleObject':
 			wr('\n\nfrom MiddleKit.Run.MiddleObject import MiddleObject\n')
@@ -193,15 +201,14 @@ class Attr:
 		name = self.name()
 		pySetName = self.pySetName()
 		capName = string.upper(name[0]) + name[1:]
+		values = locals()
+		out.write('\n\tdef %(pySetName)s(self, value):\n' % values)
+		self.writePySetChecks(out)
+		out.write('\t\tself._%(name)s = value\n' % values)
+
+	def writePySetChecks(self, out):
 		if self.isRequired():
-			assertions = 'assert value is not None'
-		else:
-			assertions = ''
-		out.write('''
-	def %(pySetName)s(self, value):
-		%(assertions)s
-		self._%(name)s = value
-''' % locals())
+			out.write('\t\tassert value is not None\n')
 
 
 PyStubTemplate = """\
@@ -233,11 +240,31 @@ class BoolAttr:
 		assert value==0 or value==1
 		return value
 
+	def writePySetChecks(self, out):
+		Attr.writePySetChecks.im_func(self, out)
+		out.write('''\
+		if value is not None:
+			if type(value) is not types.IntType:
+				raise TypeError, 'expecting int for bool, but got value %r of type %r instead' % (value, type(value))
+			if value not in (0, 1):
+				raise ValueError, 'expecting 0 or 1 for bool, but got %s instead' % value
+''')
+
 
 class IntAttr:
 
 	def stringToValue(self, string):
 		return int(string)
+
+	def writePySetChecks(self, out):
+		Attr.writePySetChecks.im_func(self, out)
+		out.write('''\
+		if value is not None:
+			if type(value) is types.LongType:
+				value = int(value)
+			elif type(value) is not types.IntType:
+				raise TypeError, 'expecting int type, but got value %r of type %r instead' % (value, type(value))
+''')
 
 
 class LongAttr:
@@ -245,11 +272,31 @@ class LongAttr:
 	def stringToValue(self, string):
 		return long(string)
 
+	def writePySetChecks(self, out):
+		Attr.writePySetChecks.im_func(self, out)
+		out.write('''\
+		if value is not None:
+			if type(value) is types.IntType:
+				value = long(value)
+			elif type(value) is not types.LongType:
+				raise TypeError, 'expecting long type, but got value %r of type %r instead' % (value, type(value))
+''')
+
 
 class FloatAttr:
 
 	def stringToValue(self, string):
 		return float(string)
+
+	def writePySetChecks(self, out):
+		Attr.writePySetChecks.im_func(self, out)
+		out.write('''\
+		if value is not None:
+			if type(value) in (types.IntType, types.LongType):
+				value = float(value)
+			elif type(value) is not types.FloatType:
+				raise TypeError, 'expecting float type, but got value %r of type %r instead' % (value, type(value))
+''')
 
 
 class StringAttr:
@@ -257,11 +304,72 @@ class StringAttr:
 	def stringToValue(self, string):
 		return string
 
+	def writePySetChecks(self, out):
+		Attr.writePySetChecks.im_func(self, out)
+		out.write('''\
+		if value is not None:
+			if type(value) is not types.StringType:
+				raise TypeError, 'expecting string type, but got value %r of type %r instead' % (value, type(value))
+''')
+
 
 class EnumAttr:
 
 	def stringToValue(self, string):
 		return repr(string)
+
+	def writePySetChecks(self, out):
+		Attr.writePySetChecks.im_func(self, out)
+		out.write('''\
+		if value is not None:
+			if type(value) is not types.StringType:
+				raise TypeError, 'expecting string type for enum, but got value %%r of type %%r instead' %% (value, type(value))
+			attr = self.klass().lookupAttr('%s')
+			if not attr.hasEnum(value):
+				raise ValueError, 'expecting one of %%r, but got %%r instead' %% (attr.enums(), value)
+''' % self.name())
+		# @@ 2001-07-11 ce: could optimize above code
+
+
+class AnyDateTimeAttr:
+
+	def mxDateTimeTypeName(self):
+		raise SubclassResponsibilityError, self.__class__
+
+	def writePySetChecks(self, out):
+		Attr.writePySetChecks.im_func(self, out)
+		if DateTime:
+			out.write('''\
+		# have DateTime
+		if value is not None:
+			if type(value) is not DateTime.%s:
+				raise TypeError, 'expecting %s type, but got value %%r of type %%r instead' %% (value, type(value))
+''' % (self.mxDateTimeTypeName(), self['Type']))
+		else:
+			out.write('''\
+		# no DateTime, use strings
+		if value is not None:
+			if type(value) is not types.StringType:
+				raise TypeError, 'expecting string type, but got value %r of type %r instead' % (value, type(value))
+''')
+
+
+class DateAttr:
+
+	def mxDateTimeTypeName(self):
+		return 'DateTimeType'
+
+
+class TimeAttr:
+
+	def mxDateTimeTypeName(self):
+		return 'DateTimeDeltaType'
+
+
+class DateTimeAttr:
+
+	def mxDateTimeTypeName(self):
+		return 'DateTimeType'
 
 
 class ObjRefAttr:
@@ -281,9 +389,11 @@ class ObjRefAttr:
 	def %(pySetName)s(self, value):
 		%(reqAssert)s
 		if value is not None and type(value) is not LongType:
-			assert type(value) is InstanceType
+			if not type(value) is InstanceType:
+				raise TypeError, 'expecting InstanceType, but got value %%r of type %%r instead' %% (value, type(value))
 			from %(package)s%(targetClassName)s import %(targetClassName)s
-			assert isinstance(value, %(targetClassName)s)
+			if not isinstance(value, %(targetClassName)s):
+				raise TypeError, 'expecting %(targetClassName)s, but got value %%r of type %%r instead' %% (value, type(value))
 		self._%(name)s = value
 ''' % locals())
 

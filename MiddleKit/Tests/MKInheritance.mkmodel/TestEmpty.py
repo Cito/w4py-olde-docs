@@ -19,6 +19,7 @@ def test():
 	two.setB('2')
 	two.setC('3')
 	two.setD('4')
+	two.setE('a')
 	store.addObject(two)
 
 	store.saveChanges()
@@ -53,7 +54,7 @@ def test():
 	objs = store.fetchObjectsOfClass(One)
 	assert len(objs)==2
 	for obj in objs:
-		fetchedObj = store.fetchObject(obj.__class__, obj.serialNum())	
+		fetchedObj = store.fetchObject(obj.__class__, obj.serialNum())
 		assert fetchedObj.__class__ == obj.__class__
 		assert fetchedObj.a() == obj.a()
 

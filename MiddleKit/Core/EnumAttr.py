@@ -10,6 +10,13 @@ class EnumAttr(Attr):
 		enums = enums.split(',')
 		enums = [enum.strip() for enum in enums]
 		self._enums = enums
+		set = {}
+		for enum in self._enums:
+			set[enum] = 1
+		self._enumSet = set
 
 	def enums(self):
 		return self._enums
+
+	def hasEnum(self, name):
+		return self._enumSet.has_key(name)

@@ -4,11 +4,11 @@ from MiddleKit.Run.ObjectStore import Store as store
 
 def test():
 	try:
-		import DateTime
+		from mx import DateTime
 		testObjects()
 	except ImportError:
 		testStrings()
-	testNone()
+		testNone()
 
 
 def testStrings():
@@ -29,7 +29,8 @@ def testStrings():
 
 
 def testObjects():
-	from DateTime import DateTimeFrom, TimeFrom
+	import mx
+	from mx.DateTime import DateTimeFrom, TimeFrom
 	print 'Testing with DateTime module.'
 
 	d  = DateTimeFrom('2001-06-07')
