@@ -117,6 +117,13 @@ class Cookie(Object):
 	def setVersion(self, version):
 		self._cookie['version'] = version
 
+	## Convenience ##
+	def delete(self):
+		self._value = ''
+		self._cookie['expires'] = "Mon, 01-Jan-1900 00:00:00 GMT"
+		self._cookie['max-age'] = 0
+		self._cookie['path'] = '/'
+
 
 	## HTTP Headers ##
 

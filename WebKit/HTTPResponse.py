@@ -156,6 +156,19 @@ class HTTPResponse(Response):
 		assert isinstance(cookie, Cookie)
 		self._cookies[cookie.name()] = cookie
 
+	def delCookie(self, name):
+ 		"""
+		Deletes a cookie at the browser. To do so, one has
+ 		to create and send to the browser a cookie with
+ 		parameters that will cause the browser to delete it.
+ 		"""
+ 		if self._cookies.has_key(name):
+ 			self._cookies[name].delete()
+ 		else:
+ 			cookie = Cookie(name, None)
+ 			cookie.delete()
+ 			self.addCookie(cookie)
+
 	def cookies(self):
 		"""
 		Returns a dictionary-style object of all Cookie objects that will be sent
