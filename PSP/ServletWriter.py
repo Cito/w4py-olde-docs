@@ -31,7 +31,7 @@ from PSPReader import *
 
 class ServletWriter:
     
-	''' This file creates the servlet source code. Well, it writes it out to a file at least.'''
+	""" This file creates the servlet source code. Well, it writes it out to a file at least."""
 
 	TAB = '\t'
 	SPACES = '    ' # 4 spaces
@@ -80,7 +80,7 @@ class ServletWriter:
 		os.rename(self._temp, self._pyfilename)
 
 	def pushIndent(self):
-		'''this is very key, have to think more about it'''
+		"""this is very key, have to think more about it"""
 		self._tabcnt = self._tabcnt + 1
 
 	def popIndent(self):
@@ -102,7 +102,7 @@ class ServletWriter:
 				self._filehandle.write(i)
 
 	def quoteString(self, s):
-		'''escape the string'''
+		"""escape the string"""
 		#None
 		if s == None:
 			return 'None'
@@ -116,7 +116,7 @@ class ServletWriter:
 		return st
 	
 	def println(self, line=None):
-		'''Prints with Indentation and a newline if none supplied'''
+		"""Prints with Indentation and a newline if none supplied"""
 		if line:
 			self._filehandle.write(self.indent(line))
 		else:
@@ -127,7 +127,7 @@ class ServletWriter:
 			self._filehandle.write('\n')
 
 	def printChars(self, st):
-		'''just prints what its given'''
+		"""just prints what its given"""
 		self._filehandle.write(st)
 
 	def printMultiLn(self, st):
@@ -135,13 +135,13 @@ class ServletWriter:
 
 
 	def printList(self, strlist):
-		'''prints a list of strings with indentation and a newline'''
+		"""prints a list of strings with indentation and a newline"""
 		for i in strlist:
 			self.printChars(self.indent(i))
 			self.printChars('\n')
 
 	def printIndent(self):
-		'''just prints tabs'''
+		"""just prints tabs"""
 		self.printChars(self.indent(''))
 	
 

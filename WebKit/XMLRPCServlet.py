@@ -14,13 +14,13 @@ import sys, string, traceback
 from RPCServlet import RPCServlet
 
 class XMLRPCServlet(RPCServlet):
-	'''
+	"""
 	XMLRPCServlet is a base class for XML-RPC servlets.
 	See Examples/XMLRPCExample.py for sample usage.
 
 	For more Pythonic convenience at the cost of language independence,
 	see PickleRPCServlet.
-	'''
+	"""
 	def respondToPost(self, transaction):
 		"""
 		This is similar to the xmlrpcserver.py example from the xmlrpc

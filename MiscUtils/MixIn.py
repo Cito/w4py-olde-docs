@@ -3,7 +3,7 @@ import sys
 
 if hasattr(sys, 'version_info') and sys.version_info[0]>=2:
 	def MixIn(pyClass, mixInClass, makeAncestor=0):
-		'''
+		"""
 		Mixes in the attributes of the mixInClass into the pyClass. These attributes are typically methods (but don't have to be). Note that private attributes, denoted by a double underscore, are not mixed in. Collisions are resolved by the mixInClass' attribute overwriting the pyClass'. This gives mix-ins the power to override the behavior of the pyClass.
 
 		After using MixIn(), instances of the pyClass will respond to the messages of the mixInClass.
@@ -21,7 +21,7 @@ if hasattr(sys, 'version_info') and sys.version_info[0]>=2:
 		If makeAncestor is 1, then a different technique is employed: the mixInClass is made the first base class of the pyClass. You probably don't need to use this and if you do, be aware that your mix-in can no longer override attributes/methods in pyClass.
 
 		This function only exists if you are using Python 2.0 or later. Python 1.5.2 has a problem where functions (as in aMethod.im_func) are tied to their class, when in fact, they should be totally generic with only the methods being tied to their class. Apparently this was fixed in Py 2.0.
-		'''
+		"""
 		assert mixInClass is not pyClass, 'mixInClass = %r, pyClass = %r' % (mixInClass, pyClass)
 		if makeAncestor:
 			if mixInClass not in pyClass.__bases__:

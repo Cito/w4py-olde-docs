@@ -1,4 +1,4 @@
-'''
+"""
 HTMLTag defines a class of the same name that represents HTML content. An additional HTMLReader class kicks off the process of reading an HTML file into a set of tags:
 
 	from WebUtils.HTMLTag import HTMLReader
@@ -36,7 +36,7 @@ CREDITS
 * I didn't grok how to write an SGMLParser subclass until I read the very small example by Sean McGrath at http://www.digitome.com/html2pyx.py (which I believe is broken for empty tags).
 
 * Determined what HTML tags are empty be scanning O'Reilly's HTML Pocket Reference.
-'''
+"""
 
 
 # Check for Python 2.0
@@ -116,12 +116,12 @@ class HTMLTag:
 		self._subtags = []
 
 	def readAttr(self, name, value):
-		''' Sets an attribute of the tag with the given name and value. An assertion fails if an attribute is set twice. '''
+		""" Sets an attribute of the tag with the given name and value. An assertion fails if an attribute is set twice. """
 		assert not self._attrs.has_key(name), 'name = %r, attrs = %r' % (name, attrs)
 		self._attrs[name] = value
 
 	def addChild(self, child):
-		''' Adds a child to the receiver. The child will be another tag or a string (CDATA). '''
+		""" Adds a child to the receiver. The child will be another tag or a string (CDATA). """
 		assert isinstance(child, HTMLTag) or type(child) is types.StringType, 'Invalid child: %r' % child
 		self._children.append(child)
 		if isinstance(child, HTMLTag):
@@ -226,10 +226,10 @@ class HTMLTag:
 	## Self utility ##
 
 	def _tagWithMatchingAttr(self, name, value):
-		'''
+		"""
 		Performs a depth-first search for a tag with an attribute that matches the given value. Returns None if the tag cannot be found.
 		The method tagWithMatchingAttr() (e.g., sans underscore) is more commonly used.
-		'''
+		"""
 		if self._attrs.get(name, None)==value:
 			return self
 		for tag in self._subtags:
@@ -313,9 +313,9 @@ class HTMLReader(SGMLParser):
 		return self.readString(contents)
 
 	def readString(self, string, retainRootTag=1):
-		'''
+		"""
 		Reads the given string, storing the results and returning the root tag. You could continue to use HTMLReader object or disregard it and simply use the root tag.
-		'''
+		"""
 		self._rootTag  = None
 		self._tagStack = []
 		self._finished = 0
@@ -336,11 +336,11 @@ class HTMLReader(SGMLParser):
 	## Printing ##
 
 	def pprint(self, out=None):
-		'''
+		"""
 		Pretty prints the tag, its attributes and all its children.
 		Indentation is used for subtags.
 		Print 'Empty.' if there is no root tag.
-		'''
+		"""
 		if self._rootTag:
 			self._rootTag.pprint(out)
 		else:
@@ -352,35 +352,35 @@ class HTMLReader(SGMLParser):
 	## Access ##
 
 	def rootTag(self):
-		'''
+		"""
 		Returns the root tag. May return None if no HTML has been read yet, or if the last invocation of one of the read methods was passed retainRootTag=0.
-		'''
+		"""
 		return self._rootTag
 
 	def filename(self):
-		'''
+		"""
 		Returns the filename that was read, or None if no file was processed.
-		'''
+		"""
 		return self._filename
 
 	def emptyTags(self):
-		'''
+		"""
 		Returns a list of empty tags. See also: class docs and setEmptyTags().
-		'''
+		"""
 		return self._emptyTagList
 
 	def setEmptyTags(self, tagList):
-		'''
+		"""
 		Sets the HTML tags that are considered empty such as <br> and <hr>.
 		The default is found in the global, DefaultEmptyTags, and is fairly thorough, but does not include <p>, <li> and some other tags that HTML authors often use as empty tags.
-		'''
+		"""
 		self._emptyTagList = list(tagList)
 		self._updateEmptyTagDict()
 
 	def extendEmptyTags(self, tagList):
-		'''
+		"""
 		Extends the current list of empty tags with the given list.
-		'''
+		"""
 		self._emptyTagList.extend(tagList)
 		self._updateEmptyTagDict()
 
@@ -391,19 +391,19 @@ class HTMLReader(SGMLParser):
 		return self._printsStack
 
 	def setPrintsStack(self, flag):
-		'''
+		"""
 		Sets the boolean value of the "prints stack" option. This is a debugging option which will print the internal tag stack during HTML processing. The default value is 0.
-		'''
+		"""
 		self._printsStack = flag
 
 
 	## Command line ##
 
 	def main(self, args=None):
-		'''
+		"""
 		The command line equivalent of readFileNamed().
 		Invoked when HTMLTag is run as a program.
-		'''
+		"""
 		if args is None:
 			args = sys.argv
 		if len(args)<2:
@@ -474,9 +474,9 @@ class HTMLReader(SGMLParser):
 	## Self utility ##
 
 	def _updateEmptyTagDict(self):
-		'''
+		"""
 		Creates a dictionary out of the empty tag list for quick look up. e.g., we are simulating a "set".
-		'''
+		"""
 		dict = {}
 		for tag in self._emptyTagList:
 			dict[tag] = 1

@@ -4,12 +4,12 @@ from types import ListType
 
 
 class ListBox(ExamplePage):
-	'''
+	"""
 	This page provides a list box interface with controls for changing
 	it's size and adding and removing items.
 
 	The source is a good example of how to use awake() and actions.
-	'''
+	"""
 
 	def awake(self, transaction):
 		ExamplePage.awake(self, transaction)
@@ -86,7 +86,7 @@ class ListBox(ExamplePage):
 	## Commands ##
 
 	def vars(self):
-		''' Returns a dictionary of values, stored in the session, for this page only. '''
+		""" Returns a dictionary of values, stored in the session, for this page only. """
 		return self.session().value('form')
 
 	def new(self):
@@ -102,7 +102,7 @@ class ListBox(ExamplePage):
 		self.writeBody() # @@ 2000-06-01 ce: not implemented
 
 	def delete(self):
-		''' Delete the selected items in the list, whose indices are passed in through the form. '''
+		""" Delete the selected items in the list, whose indices are passed in through the form. """
 		vars = self.vars()
 		req = self.request()
 		if req.hasField('list'):

@@ -10,7 +10,7 @@ class HTTPResponse(Response):
 	## Init ##
 
 	def __init__(self, transaction, strmOut, headers=None):
-		''' Initializes the request. '''
+		""" Initializes the request. """
 
 		Response.__init__(self, transaction, strmOut)
 
@@ -28,7 +28,7 @@ class HTTPResponse(Response):
 	## Headers ##
 
 	def header(self, name, default=Tombstone):
-		''' Returns the value of the specified header. '''
+		""" Returns the value of the specified header. """
 		if default is Tombstone:
 			return self._headers[string.lower(name)]
 		else:
@@ -265,11 +265,11 @@ class HTTPResponse(Response):
 		return self._strmOut.size()
 
 ##	def appendRawResponse(self, rawRes):
-##		'''
+##		"""
 ##		Appends the contents of the raw response (as returned by some transaction's rawResponse() method) to this response.
 ##		The headers of the receiving response take precedence over the appended response.
 ##		This method was built primarily to support Application.forwardRequest().
-##		'''
+##		"""
 ##		assert self._committed==0
 ##		headers = rawRes.get('headers', [])
 ##		for key, value in headers:

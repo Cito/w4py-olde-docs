@@ -29,13 +29,13 @@ class Model:
 class Klasses:
 
 	def dropDatabaseSQL(self, dbName):
-		'''
+		"""
 		Rather than drop the database, I prefer to drop just the tables.
 		The reason is that the database in MSSQL can contain users and diagrams that would then need to be re-added or re-created
 		Its better to drop the tables than delete them because if you delete the data, the identities need to be reset.
 		What is even worse is that identity resets behave differently depending on whether data has existed in them at any given point.
 		Its safer to drop the table.  dr 4-11-2001
-		'''
+		"""
 		strList = []
 		strList.append('use %s\ngo\n' % dbName)
 		self._klasses.reverse()		
@@ -51,9 +51,9 @@ class Klasses:
 		# return 'drop database %s;\n' % dbName
 
 	def createDatabaseSQL(self, dbName):
-		''' 
+		""" 
 		Creates the database only if it does not already exist
-		'''
+		"""
 		return 'Use Master\n' + 'go\n\n' + "if not exists( select * from master.dbo.sysdatabases where name = N'%s' ) create database %s; \n" % (dbName, dbName)
 
 	def useDatabaseSQL(self, dbName):
@@ -90,7 +90,7 @@ create table _MKClassIds (
 
 
 	def writeKeyValue(self, out, key, value):
-		''' Used by willWriteSQL(). '''
+		""" Used by willWriteSQL(). """
 		key = ljust(key, 12)
 		out.write('# %s = %s\n' % (key, value))
 
@@ -161,9 +161,15 @@ class Klass:
 		return 30   # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
 
 	def primaryKeySQLDef(self, generator):
-		'''
-		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
-		'''
+		"""
+		Returns a one liner that becomes part of the CREATE
+		statement for creating the primary key of the
+		table. SQL generators often override this mix-in
+		method to customize the creation of the primary key
+		for their SQL variant. This method should use
+		self.sqlIdName() and often ljust()s it by
+		self.maxNameWidth().
+		"""
 
 #		print("print 'Creating table %s'\n" % name)
 #		print('create table [%s] (\n' % name)

@@ -42,7 +42,7 @@ class ModelUser(Configurable):
 		self.modelWasSet()
 
 	def modelWasSet(self):
-		''' Invoked by setModel() or readModelFileNamed() as a hook for taking action on this event. Invokes installMixIns(). '''
+		""" Invoked by setModel() or readModelFileNamed() as a hook for taking action on this event. Invokes installMixIns(). """
 		self.installMixIns()
 
 
@@ -87,16 +87,28 @@ class ModelUser(Configurable):
 	## Warning ##
 
 	def warning(self, msg):
-		''' Invoked by self for any kind of appropriate warning that doesn't warrant an exception being thrown. Preferably, this should be invoked from a method that is invoked when the "bad event" occurs. This allows subclasses to override that method and potentially customize the behavior, including providing more debugging information.
+		"""
+		Invoked by self for any kind of appropriate warning
+		that doesn't warrant an exception being
+		thrown. Preferably, this should be invoked from a
+		method that is invoked when the "bad event"
+		occurs. This allows subclasses to override that method
+		and potentially customize the behavior, including
+		providing more debugging information.
+		
 		This implementation writes the msg to stdout.
-		'''
+		"""
 		print 'WARNING:', msg
 
 
 	## Self utility ##
 
 	def modulesForClass(self, pyClass, modules=None):
-		''' Returns a list of modules for pyClass, going up the chain of ancestor classes, stopping short before ModelUser. Utility method for installMixIns. '''
+		"""
+		Returns a list of modules for pyClass, going up the
+		chain of ancestor classes, stopping short before
+		ModelUser. Utility method for installMixIns.
+		"""
 		if modules is None:
 			modules = []
 		className = pyClass.__name__

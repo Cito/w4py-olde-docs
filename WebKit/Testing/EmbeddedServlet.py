@@ -2,14 +2,14 @@ from WebKit.Page import Page
 
 
 class EmbeddedServlet(Page):
-	'''
+	"""
 	This servlet serves as a test for "extra path info"-style URLs such as:
 
 		http://localhost/WebKit.cgi/Servlet/Extra/Path/Info
 
 	Where the servlet is embedded in the URL, rather than being the last component.
 	This servlet simply prints it's fields.
-	'''
+	"""
 
 	def writeBody(self):
 		fields = self.request().fields()

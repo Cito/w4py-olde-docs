@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+"""
 checksrc.py
 
 
@@ -102,7 +102,7 @@ Consider setting _charNum for the current location.
 Consider (optionally) displaying the source line.
 
 Maybe: Experiment with including the name of the last seen method/function with the error messages to help guide the user to where the error occurred.
-'''
+"""
 
 
 import re, string, sys, os
@@ -164,14 +164,14 @@ class CheckSrc:
 		return self._directory
 
 	def setDirectory(self, dir):
-		''' Sets the directory that checking starts in. '''
+		""" Sets the directory that checking starts in. """
 		self._directory = dir
 
 	def output(self):
 		return self._out
 
 	def setOutput(self, output):
-		''' Sets the destination output which can either be an object which must respond to write() or a string which is a filename used for one invocation of check(). '''
+		""" Sets the destination output which can either be an object which must respond to write() or a string which is a filename used for one invocation of check(). """
 		if type(output) is type(''):
 			self._out = open(output, 'w')
 			self._shouldClose = 1
@@ -183,21 +183,21 @@ class CheckSrc:
 		return self._recurse
 
 	def setRecurse(self, flag):
-		''' Sets whether or not to recurse into subdirectories. '''
+		""" Sets whether or not to recurse into subdirectories. """
 		self._recurse = flag
 
 	def verbose(self):
 		return self._verbose
 
 	def setVerbose(self, flag):
-		''' Sets whether or not to print extra information during check (such as every directory and file name scanned). '''
+		""" Sets whether or not to print extra information during check (such as every directory and file name scanned). """
 		self._verbose = flag
 
 
 	## Command line use ##
 
 	def readArgs(self, args=sys.argv):
-		''' Reads a list of arguments in command line style (e.g., sys.argv). You can pass your own args if you like, otherwise sys.argv is used. Returns 1 on success; 0 otherwise. '''
+		""" Reads a list of arguments in command line style (e.g., sys.argv). You can pass your own args if you like, otherwise sys.argv is used. Returns 1 on success; 0 otherwise. """
 		setDir = setOut = 0
 		for arg in args[1:]:
 			if arg=='-h' or arg=='--help':
@@ -262,13 +262,13 @@ Error codes and their messages:
 	## Printing, errors, etc. ##
 
 	def write(self, *args):
-		''' Invoked by self for all printing so that output can be easily redirected. '''
+		""" Invoked by self for all printing so that output can be easily redirected. """
 		write = self._out.write
 		for arg in args:
 			write(str(arg))
 
 	def error(self, msgCode, args):
-		''' Invoked by self when a source code error is detected. Prints the error message and it's location. Does not raise exceptions or halt the program. '''
+		""" Invoked by self when a source code error is detected. Prints the error message and it's location. Does not raise exceptions or halt the program. """
 
 		# Implement the DisableErrors option
 		disableNames = self.setting('DisableErrors', {}).get(msgCode, [])
@@ -281,12 +281,12 @@ Error codes and their messages:
 		self.write(self.location(), msg, '\n')
 
 	def fatalError(self, msg):
-		''' Reports a fatal error such as an invalid configuration file and raises CheckSrcError. '''
+		""" Reports a fatal error such as an invalid configuration file and raises CheckSrcError. """
 		self.write('FATAL ERROR: %s\n' % msg)
 		raise CheckSrcError
 
 	def location(self):
-		''' Returns a string indicating the current location such as "fileName:lineNum:charNum". The string may be shorter if the latter components are undefined. '''
+		""" Returns a string indicating the current location such as "fileName:lineNum:charNum". The string may be shorter if the latter components are undefined. """
 		s = ''
 		if self._fileName!=None:
 			s = s + self._fileName
@@ -299,7 +299,7 @@ Error codes and their messages:
 		return s
 
 	def printDir(self):
-		''' Self utility method to print the directory being processed. '''
+		""" Self utility method to print the directory being processed. """
 		self.write('\n', self._dirName, '\n')
 		self._printedDir = 1
 
@@ -347,7 +347,7 @@ Error codes and their messages:
 			self._out.close()
 
 	def checkDir(self, arg, dirName, names):
-		''' Invoked by os.path.walk() which is kicked off by check(). Recursively checks the given directory and all it's subdirectories. '''
+		""" Invoked by os.path.walk() which is kicked off by check(). Recursively checks the given directory and all it's subdirectories. """
 		# Initialize location attributes.
 		# These are updated while processing and
 		# used when reporting errors.

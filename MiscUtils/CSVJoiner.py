@@ -2,12 +2,12 @@ import types
 
 
 def joinCSVFields(fields):
-	'''
+	"""
 	Returns a CSV record (eg a string) from a sequence of fields.
 	Fields containing commands (,) or double quotes (") are quotes
 	and double quotes are escaped (""). The terminating newline is
 	NOT included.
-	'''
+	"""
 	newFields = []
 	for field in fields:
 		assert type(field) is types.StringType

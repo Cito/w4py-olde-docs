@@ -11,7 +11,7 @@ except:
 class HTMLTagTest(unittest.TestCase):
 
 	def setUp(self):
-		self._html = '''\
+		self._html = """\
 <html>
 	<head>
 		<title>Example</title>
@@ -24,7 +24,7 @@ class HTMLTagTest(unittest.TestCase):
 			<tr> <td class=datum> 0 </td> <td class=datum> 0 </td> </tr>
 		</table>
 	</body>
-</html>'''
+</html>"""
 
 	def checkBasics(self):
 		reader = HTMLReader()

@@ -10,11 +10,11 @@ import os
 
 
 class Klasses(ModelObject, UserDict):
-	'''
+	"""
 	A Klasses object can read a list of class specifications in a spreadsheet (.csv).
 
 	Note that Klasses inherits UserDict, allowing you to access class specifications by name.
-	'''
+	"""
 
 
 	## Init ##
@@ -37,10 +37,10 @@ class Klasses(ModelObject, UserDict):
 
 
 	def initTypeMap(self):
-		'''
+		"""
 		Initializes self._typeNamesToAttrClassNames which maps MiddleKit type names (like int and enum) to the name of the attribute class that would implement them.
 		Mapping to class names rather than actual classes is key, because in __init__, a different set of attribute classes can be passed in.
-		'''
+		"""
 		map = {}
 
 		names = 'bool int long float string enum date time list ObjRef decimal'
@@ -59,7 +59,7 @@ class Klasses(ModelObject, UserDict):
 		return self._filename
 
 	def klassesInOrder(self):
-		''' Returns a list of all the Klasses in the order they were declared. Do not modify the list. '''
+		""" Returns a list of all the Klasses in the order they were declared. Do not modify the list. """
 		return self._klasses
 
 
@@ -104,7 +104,7 @@ class Klasses(ModelObject, UserDict):
 	## Adding classes ##
 
 	def addKlass(self, klass):
-		''' Restrictions: Cannot add two classes with the same name. '''
+		""" Restrictions: Cannot add two classes with the same name. """
 		name = klass.name()
 		assert not self.has_key(name), 'Already have %s.' % name
 		self._klasses.append(klass)
@@ -120,7 +120,7 @@ class Klasses(ModelObject, UserDict):
 	## Self utility ##
 
 	def pyClassNameForAttrDict(self, dict):
-		''' Given a raw attribute definition (in the form of a dictionary), this method returns the name of the Python class that should be instantiated for it. This method relies primarily on dict['Type']. '''
+		""" Given a raw attribute definition (in the form of a dictionary), this method returns the name of the Python class that should be instantiated for it. This method relies primarily on dict['Type']. """
 		typeName = dict['Type']
 		if not typeName:
 			raise Exception, 'Blank type for dict: %s' % dict
@@ -140,6 +140,6 @@ class Klasses(ModelObject, UserDict):
 	## Debugging ##
 
 	def dump(self):
-		''' Prints each class. '''
+		""" Prints each class. """
 		for klass in self._klasses:
 			print klass

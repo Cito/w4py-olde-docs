@@ -4,9 +4,9 @@ import os, mimetypes, time
 debug = 0
 
 class UnknownFileTypeServletFactory(ServletFactory):
-	'''
+	"""
 	This is the factory for files of an unknown type (e.g., not .py .psp, etc).
-	'''
+	"""
 
 	def uniqueness(self):
 		return 'file'
@@ -35,7 +35,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		self._mimeEncoding = None
 
 	def userConfig(self):
-		''' Get the user config from the 'UnknownFileTypes' section in the Application's configuration. '''
+		""" Get the user config from the 'UnknownFileTypes' section in the Application's configuration. """
 		return self._application.setting('UnknownFileTypes')
 
 	def canBeReused(self):
@@ -45,7 +45,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		return ['serveContent', 'redirectSansAdapter']
 
 	def respondToGet(self, trans):
-		''' Responds to the transaction by invoking self.foo() for foo is specified by the 'Technique' setting. '''
+		""" Responds to the transaction by invoking self.foo() for foo is specified by the 'Technique' setting. """
 		technique = self.setting('Technique')
 		assert technique in self.validTechniques(), 'technique = %s' % technique
 		method = getattr(self, technique)
@@ -54,16 +54,16 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 	respondToHead = respondToGet
 
 	def respondToPost(self, trans):
-		'''
+		"""
 		Invokes self.respondToGet().
 		Since posts are usually accompanied by data, this might not be the best policy. However, a POST would most likely be for a CGI, which currently no one is mixing in with their WebKit-based web sites.
-		'''
+		"""
 		# @@ 2001-01-25 ce: See doc string for why this might be a bad idea.
 		self.respondToGet(trans)
 
 	def redirectSansAdapter(self, trans):
-		''' Sends a redirect to a URL that doesn't contain the adapter name. Under the right configuration, this will cause the web server to then be responsible for the URL rather than the app server. This has only been test with "*.[f]cgi" adapters.
-		Keep in mind that links off the target page will NOT include the adapter in the URL. '''
+		""" Sends a redirect to a URL that doesn't contain the adapter name. Under the right configuration, this will cause the web server to then be responsible for the URL rather than the app server. This has only been test with "*.[f]cgi" adapters.
+		Keep in mind that links off the target page will NOT include the adapter in the URL. """
 		# @@ 2000-05-08 ce: the following is horribly CGI specific and hacky
 		env = trans.request()._environ
 		# @@ 2001-01-25 ce: isn't there a func in WebUtils to get script name? because some servers are different?

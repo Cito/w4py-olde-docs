@@ -58,11 +58,11 @@ class Transaction(Object):
 		self._response = response
 
 	def hasSession(self):
-		''' Returns true if the transaction has a session. '''
+		""" Returns true if the transaction has a session. """
 		return self._session is not None
 
 	def session(self):
-		''' Returns the session for the transaction, creating one if necessary. Therefore, this method never returns None. Use hasSession() if you want to find out if there one already exists. '''
+		""" Returns the session for the transaction, creating one if necessary. Therefore, this method never returns None. Use hasSession() if you want to find out if there one already exists. """
 		if not self._session:
 			self._session = self._application.createSessionForTransaction(self)
 		return self._session
@@ -71,21 +71,21 @@ class Transaction(Object):
 		self._session = session
 
 	def servlet(self):
-		''' Return the current servlet that is processing. Remember that servlets can be nested. '''
+		""" Return the current servlet that is processing. Remember that servlets can be nested. """
 		return self._servlet
 
 	def setServlet(self, servlet):
 		self._servlet = servlet
 
 	def duration(self):
-		''' Returns the duration, in seconds, of the transaction (basically response end time minus request start time). '''
+		""" Returns the duration, in seconds, of the transaction (basically response end time minus request start time). """
 		return self._response.endTime() - self._request.time()
 
 	def errorOccurred(self):
 		return self._errorOccurred
 
 	def setErrorOccurred(self, flag):
-		''' Invoked by the application if an exception is raised to the application level. '''
+		""" Invoked by the application if an exception is raised to the application level. """
 		self._errorOccurred = flag
 		#self._servlet = None
 		# @@ 2002-02-05 ce: disabled above statement so that custom exception handlers can examine the servlet
@@ -94,7 +94,7 @@ class Transaction(Object):
 	## Transaction stages ##
 
 	def awake(self):
-		''' Sends awake() the to session (if there is one) and the servlet. Currently, the request and response do not partake in the awake()-respond()-sleep() cycle. This could definitely be added in the future if any use was demonstrated for it. '''
+		""" Sends awake() the to session (if there is one) and the servlet. Currently, the request and response do not partake in the awake()-respond()-sleep() cycle. This could definitely be added in the future if any use was demonstrated for it. """
 		if self._session:
 			self._session.awake(self)
 		self._servlet.awake(self)
@@ -105,7 +105,7 @@ class Transaction(Object):
 		self._servlet.respond(self)
 
 	def sleep(self):
-		''' Note that sleep() is sent in reverse order as awake() (which is typical for shutdown/cleanup methods). '''
+		""" Note that sleep() is sent in reverse order as awake() (which is typical for shutdown/cleanup methods). """
 		self._servlet.sleep(self)
 		if self._session:
 			self._session.sleep(self)
@@ -114,7 +114,7 @@ class Transaction(Object):
 	## Debugging ##
 
 	def dump(self, file=None):
-		''' Dumps debugging info to stdout. '''
+		""" Dumps debugging info to stdout. """
 		if file is None:
 			file = sys.stdout
 		wr = file.write
@@ -127,7 +127,7 @@ class Transaction(Object):
 	## Die ##
 
 	def die(self):
-		''' This method should be invoked when the entire transaction is finished with. Currently, this is invoked by AppServer. This method removes references to the different objects in the transaction, breaking cyclic reference chains and allowing either older versions of Python to collect garbage, or newer versions to collect it faster. '''
+		""" This method should be invoked when the entire transaction is finished with. Currently, this is invoked by AppServer. This method removes references to the different objects in the transaction, breaking cyclic reference chains and allowing either older versions of Python to collect garbage, or newer versions to collect it faster. """
 		from types import InstanceType
 		for attrName in self.__dict__.keys():
 			# @@ 2000-05-21 ce: there's got to be a better way!

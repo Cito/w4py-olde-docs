@@ -7,7 +7,7 @@ from MiddleKit.Core.ObjRefAttr import objRefJoin
 
 
 class SQLGenerator(CodeGenerator):
-	'''
+	"""
 	This class and its associated mix-ins are responsible for generating:
 		- Create.sql
 		- InsertSample.sql
@@ -31,7 +31,7 @@ class SQLGenerator(CodeGenerator):
 				useDatabaseSQL()
 			StringAttr
 			EnumAttr
-	'''
+	"""
 
 	def dbName(self):
 		"""
@@ -61,10 +61,10 @@ class SQLGenerator(CodeGenerator):
 		self._model.writeInsertSamplesSQL(self, dirname)
 
 	def sqlSupportsDefaultValues(self):
-		'''
+		"""
 		Subclasses must override to return 1 or 0, indicating their SQL variant supports DEFAULT <value> in the CREATE statement.
 		Subclass responsibility.
-		'''
+		"""
 		return SubclassResponsibility
 
 
@@ -85,7 +85,7 @@ class Model:
 		self._klasses.writeCreateSQL(generator, os.path.join(dirname, 'Create.sql'))
 
 	def dbName(self):
-		''' Returns the name of the database, which is currently always equal to self.name(). '''
+		""" Returns the name of the database, which is currently always equal to self.name(). """
 		return self.name()
 
 	def writeInsertSamplesSQL(self, generator, dirname):
@@ -170,14 +170,14 @@ class Model:
 			file.write(stmt)
 
 	def unquote(self, string):
-		''' Removes preceding and trailing quotes. This is a utility method for writeInsertSamplesSQLForLines(). '''
+		""" Removes preceding and trailing quotes. This is a utility method for writeInsertSamplesSQLForLines(). """
 		if string:
 			if string.startswith('"') and string.endswith('"'):
 				string = string[1:-1]
 		return string
 
 	def areFieldsBlank(self, fields):
-		''' Utility method for writeInsertSamplesSQLForLines(). '''
+		""" Utility method for writeInsertSamplesSQLForLines(). """
 		if len(fields)==0:
 			return 1
 		for field in fields:
@@ -195,16 +195,16 @@ class Klasses:
 		self._sqlGenerator = generator
 
 	def auxiliaryTableNames(self):
-		''' Returns a list of table names in addition to the tables that hold objects. One popular user of this method is dropTablesSQL(). '''
+		""" Returns a list of table names in addition to the tables that hold objects. One popular user of this method is dropTablesSQL(). """
 		return ['_MKClassIds']
 
 	def writeKeyValue(self, out, key, value):
-		''' Used by willCreateWriteSQL(). '''
+		""" Used by willCreateWriteSQL(). """
 		key = key.ljust(12)
 		out.write('# %s = %s\n' % (key, value))
 
 	def writeCreateSQL(self, generator, out):
-		''' Writes the SQL to define the tables for a set of classes. The target can be a file or a filename. '''
+		""" Writes the SQL to define the tables for a set of classes. The target can be a file or a filename. """
 		if type(out) is StringType:
 			out = open(out, 'w')
 			close = 1
@@ -249,35 +249,35 @@ class Klasses:
 			raise Exception, 'Invalid value for DropStatements setting: %r' % drop
 
 	def dropDatabaseSQL(self, dbName):
-		'''
+		"""
 		Returns SQL code that will remove the database with the given name.
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
-		'''
+		"""
 		raise SubclassResponsibilityError
 
 	def dropTablesSQL(self):
-		'''
+		"""
 		Returns SQL code that will remove each of the tables in the database.
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
-		'''
+		"""
 		raise SubclassResponsibilityError
 
 	def createDatabaseSQL(self, dbName):
-		'''
+		"""
 		Returns SQL code that will create the database with the given name.
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
-		'''
+		"""
 		raise SubclassResponsibilityError
 
 	def useDatabaseSQL(self, dbName):
-		'''
+		"""
 		Returns SQL code that will use the database with the given name.
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
-		'''
+		"""
 		raise SubclassResponsibilityError
 
 	def _writeCreateSQL(self, generator, out):
@@ -311,10 +311,10 @@ create table _MKClassIds (
 		out.write('/* end of generated SQL */\n')
 
 	def writeDeleteAllRecords(self, generator, file):
-		'''
+		"""
 		Writes a delete statement for each data table in the model. This is used for InsertSamples.sql to wipe out all data prior to inserting sample values.
 		SQL generators rarely have to customize this method.
-		'''
+		"""
 		wr = file.write
 		if 0:
 			# Woops. Our only auxiliary table is _MKClassIds, which we
@@ -367,16 +367,16 @@ class Klass:
 			wr(');\n\n\n')
 
 	def primaryKeySQLDef(self, generator):
-		'''
+		"""
 		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
-		'''
+		"""
 		return '    %s int not null primary key,\n' % self.sqlIdName().ljust(self.maxNameWidth())
 
 	def deletedSQLDef(self, generator):
-		'''
+		"""
 		Returns a one liner that becomes part of the CREATE statement for creating the deleted timestamp field of the table.
 		This is used if DeleteBehavior is set to "mark".
-		'''
+		"""
 		return '    %s datetime,\n' % ('deleted'.ljust(self.maxNameWidth()))
 
 	def sqlIdName(self):
@@ -401,13 +401,13 @@ class Attr:
 		return self.name()
 
 	def hasSQLColumn(self):
-		''' Returns true if the attribute has a direct correlating SQL column in it's class' SQL table definition. Most attributes do. Those of type list do not. '''
+		""" Returns true if the attribute has a direct correlating SQL column in it's class' SQL table definition. Most attributes do. Those of type list do not. """
 		return not self.get('isDerived', 0)
 
 	def sampleValue(self, value):
-		''' Returns a string suitable for a SQL insert statement including any necessary SQL syntax. Subclasses should override to perform type checking and handle any special capabilities.
+		""" Returns a string suitable for a SQL insert statement including any necessary SQL syntax. Subclasses should override to perform type checking and handle any special capabilities.
 		The invoker of this method already strips preceding and trailing whitespace, as well detects blanks as NULLs.
-		'''
+		"""
 		# @@ 2001-02-20 ce: restructure this
 			# sqlValue() instead of sampleValue()
 			# w.s. stripping, blanks as default value, none as NULL
@@ -512,11 +512,11 @@ class DecimalAttr:
 class StringAttr:
 
 	def sqlType(self):
-		'''
+		"""
 		Subclass responsibility.
 		Subclasses should take care that if self['Max']==self['Min'] then the "char" type is preferred over "varchar".
 		Also, most (if not all) SQL databases require different types depending on the length of the string.
-		'''
+		"""
 		raise SubclassResponsibilityError
 
 	def sampleValue(self, value):
@@ -553,7 +553,7 @@ class ObjRefAttr:
 	#	return 'bigint unsigned /* %s */' % self['Type']
 
 	def sampleValue(self, value):
-		''' Obj ref sample data format is "Class.serialNum", such as "Thing.3". If the Class and period are missing, then the obj ref's type is assumed. '''
+		""" Obj ref sample data format is "Class.serialNum", such as "Thing.3". If the Class and period are missing, then the obj ref's type is assumed. """
 		parts = value.split('.')
 		if len(parts)==2:
 			className = parts[0]

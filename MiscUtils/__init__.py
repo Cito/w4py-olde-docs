@@ -6,7 +6,7 @@ __all__ = ['Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error', 'Funcs
 
 
 class SubclassResponsibilityError(NotImplementedError):
-	'''
+	"""
 	This exception is raised by abstract methods in abstract classes. It
 	is a special case of NotImplementedError, that indicates that the
 	implementation won't be provided at that location in the future
@@ -22,12 +22,12 @@ class SubclassResponsibilityError(NotImplementedError):
 
 	Note that added the self.__class__ makes the resulting exception
 	much more useful.
-	'''
+	"""
 	pass
 
 
 class NoDefault:
-	'''
+	"""
 	This provides a singleton "thing" which can be used to initialize
 	the "default=" arguments for different retrieval methods. For
 	example:
@@ -51,7 +51,7 @@ class NoDefault:
 	It's also useful if one method that uses "default=NoDefault" relies
 	on another object and method to which it must pass the default.
 	(This is similar to the subclassing situation.)
-	'''
+	"""
 	pass
 
 

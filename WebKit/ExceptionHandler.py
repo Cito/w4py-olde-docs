@@ -11,7 +11,7 @@ class singleton: pass
 
 
 class ExceptionHandler(Object):
-	'''
+	"""
 	ExceptionHandler is a utility class for Application that is created
 	to handle a particular exception. The object is a one-shot deal.
 	After handling an exception, it should be removed.

@@ -12,4 +12,4 @@ status = 'beta'
 
 requiredPyVersion = (2, 0, 0)
 
-synopsis = '''TaskKit provides a framework for the scheduling and management of tasks which can be triggered periodically or at specific times.'''
+synopsis = """TaskKit provides a framework for the scheduling and management of tasks which can be triggered periodically or at specific times."""

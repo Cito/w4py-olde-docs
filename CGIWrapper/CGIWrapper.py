@@ -63,12 +63,12 @@ except ImportError:
 
 
 class CGIWrapper(NamedValueAccess):
-	'''
+	"""
 	A CGIWrapper executes a target script and provides various services for
 	the both the script and website developer and administrator.
 
 	See the CGIWrapper.html documentation for full information.
-	'''
+	"""
 
 
 	## Init ##
@@ -80,7 +80,12 @@ class CGIWrapper(NamedValueAccess):
 	## Configuration ##
 
 	def defaultConfig(self):
-		''' Returns a dictionary with the default configuration. Subclasses could override to customize the values or where they're taken from. '''
+		"""
+		Returns a dictionary with the default
+		configuration. Subclasses could override to customize
+		the values or where they're taken from.
+		"""
+
 		return {
 			'ScriptsHomeDir':         'Scripts',
 			'ChangeDir':              1,
@@ -106,11 +111,17 @@ class CGIWrapper(NamedValueAccess):
 		}
 
 	def configFilename(self):
-		''' Used by userConfig(). '''
+		"""Used by userConfig()."""
 		return 'Config.dict'
 
 	def userConfig(self):
-		''' Returns the user config overrides found in the optional config file, or {} if there is no such file. The config filename is taken from configFilename(). '''
+		"""
+		Returns the user config overrides found in the
+		optional config file, or {} if there is no such
+		file. The config filename is taken from
+		configFilename().
+		"""
+		
 		try:
 			file = open(self.configFilename())
 		except IOError:
@@ -122,33 +133,41 @@ class CGIWrapper(NamedValueAccess):
 			return config
 
 	def config(self):
-		''' Returns the configuration for the wrapper which is a combination of defaultConfig() and userConfig(). This method does no caching. '''
+		"""
+		Returns the configuration for the wrapper which is a
+		combination of defaultConfig() and userConfig(). This
+		method does no caching.
+		"""
 		config = self.defaultConfig()
 		config.update(self.userConfig())
 		return config
 
 	def setting(self, name):
-		''' Returns the value of a particular setting in the configuration. '''
+		"""Returns the value of a particular setting in the configuration."""
 		return self._config[name]
 
 
 	## Utilities ##
 
 	def makeHeaders(self):
-		''' Returns a default header dictionary containing {'Content-type': 'text/html'}. '''
+		"""Returns a default header dictionary containing {'Content-type': 'text/html'}."""
 		return {'Content-type': 'text/html'}
 
 	def makeFieldStorage(self):
-		''' Returns a default field storage object created from the cgi module. '''
+		"""Returns a default field storage object created from the cgi module."""
 		return cgi.FieldStorage()
 
 	def enhanceThePath(self):
-		''' Enhance sys.path according to our configuration. '''
+		"""Enhance sys.path according to our configuration."""
 		extraPathsIndex = self.setting('ExtraPathsIndex')
 		sys.path[extraPathsIndex:extraPathsIndex] = self.setting('ExtraPaths')
 
 	def requireEnvs(self, names):
-		'''	Checks that given environment variable names exist. If they don't, a basic HTML error message is printed and we exit. '''
+		"""
+		Checks that given environment variable names exist. If
+		they don't, a basic HTML error message is printed and
+		we exit.
+		"""
 		badNames = []
 		for name in names:
 			if not self._environ.has_key(name):
@@ -161,7 +180,13 @@ class CGIWrapper(NamedValueAccess):
 			sys.exit(0)
 
 	def scriptPathname(self):
-		''' Returns the full pathname of the target script. Scripts that start with an underscore are special--they run out of the same directory as the CGI Wrapper and are typically CGI Wrapper support scripts. '''
+		"""
+		Returns the full pathname of the target
+		script. Scripts that start with an underscore are
+		special--they run out of the same directory as the CGI
+		Wrapper and are typically CGI Wrapper support
+		scripts.
+		"""
 		pathname = os.path.split(self._environ['SCRIPT_FILENAME'])[0] # This removes the CGI Wrapper's filename part
 		filename = self._environ['PATH_INFO'][1:]
 		ext      = os.path.splitext(filename)[1]
@@ -181,7 +206,10 @@ class CGIWrapper(NamedValueAccess):
 		return filename
 
 	def writeScriptLog(self):
-		''' Writes an entry to the script log file. Uses settings ScriptLogFilename and ScriptLogColumns. '''
+		"""
+		Writes an entry to the script log file. Uses settings
+		ScriptLogFilename and ScriptLogColumns.
+		"""
 		filename = self.setting('ScriptLogFilename')
 		if os.path.exists(filename):
 			file = open(filename, 'a')
@@ -206,7 +234,11 @@ class CGIWrapper(NamedValueAccess):
 	## Exception handling ##
 
 	def handleException(self, excInfo):
-		''' Invoked by self when an exception occurs in the target script. <code>excInfo</code> is a sys.exc_info()-style tuple of information about the exception. '''
+		"""
+		Invoked by self when an exception occurs in the target
+		script. <code>excInfo</code> is a sys.exc_info()-style
+		tuple of information about the exception.
+		"""
 
 		self._scriptEndTime = time() # Note the duration of the script and time of the exception
 		self.logExceptionToConsole()
@@ -225,15 +257,24 @@ class CGIWrapper(NamedValueAccess):
 			self.emailException(fullErrorMsg)
 
 	def logExceptionToConsole(self, stderr=sys.stderr):
-		''' Logs the time, script name and traceback to the console (typically stderr). This usually results in the information appearing in the web server's error log. Used by handleException(). '''
+		"""
+		Logs the time, script name and traceback to the
+		console (typically stderr). This usually results in
+		the information appearing in the web server's error
+		log. Used by handleException().
+		"""
 		# stderr logging
 		stderr.write('[%s] [error] CGI Wrapper: Error while executing script %s\n' % (
 			asctime(localtime(self._scriptEndTime)), self._scriptPathname))
 		traceback.print_exc(file=stderr)
 
 	def reset(self):
-		''' Used by handleException() to clear out the current CGI output results in preparation of delivering an HTML error message page. Currently resets headers and deletes cookies, if present. '''
-
+		"""
+		Used by handleException() to clear out the current CGI
+		output results in preparation of delivering an HTML
+		error message page. Currently resets headers and
+		deletes cookies, if present.
+		"""
 		# Set headers to basic text/html. We don't want stray headers from a script that failed.
 		headers = {'Content-Type': 'text/html'}
 
@@ -242,7 +283,12 @@ class CGIWrapper(NamedValueAccess):
 			del self._namespace['cookies']
 
 	def htmlErrorPage(self, showDebugInfo=1):
-		''' Returns an HTML page explaining that there is an error. There could be more options in the future so using named arguments (e.g., 'showDebugInfo=1') is recommended. Invoked by handleException(). '''
+		"""
+		Returns an HTML page explaining that there is an
+		error. There could be more options in the future so
+		using named arguments (e.g., 'showDebugInfo=1') is
+		recommended. Invoked by handleException().
+		"""
 		html = ['''
 <html>
 	<title>Error</title>
@@ -257,7 +303,10 @@ class CGIWrapper(NamedValueAccess):
 		return string.join(html, '')
 
 	def htmlDebugInfo(self):
-		''' Return HTML-formatted debugging information about the current exception. Used by handleException(). '''
+		"""
+		Return HTML-formatted debugging information about the
+		current exception. Used by handleException().
+		"""
 		html = ['''
 %s
 <p> <i>%s</i>
@@ -281,7 +330,11 @@ class CGIWrapper(NamedValueAccess):
 		return string.join(html, '')
 
 	def saveHTMLErrorPage(self, html):
-		''' Saves the given HTML error page for later viewing by the developer, and returns the filename used. Invoked by handleException(). '''
+		"""
+		Saves the given HTML error page for later viewing by
+		the developer, and returns the filename used. Invoked
+		by handleException().
+		"""
 		filename = os.path.join(self.setting('ErrorMessagesDir'), self.htmlErrorPageFilename())
 		f = open(filename, 'w')
 		f.write(html)
@@ -289,7 +342,7 @@ class CGIWrapper(NamedValueAccess):
 		return filename
 
 	def htmlErrorPageFilename(self):
-		''' Construct a filename for an HTML error page, not including the 'ErrorMessagesDir' setting. '''
+		"""Construct a filename for an HTML error page, not including the 'ErrorMessagesDir' setting."""
 		return 'Error-%s-%s-%d.html' % (
 			os.path.split(self._scriptPathname)[1],
 			string.join(map(lambda x: '%02d' % x, localtime(self._scriptEndTime)[:6]), '-'),
@@ -297,7 +350,12 @@ class CGIWrapper(NamedValueAccess):
 			# @@ 2000-04-21 ce: Using the timestamp & a random number is a poor technique for filename uniqueness, but this works for now
 
 	def logExceptionToDisk(self, errorMsgFilename='', excInfo=None):
-		''' Writes a tuple containing (date-time, filename, pathname, exception-name, exception-data,error report filename) to the errors file (typically 'Errors.csv') in CSV format. Invoked by handleException(). '''
+		"""
+		Writes a tuple containing (date-time, filename,
+		pathname, exception-name, exception-data,error report
+		filename) to the errors file (typically 'Errors.csv')
+		in CSV format. Invoked by handleException().
+		"""
 		if not excInfo:
 			excInfo = sys.exc_info()
 		logline = (
@@ -450,7 +508,7 @@ class CGIWrapper(NamedValueAccess):
 
 
 	def deliver(self):
-		''' Deliver the HTML, whether it came from the script being served, or from our own error reporting. '''
+		"""Deliver the HTML, whether it came from the script being served, or from our own error reporting."""
 
 		# Compile the headers & cookies
 		headers = StringIO()
@@ -480,7 +538,7 @@ def htTitle(name):
 </td> </tr> </table>''' % name
 
 def htDictionary(dict, addSpace=None):
-	''' Returns an HTML string with a <table> where each row is a key-value pair. '''
+	"""Returns an HTML string with a <table> where each row is a key-value pair."""
 	keys = dict.keys()
 	keys.sort()
 	html = ['<table width=100% border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>']
@@ -494,8 +552,11 @@ def htDictionary(dict, addSpace=None):
 	return string.join(html, '')
 
 def osIdTable():
-	''' Returns a list of dictionaries contained id information such as uid, gid, etc.,
-		all obtained from the os module. Dictionary keys are 'name' and 'value'. '''
+	"""
+	Returns a list of dictionaries contained id information such
+	as uid, gid, etc., all obtained from the os module. Dictionary
+	keys are 'name' and 'value'.
+	"""
 	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp', 'getpid', 'getppid', 'getuid']
 	table = []
 	for funcName in funcs:
@@ -505,11 +566,17 @@ def osIdTable():
 	return table
 
 def htTable(listOfDicts, keys=None):
-	''' The listOfDicts parameter is expected to be a list of dictionaries whose keys are always the same.
-		This function returns an HTML string with the contents of the table.
-		If keys is None, the headings are taken from the first row in alphabetical order.
-		Returns an empty string if listOfDicts is none or empty.
-		Deficiencies: There's no way to influence the formatting or to use column titles that are different than the keys. '''
+	"""
+	The listOfDicts parameter is expected to be a list of
+	dictionaries whose keys are always the same.  This function
+	returns an HTML string with the contents of the table.  If
+	keys is None, the headings are taken from the first row in
+	alphabetical order.  Returns an empty string if listOfDicts is
+	none or empty.
+
+	Deficiencies: There's no way to influence the formatting or to
+	use column titles that are different than the keys.
+	"""
 
 	if not listOfDicts:
 		return ''

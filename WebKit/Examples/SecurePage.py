@@ -3,7 +3,7 @@ from MiscUtils.Configurable import Configurable
 from ExamplePage import ExamplePage
 
 class SecurePage(ExamplePage, Configurable):
-	'''
+	"""
 	This class is an example of how to implement username and password-based
 	security using WebKit.  Use a SecurePage class like this one as the
 	base class for any pages that you want to require login.  Modify
@@ -22,7 +22,7 @@ class SecurePage(ExamplePage, Configurable):
 	To-Do: Integrate this functionality with the upcoming UserKit.
 		   Make more of the functionality configurable in the config file.
 
-	'''
+	"""
 
 	def __init__(self):
 		ExamplePage.__init__(self)

@@ -1,5 +1,5 @@
 class Role:
-	'''
+	"""
 	Roles are used in conjuction with RoleUser to provide role-based security. All roles have a name and a description and respond to playsRole().
 
 	RoleUser also responds to playsRole() and is the more popular entry point for programmers. Application code may then do something along the lines of:
@@ -10,7 +10,7 @@ class Role:
 	See also:
 		* class HierRole
 		* class RoleUser
-	'''
+	"""
 
 	## Init ##
 
@@ -46,6 +46,6 @@ class Role:
 	## The big question ##
 
 	def playsRole(self, role):
-		''' Returns true if the receiving role plays the role passed in. For Role, this is simply a test of equality. Subclasses may override this method to provide richer semantics (such as hierarchical roles). '''
+		""" Returns true if the receiving role plays the role passed in. For Role, this is simply a test of equality. Subclasses may override this method to provide richer semantics (such as hierarchical roles). """
 		assert isinstance(role, Role)
 		return self==role

@@ -39,7 +39,7 @@ class SessionStore(Object):
 	## Init ##
 
 	def __init__(self, app):
-		''' Subclasses must invoke super. '''
+		""" Subclasses must invoke super. """
 		Object.__init__(self)
 		self._app = app
 

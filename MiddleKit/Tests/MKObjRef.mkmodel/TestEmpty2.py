@@ -1,8 +1,8 @@
 def test(store):
-	'''
+	"""
 	Bug report from Stefan Karlsson <stefan@everynet.se> on Dec 3 2001.
 	Obj refs can be incorrectly stored to the database as zeroes for newly created objects.
-	'''
+	"""
 
 	from Bar import Bar
 	from Foo import Foo

@@ -3,7 +3,11 @@ from AdminPage import *
 
 
 def LoadCSV(filename):
-	''' Loads a CSV (comma-separated value) file from disk and returns it as a list of rows where each row is a list of values (which are always strings). '''
+	"""
+	Loads a CSV (comma-separated value) file from disk and returns
+	it as a list of rows where each row is a list of values (which
+	are always strings).
+	"""
 	f = open(filename)
 	rows = []
 	while 1:
@@ -54,5 +58,9 @@ class _dumpCSV(AdminPage):
 		self.writeln('</table>')
 
 	def cellContents(self, rowIndex, colIndex, value):
-		''' This is a hook for subclasses to customize the contents of a cell based on any criteria (including location). '''
+		"""
+		This is a hook for subclasses to customize the
+		contents of a cell based on any criteria (including
+		location).
+		"""
 		return value

@@ -33,11 +33,11 @@ import time
 
 
 class PSPServletFactory(ServletFactory):
-	'''
+	"""
 	Servlet Factory for PSP files.
 	Very sloppy.  Need to come back and do a serious cleanup.
 
-	'''
+	"""
 
 	def __init__(self,application):
 		ServletFactory.__init__(self,application)

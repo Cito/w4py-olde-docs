@@ -1,11 +1,11 @@
-'''
+"""
 DictForArgs.py
 
 
 See the doc string for the DictForArgs() function.
 
 Also, there is a test suite in Testing/TestDictForArgs.py
-'''
+"""
 
 
 import re, string
@@ -18,7 +18,7 @@ def _SyntaxError(s):
 	raise DictForArgsError, 'Syntax error: %s' % repr(s)
 
 def DictForArgs(s):
-	'''
+	"""
 	Takes an input such as:
 			x=3
 			name="foo"
@@ -42,7 +42,7 @@ def DictForArgs(s):
 	Will raise DictForArgsError if the string is invalid.
 
 	See also: PyDictForArgs() and ExpandDictWithExtras() in this module
-	'''
+	"""
 
 	s = string.strip(s)
 
@@ -54,7 +54,7 @@ def DictForArgs(s):
 	stringRE = re.compile(r'''
 					"[^"]+"|
 					'[^']+'|
-					\S+''', re.VERBOSE)
+					\S+''', re.VERBOSE)    #'
 	whiteRE  = re.compile(r'\s+')
 	REs = [nameRE, equalsRE, stringRE, whiteRE]
 
@@ -144,7 +144,7 @@ def DictForArgs(s):
 from string import letters
 
 def PyDictForArgs(s):
-	'''
+	"""
 	Takes an input such as:
 			x=3
 			name="foo"
@@ -165,7 +165,7 @@ def PyDictForArgs(s):
 	Returns {} for an empty string.
 
 	See also: DictForArgs() and ExpandDictWithExtras() in this module
-	'''
+	"""
 	s = s.strip()
 	if not s:
 		return {}
@@ -184,7 +184,7 @@ def PyDictForArgs(s):
 
 
 def ExpandDictWithExtras(dict, key='Extras', delKey=1, dictForArgs=DictForArgs):
-	'''
+	"""
 	Returns a dictionary with the 'Extras' column expanded by DictForArgs(). For example, given:
 		{ 'Name': 'foo', 'Extras': 'x=1 y=2' }
 	The return value is:
@@ -192,7 +192,7 @@ def ExpandDictWithExtras(dict, key='Extras', delKey=1, dictForArgs=DictForArgs):
 	The key argument controls what key in the dictionary is used to hold the extra arguments. The delKey argument controls whether that key and its corresponding value are retained.
 	The same dictionary may be returned if there is no extras key.
 	The most typical use of this function is to pass a row from a DataTable that was initialized from a CSV file (e.g., a spreadsheet or tabular file). FormKit and MiddleKit both use CSV files and allow for an Extras column to specify attributes that occur infrequently.
-	'''
+	"""
 
 	if dict.has_key(key):
 		newDict = {}

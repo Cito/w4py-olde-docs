@@ -1,4 +1,4 @@
-'''
+"""
 DataTable.py
 
 
@@ -170,7 +170,7 @@ TO DO
   cause problems).
 * Look for various @@ tags through out the code.
 
-'''
+"""
 
 
 import string, sys
@@ -206,13 +206,13 @@ class DataTableError(Exception):
 
 
 class TableColumn:
-	'''
+	"""
 	A table column represents a column of the table including name and
 	type.
 
 	It does not contain the actual values of the column. These are
 	stored individually in the rows.
-	'''
+	"""
 
 	def __init__(self, spec):
 
@@ -234,7 +234,7 @@ class TableColumn:
 		return self._type
 
 	def setType(self, type):
-		''' Sets the type (by a string containing the name) of the heading. Usually invoked by DataTable to set the default type for columns whose types were not specified. '''
+		""" Sets the type (by a string containing the name) of the heading. Usually invoked by DataTable to set the default type for columns whose types were not specified. """
 		if type==None:
 			self._type = None
 		else:
@@ -254,7 +254,7 @@ class TableColumn:
 	## Utilities ##
 
 	def valueForRawValue(self, rawValue):
-		''' The rawValue is typically a string or value already of the appropriate type. TableRecord invokes this method to ensure that values (especially strings that come from files) are the correct types (e.g., ints are ints and floats are floats). '''
+		""" The rawValue is typically a string or value already of the appropriate type. TableRecord invokes this method to ensure that values (especially strings that come from files) are the correct types (e.g., ints are ints and floats are floats). """
 		# @@ 2000-07-23 ce: an if-else ladder? perhaps these should be dispatched messages or a class hier
 		if self._type is StringType:
 			value = str(rawValue)
@@ -283,8 +283,8 @@ class TableColumn:
 
 
 class DataTable:
-	'''
-	'''
+	"""
+	"""
 
 	## Init ##
 
@@ -344,10 +344,10 @@ class DataTable:
 		file.close()
 
 	def writeFile(self, file):
-		'''
+		"""
 		@@ 2000-07-20 ce: This doesn't write the column types (like :int) back out.
 		@@ 2000-07-21 ce: It's notable that a blank numeric value gets read as zero and written out that way. Also, values None are written as blanks.
-		'''
+		"""
 
 		# write headings
 		file.write(join(map(lambda h: str(h), self._headings), ','))
@@ -388,7 +388,7 @@ class DataTable:
 		return self._headings
 
 	def setHeadings(self, headings):
-		''' Headings can be a list of strings (like ['name', 'age:int']) or a list of TableColumns or None. '''
+		""" Headings can be a list of strings (like ['name', 'age:int']) or a list of TableColumns or None. """
 		if not headings:
 			self._headings = []
 		elif type(headings[0]) is StringType:
@@ -410,7 +410,7 @@ class DataTable:
 		return self._rows[index]
 
 	def append(self, object):
-		''' If object is not a TableRecord, then one is created, passing the object to initialize the TableRecord. Therefore, object can be a TableRecord, list, dictionary or object. See TableRecord for details. '''
+		""" If object is not a TableRecord, then one is created, passing the object to initialize the TableRecord. Therefore, object can be a TableRecord, list, dictionary or object. See TableRecord for details. """
 
 		if not isinstance(object, TableRecord):
 			object = TableRecord(self, object)
@@ -458,7 +458,7 @@ class DataTable:
 	## As a dictionary ##
 
 	def dictKeyedBy(self, key):
-		''' Returns a dictionary containing the contents of the table indexed by the particular key. This is useful for tables that have a column which represents a unique key (such as a name, serial number, etc.). '''
+		""" Returns a dictionary containing the contents of the table indexed by the particular key. This is useful for tables that have a column which represents a unique key (such as a name, serial number, etc.). """
 		dict = {}
 		for row in self:
 			dict[row[key]] = row
@@ -471,7 +471,7 @@ class DataTable:
 		return self._filename
 
 	def nameToIndexMap(self):
-		''' Table rows keep a reference to this map in order to speed up index-by-names (as in row['name']). '''
+		""" Table rows keep a reference to this map in order to speed up index-by-names (as in row['name']). """
 		return self._nameToIndexMap
 
 
@@ -503,13 +503,13 @@ class TableRecord:
 	## Init ##
 
 	def __init__(self, table, values=None):
-		'''
+		"""
 		Dispatches control to one of the other init methods based on the type of values.  Values can be one of three things:
 			1. A TableRecord
 			2. A list
 			3. A dictionary
 			4. Any object responding to hasValueForKey() and valueForKey().
-		'''
+		"""
  		self._headings = table.headings()
 		self._nameToIndexMap = table.nameToIndexMap()
 		# @@ 2000-07-20 ce: Take out the headings arg to the init method since we have an attribute for that
@@ -619,7 +619,7 @@ class TableRecord:
 		return self._values[:]
 
 	def asDict(self):
-		''' Returns a dictionary whose key-values match the table record. '''
+		""" Returns a dictionary whose key-values match the table record. """
 		dict = {}
 		nameToIndexMap = self._nameToIndexMap
 		for key in nameToIndexMap.keys():

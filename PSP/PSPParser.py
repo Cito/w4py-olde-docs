@@ -57,7 +57,7 @@ class PSPParser:
 		self.currentFile = self._reader.Mark().getFile()
 
     def setEventHandler(self,handler):
-		'''Set the handler this parser will use when it finds psp code.'''
+		"""Set the handler this parser will use when it finds psp code."""
 		self._handler = handler
 
     def flushCharData(self, start, stop):

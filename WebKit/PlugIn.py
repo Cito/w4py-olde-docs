@@ -7,7 +7,7 @@ class PlugInError(Exception):
 
 
 class PlugIn(Object):
-	'''
+	"""
 	A plug-in is a software component that is loaded by WebKit in order to provide additional WebKit functionality without necessarily having to modify WebKit's source.
 	The most infamous plug-in is PSP (Python Server Pages) which ships with Webware.
 	Plug-ins often provide additional servlet factories, servlet subclasses, examples and documentation. Ultimately, it is the plug-in author's choice as to what to provide and in what manner.
@@ -28,13 +28,13 @@ class PlugIn(Object):
 			return None
 		p.install()
 		# Note that load() and install() could raise exceptions. You should expect this.
-	'''
+	"""
 
 
 	## Init, load and install ##
 
 	def __init__(self, appServer, path):
-		''' Initializes the plug-in with basic information. This lightweight constructor does not access the file system. '''
+		""" Initializes the plug-in with basic information. This lightweight constructor does not access the file system. """
 		self._appServer = appServer
 		self._path = path
 		self._dir, self._name = os.path.split(path)
@@ -42,7 +42,7 @@ class PlugIn(Object):
 		self._examplePages = None
 
 	def load(self):
-		''' Loads the plug-in into memory, but does not yet install it. Will return None on success, otherwise a message (string) that says why the plug-in could not be loaded. '''
+		""" Loads the plug-in into memory, but does not yet install it. Will return None on success, otherwise a message (string) that says why the plug-in could not be loaded. """
 		print 'Loading plug-in: %s at %s' % (self._name, self._path)
 
 		assert os.path.exists(self._path)
@@ -97,7 +97,7 @@ class PlugIn(Object):
 		return self._examplePages
 
 	def install(self):
-		''' Installs the plug-in by invoking it's required InstallInWebKit() function. '''
+		""" Installs the plug-in by invoking it's required InstallInWebKit() function. """
 		self._module.InstallInWebKit(self._appServer)
 
 
@@ -122,20 +122,20 @@ class PlugIn(Object):
 			return self._path
 
 	def module(self):
-		''' Returns the Python module object of the plug-in. '''
+		""" Returns the Python module object of the plug-in. """
 		return self._module
 
 	def properties(self):
-		''' Returns the properties, a dictionary-like object, of the plug-in which comes from its Properties.py file. See MiscUtils.PropertiesObject.py. '''
+		""" Returns the properties, a dictionary-like object, of the plug-in which comes from its Properties.py file. See MiscUtils.PropertiesObject.py. """
 		return self._properties
 
 
 	## Deprecated ##
 
 	def version(self):
-		'''
+		"""
 		DEPRECATED: PlugIn.version() on 1/25 in ver 0.5. Use self.properties()['versionString'] instead. @
 		Returns the version of the plug-in as reported in its Properties.py. Example: (0, 2, 0)
-		'''
+		"""
 		self.deprecated(self.version)
 		return self._properties['version']

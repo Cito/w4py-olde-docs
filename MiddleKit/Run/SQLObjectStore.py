@@ -16,12 +16,12 @@ class SQLObjectStoreThreadingError(SQLObjectStoreError): pass
 
 
 class UnknownSerialNumberError(SQLObjectStoreError):
-	'''
+	"""
 	For internal use when archiving objects.
 
 	Sometimes an obj ref cannot be immediately resolved on INSERT because
 	the target has not yet been inserted and therefore, given a serial number.
-	'''
+	"""
 	def __init__(self, info):
 		self.info = info
 
@@ -49,14 +49,14 @@ class UnknownSerialNumInfo:
 
 
 class SQLObjectStore(ObjectStore):
-	'''
+	"""
 	TO DO:
 
 		* _sqlEcho should be accessible via a config file setting as stdout, stderr or a filename.
 
 	For details on DB API 2.0, including the thread safety levels see:
 		http://www.python.org/topics/database/DatabaseAPI-2.0.html
-	'''
+	"""
 
 	## Init ##
 
@@ -71,12 +71,12 @@ class SQLObjectStore(ObjectStore):
 		self._pool = None   # an optional DBPool
 
 	def modelWasSet(self):
-		'''
+		"""
 		Performs additional set up of the store after the model is set,
 		normally via setModel() or readModelFileNamed(). This includes
 		checking that threading conditions are valid, and connecting to
 		the database.
-		'''
+		"""
 		ObjectStore.modelWasSet(self)
 
 		# Check thread safety
@@ -132,13 +132,13 @@ class SQLObjectStore(ObjectStore):
 		return self._connected
 
 	def connect(self):
-		'''
+		"""
 		Connects to the database only if the store has not already and
 		provided that the store has a valid model.
 
 		The default implementation of connect() is usually sufficient
 		provided that subclasses have implemented newConnection().
-		'''
+		"""
 		assert self._model, 'Cannot connect: No model has been attached to this store yet.'
 		if not self._connected:
 			self._connection = self.newConnection()
@@ -151,20 +151,20 @@ class SQLObjectStore(ObjectStore):
 				self._pool = DBPool(self.dbapiModule(), poolSize, **args)
 
 	def newConnection(self):
-		'''
+		"""
 		Returns a DB API 2.0 connection. This is a utility method
 		invoked by connect(). Subclasses should implement this, making
 		use of self._dbArgs (a dictionary specifying host, username,
 		etc.) as well as self._model.sqlDatabaseName().
 
 		Subclass responsibility.
-		'''
+		"""
 		raise SubclassResponsibilityError
 
 	def readKlassIds(self):
-		'''
+		"""
 		Reads the klass ids from the SQL database. Invoked by connect().
-		'''
+		"""
 		conn, cur = self.executeSQL('select id, name from _MKClassIds;')
 		klassesById = {}
 		for (id, name) in cur.fetchall():
@@ -212,8 +212,8 @@ class SQLObjectStore(ObjectStore):
 		self._objects[object.key()] = object
 
 	def retrieveLastInsertId(self, conn, cur):
-		''' Returns the id (typically a 32-bit int) of the last INSERT operation by this connection. Used by commitInserts() to get the correct serial number for the last inserted object.
-		Subclass responsibility. '''
+		""" Returns the id (typically a 32-bit int) of the last INSERT operation by this connection. Used by commitInserts() to get the correct serial number for the last inserted object.
+		Subclass responsibility. """
 		raise SubclassResponsibilityError
 
 	def commitUpdates(self):
@@ -232,9 +232,9 @@ class SQLObjectStore(ObjectStore):
 	## Fetching ##
 
 	def fetchObject(self, aClass, serialNum, default=NoDefault):
-		''' Fetches a single object of a specific class and serial number. TheClass can be a Klass object (from the MiddleKit object model), the name of the class (e.g., a string) or a Python class.
+		""" Fetches a single object of a specific class and serial number. TheClass can be a Klass object (from the MiddleKit object model), the name of the class (e.g., a string) or a Python class.
 		Raises an exception if theClass parameter is invalid, or the object cannot be located.
-		'''
+		"""
 		klass = self._klassForClass(aClass)
 		objects = self.fetchObjectsOfClass(klass, serialNum=serialNum, isDeep=0)
 		count = len(objects)
@@ -248,7 +248,7 @@ class SQLObjectStore(ObjectStore):
 			return objects[0]
 
 	def fetchObjectsOfClass(self, aClass, clauses='', isDeep=1, refreshAttrs=1, serialNum=None):
-		'''
+		"""
 		Fetches a list of objects of a specific class. The list may be empty if no objects are found.
 		aClass can be a Klass object (from the MiddleKit object model), the name of the class (e.g., a string) or a Python class.
 		The clauses argument can be any SQL clauses such as 'where x<5 order by x'. Obviously, these could be specific to your SQL database, thereby making your code non-portable. Use your best judgement.
@@ -257,7 +257,7 @@ class SQLObjectStore(ObjectStore):
 			objs = store.fetchObjectsOfClass('Foo', clauses='where x<5')
 		The reason for labeling is that this method is likely to undergo improvements in the future which could include additional arguments. No guarantees are made about the order of the arguments except that aClass will always be the first.
 		Raises an exception if aClass parameter is invalid.
-		'''
+		"""
 		klass = self._klassForClass(aClass)
 
 		# Fetch objects of subclasses first, because the code below will be modifying clauses and serialNum
@@ -305,14 +305,14 @@ class SQLObjectStore(ObjectStore):
 	## Self utility for SQL, connections, cursors, etc. ##
 
 	def executeSQL(self, sql, connection=None):
-		'''
+		"""
 		Executes the given SQL, connecting to the database for the first
 		time if necessary. This method will also log the SQL to
 		self._sqlEcho, if it is not None. Returns the connection and
 		cursor used and relies on connectionAndCursor() to obtain these.
 		Note that you can pass in a connection to force a particular one
 		to be used.
-		'''
+		"""
 		self._sqlCount += 1
 		if self._sqlEcho:
 			timestamp = funcs.timestamp()['pretty']
@@ -332,18 +332,18 @@ class SQLObjectStore(ObjectStore):
 
 
 	def setSQLEcho(self, file):
-		''' Sets a file to echo sql statements to, as sent through executeSQL(). None can be passed to turn echo off. '''
+		""" Sets a file to echo sql statements to, as sent through executeSQL(). None can be passed to turn echo off. """
 		self._sqlEcho = file
 
 
 	def connectionAndCursor(self, connection=None):
-		'''
+		"""
 		Returns the connection and cursor needed for executing SQL,
 		taking into account factors such as setting('Threaded') and the
 		threadsafety level of the DB API module. You can pass in a
 		connection to force a particular one to be used. Uses
 		newConnection() and connect().
-		'''
+		"""
 		if connection:
 			conn = connection
 		elif self._threaded:
@@ -364,18 +364,18 @@ class SQLObjectStore(ObjectStore):
 		return conn, cursor
 
 	def newConnection(self):
-		'''
+		"""
 		Subclasses must override to return a newly created database connection.
-		'''
+		"""
 		raise SubclassResponsibilityError
 
 	def threadSafety(self):
 		return self.dbapiModule().threadsafety
 
 	def addDeletedToClauses(self, clauses):
-		'''
+		"""
 		Modify the given set of clauses so that it filters out records with non-NULL deleted field
-		'''
+		"""
 		clauses = clauses.strip()
 		if clauses.lower().startswith('where'):
 			orderByIndex = clauses.lower().find('order by')
@@ -429,12 +429,12 @@ class SQLObjectStore(ObjectStore):
 				return self.objRefDangles(objRef)
 
 	def objRefZeroSerialNum(self, objRef):
-		''' Invoked by fetchObjRef() if either the class or object serial number is 0. '''
+		""" Invoked by fetchObjRef() if either the class or object serial number is 0. """
 		self.warning('Zero serial number. Obj ref = %x.' % objRef)
 		return None
 
 	def objRefDangles(self, objRef):
-		''' Invoked by fetchObjRef() if there is no possible target object for the given objRef, e.g., a dangling reference. This method invokes self.warning() and includes the objRef as decimal, hexadecimal and class:obj numbers. '''
+		""" Invoked by fetchObjRef() if there is no possible target object for the given objRef, e.g., a dangling reference. This method invokes self.warning() and includes the objRef as decimal, hexadecimal and class:obj numbers. """
 		klassId, objSerialNum = objRefSplit(objRef)
 		self.warning('Obj ref dangles. dec=%i  hex=%x  class.obj=%s.%i.' % (objRef, objRef, self.klassForId(klassId).name(), objSerialNum))
 		return None
@@ -477,13 +477,13 @@ class MiddleObjectMixIn:
 		return objRefJoin(self.klass().id(), self.serialNum())
 
 	def sqlInsertStmt(self, unknowns):
-		'''
+		"""
 		Returns the SQL insert statements for MySQL (as a tuple) in the form:
 			insert into table (name, ...) values (value, ...);
 
 		May add an info object to the unknowns list for obj references that
 		are not yet resolved.
-		'''
+		"""
 		klass = self.klass()
 		insertSQLStart, sqlAttrs = klass.insertSQLStart()
 		values = []
@@ -502,11 +502,11 @@ class MiddleObjectMixIn:
 		return insertSQLStart+values+');'
 
 	def sqlUpdateStmt(self):
-		'''
+		"""
 		Returns the SQL update statement for MySQL of the form:
 			update table set name=value, ... where idName=idValue;
 		Installed as a method of MiddleObject.
-		'''
+		"""
 		assert self._mk_changedAttrs
 		klass = self.klass()
 		res = []
@@ -518,13 +518,13 @@ class MiddleObjectMixIn:
 		return ''.join(res)
 
 	def sqlDeleteStmt(self):
-		'''
+		"""
 		Returns the SQL delete statement for MySQL of the form:
 			delete from table where idName=idValue;
 		Or if deletion is being marked with a timestamp:
 			update table set deleted=Now();
 		Installed as a method of MiddleObject.
-		'''
+		"""
 		klass = self.klass()
 		assert klass is not None
 		if self.store().model().setting('DeleteBehavior', 'delete') == 'mark':
@@ -547,12 +547,12 @@ class Klass:
 	_insertSQLStart = None  # help out the caching mechanism in fetchSQLStart()
 
 	def sqlTableName(self):
-		'''
+		"""
 		Returns the name of the SQL table for this class.
 		Returns self.name().
 		Subclasses may wish to override to provide special quoting that
 		prevents name collisions between table names and reserved words.
-		'''
+		"""
 		return self.name()
 
 	def sqlIdName(self):
@@ -588,25 +588,25 @@ class Klass:
 class Attr:
 
 	def shouldRegisterChanges(self):
-		''' Returns self.hasSQLColumn(). This only makes sense since there would be no point in registering changes on an attribute with no corresponding SQL column. The standard example of such an attribute is "list". '''
+		""" Returns self.hasSQLColumn(). This only makes sense since there would be no point in registering changes on an attribute with no corresponding SQL column. The standard example of such an attribute is "list". """
 		return self.hasSQLColumn()
 
 	def hasSQLColumn(self):
-		''' Returns true if the attribute has a direct correlating SQL column in it's class' SQL table definition. Most attributes do. Those of type list do not. '''
+		""" Returns true if the attribute has a direct correlating SQL column in it's class' SQL table definition. Most attributes do. Those of type list do not. """
 		return not self.get('isDerived', 0)
 
 	def sqlColumnName(self):
-		''' Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). '''
+		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
 		if not self._sqlColumnName:
 			self._sqlColumnName = self.name() + self.sqlTypeSuffix()
 		return self._sqlColumnName
 
 	def sqlTypeSuffix(self):
-		''' Returns a string to be used as a suffix for sqlColumnName(). Returns an empty string. Occasionally, a subclass will override this to help clarify SQL column names of their type. '''
+		""" Returns a string to be used as a suffix for sqlColumnName(). Returns an empty string. Occasionally, a subclass will override this to help clarify SQL column names of their type. """
 		return ''
 
 	def sqlValue(self, value):
-		''' For a given Python value, this returns the correct string for use in a SQL INSERT statement. Subclasses should override if this implementation, which returns repr(value), doesn't work for them. This method is responsible for returning 'NULL' if the value is None. '''
+		""" For a given Python value, this returns the correct string for use in a SQL INSERT statement. Subclasses should override if this implementation, which returns repr(value), doesn't work for them. This method is responsible for returning 'NULL' if the value is None. """
 		if value is None:
 			return 'NULL'
 		else:

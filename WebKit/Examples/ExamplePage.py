@@ -3,7 +3,7 @@ import string, os
 
 
 class ExamplePage(SidebarPage):
-	'''
+	"""
 	The convention for picking up examples from WebKit plug-ins is:
 		* Properties.py must have at least this:
 			WebKitConfig = {
@@ -32,7 +32,7 @@ class ExamplePage(SidebarPage):
 
 	If the WebKit Examples context is not present in the first place,
 	then there is no access to the plug-in examples.
-	'''
+	"""
 
 	def cornerTitle(self):
 		return 'WebKit Examples'
@@ -41,11 +41,11 @@ class ExamplePage(SidebarPage):
 		return 0
 
 	def examplePages(self):
-		'''
+		"""
 		Returns a list of all the example pages for our particular plug-in.
 		These can be used in the sidebar or in the main content area to
 		give easy access to the other example pages.
-		'''
+		"""
 		ctxName = self.request().contextName()
 		if ctxName=='Examples':
 			# Special case: We're in WebKit Examples

@@ -2,19 +2,19 @@ import os, string, time
 from ExamplePage import ExamplePage
 
 class Colors(ExamplePage):
-	'''
+	"""
 	This class is a good example of caching. The color table that
 	this servlet creates never changes, so the servlet caches this in
 	the _htColorTable attribute. The original version of this
 	example did no caching and was 12 times slower.
-	'''
+	"""
 
 	def __init__(self):
 		ExamplePage.__init__(self)
 		self._htColorTable = None
 
 	def awake(self, trans):
-		''' Set _bgcolor and _bgcolorArg according to our fields. '''
+		""" Set _bgcolor and _bgcolorArg according to our fields. """
 		ExamplePage.awake(self, trans)
 		self._bgcolor = ''
 		self._bgcolorArg = ''
@@ -25,7 +25,7 @@ class Colors(ExamplePage):
 				self._bgcolorArg = 'bgcolor=' + self._bgcolor
 
 	def htBodyArgs(self):
-		''' Overridden to throw in the custom background color that the user can specify in our form. '''
+		""" Overridden to throw in the custom background color that the user can specify in our form. """
 		return 'color=black ' + self._bgcolorArg
 
 	def writeContent(self):

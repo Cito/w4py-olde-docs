@@ -5,7 +5,7 @@ class WillNotRunError(Exception): pass
 
 
 class PropertiesObject(UserDict):
-	'''
+	"""
 	A PropertiesObject represents, in a dictionary-like fashion, the values found in a Properties.py file. That file is always included with a Webware component to advertise its name, version, status, etc. Note that a Webware component is a Python package that follows additional conventions. Also, the top level Webware directory contains a Properties.py.
 
 	Component properties are often used for:
@@ -28,7 +28,7 @@ class PropertiesObject(UserDict):
 			print '%s: %s' % item
 
 	Note: We don't normally suffix a class name with "Object" as we have with this class, however, the name Properties.py is already used in our containing package and all other packages.
-	'''
+	"""
 
 
 	## Init and reading ##
@@ -51,7 +51,7 @@ class PropertiesObject(UserDict):
 	## Self utility ##
 
 	def cleanPrivateItems(self):
-		''' Removes items whose keys start with a double underscore, such as __builtins__. '''
+		""" Removes items whose keys start with a double underscore, such as __builtins__. """
 		for key in self.keys():
 			if key[:2]=='__':
 				del self[key]
@@ -62,7 +62,7 @@ class PropertiesObject(UserDict):
 		self.createWillRun()
 
 	def _versionString(self, version):
-		''' For a sequence containing version information such as (2, 0, 0, 'pre'), this returns a printable string such as '2.0-pre'. The micro version number is only excluded from the string if it is zero. '''
+		""" For a sequence containing version information such as (2, 0, 0, 'pre'), this returns a printable string such as '2.0-pre'. The micro version number is only excluded from the string if it is zero. """
 		ver = map(lambda x: str(x), version)
 		if ver[2]=='0': # e.g., if minor version is 0
 			numbers = ver[:2]
@@ -96,7 +96,7 @@ class PropertiesObject(UserDict):
 		self['willRun'] = 1  # we passed all the tests
 
 	def willRunKeys(self):
-		''' Returns a list of keys whose values should be examined in order to determine if the component will run. Used by createWillRun(). '''
+		""" Returns a list of keys whose values should be examined in order to determine if the component will run. Used by createWillRun(). """
 		return ['requiredPyVersion', 'requiredOpSys', 'deniedOpSys', 'willRunFunc']
 
 	def checkRequiredPyVersion(self):
@@ -129,7 +129,7 @@ class PropertiesObject(UserDict):
 				raise WillNotRunError, 'Will not run on op sys %s and actual op sys is %s.' % (deniedOpSys, os.name)
 
 	def checkRequiredSoftware(self):
-		''' Not implemented. No op right now. '''
+		""" Not implemented. No op right now. """
 		# Check required software
 		# @@ 2001-01-24 ce: TBD
 		# Issues include:

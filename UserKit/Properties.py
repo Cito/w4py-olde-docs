@@ -11,4 +11,4 @@ status = 'alpha'
 
 requiredPyVersion = (2, 0, 0)
 
-synopsis = '''UserKit provides for the management of users including passwords, user data, server-side archiving and caching.'''
+synopsis = """UserKit provides for the management of users including passwords, user data, server-side archiving and caching."""

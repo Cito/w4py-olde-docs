@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-'''
+"""
 TestDesign.py
-'''
+"""
 
 from TestCommon import *
 from MiddleKit.Design.Generate import Generate

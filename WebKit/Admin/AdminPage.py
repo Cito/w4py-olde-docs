@@ -3,13 +3,13 @@ import os
 
 
 class AdminPage(SidebarPage):
-	'''
+	"""
 	AdminPage is the abstract superclass of all WebKit administration
 	pages.
 
 	Subclasses typically override title() and writeContent(), but may
 	customize other methods.
-	'''
+	"""
 
 	def cornerTitle(self):
 		return 'WebKit AppServer'
@@ -32,7 +32,7 @@ class AdminPage(SidebarPage):
 		self.menuItem('Application Control','AppControl')
 
 	def fileSize(self, filename):
-		''' Utility method for writeMenu() to get the size of a configuration file. Returns an HTML string. '''
+		""" Utility method for writeMenu() to get the size of a configuration file. Returns an HTML string. """
 		filename = self.application().setting(filename)
 		if os.path.exists(filename):
 			return '<font size=-1>(%0.0f KB)</font>' % (os.path.getsize(filename)/1024.0)

@@ -5,11 +5,11 @@ from MiscUtils import NoDefault
 
 
 class Model(Configurable):
-	'''
+	"""
 	A Model defines the classes, attributes and enumerations of an application.
 
 	It also provides access to the Python classes that implement these structures for use by other MiddleKit entities including code generators and object stores.
-	'''
+	"""
 
 	def __init__(self, filename=None, customCoreClasses={}, rootModel=None, havePythonClasses=1):
 		Configurable.__init__(self)
@@ -138,7 +138,7 @@ class Model(Configurable):
 		return parents
 
 	def coreClass(self, className):
-		''' For the given name, returns a class from MiddleKit.Core or the custom set of classes that were passed in via initialization. '''
+		""" For the given name, returns a class from MiddleKit.Core or the custom set of classes that were passed in via initialization. """
 		pyClass = self._coreClasses.get(className, None)
 		if pyClass is None:
 			results = {}
@@ -149,7 +149,7 @@ class Model(Configurable):
 		return pyClass
 
 	def coreClassNames(self):
-		''' Returns a list of model class names found in MiddleKit.Core. '''
+		""" Returns a list of model class names found in MiddleKit.Core. """
 		# a little cheesy, but it does the job:
 		import MiddleKit.Core as Core
 		return Core.__all__

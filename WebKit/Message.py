@@ -2,7 +2,7 @@ from Common import *
 
 
 class Message(Object):
-	'''
+	"""
 	Message is the abstract, parent class for both Request and Response, and implements the behavior that is generic to both.
 
 	Messages have:
@@ -13,7 +13,7 @@ class Message(Object):
 
 	FUTURE
 		* Support for different types of encodings
-	'''
+	"""
 
 
 	## Init ##
@@ -26,18 +26,18 @@ class Message(Object):
 	## Content ##
 
 	def contentLength(self):
-		''' Returns the length of the message body or -1 if not known. '''
+		""" Returns the length of the message body or -1 if not known. """
 		return -1
 
 	def contentType(self):
-		''' Returns the MIME type of the message body or None if not known. '''
+		""" Returns the MIME type of the message body or None if not known. """
 		return None
 
 
 	## Protocol ##
 
 	def protocol(self):
-		''' Returns the name and version of the protocol the message uses in the form protocol/majorVersion.minorVersion, for example, HTTP/1.1. '''
+		""" Returns the name and version of the protocol the message uses in the form protocol/majorVersion.minorVersion, for example, HTTP/1.1. """
 		# @@ 2000-04-09 ce: Move this down into HTTPSomething subclasses
 		return 'HTTP/1.0'
 
@@ -65,7 +65,7 @@ class Message(Object):
 		self._args.clear()
 
 	def argNames(self):
-		''' Returns a list of argument names. '''
+		""" Returns a list of argument names. """
 		return self._args.keys()
 
 

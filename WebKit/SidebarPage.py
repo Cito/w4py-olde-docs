@@ -2,7 +2,7 @@ from Page import Page
 
 
 class SidebarPage(Page):
-	'''
+	"""
 	SidebarPage is an abstract superclass for pages that have a sidebar (as well as a header and "content well"). Sidebars are normally used for navigation (e.g., a menu or list of links), showing small bits of info and occasionally a simple form (such as login or search).
 
 	Subclasses should override cornerTitle(), writeSidebar() and writeContent() (and title() if necessary; see Page).
@@ -22,7 +22,7 @@ class SidebarPage(Page):
 		* the corner
 		* the colors
 		* the spacer
-	'''
+	"""
 
 
 	## Init ##
@@ -68,8 +68,8 @@ class SidebarPage(Page):
 		cornerTitle = self.cornerTitle()
 		self.writeln('''
 			<tr>
-				<td align=center bgcolor='#000000'>%(startFont1)s%(cornerTitle)s%(endFont1)s</td>
-				<td align=center bgcolor='#00008B' colspan=2>&nbsp;<br>%(startFont2)s%(title)s%(endFont2)s<br>&nbsp;</td>
+				<td align=center bgcolor="#000000">%(startFont1)s%(cornerTitle)s%(endFont1)s</td>
+				<td align=center bgcolor="#00008B" colspan=2>&nbsp;<br>%(startFont2)s%(title)s%(endFont2)s<br>&nbsp;</td>
 			</tr>''' % locals())
 
 	def writeSidebar(self):
@@ -112,7 +112,7 @@ class SidebarPage(Page):
 	## WebKit sidebar sections ##
 
 	def writeWebKitSidebarSections(self):
-		''' This method (and consequently the methods it invokes) are provided for WebKit's example and admin pages. It writes sections such as contexts, e-mails, exits and versions. '''
+		""" This method (and consequently the methods it invokes) are provided for WebKit's example and admin pages. It writes sections such as contexts, e-mails, exits and versions. """
 		self.writeContextsMenu()
 		self.writeWebwareEmailMenu()
 		self.writeWebwareExitsMenu()
@@ -151,7 +151,7 @@ class SidebarPage(Page):
 	## Deprecated ##
 
 	def writeMenuBarMinWidthImage(self):
-		''' DEPRECATED: SidebarPage.writeMenuBarMinWidthImage() deprecated on 1/26/01 in ver 0.5. HTML's nowrap is used instead. '''
+		""" DEPRECATED: SidebarPage.writeMenuBarMinWidthImage() deprecated on 1/26/01 in ver 0.5. HTML's nowrap is used instead. """
 		# To ensure a minimum width of the sidebar
 		# Technique learned from www.python.org in 6/2000
 		self.deprecated(self.writeMenuBarMinWidthImage)

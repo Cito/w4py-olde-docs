@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+"""
 install.py
 Webware for Python
 
@@ -10,7 +10,7 @@ FUTURE
 	* Upon successful install, create "installed" file with info such
 	  as date, time, py ver, etc. Maybe just put the output of this
 	  in there.
-'''
+"""
 
 
 import os, string, sys, compileall
@@ -27,9 +27,9 @@ except ImportError:
 MinimumVersionErrorMsg="""\nThis Release of Webware requires Python %s.  Your current version of Python is:\n %s.\nPlease go to http://www.python.org for the latest version of Python.\nYou may continue to install, but Webware may not perform as expected.\nDo you wish to continue with the installation? [yes/no]"""
 
 class Installer:
-	'''
+	"""
 	The _comps attribute is a list of components, each of which is an instance of MiscUtils.PropertiesObject.
-	'''
+	"""
 
 	## Init ##
 
@@ -64,10 +64,10 @@ class Installer:
 		return self
 
 	def clearInstalledFile(self):
-		'''
+		"""
 		Removes the _installed file which will get created at the very
 		end of installation, provided there are no errors.
-		'''
+		"""
 		if os.path.exists('_installed'):
 			os.remove('_installed')
 
@@ -128,7 +128,7 @@ class Installer:
 
 
 	def setupWebKitPassword(self, prompt, defpass):
-		''' Setup a password for WebKit Application server. '''
+		""" Setup a password for WebKit Application server. """
 		print 'Setting passwords...'
 		print
 
@@ -206,7 +206,7 @@ class Installer:
 		self.createComponentIndexes()
 
 	def propagateStyleSheet(self):
-		''' Copy Docs/StyleSheet.css and GenIndex.css into other Docs dirs. '''
+		""" Copy Docs/StyleSheet.css and GenIndex.css into other Docs dirs. """
 		print 'Propagating stylesheets...'
 		for name in ['StyleSheet.css', 'GenIndex.css']:
 			stylesheet = open('Docs/%s' % name, 'rb').read()
@@ -225,7 +225,7 @@ class Installer:
 		print
 
 	def createBrowsableSource(self):
-		''' Create HTML documents for class hierarchies, summaries, source files, etc. '''
+		""" Create HTML documents for class hierarchies, summaries, source files, etc. """
 
 		print 'Creating browsable source and summaries...'
 		self.requirePath('DocSupport')
@@ -286,7 +286,7 @@ class Installer:
 		raise NotImplementedError
 
 	def createBrowsableClassHier(self, filesDir, docsDir):
-		''' Create HTML class hierarchy listings of the source files. '''
+		""" Create HTML class hierarchy listings of the source files. """
 		from classhier import ClassHier
 
 		classHierName = os.path.join(os.getcwd(), docsDir, 'ClassHier.html')
@@ -304,7 +304,7 @@ class Installer:
 			os.chdir(saveDir)
 
 	def createBrowsableFileList(self, filesDir, docsDir):
-		''' Create HTML list of the source files. '''
+		""" Create HTML list of the source files. """
 		# @@ 2000-08-18 ce: not yet
 		fullnames = glob('%s/*.py' % filesDir)
 		filenames = map(lambda filename: os.path.basename(filename), fullnames)
@@ -318,7 +318,7 @@ class Installer:
 		open(docsDir+'/FileList.html', 'w').write(ht)
 
 	def backupConfigs(self):
-		''' Copies *.config to *.config.default, if the .default files don't already exist. This allows the user to always go back to the default config file if needed (for troubleshooting for example). '''
+		""" Copies *.config to *.config.default, if the .default files don't already exist. This allows the user to always go back to the default config file if needed (for troubleshooting for example). """
 		print 'Backing up original config files...'
 		print '   ',
 		self._backupConfigs(os.curdir)
@@ -453,10 +453,10 @@ class Installer:
 			self.writeDocFile(title, filename, contents, extraHead=cssLink)
 
 	def finished(self):
-		'''
+		"""
 		This method is invoked just before printGoodbye().
 		It writes the _installed file to disk.
-		'''
+		"""
 		open('_installed', 'w').write('This file is written upon successful installation.\nLeave this file in place.\n')
 
 	def printGoodbye(self):
@@ -491,7 +491,7 @@ Installation is finished.'''
 			sys.path.insert(1, path)
 
 	def sortReleaseNotes(self, a, b):
-		''' Used by createComponentIndexes(). You pass this to list.sort(). '''
+		""" Used by createComponentIndexes(). You pass this to list.sort(). """
 		# We append '.0' below so that values like 'x.y' and 'x.y.z'
 		# compare the way we want them too (x.y.z is newer than x.y)
 		a = a['name']
@@ -503,7 +503,7 @@ Installation is finished.'''
 		return -cmp(a, b)
 
 	def htFragment(self, name):
-		''' Returns an HTML fragment with the given name. '''
+		""" Returns an HTML fragment with the given name. """
 		return open(os.path.join('Docs', name+'.htmlf')).read()
 
 	def writeDocFile(self, title, filename, contents, extraHead=''):

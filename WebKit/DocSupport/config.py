@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-'''
+"""
 Used to generate the config sections for WebKit.html.
-'''
+"""
 
 import re, string, sys
 

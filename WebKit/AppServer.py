@@ -68,9 +68,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			self._closeThread.start()
 
 	def checkForInstall(self):
-		'''
+		"""
 		Exits with an error message if Webware was not installed.
-		'''
+		"""
 		if not os.path.exists(os.path.join(self._webwarePath, '_installed')):
 			sys.stdout = sys.stderr
 			print 'ERROR: You have not installed Webware.'
@@ -141,11 +141,11 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	## Network Server ##
 
 	def createApplication(self):
-		''' Creates and returns an application object. Invoked by __init__. '''
+		""" Creates and returns an application object. Invoked by __init__. """
 		return Application(server=self)
 
 	def printStartUpMessage(self):
-		''' Invoked by __init__. '''
+		""" Invoked by __init__. """
 		print 'WebKit AppServer', self.version()
 		print 'part of Webware for Python'
 		print 'Copyright 1999-2001 by Chuck Esterbrook. All Rights Reserved.'
@@ -162,11 +162,11 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	## Plug-ins ##
 
 	def plugIns(self):
-		''' Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. '''
+		""" Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. """
 		return self._plugIns
 
 	def plugIn(self, name, default=NoDefault):
-		''' Returns the plug-in with the given name. '''
+		""" Returns the plug-in with the given name. """
 		# @@ 2001-04-25 ce: linear search. yuck. Plus we should guarantee plug-in name uniqueness anyway
 		for pi in self._plugIns:
 			if pi.name()==name:
@@ -177,7 +177,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			return default
 
 	def loadPlugIn(self, path):
-		''' Loads and returns the given plug-in. May return None if loading was unsuccessful (in which case this method prints a message saying so). Used by loadPlugIns(). '''
+		""" Loads and returns the given plug-in. May return None if loading was unsuccessful (in which case this method prints a message saying so). Used by loadPlugIns(). """
 		plugIn = None
 		path = self.serverSidePath(path)
 		try:
@@ -237,19 +237,19 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		return self._app
 
 	def startTime(self):
-		''' Returns the time the app server was started (as seconds, like time()). '''
+		""" Returns the time the app server was started (as seconds, like time()). """
 		return self._startTime
 
 	def numRequests(self):
-		''' Return the number of requests received by this server since it was launched. '''
+		""" Return the number of requests received by this server since it was launched. """
 		return self._reqCount
 
 	def isPersistent(self):
 		raise SubclassResponsibilityError
 
 	def serverSidePath(self, path=None):
-		'''	Returns the absolute server-side path of the WebKit app server. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the app server.
-		'''
+		"""	Returns the absolute server-side path of the WebKit app server. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the app server.
+		"""
 		if path:
 			return os.path.normpath(os.path.join(self._serverSidePath, path))
 		else:

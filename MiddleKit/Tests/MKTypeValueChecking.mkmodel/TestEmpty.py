@@ -1,9 +1,9 @@
 def typeErrors(object, value, skipAttrs=[]):
-	'''
+	"""
 	Attempts to set every attribute of object to the given value,
 	expecting that TypeError will be raised. skipAttrs can be used to
 	give a list of attribute names to by pass.
-	'''
+	"""
 	for attr in object.klass().allAttrs():
 		if attr.name() not in skipAttrs:
 			try:

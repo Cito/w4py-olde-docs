@@ -9,7 +9,7 @@ class PSPExamplePage(ExamplePage):
 		return "PSP Examples"
 
 	def scripts(self):
-		''' Create a list of dictionaries, where each dictionary stores information about a particular script. '''
+		""" Create a list of dictionaries, where each dictionary stores information about a particular script. """
 
 		examples = []
 		filesyspath=self.request().serverSidePath()

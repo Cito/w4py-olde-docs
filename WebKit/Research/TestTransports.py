@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 TestTransports.py
 
 In order to get a raw request from a WebKit adaptor (such as CGIAdaptor or FCGIAdaptor) a very simple dictionary has to be transferred (normally via a TCP/IP socket) to the AppServer. What is the most efficient way to do the transfer?
@@ -18,7 +18,7 @@ The results:
 
 
 marshal wins.
-'''
+"""
 
 import cPickle, pickle, marshal, sys
 from time import time
@@ -27,11 +27,11 @@ dict = {'format': 'CGI', 'time': 957828183.321, 'environ': {'DOCUMENT_ROOT': '/h
 
 
 def bench(title, encode, decode, reps=1000, validate=0):
-	'''
+	"""
 	title - descriptive string for output
 	encode - function that takes a dictionary and returns it encoded as a string
 	decode - function that takes string and returns the dictionary encoded within
-	'''
+	"""
 	start = time()
 	for i in xrange(reps):
 		s = encode(dict)

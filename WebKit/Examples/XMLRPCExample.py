@@ -1,7 +1,7 @@
 from WebKit.XMLRPCServlet import XMLRPCServlet
 
 class XMLRPCExample(XMLRPCServlet):
-	'''
+	"""
 	Example XML-RPC servlet.  To try it out, use something like the following:
 
 	>>> import xmlrpclib
@@ -13,7 +13,7 @@ class XMLRPCExample(XMLRPCServlet):
 
 	You'll get an exception if you try to call divide, because that
 	method is not listed in exposedMethods.
-	'''
+	"""
 	
 	def exposedMethods(self):
 		return ['multiply', 'add']

@@ -42,9 +42,9 @@ class UserManagerTest(unittest.TestCase):
 
 
 class UserManagerToSomewhereTest(UserManagerTest):
-	'''
+	"""
 	This abstract class provides some tests that all user managers should pass. Subclasses are responsible for overriding setUp() and tearDown() for which they should invoke super.
-	'''
+	"""
 
 	def setUp(self):
 		# Nothing for now
@@ -213,7 +213,7 @@ class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 		pass
 
 	def makeModel(self):
-		''' Constructs and returns a MiddleKit model for use with UserKit. '''
+		""" Constructs and returns a MiddleKit model for use with UserKit. """
 
 		from MiddleKit.Core.Model import Model
 		from MiddleKit.Core.Klasses import Klasses
@@ -260,13 +260,13 @@ class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 class BasicRoleTest(unittest.TestCase):
 
 	def roleClasses(self):
-		''' Returns a list of all Role classes for testing. '''
+		""" Returns a list of all Role classes for testing. """
 		from UserKit.Role import Role
 		from UserKit.HierRole import HierRole
 		return [Role, HierRole]
 
 	def checkA_RoleBasics(self):
-		''' Invokes testRole() with each class returned by roleClasses. '''
+		""" Invokes testRole() with each class returned by roleClasses. """
 		for roleClass in self.roleClasses():
 			self.testRoleClass(roleClass)
 

@@ -27,7 +27,7 @@ A bunch of utility functions for the PSP generator.
 import string
 import copy
 
-'''various utility functions'''
+"""various utility functions"""
 
 
 

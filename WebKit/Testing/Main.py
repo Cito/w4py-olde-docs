@@ -5,12 +5,12 @@ import os
 
 
 class Main(Page):
-	'''
+	"""
 	Read TestCases.data and display them.
 
 	TO DO
 		* Reload TestCases.data only load when modified (by checking mod date).
-	'''
+	"""
 
 	def error(self, msg):
 		raise Exception, msg
@@ -55,7 +55,7 @@ class Main(Page):
 
 
 	def readFileNamed(self, filename):
-		''' Returns a list of test cases, each of which is a dictionary, as defined the given file. See TestCases.data for information on the format. '''
+		""" Returns a list of test cases, each of which is a dictionary, as defined the given file. See TestCases.data for information on the format. """
 		f = open(filename)
 		cases = self.readFile(f)
 		f.close()
@@ -90,7 +90,7 @@ class Main(Page):
 
 	def writeNotes(self):
 		self.writeln('<p> <b>Notes</b>')
-		rawNotes = '''
+		rawNotes = """
 Test all links in all pages of all contexts (Examples, Admin, Testing, etc.), including links found in the headers and footers of the pages.
 
 Test functionality of interactive pages, like CountVisits and ListBox.
@@ -100,7 +100,7 @@ Test each link more than once.
 Test with multiple adapters (WebKit.cgi, OneShot.cgi, etc.)
 
 Application's serverSideInfoForRequest() method is fairly involved. It supports a variety of functionalities as described in it's doc string: <pre>%(serverSideInfoForRequestDoc)s</pre>
-'''
+"""
 		doc = Application.serverSideInfoForRequest.__doc__
 		doc = replace(doc, '\t', '    ')
 		fields = {

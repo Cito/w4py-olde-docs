@@ -8,7 +8,7 @@ class ConfigurationError(Exception):
 
 
 class Configurable:
-	'''
+	"""
 	Configurable is an abstract superclass that provides configuration
 	file functionality for subclasses.
 
@@ -39,7 +39,7 @@ class Configurable:
 
 	Subclasses can also override userConfig() in order to obtain the
 	user configuration settings from another source.
-	'''
+	"""
 
 	## Init ##
 
@@ -50,14 +50,14 @@ class Configurable:
 	## Configuration
 
 	def config(self):
-		''' Returns the configuration of the object as a dictionary. This is a combination of defaultConfig() and userConfig(). This method caches the config. '''
+		""" Returns the configuration of the object as a dictionary. This is a combination of defaultConfig() and userConfig(). This method caches the config. """
 		if self._config is None:
 			self._config = self.defaultConfig()
 			self._config.update(self.userConfig())
 		return self._config
 
 	def setting(self, name, default=NoDefault):
-		''' Returns the value of a particular setting in the configuration. '''
+		""" Returns the value of a particular setting in the configuration. """
 		if default is NoDefault:
 			return self.config()[name]
 		else:
@@ -67,11 +67,11 @@ class Configurable:
 		return self.config().has_key(name)
 
 	def defaultConfig(self):
-		''' Returns a dictionary containing all the default values for the settings. This implementation returns {}. Subclasses should override. '''
+		""" Returns a dictionary containing all the default values for the settings. This implementation returns {}. Subclasses should override. """
 		return {}
 
 	def configFilename(self):
-		''' Returns the filename by which users can override the configuration. Subclasses must override to specify a name. Returning None is valid, in which case no user config file will be loaded. '''
+		""" Returns the filename by which users can override the configuration. Subclasses must override to specify a name. Returning None is valid, in which case no user config file will be loaded. """
 		raise SubclassResponsibilityError()
 
 	def configReplacementValues(self):
@@ -84,7 +84,7 @@ class Configurable:
 		return {}
 
 	def userConfig(self):
-		''' Returns the user config overrides found in the optional config file, or {} if there is no such file. The config filename is taken from configFilename(). '''
+		""" Returns the user config overrides found in the optional config file, or {} if there is no such file. The config filename is taken from configFilename(). """
 		try:
 			filename = self.configFilename()
 			if filename is None:
@@ -111,7 +111,7 @@ class Configurable:
 			return config
 
 	def printConfig(self, dest=None):
-		''' Prints the configuration to the given destination, which defaults to stdout. A fixed with font is assumed for aligning the values to start at the same column. '''
+		""" Prints the configuration to the given destination, which defaults to stdout. A fixed with font is assumed for aligning the values to start at the same column. """
 		if dest is None:
 			dest = sys.stdout
 		keys = self.config().keys()

@@ -99,9 +99,9 @@ class MiddleObject(NamedValueAccess):
 		return self._mk_serialNum
 
 	def setSerialNum(self, value):
-		''' Sets the serial number of the object and invalidates the object's key.
+		""" Sets the serial number of the object and invalidates the object's key.
 		There are some restrictions: Once the serial number is a positive value, indicating a legitimate value from the object store, it cannot be set to anything else. Also, if the serial number is negative, indicating a temporary serial number for new objects that haven't been committed to the database, it can only be set to a positive value.
-		'''
+		"""
 		assert type(value) in (type(0), type(0L)), "Type is: %r, value is: %r" % (type(value), value)
 		if self._mk_serialNum<0:
 			assert value>0
@@ -252,7 +252,7 @@ class MiddleObject(NamedValueAccess):
 	## Accessing attributes by name ##
 
 	def valueForKey(self, attrName, default=NoDefault):
-		'''
+		"""
 		Returns the value of the named attribute by invoking its "get"
 		accessor method. You can use this when you want a value whose
 		name is determined at runtime.
@@ -264,7 +264,7 @@ class MiddleObject(NamedValueAccess):
 
 		If the attribute is not found, the default argument is returned
 		if specified, otherwise LookupError is raised with the attrName.
-		'''
+		"""
 		attr = self.klass().lookupAttr(attrName, None)
 		if attr:
 			return self.valueForAttr(attr, default)
@@ -275,7 +275,7 @@ class MiddleObject(NamedValueAccess):
 				return default
 
 	def setValueForKey(self, attrName, value):
-		'''
+		"""
 		Sets the value of the named attribute by invoking its "set"
 		accessor method. You can use this when you want a value whose
 		name is determined at runtime.
@@ -287,7 +287,7 @@ class MiddleObject(NamedValueAccess):
 
 		If the required set method is not found, a LookupError is raised
 		with the attrName.
-		'''
+		"""
 		try:
 			attr = self.klass().lookupAttr(attrName)
 		except KeyError:

@@ -11,8 +11,10 @@ print '''
 '''
 
 def sizeSorter(a, b):
-	''' Used for sorting when the elements are dictionaries and the attribute
-		to sort by is 'size'. '''
+	"""
+	Used for sorting when the elements are dictionaries and the
+	attribute to sort by is 'size'.
+	"""
 	return a['size'] - b['size']
 
 # Create a list of dictionaries, where each dictionary stores information about

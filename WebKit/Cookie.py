@@ -31,7 +31,7 @@ else:
 
 
 class Cookie(Object):
-	'''
+	"""
 	Cookie is used to create cookies that have additional attributes beyond their value.
 
 	Note that web browsers don't typically send any information with the cookie other than it's value. Therefore, in HTTPRequest, cookie() simply returns a value such as an integer or a string.
@@ -48,7 +48,7 @@ class Cookie(Object):
 
 		* This class should provide error checking in the setFoo() methods. Or maybe our internal Cookie implementation already does that?
 		* This implementation is probably not as efficient as it should be, [a] it works and [b] the interface is stable. We can optimize later.
-	'''
+	"""
 
 	## Init ##
 
@@ -121,11 +121,11 @@ class Cookie(Object):
 	## HTTP Headers ##
 
 	def headerValue(self):
-		''' Returns a string with the value that should be used in the HTTP headers. '''
+		""" Returns a string with the value that should be used in the HTTP headers. """
 		items = self._cookies.items()
 		assert(len(items)==1)
 		return items[0][1].OutputString()
 
 	def headerString(self):
-		''' @@ 2000-06-09 ce: Not typically needed now that raw responses are structured dictionaries instead of opaque strigns. headerValue() is used instead. '''
+		""" @@ 2000-06-09 ce: Not typically needed now that raw responses are structured dictionaries instead of opaque strigns. headerValue() is used instead. """
 		return str(self._cookies)

@@ -4,7 +4,7 @@ import string
 
 
 class HTTPServlet(Servlet):
-	'''
+	"""
 	HTTPServlet implements the respond() method to invoke methods such as respondToGet() and respondToPut() depending on the type of HTTP request.
 	Example HTTP request methods are GET, POST, HEAD, etc.
 	Subclasses implement HTTP method FOO in the Python method respondToFoo.
@@ -16,7 +16,7 @@ class HTTPServlet(Servlet):
 
 	FUTURE
 		* Document methods (take hints from Java HTTPServlet documentation)
-	'''
+	"""
 
 	## Init ##
 
@@ -28,7 +28,7 @@ class HTTPServlet(Servlet):
 	## Transactions ##
 
 	def respond(self, trans):
-		''' Invokes the appropriate respondToSomething() method depending on the type of request (e.g., GET, POST, PUT, ...). '''
+		""" Invokes the appropriate respondToSomething() method depending on the type of request (e.g., GET, POST, PUT, ...). """
 		httpMethodName = trans.request().method()
 		method = self._methodForRequestType.get(httpMethodName, None)
 		if not method:
@@ -41,10 +41,10 @@ class HTTPServlet(Servlet):
 		trans.response().setHeader('Status', '501 Not Implemented')
 
 	def respondToHead(self, trans):
-		'''
+		"""
 		A correct but inefficient implementation.
 		Should at least provide Last-Modified and Content-Length.
-		'''
+		"""
 		res = trans.response()
 		w = res.write
 		res.write = lambda *args: None

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-'''
+"""
 Generate.py
 
 > python Generate.py -h
-'''
+"""
 
 
 import os, string, sys, types
@@ -11,10 +11,10 @@ from getopt import getopt
 
 
 def FixPathForMiddleKit(verbose=0):
-	'''
+	"""
 	Enhances sys.path so that Generate.py can import MiddleKit.whatever.
 	We *always* enhance the sys.path so that Generate.py is using the MiddleKit that contains him, as opposed to whatever happens to be found first in the Python path. That's an subtle but important feature for those of us who sometimes have more than one MiddleKit on our systems.
-	'''
+	"""
 	v = verbose
 	import os, sys
 	if globals().has_key('__file__'):
@@ -134,7 +134,7 @@ class Generate:
 		return opt
 
 	def generate(self, pyClass, model, outdir):
-		''' Generates code using the given class, model and output directory. The pyClass may be a string, in which case a module of the same name is imported and the class extracted from that. The model may be a string, in which case it is considered a filename of a model. '''
+		""" Generates code using the given class, model and output directory. The pyClass may be a string, in which case a module of the same name is imported and the class extracted from that. The model may be a string, in which case it is considered a filename of a model. """
 		if type(pyClass) is types.StringType:
 			module = __import__(pyClass, globals())
 			pyClass = getattr(module, pyClass)

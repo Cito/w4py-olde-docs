@@ -1,4 +1,4 @@
-'''
+"""
 RawToHTML.py
 
 This script inputs a .raw file and outputs a .html file of the same base name.
@@ -32,7 +32,7 @@ FUTURE
 
 * Consider if this would be useful as a generate "templating" component (along with additional features).
 
-'''
+"""
 
 
 import os, string, sys
@@ -41,9 +41,9 @@ from types import *
 
 
 class Convention:
-	'''
+	"""
 	This class is on the "raw-to-HTML" classes and is specifically for ../Docs/StyleGuidelines.raw.
-	'''
+	"""
 
 	def __init__(self, processor):
 		pass
@@ -86,12 +86,12 @@ class RawToHTML:
 		sys.exit(1)
 
 	def createTranslator(self, className):
-		''' Returns a translator by instantiating a class for the given name out of globals(). A subclass could override this (or a future version of this class could change this) to do something more sophisticated, like locate the class in the current directory or DocSupport. Used by processString(). '''
+		""" Returns a translator by instantiating a class for the given name out of globals(). A subclass could override this (or a future version of this class could change this) to do something more sophisticated, like locate the class in the current directory or DocSupport. Used by processString(). """
 		pyClass = globals()[className]
 		return pyClass(self)
 
 	def translator(self, className):
-		''' Returns the translator for the given class name, invoking createTranslator() if necessary. '''
+		""" Returns the translator for the given class name, invoking createTranslator() if necessary. """
 		translator = self._translators.get(className, None)
 		if translator is None:
 			translator = self.createTranslator(className)

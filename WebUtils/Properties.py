@@ -10,4 +10,4 @@ status = 'beta'
 
 requiredPyVersion = (2, 0, 0)
 
-synopsis = '''WebUtils contains functions for common web related programming tasks such as encoding/decoding HTML, etc.'''
+synopsis = """WebUtils contains functions for common web related programming tasks such as encoding/decoding HTML, etc."""

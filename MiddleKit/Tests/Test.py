@@ -15,7 +15,7 @@ class Test:
 	## Customization ##
 
 	def cmdLineDB(self):
-		''' Returns the database command used for feeding SQL to the database via stdin. '''
+		""" Returns the database command used for feeding SQL to the database via stdin. """
 		return 'mysql'
 
 	def modelNames(self):
@@ -51,9 +51,9 @@ class Test:
 			'''.split()
 
 	def testEmpty(self):
-		'''
+		"""
 		Run all TestEmpty*.py files in the model, in alphabetical order by name.
-		'''
+		"""
 		names = glob(os.path.join(self._modelName, 'TestEmpty*.py'))
 		if names:
 			names.sort()
@@ -94,7 +94,7 @@ class Test:
 	## Self utility ##
 
 	def run(self, cmd):
-		''' Self utility method to run a system command. '''
+		""" Self utility method to run a system command. """
 		print '<cmd>', cmd
 		sys.stdout.flush()
 		sys.stderr.flush()

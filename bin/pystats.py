@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-'''
+"""
 pystats.py
 
 Reports stats for various aspects of Python source including:
@@ -55,7 +55,7 @@ Some of our code is in common with checksrc.py. One more similar program and it 
 Provide command line option to change extensions.
 
 Py 2.0: Use dict.setdefault() & +=
-'''
+"""
 
 
 import os, re, string, sys
@@ -79,7 +79,7 @@ class Stats(UserDict):
 		return result
 
 	def copy(self):
-		''' Returns a real copy/duplicate of the receiver. (Note that userDict.copy() will do so, but subclassOfUserDict.copy() does not.) '''
+		""" Returns a real copy/duplicate of the receiver. (Note that userDict.copy() will do so, but subclassOfUserDict.copy() does not.) """
 		return self.__class__(self.data)
 
 	def write(self, file=sys.stdout):
@@ -87,7 +87,7 @@ class Stats(UserDict):
 			file.write('%8d' % self[name])
 
 def Stats_writeHeaders(nameWidth, file=sys.stdout):
-	''' This would be a class method in other OO languages: Stats.writeHeaders(). '''
+	""" This would be a class method in other OO languages: Stats.writeHeaders(). """
 	file.write(' '*nameWidth)
 	for name in Stats.statNames:
 		file.write('%8s' % name)
@@ -181,7 +181,7 @@ class PyStats:
 		return self._directory
 
 	def setDirectory(self, dir):
-		''' Sets the directory that checking starts in. '''
+		""" Sets the directory that checking starts in. """
 		self._directory = dir
 
 	def extensions(self):
@@ -194,7 +194,7 @@ class PyStats:
 		return self._recurse
 
 	def setRecurse(self, flag):
-		''' Sets whether or not to recurse into subdirectories. '''
+		""" Sets whether or not to recurse into subdirectories. """
 		self._recurse = flag
 
 	def showSummary(self):
@@ -207,7 +207,7 @@ class PyStats:
 		return self._verbose
 
 	def setVerbose(self, flag):
-		''' Sets whether or not to print extra information during check (such as every directory and file name scanned). '''
+		""" Sets whether or not to print extra information during check (such as every directory and file name scanned). """
 		self._verbose = flag
 
 

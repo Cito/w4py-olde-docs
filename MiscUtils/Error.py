@@ -2,7 +2,7 @@ from UserDict import UserDict
 
 
 class Error(UserDict):
-	'''
+	"""
 	An error is a dictionary-like object, containing a specific user-readable error message and an object associated with it. Since Error inherits UserDict, other informative values can be arbitrarily attached to errors. For this reason, subclassing Error is rare.
 
 	Example:
@@ -24,10 +24,10 @@ class Error(UserDict):
 		>>> err = Error(None, 'Too bad.', info)
 
 	Or you could even do both if you needed to.
-	'''
+	"""
 
 	def __init__(self, object, message, valueDict={}, **valueArgs):
-		''' Initializes an error with the object the error occurred for, and the user-readable error message. The message should be self sufficient such that if printed by itself, the user would understand it. '''
+		""" Initializes an error with the object the error occurred for, and the user-readable error message. The message should be self sufficient such that if printed by itself, the user would understand it. """
 		UserDict.__init__(self)
 		self._object    = object
 		self._message   = message

@@ -73,15 +73,15 @@ class Session(Object):
 	## Access ##
 
 	def creationTime(self):
-		''' Returns the time when this session was created. '''
+		""" Returns the time when this session was created. """
 		return self._creationTime
 
 	def lastAccessTime(self):
-		''' Returns the last time the user accessed the session through interaction. This attribute is updated in awake(), which is invoked at the beginning of a transaction. '''
+		""" Returns the last time the user accessed the session through interaction. This attribute is updated in awake(), which is invoked at the beginning of a transaction. """
 		return self._lastAccessTime
 
 	def identifier(self):
-		''' Returns a string that uniquely identifies the session. This method will create the identifier if needed. '''
+		""" Returns a string that uniquely identifies the session. This method will create the identifier if needed. """
 		return self._identifier
 
 	def isExpired(self):
@@ -148,16 +148,16 @@ class Session(Object):
 	## Transactions ##
 
 	def awake(self, trans):
-		''' Invoked during the beginning of a transaction, giving a Session an opportunity to perform any required setup. The default implementation updates the 'lastAccessTime'. '''
+		""" Invoked during the beginning of a transaction, giving a Session an opportunity to perform any required setup. The default implementation updates the 'lastAccessTime'. """
 		self._lastAccessTime = time()
 		self._numTrans += 1
 
 	def respond(self, trans):
-		''' The default implementation does nothing, but could do something in the future. Subclasses should invoke super. '''
+		""" The default implementation does nothing, but could do something in the future. Subclasses should invoke super. """
 		pass
 
 	def sleep(self, trans):
-		''' Invoked during the ending of a transaction, giving a Session an opportunity to perform any required shutdown. The default implementation does nothing, but could do something in the future. Subclasses should invoke super. '''
+		""" Invoked during the ending of a transaction, giving a Session an opportunity to perform any required shutdown. The default implementation does nothing, but could do something in the future. Subclasses should invoke super. """
 		pass
 
 	def expiring(self):

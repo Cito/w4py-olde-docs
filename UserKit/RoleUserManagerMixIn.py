@@ -4,9 +4,9 @@ from MiscUtils import NoDefault
 
 
 class RoleUserManagerMixIn:
-	'''
+	"""
 	RoleUserManagerMixIn adds the functionality of keeping a dictionary mapping names to role instances. Several accessor methods are provided for this.
-	'''
+	"""
 
 
 	## Init ##
@@ -16,10 +16,10 @@ class RoleUserManagerMixIn:
 		self.initUserClass()
 
 	def initUserClass(self):
-		'''
+		"""
 		Invoked by __init__ to set the default user class to
 		RoleUser.
-		'''
+		"""
 		self.setUserClass(RoleUser)
 
 

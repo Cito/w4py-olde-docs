@@ -235,7 +235,7 @@ class PSPReader:
 
 
 	def isSpace(self):
-		'''no advancing'''
+		"""no advancing"""
 		return self.current.stream[self.current.cursor] == ' ' or self.current.stream[self.current.cursor] == '\n'
 
 
@@ -291,7 +291,7 @@ class PSPReader:
 
 	
 	def nextContent(self):
-		''' Find next <'''
+		""" Find next <"""
 		cur_cursor = self.current.cursor
 		self.current.cursor = self.current.cursor+1
 		pt = string.find(self.current.stream[self.current.cursor:],'<')
@@ -304,7 +304,7 @@ class PSPReader:
 
 
 	def parseTagAttributes(self):
-		'''parses the attributes at the beginning of a tag'''
+		"""parses the attributes at the beginning of a tag"""
 
 		values = {}
 		while 1:
@@ -351,7 +351,7 @@ class PSPReader:
 		valuedict[name]=value
 
 	def parseToken(self, quoted):
-		''' This may not be quite right'''
+		""" This may not be quite right"""
 		buffer=[]
 		self.skipSpaces()
 		ch = self.peekChar()

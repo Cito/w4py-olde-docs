@@ -7,14 +7,14 @@ from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 
 
 class Klass(UserDict, ModelObject):
-	'''
+	"""
 	A Klass represents a class specification consisting primarily of a name and a list of attributes.
-	'''
+	"""
 
 	## Init ##
 
 	def __init__(self, klassContainer, dict=None):
-		''' Initializes a Klass definition with a raw dictionary, typically read from a file. The 'Class' field contains the name and can also contain the name of the superclass (like "Name : SuperName"). Multiple inheritance is not yet supported. '''
+		""" Initializes a Klass definition with a raw dictionary, typically read from a file. The 'Class' field contains the name and can also contain the name of the superclass (like "Name : SuperName"). Multiple inheritance is not yet supported. """
 		UserDict.__init__(self, {})
 		self._klassContainer = klassContainer
 		self._attrsList = []
@@ -122,7 +122,7 @@ class Klass(UserDict, ModelObject):
 	## Id ##
 
 	def id(self):
-		''' Returns the id of the class, which is an integer. Ids can be fundamental to storing object references in concrete object stores. This method will throw an exception if setId() was not previously invoked. '''
+		""" Returns the id of the class, which is an integer. Ids can be fundamental to storing object references in concrete object stores. This method will throw an exception if setId() was not previously invoked. """
 		return self._id
 
 	def setId(self, id):
@@ -194,7 +194,7 @@ class Klass(UserDict, ModelObject):
 		return self._attrsByName.has_key(name)
 
 	def attr(self, name, default=NoDefault):
-		''' Returns the attribute with the given name. If no such attribute exists, an exception is raised unless a default was provided (which is then returned). '''
+		""" Returns the attribute with the given name. If no such attribute exists, an exception is raised unless a default was provided (which is then returned). """
 		if default is NoDefault:
 			return self._attrsByName[name]
 		else:

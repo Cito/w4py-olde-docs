@@ -80,10 +80,10 @@ class TestThreads(Test):
 			thread.join()
 
 	def testSamples(self):
-		'''
+		"""
 		We do all our necessary testing in testEmpty() so we override
 		this method to pass.
-		'''
+		"""
 		pass
 
 

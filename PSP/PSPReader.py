@@ -269,7 +269,7 @@ class PSPReader:
 
     
     def isSpace(self):
-		'''no advancing'''
+		"""no advancing"""
 		return self.current.stream[self.current.cursor] == ' '
 
     
@@ -328,9 +328,9 @@ class PSPReader:
 
 	
     def nextContent(self):
-		''' Find next <
+		""" Find next <
 		There must be a reason the JSP implementation didnt use skipUntil, but I dont know what it is
-		POTENTIAL OFF BY ONE-> might be grabbing the < at the end of the string'''
+		POTENTIAL OFF BY ONE-> might be grabbing the < at the end of the string"""
 		cur_cursor = self.current.cursor
 		length = len(self.current.stream)
 		ch = None
@@ -355,7 +355,7 @@ class PSPReader:
     
 
     def parseTagAttributes(self):
-		'''parses the attributes at the beginning of a tag'''
+		"""parses the attributes at the beginning of a tag"""
 
 		values = {}
 		while 1:
@@ -402,7 +402,7 @@ class PSPReader:
 		valuedict[name]=value
 
     def parseToken(self, quoted):
-		''' This may not be quite right'''
+		""" This may not be quite right"""
 		buffer=[]
 		self.skipSpaces()
 		ch = self.peekChar()

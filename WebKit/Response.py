@@ -3,7 +3,7 @@ from Message import Message
 
 
 class Response(Message):
-	'''
+	"""
 	Response is a type of Message that offers the following:
 
 		* @@ 20000-04-17 ce
@@ -14,7 +14,7 @@ class Response(Message):
 	FUTURE
 		* Consider implementing the buffer/flush logic here including buffer size.
 		* Also, consider then having a method that doesn't allow committment until the end.
-	'''
+	"""
 
 	## Init ##
 	
@@ -29,7 +29,7 @@ class Response(Message):
 		return self._endTime
 	
 	def recordEndTime(self):
-		''' Stores the current time as the end time of the response. This should be invoked at the end of deliver(). It may also be invoked by the application for those responses that never deliver due to an error. '''
+		""" Stores the current time as the end time of the response. This should be invoked at the end of deliver(). It may also be invoked by the application for those responses that never deliver due to an error. """
 		self._endTime = time.time()
 
 			

@@ -6,7 +6,7 @@ from MiscUtils.DataTable import DataTable
 class DumpCSV(AdminSecurity):
 
 	def filename(self):
-		''' Overidden by subclasses to specify what filename to show. '''
+		""" Overidden by subclasses to specify what filename to show. """
 		return None
 
 	def awake(self, trans):
@@ -57,5 +57,5 @@ class DumpCSV(AdminSecurity):
 		self.writeln('</table>')
 
 	def cellContents(self, rowIndex, colIndex, value):
-		''' This is a hook for subclasses to customize the contents of a cell based on any criteria (including location). '''
+		""" This is a hook for subclasses to customize the contents of a cell based on any criteria (including location). """
 		return value

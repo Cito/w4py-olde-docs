@@ -5,13 +5,13 @@ import os, string, time
 
 
 class ServletCache(AdminSecurity):
-	'''
+	"""
 	This servlet displays, in a readable form, the internal data
 	structure of the application known as the "servlet cache by path".
 
 	This can be useful for debugging WebKit problems and the
 	information is interesting in general.
-	'''
+	"""
 
 	def title(self):
 		return 'Servlet Cache'
@@ -22,7 +22,7 @@ class ServletCache(AdminSecurity):
 
 
 def sortSplitFilenames(a, b):
-	''' This is a utility function for list.sort() that handles list elements that come from os.path.split. We sort first by base filename and then by directory, case insensitive. '''
+	""" This is a utility function for list.sort() that handles list elements that come from os.path.split. We sort first by base filename and then by directory, case insensitive. """
 	result = cmp(string.lower(a['base']), string.lower(b['base']))
 	if result==0:
 		result = cmp(string.lower(a['dir']), string.lower(b['dir']))

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 Helps with cutting Python releases.
 
 This script creates a tar file named Webware-VER.tar.gz from a live CVS
@@ -25,7 +25,7 @@ TO DO
 
   - Using ProperitesObject, this program could suggest a version string
     from the Webware version.
-'''
+"""
 
 import os, sys, time
 
@@ -109,7 +109,7 @@ class ReleaseHelper:
 		os.chdir(path)
 
 	def run(self, cmd):
-		''' Runs an arbitrary UNIX command. '''
+		""" Runs an arbitrary UNIX command. """
 		print 'cmd>', cmd
 		results = os.popen(cmd).read()
 		print results

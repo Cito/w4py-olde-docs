@@ -1,6 +1,6 @@
-'''
+"""
 UserManagerToMiddleKit.py
-'''
+"""
 
 from UserManager import UserManager
 from MiscUtils import NoDefault
@@ -10,7 +10,7 @@ from MiddleKit.Run.ObjectStore import UnknownObjectError
 
 
 class UserManagerToMiddleKit(UserManager):
-	'''
+	"""
 	UserManagerToMiddleKit stores the users in a given MiddleKit object store.
 
 	However, the manager itself does not keep any information there. This might change in the future.
@@ -34,15 +34,15 @@ class UserManagerToMiddleKit(UserManager):
 
 		from MyUser import MyUser
 		userMgr = UserManagerToMiddleKit(userClass=MyUser, store=store)
-	'''
+	"""
 
 
 	## Init ##
 
 	def __init__(self, userClass=None, store=None, useSQL=None):
-		'''
+		"""
 		@@ 2001-02-18 ce: docs
-		'''
+		"""
 		# If no userClass was specified, try to pull 'User'
 		# out of the object model.
 		if userClass is None:
@@ -90,7 +90,7 @@ class UserManagerToMiddleKit(UserManager):
 	## UserManager customizations ##
 
 	def setUserClass(self, userClass):
-		''' Overridden to verify that our userClass is really a MiddleObject. '''
+		""" Overridden to verify that our userClass is really a MiddleObject. """
 		from MiddleKit.Run.MiddleObject import MiddleObject
 		assert issubclass(userClass, MiddleObject)
 		UserManager.setUserClass(self, userClass)

@@ -296,11 +296,11 @@ class ThreadedAppServer(AppServer):
 		if debug: print threading.currentThread(), "Quitting"
 
 	def initThread(self):
-		''' Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. '''
+		""" Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. """
 		pass
 
 	def delThread(self):
-		''' Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. '''
+		""" Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. """
 		pass
 
 	def awakeSelect(self):
@@ -448,12 +448,12 @@ class RequestHandler:
 		self.server = server
 
 	def activate(self, sock, number):
-		'''
+		"""
 		Activates the handler for processing the request.
 		Number is the number of the request, mostly used to identify
 		verbose output. Each request should be given a unique,
 		incremental number.
-		'''
+		"""
 		self.sock = sock
 #		self._strmOut = TASASStreamOut(sock)
 		self._number = number

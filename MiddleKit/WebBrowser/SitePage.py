@@ -71,7 +71,7 @@ class SitePage(Page, Configurable):
 		self.writeln(self.help())
 
 	def help(self, name=None):
-		''' Returns the body text for help on this page. Loaded from SelectModelHelp.htmlf. '''
+		""" Returns the body text for help on this page. Loaded from SelectModelHelp.htmlf. """
 		if not name:
 			name = self.__class__.__name__
 		filename = self.request().relativePath('Help/%s.htmlf' % name)

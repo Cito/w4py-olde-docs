@@ -2,14 +2,14 @@ import os, string, sys
 
 
 class AdminPage:
-	'''
+	"""
 	AdminPage is the abstract superclass of all CGI Wrapper administration CGI classes.
 	
 	Subclasses typically override title() and writeBody(), but may customize other methods.
 	
 	Subclasses use self._var for the various vars that are passed in from CGI Wrapper
 	and self.write() and self.writeln().
-	'''	
+	"""	
 
 	## Init ##
 

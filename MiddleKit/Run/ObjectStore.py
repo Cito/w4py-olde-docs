@@ -12,22 +12,22 @@ from MiddleKit.Core.ListAttr import ListAttr
 
 
 class UnknownObjectError(LookupError):
-	''' This is the exception returned by store.fetchObject() if the specified object cannot be found (unless you also passed in a default value in which case that value is returned). '''
+	""" This is the exception returned by store.fetchObject() if the specified object cannot be found (unless you also passed in a default value in which case that value is returned). """
 	pass
 
 class DeleteError(Exception):
-	''' Base class for all delete exceptions '''
+	""" Base class for all delete exceptions """
 	pass
 
 class DeleteReferencedError(DeleteError):
-	'''
+	"""
 	This is raised when you attempt to delete an object that is referenced by other objects with
 	onDeleteOther not set to detach or cascade.  You can call referencingObjectsAndAttrs() to get a
 	list of tuples of (object, attr) for the particular attributes that caused the error.
 	And you can call object() to get the object that was trying to be deleted.
 	This might not be the same as the object originally being deleted if a cascading
 	delete was happening.
-	'''
+	"""
 	def __init__(self, text, object, referencingObjectsAndAttrs):
 		Exception.__init__(self, text)
 		self._object = object
@@ -38,14 +38,14 @@ class DeleteReferencedError(DeleteError):
 		return self._referencingObjectsAndAttrs
 
 class DeleteObjectWithReferencesError(DeleteError):
-	'''
+	"""
 	This is raised when you attempt to delete an object that references other objects,
 	with onDeleteSelf=deny.  You can call attrs() to get a list of attributes
 	that reference other objects with onDeleteSelf=deny.  And you can call object() to
 	get the object trying to be deleted that contains those attrs.
 	This might not be the same as the object originally being deleted if a cascading
 	delete was happening.
-	'''
+	"""
 	def __init__(self, text, object, attrs):
 		Exception.__init__(self, text)
 		self._object = object
@@ -56,13 +56,13 @@ class DeleteObjectWithReferencesError(DeleteError):
 		return self._attrs
 
 class ObjectStore(ModelUser):
-	'''
+	"""
 	NOT IMPLEMENTED:
 		* revertChanges()
 
 	FUTURE
 		* expanded fetch
-	'''
+	"""
 
 
 	## Init ##
@@ -81,10 +81,10 @@ class ObjectStore(ModelUser):
 	## Settings ##
 
 	def setting(self, name, default=NoDefault):
-		'''
+		"""
 		Returns the given setting for the store, which is actually
 		just taken from the model.
-		'''
+		"""
 		return self._model.setting(name, default)
 
 
@@ -99,7 +99,7 @@ class ObjectStore(ModelUser):
 			return self._objects.has_key(key)
 
 	def object(self, key, default=NoDefault):
-		''' Returns an object from the store by it's given key. If no default is given and the object is not in the store, then an exception is raised. Note: This method doesn't currently fetch objects from the persistent store. '''
+		""" Returns an object from the store by it's given key. If no default is given and the object is not in the store, then an exception is raised. Note: This method doesn't currently fetch objects from the persistent store. """
 		if default is NoDefault:
 			return self._objects[key]
 		else:
@@ -270,37 +270,37 @@ class ObjectStore(ModelUser):
 		return self._hasChanges
 
 	def saveChanges(self):
-		''' Commits object changes to the object store by invoking commitInserts(), commitUpdates() and commitDeletions() all of which must by implemented by a concrete subclass. '''
+		""" Commits object changes to the object store by invoking commitInserts(), commitUpdates() and commitDeletions() all of which must by implemented by a concrete subclass. """
 		self.commitDeletions()
 		self.commitInserts()
 		self.commitUpdates()
 		self._hasChanges = 0
 
 	def commitInserts(self):
-		''' Invoked by saveChanges() to insert any news objects add since the last save. Subclass responsibility. '''
+		""" Invoked by saveChanges() to insert any news objects add since the last save. Subclass responsibility. """
 		raise SubclassResponsibilityError
 
 	def commitUpdates(self):
-		''' Invoked by saveChanges() to update the persistent store with any changes since the last save. '''
+		""" Invoked by saveChanges() to update the persistent store with any changes since the last save. """
 		raise SubclassResponsibilityError
 
 	def commitDeletions(self):
-		''' Invoked by saveChanges() to delete from the persistent store any objects deleted since the last save. Subclass responsibility. '''
+		""" Invoked by saveChanges() to delete from the persistent store any objects deleted since the last save. Subclass responsibility. """
 		raise SubclassResponsibilityError
 
 	def revertChanges(self):
-		''' Discards all insertions and deletions, and restores changed objects to their original values. '''
+		""" Discards all insertions and deletions, and restores changed objects to their original values. """
 		raise NotImplementedError
 
 
 	## Fetching ##
 
 	def fetchObject(self, className, serialNum, default=NoDefault):
-		''' Subclasses should raise UnknownObjectError if an object with the given className and serialNum does not exist, unless a default value was passed in, in which case that value should be returned. '''
+		""" Subclasses should raise UnknownObjectError if an object with the given className and serialNum does not exist, unless a default value was passed in, in which case that value should be returned. """
 		raise SubclassResponsibilityError
 
 	def fetchObjectsOfClass(self, className, isDeep=1):
-		''' Fetches all objects of a given class. If isDeep is 1, then all subclasses are also returned. '''
+		""" Fetches all objects of a given class. If isDeep is 1, then all subclasses are also returned. """
 		raise SubclassResponsibilityError
 
 
@@ -341,11 +341,11 @@ class ObjectStore(ModelUser):
 	## Notifications ##
 
 	def objectChanged(self, object):
-		'''
+		"""
 		MiddleObjects must send this message when one of their interesting attributes change, where an attribute is interesting if it's listed in the class model.
 		This method records the object in a set for later processing when the store's changes are saved.
 		If you subclass MiddleObject, then you're taken care of.
-		'''
+		"""
 		self._hasChanges = 1
 		self._changedObjects[object] = object  ## @@ 2000-10-06 ce: Should this be keyed by the object.key()? Does it matter?
 
@@ -353,7 +353,7 @@ class ObjectStore(ModelUser):
 	## Serial numbers ##
 
 	def newSerialNum(self):
-		''' Returns a new serial number for a newly created object. This is a utility methods for objects that have been created, but not yet committed to the persistent store. These serial numbers are actually temporary and replaced upon committal. Also, they are always negative to indicate that they are temporary, whereas serial numbers taken from the persistent store are positive. '''
+		""" Returns a new serial number for a newly created object. This is a utility methods for objects that have been created, but not yet committed to the persistent store. These serial numbers are actually temporary and replaced upon committal. Also, they are always negative to indicate that they are temporary, whereas serial numbers taken from the persistent store are positive. """
 		self._newSerialNum -= 1
 		return self._newSerialNum
 
@@ -361,12 +361,12 @@ class ObjectStore(ModelUser):
 	## Self utility ##
 
 	def _klassForClass(self, aClass):
-		''' Returns a Klass object for the given class, which may be:
+		""" Returns a Klass object for the given class, which may be:
 			- the Klass object already
 			- a Python class
 			- a class name (e.g., string)
 		Users of this method include the various fetchObjectEtc() methods which take a "class" parameter.
-		'''
+		"""
 		assert aClass is not None
 		if not isinstance(aClass, BaseKlass):
 			if type(aClass) is ClassType:
@@ -381,5 +381,5 @@ class ObjectStore(ModelUser):
 class Attr:
 
 	def shouldRegisterChanges(self):
-		''' MiddleObject asks attributes if changes should be registered. By default, all attributes respond true, but specific stores may choose to override this (a good example being ListAttr for SQLStore). '''
+		""" MiddleObject asks attributes if changes should be registered. By default, all attributes respond true, but specific stores may choose to override this (a good example being ListAttr for SQLStore). """
 		return 1

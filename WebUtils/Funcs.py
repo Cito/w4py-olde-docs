@@ -1,4 +1,4 @@
-'''
+"""
 WebUtils.Funcs provides some basic functions that are useful in HTML and web development.
 
 You can safely import * from WebUtils.Funcs if you like.
@@ -8,7 +8,7 @@ TO DO
 
 * Document the 'codes' arg of htmlEncode/Decode.
 
-'''
+"""
 
 import string
 
@@ -26,13 +26,13 @@ htmlCodesReversed.reverse()
 
 
 def htmlEncode(s, codes=htmlCodes):
-	''' Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page.'''
+	""" Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page."""
 	for code in codes:
 		s = string.replace(s, code[0], code[1])
 	return s
 
 def htmlDecode(s, codes=htmlCodesReversed):
-	''' Returns the ASCII decoded version of the given HTML string. This does NOT remove normal HTML tags like <p>. It is the inverse of htmlEncode(). '''
+	""" Returns the ASCII decoded version of the given HTML string. This does NOT remove normal HTML tags like <p>. It is the inverse of htmlEncode(). """
 	for code in codes:
 		s = string.replace(s, code[1], code[0])
 	return s
@@ -47,11 +47,11 @@ for c in string.letters + string.digits + '_,.-/':
 _urlEncode[' '] = '+'
 
 def urlEncode(s):
-	''' Returns the encoded version of the given string, safe for using as a URL. '''
+	""" Returns the encoded version of the given string, safe for using as a URL. """
 	return string.join(map(lambda c: _urlEncode[c], list(s)), '')
 
 def urlDecode(s):
-	''' Returns the decoded version of the given string. Note that invalid URLs will throw exceptons. For example, a URL whose % coding is incorrect. '''
+	""" Returns the decoded version of the given string. Note that invalid URLs will throw exceptons. For example, a URL whose % coding is incorrect. """
 	mychr = chr
 	atoi = string.atoi
 	parts = string.split(string.replace(s, '+', ' '), '%')
@@ -62,7 +62,7 @@ def urlDecode(s):
 
 
 def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=None):
-	''' Returns an HTML string with a <table> where each row is a key-value pair. '''
+	""" Returns an HTML string with a <table> where each row is a key-value pair. """
 	keys = dict.keys()
 	keys.sort()
 	# A really great (er, bad) example of hardcoding.  :-)
@@ -83,7 +83,7 @@ def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=No
 
 
 def requestURI(dict):
-	''' Returns the request URI for a given CGI-style dictionary. Uses REQUEST_URI if available, otherwise constructs and returns it from SCRIPT_NAME, PATH_INFO and QUERY_STRING. '''
+	""" Returns the request URI for a given CGI-style dictionary. Uses REQUEST_URI if available, otherwise constructs and returns it from SCRIPT_NAME, PATH_INFO and QUERY_STRING. """
 	uri = dict.get('REQUEST_URI', None)
 	if uri==None:
 		uri = dict.get('SCRIPT_NAME', '') + dict.get('PATH_INFO', '')

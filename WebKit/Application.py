@@ -192,11 +192,11 @@ class Application(ConfigurableForServerSidePath, Object):
 
 
 	def initVersions(self):
-		'''
+		"""
 		Initialize attributes that store the Webware and WebKit versions
 		as both tuples and strings. These are stored in the Properties.py
 		files.
-		'''
+		"""
 		from MiscUtils.PropertiesObject import PropertiesObject
 		props = PropertiesObject(os.path.join(self.webwarePath(), 'Properties.py'))
 		self._webwareVersion = props['version']
@@ -328,19 +328,19 @@ class Application(ConfigurableForServerSidePath, Object):
 		return '0.1'
 
 	def webwareVersion(self):
-		''' Returns the Webware version as a tuple. '''
+		""" Returns the Webware version as a tuple. """
 		return self._webwareVersion
 
 	def webwareVersionString(self):
-		''' Returns the Webware version as a printable string. '''
+		""" Returns the Webware version as a printable string. """
 		return self._webwareVersionString
 
 	def webKitVersion(self):
-		''' Returns the WebKit version as a tuple. '''
+		""" Returns the WebKit version as a tuple. """
 		return self._webKitVersion
 
 	def webKitVersionString(self):
-		''' Returns the WebKit version as a printable string. '''
+		""" Returns the WebKit version as a printable string. """
 		return self._webKitVersionString
 
 
@@ -514,7 +514,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			# @@ 2000-08-10 ce: This is a little cheesy. We could load a template...
 
 	def handleMissingPathSession(self,transaction):
-		'''
+		"""
 		if UseAutomaticPathSessions is enabled in Application.config
 		we redirect the browser to a url with SID in path
 		http://gandalf/a/_SID_=2001080221301877755/Examples/
@@ -522,7 +522,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		this is for convinient building of webapps that must not
 		depend on cookie support
-		'''
+		"""
 		newSid = transaction.session().identifier()
 		request = transaction.request()
 		url = request.adapterName() + '/_SID_='+ newSid + '/' + request.pathInfo()
@@ -741,8 +741,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		return self._server
 
 	def serverSidePath(self, path=None):
-		'''	Returns the absolute server-side path of the WebKit application. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the app server.
-		'''
+		"""	Returns the absolute server-side path of the WebKit application. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the app server.
+		"""
 		if path:
 			return os.path.normpath(os.path.join(self._serverSidePath, path))
 		else:
@@ -776,7 +776,7 @@ class Application(ConfigurableForServerSidePath, Object):
 	## Contexts ##
 
 	def context(self, name, default=Tombstone):
-		''' Returns the value of the specified context. '''
+		""" Returns the value of the specified context. """
 		if default is Tombstone:
 			return self._contexts[name]
 		else:
@@ -1058,11 +1058,11 @@ class Application(ConfigurableForServerSidePath, Object):
 		return filenames
 
 	def defaultContextNameAndPath(self):
-		'''
+		"""
 		Returns the default context name and path in a tuple.  If there's an explicitly named context with the same
 		path as the "default" context, then we'll use that name instead.  Otherwise, we'll just
 		use "default" as the name.
-		'''
+		"""
 		if not self._defaultContextName:
 			defaultContextPath = self._contexts['default']
 			for contextName, contextPath in self._contexts.items():
@@ -1345,21 +1345,21 @@ class Application(ConfigurableForServerSidePath, Object):
 
 
 def isdir(s):
-	'''
+	"""
 	*** Be sure to use this isdir() function rather than os.path.isdir()
 		in this file.
 
 	2000-07-06 ce: Only on Windows, does an isdir() call with a
 	path ending in a slash fail to return 1. e.g.,
 	isdir('C:\\tmp\\')==0 while on UNIX isdir('/tmp/')==1.
-	'''
+	"""
 	if s and os.name=='nt' and s[-1]==os.sep:
 		return os.path.isdir(s[:-1])
 	else:
 		return os.path.isdir(s)
 
 def noslash(s):
-	''' Return 1 if s is blank or does end in /.  A little utility for dispatchRequest(). '''
+	""" Return 1 if s is blank or does end in /.  A little utility for dispatchRequest(). """
 	return s=='' or s[-1]!='/'
 
 

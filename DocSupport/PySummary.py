@@ -1,4 +1,4 @@
-'''
+"""
 PySummary
 
 
@@ -6,7 +6,7 @@ A PySummary instance reads a python file and creates a summary of the file which
 
 The notion of a "category" is recognized. A category is simply a group of methods with a given name. The default prefix for denoting a category is ##.
 
-'''
+"""
 
 import string
 from string import find, join, replace, strip

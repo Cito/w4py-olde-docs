@@ -1,4 +1,4 @@
-'''
+"""
 OneShotAdapter.py
 
 This is a special version of the CGIAdapter that doesn't require a persistent AppServer process. This is mostly useful during development when repeated changes to classes forces the developer to restart the app server to make the changes take effect.
@@ -7,7 +7,7 @@ An example, URL:
 
 	http://127.0.0.1/OneShot.cgi/MyPage
 
-'''
+"""
 
 
 # 2000-08-07 ce: For accuracy purposes, we want to record the timestamp as early as possible.

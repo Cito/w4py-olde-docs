@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-'''
+"""
 Used to generate the config section for CGIWrapper.html from Config.list
-'''
+"""
 
 
 import re, string

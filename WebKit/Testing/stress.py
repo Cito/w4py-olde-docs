@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-'''
+"""
 stress.py
 By Chuck Esterbrook
 Mods by Jay Love
@@ -31,7 +31,7 @@ that save the raw requests.
 
 Caveat: HTTP cookies are blown away from the raw requests. Mostly due to
 the fact that they will contain stale session ids.
-'''
+"""
 
 
 import sys, string, os, time
@@ -45,7 +45,7 @@ from threading import Thread
 
 
 def usage():
-	''' Prints usage of this program and exits. '''
+	""" Prints usage of this program and exits. """
 	sys.stdout = sys.stderr
 	name = sys.argv[0]
 	print '%s usage:' % name
@@ -60,10 +60,10 @@ def usage():
 
 
 def request(names, dicts, host, port, count, delay=0, slowconn=0):
-	'''
+	"""
 	Performs a single AppServer request including sending the request and receiving the response.
 	slowconn simulates a slowed connection from the client.
-	'''
+	"""
 	complete = 0
 	filecount = len(names)
 	totalbytes = 0
@@ -95,7 +95,7 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
 		totalbytes = totalbytes+len(data)
 
 def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0, slowconn=0):
-	''' Executes a stress test on the AppServer according to the arguments. '''
+	""" Executes a stress test on the AppServer according to the arguments. """
 
 	# Taken from CGIAdaptor:
 	(host, port) = string.split(open('../address.text').read(), ':')

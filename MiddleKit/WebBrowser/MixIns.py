@@ -1,11 +1,11 @@
-'''
+"""
 This file contains "mix-in" classes that are mixed in with classes found in MiddleKit.Core and .Run. The mix-ins are named directly after their target classes, which is how they get bound in InstallMixIns().
 
 The InstallMixIns() functions is called from this module. So all you need do is import this module to make the mix-ins take effect. This is done in __init__.py.
 
 If you add another mix-in then update the list of names found in InstallMixIns().
 
-'''
+"""
 
 from WebUtils.Funcs import htmlEncode
 from types import LongType
@@ -29,7 +29,7 @@ class ObjectStore:
 		return self.htObjectsInList(objs, className)
 
 	def htObjectsInList(self, objs, adjective):
-		''' Returns an HTML string for a list of MiddleKit objects and their attributes. The adjective describes the type of objects and is used in the output (for example 'Customer'). This is a utility method for use by anyone. '''
+		""" Returns an HTML string for a list of MiddleKit objects and their attributes. The adjective describes the type of objects and is used in the output (for example 'Customer'). This is a utility method for use by anyone. """
 		if objs is None:
 			objs = []
 		ht = []

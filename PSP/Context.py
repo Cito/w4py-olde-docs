@@ -29,14 +29,14 @@ environment we are doing it in.
 from ParseEventHandler import *
 import os
 
-'''
+"""
 Holds all the common stuff that various parts of the compilation will need access to.
 The items in this class will be used by both the compiler and the class generator.
-'''
+"""
 
 
 class PSPContext:
-	''' PSPContext is an abstract base class for Context classes.'''
+	""" PSPContext is an abstract base class for Context classes."""
 	def __init__(self):
 		raise NotImplementedError
 
@@ -51,42 +51,42 @@ class PSPContext:
 		raise NotImplementedError
 
 	def getOutputDirectory(self):
-		'''provide directory to dump PSP source file to'''
+		"""provide directory to dump PSP source file to"""
 		raise NotImplementedError
 
 	def getServletClassName(self):
-		'''returns the class name of the servlet being generated'''
+		"""returns the class name of the servlet being generated"""
 		raise NotImplementedError
 
 	def getFullClassName(self):
-		'''return class name including package prefixes
-		Wont use this for now'''
+		"""return class name including package prefixes
+		Wont use this for now"""
 		raise NotImplementedError
 
 	def getPythonFileName(self):
-		'''the filename that we are generating to'''
+		"""the filename that we are generating to"""
 		raise NotImplementedError
 
 	def setPSPReader(self):
-		'''set the PSPReader for this context'''
+		"""set the PSPReader for this context"""
 		raise NotImplementedError
 
 	def setServletWriter(self):
-		'''set the PSPWriter instance for this context'''
+		"""set the PSPWriter instance for this context"""
 		raise NotImplementedError
 
 
 	def setPythonFileName(self):
-		'''sets the name of the .py file to generate'''
+		"""sets the name of the .py file to generate"""
 		raise NotImplementedError
 
 
 
 #I'll implement this as I need it
 class PSPCLContext(PSPContext):
-	'''a context for command line compilation.  Currently used for both cammand line and PSPServletEngine compilation.
+	"""a context for command line compilation.  Currently used for both cammand line and PSPServletEngine compilation.
 	This class provides all the information necessary during the parsing and page generation steps of the PSP compilation
-	process.'''
+	process."""
 	
 	def __init__(self, pspfile, trans=None):
 		#self._transactrion = trans #I don't think I need this
@@ -99,29 +99,29 @@ class PSPCLContext(PSPContext):
 		raise NotImplementedError
 
 	def getReader(self):
-		'''return the PSPReader object assigned to this context'''
+		"""return the PSPReader object assigned to this context"""
 		return self._pspReader
 
 	def getServletWriter(self):
-		'''Return the ServletWriter object assigned to this context'''
+		"""Return the ServletWriter object assigned to this context"""
 		return self._servletWriter
 
 	def getOutputDirectory(self):
-		'''provide directory to dump PSP source file to.  I am probably doing this in reverse order at the moment.
-		I should start with this and get the python filename from it.'''
+		"""provide directory to dump PSP source file to.  I am probably doing this in reverse order at the moment.
+		I should start with this and get the python filename from it."""
 		return os.path.split(self._pyFileName)[0]
 
 	def getServletClassName(self):
-		'''returns the class name of the servlet being generated'''
+		"""returns the class name of the servlet being generated"""
 		return self._className
 
 	def getFullClassName(self):
-		'''return class name including package prefixes
-		Wont use this for now'''
+		"""return class name including package prefixes
+		Wont use this for now"""
 		raise NotImplementedError
 
 	def getPythonFileName(self):
-		'''the filename that we are generating to'''
+		"""the filename that we are generating to"""
 		return self._pyFileName
 
 	def getPspFileName(self):
@@ -131,20 +131,20 @@ class PSPCLContext(PSPContext):
 		return self._fullpath
 
 	def setPSPReader(self, reader):
-		'''set the PSPReader for this context'''
+		"""set the PSPReader for this context"""
 		self._pspReader = reader
 		
 	def setServletWriter(self, writer):
-		'''set the ServletWriter instance for this context'''
+		"""set the ServletWriter instance for this context"""
 		self._servletWriter = writer
     
 
 	def setPythonFileName(self,name):
-		'''sets the name of the .py file to generate'''
+		"""sets the name of the .py file to generate"""
 		self._pyFileName = name
 
 	def setClassName(self , name):
-		'''set the class name to create'''
+		"""set the class name to create"""
 		self._className = name
 
 	def resolveRelativeURI(self, uri):

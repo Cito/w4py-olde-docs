@@ -13,4 +13,4 @@ status = 'alpha'
 
 requiredPyVersion = (2, 0, 0)
 
-synopsis = '''For building the "middle tier" of an application, that is, the domain-specific objects in between the front end and the database/datastore. MiddleKit is roughly analogous to NeXT/Apple's Enterprise Objects and Sun's Enterprise Java Beans.'''
+synopsis = """For building the "middle tier" of an application, that is, the domain-specific objects in between the front end and the database/datastore. MiddleKit is roughly analogous to NeXT/Apple's Enterprise Objects and Sun's Enterprise Java Beans."""

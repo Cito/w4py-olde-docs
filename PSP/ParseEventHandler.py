@@ -72,36 +72,36 @@ class ParseEventHandler:
 
 
 	def handleExpression(self, start, stop, attrs):
-		'''Flush any template data into a CharGen and then create a new Expression Gen'''
+		"""Flush any template data into a CharGen and then create a new Expression Gen"""
 		self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		exp = ExpressionGenerator(self._reader.getChars(start,stop))
 		self.addGenerator(exp)
 
 	def handleCharData(self, start, stop, chars):
-		'''flush character data into a chargen'''
+		"""flush character data into a chargen"""
 		if chars !='' or '\n':
 			gen = CharDataGenerator(chars)
 			self.addGenerator(gen)
 
 
 	def handleComment(self, start, stop):
-		'''Comments get swallowed into nothing'''
+		"""Comments get swallowed into nothing"""
 		self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		return #just eats the comment
 
 
 	def handleInclude(self, attrs,param):
-		'''
+		"""
 		this is for includes of the form <psp:include ...>
 		This function essentially forwards the request to the specified URL and includes that output.
-		'''
+		"""
 		self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		gen = IncludeGenerator(attrs, param,self._ctxt)
 		self.addGenerator(gen)
 
 	def handleInsert(self, attrs,param):
-		''' this is for includes of the form <psp:insert ...>
-		This type of include is not parsed, it is just inserted in the output stream.'''
+		""" this is for includes of the form <psp:insert ...>
+		This type of include is not parsed, it is just inserted in the output stream."""
 		self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		gen = InsertGenerator(attrs, param,self._ctxt)
 		self.addGenerator(gen)
@@ -125,9 +125,9 @@ class ParseEventHandler:
 		self._baseClasses = map(string.strip, string.split(bc, ','))
 
 	def mainMethodHandler(self, method, start, stop):
-		'''BaseMethod is a page directive.  It sets the class method that the main body
+		"""BaseMethod is a page directive.  It sets the class method that the main body
 		of this PSP page over-rides.  The default is WriteHTML. This value should be set to either WriteHTML
-		or writeBody.  See the PSPPage.py and Page.py servlet classes for more information.'''
+		or writeBody.  See the PSPPage.py and Page.py servlet classes for more information."""
 		self._baseMethod=method
 
 	def threadSafeHandler(self, bool, start, stop):
@@ -136,8 +136,8 @@ class ParseEventHandler:
 		self._threadSafe=bool
 
 	def instanceSafeHandler(self, bool, start, stop):
-		'''isInstanceSafe tells the Servlet Engine whether it is safe to use object instances of this page
-	multiple times. The default is "yes".  Saying "no" here hurts performance.'''
+		"""isInstanceSafe tells the Servlet Engine whether it is safe to use object instances of this page
+	multiple times. The default is "yes".  Saying "no" here hurts performance."""
 		self._instanceSafe=bool
 
 	def indentTypeHandler(self,type,start, stop):
@@ -179,7 +179,7 @@ class ParseEventHandler:
 
 	def handleDirective(self, directive, start, stop, attrs):
 		validDirectives = ['page','include']
-		'''Flush any template data into a CharGen and then create a new Directive Gen'''
+		"""Flush any template data into a CharGen and then create a new Directive Gen"""
 		self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		#big switch
 
@@ -212,7 +212,7 @@ class ParseEventHandler:
 
 
 	def handleScript(self, start, stop, attrs):
-		'''handling scripting elements'''
+		"""handling scripting elements"""
 		self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		gen = ScriptGenerator(self._reader.getChars(start, stop),attrs)
 		self.addGenerator(gen)
@@ -254,7 +254,7 @@ class ParseEventHandler:
 		self.generateFooter()
 
 	def setTemplateInfo(self, start, stop):
-		'''marks non code data'''
+		"""marks non code data"""
 		self.tmplStart = start
 		self.tmplStop = stop
 
@@ -369,7 +369,7 @@ class ParseEventHandler:
 	#self._writer.println('app = trans.application()')
 
 	def generateFooter(self):
-		'''cant decide if this is in the class or outside.  Guess Ill know when Im done'''
+		"""cant decide if this is in the class or outside.  Guess Ill know when Im done"""
 		self._writer.popIndent()
 		self._writer.println('##footer')
 

@@ -6,11 +6,11 @@ from User import User
 
 
 class UserManagerToFile(UserManager):
-	'''
+	"""
 	When using this user manager, make sure you invoke setUserDir() and that this directory is writeable by your application. It will contain 1 file per user with the user's serial number as the main filename and an extension of '.user'.
 
 	The default user directory is the current working directory, but relying on the current directory is often a bad practice.
-	'''
+	"""
 
 	baseOfUserManagerToFile = UserManager
 
@@ -52,14 +52,14 @@ class UserManagerToFile(UserManager):
 		return self._userDir
 
 	def setUserDir(self, userDir):
-		''' Sets the directory where user information is stored. You should strongly consider invoking initNextSerialNum() afterwards. '''
+		""" Sets the directory where user information is stored. You should strongly consider invoking initNextSerialNum() afterwards. """
 		self._userDir = userDir
 
 	def loadUser(self, serialNum, default=NoDefault):
-		'''
+		"""
 		Loads the user with the given serial number from disk.
 		If there is no such user, a KeyError will be raised unless a default value was passed, in which case that value is returned.
-		'''
+		"""
 		filename = str(serialNum)+'.user'
 		filename = os.path.join(self.userDir(), filename)
 		if os.path.exists(filename):
@@ -76,9 +76,9 @@ class UserManagerToFile(UserManager):
 				return default
 
 	def scanSerialNums(self):
-		'''
+		"""
 		Returns a list of all the serial numbers of users found on disk. Serial numbers are always integers.
-		'''
+		"""
 		chopIndex = -len('.user')
 		nums = glob(os.path.join(self.userDir(), '*.user'))
 		nums = [num[:chopIndex] for num in nums]
@@ -90,7 +90,7 @@ class UserManagerToFile(UserManager):
 	## UserManager customizations ##
 
 	def setUserClass(self, userClass):
-		''' Overridden to mix in UserMixIn to the class that is passed in. '''
+		""" Overridden to mix in UserMixIn to the class that is passed in. """
 		from MiscUtils.MixIn import MixIn
 		MixIn(userClass, UserMixIn)
 		self.baseOfUserManagerToFile.setUserClass(self, userClass)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-'''
+"""
 Used to generate the table of contents for CGIWrapper.html.
-'''
+"""
 
 
 import re, string, sys

@@ -4,7 +4,7 @@ from User import User
 
 
 class UserManager:
-	'''
+	"""
 	A UserManager manages a set of users including authentication, indexing and persistence. Keep in mind that UserManager is abstract; you will always use one of the concrete subclasses (but please read the rest of this doc string):
 		* UserManagerToFile
 		* UserManagerToMiddleKit
@@ -75,7 +75,7 @@ class UserManager:
 	Subclasses should ensure "uniqueness" of users. For example, invoking any of the userForSomething() methods repeatedly should always return the same user instance for a given key. Without uniqueness, consistency issues could arise with users that are modified.
 
 	Please read the method doc strings and other class documentation to fully understand UserKit.
-	'''
+	"""
 
 	## Init ##
 
@@ -92,21 +92,21 @@ class UserManager:
 		self._numActive = 0
 
 	def shutDown(self):
-		''' Performs any tasks necessary to shut down the user manager. Subclasses may override and must invoke super as their *last* step. '''
+		""" Performs any tasks necessary to shut down the user manager. Subclasses may override and must invoke super as their *last* step. """
 		pass
 
 
 	## Settings ##
 
 	def userClass(self):
-		''' Returns the userClass, which is used by createUser. The default value is UserKit.User.User. '''
+		""" Returns the userClass, which is used by createUser. The default value is UserKit.User.User. """
 		if self._userClass is None:
 			from User import User
 			self.setUserClass(User)
 		return self._userClass
 
 	def setUserClass(self, userClass):
-		''' Sets the userClass, which cannot be None and must inherit from User. See also: userClass(). '''
+		""" Sets the userClass, which cannot be None and must inherit from User. See also: userClass(). """
 		assert type(userClass) is types.ClassType
 		from User import User
 		assert issubclass(userClass, User)
@@ -134,12 +134,12 @@ class UserManager:
 	## Basic user access ##
 
 	def createUser(self, name, password, userClass=None):
-		'''
+		"""
 		Returns a newly created user that is added to the manager. If userClass is not specified, the manager's default user class is instantiated.
 		This not imply that the user is logged in.
 		This method invokes self.addUser().
 		See also: userClass(), setUserClass()
-		'''
+		"""
 		if userClass is None:
 			userClass = self.userClass()
 		user = userClass(manager=self, name=name, password=password)
@@ -153,27 +153,27 @@ class UserManager:
 		self._cachedUsersBySerialNum[user.serialNum()] = user
 
 	def userForSerialNum(self, serialNum, default=NoDefault):
-		''' Returns the user with the given serialNum, pulling that user record into memory if needed. '''
+		""" Returns the user with the given serialNum, pulling that user record into memory if needed. """
 		raise SubclassResponsibilityError
 
 	def userForExternalId(self, externalId, default=NoDefault):
-		''' Returns the user with the given external id, pulling that user record into memory if needed. '''
+		""" Returns the user with the given external id, pulling that user record into memory if needed. """
 		raise SubclassResponsibilityError
 
 	def userForName(self, name, default=NoDefault):
-		''' Returns the user with the given name, pulling that user record into memory if needed. '''
+		""" Returns the user with the given name, pulling that user record into memory if needed. """
 		raise SubclassResponsibilityError
 
 	def users(self):
-		''' Returns a list of all users (regardless of login status). '''
+		""" Returns a list of all users (regardless of login status). """
 		raise SubclassResponsibilityError
 
 	def numActiveUsers(self):
-		''' Returns the number of active users, e.g., users that are logged in. '''
+		""" Returns the number of active users, e.g., users that are logged in. """
 		return self._numActive
 
 	def activeUsers(self):
-		''' Returns a list of all active users. '''
+		""" Returns a list of all active users. """
 		raise SubclassResponsibilityError
 
 	def inactiveUsers(self):
@@ -183,7 +183,7 @@ class UserManager:
 	## Logging in and out ##
 
 	def login(self, user, password):
-		''' Returns the user if the login is successful, otherwise returns None. '''
+		""" Returns the user if the login is successful, otherwise returns None. """
 		assert isinstance(user, User)
 		result = user.login(password, fromMgr=1)
 		if result:
@@ -220,9 +220,9 @@ class UserManager:
 	## Cached ##
 
 	def clearCache(self):
-		'''
+		"""
 		Clears the cache of the manager. Use with extreme caution. If your program maintains a reference to a user object, but the manager loads in a new copy later on, then consistency problems could occur.
 		The most popular use of this method is in the regression test suite.
-		'''
+		"""
 		self._cachedUsers = []
 		self._cachedUsersBySerialNum = {}

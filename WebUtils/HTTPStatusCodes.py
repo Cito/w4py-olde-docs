@@ -1,4 +1,4 @@
-'''
+"""
 HTTPStatusCodes.py
 
 
@@ -10,7 +10,7 @@ TO DO
 DONE
 
 	* 2000-05-08 ce: Incorporated Matt Schinkel's (matt@null.net) re.sub() for stripping HTML tags in the ASCII version of the HTTP msg.
-'''
+"""
 
 
 import re, string
@@ -62,7 +62,7 @@ HTTPStatusCodeListColumnNames = ('Code', 'Identifier', 'Description')
 
 
 HTTPStatusCodes = {}
-	#''' HTTPStatusCodes can be indexed by either their status code number of textual identifier. The result is a dictionary with keys code, identifier, asciiMessage and htmlMessage. '''
+	#""" HTTPStatusCodes can be indexed by either their status code number of textual identifier. The result is a dictionary with keys code, identifier, asciiMessage and htmlMessage. """
 
 
 # Construct HTTPStatusCodes dictionary
@@ -80,7 +80,7 @@ for record in HTTPStatusCodeList:
 
 
 def HTMLTableOfHTTPStatusCodes(codes=HTTPStatusCodeList, tableArgs='align=center border=2', rowArgs='valign=top', colArgs='', headingTag='th', headingArgs=''):
-	''' Returns an HTML string containing all the status code information as provided by this module. It's highly recommended that if pass arguments to this function, that you do so by keyword. FUTURE: Allow font specs. '''
+	""" Returns an HTML string containing all the status code information as provided by this module. It's highly recommended that if pass arguments to this function, that you do so by keyword. FUTURE: Allow font specs. """
 	res = ['<table %s>\n' % tableArgs]
 	th = '<%s %s>' % (headingTag, headingArgs)
 	res.append('<tr> %s Code </th>  %s Identifier </th>  %s Description </th> </tr>\n' % (th, th, th))

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-'''
+"""
 A quick, hacky script to contruct a class hierarchy list from a set of python files.
-'''
+"""
 
 
 import os, re, string, string, sys, time
@@ -14,7 +14,7 @@ def EmptyString(klass):
 
 
 class Klass:
-	''' Represents a Python class for our purposes. '''
+	""" Represents a Python class for our purposes. """
 	def __init__(self, name, filename=''):
 		self._name = name
 		self._bases = []
@@ -184,7 +184,7 @@ class ClassHier:
 			file.close()
 
 	def links(self, klass):
-		''' In support of printForWeb(). '''
+		""" In support of printForWeb(). """
 		filename = klass.filename()
 		links = []
 

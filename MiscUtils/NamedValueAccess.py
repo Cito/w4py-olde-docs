@@ -1,4 +1,4 @@
-'''
+"""
 NamedValueAccess provides functions, a mix-in class and a wrapper class
 all for accessing Python objects by named attributes. You can use which
 ever of the three approaches best suites your needs and style.
@@ -54,7 +54,7 @@ CREDIT
 
 Chuck Esterbrook <echuck@mindspring.com>
 Tavis Rudd <tavis@calrudd.com>
-'''
+"""
 
 
 import types
@@ -75,7 +75,7 @@ class ValueForKeyError(NamedValueAccessError): pass
 
 
 class NamedValueAccess:
-	'''
+	"""
 	This class is intended to be ancestor class such that you can say:
 		from NamedValueAccess import *
 		age = someObj.valueForName("age")
@@ -117,20 +117,20 @@ class NamedValueAccess:
 
 	@@ This class probably needs to be in MiscUtils, as it's being used in that way
 	   while MiddleKit was intended for "enterprise/business objects".
-	'''
+	"""
 
 	#
 	# Accessing values by key
 	#
 	def hasValueForKey(self, key):
-		'''	Returns true if the key is available, although that does not
-			guarantee that there will not be errors caused by retrieving the key. '''
+		"""	Returns true if the key is available, although that does not
+			guarantee that there will not be errors caused by retrieving the key. """
 
 		return self._bindingForGetKey(key)!=None
 
 
 	def valueForKey(self, key, default=NoDefault):
-		''' Suppose key is 'foo'. This method returns the value with the following precedence:
+		""" Suppose key is 'foo'. This method returns the value with the following precedence:
 				1. Methods before non-methods
 				2. Public attributes before private attributes
 
@@ -146,7 +146,7 @@ class NamedValueAccess:
 
 			See valueForName() which is a more advanced version of this method that allows
 			multiple, qualified keys.
-		'''
+		"""
 
 		binding = self._bindingForGetKey(key)
 
@@ -178,9 +178,9 @@ class NamedValueAccess:
 		return 1
 
 	def valueForName(self, keysString, default=None):
-		''' Returns the value for the given keysString. This is the more advanced version of
+		""" Returns the value for the given keysString. This is the more advanced version of
 			valueForKey(), which can only handle single names. This method can handle
-			'foo', 'foo1.foo2', 'a.b.c.d', etc. It will traverse dictionaries if needed. '''
+			'foo', 'foo1.foo2', 'a.b.c.d', etc. It will traverse dictionaries if needed. """
 		keys = string.split(keysString, '.')
 		return self.valueForKeySequence(keys, default)
 
@@ -189,7 +189,7 @@ class NamedValueAccess:
 		return _valueForKeySequence(self, listOfKeys, default)
 
 	def valuesForNames(self, keys, default=None, defaults=None, forgive=0, includeNames=0):
-		''' Returns a list of values that match the given keys, each of which is passed
+		""" Returns a list of values that match the given keys, each of which is passed
 			  through valueForName() and so could be of the form 'a.b.c'.
 			keys is a sequence. default is any kind of object. defaults is a sequence.
 			  forgive and includeNames is a flag.
@@ -213,7 +213,7 @@ class NamedValueAccess:
 				It should be supported for the other cases.
 				It should be documented.
 				It should be included in the test cases.
-		'''
+		"""
 
 		if keys is None:
 			return None
@@ -244,7 +244,7 @@ class NamedValueAccess:
 
 	def setValueForKey(self, key, value):
 		# @@ 2000-02-18: naming might be weired here with args reversed
-		''' Suppose key is 'foo'. This method sets the value with the following precedence:
+		""" Suppose key is 'foo'. This method sets the value with the following precedence:
 				1. Public attributes before private attributes
 				2. Methods before non-methods
 
@@ -252,7 +252,7 @@ class NamedValueAccess:
 				@@ 2000-03-04 ce: fill in
 
 			...or invokes handleUnknownSetKey().
-		'''
+		"""
 		raise NotImplementedError # @@ 2000-03-04 ce
 
 	def resetKeyBindings(self):
@@ -275,9 +275,9 @@ class NamedValueAccess:
 	# Private
 	#
 	def _bindingForGetKey(self, key):
-		'''	Bindings are cached.
+		"""	Bindings are cached.
 			Bindings are methods or strings.
-		'''
+		"""
 
 		# Make _kvGetBindings dictionary if we don't have one
 		if not hasattr(self, '_kvGetBindings'):
@@ -328,7 +328,7 @@ class NamedValueAccess:
 
 
 class NamedValueAccessWrapper(NamedValueAccess):
-	'''
+	"""
 	This provides a wrapper around an existing object which will respond
 	to the methods of NamedValueAccess. By using the wrapper, you can
 	stick with objects and methods such as obj.valueForName('x.y') (as
@@ -338,7 +338,7 @@ class NamedValueAccessWrapper(NamedValueAccess):
 	Example:
 		wrapper = NamedValueAccessWrapper(obj)
 		print wrapper.valueForName('manager.name')
-	'''
+	"""
 
 	def __init__(self, object):
 		self._object = object
@@ -364,10 +364,10 @@ class NamedValueAccessWrapper(NamedValueAccess):
 #
 
 def _valueForKeySequence(obj, listOfKeys, default=None):
-	'''	This is a recursive function used to implement NamedValueAccess.valueForKeySequence.
+	"""	This is a recursive function used to implement NamedValueAccess.valueForKeySequence.
 		Besides supporting inheritors of NamedValueAccess, this function also supports
 		dictionaries, which is why it's not found in the class.
-	'''
+	"""
 
 	# @@ 2000-02-18: Optimize by specifying index instead of making new list
 	if type(obj) is types.DictType:
@@ -387,10 +387,10 @@ def _valueForKeySequence(obj, listOfKeys, default=None):
 
 
 def _dict_valueForKey(obj, key, default=NoDefault):
-	'''
+	"""
 	Returns the value for a given key of the dictionary-like object.
 	This is a private, custom function built in support of valueForKey().
-	'''
+	"""
 	try:
 		value = obj[key]
 	except AttributeError, e:
@@ -420,7 +420,7 @@ def _dict_valueForKey(obj, key, default=NoDefault):
 
 
 def valueForKey(obj, key, default=NoDefault):
-	'''
+	"""
 	Returns the value of the object named by the given key.
 
 	Suppose key is 'foo'. This method returns the value with the
@@ -459,7 +459,7 @@ def valueForKey(obj, key, default=NoDefault):
 
 	* See valueForName() which is a more advanced version of this
 	  function that allows multiple, qualified keys.
-	'''
+	"""
 
 	# We only accept strings for keys
 	assert type(key) is types.StringType
@@ -522,7 +522,7 @@ def valueForKey(obj, key, default=NoDefault):
 
 
 def valueForName(obj, name, default=NoDefault):
-	'''
+	"""
 	Returns the value of the object that is named. The name can use
 	dotted notation to traverse through a network/graph of objects.
 	Since this function relies on valueForKey() for each individual
@@ -530,7 +530,7 @@ def valueForName(obj, name, default=NoDefault):
 	of that notation.
 
 	Example: valueForName(obj, 'department.manager.salary')
-	'''
+	"""
 
 	names = string.split(name, '.')
 	for name in names:

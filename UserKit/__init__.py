@@ -7,7 +7,7 @@ def InstallInWebKit(appServer):
 
 
 def dont_use_combineManagerClasses(*classesOrNamesThereof):
-	'''
+	"""
 	----
 	While this was a nice idea that nearly worked, it broke on keyword arguments to __init__ methods. Fixing it seemed nastier than the next solution: Split RoleUserManager's methods out into RoleUserManagerMixIn, which inherits nothing. Then use the mix-in for the various manager classes, taking care of problems manually in the classes.
 	@@ 2002-04-10 ce
@@ -44,7 +44,7 @@ def dont_use_combineManagerClasses(*classesOrNamesThereof):
 		  But instead must do this:
 			self.baseOfFoo.someMethod(self, arg1, arg2)
 	Yes, that's a little weird. But it's minimal and it empowers this function to create a combination class from orthogonal subclasses of UserManager. I think that if Python had a true "super" feature like Smalltalk and Objective-C, these conventions wouldn't be necessary.
-	'''
+	"""
 	import types
 
 	classes = []

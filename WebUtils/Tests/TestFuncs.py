@@ -1,10 +1,10 @@
 #!/usr/bin/env python
-'''
+"""
 TestFuncs.py
 Webware for Python
 
 This tests the performace of utility functions in WebUtils vs. their standard Python alternatives.
-'''
+"""
 
 import os, string, sys, time
 sys.path.insert(1, os.path.abspath(os.pardir))

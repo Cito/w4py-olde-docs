@@ -12,7 +12,7 @@ HTMLForExceptionOptions = {
 
 
 def HTMLForException(excInfo=None, options=None):
-	''' Returns an HTML string that presents useful information to the developer about the exception. The first argument is a tuple such as returned by sys.exc_info() which is in fact, invoked if the tuple isn't provided. '''
+	""" Returns an HTML string that presents useful information to the developer about the exception. The first argument is a tuple such as returned by sys.exc_info() which is in fact, invoked if the tuple isn't provided. """
 	# @@ 2000-04-17 ce: Maybe excInfo should default to None and get set to sys.excInfo() if not specified. If so, then clean up other code.
 
 	# Get the excInfo if needed

@@ -73,18 +73,18 @@ for name in dir():
 		tClasses.append(globals()[name])
 
 class NamedValueAccessTest(unittest.TestCase):
-	'''
+	"""
 	This is the abstract root ancestor for all test case classes in this file.
-	'''
+	"""
 	pass
 
 
 class LookupTest(NamedValueAccessTest):
-	'''
+	"""
 	This is an abstract super class for the test cases that cover the
 	functions. Subclasses must implement self.lookup() and can make use
 	of self.classes and self.objs.
-	'''
+	"""
 
 	def setUp(self):
 		self.setUpClasses()
@@ -100,11 +100,11 @@ class LookupTest(NamedValueAccessTest):
 		raise SubclassResponsibilityError
 
 	def checkBasicAccess(self):
-		'''
+		"""
 		Invoke the look up function with key 'foo', expecting 1 in return.
 		Invoke the look up with 'bar', expected an exception.
 		Invoke the look up with 'bar' and default 2, expecting 2.
-		'''
+		"""
 		func = self.lookup
 		for obj in self.objs:
 
@@ -117,9 +117,9 @@ class LookupTest(NamedValueAccessTest):
 			assert value==2, 'value = %r, obj = %r' % (value, obj)
 
 	def checkBasicAccessRepeated(self):
-		'''
+		"""
 		Just repeat checkBasicAccess multiple times to check stability.
-		'''
+		"""
 		for count in xrange(50):
 			# Yes, it's safe to invoke this other particular test
 			# multiple times without the usual setUp()/tearDown()
@@ -163,7 +163,7 @@ class ValueForNameTest(LookupTest):
 		self._checkDicts(dict, obj)
 
 	def _checkDicts(self, dict, obj):
-		''' Used exclusively by checkDicts(). '''
+		""" Used exclusively by checkDicts(). """
 		assert self.lookup(dict, 'origin.x')==1
 		assert self.lookup(obj, 'rect.origin.x')
 
@@ -175,12 +175,12 @@ class ValueForNameTest(LookupTest):
 
 
 class MixInTest(NamedValueAccessTest):
-	'''
+	"""
 	This test case is really just a utility to mix-in the
 	NamedValueAccess so that the test classes (t1, t2, ...) inherit it.
 	Run this test suite after the basic tests, but before the
 	NamedValueAccess mix-in tests.
-	'''
+	"""
 
 	def setUp(self):
 		if NamedValueAccess not in tRoot.__bases__:
@@ -242,11 +242,11 @@ class MixInExtrasTest(MixInTest, NamedValueAccessTest):
 
 
 class WrapperTest(NamedValueAccessTest):
-	'''
+	"""
 	This is a utility class that modifies LookupTest. After running this,
 	run	all the LookupTests (e.g., all subclasses) as usual in order to
 	test wrappers.
-	'''
+	"""
 
 	def setUp(self):
 		def setUpObjects(self):

@@ -8,7 +8,7 @@ docs = [
 
 status = 'alpha'
 
-synopsis = '''COMKit allows COM objects to be used in the multi-threaded versions of WebKit.  Especially useful for data access using ActiveX Data Objects. Requires Windows and Python win32 extensions.'''
+synopsis = """COMKit allows COM objects to be used in the multi-threaded versions of WebKit.  Especially useful for data access using ActiveX Data Objects. Requires Windows and Python win32 extensions."""
 
 requiredPyVersion = (2, 0, 0)
 
