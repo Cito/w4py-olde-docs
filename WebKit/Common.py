@@ -24,6 +24,7 @@ except ImportError:
 
 from Object import Object
 import WebUtils
+from MiscUtils import NoDefault
 
 
 # @@ 2000-05-10 ce: Consider if all the following should be located in MiscUtils
