@@ -520,8 +520,3 @@ class TableRecord:
 
 	def __repr__(self):
 		return '%s' % self._values
-
-
-if __name__=='__main__':
-	import TestDataTable
-	TestDataTable.test()
