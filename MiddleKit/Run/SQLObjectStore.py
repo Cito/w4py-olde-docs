@@ -226,12 +226,16 @@ class SQLObjectStore(ObjectStore):
 				rep = '(repr exception)'
 			assert object.serialNum()<1, 'object=%s' % rep
 
+		# try to get the next ID (if database supports this)
+		idNum = self.retrieveNextInsertId(object.klass())
+
 		# SQL insert
-		sql = object.sqlInsertStmt(unknownSerialNums)
+		sql = object.sqlInsertStmt(unknownSerialNums, idNum)
 		conn, cur = self.executeSQL(sql)
 
 		# Get new id/serial num
-		idNum = self.retrieveLastInsertId(conn, cur)
+		if idNum is None:
+			idNum = self.retrieveLastInsertId(conn, cur)
 
 		# Update object
 		object.setSerialNum(idNum)
@@ -240,6 +244,12 @@ class SQLObjectStore(ObjectStore):
 
 		# Update our object pool
 		self._objects[object.key()] = object
+
+	def retrieveNextInsertId(self, klass):
+		""" Returns the id for the next new object of this class.  Databases which cannot determine
+		the id until the object has been added return None, signifying that retrieveLastInsertId 
+		should be called to get the id after the insert has been made. """
+		return None
 
 	def retrieveLastInsertId(self, conn, cur):
 		""" Returns the id (typically a 32-bit int) of the last INSERT operation by this connection. Used by commitInserts() to get the correct serial number for the last inserted object.
@@ -595,7 +605,7 @@ class MiddleObjectMixIn:
 		"""
 		return objRefJoin(self.klass().id(), self.serialNum())
 
-	def sqlInsertStmt(self, unknowns):
+	def sqlInsertStmt(self, unknowns, id=None):
 		"""
 		Returns the SQL insert statements for MySQL (as a tuple) in the form:
 			insert into table (name, ...) values (value, ...);
@@ -604,10 +614,12 @@ class MiddleObjectMixIn:
 		are not yet resolved.
 		"""
 		klass = self.klass()
-		insertSQLStart, sqlAttrs = klass.insertSQLStart()
+		insertSQLStart, sqlAttrs = klass.insertSQLStart(includeSerialColumn=id)
 		values = []
 		append = values.append
 		extend = values.extend
+		if id is not None:
+			append(str(id))
 		for attr in sqlAttrs:
 			try:
 				value = attr.sqlValue(self.valueForAttr(attr))
@@ -702,7 +714,7 @@ class Klass:
 			self._fetchSQLStart = 'select %s from %s ' % (','.join(colNames), self.sqlTableName())
 		return self._fetchSQLStart
 
-	def insertSQLStart(self):
+	def insertSQLStart(self, includeSerialColumn=False):
 		"""
 		Returns a tuple of insertSQLStart (a string) and sqlAttrs (a list).
 		"""
@@ -711,8 +723,8 @@ class Klass:
 			attrs = self.allDataAttrs()
 			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
 			fieldNames = [attr.sqlColumnName() for attr in attrs]
-			if len(fieldNames)==0:
-				fieldNames = [self.sqlSerialColumnName()]
+			if includeSerialColumn or len(fieldNames) == 0:
+				fieldNames.insert(0, self.sqlSerialColumnName())
 			res.append(','.join(fieldNames))
 			res.append(') values (')
 			self._insertSQLStart = ''.join(res)

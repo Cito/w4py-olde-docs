@@ -43,26 +43,12 @@ class PostgreSQLObjectStore(SQLObjectStore):
 	def newCursorForConnection(self, conn, dictMode=0):
 		return conn.cursor()
 	
-	def _insertObject(self, object, unknownSerialNums):
-		# basically the same as the SQLObjectStore-
-		# version but modified to retrieve the
-		# serialNum via the oid (for which we need
-		# class-name, unfortunately)
-		object.klass
-		seqname = "%s_%s_seq" % (object.klass().name(), object.klass().sqlSerialColumnName())
+	def retrieveNextInsertId(self, klass):
+		seqname = "%s_%s_seq" % (klass.name(), klass.sqlSerialColumnName())
 		conn, curs = self.executeSQL("select nextval('%s')" % seqname)
 		id = curs.fetchone()[0]
 		assert id, "Didn't get next id value from sequence"
-
-		sql = object.sqlInsertStmt(unknownSerialNums,id=id)
-		conn, curs = self.executeSQL(sql,conn)
-		conn.commit()
-
-		object.setSerialNum(id)
-		object.setKey(ObjectKey().initFromObject(object))
-		object.setChanged(0)
-
-		self._objects[object.key()] = object
+		return id
 
 	def dbapiModule(self):
 		return dbi
@@ -91,59 +77,6 @@ class PostgreSQLObjectStore(SQLObjectStore):
 	def sqlCaseInsensitiveLike(self, a, b):
 		return "%s ilike %s" % (a,b)
 
-
-class Klass:
-
-	def insertSQLStart(self):
-		"""
-		We override this so that the id column is always specified explicitly.
-		"""
-		if self._insertSQLStart is None:
-			res = ['insert into %s (' % self.sqlTableName()]
-			attrs = self.allDataAttrs()
-			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
-			fieldNames = [self.sqlSerialColumnName()] + [attr.sqlColumnName() for attr in attrs]
-			if len(fieldNames)==0:
-				fieldNames = [self.sqlSerialColumnName()]
-			res.append(','.join(fieldNames))
-			res.append(') values (')
-			self._insertSQLStart = ''.join(res)
-			self._sqlAttrs = attrs
-		return self._insertSQLStart, self._sqlAttrs
-
-class MiddleObjectMixIn:
-
-
-	def sqlInsertStmt(self, unknowns, id):
-		"""
-		We override this so that the id column is always specified explicitly.
-		"""
-		klass = self.klass()
-		insertSQLStart, sqlAttrs = klass.insertSQLStart()
-		values = []
-		append = values.append
-		extend = values.extend
-		append(str(id))
-		for attr in sqlAttrs:
-			try:
-				value = attr.sqlValue(self.valueForAttr(attr))
-			except UnknownSerialNumberError, exc:
-				exc.info.sourceObject = self
-				unknowns.append(exc.info)
-				value = 'NULL'
-			if isinstance(value, str):
-				append(value)
-			else:
-				extend(value) # value could be sequence for attrs that require multiple SQL columns
-		if len(values)==0:
-			values = ['0']
-		values = ','.join(values)
-		return insertSQLStart+values+');'
-
-MixIn(MiddleObject, MiddleObjectMixIn)
-	# Normally we don't have to invoke MixIn()--it's done automatically.
-	# However, that only works when augmenting MiddleKit.Core classes
-	# (MiddleObject belongs to MiddleKit.Run).
 
 class StringAttr:
 	def sqlForNonNone(self, value):
