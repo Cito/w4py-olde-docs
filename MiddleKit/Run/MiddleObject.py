@@ -31,6 +31,7 @@ class MiddleObject(NamedValueAccess):
 		self._mk_key          = None
 		self._mk_changed      = 0
 		self._mk_initing      = 0
+		self._mk_inStore      = 0
 
 	def initFromRow(self, row):
 		allAttrs = self.klass().allAttrs()
@@ -55,6 +56,7 @@ class MiddleObject(NamedValueAccess):
 			else:
 				apply(setMethod, (value,))
 		dict['_mk_initing'] = 0
+		dict['_mk_inStore'] = 1
 		return self
 
 
@@ -83,6 +85,14 @@ class MiddleObject(NamedValueAccess):
 
 	def setChanged(self, flag):
 		self._mk_changed = flag
+
+	## In Store ##
+
+	def isInStore(self):
+		return self._mk_inStore
+
+	def setInStore(self, flag):
+		self._mk_inStore = flag
 
 
 	## Keys ##

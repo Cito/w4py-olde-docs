@@ -325,6 +325,7 @@ class ListAttr:
 		assert value.%(lowerSourceClassName)s()==None
 		self.%(pyGetName)s().append(value)
 		value.set%(sourceClassName)s(self)
-		if value.serialNum()==0:
-			self.store().addObject(value)
+		store = self.store()
+		if value.serialNum()==0 and self.isInStore():
+			store.addObject(value)
 ''' % names)

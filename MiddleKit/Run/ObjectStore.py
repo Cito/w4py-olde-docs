@@ -70,8 +70,10 @@ class ObjectStore(ModelUser):
 		''' Restrictions: You cannot insert the same object twice. You cannot insert an object that was loaded from the store. '''
 		#assert not self.hasObject(object)
 		assert object.key()==None
+		assert not object.isInStore()
 		self.willChange()
 		self._newObjects.append(object)
+		object.setInStore(1)
 		# 2000-10-07 ce: Decided not to allow keys for non-persisted objects
 		# Because the serial num, and therefore the key, will change
 		# upon saving.
