@@ -77,9 +77,8 @@ def handler(req):
 			ot.write("*************\n%s\n************\n"% len(myInput))
 			for name in req.headers_in.keys():
 				ot.write("%s=%s\n"%(name,req.headers_in[name]))
-				ot.write("*************************\n")
-				ot.write(req.uri)
-				ot.write("\n")
+			ot.write(req.uri)
+			ot.write("\n*************************\n")
 
 		# get the apache module to do the grunt work of
 		#   building the environment
@@ -90,7 +89,8 @@ def handler(req):
 ##		env['PATH_INFO'] = WK_URI  #Hack to accomodate the current cgi-centric approach WK uses to find the path
 ##		env['WK_URI'] = WK_URI
 ##		if env["WK_URI"] == "": env["WK_URI"]="/"
-		if not env.has_key('PATH_INFO'): env['PATH_INFO']="/"
+		if debug: ot.write("PATH_INFO=%s\n"% env.get('PATH_INFO'))
+		if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info #"/"
 
 		dict = {
 				'format': 'CGI',
@@ -101,7 +101,7 @@ def handler(req):
 
 
 		s = socket(AF_INET, SOCK_STREAM)
-		s.connect(host, port)
+		s.connect((host, port))
 		s.send(dumps(dict))
 		s.shutdown(1)
 
@@ -122,6 +122,8 @@ def handler(req):
 		for pair in respdict['headers']:
 			req.headers_out[pair[0]] = str(pair[1])
 		req.content_type = req.headers_out['content-type']
+		if req.headers_out.has_key('status'):
+			req.status = int(req.headers_out['status'])
 		req.send_http_header()
 		req.write(respdict['contents'])
 
@@ -205,7 +207,7 @@ def pspHandler(req):
 
 
 		s = socket(AF_INET, SOCK_STREAM)
-		s.connect(host, port)
+		s.connect((host, port))
 		s.send(dumps(dict))
 		s.shutdown(1)
 
@@ -226,6 +228,8 @@ def pspHandler(req):
 		for pair in respdict['headers']:
 			req.headers_out[pair[0]] = str(pair[1])
 		req.content_type = req.headers_out['content-type']
+		if req.headers_out.has_key('status'):
+			req.status = int(req.headers_out['status'])
 		req.send_http_header()
 		req.write(respdict['contents'])
 
