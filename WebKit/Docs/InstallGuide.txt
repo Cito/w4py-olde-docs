@@ -44,7 +44,8 @@ Posix (Linux, BSD, etc)
 
 If you just want to get to a working configuration fast, and your
 setup is fairly conventional, here's a minimal set of instructions for
-Posix systems::
+Posix systems (for FreeBSD users, please note that GNU make is necessary to 
+build wkcgi):: 
 
     $ cd /path/to/Webware/
     $ python install.py
@@ -526,8 +527,8 @@ To install:
   $ make
   $ make install
 
-The most likely most like error you will get in this process is an
-error ``make: /usr/sbin/apxs: Command not found``.  This means the
+The most common error you will get in this process is an error 
+``make: /usr/sbin/apxs: Command not found``.  This means the
 ``apxs`` utility is probably located somewhere else, or you do not
 have it installed.  It should be in one of these locations:
 
