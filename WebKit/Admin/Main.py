@@ -15,7 +15,6 @@ class Main(AdminPage):
 		app = self.application()
 		curTime = time()
 		self.writeGeneralInfo()
-		self.writePlugIns()
 		self.writeMenu()
 		self.writeSignature()
 
@@ -46,7 +45,8 @@ class Main(AdminPage):
 		self.startMenu()
 		self.menuItem('Activity log', 'Access', self.fileSize('ActivityLogFilename'))
 		self.menuItem('Error log', 'Errors', self.fileSize('ErrorLogFilename'))
-		self.menuItem('Show config', 'Config')
+		self.menuItem('Config', 'Config')
+		self.menuItem('Plug-ins', 'PlugIns')
 		self.menuItem('Servlet cache by path', 'ServletCacheByPath')
 		self.endMenu()
 
@@ -71,26 +71,6 @@ class Main(AdminPage):
 			return '<font size=-1>(%0.0f KB)</font>' % (os.path.getsize(filename)/1024.0)
 		else:
 			return '<font size=-1>(does not exist)</font>'
-
-
-	## Plug-ins ##
-
-	def writePlugIns(self):
-		# @@ 2000-06-02 ce: We should allow a custom admin link for each plug-in (if it provides one)
-		# @@ 2000-06-02 ce: We should have a link to the plug-in's docs
-		plugIns = self.application().server().plugIns()
-		if plugIns:
-			self.writeln('''<p><table align=center border=0 cellspacing=2 cellpadding=2>
-<tr bgcolor=black><td align=center colspan=3><font face="Arial, Helvetica" color=white><b>Plug-ins</b></font></td></tr>''')
-			for plugIn in plugIns:
-				name, dir, ver = plugIn.name(), plugIn.directory(), plugIn.version()
-				self.writeln('<tr> %(td)s %(name)s </td> %(td)s %(ver)s </td> %(td)s %(dir)s </td> </tr>' % {
-					'name': name,
-					'ver': ver,
-					'dir': dir,
-					'td': '<td bgcolor=#DDDDDD>'
-				})
-			self.writeln('</table>')
 
 
 	## Signature ##

@@ -39,6 +39,8 @@ class AdminPage(Page):
 		pass
 
 	def writeFooter(self):
+		app = self.application()
+
 		self.writeln('<p><br><hr>')
 		self.writeln('<center>')
 
@@ -58,6 +60,7 @@ class AdminPage(Page):
 		self.write(' <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>')
 
 		# Kit and versions
-		self.write('<br>WebKit 0.3, part of Webware for Python 0.3')
+		self.write('<br>WebKit %s, part of Webware %s' % (
+			app.webKitVersion(), app.webwareVersion()))
 
 		self.writeln('</center></table></body>')
