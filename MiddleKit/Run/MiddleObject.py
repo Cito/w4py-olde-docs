@@ -48,7 +48,17 @@ class MiddleObject(NamedValueAccess):
 
 	_mk_setCache = {}    # cache the various setFoo methods first by qualified class name
 
-	def initFromRow(self, row):
+	def readStoreData(self, store, row):
+		"""
+		Invoked by the store in order for this object to read data
+		from the persistent store. Could be invoked multiple times
+		for the same object in order to "refresh the attributes"
+		from the persistent store.
+		"""
+		if self._mk_store:
+			assert self._mk_store is store, 'Cannot refresh data from a different store.'
+		else:
+			self.setStore(store)
 		fullClassName = self.__class__.__module__ + '.' + self.__class__.__name__
 		cache = self._mk_setCache.setdefault(fullClassName, [])
 		if not cache:

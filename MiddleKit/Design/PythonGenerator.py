@@ -131,7 +131,7 @@ del sys.path[0]
 		wr = self._pyOut.write
 		wr('\n\nclass Gen%s(%s):\n' % (self.name(), self.supername()))
 		self.writePyInit()
-		self.writePyInitFromRow()
+		self.writePyReadStoreData()
 		self.writePyAccessors()
 		wr('\n')
 
@@ -152,18 +152,18 @@ del sys.path[0]
 			wr('\t\tself._%s = %r\n' % (name, attr.defaultValue()))
 		wr('\n')
 
-	def writePyInitFromRow(self):
+	def writePyReadStoreData(self):
 		wr = self._pyOut.write
-		statements = [attr.pyInitFromRowStatement() for attr in self.attrs()]
+		statements = [attr.pyReadStoreDataStatement() for attr in self.attrs()]
 		statements = [s for s in statements if s]
 		if statements:
 			wr('''
-	def initFromRow(self, row):
+	def readStoreData(self, store, row):
 		if not self._mk_inStore:
 ''')
 			for s in statements:
 				wr(s)
-			wr('\t\t%s.initFromRow(self, row)\n\n' % self.supername())
+			wr('\t\t%s.readStoreData(self, store, row)\n\n' % self.supername())
 
 	def writePyAccessors(self):
 		''' Write Python accessors for attributes simply by asking each one to do so. '''
@@ -197,7 +197,7 @@ class Attr:
 		'''
 		raise SubclassResponsibilityError
 
-	def pyInitFromRowStatement(self):
+	def pyReadStoreDataStatement(self):
 		return None
 
 	def writePyAccessors(self, out):
@@ -441,7 +441,7 @@ class ListAttr:
 		assert not self.get('Default', 0), 'Cannot have default values for lists.'
 		return []
 
-	def pyInitFromRowStatement(self):
+	def pyReadStoreDataStatement(self):
 		# Set the lists to None on the very first read from the store
 		# so the list get methods will fetch the lists from the store.
 		return '\t\t\tself._%s = None\n' % self.name()

@@ -284,15 +284,13 @@ class SQLObjectStore(ObjectStore):
 					pyClass = klass.pyClass()
 					obj = pyClass()
 					assert isinstance(obj, MiddleObject), 'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r' % (obj, type(obj), MiddleObject)
-					obj.initFromRow(row)  # @@ 2002-05-03 ce: should be redone as readStoreData(store, row) and then remove next if stmt
-					if obj._mk_store is not self:
-						obj.setStore(self)
+					obj.readStoreData(self, row)
 					obj.setKey(key)
 					self._objects[key] = obj
 				else:
 					# Existing object
 					if refreshAttrs:
-						obj.initFromRow(row)
+						obj.readStoreData(self, row)
 				objs.append(obj)
 		objs.extend(deepObjs)
 		return objs
