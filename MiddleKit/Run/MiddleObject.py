@@ -247,56 +247,6 @@ class MiddleObject(NamedValueAccess):
 			self._mk_klass = self._mk_store.model().klass(self.__class__.__name__)
 		return self._mk_klass
 
-	def __setattr__(self, name, value):
-		''' This method takes note when attributes (as specified in the class model) are being changed, so that later these attributes can be saved to the persistent store. '''
-		# Get out of here if initializing or this is a MiddleKit
-		# related attribute.
-		if self._mk_initing or name.startswith('_mk_'):
-			#self.__dict__['_mk_changed'] = 1
-			self.__dict__[name] = value
-			return
-
-		# Get out of here if there really isn't any change.
-		# However, we use "is" instead of "==" to save CPU
-		# cycles, at the cost of accepting a few fake changes.
-		dict = self.__dict__
-		if dict.has_key(name) and dict[name] is value:
-			return
-
-		# Get out of here if we're a new object (e.g., not persisted yet)
-		if self._mk_serialNum<1:
-			dict['_mk_changed'] = 1
-			dict[name] = value
-			return
-
-		# Get out of here if attribute isn't prefixed with underscore
-		# This isn't a MiddleKit model attribute
-		if name[0]!='_':
-			dict[name] = value
-			return
-
-		# Get the attribute name (skip the preceding underscore)
-		attrName = name[1:]
-
-		# Get a ref to our class model
-		klass = self.klass()
-
-		# If the attr is one our modeled attributes,
-		attr = klass.lookupAttr(attrName, None)
-
-		if attr and attr.shouldRegisterChanges():
-			# Record that is has been changed
-			if self._mk_changedAttrs is None:
-				self._mk_changedAttrs = {} # maps name to attribute
-			self._mk_changedAttrs[attrName] = attr  # changedAttrs is a set
-			# Tell ObjectStore it happened
-			self._mk_store.objectChanged(self)
-			# We're changed
-			dict['_mk_changed'] = 1
-
-		# Set the attribute
-		dict[name] = value
-
 	def addReferencedObjectsToStore(self, store):
 		""" Adds all MK objects referenced by this object to the store """
 		for value in self.allAttrs().values():
@@ -306,6 +256,7 @@ class MiddleObject(NamedValueAccess):
 				for obj in value:
 					if isinstance(obj, MiddleObject):
 						store.addObject(obj)
+
 
 	## Accessing attributes by name ##
 

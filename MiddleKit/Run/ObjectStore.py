@@ -152,9 +152,7 @@ class ObjectStore(ModelUser):
 		# detaches
 		for obj, attr in detaches:
 			if not objectsToDel.has_key(id(obj)):
-				setattr(obj, '_'+attr.name(), None)
-				# Can't use setValueForAttr() because that invokes the setter method which will raise an exception if the attribute is required.
-				#obj.setValueForAttr(attr, None)
+				obj.setValueForAttr(attr, None)
 
 		# deleted objects
 		objectsToDel = objectsToDel.values()

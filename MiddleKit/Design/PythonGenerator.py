@@ -189,7 +189,26 @@ class Attr:
 		values = locals()
 		out.write('\n\tdef %(pySetName)s(self, value):\n' % values)
 		self.writePySetChecks(out)
-		out.write('\t\tself._%(name)s = value\n' % values)
+		self.writePySetAssignment(out.write, name)
+
+	def writePySetAssignment(self, write, name):
+		write('''
+		# set the attribute
+		origValue = self._%(name)s
+		self._%(name)s = value
+
+		# MiddleKit machinery
+		self._mk_changed = 1  # @@ original semantics, but I think this should be under "if not self._mk_initing..."
+		if not self._mk_initing and self._mk_serialNum>0 and value is not origValue:
+			attr = self.klass().lookupAttr('%(name)s') # @@ could use allAttrs() dictionary
+			if attr.shouldRegisterChanges():
+				# Record that it has been changed
+				if self._mk_changedAttrs is None:
+					self._mk_changedAttrs = {} # maps name to attribute
+				self._mk_changedAttrs['%(name)s'] = attr  # changedAttrs is a set
+				# Tell ObjectStore it happened
+				self._mk_store.objectChanged(self)
+''' % {'name': name})
 
 	def writePySetChecks(self, out):
 		if self.isRequired():
@@ -379,8 +398,8 @@ class ObjRefAttr:
 			from %(package)s%(targetClassName)s import %(targetClassName)s
 			if not isinstance(value, %(targetClassName)s):
 				raise TypeError, 'expecting %(targetClassName)s, but got value %%r of type %%r instead' %% (value, type(value))
-		self._%(name)s = value
 ''' % locals())
+		self.writePySetAssignment(out.write, name)
 
 
 class ListAttr:

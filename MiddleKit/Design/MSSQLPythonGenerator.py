@@ -19,5 +19,5 @@ class ObjRefAttr:
 		%(reqAssert)s
 		if value is not None and type(value) is not LongType:
 			assert type(value) is InstanceType
-		self._%(name)s = value
 ''' % locals())
+		self.writePySetAssignment(out.write, name)
