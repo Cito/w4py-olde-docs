@@ -1,3 +1,18 @@
+"""
+URL parsing is done through objects which are subclasses of the
+`URLParser` class.  `Application` delegates most of the URL parsing
+to these objects.
+
+Application has a single "root" URL parser, which is used to parse
+all URLs.  This parser then can pass the request on to other parsers,
+usually taking off parts of the URL with each step.
+
+This root parser is generally `ContextParser`, which is instantiated
+and set up by `Application` (accessible through
+`Application.rootURLParser`).
+"""
+
+
 import WebKit.ImportSpy as imp
 import re, os, sys
 from MiscUtils.ParamFactory import ParamFactory
@@ -10,6 +25,10 @@ import AppServer
 moduleNameRE = re.compile('[^a-zA-Z_]')
 
 def application():
+	"""
+	Returns the global Application.
+	:ignore:
+	"""
 	return AppServer.globalAppServer.application()
 
 class URLParser:
@@ -21,24 +40,43 @@ class URLParser:
 	want to implement an `__init__` method with arguments that
 	control how the parser works (for instance, passing a starting
 	path for the parser)
+
+	The `parse` method is where most of the work is done.  It takes
+	two arguments -- the transaction and the portion of the URL
+	that is still to be parsed.  The transaction may (and usually
+	is) modified along the way.  The URL is passed through so that
+	you can take pieces off the front, and then pass the reduced
+	URL to another parser.  The method should return a servlet
+	(never None).
+
+	If you cannot find a servlet, or some other (somewhat)
+	expected error occurs, you should raise an exception.
+	HTTPNotFound probably being the most interesting.
 	"""
 
 	def __init__(self):
 		pass
 
 	def findServletForTransaction(self, trans):
+		"""
+		Returns a servlet for the transaction.  This is the
+		top-level entry point, below it `parse` is used.
+		"""
 		return self.parse(trans, trans.request().urlPath())
 
 class ContextParser(URLParser):
 
 	"""
-	ContextParser uses the Application.config context settings
+	ContextParser uses the ``Application.config`` context settings
 	to find the context of the request.  It then passes the
 	request to a FileParser rooted in the context path.
 
 	The context is the first element of the URL, or if no context
 	matches that then it is the ``default`` context (and the
 	entire URL is passed to the default context's FileParser).
+
+	There is generally only one ContextParser, which can be
+	found as ``application.rootURLParser()``.  
 	"""
 
 	def __init__(self, app):
@@ -126,6 +164,11 @@ class ContextParser(URLParser):
 		self._contexts[name] = dir
 
 	def absContextPath(self, path):
+		"""
+		Resolves relative paths, which are assumed to be
+		relative to the Application's serverSidePath (the
+		working directory).
+		"""
 		if os.path.isabs(path):
 			return path
 		else:
@@ -135,6 +178,10 @@ class ContextParser(URLParser):
 		"""
 		Get the context name, and dispatch to a FileParser
 		rooted in the context's path.
+
+		The context name and file path are stored in the
+		request (accessible through `Request.serverSidePath`
+		and `Request.contextName`).
 		"""
 		# This is a hack... this should probably go in the
 		# Transaction class:
@@ -163,10 +210,24 @@ class _FileParser(URLParser):
 
 	FileParser objects are threadsafe.  A factory function is
 	used to cache FileParser instances, so for any one path only
-	a single FileParser instance will exist.
+	a single FileParser instance will exist.  The `_FileParser`
+	class is the real class, and `FileParser` is a factory that
+	either returns an existant _FileParser object, or creates a
+	new one if none exists.
+
+	FileParser uses several settings from ``Application.config``,
+	which are persistant over the life of the application.  These
+	are set up in the function `initApp`, as class variables.
+	They cannot be set when the module is loaded, because the
+	Application is not yet set up, so `initApp` is called in
+	`Application.__init__`.
 	"""
 
 	def __init__(self, path):
+		"""
+		Each parsed directory has a FileParser instance associated
+		with it (``self._path``).
+		"""
 		URLParser.__init__(self)
 		self._path = path
 		self._initModule = None
@@ -174,7 +235,18 @@ class _FileParser(URLParser):
 	def parse(self, trans, requestPath):
 		"""
 		Return the servlet.  __init__ files will be used for various
-		hooks (see parseInit for more)
+		hooks (see `parseInit` for more)
+
+		If the next part of the URL is a directory, it calls
+		``FileParser(dirPath).parse(trans, restOfPath)`` where
+		``restOfPath`` is `requestPath` with the first section
+		of the path removed (the part of the path that this
+		FileParser just handled).
+
+		This uses `fileNamesForBaseName` to find files in its
+		directory.  That function has several functions to define
+		what files are ignored, hidden, etc.  See its documentation
+		for more information.
 		"""
 
 		# print "FP(%r) parses %r" % (self._path, requestPath)
@@ -217,8 +289,6 @@ class _FileParser(URLParser):
 		return ServletFactoryManager.servletForFile(trans, os.path.join(self._path, name))
 
 
-	_filesSetup = 0
-				
 	def filenamesForBaseName(self, baseName):
 		"""
 		Given a path, like ``/a/b/c``, searches for files in ``/a/b``
@@ -309,7 +379,27 @@ class _FileParser(URLParser):
 	def parseIndex(self, trans, requestPath):
 		"""
 		Return the servlet for a directory index (i.e., ``Main`` or
-		``index``).
+		``index``).  When `parse` encounters a directory and there's
+		nothing left in the URL, or when there is something left
+		and no file matches it, then it will try `parseIndex` to
+		see if there's an index file.
+
+		That means that if ``/a/b/c`` is requested, and in ``/a``
+		there's no file or directory matching ``b``, then it'll
+		look for an index file (like ``Main.py``), and that
+		servlet will be returned.  In fact, if no ``a`` was found,
+		and the default context had an index (like ``index.html``)
+		then that would be called with ``/a/b/c`` as
+		`HTTPRequest.extraURLPath`.  If you don't want that
+		to occur, you should raise an HTTPNotFound in your
+		no-extra-url-path-taking servlets.
+
+		The directory names are based off the ``Application.config``
+		setting ``DirectoryFile``, which is a list of base names,
+		by default ``["Main", "index", "main", "Index"]``, which
+		are searched in order.  A file with any extension is
+		allowed, so the index can be an HTML file, a PSP file,
+		a Python servlet, etc.
 		"""
 
 		# if requestPath is empty, then we're missing the trailing /
@@ -508,7 +598,7 @@ class URLParameterParser(URLParser):
 	the ``SID=123`` will be removed from the URL, and a field
 	will be set in the request (so long as no field by that name
 	already exists -- if a field does exist the variable is thrown
-	away).
+	away).  These are put in the place of GET or POST variables.
 
 	It should be put in an __init__, like::
 
@@ -524,9 +614,20 @@ class URLParameterParser(URLParser):
 		self.fileParser = fileParser
 
 	def parse(self, trans, requestPath):
+		"""
+		Delegates to `parseHook`.
+		"""
 		return self.parseHook(trans, requestPath, self.fileParser)
 
 	def parseHook(self, trans, requestPath, hook):
+		"""
+		Munges the path.  The `hook` is the FileParser object
+		that originally called this -- we just want to strip
+		stuff out of the URL and then give it back to the
+		FileParser instance, which can actually find the
+		servlet.
+		"""
+		
 		parts = requestPath.split('/')
 		result = []
 		req = trans.request()
@@ -542,19 +643,11 @@ class URLParameterParser(URLParser):
 class ServletFactoryManagerClass:
 
 	"""
-	This singleton class manages all the servlet factories
-	that are installed.  The primary instance is called
-	ServletFactoryManager.
+	This singleton (called `ServletFactoryManager`) collects
+	and manages all the servlet factories that are installed.
 
-	Servlets can add themselves with the `addServletFactory(factory)`
-	method; the factory must have an `extensions` method, which
-	should return a list of extensions that the factory handles
-	(like ``['.ht']``).  The special extension ``.*`` will match
-	any file if no other factory is found.
-
-	The method `servetForFile(trans, path)` will create a servlet
-	based on the path, raising HTTPNotFound if no appropriate
-	factory can be found.
+	See `addServletFactory` for adding new factories, and
+	`servletForFile` for getting the factories back.
 	"""
 
 	def __init__(self):
@@ -562,6 +655,18 @@ class ServletFactoryManagerClass:
 		self._factoryExtensions = {}
 
 	def addServletFactory(self, factory):
+		"""
+		Servlet factories can add themselves with::
+		
+		    ServletFactoryManager.addServletFactory(factory)
+	    
+		The factory must have an `extensions` method, which should
+		return a list of extensions that the factory handles (like
+		``['.ht']``).  The special extension ``.*`` will match any
+		file if no other factory is found.  See `ServletFactory`
+		for more information.
+		"""
+
 		self._factories.append(factory)
 		for ext in factory.extensions():
 			assert not self._factoryExtensions.has_key(ext), \
@@ -571,6 +676,10 @@ class ServletFactoryManagerClass:
 			self._factoryExtensions[ext] = factory
 
 	def factoryForFile(self, path):
+		"""
+		Gets a factory for a filename.
+		"""
+		
 		name, ext = os.path.splitext(path)
 		if self._factoryExtensions.has_key(ext):
 			return self._factoryExtensions[ext]
@@ -579,6 +688,12 @@ class ServletFactoryManagerClass:
 		raise HTTPNotFound
 
 	def servletForFile(self, trans, path):
+		"""
+		Gets a servlet for a filename and transaction.
+		Uses `factoryForFile` to find the factory, which
+		creates the servlet.
+		"""
+		
 		factory = self.factoryForFile(path)
 		return factory.servletForTransaction(trans)
 
@@ -614,7 +729,6 @@ def initApp(app):
 	cls._toServe = app.setting('ExtensionsToServe')
 	cls._useCascading = app.setting('UseCascadingExtensions')
 	cls._cascadeOrder = app.setting('ExtensionCascadeOrder')
-	cls._filesSetup = 1
 	cls._directoryFile = app.setting('DirectoryFile')
 
 
