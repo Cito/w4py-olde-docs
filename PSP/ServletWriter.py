@@ -36,6 +36,7 @@ class ServletWriter:
 
 	TAB = '\t'
 	SPACES = '    ' # 4 spaces
+	EMPTY_STRING=''
     
 	def __init__(self,ctxt):
 	
@@ -46,6 +47,7 @@ class ServletWriter:
 		self._indentSpaces = self.SPACES
 		self._useTabs=1
 		self._indent='\t'
+		self._userIndent = self.EMPTY_STRING
 
 	def setIndentSpaces(self,amt):
 		self._indentSpaces=' '*amt
@@ -100,8 +102,9 @@ class ServletWriter:
 		return 'r'+s
 
 	def indent(self,st):
+		"""Added userIndent 6/18/00"""
 		if self._tabcnt>0:
-			return self._indent*self._tabcnt + st
+			return self._userIndent + self._indent*self._tabcnt +st
 		return st
 	
 	def println(self, line=None):

@@ -181,6 +181,7 @@ class PSPParser:
     def checkEndBlock(self, handler, reader):
 	    OPEN_SCRIPT='<%'
 	    CLOSE_SCRIPT='%>'
+	    CLOSE_SCRIPT2='$%>'
 	    CENTER_SCRIPT='end'
 	    start=reader.Mark()
 
@@ -188,13 +189,19 @@ class PSPParser:
 		    reader.Advance(len(OPEN_SCRIPT))
 		    reader.skipSpaces()
 		    if reader.Matches(CENTER_SCRIPT):
-			    reader.Advance(len(CENTER_SCRIPT))
-			    reader.skipSpaces()
-			    if reader.Matches(CLOSE_SCRIPT):
-				    reader.Advance(len(CLOSE_SCRIPT))
-				    handler.setTemplateInfo(self.tmplStart, self.tmplStop)
-				    handler.handleEndBlock()
-				    return 1
+				reader.Advance(len(CENTER_SCRIPT))
+				reader.skipSpaces()
+				if reader.Matches(CLOSE_SCRIPT):
+					reader.Advance(len(CLOSE_SCRIPT))
+					handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+					handler.handleEndBlock()
+					return 1
+				if reader.Matches(CLOSE_SCRIPT2):
+					reader.Advance(len(CLOSE_SCRIPT2))
+					handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+					handler.handleEndBlock()
+					print ">>>>Putting a $ at the end of an end tag does nothing, I Say"
+					return 1
 	    #that wasn't it
 	    reader.reset(start)
 	    return 0

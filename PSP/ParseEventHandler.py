@@ -138,7 +138,7 @@ class ParseEventHandler:
 	def indentSpacesHandler(self,amount,start,stop):
 		"""set number of spaces used to indent in generated source"""
 		self._indentSpaces=int(amount)#don't really need this
-		self._writer._setIndentSpaces(int(amount))
+		self._writer.setIndentSpaces(int(amount))
 
 
 	directiveHandlers = {'imports':importHandler,

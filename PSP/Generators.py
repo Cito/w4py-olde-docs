@@ -108,12 +108,29 @@ class ScriptGenerator(GenericGenerator):
 		#check for whitespace at the beginning and if less than 2 spaces, remove
 		if self.chars[:1]==' ' and self.chars[:2]!= '  ':
 			self.chars=string.lstrip(self.chars)
-		writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
+		lines = string.splitfields(PSPUtils.removeQuotes(self.chars),'\n')
+		#writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
 		
+
+		#userIndent check
+		if len(lines[-1])>0 and lines[-1][-1] == '$':
+			lastline = lines[-1] = lines[-1][:-1]
+			if lastline == '': lastline = lines[-2] #handle endscript marker on its own line
+			count=0
+			while lastline[count] in string.whitespace:
+				count=count+1
+			userIndent = lastline[:count]
+		else:
+			userIndent = writer.EMPTY_STRING
+			lastline=lines[-1]
+
+		#print out code, (moved from above)
+		writer._userIndent = writer.EMPTY_STRING #reset to none
+		writer.printList(lines)
 		writer.printChars('\n')
 
 		#check for a block
-		lastline = string.splitfields(PSPUtils.removeQuotes(self.chars),'\n')[-1]
+		#lastline = string.splitfields(PSPUtils.removeQuotes(self.chars),'\n')[-1]
 		commentstart = string.find(lastline,'#')
 		if commentstart > 0: lastline = lastline[:commentstart]
 		blockcheck=string.rstrip(lastline)
@@ -127,6 +144,9 @@ class ScriptGenerator(GenericGenerator):
 			writer.println()
 			writer._blockcount = writer._blockcount-1
 
+		#set userIndent for subsequent HTML
+		writer._userIndent = userIndent
+
 class EndBlockGenerator(GenericGenerator):
 	def __init__(self):
 		GenericGenerator.__init__(self)
@@ -136,6 +156,7 @@ class EndBlockGenerator(GenericGenerator):
 			writer.popIndent()
 			writer.println()
 			writer._blockcount = writer._blockcount-1
+		writer._userIndent = writer.EMPTY_STRING
 		
 		
 
