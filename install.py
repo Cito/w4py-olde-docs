@@ -111,7 +111,7 @@ class Installer:
 		print
 
 	def processRawFiles(self):
-		print 'Processing raw files...'
+		print 'Processing raw doc files...'
 		self.requirePath('DocSupport')
 		from RawToHTML import RawToHTML
 		processor = RawToHTML()
@@ -275,7 +275,7 @@ class Installer:
 		print 'Creating index.html...'
 		ht = self.htFragment('index')
 		ht = ht % self._props
-		self.writeDocFile('Webware Documentation', 'Docs/index.html', ht, extraHead='<link rel=stylesheet href=index.css type=text/css>')
+		self.writeDocFile('Webware Documentation', 'Docs/index.html', ht, extraHead='<link rel=stylesheet href=GenIndex.css type=text/css>')
 
 		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until
 		# we have a more general mechanism for adding the header
