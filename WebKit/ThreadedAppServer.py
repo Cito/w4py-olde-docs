@@ -286,7 +286,6 @@ class RequestHandler:
 		rawResponse = transaction.response().rawResponse()
 
 
-		reslen = len(rawResponse)
 		sent = 0
 
 		self._buffer = ''
@@ -296,6 +295,7 @@ class RequestHandler:
 		self._buffer = self._buffer + "\n" + rawResponse['contents']
 
 		
+		reslen = len(self._buffer)
 		while sent < reslen:
 			sent = sent + conn.send(self._buffer[sent:sent+8192])
 
