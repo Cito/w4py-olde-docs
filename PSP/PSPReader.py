@@ -237,7 +237,7 @@ class PSPReader:
 			self.current.col = self.current.col + length
 			return
 			# I may have broken something here. I changed the first line above to <= from < and took out the below 5/20/00
-			prog = len(self.current.linearray[self.current.row]) - self.current.col
+		prog = len(self.current.linearray[self.current.row]) - self.current.col
 			# if prog == length:  #I'm gonna have off by 1 errs, try to handle it
 			#    self.advanceLine()
 			# return
