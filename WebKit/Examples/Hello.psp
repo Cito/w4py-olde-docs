@@ -1,4 +1,4 @@
- 
+
 <%@ page imports = "sys,os,time"%>
 <%@ page method="writeHTML" %>
 <%@ page extends="Page"%>
@@ -49,7 +49,11 @@ Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>
 
 
 <table bgcolor = 'blue'>
-<%for i in os.uname():
+<%if hasattr(os, 'uname'):
+	info = os.uname()
+else:
+	info = (sys.platform, 'node', 'release', 'version', 'machine')
+for i in info:
 	res.write('<tr><td><font color="white">'+str(i)+'</font></td></tr>')
 res.write('<tr><td>'+req.pathInfo()+'</td></tr>')
 %>
