@@ -186,6 +186,7 @@ class SQLObjectStore(ObjectStore):
 					exec 'from %s import %s' % (className, className) in results
 					pyClass = results[className]
 					obj = pyClass()
+					assert isinstance(obj, MiddleObject), 'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r' % (obj, type(obj), MiddleObject)
 					obj._mk_store = self
 					# ^^^ a store is the only outsider that is allowed
 					# to directly set a MiddleObject's store like this
