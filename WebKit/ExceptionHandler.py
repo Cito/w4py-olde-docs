@@ -177,6 +177,7 @@ class ExceptionHandler(Object):
 		if self._res and (not self._res.isCommitted() or self._res.header('Content-type', None)=='text/html'):
 			if not self._res.isCommitted():
 				self._res.reset()
+				self._res.setStatus(500, "Servlet Error")
 			if self.setting('ShowDebugInfoOnErrors')==1:
 				publicErrorPage = self.privateErrorPage()
 			else:
