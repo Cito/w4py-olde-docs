@@ -88,7 +88,7 @@ class Servlet(Object):
 
 	## Server side filesystem ##
 
-	def serverSidePath(self, path):
+	def serverSidePath(self, path=None):
 		''' Returns the filesystem path of the page on the server. '''
 		if self._serverSidePath is None:
 			self._serverSidePath = self._request.serverSidePath()
