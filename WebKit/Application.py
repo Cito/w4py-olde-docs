@@ -148,6 +148,7 @@ class Application(Configurable, CanContainer, Object):
 		Interface for adding directories to the Can search path
 		See CanFactory for the ugly hack required by the session pickling process
 		"""
+		print "Adding Can directory: %s" % newDir
 		self._canFactory.addCanDir(newDir)
 
 	def startSessionSweeper(self):
@@ -182,7 +183,6 @@ class Application(Configurable, CanContainer, Object):
 		"""
 	Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references.
 		"""
-		open(os.path.join(self._serverDir,"Exiting"),"a").write("Exiting Application/n")
 		print "Application is Shutting Down"
 		self.running = 0
 		if hasattr(self, '_sessSweepThread'):
@@ -199,7 +199,6 @@ class Application(Configurable, CanContainer, Object):
 		del self._server
 		del self._servletCacheByPath
 		print "Exiting Application"
-		open(os.path.join(self._serverDir,"Exiting"),"a").write("Exiting Application/n")
 
 
 	## Config ##
@@ -545,16 +544,18 @@ class Application(Configurable, CanContainer, Object):
 		if self._contexts.has_key(name):
 			print 'WARNING: Overwriting context %s (=%s) with %s' % (
 				repr(name), repr(self._contents[name]), repr(value))
-		print 'Loading context: %s at %s' % (name, dir)
 		try:
 			localdir, pkgname = os.path.split(dir)
 			res = imp.find_module(pkgname, [localdir])
 			# @@ question, do we want the package name to be the dir name or the context name?
 			mod = imp.load_module(name, res[0], res[1], res[2])
 			if mod.__dict__.has_key('contextInitialize'):
-				mod.__dict__['contextInitialize'](self, os.path.normpath(os.path.join(os.getcwd(),dir)))
+				result = mod.__dict__['contextInitialize'](self, os.path.normpath(os.path.join(os.getcwd(),dir)))
+				if result != None and result.has_key('ContentLocation'):
+					dir = result['ContentLocation']
 		except ImportError:
 			pass
+		print 'Loading context: %s at %s' % (name, dir)
 		self._contexts[name] = dir
 
 
