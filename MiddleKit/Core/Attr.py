@@ -2,6 +2,9 @@ from ModelObject import ModelObject
 from UserDict import UserDict
 import types
 from MiscUtils import NoDefault
+import re
+
+nameRE = re.compile(r'^([A-Za-z_][A-Za-z_0-9]*)$')
 
 
 class Attr(UserDict, ModelObject):
@@ -18,6 +21,9 @@ class Attr(UserDict, ModelObject):
 			if type(value) is types.StringType and value.strip()=='':
 				value = None
 			self[key] = value
+		match = nameRE.match(self['Name'])
+		if match is None or len(match.groups())!=1:
+			raise ValueError, 'Bad name (%r) for attribute: %r.' % (self['Name'], dict)
 
 	def name(self):
 		return self.data['Name']
