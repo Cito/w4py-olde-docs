@@ -204,7 +204,7 @@ class ASTASStreamOut(ASStreamOut):
 		"""
 		if debug: print "writeable called with self._comm=%s and len(buffer)=%s"%(self._committed, len(self._buffer))
 		if self._closed: return 1
-		return self._committed and len(self._buffer)
+		return self._committed and self._buffer
 
 	def flush(self):
 		if debug: print "ASTASStreanOut Flushing"
@@ -333,11 +333,11 @@ class RequestHandler(asyncore.dispatcher):
 		self._strmOut.pop(sent)
 		
 		 #if the servlet has returned and there is no more data in the buffer
-		if self._strmOut.closed() and len(self._strmOut._buffer)==0: 
+		if self._strmOut.closed() and not self._strmOut._buffer: 
 ##			self.socket.shutdown(1)
 			self.close()
 			#For testing
-		elif len(self._strmOut._buffer) > 0:
+		elif self._strmOut._buffer:
 			MainRelease.release() #let's send the rest
 		if debug:
 			sys.stdout.write(".")
@@ -458,7 +458,7 @@ def run(useMonitor=0):
 			if server.running:
 				server.initiateShutdown()
 			server._closeThread.join()
-	sys.exit()
+	#sys.exit()
 
 
 def shutDown(arg1,arg2):
@@ -480,7 +480,7 @@ If AppServer is called with no arguments, it will start the AppServer and record
 """
 
 
-def main(args):
+def main(args=[]):
 	monitor=0
 	function=run
 	daemon=0
@@ -498,9 +498,9 @@ def main(args):
 		else:
 			print usage
 
-	if 0:
+	if 0: #this doesn't work
 		import profile
-		profile.run("main()", "profile.txt")
+		profile.run(run(), "profile.txt")
 	else:
 		if daemon:
 			if os.name == "posix":
