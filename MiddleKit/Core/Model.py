@@ -186,14 +186,15 @@ class Model(Configurable):
 		indexes = range(len(searchOrder))
 		indexes.reverse()
 		for i in indexes:
-			model = searchOrder[i]
-			j = 0
-			while j<i:
-				if searchOrder[j] is model:
-					del searchOrder[j]
-					i -= 1
-				else:
-					j += 1
+			if i < len(searchOrder):
+				model = searchOrder[i]
+				j = 0
+				while j<i:
+					if searchOrder[j] is model:
+						del searchOrder[j]
+						i -= 1
+					else:
+						j += 1
 
 		self._searchOrder = searchOrder
 
