@@ -4,7 +4,7 @@ import ObjectStore
 import sys, types
 from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
-
+from MiddleKit.Core.ListAttr import ListAttr
 
 class MiddleObject(NamedValueAccess):
 	"""
@@ -184,6 +184,35 @@ class MiddleObject(NamedValueAccess):
 				attrName = '_' + key
 			allAttrs[key] = getattr(self, attrName)
 		return allAttrs
+
+	def removeObjectFromListAttrs(self, object):
+		""" 
+		Removes object from any list attributes that this instance might have.
+		This is used if the object is deleted, so we don't have dangling references.
+		"""
+		for attr in self.klass().allAttrs():
+			if isinstance( attr, ListAttr ):
+				listName = '_' + attr.name()
+				list = getattr( self, listName )
+				if list is not None and object in list:
+					delattr(self,listName)
+					setattr(self,listName,None)
+
+	def updateReferencingListAttrs(self):
+		"""
+		Checks through all object references, and asks each referenced
+		object to remove us from any list attributes that they might have.
+		"""
+		for attr in self.klass().allAttrs():
+			if isinstance( attr, ObjRefAttr ):
+				value = getattr( self, '_' + attr.name() )
+				if value is not None:
+					if type(value) is types.InstanceType:
+						value.removeObjectFromListAttrs(self)
+					elif type(value) is types.LongType:
+						obj = self.store().objRefInMem(value)
+						if obj:
+							obj.removeObjectFromListAttrs(self)
 
 	def referencingObjectsAndAttrs(self):
 		"""

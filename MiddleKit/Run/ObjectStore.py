@@ -166,6 +166,7 @@ class ObjectStore(ModelUser):
 
 		# remove deleted objects from main list of objects
 		for obj in objectsToDel:
+ 			obj.updateReferencingListAttrs()
 			del self._objects[obj.key()]
 
 	def _deleteObject(self, object, objectsToDel, detaches, superobject=None):
