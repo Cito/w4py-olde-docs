@@ -91,11 +91,13 @@ Version 0.3
 
 <a name=GettingStarted><h3>Getting Started</h3></a>
 
-<p> You will need to locate the Webware distribution in a directory such that your web server will accept URLs there, including CGIs. For testing purposes, a URL might look something like:
+<p> You can put the whole Webware distribution in a directory such that your web server will accept URLs there, including CGIs, or you can put the distribution somewhere else and just put the WebKit.cgi file in an executable area of your Web Server's document tree.  If you choose to put only the WebKit.cgi file in your WebServer's path, you'll need to edit the WebKit.cgi and set the variable WebKitDir at the top of the file to the location of the <b>WebKit</b> directory, as in WebKitDir="/usr/local/Webware/WebKit". 
 
+For testing purposes, a URL might look something like:
 <p><code>http://localhost/~echuck/Projects/Webware/WebKit/WebKit.cgi/Welcome</code>
+<p>or
+<p><code>http://localhost/cgi-bin/WebKit.cgi/</code>
 
-<p> If you want to create a symbolic link from your HTTP server area (such as <code>public_html/</code>), be sure to link to the WebKit directory and not the CGI (or FastCGI) adaptor within.
 
 <p>Before you enter the URL into a browser, you need to start the WebKit app server from the command line:
 
@@ -123,7 +125,7 @@ Version 0.3
 
 <p> There are currently two adaptors in WebKit. The first is the CGI adaptor, named WebKit.cgi, which should work with any CGI-enabled web server. Of course, the web server will have to be configured to allow execution of CGI scripts.
 
-<p> The second adaptor is the FastCGI adaptor, named WebKit.fcgi, which should result in faster responses, although definitive performance tests have not yet been made on the adaptors. Your web server will have to be FastCGI enabled, which you may be able to accomplish by picking up software at <a href=http://www.FastCGI.com>http://www.FastCGI.com</a> where you can also learn more about FastCGI. There is also very useful documentation provided inline with the adaptor which you should read if you choose to use it.
+<p> The second adaptor is the FastCGI adaptor, named WebKit.fcgi, which should result in faster responses (informal testing is generally at least twice as fast), although definitive performance tests have not yet been made on the adaptors. Your web server will have to be FastCGI enabled, which you may be able to accomplish by picking up software at <a href=http://www.FastCGI.com>http://www.FastCGI.com</a> where you can also learn more about FastCGI. There is also very useful documentation provided inline with the adaptor which you should read if you choose to use it.
 
 <p> In the future, custom adaptors for popular web servers such as Apache, Microsoft, etc. should be provided in order to provide even better performance.
 
