@@ -12,6 +12,8 @@ class FieldStorage(cgi.FieldStorage):
 	def __init__(self, fp=None, headers=None, outerboundary="",
                  environ=os.environ, keep_blank_values=0, strict_parsing=0):
 		self._environ = environ
+		self._strict_parsing = strict_parsing
+		self._keep_blank_values = keep_blank_values
 		cgi.FieldStorage.__init__(self, fp, headers, outerboundary, environ, keep_blank_values, strict_parsing)
 	
 	def parse_qs(self):
@@ -34,18 +36,18 @@ class FieldStorage(cgi.FieldStorage):
 		for name_value in name_value_pairs:
 			nv = string.splitfields(name_value, '=')
 			if len(nv) != 2:
-				if strict_parsing:
+				if self._strict_parsing:
 					raise ValueError, "bad query field: %s" % `name_value`
 				continue
 			name = urllib.unquote(string.replace(nv[0], '+', ' '))
 			value = urllib.unquote(string.replace(nv[1], '+', ' '))
-			if len(value) or keep_blank_values:
+			if len(value) or self._keep_blank_values:
 				if dict.has_key (name):
 					dict[name].append(value)
-					print "appending"
+					##print "appending"
 				else:
 					dict[name] = [value]
-					print "no append"
+					##print "no append"
 
 
 		for i,v in dict.items():
@@ -54,7 +56,7 @@ class FieldStorage(cgi.FieldStorage):
 			else:
 				mfs=cgi.MiniFieldStorage(i,v[0])				
 			self.list.append(mfs)
-			print "adding %s=%s" % (str(i),str(v))
+			##print "adding %s=%s" % (str(i),str(v))
 			
 
 
