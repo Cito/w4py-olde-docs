@@ -76,6 +76,12 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		trans.response().sendRedirect(newURL)
 
 
+	def filename(self, trans):
+		"""
+		Returns the filename to be served. A subclass could override this in order to serve files from other disk locations based on some logic.
+		"""
+		return trans.request().serverSidePath()
+
 	def serveContent(self, trans):
 
 		response = trans.response()
@@ -86,7 +92,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		#start sending automatically
 		response.streamOut().autoCommit(1)
 
-		filename = trans.request().serverSidePath()
+		filename = self.filename(trans)
 		filesize = os.path.getsize(filename)
 
 		isHead = trans.request().method().upper()[0]=='H' # as in HEAD
