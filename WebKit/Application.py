@@ -110,9 +110,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 ## TaskManager
 		if self._server.isPersistent():
-			self._taskmanager = Scheduler()
-			self._taskmanager.setDaemon(1)
-			self._taskmanager.start()
+			self._taskManager = Scheduler(1)
+			self._taskManager.start()
 ## End TaskManager
 
 
@@ -155,7 +154,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 ## Task access
 	def taskManager(self):
-		return self._taskmanager
+		return self._taskManager
 
 ## Session sweep task
 	def startSessionSweeper(self):
@@ -189,32 +188,6 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		instance = apply(self._canFactory.createCan,(klass,)+args,kwargs)
 		self.setCan(ID, instance)
 
-##Session Stuff - Now we use TaskManager
-##	def startSessionSweeper(self):
-##		self._closeEvent = Event()
-##		self._sessSweepThread = Thread(None, self.sweepSessionsContinuously, 'SessionSweeper',(self._closeEvent,))
-##		self._sessSweepThread.setDaemon(1)
-##		self._sessSweepThread.start()
-
-##	def sweepSessionsContinuously(self,close):
-##		"""
-##		Invoked by __init__ via a new thread to clean out stale sessions in the background. This method doesn't exit until self.running is 0.
-##		"""
-##		while self.running:
-##			self.sweepSessions()
-##			try:
-##				close.wait(self.setting('SessionTimeout')*60/10.0)
-##				#sleep(self.setting('SessionTimeout')*60/10.0)
-##				# @@ 2000-08-04 ce: make sleep interval or div factor a setting
-##			except IOError:
-##				pass
-##		self._sessions.storeAllSessions()
-
-##	def sweepSessions(self):
-##		''' Removes stale sessions by checking their lastAccessTime(). Session life time is configured via the SessionTimeout setting. '''
-##		self._sessions.cleanStaleSessions()
-
-
 
 	def shutDown(self):
 		"""
@@ -229,7 +202,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			del self._sessSweepThread
 		self._sessions.storeAllSessions()
 		if self._server.isPersistent():
-			self._taskmanager.stop()
+			self.taskManager().stop()
 		del self._canFactory
 		del self._sessions
 		self._delCans()

@@ -443,7 +443,6 @@ def main(args):
 	monitor=0
 	function=run
 	daemon=0
-	
 	for i in args[1:]:
 		if i == "monitor":
 			print "Enabling Monitoring"
