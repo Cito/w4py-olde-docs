@@ -2,7 +2,7 @@ from MiscUtils.NamedValueAccess import NamedValueAccess
 from MiscUtils import NoDefault
 import ObjectStore
 import sys, types
-
+from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 
 class MiddleObject(NamedValueAccess):
 	'''
@@ -32,6 +32,7 @@ class MiddleObject(NamedValueAccess):
 		self._mk_changed      = 0
 		self._mk_initing      = 0
 		self._mk_inStore      = 0
+		self._mk_backObjRefAttrs = None
 
 	def initFromRow(self, row):
 		allAttrs = self.klass().allAttrs()
@@ -123,6 +124,46 @@ class MiddleObject(NamedValueAccess):
 			allAttrs[key] = getattr(self, attrName)
 		return allAttrs
 
+	def backObjRefAttrs(self):
+		"""
+		Returns a list of all ObjRefAttrs in the given object model that can
+		potentially refer to this object.  The list does NOT include attributes
+		inherited from superclasses.
+		"""
+		if self._mk_backObjRefAttrs is None:
+			backObjRefAttrs = []
+			# Construct targetKlasses = a list of this object's klass and all superklasses
+			targetKlasses = []
+			super = self.klass()
+			while super:
+				targetKlasses.append(super.name())
+				super = super.superklass()
+			# Look at all klasses in the model
+			for klass in self.store().model().klasses().values():
+				# find all ObjRefAttrs of this klass that refer to one of our targetKlasses
+				for attr in klass.attrs():
+					if isinstance(attr, ObjRefAttr) and attr.className() in targetKlasses:
+						backObjRefAttrs.append(attr)
+			self._mk_backObjRefAttrs = backObjRefAttrs
+		return self._mk_backObjRefAttrs
+
+	def referencingObjectsAndAttrs(self):
+		"""
+		Returns a list of tuples of (object, attr) for all objects that have
+		ObjRefAttrs that reference this object.
+		
+		@@ gat: This is implemented correctly, but inefficiently.  It does a full
+		query of all tables in the model.  I don't understand the caching
+		ramifications well enough to know if I can safely use a WHERE clause to
+		reduce the load on the database.
+		"""
+		referencingObjectsAndAttrs = []
+		for backObjRefAttr in self.backObjRefAttrs():
+			objects = self.store().fetchObjectsOfClass(backObjRefAttr.klass())
+			for object in objects:
+				if object.valueForAttr(backObjRefAttr) == self:
+					referencingObjectsAndAttrs.append((object, backObjRefAttr))
+		return referencingObjectsAndAttrs
 
 	## Debugging ##
 

@@ -4,6 +4,8 @@ from MiscUtils import NoDefault
 from ObjectKey import ObjectKey
 from MiddleKit.Core.ModelUser import ModelUser
 from MiddleKit.Core.Klass import Klass as BaseKlass
+from MiddleKit.Core.ObjRefAttr import ObjRefAttr
+from MiddleKit.Core.ListAttr import ListAttr
 	# ^^^ for use in _klassForClass() below
 	# Can't import as Klass or Core.ModelUser (our superclass)
 	# will try to mix it in.
@@ -13,6 +15,41 @@ class UnknownObjectError(LookupError):
 	''' This is the exception returned by store.fetchObject() if the specified object cannot be found (unless you also passed in a default value in which case that value is returned). '''
 	pass
 
+class DeleteError(Exception):
+	''' Base class for all delete exceptions '''
+	pass
+
+class DeleteReferencedError(Exception):
+	'''
+	This is raised when you attempt to delete an object that is referenced by other objects with
+	onDeleteOther not set to detach or cascade.  You can call referencingObjectsAndAttrs() to get a
+	list of tuples of (object, attr) for the particular attributes that caused the error.
+	And you can call object() to get the object that was trying to be deleted.
+	This might not be the same as the object originally being deleted if a cascading
+	delete was happening.
+	'''
+	def __init__(self, text, object, referencingObjectsAndAttrs):
+		Exception.__init__(self, text)
+		self._object = object
+		self._referencingObjectsAndAttrs = referencingObjectsAndAttrs
+	def referencingObjects(self):
+		return self._referencingObjectsAndAttrs
+
+class DeleteObjectWithReferencesError(Exception):
+	'''
+	This is raised when you attempt to delete an object that references other objects,
+	with onDeleteSelf=deny.  You can call attrs() to get a list of attributes
+	that reference other objects with onDeleteSelf=deny.  And you can call object() to
+	get the object trying to be deleted that contains those attrs.
+	This might not be the same as the object originally being deleted if a cascading
+	delete was happening.
+	'''
+	def __init__(self, text, object, attrs):
+		Exception.__init__(self, text)
+		self._object = object
+		self._attrs = attrs
+	def attrs(self):
+		return self._attrs
 
 class ObjectStore(ModelUser):
 	'''
@@ -52,7 +89,7 @@ class ObjectStore(ModelUser):
 	## Manipulating the objects in the store ##
 
 	def hasObject(self, object):
-		raise NotImplementedError
+		""" Checks if the object is in the store.  Note: this does not check the persistent store. """
 		key = object.key()
 		if key is None:
 			return 0
@@ -94,12 +131,122 @@ class ObjectStore(ModelUser):
 			#	object.setKey(key)
 			#self._objects[key] = object
 
-	def deleteObject(self, object):
-		''' Restrictions: The object must be contained in the store and obviously you cannot remove it more than once. '''
+	def deleteObject(self, object, checkOnly=0):
+		"""
+		Restrictions: The object must be contained in the store and obviously
+		you cannot remove it more than once.  If checkOnly is true, then
+		only do the check, don't actually change anything.
+		"""
+		# First check if the delete is possible.  Then do the actual delete.  This avoids partially deleting
+		# objects only to have an exception halt the process in the middle.
+		self.doDeleteObject(object, 1)
+		if not checkOnly:
+			self.doDeleteObject(object, 0)
+		
+	def doDeleteObject(self, object, checkOnly):
+		'''
+		Do the work of deleting the object.  If checkOnly is true then only do the checks, don't actually delete anything.
+		If checkOnly is false then go ahead and delete, assuming all checks have already been done.
+		'''
+		# Some basic assertions
 		assert self.hasObject(object)
-		self.willChange()
-		self._deletedObjects.append(object)
-		del self._objects[key]
+		assert object.key() is not None
+		
+		if checkOnly:
+			print 'checking delete of %s.%d' % (object.klass().name(), object.serialNum())
+		else:
+			print 'deleting %s.%d' % (object.klass().name(), object.serialNum())
+
+		# Deal with all other objects that reference or are referenced by this object.  By default, you are not allowed
+		# to delete an object that has an ObjRef pointing to it.  But if the ObjRef has
+		# onDeleteOther=detach, then that ObjRef attr will be set to None and the delete will be allowed;
+		# and if onDeleteOther=cascade, then that object will itself be deleted and the delete
+		# will be allowed.
+		#
+		# You _are_ by default allowed to delete an object that points to other objects (by List or ObjRef)
+		# but if onDeleteSelf=deny it will be disallowed, or if onDeleteSelf=cascade the pointed-to
+		# objects will themselves be deleted.
+
+		# Get the objects/attrs that reference this object
+		referencingObjectsAndAttrs = object.referencingObjectsAndAttrs()
+
+		# Determine all referenced objects, constructing a list of (attr, referencedObject) tuples.
+		referencedAttrsAndObjects = []
+		for attr in object.klass().allAttrs():
+			if isinstance(attr, ObjRefAttr):
+				obj = object.valueForAttr(attr)
+				if obj:
+					referencedAttrsAndObjects.append((attr, obj))
+			elif isinstance(attr, ListAttr):
+				for obj in object.valueForAttr(attr):
+					referencedAttrsAndObjects.append((attr, obj))
+
+		# Check for onDeleteOther=deny
+		badObjectsAndAttrs = []
+		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
+			onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
+			assert onDeleteOther in ['deny', 'detach', 'cascade']
+			if onDeleteOther == 'deny':
+				badObjectsAndAttrs.append((referencingObject, referencingAttr))
+		if badObjectsAndAttrs:
+			raise DeleteReferencedError(
+				'You tried to delete an object (%s.%d) that is referenced by other objects with onDeleteOther unspecified or set to deny'
+				% (object.klass().name(), object.serialNum()),
+				object,
+				badObjectsAndAttrs)
+
+		# Check for onDeleteSelf=deny
+		badAttrs = []
+		for referencedAttr, referencedObject in referencedAttrsAndObjects:
+			onDeleteSelf = referencedAttr.get('onDeleteSelf', 'detach')
+			assert onDeleteSelf in ['deny', 'detach', 'cascade']
+			if onDeleteSelf == 'deny':
+				badAttrs.append(referencedAttr)
+		if badAttrs:
+			raise DeleteObjectWithReferencesError(
+				'You tried to delete an object (%s.%d) that references other objects with onDeleteSelf set to deny'
+				% (object.klass().name(), object.serialNum()),
+				object,
+				badAttrs)
+
+		# cascade-delete objects with onDeleteOther=cascade
+		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
+			onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
+			if onDeleteOther == 'cascade':
+				# @@ gat: should protect against infinite recursion here.
+				if checkOnly:
+					print 'checking cascade-delete of %s.%d' % (referencingObject.klass().name(), referencingObject.serialNum())
+				else:
+					print 'cascade-deleting %s.%d' % (referencingObject.klass().name(), referencingObject.serialNum())
+				self.doDeleteObject(referencingObject, checkOnly=checkOnly)
+
+		# Check if it's possible to cascade-delete objects with onDeleteSelf=cascade
+		for referencedAttr, referencedObject in referencedAttrsAndObjects:
+			onDeleteSelf = referencedAttr.get('onDeleteSelf', 'detach')
+			if onDeleteSelf == 'cascade':
+				# @@ gat: should protect against infinite recursion here.
+				if checkOnly:
+					print 'checking cascade-delete of %s.%d' % (referencedObject.klass().name(), referencedObject.serialNum())
+				else:
+					print 'cascade-deleting %s.%d' % (referencedObject.klass().name(), referencedObject.serialNum())
+				self.doDeleteObject(referencedObject, checkOnly=checkOnly)
+
+		# Detach objects with onDeleteOther=detach
+		if not checkOnly:
+			for referencingObject, referencingAttr in referencingObjectsAndAttrs:
+				onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
+				if onDeleteOther == 'detach':
+					print 'setting %s.%d.%s to None' % (referencingObject.klass().name(), referencingObject.serialNum(), referencingAttr.name())
+					referencingObject.setValueForAttr(referencingAttr, None)
+
+		# Detach objects with onDeleteSelf=detach
+		# This is actually a no-op.  There is nothing that needs to be set to zero.
+
+		# Ok, now that that's all taken care of, do the delete of this object.
+		if not checkOnly:
+			self.willChange()
+			self._deletedObjects.append(object)
+			del self._objects[object.key()]
 
 
 	## Changes ##

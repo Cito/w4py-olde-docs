@@ -160,10 +160,10 @@ class SQLObjectStore(ObjectStore):
 		self._changedObjects.clear()
 
 	def commitDeletions(self):
-		if len(self._deletedObjects):
-			## @@ 2000-09-24 ce: implement this
-			print '>> whoops! deletions not implemented'
-			print
+		for object in self._deletedObjects:
+			sql = object.sqlDeleteStmt()
+			self.executeSQL(sql)
+		self._deletedObjects[:] = []
 
 
 	## Fetching ##
@@ -349,7 +349,7 @@ class SQLObjectStore(ObjectStore):
 	def objRefDangles(self, objRef):
 		''' Invoked by fetchObjRef() if there is no possible target object for the given objRef, e.g., a dangling reference. This method invokes self.warning() and includes the objRef as decimal, hexadecimal and class:obj numbers. '''
 		klassId, objSerialNum = objRefSplit(objRef)
-		self.warning('Obj ref dangles. dec=%i  hex=%x  class:obj=%i:%i.' % (objRef, objRef, klassId, objSerialNum))
+		self.warning('Obj ref dangles. dec=%i  hex=%x  class.obj=%s.%i.' % (objRef, objRef, self.klassForId(klassId).name(), objSerialNum))
 		return None
 
 
@@ -430,6 +430,16 @@ class MiddleObjectMixIn:
 		idValue = self.serialNum()
 		res.append('where %s=%d;' % (klass.sqlIdName(), idValue))
 		return ''.join(res)
+
+	def sqlDeleteStmt(self):
+		'''
+		Returns the SQL delete statement for MySQL of the form:
+			delete from table where idName=idValue;
+		Installed as a method of MiddleObject.
+		'''
+		klass = self.klass()
+		assert klass is not None
+		return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
 
 	def sqlValueForName(self, name):
 		# Our valueForKey() comes courtesy of MiscUtils.NamedValueAccess
