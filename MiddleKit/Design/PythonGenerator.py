@@ -29,6 +29,10 @@ class PythonGenerator(CodeGenerator):
 class Model:
 
 	def writePy(self, generator, dirname):
+		if self.hasSetting('Package'):
+			filename = os.path.join(dirname, '__init__.py')
+			if not os.path.exists(filename):
+				open(filename, 'w').write('#')
 		self._klasses.writePy(generator, dirname)
 
 
