@@ -26,7 +26,6 @@ class TaskHandler:
 		self._reregister = 1
 		self._rerun = 0
 		self._period = abs(period)
-		self._stopEvent = Event()
 
 	
 	## Scheduling ##

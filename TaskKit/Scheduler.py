@@ -309,7 +309,8 @@ class Scheduler(Thread):
 		Returns 1 if the task was either not running, or was running and was told to stop.
 		"""
 		handle = self.running(name)
-		if not handle: return 0
+		if not handle:
+			return 0
 		handle.stop()
 		return 1
 
@@ -400,7 +401,7 @@ class Scheduler(Thread):
 		This method terminates the scheduler and its associated tasks.
 		"""
 		self._isRunning = 0
-		self.notify()
+		#self.notify()  #this isn't necessary with the below is it?
 		self._closeEvent.set()
 
 

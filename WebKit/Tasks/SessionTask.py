@@ -7,6 +7,6 @@ class SessionTask(Task):
 		Task.__init__(self)
 		self._sessionstore = sessions
 
-	def run(self, close):
+	def run(self):
 		if self.proceed():
 			self._sessionstore.cleanStaleSessions(self)
