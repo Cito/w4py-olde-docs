@@ -478,7 +478,7 @@ class ListAttr:
 		assert value is not None
 		from %(package)s%(targetClassName)s import %(targetClassName)s
 		assert isinstance(value, %(targetClassName)s)
-		assert value.%(lowerSourceClassName)s()==None
+		assert value.%(lowerSourceClassName)s() is None
 		self.%(pyGetName)s().append(value)
 		value.set%(sourceClassName)s(self)
 		store = self.store()
