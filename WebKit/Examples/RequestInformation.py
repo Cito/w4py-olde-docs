@@ -29,6 +29,7 @@ class RequestInformation(ExamplePage):
 		keys = dict.keys()
 		keys.sort()
 		for name in keys:
-			self.writeln('<tr valign=top><td>%s</td><td>%s</td></tr>' % (name, dict[name]))
+			self.writeln('<tr valign=top><td>%s</td><td>%s</td></tr>'
+				 % (name, string.replace(self.htmlEncode(str(dict[name])), '\n', '<br>')))
 
 		
