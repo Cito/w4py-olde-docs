@@ -493,12 +493,12 @@ def htDictionary(dict, addSpace=None):
 def osIdTable():
 	''' Returns a list of dictionaries contained id information such as uid, gid, etc.,
 		all obtained from the os module. Dictionary keys are 'name' and 'value'. '''
-	funcs = [os.getegid, os.geteuid, os.getgid, os.getpgrp, os.getpid, os.getppid, os.getuid]
+	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp', 'getpid', 'getppid', 'getuid']
 	table = []
-	for func in funcs:
-		value = func()
-		name = func.__name__[3:]
-		table.append({'name': name, 'value': value})
+	for funcName in funcs:
+		if hasattr(os, funcName):
+			value = getattr(os, funcName)()
+			table.append({'name': funcName, 'value': value})
 	return table
 
 def htTable(listOfDicts, keys=None):
