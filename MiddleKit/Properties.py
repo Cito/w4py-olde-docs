@@ -1,6 +1,6 @@
 name = 'MiddleKit'
 
-version = (0, 8, 0, 'b1')
+version = (0, 8, 0, 'b2')
 
 docs = [
 	{'name': 'Introduction', 'file': 'Intro.html'},
