@@ -112,7 +112,7 @@ class ThreadedAppServer(AppServer):
 			except select.error, v:
 				# if the error is EINTR/interrupt, then self.running should be set to 0 and
 				# we'll exit on the next loop
-				if v[0] == EINTR or v[0]==0: break
+				if v[0] == EINTR or v[0]==0 or v[0]==2: break
 				else: raise
 				
 			if not self.running:
