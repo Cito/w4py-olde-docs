@@ -31,7 +31,7 @@
     info (the part of the URL following the CGI script name) is
     tried. In case no host is given, the host where the CGI script
     lives and HTTP are used.
- 
+
     * Uses Just van Rossum's PyFontify version 0.3 to tag Python scripts.
       You can get it via his homepage on starship:
         URL: http://starship.skyport.net/crew/just
@@ -45,7 +45,7 @@ __comments__ = """
 py2html -stdout -format:ansi -mode:mono $* | less -r
 
     History:
-	
+
     0.5: Added a few suggestions by Kevin Ng to make the CGI version
          a little more robust.
 
@@ -110,7 +110,7 @@ class PrettyPrint:
 
     """ generic Pretty Printer class
 
-        * supports tagging Python scripts in the following ways: 
+        * supports tagging Python scripts in the following ways:
 
 	  # format/mode |  color  mono
 	  # --------------------------
@@ -122,7 +122,7 @@ class PrettyPrint:
 
 	   file_filter -- takes two files: input & output (may be stdin/stdout)
 	   filter -- takes a string and returns the highlighted version
-	
+
 	* to create an instance use:
 
 	  c = PrettyPrint(tagfct,format,mode)
@@ -237,16 +237,16 @@ class PrettyPrint:
 	    text = string.join(string.split(text,x),y)
 	return text
 
-	
+
 	# 2000-05-11 ce: Convert tabs to spaces
-	
+
     def filtertabs(self, s):
 		return string.expandtabs(s, 4)
 
     def filter_html(self,text):
 
 	output = self.fontify(self.escape_html(self.filtertabs(text)))
-	if self.replace_URLs: 
+	if self.replace_URLs:
 	    output = re.sub('URL:([ \t]+)([^ \n\r<]+)',
 			    'URL:\\1<A HREF="\\2">\\2</A>',output)
 	html = """<HTML><HEAD><TITLE>%s</TITLE></HEAD>
@@ -260,7 +260,7 @@ class PrettyPrint:
     def filter_rawhtml(self,text):
 
 	output = self.fontify(self.escape_html(text))
-	if self.replace_URLs: 
+	if self.replace_URLs:
 	    output = re.sub('URL:([ \t]+)([^ \n\r<]+)',
 			    'URL:\\1<A HREF="\\2">\\2</A>',output)
 	return self.header+output+self.footer
@@ -293,7 +293,7 @@ class PrettyPrint:
 	    l.append(insert)
 	    li = ri
 	if li < len(pytext): l.append(pytext[li:])
-	
+
 	return string.join(l,'')
 
 def addsplits(splits,text,formats,taglist):
@@ -340,7 +340,7 @@ The document has moved to <A HREF="%s">%s</A>.<P>
 
 def main(cmdline):
 
-    """ main(cmdline) -- process cmdline as if it were sys.argv 
+    """ main(cmdline) -- process cmdline as if it were sys.argv
     """
     # parse options/files
     options = []
@@ -357,7 +357,7 @@ def main(cmdline):
 	    break
     files = cmdline[len(options)+1:]
 
-    # create converting object	
+    # create converting object
 
     # load fontifier
     if '-marcs' in options:
@@ -371,17 +371,17 @@ def main(cmdline):
 	# load Just's
 	try:
 	    import PyFontify
-	    if PyFontify.__version__ < '0.3': raise ValueError
+	    if PyFontify.__version__ < '0.3': raise ImportError
 	    tagfct = PyFontify.fontify
-	except:
+	except ImportError:
 	    print """
     Sorry, but this script needs the PyFontify.py module version 0.3;
     You can download it from Just's homepage at
 
        URL: http://starship.skyport.net/crew/just
 """
-	    sys.exit()
-	
+	    sys.exit(1)
+
 
     if '-format' in options:
 	format = optvalues['-format']
@@ -413,7 +413,7 @@ def main(cmdline):
 	    f.close()
 	except IOError:
 	    if verbose: print 'IOError: header file not found'
-	    
+
     if '-footer' in options:
 	try:
 	    f = open(optvalues['-footer'])
