@@ -34,6 +34,8 @@ Version 0.1
 <br> &nbsp; &nbsp; &nbsp; <a href="#GP_addToBars">Lists: addToBars()</a>
 <br> <a href="#MiscTopics"><font size=+1>Miscellaneous Topics</font></a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_IteratingAttrs">Iterating over attributes</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#MT_DeletingObjects">Deleting objects</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#MT_DerivedAttributes">Derived attributes</a>
 <br> <a href="#RelatedLinks"><font size=+1>Related Links</font></a>
 <br> <a href="#Credit"><font size=+1>Credit</font></a>
 <br> <a href="#ImpGuide"><font size=+1>Implementor's Guide</font></a>
@@ -211,24 +213,27 @@ Version 0.1
 	</tr>
 </table>
 
+<p> There are two additional properties that applies to attributes whose types are object references.
 
-<!--
-@@ 2002-02-26 ce: not yet
-
-<p> There is an additional property that applies only to attributes whose types are object references.
-
-<p> For the purpose of discussion, the object containing the attribute is the <i>source</i> while the objects being referred to are the <i>targets</i>. Now then, the <b>onRequired</b> property specifies what happens to the target object(s) when the source object is deleted:
+<p> For the purpose of discussion, the object containing the attribute is <i>self</i> while the objects being referred to are the <i>others</i>. Now then, the <b>onDeleteSelf</b> property specifies what happens to the other object(s) when the self object is deleted:
 
 <ol>
-	<li> disconnect - leave the target intact, but remove any back reference it might have to the source
-	<li> cascade - delete the target as well
-	<li> refuse - do not delete the source if the target exists
-	<li> dangle - delete the source and do nothing to the target. This is very dangerous.
+	<li> deny - do not allow self to be deleted
+	<li> cascade - also delete other when self is deleted
+	<li> detach - allow self to be deleted with no effect on other (this is the default)
 </ol>
 
-<p> The default value of onDelete is disconnect. An example specification would be <code>onDelete=cascade</code>.
--->
+<p> There is a similar property <b>onDeleteOther</b> which specifies what happens to the self object with the other object(s) is deleted:
 
+<ol>
+	<li> deny - do not allow other to be deleted (this is the default)
+	<li> cascade - also delete self when other is deleted
+	<li> detach - allow other to be deleted, and set the reference attribute in self that referred to other to None
+</ol>
+
+<p> The default value of onDeleteSelf is detach, and the default value of onDeleteOther is deny.  In other words, by default, you can delete an object which <i>references</i> other objects, but you can't delete an object which is <i>referenced by</i> other objects.  An example specification would be <code>onDeleteOther=cascade</code>.
+
+<p> Note: onDeleteSelf can also be specified for "list of reference" attributes, where it has the same effect as it does when applied to reference attributes.
 
 <a name=ModelFiles><h2>Model Files</h2></a>
 
@@ -278,6 +283,15 @@ Version 0.1
 
 <pre>{
     'SQLLog': { 'File': 'middlekit.sql', 'Mode': 'append' },
+}</pre>
+
+<p> The <span class=name>DeleteBehavior</span> setting can be used to change what MiddleKit does when you delete objects.
+The default behavior is "delete" which means that objects are deleted from the SQL database when they are deleted from the MiddleKit object store.
+But setting DeleteBehavior to "mark" causes an extra SQL datetime column called "deleted" to be added to each SQL table, and records that are deleted from the object store in MiddleKit are kept in SQL tables with the deleted field set to the date/time when the object was deleted.
+This setting has no effect on the visible behavior of MiddleKit; it only changes what happens behind the scenes in the SQL store.
+
+<pre>{
+    'DeleteBehavior': 'mark',
 }</pre>
 
 <p> <span class=filename>SQLGenerator.config</span> has one setting: <span class=name>DropStatements</span> whose potential values are:
@@ -350,6 +364,30 @@ foo.addToBars(newBar)
 
 <p> If you want to get a dictionary of all the attribute values for a particular object, don't roll your own code. You can already ask your middle objects for allAttrs(), in which case you get values instead of definitions (which is what Klass returns for allAttrs()).
 
+<a name=MT_DeletingObjects><h3>Deleting objects</h3></a>
+
+<p> If you need to delete an object from the object store, you can do so like this:
+
+<pre class=py>store.deleteObject(object)
+</pre>
+
+<p> As with other changes, the deletion is is not committed until you perform store.saveChanges().
+
+<p> This may raise one of these two exceptions defined in MiddleKit.Run.ObjectStore:
+
+<ul>
+	<li> <b>DeleteReferencedException</b> - This is raised when you try to delete an object that is referenced by other objects.  To avoid this exception, either make sure that there are no other objects referencing an object before you try to delete it, or change the onDeleteOther property of the reference attribute to detach or cascade.
+	<li> <b>DeleteObjectWithReferencesError</b> - This is raised when you try to delete an object that references other objects, with a reference attribute that has the property onDeleteSelf=deny.  To avoid this exception, either set the reference to None before deleting, or switch to a different setting for onDeleteSelf on the reference attribute.
+</ul>
+
+<a name=MT_DerivedAttributes><h3>Derived attributes</h3></a>
+
+<p> Sometimes it can be convenient to define an attribute in MiddleKit that does not exist in the SQL database back end.
+Perhaps you want to compute the value from other attributes, or store the value somewhere else outside of the SQL database.
+Yet you still want to be able to iterate over the attribute using the allAttrs() method provided in MiddleKit.
+
+<p> To do this, simply set the property <b>isDerived</b> on the attribute in the model file.
+You will have to write your own setter and getter methods for the attribute.
 
 <a name=RelatedLinks><h2>Related Links</h2></a>
 
