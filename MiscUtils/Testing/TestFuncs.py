@@ -52,6 +52,52 @@ def TestHostName():
 		'host type = %s, host = %s' % (type(host), repr(host))
 
 
+def TestUniqueId():
+	lastResult = None
+	for x in range(5):
+		result = uniqueId()
+		assert type(result) is type('')
+		assert len(result)==32
+		assert result!=lastResult
+
+		result = uniqueId(TestUniqueId)
+		assert type(result) is type('')
+		assert len(result)==32
+		assert result!=lastResult
+
+
+def TestValueForString():
+	evalCases = '''
+		1
+		5L
+		5.5
+		True
+		False
+		None
+		[1]
+		['a']
+		{'x':1}
+		(1, 2, 3)
+		'a'
+		"z"
+		"""1234"""
+	'''
+	
+	stringCases = '''
+		kjasdfkasdf
+		2389234lkdsflkjsdf
+		*09809
+	'''
+
+	evalCases = [s.strip() for s in evalCases.strip().split('\n')]
+	for case in evalCases:
+		assert valueForString(case)==eval(case), 'case=%r, valueForString()=%r, eval()=%r' % (case, valueForString(case), eval(case))
+
+	stringCases = [s.strip() for s in stringCases.strip().split('\n')]
+	for case in stringCases:
+		assert valueForString(case)==case, 'case=%r, valueForString()=%r' % (case, valueForString(case))
+
+
 def TestWordWrap():
 	# an example with some spaces and newlines
 	msg = """Arthur:  "The Lady of the Lake, her arm clad in the purest \
@@ -70,26 +116,13 @@ ceremony!\""""
 			assert len(line)<=margin, 'len=%i, margin=%i, line=%r' % (len(line), margin, line)
 
 
-def TestUniqueId():
-	lastResult = None
-	for x in range(5):
-		result = uniqueId()
-		assert type(result) is type('')
-		assert len(result)==32
-		assert result!=lastResult
-
-		result = uniqueId(TestUniqueId)
-		assert type(result) is type('')
-		assert len(result)==32
-		assert result!=lastResult
-
-
 def Test():
 	TestCommas()
 	TestHostName()
 	TestLocalIP()
-	TestWordWrap()
 	TestUniqueId()
+	TestValueForString()
+	TestWordWrap()
 
 
 if __name__=='__main__':

@@ -5,6 +5,7 @@ Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else
 """
 
 import md5, os, random, string, time
+True, False = 1==1, 1==0
 
 
 def commas(number):
@@ -218,6 +219,40 @@ def uniqueId(forObject=None):
 		for char in md5object.digest():
 			hexdigest.append('%02x' % ord(char))
 		return string.join(hexdigest, '')
+
+
+def valueForString(s):
+	"""
+	For a given string, returns the most appropriate Pythonic value
+	such as None, a long, an int, a list, etc.
+
+	"None", "True" and "False" are case-insensitive because there is
+	already too much case sensitivity in computing, damn it!
+	"""
+	if not s:
+		return s
+	try:
+		return int(s)
+	except ValueError:
+		pass
+	try:
+		return long(s)
+	except ValueError:
+		pass
+	try:
+		return float(s)
+	except ValueError:
+		pass
+	t = s.lower()
+	if t=='none':
+		return None
+	if t=='true':
+		return True
+	if t=='false':
+		return False
+	if s[0] in '[({"\'':
+		return eval(s)
+	return s
 
 
 ### Deprecated
