@@ -1,4 +1,9 @@
 
+/* marshal.c */
+/* author: Jay Love (jsliv@jslove.org) */
+/* Adapted from marshal.c in the python distribution */
+/* This file handles the creation of python marshal structures. */
+
 
 
 #include <string.h>
@@ -161,6 +166,11 @@ write_integer(int number, WFILE* wf) {
 			w_long(x, wf);
 		}
 }
+
+
+
+
+
 
 
 

@@ -1,3 +1,16 @@
+/********************************************************************
+mod_webkit.c											           
+Apache module for the WebKit Python Application Server	       
+author: Jay Love (jsliv@jslove.org)                             
+
+
+********************************************************************/
+
+
+
+
+
+
 
 #include "mod_webkit.h"
 
@@ -5,7 +18,7 @@
 
 
 /*
- * Sample configuration record.  Used for both per-directory and per-server
+ * Configuration record.  Used for both per-directory and per-server
  * configuration data.
  *
  * It's perfectly reasonable to have two different structures for the two
@@ -33,6 +46,7 @@ typedef struct wkcfg {
 } wkcfg;
 
 
+/*A quick logging macro */
 #define log_error(message,server) ap_log_error(APLOG_MARK, APLOG_ERR, server, message)
 
 
@@ -46,7 +60,7 @@ module webkit_module;
 
 
 
-
+/* A quick logging function */
 int log_message(char* msg, request_rec* r) {
 		ap_log_error(APLOG_MARK, APLOG_ERR, r->server, msg);
 		return 0;
@@ -84,8 +98,8 @@ unsigned long resolve_host(char *value) {
 
 /* ================================================================== */
 /*
- * Command handler for a TAKE2 directive.  TAKE2 commands must always have
- * exactly two arguments.
+ *  Command handler for the WKServer command.
+ *  Takes 2 arguments, the host and the port of the AppServer to use.
  */
 /* ================================================================= */
  static const char *handle_wkserver(cmd_parms *cmd, void *mconfig,
@@ -145,6 +159,7 @@ static void *wk_create_dir_config(pool *p, char *dirspec)
 
 /* ====================================================== */
 /*  Initialize the WFILE structure
+ *  This is used by the marshalling functions.
 /* ======================================================= */
 WFILE*  setup_WFILE(request_rec* r)
 {
@@ -174,6 +189,8 @@ WFILE*  setup_WFILE(request_rec* r)
 // This reads input from the client.
 // It's a quick fix.  Input from the client needs to go directly to the appserver, 
 // and not be buffered here.
+//
+// NOTE: This isn't used anymore
 /* =============================================================== */
 static int util_read(request_rec* r, char **rbuf)
 {
@@ -299,6 +316,7 @@ I'm gonna set the time = 0 for the time being
 				'input':   myInput
 				}
 */
+//Here's the real content handler
 static int content_handler(request_rec *r)
 {
 
@@ -373,13 +391,13 @@ static int content_handler(request_rec *r)
 //	log_message("Built env dictionary", r);
 
 
-	//We can start building now the full dictionary now
+	//We can start building the full dictionary now
 	w_byte(TYPE_DICT, whole_dict);
 	write_string("format", 6, whole_dict); //key
 	write_string("CGI", 3, whole_dict);  //value
 	write_string("time", 4, whole_dict); //key
 	w_byte(TYPE_NONE, whole_dict);  //value
-//This won't work.  Marshal converts this from a float to a string, I have neither
+//This won't work.  Marshal converts this from a float to a string, I have neither. Floats are ugly.
 //	w_long((long)time(&the_time), whole_dict);//value
 
 	write_string("environ", 7, whole_dict); //key
