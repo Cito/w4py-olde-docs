@@ -594,6 +594,7 @@ class Application(Configurable,CanContainer):
 		''' Returns what it says. This is a 'private' service method for use by HTTPRequest. '''
 		ssPath = self._serverSidePathCacheByPath.get(urlPath, None)
 		if ssPath is None:
+			if not urlPath: urlPath = os.path.join(self._Contexts['default'],"index.html") #handle no filename, should be configurable
 			if urlPath[0]=='_':  # special administration scripts are denoted by a preceding underscore and are located with the app server. @@ 2000-05-19 ce: redesign this
 				ssPath = os.path.join(self.serverDir(), urlPath)
 			else:
@@ -615,6 +616,7 @@ class Application(Configurable,CanContainer):
 				if not os.path.isabs(prepath):
 					prepath = os.path.join(self.serverDir(), prepath)
 				#ssPath = os.path.join(prepath, urlPath)
+				if head == '': head="index.html"  #Again, should be configurable
 				ssPath = os.path.join(prepath, head)
 				ssPath=os.path.normpath(ssPath)
 
