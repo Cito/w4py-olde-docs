@@ -41,42 +41,47 @@
 <li><a class="reference" href="#cgi-based-adapters" id="id27" name="id27">CGI-based Adapters</a><ul>
 <li><a class="reference" href="#wkcgi-webkit-exe" id="id28" name="id28">wkcgi, WebKit.exe</a></li>
 <li><a class="reference" href="#python-cgi-adapter" id="id29" name="id29">Python CGI Adapter</a></li>
-<li><a class="reference" href="#mod-webkit" id="id30" name="id30">mod_webkit</a></li>
-<li><a class="reference" href="#id3" id="id31" name="id31">AOLServer</a></li>
-<li><a class="reference" href="#lrwp-adapter-for-xitami" id="id32" name="id32">LRWP Adapter (for Xitami)</a></li>
-<li><a class="reference" href="#fastcgi" id="id33" name="id33">FastCGI</a></li>
-<li><a class="reference" href="#mod-python" id="id34" name="id34">mod_python</a></li>
-<li><a class="reference" href="#mod-snake" id="id35" name="id35">mod_snake</a></li>
-<li><a class="reference" href="#oneshot" id="id36" name="id36">OneShot</a></li>
-<li><a class="reference" href="#isapi" id="id37" name="id37">ISAPI</a></li>
+<li><a class="reference" href="#mod-webkit" id="id30" name="id30">mod_webkit</a><ul>
+<li><a class="reference" href="#posix-installation" id="id31" name="id31">Posix Installation</a></li>
+<li><a class="reference" href="#windows-installation" id="id32" name="id32">Windows Installation</a></li>
+<li><a class="reference" href="#apache-configuration" id="id33" name="id33">Apache Configuration</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#renaming-adapters" id="id38" name="id38">Renaming Adapters</a></li>
-<li><a class="reference" href="#adapter-problems-not-cgi" id="id39" name="id39">Adapter Problems (not CGI)</a></li>
+<li><a class="reference" href="#id3" id="id34" name="id34">AOLServer</a></li>
+<li><a class="reference" href="#lrwp-adapter-for-xitami" id="id35" name="id35">LRWP Adapter (for Xitami)</a></li>
+<li><a class="reference" href="#fastcgi" id="id36" name="id36">FastCGI</a></li>
+<li><a class="reference" href="#mod-python" id="id37" name="id37">mod_python</a></li>
+<li><a class="reference" href="#mod-snake" id="id38" name="id38">mod_snake</a></li>
+<li><a class="reference" href="#oneshot" id="id39" name="id39">OneShot</a></li>
+<li><a class="reference" href="#isapi" id="id40" name="id40">ISAPI</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#configuration" id="id40" name="id40">Configuration</a><ul>
-<li><a class="reference" href="#sessions" id="id41" name="id41">Sessions</a></li>
-<li><a class="reference" href="#contexts" id="id42" name="id42">Contexts</a></li>
-<li><a class="reference" href="#creating-a-working-directory" id="id43" name="id43">Creating a Working Directory</a></li>
+<li><a class="reference" href="#renaming-adapters" id="id41" name="id41">Renaming Adapters</a></li>
+<li><a class="reference" href="#adapter-problems-not-cgi" id="id42" name="id42">Adapter Problems (not CGI)</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#appserver-notes" id="id44" name="id44">AppServer Notes</a><ul>
-<li><a class="reference" href="#stopping-the-app-server" id="id45" name="id45">Stopping the App Server</a></li>
-<li><a class="reference" href="#reloading-servlets" id="id46" name="id46">Reloading Servlets</a></li>
-<li><a class="reference" href="#launching-the-appserver-at-unix-boot-up" id="id47" name="id47">Launching the AppServer at UNIX boot up</a><ul>
-<li><a class="reference" href="#redhat" id="id48" name="id48">Redhat</a></li>
-<li><a class="reference" href="#debian" id="id49" name="id49">Debian</a></li>
-<li><a class="reference" href="#other-sytems" id="id50" name="id50">Other Sytems</a></li>
-<li><a class="reference" href="#additional-notes" id="id51" name="id51">Additional Notes</a></li>
+<li><a class="reference" href="#configuration" id="id43" name="id43">Configuration</a><ul>
+<li><a class="reference" href="#sessions" id="id44" name="id44">Sessions</a></li>
+<li><a class="reference" href="#contexts" id="id45" name="id45">Contexts</a></li>
+<li><a class="reference" href="#creating-a-working-directory" id="id46" name="id46">Creating a Working Directory</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#running-threadedappserver-as-a-windows-nt-2000-service" id="id52" name="id52">Running ThreadedAppServer as a Windows NT/2000 Service</a></li>
-<li><a class="reference" href="#other-notes" id="id53" name="id53">Other Notes</a></li>
+<li><a class="reference" href="#appserver-notes" id="id47" name="id47">AppServer Notes</a><ul>
+<li><a class="reference" href="#stopping-the-app-server" id="id48" name="id48">Stopping the App Server</a></li>
+<li><a class="reference" href="#reloading-servlets" id="id49" name="id49">Reloading Servlets</a></li>
+<li><a class="reference" href="#launching-the-appserver-at-unix-boot-up" id="id50" name="id50">Launching the AppServer at UNIX boot up</a><ul>
+<li><a class="reference" href="#redhat" id="id51" name="id51">Redhat</a></li>
+<li><a class="reference" href="#debian" id="id52" name="id52">Debian</a></li>
+<li><a class="reference" href="#other-sytems" id="id53" name="id53">Other Sytems</a></li>
+<li><a class="reference" href="#additional-notes" id="id54" name="id54">Additional Notes</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#troubleshooting" id="id54" name="id54">Troubleshooting</a><ul>
-<li><a class="reference" href="#bad-marshal-data" id="id55" name="id55">Bad Marshal Data</a></li>
+<li><a class="reference" href="#running-threadedappserver-as-a-windows-nt-2000-service" id="id55" name="id55">Running ThreadedAppServer as a Windows NT/2000 Service</a></li>
+<li><a class="reference" href="#other-notes" id="id56" name="id56">Other Notes</a></li>
+</ul>
+</li>
+<li><a class="reference" href="#troubleshooting" id="id57" name="id57">Troubleshooting</a><ul>
+<li><a class="reference" href="#bad-marshal-data" id="id58" name="id58">Bad Marshal Data</a></li>
 </ul>
 </li>
 </ul>
@@ -505,15 +510,14 @@ build mod_webkit are located in the
 <p>There are two versions, mod_webkit and mod_webkit2 -- mod_webkit2 is
 for use with Apache 2.0.  The other version is for Apache 1.3.  Each
 is in its own directory.</p>
-<p>On Windows systems the module comes pre-compiled, as
-<tt class="literal"><span class="pre">mod_webkit.dll</span></tt>.  (&#64;&#64;: instructions for installing it?)</p>
-<p>To install the adapter on Posix systems:</p>
-<pre class="literal-block">
+<div class="section" id="posix-installation">
+<h4><a class="toc-backref" href="#id31" name="posix-installation">Posix Installation</a></h4>
+<p>To install:</p>
+<blockquote>
 $ cd /path/to/Webware/WebKit/Adapters/mod_webkit
 # or mod_webkit2 for Apache 2.0
 $ make
-$ make install
-</pre>
+$ make install</blockquote>
 <p>The most likely most like error you will get in this process is an
 error <tt class="literal"><span class="pre">make:</span> <span class="pre">/usr/sbin/apxs:</span> <span class="pre">Command</span> <span class="pre">not</span> <span class="pre">found</span></tt>.  This means the
 <tt class="literal"><span class="pre">apxs</span></tt> utility is probably located somewhere else, or you do not
@@ -536,8 +540,23 @@ package.</p>
 <tt class="literal"><span class="pre">Makefile</span></tt> file in the mod_webkit directory.  Where it says
 <tt class="literal"><span class="pre">APXS=/usr/sbin/apxs</span></tt>, change it to the appropriate location.</p>
 <p><tt class="literal"><span class="pre">make</span> <span class="pre">install</span></tt> will copy the compiled module to the appropriate
-location and add a line to your httpd.conf file to load the module.
-You must also add a line like this to your httpd.conf:</p>
+location and add a line to your httpd.conf file to load the module
+(but not activate it, see <a class="reference" href="#apache-configuration">Apache Configuration</a> below).</p>
+</div>
+<div class="section" id="windows-installation">
+<h4><a class="toc-backref" href="#id32" name="windows-installation">Windows Installation</a></h4>
+<p>Copy <tt class="literal"><span class="pre">WebKit/Adapters/mod_webkit/mod_webkit.dll</span></tt> (or the file from
+<tt class="literal"><span class="pre">mod_webkit2</span></tt> if you are using Apache 2) into your module directory
+for Apache (usually <tt class="literal"><span class="pre">C:\Program</span> <span class="pre">Files\Apache</span> <span class="pre">Group\Apache\modules</span></tt>).</p>
+<p>Edit <tt class="literal"><span class="pre">httpd.conf</span></tt> to include the line:</p>
+<pre class="literal-block">
+LoadModule webkit_module modules/mod_webkit.dll
+</pre>
+<p>As well adding the configuration below.</p>
+</div>
+<div class="section" id="apache-configuration">
+<h4><a class="toc-backref" href="#id33" name="apache-configuration">Apache Configuration</a></h4>
+<p>You must also add a line like this to your httpd.conf:</p>
 <pre class="literal-block">
 &lt;Location /WK&gt;
     WKServer localhost 8086
@@ -545,21 +564,33 @@ You must also add a line like this to your httpd.conf:</p>
 &lt;/Location&gt;
 </pre>
 <p>Then any URL that starts with <tt class="literal"><span class="pre">/WK/</span></tt> will be directed to the
-AppServer on 8086.</p>
+AppServer on 8086.  You can also use:</p>
+<pre class="literal-block">
+AddHandler psp-handler .psp
+</pre>
+<p>To run PSP files that are found anywhere (similar to how PHP would
+work, for example).  You still need the <tt class="literal"><span class="pre">/WK</span></tt> portion to tell
+mod_webkit where to find the AppServer.  This also works:</p>
+<pre class="literal-block">
+Action py-serverpages /WK/
+AddType py-serverpages .py
+</pre>
+<p>Which will run Python servlets from any location.</p>
 <a class="target" id="id2" name="id2"></a></div>
+</div>
 <div class="section" id="id3">
-<h3><a class="toc-backref" href="#id31" name="id3">AOLServer</a></h3>
+<h3><a class="toc-backref" href="#id34" name="id3">AOLServer</a></h3>
 <p>This adapter comes with the Python-enhanced AOLserver created by the
 <a class="reference" href="http://pywx.idyll.org">PyWX project</a> and is described there.</p>
 <a class="target" id="lrwp" name="lrwp"></a><a class="target" id="lrwp-adapter" name="lrwp-adapter"></a></div>
 <div class="section" id="lrwp-adapter-for-xitami">
-<h3><a class="toc-backref" href="#id32" name="lrwp-adapter-for-xitami">LRWP Adapter (for Xitami)</a></h3>
+<h3><a class="toc-backref" href="#id35" name="lrwp-adapter-for-xitami">LRWP Adapter (for Xitami)</a></h3>
 <p>The LRWP Adapter is meant to be used with the <a class="reference" href="http://www.xitami.com">Xitami web server</a>.
 It requires the LRWP Python library to be loaded.  We don't know
 a great deal more than that.</p>
 </div>
 <div class="section" id="fastcgi">
-<h3><a class="toc-backref" href="#id33" name="fastcgi">FastCGI</a></h3>
+<h3><a class="toc-backref" href="#id36" name="fastcgi">FastCGI</a></h3>
 <p>In most cases FastCGI will not be significantly faster than <a class="reference" href="#wkcgi">wkcgi</a>
 (and may be slower!), and FastCGI is considerably slower than
 <a class="reference" href="#mod-webkit">mod_webkit</a>.  At the same time it is also much more difficult to
@@ -572,7 +603,7 @@ explaining its setup.</p>
 <p>Note that to date, we have only gotten this to work on UNIX.</p>
 </div>
 <div class="section" id="mod-python">
-<h3><a class="toc-backref" href="#id34" name="mod-python">mod_python</a></h3>
+<h3><a class="toc-backref" href="#id37" name="mod-python">mod_python</a></h3>
 <p>In most cases the mod_python adapter will not be significantly faster
 than <a class="reference" href="#wkcgi">wkcgi</a> (and may be slower!), and the mod_python adapter is
 considerably slower than <a class="reference" href="#mod-webkit">mod_webkit</a>.  At the same time it is also
@@ -587,7 +618,7 @@ return incorrect responses under heavy load.</p>
 <a class="reference" href="http://www.modpython.org">http://www.modpython.org</a>.</p>
 </div>
 <div class="section" id="mod-snake">
-<h3><a class="toc-backref" href="#id35" name="mod-snake">mod_snake</a></h3>
+<h3><a class="toc-backref" href="#id38" name="mod-snake">mod_snake</a></h3>
 <p>In most cases the mod_snake adapter will not be significantly faster
 than <a class="reference" href="#wkcgi">wkcgi</a> (and may be slower!), and the mod_snake adapter is
 considerably slower than <a class="reference" href="#mod-webkit">mod_webkit</a>.  At the same time it is also
@@ -601,7 +632,7 @@ if you need to work with Apache 2.0.</p>
 configuration steps to use this adapter.</p>
 </div>
 <div class="section" id="oneshot">
-<h3><a class="toc-backref" href="#id36" name="oneshot">OneShot</a></h3>
+<h3><a class="toc-backref" href="#id39" name="oneshot">OneShot</a></h3>
 <p>The OneShot adapter is another CGI based adapter, but unlike wkcgi and
 WebKit.cgi, the AppServer launches, serves a response and shuts down
 for every single request via OneShot.cgi.</p>
@@ -617,7 +648,7 @@ warned that OneShot is <em>very</em> slow.</p>
 <p>If you use OneShot, do not launch the AppServer separately.</p>
 </div>
 <div class="section" id="isapi">
-<h3><a class="toc-backref" href="#id37" name="isapi">ISAPI</a></h3>
+<h3><a class="toc-backref" href="#id40" name="isapi">ISAPI</a></h3>
 <p>The ISAPI module is located in <tt class="literal"><span class="pre">WebKit/Adapters/wkISAPI</span></tt>.  
 It currently has some memory leaks and is not well tested.  It is
 looking for a maintainer.  There's no documentation for it, and you
@@ -625,7 +656,7 @@ must compile it yourself.</p>
 </div>
 </div>
 <div class="section" id="renaming-adapters">
-<h2><a class="toc-backref" href="#id38" name="renaming-adapters">Renaming Adapters</a></h2>
+<h2><a class="toc-backref" href="#id41" name="renaming-adapters">Renaming Adapters</a></h2>
 <p>Adapters such as WebKit.cgi and OneShot.cgi do not rely on their
 name. Consequently, when you deploy your web site, you can rename the
 adapter to something like <tt class="literal"><span class="pre">serve.cgi</span></tt>. This allows you to switch
@@ -636,7 +667,7 @@ redirecting the root of a site to a specific context, or other URL
 manipulations.  Mod_rewrite is extremely general.</p>
 </div>
 <div class="section" id="adapter-problems-not-cgi">
-<h2><a class="toc-backref" href="#id39" name="adapter-problems-not-cgi">Adapter Problems (not CGI)</a></h2>
+<h2><a class="toc-backref" href="#id42" name="adapter-problems-not-cgi">Adapter Problems (not CGI)</a></h2>
 <p>There is one gotcha in setting up the adapters that don't rely on CGI.
 For mod_webkit, ModPython and ModSnake, the name that you give to the
 adapter location in your Apache configuration file must not actually
@@ -647,14 +678,14 @@ document root.</p>
 </div>
 </div>
 <div class="section" id="configuration">
-<h1><a class="toc-backref" href="#id40" name="configuration">Configuration</a></h1>
+<h1><a class="toc-backref" href="#id43" name="configuration">Configuration</a></h1>
 <p>In this section, we'll briefly touch on some of the configuration
 options related to installing and running WebKit. A full reference to
 these options can be found in the <a class="reference" href="UsersGuide.html#Configuration">User's Guide</a>.</p>
 <p>The settings referenced below are found in the configuration file,
 <tt class="literal"><span class="pre">WebKit/Configs/Application.config</span></tt>.</p>
 <div class="section" id="sessions">
-<h2><a class="toc-backref" href="#id41" name="sessions">Sessions</a></h2>
+<h2><a class="toc-backref" href="#id44" name="sessions">Sessions</a></h2>
 <p>WebKit provides a Session utility class for storing data on the server
 side that relates to an individual user's session with your site. The
 <tt class="literal"><span class="pre">SessionStore</span></tt> setting determines where the data is stored and can
@@ -702,7 +733,7 @@ deploying a web site.</p>
 <p>See <a class="reference" href="UsersGuide.html#Configuration">Configuration</a> in the User's Guide for more information.</p>
 </div>
 <div class="section" id="contexts">
-<h2><a class="toc-backref" href="#id42" name="contexts">Contexts</a></h2>
+<h2><a class="toc-backref" href="#id45" name="contexts">Contexts</a></h2>
 <p>WebKit divides the world into <em>contexts</em>, each of which is a directory
 with its own files and servlets. WebKit will only serve files out of
 its list of known contexts.</p>
@@ -736,7 +767,7 @@ executed when the context is loaded at app server startup. You can put
 any kind of initialization code you deem appropriate there.</p>
 <a class="target" id="makeappworkdir" name="makeappworkdir"></a></div>
 <div class="section" id="creating-a-working-directory">
-<h2><a class="toc-backref" href="#id43" name="creating-a-working-directory">Creating a Working Directory</a></h2>
+<h2><a class="toc-backref" href="#id46" name="creating-a-working-directory">Creating a Working Directory</a></h2>
 <p>You can create a working directory for your applications that is
 separate from the Webware installation.  To do this you will use the
 script <tt class="literal"><span class="pre">bin/MakeAppWorkDir.py</span></tt>.  You should run it like:</p>
@@ -802,13 +833,13 @@ switch.  Import from this like <tt class="literal"><span class="pre">from</span>
 </div>
 </div>
 <div class="section" id="appserver-notes">
-<h1><a class="toc-backref" href="#id44" name="appserver-notes">AppServer Notes</a></h1>
+<h1><a class="toc-backref" href="#id47" name="appserver-notes">AppServer Notes</a></h1>
 <p>WebKit uses a process called an AppServer to handle requests.  The
 AppServer is responsible for receiving a request from the adapter, and
 then running it through the Application, and then sending the response
 back to the adapter.</p>
 <div class="section" id="stopping-the-app-server">
-<h2><a class="toc-backref" href="#id45" name="stopping-the-app-server">Stopping the App Server</a></h2>
+<h2><a class="toc-backref" href="#id48" name="stopping-the-app-server">Stopping the App Server</a></h2>
 <p>The recommended method of stopping the AppServer is through the
 Application Control interface.  This is a servlet located in the Admin
 context.  A username and password are required -- the username is
@@ -833,7 +864,7 @@ access the machine), and &quot;AppServer stop&quot; doesn't work, you can use
 effect a Control-C.</p>
 </div>
 <div class="section" id="reloading-servlets">
-<h2><a class="toc-backref" href="#id46" name="reloading-servlets">Reloading Servlets</a></h2>
+<h2><a class="toc-backref" href="#id49" name="reloading-servlets">Reloading Servlets</a></h2>
 <p>As you develop your web application, you will change the code of your
 various Python classes, including your servlets. The WebKit app server
 will detect a change in the timestamp of a servlet's source file and
@@ -865,7 +896,7 @@ definitions can still exist.  AutoReload is generally the best
 solution.</p>
 <a class="target" id="webkit-init-script" name="webkit-init-script"></a></div>
 <div class="section" id="launching-the-appserver-at-unix-boot-up">
-<h2><a class="toc-backref" href="#id47" name="launching-the-appserver-at-unix-boot-up">Launching the AppServer at UNIX boot up</a></h2>
+<h2><a class="toc-backref" href="#id50" name="launching-the-appserver-at-unix-boot-up">Launching the AppServer at UNIX boot up</a></h2>
 <p>The script <tt class="literal"><span class="pre">WebKit/webkit</span></tt> is a UNIX shell script launching WebKit
 at boot time through the standard &quot;init&quot; mechanisms.</p>
 <p>To start WebKit at boot time, make the necessary variable
@@ -878,7 +909,7 @@ PYTHONPATH=
 PYTHONPATH_ADDONS=
 </pre>
 <div class="section" id="redhat">
-<h3><a class="toc-backref" href="#id48" name="redhat">Redhat</a></h3>
+<h3><a class="toc-backref" href="#id51" name="redhat">Redhat</a></h3>
 <p>Now put this script in <tt class="literal"><span class="pre">/etc/rc.d/init.d</span></tt> and do this:</p>
 <pre class="literal-block">
 # cd /etc/rc.d/init.d
@@ -898,7 +929,7 @@ after Apache.</p>
 priority 25.</p>
 </div>
 <div class="section" id="debian">
-<h3><a class="toc-backref" href="#id49" name="debian">Debian</a></h3>
+<h3><a class="toc-backref" href="#id52" name="debian">Debian</a></h3>
 <p>Now put this script in <tt class="literal"><span class="pre">/etc/init.d</span></tt> and do this:</p>
 <pre class="literal-block">
 # cd /etc/rc.d/init.d
@@ -914,7 +945,7 @@ time you need to jump start it:</p>
 <tt class="literal"><span class="pre">man</span> <span class="pre">update-rc.d</span></tt> for more information.</p>
 </div>
 <div class="section" id="other-sytems">
-<h3><a class="toc-backref" href="#id50" name="other-sytems">Other Sytems</a></h3>
+<h3><a class="toc-backref" href="#id53" name="other-sytems">Other Sytems</a></h3>
 <p>&#64;&#64; someone check this</p>
 <p>You should put the <tt class="literal"><span class="pre">webkit</span></tt> script either in <tt class="literal"><span class="pre">/etc/rc.d/init.d/</span></tt>
 or <tt class="literal"><span class="pre">/etc/init.d/</span></tt> depending on what you system has.  For the example
@@ -930,7 +961,7 @@ make symbolic links, like:</p>
 </pre>
 </div>
 <div class="section" id="additional-notes">
-<h3><a class="toc-backref" href="#id51" name="additional-notes">Additional Notes</a></h3>
+<h3><a class="toc-backref" href="#id54" name="additional-notes">Additional Notes</a></h3>
 <p>You will notice the variables <tt class="literal"><span class="pre">PYTHONPATH</span></tt> and <tt class="literal"><span class="pre">PYTHON_PATH</span></tt> which
 are both set to blank. The first prevents inheriting <tt class="literal"><span class="pre">PYTHON_PATH</span></tt>
 from the environment (as security paranoia). You can comment this out
@@ -940,7 +971,7 @@ not you inherited the path).</p>
 </div>
 </div>
 <div class="section" id="running-threadedappserver-as-a-windows-nt-2000-service">
-<h2><a class="toc-backref" href="#id52" name="running-threadedappserver-as-a-windows-nt-2000-service">Running ThreadedAppServer as a Windows NT/2000 Service</a></h2>
+<h2><a class="toc-backref" href="#id55" name="running-threadedappserver-as-a-windows-nt-2000-service">Running ThreadedAppServer as a Windows NT/2000 Service</a></h2>
 <p><tt class="literal"><span class="pre">ThreadedAppServerService</span></tt> is a version of <tt class="literal"><span class="pre">ThreadedAppServer</span></tt>
 that runs as a Windows NT Service.  This means it can be started and
 stopped from the Control Panel or from the command line using <tt class="literal"><span class="pre">net</span>
@@ -977,15 +1008,15 @@ the following commands:</p>
 </pre>
 </div>
 <div class="section" id="other-notes">
-<h2><a class="toc-backref" href="#id53" name="other-notes">Other Notes</a></h2>
+<h2><a class="toc-backref" href="#id56" name="other-notes">Other Notes</a></h2>
 <p>See <a class="reference" href="#stopping-the-app-server">Stopping the App Server</a> and <a class="reference" href="#reloading-servlets">Reloading Servlets</a> above in
 <a class="reference" href="#adapters">Adapters</a>.</p>
 </div>
 </div>
 <div class="section" id="troubleshooting">
-<h1><a class="toc-backref" href="#id54" name="troubleshooting">Troubleshooting</a></h1>
+<h1><a class="toc-backref" href="#id57" name="troubleshooting">Troubleshooting</a></h1>
 <div class="section" id="bad-marshal-data">
-<h2><a class="toc-backref" href="#id55" name="bad-marshal-data">Bad Marshal Data</a></h2>
+<h2><a class="toc-backref" href="#id58" name="bad-marshal-data">Bad Marshal Data</a></h2>
 <p>The most common installation problem is a Python exception appearing
 in your browser that says &quot;bad marshal data&quot;. This is always caused by
 pointing the web browser to the app server:</p>

@@ -507,10 +507,10 @@ There are two versions, mod_webkit and mod_webkit2 -- mod_webkit2 is
 for use with Apache 2.0.  The other version is for Apache 1.3.  Each
 is in its own directory.
 
-On Windows systems the module comes pre-compiled, as
-``mod_webkit.dll``.  (@@: instructions for installing it?)
+Posix Installation
+^^^^^^^^^^^^^^^^^^
 
-To install the adapter on Posix systems::
+To install:
 
   $ cd /path/to/Webware/WebKit/Adapters/mod_webkit
   # or mod_webkit2 for Apache 2.0
@@ -540,7 +540,25 @@ Once you've found or attained the apxs utility, change the
 ``APXS=/usr/sbin/apxs``, change it to the appropriate location.
 
 ``make install`` will copy the compiled module to the appropriate
-location and add a line to your httpd.conf file to load the module.
+location and add a line to your httpd.conf file to load the module
+(but not activate it, see `Apache Configuration`_ below).
+
+Windows Installation
+^^^^^^^^^^^^^^^^^^^^
+
+Copy ``WebKit/Adapters/mod_webkit/mod_webkit.dll`` (or the file from
+``mod_webkit2`` if you are using Apache 2) into your module directory
+for Apache (usually ``C:\Program Files\Apache Group\Apache\modules``).
+
+Edit ``httpd.conf`` to include the line::
+
+    LoadModule webkit_module modules/mod_webkit.dll
+
+As well adding the configuration below.
+
+Apache Configuration
+^^^^^^^^^^^^^^^^^^^^
+
 You must also add a line like this to your httpd.conf::
 
     <Location /WK>
@@ -549,8 +567,18 @@ You must also add a line like this to your httpd.conf::
     </Location>
 
 Then any URL that starts with ``/WK/`` will be directed to the
-AppServer on 8086.
+AppServer on 8086.  You can also use::
 
+    AddHandler psp-handler .psp
+
+To run PSP files that are found anywhere (similar to how PHP would
+work, for example).  You still need the ``/WK`` portion to tell
+mod_webkit where to find the AppServer.  This also works::
+
+    Action py-serverpages /WK/
+    AddType py-serverpages .py
+
+Which will run Python servlets from any location.
 
 .. _AOLServer:
 
