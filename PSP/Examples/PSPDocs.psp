@@ -1,7 +1,1 @@
-The PSPDocs.psp file is currently broken. 
-
-It attemps to import data out of a parent directory, but that is out of reach of any context.
-<psp:include path="../Docs/UsersGuide.html">
-
-
-
+<psp:insert file="../Docs/UsersGuide.html">
