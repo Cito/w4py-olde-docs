@@ -151,7 +151,7 @@ class Application(Configurable,CanContainer):
 		import CanFactory
 		self._canFactory = CanFactory.CanFactory(self,os.path.join(os.getcwd(),'Cans'))
 
-		
+
 
 	def startSessionSweeper(self):
 		self._sessSweepThread=Thread(None, self.sweeperThreadFunc, 'SessionSweeper', (self._sessions,self.setting('SessionTimeout')))
@@ -178,6 +178,7 @@ class Application(Configurable,CanContainer):
 				count = 0
 			try:
 				time.sleep(2)#sleep for 2 secs, then check to see if its time to quit or run
+				# @@ 2000-08-03 ce: er, 2 secs? perhaps that and 'frequency' should be configurable
 			except IOError, e:
 				pass
 
@@ -486,7 +487,7 @@ class Application(Configurable,CanContainer):
 			localdir,pkgname = os.path.split(dir)
 			res = imp.find_module(pkgname,[localdir])
 			#question, do we want the package name to be the dir name or the context name?
-			imp.load_module(name,res[0],res[1],res[2]) 
+			imp.load_module(name,res[0],res[1],res[2])
 		except:
 			print "%s is not a package" % (name,)
 		self._contexts[name] = dir
@@ -798,7 +799,7 @@ class Application(Configurable,CanContainer):
 
 		if request._absolutepath:
 			return urlPath
-		
+
 		# try the cache first
 		ssPath = self._serverSidePathCacheByPath.get(urlPath, None)
 		if ssPath is not None:
