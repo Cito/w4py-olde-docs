@@ -3,6 +3,12 @@ Author:  Jay Love  (jsliv@jslove.org)
 February 2, 2001, Updated fro Apache2 November 2002
 
 
+ATTENTION:  The Makefile included here is for a standard built from source 
+apache2 install.  It may not work with some linux distributions prepackaged 
+apache packages (like Redhat 8).
+
+
+
 This is a native apache module for communicating with the Webware WebKit 
 AppServer.  
 
