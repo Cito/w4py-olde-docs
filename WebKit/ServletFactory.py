@@ -223,32 +223,41 @@ class ServletFactory(Object):
 		request = transaction.request()
 		path = request.serverSidePath()
 
-		if self._threadsafeServletCache.has_key(path):
-			return self._threadsafeServletCache[path]
-		try:
-			servlet = self._servletPool[path].pop()
-		except (KeyError, IndexError):
-			pass
+		# Do we need to import/reimport the class because the file changed on disk or isn't in cache?
+		mtime = os.path.getmtime(path)
+		if not self._classCache.has_key(path) or mtime != self._classCache[path]['mtime']:
+			# Use a lock to prevent multiple simultaneous imports of the same module
+			self._importLock.acquire()
+			try:
+				if not self._classCache.has_key(path) or mtime != self._classCache[path]['mtime']:
+					theClass = self.loadClass(transaction, path)
+					if self._cacheClasses:
+						self._classCache[path] = {'mtime': mtime, 'class': theClass}
+				else:
+					theClass = self._classCache[path]['class']
+			finally:
+				self._importLock.release()
 		else:
-			return servlet
-		
-		# Use a lock to prevent multiple simultaneous imports
-		# of the same module
-		self._importLock.acquire()
-		try:
-			mtime = os.path.getmtime(path)
-			if not self._classCache.has_key(path):
-				self._classCache[path] = {'mtime': mtime,
-							  'class': self.loadClass(transaction, path)}
-			elif mtime > self._classCache[path]['mtime']:
-				self._classCache[path]['mtime'] = mtime
-				self._classCache[path]['class'] = self.loadClass(transaction, path)
 			theClass = self._classCache[path]['class']
-			if not self._cacheClasses:
-				del self._classCache[path]
-		finally:
-			self._importLock.release()
 
+		# Try to find a cached servlet of the correct class.  (Outdated servlets may
+		# have been returned to the pool after a new class was imported, but we don't want
+		# to use an outdated servlet.)
+		if self._threadsafeServletCache.has_key(path):
+			servlet = self._threadsafeServletCache[path]
+			if servlet.__class__ is theClass:
+				return servlet
+		else:
+			while 1:
+				try:
+					servlet = self._servletPool[path].pop()
+				except (KeyError, IndexError):
+					break
+				else:
+					if servlet.__class__ is theClass:
+						return servlet
+		
+		# No adequate cached servlet exists, so create a new servlet instance
 		servlet = theClass()
 		servlet.setFactory(self)
 		if servlet.canBeReused():
