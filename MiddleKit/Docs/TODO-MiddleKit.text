@@ -345,6 +345,10 @@ specification."
 
 <testing>
 
+	[ ] Settings.config: Package
+
+	[ ] ObjectStore.object()
+
 	[ ] We should pass the store into the test() function instead of requiring:
 		from MiddleKit.Run.ObjectStore import Store as store
 
