@@ -293,7 +293,7 @@ def mystr(s):
 	try:
 		UnicodeError
 	except NameError:
-		# older Python. irrevelant
+		# older Python. irrelevant
 		return str(s)
 
 	try:
