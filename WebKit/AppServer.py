@@ -17,6 +17,11 @@ import Profiler
 
 from threading import Thread, Event
 
+globalServer = None
+	# Concrete app servers have to set this variable which then allows
+	# any Python code to access the app server singleton like so:
+	#     from WebKit.AppServer import globalServer
+
 DefaultConfig = {
 	'PrintConfigAtStartUp': 1,
 	'Verbose':              1,
@@ -38,6 +43,11 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 	def __init__(self, path=None):
 		self._startTime = time.time()
+		
+		global globalServer
+		assert globalServer is None, 'more than one app server; or __init__() invoked more than once'
+		globalServer = self
+		
 		ConfigurableForServerSidePath.__init__(self)
 		Object.__init__(self)
 		if path is None:
