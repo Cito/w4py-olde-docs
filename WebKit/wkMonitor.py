@@ -66,7 +66,7 @@ cfg = open("Configs/AppServer.config")
 cfg = eval(cfg.read())
 addr = ((cfg['Host'],cfg['Port']-1))
 
-debug = 1
+debug = 0
 
 
 def createServer():
