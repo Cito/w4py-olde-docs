@@ -283,12 +283,12 @@ Actions
 
 Suppose you have a web page with a form and one or more
 buttons. Normally, when the form is submitted, a method such as
-Servlet's ``respondToPost()`` or Page's ``writeHTML()``, will be
+Servlet's ``respondToPost()`` or Page's ``writeBody()``, will be
 invoked. However, you may find it more useful to bind the button to a
 specific method of your servlet such as ``new()``, ``remove()``
-etc. to implement the command, and reserve ``writeHTML()`` for
+etc. to implement the command, and reserve ``writeBody()`` for
 displaying the page and the form that invokes these methods.  Note
-that your "command methods" can then invoke ``writeHTML()`` after
+that your "command methods" can then invoke ``writeBody()`` after
 performing their task.
 
 The *action* feature of ``Page`` let's you do this. The process goes
