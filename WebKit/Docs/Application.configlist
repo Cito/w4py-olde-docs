@@ -103,6 +103,6 @@
 
 	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems. '''),
 
-('IncludeTracebackInXMLRPCFault', "1", "If true, then the full traceback for uncaught exceptions in XML-RPC Servlets will be returned to the client in an XML-RPC Fault.  If false, then a generic 'unhandled exception' message will be returned in the Fault."),
+('RPCExceptionReturn', "'traceback'", "Determines how much detail an RPC servlet will return when an exception occurs on the server side. Can take the values, in order of increasing detail, 'occurred', 'exception' and 'traceback'. The first reports the string 'unhandled exception', which the second prints the actual exception and finally the third prints both the exception and accompanying traceback. All returns are always strings."),
 
 ]

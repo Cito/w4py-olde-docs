@@ -29,14 +29,16 @@ class HTTPRequest(Request):
 			self._time    = dict['time']
 			self._environ = dict['environ']
 			self._input   = dict['input']
+			self._xmlInput = None
+			self._pickleInput = None
 			# If the content type is text/xml, don't run self._input through cgi.FieldStorage; instead, save it in
 			# self._xmlInput to be processed by a servlet.  This is needed for XML-RPC.
-			if self._environ.get('CONTENT_TYPE', None) == 'text/xml':
+			if self._environ.get('CONTENT_TYPE', None)=='text/xml':
 				self._xmlInput = self._input
 				self._input = StringIO('')
-			else:
-				self._xmlInput = None
-
+			if self._environ.get('CONTENT_TYPE', None)=='text/python/pickled/dict':
+				self._dictInput = self._input
+				self._input = StringIO('')
 			self._fields  = FieldStorage.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._fields.parse_qs()
 			self._cookies = Cookie()
@@ -140,6 +142,7 @@ class HTTPRequest(Request):
 		self._sessionExpired = 0
 
 		if debug: print "Done setting up request, found keys %s" % repr(self._fields.keys())
+
 
 	## Transactions ##
 
@@ -416,6 +419,21 @@ class HTTPRequest(Request):
 		ready to read the XML.  Otherwise, it returns None.
 		"""
 		return self._xmlInput
+
+	def dictInput(self):
+		"""
+		If content-type "text/python/pickled/dict" was POST'ed, this
+		will return a file-like object ready to read the XML.
+		Otherwise, it returns None.
+		"""
+		return self._dictInput
+
+	def time(self):
+		"""
+		Returns the time that the request was received.
+		"""
+		return self._time
+
 
 	## Information ##
 

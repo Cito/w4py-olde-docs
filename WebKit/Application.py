@@ -295,6 +295,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			                           'content-type': 'text/html',
 			                           'Subject':      'Error'
 			                         },
+			'RPCExceptionReturn':    'traceback',
 			'Contexts':              { 'default':       'Examples',
 			                           'Admin':         'Admin',
 			                           'Examples':      'Examples',
