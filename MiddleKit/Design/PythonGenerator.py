@@ -372,6 +372,21 @@ class EnumAttr:
 		else:
 			return string
 
+	def writePyAccessors(self, out):
+		Attr.writePyAccessors.im_func(self, out)
+		if self.setting('ExternalEnumsSQLNames')['Enable']:
+			name = self.name()
+			getName = self.pyGetName()
+			out.write('''
+	def %(getName)sString(self):
+		global _%(name)sAttr
+		if _%(name)sAttr is None:
+			_%(name)sAttr = self.klass().lookupAttr('%(name)s')
+		return _%(name)sAttr.enums()[self._%(name)s]
+''' % locals())
+			if self.setting('AccessorStyle', 'methods')=='properties':
+				out.write('\n\n\t%(name)sString = property(%(getName)sString, "Returns the string form of %(name)s (instead of the integer value).")\n\n' % locals())
+
 	def writePySetChecks(self, out):
 		Attr.writePySetChecks.im_func(self, out)
 		out.write('''\
