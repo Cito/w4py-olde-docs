@@ -38,6 +38,7 @@ WebKit 0.6.1
 <br> &nbsp; &nbsp; &nbsp; <a href="#WebServers_IIS">IIS</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#WebServers_AOLserver">AOLserver</a>
 <br> <a href="#Architecture"><font size=+1>Architecture</font></a>
+<br> <a href="#BadMarshalData"><font size=+1>Bad Marshal Data</font></a>
 <br> <a href="#Adapters"><font size=+1>Adapters</font></a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_Permissions">Permissions</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_CGI">CGI Adapter</a>
@@ -200,6 +201,19 @@ WebKit 0.6.1
 <p> The chronological order of events goes from top to bottom and then back up to top. In other words, the browser makes a request to the web server which in turn makes a request to the app server. The response then goes from the app server to the web server to the browser.
 
 <p> The key to installing WebKit is to get the web server and app server talking to each other. For this purpose, you must use a WebKit adapter. See below.
+
+
+<a name=BadMarshalData><h2>Bad Marshal Data</h2></a>
+
+<p> The most common installation problem is a Python exception appearing in your browser that says "bad marshal data". This is always caused by pointing the web browser to the app server:
+
+	<blockquote>http://localhost:8086/WebKit.cgi/</blockquote>
+
+<p> But the app server hides behind a web server so the correct URL would be:
+
+	<blockquote>http://localhost/WebKit.cgi/</blockquote>
+
+<p> That requires that web server and app server are set up to talk to each other. And that's what the next section is all about...
 
 
 <a name=Adapters><h2>Adapters</h2></a>
