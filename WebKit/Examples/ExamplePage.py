@@ -74,6 +74,9 @@ class ExamplePage(Page):
 		if os.path.exists(filename):
 			self.write(' | <a href=%s>%s</a>' % (filename, 'Webware'))
 
+		# admin
+		self.write(' | <a href=_admin>admin</a>')
+
 		# Project page
 		self.write(' | <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>')
 
