@@ -174,6 +174,7 @@ class ThreadedAppServer(AppServer):
 
 	def shutDown(self):
 		self.running=0
+		self.awakeSelect()
 		self._shuttingdown=1  #jsl-is this used anywhere?
 		print "ThreadedAppServer: Shutting Down"
 		self.mainsocket.close()
