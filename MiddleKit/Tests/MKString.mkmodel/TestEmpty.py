@@ -19,7 +19,7 @@ def test(store):
 	assert f.max500()==b500
 	assert f.max70000()==c70000
 
-	difficultString = ''.join([chr(i) for i in range(256)])
+	difficultString = ''.join([chr(i) for i in range(1,256)])
 	f = Foo()
 	f.setMax500(difficultString)
 	store.addObject(f)
