@@ -111,7 +111,7 @@ class ThreadedAppServer(AppServer):
 				else: raise
 			if not self.running:
 				return
-			
+
 			for sock in input:
 				if sock.getsockname()[1] == self.monitorPort:
 					client,addr = sock.accept()
@@ -155,6 +155,7 @@ class ThreadedAppServer(AppServer):
 
 	def shutDown(self):
 		print "Shutting Down Threaded AppServer"
+		self.running = 0
 		self.mainsocket.close()
 		for i in range(self._poolsize):
 			self.requestQueue.put(None)#kill all threads
@@ -270,7 +271,7 @@ class RequestHandler:
 		dict = loads(chunk)
 		if verbose:
 			chucklen1 = len(chunk)
-		
+
 		while 1:
 			chunk = recv(BUFSIZE)
 			if not chunk:
@@ -299,10 +300,10 @@ class RequestHandler:
 		self._buffer = ''
 		for item in rawResponse['headers']:
 			self._buffer = self._buffer + item[0] + ": " + str(item[1]) + "\n"
-		
+
 		self._buffer = self._buffer + "\n" + rawResponse['contents']
 
-		
+
 		reslen = len(self._buffer)
 		while sent < reslen:
 			sent = sent + conn.send(self._buffer[sent:sent+8192])
@@ -351,13 +352,15 @@ class RequestHandler:
 
 
 
-def main(monitor = 0):
+def run(useMonitor=0):
 	global server
 	try:
 		server = None
 		server = ThreadedAppServer()
-		if monitor:
+		if useMonitor:
 			monitor = Monitor(server)
+		else:
+			monitor = 0
 		# On NT, run mainloop in a different thread because it's not safe for
 		# Ctrl-C to be caught while manipulating the queues.
 		# It's not safe on Linux either, but there, it appears that Ctrl-C
@@ -407,13 +410,13 @@ ThreadedAppServer takes the following command line arguments:
 If AppServer is called with no arguments, it will start the AppServer and record the pid of the process in appserverpid.txt
 """
 
-if __name__=='__main__':
-	import sys
-	if len(sys.argv) > 1:
-		if sys.argv[1] == "-monitor":
+
+def main(args):
+	if len(args)>1:
+		if args[1] == "-monitor":
 			print "Enabling Monitoring"
-			main(1)
-		elif sys.argv[1] == "-stop":
+			run(useMonitor=1)
+		elif args[1] == "-stop":
 			import AppServer
 			AppServer.stop()
 		else:
@@ -421,6 +424,6 @@ if __name__=='__main__':
 	else:
 		if 0:
 			import profile
-			profile.run("main()","profile.txt")
+			profile.run("main()", "profile.txt")
 		else:
-			main(0)
+			run(useMonitor=0)

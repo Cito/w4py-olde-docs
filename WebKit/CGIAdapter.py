@@ -37,7 +37,7 @@ from Adapter import Adapter
 debugging = 0   # set 1 if you want to see the raw response dictionary, instead of a normal page
 
 class CGIAdapter(Adapter):
-    def main(self):
+    def main(self, webKitDir):
         import os, sys
 
         try:
@@ -61,7 +61,7 @@ class CGIAdapter(Adapter):
             #open('counter.text', 'w').write(str(counter))
             #open('rr-%02d.rr' % counter, 'w').write(str(dict))
 
-            (host, port) = string.split(open('address.text').read(), ':')
+            (host, port) = string.split(open(os.path.join(webKitDir, 'address.text')).read(), ':')
             if os.name=='nt' and host=='': # MS Windows doesn't like a blank host name
                 host = 'localhost'
             port = int(port)
@@ -110,8 +110,5 @@ def HTMLEncode(s, codes=HTMLCodes):
         s = string.replace(s, code[0], code[1])
     return s
 
-def main():
-    CGIAdapter().main()
-
-if __name__=='__main__':
-	main()
+def main(webKitDir):
+	CGIAdapter().main(webKitDir)

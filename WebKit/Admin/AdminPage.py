@@ -1,4 +1,4 @@
-from SidebarPage import SidebarPage
+from WebKit.SidebarPage import SidebarPage
 import os
 
 

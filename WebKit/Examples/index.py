@@ -1,4 +1,4 @@
-from HTTPServlet import HTTPServlet
+from WebKit.HTTPServlet import HTTPServlet
 
 
 class index(HTTPServlet):

@@ -122,7 +122,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		"""
 		while self.running:
 		#print "asyncore loop"
-		    asyncore.loop()
+			asyncore.loop()
 
 	def address(self):
 		if self._addr is None:
@@ -171,7 +171,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		asyncore.close_all()
 		AppServer.shutDown(self)
 		print "AppServer: All Services have been shutdown"
-		
+
 
 
 
@@ -201,7 +201,7 @@ class RequestHandler(asyncore.dispatcher):
 			self.have_response = 1
 			self.server.shutDown()
 			return
-			
+
 
 		verbose = self.server._verbose
 
@@ -239,9 +239,9 @@ class RequestHandler(asyncore.dispatcher):
 
 		for item in rawResponse['headers']:
 			self._buffer = self._buffer + item[0] + ":" + str(item[1]) + "\n"
-		
+
 		self._buffer = self._buffer + "\n" + rawResponse['contents']
-		
+
 		self.have_response = 1
 
 		transaction._application=None
@@ -301,7 +301,7 @@ class RequestHandler(asyncore.dispatcher):
 		pass
 		#print ">>Handling Close"
 		#self.recycle()
-		
+
 	def recycle(self):
 		#print "Recycling\n"
 		self.active = 0
@@ -309,7 +309,7 @@ class RequestHandler(asyncore.dispatcher):
 		self.have_response = 0
 		self.reqdata=[]
 		asyncore.dispatcher.close(self)
-		self.server.rhQueue.put(self)		
+		self.server.rhQueue.put(self)
 
 	def log(self, message):
 		pass
@@ -356,7 +356,7 @@ class Monitor(asyncore.dispatcher):
 
 
 
-def main(monitor = 0):
+def run(useMonitor=0):
 	from errno import EINTR
 	import select
 	global server
@@ -370,11 +370,13 @@ def main(monitor = 0):
 			print "Traceback:\n"
 			print tb[0]
 			print tb[1]
-			import traceback			
+			import traceback
 			traceback.print_tb(tb[2])
 			sys.exit()
-		if monitor:
+		if useMonitor:
 			monitor = Monitor(server)
+		else:
+			monitor = 0
 		try:
 			asyncore.loop()
 		except select.error, v:
@@ -416,14 +418,12 @@ If AppServer is called with no arguments, it will start the AppServer and record
 """
 
 
-
-if __name__=='__main__':
-	import sys
-	if len(sys.argv) > 1:
-		if sys.argv[1] == "-monitor":
+def main(args):
+	if len(args)>1:
+		if args[1] == "-monitor":
 			print "Enabling Monitoring"
-			main(1)
-		elif sys.argv[1] == '-stop':
+			run(useMonitor=1)
+		elif args[1] == "-stop":
 			import AppServer
 			AppServer.stop()
 		else:
@@ -431,6 +431,6 @@ if __name__=='__main__':
 	else:
 		if 0:
 			import profile
-			profile.run("main()","profile.txt")
+			profile.run("main()", "profile.txt")
 		else:
-			main(0)
+			run(useMonitor=0)

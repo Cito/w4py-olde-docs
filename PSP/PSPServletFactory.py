@@ -23,7 +23,7 @@ This module handles requests from the application for PSP pages.
 
 """
 
-from ServletFactory import ServletFactory
+from WebKit.ServletFactory import ServletFactory
 
 
 import string
@@ -44,7 +44,7 @@ class PSPServletFactory(ServletFactory):
 		self.cacheDir = application.serverSidePath('Cache/PSP')
 		self._classcache={}
 		sys.path.append(self.cacheDir)
-		
+
 		self._cacheClassFiles = self._cacheClasses
 
 		l = ['_'] * 256
@@ -88,7 +88,7 @@ class PSPServletFactory(ServletFactory):
 	def import_createInstanceFromFile(self,path,classname,mtime,reimp=0):
 		"""
 		Create an actual instance of a PSP class.  This version uses import to generate the instance.
-		
+
 		"""
 		globals={}
 		module_obj=__import__(classname)

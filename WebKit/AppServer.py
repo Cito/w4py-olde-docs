@@ -54,7 +54,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self.loadPlugIns()
 
 		self.running = 1
-		
+
 
 
 	def recordPID(self):
@@ -146,13 +146,15 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source. Plug-ins are loaded by AppServer at startup time, just before listening for requests. See the docs for PlugIn.py for more info.
 		"""
 		plugIns = self.setting('PlugIns')
-		plugIns = map(lambda path: os.path.normpath(path), plugIns)
+		plugIns = map(lambda path: self.serverSidePath(path), plugIns)
+
 
 		# Scan each directory named in the PlugInDirs list.
 		# If those directories contain Python packages (that
 		# don't have a "dontload" file) then add them to the
 		# plugs in list.
 		for plugInDir in self.setting('PlugInDirs'):
+			plugInDir = self.serverSidePath(plugInDir)
 			for filename in os.listdir(plugInDir):
 				filename = os.path.normpath(os.path.join(plugInDir, filename))
 				if os.path.isdir(filename) and \

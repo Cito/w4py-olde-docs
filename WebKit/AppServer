@@ -1,4 +1,3 @@
 #!/bin/sh
 
-python ThreadedAppServer.py $1 &
-
+python Launch.py ThreadedAppServer $* &

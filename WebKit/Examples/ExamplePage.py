@@ -1,4 +1,4 @@
-from SidebarPage import SidebarPage
+from WebKit.SidebarPage import SidebarPage
 import string, os
 
 
@@ -21,7 +21,7 @@ class ExamplePage(SidebarPage):
 		scripts = []
 		#dir = self.request().serverSideDir()
 		dir = self.request().uriWebKitRoot() + 'Examples'
-		examples = eval(open('Examples/Examples.list').read())
+		examples = eval(open(self.serverSidePath('Examples.list')).read())
 		for name in examples:
 			script = {}
 			script['pathname'] = dir + '/' + name
