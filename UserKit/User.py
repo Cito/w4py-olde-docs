@@ -35,6 +35,8 @@ class User:
 	def setManager(self, manager):
 		''' Sets the manager, which can only be done once. '''
 		assert self._manager is None
+		from UserManager import UserManager
+		assert isinstance(manager, UserManager)
 		self._manager = manager
 
 	def serialNum(self):
