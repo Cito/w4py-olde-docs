@@ -24,6 +24,7 @@ try:
 except ImportError:
 	from StringIO import StringIO
 
+MinimumVersionErrorMsg="""\nThis Release of Webware reuires Python %s.  Your current version of Python is:\n %s.\nPlease go to http://www.python.org for the latest version of Python.\nYou may continue to install, but Webware may not perform as expected.\nDo you wish to continue with the installation? [yes/no]"""
 
 class Installer:
 	'''
@@ -51,6 +52,7 @@ class Installer:
 		else: self.printMsg = self._nop
 		self.clearInstalledFile()
 		self.printHello()
+		if not self.checkPyVersion(): return
 		self.detectComponents()
 		self.installDocs()
 		self.backupConfigs()
@@ -78,6 +80,20 @@ class Installer:
 		self.printKeyValue('Platform', sys.platform)
 		self.printKeyValue('Cur dir', os.getcwd())
 		print
+
+	def checkPyVersion(self,minver=[2,0]):
+		try:
+			version_info = sys.version_info
+		except:
+			version_info=None
+		if not version_info or version_info[0]<minver[0] or (version_info[0]==minver and version_info[1]<min[1]):
+			minVersionString=str(minver[0])+"."+str(minver[1])
+			response=raw_input( MinimumVersionErrorMsg % (minVersionString,sys.version))
+			if response and string.upper(response)[0] == "Y":
+				rtncode=1
+			else:
+				rtncode=0
+		return rtncode
 
 	def detectComponents(self):
 		print 'Scanning for components...'
@@ -254,8 +270,7 @@ class Installer:
 
 	def compileModules(self):
 		import StringIO
-		print "Byte compiling all modules\n
-		------------------------------------------\n"
+		print """Byte compiling all modules\n------------------------------------------\n"""
 		stdout = sys.stdout
 		stderr = sys.stderr
 		sys.stdout = StringIO.StringIO() #the compileall is a little verbose
