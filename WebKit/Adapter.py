@@ -2,7 +2,7 @@ import os, sys, time, socket
 from marshal import dumps, loads
 from Object import Object
 from MiscUtils.Configurable import Configurable
-
+import struct, errno
 
 class Adapter(Configurable, Object):
 
@@ -10,6 +10,7 @@ class Adapter(Configurable, Object):
 		Configurable.__init__(self)
 		Object.__init__(self)
 		self._webKitDir = webKitDir
+		self._respData = ''
 
 	def name(self):
 		return self.__class__.__name__
@@ -29,12 +30,11 @@ class Adapter(Configurable, Object):
 				'format': 'CGI',
 				'time':   time.time(),
 				'environ': env,
-			#	'input':   myInput
 				}
 
-		resp = ''
 		retries = 0
 		while 1:
+
 			try:
 				# Send our request to the AppServer
 				s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -42,29 +42,44 @@ class Adapter(Configurable, Object):
 				data = dumps(dict)
 				s.send(dumps(int(len(data))))
 				s.send(data)
-				s.send(myInput)
+				
+				sent=0				
+				inputLength = len(myInput)
+				while sent < inputLength:
+					chunk = s.send(myInput[sent:])
+					sent = sent+chunk
 				s.shutdown(1)
 
 				# Get the response from the AppServer
 				bufsize = 8*1024
 				# @@ 2000-04-26 ce: this should be configurable, also we should run some tests on different sizes
 				# @@ 2001-01-25 jsl: It really doesn't make a massive difference.  8k is fine and recommended.
-				resp = ''
+				
+##				s.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('ll',0,5)) #wait for 0.5 seconds for data
 				while 1:
-					data = s.recv(bufsize)
-					if not data:
-						break
-					resp = resp+data
+					try:
+						data = s.recv(bufsize)
+						if not data:
+							break
+						self.processResponse(data)
+					except socket.error, e:
+						if e[0] == errno.EAGAIN: #timed out
+							pass
+						else:
+							raise "error receiving response"
 				break
 			except socket.error:
-				# partial response then error == no good.
-				if resp:
-					raise 'got a socket error after a partial response from the app server'
 				# retry
 				if retries <= self.setting('NumRetries'):
 					retries = retries + 1
 					time.sleep(self.setting('SecondsBetweenRetries'))
 				else:
 					raise 'timed out waiting for app server to respond'
-		#return loads(resp)
-		return resp
+
+		return self._respData
+
+
+	def processResponse(self, data):
+		""" Process response data as it arrives."""
+		self._respData = self._respData + data
+		
