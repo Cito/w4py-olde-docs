@@ -44,6 +44,10 @@ class XMLRPCServlet(RPCServlet):
 					response = self.call(method, *params)
 				if type(response) != type(()):
 					response = (response,)
+			except xmlrpclib.Fault, fault:
+				response = xmlrpclib.dumps(fault, encoding=encoding)
+				self.sendOK('text/xml', response, transaction)
+				self.handleException(transaction)
 			except Exception, e:
 				fault = self.resultForException(e, transaction)
 				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault), encoding=encoding)
