@@ -10,8 +10,8 @@ class ListAttr(Attr):
 	def __init__(self, dict):
 		Attr.__init__(self, dict)
 		self._className = dict['Type'].split()[-1]
-		if dict.has_key('backRefAttr'):
-			self._backRefAttr = dict['backRefAttr']
+		if dict.has_key('BackRefAttr'):
+			self._backRefAttr = dict['BackRefAttr']
 		else:
 			self._backRefAttr = None
 		
