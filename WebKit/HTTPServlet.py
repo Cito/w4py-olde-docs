@@ -34,6 +34,7 @@ class HTTPServlet(Servlet):
 		if not method:
 			methName = 'respondTo' + string.capitalize(httpMethodName)
 			method = getattr(self, methName, self.notImplemented)
+			self._methodForRequestType[httpMethodName] = method
 		method(trans)
 
 	def notImplemented(self, trans):
