@@ -239,7 +239,7 @@ class TableColumn:
 
 	def valueForRawValue(self, rawValue):
 		''' The rawValue is typically a string or value already of the appropriate type. TableRecord invokes this method to ensure that values (especially strings that come from files) are the correct types (e.g., ints are ints and floats are floats). '''
-		# @@ 2000-07-23 ce: an if-else ladder? perhaps these should be dispatched messages
+		# @@ 2000-07-23 ce: an if-else ladder? perhaps these should be dispatched messages or a class hier
 		if self._type is StringType:
 			value = str(rawValue)
 		elif self._type is IntType:
@@ -304,7 +304,7 @@ class DataTable:
 	def readLines(self, lines, delimiter=',', allowComments=1, stripWhite=1):
 		if not lines:
 			return self
-		readHeadings = 0
+		haveReadHeadings = 0
 		lineNumber = 0
 		lenLines = len(lines)
 		while lineNumber<lenLines:
@@ -316,8 +316,8 @@ class DataTable:
 			elif line[0]=='#':
 				# skip comments
 				pass
-			elif readHeadings:
-				# process data rows
+			else:
+				# process row, either headings or data
 
 				# Split into a list of values
 				if '"' in line:
@@ -347,25 +347,22 @@ class DataTable:
 
 				values = split(line, delimiter)
 
-				if stripWhite:
+				if stripWhite  or  not haveReadHeadings:
 					values = map(strip, values)
 
 				if fixLine:
 					values = map(lambda v, d=delimiter: replace(v, '\0', d), values)
 
-				# Create a record using the headings and the current values
-				row = TableRecord(self, values)
-				self._rows.append(row)
-			else:
-				# process headings
-				headings = split(line, delimiter)
-				if headings==None  or  len(headings)==0:
-					raise DataTableError, "Couldn't read valid headings"
-				if stripWhite:
-					headings = map(strip, headings)
-				self.setHeadings(headings)
-				self.createNameToIndexMap()
-				readHeadings = 1
+				if haveReadHeadings:
+					# Create a record using the headings and the current values
+					row = TableRecord(self, values)
+					self._rows.append(row)
+				else:
+					if values==None  or  len(values)==0:
+						raise DataTableError, "Couldn't read valid headings"
+					self.setHeadings(values)
+					self.createNameToIndexMap()
+					haveReadHeadings = 1
 
 			lineNumber = lineNumber + 1
 

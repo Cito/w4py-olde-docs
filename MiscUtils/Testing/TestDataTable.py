@@ -56,8 +56,7 @@ def test01():
 
 	heading('Quoted values:')
 	t = DataTable()
-	# "x",'y,y',z # to do
-	lines = split('''x,y,z
+	lines = split('''"x","y,y",z
 		a,b,c
 		a,b,"c,d"
 		"a,b",c,d
@@ -70,7 +69,7 @@ def test01():
 
 	t.readLines(lines)
 	assert t.headings()[0].name()=='x'
-	assert t.headings()[1].name()=='y'
+	assert t.headings()[1].name()=='y,y'
 	assert t.headings()[2].name()=='z'
 
 	matches = [
