@@ -97,8 +97,6 @@ class ThreadedAppServer(AppServer):
 			out.flush()
 		out.write("\n")
 
-		self.recordPID()
-
 		self._socketHandlers = {}
 		self._handlerCache = {}
 		self._sockets = {}
