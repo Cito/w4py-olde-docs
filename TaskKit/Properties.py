@@ -10,4 +10,4 @@ status = 'beta'
 
 requiredPyVersion = (1, 5, 2)
 
-synopsis = ''' We aren't sure what this does yet  '''
+synopsis = '''TaskKit provides a framework for the scheduling and management of periodic tasks.'''
