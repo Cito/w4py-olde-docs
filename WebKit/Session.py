@@ -54,6 +54,9 @@ class Session(Object, CanContainer):
 			attempts = attempts + 1
 		else:
 			raise SessionError, "Can't create valid session id after %d attempts." % attempts
+		if trans.application().setting('Debug')['Sessions']:
+			print '>> [session] Created session, timeout=%s, id=%s, self=%s' % (
+				self._timeout, self._identifier, self)
 
 
 	## Access ##

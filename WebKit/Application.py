@@ -221,6 +221,9 @@ class Application(Configurable,CanContainer):
 			                           'Documentation': 'Documentation',
 			                           'Testing':       'Testing',
 			                         },
+			'Debug':	{
+				'Sessions': 0,
+			}
 		}
 
 	def configFilename(self):
@@ -333,26 +336,31 @@ class Application(Configurable,CanContainer):
 		This method will also expire the session if it's too old.
 		This method is invoked by dispatchRequest() as one of the major steps in handling requests.
 		'''
+		debug = self.setting('Debug')['Sessions']
+		if debug: prefix = '>> [session] isSessionIdProblematic:'
 		sid = request.sessionId()
 		if sid:
 			if self._sessions.has_key(sid):
 				if (time()-request.session().lastAccessTime()) >= self.setting('SessionTimeout')*60:
-					if debug: print '>> session expired:', sid
+					if debug: print prefix, 'session expired:', sid
 					del sessions[sid]
 					problematic = 1
 				else:
 					problematic = 0
 			else:
-				if debug: print '>> session does not exist:', sid
+				if debug: print prefix, 'session does not exist:', sid
 				problematic = 1
 		else:
 			problematic = 0
-		if debug: print '>> isSessionIdProblematic =', problematic, ',  id =', sid
+		if debug: print prefix, 'isSessionIdProblematic =', problematic, ',  id =', sid
 		return problematic
 
 	def handleInvalidSession(self, transaction):
 		res = transaction.response()
+		debug = self.setting('Debug')['Sessions']
+		if debug: prefix = '>> handleInvalidSession:'
 		res.setCookie('_SID_', '')
+		if debug: print prefix, "set _SID to ''"
 		res.write('''<html> <head> <title>Session expired</title> </head>
 			<body> <h1>Session Expired</h1>
 			<p> Your session has expired and all information related to your previous working session with this site has been cleared. <p> You may try this URL again by choosing Refresh/Reload, or revisit the front page. ''')
@@ -555,13 +563,17 @@ class Application(Configurable,CanContainer):
 		return response
 
 	def createSessionForTransaction(self, transaction):
+		debug = self.setting('Debug')['Sessions']
+		if debug: prefix = '>> [session] createSessionForTransaction:'
 		sessId = transaction.request().sessionId()
-
+		if debug: print prefix, 'sessId =', sessId
 		if sessId:
 			session = self.session(sessId)
+			if debug: print prefix, 'retrieved session =', session
 		else:
 			session = self._sessionClass(transaction)
 			self._sessions[session.identifier()] = session
+			if debug: print prefix, 'created session =', session
 		transaction.setSession(session)
 		return session
 

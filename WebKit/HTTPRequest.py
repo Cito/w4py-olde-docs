@@ -301,7 +301,10 @@ class HTTPRequest(Request):
 
 	def sessionId(self):
 		''' Returns a string with the session id specified by the client, or None if there isn't one. '''
-		return self.value('_SID_', None)
+		sid = self.value('_SID_', None)
+		if self._transaction.application().setting('Debug')['Sessions']:
+			print '>> sessionId: returning sid =', sid
+		return sid
 
 
 	## Inspection ##
