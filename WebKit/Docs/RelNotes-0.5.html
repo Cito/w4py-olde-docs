@@ -28,7 +28,7 @@ Version 0.5
 
 <ul>
 
-	<li> Added a new admin page: AppControl. User name and password are Admin/Webware. Try it out. [Jay L]
+	<li> Added a new admin page: AppControl. User name and password are Admin/Webware. Try it out. This Page will allow you to shutdown the running AppServer cleanly, without interrupting any current sessions.  This is now the recommended way to shut down the AppServers.[Jay L]
 
 	<li> There is a new SecurePage example for securing pages with a login id and password. [Geoff T]
 
@@ -50,6 +50,7 @@ Version 0.5
         'CacheContent': 1,
         'CheckDate': 1,
     },
+
 </pre>
 
 <p> So by default, a particular file with an unknown type (*.html, *.gif, etc.):
@@ -68,7 +69,18 @@ Version 0.5
 
 	<li> Added options <span class=name>CacheServletClasses</span> and <span class=name>CacheServletInstances</span>. See the <a href=UsersGuide.html#Configuration>Configuration</a> section of the User's Guide for more info. [Jay L]
 
-	<li> Added <span class=name>SessionDynamicStore</span> and made it the default session store. It will move inactive, but unexpired sessions out of memory and onto disk. @@ 2001-02-22 ce: what are the settings for this? [Jay L]
+	<li> Added <span class=name>SessionDynamicStore</span> and made it the default session store. It will move inactive, but unexpired sessions out of memory and onto disk. In support of this functionality, the following configuration options have been added to Application.config: [Jay L]
+								  <ul>
+									<li>"DynamicSessionTimeout": After how much time (in minutes) without activity should a session be moved from Memory to File.  Default is 15 minutes.
+									<li>"MaxDynamicMemorySessions":  The maximum number of sessions to have in memory. Default is 10,000.
+									</ul>
+
+
+   <li>Added Session.sessionEncode function which takes a string containing a URL/I as a parameter and returns that string with the session ID added as a get parameter.  This will enable WebKit's session functionality to function with clients that don't accept cookies.  This can also be accessed through Page.sessionEncode (as a convenience).[Jay L]
+
+   <li>A new adapter has been added, mod_webkit.  This is a native apache module for communicating with the AppServer. See <span class=name>Webware/WebKit/mod_webkit</span> for more details. [Jay L]
+
+   <li>Another new adapter is ModSnakeAdapter, an adapter for the mod_snake apache module. (Contributed by Jon Travis, the author of ModSnake)
 
 </ul>
 
@@ -84,7 +96,11 @@ Version 0.5
 	<li> Plug-ins (which are Python packages) now have a 'plugIn' variable set to point to the PlugIn object created in WebKit. We're not even sure what this could be used for yet, but it makes sense to have this pointer as hook that can be used as needed. [Chuck]
 
 	<li> The usual slew of code clean-ups. [everyone]
+
+    <li> The communications protocol between the Adapters and the AppServers has been refined in preparation for adding buffering functionality in the next release.
+
 </ul>
+
 
 
 <h2>API Changes</h2>
