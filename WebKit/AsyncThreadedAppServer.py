@@ -63,6 +63,8 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 	    #self.asyn_thread = Thread(target=self.asynloop)
 	    #self.asyn_thread.start()
 
+		self.setRequestHandlerClass(RequestHandler)
+
 		self.listen(self._poolsize*2) # @@ 2000-07-14 ce: hard coded constant should be a setting
 		print "Ready\n"
 
@@ -70,6 +72,9 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 	def isPersistent(self):
 		return 1
 
+
+	def setRequestHandlerClass(self, requestHandlerClass):
+		self._requestHandlerClass = requestHandlerClass
 
 	def handle_accept(self):
 		"""
@@ -80,7 +85,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 			rh=self.rhQueue.get_nowait()
 		except Queue.Empty:
 			if self.rhCreateCount < self._maxRHCount:
-				rh = RequestHandler(self)
+				rh = self._requestHandlerClass(self)
 				self.rhCreateCount = self.rhCreateCount + 1
 			else:
 		#rh = self.rhQueue.get() #block - No Don't, cause then nothing else happens, we're frozen
@@ -89,7 +94,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		self._reqCount = self._reqCount+1
 		conn,addr = self.accept()
 		conn.setblocking(0)
-		rh.activate(conn)
+		rh.activate(conn, addr)
 
 	def readable(self):
 		return self.accepting
@@ -232,7 +237,7 @@ class RequestHandler(asyncore.dispatcher):
 		del transaction
 		MainRelease.release()
 
-	def activate(self, socket):
+	def activate(self, socket, addr):
 		self.set_socket(socket)
 		self._buffer=''
 		self.active = 1
