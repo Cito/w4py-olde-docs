@@ -22,7 +22,7 @@ class SQLGenerator(CodeGenerator):
 		gen.generate(dirname)
 
 	For subclassers:
-		- Subclasses should be name <DATABASE>SQLGenerator where <DATABASE> is the name of the particular database product.
+		- Subclasses should be named <DATABASE>SQLGenerator where <DATABASE> is the name of the particular database product.
 		- A good example of a custom subclass is MySQLSQLGenerator.py. Be sure to take a look at it.
 		- Candidates for customization include:
 			Klasses
@@ -33,11 +33,12 @@ class SQLGenerator(CodeGenerator):
 			EnumAttr
 	"""
 
-	def dbName(self):
+	def sqlDatabaseName(self):
 		"""
-		Returns the name of the database by asked the generator's model for dbName().
+		Returns the name of the database by asking the generator's
+		model.
 		"""
-		return self.model().dbName()
+		return self.model().sqlDatabaseName()
 
 	def configFilename(self):
 		filename = self.model().filename()
@@ -84,14 +85,20 @@ class Model:
 		self._klasses.setSQLGenerator(generator)
 		self._klasses.writeCreateSQL(generator, os.path.join(dirname, 'Create.sql'))
 
-	def dbName(self):
-		""" Returns the name of the database, which is currently always equal to self.name(). """
-		return self.name()
+	def sqlDatabaseName(self):
+		"""
+		Returns the name of the database (which is either the 'Database'
+		setting or self.name()).
+		"""
+		name = self.setting('Database', None)
+		if name is None:
+			name = self.name()
+		return name
 
 	def writeInsertSamplesSQL(self, generator, dirname):
 		if self._filename is not None:
 			file = open(os.path.join(dirname, 'InsertSamples.sql'), 'w')
-			file.write('use %s;\n\n' % self.dbName())
+			file.write('use %s;\n\n' % self.sqlDatabaseName())
 			self._klasses.writeDeleteAllRecords(generator, file)
 			filenames = glob(os.path.join(self._filename, 'Sample*.csv'))
 			for filename in filenames:
@@ -236,7 +243,7 @@ class Klasses:
 		if sql:
 			wr('/* PreSQL start */\n' + sql + '\n/* PreSQL end */\n\n')
 
-		dbName = generator.dbName()
+		dbName = generator.sqlDatabaseName()
 		drop = generator.setting('DropStatements')
 		if drop=='database':
 			wr(self.dropDatabaseSQL(dbName))
