@@ -45,6 +45,7 @@ import AsyncThreadedAppServer
 from cStringIO import StringIO
 from BaseHTTPServer import BaseHTTPRequestHandler
 import urllib, string, time, asyncore, socket
+import sys
 
 global monitor
 monitor=0
@@ -90,7 +91,6 @@ class AsyncThreadedHTTPServer(AsyncThreadedAppServer.AsyncThreadedAppServer):
 		Returns the server port.
 		'''
 		return self.address()[1]
-
 
 
 
@@ -173,7 +173,6 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		"""
 		Always ready to write, otherwise we might have to wait for a timeout to be asked again
 		"""
-		#return self.active
 		return self.have_response
 
 	def handle_connect(self):
@@ -188,7 +187,6 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			self.reqdata = string.join(self.reqdata,'')
 			self.have_request=1
 			self.server.requestQueue.put(self)
-			#self.socket.shutdown(0)
 
 	def handle_write(self):
 		if not self.have_response: return
@@ -196,7 +194,8 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		self._buffer = self._buffer[sent:]
 		if len(self._buffer) == 0:
 			self.close()
-			#For testing
+		else:
+			MainRelease.release()
 		if __debug__:
 			sys.stdout.write(".")
 			sys.stdout.flush()
@@ -231,6 +230,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		env['GATEWAY_INTERFACE'] = 'CGI/1.1'
 		env['SERVER_PROTOCOL'] = self.protocol_version
 		env['SERVER_NAME'] = self.server.serverName()
+		env['HTTP_HOST'] = self.server.serverName()
 		env['SERVER_PORT'] = str(self.server.serverPort())
 		env['REQUEST_METHOD'] = self.command
 		uqrest = urllib.unquote(path)
@@ -244,7 +244,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		#    env['REMOTE_HOST'] = host
 		env['REMOTE_HOST'] = host
 		env['REMOTE_PORT'] = str(port)
-		print 'REMOTE_PORT = %d' % port
+#		print 'REMOTE_PORT = %d' % port
 		# AUTH_TYPE
 		# REMOTE_USER
 		# REMOTE_IDENT
@@ -255,9 +255,9 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		length = self.headers.getheader('content-length')
 		if length:
 			env['CONTENT_LENGTH'] = length
-			print 'reading %d chars of input' % int(length)
+#			print 'reading %d chars of input' % int(length)
 			input = self.rfile.read(int(length))
-			print 'done reading; input is %d chars long' % int(len(input))
+#			print 'done reading; input is %d chars long' % int(len(input))
 		else:
 			input = ''
 		for name, value in self.headers.items():
@@ -299,7 +299,6 @@ def main(use_monitor = 0):
 		except select.error, v:
 			if v[0] == EINTR:
 				print "Shutdown may not be clean."
-				print v
 			elif v[0] == 0: pass
 			else:raise
 	except Exception, e: #Need to kill the Sweeper thread somehow
