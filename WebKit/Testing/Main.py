@@ -99,12 +99,12 @@ Test each link more than once.
 
 Test with multiple adapters (WebKit.cgi, OneShot.cgi, etc.)
 
-Application's serverSidePathForRequest() method is fairly involved. It supports a variety of functionalities as described in it's doc string: <pre>%(serverSidePathForRequestDoc)s</pre>
+Application's serverSidePathsForRequest() method is fairly involved. It supports a variety of functionalities as described in it's doc string: <pre>%(serverSidePathsForRequestDoc)s</pre>
 '''
-		doc = Application.serverSidePathForRequest.__doc__
+		doc = Application.serverSidePathsForRequest.__doc__
 		doc = replace(doc, '\t', '    ')
 		fields = {
-			'serverSidePathForRequestDoc': doc,
+			'serverSidePathsForRequestDoc': doc,
 		}
 		lines = split(rawNotes, '\n')
 		lines = map(lambda line: strip(line), lines)

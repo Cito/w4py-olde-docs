@@ -2,6 +2,7 @@ from Common import *
 from Servlet import Servlet
 import sys
 from types import ClassType
+import imp
 
 
 class ServletFactory(Object):
@@ -44,6 +45,72 @@ class ServletFactory(Object):
 		"""
 		raise SubclassResponsibilityError
 
+	def importAsPackage(self, transaction, serverSidePathToImport):
+		"""
+		Imports the module at the given path in the proper package/subpackage for the current request.  For example, if the
+		transaction has the URL 'http://localhost/WebKit.cgi/MyContext/MySubdirectory/MyPage' and
+		path = 'some/random/path/MyModule.py' then this function imports the module at that path as
+		MyContext.MySubdirectory.MyModule .
+
+		Note that the module imported may have a different name from the servlet name specified in the URL.  This is used in PSP.
+		"""
+		# Pull out the full server side path and the context path		
+		request = transaction.request()
+		path = request.serverSidePath()
+		contextPath = request.serverSideContextPath()
+		
+		# First, we'll import the context's package.
+		directory, context = os.path.split(contextPath)
+		self._importModuleFromDirectory(context, directory, isPackageDir=1)
+		directory = os.path.join(directory, context)
+				
+		# Now we'll break up the rest of the path into components.
+		remainder = path[len(contextPath)+1:]
+		remainder = string.replace(remainder, '\\', '/')
+		remainder = string.split(remainder, '/')
+		fullname = context
+		
+		# Import all subpackages of the context package
+		for name in remainder[:-1]:
+			fullname = fullname + '.' + name
+			self._importModuleFromDirectory(fullname, directory, isPackageDir=1)
+			directory = os.path.join(directory, name)
+					
+		# Finally, import the module itself as though it was part of the package
+		# or subpackage, even though it may be located somewhere else.
+		moduleFileName = os.path.basename(serverSidePathToImport)
+		moduleDir = os.path.dirname(serverSidePathToImport)
+		name, ext = os.path.splitext(moduleFileName)
+		fullname = fullname + '.' + name
+		module = self._importModuleFromDirectory(fullname, moduleDir)
+		return module		
+
+	def _importModuleFromDirectory(self, fullModuleName, directory, isPackageDir=0):
+		"""
+		Imports the given module from the given directory.  fullModuleName should be the full
+		dotted name if the module is in a package or subpackage.  Returns the module object.
+
+		If isPackageDir is true, then this function simulates importing an empty __init__.py
+		if that file doesn't actually exist.
+		"""
+		moduleName = string.split(fullModuleName,'.')[-1]
+		fp = None
+		try:
+			if isPackageDir:
+				# Check if __init__.py is in the directory -- if not, fake an empty one.
+				packageDir = os.path.join(directory, moduleName)
+				if not os.path.exists(os.path.join(packageDir, '__init__.py')):
+					# Here we are faking the presence of an empty __init__.py in the package directory
+					fp, pathname, stuff = None, packageDir, ('', '', imp.PKG_DIRECTORY)
+				else:
+					fp, pathname, stuff = imp.find_module(moduleName, [directory])
+			else:
+				fp, pathname, stuff = imp.find_module(moduleName, [directory])
+			module = imp.load_module(fullModuleName, fp, pathname, stuff)
+		finally:
+			if fp is not None:
+				fp.close()
+		return module
 
 class PythonServletFactory(ServletFactory):
 	'''
@@ -63,28 +130,30 @@ class PythonServletFactory(ServletFactory):
 	def flushCache(self):
 		self._cache = {}
 
-	def old_servletForTransaction(self, transaction):
-		path = transaction.request().serverSidePath()
-		globals = {}
-		execfile(path, globals)
-		from types import ClassType
-		name = os.path.splitext(os.path.split(path)[1])[0]
-		assert globals.has_key(name), 'Cannot find expected servlet class named "%s".' % name
-		theClass = globals[name]
-		assert type(theClass) is ClassType
-		assert issubclass(theClass, Servlet)
-		return theClass()
+#	def old_servletForTransaction(self, transaction):
+#		path = transaction.request().serverSidePath()
+#		globals = {}
+#		execfile(path, globals)
+#		from types import ClassType
+#		name = os.path.splitext(os.path.split(path)[1])[0]
+#		assert globals.has_key(name), 'Cannot find expected servlet class named "%s".' % name
+#		theClass = globals[name]
+#		assert type(theClass) is ClassType
+#		assert issubclass(theClass, Servlet)
+#		return theClass()
 
 	def servletForTransaction(self, transaction):
-		path = transaction.request().serverSidePath()
+		request = transaction.request()
+		path = request.serverSidePath()
 		name = os.path.splitext(os.path.split(path)[1])[0]
 		if not self._cache.has_key(path):
 			self._cache[path] = {}
 		if os.path.getmtime(path) > self._cache[path].get('mtime', 0):
-			globals = {'transaction': transaction}
-			execfile(path, globals)
-			assert globals.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
-			theClass = globals[name]
+			# Import the module as part of the context's package
+			module = self.importAsPackage(transaction, path)
+			assert module.__dict__.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
+			# Pull the servlet class out of the module
+			theClass = getattr(module, name)
 			assert type(theClass) is ClassType
 			assert issubclass(theClass, Servlet)
 			self._cache[path]['mtime'] = os.path.getmtime(path)
@@ -95,16 +164,16 @@ class PythonServletFactory(ServletFactory):
 				del self._cache[path]
 		return theClass()
 
-	def import_servletForTransaction(self, transaction):
-		path = transaction.request().serverSidePath()
-		name = os.path.splitext(os.path.split(path)[1])[0]
-		if not self.cache.has_key(name): self.cache[name]={}
-		if os.path.getmtime(path) > self.cache[name].get('mtime',0):
-			if not os.path.split(path)[0] in sys.path: sys.path.append(os.path.split(path[0]))
-			module_obj=__import__(name)
-			reload(module_obj)#force reload
-			inst =  module_obj.__dict__[name]()
-			self.cache[name]['mtime']=os.path.getmtime(path)
-		else:
-			inst = sys.modules[name].__dict__[name]()
-		return inst
+#	def import_servletForTransaction(self, transaction):
+#		path = transaction.request().serverSidePath()
+#		name = os.path.splitext(os.path.split(path)[1])[0]
+#		if not self.cache.has_key(name): self.cache[name]={}
+#		if os.path.getmtime(path) > self.cache[name].get('mtime',0):
+#			if not os.path.split(path)[0] in sys.path: sys.path.append(os.path.split(path[0]))
+#			module_obj=__import__(name)
+#			reload(module_obj)#force reload
+#			inst =  module_obj.__dict__[name]()
+#			self.cache[name]['mtime']=os.path.getmtime(path)
+#		else:
+#			inst = sys.modules[name].__dict__[name]()
+#		return inst

@@ -201,6 +201,7 @@ class HTTPRequest(Request):
 		''' Sets the URL path of the request. There is rarely a need to do this. Proceed with caution. The only known current use for this is Application.forwardRequest(). '''
 		if hasattr(self, '_serverSidePath'):
 			del self._serverSidePath
+			del self._serverSideContextPath
 		if hasattr(self, '_serverSideDir'):
 			del self._serverSideDir
 		self._environ['PATH_INFO'] = path
@@ -211,11 +212,26 @@ class HTTPRequest(Request):
 		'''
 		if not hasattr(self, '_serverSidePath'):
 			app = self._transaction.application()
-			self._serverSidePath = app.serverSidePathForRequest(self)
+			self._serverSidePath, self._serverSideContextPath = app.serverSidePathsForRequest(self)
 		if path:
 			return os.path.normpath(os.path.join(os.path.dirname(self._serverSidePath), path))
 		else:
 			return self._serverSidePath
+
+	def serverSideContextPath(self, path=None):
+		''' Returns the absolute server-side path of the context of this request.
+		If the optional path is passed in, then it is joined with the server side context directory
+		to form a path relative to the object.
+
+		This directory could be different from the result of serverSidePath() if the request
+		is in a subdirectory of the main context directory.'''
+		if not hasattr(self, '_serverSideContextPath'):
+			app = self._transaction.application()
+			self._serverSidePath, self._serverSideContextPath = app.serverSidePathsForRequest(self)
+		if path:
+			return os.path.normpath(os.path.join(os.path.dirname(self._serverSideContextPath), path))
+		else:
+			return self._serverSideContextPath
 
 	def servletURI(self):
 		"""This is the URI of the servlet, without any query strings or extra path info"""

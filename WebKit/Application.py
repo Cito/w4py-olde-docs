@@ -793,7 +793,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 	def filenamesForBaseName(self, baseName, debug=0):
 		'''
-		Returns a list of all filenames with extensions existing for baseName, but not including extension found in the setting ExtensionsToIgnore. This utility method is used by serverSidePathForRequest().
+		Returns a list of all filenames with extensions existing for baseName, but not including extension found in the setting ExtensionsToIgnore. This utility method is used by serverSidePathsForRequest().
 		Example: '/a/b/c' could yield ['/a/b/c.py', '/a/b/c.html'], but will never yield a '/a/b/c.pyc' filename since .pyc files are ignored.
 		'''
 		filenames = glob(baseName+'.*')
@@ -810,10 +810,13 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 
 
-	def serverSidePathForRequest(self, request, debug=0):
+	def serverSidePathsForRequest(self, request, debug=0):
 		"""
-		Returns what it says. This is a 'private' service method for use by HTTPRequest.
-		Returns None if there is no corresponding server side path for the URL.
+		Returns a tuple (requestPath, contextPath) where requestPath is
+		the server-side path of this request, and contextPath is the
+		server-side path of the context for this request.
+		This is a 'private' service method for use by HTTPRequest.
+		Returns (None, None) if there is no corresponding server side path for the URL.
 
 		This method supports:
 			* Contexts
@@ -833,7 +836,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		"""
 
 		if debug:
-			print '>> serverSidePathForRequest(request=%s)' % repr(request)
+			print '>> serverSidePathsForRequest(request=%s)' % repr(request)
 			import pprint
 			pprint.pprint(request._rawRequest)
 
@@ -841,13 +844,13 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		if debug: print '>> urlPath =', repr(urlPath)
 
 		if request._absolutepath:
-			return urlPath
+			return urlPath, None
 
 		# try the cache first
-		ssPath = self._serverSidePathCacheByPath.get(urlPath, None)
+		ssPath, contextPath = self._serverSidePathCacheByPath.get(urlPath, (None, None))
 		if ssPath is not None:
 			if debug: print '>> returning path from cache: %s' % repr(ssPath)
-			return ssPath
+			return ssPath, contextPath
 
 
 		# case: no URL then use the default context
@@ -881,6 +884,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			else:
 				ssPath = prepath
 			if debug: print ">> ssPath= %s" % ssPath
+
+		contextPath = self._contexts[contextName]
 
 		lastChar = ssPath[-1]
 		ssPath = os.path.normpath(ssPath)
@@ -952,10 +957,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 			##Finish extraURLPath checks
 			##Check cache again
-			cachePath = self._serverSidePathCacheByPath.get(urlPath, None)
+			cachePath, cacheContextPath = self._serverSidePathCacheByPath.get(urlPath, (None, None))
 			if cachePath is not None:
 				if debug: print '>> returning path from cache: %s' % repr(ssPath)
-				return cachePath
+				return cachePath, cacheContextPath
 
 
 		if isdir(ssPath):
@@ -967,7 +972,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			if extraURLPath == '' and (urlPath=='' or urlPath[-1]!='/'):
 				if debug:
 					print '>> BAILING on directory url: %s' % repr(urlPath)
-				return ssPath
+				return ssPath, contextPath
 
 			# Handle directories
 			if debug: print '>> directory = %s' % repr(ssPath)
@@ -978,10 +983,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 					break  # we found a file to handle the directory
 				elif num>1:
 					print 'WARNING: For %s, the directory is %s which contains more than 1 directory file: %s' % (urlPath, ssPath, filenames)
-					return None
+					return None, None
 			if num==0:
 				print 'WARNING: For %s, the directory is %s which contains no directory file.' % (urlPath, ssPath)
-				return None
+				return None, None
 			ssPath = filenames[0] # our path now includes the filename within the directory
 			if debug: print '>> discovered directory file = %s' % repr(ssPath)
 		elif os.path.splitext(ssPath)[1]=='':
@@ -992,18 +997,25 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				if debug: print '>> discovered extension, file = %s' % repr(ssPath)
 			else:
 				print 'WARNING: For %s, did not get precisely 1 filename: %s' % (urlPath, filenames)
-				return None
+				return None, None
 		elif not os.path.exists(ssPath):
-			return None
+			return None, None
 
-		self._serverSidePathCacheByPath[urlPath] = ssPath
+		self._serverSidePathCacheByPath[urlPath] = ssPath, contextPath
 
 		if debug:
 			print '>> returning %s\n' % repr(ssPath)
-		return ssPath
-
+		return ssPath, contextPath
 
 	## Deprecated ##
+
+	def serverSidePathForRequest(self, request, debug=0):
+		"""
+		This is maintained for backward compatibility; it just returns the first part of the tuple
+		returned by serverSidePathsForRequest.
+		"""
+		self.deprecated(self.serverSidePathForRequest)
+		return self.serverSidePathsForRequest(request, debug)[0]
 
 	def serverDir(self):
 		"""

@@ -242,7 +242,7 @@ class IncludeGenerator(GenericGenerator):
 		self.page=thepath
 
 		if not self.static:
-			self.scriptgen = ScriptGenerator("self.__includeFile('%s')" % thepath, None)
+			self.scriptgen = ScriptGenerator("self.__includeFile('%s')" % string.replace(thepath, '\\', '\\\\'), None)
 
     def generate(self, writer, phase=None):
 		""" JSP does this in the servlet.  I'm doing it here because I have triple quotes.

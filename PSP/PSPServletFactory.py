@@ -55,10 +55,10 @@ class PSPServletFactory(ServletFactory):
 		self.clearFileCache()
 
 	def uniqueness(self):
-            return 'file'
+		 return 'file'
 
 	def extensions(self):
-            return ['.psp']
+		 return ['.psp']
 
 	def flushCache(self):
 		"""
@@ -81,35 +81,49 @@ class PSPServletFactory(ServletFactory):
 		Argument: pagename:  the path to the PSP source file
 		Returns:  A unique name for the class generated fom this PSP source file.
 		"""
-	    # Compute class name by taking the path and substituting underscores for
-	    # all non-alphanumeric characters.
+		# Compute class name by taking the path and substituting underscores for
+		# all non-alphanumeric characters.
 		return string.translate(os.path.splitdrive(pagename)[1], self._classNameTrans)
 
-	def import_createInstanceFromFile(self,path,classname,mtime,reimp=0):
-		"""
-		Create an actual instance of a PSP class.  This version uses import to generate the instance.
+#	def import_createInstanceFromFile(self,transaction,path,classname,mtime,reimp=0):
+#		"""
+#		Create an actual instance of a PSP class.  This version uses import to generate the instance.
+#
+#		"""
+#		globals={}
+#		module_obj=__import__(classname)
+#		if reimp:
+#			reload(module_obj)
+#		instance = module_obj.__dict__[classname]()
+#		code=module_obj.__dict__[classname]
+#		self._classcache[classname] = {'code':code,
+#					   'filename':path,
+#					   'mtime':time.time(),}
+#		return instance
 
-		"""
-		globals={}
-		module_obj=__import__(classname)
-		if reimp:
-			reload(module_obj)
-		instance = module_obj.__dict__[classname]()
-		code=module_obj.__dict__[classname]
-		self._classcache[classname] = {'code':code,
-					   'filename':path,
-					   'mtime':time.time(),}
-		return instance
+#	def createInstanceFromFile(self,transaction,filename,classname,mtime,reimp=0):
+#		"""
+#		Create an actual class instance.  This version uses "exec" to generate the class instance.
+#		"""
+#		globals={}
+#		execfile(filename,globals)
+#		assert globals.has_key(classname)
+#		instance = globals[classname]()
+#		code=globals[classname]
+#		self._classcache[classname] = {'code':code,
+#					   'filename':filename,
+#					   'mtime':time.time(),}
+#		return instance
 
-	def createInstanceFromFile(self,filename,classname,mtime,reimp=0):
+	def createInstanceFromFile(self,transaction,filename,classname,mtime,reimp=0):
 		"""
-		Create an actual class instance.  This version uses "exec" to generate the class instance.
+		Create an actual class instance.  The module containing the class is imported as though it
+		were a module within the context's package (and appropriate subpackages).
 		"""
-		globals={}
-		execfile(filename,globals)
-		assert globals.has_key(classname)
-		instance = globals[classname]()
-		code=globals[classname]
+		module = self.importAsPackage(transaction,filename)
+		assert module.__dict__.has_key(classname), 'Cannot find expected class named %s in %s.' % (repr(classname), repr(filename))
+		code = getattr(module, classname)
+		instance = code()
 		self._classcache[classname] = {'code':code,
 					   'filename':filename,
 					   'mtime':time.time(),}
@@ -136,7 +150,7 @@ class PSPServletFactory(ServletFactory):
 
 		classname = self.computeClassName(fullname)
 
-	    #see if we can just create a new instance
+		#see if we can just create a new instance
 		if self._cacheClasses:
 			instance = self.checkClassCache(classname,mtime)
 		if instance != None:
@@ -146,7 +160,7 @@ class PSPServletFactory(ServletFactory):
 
 		if self._cacheClassFiles and os.path.exists(cachedfilename) and os.stat(cachedfilename)[6] > 0:
 			if os.path.getmtime(cachedfilename) > mtime:
-				instance = self.createInstanceFromFile(cachedfilename,classname,mtime,0)
+				instance = self.createInstanceFromFile(trans,cachedfilename,classname,mtime,0)
 				return instance
 
 		pythonfilename = cachedfilename
@@ -161,7 +175,7 @@ class PSPServletFactory(ServletFactory):
 		print 'creating python class: ' , classname
 		clc.compile()
 
-		instance = self.createInstanceFromFile(cachedfilename,classname,mtime,1)
+		instance = self.createInstanceFromFile(trans,cachedfilename,classname,mtime,1)
 		return instance
 
 
