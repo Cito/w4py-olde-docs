@@ -103,12 +103,12 @@ class Installer:
 		self.createComponentIndexes()
 
 	def propagateStyleSheet(self):
-		''' Copy Documentation/StyleSheet.css into other Documentation dirs. '''
+		''' Copy Docs/StyleSheet.css into other Docs dirs. '''
 		print 'Propagating stylesheet...'
-		stylesheet = open('Documentation/StyleSheet.css', 'rb').read()
+		stylesheet = open('Docs/StyleSheet.css', 'rb').read()
 		for comp in self._comps:
 			#print '  %s...' % comp['filename']
-			target = os.path.join(comp['filename'], 'Documentation', 'StyleSheet.css')
+			target = os.path.join(comp['filename'], 'Docs', 'StyleSheet.css')
 			open(target, 'wb').write(stylesheet)
 		print
 
@@ -117,7 +117,7 @@ class Installer:
 		self.requirePath('DocSupport')
 		from RawToHTML import RawToHTML
 		processor = RawToHTML()
-		processor.main(['install.RawToHTML', 'Documentation/*.raw'])
+		processor.main(['install.RawToHTML', 'Docs/*.raw'])
 		print
 
 	def createBrowsableSource(self):
@@ -130,7 +130,7 @@ class Installer:
 			filename = comp['filename']
 			print '  %s...' % filename
 
-			sourceDir = '%s/Documentation/Source' % filename
+			sourceDir = '%s/Docs/Source' % filename
 			self.makeDir(sourceDir)
 
 			filesDir = sourceDir + '/Files'
@@ -229,13 +229,13 @@ class Installer:
 		print 'Creating ComponentIndex.html...'
 		ht = []
 		wr = ht.append
-		wr("Don't know where to start? Try <a href=../WebKit/Documentation/index.html>WebKit</a>. <p>")
+		wr("Don't know where to start? Try <a href=../WebKit/Docs/index.html>WebKit</a>. <p>")
 		wr('<table align=center border=0 cellpadding=2 cellspacing=2 width=100%>')
 		wr('<tr class=ComponentHeadings> <td nowrap>Component</td> <td>Status</td> <td nowrap>Py ver</td> <td>Summary</td> </tr>')
 		row = 0
 		for comp in self._comps:
 			comp = comp.copy()
-			comp['name'] = '<a href=../%(filename)s/Documentation/index.html>%(name)s</a>' % comp
+			comp['name'] = '<a href=../%(filename)s/Docs/index.html>%(name)s</a>' % comp
 			#comp['version'] = '.'.join([str(x) for x in comp['version']])
 			comp['version'] = join(map(lambda x: str(x), comp['version']), '.')
 			#comp['requiredPyVersion'] = '.'.join([str(x) for x in comp['requiredPyVersion']])
@@ -252,20 +252,20 @@ class Installer:
 		wr('</table>')
 #		ht = '\n'.join(ht)
 		ht = string.join(ht, '\n')
-		self.writeDocFile('Webware Component Index', 'Documentation/ComponentIndex.html', ht, extraHead='<link rel=stylesheet href=ComponentIndex.css type=text/css>')
+		self.writeDocFile('Webware Component Index', 'Docs/ComponentIndex.html', ht, extraHead='<link rel=stylesheet href=ComponentIndex.css type=text/css>')
 
 	def createIndex(self):
 		print 'Creating index.html...'
 		version = self._ver
 		ht = self.htFragment('index')
 		ht = ht % locals()
-		self.writeDocFile('Webware Documentation', 'Documentation/index.html', ht, extraHead='<link rel=stylesheet href=index.css type=text/css>')
+		self.writeDocFile('Webware Documentation', 'Docs/index.html', ht, extraHead='<link rel=stylesheet href=index.css type=text/css>')
 
 		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until
 		# we have a more general mechanism for adding the header
 		# and footer to various documents
 		ht = self.htFragment('Copyright')
-		self.writeDocFile('Webware Copyright et al', 'Documentation/Copyright.html', ht)
+		self.writeDocFile('Webware Copyright et al', 'Docs/Copyright.html', ht)
 
 
 	def createComponentIndexes(self):
@@ -291,7 +291,7 @@ class Installer:
 
 			# Set up release notes
 			ht = []
-			releaseNotes = glob(os.path.join(comp['filename'], 'Documentation', 'RelNotes-*.html'))
+			releaseNotes = glob(os.path.join(comp['filename'], 'Docs', 'RelNotes-*.html'))
 			if releaseNotes:
 #				releaseNotes = [{'filename': os.path.basename(filename)} for filename in releaseNotes]
 				results = []
@@ -314,9 +314,9 @@ class Installer:
 
 			# Write file
 			title = comp['name'] + ' Documentation'
-			filename = os.path.join(comp['filename'], 'Documentation', 'index.html')
+			filename = os.path.join(comp['filename'], 'Docs', 'index.html')
 			contents = indexFrag % comp
-			cssLink = '<link rel=stylesheet href=../../Documentation/index.css type=text/css>'
+			cssLink = '<link rel=stylesheet href=../../Docs/index.css type=text/css>'
 			self.writeDocFile(title, filename, contents, extraHead=cssLink)
 
 	def finished(self):
@@ -330,7 +330,7 @@ Installation looks successful.
 Welcome to Webware!
 
 You can find more information at:
-  * Documentation/index.html  (e.g., local docs)
+  * Docs/index.html  (e.g., local docs)
   * http://webware.sourceforge.net
 
 Installation is finished.'''
@@ -366,7 +366,7 @@ Installation is finished.'''
 
 	def htFragment(self, name):
 		''' Returns an HTML fragment with the given name. '''
-		return open(os.path.join('Documentation', name+'.htmlf')).read()
+		return open(os.path.join('Docs', name+'.htmlf')).read()
 
 	def writeDocFile(self, title, filename, contents, extraHead=''):
 		values = locals()
