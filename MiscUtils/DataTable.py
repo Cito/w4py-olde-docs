@@ -154,6 +154,7 @@ at. See below.
 
 TO DO
 
+* Allow callback parameter or setting for parsing CSV records.
 * Perhaps TableRecord should inherit UserList and UserDict and override methods as appropriate...?
 * Better support for datetime.
 * _types and BlankValues aren't really packaged, advertised or
