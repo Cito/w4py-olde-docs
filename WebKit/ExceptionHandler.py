@@ -146,7 +146,7 @@ class ExceptionHandler(Object):
 				from WebUtils.ExpansiveHTMLForException import ExpansiveHTMLForException
 				html.append(ExpansiveHTMLForException(context=self.setting('FancyTracebackContext')))
 			except:
-				html.append('Unable to generate a fancy traceback.  Make sure that cgitb.py is installed and works properly.  It can be downloaded from <a href="http://web.lfw.org/python/">here</a>.')
+				html.append('Unable to generate a fancy traceback!')
 				
 		return string.join(html, '')
 
