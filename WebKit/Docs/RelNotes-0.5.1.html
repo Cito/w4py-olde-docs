@@ -33,6 +33,8 @@ Version 0.5.1
 
 	<li> The servlet used to view the source code of the examples was also able to view any file on the system to which the WebKit process had access.  This has been corrected so that only files in the Examples dirtectory can be viewed.  A similar issue existed in the PSP Examples context and was also corrected.
 
+	<li> The SessionFileStore.keys() method incorrectly put a slash at the beginning of every key. This affected the other flavors of session storage, which use SessionFileStore for various purposes.
+
 	<li> The XMLRPC servlet in the 0.5.0 release was non-functioning.  It is now functional.
 
     <li> <span class=filename>Testing/stress.py</span> now works properly (by killing HTTP cookies, in the test requests, which contain stale session ids).
