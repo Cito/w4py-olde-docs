@@ -7,6 +7,7 @@ __version__ = 0.1
 import os
 from PSPServletFactory import PSPServletFactory
 
+__version__='0.1'
 
 def InstallInWebKit(appServer):
 	app = appServer.application()

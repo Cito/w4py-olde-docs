@@ -191,6 +191,7 @@ class PSPReader:
 		"""greedy search, return the point before the string, but move reader past it"""
 		pt = string.find(self.current.stream[self.current.cursor:],st)
 		if pt == -1:
+			self.current.cursor = len(self.current.stream)
 			if self.hasMoreInput():
 				self.popFile() #Should I do this here? 6/1/00
 				self.skipUntil(st)

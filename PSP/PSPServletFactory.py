@@ -42,7 +42,6 @@ class PSPServletFactory(ServletFactory):
 	def __init__(self,application):
 	    ServletFactory.__init__(self,application)
 
-	    self.application = application
 	    self.apppath = application.serverDir()
 	    self.cacheDir = os.path.join(self.apppath, 'cache')
 	    self._classcache={}
