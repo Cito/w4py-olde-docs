@@ -67,3 +67,12 @@ class Message(Object):
 	def argNames(self):
 		''' Returns a list of argument names. '''
 		return self._args.keys()
+
+
+	## Exception reports ##
+
+	exceptionReportAttrNames = ['args']
+
+	def writeExceptionReport(self, handler):
+		handler.writeTitle(self.__class__.__name__)
+		handler.writeAttrs(self, self.exceptionReportAttrNames)

@@ -50,6 +50,13 @@ class Response(Message):
 	def streamOut(self):
 		return self._strmOut
 
+		
 	## Cleanup ##
+
 	def clearTransaction(self):
 		del self._transaction
+
+
+	## Exception reporting ##
+
+	exceptionReportAttrNames = Message.exceptionReportAttrNames + ['endTime']

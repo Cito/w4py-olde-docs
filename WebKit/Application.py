@@ -1314,7 +1314,11 @@ class Application(ConfigurableForServerSidePath, Object):
 		if debug: print "processExtraURLPath returning %s, %s, %s" % ( ssPath, urlPath, extraURLPath )
 		return ssPath, urlPath, extraURLPath
 
-
+	def writeExceptionReport(self, handler):
+		# Nothing particularly useful that I can think of needs to be
+		# added to the exception reports by the Application.
+		# See ExceptionHandler.py for more info.
+		pass
 
 
 	## Deprecated ##

@@ -334,6 +334,7 @@ class Page(HTTPServlet):
 		"""
 		return apply(self.application().callMethodOfServlet, (self.transaction(), URL, method) + args, kwargs)
 
+
 	## Self utility ##
 
 	def sessionEncode(self, url=None):
@@ -347,7 +348,6 @@ class Page(HTTPServlet):
 		return self.session().sessionEncode(url)
 
 
-
 	## Private utility ##
 
 	def _actionSet(self):
@@ -357,3 +357,19 @@ class Page(HTTPServlet):
 			for action in self.actions():
 				self._actionDict[action] = 1
 		return self._actionDict
+
+
+	## Exception reports ##
+
+	def writeExceptionReport(self, handler):
+		handler.writeTitle(self.__class__.__name__)
+		handler.writeln('''Servlets can provide debugging information here by overriding writeExceptionReport().<br>For example:
+<pre>    exceptionReportAttrs = 'foo bar baz'.split()
+    def writeExceptionReport(self, handler):
+        handler.writeTitle(self.__class__.__name__)
+        handler.writeAttrs(self, self.exceptionReportAttrs)
+        handler.write('any string')
+</pre>
+
+See WebKit/ExceptionHandler.py for more information.
+''')

@@ -1,4 +1,6 @@
 from Common import *
+from WebUtils.Funcs import htmlEncode
+import traceback
 
 
 class Transaction(Object):
@@ -134,3 +136,22 @@ class Transaction(Object):
 				#print '>> resetting'
 				attr.resetKeyBindings()
 			delattr(self, attrName)
+
+
+	## Exception handling ##
+
+	exceptionReportAttrNames = 'application request response session servlet'.split()
+
+	def writeExceptionReport(self, handler):
+		handler.writeTitle(self.__class__.__name__)
+		handler.writeAttrs(self, self.exceptionReportAttrNames)
+
+		for name in self.exceptionReportAttrNames:
+			obj = getattr(self, '_'+name, None)
+			if obj:
+				try:
+					obj.writeExceptionReport(handler)
+				except Exception, e:
+					handler.writeln('<p> Uncaught exception while asking <b>%s</b> to write report:\n<pre>' % name)
+					traceback.print_exc(file=handler)
+					handler.writeln('</pre>')

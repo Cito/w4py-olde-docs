@@ -285,3 +285,7 @@ class HTTPResponse(Response):
 			if sep:
 				self.setHeader(i[:sep], string.rstrip(i[sep+1:]))
 
+
+	## Exception reporting ##
+
+	exceptionReportAttrNames = Response.exceptionReportAttrNames + ['committed', 'headers', 'cookies']

@@ -517,6 +517,8 @@ class HTTPRequest(Request):
 		res.append('</table>\n')
 		return string.join(res, '')
 
+	exceptionReportAttrNames = Request.exceptionReportAttrNames + 'uri servletPath serverSidePath pathInfo pathTranslated queryString method sessionId parents fields cookies environ'.split()
+
 
 	## Deprecated ##
 

@@ -177,3 +177,12 @@ class Session(Object):
 			url.insert(4, params + "&" + sid)
 		url = urlparse.urlunparse(url)
 		return url
+
+
+	## Exception reports ##
+
+	exceptionReportAttrNames = 'lastAccessTime isExpired numTrans timeout values'.split()
+
+	def writeExceptionReport(self, handler):
+		handler.writeTitle(self.__class__.__name__)
+		handler.writeAttrs(self, self.exceptionReportAttrNames)

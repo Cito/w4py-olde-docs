@@ -2,8 +2,12 @@ from Common import *
 import string, time, traceback, types, whrandom, sys
 from time import asctime, localtime
 from WebUtils.HTMLForException import HTMLForException
-from WebUtils.Funcs import htmlForDict
+from WebUtils.Funcs import htmlForDict, htmlEncode
 from HTTPResponse import HTTPResponse
+from types import DictType
+
+
+class singleton: pass
 
 
 class ExceptionHandler(Object):
@@ -11,6 +15,25 @@ class ExceptionHandler(Object):
 	ExceptionHandler is a utility class for Application that is created
 	to handle a particular exception. The object is a one-shot deal.
 	After handling an exception, it should be removed.
+
+	At some point, the exception handler sends "writeExceptionReport"
+	to the transaction, which in turn sends it to the other transactional objects (application, request, response, etc.)
+	The handler is the single argument for this message.
+
+	Classes may find it useful to do things like this:
+
+	exceptionReportAttrs = 'foo bar baz'.split()
+	def writeExceptionReport(self, handler):
+		handler.writeTitle(self.__class__.__name__)
+		handler.writeAttrs(self, self.exceptionReportAttrs)
+
+	The handler write methods that may be useful are:
+		def write(self, s):
+		def writeln(self, s):
+		def writeTitle(self, s):
+		def writeDict(self, d):
+		def writeTable(self, listOfDicts, keys=None):
+		def writeAttrs(self, obj, attrNames):
 
 	See the WebKit.html documentation for other information.
 	'''
@@ -47,9 +70,10 @@ class ExceptionHandler(Object):
 		return self._app.setting(name)
 
 	def servletPathname(self):
-		return self._tra.request().pathTranslated()
-		# @@ 2000-05-01 ce: What should this be?
-		# @@ 2000-06-28 ce: probaby servletURL()
+		try:
+			return self._tra.request().serverSidePath()
+		except:
+			return None
 
 	def basicServletName(self):
 		name = self.servletPathname()
@@ -124,36 +148,133 @@ class ExceptionHandler(Object):
 
 	def htmlDebugInfo(self):
 		''' Return HTML-formatted debugging information about the current exception. '''
-		html = ['''
-%s
-<p> <i>%s</i>
-''' % (htTitle('Traceback'), self.servletPathname())]
+		self.html = []
+		self.writeHTML()
+		html = ''.join(self.html)
+		self.html = None
+		return html
 
-		html.append(HTMLForException(self._exc))
+	def writeHTML(self):
+		self.writeTraceback()
+		self.writeMiscInfo()
+		self.writeTransaction()
+		self.writeEnvironment()
+		self.writeIds()
+		self.writeFancyTraceback()
 
-		html.extend([
-			htTitle('Misc Info'),
-			htmlForDict({
-				'time':          asctime(localtime(self._res.endTime())),
-				'filename':      self.servletPathname(),
-				'os.getcwd()':   os.getcwd(),
-				'sys.path':      sys.path
-			}),
-			htTitle('Fields'),        htmlForDict(self._req.fields()),
-			htTitle('Headers'),       htmlForDict(self._res.headers()),
-			htTitle('Environment'),   htmlForDict(self._req.environ(), {'PATH': ';'}),
-			htTitle('Ids'),           htTable(osIdTable(), ['name', 'value'])])
-			# @@ 2000-05-01 ce: Shouldn't we be asking each of the objects (transaction, request, response, ...) for it's debugging info to append? That would be more OOPish.
 
+	## Write utility methods ##
+
+	def write(self, s):
+		self.html.append(str(s))
+
+	def writeln(self, s):
+		self.html.append(str(s))
+		self.html.append('\n')
+
+	def writeTitle(self, s):
+		self.writeln(htTitle(s))
+
+	def writeDict(self, d):
+		self.writeln(htmlForDict(d))
+
+	def writeTable(self, listOfDicts, keys=None):
+		"""
+		Writes a table whose contents are given by listOfDicts. The
+		keys of each dictionary are expected to be the same. If the
+		keys arg is None, the headings are taken in alphabetical order
+		from the first dictionary. If listOfDicts is "false", nothing
+		happens.
+
+		Caveat: There's no way to influence the formatting or to use
+		column titles that are different than the keys.
+		"""
+		if not listOfDicts:
+			return
+
+		if keys is None:
+			keys = listOfDicts[0].keys()
+			keys.sort()
+
+		wr = self.writeln
+		wr('<table>\n<tr>')
+		for key in keys:
+			wr('<td bgcolor=#F0F0F0><b>%s</b></td>' % key)
+		wr('</tr>\n')
+
+		for row in listOfDicts:
+			wr('<tr>')
+			for key in keys:
+				wr('<td bgcolor=#F0F0F0>%s</td>' % row[key])
+			wr('</tr>\n')
+
+		wr('</table>')
+
+	def writeAttrs(self, obj, attrNames):
+		"""
+		Writes the attributes of the object as given by attrNames.
+		Tries obj._name first, followed by obj.name(). Is resilient
+		regarding exceptions so as not to not ever spoil the
+		exception report.
+		"""
+		rows = []
+		for name in attrNames:
+			value = getattr(obj, '_'+name, singleton) # go for data attribute
+			try:
+				if value is singleton:
+					value = getattr(obj, name, singleton) # go for method
+					if value is singleton:
+						value = '(could not find attribute or method)'
+					else:
+						try:
+							value = value()
+						except Exception, e:
+							value = '(exception during method call: %s: %s)' % (e.__class__.__name__, e)
+						value = self.repr(value)
+				else:
+					value = self.repr(value)
+			except Exception, e:
+				value = '(exception during value processing: %s: %s)' % (e.__class__.__name__, e)
+			rows.append({'attr': name, 'value': value})
+		self.writeTable(rows, ('attr', 'value'))
+
+
+	## Write specific parts ##
+
+	def writeTraceback(self):
+		self.writeTitle('Traceback')
+		self.write('<p> <i>%s</i>' % self.servletPathname())
+		self.write(HTMLForException(self._exc))
+
+	def writeMiscInfo(self):
+		self.writeTitle('MiscInfo')
+		info = {
+			'time':          asctime(localtime(self._res.endTime())),
+			'filename':      self.servletPathname(),
+			'os.getcwd()':   os.getcwd(),
+			'sys.path':      sys.path
+		}
+		self.writeDict(info)
+
+	def writeTransaction(self):
+		self._tra.writeExceptionReport(self)
+
+	def writeEnvironment(self):
+		self.writeTitle('Environment')
+		self.writeDict(os.environ)
+
+	def writeIds(self):
+		self.writeTitle('Ids')
+		self.writeTable(osIdTable(), ['name', 'value'])
+
+	def writeFancyTraceback(self):
 		if self.setting('IncludeFancyTraceback'):
-			html.append(htTitle('Fancy Traceback'))
+			self.writeTitle('Fancy Traceback')
 			try:
 				from WebUtils.ExpansiveHTMLForException import ExpansiveHTMLForException
-				html.append(ExpansiveHTMLForException(context=self.setting('FancyTracebackContext')))
+				self.write(ExpansiveHTMLForException(context=self.setting('FancyTracebackContext')))
 			except:
-				html.append('Unable to generate a fancy traceback!')
-				
-		return string.join(html, '')
+				self.write('Unable to generate a fancy traceback! (uncaught exception)')
 
 	def saveErrorPage(self, html):
 		''' Saves the given HTML error page for later viewing by the developer, and returns the filename used. '''
@@ -223,10 +344,24 @@ class ExceptionHandler(Object):
 		server.quit()
 
 
+	## Self utility ##
+
+	def repr(self, x):
+		"""
+		Returns the repr() of x already html encoded. As a special case, dictionaries are nicely formatted in table.
+
+		This is a utility method for writeAttrs.
+		"""
+		if type(x) is DictType:
+			return htmlForDict(x)
+		else:
+			return htmlEncode(repr(x))
+
+
 # Some misc functions
 def htTitle(name):
 	return '''
-<p> <br> <table border=0 cellpadding=4 cellspacing=0 bgcolor=#A00000> <tr> <td>
+<p> <br> <table border=0 cellpadding=4 cellspacing=0 bgcolor=#A00000 width=100%%> <tr> <td align=center>
 	<font face="Tahoma, Arial, Helvetica" color=white> <b> %s </b> </font>
 </td> </tr> </table>''' % name
 
@@ -241,34 +376,6 @@ def osIdTable():
 			value = getattr(os, funcName)()
 			table.append({'name': funcName, 'value': value})
 	return table
-
-def htTable(listOfDicts, keys=None):
-	''' The listOfDicts parameter is expected to be a list of dictionaries whose keys are always the same.
-		This function returns an HTML string with the contents of the table.
-		If keys is None, the headings are taken from the first row in alphabetical order.
-		Returns an empty string if listOfDicts is none or empty.
-		Deficiencies: There's no way to influence the formatting or to use column titles that are different than the keys. '''
-
-	if not listOfDicts:
-		return ''
-
-	if keys is None:
-		keys = listOfDicts[0].keys()
-		keys.sort()
-
-	s = '<table border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>\n<tr>'
-	for key in keys:
-		s = '%s<td><b>%s</b></td>' % (s, key)
-	s = s + '</tr>\n'
-
-	for row in listOfDicts:
-		s = s + '<tr>'
-		for key in keys:
-			s = '%s<td>%s</td>' % (s, row[key])
-		s = s + '</tr>\n'
-
-	s = s + '</table>'
-	return s
 
 def dateForEmail():
     """ Returns a properly formatted date/time string for email messages """
