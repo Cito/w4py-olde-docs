@@ -306,8 +306,7 @@ class HTTPResponse(Response):
 			cookie.setPath('/')
 			if sess.isExpired() or sess.timeout() == 0:
 				# Invalid -- tell client to forget the cookie.
-				cookie.setMaxAge(0)
-				cookie.setExpires(-365*24*60*60)
+				cookie.delete()
 			self.addCookie(cookie)
 			if debug: print prefix, 'setting sid =', sess.identifier()
 		else:
@@ -390,5 +389,6 @@ class HTTPResponse(Response):
 		self._strmOut.clear()
 		self.setHeader('Content-type', 'text/html')
 		self._strmOut.write(err.html())
-		print 'ERROR:', err.codeMessage()
+		uri = self._transaction.request().uri()
+		print 'HTTPResponse: %s: %s' % (uri, err.codeMessage())
 		self.commit()
