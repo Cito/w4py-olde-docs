@@ -329,7 +329,7 @@ class ExceptionHandler(Object):
  		writer = MimeWriter.MimeWriter(message)
 
  		## Construct the message headers
- 		headers = self.setting('ErrorEmailHeaders')
+ 		headers = self.setting('ErrorEmailHeaders').copy()
  		headers['Date'] = dateForEmail()
  		headers['Subject'] = headers.get('Subject','[WebKit Error]') + ' ' \
  				     + str(sys.exc_info()[0]) + ': ' \
