@@ -5,6 +5,7 @@ from WebKit.ImportSpy import modloader
 from Funcs import valueForString
 
 
+
 class ConfigurationError(Exception):
 	pass
 
@@ -151,3 +152,15 @@ def addCommandLineSetting(name, value):
 	if not _settings.has_key(configName):
 		_settings[configName] = {}
 	_settings[configName][settingName] = value
+
+def commandLineSetting(configName, settingName, default=NoDefault):
+	"""
+	Retrieve a command-line setting.  You can use this with
+	non-existent classes, like --Context.Root=/WK, and then
+	fetch it back with commandLineSetting('Context', 'Root').
+	"""
+	if default is NoDefault:
+		return _settings[configName][settingName]
+	else:
+		return _settings.get(configName, {}).get(settingName, default)
+

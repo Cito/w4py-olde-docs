@@ -41,6 +41,12 @@ Version 0.8
 		<dd>Returns a version of the string word wrapped to the given width.</dd>
 	</dl>
 
+<p> New functions in <span class=name>Configurable</span>
+      <dl>
+      <dt><span class=name>commandLineSetting(configName, settingName, default=NoDefault)</span></dt>
+      <dd>Accesses the values of settings passed through <span class=name>addCommandLineSetting</span>.  Typically, you would use it by calling AppServer like <tt>./AppServer --Context.Root=/WK</tt> -- where <tt>Context</tt> is not necessarily the name of a configurable class.  Other classes can use this setting to retrieve <tt>"/WK"</tt>, like <tt>Configurable.commandLineSetting("Context", "Root")</tt>.</dd>
+      </dl>
+
 <p><hr>
 
 </body>
