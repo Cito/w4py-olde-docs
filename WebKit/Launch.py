@@ -12,6 +12,8 @@ def main(args):
 	if len(args)<2:
 		usage()
 	server = args[1]
+	if server[-3:]=='.py':
+		server = server[:-3]
 	os.chdir(os.pardir)
 	if '' not in sys.path:
 		sys.path = [''] + sys.path
