@@ -253,7 +253,6 @@ class RequestHandler(asyncore.dispatcher):
 
 		self._buffer = self._buffer + "\n" + rawResponse['contents']
 
-		if verbose: print self._buffer[:50]
 
 		self.have_response = 1
 
