@@ -91,6 +91,12 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 		 Note that if the AppServer crashes a stale pid file will be left 
 		 around, which must be removed before the AppServer can be restarted. 
+
+	<li> Page has been refactored into HTTPContent and Page.  HTTPContent
+		 can be used as a base class for servlets which generate non-HTML
+		 content.  As Page inherits from HTTPContent (which inherits from 
+		 HTTPServlet), Page still contains all the methods it previously did,
+		 and this change should not require any changes to end-user code.
 </ul>
 
 
