@@ -146,6 +146,7 @@ class Model:
 		readColumns = 1
 		parse = CSVParser.CSVParser().parse
 		linenum = 0
+		klass = None
 		for line in lines:
 			linenum += 1
 			try:
@@ -160,7 +161,7 @@ class Model:
 					continue  # skip blank lines
 				if fields[0] and str(fields[0])[0]=='#':
 					continue
-				if fields[0].endswith(' objects'):
+				if fields[0].lower().endswith(' objects'):
 					klassName = fields[0].split()[0]
 					try:
 						klass = self.klass(klassName)
@@ -175,6 +176,8 @@ class Model:
 					readColumns = 1
 					continue
 				if readColumns:
+					if klass is None:
+						raise SampleError(linenum, "Have not yet seen an 'objects' declaration.")
 					names = [name for name in fields if name]
 					attrs = []
 					for name in names:
@@ -193,6 +196,8 @@ class Model:
 					colSql = ','.join(colNames)
 					readColumns = 0
 					continue
+				if klass is None:
+					raise SampleError(linenum, "Have not yet seen an 'objects' declaration.")
 				values = fields[:len(attrs)]
 				i = 0
 				for attr in attrs:
