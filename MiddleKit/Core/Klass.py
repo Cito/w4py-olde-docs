@@ -186,6 +186,18 @@ class Klass(MiddleDict, ModelObject):
 	def addSubklass(self, klass):
 		self._subklasses.append(klass)
 
+	def descendants(self, init=1, memo=None):
+		""" Return all descendant klasses of this klass.  """
+		if memo is None:
+			memo = {}
+		if memo.has_key(self):
+			return
+		memo[self] = 1
+		for k in self.subklasses():
+			k.descendants(init=0, memo=memo)
+		if init:
+			del memo[self]
+		return memo.keys()
 
 	## Accessing attributes ##
 
