@@ -23,6 +23,7 @@ class Klass(UserDict, ModelObject):
 		self._subklasses = []
 		self._pyClass = 0   # 0 means never computed. None would mean computed, but not found.
 		self._backObjRefAttrs = None
+		self._allAttrs = None
 
 		if dict is not None:
 			self.readDict(dict)
@@ -74,13 +75,18 @@ class Klass(UserDict, ModelObject):
 
 	def _makeAllAttrs(self):
 		"""
-		Makes two list attributes accessible via methods:
+		Makes list attributes accessible via methods for the following:
 			allAttrs - every attr of the klass including inherited and derived attributes
 			allDataAttrs - every attr of the klass including inherited, but NOT derived
 			allDataRefAttrs - same as allDataAttrs, but only obj refs and lists
 
 		...and a dictionary attribute used by lookupAttr().
+
+		Does nothing if called extra times.
 		"""
+		if self._allAttrs is not None:
+			return
+
 		klass = self
 		klasses = []
 		while 1:
@@ -203,6 +209,9 @@ class Klass(UserDict, ModelObject):
 			return self._attrsByName.get(name, default)
 
 	def lookupAttr(self, name, default=NoDefault):
+		if self._allAttrs is None:
+			# happens sometimes during awakeFromRead()
+			self._makeAllAttrs()
 		if default is NoDefault:
 			return self._allAttrsByName[name]
 		else:

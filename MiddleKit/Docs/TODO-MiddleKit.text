@@ -74,7 +74,7 @@ I'll be happy to support anyone's efforts by answering questions, discussing ide
 
 <refinements/improvements>
 
-	[ ] With "list of SomeClass", there is no error reported if SomeClass does not exist
+	[ ] Model loading should complain or at least warn if Enums is defined, but the data type is not 'enum'.
 
 	[ ] mysqldb 0.9.2 causes errors with MiddleKit while all previous versions do not. The problem seems to be that MK creates a lot of connections *and* they hang around in memory for a long time, probably due to a new circular reference in mysqldb. I'm not able to resolve the problem with Andy Dustman, the author, so I will probably have to revamp MiddleKit. yuk. Current workaround is to use mysql 0.9.1.
 
