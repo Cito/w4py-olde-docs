@@ -93,7 +93,7 @@ if os.name == 'posix': {
 
 <hr>
 <p>Path Info: <%=req.pathInfo()%>
-<p>extraPathInfo: <%=req.extraURLPath()%>
+<p>extraURLPath: <%=req.extraURLPath()%>
 <p>Fields: <%= req.fields() %>
 <p>servletURI = <%= req.servletURI()%>
 <p>uriWebKitRoot = <%= req.uriWebKitRoot() %>
