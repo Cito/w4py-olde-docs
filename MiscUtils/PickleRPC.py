@@ -2,7 +2,7 @@
 PickleRPC provides a Server object for connection to Pickle-RPC servers
 for the purpose of making requests and receiving the responses.
 
-	>>> from MiscUtils.PickleRPCLib import Server
+	>>> from MiscUtils.PickleRPC import Server
 	>>> server = Server('http://localhost/cgi-bin/WebKit.cgi/Examples/PickleRPCExample')
 	>>> server.multiply(10,20)
 	200
