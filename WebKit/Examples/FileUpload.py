@@ -48,6 +48,8 @@ class FileUpload(ExamplePage):
 
 		f = self.request().field('filename')
 
+		contents = f.file.read()
+
 		self.write("""<html><head></head><body bgcolor='#DDDDEE'>
 		Here's the file you submitted:
 		<hr>
@@ -59,7 +61,7 @@ class FileUpload(ExamplePage):
 		headers:%s<p>
 		size: %s<p>
 		contents:<hr>%s </body>
-		""" % (f.filename, f.type, f.type_options, f.disposition, f.disposition_options, f.headers, os.fstat(f.file.fileno())[stat.ST_SIZE], Funcs.htmlEncode(f.file.read()) ) )
+		""" % (f.filename, f.type, f.type_options, f.disposition, f.disposition_options, f.headers, len(contents), Funcs.htmlEncode(contents) ) )
 
 	def actions(self):
 		return ExamplePage.actions(self) + ['fileupload']
