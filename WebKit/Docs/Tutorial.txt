@@ -139,6 +139,7 @@ For the first iteration, we'll display files that you upload by hand.  We do thi
     from WebKit.Page import Page
     import os
     import Image
+    from urllib import quote as urlEncode
     dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "pics")
     
     class Main(Page):
@@ -151,8 +152,7 @@ For the first iteration, we'll display files that you upload by hand.  We do thi
         def writeContent(self):
             # We'll format these simpy, one thumbnail per line.
             for filename in os.listdir(dir):
-                filename = os.path.join(dir, filename)
-                im = Image.open(filename)
+                im = Image.open(os.path.join(dir, filename))
                 x, y = im.size
                 # Here we figure out the scaled-down size of the image,
                 # so that we preserve the aspect ratio.  We'll use fake
@@ -166,30 +166,36 @@ For the first iteration, we'll display files that you upload by hand.  We do thi
                 # if there's a file with an embedded space or other character
                 # in it.
                 self.write('<p><a href="View?filename=%s">'
-                           % self.urlEncode(filename))
+                           % urlEncode(filename))
                 self.write('<img src="../pics/%s" width="%i" height="%i">'
-                           % (self.urlEncode(filename), x, y))
+                           % (urlEncode(filename), x, y))
                 self.write('</a></p>\n')
 
-The servlet ``View`` takes one URL parameter of ``filename`` -- you can get the value of a URL parameter like ``self.field('filename')`` -- or, if you want a default value, you can use ``self.field('filename', defaultValue)``.  The ``field`` method is also in the ``HTTPRequest`` class, so you'll often see people do something like::
+The servlet ``View`` takes one URL parameter of ``filename`` -- you can get the value of a URL parameter like ``self.request().field('filename')`` -- or, if you want a default value, you can use ``self.request().field('filename', defaultValue)``.  In the likely case you don't want to write ``self.request()`` before retrieving each value, do::
 
     req = self.request()
     self.write(req.field('username'))
+    
+    # Even more compactly:
+    field = self.request().field
+    self.write(field('username'))
 
-The ``Page`` class just provides a shortcut.  The individual images are viewed with this servlet::
+The individual images are viewed with this servlet::
 
     from WebKit.Page import Page
     import os
     import Image
+    from urllib import quote as urlEncode
     dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "pics")
     
     class View(Page):
     
         def title(self):
-            return 'View: %s' % self.htmlEncode(self.field('filename'))
+            return 'View: %s' \
+                   % self.htmlEncode(self.request().field('filename'))
             
         def writeContent(self):
-            filename = self.field('filename')
+            filename = self.request().field('filename')
             im = Image.open(os.path.join(dir, filename))
             self.write('<center>')
             self.write('<img src="../pics/%s" width="%i" height="%i">'
@@ -199,4 +205,104 @@ The ``Page`` class just provides a shortcut.  The individual images are viewed w
             self.write('<p>\n')
             self.write('<a href="./">Return to Index</a>')
             self.write('</center>')
+            
+Iteration 2: Uploading Files
+----------------------------
+
+That was fairly simple -- but usually you want to upload files, potentially through a web interface.  Along the way we'll add thumbnail generation using PIL, and slighly improve the image index.
+
+We'll generate thumbnails kind of on demand, so you can still upload files manually -- thumbnails will be put in ``pics/thumbs/`` and have ``-tn`` appended just to avoid confusion::
+
+    from WebKit.Page import Page
+    import os
+    import Image
+    from urllib import quote as urlEncode
+    dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "pics")
+    
+    class Main(Page):
+    
+        def title(self):
+            # It's nice to give a real title, otherwise "Main" would
+            # be used.
+            return 'Photo Album'
+
+        def writeContent(self):
+            # We'll format these in a table, two columns wide
+            self.write('<table width="100%">\n')
+            # col will be 0 or 1, depending if we're on the left or
+            # right column.
+            col = 0
+            filenames = os.listdir(dir)
+            # We'll sort the files, case-insensitive
+            filenames.sort(lambda a, b: cmp(a.lower(), b.lower()))
+            for filename in filenames:
+            
+                if not col: # right column
+                    self.write('<tr>')
+                
+                thumbFilename = os.path.splitext(filename)[0] + "-tn.jp"
+                if not os.path.exists(os.path.join(dir, "thumbs",
+                                      thumbFilename)):
+                    # No thumnail exists -- we have to generate one
+                    im = Image.open(os.path.join(dir, filename))
+                    im.thumbnail((250, 100))
+                    # @@ ib: handle GIFs
+                    im.save(os.path.join(dir, "thumbs", thumbFilename))
+                else:
+                    im = Image.open(os.path.join(dir, "thumbs", thumbFilename))
+                # note that we are just using % substitution to generate
+                # the HTML.  There's other ways, but this works well enough.
+                # We're linking to the View servlet which we'll show later.
+                # Notice we use urlEncode -- otherwise we'll encounter bugs
+                # if there's a file with an embedded space or other character
+                # in it.
+                self.write('<td><a href="View?filename=%s">'
+                           % urlEncode(filename))
+                self.write('<img src="../pics/%s" width="%i" height="%i">'
+                           % (urlEncode(filename), im.size[0], im.size[1]))
+                self.write('<br>Filename: %s<br>Size: %i'
+                           % (self.htmlEncode(filename), 
+                              os.stat(os.path.join(dir, filename)).st_size))
+                self.write('</a></td>\n')
+
+                if col:
+                    self.write('</tr>\n')
+                col = not col
+                
+            self.write('</table><p>\n')
+            self.write('<center><a href="Upload">Upload an image</a></center>')
+            
+The ``View`` servlet we'll leave just like it was.  We'll add an ``Upload`` servlet.  Notice we use ``enctype="form/multi-part"`` in the ``<form>`` tag -- this is an HTMLism for file uploading (otherwise you'll just get the filename and not the file contents).  We also add a hidden field ``doUpload`` which tells us that the form has been submitted.  Finally when the form is finished we redirect them to the viewing page (``self.response().sendRedirect(url)``)::
+
+    from WebKit.Page import Page
+    from urllib import quote as urlEncode
+    dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "pics")
+
+    class Upload(Page):
+    
+        def writeContent(self):
+            if self.request().field('doUpload', 0):
+                self.doUpload()
+                return
+                
+            self.write('''
+            Upload your image:<br>
+            <form action="Upload" method="POST" enctype="form/multi-part">
+            <input type="hidden" name="doUpload" value="yes">
+            <input type="file" name="imageFile">
+            <input type="submit" value="Upload">
+            </form>
+            ''')
+            
+        def doUpload(self):
+            file = self.request().field('imageFile')
+            # Because it's a file upload, we don't get a string back.
+            # So to get the value we do this:
+            contents = file.value
+            filename = file.filename
+            f = open(os.path.join(dir, filename), 'w')
+            f.write(contents)
+            f.close()
+            self.response().sendRedirect('View?filename=%s'
+                                         % urlEncode(filename))
             
