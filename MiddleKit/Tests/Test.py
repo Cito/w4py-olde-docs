@@ -79,6 +79,7 @@ class Test:
 		self.run(cmd)
 
 	def insertSamples(self):
+		self.createDatabase()
 		filename = 'GeneratedSQL/InsertSamples.sql'
 		filename = os.path.normpath(filename)
 		if os.path.exists(filename):
