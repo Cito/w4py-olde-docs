@@ -105,6 +105,36 @@ class Klass(UserDict, ModelObject):
 		klass.addSubklass(self)
 
 
+	## Ancestors ##
+
+	def lookupAncestorKlass(self, name, default=NoDefault):
+		"""
+		Searches for and returns the ancestor klass with the given
+		name. Raises an exception if no such klass exists, unless a
+		default is specified (in which case it is returned).
+		"""
+		if self._superklass:
+			if self._superklass.name()==name:
+				return self._superklass
+			else:
+				return self._superklass.lookupAncestorKlass(name, default)
+		else:
+			if default is NoDefault:
+				raise KeyError, name
+			else:
+				return default
+
+	def isKindOfKlassNamed(self, name):
+		"""
+		Returns true if the klass is the same as, or inherits from,
+		the klass with the given name.
+		"""
+		if self.name()==name:
+			return 1
+		else:
+			return klass.lookupAncestorKlass(name) is not None
+
+
 	## Subklasses ##
 
 	def subklasses(self):
