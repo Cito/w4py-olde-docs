@@ -40,28 +40,28 @@
 
 <h1>Webware Style Guidelines</h1>
 
-
 <a name=TOC><h2>Table of Contents</h2></a>
+
 <p><font face="Helvetica">
-<a href="#Introduction"><font size=+1>Introduction</font></a>
-<br>  <a href="#Syntax"><font size=+1>Syntax and Naming</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_MethodsAndAttrs"><font size=>Methods and Attributes</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_MethodCategories"><font size=>Method Categories</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_Abbreviations"><font size=>Abbreviations</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_CompoundNames"><font size=>Compound Names</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_ComponentNames"><font size=>Component Names</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_Rules"><font size=>Rules</font></a>
-<br>  <a href="#Structure"><font size=+1>Structure and Patterns</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Structure_Classes"><font size=>Classes</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Structure_ConfigFiles"><font size=>Configuration Files</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Structure_NamedObjs"><font size=>Accessing Named Objects</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Structure_Components"><font size=>Components</font></a>
-<br>  <a href="#MiscNotes"><font size=+1>Miscellaneous Notes</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Misc_Permissions"><font size=>Permissions</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Misc_SendingUpdates"><font size=>Sending Updates</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Misc_BreakingRules"><font size=>Breaking the Rules</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Misc_checksrc"><font size=>checksrc.py</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Misc_Future"><font size=>Future Work</font></a>
+<br> <a href="#Introduction"><font size=+1>Introduction</font></a>
+<br> <a href="#Syntax"><font size=+1>Syntax and Naming</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#SynNaming_MethodsAndAttrs">Methods and Attributes</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#SynNaming_MethodCategories">Method Categories</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#SynNaming_Abbreviations">Abbreviations</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#SynNaming_CompoundNames">Compound Names</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#SynNaming_ComponentNames">Component Names</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#SynNaming_Rules">Rules</a>
+<br> <a href="#Structure"><font size=+1>Structure and Patterns</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Structure_Classes">Classes</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Structure_ConfigFiles">Configuration Files</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Structure_NamedObjs">Accessing Named Objects</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Structure_Components">Components</a>
+<br> <a href="#MiscNotes"><font size=+1>Miscellaneous Notes</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Misc_Permissions">Permissions</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Misc_SendingUpdates">Sending Updates</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Misc_BreakingRules">Breaking the Rules</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Misc_checksrc">checksrc.py</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Misc_Future">Future Work</a>
 </font></p>
 
 
