@@ -22,6 +22,7 @@
 <ul>
 	<li> Version 0.2.2 was released on @@/@@/2001.
 	<li> CGIWrapper's exception handling no longer fails on non-posix platforms such as Windows ME. Previously, it was trying to get too many OS values such as getegid(). Now it only gets the ones that are available.
+	<li> sys.path is dealt with better. A <b>''</b> always appears at the front, and the <b>'..'</b> that was previously installed (in the event that Webware modules couldn't be found) is now passed through os.path.abspath().
 </ul>
 
 
