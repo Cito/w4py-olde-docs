@@ -332,7 +332,9 @@ class _FileParser(URLParser):
 		dir = os.path.dirname(baseName)
 		filenames = []
 		for filename in os.listdir(dir):
-			if filename == fileStart:
+			if filename.startswith('.'):
+				continue
+			elif filename == fileStart:
 				filenames.append(os.path.join(dir, filename))
 			elif filename.startswith(fileStart) \
 			     and os.path.splitext(filename)[0] == fileStart:
