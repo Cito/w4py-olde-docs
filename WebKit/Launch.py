@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+import sys
+if sys.version[0] == '1':
+	print """Webware requires Python version 2.0+.  Webware is currently being
+run with the Python version:
+  %s
+This Python interpreter is located at:
+  %s
+You may need to change the AppServer script, giving the full path of
+the appropriate Python interpreter.""" % (sys.version, sys.executable)
+	sys.exit(1)
+
 import time; startTime = time.time()
 
 runProfile = 0   # as in Python's profile module. See doc string of Profiler.py
