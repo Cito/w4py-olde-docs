@@ -40,6 +40,7 @@ class ServletWriter:
 	def __init__(self,ctxt):
 	
 		self._pyfilename = ctxt.getPythonFileName()
+		tempfile.tempdir=os.path.dirname(self._pyfilename)
 		self._temp = tempfile.mktemp('tmp')
 		self._filehandle = open(self._temp,'w+')
 		self._tabcnt = 0
