@@ -330,9 +330,9 @@ class SQLObjectStore(ObjectStore):
 			timestamp = funcs.timestamp()['pretty']
 			self._sqlEcho.write('SQL %04i. %s %s\n' % (self._sqlCount, timestamp, sql))
 			self._sqlEcho.flush()
-			if self._sqlCount in (2, 3, 4):
-				import traceback as tb
-				tb.print_stack()
+#			if self._sqlCount in (2, 3, 4):
+#				import traceback as tb
+#				tb.print_stack()
 		conn, cur = self.connectionAndCursor(connection)
 		self._executeSQL(cur, sql.strip())
 		return conn, cur
