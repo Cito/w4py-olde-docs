@@ -228,6 +228,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] Consider use "id" instead of "someClassId" for the identity column.
 
+	[ ] Do we still use Core/NULL.py?
+
 </very minor/clean up>
 
 
