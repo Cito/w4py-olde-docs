@@ -30,7 +30,7 @@ class Test:
 	## Testing ##
 
 	def main(self, args=sys.argv):
-		# We explicitly list the tests rather than scanning for them (via glob) in order to perform them in a certain order (simplest to most complex)
+		# The tests are listed explicitly rather than scanning for them (via glob) in order to perform them in a certain order (simplest to most complex)
 		self.readArgs(args)
 		results = []
 		for self._modelName in self.modelNames():
@@ -61,6 +61,8 @@ class Test:
 			if not outcome:
 				outcome = '     succeeded'
 			print outcome, name
+
+		self.printInfo()
 
 		# print duration for curiosity's sake
 		print
@@ -140,6 +142,41 @@ class Test:
 			cmd = '%s < %s' % (sqlCommand, filename)
 			self.run(cmd)
 
+	def printInfo(self):
+		print
+		print 'SYSTEM INFO'
+		print '-----------'
+		print 'sys.version =', sys.version
+		print 'sys.platform =', sys.platform
+		print 'os.name =', os.name
+		if hasattr(sys, 'getwindowsversion'):
+			print 'sys.getwindowsversion =', sys.getwindowsversion()
+		print 'os.getcwd() =', os.getcwd()
+		print 'dbName =', dbName
+		if sqlVersionCommand:
+			self.run(sqlVersionCommand)
+
+		# Since Test.py runs things via os.system() it won't actually have the DB API module loaded.
+		# But that's really desireable so its version number can be printed out, so import the store:
+		objStoreName = dbName + 'ObjectStore'
+		values = {}
+		exec 'import MiddleKit.Run.'+objStoreName in values
+
+		out = sys.stdout
+		out.write('modules with versions:\n')
+		modules = [m for m in sys.modules.values() if m is not None]
+		modules.sort(lambda a, b: cmp(a.__name__, b.__name__))
+		for mod in modules:
+			ver = getattr(mod, 'version', None)
+			verInfo = getattr(mod, 'version_info', None)
+			if ver or verInfo:
+				out.write('    %s' % mod.__name__)
+				if verInfo:
+					out.write(', %s' % (verInfo,))
+				if ver:
+					out.write(', %r' % ver)
+				out.write(', %s' % getattr(mod, '__file__', '(built-in)'))
+				out.write('\n')
 
 	## Self utility ##
 

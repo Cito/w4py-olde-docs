@@ -8,6 +8,7 @@ To run the test suite, create a file, LocalConfig.py like so:
 dbName = 'MySQL'
 storeArgs = {'user': 'root', 'passwd': 'blarr'}
 sqlCommand = 'mysql -u root -pblarr'
+sqlVersionCommand = 'mysql --version'
 # end
 
 It can be useful to run one test at a time, especially when developing a
@@ -27,6 +28,7 @@ Windows:
 dbName = 'MySQL'
 storeArgs = {'user': 'root'}
 sqlCommand = 'C:\\mysql\\bin\\mysql -u root'
+sqlVersionCommand = 'mysql --version'
 # end
 
 You can see what databases are supported by looking in the MiddleKit/Run
@@ -38,6 +40,7 @@ Here is a Microsoft SQL Server config using trusted authentication:
 dbName = 'MSSQL'
 storeArgs = {'dsn': 'LocalServer', 'clear_auto_commit': 0}
 sqlCommand = r'"C:\Program Files\Microsoft SQL Server\80\Tools\Binn\isql" -E'
+sqlVersionCommand = None
 # end
 
 

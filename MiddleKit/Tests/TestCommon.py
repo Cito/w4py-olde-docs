@@ -38,6 +38,9 @@ storeArgs = {}
 sqlCommand = 'mysql'
 	# the database command used for feeding SQL to the database via stdin
 
+sqlVersionCommand = 'mysql --version'
+	# the database command used to get the version number of the SQL database
+
 
 # override any of the preceding as needed by creating a LocalConfig.py:
 try:
