@@ -85,20 +85,6 @@ class Klass:
 		return "\t%s integer not null primary key default nextval('%s'),\n" % (self.sqlSerialColumnName(), self.seqName())
 
 
-## Enums are not supported directly by postgres, but we can emulate them
-## using simple char columns.
-
-class EnumAttr:
-
-	def sqlType(self):
-		lengths = map( lambda value: len(value), self.enums())
-		return 'varchar(%d)' % max(lengths)
-
-	def sampleValue(self, value):
-		assert value in self._enums, 'value = %r, enums = %r' % (value, self._enums)
-		return repr(value)
-
-
 class StringAttr:
 
 	def sqlType(self):
