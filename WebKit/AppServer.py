@@ -32,11 +32,6 @@ DefaultConfig = {
 }
 
 
-# @@ ib 03-3: this isn't used
-class AppServerError(Exception):
-	pass
-
-
 class AppServer(ConfigurableForServerSidePath, Object):
 
 	"""
