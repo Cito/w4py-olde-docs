@@ -133,7 +133,7 @@ class HTTPResponse(Response):
 			self.addCookie(cookie)
 			if debug: print prefix, 'setting sid =', sess.identifier()
 		else:
-			print prefix, 'did not set sid'
+			if debug: print prefix, 'did not set sid'
 
 	def reset(self):
 		''' Resets the response (such as headers, cookies and contents). '''
