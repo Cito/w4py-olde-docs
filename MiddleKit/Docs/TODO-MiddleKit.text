@@ -86,8 +86,6 @@ I'll be happy to support anyone's efforts by answering questions, discussing ide
 
 	[ ] MySQL: Can refer to classId column as literally '_rowid'. (@@ 2004-03-05 ce: what does that mean?
 
-	[ ] deleting: If you delete an object that is in some other object's list which is also in memory at the time, the list in question is not updated.
-
 	[ ] A subtle issue with deleting objects requires a saveChanges() repeated times. I inquired with Geoff T who wrote:
 
 		This is tricky.  I think what happens is that store.deleteObject() ends up
