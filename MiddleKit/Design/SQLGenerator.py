@@ -555,7 +555,7 @@ class ObjRefAttr:
 			className = self.className()
 			objSerialNum = value
 		# @@ 2000-11-24 ce: check that we're pointing to a legal class
-		klass = self.klass().klasses()[className]
+		klass = self.klass().klasses()._model.klass(className)
 		klassId = klass.id()
 		objRef = objRefJoin(klassId, objSerialNum)
 		return str(objRef)
