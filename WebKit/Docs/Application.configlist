@@ -9,7 +9,7 @@
 
 ('ExtensionsToServe', "[]", 'This is a list of extensions that WebKit will use exclusively when autodetecting extensions. Note that this does not prevent WebKit from serving such a file if it is named explicitly in a URL.'),
 
-('UseExtensionCascading', "1", 'Should extension cascading be used when autodetecting extensions'),
+('UseCascadingExtensions', "1", 'Should extension cascading be used when autodetecting extensions'),
 
 ('ExtensionCascadeOrder', "['.psp', '.py', '.html']", 'This is a list of extensions that WebKit will cascade through when autodetecting extensions. Note that this has no effect if the extension is named explicitly in a URL.'),
 
