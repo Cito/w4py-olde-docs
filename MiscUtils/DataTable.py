@@ -178,7 +178,10 @@ from CSVParser import CSVParser
 from string import join, replace, split, strip
 from types import *
 from MiscUtils import NoDefault
-
+try:
+	from mx.DateTime import DateTimeType, DateTimeFrom
+except ImportError:
+	pass
 
 ## Types ##
 
@@ -271,7 +274,7 @@ class TableColumn:
 			else:
 				value = float(rawValue)
 		elif self._type is DateTimeType:
-			value = DateTime().initFromString(rawValue)
+			value = DateTimeFrom(rawValue)
 		elif self._type is ObjectType:
 			value = rawValue
 		else:
