@@ -7,6 +7,16 @@
 
 ('ExtensionsToIgnore', "['.pyc', '.pyo', '.py~', '.bak']", 'This is a list of extensions that WebKit will ignore when autodetecting extensions. Note that this does not prevent WebKit from serving such a file if it is named explicitly in a URL.'),
 
+('ExtensionsToServe', "[]", 'This is a list of extensions that WebKit will use exclusively when autodetecting extensions. Note that this does not prevent WebKit from serving such a file if it is named explicitly in a URL.'),
+
+('UseExtensionCascading', "1", 'Should extension cascading be used when autodetecting extensions'),
+
+('ExtensionCascadeOrder', "['.psp', '.py', '.html']", 'This is a list of extensions that WebKit will cascade through when autodetecting extensions. Note that this has no effect if the extension is named explicitly in a URL.'),
+
+('FilesToHide', "['.*','*~', '*bak', '*.tmpl', ]", 'File patterns to protect from browsing.'),
+
+('FilesToServe', "[]", 'File patterns to serve from exclusively. If the file being served for a particulary request does not match one of these patterns an HTTP403 Forbidden error will be return.'),
+
 ('LogActivity', '1', "If true, then the execution of each servlet is logged with useful information such as time, duration and whether or not an error occurred."),
 
 ('ActivityLogFilename', "'Logs/Activity.csv'", "This is the name of the file that servlet executions are logged to. This setting has no effect if <span class=name>LogActivity</span> is 0. The path can be relative to the WebKit location, or an absolute path."),

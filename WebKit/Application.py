@@ -14,6 +14,8 @@ import imp
 import string
 from threading import Lock, Thread, Event
 from time import *
+from fnmatch import fnmatch
+
 from WebKit.Cookie import Cookie
 
 from WebUtils.HTMLForException import HTMLForException
@@ -247,6 +249,14 @@ class Application(ConfigurableForServerSidePath, Object):
 			'PrintConfigAtStartUp': 1,
 			'DirectoryFile':        ['index', 'Main'],
 			'ExtensionsToIgnore':   ['.pyc', '.pyo', '.py~', '.bak'],
+			'ExtensionsToServe':   None,
+			'UseCascadingExtensions':1,
+			'ExtensionCascadeOrder':['.psp','.py','.html',],
+			
+
+			'FilesToHide': ['.*','*~', '*bak', '*.tmpl', '*.config' ],
+			'FilesToServe': None,
+			
 			'LogActivity':          1,
 			'ActivityLogFilename':  'Logs/Activity.csv',
 			'ActivityLogColumns':   ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'],
@@ -345,7 +355,22 @@ class Application(ConfigurableForServerSidePath, Object):
 			elif self.setting('UseAutomaticPathSessions') and not request.hasPathSession():
 				self.handleMissingPathSession(transaction)
 			else:
-				self.handleGoodURL(transaction)
+				validFile = 1
+				baseName = os.path.split(ssPath)[1]
+				for patternToHide in self.setting('FilesToHide'):
+					if fnmatch(baseName, patternToHide):
+						validFile = 0
+
+				patternsToServe = self.setting('FilesToServe')
+				if patternsToServe:
+					validFile = 0
+					for patternToServe in self.setting('FilesToServe'):
+						if fnmatch(baseName, patternToServe):
+							validFile = 1
+				if not validFile:
+					self.handleBadURL(transaction)
+				else:
+					self.handleGoodURL(transaction)
 
 			if request.value('_captureOut_', 0):
 				response.write('''<br><p><table><tr><td bgcolor=#EEEEEE>
@@ -937,16 +962,29 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._exceptionHandlerClass(self, transaction, excInfo)
 
 	def filenamesForBaseName(self, baseName):
-		'''
-		Returns a list of all filenames with extensions existing for baseName, but not including extension found in the setting ExtensionsToIgnore. This utility method is used by serverSideInfoForRequest().
-		Example: '/a/b/c' could yield ['/a/b/c.py', '/a/b/c.html'], but will never yield a '/a/b/c.pyc' filename since .pyc files are ignored.
-		'''
-		filenames = glob(baseName+'.*')
+		
+		"""Returns a list of all filenames with extensions existing for
+		baseName, but not including extension found in the setting
+		ExtensionsToIgnore. This utility method is used by
+		serverSideInfoForRequest().  Example: '/a/b/c' could yield
+		['/a/b/c.py', '/a/b/c.html'], but will never yield a
+		'/a/b/c.pyc' filename since .pyc files are ignored."""
+		
+		filenames = []
 		ignoreExts = self.setting('ExtensionsToIgnore')
-		for i in range(len(filenames)):
-			if os.path.splitext(filenames[i])[1] in ignoreExts: # @@ 2000-06-22 ce: linear search
-				filenames[i] = None
-		filenames = filter(None, filenames)
+		for filename in glob(baseName+'.*'):
+			if os.path.splitext(filename)[1] not in ignoreExts:
+				# @@ 2000-06-22 ce: linear search
+				filenames.append(filename)
+
+		extensionsToServe = self.setting('ExtensionsToServe')
+		if extensionsToServe:
+			filteredFilenames = []
+			for filename in filenames:
+				if os.path.splitext(filename)[1] in extensionsToServe:
+					filteredFilenames.append(filename)
+			filenames = filteredFilenames
+		
 		if debug:
 			print '>> filenamesForBaseName(%s) returning %s' % (
 				repr(baseName), repr(filenames))
@@ -1101,9 +1139,23 @@ class Application(ConfigurableForServerSidePath, Object):
 			if len(filenames)==1:
 				ssPath = filenames[0]
 				if debug: print '>> discovered extension, file = %s' % repr(ssPath)
+			elif len(filenames) > 1:
+				foundMatch = 0
+				if self.setting('UseCascadingExtensions'):
+					for ext in self.setting('ExtensionCascadeOrder'):
+						if (ssPath + ext) in filenames:
+							fullPath = ssPath + ext
+							foundMatch = 1
+							break
+				if not foundMatch:
+					print 'WARNING: For %s, did not get precisely 1 filename: %s' %\
+					      (urlPath, filenames)
+					return None, None, None
 			else:
-				print 'WARNING: For %s, did not get precisely 1 filename: %s' % (urlPath, filenames)
+				print 'WARNING: For %s, did not get precisely 1 filename: %s' % \
+				      (urlPath, filenames)
 				return None, None, None
+					
 		elif not os.path.exists(ssPath):
 			return None, None, None
 

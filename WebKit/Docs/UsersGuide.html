@@ -226,6 +226,48 @@ Does what it says. It's generally a good idea to leave this on.
 </dl></p>
 
 <p><dl class=config>
+<dt class=config><span class=setting>ExtensionsToServe</span>
+&nbsp; <code> = []</code></dt>
+<dd class=config>
+This is a list of extensions that WebKit will use exclusively when autodetecting extensions. Note that this does not prevent WebKit from serving such a file if it is named explicitly in a URL.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>UseExtensionCascading</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+Should extension cascading be used when autodetecting extensions
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ExtensionCascadeOrder</span>
+&nbsp; <code> = </code></dt>
+<dd class=config>
+<code>['.psp', '.py', '.html']</code>
+<br> This is a list of extensions that WebKit will cascade through when autodetecting extensions. Note that this has no effect if the extension is named explicitly in a URL.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>FilesToHide</span>
+&nbsp; <code> = </code></dt>
+<dd class=config>
+<code>['.*','*~', '*bak', '*.tmpl', ]</code>
+<br> File patterns to protect from browsing.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>FilesToServe</span>
+&nbsp; <code> = []</code></dt>
+<dd class=config>
+File patterns to serve from exclusively. If the file being served for a particulary request does not match one of these patterns an HTTP403 Forbidden error will be return.
+</dd>
+</dl></p>
+
+<p><dl class=config>
 <dt class=config><span class=setting>LogActivity</span>
 &nbsp; <code> = 1</code></dt>
 <dd class=config>
@@ -463,7 +505,6 @@ The SMTP server to use for sending e-mail error messages.
 If true, then the full traceback for uncaught exceptions in XML-RPC Servlets will be returned to the client in an XML-RPC Fault.  If false, then a generic 'unhandled exception' message will be returned in the Fault.
 </dd>
 </dl></p>
-
 
 <a name=Administration><h2>Administration</h2></a>
 
