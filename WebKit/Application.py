@@ -146,7 +146,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		print 'Current directory:', os.getcwd()
 
 		self.running = 1
-		
+
 		if useSessionSweeper:
 			self.startSessionSweeper()
 
@@ -229,7 +229,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			self._sessSweepThread.join()
 			del self._sessSweepThread
 		self._sessions.storeAllSessions()
-		self._taskmanager.stop()
+		if self._server.isPersistent():
+			self._taskmanager.stop()
 		del self._canFactory
 		del self._sessions
 		self._delCans()
