@@ -49,8 +49,9 @@ The text below comes from another psp page which was inserted into this one with
 </font>
 
 <p>
-<p>There are actually two ways to insert the contents of another file into a PSP page.  use &lt%@ include file="somefile" %&gt will effectively insert the contents of the other file before class creation time.<br>
-Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>after</i> page creation.  In other words, the file won't be parsed for psp codes.  It'll just be output as is in the response stream.
+<p>There are actually two ways to insert the contents of another file into a PSP page.  use &lt%@ include file="somefile" %&gt will effectively insert the contents of the other file before class creation time.
+
+<p>Using &lt psp:include path="somepath"/&gt will insert the output of the specified WebKit URL into the output stream.
 <p>
 
 

@@ -16,6 +16,7 @@ return "PSP Tests Page"
 
 
 
+
 <HTML>
 <BODY bgcolor='white'>
 
@@ -39,7 +40,6 @@ return "PSP Tests Page"
 <p>The syntax for Python Server Pages is almost identical to that of Java Server Pages (JSP).  Just the scripting language is different! And obviously better.  In fact, just about anything you can do with JSP, you can do with PSP, and more.  With PSP, not only can you create template text that will be inerted in one method when the page is run as a servlet, but you can choose which base class to inherit from, you can choose which method of the base class to over-ride with your template text, and you can add additional methods to the servlet class, all from the PSP template code.  We've got a bean equivalent called Can, too. (can of spam, get it?  That's OK, there are others who don't like it either).
 <p>
 
-
 <br><br>
 The text below comes from another psp page which was inserted into this one with the &lt%@ include %> directive.
 <p>
@@ -48,15 +48,30 @@ The text below comes from another psp page which was inserted into this one with
 </font>
 
 <p>
-<p>There are actually two ways to insert the contents of another file into a PSP page.  use &lt%@ include file="somefile" %&gt will effectively insert the contents of the other file before class creation time.<br>
-Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>after</i> page creation.  In other words, the file won't be parsed for psp codes.  It'll just be output as is in the response stream.
+<p>There are actually two ways to insert the contents of another file into a PSP page.  use &lt%@ include file="somefile" %&gt will effectively insert the contents of the other file before class creation time.
+
+<p>Using &lt psp:include path="somefile"/&gt will insert the output of the specified WebKit URL into the page <i>dynamically</i>.
 <p>
 
 
 <font color="blue">
-<psp:include file = "APSPinclude.html">
-</font>
+<psp:include path = "APSPinclude.html">
 
+<br/>
+Time at which dynamic output was generated: <psp:include path = "APSPinclude.psp">
+<br/>
+Time it takes to forward a request to APSPinclude.psp 10 times: 
+<%
+starttime = time.time()
+for i in range(1,10):
+	self.application().includeServlet(self.transaction(), "APSPinclude.psp")
+endtime = time.time()
+looptime = endtime - starttime
+%>
+<br/>Total time: <%=looptime%> seconds
+</font>
+<p>
+<hr>
 
 
 
