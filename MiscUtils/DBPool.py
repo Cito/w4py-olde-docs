@@ -1,21 +1,22 @@
 """
 DBPool.py
 
-Implements a pool of cached connections to a database. This should result in a speedup for persistent apps.
-The pool of connections is threadsafe regardless of whether the DB API module question in general has a threadsafety of 1 or 2.
-
-Reportedly there has been no speed up in tests with MySQL.
+Implements a pool of cached connections to a database. This should result in
+a speedup for persistent apps. The pool of connections is threadsafe
+regardless of whether the DB API module question in general has a
+threadsafety of 1 or 2.
 
 For more information on the DB API, see:
 	http://www.python.org/topics/database/DatabaseAPI-2.0.html
 
-
-The idea behind DBPool is that it's completely seamless, so once you have established your connection, use it just as you would any other DB-API compliant module. For example:
+The idea behind DBPool is that it's completely seamless, so once you have
+established your connection, use it just as you would any other DB-API
+compliant module. For example:
 
 	dbPool = DBPool(MySQLdb, 5, host=xxx, user=xxx, ...)
 	db = dbPool.getConnection()
 
-Now use "db" exactly as if it were a MySQLdb module. It's really
+Now use "db" exactly as if it were a MySQLdb connection. It's really
 just a proxy class.
 
 db.close() will return the connection to the pool, not actually
@@ -53,7 +54,7 @@ class PooledConnection:
 		self._pool = pool
 
 	def close(self):
-		if self._con != None:
+		if self._con is not None:
 			self._pool.returnConnection(self)
 			self._con = None
 
