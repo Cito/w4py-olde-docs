@@ -98,7 +98,7 @@ def FCGICallback(fcg,env,form):
 			'input':   form
 		}
 
-		addrfile=os.path.join(WebKitDir, _AddresFile)
+		addrfile=os.path.join(WebKitDir, _AddressFile)
 		(host, port) = string.split(open(addrfile).read(), ':')
 		port = int(port)
 
