@@ -2,7 +2,7 @@ from CodeGenerator import CodeGenerator
 from MiscUtils import AbstractError
 from time import asctime, localtime, time
 import string
-import os, sys
+import os, sys, types
 from types import *
 from MiddleKit.Core.ObjRefAttr import objRefJoin
 
@@ -186,7 +186,7 @@ class Attr:
 		""" Returns the default value as a legal Pythonic value. """
 		if self.has_key('Default'):
 			default = self['Default']
-			if type(default) is type(''):
+			if isinstance(default, types.StringTypes):
 				default = default.strip()
 			if not default:
 				return None
@@ -293,10 +293,10 @@ class BoolAttr:
 		Attr.writePySetChecks.im_func(self, out)
 		out.write('''\
 		if value is not None:
-			if type(value) is not types.IntType:
-				raise TypeError, 'expecting int for bool, but got value %r of type %r instead' % (value, type(value))
-			if value not in (0, 1):
-				raise ValueError, 'expecting 0 or 1 for bool, but got %s instead' % value
+			if not isinstance(value, types.IntType):
+				raise TypeError, 'expecting bool or int for bool, but got value %r of type %r instead' % (value, type(value))
+			if value not in (True, False, 1, 0):
+				raise ValueError, 'expecting True, False, 1 or 0 for bool, but got %s instead' % value
 ''')
 
 
@@ -309,11 +309,11 @@ class IntAttr:
 		Attr.writePySetChecks.im_func(self, out)
 		out.write('''\
 		if value is not None:
-			if type(value) is types.LongType:
+			if isinstance(value, types.LongType):
 				value = int(value)
-				if type(value) is types.LongType: # happens in Python 2.3
+				if isinstance(value, types.LongType): # happens in Python 2.3
 					raise OverflowError, value
-			elif type(value) is not types.IntType:
+			elif not isinstance(value, types.IntType):
 				raise TypeError, 'expecting int type, but got value %r of type %r instead' % (value, type(value))
 ''')
 
@@ -327,9 +327,9 @@ class LongAttr:
 		Attr.writePySetChecks.im_func(self, out)
 		out.write('''\
 		if value is not None:
-			if type(value) is types.IntType:
+			if isinstance(value, types.IntType):
 				value = long(value)
-			elif type(value) is not types.LongType:
+			elif not isinstance(value, types.LongType):
 				raise TypeError, 'expecting long type, but got value %r of type %r instead' % (value, type(value))
 ''')
 
@@ -343,9 +343,9 @@ class FloatAttr:
 		Attr.writePySetChecks.im_func(self, out)
 		out.write('''\
 		if value is not None:
-			if type(value) in (types.IntType, types.LongType):
+			if isinstance(value, (types.IntType, types.LongType)):
 				value = float(value)
-			elif type(value) is not types.FloatType:
+			elif not isinstance(value, types.FloatType):
 				raise TypeError, 'expecting float type, but got value %r of type %r instead' % (value, type(value))
 ''')
 
