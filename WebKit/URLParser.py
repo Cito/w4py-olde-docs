@@ -177,6 +177,8 @@ class ContextParser(URLParser):
 				mod = sys.modules[importAsName]
 			else:
 				res = imp.find_module(packageName, [localDir])
+				if res is None:
+					raise ImportError, '__init__.py could not be found'
 				mod = imp.load_module(name, *res)
 		except ImportError, e:
 			print 'Error loading context: %s: %s: dir=%s' \
