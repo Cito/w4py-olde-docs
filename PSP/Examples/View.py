@@ -14,6 +14,7 @@ class View(Page):
 
 			filename = req.field('filename')
 
+			filename = self.request().serverSidePath(os.path.basename(filename))
 			if not os.path.exists(filename):
 				self.write("No such file %s exists" % filename)
 				return
