@@ -19,7 +19,7 @@ class DeleteError(Exception):
 	''' Base class for all delete exceptions '''
 	pass
 
-class DeleteReferencedError(Exception):
+class DeleteReferencedError(DeleteError):
 	'''
 	This is raised when you attempt to delete an object that is referenced by other objects with
 	onDeleteOther not set to detach or cascade.  You can call referencingObjectsAndAttrs() to get a
@@ -37,7 +37,7 @@ class DeleteReferencedError(Exception):
 	def referencingObjects(self):
 		return self._referencingObjectsAndAttrs
 
-class DeleteObjectWithReferencesError(Exception):
+class DeleteObjectWithReferencesError(DeleteError):
 	'''
 	This is raised when you attempt to delete an object that references other objects,
 	with onDeleteSelf=deny.  You can call attrs() to get a list of attributes
