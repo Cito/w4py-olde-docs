@@ -47,7 +47,7 @@ class Page(HTTPServlet):
 
 		# Check for actions
 		for action in self.actions():
-			if req.hasField('_action_%s' % action):
+			if req.hasField('_action_%s' % action) or (req.hasField('_action_%s.x' % action) and req.hasField('_action_%s.y' % action)):
 				if self._actionSet().has_key(action):
 					self.handleAction(action)
 					return
