@@ -141,13 +141,6 @@ class HTTPResponse(Response):
 			cookie.setSecure(secure)
 		self.response().addCookie(cookie)
 
-	def setCookie(self, name, value):
-		"""
-		Sets the named cookie to a value.
-		"""
-		assert self._committed==0, "Headers have already been sent"
-		self.addCookie(Cookie(name, value))
-
 	def addCookie(self, cookie):
 		"""
 		Adds a cookie that will be sent with this response.
