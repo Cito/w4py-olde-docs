@@ -8,8 +8,8 @@
 <body>
 
 <h1>WebKit Future Work</h1>
-Version 0.4.1
-<br>Webware for Python 0.4.1
+Version 0.5
+<br>Webware for Python 0.5
 
 
 <a name=Future><h2>Future Work/Limitations</h2></a>
@@ -24,9 +24,9 @@ Version 0.4.1
 <a name=KnownBugs><h3>Known Bugs</h3></a>
 
 <ol>
+	<li> Contexts do not have separate name spaces.
 	<li> The ListBox example does not take kindly to a Refresh/Reload after a delete operation. In essence, you are telling the ListBox to delete the same object twice.
 	<li> Problems have been reported with cookies on MS IE for the Mac.
-	<li> On Netscape 4.7, when browsing through the Servlet examples, the [BACK] button of the browser doesn't seem to keep a history. This is pretty strange. Also, this hasn't been confirmed or tested in a long time.
 	<li> The OneShot adapter does not clean old sessions when using SessionFileStore.
 	<li> If a context appears in the Contexts setting once by name and once as the default, Application seems to load it twice.
 </ol>
@@ -50,7 +50,6 @@ Version 0.4.1
 		<li> Investigate case insensitive URLs, especially for the Windows platform.
 		<li> Plug-ins
 			<ol>
-			<li> In admin page, provide links to docs
 			<li> In ExamplePage, automatically support examples of any plug-in
 			<li> Better docs
 			<li> Properties.config. 'Load', 0, 1 or the name of the required op sys
@@ -66,9 +65,7 @@ Version 0.4.1
 		<li> Review the timestamp caching logic and its relation to .pyc files if any.
 		<li> AppServer: Servlets get reloaded when they are changed, but not the Servlets ancestor classes.
 		<li> Add "Last-modified:" to generic files that are served via WebKit.
-		<li> Change the raw response format to a MIME header looking format (rather than a marshalled Python dictionary).
 		<li> If a Python file has only one class that inherits from Servlet, then use that as the Servlet class (rather than requiring the name be the same as the file).
-		<li> Have the generic file servlet cache it's files.
 		</ol>
 
 	<li> <b>Testing</b>
@@ -77,7 +74,6 @@ Version 0.4.1
 		<li> Provide higher level automation of testing. For example, a testing script should be able to launch various app servers multiple times.
 		<li> Provide highly automated benchmarking so we can track changes in performance.
 		<li> Expand the regression test suite.
-		<li> Investigate <a href=http://pyunit.sourceforge.net>http://pyunit.sourceforge.net</a>.
 		</ol>
 
 	<li> <b>Docs</b>
@@ -91,9 +87,7 @@ Version 0.4.1
 	<li> <b>Food for thought, considerations, reviews</b>
 		<ol>
 		<li> Consider this statement from the FastCGI docs: Redirects are handled similar to CGI.  Location headers with values that begin with "/" are treated as internal-redirects; otherwise, they are treated as external redirects (302).
-		<li> Consider how Pages might be nested. Consider if a different name is in order.
 		<li> Consider if we need to support &lt;form action="x.py?a=1" method="POST"&gt; where you will have both a query string and posted data.
-		<li> What are the implications of multi-threading for servlets?
 		<li> Application modifies sys.path so that servlets can say "from SuperServlet import SuperServlet" where SuperServlet is located in the same directory as the Servlet. We'd prefer a more sophisticated technique which does not modify sys.path and does not affect other servlets. (Or maybe this would go away with a new one-process-per-application architecture.)
 		</ol>
 
