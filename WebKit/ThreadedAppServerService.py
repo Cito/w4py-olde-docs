@@ -91,7 +91,10 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 			# Import the ThreadedAppServer
 			if '' not in sys.path:
 				sys.path = [''] + sys.path
-			os.chdir(os.pardir)
+			try:
+				os.chdir(self.workDir())
+			except:
+				os.chdir(os.pardir)
 			from WebKit import Profiler
 			Profiler.startTime = startTime
 			from WebKit.ThreadedAppServer import ThreadedAppServer
