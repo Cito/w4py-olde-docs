@@ -481,7 +481,7 @@ class RequestHandler:
 				else:
 					requestURI = None
 				print requestURI
-			
+
 		dict['input'] = conn.makefile("rb",8012)
 
 		strmOut = TASASStreamOut(self.sock)
@@ -571,8 +571,9 @@ def run(useMonitor = 0, workDir=None):
 			except KeyboardInterrupt, e:
 				server.shutDown()
 	except Exception, e:
-		import traceback
-		traceback.print_exc(file=sys.stderr)
+		if not isinstance(e, SystemExit):
+			import traceback
+			traceback.print_exc(file=sys.stderr)
 		#print e
 		print
 		print "Exiting AppServer"
