@@ -94,6 +94,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 <refinements/improvements>
 
+	[ ] The documentation generation for Webware doesn't pick up on MiddleKit very well, which is the first component to have subpackages (and mix-ins!).
+
 	[ ] MK should add back pointers as necessary (like for lists). Right now the modeler has to make sure they are there. This also ties into the "distinct lists" problem, so you might wish tackle these simultaneously.
 
 	[ ] Prior to inserting or updating an object in the store, validate the requirements on it's attributes.
