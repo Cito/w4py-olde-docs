@@ -162,17 +162,14 @@ class Klasses(ModelObject, UserDict):
 			else:
 				raise ModelError('type specifier missing')
 
-
-		if typeName[0].upper()==typeName[0]:
-			return 'ObjRefAttr'
-
 		# to support "list of <class>":
-		typeName = typeName.split()[0]
+		if typeName.lower().startswith('list '):
+			typeName = 'list'
 
 		try:
 			return self._typeNamesToAttrClassNames[typeName]
 		except KeyError:
-			raise ModelError("Unknown type %s." % typeName)
+			return 'ObjRefAttr'
 
 
 	## Debugging ##
