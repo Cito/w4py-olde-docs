@@ -57,6 +57,9 @@ class MiddleObject(NamedValueAccess):
 		"""
 		if self._mk_store:
 			assert self._mk_store is store, 'Cannot refresh data from a different store.'
+			if self._mk_changed and not self._mk_initing:
+				if not store.setting('AllowRefreshOfChangedObject', False):
+					assert 0, "attempted to refresh changed object %s.%d\nYour app needs to call store.saveChanges() before doing anything which can cause objects to be refreshed from the database (i.e. calling store.deleteObject()), otherwise your changes will be lost." % (self.klass().name(), self.serialNum())
 		else:
 			self.setStore(store)
 		if store.setting('UseBigIntObjRefColumns', False):
@@ -97,6 +100,7 @@ class MiddleObject(NamedValueAccess):
 
 		self._mk_initing = 0
 		self._mk_inStore = 1
+		self._mk_changed = 0  # setting the values above will have caused this to be set; clear it now.
 		return self
 
 

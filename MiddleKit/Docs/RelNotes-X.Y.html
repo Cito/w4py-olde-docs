@@ -37,6 +37,7 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 <pre>{
 	'SQLSerialColumnName': '%(className)sId',
 	'UseBigIntObjRefColumns': True,
+	'AllowRefreshOfChangedObjects': True,
 }</pre>
 	<li> If your model has a SQLGenerator.config file, move its contents to Settings.config.
 	<li> If you use Microsoft SQL Server and your model uses the float type then read the section below detailing that.
@@ -70,6 +71,24 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 <p> The serial primary key field is now typed as int instead of bigint. This matches the MiddleKit approach for other databases and also allows object id columns to be foreign keys to this primary key (MS SQL will give an error if an int column tries to reference a bigint column).
 
+<h3>Protection against losing changes</h3>
+<p>
+Depending on the application, certain call sequences can cause uncommitted changes to be lost.  This might be due to
+programmer error (i.e. forgetting to call saveChanges when necessary), but can also happen due to the implementation
+of store.deleteObject(), which executes SQL queries (and refreshes objects) when locating and resolving object 
+references (i.e. cascade, detach).
+</p>
+
+<p>In order to protect the programmer against such errors, which may be
+very subtle and difficult to detect, MiddleKit will raise an assertion
+error when a changed object's attributes are about to be refreshed from
+the database.  The programmer should then add calls to store.saveChanges()
+to ensure that data loss cannot occur.  </p>
+
+<p> Since this change may break existing applications, a new setting
+called "AllowRefreshOfChangedObject" has been added. This setting defaults
+to false (strongly recommended), but for existing applications you may
+set it to true to avoid ever getting an assertion failure.  </p>
 
 <h2>New Features</h2>
 <ul>

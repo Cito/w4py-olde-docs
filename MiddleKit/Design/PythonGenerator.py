@@ -224,7 +224,6 @@ class Attr:
 		self._%(name)s = value
 
 		# MiddleKit machinery
-		self._mk_changed = 1  # @@ original semantics, but I think this should be under "if not self._mk_initing..."
 		if not self._mk_initing and self._mk_serialNum>0 and value is not origValue:
 			global _%(name)sAttr
 			if _%(name)sAttr is None:
@@ -233,6 +232,7 @@ class Attr:
 					_%(name)sAttr = 0
 			if _%(name)sAttr:
 				# Record that it has been changed
+				self._mk_changed = 1
 				if self._mk_changedAttrs is None:
 					self._mk_changedAttrs = {} # maps name to attribute
 				self._mk_changedAttrs['%(name)s'] = _%(name)sAttr  # changedAttrs is a set
@@ -398,9 +398,9 @@ class EnumAttr:
 		self._%(name)s = value
 
 		# MiddleKit machinery
-		self._mk_changed = 1  # @@ original semantics, but I think this should be under "if not self._mk_initing..."
 		if not self._mk_initing and self._mk_serialNum>0 and value is not origValue:
 			# Record that it has been changed
+			self._mk_changed = 1
 			if self._mk_changedAttrs is None:
 				self._mk_changedAttrs = {} # maps name to attribute
 			self._mk_changedAttrs['%(name)s'] = _%(name)sAttr  # changedAttrs is a set

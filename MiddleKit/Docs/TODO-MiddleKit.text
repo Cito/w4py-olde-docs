@@ -102,6 +102,9 @@ I'll be happy to support anyone's efforts by answering questions, discussing ide
 
 		Also see the comment in MiddleObject.referencingObjectsAndAttrs().
 
+		@@jdh: This issue is mitigated by new assertion checking which ensures 
+		that changed objects are not refreshed.  See release notes for more details.
+
 	[ ] fetchObject*() refreshes the attributes of the objects in question, even if they were modified. eg, you could lose your changes
 
 	[ ] "set" methods for strings don't raise an exception when the min or max length boundaries are violated.
