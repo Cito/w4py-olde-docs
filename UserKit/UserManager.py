@@ -215,3 +215,14 @@ class UserManager:
 			return self.login(user, password)
 		else:
 			return None
+
+
+	## Cached ##
+
+	def clearCache(self):
+		'''
+		Clears the cache of the manager. Use with extreme caution. If your program maintains a reference to a user object, but the manager loads in a new copy later on, then consistency problems could occur.
+		The most popular use of this method is in the regression test suite.
+		'''
+		self._cachedUsers = []
+		self._cachedUsersBySerialNum = {}
