@@ -22,7 +22,7 @@ normal Python programs.
 Scheduling periodic tasks is a very common activity for users of a modern operating system.
 System administrators for example know very well how to start new <code>cron</code> jobs or the 
 corresponding Windows analogues. So, why does a web application server like Webware/WebKit 
-need it's own scheduling framework. The answer is simple: Because it knows better how to
+need its own scheduling framework. The answer is simple: Because it knows better how to
 react to a failed job, has access to internal data structures, which otherwise would have 
 to be exposed to the outside world and last but not least it needs scheduling capabilities
 anyway (e.g. for session sweeping and other memory cleaning operations).
@@ -32,7 +32,7 @@ Webware is developped with the object oriented scripting language Python so it s
 to write a general purpose Python based scheduling framework. One could think that this
 problem is already solved (remember the Python slogan: batteries included), but strange
 enough there has not much work been done in this area. The two standard Python modules
-<code>sched.py</code> and <code>bisect.py</code> are way to simple, not really object oriented 
+<code>sched.py</code> and <code>bisect.py</code> are way too simple, not really object oriented 
 and also not multithreaded. This was the reason to develop a new scheduling framework, which
 can not only be used with Webware but also with general purpose Python programs. Unfortunately 
 scheduling has an annoying side effect. The more you delve into the subject the more it becomes 
@@ -47,14 +47,14 @@ This modularity is one of the real strengths of Webware and in sharp contrast to
 where people tend to think in Zope and not in Python terms. In a perfect world one should 
 be able to use web wrappers (for Zope, Webware, Quixote,..) around clearly designed Python
 classes and not be forced to use one framework. Time will tell if this is just a dream
-or if people will reinvent the "python weels" over and over again.
+or if people will reinvent the "python wheels" over and over again.
 
 <h2>Tasks</h2>
 
 <P>
 The TaskKit implements the three classes <code>Scheduler, TaskHandler</code> and <code>Task</code>.
 Let's begin with the simplest one, i.e. Task. It's an abstract base class, from which you
-have to derive you own task classes by overriding the <code>run()</code>-method like in
+have to derive your own task classes by overriding the <code>run()</code>-method like in
 the following example:
 
 <p>
@@ -97,7 +97,7 @@ to check if they should terminate. This is the case when the scheduler or the ta
 stoped. The latter is achieved with a <code>stopTask()</code> call which is not recommented though.
 It's generally better to let the task finish and use the <code>unregister()</code>  and 
 <code>disable()</code> methods. The first really deletes the task after termination while 
-the second only disables it's rescheduling. You can still use it afterwards. Right now the implementation
+the second only disables its rescheduling. You can still use it afterwards. Right now the implementation
 of <code>proceed()</code>
 
 <p>
@@ -132,7 +132,7 @@ common practice to use semistatic page generation techniques. For example
 you can generate the entry page as a static page once per minute. During this time 
 the content will not be completely accurate (e.g. the number of comments will certainly 
 increase), but nobody really cares about that. The benefit is a dramatic reduction of 
-database requests. For other pages (like older news with comments attached) it gives 
+database requests. For other pages (like older news with comments attached) it makes 
 more sense to generate static versions on demand. This is the case when the discussion 
 has come to an end, but somebody adds a comment afterwards and implicitely changes the 
 page by this action. Generating a static version will happen very seldom after the 
@@ -143,7 +143,7 @@ be clear by now, that an integrated Webware scheduling mechnism is very useful f
 this kind of things and the better approach than external <code>cron</code> jobs.
 Let's look a litle bit closer at the static generation technique now. First of all we 
 need a <code>PageGenerator</code> class. To keep the example simple we just 
-write the actual date into a file. In real live you will assemble much more complex data
+write the actual date into a file. In real life you will assemble much more complex data
 into such static pages.
 
 <p>
@@ -243,7 +243,7 @@ Let's refine our example a little bit and plug it into Webware. We will write a 
 
 <P>
 When you click on the <code>Generate</code> button a new periodic <code>PageGenerator</code> task 
-will be add to the Webware scheduler. Remember that this will generate a static page <code>static.html</code> 
+will be added to the Webware scheduler. Remember that this will generate a static page <code>static.html</code> 
 every 60 seconds (if you use the default values). The new task name is <code>"PageGenerator for filename"</code>, 
 so you can use this servlet to change the settings of already scheduled tasks (by rescheduling) or 
 add new <code>PageGenerator</code> tasks with different filenames. This is quite useless here, but as 
@@ -256,7 +256,7 @@ with user defined parameters). In any case, don't be shy and contribute other in
 Finally we come to the servlet code, which should be more or less self explanatory, except for the
 <code>_action_</code> construct which is very well explained in the Webware documentation though (just
 in case you forgot that). <code>app.taskManager()</code> gives you the WebKit scheduler, which can be 
-used to add new tasks. In real live you will have to make the scheduling information persistent
+used to add new tasks. In real life you will have to make the scheduling information persistent
 and reschedule all tasks after a WebKit restart because it would be quite annoying to enter this
 data again and again. <code>PersistantScheduler</code> is a class which is on the ToDo list for the 
 next TaskKit version and will probably be implemented with the new MiddleKit from Chuck Esterbrook.
