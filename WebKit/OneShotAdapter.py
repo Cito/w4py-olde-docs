@@ -16,6 +16,7 @@ _timestamp = time.time()
 
 
 # 2000-08-07 ce: We have to reassign sys.stdout *immediately* because it's referred to as a default parameter value in Configurable.py which happens to be our ancestor class as well as the ancestor class of AppServer and Application. The Configurable method that uses sys.stdout for a default parameter value must not execute before we rewire sys.stdout. Tricky, tricky.
+# 2000-12-04 ce: Couldn't this be fixed by Configurable taking None as the default and then using sys.stdout if arg==None?
 try:
 	from cStringIO import StringIO
 except ImportError:
@@ -24,11 +25,9 @@ import sys
 _real_stdout = sys.stdout
 sys.stdout = _console = StringIO()  # to capture the console output of the application
 
-
-
 import os, string
-
-from Adapter import *
+from Adapter import Adapter
+from MiscUtils.Funcs import CharWrap
 
 
 class OneShotAdapter(Adapter):
@@ -97,7 +96,7 @@ class OneShotAdapter(Adapter):
 	def showConsole(self, contents):
 		width = self.setting('ConsoleWidth')
 		if width:
-			contents = WordWrap(contents, self.setting('ConsoleWidth'), self.setting('ConsoleHangingIndent'))
+			contents = CharWrap(contents, self.setting('ConsoleWidth'), self.setting('ConsoleHangingIndent'))
 		contents = HTMLEncode(contents)
 		sys.stdout.write('<br><p><table><tr><td bgcolor=#EEEEEE><pre>%s</pre></td></tr></table>' % contents)
 
