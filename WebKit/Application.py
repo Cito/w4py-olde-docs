@@ -616,7 +616,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 	def addContext(self, name, dir):
 		if self._contexts.has_key(name):
 			print 'WARNING: Overwriting context %s (=%s) with %s' % (
-				repr(name), repr(self._contexts[name]), repr(value))
+				repr(name), repr(self._contexts[name]), repr(dir))
 		try:
 			importAsName = name
 			localdir, pkgname = os.path.split(dir)
