@@ -74,13 +74,16 @@ class Configurable:
 		return {}
 
 	def configFilename(self):
-		''' Returns the filename by which users can override the configuration. Subclasses must override to specify a name. '''
+		''' Returns the filename by which users can override the configuration. Subclasses must override to specify a name. Returning None is valid, in which case no user config file will be loaded. '''
 		raise SubclassResponsibilityError()
 
 	def userConfig(self):
 		''' Returns the user config overrides found in the optional config file, or {} if there is no such file. The config filename is taken from configFilename(). '''
 		try:
-			file = open(self.configFilename())
+			filename = self.configFilename()
+			if filename is None:
+				return {}
+			file = open(filename)
 		except IOError:
 			return {}
 		else:
