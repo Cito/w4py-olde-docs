@@ -40,10 +40,12 @@ class HTTPResponse(Response):
 
 	def setHeader(self, name, value):
 		''' Sets a specific header by name. '''
+		assert self._committed==0
 		self._headers[name] = value
 
 	def addHeader(self, name, value):
 		''' Adds a specific header by name. '''
+		assert self._committed==0
 		raise NotImplementedError
 
 	def headers(self, name=None):
@@ -62,10 +64,12 @@ class HTTPResponse(Response):
 
 	def setCookie(self, name, value):
 		''' Sets the named cookie to a value. '''
+		assert self._committed==0
 		self.addCookie(Cookie(name, value))
 
 	def addCookie(self, cookie):
 		''' Adds a cookie that will be sent with this response. '''
+		assert self._committed==0
 		assert isinstance(cookie, Cookie)
 		self._cookies[cookie.name()] = cookie
 
@@ -77,15 +81,18 @@ class HTTPResponse(Response):
 	## Status ##
 
 	def setStatus(self, code):
+		assert self._committed==0
 		raise NotImplementedError
 
 
 	## Special responses ##
 
 	def sendError(self, code, msg=None):
+		assert self._committed==0
 		raise NotImplementedError
 
 	def sendRedirect(self, url):
+		assert self._committed==0
 		self._headers = {'Location': url}
 		self._cookies = {}
 		self._contents = []
@@ -94,22 +101,17 @@ class HTTPResponse(Response):
 	## Output ##
 
 	def write(self, string):
+		assert self._committed==0
 		self._contents.append(str(string))
 
 	def isCommitted(self):
 		return self._committed
 
 	def deliver(self, trans):
-		self._committed = 1
 		self.recordSession(trans)
-		prefix = []
-		for key, value in self._headers.items():
-			prefix.append('%s: %s\n' % (key, value))
-		for cookie in self._cookies.values():
-			prefix.append('%s\n' % cookie.headerString())
-		prefix.append('\n')
-		self._contents = string.join(prefix, '') + string.join(self._contents, '')
+		self._contents = string.join(self._contents, '')
 		self.recordEndTime()
+		self._committed = 1
 
 	def recordSession(self, trans):
 		''' Invoked by deliver() to record the session id in the response (if a session exists). This implementation sets a cookie for that purpose. For people who don't like sweets, a future version could check a setting and instead of using cookies, could parse the HTML and update all the relevant URLs to include the session id (which implies a big performance hit). Or we could require site developers to always pass their URLs through a function which adds the session id (which implies pain). Personally, I'd rather just use cookies. You can experiment with different techniques by subclassing Session and overriding this method. Just make sure Application knows which "session" class to use. '''
@@ -119,13 +121,23 @@ class HTTPResponse(Response):
 
 	def reset(self):
 		''' Resets the response (such as headers, cookies and contents). '''
+		self._committed = 0  # @@ 2000-06-09 ce: this fixes ExceptionHandler problem where it reuses the response. maybe this is "bad"
 		self._headers = {'Content-type': 'text/html'}
 		self._cookies = {}
 		self._contents = []
 
-	def contents(self):
-		''' Returns the final contents of the response. Don't invoke this method until after deliver(). '''
-		assert self._contents is not None, 'Contents are not set. Perhaps deliver() has not been invoked.'
+	def rawResponse(self):
+		''' Returns the final contents of the response. Don't invoke this method until after deliver().
+		Returns a dictionary representing the response containing only strings, numbers, lists, tuples, etc. with no backreferences. That means you don't need any special imports to examine the contents and you can marshal it. Currently there are two keys. 'headers' is list of tuples each of which contains two strings: the header and it's value. 'contents' is a string (that may be binary (for example, if an image were being returned)). '''
+		headers = []
+		for key, value in self._headers.items():
+			headers.append((key, value))
+		for cookie in self._cookies.values():
+			headers.append(('Set-Cookie', cookie.headerValue()))
+		return {
+			'headers': headers,
+			'contents': self._contents
+		}
 		return self._contents
 
 	def size(self):

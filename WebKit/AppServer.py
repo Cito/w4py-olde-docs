@@ -20,7 +20,7 @@ from Configurable import Configurable
 from Application import Application
 from PlugIn import PlugIn
 from WebKitSocketServer import ThreadingTCPServer, ForkingTCPServer, TCPServer, BaseRequestHandler
-from marshal import loads
+from marshal import dumps, loads
 import os, sys
 from threading import Lock
 
@@ -166,7 +166,7 @@ class WebKitAppServer(Configurable):
 		self.__class__.request_queue_size = value
 
 	def version(self):
-		return '0.3'
+		return '0.4 PRERELEASE'
 
 	def serve(self):
 		''' Starts serving requests and does so indefinitely. Sends serve_forever() to the TCP server. '''
@@ -206,10 +206,12 @@ class WebKitAppServer(Configurable):
 class RequestHandler(BaseRequestHandler):
 
 	def handle(self):
+		# Note: according to BaseRequestHandler docs, we have access to
+		#     self.[request, client_address, server]
+
 		#JSL-Looking for memory leak
 		import sys
-		
-		# according to BaseRequestHandler docs, we have access to self.[request, client_address, server]
+
 		verbose = self.server.wkVerbose
 
 		startTime = time.time()
@@ -236,11 +238,11 @@ class RequestHandler(BaseRequestHandler):
 				print 'request has keys:', string.join(dict.keys(), ', ')
 
 			transaction = self.server.wkApp.dispatchRawRequest(dict)
-			results = transaction.response().contents()
-			
+			rawResponse = dumps(transaction.response().rawResponse())
+
 			if verbose:
-				print 'about to send %d bytes' % len(results)
-			conn.send(results)
+				print 'about to send %d bytes' % len(rawResponse)
+			conn.send(rawResponse)
 			if verbose:
 				print 'sent.'
 		else:
@@ -252,7 +254,6 @@ class RequestHandler(BaseRequestHandler):
 			print '%0.2f secs' % (time.time() - startTime)
 			print 'END REQUEST'
 			print
-
 
 		transaction._application=None
 		transaction.die()

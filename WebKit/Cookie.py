@@ -5,21 +5,21 @@ import zCookieEngine
 class Cookie(Object):
 	'''
 	Cookie is used to create cookies that have additional attributes beyond their value.
-	
+
 	Note that web browsers don't typically send any information with the cookie other than it's value. Therefore, in HTTPRequest, cookie() simply returns a value such as an integer or a string.
 
 	When the server sends cookies back to the browser, it can send a cookie that simply has a value, or the cookie can be accompanied by various attributes (domain, path, max-age, ...) as described in RFC 2109. Therefore, in HTTPResponse, setCookie() can take either an instance of the Cookie class, as defined in this module, or a value.
-	
+
 	Note that Cookies values get pickled (see the pickle module), so you can set and get cookies that are integers, lists, dictionaries, etc.
-		
+
 	HTTP Cookies are officially described in RFC 2109:
-	
+
 		ftp://ftp.isi.edu/in-notes/rfc2109.txt
-		
+
 	FUTURE
-	
+
 		* This class should provide error checking in the setFoo() methods. Or maybe our internal Cookie implementation already does that?
-		* This implementation is probably not as efficient as it should be, [a] it works and [b] the interface is stable. We can optimize later.		
+		* This implementation is probably not as efficient as it should be, [a] it works and [b] the interface is stable. We can optimize later.
 	'''
 
 	## Init ##
@@ -48,17 +48,17 @@ class Cookie(Object):
 
 	def path(self):
 		return self._cookie['path']
-	
+
 	def isSecure(self):
 		return self._cookie['secure']
-	
+
 	def value(self):
 		return self._value
-	
+
 	def version(self):
 		return self._cookie['version']
 
-		
+
 	## Setting attributes ##
 
 	def setComment(self, comment):
@@ -66,16 +66,16 @@ class Cookie(Object):
 
 	def setDomain(self, domain):
 		self._cookie['domain'] = domain
-	
+
 	def setMaxAge(self, maxAge):
 		self._cookie['max-age'] = maxAge
-		
+
 	def setPath(self, path):
 		self._cookie['path'] = path
-	
+
 	def setSecure(self, bool):
 		self._cookie['secure'] = bool
-		
+
 	def setValue(self, value):
 		self._value = value
 		self._cookies[self._name] = value
@@ -83,8 +83,15 @@ class Cookie(Object):
 	def setVersion(self, version):
 		self._cookie['version'] = version
 
-	
+
 	## HTTP Headers ##
-	
+
+	def headerValue(self):
+		''' Returns a string with the value that should be used in the HTTP headers. '''
+		items = self._cookies.items()
+		assert(len(items)==1)
+		return items[0][1].OutputString()
+
 	def headerString(self):
+		''' @@ 2000-06-09 ce: Not typically needed now that raw responses are structured dictionaries instead of opaque strigns. headerValue() is used instead. '''
 		return str(self._cookies)

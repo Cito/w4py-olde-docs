@@ -26,15 +26,18 @@ or even:
 '''
 
 
-import time
+import string, time
 timestamp = time.time()
 
 from socket import *
-from marshal import dumps
+from marshal import dumps, loads
+
+
+debugging = 0   # set 1 if you want to see the raw response dictionary, instead of a normal page
 
 
 def main():
-	import os, string, sys
+	import os, sys
 
 	try:
 		myInput = sys.stdin.read()
@@ -69,25 +72,38 @@ def main():
 			import msvcrt
 			msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
+		# read the raw reponse (which is a marshalled dictionary)
+		response = ''
 		while 1:
-			data = s.recv(bufsize)
-			if not data:
+			chunk = s.recv(bufsize)
+			if not chunk:
 				break
-			sys.stdout.write(data)
+			response = response + chunk
+		response = loads(response)  # decode it
+
+		# deliver it!
+		write = sys.stdout.write
+		if debugging:
+			write('Content-type: text/html\n\n<html><body>')
+			write('<p> Your adapter has <b>debugging</b> set to true. <p>')
+			write(HTMLEncode(str(response)))
+			write('</body></html>')
+		else:
+			for pair in response['headers']:
+				write('%s: %s\n' % pair)
+			write('\n')
+			write(response['contents'])
 
 	except:
 		import traceback
 
-		sys.stderr.write('[%s] [error] WebKitCGIAdaptor: Error while responding to request (unknown)\n' % (
-			time.asctime(time.localtime(time.time()))))
+		sys.stderr.write('[%s] [error] WebKitCGIAdaptor: Error while responding to request (unknown)\n' % (time.asctime(time.localtime(time.time()))))
 		sys.stderr.write('Python exception:\n')
 		traceback.print_exc(file=sys.stderr)
 
 		output = apply(traceback.format_exception, sys.exc_info())
 		output = string.join(output, '')
-		output = string.replace(output, '&', '&amp;')
-		output = string.replace(output, '<', '&lt;')
-		output = string.replace(output, '>', '&gt;')
+		output = HTMLEncode(output)
 		sys.stdout.write('''Content-type: text/html
 
 <html><body>
@@ -95,6 +111,20 @@ def main():
 
 %s</pre>
 </body></html>\n''' % output)
+
+
+HTMLCodes = [
+	['&', '&amp;'],
+	['<', '&lt;'],
+	['>', '&gt;'],
+	['"', '&quot;'],
+]
+
+def HTMLEncode(s, codes=HTMLCodes):
+	''' Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdaptor independent of everything but standard Python.) '''
+	for code in codes:
+		s = string.replace(s, code[0], code[1])
+	return s
 
 
 if __name__=='__main__':
