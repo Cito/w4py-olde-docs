@@ -20,9 +20,6 @@ Version 0.4
 <br>  <a href="#Introduction"><font size=+1>Introduction</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Overview"><font size=>Overview</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#CompareCGIs"><font size=>Compared to CGI "apps"</font></a>
-<br>  <a href="#Running"><font size=+1>Running and Testing</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#GettingStarted"><font size=>Getting Started</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#WebKitAdaptors"><font size=>WebKit Adaptors</font></a>
 <br>  <a href="#Errors"><font size=+1>Errors / Uncaught Exceptions</font></a>
 <br>  <a href="#Configuration"><font size=+1>Configuration</font></a>
 <br>  <a href="#Administration"><font size=+1>Administration</font></a>
@@ -62,7 +59,7 @@ Version 0.4
 
 <p> Content is normally served in HTML or XML format over an HTTP connection. However, applications can provide other forms of content and the framework is designed to allow new classes for supporting protocols other than HTTP.
 
-<p> In order to connect the web server and the application server, there is a small CGI script, WebKit.cgi, that bundles a web browser request and sends it to the application server, which then processes it and sends the response back to WebKit.cgi which then outputs the results for use by the web server. See the <a href=#Running>Running and Testing</a> section below.
+<p> In order to connect the web server and the application server, there is a small CGI script, WebKit.cgi, that bundles a web browser request and sends it to the application server, which then processes it and sends the response back to WebKit.cgi which then outputs the results for use by the web server. See the <a href=InstallGuide.html>Install Guide</a> for more information.
 
 <p> At a more detailed level, the process looks like this:
 
@@ -86,58 +83,6 @@ Version 0.4
 <p> With the server-side application, the majority of these tasks can be done once at launch time and important  results can be easily cached. This the application significantly more efficient.
 
 <p> Of course, CGIs can still be appropriate for "one shot" deals or simple applications. <a href=../../Documentation/Webware.html>Webware</a> includes a <a href=../../CGIWrapper/Documentation/CGIWrapper.html>CGI Wrapper</a> if you'd like to encapsulate your CGI scripts with robust error handling, e-mail notifications, etc.
-
-
-<a name=Running><h2>Running and Testing</h2></a>
-
-<a name=GettingStarted><h3>Getting Started</h3></a>
-
-<p> You can put the whole Webware distribution in a directory such that your web server will accept URLs there, including CGIs, or you can put the distribution somewhere else and just put the WebKit.cgi file in an executable area of your Web Server's document tree.  If you choose to put only the WebKit.cgi file in your WebServer's path, you'll need to edit the WebKit.cgi and set the variable WebKitDir at the top of the file to the location of the <b>WebKit</b> directory, as in WebKitDir="/usr/local/Webware/WebKit".
-
-For testing purposes, a URL might look something like:
-<p><code>http://localhost/Projects/Webware/WebKit/WebKit.cgi/Welcome</code>
-<p>or
-<p><code>http://localhost/cgi-bin/WebKit.cgi/</code>
-
-
-<p>Before you enter the URL into a browser, you need to start the WebKit app server from the command line:
-
-<p><code>&gt; cd ~/Projects/Webware/WebKit
-<br>&gt; AppServer.py
-<br>WebKit AppServer 0.3
-<br>part of Webware for Python
-<br>Copyright 1999-2000 by Chuck Esterbrook. All Rights Reserved.
-<br>WebKit and Webware are open source.
-<br>Please visit:  http://webware.sourceforge.net
-<br>
-<br><i>&lt;a display of all settings and their values&gt;</i>
-<br>
-<br>Current directory is /usr/local/Webware/WebKit
-<br>Plug-in: PSP in ../PSP
-<br>Listening at ('', 8086)
-<br>OK
-</code>
-
-<p><table bgcolor=#FFFFEE><tr><td>
-Also, if you're on Windows, you will need to change the first line of WebKit.cgi, which specifies that the CGI script is a Python script. Try <code>#!python</code> which usually works, otherwise include the full path such as <code>#!\python\python</code>.
-<br>
-<br> Even on a UNIX system, you sometimes have to modify this first line, depending on whether or not you have <code>/usr/bin/env</code> and Python is in the search path. If not, then try using an absolute path such as <code>#!/usr/bin/python</code>.
-</td></tr></table></p>
-
-
-<p> Upon entering the URL, the results of the Welcome page should be displayed in your browser. Some diagnostic information will be printed in the terminal window of the server. You'll notice after the first page is served, that additional pages are served much faster. You can verify this in the console of the AppServer which reports the response time for each request. As the application warms up (e.g., caches classes, objects, files and settings) performance increases.
-
-<p> The <b>Welcome</b> page has links to other examples which you can browse. There is also a link with each example for viewing the source.
-
-<a name=WebKitAdaptors><h3>WebKit Adaptors</h3></a>
-
-<p> A WebKit adaptor takes an HTTP request from a webserver and, as quickly as possible, packs it up and ships it to the AppServer which subsequently sends the response back to the adaptor for delivery to the web server and ultimately the web client. More concisely, an adaptor is the go-between of the web server and the app server.
-
-<p> There are currently two adaptors in WebKit. The first is the CGI adaptor, named WebKit.cgi, which should work with any CGI-enabled web server. Of course, the web server will have to be configured to allow execution of CGI scripts.
-
-<p> The second adaptor is the FastCGI adaptor, named WebKit.fcgi, which should result in faster responses (informal testing is generally at least twice as fast), although definitive performance tests have not yet been made on the adaptors. Your web server will have to be FastCGI enabled, which you may be able to accomplish by picking up software at <a href=http://www.FastCGI.com>http://www.FastCGI.com</a> where you can also learn more about FastCGI. There is also very useful documentation provided inline with the adaptor which you should read if you choose to use it.
-
-<p> In the future, custom adaptors for popular web servers such as Apache, Microsoft, etc. should be provided in order to provide even better performance.
 
 
 <a name=Errors><h2>Errors / Uncaught Exceptions</h2></a>
@@ -434,7 +379,7 @@ Also, if you're on Windows, you will need to change the first line of WebKit.cgi
 <p> The answer to that question might not seem clear after being deluged with all the details. Here's a summary:
 
 <ol>
-	<li> Make sure you can run the WebKit AppServer. See the <a href=#Running>Running and Testing</a> section.
+	<li> Make sure you can run the WebKit AppServer. See the <a href=InstallGuide.html>Install Guide</a> for more information.
 	<li> Read the source to the examples (in WebKit/Examples), then modify one of them to get your toes wet.
 	<li> Create your own new example from scratch. Ninety-nine percent of the time you will be subclassing the <b>Page</b> class.
 	<li> Familiarize yourself with the class docs in order to take advantage of classes like Page, HTTPRequest, HTTPResponse and Session. Unfortunately, I couldn't get generated class docs working for this release, so you'll have to resort to breezing through the source code which is coupled with documentation strings. Read the examples first.
