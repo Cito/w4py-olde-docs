@@ -413,10 +413,10 @@ If AppServer is called with no arguments, it will start the AppServer and record
 
 def main(args):
 	if len(args)>1:
-		if args[1] == "-monitor":
+		if args[1] == "monitor":
 			print "Enabling Monitoring"
 			run(useMonitor=1)
-		elif args[1] == "-stop":
+		elif args[1] == "stop":
 			import AppServer
 			AppServer.stop()
 		else:
