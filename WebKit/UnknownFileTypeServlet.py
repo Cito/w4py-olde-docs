@@ -87,7 +87,6 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		filesize = os.path.getsize(filename)
 
 		isHead = trans.request().method().upper()[0]=='H' # as in HEAD
-		print '>> HEAD REQUEST'
 		if isHead:
 			response.setHeader('Content-Length', str(filesize))
 			mtime = os.path.getmtime(filename)
