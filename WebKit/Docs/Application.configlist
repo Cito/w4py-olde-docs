@@ -5,7 +5,7 @@
 
 ('PrintConfigAtStartUp', '1', "Does what it says. It's generally a good idea to leave this on."),
 
-('ExtensionsToIgnore', "['.pyc', '.pyo', '.py~', '.bak']", 'This is a list of extensions that WebKit will ignore when autodetecting extensions. Note that this does not prevent WebKit from serving such a file if it is named explicitly in a URL.'),
+('ExtensionsToIgnore', "['.pyc', '.pyo', '.py~', '.bak', '.tmpl']", 'This is a list of extensions that WebKit will ignore when autodetecting extensions. Note that this does not prevent WebKit from serving such a file if it is named explicitly in a URL.'),
 
 ('ExtensionsToServe', "[]", 'This is a list of extensions that WebKit will use exclusively when autodetecting extensions. Note that this does not prevent WebKit from serving such a file if it is named explicitly in a URL.'),
 

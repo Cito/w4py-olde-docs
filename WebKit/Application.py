@@ -262,7 +262,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		return {
 			'PrintConfigAtStartUp': 1,
 			'DirectoryFile':        ['index', 'Main'],
-			'ExtensionsToIgnore':   ['.pyc', '.pyo', '.py~', '.bak'],
+			'ExtensionsToIgnore':   ['.pyc', '.pyo', '.py~', '.bak', '.tmpl'],
 			'ExtensionsToServe':   None,
 			'UseCascadingExtensions':1,
 			'ExtensionCascadeOrder':['.psp','.py','.html',],
@@ -1210,7 +1210,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				if self.setting('UseCascadingExtensions'):
 					for ext in self.setting('ExtensionCascadeOrder'):
 						if (ssPath + ext) in filenames:
-							fullPath = ssPath + ext
+							ssPath = ssPath + ext
 							foundMatch = 1
 							break
 				if not foundMatch:
