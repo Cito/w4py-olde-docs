@@ -159,6 +159,8 @@ Class,Attribute,Type,Extras
 
 def testExcel():
 	if canReadExcel():
+		import sys
+		sys.stderr = sys.stdout
 		heading('Testing Excel...')
 		t = DataTable('Sample3.xls')
 		assert t[0][0]==1.0, t[0]
@@ -166,8 +168,26 @@ def testExcel():
 
 def main():
 	print 'Testing DataTable.py'
+
+	import os
+	from glob import glob
+	for name in glob('*.cache'):
+		print 'Removing', name
+		os.remove(name)
+
+	DataTable.usePickleCache = 0
+
 	test01()
 	testExcel()
+
+	DataTable.usePickleCache = 1
+
+	test01()
+	testExcel()
+
+	test01()
+	testExcel()
+
 	print 'Done.'
 
 
