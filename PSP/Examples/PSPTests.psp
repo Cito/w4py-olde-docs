@@ -62,7 +62,7 @@ Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>
 
 
 <% for i in range(2): %> <%-- Loop #1, an automatic loop --%>
-<% self.write('<p>outerloop: ')
+<% self.write('<p>outerloop: ') 
 self.write(i)%>&nbsp;
 <% for n in range(2): %>  <%-- Another automatic loop --%>
 <p><i> &nbsp;&nbsp;Inner Loop: <%= n %><br> </i>
