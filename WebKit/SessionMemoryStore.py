@@ -21,6 +21,7 @@ class SessionMemoryStore(SessionStore):
 			keys = filestore.keys()
 			for i in keys:
 				self[i] = filestore[i]
+			filestore.clear()
 
 
 	## Access ##
