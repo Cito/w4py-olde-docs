@@ -46,6 +46,7 @@ else:
 					AdminPage.writeHTML(self)
 				else:
 					# Failed login attempt; have them try again
+					
 					request.fields()['extra'] = 'Login failed.  Please try again. (And make sure cookies are enabled.)'
 					app.forward(trans, 'LoginPage')
 					return
@@ -62,6 +63,19 @@ else:
 		def isValidUserAndPassword(self, username, password):
 			# Replace this with a database lookup, or whatever you're using for
 			# authentication...
-			users = [('admin', self.application().setting('AdminPassword')),]
-			return (username, password) in users
+			adminPassword = self.application().setting('AdminPassword')
+			if username == 'admin' and adminPassword and \
+			   password == adminPassword:
+				return 1
+			else:
+				return 0
 
+		def loginDisabled(self):
+			"""
+			Return None if login is enabled, else a message
+			about why not
+			"""
+			if self.application().setting('AdminPassword'):
+				return None
+			else:
+				return """Logins to admin pages are disabled until you supply an AdminPassword in Application.config"""

@@ -4,6 +4,9 @@ from time import time, localtime
 
 class LoginPage(AdminPage):
 	def writeContent(self):
+		if self.loginDisabled():
+			self.write(self.loginDisabled())
+			return
 		self.write('''
 <center>
 	<table border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" width="300">
@@ -56,4 +59,3 @@ class LoginPage(AdminPage):
 	</table>
 </center>
 ''')
-
