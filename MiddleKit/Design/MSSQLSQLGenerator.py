@@ -218,7 +218,7 @@ class Attr:
 	def sqlType(self):
 		return self['Type']
 		# @@ 2000-10-18 ce: reenable this when other types are implemented
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def sqlName(self):
 		return '[' + self.name() + ']'

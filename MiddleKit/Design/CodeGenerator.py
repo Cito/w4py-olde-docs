@@ -57,4 +57,4 @@ class CodeGenerator(ModelUser):
 		out.write('%s = %s\n' % (key, value))
 
 	def generate(self, outdir):
-		raise AbstractError
+		raise AbstractError, self.__class__

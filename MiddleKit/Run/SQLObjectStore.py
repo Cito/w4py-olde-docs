@@ -169,7 +169,7 @@ class SQLObjectStore(ObjectStore):
 
 		Subclass responsibility.
 		"""
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def readKlassIds(self):
 		"""
@@ -224,7 +224,7 @@ class SQLObjectStore(ObjectStore):
 	def retrieveLastInsertId(self, conn, cur):
 		""" Returns the id (typically a 32-bit int) of the last INSERT operation by this connection. Used by commitInserts() to get the correct serial number for the last inserted object.
 		Subclass responsibility. """
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def commitUpdates(self,allThreads=0):
 		for object in self._changedObjects.values(allThreads):
@@ -389,7 +389,7 @@ class SQLObjectStore(ObjectStore):
 		"""
 		Subclasses must override to return a newly created database connection.
 		"""
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def threadSafety(self):
 		return self.dbapiModule().threadsafety

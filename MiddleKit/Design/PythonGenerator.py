@@ -195,7 +195,7 @@ class Attr:
 		Used by at least defaultValue().
 		Subclass responsibility.
 		"""
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def pyReadStoreDataStatement(self):
 		return None

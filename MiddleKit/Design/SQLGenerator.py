@@ -261,7 +261,7 @@ class Klasses:
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
 		"""
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def dropTablesSQL(self):
 		"""
@@ -269,7 +269,7 @@ class Klasses:
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
 		"""
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def createDatabaseSQL(self, dbName):
 		"""
@@ -277,7 +277,7 @@ class Klasses:
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
 		"""
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def useDatabaseSQL(self, dbName):
 		"""
@@ -285,7 +285,7 @@ class Klasses:
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
 		"""
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def _writeCreateSQL(self, generator, out):
 		for klass in self._model._allKlassesInOrder:
@@ -464,7 +464,7 @@ class Attr:
 		return 30  # @@ 2000-09-14 ce: should compute that from names rather than hard code
 
 	def sqlType(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def sqlColumnName(self):
 		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
@@ -542,7 +542,7 @@ class StringAttr:
 		Subclasses should take care that if self['Max']==self['Min'] then the "char" type is preferred over "varchar".
 		Also, most (if not all) SQL databases require different types depending on the length of the string.
 		"""
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def sampleValue(self, value):
 		if value=="''":

@@ -36,16 +36,16 @@ class Response(Message):
 	## Output ##
 
 	def write(self, string):
-		raise AbstractError
+		raise AbstractError, self.__class__
 	
 	def isCommitted(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def deliver(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def reset(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def streamOut(self):
 		return self._strmOut

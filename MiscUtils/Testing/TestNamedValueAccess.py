@@ -97,7 +97,7 @@ class LookupTest(NamedValueAccessTest):
 		self.objs = map(lambda clazz: clazz(), self.classes)
 
 	def lookup(self, obj, key, default=NoDefault):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def checkBasicAccess(self):
 		"""

@@ -72,7 +72,7 @@ class Configurable:
 
 	def configFilename(self):
 		""" Returns the filename by which users can override the configuration. Subclasses must override to specify a name. Returning None is valid, in which case no user config file will be loaded. """
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def configReplacementValues(self):
 		"""

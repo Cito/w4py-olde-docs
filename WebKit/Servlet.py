@@ -40,7 +40,7 @@ class Servlet(Object):
 		pass
 
 	def respond(self, trans):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def sleep(self, trans):
 		pass

@@ -264,7 +264,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		return self._reqCount
 
 	def isPersistent(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def serverSidePath(self, path=None):
 		"""	Returns the absolute server-side path of the WebKit app server. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the app server.

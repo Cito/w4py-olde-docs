@@ -59,13 +59,13 @@ class SessionStore(Object):
 	## Dictionary-style access ##
 
 	def __len__(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def __getitem__(self, key):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def __setitem__(self, key, item):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def __delitem__(self, key):
 		"""
@@ -75,25 +75,25 @@ class SessionStore(Object):
 			if not sess.isExpired():
 				sess.expiring()
 		"""
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def has_key(self, key):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def keys(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def clear(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 
 	## Application support ##
 
 	def storeSession(self, session):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def storeAllSessions(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def cleanStaleSessions(self, task=None):
 		"""

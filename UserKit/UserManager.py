@@ -154,19 +154,19 @@ class UserManager:
 
 	def userForSerialNum(self, serialNum, default=NoDefault):
 		""" Returns the user with the given serialNum, pulling that user record into memory if needed. """
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def userForExternalId(self, externalId, default=NoDefault):
 		""" Returns the user with the given external id, pulling that user record into memory if needed. """
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def userForName(self, name, default=NoDefault):
 		""" Returns the user with the given name, pulling that user record into memory if needed. """
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def users(self):
 		""" Returns a list of all users (regardless of login status). """
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def numActiveUsers(self):
 		""" Returns the number of active users, e.g., users that are logged in. """
@@ -174,10 +174,10 @@ class UserManager:
 
 	def activeUsers(self):
 		""" Returns a list of all active users. """
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 	def inactiveUsers(self):
-		raise AbstractError
+		raise AbstractError, self.__class__
 
 
 	## Logging in and out ##
