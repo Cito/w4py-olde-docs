@@ -38,7 +38,7 @@ class PlugIn(Object):
 
 	def load(self):
 		''' Loads the plug-in into memory, but does not yet install it. '''
-		print 'Plug-in: %s in %s' % (self._name, self._path)
+		print 'Loading plug-in: %s at %s' % (self._name, self._path)
 
 		assert os.path.exists(self._path)
 
@@ -49,7 +49,7 @@ class PlugIn(Object):
 		# Import the package
 		self._module = __import__(self._name, globals(), [], [])
 
-		# Check it out
+		# Inspect it and verify some required conventions
 		if not hasattr(self._module, '__version__'):
 			raise PlugInError, "Plug-in '%s' in '%s' has no __version__." % (self._name, self._dir)
 		self._ver = self._module.__version__
