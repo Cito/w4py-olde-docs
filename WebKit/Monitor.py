@@ -53,6 +53,7 @@ import asyncore
 import sys
 import signal
 import string
+from marshal import dumps
 
 global serverName
 serverName = defaultServer
@@ -64,7 +65,12 @@ global addr
 global running
 running = 0
 
-debug = 0
+statstr = dumps({'format':'STATUS',})
+statstr = dumps(len(statstr)) + statstr
+quitstr = dumps({'format':'QUIT',})
+quitstr = dumps(len(quitstr)) + quitstr
+
+debug = 1
 
 
 def createServer(setupPath=0):
@@ -130,7 +136,7 @@ def checkServer(restart = 1):
 		sts = time.time()
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect(addr)
-		s.send("STATUS")
+		s.send(statstr)
 		s.shutdown(1)
 		resp = s.recv(9)  #up to 1 billion requests!
 		monwait = time.time() - sts
@@ -199,7 +205,7 @@ def shutDown(arg1,arg2):
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect(addr)
-		s.send("QUIT")
+		s.send(quitstr)
 		s.shutdown(1)
 		resp = s.recv(10)
 		s.close()
@@ -269,6 +275,11 @@ if __name__=='__main__':
 			usage()
 		if not wwdir in sys.path:
 			sys.path.insert(0,wwdir)
+		sys.path.remove('')
+		try:
+			sys.path.remove('.')
+		except:
+			pass
 
 
 	cfg = open(os.path.join(wwdir,"WebKit","Configs/AppServer.config"))
