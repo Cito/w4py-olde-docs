@@ -11,6 +11,8 @@ def main(args):
 		usage()
 	server = args[1]
 	os.chdir(os.pardir)
+	if '' not in sys.path:
+		sys.path = [''] + sys.path
 	import WebKit
 	code = 'from WebKit.%s import main' % server
 	exec code
