@@ -1495,9 +1495,13 @@ class Application(ConfigurableForServerSidePath, Object):
 				continue
 			if toServe and ext not in toServe:
 				continue
+			shouldServe = 1
 			for regex in self._filesToHideRegexes:
 				if regex.match(shortFilename):
-					continue
+					shouldServe = 0
+					break
+			if not shouldServe:
+				continue
 			if self._filesToServeRegexes:
 				shouldServe = 0
 				for regex in self._filesToServeRegexes:
