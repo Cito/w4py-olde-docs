@@ -16,7 +16,7 @@ try:
 	else:
 		WebwareDir = os.path.dirname(os.getcwd())
 	webKitDir = os.path.join(WebwareDir, 'WebKit')
-	 if AppWorkDir is None:
+	if AppWorkDir is None:
 		AppWorkDir = webKitDir
 
 	import WebKit.CGIAdapter
