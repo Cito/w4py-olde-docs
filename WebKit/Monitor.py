@@ -64,7 +64,7 @@ global addr
 global running
 running = 0
 
-debug = 1
+debug = 0
 
 
 def createServer(changeDirectory=0):
@@ -111,7 +111,7 @@ def startServer(killcurrent = 1):
 			os.waitpid(srvpid,0) #prevent zombies
 		srvpid = os.fork()
 		if srvpid == 0:
-			createServer(not killCurrent)
+			createServer(not killcurrent)
 			sys.exit()
 	
 	
@@ -125,13 +125,14 @@ def checkServer(restart = 1):
 	getting a response when using the standard port.
 	"""
 	global addr
+	global running
 	try:
 		sts = time.time()
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect(addr)
 		s.send("STATUS")
 		s.shutdown(1)
-		resp = s.recv(9)#up to 1 billion requests!
+		resp = s.recv(9)  #up to 1 billion requests!
 		monwait = time.time() - sts
 		if debug:
 			print "Processed %s Requests" % resp
