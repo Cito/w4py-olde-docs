@@ -1,6 +1,6 @@
 name = 'Python Server Pages'
 
-version = (0, 6, 0)
+version = (0, 5, 0)
 
 docs = [ {'name': "User's Guide", 'file': 'UsersGuide.html'} ]
 
