@@ -47,7 +47,8 @@ class SessionStore(Object):
 			from cPickle import load, dump
 		except ImportError:
 			from pickle import load, dump
-		self.setEncoderDecoder(dump, load)
+		self._encoder = dump
+		self._decoder = load
 
 
 	## Access ##
