@@ -268,3 +268,16 @@ class ListAttr:
 
 	def sqlType(self):
 		raise Exception, 'Lists do not have a SQL type.'
+
+
+class FloatAttr:
+
+	def sqlType(self):
+		return 'decimal(16,8)'
+		# @@ 2001-04-26 dr: this (16,8) should be doable through your model
+		# you should use the decimal attribute and max/numDecimalPlaces
+		# float is supported for mySQL test compatibility
+
+	def sampleValue(self, value):
+		float(value) # raises exception if value is invalid
+		return value
