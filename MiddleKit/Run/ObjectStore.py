@@ -1,6 +1,7 @@
 import sys
 from types import ClassType, StringType
 from MiscUtils import NoDefault
+from MiscUtils.Funcs import safeDescription
 from ObjectKey import ObjectKey
 from MiddleKit.Core.ModelUser import ModelUser
 from MiddleKit.Core.Klass import Klass as BaseKlass
@@ -186,7 +187,7 @@ class ObjectStore(ModelUser):
 		superobject  - the object that was the cause of this invocation
 		"""
 		# Some basic assertions
-		assert self.hasObject(object)
+		assert self.hasObject(object), safeDescription(object)
 		assert object.key() is not None
 
 		v = self._verboseDelete
