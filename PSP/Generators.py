@@ -51,8 +51,8 @@ AwakeCreated = 0
 class GenericGenerator:
     """ Base class for the generators """
     def __init__(self, ctxt=None):
-	self._ctxt = ctxt
-	self.phase='Service'
+		self._ctxt = ctxt
+		self.phase='Service'
 
 
 class ExpressionGenerator(GenericGenerator):
@@ -61,11 +61,11 @@ class ExpressionGenerator(GenericGenerator):
     with a str() call."""
 
     def __init__(self, chars):
-	self.chars = chars
-	GenericGenerator.__init__(self)
+		self.chars = chars
+		GenericGenerator.__init__(self)
 
     def generate(self, writer, phase=None):
-	writer.println('res.write(str(' + PSPUtils.removeQuotes(self.chars) + '))')
+		writer.println('res.write(str(' + PSPUtils.removeQuotes(self.chars) + '))')
 
 
 
@@ -75,55 +75,54 @@ class CharDataGenerator(GenericGenerator):
     Need to handle all the escaping of characters.  It's just skipped for now."""
 
     def __init__(self, chars):
-	GenericGenerator.__init__(self)
-	self.chars = chars
+		GenericGenerator.__init__(self)
+		self.chars = chars
 
     def generate(self, writer, phase=None):
-	current=0
-	limit = len(self.chars)
-
-	#try this without any escaping
-	#self.chars = string.replace(self.chars,'\n','\\\\n')
-	#self.chars = string.replace(self.chars,'"','\\"')
-	#self.chars = string.replace(self.chars,'\t','\\\\t')
-	#self.chars = string.replace(self.chars, "'", "\\'")
-	
-	self.generateChunk(writer)
+		current=0
+		limit = len(self.chars)
+		#try this without any escaping
+		#self.chars = string.replace(self.chars,'\n','\\\\n')
+		#self.chars = string.replace(self.chars,'"','\\"')
+		#self.chars = string.replace(self.chars,'\t','\\\\t')
+		#self.chars = string.replace(self.chars, "'", "\\'")
+		self.chars = string.replace(self.chars,'"""',r'\"""')
+		
+		self.generateChunk(writer)
 
 
     def generateChunk(self, writer, start=0, stop=None):
-	writer.printIndent()#gives a tab
-	writer.printChars(ResponseObject+'.write("""')
-	writer.printChars(self.chars)
-	writer.printChars('""")')
-	writer.printChars('\n')
+		writer.printIndent()#gives a tab
+		writer.printChars(ResponseObject+'.write("""')
+		writer.printChars(self.chars)
+		writer.printChars('""")')
+		writer.printChars('\n')
 
 class ScriptGenerator(GenericGenerator):
     """generates scripts"""
     def __init__(self, chars,attrs):
-	GenericGenerator.__init__(self)	
-	self.chars = chars
+		GenericGenerator.__init__(self)	
+		self.chars = chars
 
     def generate(self, writer, phase=None):	
-	writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
-	
-	writer.printChars('\n')
+		writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
+		
+		writer.printChars('\n')
 
-	#check for a block
-	lastline = string.splitfields(PSPUtils.removeQuotes(self.chars),'\n')[-1]
-	commentstart = string.find(lastline,'#')
-	if commentstart > 0: lastline = lastline[:commentstart]
-	blockcheck=string.rstrip(lastline)
-	if len(blockcheck)>0 and blockcheck[-1] == ':':
-	    writer.pushIndent()
-	    writer.println()
-	    writer._blockcount = writer._blockcount+1
-
-	#check for end of block, "pass" by itself
-	if string.strip(self.chars) == 'pass' and writer._blockcount>0:
-	    writer.popIndent()
-	    writer.println()
-	    writer._blockcount = writer._blockcount-1
+		#check for a block
+		lastline = string.splitfields(PSPUtils.removeQuotes(self.chars),'\n')[-1]
+		commentstart = string.find(lastline,'#')
+		if commentstart > 0: lastline = lastline[:commentstart]
+		blockcheck=string.rstrip(lastline)
+		if len(blockcheck)>0 and blockcheck[-1] == ':':
+			writer.pushIndent()
+			writer.println()
+			writer._blockcount = writer._blockcount+1
+			#check for end of block, "pass" by itself
+		if string.strip(self.chars) == 'pass' and writer._blockcount>0:
+			writer.popIndent()
+			writer.println()
+			writer._blockcount = writer._blockcount-1
 
 class EndBlockGenerator(GenericGenerator):
 	def __init__(self):
@@ -141,69 +140,74 @@ class MethodGenerator(GenericGenerator):
     """ generates class methods defined in the PSP page.  There are two parts to method generation.  This
     class handles getting the method name and parameters set up."""
     def __init__(self, chars, attrs):
-	GenericGenerator.__init__(self)
-	self.phase='Declarations'
-	self.attrs=attrs
+		GenericGenerator.__init__(self)
+		self.phase='Declarations'
+		self.attrs=attrs
 	
     def generate(self, writer, phase=None):
-	writer.printIndent()
-	writer.printChars('def ')
-	writer.printChars(self.attrs['name'])
-	writer.printChars('(')
-
-	#self.attrs['params']
-	writer.printChars('self')
-	if self.attrs.has_key('params') and self.attrs['params'] != '':
-	    writer.printChars(', ')
-	    writer.printChars(self.attrs['params'])
-	writer.printChars('):\n')
-	if self.attrs['name'] == 'awake':  #This is hacky, need better method, but it works: MAybe I should require a standard parent and do the intPSP call in that awake???????
-	    AwakeCreated = 1
-	    writer.pushIndent()
-	    writer.println('self.initPSP()\n')
-	    writer.popIndent()
-	    writer.println()
+		writer.printIndent()
+		writer.printChars('def ')
+		writer.printChars(self.attrs['name'])
+		writer.printChars('(')
+		#self.attrs['params']
+		writer.printChars('self')
+		if self.attrs.has_key('params') and self.attrs['params'] != '':
+			writer.printChars(', ')
+			writer.printChars(self.attrs['params'])
+		writer.printChars('):\n')
+		if self.attrs['name'] == 'awake':  #This is hacky, need better method, but it works: MAybe I should require a standard parent and do the intPSP call in that awake???????
+			AwakeCreated = 1
+		writer.pushIndent()
+		writer.println('self.initPSP()\n')
+		writer.popIndent()
+		writer.println()
 
 class MethodEndGenerator(GenericGenerator):
     """ Part of class method generation.  After MethodGenerator, MethodEndGenerator actually generates
     the code for th method body."""
     def __init__(self, chars, attrs):
-	GenericGenerator.__init__(self)
-	self.phase='Declarations'
-	self.attrs=attrs
-	self.chars=chars
+		GenericGenerator.__init__(self)
+		self.phase='Declarations'
+		self.attrs=attrs
+		self.chars=chars
 
     def generate(self, writer, phase=None):
-	writer.pushIndent()
-	writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
-       	writer.printChars('\n')
-	writer.popIndent()
+		writer.pushIndent()
+		writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
+		writer.printChars('\n')
+		writer.popIndent()
 
 
 class IncludeGenerator(GenericGenerator):
     """ Include files designated by the psp:include syntax. Not done yet, just
     a raw dump for now."""
     def __init__(self, attrs, param, ctxt):
-	GenericGenerator.__init__(self,ctxt)
-	self.attrs = attrs
-	self.param = param
+		GenericGenerator.__init__(self,ctxt)
+		self.attrs = attrs
+		self.param = param
 
-	self.page = attrs.get('file')
-	if self.page == None:
-		raise "No Page attribute in Include"
-	thepath=self._ctxt.resolveRelativeURI(self.page)
+		self.page = attrs.get('file')
+		if self.page == None:
+			raise "No Page attribute in Include"
+		thepath=self._ctxt.resolveRelativeURI(self.page)
     
-	if not os.path.exists(thepath):
-		print self.page
-		raise "Invalid included file",thepath
-	self.page=thepath
+		if not os.path.exists(thepath):
+			print self.page
+			raise "Invalid included file",thepath
+		self.page=thepath
 
     def generate(self, writer, phase=None):
-	""" JSP does this in the servlet.  I'm doing it here because I have triple quotes"""
-	data = open(self.page).readlines()
-	for i in data:
-	    writer.println('res.write("""'+i+'""")\n')
-	writer.println()
+		""" JSP does this in the servlet.  I'm doing it here because I have triple quotes.
+		Note: res.write statements inflate the size of the resulting classfile when it is cached.
+		Cut down on those by using a single res.write on the whole file, after escaping any triple-double quotes."""
+		#data = open(self.page).readlines()
+		#for i in data:
+		#	writer.println('res.write("""'+i+'""")\n')
+		data = open(self.page).read()
+		data=string.replace(data,'"""',r'\"""')
+		writer.println('res.write("""'+data+'"""\n)')
+		writer.println()
+		
 	
 	
 	
