@@ -384,9 +384,9 @@ create table _MKClassIds (
 class Klass:
 
 	def writeCreateSQL(self, generator, out):
+		for attr in self.attrs():
+			attr.writeAuxiliaryCreateTable(generator, out)
 		if not self.isAbstract():
-			for attr in self.attrs():
-				attr.writeAuxiliaryCreateTable(generator, out)
 			self.writeCreateTable(generator, out)
 
 	def writeCreateTable(self, generator, out):
@@ -516,7 +516,7 @@ class Attr:
 			default = str(default).strip()
 			if default.lower()=='none':  # kind of redundant
 				default = None
-			return 'default ' + self.sampleValue(default)
+			return 'default ' + str(self.sampleValue(default))
 		else:
 			return ''
 
