@@ -133,7 +133,7 @@ class UserManagerToFile(UserManager):
 			if user.name()==name:
 				return user
 		if default is NoDefault:
-			raise KeyError, externalId
+			raise KeyError, name
 		else:
 			return default
 

@@ -43,7 +43,7 @@ class UserManagerTest(unittest.TestCase):
 
 class UserManagerToSomewhereTest(UserManagerTest):
 
-	def checkUsers(self):
+	def checkBasics(self):
 		mgr = self.mgr
 		user = self.user = mgr.createUser('foo', 'bar')
 		assert user.manager()==mgr
@@ -88,6 +88,22 @@ class UserManagerToSomewhereTest(UserManagerTest):
 		user.login('rab')
 		assert not user.isActive()
 		assert mgr.numActiveUsers()==0
+
+	def checkUserAccess(self):
+		mgr = self.mgr
+		user = mgr.createUser('foo', 'bar')
+
+		assert mgr.userForSerialNum(user.serialNum())==user
+		assert mgr.userForExternalId(user.externalId())==user
+		assert mgr.userForName(user.name())==user
+
+		self.assertRaises(KeyError, mgr.userForSerialNum, 1000)
+		self.assertRaises(KeyError, mgr.userForExternalId, 'asdf')
+		self.assertRaises(KeyError, mgr.userForName, 'asdf')
+
+		assert mgr.userForSerialNum(1000, 1)==1
+		assert mgr.userForExternalId('asdf', 1)==1
+		assert mgr.userForName('asdf', 1)==1
 
 
 class UserManagerToFileTest(UserManagerToSomewhereTest):

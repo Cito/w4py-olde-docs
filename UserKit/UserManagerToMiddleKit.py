@@ -6,6 +6,7 @@ from UserManager import UserManager
 from MiscUtils import NoDefault
 import os
 from glob import glob
+from MiddleKit.Run.ObjectStore import UnknownObjectError
 
 
 class UserManagerToMiddleKit(UserManager):
@@ -74,12 +75,12 @@ class UserManagerToMiddleKit(UserManager):
 	## MiddleKit specifics ##
 
 	def loadUser(self, serialNum, default=NoDefault):
-		user = self._store.fetchObject(self._userClass, serialNum, default)
+		try:
+			user = self._store.fetchObject(self._userClass, serialNum, default)
+		except UnknownObjectError:
+			raise KeyError, serialNum
 		if user is default:
-			if default is NoDefault: # @@ 2002-03-30 ce: doesn't really work like this. The store will raise an exception all its own
-				raise KeyError, serialNum
-			else:
-				return default
+			return default
 		else:
 			self._cachedUsers.append(user)
 			self._cachedUsersBySerialNum[serialNum] = user
@@ -136,7 +137,7 @@ class UserManagerToMiddleKit(UserManager):
 			if user.name()==name:
 				return user
 		if self._useSQL:
-			self._store.fetchObjectsOfClass(self._userClass, clauses='where name=%r' % name)
+			users = self._store.fetchObjectsOfClass(self._userClass, clauses='where name=%r' % name)
 			if users:
 				assert len(users)==1
 				user = users[0]
@@ -147,7 +148,7 @@ class UserManagerToMiddleKit(UserManager):
 				if user.name()==name:
 					return user
 		if default is NoDefault:
-			raise KeyError, externalId
+			raise KeyError, name
 		else:
 			return default
 
