@@ -70,8 +70,18 @@ class SessionStore(Object):
 		raise SubclassResponsibilityError
 
 	def cleanStaleSessions(self):
-		# @@ 2000-01-24 ce: We're missing the old logic from a previous version of Application that cleaned sessions.
-		pass
+		"""
+		Called by the Application to tell this store to clean out all sessions that
+		have exceeded their lifetime.
+		
+		"""
+		curTime = time.time()
+		for key in self.keys():
+			sess = self[key]
+			if (curTime - sess.lastAccessTime()) >= sess.timeout()  or  sess.timeout()==0:
+				self[key].expiring()
+				del self[key]
+
 
 
 	## Convenience methods ##
