@@ -27,7 +27,7 @@ sys.stdout = _console = StringIO()  # to capture the console output of the appli
 
 import os, string
 from Adapter import *
-from MiscUtils.Funcs import CharWrap
+from MiscUtils.Funcs import charWrap
 
 
 class OneShotAdapter(Adapter):
@@ -41,7 +41,7 @@ class OneShotAdapter(Adapter):
 		})
 		return config
 
-	def run(self, webKitDir):
+	def run(self):
 
 		try:
 			myInput = ''
@@ -61,7 +61,7 @@ class OneShotAdapter(Adapter):
 			print 'ONE SHOT MODE\n'
 
 			from OneShotAppServer import OneShotAppServer
-			appSvr = OneShotAppServer(webKitDir)
+			appSvr = OneShotAppServer(self._webKitDir)
 
 			# It is important to call transaction.die() after using it, rather than just
 			# letting it fall out of scope, to avoid circular references
@@ -119,7 +119,7 @@ class OneShotAdapter(Adapter):
 	def showConsole(self, contents):
 		width = self.setting('ConsoleWidth')
 		if width:
-			contents = CharWrap(contents, self.setting('ConsoleWidth'), self.setting('ConsoleHangingIndent'))
+			contents = charWrap(contents, self.setting('ConsoleWidth'), self.setting('ConsoleHangingIndent'))
 		contents = HTMLEncode(contents)
 		sys.stdout.write('<br><p><table><tr><td bgcolor=#EEEEEE><pre>%s</pre></td></tr></table>' % contents)
 
@@ -129,7 +129,7 @@ def main(webKitDir=None):
 		import os
 		webKitDir = os.getcwd()
 	try:
-		OneShotAdapter().run(webKitDir)
+		OneShotAdapter(webKitDir).run()
 	except:
 		import traceback
 

@@ -1,4 +1,4 @@
-import sys, time, socket
+import os, sys, time, socket
 from marshal import dumps, loads
 from Object import Object
 from MiscUtils.Configurable import Configurable
@@ -7,9 +7,10 @@ from WebUtils.WebFuncs import HTMLEncode
 
 class Adapter(Configurable, Object):
 
-	def __init__(self):
+	def __init__(self, webKitDir):
 		Configurable.__init__(self)
 		Object.__init__(self)
+		self._webKitDir = webKitDir
 
 	def name(self):
 		return self.__class__.__name__
@@ -21,7 +22,7 @@ class Adapter(Configurable, Object):
 		}
 
 	def configFilename(self):
-		return 'Configs/%s.config' % self.name()
+		return os.path.join(self._webKitDir, 'Configs/%s.config' % self.name())
 
 	def transactWithAppServer(self, env, myInput, host, port):
 		'''Used by subclasses that are communicating with a separate app server via socket.  Returns the unmarshaled response dictionary.'''
