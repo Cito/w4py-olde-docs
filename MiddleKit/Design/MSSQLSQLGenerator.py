@@ -47,9 +47,9 @@ class Klasses:
 				strList.append('go\n\n')
 			self._klasses.reverse()
 
-		return ''.join(strList) 
+		return ''.join(strList)
 
-	def dropTablesSQL(self):		
+	def dropTablesSQL(self):
 		strList = []
 		self._klasses.reverse()
 		for klass in self._klasses:
@@ -60,7 +60,7 @@ class Klasses:
 			strList.append('go\n\n')
 		self._klasses.reverse()
 		return ''.join(strList)
-	
+
 
 	def createDatabaseSQL(self, dbName):
 		'''
@@ -224,16 +224,20 @@ class Attr:
 
 
 class DateTimeAttr:
+
 	def sqlType(self):
 		return 'DateTime'
 
 class DateAttr:
+
 	def sqlType(self):
 		return 'DateTime'
 
 class TimeAttr:
+
 	def sqlType(self):
 		return 'DateTime'
+
 
 class BoolAttr:
 
@@ -257,12 +261,17 @@ class StringAttr:
 		elif self['Min']==self['Max']:
 			return 'char(%s)' % self['Max']
 		else:
-			ref = self.get('Ref','')
-			if not ref:
-				ref = '' # for some reason ref was none instead of ''
+			max = int(self['Max'])
+			if int(self['Max'])>8000:
+				return 'text'
 			else:
-				ref = ' ' + ref
-			return 'varchar(%s)%s' % (self['Max'],ref)
+				ref = self.get('Ref', '')
+				if not ref:
+					ref = '' # for some reason ref was none instead of ''
+				else:
+					ref = ' ' + ref
+				return 'varchar(%s)%s' % (self['Max'], ref)
+
 
 class EnumAttr:
 
