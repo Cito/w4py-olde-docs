@@ -55,11 +55,14 @@ class Test:
 		self.run('python TestDesign.py %s' % self._modelName)
 
 	def createDatabase(self):
-		cmd = '%s < GeneratedSQL\Create.sql' % self.cmdLineDB()
+		filename = 'GeneratedSQL/Create.sql'
+		filename = os.path.normpath(filename)
+		cmd = '%s < %s' % (self.cmdLineDB(), filename)
 		self.run(cmd)
 
 	def insertSamples(self):
-		filename = 'GeneratedSQL\InsertSamples.sql'
+		filename = 'GeneratedSQL/InsertSamples.sql'
+		filename = os.path.normpath(filename)
 		if os.path.exists(filename):
 			cmd = '%s < %s' % (self.cmdLineDB(), filename)
 			self.run(cmd)
