@@ -526,6 +526,10 @@ class Application(ConfigurableForServerSidePath, Object):
 		#add a reference to the parent servlet
 		req.addParent(req.transaction()._servlet)
 
+		# Store the session so that the new servlet can access its values
+		if trans.hasSession():
+			self._sessions.storeSession(trans.session())
+
 		# We might have created a brand-new session prior to this call.  If so, we need
 		# to set the _SID_ identifier in the request so that the new transaction will
 		# know about the new session.
@@ -546,6 +550,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		trans.response()._strmOut = ASStreamOut()
 		req._transaction = trans  #this is needed by dispatchRequest
 
+		# Get rid of the session in the old transaction so it won't try to save it,
+		# thereby wiping out session changes made in the servlet we forwarded to
+		trans.setSession(None)
 
 
 	def forwardRequest(self, trans, URL):
