@@ -1,6 +1,7 @@
 import ihooks
 import os
 import sys
+import imp
 
 """
 ImportSpy.py
@@ -15,6 +16,40 @@ loader is identical to Python's default behaviour.
 
 True, False = 1==1, 0==1
 
+class ImportLock:
+	""" Provides a lock for protecting against concurrent imports.  This
+	is necessary because WebKit is multithreaded and uses its own import
+	hook.  
+	
+	This class abstracts the difference between using the Python interpreter's
+	global import lock, and using our own RLock.  The global lock is
+	the correct solution, but is only available in recent Python versions 
+	(2.3 or 2.2.3).  If it's not available, we fall back to using an RLock 
+	(which is not as good, but better than nothing).  """
+
+	def __init__(self):
+		if hasattr(imp,'acquire_lock'):
+			self.acquire = self.acquireBuiltin
+			self.release = self.releaseBuiltin
+		else:
+			from threading import RLock
+			self._lock = RLock()
+			self.acquire = self.acquireRLock
+			self.release = self.releaseRLock
+
+	def acquireBuiltin(self):
+		imp.acquire_lock()
+
+	def releaseBuiltin(self):
+		imp.release_lock()
+
+	def acquireRLock(self):
+		self._lock.acquire()
+
+	def releaseRLock(self):
+		self._lock.release()
+
+
 class ModuleLoader(ihooks.ModuleLoader):
 
 	def __init__(self):
@@ -24,10 +59,15 @@ class ModuleLoader(ihooks.ModuleLoader):
 		self._fileList = {}
 		self._notifyHook = None
 		self._installed = False
+		self._lock = ImportLock()
 
 	def load_module(self,name,stuff):
 		try:
-			mod = ihooks.ModuleLoader.load_module(self, name, stuff)
+			try:
+				self._lock.acquire()
+				mod = ihooks.ModuleLoader.load_module(self, name, stuff)
+			finally:
+				self._lock.release()
 			self.recordFileName(stuff, mod)
 		except:
 			self.recordFileName(stuff, None)
