@@ -310,6 +310,13 @@ class Klass(MiddleDict, ModelObject):
 			self._backObjRefAttrs = backObjRefAttrs
 		return self._backObjRefAttrs
 
+	def setting(self, name, default=NoDefault):
+		"""
+		Returns the value of a particular configuration setting taken
+		from the model.
+		"""
+		return self._klassContainer._model.setting(name, default)
+
 
 	## As string ##
 
