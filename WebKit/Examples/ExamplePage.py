@@ -80,7 +80,7 @@ class ExamplePage(Page):
 #			self.write(' | <a href=%s>%s</a>' % (filename, 'Webware Docs'))
 
 		# admin
-		self.write(' | <a href=_admin>admin</a>')
+		self.write(' | <a href=../Admin/>Admin</a>')
 
 		# Project page
 		self.write(' | <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>')
