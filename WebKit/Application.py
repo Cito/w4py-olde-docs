@@ -267,7 +267,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		return self._webwareVersion
 
 	def webKitVersion(self):
-		return '0.5'  # @@ 2002-02-26 ce: should pull from Properties.py
+		return '0.5.1'  # @@ 2002-02-26 ce: should pull from Properties.py
 
 	def version(self):
 		"""
