@@ -32,6 +32,7 @@ WebwareChunkSize  69
 import mod_snake
 import string
 import time
+import os
 from marshal import dumps, loads
 from socket  import *
 try:
@@ -47,7 +48,7 @@ PER_SVR_CHUNKSIZE = 3      # Size of chunks to read and write
 
 DEFAULT_CHUNKSIZE = 32 * 1024
 
-from Adapter import Adapter
+from WebKit.Adapter import Adapter
 
 class ModSnakeAdapter(Adapter):
 	def __init__(self, module):
@@ -66,7 +67,7 @@ class ModSnakeAdapter(Adapter):
 					   
 		module.add_directives(directives)
 		
-		Adapter.__init__(self)
+		Adapter.__init__(self,'')
 
 	def create_svr_config(self, server):
 		return { PER_SVR_SERVER    : server,
@@ -86,7 +87,8 @@ class ModSnakeAdapter(Adapter):
 		(host, port) = string.split(open(file).read(), ':')
 		per_svr[PER_SVR_PORT]    = int(port)
 		per_svr[PER_SVR_ADDRESS] = host
-
+		self._webKitDir = os.path.basename(file)
+		
 	def content_handler(self, per_dir, per_svr, request):
 		if request.handler != 'webware':
 			return mod_snake.DECLINED
