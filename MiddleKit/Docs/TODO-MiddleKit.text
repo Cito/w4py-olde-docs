@@ -3,8 +3,14 @@ TO DO
 
 Update
 ------
+Create.sql now includes NOT NULL as appropriate.
 
-[ ] find out from Dave if NOT NULL and DEFAULT <value> are supported in MSSQL. Check docs for Postgres and Gadfly.
+For providers of SQL adapters:
+
+Added SQLGenerator.sqlSupportsDefaultValues(self) so that concrete subclasses can advertise whether or not their CREATE statement supports DEFAULT <value>. (MySQL & PostgreSQL do; MSSQL does not.)
+
+I factored out the SQL for the primary key since this often needs to be customized for each database. Check out primaryKeySQLDef() in Design/[MySQL]SQLGenerator.py.
+
 
 [ ] Implement all ***
 
@@ -133,7 +139,7 @@ If you have general comments or questions or contributions, please contact webwa
 		- review EOF's validation policies
 		- should the accessor assertions be inside a different method? That way you could validate a value for an attribute without necessarily having to set it. The default implementation could invoke self.klass().attr('name').validate(value). Subclasses could override, invoke super, and perform additional checks.
 
-	*** [ ] support "not null" in SQL. e.g. if isRequired: then add NOT NULL.
+	[x] support "not null" in SQL. e.g. if isRequired: then add NOT NULL.
 
 	[ ] SQL store: allow connection info to be passed in connect(). e.g., don't require it in __init__
 
@@ -169,6 +175,8 @@ If you have general comments or questions or contributions, please contact webwa
 	[ ] Add a parameter to the config for the database name, which right now is assumed to be the same name as the CSV file.
 
 	*** [ ] enforce min and max for attributes in generated python
+
+	[ ] Error checking: Classes.csv: the default value is a legal value. (for example, if type is int, the default must be a number. If type is enum, must be a legal enum.)
 
 	[ ] Consider breaking obj refs in the SQL tables into two fields so that non-MK entities, like stored procedures, can have a fighting chance of using them.
 

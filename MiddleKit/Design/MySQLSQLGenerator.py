@@ -32,6 +32,12 @@ class Klasses:
 		return 'use %s;\n\n' % dbName
 
 
+class Klass:
+
+	def primaryKeySQLDef(self, generator):
+		return '    %s int not null primary key auto_increment,\n' % self.sqlIdName().ljust(self.maxNameWidth())
+
+
 class EnumAttr:
 
 	def sqlType(self):

@@ -313,11 +313,17 @@ class Klass:
 			wr = out.write
 			sqlIdName = self.sqlIdName()
 			wr('create table %s (\n' % name)
-			wr('	%s int not null auto_increment,\n' % sqlIdName.ljust(self.maxNameWidth()))
+			wr(self.primaryKeySQLDef(generator))
 			for attr in self.allAttrs():
 				attr.writeCreateSQL(generator, out)
-			wr('	unique index (%s)\n' % sqlIdName)
+			wr('asdfkljasdflsdf int\n')
 			wr(');\n\n\n')
+
+	def primaryKeySQLDef(self, generator):
+		'''
+		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
+		'''
+		return '    %s int not null primary key,\n' % self.sqlIdName().ljust(self.maxNameWidth())
 
 	def sqlIdName(self):
 		name = self.name()
