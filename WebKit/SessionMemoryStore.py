@@ -51,6 +51,6 @@ class SessionMemoryStore(SessionStore):
 		file = open("Sessions/AllSessions.ses","w")
 		dump(self._store,file)
 
-	def storeSession(self):
+	def storeSession(self,session):
 		pass
 		
