@@ -14,16 +14,16 @@ import sys, string, traceback
 from HTTPServlet import HTTPServlet
 
 class XMLRPCServlet(HTTPServlet):
-	'''
+	"""
 	XMLRPCServlet is a base class for XML-RPC servlets.
-	See Examples/XMLRPCExample.py for sample usage.	
-	'''
+	See Examples/XMLRPCExample.py for sample usage.
+	"""
 	def respondToPost(self, transaction):
-		'''
+		"""
 		This is similar to the xmlrpcserver.py example from the xmlrpc
 		library distribution, only it's been adapted to work within a
 		WebKit servlet.
-		'''
+		"""
 		try:
 			# get arguments
 			data = transaction.request().xmlInput().read()
@@ -37,8 +37,11 @@ class XMLRPCServlet(HTTPServlet):
 					response = self.call(method, params)
 				if type(response) != type(()):
 					response = (response,)
+			except xmlrpclib.Fault, e:
+				# if the user code raises xmlrpclib.Fault send it directly
+				response = xmlrpclib.dumps(e)
 			except:
-				# report exception back to server
+				# report other exceptions back to server
 				if transaction.application().setting('IncludeTracebackInXMLRPCFault', 0):
 					fault = string.join(traceback.format_exception(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2]))
 				else:
@@ -59,16 +62,17 @@ class XMLRPCServlet(HTTPServlet):
 			transaction.response().write(response)
 
 	def call(self, method, params):
-		'''
+		"""
 		Subclasses may override this class for custom handling of methods.
-		'''
+		"""
 		if method in self.exposedMethods():
 			return apply(getattr(self, method), params)
 		else:
 			raise 'method not implemented', method
 
 	def exposedMethods(self):
-		'''
+		"""
 		Subclasses should return a list of methods that will be exposed through XML-RPC.
-		'''
+		"""
 		return []
+

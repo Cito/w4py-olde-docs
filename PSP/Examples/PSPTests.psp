@@ -60,11 +60,11 @@ The text below comes from another psp page which was inserted into this one with
 <br/>
 Time at which dynamic output was generated: <psp:include path = "APSPinclude.psp">
 <br/>
-Time it takes to forward a request to APSPinclude.psp 10 times: 
+Time it takes to forward a request to APSPinclude.psp 10 times:
 <%
 starttime = time.time()
 for i in range(1,10):
-	self.application().includeServlet(self.transaction(), "APSPinclude.psp")
+	self.application().includeURL(self.transaction(), "APSPinclude.psp")
 endtime = time.time()
 looptime = endtime - starttime
 %>
@@ -81,7 +81,7 @@ looptime = endtime - starttime
 
 
 <% for i in range(2): %> <%-- Loop #1, an automatic loop --%>
-<% self.write('<p>outerloop: ') 
+<% self.write('<p>outerloop: ')
 self.write(i)%>&nbsp;
 <% for n in range(2): %>  <%-- Another automatic loop --%>
 <p><i> &nbsp;&nbsp;Inner Loop: <%= n %><br> </i>

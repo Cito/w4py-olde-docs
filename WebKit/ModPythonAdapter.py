@@ -1,6 +1,6 @@
 ###########################################
 # mod_python adapter for WebKit
-# 
+#
 #
 # Contributed by: Dave Wallace
 # Modified by Jay Love and Geoff Talvola
@@ -14,12 +14,15 @@ Here's how I set up my Apache conf:
    SetHandler python-program
    # add the directory that contains ModPythonAdapter.py
    PythonPath "sys.path+['/path/to/WebKit']"
+   PythonOption AppWorkDir /path/to/dir/with/address.text
    PythonHandler ModPythonAdapter
-   PythonDebug
-   </Location>
+   PythonDebug On
+</Location>
 
-Make sure you set WEBWARE_ADDRESS_FILE below and now you can access
-your running AppServer with:
+If you used the MakeAppWorkDir.py script to make a separate
+application working directory, specify that path for the AppWorkDir
+option, otherwise it should be in your WebKit directory in which case
+you should use /path/to/WebKit/address.text
 
 http://localhost/WK/Welcome
 
@@ -30,7 +33,7 @@ of any location or dircetory.
 AddHandler python-program .psp
 PythonPath "sys.path+['/path/to/WebKit']"
 PythonHandler modpHandler::pspHandler
-
+PythonOption AppWorkDir /path/to/dir/with/address.text
 """
 
 # Fix the current working directory -- this gets initialized incorrectly
@@ -51,18 +54,16 @@ import string
 from Adapter import Adapter
 
 debug=0
-_adapter = None
+__adapter = None
 bufsize = 32*1024
 
-WEBWARE_ADDRESS_FILE='/path/to/Webware/WebKit/address.text'
 
 class ModPythonAdapter(Adapter):
-	def __init__(self, host, port):
-		webkitdir = os.path.dirname(WEBWARE_ADDRESS_FILE)
+	def __init__(self, host, port, webkitdir):
 		Adapter.__init__(self, webkitdir)
 		self.host = host
 		self.port = port
-		
+
 	def handler(self, req):
 		self.reset(req)
 		try:
@@ -73,13 +74,13 @@ class ModPythonAdapter(Adapter):
 			#   building the environment
 			env=apache.build_cgi_env(req)
 
-			# Fix up the path			
+			# Fix up the path
 			if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info
 
 			# Communicate with the app server
 			respdict = self.transactWithAppServer(env, myInput, self.host, self.port)
 
-			# Respond back to Apache			
+			# Respond back to Apache
 			#self.respond(req, respdict)
 
 		except:
@@ -97,16 +98,16 @@ class ModPythonAdapter(Adapter):
 			#   building the environment
 			env=apache.build_cgi_env(req)
 
-			# Special environment setup needed for psp handler			
+			# Special environment setup needed for psp handler
 			env['WK_ABSOLUTE']=1
 
-			# Fix up the path			
+			# Fix up the path
 			if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info
 
 			# Communicate with the app server
 			respdict = self.transactWithAppServer(env, myInput, self.host, self.port)
 
-			# Respond back to Apache			
+			# Respond back to Apache
 			self.respond(req, respdict)
 
 		except:
@@ -183,7 +184,7 @@ class ModPythonAdapter(Adapter):
 		apache.log_error('WebKit mod_python: Error while responding to request\n')
 		apache.log_error('Python exception:\n')
 		traceback.print_exc(file=sys.stderr)
-		
+
 		output = apply(traceback.format_exception, sys.exc_info())
 		output = string.join(output, '')
 		output = string.replace(output, '&', '&amp;')
@@ -230,8 +231,8 @@ if os.name == 'nt':
 	# This seems a bit hokey, but it was easy to write and it works.
 	OriginalModPythonAdapter = ModPythonAdapter
 	class WinModPythonAdapter(OriginalModPythonAdapter):
-		def __init__(self, host, port):
-			OriginalModPythonAdapter.__init__(self, host, port)
+		def __init__(self, host, port, webkitdir):
+			OriginalModPythonAdapter.__init__(self, host, port, webkitdir)
 			self._threadSafeStorage = {}
 
 		def threadSafeValue(self, name):
@@ -240,7 +241,7 @@ if os.name == 'nt':
 		def setThreadSafeValue(self, name, value):
 			threadID = win32api.GetCurrentThreadId()
 			self._threadSafeStorage[threadID, name] = value
-		
+
 		def doneHeader(self):
 			return self.threadSafeValue('doneHeader')
 		def setDoneHeader(self, doneHeader):
@@ -253,20 +254,28 @@ if os.name == 'nt':
 			return self.threadSafeValue('request')
 		def setRequest(self, request):
 			self.setThreadSafeValue('request', request)
-		
+
 	# Replace ModPythonAdapter with the Windows-safe version.
 	ModPythonAdapter = WinModPythonAdapter
 
 
-if _adapter is None:
-	(host, port) = string.split(open(WEBWARE_ADDRESS_FILE).read(), ':')
-	port = int(port)
-	_adapter = ModPythonAdapter(host, port)
+def _adapter(req):
+	global __adapter
+	if __adapter is None:
+		appWorkDir = req.get_options()['AppWorkDir']
+		WEBWARE_ADDRESS_FILE = os.path.join(appWorkDir, 'address.text')
+		(host, port) = string.split(open(WEBWARE_ADDRESS_FILE).read(), ':')
+		port = int(port)
+		__adapter = ModPythonAdapter(host, port, appWorkDir)
+	return __adapter
+
 
 
 def handler(req):
-	return _adapter.handler(req)
+	return _adapter(req).handler(req)
+
 def pspHandler(req):
-	return _adapter.pspHandler(req)
+	return _adapter(req).pspHandler(req)
+
 def typehandler(req):
-	return _adapter.typehandler(req)
+	return _adapter(req).typehandler(req)

@@ -15,8 +15,9 @@ Here's how I set up my Apache conf:
    SetHandler python-program
    # add the directory that contains this file and the rest of WebKit.  This should be (path to Webware)/WebKit
    PythonPath "sys.path+['/path/to/WebKit']"
+   PythonOption AppWorkDir /path/to/dir/with/address.text
    PythonHandler ModPythonAppServer
-   PythonDebug
+   PythonDebug On
 </Location>
 
 
@@ -27,6 +28,7 @@ of any location or directory.
 AddHandler python-program .psp
 PythonPath "sys.path+['/path/to/WebKit']"
 PythonHandler ModPythonAppServer::pspHandler
+PythonOption AppWorkDir /path/to/dir/with/address.text
 
 
 Now, on to configuration issues.  The big one is that you need to set your Application.config
@@ -53,12 +55,8 @@ import sys
 import string
 import os
 
-# Change the working directory so that all relative paths work out right
-os.chdir(os.path.abspath(os.path.dirname(__file__)))
-
 filedir = os.path.abspath(os.path.dirname(__file__))
-WebwareDir = os.path.join(filedir+"/../")
-sys.path.append(filedir) #This probably isn't necessary, as this should be set in the Apache Configuration
+WebwareDir = os.path.join(filedir, "..")
 sys.path.append(WebwareDir)
 
 
@@ -66,14 +64,14 @@ from Adapter import Adapter
 
 
 debug=0
-_adapter = None
+__adapter = None
 bufsize = 32*1024
 
 
 
 from AppServer import AppServer
 from Application import Application
-from modpHandler import ModPythonAdapter
+from ModPythonAdapter import ModPythonAdapter
 
 
 DefaultConfigAppServer = {
@@ -128,9 +126,9 @@ class InProcessAppServer(AppServer):
 cleanup_registered = 0
 
 class ModpApacheAdapter(ModPythonAdapter):
-	def __init__(self):
-		Adapter.__init__(self)
-		self._AppServer=InProcessAppServer()
+	def __init__(self, workDir):
+		Adapter.__init__(self, workDir)
+		self._AppServer=InProcessAppServer(workDir)
 
 	def shutDown(self, data):
 		self._AppServer.shutDown()
@@ -198,11 +196,16 @@ class ModpApacheAdapter(ModPythonAdapter):
 		return apache.OK
 
 
-if _adapter is None:
-	_adapter = ModpApacheAdapter()
+def _adapter(req):
+	global __adapter
+	if __adapter is None:
+		appWorkDir = req.get_options()['AppWorkDir']
+		__adapter = ModpApacheAdapter(appWorkDir)
+        return __adapter
 
 
 def handler(req):
-	return _adapter.handler(req)
+	return _adapter(req).handler(req)
+
 def pspHandler(req):
-	return _adapter.pspHandler(req)
+	return _adapter(req).pspHandler(req)

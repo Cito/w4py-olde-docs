@@ -5,6 +5,10 @@
 # For example, WebwareDir = '/Servers/Webware'
 WebwareDir = None
 
+# If you used the MakeAppWorkDir.py script to make a separate
+# application working directory, specify it here.
+AppWorkDir = None
+
 try:
 	import os, sys
 	if WebwareDir:
@@ -12,8 +16,11 @@ try:
 	else:
 		WebwareDir = os.path.dirname(os.getcwd())
 	webKitDir = os.path.join(WebwareDir, 'WebKit')
+	if AppWorkDir is None:
+		AppWorkDir = webKitDir
+
 	import WebKit.OneShotAdapter
-	WebKit.OneShotAdapter.main(webKitDir)
+	WebKit.OneShotAdapter.main(AppWorkDir)
 except:
 	import string, sys, traceback
 	from time import asctime, localtime, time

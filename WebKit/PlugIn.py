@@ -66,7 +66,7 @@ class PlugIn(Object):
 		setattr(self._module, 'plugIn', self)
 
 		# Make a directory for it in Cache/
-		cacheDir = os.path.join(os.path.dirname(__file__),'Cache', self._name)
+		cacheDir = os.path.join(self._appServer.serverSidePath(), 'Cache', self._name)
 		if not os.path.exists(cacheDir):
 			os.mkdir(cacheDir)
 

@@ -61,8 +61,8 @@ class ThreadedAppServer(AppServer):
 
 	## Init ##
 
-	def __init__(self):
-		AppServer.__init__(self)
+	def __init__(self, path=None):
+		AppServer.__init__(self, path)
 		self._addr = None
 		threadCount = self.setting('StartServerThreads')
 		self.maxServerThreads = self.setting('MaxServerThreads')
@@ -111,7 +111,7 @@ class ThreadedAppServer(AppServer):
 		threadCheckInterval = 100  #does this need to be configurable???
 		threadUpdateDivisor = 10 #grabstat interval
 		threadCheck=0
-			
+
 		while 1:
 			if not self.running:
 				return
@@ -146,7 +146,7 @@ class ThreadedAppServer(AppServer):
 
 			if threadCheck % threadUpdateDivisor == 0:
 				self.updateThreadUsage()
-				
+
 			if threadCheck > threadCheckInterval:
 				if debug: print "Busy Threads: ", self.activeThreadCount()
 				threadCheck=0
@@ -171,7 +171,7 @@ class ThreadedAppServer(AppServer):
 		if len(self.threadUseCounter) > 10:
 			self.threadUseCounter.pop(0)
 		self.threadUseCounter.append(count)
-		
+
 
 	def manageThreadCount(self):
 		"""
@@ -182,7 +182,7 @@ class ThreadedAppServer(AppServer):
 
 		avg=0
 		max=0
-		 
+
 		for i in self.threadUseCounter:
 			avg = avg + i
 			if i > max:
@@ -215,7 +215,7 @@ class ThreadedAppServer(AppServer):
 	def absorbThread(self):
 		if debug: print "Absorbing Thread"
 		self.requestQueue.put(None)
-		self.threadCount = self.threadCount-1		
+		self.threadCount = self.threadCount-1
 		for i in self.threadPool:
 			if not i.isAlive():
 				rv=i.join() #Don't need a timeout, it isn't alive
@@ -225,7 +225,7 @@ class ThreadedAppServer(AppServer):
 
 	def threadloop(self):
 		self.initThread()
-		
+
 		t=threading.currentThread()
 		t.processing=0
 		try:
@@ -520,13 +520,13 @@ class RequestHandler:
 
 
 
-def run(useMonitor = 0):
+def run(useMonitor = 0, workDir=None):
 	global server
 	global monitor
 	monitor = useMonitor
 	try:
 		server = None
-		server = ThreadedAppServer()
+		server = ThreadedAppServer(workDir)
 		if useMonitor:
 			monitor_socket = Monitor(server)
 		else:
@@ -589,6 +589,8 @@ def main(args):
 	monitor=0
 	function=run
 	daemon=0
+	workDir=None
+
 	for i in args[:]:
 		if i == "monitor":
 			print "Enabling Monitoring"
@@ -600,6 +602,8 @@ def main(args):
 			daemon=1
 		elif i == "start":
 			pass
+		elif i[:5] == "work=":
+			workDir = i[5:]
 		else:
 			print usage
 
@@ -614,4 +618,4 @@ def main(args):
 					sys.exit()
 			else:
 				print "daemon mode not available on your OS"
-		function(monitor)
+		function(monitor, workDir)

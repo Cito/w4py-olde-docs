@@ -38,11 +38,11 @@ int_length = len(dumps(int(1)))
 class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 	"""
 	"""
-	def __init__(self):
-		AppServer.__init__(self)
+	def __init__(self, path=None):
+		AppServer.__init__(self, path)
 
 		self._addr = None
-		self._poolsize=self.setting('ServerThreads')
+		self._poolsize=self.setting('StartServerThreads')
 
 		self.threadPool=[]
 		self.requestQueue=Queue.Queue(self._poolsize*5) #5 times the number of threads we have
@@ -214,7 +214,7 @@ class ASTASStreamOut(ASStreamOut):
 		self._lock.release()
 		if self._committed:
 			self._trigger.release()
-		
+
 	def write(self, charstr):
 		self._lock.acquire()
 		ASStreamOut.write(self, charstr)
@@ -241,13 +241,13 @@ class RequestHandler(asyncore.dispatcher):
 		self.have_response = 0
 		self._strmOut = None
 		self.readfile = ATASStreamIn(self,8192)
-		
+
 	def handleRequest(self):
 
 		dictlen = loads(self.readfile.read(int_length))
 
 		dict = loads(self.readfile.read(dictlen))
-		
+
 ##		check for status message
    		if dict.get('format') == "STATUS":
    			self._strmOut.write( str(self.server._reqCount))
@@ -263,7 +263,7 @@ class RequestHandler(asyncore.dispatcher):
    			self.server.initiateShutdown()
    			return
 
-			
+
 		verbose = self.server._verbose
 
 		startTime = time.time()
@@ -344,9 +344,9 @@ class RequestHandler(asyncore.dispatcher):
 				self.close()
 				return
 		self._strmOut.pop(sent)
-		
+
 		 #if the servlet has returned and there is no more data in the buffer
-		if self._strmOut._closed and not self._strmOut._buffer: 
+		if self._strmOut._closed and not self._strmOut._buffer:
 			self.close()
 			#For testing
 		elif self._strmOut._buffer:
@@ -423,7 +423,7 @@ class Monitor(asyncore.dispatcher):
 
 
 
-def run(useMonitor=0):
+def run(useMonitor=0, workDir=None):
 	from errno import EINTR
 	import select
 	global server
@@ -431,7 +431,7 @@ def run(useMonitor=0):
 	try:
 		server = None
 		try:
-			server = AsyncThreadedAppServer()
+			server = AsyncThreadedAppServer(workDir)
 		except Exception, e:
 			print "Error starting the AppServer"
 			tb = sys.exc_info()
@@ -498,6 +498,8 @@ def main(args=[]):
 	monitor=0
 	function=run
 	daemon=0
+	workDir=None
+
 	for i in args:
 		if i == "monitor":
 			print "Enabling Monitoring"
@@ -509,6 +511,8 @@ def main(args=[]):
 			daemon=1
 		elif i == "start":
 			pass
+		elif i[:5] == "work=":
+			workDir = i[5:]
 		else:
 			print usage
 
@@ -523,4 +527,4 @@ def main(args=[]):
 					sys.exit()
 			else:
 				print "daemon mode not available on your OS"
-		function(monitor)
+		function(monitor, workDir)

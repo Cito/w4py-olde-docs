@@ -58,8 +58,8 @@ class AsyncThreadedHTTPServer2(AsyncThreadedAppServer.AsyncThreadedAppServer):
 	of RequestHandler from the one defined in AsyncThreadedAppServer.py.
 	See below for the modified version of RequestHandler.
 	"""
-	def __init__(self):
-		AsyncThreadedAppServer.AsyncThreadedAppServer.__init__(self)
+	def __init__(self, path=None):
+		AsyncThreadedAppServer.AsyncThreadedAppServer.__init__(self, path)
 		# Use a custom request handler class that is designed to respond
 		# to http directly
 		self.setRequestHandlerClass(HTTPRequestHandler)
@@ -118,7 +118,7 @@ class ASTHSStreamOut(ASStreamOut):
 		self._lock.release()
 		if self._committed:
 			self._trigger.release()
-		
+
 	def write(self, charstr):
 		self._lock.acquire()
 		ASStreamOut.write(self, charstr)
@@ -134,7 +134,7 @@ class ASTHSStreamOut(ASStreamOut):
 class HTTPRequestHandler(asyncore.dispatcher):
 	"""
 	Has the methods that process the request.
-	
+
 	An instance of this class is activated by AsyncThreadedHTTPServer.
 	When activated, it is listening for the request to come in.  asyncore will
 	call handle_read when there is data to be read.  ONce all the request has
@@ -265,9 +265,9 @@ class HTTPRequestHandler(asyncore.dispatcher):
 				self.close()
 				return
 		self._strmOut.pop(sent)
-		
+
 		 #if the servlet has returned and there is no more data in the buffer
-		if self._strmOut.closed() and len(self._strmOut._buffer)==0: 
+		if self._strmOut.closed() and len(self._strmOut._buffer)==0:
 			self.socket.shutdown(1)
 			self.close()
 			#For testing
@@ -335,6 +335,7 @@ class HTTPRequestHandler(asyncore.dispatcher):
 		#if host != self.client_address[0]:
 		#    env['REMOTE_HOST'] = host
 		env['REMOTE_HOST'] = host
+                env['REMOTE_ADDR'] = host
 		env['REMOTE_PORT'] = str(port)
 #		print 'REMOTE_PORT = %d' % port
 		# AUTH_TYPE
@@ -358,13 +359,13 @@ class HTTPRequestHandler(asyncore.dispatcher):
 				'format': 'CGI',
 				'time':   time.time(),
 				'environ': env,
-				'input':   input
+				'input':   StringIO(input)
 				}
 
 		self.transaction = self.server._app.dispatchRawRequest(dict, self._strmOut)
 		self._strmOut.close()
 
-		
+
 
 	def log_message(self, format, *args):
 		if debug:
@@ -375,7 +376,7 @@ class HTTPRequestHandler(asyncore.dispatcher):
 
 
 
-def run(useMonitor=0):
+def run(useMonitor=0, workDir=None):
 	from errno import EINTR
 	import select
 	global server
@@ -383,7 +384,7 @@ def run(useMonitor=0):
 	try:
 		server = None
 		try:
-			server = AsyncThreadedHTTPServer2()
+			server = AsyncThreadedHTTPServer2(workDir)
 			print __doc__
 		except Exception, e:
 			print "Error starting the AppServer"
@@ -452,6 +453,7 @@ def main(args):
 	monitor=0
 	function=run
 	daemon=0
+	workDir=None
 
 	for i in args[1:]:
 		if i == "monitor":
@@ -462,6 +464,8 @@ def main(args):
 			function=AppServer.stop
 		elif i == "daemon":
 			daemon=1
+		elif i[:5] == "work=":
+			workDir = i[5:]
 		else:
 			print usage
 
@@ -476,4 +480,4 @@ def main(args):
 					sys.exit()
 			else:
 				print "daemon mode not available on your OS"
-		function(monitor)
+		function(monitor, workDir)

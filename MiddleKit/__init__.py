@@ -8,7 +8,7 @@ import os
 
 def InstallInWebKit(appServer):
 	app = appServer.application()
-	relPath = '../MiddleKit/WebBrowser'
+	relPath = os.path.join(os.path.dirname(__file__), 'WebBrowser')
 	path = app.serverSidePath(relPath)
 	if os.path.exists(path):
 		app.addContext('MKBrowser', path)

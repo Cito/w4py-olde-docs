@@ -87,12 +87,12 @@ class HTTPRequest(Request):
 			# set of fields.
 			keys = []
 		dict = {}
-		
+
 		for key in keys:
 			value = self._fields[key]
 			if type(value) is not ListType:
 				if value.filename:
-					if debug: print "Uploaded File Found"					
+					if debug: print "Uploaded File Found"
 				else:
 					value = value.value # i.e., if we don't have a list, we have one of those cgi.MiniFieldStorage objects. Get it's value.
 			else:
@@ -236,8 +236,8 @@ class HTTPRequest(Request):
 		if not path[:-1] == "/":
 			path = path[:string.rfind("/", path)+1]
 		return path
-		
- 
+
+
 	def setURLPath(self, path):
 		''' Sets the URL path of the request. There is rarely a need to do this. Proceed with caution. The only known current use for this is Application.forwardRequest(). '''
 		if hasattr(self, '_serverSidePath'):
@@ -270,7 +270,7 @@ class HTTPRequest(Request):
 			app = self._transaction.application()
 			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
 		if path:
-			return os.path.normpath(os.path.join(os.path.dirname(self._serverSideContextPath), path))
+			return os.path.normpath(os.path.join(self._serverSideContextPath, path))  # The contextPath is already the dirname, no need to dirname it again
 		else:
 			return self._serverSideContextPath
 

@@ -225,7 +225,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 	def shutDown(self):
 		"""
-	Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references.
+		Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references.
 		"""
 		print "Application is Shutting Down"
 		self.running = 0
@@ -296,7 +296,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		''' Returns the version of Webware as a string. '''
 		if not hasattr(self, '_webwareVersion'):
 			from MiscUtils.PropertiesObject import PropertiesObject
-			props = PropertiesObject(self.serverSidePath('../Properties.py'))
+			props = PropertiesObject(os.path.join(os.path.dirname(__file__),
+							      '../Properties.py'))
 			self._webwareVersion = props['versionString']
 		return self._webwareVersion
 
@@ -466,7 +467,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		New Response and Transaction objects are created.
 		Currently the URL is always relative to the existing URL.
 		"""
-		if debug: print "forwardRequest called"
+		if debug: print "forward called"
 
 		req = trans.request()
 
@@ -520,7 +521,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 
 		req = trans.request()
-		
+
 		#Save the things we're gonna change.
 		currentPath=req.urlPath()
 		currentServlet=trans._servlet

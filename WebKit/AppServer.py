@@ -172,7 +172,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source. Plug-ins are loaded by AppServer at startup time, just before listening for requests. See the docs for PlugIn.py for more info.
 		"""
 		plugIns = self.setting('PlugIns')
-		plugIns = map(lambda path: self.serverSidePath(path), plugIns)
+		plugIns = map(lambda path, ssp=self.serverSidePath: ssp(path), plugIns)
 
 
 		# Scan each directory named in the PlugInDirs list.
