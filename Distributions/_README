@@ -1,8 +1,0 @@
-Distributions
-Webware for Python
-See ../_README as well
-
-Webware uses other open source packages. Some of them are simple, single .py files, while others have "distributions", usually in the form of tar balls that include copyright notice, docs, examples, etc.
-
-For those software components used by Webware that have a distribution, the full, original distribution is included in this directory.
-
