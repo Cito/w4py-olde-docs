@@ -643,26 +643,19 @@ class Application(Configurable,CanContainer):
 
 
 def main(requestDict):
+	''' Returns a raw reponse. This method is mostly used by OneShotAdaptor.py. '''
 	from WebUtils.HTMLForException import HTMLForException
 	try:
 		assert type(requestDict) is type({})
 		from HTTPRequest import HTTPRequest
 		request = HTTPRequest(requestDict)
-		if 0:
-			# For debugging in bad circumstances
-			print '<html><body>'
-			print '<p><b>Application</b>'
-			print request.htmlInfo()
-			print '</body></html>'
 		app = Application(useSessionSweeper=0)
-		return app.dispatchRequest(request)
+		return app.dispatchRequest(request).response().rawResponse()
 	except:
-		print 'Content-type: text/html\n'
-		print '<html>'
-		print '<body>'
-		print HTMLForException()
-		print '</body>'
-		print '</html>'
+		return {
+			'headers': [('Content-type', 'text/html')],
+			'contents': '<html><body>%s</html></body>' % HTMLForException()
+		}
 
 
 # You can run Application as a main script, in which case it expects a single
