@@ -50,7 +50,7 @@ class SQLObjectStore(ObjectStore):
 		assert self._model, 'Cannot connect: No model has been attached to this store yet.'
 		if not self._connected:
 			self._db = self.dbapiConnect()
-			self._cursor = self._db.cursor()
+#			self._cursor = self._db.cursor()
 			self._connected = 1
 			self.useDB()
 			self.readKlassIds()
@@ -70,6 +70,8 @@ class SQLObjectStore(ObjectStore):
 		This implementation performs a SQL "use MODELNAME;" so subclasses only need override if that doesn't work.
 		'''
 		self.executeSQL('use %s;' % self._model.name())
+		self.closeCursor()
+
 
 	def readKlassIds(self):
 		''' Reads the klass ids from the SQL database. Should be invoked by connect(). '''
@@ -80,6 +82,12 @@ class SQLObjectStore(ObjectStore):
 			klassesById[id] = klass
 			klass.setId(id)
 		self._klassesById = klassesById
+		self.closeCursor()
+		
+	def closeCursor(self):
+		if self._cursor != None:
+			self._cursor.close()
+			self._cursor = None
 
 
 	## Changes ##
@@ -103,6 +111,7 @@ class SQLObjectStore(ObjectStore):
 
 			# Update our object pool
 			self._objects[object.key()] = object
+			self.closeCursor()
 
 		self._newObjects = []
 
@@ -115,6 +124,7 @@ class SQLObjectStore(ObjectStore):
 		for object in self._changedObjects.values():
 			sql = object.sqlUpdateStmt()
 			self.executeSQL(sql)
+			self.closeCursor()
 		self._changedObjects.clear()
 
 	def commitDeletions(self):
@@ -164,8 +174,8 @@ class SQLObjectStore(ObjectStore):
 			className = klass.name()
 			if serialNum is not None:
 				clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
-			count = self.executeSQL('select %s from %s %s;' % (
-				','.join(colNames), className, clauses))
+			count = self.executeSQL('select %s from [%s] %s;' % (
+				','.join(colNames), className, clauses))# dr 4-10-2001 added [] for mssql support of keywords as table names
 			for row in self._cursor.fetchall():
 				serialNum = row[0]
 				key = ObjectKey().initFromClassNameAndSerialNum(className, serialNum)
@@ -186,6 +196,7 @@ class SQLObjectStore(ObjectStore):
 					# Existing object
 					obj.initFromRow(row)
 				objs.append(obj)
+			self.closeCursor()
 		if isDeep:
 			for klass in klass.subklasses():
 				objs.extend(self.fetchObjectsOfClass(klass, clauses, isDeep, serialNum))
@@ -209,7 +220,11 @@ class SQLObjectStore(ObjectStore):
 			timestamp = funcs.timestamp()['pretty']
 			self._sqlEcho.write('SQL %03i. %s %s\n' % (self._sqlCount, timestamp, sql))
 			self._sqlEcho.flush()
+			self._cursor = None # explicitly break cursor
+			self._cursor = self._db.cursor()
+		# get new cursor - use that.
 		return self._cursor.execute(sql.strip())
+
 
 	def setSQLEcho(self, file):
 		''' Sets a file to echo sql statements to, as sent through executeSQL(). None can be passed to turn echo off. '''
@@ -270,6 +285,7 @@ class SQLObjectStore(ObjectStore):
 			out.write(klass.name()+'\n')
 			self.executeSQL('select * from %s;' % klass.name())
 			out.write(str(self._cursor.fetchall()))
+			self.closeCursor()
 			out.write('\n')
 		out.write('END\n')
 
