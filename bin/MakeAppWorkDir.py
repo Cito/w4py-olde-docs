@@ -83,9 +83,9 @@ class MakeAppWorkDir:
 		self.copyOtherFiles()
 		self.makeLauncherScripts()
 		self.makeDefaultContext()
-		self.printCompleted()
 		if self._addCVSIgnore:
 			self.addCVSIgnore()
+		self.printCompleted()
 
 	def makeDirectories(self):
 		"""Creates all the needed directories if they don't already exist."""
@@ -389,11 +389,16 @@ if __name__ == "__main__":
 			contextName = args[1]
 			args = args[2:]
 			continue
-		if not args:
-			print __doc__
-			sys.exit(1)
-		targetDir = args[0]
-		args = args[1:]
+		if not targetDir and not args[0].startswith('-'):
+			targetDir = args[0]
+			args = args[1:]
+			continue
+		# Must be an error:
+		print __doc__
+		sys.exit(1)
+	if not targetDir:
+		print __doc__
+		sys.exit(1)
 
 	# this assumes that this script is still located in Webware/bin
 	p = os.path
