@@ -133,7 +133,10 @@ Version 0.8 beta 1
 	<li> The singleton <span class=name>Tombstone</span> has been deprecated in favor of <span class=name>MiscUtils.NoDefault</span>.
 
 	<li> Added general purpose Application.handleException() which does not take a transaction.  Note that if you provide an exception handler, it must work when transaction=None.
+
 	<li> Removed <b>ModPythonAppServer</b>. If you are running mod_python, you can use the ModPythonAdapter.   Most people use the mod_webkit, or wkcgi adapters; therefore they are probably a little better supported.
+
+	<li> The default implementation of the Page.writeDocType() method no longer writes out a default doctype.  It is up to a derived class to provide the writeDocType method to specify a doctype string.
 </ul>
 
 
