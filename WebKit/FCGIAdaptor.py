@@ -60,6 +60,8 @@ Do these need to be adjusted in order to realize the full benefits of FastCGI?
 
 (*) Has anyone measured the performance difference between CGIAdaptor and FCGIAdaptor? What are the results?
 
+JSL- It's twice as fast as straight CGI
+
 
 
 CHANGES
@@ -74,8 +76,10 @@ CHANGES
 """
 
 import fcgi, time
-from marshal import dumps
+from marshal import dumps, loads
 from socket import *
+import string
+import os
 
 timestamp = time.time()
 
@@ -92,8 +96,13 @@ HTMLCodes = [
 	['"', '&quot;'],
 ]
 
+##Do this once, not every time a request comes in!
+addrfile=os.path.join(WebKitDir, _AddressFile)
+(host, port) = string.split(open(addrfile).read(), ':')
+port = int(port)
+
 def HTMLEncode(s, codes=HTMLCodes):
-	''' Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdaptor independent of everything but standard Python.) '''
+	""" Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdaptor independent of everything but standard Python.) """
 	for code in codes:
 		s = string.replace(s, code[0], code[1])
 	return s
@@ -101,7 +110,7 @@ def HTMLEncode(s, codes=HTMLCodes):
 
 def FCGICallback(fcg,env,form):
 	"""This function is called whenever a request comes in"""
-	import os, string, sys
+	import sys
 
 	try:
 
@@ -112,9 +121,7 @@ def FCGICallback(fcg,env,form):
 			'input':   form
 		}
 
-		addrfile=os.path.join(WebKitDir, _AddressFile)
-		(host, port) = string.split(open(addrfile).read(), ':')
-		port = int(port)
+
 
 		bufsize = 32*1024
 
@@ -130,15 +137,15 @@ def FCGICallback(fcg,env,form):
 			if not chunk:
 				break
 			response = response + chunk
-		response = loads(response)  # decode it
+		response = loads(response)  # decode ita
 
 		# deliver it!
-		write = fcg.req.write
+		write = fcg.req.out.write
 		for pair in response['headers']:
 			write('%s: %s\n' % pair)
 		write('\n')
 		write(response['contents'])
-		fcg.req.flush()
+		fcg.req.out.flush()
 
 	except:
 		import traceback
