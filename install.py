@@ -24,7 +24,7 @@ try:
 except ImportError:
 	from StringIO import StringIO
 
-MinimumVersionErrorMsg="""\nThis Release of Webware reuires Python %s.  Your current version of Python is:\n %s.\nPlease go to http://www.python.org for the latest version of Python.\nYou may continue to install, but Webware may not perform as expected.\nDo you wish to continue with the installation? [yes/no]"""
+MinimumVersionErrorMsg="""\nThis Release of Webware requires Python %s.  Your current version of Python is:\n %s.\nPlease go to http://www.python.org for the latest version of Python.\nYou may continue to install, but Webware may not perform as expected.\nDo you wish to continue with the installation? [yes/no]"""
 
 class Installer:
 	'''
