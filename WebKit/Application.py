@@ -706,33 +706,28 @@ class Application(Configurable,CanContainer):
 			if debug:
 				print '>> no urlPath, so using default context path: %s' % repr(urlPath)
 
-		# special administration scripts are denoted by a preceding underscore and are located with the app server. @@ 2000-05-19 ce: redesign this
-		if urlPath[0]=='_':
-			ssPath = os.path.join(self.serverDir(), urlPath)
-			if debug: print '>> leading underscore indicates admin script. trying: %s' % repr(ssPath)
+		# handle case of no / in the url
+		if string.find(urlPath, '/')!=-1:
+			contextName, restOfPath = string.split(urlPath, '/', 1)
 		else:
-			# handle case of no / in the url
-			if string.find(urlPath, '/')!=-1:
-				contextName, restOfPath = string.split(urlPath, '/', 1)
-			else:
-				contextName, restOfPath = urlPath, ''
-			if debug: print '>> contextName=%s, restOfPath=%s' % (repr(contextName), repr(restOfPath))
+			contextName, restOfPath = urlPath, ''
+		if debug: print '>> contextName=%s, restOfPath=%s' % (repr(contextName), repr(restOfPath))
 
-			# Look for Context
-			try:
-				prepath = self._Contexts[contextName]
-			except KeyError:
-				restOfPath = urlPath  # put the old path back, there's no context here
-				prepath = self._Contexts['default']
-				if debug:
-					print '>> context not found so assuming default:'
-			if debug: print '>> prepath=%s, restOfPath=%s' % (repr(prepath), repr(restOfPath))
+		# Look for Context
+		try:
+			prepath = self._Contexts[contextName]
+		except KeyError:
+			restOfPath = urlPath  # put the old path back, there's no context here
+			prepath = self._Contexts['default']
+			if debug:
+				print '>> context not found so assuming default:'
+		if debug: print '>> prepath=%s, restOfPath=%s' % (repr(prepath), repr(restOfPath))
 
-			# If we have a relative path, prepend the server directory
-			if not os.path.isabs(prepath):
-				basePath = os.path.join(self.serverDir(), prepath)
-			ssPath = os.path.join(prepath, restOfPath)
-			ssPath = os.path.normpath(ssPath)
+		# If we have a relative path, prepend the server directory
+		if not os.path.isabs(prepath):
+			basePath = os.path.join(self.serverDir(), prepath)
+		ssPath = os.path.join(prepath, restOfPath)
+		ssPath = os.path.normpath(ssPath)
 
 		if 0: # @@ 2000-06-22 ce: disabled, have to rethink the logic here
 			extraPathInfo=''

@@ -81,8 +81,9 @@ class HTTPResponse(Response):
 	## Status ##
 
 	def setStatus(self, code):
+		''' Set the status code of the response, such as 200, 'OK'. '''
 		assert self._committed==0
-		raise NotImplementedError
+		self.setHeader('Status', code)
 
 
 	## Special responses ##
