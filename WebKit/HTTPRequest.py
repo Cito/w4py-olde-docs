@@ -4,7 +4,7 @@ from WebUtils.Cookie import Cookie
 import os, cgi
 from types import ListType
 from WebUtils.Funcs import requestURI
-
+from WebUtils import FieldStorage
 
 debug=0
 
@@ -37,8 +37,8 @@ class HTTPRequest(Request):
 			else:
 				self._xmlInput = None
 
-			self._fields  = cgi.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
-
+			self._fields  = FieldStorage.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
+			self._fields.parse_qs()
 			self._cookies = Cookie()
 			if self._environ.has_key('HTTP_COOKIE'):
 				self._cookies.load(self._environ['HTTP_COOKIE'])
@@ -104,7 +104,6 @@ class HTTPRequest(Request):
 
 			dict[key] = value
 		self._fields = dict
-
 		self._pathInfo = None
 
 		# We use Tim O'Malley's Cookie class to get the cookies, but then change them into an ordinary dictionary of values
