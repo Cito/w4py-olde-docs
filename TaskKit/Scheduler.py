@@ -413,7 +413,9 @@ class Scheduler(Thread):
 		self._isRunning = 0
 		self.notify()
 		self.stopAllTasks()
-
+		self.join()	 # jdh: wait until the scheduler thread exits; otherwise
+					 # it's possible for the interpreter to exit before this thread
+					 # has a chance to shut down completely, which causes a traceback
 
 
 	## Main Method ##
