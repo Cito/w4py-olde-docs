@@ -70,12 +70,12 @@ def HTMLForDictionary(dict, addSpace=None):
 	keys = dict.keys()
 	keys.sort()
 	# A really great (er, bad) example of hardcoding.  :-)
-	html = ['<table width=100% border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>']
+	html = ['<table width=100% border=0 cellpadding=2 cellspacing=2>']
 	for key in keys:
 		value = dict[key]
 		if addSpace!=None  and  addSpace.has_key(key):
 			target = addSpace[key]
 			value = string.join(string.split(value, target), '%s '%target)
-		html.append('<tr> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (key, value))
+		html.append('<tr bgcolor=#F0F0F0> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (key, value))
 	html.append('</table>')
 	return string.join(html, '')
