@@ -1,7 +1,7 @@
 from Common import *
 from WebKit.Servlet import Servlet
 import sys
-from types import ClassType
+from types import ClassType, BuiltinFunctionType
 import ImportSpy as imp   # ImportSpy provides find_module and load_module
 import threading
 
@@ -184,7 +184,18 @@ class PythonServletFactory(ServletFactory):
 				assert module.__dict__.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
 				# Pull the servlet class out of the module
 				theClass = getattr(module, name)
-				assert type(theClass) is ClassType
+				# new-style classes aren't ClassType, but they
+				# are okay to use.  They are subclasses of
+				# type.  But type isn't a class in older
+				# Python versions, it's a builtin function.
+				# So we test what type is first, then use
+				# isinstance only for the newer Python
+				# versions
+				if type(type) is BuiltinFunctionType:
+					assert type(theClass) is ClassType
+				else:
+					assert type(theClass) is ClassType \
+					       or isinstance(theClass, type)
 				assert issubclass(theClass, Servlet)
 				self._cache[path]['mtime'] = os.path.getmtime(path)
 				self._cache[path]['class'] = theClass
