@@ -66,14 +66,14 @@ class ExamplePage(Page):
 		self.write('<br><a href=View?filename=%s>source</a>' % self.__class__.__name__)
 
 		# WebKit docs
-		filename = 'Documentation/WebKit.html'
-		if os.path.exists(filename):
-			self.write(' | <a href=%s>%s</a>' % (filename, 'WebKit Docs'))
+#		filename = 'Documentation/WebKit.html'
+#		if os.path.exists(filename):
+#			self.write(' | <a href=%s>%s</a>' % (filename, 'WebKit Docs'))
 
 		# Webware docs
-		filename = '../Documentation/Webware.html'
-		if os.path.exists(filename):
-			self.write(' | <a href=%s>%s</a>' % (filename, 'Webware Docs'))
+#		filename = '../Documentation/Webware.html'
+#		if os.path.exists(filename):
+#			self.write(' | <a href=%s>%s</a>' % (filename, 'Webware Docs'))
 
 		# admin
 		self.write(' | <a href=_admin>admin</a>')
