@@ -13,7 +13,7 @@ FUTURE
 '''
 
 
-import os, string, sys
+import os, string, sys, compileall
 from time import time, localtime, asctime
 from string import count, join, rfind, split, strip, replace
 from glob import glob
@@ -54,6 +54,7 @@ class Installer:
 		self.detectComponents()
 		self.installDocs()
 		self.backupConfigs()
+		self.compileModules()
 		self.fixPermissions()
 		self.finished()
 		self.printGoodbye()
@@ -250,6 +251,18 @@ class Installer:
 				else:
 					wr('-')
 				sys.stdout.flush()
+
+	def compileModules(self):
+		import StringIO
+		print "Byte compiling all modules\n\tNote: a Python 1.5 installation will \n\tproduce some errors. They can be safely \n\tignored for basic operation.\n------------------------------------------\n"
+		stdout = sys.stdout
+		stderr = sys.stderr
+		sys.stdout = StringIO.StringIO() #the compileall is a little verbose
+		sys.stderr = StringIO.StringIO()
+		compileall.compile_dir(".", 10, '', 1)
+		sys.stdout = stdout
+		sys.stderr = stderr
+		print "\n\n"
 
 	def fixPermissions(self):
 		if os.name=='posix':
