@@ -20,9 +20,9 @@
 		                        'Content-type': 'text/html',
 		                        'Subject':      'Error',
 	                          },
-	'Contexts':               { 'default':  'Examples',
-	                            'Examples': 'Examples',
-	                          },
-	'SessionTimeout':         60, # seconds, should be 30*60 (30 min) in real life
+	'Contexts':               {'default':'Examples',
+							   'Examples':'Examples',
+							  },
+	'SessionTimeout':         60*60, # seconds
 	'InstanceCacheSize':      10,
 }
