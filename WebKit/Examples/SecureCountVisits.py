@@ -11,5 +11,7 @@ class SecureCountVisits(SecurePage):
 		self.writeln("<p> You've been here %d time%s." % (count, plural))
 		self.writeln('<p> This page records your visits using a session object. Every time you RELOAD or revisit this page, the counter will increase. If you close your browser, then your session will end and you will see the counter go back to 1 on your next visit.')
 		self.writeln('<p> Try hitting RELOAD now.')
-		self.writeln('<p> Authenticated user is %s.' % self.session().value('authenticated_user'))
+		user = self.getLoggedInUser()
+		if user:
+			self.writeln('<p> Authenticated user is %s.' % user)
 		self.writeln('<p> <a href="SecureCountVisits">Revisit this page</a> <a href="SecureCountVisits?logout=1">Logout</a>')
