@@ -106,12 +106,8 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler, Adapter.Adapter):
             env['QUERY_STRING'] = ''
         env['PATH_INFO'] = env['REQUEST_URI']
         myInput = ''
-        if self.requestMethod == 'POST':
-            if self.headers.has_key('Content-Length'):
-                myInput = self.rfile.read(int(self.headers['Content-Length']))
-            else:
-                # Treat this as no input
-                myInput = ''
+        if self.headers.has_key('Content-Length'):
+            myInput = self.rfile.read(int(self.headers['Content-Length']))
         self.transactWithAppServer(env, myInput, host, port)
 
     def headersToEnviron(self, headers, env):
