@@ -109,9 +109,10 @@ class HTTPResponse(Response):
 		  'NEVER': some time in the far, far future.
 		  integer: a timestamp value
 		  tuple: a tuple, as created by the time module
-		  DateTime: an mxDateTime object for the time
-		  DeltaDateTime: a interval from the present, e.g.,
-		    DateTime.DeltaDateTime(month=1) (1 month in the future)
+		  DateTime: an mxDateTime object for the time (assumed to
+		    be *local*, not GMT time)
+		  DateTimeDelta: a interval from the present, e.g.,
+		    DateTime.DateTimeDelta(month=1) (1 month in the future)
                   '+...': a time in the future, '...' should be something like
 		    1w (1 week), 3h46m (3:45), etc.  You can use y (year),
                     b (month), w (week), d (day), h (hour), m (minute),
@@ -120,7 +121,10 @@ class HTTPResponse(Response):
 		cookie = Cookie(name, value)
 		if expires == 'ONCLOSE' or not expires:
 			pass # this is already default behavior
-		elif expires == 'NOW' or expires == 'NEVER':
+		elif expires == 'NOW':
+			cookie.delete()
+			return
+		elif expires == 'NEVER':
 			t = time.gmtime(time.time())
 			if expires == 'NEVER':
 				t = (t[0] + 10,) + t[1:]
@@ -131,15 +135,16 @@ class HTTPResponse(Response):
 			if type(t) is StringType and t and t[0] == '+':
 				interval = timeDecode(t[1:])
 				t = time.time() + interval
-			if type(t) in (IntType, LongType,FloatType):
+			if type(t) in (IntType, LongType, FloatType):
 				t = time.gmtime(t)
 			if type(t) in (TupleType, TimeTupleType):
 				t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
-			if DateTime and type(t) in \
-			   (DateTime.DeltaDateTimeType, DateTime.RelativeDateTimeType):
+			if DateTime and \
+			       (type(t) is DateTime.DateTimeDeltaType
+				or isinstance(t, DateTime.RelativeDateTime)):
 				t = DateTime.now() + t
 			if DateTime and type(t) is DateTime.DateTimeType:
-				t = t.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
+				t = (t - t.gmtoffset()).strftime("%a, %d-%b-%Y %H:%M:%S GMT")
 			cookie.setExpires(t)
 		if path:
 			cookie.setPath(path)
