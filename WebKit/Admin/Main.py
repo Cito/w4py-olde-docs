@@ -16,8 +16,8 @@ class Main(AdminSecurity):
 		app = self.application()
 		curTime = time()
 		info = [
-			('Webware Version', app.webwareVersion()),
-			('WebKit Version',  app.webKitVersion()),
+			('Webware Version', app.webwareVersionString()),
+			('WebKit Version',  app.webKitVersionString()),
 			('Local Time',      asctime(localtime(curTime))),
 			('Up Since',        asctime(localtime(app.server().startTime()))),
 			('Num Requests',    app.server().numRequests()),
