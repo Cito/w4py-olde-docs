@@ -2,7 +2,7 @@ from SessionStore import SessionStore
 import SessionMemoryStore, SessionFileStore
 import os, time
 
-debug = 1
+debug = 0
 
 class SessionDynamicStore(SessionStore):
 	"""
@@ -32,8 +32,7 @@ class SessionDynamicStore(SessionStore):
 		self._memoryStore.clear()  #fileStore will have the files on disk
 
 		#moveToFileInterval specifies after what period of time a session is automatically moved to file
-		self.moveToFileInterval = self.application().setting('DynamicSessionTimeout', 15) # 15 minutes, make configurable
-		self.moveToFileInterval = self.moveToFileInterval * 60 #convert to seconds
+		self.moveToFileInterval = self.application().setting('DynamicSessionTimeout', 15) * 60
 
 		#minMemoryInterval is the minimum amount of time Sessions will stay in memory
 		self.minMemoryInterval = 300 #5 minutes
@@ -45,6 +44,9 @@ class SessionDynamicStore(SessionStore):
 		self._maxDynamicMemorySessions = self.application().setting('MaxDynamicMemorySessions', 10000)
 
 		self._fileSweepCount = 0
+
+		if debug:
+			print "SessionDynamicStore Initialized"
 		
 	## Access ##
 
@@ -104,7 +106,7 @@ class SessionDynamicStore(SessionStore):
 		for i in self._memoryStore.keys():
 			self.MovetoFile(i)
 
-	def cleanStaleSessions(self):
+	def cleanStaleSessions(self, task=None):
 		"""
 		Called by the Application to tell this store to clean out all sessions that have
 		exceeded their lifetime.
@@ -116,11 +118,11 @@ class SessionDynamicStore(SessionStore):
 		The problem is the FileStore.cleanStaleSessions can take a while to run.
 		So here, we only run the file sweep every fourth time.
 		"""
-		
+		if debug: print "Session Sweep started"
 		try:
 			if self._fileSweepCount == 0:
-				self._fileStore.cleanStaleSessions()
-			self._memoryStore.cleanStaleSessions()
+				self._fileStore.cleanStaleSessions(task)
+			self._memoryStore.cleanStaleSessions(task)
 		except KeyError:
 			pass
 		if self._fileSweepCount < 4:
@@ -142,10 +144,10 @@ class SessionDynamicStore(SessionStore):
 		"""
 		global debug
 		if debug:
-			print "Starting interval Sweep at %s\n" % time.ctime(time.time())
-			print "Memory Sessions: %s   FileSessions: %s\n" % (len(self._memoryStore), len(self._fileStore))
-			print "maxDynamicMemorySessions = %s\n" % self._maxDynamicMemorySessions
-			print "moveToFileInterval = %s\n" % self.moveToFileInterval
+			print "Starting interval Sweep at %s" % time.ctime(time.time())
+			print "Memory Sessions: %s   FileSessions: %s" % (len(self._memoryStore), len(self._fileStore))
+			print "maxDynamicMemorySessions = %s" % self._maxDynamicMemorySessions
+			print "moveToFileInterval = %s" % self.moveToFileInterval
 			
 		now = time.time()
 		
@@ -165,8 +167,8 @@ class SessionDynamicStore(SessionStore):
 			self.moveToFileInterval = self.moveToFileInterval * 2
 
 			
-		if debug: print "Finished interval Sweep at %s\n" % time.ctime(time.time())
-		if debug: print "Memory Sessions: %s   FileSessions: %s\n" % (len(self._memoryStore), len(self._fileStore))
+		if debug: print "Finished interval Sweep at %s" % time.ctime(time.time())
+		if debug: print "Memory Sessions: %s   FileSessions: %s" % (len(self._memoryStore), len(self._fileStore))
 
 		
 	def findInterval(self):

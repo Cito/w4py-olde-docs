@@ -69,7 +69,7 @@ class SessionStore(Object):
 	def storeAllSessions(self):
 		raise SubclassResponsibilityError
 
-	def cleanStaleSessions(self):
+	def cleanStaleSessions(self, task=None):
 		"""
 		Called by the Application to tell this store to clean out all sessions that
 		have exceeded their lifetime.
