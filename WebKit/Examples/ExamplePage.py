@@ -37,7 +37,11 @@ class ExamplePage(Page):
 		scripts = filter(lambda script, hidden=hidden: not script['name'] in hidden, self.scripts())
 		scripts = map(lambda scriptDict: '<a href="%s">%s</a>' % (scriptDict['name'], scriptDict['name']), scripts)
 		self.writeln('<p><center>', string.join(scripts, ' | '), '</center>')
-		self.writeln('<p><center> <a href="PSPExamples/Hello.psp">PSP</a></center>') #Annoy Chuck!
+		#handle case of which directory the client thinks we're in
+		self.write('<p><center> <a href="')
+		if string.find(self._request._environ['PATH_INFO'],'/Examples/')>0: self.write('../')
+		self.writeln('PSPExamples/Hello.psp">PSP</a></center>')
+		#end special case
 		if self.isDebugging():
 			self.writeln('<p><center>', self._session.identifier(), '</center>')
 			from WebUtils.WebFuncs import HTMLEncode
