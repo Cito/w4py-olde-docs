@@ -121,6 +121,9 @@ class MiddleObject(NamedValueAccess):
 		self._mk_serialNum = value
 		self._mk_key = None
 
+	# for people who capitalize the attributes in their model:
+	SerialNum = serialNum
+
 
 	## Change ##
 
@@ -190,7 +193,7 @@ class MiddleObject(NamedValueAccess):
 		return allAttrs
 
 	def removeObjectFromListAttrs(self, object):
-		""" 
+		"""
 		Removes object from any list attributes that this instance might have.
 		This is used if the object is deleted, so we don't have dangling references.
 		"""
@@ -406,23 +409,23 @@ class MiddleObject(NamedValueAccess):
 	_set = setValueForKey
 
 	def clone(self,memo=None,depthAttr=None):
-		''' 
+		'''
 		Clone middle object(s) generically.
 
-		You may or may not want objects referenced by ObjRefAttr or ListAttr attributes 
-		to be cloned in addition to the object itself.  You can control this by adding a 
+		You may or may not want objects referenced by ObjRefAttr or ListAttr attributes
+		to be cloned in addition to the object itself.  You can control this by adding a
 		"Copy" column in your Classes.csv file, and set the value for each attribute which may
 		reference another object.  The possible values are:
 			Copy = 'deep': referenced objects will be cloned and references to them will be set
 			Copy = 'shallow': the cloned object references the same object as the original
-			Copy = 'none': the attribute in the cloned object is set to 'None' 
+			Copy = 'none': the attribute in the cloned object is set to 'None'
 
-		Clone will call itself recursively to copy references deeply, and gracefully handles 
+		Clone will call itself recursively to copy references deeply, and gracefully handles
 		recursive references (where a referenced object may have already been cloned).  In this case
-		only one clone is created, not two cloned instances of the same original.  
+		only one clone is created, not two cloned instances of the same original.
 
-		If you want a mapping from original to cloned objects, pass in an empty dict for the 
-		memo argument.  It will be filled in during the clone operation, such that the keys are 
+		If you want a mapping from original to cloned objects, pass in an empty dict for the
+		memo argument.  It will be filled in during the clone operation, such that the keys are
 		the original object instances and the values are the corresponding clones.
 
 		The parameter depthAttr may be set to a column name which, if set,
@@ -444,7 +447,7 @@ class MiddleObject(NamedValueAccess):
 					clonedvalue = None
 				retvalue = apply( getattr(dest,attr.pySetName()), (clonedvalue,))
 			elif copymode == 'none':
-				# Shouldn't set to attribute to None explicitly since attribute may have 
+				# Shouldn't set to attribute to None explicitly since attribute may have
 				# isRequired=1
 				# besides, the object will initialize all attributes to None anyways
 				pass
@@ -452,9 +455,9 @@ class MiddleObject(NamedValueAccess):
 				# copy the value of an attribute from the source object
 				# to the dest object
 				#print 'copying value of ' + attr.name()
-				value = apply( getattr(source,attr.pyGetName()), ()) 
+				value = apply( getattr(source,attr.pyGetName()), ())
 				retvalue = apply( getattr(dest,attr.pySetName()), (value,))
-				
+
 		if memo is None:
 			#print 'Initializing memo'
 			memo = {}
