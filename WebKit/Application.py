@@ -660,7 +660,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			except EndResponse:
 				pass
 			trans.servlet().sleep(trans)
-		except ReponseDone:
+		except EndResponse:
 			pass
 
 		self.returnInstance(trans,trans.request().serverSidePath())
@@ -717,7 +717,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			except EndResponse:
 				pass
 			servlet.sleep(trans)
-		except ReponseDone:
+		except EndResponse:
 			pass
 
 		# Return the servlet instance to the cache
