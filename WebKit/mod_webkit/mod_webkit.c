@@ -322,7 +322,6 @@ static int content_handler(request_rec *r)
 	WFILE* env_dict=NULL;
 	WFILE* whole_dict=NULL;
 	char* content;
-	long the_time;
 	BUFF* buffsocket;
 	int sock = 0;
 	long length;
@@ -332,6 +331,9 @@ static int content_handler(request_rec *r)
 	char msgbuf[MAX_STRING_LEN];
 	int debugint;
 	int ret;
+	int conn_attempt = 0;
+	int conn_attempt_delay = 1;
+	int max_conn_attempt=10;
 
 	const char *value;
 	const char *key;
@@ -392,9 +394,9 @@ static int content_handler(request_rec *r)
 	write_string("format", 6, whole_dict); //key
 	write_string("CGI", 3, whole_dict);  //value
 	write_string("time", 4, whole_dict); //key
-	w_byte(TYPE_NONE, whole_dict);  //value
-//This won't work.  Marshal converts this from a float to a string, I have neither. Floats are ugly.
-//	w_long((long)time(&the_time), whole_dict);//value
+	w_byte(TYPE_INT, whole_dict);  //value
+//patch from Ken Lalonde to make the time entry useful, (who knew?? I didn't think this would work and didn't bother)
+	w_long((long)time(0), whole_dict);//value
 
 	write_string("environ", 7, whole_dict); //key
 
@@ -415,8 +417,16 @@ static int content_handler(request_rec *r)
 
 	ap_hard_timeout("wk_send", r);
 
+	while (sock <= 0 ) {
 	sock = wksock_open(r, cfg->addr, cfg->port, cfg);
-	
+	if (sock > 0 || (conn_attempt > max_conn_attempt)) break;
+	//	if (errno != EAGAIN) break;
+	sprintf(msgbuf, "Couldn't connect to AppServer,attempt %i of %i", conn_attempt, max_conn_attempt);
+	log_message(msgbuf, r);
+	conn_attempt++;
+	sleep(1);
+	}
+
 	if (sock <= 0) {
 			log_message("Couldn't connect to app server", r);
 			return;
