@@ -14,18 +14,18 @@
 <h1 align=center><font color='blue'  face='helvetica'>Hello from PSP!</font></h1><br><br>
 
 
+<table><tr><td></td><td width="90%">
+<center><h2>This is the sample/test page for an implementation of Python Server Pages.</h2></center>
 
-<center><h2>This is the sample/test page for an implmentation of Python Server Pages.</h2></center>
-<p>What happens if I put a triple quote here? """
-<% self.test=5 %>
+
 
 <p><h3>Read the documentation <a href="PSPDocs.psp">here</a>.</h3>
-
+<p> See the source for this page <a href="View.py?filename=<%=self.request().serverSidePath()%>">here</a>
 
 <br>
-<p>The syntax for Python Server Pages is almost identical to that of Java Server Pages (JSP).  Just the scripting language is different! And obviously better.  In fact, just about anything you can do with JSP, you can do with PSP, and more.  With PSP, not only can you create template text that will be inerted in one method when the page is run as a servlet, but you can choose which base class to inherit from, you can choose which method of the base class to over-ride with your template text, and you can add additional methods to the servlet class, all from the PSP template code.  We got a bean equivalent called Can, too. (can of spam, get it?  That's OK, there are others who don't like it either).
+<p>The syntax for Python Server Pages is almost identical to that of Java Server Pages (JSP).  Just the scripting language is different! And obviously better.  In fact, just about anything you can do with JSP, you can do with PSP, and more.  With PSP, not only can you create template text that will be inerted in one method when the page is run as a servlet, but you can choose which base class to inherit from, you can choose which method of the base class to over-ride with your template text, and you can add additional methods to the servlet class, all from the PSP template code.  We've got a bean equivalent called Can, too. (can of spam, get it?  That's OK, there are others who don't like it either).
 <p>
-<p>I know, Cool, huh?
+
 
 <br><br>
 The text below comes from another psp page which was inserted into this one with the &lt%@ include %> directive.
@@ -46,16 +46,18 @@ Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>
 
 
 <b>Below is a loop test</b>
+<br> Loops are the trickiest part of PSP due to Python Indentation for blocks syntax.
+<br>
 
 
-<% for i in range(2): %>
+<% for i in range(2): %> <%-- Loop #1, an automatic loop --%>
 <% self.write('<p>outerloop: ')
 self.write(i)%>&nbsp;
-<% for n in range(2): %>
+<% for n in range(2): %>  <%-- Another automatic loop --%>
 <p><i> &nbsp;&nbsp;Inner Loop: <%= n %><br> </i>
 <%self.write('Still in the inner loop') %>
-<% end %>
-<% end %>
+<% end %>  <%-- End loop #1 --%>
+<% end %>  <%-- End loop #2 --%>
 
 <hr>
 <b>Unix system info.</b>
@@ -83,7 +85,7 @@ for i in os.environ.keys():
 <%-- Comment check --%> <%-- #This kind not even in python file created. --%>
 <!-- Comment Check -->  
 
-
+<%--  Method declaration Test --%>
 <psp:method name="testing" params="val">
 self._response.write('<br>I\'m a method. ')
 self._response.write(val)
@@ -92,9 +94,12 @@ self._response.write(val)
 <p>Testing a class method defined in the psp code.<br>
 <%self.testing('Howdy!')%>
 
+
+<%-- "pass" can be used to end a block, so test that it can be used by itself too! --%>
 <% pass %>
 
 
+<%-- Here is a crappy Can example.  I've got a whole site built around this now, so I should improve this example %--%>
 <p>Here is a list of the pages you have been to that are tracking compatible:<br>
 
 <% locationCan = self.getCan("locationCan","LocationCan","session")%>
@@ -105,8 +110,9 @@ for i in locationCan.locationList():%>
 <% end %>
 
 <p>There's actually only one other page that is tracking compatible, <a href="TrackingExample.psp"> this one </a>
+<p><p><p>
 
-
+</td><td></td></tr></table>
 
 </BODY>
 </HTML>
