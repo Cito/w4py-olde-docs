@@ -40,7 +40,17 @@ def main():
 	import os, sys
 
 	try:
-		myInput = sys.stdin.read()
+		# MS Windows: no special translation of end-of-lines
+		if os.name=='nt':
+			import msvcrt
+			msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+			msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+
+		myInput = ''
+		if os.environ.has_key('CONTENT_LENGTH'):
+			length = int(os.environ['CONTENT_LENGTH'])
+			if length:
+				myInput = sys.stdin.read(length)
 
 		dict = {
 			'format':  'CGI',
@@ -67,10 +77,6 @@ def main():
 		s.connect(host, port)
 		s.send(dumps(dict))
 		s.shutdown(1)
-
-		if os.name=='nt': # MS Windows: no special translation of end-of-lines
-			import msvcrt
-			msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
 		# read the raw reponse (which is a marshalled dictionary)
 		response = ''
