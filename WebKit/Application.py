@@ -519,8 +519,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		The transaction's URL is changed to point to the new
 		servlet, and the transaction is simply run again.
 
-		Output is accumulated, so if the original servlet
-		had any output, the new output will just be concatenated.
+		Output is _not_ accumulated, so if the original servlet
+		had any output, the new output will _replace_ the old
+		output.
 
 		You can change the request in place to control the
 		servlet you are forwarding to -- using methods like
@@ -529,9 +530,15 @@ class Application(ConfigurableForServerSidePath, Object):
 		@@ 2003-03 ib: how does the forwarded servlet knows
 		that it's not the original servlet?
 		"""
-		urlPath = self.resolveInternalRelativePath(trans, url, context)
-		trans.request().setURLPath(urlPath)
-		self.runTransaction(trans)
+		
+		# Reset the response to a "blank slate"
+		trans.response().reset()
+		
+		# Include the other servlet
+		self.includeURL(trans, url, context)
+		
+		# Raise an exception to end processing of this request
+		raise EndResponse
 
 	def callMethodOfServlet(self, trans, url, method, *args, **kw):
 		"""
@@ -560,14 +567,16 @@ class Application(ConfigurableForServerSidePath, Object):
 			del kw['context']
 		else:
 			context = None
+			
 		urlPath = self.resolveInternalRelativePath(trans, url, context)
 		req = trans.request()
-		
-		req.setURLPath(urlPath)
-		currentServlet = trans._servlet
 		currentPath = req.urlPath()
+		currentServlet = trans._servlet
+		req.setURLPath(urlPath)
 		req.addParent(currentServlet)
+		
 		servlet = self._rootURLParser.findServletForTransaction(trans)
+		trans._servlet = servlet
 		if hasattr(servlet, 'runMethodForTransaction'):
 			result = servlet.runMethodForTransaction(trans, method, *args, **kw)
 		else:
@@ -597,7 +606,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		req.addParent(currentServlet)
 
 		servlet = self._rootURLParser.findServletForTransaction(trans)
-		self.runTransaction(trans)
+		trans._servlet = servlet
+		servlet.runTransaction(trans)
 		req.setURLPath(currentPath)
 		req.popParent()
 		trans._servlet = currentServlet
