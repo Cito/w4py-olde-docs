@@ -100,9 +100,18 @@ class HTTPResponse(Response):
 		raise NotImplementedError
 
 	def sendRedirect(self, url):
-		''' This method sets the headers and content for the redirect, but does NOT change the cookies. Use clearCookies() as appropriate. '''
+		'''
+		This method sets the headers and content for the redirect, but does NOT change the cookies. Use clearCookies() as appropriate.
+		@@ 2002-03-21 ce: I thought cookies were ignored by user agents if a redirect occurred. We should verify and update code or docs as appropriate.
+		'''
+		# ftp://ftp.isi.edu/in-notes/rfc2616.txt
+		# Sections: 10.3.3 and others
 		assert self._committed==0
-		self._headers = {'Location': url, 'Content-type': 'text/html'}
+		self._headers = {
+			'Status': '302 Redirect',
+			'Location': url,
+			'Content-type': 'text/html'
+		}
 		self._contents = [
 			'<html> <body> This page has been redirected to <a href="%s">%s</a>. </body> </html>' % (url, url)]
 
@@ -174,4 +183,4 @@ class HTTPResponse(Response):
 		self.write(rawRes['contents'])
 
 
-		
+
