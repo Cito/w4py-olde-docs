@@ -1,3 +1,4 @@
+
 """
 This is the TaskManager python package.  It provides a system for running any number of
 predefined tasks in separate threads in an organized and controlled manner.
@@ -20,11 +21,11 @@ from exceptions import IOError
 
 class Scheduler(Thread):
 	"""
-	The top level class of the TaskManager system.  The Scheduler is a thread that handles organizing and
-	running tasks.  The Sheduler class should be instantiated to start a TaskManager sessions.  It's run
-	method should be called to start the TaskManager.  It's stop method should be called to end the
-	TaskManager session.
-"""
+	The top level class of the TaskManager system.  The Scheduler is a thread that 
+	handles organizing and running tasks.  The Sheduler class should be instantiated 
+	to start a TaskManager sessions.  It's run method should be called to start the 
+	TaskManager.  It's stop method should be called to end the TaskManager session.
+	"""
 
 	## Init ##
 
@@ -61,7 +62,7 @@ class Scheduler(Thread):
 		self._notifyEvent.clear()
 
 
-	## Value Methods ##
+	## Attributes ##
 
 	def running(self, name, default=None):
 		"""
@@ -97,13 +98,13 @@ class Scheduler(Thread):
 
 	def scheduled(self, name, default=None):
 		"""
-		Returns a task from the Scheduled list.
+		Returns a task from the scheduled list.
 		"""
 		return self._scheduled.get(name, default)
 
 	def hasScheduled(self, name):
 		"""
-		Is the task with he given name in the Scheduled list?
+		Is the task with he given name in the scheduled list?
 		If so, return it.
 		"""
 		return self._scheduled.has_key(name)
@@ -115,6 +116,9 @@ class Scheduler(Thread):
 		self._scheduled[handle.name()] = handle
 
 	def delScheduled(self, name):
+		"""
+		Deleted a task with the given name from the scheduled list.
+		"""
 		try:
 			handle = self._scheduled[name]
 			del self._scheduled[name]
@@ -123,15 +127,28 @@ class Scheduler(Thread):
 			return None
 
 	def onDemand(self, name, default=None):
+		"""
+		Returns a task from the onDemand list.
+		"""
 		return self._onDemand.get(name, default)
 
 	def hasOnDemand(self, name):
+		"""
+		Is the task with he given name in the onDemand list?
+		If so, return it.
+		"""		
 		return self._onDemand.has_key(name)
 
 	def setOnDemand(self, handle):
+		"""
+		Add the given task to the onDemand list.
+		"""
 		self._onDemand[handle.name()] = handle
 
 	def delOnDemand(self, name):
+		"""
+		Deleted a task with the given name from the onDemand list.
+		"""
 		try:
 			handle = self._onDemand[name]
 			del self._onDemand[name]
@@ -152,6 +169,9 @@ class Scheduler(Thread):
 	## Adding Tasks ##
 
 	def addTimedAction(self, time, task, name):
+		"""
+		This method is used to add an action to be run once, at a specific time.
+		"""
 		handle = self.unregisterTask(name)
 		if not handle:
 			handle = TaskHandler(self, time, 0, task, name)
@@ -160,6 +180,10 @@ class Scheduler(Thread):
 		self.scheduleTask(handle)
 
 	def addActionOnDemand(self, task, name):
+		"""
+		This method is used to add a task to the scheduler that will not be scheduled 
+		until specifically requested.
+		"""
 		handle = self.unregisterTask(name)
 		if not handle:
 			handle = TaskHandler(self, time(), 0, task, name)
@@ -168,39 +192,53 @@ class Scheduler(Thread):
 		self.setOnDemand(handle)
 
 	def addDailyAction(self, hour, minute, task, name):
-		"""
-		Add a task to be run every day at the given time.
-		
+		"""		
+		This method is used to add an action to be run every day at a specific time.
+		If a task with the given name is already registered with the scheduler, that task 
+		will be removed from the scheduling queue and registered anew as a periodic task.
+			
 		Can we make this addCalendarAction?  What if we want to run something once a week?
 		We probably don't need that for Webware, but this is a more generally useful module.
 		This could be a difficult function, though.  Particularly without mxDateTime.
 		"""
 		import time
 		current = time.localtime(time.time())
-		currhour = current[3]
-		currmin = current[4]
+		currHour = current[3]
+		currMin = current[4]
 
-		#minute_difference
-		if minute > currmin:
-			minute_difference = minute - currmin
-		elif minute < currmin:
-			minute_difference = 60 - currmin + minute
+		#minute difference
+		if minute > currMin:
+			minuteDifference = minute - currMin
+		elif minute < currMin:
+			minute_difference = 60 - currMin + minute
 		else: #equal
-			minute_difference = 0
+			minuteDifference = 0
 
-		#hour_difference
-		if hour > currhour:
-			hour_difference = hour - currhour
-		elif hour < currhour:
-			hour_difference = 24 - currhour + hour
+		#hourDifference
+		if hour > currHour:
+			hourDifference = hour - currHour
+		elif hour < currHour:
+			hourDifference = 24 - currHour + hour
 		else: #equal
-			hour_difference = 0
+			hourDifference = 0
 
-		delay = (minute_difference + (hour_difference * 60)) * 60
+		delay = (minuteDifference + (hourDifference * 60)) * 60
 		self.addPeriodicAction(time.time()+delay, 24*60*60, task, name)
 
 
 	def addPeriodicAction(self, start, period, task, name):
+		"""
+		This method is used to add an action to be run at a specific initial time, 
+		and every period thereafter.
+
+		The scheduler will not reschedule a task until the last scheduled instance 
+		of the task has completed.
+
+		If a task with the given name is already registered with the scheduler, 
+		that task will be removed from the scheduling queue and registered
+		anew as a periodic task.
+		"""
+		
 		handle = self.unregisterTask(name)
 		if not handle:
 			handle = TaskHandler(self, start, period, task, name)
@@ -212,6 +250,10 @@ class Scheduler(Thread):
 	## Task methods ##
 
 	def unregisterTask(self, name):
+		"""
+		This method unregisters the named task so that it can be rescheduled with 
+		different parameters, or simply removed.
+		"""
 		handle = None
 		if self.hasScheduled(name):
 			handle = self.delScheduled(name)
@@ -222,6 +264,12 @@ class Scheduler(Thread):
 		return handle
 
 	def runTaskNow(self, name):
+		"""
+		This method is provided to allow a registered task to be immediately executed.
+		
+		Returns 1 if the task is either currently running or was started, or 0 if the 
+		task could not be found in the list of currently registered tasks.
+		"""
 		if self.hasRunning(name):
 			return 1
 		handle = self.scheduled(name)
@@ -232,15 +280,49 @@ class Scheduler(Thread):
 		self.runTask(handle)
 		return 1
 
-	def demandTask(self, name): pass
+	def demandTask(self, name):
+		"""
+		This method is provided to allow the server to request that a task listed as being 
+		registered on-demand be run as soon as possible.
+		
+		If the task is currently running, it will be flagged to run again as soon as the 
+		current run completes. 
+
+		Returns 0 if the task name could not be found on the on-demand or currently running lists.
+		"""
+		if  not self.hasRunning(name) and not self.hasOnDemand(name):
+			return 0
+		else:
+			handle = self.running(name)
+			if handle:
+				handle.runOnCompletion()
+				return 1
+			handle = self.onDemand(name)
+			if not handle:
+				return 0			
+			self.runTask(handle)
+			return 1
 
 	def stopTask(self, name):
+		"""
+		This method is provided to put an immediate halt to a running background task.
+		
+		Returns 1 if the task was either not running, or was running and was told to stop.
+		"""
 		handle = self.running(name)
 		if not handle: return 0
 		handle.stop()
 		return 1
 
 	def disableTask(self, name):
+		"""
+		This method is provided to specify that a task be suspended. Suspended tasks will 
+		not be scheduled until later enabled. If the task is currently running, it will 
+		not be interfered with, but the task will not be scheduled for execution in future 
+		until re-enabled.
+		
+		Returns 1 if the task was found and disabled.
+		"""
 		handle = self.running(name)
 		if not handle:
 			handle = self.scheduled(name)
@@ -250,6 +332,15 @@ class Scheduler(Thread):
 		return 1
 
 	def enableTask(self, name):
+		"""
+		This method is provided to specify that a task be re-enabled after a suspension.
+		A re-enabled task will be scheduled for execution according to its original schedule, 
+		with any runtimes that would have been issued during the time the task was suspended 
+		simply skipped.
+
+		Returns 1 if the task was found and enabled
+		"""
+		
 		handle = self.running(name)
 		if not handle:
 			handle = self.scheduled(name)
@@ -259,12 +350,22 @@ class Scheduler(Thread):
 		return 1
 
 	def runTask(self, handle):
+		"""
+		This method is used by the Scheduler thread's main loop to put a task in 
+		the scheduled hash onto the run hash.
+		"""
 		name = handle.name()
 		if self.delScheduled(name) or self.delOnDemand(name):
 			self.setRunning(handle)
 			handle.runTask()
 
 	def scheduleTask(self, handle):
+		"""
+		This method takes a task that needs to be scheduled and adds it to the scheduler. 
+		All scheduling additions or changes are handled by this method. This is the only 
+		Scheduler method that can notify the run() method that it may need to wake up early 
+		to handle a newly registered task.
+		"""
 		self.setScheduled(handle)
 		if not self.nextTime() or handle.startTime() < self.nextTime():
 			self.setNextTime(handle.startTime())
@@ -274,6 +375,11 @@ class Scheduler(Thread):
 	## Misc Methods ##
 
 	def notifyCompletion(self, handle):
+		"""
+		This method is used by instances of TaskHandler to let the Scheduler thread know 
+		when their tasks have run to completion.
+		This method is responsible for rescheduling the task if it is a periodic task.
+		"""
 		name = handle.name()
 		if self.hasRunning(name):
 			self.delRunning(name)
@@ -291,6 +397,9 @@ class Scheduler(Thread):
 		self._notifyEvent.set()
 
 	def stop(self):
+		"""
+		This method terminates the scheduler ad its associated tasks.
+		"""
 		self._isRunning = 0
 		self.notify()
 		self._closeEvent.set()
@@ -299,6 +408,14 @@ class Scheduler(Thread):
 	## Main Method ##
 
 	def run(self):
+		"""
+		This method is responsible for carrying out the scheduling work of this class 
+		on a background thread. The basic logic is to wait until the next action is due to 
+		run, move the task from our scheduled list to our running list, and run it. Other
+		synchronized methods such as runTask(), scheduleTask(), and notifyCompletion(), may 
+		be called while this method is waiting for something to happen. These methods modify 
+		the data structures that run() uses to determine its scheduling needs.
+		"""
 		self._isRunning = 1
 		while 1:
 			if not self._isRunning:
