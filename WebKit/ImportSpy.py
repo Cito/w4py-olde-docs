@@ -13,14 +13,17 @@ Other than keeping track of the filepaths, the behaviour of this module
 loader is identical to Python's default behaviour.
 """
 
+True, False = 1==1, 0==1
 
 class ModuleLoader(ihooks.ModuleLoader):
 
 	def __init__(self):
+		assert modloader is None, \
+		       "ModuleLoader can only be instantiated once"
 		ihooks.ModuleLoader.__init__(self)
 		self._fileList = {}
 		self._notifyHook = None
-		self.recordModules(sys.modules.keys())
+		self._installed = False
 
 	def load_module(self,name,stuff):
 		try:
@@ -51,7 +54,7 @@ class ModuleLoader(ihooks.ModuleLoader):
 		be know when a new file is imported """
 		self._notifyHook = hook
 
-	def addToFileList(self, filepath, getmtime=os.path.getmtime):
+	def watchFile(self, filepath, getmtime=os.path.getmtime):
 		modtime = getmtime(filepath)
 		self._fileList[filepath] = modtime
 		# send notification that this file was imported 
@@ -71,7 +74,7 @@ class ModuleLoader(ihooks.ModuleLoader):
 			if f2 and f2 not in fileList.keys():
 				try:
 					if isfile(f2):
-						self.addToFileList(f2)
+						self.watchFile(f2)
 				except OSError:
 					pass
 			elif f and f not in fileList.keys():
@@ -80,9 +83,9 @@ class ModuleLoader(ihooks.ModuleLoader):
 					f = f[:-1]
 				try:
 					if isfile(f):
-						self.addToFileList(f)
+						self.watchFile(f)
 					else:
-						self.addToFileList(os.path.join(f, '__init__.py'))
+						self.watchFile(os.path.join(f, '__init__.py'))
 				except OSError:
 					pass
 
@@ -92,13 +95,18 @@ class ModuleLoader(ihooks.ModuleLoader):
 		# file is modified
 		elif pathname:
 			if isfile(pathname):
-				self.addToFileList(pathname)
+				self.watchFile(pathname)
 
-# install our custom ModuleLoader.  Any subsequently-imported modules will
-# be noticed.
+	def activate(self):
+		imp = ihooks.ModuleImporter(loader=modloader)
+		ihooks.install(imp)
+		self.recordModules(sys.modules.keys())
+		self._installed = True
+
+# We do this little double-assignment trick to make sure ModuleLoader
+# is only instantiated once.
+modloader = None
 modloader = ModuleLoader()
-imp = ihooks.ModuleImporter(loader=modloader)
-ihooks.install(imp)
 
 """ These two methods are compatible with the 'imp' module (and can
 therefore be useds as drop-in replacements), but will use the

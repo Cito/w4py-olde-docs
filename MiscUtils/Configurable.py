@@ -1,7 +1,7 @@
 import string, sys
 from types import DictType
 from MiscUtils import NoDefault
-
+from WebKit.ImportSpy import modloader
 
 class ConfigurationError(Exception):
 	pass
@@ -95,6 +95,7 @@ class Configurable:
 		else:
 			contents = file.read()
 			file.close()
+			modloader.watchFile(filename)
 			replacements = self.configReplacementValues()
 			if replacements:
 				try:

@@ -29,6 +29,8 @@ except:
 	haveFam = 0
 
 from ImportSpy import modloader
+standardLibraryPrefix = '%s/lib/python%i.%i' % \
+			(sys.prefix, sys.version_info[0], sys.version_info[1])
 
 
 DefaultConfig = {
@@ -71,6 +73,7 @@ class AutoReloadingAppServer(AppServer):
 
 	def activateAutoReload(self):
 		"""Start the monitor thread"""
+		modloader.activate()
 		if not self._autoReload:
 			if haveFam:
 				print 'AutoReload Monitor started, using FAM'
