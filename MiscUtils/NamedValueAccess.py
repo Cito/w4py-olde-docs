@@ -8,6 +8,9 @@ from time import time
 technique = 1
 
 
+class NamedValueAccessError(Exception):
+	pass
+
 class _NoDefault:
 	pass
 
@@ -102,7 +105,7 @@ class NamedValueAccess:
 				result = binding()
 #			except:
 				# @@ 2000-02-18: Improve next line with exception info
-#				raise 'NamedValueAccess', 'Caught exception while accessing key (%s). Exception is %s' % (key, sys.exc_info())
+#				raise NamedValueAccessError, 'Caught exception while accessing key (%s). Exception is %s' % (key, sys.exc_info())
 			return result
 		else:
 			return getattr(self, binding)
@@ -162,7 +165,7 @@ class NamedValueAccess:
 			results = map(lambda key, myself=self, mydefault=default: myself.valueForName(key, mydefault), keys)
 		elif defaults is not None:
 			if len(keys) is not len(defaults):
-				raise 'NamedValueAccess', 'Keys and defaults have mismatching lengths (%d and %d).' % (len(keys), len(defaults))
+				raise NamedValueAccessError, 'Keys and defaults have mismatching lengths (%d and %d).' % (len(keys), len(defaults))
 			results = map(lambda key, default, myself=self: myself.valueForName(key, default), keys, defaults)
 		elif forgive:
 			results = []
@@ -190,7 +193,7 @@ class NamedValueAccess:
 
 			...or invokes handleUnknownSetKey().
 		'''
-		raise 'KeyValue', 'Not implemented' # @@ 2000-03-04 ce
+		raise NotImplementedError # @@ 2000-03-04 ce
 
 	def resetKeyBindings(self):
 		# @@ 2000-02-18 document this method
@@ -202,10 +205,10 @@ class NamedValueAccess:
 	# Errors
 	#
 	def handleUnknownGetKey(self, key):
-		raise 'NamedValueAccess', key
+		raise NamedValueAccessError, key
 
 	def handleUnknownSetKey(self, key):
-		raise 'NamedValueAccess', key
+		raise NamedValueAccessError, key
 
 
 	#
@@ -280,7 +283,7 @@ def _valueForKeySequence(obj, listOfKeys, default=None):
 			value = obj[listOfKeys[0]]
 		except: # @@ 2000-03-03 ce: this exception should be more specific. probably nameerror or indexerror
 			if default is None:
-				raise 'NamedValueAccess', 'Unknown key (%s) in dictionary.' % listOfKeys[0]
+				raise NamedValueAccessError, 'Unknown key (%s) in dictionary.' % listOfKeys[0]
 			else:
 				return default
 	else:
@@ -294,6 +297,10 @@ def _valueForKeySequence(obj, listOfKeys, default=None):
 #
 # Testing
 #
+
+# @@ 2000-01-12: move these tests to a separate file
+# @@ 2000-01-12: make these tests based on assertions
+
 class _t1(NamedValueAccess):
 	def foo(self):
 		return 1
