@@ -27,7 +27,7 @@ from ServletFactory import ServletFactory
 
 
 import string
-import os,sys
+import os,sys,string
 from PSP import Context, PSPCompiler
 import time
 
@@ -45,6 +45,12 @@ class PSPServletFactory(ServletFactory):
 		self._classcache={}
 		sys.path.append(self.cacheDir)
 
+		# Initialize self.classNameTrans so that it translates all non-alphanumeric
+		# characters to underscores
+		l = ['_'] * 256
+		for c in string.digits + string.letters:
+			l[ord(c)] = c
+		self._classNameTrans = string.join(l, '')
 
 	def uniqueness(self):
             return 'file'
@@ -53,17 +59,9 @@ class PSPServletFactory(ServletFactory):
             return ['.psp']
 
 	def computeClassName(self,pagename):
-		tail = None
-		junk, pagename = os.path.splitdrive(pagename)
-		head,tail = os.path.split(pagename)
-		className = string.replace(tail,'.','_')
-		while os.path.isdir(head) and tail != '':
-			head, tail = os.path.split(head)
-			className = tail + '_'+ className
-			className=string.replace(className,'.','_')
-		className = string.replace(className,'-','_')
-		className = string.replace(className,' ','_')
-		return className
+	    # Compute class name by taking the path and substituting underscores for
+	    # all non-alphanumeric characters.
+	    return string.translate(os.path.splitdrive(pagename)[1], self._classNameTrans)
 
 	def import_createInstanceFromFile(self,path,classname,mtime,reimp=0):
 		globals={}
