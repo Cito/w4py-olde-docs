@@ -177,7 +177,7 @@ WebKit 0.5
 
 <p> 2) Use Gordon McMillan's Standalone utility, which is part of his Installer package, to convert WebKit.cgi into an executable program, WebKit.exe.  IIS apparently will not handle requests with additional path components after the name of the script, like <code>http://localhost/WebKit.cgi/foo/bar</code> where WebKit.cgi is a script, but will handle requests like <code>http://localhost/WebKit.exe/foo/bar</code> where WebKit.exe is an executable. In any case, using the Standalone utility probably results in a speed increase, so this is probably a good thing to do anyway.
 
-<p> In order to convert WebKit.cgi into WebKit.exe using the Standalone utility, you first have to rename it to WebKit.py, and add <code>import socket</code> to the top of the file (you could use a configuration file instead, but this is easier).
+<p> In order to convert WebKit.cgi into WebKit.exe using the Standalone utility, you first have to rename it to WebKit.py, and add <code>import socket</code> to the top of the file (you could use a configuration file instead, but this is easier). After creating the .exe file, delete WebKit.pyc and rename WebKit.py to _WebKit.py. This will avoid conflicts with the .exe.
 
 <p> We hope to provide a native Windows executable cgi program written in C in the near future, as well as a DLL for apache and an ISAPI module for IIS.  If you would like to implement any of these, please do so.  The mod_webkit adapter source includes all of the WebKit specific code you'll need.
 
