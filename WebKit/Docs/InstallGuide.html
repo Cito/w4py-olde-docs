@@ -252,7 +252,7 @@ WebKit 0.5
 	<li> [IIS] See the <a href=#WebServers_IIS>IIS configuration notes</a> above.
 	<li> [Windows and Apache] With a text editor, modify the first line of WebKit.cgi to read <code>#!python</code> rather than <code>#!/usr/bin/env python</code>. Make sure that python is in your search path as defined in AUTOEXEC.BAT. You can check this by typing <code>python</code> at the command prompt to see if Python launches.
 	<li> [UNIX] On most UNIX systems, the WebKit.cgi startup line, <code>#!/usr/bin/env python</code>, works just fine. You can check this by typing <code>/usr/bin/env python</code> at the command line to verify that Python launches. In the event that it does not, or if you wish to point to a different installation, you can change the line to something else, for example, <code>/usr/local/bin/python</code> or <code>/home/me/bin/python</code>.
-	<li> Using a text editor, change the line in WebKit.cgi that reads <code>WebKitDir = None</code> to point to WebKit. For example, <code>WebKitDir = '/home/me/Webware/WebKit'</code>.
+	<li> Using a text editor, change the line in WebKit.cgi that reads <code>WebwareDir = None</code> to point to Webware. For example, <code>WebwareDir = '/home/me/Webware'</code>.
 </ul>
 
 <h4>3. Launch the servers</h4>
