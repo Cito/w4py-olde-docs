@@ -223,8 +223,6 @@ specification."
 
 	[x] In sample code generation, do all deletes first, one time for each table. That way you can have multiple groups of objects
 
-	[ ] Add a parameter to the config for the database name, which right now is assumed to be the same name as the CSV file.
-
 	*** [ ] enforce min and max for attributes in generated python
 
 	[ ] Error checking: Classes.csv: the default value is a legal value. (for example, if type is int, the default must be a number. If type is enum, must be a legal enum.)
