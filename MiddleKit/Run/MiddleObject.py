@@ -177,7 +177,7 @@ class MiddleObject(NamedValueAccess):
 		for backObjRefAttr in self.klass().backObjRefAttrs():
 			objects = self.store().fetchObjectsOfClass(backObjRefAttr.klass(), **self.referencingObjectsAndAttrsFetchKeywordArgs(backObjRefAttr))
 			for object in objects:
-				assert object.valueForAttr(backObjRefAttr)==self
+				assert object.valueForAttr(backObjRefAttr) is self
 				referencingObjectsAndAttrs.append((object, backObjRefAttr))
 		return referencingObjectsAndAttrs
 
