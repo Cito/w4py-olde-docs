@@ -576,7 +576,10 @@ You must also add a line like this to your httpd.conf::
         SetHandler webkit-handler
     </Location>
 
-Then any URL that starts with ``/WK/`` will be directed to the
+Some Apache 2 users have found that they must use "127.0.0.1" instead
+of "localhost", since Apache 2 defaults to using ipv6 addresses first. 
+
+With these lines, any URL that starts with ``/WK/`` will be directed to the
 AppServer on 8086.  You can also use::
 
     AddHandler psp-handler .psp
