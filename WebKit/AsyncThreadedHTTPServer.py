@@ -185,35 +185,38 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 	def handle_read(self):
 		if not self.haveheader:
 			data = string.strip(self.clientf.readline())
-			print "received: ", data
+			#print "received header: ", data
 			if data:
 				self.request_data.append(data+"\r\n")
 				return
-			print "have header"
+			#print "have header"
 			self.haveheader = 1
-			self.reqtype = string.split(self.request_data[0])[0]
 			self.request_data.append("\r\n")
+			try:
+				self.reqtype = string.split(self.request_data[0])[0]
+			except:
+				self.close()
 			if string.lower(self.reqtype) == "get":
 				self.reqdata = string.join(self.request_data,"")
 				self.have_request = 1
-				print "have get request"
+				#print "have get request"
 				self.server.requestQueue.put(self)
 				#self.shutdown(0)
 			elif string.lower(self.reqtype) == "post":
 				#find content length
 				for i in self.request_data:
 					if string.lower(string.split(i,":")[0]) =="content-length":
-						self.datalength = int(string.split(i)[1])
-						break
+						self.datalength = int(string.split(i)[1]) + 2
 		else:
 			data = self.recv(self.datalength)
 			self.request_data.append(data)
 			self.datalength = self.datalength - len(data)
-			print "received: ", data
+			#print "received post: ", data
 			if self.datalength > 0:
 				return
 			self.reqdata = string.join(self.request_data,"")
-			print "have post request"
+			#print "have post request"
+			#print self.reqdata
 			self.have_request = 1
 			self.server.requestQueue.put(self)
 
@@ -246,13 +249,21 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			sys.stdout.write(".")
 			sys.stdout.flush()
 
+##	def handle_close(self):
+##		print "Handling Close"
+		
+
 	def close(self):
+		self.clientf=None
 		try:
 			self.shutdown(1)
 		except:
 			pass
-		print "Closing"
-		asyncore.dispatcher.close(self)
+##		print "Closing"
+		try:
+			asyncore.dispatcher.close(self)
+		except:
+			pass
 		self.active = 0
 		self.have_request = 0
 		self.have_response = 0
