@@ -24,7 +24,7 @@ class ExamplePage(SidebarPage):
 		examples = eval(open('Examples/Examples.list').read())
 		for filename in map(lambda x: x+'.py', examples):
 			script = {}
-			script['pathname'] = os.path.join(dir, filename)
+			script['pathname'] = dir + '/' + filename
 			script['name']     = filename[:-3]
 			scripts.append(script)
 		return scripts
@@ -48,7 +48,7 @@ class ExamplePage(SidebarPage):
 		viewPath = self.request().uriWebKitRoot() + "Examples/View"
 		self.menuItem(
 			'View source of %s' % self.title(),
-			self.request().uriWebKitRoot() + 'Examples/View?filename=%s' % self.request().serverSidePath())
+			self.request().uriWebKitRoot() + 'Examples/View?filename=%s' % string.replace(self.request().serverSidePath(), '\\', '/'))
 
 		if self.application().hasContext('Documentation'):
 			filename = 'Documentation/WebKit.html'
