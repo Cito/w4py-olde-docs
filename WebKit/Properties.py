@@ -28,5 +28,6 @@ WebKitConfig = {
 		'SecureCountVisits',
 		'FileUpload',
 		'PushServlet',
+		'RequestInformation',
 	]
 }
