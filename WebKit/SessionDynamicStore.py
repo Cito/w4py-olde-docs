@@ -89,7 +89,7 @@ class SessionDynamicStore(SessionStore):
 
 	def MovetoFile(self, key):
 		global debug
-		#if debug: print ">> Moving %s to File" % key
+		if debug: print ">> Moving %s to File" % key
 		self._fileStore[key] = self._memoryStore[key]
 		del self._memoryStore[key]
 		
@@ -118,7 +118,7 @@ class SessionDynamicStore(SessionStore):
 		"""
 		
 		try:
-			if self._fileSweepCount = 0:
+			if self._fileSweepCount == 0:
 				self._fileStore.cleanStaleSessions()
 			self._memoryStore.cleanStaleSessions()
 		except KeyError:
