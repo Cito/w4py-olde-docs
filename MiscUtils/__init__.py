@@ -2,7 +2,7 @@
 # Webware for Python
 # See Documentation/MiscUtils.html
 
-__all__ = ['Configurable', 'DataTable', 'DictForArgs', 'Error', 'Funcs', 'NamedValueAccess']
+__all__ = ['Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error', 'Funcs', 'NamedValueAccess']
 
 __version__ = '0.5pre'
 
