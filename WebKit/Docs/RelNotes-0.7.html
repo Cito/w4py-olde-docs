@@ -56,8 +56,9 @@ Version 0.7
 
 	<li> The session code is more robust to exceptions that may happen while unpickling.
 
-	<li> WebKit now properly handles files that are deleted while the app server is running.
-	
+	<li> WebKit now properly handles files that are deleted while the app server is running, and also refuses to attempt to serve non-regular files.
+
+	<li> WebKit now tries to convince the browser to delete its session cookie when the session expires.
 </ul>
 
 

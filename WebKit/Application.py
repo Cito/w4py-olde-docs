@@ -1218,8 +1218,8 @@ class Application(ConfigurableForServerSidePath, Object):
 				print 'WARNING: For %s, did not get precisely 1 filename: %s' % \
 				      (urlPath, filenames)
 				return None, None, None
-					
-		elif not os.path.exists(ssPath):
+
+		elif not os.path.isfile(ssPath):
 			return None, None, None
 
 		self._serverSideInfoCacheByPath[urlPath] = ssPath, contextPath, contextName
