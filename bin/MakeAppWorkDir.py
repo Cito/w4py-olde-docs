@@ -213,6 +213,7 @@ class MakeAppWorkDir:
 			 'ErrorMsgs': '*',
 			 'Logs': '*',
 			 'Sessions': '*',
+			 self._sample: '*.pyc',
 			 }
 		for dir, contents in files.items():
 			filename = os.path.join(self._workDir, dir, '.cvsignore')
