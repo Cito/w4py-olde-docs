@@ -1,16 +1,16 @@
 import os, string
-from AdminPage import AdminPage
+from AdminSecurity import AdminSecurity
 from MiscUtils.DataTable import DataTable
 
 
-class DumpCSV(AdminPage):
+class DumpCSV(AdminSecurity):
 
 	def filename(self):
 		''' Overidden by subclasses to specify what filename to show. '''
 		return None
 
 	def awake(self, trans):
-		AdminPage.awake(self, trans)
+		AdminSecurity.awake(self, trans)
 		self._filename = self.filename()
 
 	def shortFilename(self):
