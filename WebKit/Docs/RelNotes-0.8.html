@@ -9,14 +9,14 @@
 	-->
 	</style>
 
-	<title>WebKit 0.8 beta 1 Release Notes</title>
+	<title>WebKit 0.8 beta 2 Release Notes</title>
 </head>
 
 <body>
 
-<h1>WebKit 0.8 beta 1 Release Notes</h1>
-Version 0.8 beta 1
-<br>Webware for Python 0.8 beta 1
+<h1>WebKit 0.8 beta 2 Release Notes</h1>
+Version 0.8 beta 2
+<br>Webware for Python 0.8 beta 2
 
 
 <a name=Introduction><h2>Introduction</h2></a>
@@ -38,6 +38,7 @@ Version 0.8 beta 1
 
 <ul>
 	<li> Added experimental HTTPAdapter.py written by Ian Bicking.  This is an adapter that serves HTTP directly, eliminating the need for a separate web server.  <b>Note that this is experimental!  Please do not use this to serve a production web site!</b>
+
 	<li> <b>AutoReload</b> - A new setting in AppServer.config, 'AutoReload' enables the
 	AutoReloadingAppServer module..  This module is designed to notice changes
 	to source files, including servlets, PSP's templates, or changes to the Webware
@@ -47,12 +48,15 @@ Version 0.8 beta 1
 	set with the <b>AutoReloadPollInterval</b> setting which defaults
 	to 1 second.
 
+	<li> Added an adapter for Apache 2 found under WebKit/Adapters/mod_apache2/.  The release also includes a binary .dll of this so you do not need to compile it on your own. See the README in that directory for more information.
+
 </ul>
 
 
 <h2>Improvements and Refinements</h2>
 
 <ul>
+
 
 	<li> New setting 'ReportRPCExceptionsInWebKit': 1 means report exceptions in RPC servlets in the same way as exceptions in other servlets, i.e. in the logfiles, the error log, and/or by email.  0 means don't report the exceptions on the server side at all; this is useful if your RPC servlets are raising exceptions by design and you don't want to be notified.  Note that in release 0.7, there was no exception reporting on the server side in RPC servlets; if you want to get the same behavior in this release you'll have to set this setting to 0.
 
@@ -136,7 +140,9 @@ Version 0.8 beta 1
 
 	<li> Removed <b>ModPythonAppServer</b>. If you are running mod_python, you can use the ModPythonAdapter.   Most people use the mod_webkit, or wkcgi adapters; therefore they are probably a little better supported.
 
-	<li> The default implementation of the Page.writeDocType() method no longer writes out a default doctype.  It is up to a derived class to provide the writeDocType method to specify a doctype string.
+	<li> The Page.writeDocType() method has been restored to its 0.7 behavior of writing the 4.01 Transitional DocType string.  This is a change from the 0.8b1 and CVS development version behavior of the last several months.  It was originally removed because some people had reported problems with rendering in some versions of Mozilla.  However the 4.01 transitional should be a reasonable default, and Mozilla has been updated since then.  If you experience problems with rendering as a result, you will need to override this in a subclass. You can find out more about doc types by searching for DOCTYPE
+                on the web, or visiting: <a href="http://www.htmlhelp.com/tools/validator/doctype.html">http://www.htmlhelp.com/tools/validator/doctype.html</a>.
+        
 </ul>
 
 
@@ -166,11 +172,9 @@ We don't track every change to the interface, but here are some notables:
 	<li> Fixed a race condition that caused problems when multiple simultaneous requests were made for a servlet that hadn't yet been imported.
 	
 	<li> Fixed another rare problem that could eventually cause a servlet to hang until another request for that servlet came in.  Like the above problem, it is provoked by multiple simultaneous requests for the same servlet, but only if it happens hundreds or thousands of times.
-	<li> Fixed SesssionFileStore to fail safely and call the applications exception handler on a pickling error.
-
+	<li> Fixed SesssionFileStore to fail safely and call the applications exception handler on a pickling error. <b>Note: While using the currently supported SessionStore settings, sessions may not contain data which can not be pickled, such as open files, or database connections. Doing so will generate an error when attempting to save the session to disk.</b>
 
 </ul>
-
 
 <p><hr>
 
