@@ -28,7 +28,7 @@ Version 0.5
 
 <ul>
 
-	<li> Added a new admin page: AppControl. User name and password are Admin/Webware. Try it out. This Page will allow you to shutdown the running AppServer cleanly, without interrupting any current sessions.  This is now the recommended way to shut down the AppServers.[Jay L]
+	<li> Added a new admin page: AppControl. User name and password are admin/webware. This Page allows you to shutdown the running AppServer cleanly, without interrupting any current sessions.  This is now the recommended way to shut down the AppServers. [Jay L]
 
 	<li> There is a new SecurePage example for securing pages with a login id and password. [Geoff T]
 
@@ -76,11 +76,11 @@ Version 0.5
 									</ul>
 
 
-   <li>Added Session.sessionEncode function which takes a string containing a URL/I as a parameter and returns that string with the session ID added as a get parameter.  This will enable WebKit's session functionality to function with clients that don't accept cookies.  This can also be accessed through Page.sessionEncode (as a convenience).[Jay L]
+   <li>Added Session.sessionEncode() function which takes a string containing a URL/I as a parameter and returns that string with the session ID added as a get parameter.  This will enable WebKit's session functionality to function with clients that don't accept cookies.  This can also be accessed through Page.sessionEncode() (as a convenience). [Jay L]
 
-   <li>A new adapter has been added, mod_webkit.  This is a native apache module for communicating with the AppServer. See <span class=name>Webware/WebKit/mod_webkit</span> for more details. [Jay L]
+   <li>Added the mod_webkit adapter. This is a native apache module for communicating with the AppServer. See <span class=filename>Webware/WebKit/mod_webkit/README</span> for more details. [Jay L]
 
-   <li>Another new adapter is ModSnakeAdapter, an adapter for the mod_snake apache module. (Contributed by Jon Travis, the author of ModSnake)
+   <li>Added the ModSnakeAdapter adapter. This is an adapter for the mod_snake Apache module. [Jon Travis, author of ModSnake]
 
 </ul>
 
@@ -97,7 +97,10 @@ Version 0.5
 
 	<li> The usual slew of code clean-ups. [everyone]
 
+<!-- Very important to us developers, but doesn't seem important to users. 2002-02-25 ce
+
     <li> The communications protocol between the Adapters and the AppServers has been refined in preparation for adding buffering functionality in the next release.
+-->
 
 </ul>
 
@@ -121,7 +124,7 @@ We don't track every change to the interface, but here are some notables:
 
 <ul>
 
-	<li> A URL such as <span name=filename>http://localhost/WebKit.cgi/File.badext</span> raised a Python exception when it should have return a 404 error. The trick to triggering this bug was to specify an extension that did not exist. [Chuck]
+	<li> A URL such as <span class=filename>http://localhost/WebKit.cgi/File.badext</span> raised a Python exception when it should have return a 404 error. The trick to triggering this bug was to specify an extension that did not exist. [Chuck]
 
 	<li> ThreadedAppServer would sometimes degenerate into a mode where it stopped handling requests in a timely manner.  This behavior could be provoked by hitting it with more simultaneous requests than it could handle at once. [Geoff T]
 
