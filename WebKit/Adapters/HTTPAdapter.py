@@ -36,13 +36,14 @@ except 0:
 	## but I'm not sure.
 	pass
 
+import BaseHTTPServer, threading, socket
 
 
 ############################################################
 ## HTTP Server
 ############################################################
 
-from WebKit.HTTPServer import HTTPHandler, run
+from WebKit.HTTPServer import HTTPHandler
 
 class HTTPAdapter(HTTPHandler, Adapter):
 
@@ -101,7 +102,7 @@ class ThreadedHTTPServer(BaseHTTPServer.HTTPServer):
 		self.socket.close()
 
 
-def run(serverAddress, klass=HTTPHandler):
+def run(serverAddress, klass=HTTPAdapter):
 	httpd = ThreadedHTTPServer(serverAddress, klass)
 	httpd.serve_forever()
 
@@ -125,9 +126,12 @@ def main():
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], 'p:h:d',
 								   ['port=', 'host=', 'daemon'])
-	except getopt.GetoptErrro:
+	except getopt.GetoptError:
 		print usage
 		sys.exit(2)
+	daemon = 0
+	host = 'localhost'
+	port = 8080
 	for o, a in opts:
 		if o in ('-p', '--port'):
 			port = int(a)
@@ -139,7 +143,20 @@ def main():
 		if os.fork() or os.fork():
 			sys.exit(0)
 	print "PS: This adapter is experimental and should not be used in\na production environment"
-	run()
+	run((host, port))
+
+def shutDown(arg1, arg2):
+	"""
+	We have to have a shutdown handler, because ThreadedAppServer
+	installs one that we have to overwrite.
+	"""
+	import sys
+	print 'Shutting down.'
+	sys.exit()
+
+import signal
+signal.signal(signal.SIGINT, shutDown)
+signal.signal(signal.SIGTERM, shutDown)
 
 if __name__ == '__main__':
 	main()

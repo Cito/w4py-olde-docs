@@ -4,7 +4,7 @@ try:
 except ImportError:
 	from StringIO import StringIO
 import threading, socket
-from WebKit.NewThreadedAppServer import Handler
+from WebKit.ThreadedAppServer import Handler
 from WebKit.ASStreamOut import ASStreamOut
 import time
 
@@ -33,7 +33,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 	## SCRIPT_FILENAME (?)
 	## SERVER_ADMIN (?)
 
-	def doRequest(self):
+	def handleRequest(self):
 		"""
 		Actually performs the request, creating the environment and
 		calling self.doTransaction(env, myInput) to perform the
@@ -59,11 +59,11 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			myInput = self.rfile.read(int(self.headers['Content-Length']))
 		self.doTransaction(env, myInput)
 
-	do_GET = do_POST = do_HEAD = doRequest
+	do_GET = do_POST = do_HEAD = handleRequest
 	# These methods are used in WebDAV requests:
-	do_OPTIONS = do_PUT = do_DELETE = doRequest
-	do_MKCOL = do_COPY = do_MOVE = doRequest
-	do_PROPFIND = doRequest
+	do_OPTIONS = do_PUT = do_DELETE = handleRequest
+	do_MKCOL = do_COPY = do_MOVE = handleRequest
+	do_PROPFIND = handleRequest
 
 	def headersToEnviron(self, headers, env):
 		"""Use a simple heuristic to convert all the headers to
