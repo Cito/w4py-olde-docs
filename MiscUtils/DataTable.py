@@ -462,8 +462,8 @@ class DataTable:
 
 BlankValues = {
 	StringType:   '',
-	IntType:      '0',
-	FloatType:    '0.0',
+	IntType:      0,
+	FloatType:    0.0,
 	DateTimeType: '',
 }
 
@@ -472,7 +472,7 @@ class TableRecord:
 
 	def __init__(self, table, values=None):
 		'''
-		Dispatches control to one of the other init method based on the type of values.  Values can be one of three things:
+		Dispatches control to one of the other init methods based on the type of values.  Values can be one of three things:
 			1. A TableRecord
 			2. A list
 			3. A dictionary
