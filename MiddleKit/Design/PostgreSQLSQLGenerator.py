@@ -9,6 +9,9 @@ class PostgreSQLSQLGenerator(SQLGenerator):
 		return 1
 
 class Model:
+	def writeConnectToDatabase(self, generator, output, databasename):
+		output.write('\c %s;\n\n' % databasename)
+
 	def writePostSamplesSQL(self, generator, output):
 		# after inserting the samples, update the sequences with the highest
 		# serial numbers we've seen for each class.
@@ -17,6 +20,15 @@ class Model:
 				output.write("select setval('%s', %d);" % ( klass.seqName(), klass._maxSerialNum))
 	
 class Klasses:
+
+	def writeClassIdsSQL(self, generator, out):
+		# pgsql 7.3.4 doesn't seem to drop the _MKClassIDs table when the database 
+		# is dropped.  very strange.  Anyways, we drop it here just to make sure.
+		wr = out.write
+		wr('''\
+drop table _MKClassIds;
+		''')
+		Klasses.mixInSuperWriteClassIdsSQL(self, generator, out)
 
 	def dropDatabaseSQL(self, dbName):
 		# errors are ignored
@@ -94,8 +106,6 @@ class StringAttr:
 		if not self.get('Max', None):
 			return 'varchar(100) /* WARNING: NO LENGTH SPECIFIED */'
 		max = int(self['Max']) # @@ 2000-11-12 ce: won't need int() after using types
-		if max>65535:
-			return 'longtext'
 		if max>255:
 			return 'text'
 		if self.has_key('Min') and self['Min'] and int(self['Min'])==max:
@@ -129,6 +139,11 @@ class BoolAttr:
 				pass
 		assert value in ['TRUE','FALSE'], "'%s' is not a valid default for boolean column '%s'" % (value, self.name())
 		return value
+
+class DateTimeAttr:
+
+	def sqlType(self):
+		return 'timestamptz'
 
 
 class ObjRefAttr:
