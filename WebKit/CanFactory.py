@@ -1,37 +1,28 @@
 
 import os
 import imp
+import sys
 
 class CanFactory:
-	"""Creates Cans on demand.  Looks only in the Cans directorys."""
+	"""Creates Cans on demand.  Looks only in the Cans directories.
+	Unfortunately, this is a nasty hack, at least as far as directories are concerned.  The situation is that
+	we want to be able to store Cans in he session object.  Session objects can be stored in files via pickling.
+	When they are unpickled, the class module must be in sys.path.  The solution to this is custom importing,
+	and apparently no one has time to get to that.
+	"""
 	def __init__(self, app):
 		self._canClasses={}
 		self._app = app
 	    #self.__CanDir = app.getCanDir()
 		self._canDirs=app._canDirs
+		for i in self._canDirs:
+			if not i in sys.path:
+				sys.path.append(i)
 
-	def _createCan(self,canName,*args,**kargs):
-		##Old version, only looks in one directory
-		if self.__CanClasses.has_key(canName):
-			klass=self.__CanClasses[canName]
-		else:
-			fullpath = os.path.join(self.__CanDir,canName+'.py')
-			if not os.path.exists(fullpath):
-				raise "CanNotFound"
-			globals={}
-			execfile(fullpath,globals)
-			assert globals.has_key(canName)
-			klass = self.__CanClasses[canName] = globals[canName]
+	def addCanDir(self, newdir):
+		self._canDirs.append(newdir)
+		sys.path.append(newdir)
 
-		if len(args)==0 and len(kargs)==0:
-			instance = klass()
-		elif len(args)==0:
-			instance = apply(klass,kargs)
-		elif len(kargs)==0:
-			instance = apply(klass,args)
-		else: instance = apply(klass,args,kargs)
-
-		return instance
 
 	def createCan(self, canName, *args, **kwargs):
 		##Looks in the directories specified in the application.canDirs List

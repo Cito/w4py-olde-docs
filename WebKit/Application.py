@@ -14,7 +14,7 @@ import imp
 from threading import Lock, Thread, Event
 from time import *
 from CanContainer import *
-from Cookie import Cookie
+from WebKit.Cookie import Cookie
 
 from WebUtils.WebFuncs import HTMLEncode
 from WebUtils.HTMLForException import HTMLForException
@@ -132,6 +132,9 @@ class Application(Configurable, CanContainer, Object):
 
 		print
 
+##	def __del__(self):			
+##		self.shutDown()
+
 	def initializeCans(self):
 		"""
 		@@ Overhaul by 0.4
@@ -139,6 +142,13 @@ class Application(Configurable, CanContainer, Object):
 		import CanFactory
 		self._canDirs.append("Cans")
 		self._canFactory = CanFactory.CanFactory(self)
+
+	def addCanDir(self, newDir):
+		"""
+		Interface for adding directories to the Can search path
+		See CanFactory for the ugly hack required by the session pickling process
+		"""
+		self._canFactory.addCanDir(newDir)
 
 	def startSessionSweeper(self):
 		self._closeEvent = Event()
@@ -172,6 +182,7 @@ class Application(Configurable, CanContainer, Object):
 		"""
 	Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references.
 		"""
+		open(os.path.join(self._serverDir,"Exiting"),"a").write("Exiting Application/n")
 		print "Application is Shutting Down"
 		self.running = 0
 		if hasattr(self, '_sessSweepThread'):
@@ -188,6 +199,7 @@ class Application(Configurable, CanContainer, Object):
 		del self._server
 		del self._servletCacheByPath
 		print "Exiting Application"
+		open(os.path.join(self._serverDir,"Exiting"),"a").write("Exiting Application/n")
 
 
 	## Config ##
