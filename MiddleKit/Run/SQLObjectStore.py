@@ -150,28 +150,31 @@ class SQLObjectStore(ObjectStore):
 	def commitInserts(self):
 		unknownSerialNums = []
 		for object in self._newObjects:
-			# New objects not in the persistent store have serial numbers less than 1
-			assert object.serialNum()<1
-
-			# SQL insert
-			sql = object.sqlInsertStmt(unknownSerialNums)
-			conn, cur = self.executeSQL(sql)
-
-			# Get new id/serial num
-			idNum = self.retrieveLastInsertId(conn, cur)
-
-			# Update object
-			object.setSerialNum(idNum)
-			object.setKey(ObjectKey().initFromObject(object))
-			object.setChanged(0)
-
-			# Update our object pool
-			self._objects[object.key()] = object
+			self._insertObject(object, unknownSerialNums)
 
 		for unknownInfo in unknownSerialNums:
 			stmt = unknownInfo.updateStmt()
 			self.executeSQL(stmt)
 		self._newObjects = []
+
+	def _insertObject(self, object, unknownSerialNums):
+		# New objects not in the persistent store have serial numbers less than 1
+		assert object.serialNum()<1
+
+		# SQL insert
+		sql = object.sqlInsertStmt(unknownSerialNums)
+		conn, cur = self.executeSQL(sql)
+
+		# Get new id/serial num
+		idNum = self.retrieveLastInsertId(conn, cur)
+
+		# Update object
+		object.setSerialNum(idNum)
+		object.setKey(ObjectKey().initFromObject(object))
+		object.setChanged(0)
+
+		# Update our object pool
+		self._objects[object.key()] = object
 
 	def retrieveLastInsertId(self, conn, cur):
 		''' Returns the id (typically a 32-bit int) of the last INSERT operation by this connection. Used by commitInserts() to get the correct serial number for the last inserted object.
