@@ -1,13 +1,13 @@
 name = 'UserKit'
 
-version = (0, 1, 0, 'pre-alpha')
+version = (0, 1, 0, 'pre')
 
 docs = [
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
 	{'name': 'To Do',        'file': 'TODO-UserKit.text'},
 ]
 
-status = 'alpha'
+status = 'prealpha'
 
 requiredPyVersion = (2, 0, 0)
 
