@@ -39,7 +39,7 @@ install: all
 
 #   cleanup
 clean:
-	-rm -f *.o *.lo *.slo
+	-rm -rf *.o *.lo *.slo *.la .libs
 
 
 #   reload the module by installing and restarting Apache
