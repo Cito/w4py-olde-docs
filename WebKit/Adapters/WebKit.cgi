@@ -11,10 +11,9 @@ AppWorkDir = None
 
 try:
 	import os, sys
-	if WebwareDir:
-		sys.path.insert(1, WebwareDir)
-	else:
+	if not WebwareDir:
 		WebwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
+	sys.path.insert(1, WebwareDir)
 	webKitDir = os.path.join(WebwareDir, 'WebKit')
 	if AppWorkDir is None:
 		AppWorkDir = webKitDir
@@ -24,7 +23,7 @@ try:
 	try:
 		import WebKit.Adapters.CGIAdapter
 	except ImportError:
-		cgiAdapter = os.path.join(webKitDir, 'CGIAdapter.py')
+		cgiAdapter = os.path.join(webKitDir, 'Adapters/CGIAdapter.py')
 		if not os.path.exists(cgiAdapter):
 			sys.stdout.write("""\
 Content-type: text/html
@@ -41,7 +40,7 @@ the permissions on parent directories.
 		else:
 			raise
 	else:
-		WebKit.CGIAdapter.main(AppWorkDir)
+		WebKit.Adapters.CGIAdapter.main(AppWorkDir)
 except:
 	import string, sys, traceback
 	from time import asctime, localtime, time
