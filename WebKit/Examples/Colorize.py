@@ -45,7 +45,7 @@ class Colorize(Page):
 		realout=sys.stdout
 		sys.stdout=myout
 
-		py2html.main((None,'-stdout','-files',filename))
+		py2html.main((None,'-stdout','-format:rawhtml','-files',filename))
 
 		res.write(myout.getvalue())
 
