@@ -37,7 +37,7 @@ class ExamplePage(Page):
 		scripts = filter(lambda script, hidden=hidden: not script['name'] in hidden, self.scripts())
 		scripts = map(lambda scriptDict: '<a href="%s">%s</a>' % (scriptDict['name'], scriptDict['name']), scripts)
 		self.writeln('<p><center>', string.join(scripts, ' | '), '</center>')
-		self.writeln('<p><center> <a href="PSPExamples/Hello.psp">PSP</a>') #Annoy Chuck!
+		self.writeln('<p><center> <a href="PSPExamples/Hello.psp">PSP</a></center>') #Annoy Chuck!
 		if self.isDebugging():
 			self.writeln('<p><center>', self._session.identifier(), '</center>')
 			from WebUtils.WebFuncs import HTMLEncode
