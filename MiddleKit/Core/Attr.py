@@ -20,7 +20,7 @@ class Attr(UserDict, ModelObject):
 			self[key] = value
 
 	def name(self):
-		return self['Name']
+		return self.data['Name']
 
 	def isRequired(self):
 		''' Returns true if a value is required for this attribute. In Python, that means the value cannot be None. In relational theory terms, that means the value cannot be NULL. '''

@@ -120,7 +120,7 @@ class ObjectStore(ModelUser):
 		if not object.isInStore():
 			assert object.key()==None
 			# Make the store aware of this new object
-			self.willChange()
+			self._hasChanges = 1
 			self._newObjects.append(object)
 			object.setInStore(1)
 			if not noRecurse:
@@ -147,7 +147,7 @@ class ObjectStore(ModelUser):
 		objectsToDel = {}
 		detaches = []
 		self._deleteObject(object, objectsToDel, detaches)  # compute objectsToDel and detaches
-		self.willChange()
+		self._hasChanges = 1
 
 		# detaches
 		for obj, attr in detaches:
@@ -295,10 +295,6 @@ class ObjectStore(ModelUser):
 		''' Discards all insertions and deletions, and restores changed objects to their original values. '''
 		raise NotImplementedError
 
-	def willChange(self):
-		''' Invoked by self when the object store is changed. Sets a flag to record that fact. May be overridden by subclasses; super must be invoked. '''
-		self._hasChanges = 1
-
 
 	## Fetching ##
 
@@ -353,7 +349,7 @@ class ObjectStore(ModelUser):
 		This method records the object in a set for later processing when the store's changes are saved.
 		If you subclass MiddleObject, then you're taken care of.
 		'''
-		self.willChange()
+		self._hasChanges = 1
 		self._changedObjects[object] = object  ## @@ 2000-10-06 ce: Should this be keyed by the object.key()? Does it matter?
 
 
