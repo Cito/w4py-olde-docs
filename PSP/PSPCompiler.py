@@ -25,7 +25,7 @@ A simple little module.  It organizes the actual page generation.
 """
 
 
-from StreamReader import PSPReader
+from StreamReader import StreamReader
 from ServletWriter import ServletWriter
 from PSPParser import PSPParser
 from ParseEventHandler import ParseEventHandler
@@ -43,7 +43,7 @@ class Compiler:
 
     def compile(self):
 
-	reader = PSPReader(self._ctxt.getPspFileName(),self._ctxt)
+	reader = StreamReader(self._ctxt.getPspFileName(),self._ctxt)
 	reader.init()
 	writer = ServletWriter(self._ctxt)
 	

@@ -38,7 +38,7 @@ class Mark:
 
 	def __init__(self, reader, fileid=None, stream=None, inBaseDir=None, encoding=None):
 		
-		if isinstance(reader,PSPReader):
+		if isinstance(reader,StreamReader):
 			self.reader = reader
 			self.fileid = fileid
 			self.includeStack = []
@@ -92,7 +92,7 @@ class Mark:
 
 
 
-class PSPReader:
+class StreamReader:
 	"""This class handles the psp source file
 	It provides the characters to the other parts of the system.
 	It can move forward and backwards in a file and remember locactions"""
