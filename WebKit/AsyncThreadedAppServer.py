@@ -107,14 +107,27 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		"""
 		Try to get a RequestHandler instance off the requestQueue and process it.
 		"""
-		while self.running:
-			try:
-				rh=self.requestQueue.get()
-				if rh == None: #None means time to quit
-					break
-				rh.handleRequest()      #this is all there is to it
-			except Queue.Empty:
-				pass
+		self.initThread()
+		try:
+			while self.running:
+				try:
+					rh=self.requestQueue.get()
+					if rh == None: #None means time to quit
+						break
+					rh.handleRequest()      #this is all there is to it
+				except Queue.Empty:
+					pass
+		finally:
+			self.delThread()
+
+	def initThread(self):
+		''' Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. '''
+		pass
+
+	def delThread(self):
+		''' Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. '''
+		pass
+
 
 
 	def shutDown(self):
