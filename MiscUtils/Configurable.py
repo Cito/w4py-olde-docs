@@ -39,6 +39,9 @@ class Configurable:
 	Users of your software can create a file with the same name as
 	configFilename() and selectively override settings. The format of
 	the file is a Python dictionary.
+
+	Subclasses can also override userConfig() and get the user
+	configuration settings from another source.
 	'''
 
 	## Init ##
@@ -91,8 +94,10 @@ class Configurable:
 				raise ConfigurationError, 'Invalid type of configuration. Expecting dictionary, but got %s.'  % type(config)
 			return config
 
-	def printConfig(self, dest=sys.stdout):
+	def printConfig(self, dest=None):
 		''' Prints the configuration to the given destination, which defaults to stdout. A fixed with font is assumed for aligning the values to start at the same column. '''
+		if dest is None:
+			dest = sys.stdout
 		keys = self.config().keys()
 		keys.sort()
 		width = max(map(lambda key: len(key), keys))
