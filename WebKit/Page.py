@@ -38,8 +38,21 @@ class Page(HTTPServlet):
 		self._respond(transaction)
 
 	def _respond(self, transaction):
-		''' Handles actions if an _action_ field is defined, otherwise invokes writeHTML(). '''
+		'''
+		Handles actions if an _action_ field is defined, otherwise
+		invokes writeHTML().
+		Invoked by both respondToGet() and respondToPost().
+		'''
 		req = transaction.request()
+
+		# Check for actions
+		for action in self.actions():
+			if req.hasField('_action_%s' % action):
+				if self._actionSet().has_key(action):
+					self.handleAction(action)
+					return
+
+		# Support old style actions from 0.5.x and below.
 		if req.hasField('_action_'):
 			action = self.methodNameForAction(req.field('_action_'))
 			actions = self._actionSet()
@@ -47,10 +60,11 @@ class Page(HTTPServlet):
 				self.preAction(action)
 				apply(getattr(self, action), (transaction,))
 				self.postAction(action)
+				return
 			else:
 				raise PageError, "Action '%s' is not in the public list of actions, %s." % (action, actions.keys())
-		else:
-			self.writeHTML()
+
+		self.writeHTML()
 
 	def sleep(self, transaction):
 		self._session = None
@@ -221,23 +235,64 @@ class Page(HTTPServlet):
 
 	## Actions ##
 
-	def methodNameForAction(self, name):
-		''' Invoked by _respond() to determine the method name for a given action name (which usually comes from an HTML submit button in a form). This implementation simple returns the name. Subclasses could "filter" the name by altering it or looking it up in a dictionary. Subclasses should override this method with action names don't match their method names. '''
-		return name
+	def handleAction(self, action):
+		'''
+		Invoked by _respond() when a legitimate action has been found
+		in a form. Invokes preAction(), the actual action method and
+		postAction().
+
+		Subclasses rarely override this method.
+		'''
+		self.preAction(action)
+		getattr(self, action)()
+		self.postAction(action)
 
 	def actions(self):
-		''' Returns an array of method names that are allowable actions from HTML forms. The default implementation returns []. '''
+		'''
+		Returns a list of method names that are allowable actions from
+		HTML forms. The default implementation returns [].
+		'''
 		return []
 
 	def preAction(self, actionName):
-		''' Invoked by self prior to invoking a action method. The implementation basically writes everything up to but not including the body tag.  Subclasses may override to customize and may or may not invoke super as they see fit. The actionName is passed to this method, although it seems a generally bad idea to rely on this. However, it's still provided just in case you need that hook. '''
+		'''
+		Invoked by self prior to invoking a action method. The
+		implementation basically writes everything up to but not
+		including the body tag.  Subclasses may override to customize
+		and may or may not invoke super as they see fit. The actionName
+		is passed to this method, although it seems a generally bad
+		idea to rely on this. However, it's still provided just in case
+		you need that hook.
+		'''
 		self.writeDocType()
 		self.writeln('<html>')
 		self.writeHead()
 
 	def postAction(self, actionName):
-		''' Invoked by self after invoking a action method. The implementation basically writes everything after the close of the body tag (in other words, just the </html> tag).  Subclasses may override to customize and may or may not invoke super as they see fit. The actionName is passed to this method, although it seems a generally bad idea to rely on this. However, it's still provided just in case you need that hook. '''
+		'''
+		Invoked by self after invoking a action method. The
+		implementation basically writes everything after the close of
+		the body tag (in other words, just the </html> tag).  Subclasses
+		may override to customize and may or may not invoke super as
+		they see fit. The actionName is passed to this method, although
+		it seems a generally bad idea to rely on this. However, it's
+		still provided just in case you need that hook.
+		'''
 		self.writeln('</html>')
+
+	def methodNameForAction(self, name):
+		'''
+		This method exists only to support "old style" actions from
+		WebKit 0.5.x and below.
+
+		Invoked by _respond() to determine the method name for a given
+		action name (which usually comes from an HTML submit button in a
+		form). This implementation simple returns the name. Subclasses
+		could "filter" the name by altering it or looking it up in a
+		dictionary. Subclasses should override this method when action
+		names don't match their method names.
+		'''
+		return name
 
 
 	## Convenience ##
