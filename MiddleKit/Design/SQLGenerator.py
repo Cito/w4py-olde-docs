@@ -673,7 +673,7 @@ class ObjRefAttr:
 				objIdRef = ' references %(Type)s(%(Type)sId) ' % self
 			else:
 				objIdRef = ''
-			out.write('\t%s %s%s%s references _MKClassIds,\n' % (classIdName, self.sqlType(), notNull, classIdDefault))
+			out.write('\t%s %s%s%s references _MKClassIds, /* %s */ \n' % (classIdName, self.sqlType(), notNull, classIdDefault, self.targetClassName()))
 			out.write('\t%s %s%s%s' % (objIdName, self.sqlType(), notNull, objIdRef))
 
 	def sqlForNone(self):

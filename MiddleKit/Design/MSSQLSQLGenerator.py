@@ -141,7 +141,7 @@ class Klass:
 		'''
 		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
 		'''
-		z = '	%s int primary key not null IDENTITY (1, 1),\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
+		z = '	%s int primary key not null identity(1, 1),\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
 		return z
 
 	def sqlTableName(self):
