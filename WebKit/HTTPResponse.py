@@ -52,6 +52,11 @@ class HTTPResponse(Response):
 		''' Returns a dictionary-style object of all Header objects contained by this request. '''
 		return self._headers
 
+	def clearHeaders(self):
+		''' Clears all the headers. You might consider a setHeader('Content-type', 'text/html') or something similar after this. '''
+		assert self._committed==0
+		self._headers = {}
+
 
 	## Cookies ##
 
@@ -77,6 +82,11 @@ class HTTPResponse(Response):
 		''' Returns a dictionary-style object of all Cookie objects that will be sent with this response. '''
 		return self._cookies
 
+	def clearCookies(self):
+		''' Clears all the cookies. '''
+		assert self._committed==0
+		self._cookies = {}
+
 
 	## Status ##
 
@@ -93,10 +103,11 @@ class HTTPResponse(Response):
 		raise NotImplementedError
 
 	def sendRedirect(self, url):
+		''' This method sets the headers and content for the redirect, but does NOT change the cookies. Use clearCookies() as appropriate. '''
 		assert self._committed==0
-		self._headers = {'Location': url}
-		self._cookies = {}
-		self._contents = []
+		self._headers = {'Location': url, 'Content-type': 'text/html'}
+		self._contents = [
+			'<html> <body> This page has been redirected to <a href="%s">%s</a>. </body> </html>' % (url, url)]
 
 
 	## Output ##
