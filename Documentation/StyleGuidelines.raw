@@ -338,6 +338,14 @@ req.field('city', None)
 
 <p> <code>req.fields()</code> returns the entire dictionary so that users have complete access to the full suite of dictionary methods such as <code>keys()</code>, <code>values()</code>, <code>items()</code>, etc. Users of this method are trusted not to modify the dictionary in any way. A paranoid class may choose to return a copy of the dictionary to help reduce abuse (although Webware classes normally do not for performance reasons).
 
+<p> In cases where the user of the class should be able to modify the named objects, the following methods are provided:
+
+<pre class=pysnippet>
+def setValue(self, name, value):
+def delValue(self, name):
+</pre>
+
+
 <p> Often Python programmers will provide dictionary-style access to their objects by implementing <code>__getitem__</code> so that users may say:
 
 <pre class=pysnippet>
