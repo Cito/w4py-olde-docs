@@ -10,6 +10,15 @@ class Klasses:
 	def dropDatabaseSQL(self, dbName):
 		return 'drop database if exists %s;\n' % dbName
 
+	def dropTablesSQL(self):
+		sql = []
+		for klass in self.klassesInOrder():
+			sql.append('drop table if exists %s;\n' % klass.name())
+		for tableName in self.auxiliaryTableNames():
+			sql.append('drop table if exists %s;\n' % tableName)
+		sql.append('\n')
+		return ''.join(sql)
+
 	def createDatabaseSQL(self, dbName):
 		return 'create database %s;\n' % dbName
 

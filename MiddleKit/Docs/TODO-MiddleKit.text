@@ -78,6 +78,8 @@ If you have general comments or questions or contributions, please contact webwa
 		* allow for it and bring it in as a string
 		* allow for a class to be defined that will be instantiated with the binary data
 
+	[ ] Threads: MK objects are not thread safe.
+
 	[ ] ListAttr: how about an extendBars() to complement addToBars()?
 
 	[ ] Provide a fetch mode that still creates the correct objects, but only fetches their serial number. Upon accessing any attribute, the attributes are then fetched from the database. This would allow for fetching a large set of objects without taking a big hit up front.
@@ -94,6 +96,11 @@ If you have general comments or questions or contributions, please contact webwa
 
 <refinements/improvements>
 
+	[ ] For MSSQL per Dave:
+		- Need to have an option for create, not to drop the database. This takes too long on MSSQL
+		- Since we're not dropping the DB, we need to drop the tables. They should be dropped in reverse order because:
+			1. that's good shut down policy
+			2. REF feature requires that
 	[ ] Make sure that when a store fetches objects that the objects point back to that store and not to the global store.
 
 	[ ]  Per Dave R:
@@ -176,6 +183,8 @@ If you have general comments or questions or contributions, please contact webwa
 	[ ] Allow the object model to specify an index for a particular attribute
 
 	[ ] Should the __init__ methods in generated code allow for dictionaries and/or keyword arguments to initialize attributes with?
+
+	[ ] (per Dave R) fault tolerance: If the database connection goes down, re-establish it.
 
 </refinements/improvements>
 

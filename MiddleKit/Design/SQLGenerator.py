@@ -37,12 +37,15 @@ class SQLGenerator(CodeGenerator):
 		''' Returns the name of the database by asked the generator's model for dbName(). '''
 		return self.model().dbName()
 
+	def configFilename(self):
+		return os.path.join(self.model().filename(), 'SQLGenerator.config')
+
 	def defaultConfig(self):
 		config = CodeGenerator.defaultConfig(self)
 		config.update({
 			'PreSQL': '',
 			'PostSQL': '',
-			'DropStatements': 1,
+			'DropStatements': 'database'  # database, tables
 		})
 		return config
 
@@ -185,6 +188,10 @@ class Klasses:
 	def setSQLGenerator(self, generator):
 		self._sqlGenerator = generator
 
+	def auxiliaryTableNames(self):
+		''' Returns a list of table names in addition to the tables that hold objects. One popular user of this method is dropTablesSQL(). '''
+		return ['_MKClassIds']
+
 	def writeKeyValue(self, out, key, value):
 		''' Used by willCreateWriteSQL(). '''
 		key = key.ljust(12)
@@ -211,14 +218,28 @@ class Klasses:
 			wr('/* PreSQL start */\n' + sql + '\n/* PreSQL end */\n\n')
 
 		dbName = generator.dbName()
-		if generator.setting('DropStatements'):
+		drop = generator.setting('DropStatements')
+		if drop=='database':
 			wr(self.dropDatabaseSQL(dbName))
-		wr(self.createDatabaseSQL(dbName))
-		wr(self.useDatabaseSQL(dbName))
+			wr(self.createDatabaseSQL(dbName))
+			wr(self.useDatabaseSQL(dbName))
+		elif drop=='tables':
+			wr(self.useDatabaseSQL(dbName))
+			wr(self.dropTablesSQL())
+		else:
+			raise Exception, 'Invalid value for DropStatements setting: %r' % drop
 
 	def dropDatabaseSQL(self, dbName):
 		'''
 		Returns SQL code that will remove the database with the given name.
+		Used by willWriteCreateSQL().
+		Subclass responsibility.
+		'''
+		raise SubclassResponsibilityError
+
+	def dropTablesSQL(self):
+		'''
+		Returns SQL code that will remove each of the tables in the database.
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
 		'''
@@ -278,8 +299,6 @@ class Klass:
 			name = self.name()
 			wr = out.write
 			sqlIdName = self.sqlIdName()
-			if generator.setting('DropStatements'):
-				wr('drop table if exists %s;\n\n' % name)
 			wr('create table %s (\n' % name)
 			wr('	%s int not null auto_increment,\n' % sqlIdName.ljust(self.maxNameWidth()))
 			for attr in self.allAttrs():
