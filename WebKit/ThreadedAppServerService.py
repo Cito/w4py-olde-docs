@@ -35,6 +35,8 @@ The service can be stopped from the Control Panel or with::
 And finally, to uninstall the service, stop it and then run::
 
     python ThreadedAppServerService.py remove
+
+Currently only one AppServer per system can be set up this way.
 """
 
 ## FUTURE
