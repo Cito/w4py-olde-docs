@@ -243,7 +243,7 @@ class HTTPResponse(Response):
 		if not self._committed:
 			self.commit()
 		self._strmOut.flush()
-		self._strmOut.autoCommit(1)
+		self._strmOut.autoCommit(autoFlush)
 
 
 	def isCommitted(self):
