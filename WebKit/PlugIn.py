@@ -62,6 +62,9 @@ class PlugIn(Object):
 		if not hasattr(self._module, 'InstallInWebKit'):
 			raise PlugInError, "Plug-in '%s' in '%s' has no InstallInWebKit() function." % (self._name, self._dir)
 
+		# Give the module a pointer back to us
+		setattr(self._module, 'plugIn', self)
+
 		# Make a directory for it in Cache/
 		cacheDir = os.path.join('Cache', self._name)
 		if not os.path.exists(cacheDir):
