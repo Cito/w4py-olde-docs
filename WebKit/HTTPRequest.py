@@ -248,8 +248,8 @@ class HTTPRequest(Request):
 
 	def remoteName(self):
 		""" Returns the fully qualified name of the client that sent the request, or the IP address of the client if the name cannot be determined. """
-		raise self.remoteName()
-
+		env = self._environ
+		return env.get('REMOTE_NAME', env['REMOTE_ADDR'])
 
 	## Path ##
 
