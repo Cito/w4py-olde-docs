@@ -440,7 +440,6 @@ If AppServer is called with no arguments, it will start the AppServer and record
 
 
 def main(args):
-##	if len(args)>1:
 	monitor=0
 	function=run
 	daemon=0
@@ -454,6 +453,8 @@ def main(args):
 			function=AppServer.stop
 		elif i == "daemon":
 			daemon=1
+		elif i == "start":
+			pass
 		else:
 			print usage
 

@@ -452,6 +452,8 @@ def main(args):
 			function=AppServer.stop
 		elif i == "daemon":
 			daemon=1
+		elif i == "start":
+			pass
 		else:
 			print usage
 
