@@ -21,8 +21,27 @@ try:
 	else:
 		sys.path.insert(1, AppWorkDir)
 
-	import WebKit.CGIAdapter
-	WebKit.CGIAdapter.main(AppWorkDir)
+	try:
+		import WebKit.CGIAdapter
+	except ImportError:
+		cgiAdapter = os.path.join(webKitDir, 'CGIAdapter.py')
+		if not os.path.exists(cgiAdapter):
+			sys.stdout.write("""\
+Content-type: text/html
+
+<html><body>
+<p>ERROR
+<p>I can't find the file %s.
+<p>If that file really doesn't exist, then you need to edit WebKit.cgi so
+that WebwareDir points to the actual Webware installation directory.
+<p>If that file does exist, then its permissions probably need to be modified
+with chmod so that WebKit.cgi can read it.  You may also need to modify
+the permissions on parent directories.
+""" % cgiAdapter)
+		else:
+			raise
+	else:
+		WebKit.CGIAdapter.main(AppWorkDir)
 except:
 	import string, sys, traceback
 	from time import asctime, localtime, time
@@ -43,3 +62,4 @@ except:
 <p>ERROR
 <p><pre>%s</pre>
 </body></html>\n''' % output)
+
