@@ -29,7 +29,7 @@ of any location or dircetory.
 
 AddHandler python-program .psp
 PythonPath "sys.path+['/path/to/WebKit']"
-PythonHandler webkit_handler
+PythonHandler modpHandler::pspHandler
 
 """
 
@@ -143,6 +143,143 @@ def handler(req):
 </body></html>\n''' % output)
 
 	return apache.OK
+
+
+
+
+
+
+def pspHandler(req):
+	global host
+	global port
+
+	if debug:
+		ot = open("/tmp/log2.txt","a")
+		ot.write("req.path_info=%s\n"%req.path_info)
+	try:
+		if not port:
+			(host, port) = string.split(open(WEBWARE_ADDRESS_FILE).read(), ':')
+			port = int(port)
+		
+		timestamp = time.time()
+		myInput = ""
+		inp = req.read(bufsize)
+		# this looks like bad performance if we don't get it all
+		#  in the first buffer
+		while inp:
+			myInput = myInput + inp
+			inp = req.read(bufsize)
+
+		if debug:
+			ot.write("*************\n%s\n************\n"% len(myInput))
+			for name in req.headers_in.keys():
+				ot.write("%s=%s\n"%(name,req.headers_in[name]))
+				ot.write("*************************\n")
+				ot.write(req.uri)
+				ot.write("\n")
+
+		# get the apache module to do the grunt work of
+		#   building the environment
+		env=apache.build_cgi_env(req)
+		env['WK_ABSOLUTE']=1
+		if debug:
+			ot.write("%s"%env)
+		#fix PATH_INFO
+##		if not env.has_key('PATH_INFO'):
+##			env['PATH_INFO']='/'
+
+		dict = {
+				'format': 'CGI',
+				'time':   timestamp,
+				'environ': env,
+				'input':   myInput
+				}
+
+
+		s = socket(AF_INET, SOCK_STREAM)
+		s.connect(host, port)
+		s.send(dumps(dict))
+		s.shutdown(1)
+
+		#
+		# Get the response from the AppServer, extract the headers,
+		#  and send everything to Apache through mod_python's req object
+		#
+		inheader=1
+		header = ""
+		resp = ''
+		while 1:
+			data = s.recv(bufsize)
+			if not data:
+				break
+			resp = resp+data
+
+		respdict = loads(resp)
+		for pair in respdict['headers']:
+			req.headers_out[pair[0]] = str(pair[1])
+		req.content_type = req.headers_out['content-type']
+		req.send_http_header()
+		req.write(respdict['contents'])
+
+##          if inheader:
+##              header = header + data
+##              hlines = string.split(header,'\n',1)
+##              while len(hlines) > 1:
+##                  header = hlines.pop()
+##                  h = hlines[0]
+##                  if h == '':
+##                      inheader = 0
+##                      req.send_http_header()
+##                      req.write(header)
+##                      break
+##                  else:
+##                      ot.write(h)
+##                      name,val = string.split(h,':',1)
+##                      val = string.strip(val)
+##                      if string.lower(name) == 'content-type':
+##                          req.content_type = val
+##                      req.headers_out[name] = val
+##                      if debug: ot.write("%s=%s\n"%(name,val))
+##
+##                  hlines = string.split(header,'\n',1)
+##          else:
+##              req.write(data)
+		if debug:
+			ot.write("+++\n\n")
+			ot.close()
+
+
+	except:
+		import traceback
+
+		apache.log_error('WebKit mod_python: Error while responding to request\n')
+		apache.log_error('Python exception:\n')
+		traceback.print_exc(file=sys.stderr)
+		
+		output = apply(traceback.format_exception, sys.exc_info())
+		output = string.join(output, '')
+		output = string.replace(output, '&', '&amp;')
+		output = string.replace(output, '<', '&lt;')
+		output = string.replace(output, '>', '&gt;')
+		req.write('''
+<html><body>
+<p><pre>ERROR
+
+%s</pre>
+</body></html>\n''' % output)
+
+	return apache.OK
+
+
+
+
+
+
+
+
+
+
+
 
 import string
 
