@@ -25,7 +25,10 @@ class XMLRPCServlet(HTTPServlet):
 
 			# generate response
 			try:
-				response = self.call(method, params)
+				if method == '__methods__.__getitem__':
+					response = self.exposedMethods()[params[0]]
+				else:
+					response = self.call(method, params)
 				if type(response) != type(()):
 					response = (response,)
 			except:
