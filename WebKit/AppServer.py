@@ -90,6 +90,9 @@ class WebKitAppServer(Configurable):
 		self.mainsocket=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 		self.mainsocket.bind(('localhost',self.setting('Port')))
 		print "listening on",self.address()
+		
+		addr=self.address()
+		open('address.text', 'w').write('%s:%d' % (addr[0], addr[1]))
 
 
 		print 'OK'
