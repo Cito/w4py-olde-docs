@@ -471,7 +471,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		Executes the transaction, handling HTTPException errors.
 		Finds the servlet (using the root parser, probably
 		`URLParser.ContextParser`, to find the servlet for the
-		transaction, then calling `runServlet`.
+		transaction, then calling `runTransactionViaServlet`.
 
 		Called by `dispatchRawRequest`.
 		"""
@@ -479,7 +479,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		servlet = None
 		try:
 			servlet = self._rootURLParser.findServletForTransaction(trans)
-			self.runServlet(servlet, trans)
+			self.runTransactionViaServlet(servlet, trans)
 		except HTTPExceptions.HTTPException, err:
 			err.setTransaction(trans)
 			trans.response().displayError(err)
@@ -489,9 +489,9 @@ class Application(ConfigurableForServerSidePath, Object):
 			# Return the servlet to its pool
 			self.returnServlet(servlet, trans)
 
-	def runServlet(self, servlet, trans):
+	def runTransactionViaServlet(self, servlet, trans):
 		"""
-		Executes the servlet using the transaction.  This is
+		Executes the transaction using the servlet.  This is
 		the `awake`/`respond`/`sleep` sequence of calls, or if the
 		servlet supports it, a single `runTransaction` call
 		(which is presumed to make the awake/respond/sleep calls
@@ -502,6 +502,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		Called by `runTransaction`.
 		"""
 		
+		trans.setServlet(servlet)
 		if hasattr(servlet, 'runTransaction'):
 			servlet.runTransaction(trans)
 		else:
@@ -510,10 +511,10 @@ class Application(ConfigurableForServerSidePath, Object):
 			# by keeping it in the servlet it's easier to
 			# for the servlet to catch exceptions.
 			try:
-				servlet.awake(trans)
-				servlet.respond(trans)
+				trans.awake()
+				trans.respond()
 			finally:
-				servlet.sleep(trans)
+				trans.sleep()
 	
 	def forward(self, trans, url, context=None):
 		"""

@@ -38,10 +38,10 @@ class Servlet(Object):
 
 	def runTransaction(self, trans):
 		try:
-			self.awake(trans)
-			self.respond(trans)
+			trans.awake()
+			trans.respond()
 		finally:
-			self.sleep(trans)
+			trans.sleep()
 
 	def runMethodForTransaction(self, trans, method, *args, **kw):
 		self.awake(trans)
