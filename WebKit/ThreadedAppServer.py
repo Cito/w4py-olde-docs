@@ -70,12 +70,18 @@ class ThreadedAppServer(AppServer):
 		self.minServerThreads = self.setting('MinServerThreads')
 		self.monitorPort = None
 		self.threadPool = []
+		self.threadCount=0
+		self.threadUseCounter=[]
 		self.requestQueue = Queue.Queue(self.maxServerThreads * 2) # twice the number of threads we have
 		self.rhQueue = Queue.Queue(0) # This will grow to a limit of the number of
 		                              # threads plus the size of the requestQueue plus one.
 		                              # But it's easier to just let it be unlimited.
 
 		self.mainsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		# Must use SO_REUSEADDR to avoid problems restarting the app server
+		# This was discussed on Webware-devel in Oct 2001, and this solution
+		# was found by Jeff Johnson
+		self.mainsocket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		addr = self.address()
 		try:
 			self.mainsocket.bind(addr)
@@ -90,8 +96,6 @@ class ThreadedAppServer(AppServer):
 
 		out = sys.stdout
 
-		self.threadCount=0
-		self.threadUseCounter=[]
 		out.write('Creating %d threads' % threadCount)
 		for i in range(threadCount):
 			self.spawnThread()
@@ -484,8 +488,6 @@ class RequestHandler:
 
 
 		try:
-			# @@ This next print statement mysteriously fixes a shutdown problem on FreeBSD.
-			print "."
 			conn.shutdown(1)
 			conn.close()
 		except:
