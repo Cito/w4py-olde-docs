@@ -140,7 +140,7 @@ class Model:
 					names = [name for name in fields if name]
 					attrs = []
 					for name in names:
-						if name == klass.sqlIdName():
+						if name==klass.sqlSerialColumnName():
 							attrs.append(PrimaryKey(name, klass))
 						else:
 							try:
@@ -344,6 +344,9 @@ create table _MKClassIds (
 
 
 
+import KlassSQLSerialColumnName
+
+
 class Klass:
 
 	def writeCreateSQL(self, generator, out):
@@ -355,7 +358,6 @@ class Klass:
 	def writeCreateTable(self, generator, out):
 		name = self.name()
 		wr = out.write
-		sqlIdName = self.sqlIdName()
 		wr('create table %s (\n' % self.sqlTableName())
 		wr(self.primaryKeySQLDef(generator))
 		if generator.model().setting('DeleteBehavior', 'delete') == 'mark':
@@ -382,22 +384,22 @@ class Klass:
 
 	def primaryKeySQLDef(self, generator):
 		"""
-		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
+		Returns a one liner that becomes part of the CREATE statement
+		for creating the primary key of the table. SQL generators often
+		override this mix-in method to customize the creation of the
+		primary key for their SQL variant. This method should use
+		self.sqlSerialColumnName() and often ljust()s it by
+		self.maxNameWidth().
 		"""
-		return '    %s int not null primary key,\n' % self.sqlIdName().ljust(self.maxNameWidth())
+		return '    %s int not null primary key,\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
 
 	def deletedSQLDef(self, generator):
 		"""
-		Returns a one liner that becomes part of the CREATE statement for creating the deleted timestamp field of the table.
+		Returns a one liner that becomes part of the CREATE statement
+		for creating the deleted timestamp field of the table.
 		This is used if DeleteBehavior is set to "mark".
 		"""
 		return '    %s datetime null,\n' % ('deleted'.ljust(self.maxNameWidth()))
-
-	def sqlIdName(self):
-		name = self.name()
-		if name:
-			name = name[0].lower() + name[1:] + 'Id'
-		return name
 
 	def maxNameWidth(self):
 		return 30   # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
@@ -409,10 +411,9 @@ class Klass:
 				wr('\tindex (%s)' % attr.sqlName())
 		wr('\n')
 
-
 	def sqlTableName(self):
 		"""
-		Can be overiddent to allow for table names that do not conflict with SQL
+		Can be overidden to allow for table names that do not conflict with SQL
 		reserved words. dr 08-08-2002 - MSSQL uses [tablename]
 		"""
 		return '%s' % self.name()

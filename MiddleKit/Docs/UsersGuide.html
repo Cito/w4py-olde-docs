@@ -312,6 +312,14 @@ This setting has no effect on the visible behavior of MiddleKit; it only changes
 }</pre>
 
 
+<p> <a name=Configuration_SQLSerialColumnName></a> The <span class=name>SQLSerialColumnName</span> controls the name that is used for the serial number of a given database record, which is also the primary key. The default is 'serialNum' which matches MiddleKit naming conventions. You can change this:
+
+<pre>{
+    'SQLSerialColumnName': 'SerialNum',  # capitalized, or
+    'SQLSerialColumnName': '%(className)sId',  # the name used by older MiddleKits
+        # you can use className for lower, ClassName for upper, or _ClassName for as-is
+}</pre>
+
 <p> <a name=Configuration_ObjRefSuffixes></a> The <span class=name>ObjRefSuffixes</span> controls the suffixes that are appended for the names of the two SQL column that are created for each obj ref attribute. The suffixes must be different from each other.
 
 <pre>{

@@ -54,9 +54,9 @@ class UnknownSerialNumInfo:
 		sourceKlass = self.sourceObject._mk_klass
 		assert sourceKlass
 		sourceTableName = sourceKlass.sqlTableName()
-		sourceSqlIdName = sourceKlass.sqlIdName()
+		sourceSqlSerialName = sourceKlass.sqlSerialColumnName()
 		return 'update %s set %s where %s=%s;' % (
-			sourceTableName, self.sourceAttr.sqlUpdateExpr(self.targetObject), sourceSqlIdName, self.sourceObject.serialNum())
+			sourceTableName, self.sourceAttr.sqlUpdateExpr(self.targetObject), sourceSqlSerialName, self.sourceObject.serialNum())
 
 	def __repr__(self):
 		s = []
@@ -292,7 +292,7 @@ class SQLObjectStore(ObjectStore):
 			fetchSQLStart = klass.fetchSQLStart()
 			className = klass.name()
 			if serialNum is not None:
-				clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
+				clauses = 'where %s=%d' % (klass.sqlSerialColumnName(), serialNum)
 			if self._markDeletes:
 				clauses = self.addDeletedToClauses(clauses)
 			conn, cur = self.executeSQL(fetchSQLStart + clauses + ';')
@@ -451,7 +451,7 @@ class SQLObjectStore(ObjectStore):
 			if obj:
 				return obj
 
-			clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
+			clauses = 'where %s=%d' % (klass.sqlSerialColumnName(), serialNum)
 			objs = self.fetchObjectsOfClass(klass, clauses, isDeep=0)
 			if len(objs)==1:
 				return objs[0]
@@ -514,7 +514,7 @@ class SQLObjectStore(ObjectStore):
 			out.write('%s objects\n' % ( klass.name() ) )
 			attrs = [ attr for attr in klass.allAttrs() if attr.hasSQLColumn() ]
 			colNames = [ attr.name() for attr in attrs ]
-			colNames.insert(0, klass.sqlIdName())
+			colNames.insert(0, klass.sqlSerialColumnName())
 			out.write(CSVJoiner.joinCSVFields(colNames) + "\n")
 
 			# write out a line for each object in this class
@@ -608,7 +608,7 @@ class MiddleObjectMixIn:
 		for attr in self._mk_changedAttrs.values():
 			res.append(attr.sqlUpdateExpr(self.valueForAttr(attr)))
 		res = ','.join(res)
-		res = ('update ', klass.sqlTableName(), ' set ', res, ' where ', klass.sqlIdName(), '=', str(self.serialNum()))
+		res = ('update ', klass.sqlTableName(), ' set ', res, ' where ', klass.sqlSerialColumnName(), '=', str(self.serialNum()))
 		return ''.join(res)
 
 	def sqlDeleteStmt(self):
@@ -622,9 +622,9 @@ class MiddleObjectMixIn:
 		klass = self.klass()
 		assert klass is not None
 		if self.store().model().setting('DeleteBehavior', 'delete')=='mark':
-			return 'update %s set deleted=%s where %s=%d;' % (klass.sqlTableName(), self.store().sqlNowCall(), klass.sqlIdName(), self.serialNum())
+			return 'update %s set deleted=%s where %s=%d;' % (klass.sqlTableName(), self.store().sqlNowCall(), klass.sqlSerialColumnName(), self.serialNum())
 		else:
-			return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
+			return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlSerialColumnName(), self.serialNum())
 
 	def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
 		if self.store().setting('UseBigIntObjRefColumns'):
@@ -645,6 +645,9 @@ MixIn(MiddleObject, MiddleObjectMixIn)
 	# (MiddleObject belongs to MiddleKit.Run).
 
 
+import MiddleKit.Design.KlassSQLSerialColumnName
+
+
 class Klass:
 
 	_fetchSQLStart = None  # help out the caching mechanism in fetchSQLStart()
@@ -659,15 +662,11 @@ class Klass:
 		"""
 		return self.name()
 
-	def sqlIdName(self):
-		name = self.name()
-		return name[0].lower() + name[1:] + 'Id'
-
 	def fetchSQLStart(self):
 		if self._fetchSQLStart is None:
 			attrs = self.allDataAttrs()
 			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
-			colNames = [self.sqlIdName()]
+			colNames = [self.sqlSerialColumnName()]
 			colNames.extend([attr.sqlColumnName() for attr in attrs])
 			self._fetchSQLStart = 'select %s from %s ' % (','.join(colNames), self.sqlTableName())
 		return self._fetchSQLStart
@@ -682,7 +681,7 @@ class Klass:
 			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
 			fieldNames = [attr.sqlColumnName() for attr in attrs]
 			if len(fieldNames)==0:
-				fieldNames = [self.sqlIdName()]
+				fieldNames = [self.sqlSerialColumnName()]
 			res.append(','.join(fieldNames))
 			res.append(') values (')
 			self._insertSQLStart = ''.join(res)

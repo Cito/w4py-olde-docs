@@ -137,43 +137,12 @@ create table _MKClassIds (
 
 class Klass:
 
-
-
-# Create table.
-#			wr("print 'Creating table %s'\n" % name)
-#			wr('create table [%s] (\n' % name)
-#			wr('	%s int primary key not null IDENTITY (1, 1),\n' % ljust(sqlIdName, self.maxNameWidth()))
-
-#			for attr in self.allAttrs():
-#				attr.writeSQL(generator, out)
-
-#			wr('	unique (%s)\n' % sqlIdName)
-#			wr(')\ngo\n\n\n')
-
-	def sqlIdName(self):
-		name = self._name # do not need or want protected name
-		if name:
-			name = lower(name[0]) + name[1:] + 'Id'
-		return name
-
-	def maxNameWidth(self):
-		return 30   # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
-
 	def primaryKeySQLDef(self, generator):
 		'''
 		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
 		'''
-
-#		print("print 'Creating table %s'\n" % name)
-#		print('create table [%s] (\n' % name)
-		z = '	%s int primary key not null IDENTITY (1, 1),\n' % self.sqlIdName().ljust(self.maxNameWidth())
-#		print(z)
+		z = '	%s int primary key not null IDENTITY (1, 1),\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
 		return z
-
-
-#	def name(self):
-#		return '[' + self._name + ']'
-
 
 	def sqlTableName(self):
 		"""

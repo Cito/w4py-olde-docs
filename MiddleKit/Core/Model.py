@@ -327,6 +327,7 @@ class Model(Configurable):
 			'PreSQL': '',
 			'PostSQL': '',
 			'DropStatements': 'database',  # database, tables
+			'SQLSerialColumnName': 'serialNum',  # can use [cC]lassName, _ClassName
 			'ExternalEnumsSQLNames': {
 				'Enable': False,
 				'TableName': '%(ClassName)s%(AttrName)sEnum',

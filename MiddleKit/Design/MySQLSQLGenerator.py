@@ -38,7 +38,7 @@ class Klasses:
 class Klass:
 
 	def primaryKeySQLDef(self, generator):
-		return '    %s int not null primary key auto_increment,\n' % self.sqlIdName().ljust(self.maxNameWidth())
+		return '    %s int not null primary key auto_increment,\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
 
 
 class EnumAttr:

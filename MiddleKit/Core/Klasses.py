@@ -63,6 +63,9 @@ class Klasses(ModelObject, UserDict):
 
 	## Accessing ##
 
+	def model(self):
+		return self._model
+
 	def filename(self):
 		return self._filename
 

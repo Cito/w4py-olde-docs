@@ -29,9 +29,20 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 
 <a name=Incompatible><h2>Incompatible Changes</h2></a>
+
+<p> <font color=red>There are some MiddleKit improvements that break compatibility with previous versions of MiddleKit, although all are easy to address.</font> In a nutshell, if you are upgrading MiddleKit for an existing project, take the following steps:
+
 <ul>
-	<li> <font color=red>There are some MiddleKit improvements that break compatibility with previous versions of MiddleKit, although all are easy to address. Read below.</font>
+	<li> Add these to Settings.config inside the model:
+<pre>{
+	'SQLSerialColumnName': '%(className)sId',
+	'UseBigIntObjRefColumns': True,
+}</pre>
+	<li> If your model has a SQLGenerator.config file, move its contents to Settings.config.
+	<li> If you use Microsoft SQL Server and your model uses the float type then read the section below detailing that.
 </ul>
+
+<p> Below are more details about the incompatible changes. Below that are more general notes on this release.
 
 <h3>Obj Ref Columns</h3>
 
@@ -43,6 +54,10 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 <p> <font color=red>If you are upgrading Webware then your database schema will no longer be compatible with MiddleKit.</font> The easy way to fix this is to set UseBigIntObjRefColumns to True in Settings.config (see <a href=UsersGuide.html#Configuration_UseBigIntObjRefColumns>User's Guide - Configuration</a> for more information). This will give you the old behavior. The hard way is to fix up your schema and migrate the data from the old columns to the new.
 
+
+<h3>Serial Number Column</h3>
+
+<p> MiddleKit creates a SQL table for every concrete class, and each table has a column for the serial number of a record. This column is the primary key for the table. Its new default name is <span class=name>serialNum</span> which matches the MiddleObject method of the same name and fits MiddleKit naming conventions. You can control this with a <a href=UsersGuide.html#Configuration_SQLSerialColumnName>new setting</a>.
 
 <h3>SQLGenerator.config</h3>
 
