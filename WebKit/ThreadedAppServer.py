@@ -76,7 +76,13 @@ class ThreadedAppServer(AppServer):
 
 		self.mainsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		addr = self.address()
-		self.mainsocket.bind(addr)
+		try:
+			self.mainsocket.bind(addr)
+		except:
+			if self.running:
+				self.initiateShutdown()
+			self._closeThread.join()
+			raise
 		print "Listening on", addr
 		open(self.serverSidePath('address.text'), 'w').write('%s:%d' % (addr[0], addr[1]))
 		self.monitorPort = addr[1]-1
