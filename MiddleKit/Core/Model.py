@@ -1,8 +1,9 @@
 import os
 from types import ClassType
+from MiscUtils.Configurable import Configurable
 
 
-class Model:
+class Model(Configurable):
 	'''
 	A Model defines the classes, attributes and enumerations of an application.
 
@@ -26,6 +27,9 @@ class Model:
 
 	def setName(self, name):
 		self._name = name
+
+	def filename(self):
+		return self._filename
 
 	def read(self, filename):
 		assert self._filename is None, 'Cannot read twice.'
@@ -62,3 +66,12 @@ class Model:
 
 	def klass(self, name):
 		return self._klasses[name]
+
+
+	## Being configurable ##
+
+	def configFilename(self):
+		if self._filename is None:
+			return None
+		else:
+			return os.path.join(self._filename, 'Settings.config')
