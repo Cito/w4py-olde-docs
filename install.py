@@ -250,7 +250,8 @@ class Installer:
 </tr>''' % comp)
 			row = (row+1)%2  # e.g., 1, 2, 1, 2, ...
 		wr('</table>')
-		ht = '\n'.join(ht)
+#		ht = '\n'.join(ht)
+		ht = string.join(ht, '\n')
 		self.writeDocFile('Webware Component Index', 'Documentation/ComponentIndex.html', ht, extraHead='<link rel=stylesheet href=ComponentIndex.css type=text/css>')
 
 	def createIndex(self):
