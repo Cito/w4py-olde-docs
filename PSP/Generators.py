@@ -59,14 +59,14 @@ class GenericGenerator:
 class ExpressionGenerator(GenericGenerator):
     """ This class handles expression blocks.  It simply outputs
     the (hopefully) python expression within the block wrapped
-    with a str() call."""
+    with a _formatter() call. """
 
     def __init__(self, chars):
 		self.chars = chars
 		GenericGenerator.__init__(self)
 
     def generate(self, writer, phase=None):
-		writer.println('res.write(str(' + PSPUtils.removeQuotes(self.chars) + '))')
+		writer.println('res.write(_formatter(' + PSPUtils.removeQuotes(self.chars) + '))')
 
 
 

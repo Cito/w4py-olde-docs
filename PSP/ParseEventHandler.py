@@ -44,8 +44,8 @@ class ParseEventHandler:
 				'instanceSafe':'yes',
 				'indent':int(4),
 				'gobbleWhitespace':1,
+				'formatter':'str',
 				}
-
 
 	def __init__(self, ctxt, parser):
 
@@ -65,6 +65,7 @@ class ParseEventHandler:
 		self._instanceSafe = self.defaults['instanceSafe']
 		self._indent=self.defaults['indent']
 		self._gobbleWhitespace=self.defaults['gobbleWhitespace']
+		self._formatter=self.defaults['formatter']
 
 	def addGenerator(self, gen):
 		self._gens.append(gen)
@@ -158,6 +159,10 @@ class ParseEventHandler:
 		if string.upper(value) == "NO" or value=="0":
 			self._gobbleWhitespace=0
 
+	def formatterHandler(self, value, start, stop):
+		""" set an alternate formatter function to use instead of str() """
+		self._formatter = value
+
 
 	directiveHandlers = {'imports':importHandler,
 						'import':importHandler,
@@ -168,7 +173,8 @@ class ParseEventHandler:
 						 'BaseClass':extendsHandler,
 						 'indentSpaces':indentSpacesHandler,
 						 'indentType':indentTypeHandler,
-						 'gobbleWhitespace':gobbleWhitespaceHandler}
+						 'gobbleWhitespace':gobbleWhitespaceHandler,
+						 'formatter':formatterHandler}
 
 
 	def handleDirective(self, directive, start, stop, attrs):
@@ -339,7 +345,7 @@ class ParseEventHandler:
 		self._writer.println('self.write(open(filename).read())')
 		self._writer.popIndent()
 		self._writer.println()
-		
+
 		return
 
 	def generateInitPSP(self):
@@ -358,6 +364,7 @@ class ParseEventHandler:
 		self._writer.println('trans = self._transaction')
 		self._writer.println(ResponseObject+ '= trans.response()')
 		self._writer.println('req = trans.request()')
+		self._writer.println('_formatter = %s' % self._formatter)
 
 	#self._writer.println('app = trans.application()')
 
@@ -384,7 +391,7 @@ class ParseEventHandler:
 				gencount = gencount-1
 			else:
 				count = count+1
- 
+
 
 	def gobbleWhitespace(self):
 		"""
