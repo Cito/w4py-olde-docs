@@ -65,9 +65,9 @@ class SessionFileStore(SessionStore):
 		return os.path.exists(self.filenameForKey(key))
 
 	def keys(self):
-		start = len(self._sessionDir)
+		start = len(self._sessionDir)+1
 		end = -len('.ses')
-		keys = glob(os.path.join(self._sessionDir,'*.ses'))
+		keys = glob(os.path.join(self._sessionDir, '*.ses'))
 		keys = map(lambda key, start=start, end=end: key[start:end], keys)
 		if debug:
 			print '>> keys =', keys
