@@ -90,11 +90,11 @@ class Application(ConfigurableForServerSidePath, Object):
 		print 'Current directory:', os.getcwd()
 
 		URLParser.initApp(self)
-                self._rootURLParser = URLParser.ContextParser(self)
+		self._rootURLParser = URLParser.ContextParser(self)
 
 		self.running = 1
 
-                self.startSessionSweeper()
+		self.startSessionSweeper()
 
 		self._exceptionHandlerClass = ExceptionHandler
 
@@ -325,7 +325,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	def serverSidePath(self, path=None):
 		"""
-                Returns the absolute server-side path of the WebKit
+		Returns the absolute server-side path of the WebKit
 		application. If the optional path is passed in, then
 		it is joined with the server side directory to form a
 		path relative to the app server.
