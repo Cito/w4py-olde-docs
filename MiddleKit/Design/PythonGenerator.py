@@ -475,8 +475,8 @@ class AnyDateTimeAttr:
 			dateTimeTypes = dateTimeTypes[0]
 		out.write('''
 			if not isinstance(value, %s):
-				raise TypeError, 'expecting %s type, but got value %%r of type %%r instead' %% (value, type(value))
-''' % (dateTimeTypes, self['Type']))
+				raise TypeError, 'expecting %s type (e.g., %s), but got value %%r of type %%r instead' %% (value, type(value))
+''' % (dateTimeTypes, self['Type'], dateTimeTypes))
 
 
 class DateAttr:
