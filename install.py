@@ -25,13 +25,18 @@ except ImportError:
 
 
 class Installer:
-
+	'''
+	The _comps attribute is a list of components, each of which is a dictionary initialized mostly from the component's Properties.py.
+	'''
 
 	## Init ##
 
 	def __init__(self):
 		self._nameAndVer = strip(open('_VERSION').readlines()[0])
-		self._comps = []  # components
+		self._ver = self._nameAndVer.split()[1]
+		self._comps = []
+		self._htHeader = self.htFragment('Header')
+		self._htFooter = self.htFragment('Footer')
 
 
 	## Running the installation ##
@@ -61,26 +66,43 @@ class Installer:
 		print 'Scanning for components...'
 		for filename in os.listdir('.'):
 			if os.path.isdir(filename):
-				name = os.path.join(filename, 'Documentation')
-				if os.path.isdir(name):
-					self._comps.append(filename)
+				propName = os.path.join(filename, 'Properties.py')
+				if os.path.exists(propName):
+					comp = self.readProperties(propName)
+					comp['filename'] = filename
+					self._comps.append(comp)
 					print '  yes', filename
 				else:
 					print '   no', filename
 		print
+		self._comps.sort(lambda a, b: cmp(a['name'], b['name']))
+
+	def readProperties(self, filename):
+		''' Returns a dictionary of values from executing the given Python properties file. '''
+		results = {}
+		exec open(filename).read() in results
+		# get rid of stuff like '__builtins__'
+		for key in results.keys():
+			if key.startswith('__'):
+				del results[key]
+		return results
 
 	def installDocs(self):
 		self.propagateStyleSheet()
 		self.processRawFiles()
-		self.createBrowsableSource()
+		# @@ 2000-12-22 ce: uncomment the following
+		#self.createBrowsableSource()
+		self.createComponentIndex()
+		self.createIndex()
+		self.createComponentIndexes()
 
 	def propagateStyleSheet(self):
 		''' Copy Documentation/StyleSheet.css into other Documentation dirs. '''
 		print 'Propagating stylesheet...'
 		stylesheet = open('Documentation/StyleSheet.css', 'rb').read()
 		for comp in self._comps:
-			print '  %s...' % comp
-			target = os.path.join(comp, 'Documentation', 'StyleSheet.css')
+			#print '  %s...' % comp['filename']
+			target = os.path.join(comp['filename'], 'Documentation', 'StyleSheet.css')
 			open(target, 'wb').write(stylesheet)
 		print
 
@@ -99,9 +121,10 @@ class Installer:
 		self.requirePath('DocSupport')
 
 		for comp in self._comps:
-			print '  %s...' % comp
+			filename = comp['filename']
+			print '  %s...' % filename
 
-			sourceDir = '%s/Documentation/Source' % comp
+			sourceDir = '%s/Documentation/Source' % filename
 			self.makeDir(sourceDir)
 
 			filesDir = sourceDir + '/Files'
@@ -113,13 +136,13 @@ class Installer:
 			docsDir = sourceDir + '/Docs'  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
 			#self.makeDir(docsDir)
 
-			for filename in glob('%s/*.py' % comp):
-				self.createHighlightedSource(filename, filesDir)
-				self.createSummary(filename, summariesDir)
-				#self.createDocs(filename, docsDir)  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
+			for pyFilename in glob('%s/*.py' % filename):
+				self.createHighlightedSource(pyFilename, filesDir)
+				self.createSummary(pyFilename, summariesDir)
+				#self.createDocs(pyFilename, docsDir)  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
 
-			self.createBrowsableClassHier(comp, sourceDir)
-			#self.createBrowsableFileList(comp, sourceDir)
+			self.createBrowsableClassHier(filename, sourceDir)
+			#self.createBrowsableFileList(filename, sourceDir)
 		print
 
 	def createHighlightedSource(self, filename, dir):
@@ -196,6 +219,80 @@ class Installer:
 					os.system(cmd)
 			print
 
+	def createComponentIndex(self):
+		print 'Creating ComponentIndex.html...'
+		ht = []
+		wr = ht.append
+		wr("Don't know where to start? Try <a href=../WebKit/Documentation/index.html>WebKit</a>. <p>")
+		wr('<table align=center border=0 cellpadding=2 cellspacing=2 width=100%>')
+		wr('<tr class=ComponentHeadings> <td nowrap>Component</td> <td>Status</td> <td nowrap>Py ver</td> <td>Summary</td> </tr>')
+		row = 0
+		for comp in self._comps:
+			comp = comp.copy()
+			comp['name'] = '<a href=../%(filename)s/Documentation/index.html>%(name)s</a>' % comp
+			comp['version'] = '.'.join([str(x) for x in comp['version']])
+			comp['requiredPyVersion'] = '.'.join([str(x) for x in comp['requiredPyVersion']])
+			comp['row'] = row+1
+			wr('''\
+<tr valign=top class=ComponentRow%(row)i>
+	<td class=NameVersionCell> <span class=Name>%(name)s</span><br><span class=Version>%(version)s</span> </td>
+	<td> %(status)s </td>
+	<td> %(requiredPyVersion)s </td>
+	<td> %(synopsis)s </td>
+</tr>''' % comp)
+			row = (row+1)%2  # e.g., 1, 2, 1, 2, ...
+		wr('</table>')
+		ht = '\n'.join(ht)
+		self.writeDocFile('Webware Component Index', 'Documentation/ComponentIndex.html', ht, extraHead='<link rel=stylesheet href=ComponentIndex.css type=text/css>')
+
+	def createIndex(self):
+		print 'Creating index.html...'
+		version = self._ver
+		ht = self.htFragment('index')
+		ht %= locals()
+		self.writeDocFile('Webware Documentation', 'Documentation/index.html', ht, extraHead='<link rel=stylesheet href=index.css type=text/css>')
+
+	def createComponentIndexes(self):
+		print "Creating components' index.html..."
+		indexFrag = self.htFragment('indexOfComponent')
+		webwareVersion = self._ver
+		link = '<a href=%s>%s</a> <br>\n'
+		for comp in self._comps:
+			comp = comp.copy()
+			comp['version'] = '.'.join([str(x) for x in comp['version']])
+			comp['requiredPyVersion'] = '.'.join([str(x) for x in comp['requiredPyVersion']])
+			comp['webwareVersion'] = webwareVersion
+
+			# Replace comp['docs'] with a readable HTML version of itself
+			ht = []
+			for doc in comp['docs']:
+				ht.append(link % (doc['file'], doc['name']))
+			ht = ''.join(ht)
+			comp['docs'] = ht
+
+			# Set up release notes
+			ht = []
+			releaseNotes = glob(os.path.join(comp['filename'], 'Documentation', 'RelNotes-*.html'))
+			if releaseNotes:
+				releaseNotes = [{'filename': os.path.basename(filename)} for filename in releaseNotes]
+				for item in releaseNotes:
+					filename = item['filename']
+					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
+				releaseNotes.sort(self.sortReleaseNotes)
+				for item in releaseNotes:
+					ht.append(link % (item['filename'], item['name']))
+			else:
+				ht.append('None\n')
+			ht = ''.join(ht)
+			comp['releaseNotes'] = ht
+
+			# Write file
+			title = comp['name'] + ' Documentation'
+			filename = os.path.join(comp['filename'], 'Documentation', 'index.html')
+			contents = indexFrag % comp
+			cssLink = '<link rel=stylesheet href=../../Documentation/index.css type=text/css>'
+			self.writeDocFile(title, filename, contents, extraHead=cssLink)
+
 	def finished(self):
 		''' This method is invoked just before printGoodbye(). It is a hook for subclasses. This implementation does nothing. '''
 		pass
@@ -207,7 +304,7 @@ Installation looks successful.
 Welcome to Webware!
 
 You can find more information at:
-  * Documentation/Webware.html  (e.g., local docs)
+  * Documentation/index.html  (e.g., local docs)
   * http://webware.sourceforge.net
 
 Installation is finished.'''
@@ -226,6 +323,30 @@ Installation is finished.'''
 	def requirePath(self, path):
 		if path not in sys.path:
 			sys.path.insert(1, path)
+
+	def sortReleaseNotes(self, a, b):
+		''' Used by createComponentIndexes(). You pass this to list.sort(). '''
+		# We append '.0' below so that values like 'x.y' and 'x.y.z'
+		# compare the way we want them too (x.y.z is newer than x.y)
+		a = a['name']
+		if a.count('.')==1:
+			a += '.0'
+		b = b['name']
+		if b.count('.')==1:
+			b += '.0'
+		return -cmp(a, b)
+
+	def htFragment(self, name):
+		''' Returns an HTML fragment with the given name. '''
+		return open(os.path.join('Documentation', name+'.htmlf')).read()
+
+	def writeDocFile(self, title, filename, contents, extraHead=''):
+		values = locals()
+		file = open(filename, 'w')
+		file.write(self._htHeader % values)
+		file.write(contents)
+		file.write(self._htFooter % values)
+		file.close()
 
 
 if __name__=='__main__':
