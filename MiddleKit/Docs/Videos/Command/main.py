@@ -1,6 +1,5 @@
 # Gain access to the Middle package
 import os, sys
-print os.path.abspath(os.pardir)
 sys.path.insert(1, os.path.abspath(os.pardir))
 
 from mx.DateTime import DateFrom
