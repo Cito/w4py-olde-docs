@@ -908,7 +908,6 @@ class Application(ConfigurableForServerSidePath, Object):
 			try:
 				value = objects.valueForName(column)
 			except:
-				print 'WARNING: Cannot get %s for activity log.' % column
 				value = '(unknown)'
 			if type(value) is FloatType:
 				value = '%0.2f' % value   # probably need more flexibility in the future
