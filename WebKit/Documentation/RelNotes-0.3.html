@@ -23,7 +23,13 @@ Version 0.3
 	<li> The admin script now shows more useful information including the size of the log files, when the server was started, number of requests received and a list of plug-ins.
 	<li> You no longer have to specify the extension in a URL. WebKit will automatically detect it and use it. For example, <code>http://localhost/WebKit.cgi/Welcome.py</code> now becomes <code>http://localhost/WebKit.cgi/Welcome</code>. This hides implementation details from users of your site, and also allows you to switch implementations. For example, Welcome could become a PSP file or a directory, and no one using the site would know the difference or have broken bookmarks. There is a setting, ExtensionsToIgnore, whose default value is ['.pyc', '.pyo', '.py~', '.bak']. This is used to ignore files that are generally not of interest.
 	<li> There is a new <a href=UsersGuide.html#PlugIns>Plug-in architecture</a>.
-	<li> WebKit is now more friendly to Windows. For example, the error report page now works (it previously had UNIX specific calls).
+	<li> WebKit is now more friendly to Windows.
+		<ul>
+		<li>WebKit is no longer confused about the localhost name being blank in address.text.
+		<li>The error report page now works (it previously had UNIX specific calls).
+		<li>WebKit on Windows can now serve binary files such as images.
+		<li><i>Note:</i> You still have to do one special thing on Windows, which is fix the first line in WebKit.cgi. Unfortunately, we cannot find a line that works on both platforms. See <a href="UsersGuide.html#Running">Running and Testing</a> for more info.
+		</ul>
 	<li> HTTPResonse.write() can now take any kind of object as parameter (e.g., it invokes <code>str()</code> on it's argument).
 	<li> Added various convenience methods including Session.hasValue(), HTTPResponse.hasHeader() and HTTPResponse.hasCookie().
 	<li> Testing/stress.py - This new program can be used to stress out the app server with multiple
