@@ -7,6 +7,7 @@ import threading, socket
 from WebKit.ThreadedAppServer import Handler
 from WebKit.ASStreamOut import ASStreamOut
 import time
+import errno
 
 class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 	"""Handles incoming requests.  Recreated with every request.
@@ -148,8 +149,13 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 			'requestID': self._requestID,
 			}
 		self.dispatchRawRequest(requestDict, streamOut)
-		self.processResponse(streamOut._buffer)
-		self._sock.shutdown(2)
+		try:
+			self.processResponse(streamOut._buffer)
+			self._sock.shutdown(2)
+		except socket.error, e:
+			if e[0]==errno.EPIPE: #broken pipe
+				return
+			print "HTTPServer: output error:", e	# lame
 
 	def dispatchRawRequest(self, requestDict, streamOut):
 		transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
