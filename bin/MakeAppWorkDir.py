@@ -122,8 +122,6 @@ class MakeAppWorkDir:
 		otherFiles = [("404Text.txt",   0),
 					  ("AppServer",     1),
 					  ("AppServer.bat", 1),
-					  ("HTTPServer",    1),
-					  ("HTTPServer.bat",1),
 					  ("OneShot.cgi",   0),
 					  ("WebKit.cgi",    0),
 					  ]
@@ -205,20 +203,24 @@ class MakeAppWorkDir:
 	def printCompleted(self):
 		print """\n\n
 Congratulations, you've just created a runtime working directory for
-Webware.  To get started quickly you can run these commands:
+Webware.  To start the app server you can run these commands:
 
 	cd %(WORKDIR)s
-	HTTPServer
+	./AppServer
 
-and then point your browser to http://localhost:8086/.	The page you
+Copy WebKit.cgi to your web server's cgi-bin directory, or
+anywhere else that it will execute CGIs from.  Then point your browser
+to http://localhost/cgi-bin/WebKit.cgi/ .  The page you
 see is generated from the code in the %(DEFAULT)s directory and is
 there for you to play with and to build upon.
 
-For a more robust solution, run the AppServer script and then copy
-WebKit.cgi to your web server's cgi-bin directory, or anywhere else
-that it will execute CGIs from.	 There are also several adapters in
-the  Webware/WebKit directory that allow you to connect from the web
-server to the WebKit AppServer without using CGI.
+If you see import errors, then you may need to modify the permissions
+on your Webware directory so that the WebKit.cgi script can
+access it.
+
+There are also several adapters in the Webware/WebKit directory that
+allow you to connect from the web server to the WebKit AppServer
+without using CGI.
 
 Have fun!
 """ % self._substVals
