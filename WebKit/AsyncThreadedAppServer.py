@@ -25,6 +25,7 @@ except:
 	MainRelease = lambda:()
 
 debug = 0
+global server
 
 #Need to know this value for communications
 #Note that this limits the size of the dictionary we receive from the AppServer to 2,147,483,647 bytes
@@ -358,6 +359,7 @@ class Monitor(asyncore.dispatcher):
 def main(monitor = 0):
 	from errno import EINTR
 	import select
+	global server
 	try:
 		server = None
 		try:
@@ -397,12 +399,13 @@ def main(monitor = 0):
 
 
 def shutDown(arg1,arg2):
+	global server
 	print "Shutdown Called"
-	raise KeyboardInterrupt
+	server.shutDown()
 
 import signal
 signal.signal(signal.SIGINT, shutDown)
-
+signal.signal(signal.SIGTERM, shutDown)
 
 
 usage = """

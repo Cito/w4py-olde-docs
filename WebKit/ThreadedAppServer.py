@@ -99,7 +99,7 @@ class ThreadedAppServer(AppServer):
 
 		while 1:
 			if not self.running:
-				break
+				return
 
 			#block for timeout seconds waiting for connections
 			try:
@@ -107,8 +107,11 @@ class ThreadedAppServer(AppServer):
 			except select.error, v:
 				# if the error is EINTR/interrupt, then self.running should be set to 0 and
 				# we'll exit on the next loop
-				if v[0] != EINTR: raise
-				else: break
+				if v[0] == EINTR or v[0]==0: break
+				else: raise
+			if not self.running:
+				return
+			
 			for sock in input:
 				if sock.getsockname()[1] == self.monitorPort:
 					client,addr = sock.accept()
@@ -393,6 +396,7 @@ def shutDown(arg1,arg2):
 
 import signal
 signal.signal(signal.SIGINT, shutDown)
+signal.signal(signal.SIGTERM, shutDown)
 
 
 
