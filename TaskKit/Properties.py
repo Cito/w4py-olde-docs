@@ -3,7 +3,8 @@ name = 'TaskKit'
 version = (0, 1, 0)
 
 docs = [
-	{'name': 'To Do',        'file': 'TODO-UserKit.text'},
+	{'name': "User's Guide", 'file': 'UsersGuide.html'},
+	{'name': 'To Do',        'file': 'TODO-TaskKit.text'},
 ]
 
 status = 'beta'
