@@ -378,6 +378,8 @@ class AnyDateTimeAttr:
 			out.write('''\
 		# have DateTime
 		if value is not None:
+			if type(value) is type(''):
+				value = DateTime.DateTimeFrom(value)
 			if type(value) is not DateTime.%s:
 				raise TypeError, 'expecting %s type, but got value %%r of type %%r instead' %% (value, type(value))
 ''' % (self.mxDateTimeTypeName(), self['Type']))
