@@ -81,7 +81,7 @@ class ModelUser:
 						if verbose: print '>> mixing %s into %s' % (generatorThing, baseClass)
 						assert type(baseClass) is ClassType
 						assert type(generatorThing) is ClassType
-						MixIn(baseClass, generatorThing)
+						MixIn(baseClass, generatorThing, mixInSuperMethods=1)
 
 
 	## Warning ##
