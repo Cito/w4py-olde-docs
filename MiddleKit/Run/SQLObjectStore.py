@@ -91,6 +91,13 @@ class SQLObjectStore(ObjectStore):
 		# Set up SQL echo
 		self.setUpSQLEcho()
 
+		# Set up attrs for caching
+		for klass in self.model().allKlassesInOrder():
+			klass._getMethods = {}
+			klass._setMethods = {}
+			for attr in klass.allDataAttrs():
+				attr._sqlColumnName = None
+
 		# Connect
 		self.connect()
 
@@ -582,7 +589,9 @@ class Attr:
 
 	def sqlColumnName(self):
 		''' Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). '''
-		return self.name() + self.sqlTypeSuffix()
+		if not self._sqlColumnName:
+			self._sqlColumnName = self.name() + self.sqlTypeSuffix()
+		return self._sqlColumnName
 
 	def sqlTypeSuffix(self):
 		''' Returns a string to be used as a suffix for sqlColumnName(). Returns an empty string. Occasionally, a subclass will override this to help clarify SQL column names of their type. '''
