@@ -101,7 +101,7 @@ class ServletFactory(Object):
 				packageDir = os.path.join(directory, moduleName)
 				if not os.path.exists(os.path.join(packageDir, '__init__.py')):
 					# Here we are faking the presence of an empty __init__.py in the package directory
-					fp, pathname, stuff = None, packageDir, ('', '', imp.PKG_DIRECTORY)
+					fp, pathname, stuff = None, '', ('', '', imp.PKG_DIRECTORY)
 				else:
 					fp, pathname, stuff = imp.find_module(moduleName, [directory])
 			else:
