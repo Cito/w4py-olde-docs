@@ -54,15 +54,8 @@ class Test:
 				didFail = '*** FAILED ***'
 			results.append((self._modelName, didFail))
 
-		# summarize the results of each test
-		print 'RESULTS'
-		print '-------'
-		for name, outcome in results:
-			if not outcome:
-				outcome = '     succeeded'
-			print outcome, name
-
 		self.printInfo()
+		self.printResults(results)
 
 		# print duration for curiosity's sake
 		print
@@ -177,6 +170,19 @@ class Test:
 					out.write(', %r' % ver)
 				out.write(', %s' % getattr(mod, '__file__', '(built-in)'))
 				out.write('\n')
+
+	def printResults(self, results):
+		"""
+		Summarize the results of each test.
+		"""
+		print
+		print 'RESULTS'
+		print '-------'
+		for name, outcome in results:
+			if not outcome:
+				outcome = '     succeeded'
+			print outcome, name
+
 
 	## Self utility ##
 
