@@ -65,6 +65,7 @@ class Transaction(Object):
 		""" Returns the session for the transaction, creating one if necessary. Therefore, this method never returns None. Use hasSession() if you want to find out if there one already exists. """
 		if not self._session:
 			self._session = self._application.createSessionForTransaction(self)
+			self._session.awake(self)  # give the new servlet a chance to set up
 		return self._session
 
 	def setSession(self, session):
