@@ -55,7 +55,9 @@ class ThreadedAppServer(AppServer):
 		self._poolsize = self.setting('ServerThreads')
 		self.threadPool = []
 		self.requestQueue = Queue.Queue(self._poolsize*2) # twice the number of threads we have
-		self.rhQueue = Queue.Queue(self._poolsize) # same size as threadQueue
+		self.rhQueue = Queue.Queue(0) # This will grow to a limit of the number of
+		                              # threads plus the size of the requestQueue plus one.
+		                              # But it's easier to just let it be unlimited.
 
 		self.mainsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		addr = self.address()
