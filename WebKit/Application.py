@@ -104,6 +104,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._serverSideInfoCacheByPath = {}
 		self._cacheDictLock = Lock()
 		self._instanceCacheSize = self._server.setting('MaxServerThreads')
+		self._shutDownHandlers = []
 
 		# Set up servlet factories
 		self._factoryList = []  # the list of factories
@@ -220,6 +221,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		tm.addPeriodicAction(time.time()+sweepinterval, sweepinterval, task, "SessionSweeper")
 		print "Session Sweeper started"
 
+## Shutdown
 	def shutDown(self):
 		"""
 		Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references.
@@ -239,8 +241,20 @@ class Application(ConfigurableForServerSidePath, Object):
 		del self._factoryList
 		del self._server
 		del self._servletCacheByPath
+
+		# Call all registered shutdown handlers
+		for shutDownHandler in self._shutDownHandlers:
+			shutDownHandler()
+		del self._shutDownHandlers
+
 		print "Application has been succesfully shutdown."
 
+	def addShutDownHandler(self, func):
+		"""
+		Adds this function to a list of functions that are called when the application
+		shuts down.
+		"""
+		self._shutDownHandlers.append(func)
 
 	## Config ##
 
@@ -252,11 +266,11 @@ class Application(ConfigurableForServerSidePath, Object):
 			'ExtensionsToServe':   None,
 			'UseCascadingExtensions':1,
 			'ExtensionCascadeOrder':['.psp','.py','.html',],
-			
+
 
 			'FilesToHide': ['.*', '*~', '*bak', '*.tmpl', '*.pyc', '*.pyo', '*.config'],
 			'FilesToServe': None,
-			
+
 			'LogActivity':          1,
 			'ActivityLogFilename':  'Logs/Activity.csv',
 			'ActivityLogColumns':   ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'],
