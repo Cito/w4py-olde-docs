@@ -260,7 +260,7 @@ numRequest
 
 {
 'class': 'Convention',
-'what': 'Class definitions and category comments, <code>## Like this ##</code>, are preceded by 2 blanks and lines and followed by one (unless the class implementation is <code>pass</code>).',
+'what': 'Class definitions and category comments, <code>## Like this ##</code>, are preceded by 2 blank lines and followed by one (unless the class implementation is <code>pass</code>).',
 'why': 'To help with spacing and readability. Also, see <a href=#SynNaming_MethodCategories>method categories</a>.',
 }
 
