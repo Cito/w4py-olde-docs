@@ -64,16 +64,29 @@ class Installer:
 
 	def detectComponents(self):
 		print 'Scanning for components...'
+		filenames = os.listdir('.')
+		maxLen = max(filter(None, map(lambda name: os.path.isdir(name) and len(name), filenames)))
+		count = 0
+		needPrint = 0
 		for filename in os.listdir('.'):
 			if os.path.isdir(filename):
 				propName = os.path.join(filename, 'Properties.py')
+				displayName = string.ljust(filename, maxLen)
 				if os.path.exists(propName):
 					comp = PropertiesObject(propName)
 					comp['filename'] = filename
 					self._comps.append(comp)
-					print '  yes', filename
+					print '  yes', displayName,
 				else:
-					print '   no', filename
+					print '   no', displayName,
+				if count%2==1:
+					print
+					needPrint = 0
+				else:
+					needPrint = 1
+				count = count + 1
+		if needPrint:
+			print
 		print
 		self._comps.sort(lambda a, b: cmp(a['name'], b['name']))
 
