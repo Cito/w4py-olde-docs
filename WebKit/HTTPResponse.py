@@ -1,6 +1,11 @@
 from Common import *
 from Response import Response
 from WebKit.Cookie import Cookie
+from types import *
+
+# time.gmtime() no longer returns a tuple, and there is no globally defined type
+# for this at the moment.
+TimeTupleType = type(time.gmtime(0))
 
 # Import mxDateTime if it exists, but we can get along with it
 # if not.
@@ -122,12 +127,13 @@ class HTTPResponse(Response):
 			t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
 			cookie.setExpires(t)
 		else:
+			t = expires
 			if type(t) is StringType and t and t[0] == '+':
 				interval = timeDecode(t[1:])
 				t = time.time() + interval
-			if type(t) in (IntType, LongType):
+			if type(t) in (IntType, LongType,FloatType):
 				t = time.gmtime(t)
-			if type(t) is TupleType:
+			if type(t) in (TupleType, TimeTupleType):
 				t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
 			if DateTime and type(t) in \
 			   (DateTime.DeltaDateTimeType, DateTime.RelativeDateTimeType):
@@ -139,7 +145,7 @@ class HTTPResponse(Response):
 			cookie.setPath(path)
 		if secure:
 			cookie.setSecure(secure)
-		self.response().addCookie(cookie)
+		self.addCookie(cookie)
 
 	def addCookie(self, cookie):
 		"""
