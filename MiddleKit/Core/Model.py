@@ -7,19 +7,27 @@ try:
 except ImportError:
 	from pickle import load, dump
 
+
 class ModelError(Exception):
-	def __init__(self,error,line=None):
+
+	def __init__(self, error, line=None):
 		self._line = line
 		self._error = error
+		if line is not None:
+			args = (line, error)
+		else:
+			args = (error,)
+		Exception.__init__(self, *args)
 
 	def setLine(self, line):
 		self._line = line
 
-	def printError(self,filename):
+	def printError(self, filename):
+		self.args = (filename,) + self.args
 		if self._line:
-			print '%s:%d: %s' % ( filename, self._line, self._error )
+			print '%s:%d: %s' % (filename, self._line, self._error)
 		else:
-			print '%s: %s' % ( filename, self._error )
+			print '%s: %s' % (filename, self._error)
 
 
 class Model(Configurable):
@@ -91,7 +99,8 @@ class Model(Configurable):
 			print
 			print 'Error while reading model:'
 			e.printError(filename)
-			sys.exit(1)
+			raise
+			#sys.exit(1)
 		dur = time.time() - start
 		# print '%.2f seconds\n' % dur
 
@@ -115,7 +124,7 @@ class Model(Configurable):
 	def readKlassesDirectly(self, path):
 		# read the pickled version of Classes if possible
 		data = None
-		shouldUseCache = self.setting('UsePickledClassesCache', 1)
+		shouldUseCache = self.setting('UsePickledClassesCache', 0)
 		if shouldUseCache:
 			from MiscUtils.PickleCache import readPickleCache, writePickleCache
 			data = readPickleCache(path, pickleVersion=1, source='MiddleKit')
@@ -156,7 +165,7 @@ class Model(Configurable):
 		self._allKlassesByName = byName
 		self._allKlassesInOrder = inOrder
 
-		self._klasses.awakeFromRead()
+		self._klasses.awakeFromRead(self)
 
 
 	def readParents(self, parentFilenames=None):
@@ -299,8 +308,8 @@ class Model(Configurable):
 			sorter.visitedKlasses = {}
 			klass.sortByDependency(sorter)
 		allKlasses = sorter.allKlasses
-		# jdh 2004-07-02: the following assertion failed for me when using inherited models with 
-		# UsePickledClassesCache enabled.  Setting UsePickledClassesCache to False in each of the models 
+		# jdh 2004-07-02: the following assertion failed for me when using inherited models with
+		# UsePickledClassesCache enabled.  Setting UsePickledClassesCache to False in each of the models
 		# fixed the problem.  Haven't investigated the cause.
 		assert len(allKlasses)==len(self._allKlassesInOrder)
 		return allKlasses
@@ -322,8 +331,8 @@ class Model(Configurable):
 				pkg += '.'
 			try:
 				exec 'import %s%s as module' % (pkg, name) in results
-			except ImportError:
-				raise ModelError("Could not import module for class '%s'.  If you've added this class recently, you need to re-generate your model." % name)
+			except ImportError, exc:
+				raise ModelError("Could not import module for class '%s' due to %r.  If you've added this class recently, you need to re-generate your model." % (name, exc.args[0]))
 			pyClass = getattr(results['module'], 'pyClass', None)
 			if pyClass is None:
 				pyClass = getattr(results['module'], name)
@@ -353,6 +362,7 @@ class Model(Configurable):
 			'PostSQL': '',
 			'DropStatements': 'database',  # database, tables
 			'SQLSerialColumnName': 'serialNum',  # can use [cC]lassName, _ClassName
+			'AccessorStyle': 'methods',  # can be 'methods' or 'properties'
 			'ExternalEnumsSQLNames': {
 				'Enable': False,
 				'TableName': '%(ClassName)s%(AttrName)sEnum',

@@ -86,7 +86,7 @@ class ObjectStore(ModelUser):
 		self._threaded = self.setting('Threaded')
 		if self._threaded:
 			self._hasChanges     = {} # keep track on a per-thread basis
-			self._newObjects	 = PerThreadList()
+			self._newObjects     = PerThreadList()
 			self._deletedObjects = PerThreadList()
 			self._changedObjects = PerThreadDict()
 		else:
@@ -171,7 +171,7 @@ class ObjectStore(ModelUser):
 
 		# remove deleted objects from main list of objects
 		for obj in objectsToDel:
- 			obj.updateReferencingListAttrs()
+			obj.updateReferencingListAttrs()
 			del self._objects[obj.key()]
 
 	def _deleteObject(self, object, objectsToDel, detaches, superobject=None):
@@ -413,12 +413,15 @@ class ObjectStore(ModelUser):
 			- a class name (e.g., string)
 		Users of this method include the various fetchObjectEtc() methods which take a "class" parameter.
 		"""
+		import types
 		assert aClass is not None
 		if not isinstance(aClass, BaseKlass):
-			if type(aClass) is ClassType:
+			if isinstance(aClass, ClassType):  # old Python classes
 				aClass = self._model.klass(aClass.__name__)
 			elif isinstance(aClass, StringTypes):
 				aClass = self._model.klass(aClass)
+			elif isinstance(aClass, types.TypeType):  # new Python classes
+				aClass = self._model.klass(aClass.__name__)
 			else:
 				raise ValueError, 'Invalid class parameter. Pass a Klass, a name or a Python class. Type of aClass is %s. aClass is %s.' % (type(aClass), aClass)
 		return aClass

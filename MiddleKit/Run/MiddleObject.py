@@ -6,7 +6,7 @@ from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleKit.Core.ListAttr import ListAttr
 
-class MiddleObject(NamedValueAccess):
+class MiddleObject(object, NamedValueAccess):
 	"""
 	MiddleObject is the abstract superclass of objects that are
 	manipulated at runtime by MiddleKit. For any objects that you
@@ -214,7 +214,7 @@ class MiddleObject(NamedValueAccess):
 			if isinstance( attr, ObjRefAttr ):
 				value = getattr( self, '_' + attr.name() )
 				if value is not None:
-					if type(value) is types.InstanceType:
+					if isinstance(value, (types.InstanceType, types.ObjectType)):
 						value.removeObjectFromListAttrs(self)
 					elif type(value) is types.LongType:
 						obj = self.store().objRefInMem(value)

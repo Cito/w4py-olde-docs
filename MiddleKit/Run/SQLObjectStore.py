@@ -1,5 +1,4 @@
-import sys, time
-from types import InstanceType, LongType
+import sys, time, types
 
 from MiscUtils import NoDefault, AbstractError
 from MiscUtils import Funcs as funcs
@@ -480,7 +479,7 @@ class SQLObjectStore(ObjectStore):
 		number, subclasses are certainly able to override that
 		assumption by overriding this method.
 		"""
-		assert type(objRef) is LongType, 'type=%r, objRef=%r' % (type(objRef), objRef)
+		assert isinstance(objRef, types.LongType), 'type=%r, objRef=%r' % (type(objRef), objRef)
 		if objRef==0:
 			return None
 		else:
@@ -511,7 +510,7 @@ class SQLObjectStore(ObjectStore):
 		""" Return the object corresponding to the given objref if and only
 		if it has been loaded into memory.  If the object has never been
 		fetched from the database, None is returned. """
-		assert type(objRef) is LongType, 'type=%r, objRef=%r' % (type(objRef), objRef)
+		assert isinstance(objRef, types.LongType), 'type=%r, objRef=%r' % (type(objRef), objRef)
 		if objRef==0:
 			return 0
 		else:
@@ -865,7 +864,6 @@ class ObjRefAttr:
 			return 'NULL,NULL'
 
 	def sqlForNonNone(self, value):
-		assert type(value) is InstanceType
 		assert isinstance(value, MiddleObject)
 		if value.serialNum()==0:
 			info = UnknownSerialNumInfo()

@@ -24,6 +24,8 @@ class Attr(MiddleDict, ModelObject):
 		match = nameRE.match(self['Name'])
 		if match is None or len(match.groups())!=1:
 			raise ValueError, 'Bad name (%r) for attribute: %r.' % (self['Name'], dict)
+		self._getPrefix = None
+		self._setPrefix = None
 
 	def name(self):
 		return self.data['Name']
@@ -48,12 +50,16 @@ class Attr(MiddleDict, ModelObject):
 
 	def pyGetName(self):
 		""" Returns the name that should be used for the Python "get" accessor method for this attribute. This implementation returns the name as it is, so the get methods are obj.foo(). """
-		return self.name()
+		if self._getPrefix is None:
+			self._computePrefixes()
+		return self._getPrefix + self.name()
 
 	def pySetName(self):
 		""" Returns the name that should be used for the Python "set" accessor method for this attribute. This implementation returns setName, as in obj.setFoo(). """
+		if self._setPrefix is None:
+			self._computePrefixes()
 		name = self.name()
-		return 'set'+name[0].upper()+name[1:]
+		return self._setPrefix + name[0].upper() + name[1:]
 
 	def setting(self, name, default=NoDefault):
 		"""
@@ -76,3 +82,17 @@ class Attr(MiddleDict, ModelObject):
 
 	def printWarnings(self, out):
 		pass
+
+
+	## Self Util ##
+
+	def _computePrefixes(self):
+		style = self.setting('AccessorStyle', 'methods').lower()
+		assert style in ('properties', 'methods')
+		if style=='properties':
+			self._getPrefix = '_get_'
+			self._setPrefix = '_set_'
+		else:
+			# methods
+			self._getPrefix = ''
+			self._setPrefix = 'set'

@@ -1,8 +1,9 @@
-import types
+from MiddleKit.Run.MiddleObject import MiddleObject
+
 
 def assertBazIsObjRef(bar):
 	bazAttr = getattr(bar, '_baz')
-	assert type(bazAttr) is types.InstanceType, \
+	assert isinstance(bazAttr, MiddleObject), \
 		'bazAttr=%r, type(bazAttr)=%r' % (bazAttr, type(bazAttr))
 
 def test(store):
@@ -30,5 +31,5 @@ def test(store):
 	assertBazIsObjRef(bar)
 	if 0:
 		bazAttr = getattr(bar, '_baz')
-		assert type(bazAttr) is types.InstanceType, \
+		assert isinstance(bazAttr, MiddleObject), \
 			'bazAttr=%r, type(bazAttr)=%r' % (bazAttr, type(bazAttr))

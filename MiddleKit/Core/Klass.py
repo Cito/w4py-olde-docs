@@ -60,11 +60,12 @@ class Klass(MiddleDict, ModelObject):
 			self[key] = value
 
 
-	def awakeFromRead(self):
+	def awakeFromRead(self, klasses):
 		"""
 		Performs further initialization. Invoked by Klasses after all
 		basic Klass definitions have been read.
 		"""
+		assert self._klasses is klasses
 		self._makeAllAttrs()
 		# Python classes need to know their MiddleKit classes in
 		# order for MiddleKit.Run.MiddleObject methods to work.

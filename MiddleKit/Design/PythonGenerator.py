@@ -118,6 +118,7 @@ class Klass:
 				backPath = 'dirname(%s)' % backPath
 			wr('''\
 import sys
+from MiddleKit.Run.MiddleObject import MiddleObject
 from os.path import dirname
 sys.path.insert(0, %(backPath)s)
 from %(pkg)s%(supername)s import %(supername)s
@@ -201,6 +202,8 @@ class Attr:
 	def writePyAccessors(self, out):
 		self.writePyGet(out)
 		self.writePySet(out)
+		if self.setting('AccessorStyle', 'methods')=='properties':
+			out.write('\n\n\t%s = property(%s, %s)\n\n' % (self.name(), self.pyGetName(), self.pySetName()))
 
 	def writePyGet(self, out):
 		out.write('''
@@ -457,7 +460,7 @@ class TimeAttr:
 		return 'DateTimeDeltaType'
 
 	def writePySetChecks(self, out):
-		# additional check to also allow DateTime instances.  This is what 
+		# additional check to also allow DateTime instances.  This is what
 		# comes back from the database for 'time' columns using PostgresSQL
 		# and the psycopg adapter.
 		if DateTime:
@@ -503,9 +506,9 @@ class ObjRefAttr:
 		out.write('''
 	def %(pySetName)s(self, value):
 		%(reqAssert)s
-		if value is not None and type(value) is not LongType:
-			if not type(value) is InstanceType:
-				raise TypeError, 'expecting InstanceType, but got value %%r of type %%r instead' %% (value, type(value))
+		if value is not None and not isinstance(value, types.LongType):
+			if not isinstance(value, MiddleObject):
+				raise TypeError, 'expecting a MiddleObject, but got value %%r of type %%r instead' %% (value, type(value))
 			from %(package)s%(targetClassName)s import %(targetClassName)s
 			if not isinstance(value, %(targetClassName)s):
 				raise TypeError, 'expecting %(targetClassName)s, but got value %%r of type %%r instead' %% (value, type(value))
@@ -553,15 +556,17 @@ class ListAttr:
 		raise AssertionError, 'Lists do not have a set method.'
 
 	def writePyAddTo(self, out, names):
+		names['getParens'] = self.setting('AccessorStyle', 'methods')=='methods' and '()' or ''
 		out.write('''
 	def addTo%(capName)s(self, value):
 		assert value is not None
 		from %(package)s%(targetClassName)s import %(targetClassName)s
 		assert isinstance(value, %(targetClassName)s)
-		assert value.%(backRefAttrName)s() is None
+		assert value.%(backRefAttrName)s%(getParens)s is None
 		self.%(pyGetName)s().append(value)
-		value.set%(upperBackRefAttrName)s(self)
+		value._set('%(backRefAttrName)s', self)
 		store = self.store()
 		if value.serialNum()==0 and self.isInStore():
 			store.addObject(value)
 ''' % names)
+		del names['getParens']

@@ -110,13 +110,14 @@ class Klasses(ModelObject, UserDict):
 			e.setLine(line)
 			raise
 
-	def awakeFromRead(self):
+	def awakeFromRead(self, model):
 		"""
 		Performs further initialization.
 		Expected to be invoked by the model.
 		"""
+		assert self._model is model
 		for klass in self._klasses:
-			klass.awakeFromRead()
+			klass.awakeFromRead(self)
 
 	def __getstate__(self):
 		"""
@@ -177,3 +178,6 @@ class Klasses(ModelObject, UserDict):
 		""" Prints each class. """
 		for klass in self._klasses:
 			print klass
+
+	def debugString(self):
+		return '<%s 0x%x model=%r>' % (self.__class__.__name__, id(self), getattr(self, '_model', '(none)'))
