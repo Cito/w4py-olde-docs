@@ -669,7 +669,7 @@ class Application(Configurable,CanContainer):
 					cache['instances'].get_nowait()
 				cache = None
 			except Queue.Empty:
-				pass
+				cache = None
 
 		if not cache:
 			cache = {
