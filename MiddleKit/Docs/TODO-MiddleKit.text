@@ -137,6 +137,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] enforce min and max for attributes in generated python
 
+	[ ] Consider breaking obj refs in the SQL tables into two fields so that non-MK entities, like stored procedures, can have a fighting chance of using them.
+
 	[ ] Optimization: Prefetching: Have a parameter for whether object refs should be selected in the original query or delayed/as needed (like we do now). Combine the selects into a single join and then spread the attribs out over all objects.
 
 	[ ] abstract classes
@@ -208,6 +210,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 
 <bugs/flaws>
+
+	[ ] When I go fetchObject(WebUser,id) WebUser is an abstract class - both KaiserUser and CustomerContact inherit from it. Well, I get an error where you select from the CustomerContact table with a where clause of webUserID = 1 - but there is no web user ID, just customer contact id...
 
 	[ ] Fix float(8,8) limitation. Consider also the use of decimal. Should that be covered by float?
 
