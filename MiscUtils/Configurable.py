@@ -70,6 +70,9 @@ class Configurable:
 		else:
 			return self.config().get(name, default)
 
+	def setSetting(self, name, value):
+		self.config()[name] = value
+
 	def hasSetting(self, name):
 		return self.config().has_key(name)
 
@@ -83,7 +86,7 @@ class Configurable:
 		configuration. Subclasses must override to specify a
 		name. Returning None is valid, in which case no user
 		config file will be loaded."""
-		
+
 		raise AbstractError, self.__class__
 
 	def configName(self):
@@ -129,8 +132,10 @@ class Configurable:
 			try:
 				if isDict:
 					config = eval(contents, evalContext)
+					# @@ 2005-04-03 ce: to do: catch syntax error and convert to native line endings
 				else:
 					exec contents in evalContext
+					# @@ 2005-04-03 ce: to do: catch syntax error and convert to native line endings
 					config = evalContext
 					for name in config.keys():
 						if name.startswith('_'):
