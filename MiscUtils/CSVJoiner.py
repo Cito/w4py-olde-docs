@@ -13,7 +13,7 @@ def joinCSVFields(fields):
 		assert type(field) is types.StringType
 		if field.find('"')!=-1:
 			newField = '"' + field.replace('"', '""') + '"'
-		elif field.find(',')!=-1:
+		elif field.find(',')!=-1 or field.find('\n')!=-1 or field.find('\r')!=-1:
 			newField = '"' + field + '"'
 		else:
 			newField = field
