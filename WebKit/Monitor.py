@@ -14,13 +14,14 @@ it will start a new copy of the AppServer, after killing the previous process.
 USE:
 
 
-Monitor "AppServerName"
+"Monitor start"
+ or
+"Monitor stop"
 
-ie: #>./Monitor AsyncThreadedAppServer
 
-If you don't list an appserver, the default specified below will be used.
+The default specified below will be used, or you can list the AppServer you would like after "start".
 
-You can have the whole process run as a daemon by specifying "daemon" after the appserver on the command line.
+You can have the whole process run as a daemon by specifying "daemon" after "start" on the command line.
 
 To stop the processes, run "Monitor.py stop".
 
@@ -77,7 +78,7 @@ def createServer(changeDirectory=0):
 	code = 'from WebKit.%s import main' % serverName
 	exec code
 	main(['monitor',])
-	
+
 
 def startupCheck():
 	"""
