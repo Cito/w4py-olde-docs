@@ -49,9 +49,11 @@ FUTURE
 	  mechanism.
 """
 
+import time
+startTime = time.time()
 import win32serviceutil
 import win32service
-import os, sys, time, cStringIO
+import os, sys, cStringIO
 
 class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 	_svc_name_ = 'WebKit'
@@ -85,6 +87,8 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 			if '' not in sys.path:
 				sys.path = [''] + sys.path
 			os.chdir(os.pardir)
+			from WebKit import Profiler
+			Profiler.startTime = startTime
 			from WebKit.ThreadedAppServer import ThreadedAppServer
 			self.server = ThreadedAppServer(self.workDir())
 			# Now switch the output to the logfile specified in the appserver's config
