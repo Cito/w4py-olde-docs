@@ -234,7 +234,7 @@ class Application(Configurable,CanContainer):
 		return self._webwareVersion
 
 	def webKitVersion(self):
-		return '0.4 PR 1'
+		return '0.4'
 
 	def version(self):
 		"""
@@ -802,7 +802,7 @@ class Application(Configurable,CanContainer):
 		# relative URLs in the resulting document will get appended
 		# to the URL, instead of replacing the last component.
 		if lastChar=='\\' or lastChar=='/':
-			if debug: print "lastChar was %s" % lastChar 
+			if debug: print "lastChar was %s" % lastChar
 			ssPath = ssPath + os.sep
 
 		if debug: print '>> normalized ssPath =', repr(ssPath)
