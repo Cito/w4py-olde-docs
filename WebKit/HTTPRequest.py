@@ -5,6 +5,7 @@ import cgi, os
 from types import ListType
 from WebUtils.Funcs import requestURI
 
+debug=0
 
 class HTTPRequest(Request):
 	'''
@@ -25,7 +26,8 @@ class HTTPRequest(Request):
 			self._time    = dict['time']
 			self._environ = dict['environ']
 			self._input   = dict['input']
-			self._fields  = cgi.FieldStorage(fp=StringIO(self._input), environ=self._environ, keep_blank_values=1, strict_parsing=0)
+##			self._fields  = cgi.FieldStorage(fp=StringIO(self._input), environ=self._environ, keep_blank_values=1, strict_parsing=0)
+			self._fields  = cgi.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._cookies = Cookie()
 			if self._environ.has_key('HTTP_COOKIE'):
 				self._cookies.load(self._environ['HTTP_COOKIE'])
@@ -77,12 +79,17 @@ class HTTPRequest(Request):
 			# set of fields.
 			keys = []
 		dict = {}
+		
 		for key in keys:
 			value = self._fields[key]
 			if type(value) is not ListType:
-				value = value.value # i.e., if we don't have a list, we have one of those cgi.MiniFieldStorage objects. Get it's value.
+				if value.filename:
+					if debug: print "Uploaded File Found"					
+				else:
+					value = value.value # i.e., if we don't have a list, we have one of those cgi.MiniFieldStorage objects. Get it's value.
 			else:
 				value = map(lambda miniFieldStorage: miniFieldStorage.value, value) # extract those .value's
+
 			dict[key] = value
 		self._fields = dict
 
