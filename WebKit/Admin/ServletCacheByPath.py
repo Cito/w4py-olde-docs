@@ -1,10 +1,10 @@
-from AdminPage import AdminPage
+from AdminSecurity import AdminSecurity
 from string import join
 from Queue import Queue
 from WebUtils.Funcs import htmlEncode
 
 
-class ServletCacheByPath(AdminPage):
+class ServletCacheByPath(AdminSecurity):
 	'''
 	This servlet displays, in a readable form, the internal data
 	structure of the application known as the "servlet cache by path".
