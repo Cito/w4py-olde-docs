@@ -1,6 +1,6 @@
 from Common import *
 from Response import Response
-from Cookie import Cookie
+from WebKit.Cookie import Cookie
 
 
 class HTTPResponse(Response):
