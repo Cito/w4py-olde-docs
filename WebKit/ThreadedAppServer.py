@@ -32,7 +32,7 @@ DefaultConfig = {
 	'AdapterPort':          8086,
 	'EnableMonitor':		0,
 	'MonitorPort':          8085,
-	'EnableHTTP':           0,
+	'EnableHTTP':           1,
 	'HTTPPort':             8080,
 	'MaxServerThreads':     20,
 	'MinServerThreads':     5,
@@ -681,6 +681,8 @@ class TASASStreamOut(ASStreamOut):
 					sent = sent + self._socket.send(self._buffer[sent:sent+8192])
 				except socket.error, e:
 					if e[0]==errno.EPIPE: #broken pipe
+						pass
+					elif hasattr(errno, 'ECONNRESET') and e[0]==errno.ECONNRESET:
 						pass
 					else:
 						print "StreamOut Error: ", e
