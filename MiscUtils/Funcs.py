@@ -64,7 +64,7 @@ else:
 	def mktemp(suffix="", dir=None):
 		"""
 		User-callable function to return a unique temporary file name.
-		
+
 		Duplicated from Python's own tempfile with the optional "dir"
 		argument added. This allows customization of the directory, without
 		having to take over the module level variable, tempdir.
@@ -194,6 +194,49 @@ def localIP(remote=('www.yahoo.com', 80), useCache=1):
 		_localIP = addresses[0]
 	return _localIP
 
+
+def safeDescription(x, what='what'):
+	"""
+	Returns the repr() of x and its class (or type) for help in
+	debugging. A major benefit here is that exceptions from
+	repr() are consumed. This is important in places like
+	"assert" where you don't want to lose the assertion
+	exception in your attempt to get more information.
+
+	Example use:
+	assert isinstance(foo, Foo), safeDescription(foo)
+	print "foo:", safeDescription(foo)  # won't raise exceptions
+
+	# better output format:
+	assert isinstance(foo, Foo), safeDescription(foo, 'foo')
+	print safeDescription(foo, 'foo')
+	"""
+	try:
+		xRepr = repr(x)
+	except Exception, e:
+		xRepr = _descExc('x', e)
+	if hasattr(x, '__class__'):
+		try:
+			cRepr = repr(x.__class__)
+		except Exception, e:
+			cRepr = _descExc('x.__class__', e)
+		return '%s=%s class=%s' % (what, xRepr, cRepr)
+	else:
+		try:
+			cRepr = repr(type(x))
+		except Exception, e:
+			cRepr = _descExc('type(x)', e)
+		return '%s=%s type=%s' % (what, xRepr, cRepr)
+
+def _descExc(reprOfWhat, e):
+	"""
+	Returns a description of an exception. This is a private function
+	for use by safeDescription().
+	"""
+	try:
+		return '(exception from repr(%s): %s: %s)' % (reprOfWhat, e.__class__, e)
+	except:
+		return '(exception from repr(%s))' % reprOfWhat
 
 def timestamp(numSecs=None):
 	"""

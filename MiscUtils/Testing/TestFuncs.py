@@ -57,6 +57,39 @@ def TestHostName():
 		'host type = %s, host = %s' % (type(host), repr(host))
 
 
+def TestSafeDescription():
+	# @@ I think these tests could fail in earlier versions of Python
+	# because types displayed slightly different names.
+	sd = safeDescription
+
+	# basics:
+	assert sd(1)=="what=1 class=<type 'int'>", sd(1)
+	assert sd(1, 'x')=="x=1 class=<type 'int'>", sd(1, 'x')
+	assert sd('x')=="what='x' class=<type 'str'>", sd('x')
+	class Foo: pass
+	f = Foo()
+	assert sd(f).find('__main__.Foo')!=-1, sd(f)
+
+	# new object type:
+	try:
+		object  # more recent versions of Python have a builtin object type
+	except NameError:
+		pass  # must be old Python
+	else:
+		class Bar(object): pass
+		b = Bar()
+		assert sd(b).find('__main__.Bar')!=-1, sd(b)
+
+	# okay now test that safeDescription eats exceptions from repr():
+	class Baz:
+		def __repr__(self):
+			raise KeyError, 'bogus'
+	b = Baz()
+	try:
+		assert sd(b).find("(exception from repr(x): exceptions.KeyError: 'bogus')")!=-1, sd(b)
+	except:
+		assert 0, 'failure: should not get exception'
+
 def TestUniqueId():
 	lastResult = None
 	for x in range(5):
@@ -87,7 +120,7 @@ def TestValueForString():
 		"z"
 		"""1234"""
 	'''
-	
+
 	stringCases = '''
 		kjasdfkasdf
 		2389234lkdsflkjsdf
@@ -125,6 +158,7 @@ def Test():
 	TestCommas()
 	TestHostName()
 	TestLocalIP()
+	TestSafeDescription()
 	TestUniqueId()
 	TestValueForString()
 	TestWordWrap()
