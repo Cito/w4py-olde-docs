@@ -15,8 +15,8 @@ def main(args):
 	if server[-3:]=='.py':
 		server = server[:-3]
 		
-	if '' not in sys.path:
-		sys.path = [''] + sys.path
+	if '' not in sys.path:   ##'' is the directory this file is in
+		sys.path.insert(0,'')
 	try:
 		import WebwarePathLocation
 		wwdir = os.path.abspath(os.path.join(os.path.dirname(WebwarePathLocation.__file__),".."))
@@ -24,13 +24,22 @@ def main(args):
 		print e
 		usage()
 
+	try:
+		sys.path.remove('.')
+	except:
+		pass
+	
+	sys.path.remove('')
+	
 	if not wwdir in sys.path:
 		sys.path.insert(0,wwdir)
 	import WebKit
 	code = 'from WebKit.%s import main' % server
 	exec code
 	args = args[2:]
+	
 	main(args)
 
+	
 if __name__=='__main__':
 	main(sys.argv)
