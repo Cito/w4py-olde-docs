@@ -7,6 +7,12 @@
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="tabs" %> <%-- use tabs to indent the sourcefile that this template will produce --%>
 
+
+<%--  Method declaration Test --%>
+<psp:method name="title" params="">
+return "PSP Hello"
+</psp:method>
+
 <HTML>
 <BODY bgcolor='white'>
 <p align = center><img src="psplogo.png"><%-- This image is served by WebKit --%>
@@ -31,8 +37,8 @@
 
 <%
 import glob
-filesyspath=self._request.serverSideDir()
-files=glob.glob(os.path.join(filesyspath,"*.psp"))
+filesyspath=self.request().serverSidePath()
+files=glob.glob(os.path.join(os.path.dirname(filesyspath),"*.psp"))
 for i in files:
 	file=os.path.split(i)[1]$%>   <%-- AhHa! Here's where we need the complex block syntax. OKay.  --%>
 
