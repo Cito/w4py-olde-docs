@@ -315,6 +315,9 @@ class _FileParser(URLParser):
 			fpp = FileParser(name)
 			return fpp.parse(trans, restPart)
 
+		if restPart and not self._extraPathInfo:
+			raise HTTPNotFound
+
 		trans.request()._extraURLPath = restPart
 		trans.request()._serverSidePath = name
 		return ServletFactoryManager.servletForFile(trans, name)
@@ -453,6 +456,8 @@ class _FileParser(URLParser):
 					      % (directoryFile, self._path, names))
 				raise HTTPNotFound
 			elif names:
+				if requestPath and not self._extraPathInfo:
+					raise HTTPNotFound
 				trans.request()._serverSidePath = names[0]
 				trans.request()._extraURLPath = requestPath
 				return ServletFactoryManager.servletForFile(trans, names[0])
@@ -772,4 +777,5 @@ def initApp(app):
 	cls._useCascading = app.setting('UseCascadingExtensions')
 	cls._cascadeOrder = app.setting('ExtensionCascadeOrder')
 	cls._directoryFile = app.setting('DirectoryFile')
+	cls._extraPathInfo = app.setting('ExtraPathInfo')
 
