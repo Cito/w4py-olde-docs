@@ -91,7 +91,7 @@ class PickleCacheReader(PickleCache):
 		assert filename
 
 		if not os.path.exists(filename):
-			if v: print 'cannot find %r' % filename
+			#if v: print 'cannot find %r' % filename
 			open(filename) # to get a properly constructed IOError
 
 		didReadPickle = 0
@@ -102,39 +102,39 @@ class PickleCacheReader(PickleCache):
 		picklePath = self.picklePath(filename)
 		if os.path.exists(picklePath):
 			if os.path.getmtime(picklePath)<os.path.getmtime(filename):
-				if v: print 'cache is out of date'
+				#if v: print 'cache is out of date'
 				shouldDeletePickle = 1
 			else:
 				try:
-					if v: print 'about to open for read %r' % picklePath
+					#if v: print 'about to open for read %r' % picklePath
 					file = open(picklePath)
 				except IOError, e:
-					if v: print 'cannot open cache file: %s: %s' % (e.__class__.__name__, e)
+					#if v: print 'cannot open cache file: %s: %s' % (e.__class__.__name__, e)
 					pass
 				else:
 					try:
-						if v: print 'about to load'
+						#if v: print 'about to load'
 						dict = load(file)
 					except EOFError:
-						if v: print 'EOFError - not loading'
+						#if v: print 'EOFError - not loading'
 						shouldDeletePickle = 1
 					else:
 						file.close()
-						if v: print 'finished reading'
+						#if v: print 'finished reading'
 						assert isinstance(dict, DictType), 'type=%r dict=%r' % (type(dict), dict)
 						for key in ('source', 'data', 'pickle version', 'python version'):
 							assert dict.has_key(key), key
 						if source and dict['source']!=source:
-							if v: print 'not from required source (%s): %s' % (source, dict['source'])
+							#if v: print 'not from required source (%s): %s' % (source, dict['source'])
 							shouldDeletePickle = 1
 						elif dict['pickle version']!=pickleVersion:
-							if v: print 'pickle version (%i) does not match expected (%i)' % (dict['pickle version'], pickleVersion)
+							#if v: print 'pickle version (%i) does not match expected (%i)' % (dict['pickle version'], pickleVersion)
 							shouldDeletePickle = 1
 						elif dict['python version']!=sys.version_info:
-							if v: print 'python version %s does not match current %s' % (dict['python version'], sys.version_info)
+							#if v: print 'python version %s does not match current %s' % (dict['python version'], sys.version_info)
 							shouldDeletePickle = 1
 						else:
-							if v: print 'all tests pass. accepting data'
+							#if v: print 'all tests pass. accepting data'
 							if v>1:
 								print 'display full dict:'
 								pprint(dict)
@@ -144,7 +144,7 @@ class PickleCacheReader(PickleCache):
 		# delete the pickle file if suggested by previous conditions
 		if shouldDeletePickle:
 			try:
-				if v: print 'attempting to remove pickle cache file'
+				#if v: print 'attempting to remove pickle cache file'
 				os.remove(picklePath)
 			except OSError, e:
 				if v: print 'failed to remove: %s: %s' % (e.__class__.__name__, e)
