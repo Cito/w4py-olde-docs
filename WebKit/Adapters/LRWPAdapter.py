@@ -12,7 +12,7 @@
 #-----------------------------------------------------------------------------
 ##    """Set Program Parameters"""
 
-webKitDir = 'C:\Program Files\Python22\Lib\site-packages\Webware\WebKit'
+webKitDir = None
 
 LRWPappName = 'testing'
 
@@ -23,8 +23,15 @@ LRWPport = 81
 #-----------------------------------------------------------------------------
 
 import os, sys, string
+
+if webKitDir is None:
+	webKitDir = os.path.dirname(os.getcwd())
+webwareDir = os.path.dirname(webKitDir)
+sys.path.insert(1, webwareDir)
+
 from Adapter import Adapter
 from lrwplib import LRWP
+
 
 
 class LRWPAdapter(Adapter):
