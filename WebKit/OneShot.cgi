@@ -25,7 +25,7 @@ except:
 	output = string.replace(output, '&', '&amp;')
 	output = string.replace(output, '<', '&lt;')
 	output = string.replace(output, '>', '&gt;')
-	output = string.replace(output, '&', '&quot;')
+	output = string.replace(output, '"', '&quot;')
 	sys.stdout.write('''Content-type: text/html
 
 <html><body>
