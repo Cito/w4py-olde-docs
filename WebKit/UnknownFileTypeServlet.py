@@ -137,6 +137,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		file = fileCache.get(filename, None)
 		if file is None:
 			fileSize = os.path.getsize(filename)
+		else:
+			fileSize = file['size']
 
 		isHead = trans.request().method().upper()[0]=='H' # as in HEAD
 		if isHead:
@@ -168,6 +170,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 					'mimeType':     mimeType,
 					'mimeEncoding': mimeEncoding,
 					'mtime':        os.path.getmtime(filename),
+					'size':         os.path.getsize(filename),
 					'filename':     filename,
 				}
 				fileCache[filename] = file
