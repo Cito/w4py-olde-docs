@@ -58,6 +58,9 @@ class ExceptionHandler(Object):
 
 		def contextInitialize(app, ctxPath):
 			app._exceptionHandlerClass = ExceptionHandler
+
+	You can also control the errors with settings in
+	``Application.config``	
 	"""
 
 	hideValuesForFields = ['creditcard', 'credit card', 'cc', 'password', 'passwd']
