@@ -205,11 +205,12 @@ class Application(Configurable,CanContainer):
 				                        'Reply-to':     '-@-.com',
 				                        'Content-type': 'text/html',
 				                        'Subject':      'Error'
-									},
-			'Contexts':{'default':'Examples',
-							'Examples':'Examples',},
-			'SessionTimeout':60, #seconds, s/b 1800 (30 min) in real life
-			'InstanceCacheSize':10,
+									  },
+			'Contexts':               { 'default':  'Examples',
+							            'Examples': 'Examples',
+			                          },
+			'SessionTimeout':         60*60, # seconds
+			'InstanceCacheSize':      10,
 		}
 
 	def configFilename(self):
