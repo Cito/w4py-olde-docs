@@ -15,6 +15,9 @@ class UnknownFileTypeServletFactory(ServletFactory):
 	def servletForTransaction(self, transaction):
 		return UnknownFileTypeServlet(transaction.application())
 
+	def flushCache(self):
+		pass
+
 
 from HTTPServlet import HTTPServlet
 from MiscUtils.Configurable import Configurable
