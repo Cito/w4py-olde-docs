@@ -711,12 +711,10 @@ def main(requestDict):
 	"""
 	from WebUtils.HTMLForException import HTMLForException
 	try:
-		fauxserver = Configurable()
-		fauxserver.settings['ServerThreads']=1
 		assert type(requestDict) is type({})
 		from HTTPRequest import HTTPRequest
 		request = HTTPRequest(requestDict)
-		app = Application(useSessionSweeper=0,server=fauxserver)
+		app = Application(useSessionSweeper=0)
 		return app.dispatchRequest(request).response().rawResponse()
 	except:
 		return {
