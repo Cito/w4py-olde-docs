@@ -64,6 +64,9 @@ class Configurable(Object):
 		else:
 			return self.config().get(name, default)
 
+	def hasSetting(self, name):
+		return self.config().has_key(name)
+
 	def defaultConfig(self):
 		''' Returns a dictionary containing all the default values for the settings. This implementation returns {}. Subclasses should override. '''
 		return {}
