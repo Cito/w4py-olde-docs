@@ -27,8 +27,6 @@ from Context import *
 
 from MiscUtils.Funcs import mktemp
 import string, os, sys, tempfile
-from PSPReader import *
-
 
 class ServletWriter:
 
