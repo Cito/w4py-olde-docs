@@ -333,7 +333,7 @@ class SQLObjectStore(ObjectStore):
 				return obj
 
 			clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
-			objs = self.fetchObjectsOfClass(klass, clauses)
+			objs = self.fetchObjectsOfClass(klass, clauses, isDeep=0)
 			if len(objs)>1:
 				raise ValueError, 'Multiple objects.' # @@ 2000-11-22 ce: expand the msg with more information
 			elif len(objs)==1:
