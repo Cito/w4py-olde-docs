@@ -1,7 +1,6 @@
-def test():
+def test(store):
 	from Foo import Foo
 	from Bar import Bar
-	from MiddleKit.Run.ObjectStore import Store as store
 	
 	bar = store.fetchObjectsOfClass(Bar)[0]
 	store.dumpKlassIds()

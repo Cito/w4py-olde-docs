@@ -140,7 +140,7 @@ class Generate:
 			pyClass = getattr(module, pyClass)
 		generator = pyClass()
 		if type(model) is types.StringType:
-			generator.readModelFileNamed(model)
+			generator.readModelFileNamed(model, havePythonClasses=0)
 		else:
 			generator.setModel(model)
 		generator.generate(outdir)

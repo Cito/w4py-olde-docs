@@ -5,9 +5,7 @@ def assertBazIsObjRef(bar):
 	assert type(bazAttr) is types.InstanceType, \
 		'bazAttr=%r, type(bazAttr)=%r' % (bazAttr, type(bazAttr))
 
-def test():
-	from MiddleKit.Run.ObjectStore import Store as store
-
+def test(store):
 	foos = store.fetchObjectsOfClass('Foo')
 	assert len(foos)==2
 	foo1 = foos[0]

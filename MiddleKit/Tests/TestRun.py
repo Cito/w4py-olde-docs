@@ -1,47 +1,43 @@
 #!/usr/bin/env python
-from FixPath import *
-
-try:
-	import MiddleKit
-except ImportError:
-	FixPathForMiddleKit()
-	import MiddleKit
-
-import MiscUtils
-
-
-import os, sys
+from TestCommon import *
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
 import MiddleKit.Run.ObjectStore as ObjectStore
 
 
 def test(filename, pyFilename, deleteData):
-	if os.path.splitext(filename)[1]=='':
-		filename += '.mkmodel'
-	pyFilename = os.path.join(filename, pyFilename)
-	if not os.path.exists(pyFilename):
-		print 'No such file', pyFilename
-		return
+	curDir = os.getcwd()
+	os.chdir(workDir)
+	try:
+		filename = '../'+filename
 
-	print 'Testing %s...' % filename
+		if os.path.splitext(filename)[1]=='':
+			filename += '.mkmodel'
+		pyFilename = os.path.join(filename, pyFilename)
+		if not os.path.exists(pyFilename):
+			print 'No such file', pyFilename
+			return
 
-	# Set up the store
-	store = MySQLObjectStore()
-	store.readModelFileNamed(filename)
+		print 'Testing %s...' % filename
 
-	# Clear the database
-	if deleteData:
-		print 'Deleting all database records for test...'
-		for klass in store.model().klasses().values():
-			if not klass.isAbstract():
-				ObjectStore.Store.executeSQL('delete from %s;' % klass.name())
+		# Set up the store
+		store = MySQLObjectStore()
+		store.readModelFileNamed(filename)
+		assert store.model()._havePythonClasses # @@@@@@
 
-	# Run the test
-	results = {}
-	execfile(pyFilename, results)
-	assert results.has_key('test'), 'No test defined in %s.' % filename
-	results['test']()
+		# Clear the database
+		if deleteData:
+			print 'Deleting all database records for test...'
+			for klass in store.model().klasses().values():
+				if not klass.isAbstract():
+					ObjectStore.Store.executeSQL('delete from %s;' % klass.name())
 
+		# Run the test
+		results = {}
+		execfile(pyFilename, results)
+		assert results.has_key('test'), 'No test defined in %s.' % filename
+		results['test'](store)
+	finally:
+		os.chdir(curDir)
 
 def usage():
 	print 'TestRun.py <model> <py file> [delete=0|1]'

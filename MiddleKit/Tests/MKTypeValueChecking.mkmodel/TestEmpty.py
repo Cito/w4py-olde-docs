@@ -16,10 +16,9 @@ def typeErrors(object, value, skipAttrs=[]):
 				raise Exception, 'no type error for %s' % attr.name()
 
 
-def test():
+def test(store):
 	from Foo import Foo
 	from Bar import Bar
-	from MiddleKit.Run.ObjectStore import Store as store
 	from MiscUtils.DataTable import DataTable
 	import sys
 

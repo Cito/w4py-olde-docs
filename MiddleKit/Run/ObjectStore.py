@@ -68,9 +68,6 @@ class ObjectStore(ModelUser):
 	## Init ##
 
 	def __init__(self):
-		global Store
-		if Store is None:
-			Store = self
 		self._model          = None
 		self._hasChanges     = 0
 		self._objects        = {} # keyed by ObjectKeys
@@ -122,7 +119,7 @@ class ObjectStore(ModelUser):
 			# Make the store aware of this new object
 			self._hasChanges = 1
 			self._newObjects.append(object)
-			object.setInStore(1)
+			object.setStore(self)
 			if not noRecurse:
 				# Recursively add referenced objects to the store
 				object.addReferencedObjectsToStore(self)
@@ -379,12 +376,6 @@ class ObjectStore(ModelUser):
 			else:
 				raise ValueError, 'Invalid class parameter. Pass a Klass, a name or a Python class. Type of aClass is %s. aClass is %s.' % (type(aClass), aClass)
 		return aClass
-
-
-# The singleton instance used by MiddleObject by default.
-# This gets set by __init__ if it is None, so ordinarily
-# you don't need to think about it.
-Store = None
 
 
 class Attr:

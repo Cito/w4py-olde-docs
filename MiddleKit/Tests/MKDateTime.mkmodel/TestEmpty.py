@@ -1,17 +1,16 @@
 from Foo import Foo
-from MiddleKit.Run.ObjectStore import Store as store
 
 
-def test():
+def test(store):
 	try:
 		from mx import DateTime
-		testObjects()
+		testObjects(store)
 	except ImportError:
-		testStrings()
-		testNone()
+		testStrings(store)
+		testNone(store)
 
 
-def testStrings():
+def testStrings(store):
 	print 'Testing with strings.'
 
 	f = Foo()
@@ -19,7 +18,7 @@ def testStrings():
 	f.setT('12:42')
 	f.setDt('2001-06-07 12:42')
 
-	storeFoo(f)
+	storeFoo(store, f)
 
 	f.setD('2002-11-11')
 	f.setT('16:04')
@@ -28,7 +27,7 @@ def testStrings():
 	store.saveChanges()
 
 
-def testObjects():
+def testObjects(store):
 	import mx
 	from mx.DateTime import DateTimeFrom, TimeFrom
 	print 'Testing with DateTime module.'
@@ -42,7 +41,7 @@ def testObjects():
 	f.setT(t)
 	f.setDt(dt)
 
-	storeFoo(f)
+	storeFoo(store, f)
 
 	d  = DateTimeFrom('2002-11-11')
 	t  = TimeFrom('16:04')
@@ -55,7 +54,7 @@ def testObjects():
 	store.saveChanges()
 
 
-def storeFoo(f):
+def storeFoo(store, f):
 	store.addObject(f)
 	store.saveChanges()
 
@@ -66,7 +65,7 @@ def storeFoo(f):
 #	results[0].dumpAttrs()
 
 
-def testNone():
+def testNone(store):
 	print 'Testing None.'
 
 	store.executeSQL('delete from Foo;')

@@ -11,8 +11,9 @@ class Model(Configurable):
 	It also provides access to the Python classes that implement these structures for use by other MiddleKit entities including code generators and object stores.
 	'''
 
-	def __init__(self, filename=None, customCoreClasses={}, rootModel=None):
+	def __init__(self, filename=None, customCoreClasses={}, rootModel=None, havePythonClasses=1):
 		Configurable.__init__(self)
+		self._havePythonClasses = havePythonClasses
 		self._filename = None
 		self._coreClasses = customCoreClasses
 		self._klasses = None
@@ -96,7 +97,7 @@ class Model(Configurable):
 				model = self._allModelsByFilename[filename]
 				assert model!=self._rootModel
 			else:
-				model = self.__class__(filename, self._coreClasses, self)
+				model = self.__class__(filename, customCoreClasses=self._coreClasses, rootModel=self, havePythonClasses=self._havePythonClasses)
 				self._allModelsByFilename[filename] = model
 			self._parents.append(model)
 

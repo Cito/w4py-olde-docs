@@ -1,7 +1,6 @@
-def test():
+def test(store):
 	from Line import Line
 	from Rectangle import Rectangle
-	from MiddleKit.Run.ObjectStore import Store as store
 	
 	# Note: Two inherits One
 

@@ -1,6 +1,5 @@
-def test():
+def test(store):
 	from Foo import Foo
-	from MiddleKit.Run.ObjectStore import Store as store
 	from MiscUtils.DataTable import DataTable
 
 	thing = store.model().klass('Thing')

@@ -36,13 +36,9 @@ class MiddleObject(NamedValueAccess):
 
 	## Init ##
 
-	def __init__(self, store=None): # @@ 2000-09-21 ce: do we really need the store here?
+	def __init__(self):
 		self.__dict__['_mk_initing'] = 1
-		if store is None:
-			self._mk_store = ObjectStore.Store
-		else:
-			self._mk_store = store
-		self._mk_klass           = None  # Our class model
+		self._mk_store           = None
 		self._mk_changedAttrs    = None
 		self._mk_serialNum       = 0
 		self._mk_key             = None
@@ -113,13 +109,11 @@ class MiddleObject(NamedValueAccess):
 	def setChanged(self, flag):
 		self._mk_changed = flag
 
+
 	## In Store ##
 
 	def isInStore(self):
 		return self._mk_inStore
-
-	def setInStore(self, flag):
-		self._mk_inStore = flag
 
 
 	## Keys ##
@@ -215,16 +209,26 @@ class MiddleObject(NamedValueAccess):
 	def store(self):
 		return self._mk_store
 
+	def setStore(self, store):
+		assert not self._mk_store, 'The store was previously set and cannot be set twice.'
+		self._mk_store = store
+		self._mk_inStore = 1
+
 
 	## Sneaky MiddleKit stuff ##
 
 	def klass(self):
-		if self._mk_klass is None:
-			self._mk_klass = self._mk_store.model().klass(self.__class__.__name__)
-		return self._mk_klass
+		"""
+		Return the MiddleKit class definition for this object.
+		These definitions are instances of MiddleKit.Core.Klass and
+		come from the MiddleKit model. Be sure the MiddleKit model
+		is loaded. See the docs for more details.
+		"""
+		return self._mk_klass  # If you get AttributeError, then the MK model wasn't loaded.
 
 	def addReferencedObjectsToStore(self, store):
 		""" Adds all MK objects referenced by this object to the store """
+		assert store
 		values = [self.valueForAttr(attr) for attr in self.klass().allDataRefAttrs()]
 		for value in values:
 			if isinstance(value, MiddleObject):

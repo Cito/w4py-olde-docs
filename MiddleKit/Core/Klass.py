@@ -21,7 +21,7 @@ class Klass(UserDict, ModelObject):
 		self._attrsByName = {}
 		self._superklass = None
 		self._subklasses = []
-		self._pyClass = None
+		self._pyClass = 0   # 0 means never computed. None would mean computed, but not found.
 		self._backObjRefAttrs = None
 
 		if dict is not None:
@@ -60,8 +60,15 @@ class Klass(UserDict, ModelObject):
 
 
 	def awakeFromRead(self):
-		''' Performs further initialization. Invoked by Klasses after all basic Klass definitions have been read. '''
+		"""
+		Performs further initialization. Invoked by Klasses after all
+		basic Klass definitions have been read.
+		"""
 		self._makeAllAttrs()
+		# Python classes need to know their MiddleKit classes in
+		# order for MiddleKit.Run.MiddleObject methods to work.
+		# Invoking pyClass() makes that happen.
+		self.pyClass()
 
 	def _makeAllAttrs(self):
 		"""
@@ -245,10 +252,16 @@ class Klass(UserDict, ModelObject):
 		"""
 		Returns the Python class that corresponds to this class. This
 		request will even result in the Python class' module being
-		imported if necessary.
+		imported if necessary. It will also set the Python class
+		attribute _mk_klass which is used by MiddleKit.Run.MiddleObject.
+
 		"""
-		if self._pyClass is None:
-			self._pyClass = self._klassContainer._model.pyClassForName(self.name())
+		if self._pyClass==0:
+			if self._klassContainer._model._havePythonClasses:
+				self._pyClass = self._klassContainer._model.pyClassForName(self.name())
+				self._pyClass._mk_klass = self
+			else:
+				self._pyClass = None
 		return self._pyClass
 
 	def backObjRefAttrs(self):

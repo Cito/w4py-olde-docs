@@ -4,45 +4,8 @@ TestDesign.py
 '''
 
 from TestCommon import *
-
 from MiddleKit.Design.Generate import Generate
 from MiddleKit.Core.Model import Model
-import sys
-
-
-def rmdir(dirname):
-	''' Really remove the directory, even if it has files (and directories) in it. '''
-	exceptions = (os.curdir, os.pardir)
-	for name in os.listdir(dirname):
-		if name not in exceptions:
-			fullName = os.path.join(dirname, name)
-			if os.path.isdir(fullName):
-				rmdir(fullName)
-			else:
-				os.remove(fullName)
-	os.rmdir(dirname)
-
-
-def removeGenFiles(klasses):
-	genFilenames = ['GeneratedPy', 'GeneratedSQL']
-	genFilenames.extend([name+'.py' for name in klasses.keys()])
-	genFilenames.extend([name+'.pyc' for name in klasses.keys()])
-	stdout = sys.stdout
-	first = 1
-	for filename in genFilenames:
-		if os.path.exists(filename):
-			if first:
-				stdout.write('Removing')
-				first = 0
-			stdout.write(' ' + filename)
-			stdout.flush()
-			if os.path.isdir(filename):
-				rmdir(filename)
-			else:
-				os.remove(filename)
-	if not first:
-		sys.stdout.write('\n')
-		stdout.flush()
 
 
 def importPyClasses(klasses):
@@ -56,13 +19,31 @@ def importPyClasses(klasses):
 		assert results.has_key(klassName)
 
 
-def test(modelFilename):
-	model = Model(modelFilename)
-	klasses = model.klasses()
-	removeGenFiles(klasses)
-	Generate().main('Generate.py --db MySQL --model '+modelFilename)
-	importPyClasses(klasses)
-	return model
+def test(modelFilename, workDir=workDir, toTestDir='../'):
+	"""
+	modelFilename: the correct filename to the existing model
+	workDir:       the directory to remove and create and then put the
+	               generated files in
+	toTestDir:     a relative path to get from inside the workDir back
+	               to the MiddleKit/Tests dir
+
+	In most cases, the defaults for workDir and toTestDir are
+	sufficient.	In funkalicious cases, like the MKMultipleStores test,
+	overriding these defaults comes in handy.
+	"""
+	rmdir(workDir)     # get rid of files from previous runs
+	os.mkdir(workDir)  # make a space for the files from this run
+
+	# Run generate, load the model, and import some classes
+	Generate().main('Generate.py --outdir %s --db MySQL --model %s' % (workDir, modelFilename))
+	curDir = os.getcwd()
+	os.chdir(workDir)
+	try:
+		model = Model(toTestDir+modelFilename)
+		importPyClasses(model.klasses())
+		return model
+	finally:
+		os.chdir(curDir)
 
 
 if __name__=='__main__':

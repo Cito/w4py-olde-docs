@@ -1,10 +1,9 @@
 from Foo import Foo
 from Bar import Bar
-from MiddleKit.Run.ObjectStore import Store as store
 from MiddleKit.Run import ObjectStore
 import A, B, C, D, E, F, G, H, I, J, K, L
 
-def test():
+def test(store):
 
 	testOther(store, A.A, DELETE_REFERENCED_ERROR)
 	testOther(store, B.B, DELETE_REFERENCED_ERROR)
@@ -19,14 +18,14 @@ def test():
 	testSelf(store, H.H, DELETE_FOO_AND_OBJECT)
 
 	print '*** passed testSelf'
-	
+
 	testSelfList(store, I.I, DELETE_FOO)
 	testSelfList(store, J.J, DELETE_OBJECT_WITH_REFERENCES_ERROR)
 	testSelfList(store, K.K, DELETE_FOO)
 	testSelfList(store, L.L, DELETE_FOO_AND_OBJECT)
 
 	print '*** passed testSelfList'
-	
+
 # These are possible values for expectedResult
 DELETE_FOO = 1
 DELETE_OBJECT = 2
@@ -92,7 +91,7 @@ def setupTest(store, klass):
 	object.setFoo(foo)
 	store.addObject(object)
 	store.saveChanges()
-	
+
 	return object, foo, bar
 
 def setupListTest(store, klass):
@@ -113,7 +112,7 @@ def setupListTest(store, klass):
 	object = klass()
 	getattr(foo, 'addToListOf%s' % klass.__name__)(object)
 	store.saveChanges()
-	
+
 	return object, foo, bar
 
 def runTest(store, klass, objectToDelete, expectedResult):
@@ -151,11 +150,10 @@ def runTest(store, klass, objectToDelete, expectedResult):
 	bars = store.fetchObjectsOfClass(Bar)
 	assert len(bars) == 1
 
-def cleanupTest(store, klass):	
+def cleanupTest(store, klass):
 	# Clean out all leftover objects
 	store.clear()
 	store.executeSQL('delete from Foo;')
 	store.executeSQL('delete from Bar;')
 	store.executeSQL('delete from %s;' % klass.__name__)
 	print
-	

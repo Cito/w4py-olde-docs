@@ -1,7 +1,6 @@
-def test():
+def test(store):
 	from Thing import Thing
 	from Person import Person
-	from MiddleKit.Run.ObjectStore import Store as store
 	from MiscUtils.DataTable import DataTable
 
 	dataSource = '''

@@ -1,5 +1,3 @@
-def test():
+def test(store):
 	from Thing import Thing
-	from MiddleKit.Run.ObjectStore import Store as store
-
-	# nothing to do here
+	# nothing more to do here

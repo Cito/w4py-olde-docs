@@ -1,15 +1,14 @@
 from Foo import Foo
 from Bar import Bar
-from MiddleKit.Run.ObjectStore import Store as store
 from types import *
 
 
-def reset():
+def reset(store):
 	store.clear()
 	store.executeSQL('delete from Foo;')
 	store.executeSQL('delete from Bar;')
 
-def testAddToBars():
+def testAddToBars(store):
 	# Test 1: Use addToBars()
 	f = Foo()
 	store.addObject(f)
@@ -22,15 +21,15 @@ def testAddToBars():
 	store.clear()
 	f = store.fetchObjectsOfClass(Foo)[0]
 	bars = f.bars()
-	assert len(bars)==1
+	assert len(bars)==1, 'bars=%r' % bars
 	assert bars[0].foo()==f
-	reset()
+	reset(store)
 
-def test():
+def test(store):
 	# We invoke testAddToBars twice on purpose, just to see that
 	# the second time around, things are stable enough to pass again
-	testAddToBars()
-	testAddToBars()
+	testAddToBars(store)
+	testAddToBars(store)
 
 	# Test 2: do not use addToBars()
 	# @@ 2001-02-11 ce: this is probably not a valid test in the long run
@@ -45,9 +44,11 @@ def test():
 	store.clear()
 
 	f = store.fetchObjectsOfClass(Foo)[0]
+	assert f._mk_store
+	assert f._mk_inStore
 	bars = f.bars()
 	assert type(bars) is ListType
-	assert len(bars)==1
+	assert len(bars)==1, 'bars=%r' % bars
 	assert bars[0].x()==7
 
 	# Test addToXYZ() method
@@ -61,7 +62,7 @@ def test():
 	f = store.fetchObjectsOfClass(Foo)[0]
 	bars = f.bars()
 	assert type(bars) is ListType
-	assert len(bars)==2
+	assert len(bars)==2, 'bars=%r' % bars
 	assert bars[0].x()==7
 	assert bars[1].x()==7
 

@@ -1,6 +1,5 @@
-def test():
+def test(store):
 	from Foo import Foo
-	from MiddleKit.Run.ObjectStore import Store as store
 
 	a100 = 'a'*100
 	b500 = 'b'*500

@@ -1,8 +1,7 @@
-def test():
+def test(store):
 	from Foo import Foo
 	from Bar import Bar
 	from BarReq import BarReq
-	from MiddleKit.Run.ObjectStore import Store as store
 
 	# Create a Foo and a Bar that refers to it
 	f = Foo()

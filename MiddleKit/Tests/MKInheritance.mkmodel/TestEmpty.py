@@ -1,10 +1,8 @@
-def test():
+def test(store):
 	import os
 
 	from One import One
 	from Two import Two
-
-	from MiddleKit.Run.ObjectStore import Store as store
 
 	# Note: Two inherits One
 

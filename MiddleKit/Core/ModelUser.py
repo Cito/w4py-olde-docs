@@ -28,6 +28,7 @@ class ModelUser(Configurable):
 		return self._model
 
 	def setModel(self, model):
+		assert model
 		assert self._model is None, 'Can only set model once.'
 		self._model = model
 		self.modelWasSet()

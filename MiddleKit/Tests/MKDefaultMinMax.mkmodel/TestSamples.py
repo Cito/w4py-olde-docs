@@ -1,6 +1,4 @@
-def test():
-	from MiddleKit.Run.ObjectStore import Store as store
-
+def test(store):
 	# We're testing to see if the defaults made it
 	# into the database. We have a row with i==42
 	# and all other fields blank and s=='42' and

@@ -35,7 +35,7 @@ class Test:
 			self.testEmpty()
 			self.insertSamples()
 			self.testSamples()
-			self.removeGenFiles(self._modelName)
+			rmdir(workDir)
 			print '\n'
 
 	def readArgs(self, args):
@@ -46,6 +46,7 @@ class Test:
 				MKBasic MKNone MKString MKDateTime MKDefaultMinMax
 				MKTypeValueChecking MKInheritance MKInheritanceAbstract
 				MKList MKObjRef MKObjRefReuse MKDelete MKDeleteMark
+				MKMultipleStores
 				MKModelInh1 MKModelInh2 MKModelInh3
 			'''.split()
 
@@ -61,7 +62,7 @@ class Test:
 				self.testRun(os.path.basename(name), deleteData=0)
 		else:
 			self.createDatabase()
-			
+
 	def testSamples(self):
 		self.testRun('TestSamples.py', deleteData=0)
 
@@ -76,32 +77,31 @@ class Test:
 		self.run('python TestDesign.py %s' % self._modelName)
 
 	def createDatabase(self):
-		filename = 'GeneratedSQL/Create.sql'
+		filename = workDir + '/GeneratedSQL/Create.sql'
 		filename = os.path.normpath(filename)
 		cmd = '%s < %s' % (self.cmdLineDB(), filename)
 		self.run(cmd)
 
 	def insertSamples(self):
 		self.createDatabase()
-		filename = 'GeneratedSQL/InsertSamples.sql'
+		filename = workDir + '/GeneratedSQL/InsertSamples.sql'
 		filename = os.path.normpath(filename)
 		if os.path.exists(filename):
 			cmd = '%s < %s' % (self.cmdLineDB(), filename)
 			self.run(cmd)
-
-	def removeGenFiles(self, modelName):
-		from TestDesign import removeGenFiles
-		from MiddleKit.Core.Model import Model
-		model = Model(modelName)
-		removeGenFiles(model.klasses())
 
 
 	## Self utility ##
 
 	def run(self, cmd):
 		''' Self utility method to run a system command. '''
-		print 'cmd>', cmd
+		print '<cmd>', cmd
+		sys.stdout.flush()
+		sys.stderr.flush()
 		returnCode = os.system(cmd)
+		sys.stdout.flush()
+		sys.stderr.flush()
+
 		# @@ 2001-02-02 ce: we have a problem, at least on Windows ME,
 		# that the return code of os.system() is always 0, even if
 		# the program was a Python program exited via sys.exit(1)

@@ -2,9 +2,8 @@ class NoException(Exception):
 	pass
 
 
-def test():
+def test(store):
 	from Foo import Foo
-	from MiddleKit.Run.ObjectStore import Store as store
 
 	f = Foo()
 
