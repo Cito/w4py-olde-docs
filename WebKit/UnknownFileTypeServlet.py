@@ -1,5 +1,5 @@
 from ServletFactory import ServletFactory
-import os, mimetypes
+import os, mimetypes, time
 
 debug = 0
 
@@ -51,6 +51,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		method = getattr(self, technique)
 		method(trans)
 
+	respondToHead = respondToGet
+
 	def respondToPost(self, trans):
 		'''
 		Invokes self.respondToGet().
@@ -77,12 +79,21 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 
 		# @@temp variable, move to config
 		MaxCacheContentSize = 1024*32 ##32k
-		
+
 		#start sending automatically
 		response.streamOut().autoCommit(1)
-		
+
 		filename = trans.request().serverSidePath()
 		filesize = os.path.getsize(filename)
+
+		isHead = trans.request().method().upper()[0]=='H' # as in HEAD
+		print '>> HEAD REQUEST'
+		if isHead:
+			response.setHeader('Content-Length', str(filesize))
+			mtime = os.path.getmtime(filename)
+			response.setHeader('Last-Modified',
+				time.strftime('%a, %d %b %Y %H:%M:%S GMT',
+				time.gmtime(mtime)))
 
 		if debug:
 			print '>> UnknownFileType.serveContent()'
@@ -101,6 +112,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 			response.setHeader('Content-type', self._mimeType)
 			if self._mimeEncoding:
 				response.setHeader('Content-encoding', self._mimeEncoding)
+			if isHead:
+				return
 			response.write(data)
 
 		else:
@@ -114,7 +127,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 			response.setHeader('Content-type', mimeType)
 			if self._mimeEncoding:
 				response.setHeader('Content-encoding', self._mimeEncoding)
-			
+
 
 			if self.setting('ReuseServlets') and self.setting('CacheContent') and filesize < MaxCacheContentSize:
 				# set the:
@@ -125,8 +138,12 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 				self._mimeEncoding = mimeEncoding
 				self._mtime = os.path.getmtime(filename)
 				self._serverSideFilename = filename
+				if isHead:
+					return
 				response.write(self._content)
 			else:  ##too big
+				if isHead:
+					return
 				f = open(filename, "rb")
 				sent = 0
 				while sent < filesize:
