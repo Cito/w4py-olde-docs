@@ -33,12 +33,13 @@ class Model(Configurable):
 		# increment this if a non-compatible change is made in Klasses,
 		# Klass or Attr
 
-	def __init__(self, filename=None, customCoreClasses={}, rootModel=None, havePythonClasses=1):
+	def __init__(self, filename=None, classesFilename=None, customCoreClasses={}, rootModel=None, havePythonClasses=1):
 		Configurable.__init__(self)
 		self._havePythonClasses = havePythonClasses
 		self._filename = None
 		self._coreClasses = customCoreClasses
 		self._klasses = None
+		self._name = None
 		self._parents = []  # e.g., parent models
 		self._pyClassForName = {}
 
@@ -49,8 +50,8 @@ class Model(Configurable):
 			self._allModelsByFilename = {}
 		self._rootModel = rootModel
 
-		if filename!=None:
-			self.read(filename)
+		if filename or classesFilename:
+			self.read(filename or classesFilename, classesFilename is not None)
 
 	def name(self):
 		if self._name is None:
@@ -66,24 +67,34 @@ class Model(Configurable):
 	def filename(self):
 		return self._filename
 
-	def read(self, filename):
+	def read(self, filename, isClassesFile=0):
+		import time
+		start = time.time()
 		assert self._filename is None, 'Cannot read twice.'
 		# Assume the .mkmodel extension if none is given
 		if os.path.splitext(filename)[1]=='':
 			filename += '.mkmodel'
 		self._filename = os.path.abspath(filename)
 		self._name = None
-		self.readParents()
+		if isClassesFile:
+			self.dontReadParents()
+		else:
+			self.readParents()  # the norm
 		try:
-			self.readKlasses()
+			if isClassesFile:
+				self.readKlassesDirectly(filename)
+			else:
+				self.readKlassesInModelDir()  # the norm
 			self.awakeFromRead()
 		except ModelError, e:
 			print
 			print 'Error while reading model:'
 			e.printError(filename)
 			sys.exit(1)
+		dur = time.time() - start
+		print '%.2f seconds' % dur
 
-	def readKlasses(self):
+	def readKlassesInModelDir(self):
 		"""
 		Reads the Classes.csv file, or the Classes.pickle.cache file as
 		appropriate.
@@ -98,6 +109,9 @@ class Model(Configurable):
 		if path is None:
 			open(csvPath) # to get a properly constructed IOError
 
+		self.readKlassesDirectly(path)
+
+	def readKlassesDirectly(self, path):
 		# read the pickled version of Classes if possible
 		data = None
 		shouldUseCache = self.setting('UsePickledClassesCache', 1)
@@ -182,6 +196,13 @@ class Model(Configurable):
 
 		self._searchOrder = searchOrder
 
+	def dontReadParents(self):
+		"""
+		The attributes _parents and _searchOrder are set.
+		Used internally for the rare case of reading class files directly (instead of from a model directory).
+		"""
+		self._parents = []
+		self._searchOrder = [self]
 
 	def allModelsDepthFirstLeftRight(self, parents=None):
 		"""
