@@ -21,15 +21,14 @@
 <body>
 
 <h1>WebKit Install Guide</h1>
-WebKit 0.5.1
-<br>Webware for Python 0.5.1
+WebKit 0.6.1
+<br>Webware for Python 0.6.1
 
 
 <a name=TOC><h2>Table of Contents</h2></a>
 
 <p><span class=ToC>
      <a href="#Introduction"><font size=+1>Introduction</font></a>
-<br> <a href="#None"><font size=+1>Quick Start</font></a>
 <br> <a href="#Python"><font size=+1>Python</font></a>
 <br> <a href="#WebwareVersion"><font size=+1>Webware Version</font></a>
 <br> <a href="#InstallingWebware"><font size=+1>Installing Webware</font></a>
@@ -62,8 +61,6 @@ WebKit 0.5.1
 <br> <a href="#Contexts"><font size=+1>Contexts</font></a>
 <br> <a href="#AppServerNotes"><font size=+1>AppServer Notes</font></a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_Threaded">ThreadedAppServer</a>
-<br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_Async">AsyncThreadedAppServer</a>
-<br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_AsyncHTTP">AsyncThreadedHTTPServer</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_Monitoring">Monitoring</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_UNIXStartUp">Launching the AppServer at UNIX boot up</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_NTService">Running ThreadedAppServer as a Windows NT/2000 Service</a>
@@ -88,6 +85,7 @@ WebKit 0.5.1
 <p> You can always e-mail <a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a> to give feedback, discuss features and get help using WebKit.
 
 
+<!--
 <h2>Quick Start</h2>
 <p>If you would like to jump right in and see WebKit in action, here's what you can do.  WebKit comes with a lightweight Webserver, called AsyncThreadedHTTPServer.  Don't let the name frighten you.  To see WebKit in action without having to set up a webserver and do other configuration, do this:
 <p>At a command prompt, do this:
@@ -99,11 +97,12 @@ WebKit 0.5.1
 <p>Now, in your browser, type <code>http://localhost:8086</code>
 <p>Hopefully, you'll be looking at WebKit!
 <p> To stop the server, switch back to the terminal you started the webserver from, and press control-c.
+-->
 
 
 <a name=Python><h2>Python</h2></a>
 
-<p> WebKit 0.5 was tested with both Python 1.5.2 and 2.0. If you have any problems whatsoever with Python 1.5.2 and up, please let us know so we can fix them (<a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>).
+<p> WebKit 0.6.1 was tested with Python 1.5.2, 2.0 and 2.1.1. If you have any problems whatsoever with Python 1.5.2 and up, please let us know so we can fix them (<a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>).
 
 <p> Your installation of Python must be multi-threaded, even if you are using the OneShot adapter (which logically doesn't require threads). It's not uncommon for third party web host providers to leave this disabled in Python because they don't expect that it's needed and/or because the default installation of Python does not turn threads on. If your Python installation is not multi-threaded, you will have to reinstall it. If you're using a third party host provider in this situation, you may be able to install it yourself into your home directory via a telnet or ssh account. See the <a href=http://www.python.org>Python</a> site for instructions.
 
@@ -112,7 +111,7 @@ WebKit 0.5.1
 
 <a name=WebwareVersion><h2>Webware Version</h2></a>
 
-<p> Unless you just downloaded Webware (and therefore WebKit), you should check to see if you have the latest version. This version you are looking at is 0.5. You can check for the latest version at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>.
+<p> Unless you just downloaded Webware (and therefore WebKit), you should check to see if you have the latest version. This version you are looking at is 0.6.1. You can check for the latest version at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>.
 
 <p> If you're feeling adventurous, you can get the latest in-development source code from the public repository. Instructions are located at the <a href=https://sourceforge.net/cvs/?group_id=4866>Webware CVS page</a>. You can find more information about CVS in general at <a href=http://www.cvshome.org>http://www.cvshome.org</a>.
 
@@ -137,8 +136,6 @@ WebKit 0.5.1
 <p> [UNIX] Nothing special to report. Both Linux and BSD have been used with WebKit.
 
 <p> [WinNT] If you are using IIS as your web server, please see the <a href=#WebServers_IIS>IIS notes</a> below.
-
-<p> [Win9x] Note that AsyncThreadedAppServer.py often doesn't function correctly on Win9x. Since it's not the default app server (AppServer.bat points to ThreadedAppServer.py), you don't have to think hard about this unless you go digging.
 
 <p> [Win9x] Although a lot of the development of both WebKit and various web sites that use it has been done on Windows 9x, we don't recommend that you use this operating system to actually serve your users. UNIX and NT are generally more robust and secure and therefore, more appropriate for deployment.
 
@@ -451,6 +448,7 @@ WebKit 0.5.1
 
 <p>WebKit uses a process called an AppServer to handle requests.  The AppServer is responsible for receiving a request from the adapter, and then running it through the Application, and then sending the response back to the adapter.  The default AppServer is called ThreadedAppServer.  This AppServer uses a set number of threads to process requests.  The number of threads used is configurable.  As each request comes in, a thread from the thread pool will be handed that request and will be responsible for receiving the request from the adapter, running the request through the Application, and then sending the response back to the adapter.
 
+<!--
 <a name=AppServerNotes_Async><h3>AsyncThreadedAppServer</h3></a>
 
 <p>There is also a modified version of ThreadedAppServer, called AsyncThreadedAppServer. The modification is that the threads are only responsible for running a request through the Application and not for any network I/O which is handled by the Python asyncore module.  The reason for this alternate form is that heavy network traffic could theoretically tie up threads if they are responsible for sending the response, thus leaving the potential for the AppServer to run out of threads to process requests.
@@ -477,6 +475,7 @@ WebKit 0.5.1
 <p> [UNIX] In order to provide additional stability and peace of mind, a monitor process has been developed.  The monitor is responsible for starting the AppServer and monitoring its health.  If it detects that the AppServer is not responding, it will start a new AppServer and clean up the old one.  In order to use the monitor, run the file Monitor.py with the argument start or stop. Optionally, you can also specify "daemon" on the command line to run the process as a daemon. The Monitor process will handle the starting of the main AppServer. In order to shut down WebKit when using the monitor process, run Monitor.py with "stop" as an argument.
 
 <p> This process will be available on Windows systems in the near future.
+-->
 
 
 <a name=AppServerNotes_UNIXStartUp><h3>Launching the AppServer at UNIX boot up</h3></a>
