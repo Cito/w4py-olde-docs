@@ -263,7 +263,8 @@ class ExceptionHandler(Object):
 						value = '(could not find attribute or method)'
 					else:
 						try:
-							value = value()
+							if callable(value):
+								value = value()
 						except Exception, e:
 							value = '(exception during method call: %s: %s)' % (e.__class__.__name__, e)
 						value = self.repr(value)
