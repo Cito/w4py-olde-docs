@@ -254,7 +254,7 @@ class HTTPRequestHandler(asyncore.dispatcher):
 	def handle_write(self):
 		if not self.statusSent:
 			if string.lower(self._strmOut._buffer[:7]) == "status:" :
-				self._strmOut._buffer = "HTTP/1.0" + self._strmOut._buffer[8:]
+				self._strmOut._buffer = "HTTP/1.0 " + self._strmOut._buffer[8:]
 			else:
 				self._strmOut._buffer = "HTTP/1.0 200 OK\r\n" + self._strmOut._buffer
 			self.statusSent=1
