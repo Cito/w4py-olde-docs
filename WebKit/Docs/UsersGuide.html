@@ -181,6 +181,14 @@ The maximum number of threads in the request handler thread pool, and therefore,
 </dd>
 </dl></p>
 
+<p><dl class=config>
+<dt class=config><span class=setting>CheckInterval</span>
+&nbsp; <code> = 100</code></dt>
+<dd class=config>
+The number of virtual instructions after which Python will check for thread switches, signal handlers, etc. This is passed directly to sys.setcheckinterval(). Benchmarks have shown 100 to give a worthwhile performance boost with higher values resulting in little gain.
+</dd>
+</dl></p>
+
 
 <a name=Config_Application><h3>Application.config</h3></a>
 
@@ -277,7 +285,7 @@ Determines the amount of time (expressed in minutes) that passes before a user's
 <dt class=config><span class=setting>IgnoreInvalidSession</span>
 &nbsp; <code> = 1</code></dt>
 <dd class=config>
-If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->. 
+If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->.
 </dd>
 </dl></p>
 
@@ -285,7 +293,7 @@ If false, then an error message will be returned to the user if the user's sessi
 <dt class=config><span class=setting>UseAutomaticPathSessions</span>
 &nbsp; <code> = 0</code></dt>
 <dd class=config>
-If true, then the app server will include the session ID in the URL by inserting a component of the form _SID_=8098302983 into the URL, and will parse the URL to determine the session ID.  This is useful for situations where you want to use sessions, but it has to work even if the users can't use cookies. 
+If true, then the app server will include the session ID in the URL by inserting a component of the form _SID_=8098302983 into the URL, and will parse the URL to determine the session ID.  This is useful for situations where you want to use sessions, but it has to work even if the users can't use cookies.
 </dd>
 </dl></p>
 
@@ -444,7 +452,7 @@ The SMTP server to use for sending e-mail error messages.
 
 	<br><br> If your site has a large amount of static files being served via WebKit, you should consider changing 'CacheContent' to 0. If you are confident that your static files do not get updated while the app server is live, then you might consider changing 'CheckDate' to 0 for better performance.
 
-	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems. 
+	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems.
 </dd>
 </dl></p>
 
@@ -455,7 +463,6 @@ The SMTP server to use for sending e-mail error messages.
 If true, then the full traceback for uncaught exceptions in XML-RPC Servlets will be returned to the client in an XML-RPC Fault.  If false, then a generic 'unhandled exception' message will be returned in the Fault.
 </dd>
 </dl></p>
-
 
 
 <a name=Administration><h2>Administration</h2></a>
