@@ -1,20 +1,41 @@
 #!/bin/sh
 #
-# Startup script for WebKit
-# on UNIX systems.
+# Startup script for WebKit on UNIX systems.
 #
 # See Webware/WebKit/Docs/InstallGuide.html for instructions.
 
 # chkconfig: 2345 75 25
-# description: WebKit is Python application server, part of Webware.
+# description: WebKit is a Python application server, part of Webware.
 
-# Source function library.
-. /etc/rc.d/init.d/functions
+
+# Configuration section
 
 WEBKIT_DIR=/opt/Webware/WebKit
 PID_FILE=/var/run/webkit.pid
 LOG=/var/log/webkit
 PYTHONPATH=
+
+# end configuration section
+
+
+# Source function library.
+# Use the funtions provided by Red Hat or use our own
+if [ -f /etc/rc.d/init.d/functions ]
+then
+	. /etc/rc.d/init.d/functions
+else
+	function action {
+		echo "$1"
+		shift
+		$@
+	}
+	function success {
+		echo -n "Success"
+	}
+	function failure {
+		echo -n "Failed"
+	}
+fi
 
 
 [ -x $WEBKIT_DIR/AppServer ] || exit 0
@@ -24,6 +45,7 @@ case "$1" in
 		echo -n  "Starting WebKit: "
 		pushd $WEBKIT_DIR > /dev/null
 		LAUNCH='./AppServer'
+		LAUNCH='python Launch.py ThreadedAppServer'
 
 		# run as root:
 		$LAUNCH >> $LOG 2>&1 &
@@ -39,8 +61,21 @@ case "$1" in
 
 	stop)
 		echo -n "Shutting down WebKit: "
-		kill -s 2 `cat $PID_FILE`
-		success "Shutting down WebKit"
+		if test -f "$PID_FILE" ; then
+			PID=`cat $PID_FILE`
+			if kill $PID >> $LOG 2>&1 ; then
+				/bin/rm $PID_FILE
+				success "Shutting down WebKit"
+			else
+				echo ""
+				echo "Could not kill process $PID named in $PID_FILE. Check tail of $LOG."
+				failure "Shutting down WebKit"
+			fi
+		else
+			echo ""
+			echo "No WebKit pid file found. Looked for $PID_FILE."
+			failure "No WebKit pid file found. Looked for $PID_FILE."
+		fi
 		echo
 		;;
 
