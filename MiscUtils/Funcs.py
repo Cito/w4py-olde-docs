@@ -265,7 +265,10 @@ def uniqueId(forObject=None):
 	If an object is passed, then its id() is incorporated into the generation.
 	Relies on md5 and returns a 32 character long string.
 	"""
-	r = [time.time(), random.random(), os.times()]
+	if hasattr(os, 'urandom'):	# prefer os.urandom(), if available
+		r = [os.urandom(8)]
+	else:
+		r = [time.time(), random.random(), os.times()]
 	if forObject is not None:
 		r.append(id(forObject))
 	md5object = md5.new(str(r))
