@@ -44,13 +44,15 @@ class PSPServletFactory(ServletFactory):
 		self.cacheDir = application.serverSidePath('Cache/PSP')
 		self._classcache={}
 		sys.path.append(self.cacheDir)
+		
+		self._cacheClassFiles = self._cacheClasses
 
-		# Initialize self.classNameTrans so that it translates all non-alphanumeric
-		# characters to underscores
 		l = ['_'] * 256
 		for c in string.digits + string.letters:
 			l[ord(c)] = c
 		self._classNameTrans = string.join(l, '')
+
+		self.clearFileCache()
 
 	def uniqueness(self):
             return 'file'
@@ -58,12 +60,36 @@ class PSPServletFactory(ServletFactory):
 	def extensions(self):
             return ['.psp']
 
+	def flushCache(self):
+		"""
+		Clean out the cache of classes we keep in memory.  Also, clear the class files stored on disk.
+		"""
+		self._classcache = {}
+		self.clearFileCache()
+
+	def clearFileCache(self):
+		"""
+		Clear class files stored on disk.
+		"""
+		import glob
+		files = glob.glob(os.path.join(self.cacheDir,'*.*'))
+		map(os.remove, files)
+
 	def computeClassName(self,pagename):
+		"""
+		Generates a <hopefully> unique class/file name for each PSP file.
+		Argument: pagename:  the path to the PSP source file
+		Returns:  A unique name for the class generated fom this PSP source file.
+		"""
 	    # Compute class name by taking the path and substituting underscores for
 	    # all non-alphanumeric characters.
-	    return string.translate(os.path.splitdrive(pagename)[1], self._classNameTrans)
+		return string.translate(os.path.splitdrive(pagename)[1], self._classNameTrans)
 
 	def import_createInstanceFromFile(self,path,classname,mtime,reimp=0):
+		"""
+		Create an actual instance of a PSP class.  This version uses import to generate the instance.
+		
+		"""
 		globals={}
 		module_obj=__import__(classname)
 		if reimp:
@@ -76,38 +102,49 @@ class PSPServletFactory(ServletFactory):
 		return instance
 
 	def createInstanceFromFile(self,filename,classname,mtime,reimp=0):
-	    globals={}
-	    execfile(filename,globals)
-	    assert globals.has_key(classname)
-	    instance = globals[classname]()
-	    code=globals[classname]
-	    self._classcache[classname] = {'code':code,
+		"""
+		Create an actual class instance.  This version uses "exec" to generate the class instance.
+		"""
+		globals={}
+		execfile(filename,globals)
+		assert globals.has_key(classname)
+		instance = globals[classname]()
+		code=globals[classname]
+		self._classcache[classname] = {'code':code,
 					   'filename':filename,
 					   'mtime':time.time(),}
-	    return instance
+		return instance
 
 
 	def checkClassCache(self, classname, mtime):
-	    if self._classcache.has_key(classname) and self._classcache[classname]['mtime'] > mtime:
+		"""
+		Check our cache to see if we already have this class in memory.
+		"""
+		if self._classcache.has_key(classname) and self._classcache[classname]['mtime'] > mtime:
 			return self._classcache[classname]['code']()
-	    return None
+		return None
 
 
 	def servletForTransaction(self, trans):
+		"""
+		The entry point to getting a PSP servlet instance.
+		"""
 		fullname = trans.request().serverSidePath()
 		path,pagename = os.path.split(fullname)
 		mtime = os.path.getmtime(fullname)
+		instance = None
 
 		classname = self.computeClassName(fullname)
 
 	    #see if we can just create a new instance
-		instance = self.checkClassCache(classname,mtime)
+		if self._cacheClasses:
+			instance = self.checkClassCache(classname,mtime)
 		if instance != None:
 			return instance
 
 		cachedfilename = os.path.join(self.cacheDir,str(classname + '.py'))
 
-		if os.path.exists(cachedfilename) and os.stat(cachedfilename)[6] > 0:
+		if self._cacheClassFiles and os.path.exists(cachedfilename) and os.stat(cachedfilename)[6] > 0:
 			if os.path.getmtime(cachedfilename) > mtime:
 				instance = self.createInstanceFromFile(cachedfilename,classname,mtime,0)
 				return instance
