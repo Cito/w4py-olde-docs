@@ -147,6 +147,13 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] The documentation generation for Webware doesn't pick up on MiddleKit very well, which is the first component to have subpackages (and mix-ins!).
 
+	[ ] Other useful 'LogSQL' options:
+			prefix (='SQL')
+			includeNumber (=1)
+			includeTimestamp (=1)
+		By turning those off, you would have straight SQL file you
+		could feed to the database.
+
 	[ ] MK should add back pointers as necessary (like for lists). Right now the modeler has to make sure they are there. This also ties into the "distinct lists" problem, so you might wish tackle these simultaneously.
 
 	[ ] Investigate dbinfo.py: http://www.lemburg.com/files/python/dbinfo.py

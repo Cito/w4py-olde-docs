@@ -36,10 +36,6 @@ class SQLObjectStore(ObjectStore):
 		self._sqlEcho   = None
 		self._sqlCount  = 0
 
-		# @@ 2000-09-24 ce: resolve this
-		import sys
-		self._sqlEcho = sys.stdout
-
 	def modelWasSet(self):
 		'''
 		Performs additional set up of the store after the model is set,
@@ -55,8 +51,34 @@ class SQLObjectStore(ObjectStore):
 		if self._threaded and self._threadSafety==0:
 			raise SQLObjectStoreThreadingError, 'Threaded is 1, but the DB API threadsafety is 0.'
 
+		self.setUpSQLEcho()
+
 		# Connect
 		self.connect()
+
+
+	def setUpSQLEcho(self):
+		'''
+		Sets up the SQL echoing/logging for the store according to the
+		setting 'SQLLog'. See the User's Guide for more info. Invoked by
+		modelWasSet().
+		'''
+		setting = self.setting('LogSQL', None)
+		if setting==None or setting=={}:
+			self._sqlEcho = None
+		else:
+			filename = setting['File']
+			if filename==None:
+				self._sqlEcho = None
+			elif filename=='stdout':
+				self._sqlEcho = sys.stdout
+			elif filename=='stderr':
+				self._sqlEcho = sys.stderr
+			else:
+				mode = setting.get('Mode', 'write')
+				assert mode in ['write', 'append']
+				mode = mode[0]
+				self._sqlEcho = open(filename, mode)
 
 
 	## Connecting to the db ##

@@ -248,7 +248,9 @@ Version 0.1
 
 <p> An MK model can have configuration files inside it that affect things like code generation.
 
-<p> <span class=filename>Settings.config</span> currently has one setting, <span class=name>Package</span> that can be used to declare the package that your set of middle objects are contained by. This is useful for keeping your middle objects packaged away from other parts of your programs, thereby reducing the chances of a name conflict. This is the recommended way of using MK.
+<p> <span class=filename>Settings.config</span> is the primary configuration file.
+
+<p> The <span class=name>Package</span> setting can be used to declare the package that your set of middle objects are contained by. This is useful for keeping your middle objects packaged away from other parts of your programs, thereby reducing the chances of a name conflict. This is the recommended way of using MK.
 
 <p> An example <a name=filename>Settings.config</a>:
 
@@ -261,8 +263,22 @@ Version 0.1
 <pre class=py>from Middle.Foo import Foo
 </pre>
 
-<p> Don't forget to put a <span class=filename>__init__.py</span> in the directory so that Python recognizes it as a package.
+<p> Don't forget to put an <span class=filename>__init__.py</span> in the directory so that Python recognizes it as a package.
 
+
+<p> The <span class=name>SQLLog</span> setting can be used to get MiddleKit to echo all SQL statements to 'stdout', 'stderr' or a filename. For filenames, an optional 'Mode' setting inside SQLLog can be used to write over or append to an existing file. The default is write. Here are some examples:
+
+<pre>{
+    'SQLLog': { 'File': 'stdout' },
+}</pre>
+
+<pre>{
+    'SQLLog': { 'File': 'middlekit.sql' },
+}</pre>
+
+<pre>{
+    'SQLLog': { 'File': 'middlekit.sql', 'Mode': 'append' },
+}</pre>
 
 <p> <span class=filename>SQLGenerator.config</span> has one setting: <span class=name>DropStatements</span> whose potential values are:
 
