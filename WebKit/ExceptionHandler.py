@@ -57,8 +57,6 @@ class ExceptionHandler(Object):
 			app._exceptionHandlerClass = ExceptionHandler
 	'''
 
-	maxValueLen = 20
-
 	hideValuesForFields = ['creditcard', 'credit card', 'cc', 'password', 'passwd']
 		# ^ keep all lower case to support case insensitivity
 	if 0: # for testing
