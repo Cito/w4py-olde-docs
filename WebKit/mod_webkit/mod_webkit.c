@@ -53,7 +53,7 @@ typedef struct wkcfg {
  * We'll fill it in at the end of the module.
  */
 
-module webkit_module;
+module MODULE_VAR_EXPORT webkit_module;
 
 
 
