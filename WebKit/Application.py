@@ -1104,7 +1104,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			if num==1:
 				break  # we found a file to handle the directory
 			elif num>1:
-				print 'WARNING: For %s, the directory is %s which contains more than 1 directory file: %s' % (urlPath, ssPath, filenames)
+				print 'WARNING: the directory is %s which contains more than 1 directory file: %s' % (ssPath, filenames)
 				return None
 		if num==0:
 			if debug: print 'WARNING: For %s, the directory contains no directory file.' % (ssPath)
