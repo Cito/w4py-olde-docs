@@ -66,9 +66,11 @@ class ASStreamOut:
 				if debug: print "ASSTreamOut.flush setting needCommit"
 				self._needCommit = 1
 			return 0
-		self._buffer = self._buffer + string.join(self._chunks,'')
-		self._chunks = []
-		self._chunkLen = 0
+		try:
+			self._buffer = self._buffer + string.join(self._chunks,'')
+		finally:
+			self._chunks = []
+			self._chunkLen = 0
 		return 1
 
 	def clear(self):
