@@ -27,7 +27,7 @@ from ServletFactory import ServletFactory
 
 
 import string
-import os
+import os,sys
 from PSP import Context, PSPCompiler
 import time
 
@@ -40,11 +40,11 @@ class PSPServletFactory(ServletFactory):
 	'''
 
 	def __init__(self,application):
-	    ServletFactory.__init__(self,application)
-
-	    self.apppath = application.serverDir()
-	    self.cacheDir = os.path.join(self.apppath, 'cache')
-	    self._classcache={}
+		ServletFactory.__init__(self,application)
+		self.apppath = application.serverDir()
+		self.cacheDir = os.path.join(self.apppath, 'cache')
+		self._classcache={}
+		sys.path.append(self.cacheDir)
 	    
 
 	def uniqueness(self):
@@ -66,7 +66,19 @@ class PSPServletFactory(ServletFactory):
 		className = string.replace(className,' ','_')
 		return className
 
-	def createInstanceFromFile(self,filename,classname,mtime):
+	def import_createInstanceFromFile(self,path,classname,mtime,reimp=0):
+		globals={}
+		module_obj=__import__(classname)
+		if reimp:
+			reload(module_obj)
+		instance = module_obj.__dict__[classname]()
+		code=module_obj.__dict__[classname]
+		self._classcache[classname] = {'code':code,
+					   'filename':path,
+					   'mtime':time.time(),}
+		return instance
+
+	def createInstanceFromFile(self,filename,classname,mtime,reimp=0):
 	    globals={}
 	    execfile(filename,globals)
 	    assert globals.has_key(classname)
@@ -100,7 +112,7 @@ class PSPServletFactory(ServletFactory):
 	    
 		if os.path.exists(cachedfilename) and os.stat(cachedfilename)[6] > 0:
 			if os.path.getmtime(cachedfilename) > mtime:
-				instance = self.createInstanceFromFile(cachedfilename,classname,mtime)
+				instance = self.createInstanceFromFile(cachedfilename,classname,mtime,0)
 				return instance
 
 		pythonfilename = cachedfilename
@@ -115,7 +127,7 @@ class PSPServletFactory(ServletFactory):
 		print 'creating python class: ' , classname
 		clc.compile()
 
-		instance = self.createInstanceFromFile(cachedfilename,classname,mtime)	    
+		instance = self.createInstanceFromFile(cachedfilename,classname,mtime,1)	    
 		return instance
 
 
