@@ -44,7 +44,7 @@ class MySQLObjectStore(SQLObjectStore):
 	def _executeSQL(self, cur, sql):
 		try:
 			cur.execute(sql)
-		except Exception, e:
+		except MySQLdb.Warning, e:
 			if not self.setting('IgnoreSQLWarnings', 0):
 				raise
 
@@ -57,4 +57,3 @@ class StringAttr:
 			return 'NULL'
 		else:
 			return "'" + MySQLdb.escape_string(value) + "'"
-
