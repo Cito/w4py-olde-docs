@@ -1048,7 +1048,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 			if cache['threadsafe']:
 				"""special case, put in the cache now"""
-				cache['instances'].put(inst)
+				cache['instances'].append(inst)
 
 		# Instance can be reused?
 		elif not cache['reuseable']:
