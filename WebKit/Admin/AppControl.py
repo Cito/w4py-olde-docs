@@ -65,6 +65,6 @@ class AppControl(AdminSecurity):
 
 		elif action == "Shutdown":
 			self.write("<B> Shutting down the Application server")
-			self.application()._server.initiateShutdown()
+			self.application().server().initiateShutdown()
 			self.write("<p>Good Luck!</b>")
 
