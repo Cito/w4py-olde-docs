@@ -222,10 +222,10 @@ class HTTPResponse(Response):
 		if sess:
 			cookie = Cookie('_SID_', sess.identifier())
 			cookie.setPath('/')
-			if sess.timeout() == 0:
+			if sess.isExpired() or sess.timeout() == 0:
 				# Invalid -- tell client to forget the cookie.
 				cookie.setMaxAge(0)
-				cookie._cookie['expires'] = -365*24*60*60
+				cookie.setExpires(-365*24*60*60)
 			self.addCookie(cookie)
 			if debug: print prefix, 'setting sid =', sess.identifier()
 		else:

@@ -112,6 +112,7 @@ class Session(Object):
 		"""
 		self._lastAccessTime = 0
 		self._values = {}
+		self._timeout = 0
 
 
 	## Values ##
