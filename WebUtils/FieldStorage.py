@@ -25,9 +25,8 @@ class FieldStorage(cgi.FieldStorage):
 ##			print __file__, "bailing on GET or HEAD request"
 			return  #bail because cgi.FieldStorage already did this
 		self._qs = self._environ.get('QUERY_STRING', None)
-		if self._qs: self._qs = string.upper(self._qs)
-		else:
-			print __file__, "bailing on no query_string"
+		if not self._qs:
+##			print __file__, "bailing on no query_string"
 			return  ##bail if no query string
 
 
@@ -49,14 +48,10 @@ class FieldStorage(cgi.FieldStorage):
 					dict[name] = [value]
 					##print "no append"
 
-
-		for i,v in dict.items():
-			if len(v)>1:
-				mfs=cgi.MiniFieldStorage(i,v)
-			else:
-				mfs=cgi.MiniFieldStorage(i,v[0])				
-			self.list.append(mfs)
-			##print "adding %s=%s" % (str(i),str(v))
+		for key, values in dict.items():
+			for value in values:
+				self.list.append(cgi.MiniFieldStorage(key,value))
+##				print "adding %s=%s" % (str(key),str(value))
 			
 
 
