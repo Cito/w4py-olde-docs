@@ -5,7 +5,7 @@ try:
 except:
 	# When the Webware tarball unravels,
 	# the components sit next to each other
-	sys.path.append(os.path.normpath('..'))
+	sys.path.append(os.path.abspath('..'))
 	import MiscUtils
 from MiscUtils.NamedValueAccess import NamedValueAccess
 
