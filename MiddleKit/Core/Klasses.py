@@ -128,6 +128,12 @@ class Klasses(ModelObject, UserDict):
 		Expected to be invoked by the model.
 		"""
 		assert self._model is model
+
+		for klass in self._klasses:
+			supername = klass.supername()
+			if supername!='MiddleObject':
+				klass.setSuperklass(self.model().klass(supername))
+
 		for klass in self._klasses:
 			klass.awakeFromRead(self)
 
@@ -149,13 +155,6 @@ class Klasses(ModelObject, UserDict):
 		assert not self.has_key(name), 'Already have %s.' % name
 		self._klasses.append(klass)
 		self[klass.name()] = klass
-
-		# @@ 2004-03-05 ce: should do the superklass connection in awakeFromRead()
-		# so that the model can have "forward references" to klasses
-		supername = klass.supername()
-		if supername!='MiddleObject':
-			klass.setSuperklass(self._model.klass(supername))
-
 		klass.setKlasses(self)
 
 
