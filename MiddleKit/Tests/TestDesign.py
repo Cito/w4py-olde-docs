@@ -35,10 +35,15 @@ def test(modelFilename, workDir=workDir, toTestDir='../'):
 	os.mkdir(workDir)  # make a space for the files from this run
 
 	# Run generate, load the model, and import some classes
-	Generate().main('Generate.py --outdir %s --db MySQL --model %s' % (workDir, modelFilename))
+	Generate().main('Generate.py --outdir %s --db %s --model %s' % (workDir, dbName, modelFilename))
 	curDir = os.getcwd()
 	os.chdir(workDir)
 	try:
+		if 0:
+			print 'getcwd:', os.getcwd()
+			print 'listdir:', os.listdir('.')
+			print 'model path:', repr(toTestDir+modelFilename)
+			print 'sys.path', sys.path
 		model = Model(toTestDir+modelFilename)
 		importPyClasses(model.klasses())
 		return model

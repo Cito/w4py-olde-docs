@@ -27,3 +27,20 @@ def rmdir(dirname, shouldPrint=1):
 				else:
 					os.remove(fullName)
 		os.rmdir(dirname)
+
+
+dbName = 'MySQL'
+	# passed as an cmd line arg to Generate.py, and used to find an object store module
+
+storeArgs = {}
+	# passed to the object store class
+
+sqlCommand = 'mysql'
+	# the database command used for feeding SQL to the database via stdin
+
+
+# override any of the preceding as needed by creating a LocalConfig.py:
+try:
+	from LocalConfig import *
+except ImportError:
+	pass

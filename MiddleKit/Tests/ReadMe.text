@@ -1,0 +1,32 @@
+The MiddleKit test suite is quite extensive. It's a great way to see if
+MiddleKit is working on your system and it's essential to developing new
+adapters.
+
+To run the test suite, create a file, LocalConfig.py like so:
+
+# LocalConfig.py
+dbName = 'MySQL'
+storeArgs = {'user': 'root', 'passwd': 'blarr'}
+sqlCommand = 'mysql -u root -pblarr'
+# end
+
+Then to run all tests:
+> python Test.py
+
+When developing a new adapter, it is useful to run one test at a time:
+> python MKBasic
+
+Or a few:
+> python MKBasic MKDateTime MKNone
+
+Here is another example config file for a fresh MySQL 3.x installation on
+Windows:
+
+# LocalConfig.py
+dbName = 'MySQL'
+storeArgs = {'user': 'root'}
+sqlCommand = 'C:\\mysql\\bin\\mysql -u root'
+# end
+
+You can see what databases are supported by looking in the MiddleKit/Run
+directory. At the time I write this they are MySQL, PostgreSQL and MSSQL.

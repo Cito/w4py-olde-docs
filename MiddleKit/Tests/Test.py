@@ -23,10 +23,6 @@ class Test:
 
 	## Customization ##
 
-	def cmdLineDB(self):
-		""" Returns the database command used for feeding SQL to the database via stdin. """
-		return 'mysql'
-
 	def modelNames(self):
 		return self._modelNames
 
@@ -109,7 +105,7 @@ class Test:
 	def createDatabase(self):
 		filename = workDir + '/GeneratedSQL/Create.sql'
 		filename = os.path.normpath(filename)
-		cmd = '%s < %s' % (self.cmdLineDB(), filename)
+		cmd = '%s < %s' % (sqlCommand, filename)
 		self.run(cmd)
 
 	def insertSamples(self):
@@ -117,7 +113,7 @@ class Test:
 		filename = workDir + '/GeneratedSQL/InsertSamples.sql'
 		filename = os.path.normpath(filename)
 		if os.path.exists(filename):
-			cmd = '%s < %s' % (self.cmdLineDB(), filename)
+			cmd = '%s < %s' % (sqlCommand, filename)
 			self.run(cmd)
 
 

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 from TestCommon import *
-from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
-import MiddleKit.Run.ObjectStore as ObjectStore
+import MiddleKit.Run
 
 
 def test(filename, pyFilename, deleteData):
@@ -20,7 +19,11 @@ def test(filename, pyFilename, deleteData):
 		print 'Testing %s...' % filename
 
 		# Set up the store
-		store = MySQLObjectStore()
+		names = {}
+		src = 'from MiddleKit.Run.%sObjectStore import %sObjectStore as c' % (dbName, dbName)
+		exec src in names
+		objectStoreClass = names['c']
+		store = objectStoreClass(**storeArgs)
 		store.readModelFileNamed(filename)
 		assert store.model()._havePythonClasses # @@@@@@
 
