@@ -13,7 +13,7 @@
 <p align = center><img src="psplogo.png"><%-- This image is served by WebKit --%>
 <h1 align=center><font color='blue'  face='helvetica'>Hello from PSP!</font></h1><br><br>
 
-<p>If you're running WebKit on Windows with the cgi adaptor, the image above will be broken.  You'll need to serve binary files from the WebServer itself.  We're working on a fix.  Sorry!
+
 
 <center><h2>This is the sample/test page for an implmentation of Python Server Pages.</h2></center>
 <p>What happens if I put a triple quote here? """
@@ -28,7 +28,7 @@
 <p>I know, Cool, huh?
 
 <br><br>
-The text below comes from another jsp page which was inserted into this one with the &lt%@ incude %> directive.
+The text below comes from another psp page which was inserted into this one with the &lt%@ include %> directive.
 <p>
 <font color="red">
 <%@ include file="my_include.psp" %>
@@ -36,7 +36,7 @@ The text below comes from another jsp page which was inserted into this one with
 
 <p>
 <p>There are actually two ways to insert the contents of another file into a PSP page.  use &lt%@ include file="somefile" %&gt will effectively insert the contents of the other file before class creation time.<br>
-Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>after</i> page creation.  In other words, the file won't be parsed for jsp codes.  It'll just be output as is in the response stream. 
+Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>after</i> page creation.  In other words, the file won't be parsed for psp codes.  It'll just be output as is in the response stream. 
 <p>
 
 
