@@ -22,6 +22,7 @@ from WebUtils.HTMLForException import HTMLForException
 
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 
+from TaskKit.TaskManager import Scheduler
 
 class ApplicationError(Exception):
 	pass
@@ -108,24 +109,38 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		self.addServletFactory(UnknownFileTypeServletFactory(self))
 		# ^ @@ 2000-05-03 ce: make this customizable at least through a method (that can be overridden) if not a config file (or both)
 
+## TaskManager
+		self._taskmanager = Scheduler()
+		self._taskmanager.setDaemon(1)
+		self._taskmanager.start()
+## End TaskManager
+
+
+## Contexts
 		if contexts: #Try to get this from the Config file
 			defctxt = contexts
 		else: #Get it from Configurable object, which gets it from defaults or the user config file
 			defctxt = self.setting('Contexts')
-		# New context loading routine
 		self._contexts={}
 		for i in defctxt.keys():
-			path = self.serverSidePath(defctxt[i])
+			if not os.path.isabs(defctxt[i]):
+				path = self.serverSidePath(defctxt[i])
+			else: path = defctxt[i]
 			self.addContext(i, path)
 		print
+## End Contexts
 
+## Session store
 		# Create the session store
 		from SessionMemoryStore import SessionMemoryStore
 		from SessionFileStore import SessionFileStore
 		from SessionDynamicStore import SessionDynamicStore
-		klass = locals()['Session'+self.setting('SessionStore')+'Store']
+		klass = locals()['Session'+self.setting('SessionStore','File')+'Store']
 		assert type(klass) is ClassType
 		self._sessions = klass(self)
+## End Session store
+
+
 
 		print 'Current directory:', os.getcwd()
 
@@ -133,12 +148,24 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		if useSessionSweeper:
 			self.startSessionSweeper()
 
+		self._cacheServletInstances = self.setting("CacheServletInstances",1)
 		print
 
-##	def __del__(self):
-##		self.shutDown()
 
+## Task access
+	def taskManager(self):
+		return self._taskmanager
 
+## Session sweep task
+	def startSessionSweeper(self):
+		from Tasks import SessionTask
+		import time
+		task = SessionTask.SessionTask(self._sessions)
+		tm = self.taskManager()
+		sweepinterval = self.setting('SessionTimeout')*60/10
+		tm.addPeriodicAction(time.time()+sweepinterval, sweepinterval, task, "SessionSweeper")
+		print "Session Sweeper started"
+		
 
 ##Can Stuff
 	def initializeCans(self):
@@ -161,29 +188,30 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		instance = apply(self._canFactory.createCan,(klass,)+args,kwargs)
 		self.setCan(ID, instance)
 
-##Session Stuff
-	def startSessionSweeper(self):
-		self._closeEvent = Event()
-		self._sessSweepThread = Thread(None, self.sweepSessionsContinuously, 'SessionSweeper',(self._closeEvent,))
-		self._sessSweepThread.start()
+##Session Stuff - Now we use TaskManager
+##	def startSessionSweeper(self):
+##		self._closeEvent = Event()
+##		self._sessSweepThread = Thread(None, self.sweepSessionsContinuously, 'SessionSweeper',(self._closeEvent,))
+##		self._sessSweepThread.setDaemon(1)
+##		self._sessSweepThread.start()
 
-	def sweepSessionsContinuously(self,close):
-		"""
-		Invoked by __init__ via a new thread to clean out stale sessions in the background. This method doesn't exit until self.running is 0.
-		"""
-		while self.running:
-			self.sweepSessions()
-			try:
-				close.wait(self.setting('SessionTimeout')*60/10.0)
-				#sleep(self.setting('SessionTimeout')*60/10.0)
-				# @@ 2000-08-04 ce: make sleep interval or div factor a setting
-			except IOError:
-				pass
-		self._sessions.storeAllSessions()
+##	def sweepSessionsContinuously(self,close):
+##		"""
+##		Invoked by __init__ via a new thread to clean out stale sessions in the background. This method doesn't exit until self.running is 0.
+##		"""
+##		while self.running:
+##			self.sweepSessions()
+##			try:
+##				close.wait(self.setting('SessionTimeout')*60/10.0)
+##				#sleep(self.setting('SessionTimeout')*60/10.0)
+##				# @@ 2000-08-04 ce: make sleep interval or div factor a setting
+##			except IOError:
+##				pass
+##		self._sessions.storeAllSessions()
 
-	def sweepSessions(self):
-		''' Removes stale sessions by checking their lastAccessTime(). Session life time is configured via the SessionTimeout setting. '''
-		self._sessions.cleanStaleSessions()
+##	def sweepSessions(self):
+##		''' Removes stale sessions by checking their lastAccessTime(). Session life time is configured via the SessionTimeout setting. '''
+##		self._sessions.cleanStaleSessions()
 
 
 
@@ -199,6 +227,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			self._sessSweepThread.join()
 			del self._sessSweepThread
 		self._sessions.storeAllSessions()
+		self._taskmanager.stop()
 		del self._canFactory
 		del self._sessions
 		self._delCans()
@@ -206,7 +235,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		del self._factoryList
 		del self._server
 		del self._servletCacheByPath
-		print "Exiting Application"
+		print "Application has been succesfully shutdown."
 
 
 	## Config ##
@@ -361,11 +390,11 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 </html>''' % (newURL, newURL))
 
 	def isSessionIdProblematic(self, request, debug=0):
-		'''
+		"""
 		Returns 1 if there is a session id and it's not valid (either because it doesn't exist or because it has expired due to inactivity). Having no session id is not considered problematic.
 		This method will also expire the session if it's too old.
 		This method is invoked by dispatchRequest() as one of the major steps in handling requests.
-		'''
+		"""
 		debug = self.setting('Debug')['Sessions']
 		if debug: prefix = '>> [session] isSessionIdProblematic:'
 		sid = request.sessionId()
@@ -436,10 +465,13 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 
 	def forwardRequestFast(self, trans, URL):
-		"""Enable a servlet to pass a request to another servlet.  This implementation handles chaining and requestDispatch in Java.
-		The Request, REsponse and Session objects are all kept the same, so the Servlet that is called may receive information through those objects.
-		The catch is that the function WILL return to the calling servlet, so the calling servlet should either take advantage
-		of that or return immediately."""
+		"""Enable a servlet to pass a request to another servlet.  This implementation handles chaining and
+		requestDispatch in Java.
+
+		The Request, REsponse and Session objects are all kept the same, so the Servlet that is called may
+		receive information through those objects.  The catch is that the function WILL return to the calling
+		servlet, so the calling servlet should either take advantage of that or return immediately.
+		"""
 
 
 		req = trans.request()
@@ -699,14 +731,19 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			except Queue.Full: #full or blocked
 				pass
 				print '>> queue full for:', cache['path'] #do nothing, don't want to block queue for this
-##				print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
+				print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
 
 	def newServletCacheItem(self,key,item):
-		""" Safely add new item to the main cache.  Not woried about the retrieval for now.
-		I'm not even sure this is necessary, as it's a one bytecode op, but it doesn't cost much of anything speed wise."""
+		""" Safely add new item to the main cache.  Not worried about the retrieval for now.
+		I'm not even sure this is necessary, as it's a one bytecode op, but it doesn't cost
+		much of anything speed wise.
+		"""
 		#self._cacheDictLock.acquire()
 		self._servletCacheByPath[key] = item
 		#self._cacheDictLock.release()
+
+	def flushServletCache(self):
+		self._servletCacheByPath = {}
 
 	def createServletInTransaction(self, transaction):
 		# Get the path
@@ -714,9 +751,11 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		assert path is not None
 
 		inst = None
+		cache = None
 
 		# Cached?
-		cache = self._servletCacheByPath.get(path, None)
+		if self._cacheServletInstances:
+			cache = self._servletCacheByPath.get(path, None)
 
 		# File is not newer?
 		if cache and cache['timestamp']<os.path.getmtime(path):
