@@ -296,22 +296,21 @@ class Model(Configurable):
 		order such that klasses follow the klasses they refer to
 		(via obj ref attributes).
 		The typical use for such an order is to avoid SQL errors
-		about foregin keys referring to tables that do not exist.
+		about foreign keys referring to tables that do not exist.
 		"""
-		class Container:
-			pass
-		sorter = Container()
-		# Generate the CREATE TABLEs in the order that foreign keys requires.
-		sorter.allKlasses = []  # will be added in the correct order
-		sorter.recordedKlasses = {}  # a set for fast membership testing.
 		for klass in self._allKlassesInOrder:
-			sorter.visitedKlasses = {}
-			klass.sortByDependency(sorter)
-		allKlasses = sorter.allKlasses
-		# jdh 2004-07-02: the following assertion failed for me when using inherited models with
-		# UsePickledClassesCache enabled.  Setting UsePickledClassesCache to False in each of the models
-		# fixed the problem.  Haven't investigated the cause.
+			klass.willBuildDependencies()
+		for klass in self._allKlassesInOrder:
+			klass.buildDependencies()
+		allKlasses = []
+		from sets import Set
+		visited = Set()
+		for klass in self._allKlassesInOrder:
+			if not klass.dependents:
+				#print '>>', klass.name()
+				klass.recordDependencyOrder(allKlasses, visited)
 		assert len(allKlasses)==len(self._allKlassesInOrder)
+		#print '>> allKlassesInDependencyOrder() =', ' '.join([klass.name() for klass in allKlasses])
 		return allKlasses
 
 	def pyClassForName(self, name):

@@ -67,6 +67,7 @@ class Klass(MiddleDict, ModelObject):
 		basic Klass definitions have been read.
 		"""
 		assert self._klasses is klasses
+
 		self._makeAllAttrs()
 		# Python classes need to know their MiddleKit classes in
 		# order for MiddleKit.Run.MiddleObject methods to work.
@@ -214,6 +215,7 @@ class Klass(MiddleDict, ModelObject):
 			del memo[self]
 		return memo.keys()
 
+
 	## Accessing attributes ##
 
 	def addAttr(self, attr):
@@ -279,6 +281,9 @@ class Klass(MiddleDict, ModelObject):
 		Sets the klasses object of the klass. This is the klass' owner.
 		"""
 		self._klasses = klasses
+
+	def model(self):
+		return self._klasses.model()
 
 
 	## Other access ##
@@ -370,23 +375,42 @@ class Klass(MiddleDict, ModelObject):
 
 	## Model support ##
 
-	def sortByDependency(self, sorter):
+	def willBuildDependencies(self):
 		"""
-		Sort the klasses by their dependencies so that foreign key declarations work.
-		This method is for the implementation of model.allKlassesInDependencyOrder().
+		Preps the klass for buildDependencies().
 		"""
-		if sorter.visitedKlasses.has_key(self):
-			return
-		sorter.visitedKlasses[self] = 1
-		if sorter.recordedKlasses.has_key(self):
-			return
+		self.dependencies = []  # who self depends on
+		self.dependents = []  # who depends on self
+
+	def buildDependencies(self):
+		"""
+		A klass' immediate dependencies are its ancestor classes (which may have auxilliary tables
+		such as enums), the target klasses of all its obj ref attrs and their descendant classes.
+		"""
+		if self.dependents is not None:
+			# already done
+			pass
+		klass = self.superklass()
+		while klass!=None:
+			self.dependencies.append(klass)
+			klass.dependents.append(self)
+			klass = klass.superklass()
 		from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 		for attr in self.allAttrs():
 			if isinstance(attr, ObjRefAttr):
-				targetKlass = attr.targetKlass()
-				if targetKlass is not self and not sorter.visitedKlasses.has_key(targetKlass) and attr.boolForKey('Ref', True):
-					targetKlass.sortByDependency(sorter)  # recursive call
-		# end of the dependency road
-		if not sorter.recordedKlasses.has_key(self):
-			sorter.allKlasses.append(self)
-			sorter.recordedKlasses[self] = 1
+				klass = attr.targetKlass()
+				if klass is not self and attr.boolForKey('Ref', True):
+					self.dependencies.append(klass)
+					klass.dependents.append(self)
+					for klass in klass.descendants():
+						self.dependencies.append(klass)
+						klass.dependents.append(self)
+
+	def recordDependencyOrder(self, order, visited, indent=0):
+		#print '%srecordDependencyOrder() for %s' % (' '*indent*4, self.name())
+		if self in visited:
+			return
+		visited.add(self)
+		for klass in self.dependencies:
+			klass.recordDependencyOrder(order, visited, indent+1)
+		order.append(self)
