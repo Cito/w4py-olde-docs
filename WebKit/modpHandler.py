@@ -50,6 +50,11 @@ bufsize = 32*1024
 
 WEBWARE_ADDRESS_FILE='/data/Linux/python/Webware/WebKit/address.text'
 
+
+if not port:
+	(host, port) = string.split(open(WEBWARE_ADDRESS_FILE).read(), ':')
+	port = int(port)
+
 def handler(req):
 	global host
 	global port
@@ -58,10 +63,7 @@ def handler(req):
 		ot = open("/tmp/log2.txt","a")
 		ot.write("req.path_info=%s\n"%req.path_info)
 	try:
-		if not port:
-			(host, port) = string.split(open(WEBWARE_ADDRESS_FILE).read(), ':')
-			port = int(port)
-		
+
 		timestamp = time.time()
 		myInput = ""
 		inp = req.read(bufsize)
@@ -224,29 +226,7 @@ def pspHandler(req):
 		req.send_http_header()
 		req.write(respdict['contents'])
 
-##          if inheader:
-##              header = header + data
-##              hlines = string.split(header,'\n',1)
-##              while len(hlines) > 1:
-##                  header = hlines.pop()
-##                  h = hlines[0]
-##                  if h == '':
-##                      inheader = 0
-##                      req.send_http_header()
-##                      req.write(header)
-##                      break
-##                  else:
-##                      ot.write(h)
-##                      name,val = string.split(h,':',1)
-##                      val = string.strip(val)
-##                      if string.lower(name) == 'content-type':
-##                          req.content_type = val
-##                      req.headers_out[name] = val
-##                      if debug: ot.write("%s=%s\n"%(name,val))
-##
-##                  hlines = string.split(header,'\n',1)
-##          else:
-##              req.write(data)
+
 		if debug:
 			ot.write("+++\n\n")
 			ot.close()
