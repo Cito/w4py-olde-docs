@@ -33,6 +33,7 @@ Version 0.3
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Debugging_Restarting"><font size=>Restarting the Server</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Assertions"><font size=>Assertions</font></a>
 <br>  <a href="#NamingConventions"><font size=+1>Naming Conventions</font></a>
+<br>  <a href="#PlugIns"><font size=+1>PlugIns</font></a>
 <br>  <a href="#Files"><font size=+1>Files</font></a>
 <br>  <a href="#How"><font size=+1>How do I develop an app?</font></a>
 <br>  <a href="#Credit"><font size=+1>Credit</font></a>
@@ -99,7 +100,7 @@ Version 0.3
 
 <p><code>&gt; cd ~/Projects/Webware/WebKit
 <br>&gt; AppServer.py
-<br>WebKit AppServer 0.2
+<br>WebKit AppServer 0.3
 <br>part of Webware for Python
 <br>Copyright 1999-2000 by Chuck Esterbrook. All Rights Reserved.
 <br>WebKit and Webware are open source.
@@ -333,6 +334,18 @@ Version 0.3
 <a name=NamingConventions><h2>Naming Conventions</h2></a>
 
 <p>Cookies and form values that are named with surrounding underscores (such as <code>_sid_</code> and <code>_action_</code>) are reserved by WebKit for it's own internal purposes. If you refrain from using surrounding underscores in your own names, then [a] you won't accidentally clobber an already existing internal name and [b] when new names are introduced by future versions of WebKit, they won't break your application.
+
+
+<a name=PlugIns><h2>Plug-ins</h2></a>
+
+<p>	A plug-in is a software component that is loaded by WebKit in order to provide additional WebKit functionality without necessarily having to modify WebKit's source.
+
+<p>The most infamous plug-in is PSP (Python Server Pages) which ships with Webware.
+
+<p> Plug-ins often provide additional servlet factories, servlet subclasses, examples and documentation. Ultimately, it is the plug-in author's choice as to what to provide and in what manner.
+
+<p> Technically, plug-ins are Python packages that follow a few simple conventions in order to work with WebKit. More information can be found in PlugIn.py's doc strings. You can learn more about Python packages in the Python Tutorial, 6.4: "Packages" at http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000).
+
 
 <a name=Files><h2>Files</h2></a>
 

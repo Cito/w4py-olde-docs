@@ -12,7 +12,7 @@ Version 0.3
 <br>Webware for Python 0.3
 
 
-<a name=ReleaseNotes><h2>ReleaseNotes</h2></a>
+<a name=ReleaseNotes><h2>Release Notes</h2></a>
 
 <ul>
 	<li> Version 0.3 was released on 6/5/2000.
@@ -33,10 +33,10 @@ Version 0.3
 	<li> AppServer can now handle concurrent requests correctly.
 	<li> AppServer and Application have generally better handling, recovery and messages in response to errors/exceptions.
 	<li> Fixed several memory leaks. Some leaks remain, notably when the app server receives multiple simultaneous requests.
-	<li> Added request forwarding function to Application.  You can forward a request from one Servlet to Another by calling application.forwardRequest(transaction).  See ExamplePage.py for example.
-	<li> Added capability for multiple source directories through the "Context" configuration dictionary.  See Application.default in the Configs directory for more info.
-	<li> Added an inital Java Bean like interface called Cans.  See PSP examples for an example of its use.
-	<li> And last, but not least, <b> Python Server Pages!</b>  Click on the PSP link in any of the Example servlets to see PSP.
+	<li> Added request forwarding function to Application.  You can forward a request from one Servlet to another by calling application.forwardRequest(transaction). See ExamplePage.py for example.
+	<li> Added mutiple source directories through the "Context" configuration dictionary.  See Application.default in the Configs/ directory for more info.
+	<li> There is a new Webware component named Python Server Pages (PSP) that is a plug-in to WebKit. You'll find a PSP link on the WebKit examples page, and as a separate component it has it's own <a href="../../PSP/Documentation/PSP.html">documentation</a>. (Future release notes will be found there, not here.)
+	<li> Added an inital Java Bean-like interface called Cans. See PSP examples for an example of its use.
 </ul>
 
 
