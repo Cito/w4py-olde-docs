@@ -4,7 +4,16 @@ from glob import glob
 from types import StringType
 from time import asctime, localtime, time
 from MiddleKit.Core.ObjRefAttr import objRefJoin
+import string
 
+class SampleError:
+	def __init__(self,line,error):
+		self._line = line
+		self._error = error
+	
+	def output(self,filename):
+		print '%s:%d: %s' % ( filename, self._line, self._error )
+		
 
 class SQLGenerator(CodeGenerator):
 	"""
@@ -103,7 +112,11 @@ class Model:
 			filenames = glob(os.path.join(self._filename, 'Sample*.csv'))
 			for filename in filenames:
 				lines = open(filename).readlines()
-				self.writeInsertSamplesSQLForLines(lines, generator, file)
+				try:
+					self.writeInsertSamplesSQLForLines(lines, generator, file)
+				except SampleError, s:
+					s.output( filename )
+					sys.exit(1)
 			file.close()
 
 	def writeInsertSamplesSQLForLines(self, lines, generator, file):
@@ -112,7 +125,9 @@ class Model:
 		#	some of these methods may even go into other mix-ins
 		readColumns = 1
 		# @@ 2000-10-29 ce: put in error checking that the column names are valid
+		linenum = 0
 		for line in lines:
+			linenum += 1
 			fields = line.strip().split(',')
 			fields = [self.unquote(field) for field in fields]
 			if self.areFieldsBlank(fields):
@@ -121,22 +136,25 @@ class Model:
 				continue
 			if fields[0].endswith(' objects'):
 				tableName = fields[0].split()[0]
-				klass = self.klass(tableName)
+				try:
+					klass = self.klass(tableName)
+				except KeyError:
+					raise SampleError( linenum, "Class '%s' has not been defined" % ( tableName ) )
 				file.write('\n\n/* %s */\n\n' % fields[0])
 				#print '>> table:', tableName
 				readColumns = 1
 				continue
 			if readColumns:
 				names = [name for name in fields if name]
-				try:
-					attrs = [klass.lookupAttr(name) for name in names]
-				except KeyError:
-					print '>> KeyError'
-					print '>> name: ', name
-					print '>> names:', ', '.join(names)
-					print '>> klass:', klass.name(), '-', klass
-					print '>> attrs:', ', '.join([attr.name() for attr in klass.allAttrs()])
-					raise
+				attrs = []
+				for name in names:
+					if name == klass.sqlIdName():
+						attrs.append( PrimaryKey( name, klass ) )
+					else:
+						try:
+							attrs.append( klass.lookupAttr(name) )
+						except KeyError:
+							raise SampleError( linenum, "Class '%s' has no attribute '%s'" % ( klass.name(), name ) )
 				# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
 				for attr in attrs:
 					assert not attr.get('isDerived', 0)
@@ -148,7 +166,10 @@ class Model:
 			values = fields[:len(attrs)]
 			i = 0
 			for attr in attrs:
-				value = values[i]
+				try:
+					value = values[i]
+				except IndexError:
+					raise SampleError( linenum, "Couldn't find value for attribute '%s'" % attr.name() )
 				value = value.strip()
 				#print '>> (%s, %s)' % (value, attr)
 				if value=='':
