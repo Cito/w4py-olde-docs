@@ -239,27 +239,63 @@ Version 0.3
 
 <a name=ClassHierarchy><h2>Class Hierarchy</h2></a>
 
-<pre>
-     KeyValueAccess
-        Object
-            Configurable
-               Application
-               WebKitAppServer
-            Servlet
-               HTTPServlet
-                  Page
-            Transaction
-            Message
-               Request
-                  HTTPRequest
-               Response
-                  HTTPResponse
-            Cookie
-            Session
-            ServletFactory
-               PythonServletFactory
-</pre>
+<p> Below is the class hierarchy of WebKit. Classes are declared in a file of the same name, unless otherwise noted. Classes marked with an asteriks (*) have more than one superclass and therefore, will appear more than once in the listing.
 
+<p> <font size=-1>(This table was generated using the classhier.py script found in Webware/DocSupport.)</font>
+
+<p>
+<table cellpadding=2 cellspacing=0>
+<tr><td><b>Class</b></td><td><b>File</b></td></tr>
+<tr><td>BaseRequestHandler</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; RequestHandler</td><td>AppServer.py</td></tr>
+<tr><td>CanContainer</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; Application*</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; Message*</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Request</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; HTTPRequest</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Response</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; HTTPResponse</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; Session*</td><td></td></tr>
+<tr><td>CanFactory</td><td></td></tr>
+<tr><td>Exception</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; AppServerError</td><td>AppServer.py</td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; ApplicationError</td><td>Application.py</td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; ConfigurationError</td><td>Configurable.py</td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; PageError</td><td>Page.py</td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; SessionError</td><td>Session.py</td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; PlugInError</td><td>PlugIn.py</td></tr>
+<tr><td>KeyValueAccess</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; Object</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Configurable</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; WebKitAppServer</td><td>AppServer.py</td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Application*</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Cookie</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ExceptionHandler</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Message*</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Request</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; HTTPRequest</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Response</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; HTTPResponse</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Servlet</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; HTTPServlet</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Page</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; AdminPage</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; _admin</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; _dumpCSV</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; _dumpErrors</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; _showConfig</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; UnknownFileTypeServlet</td><td>UnknownFileType.py</td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ServletFactory</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; PythonServletFactory</td><td>ServletFactory.py</td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; UnknownFileTypeServletFactory</td><td>UnknownFileType.py</td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Session*</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Transaction</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; PlugIn</td><td></td></tr>
+<tr><td>NotImplementedError</td><td></td></tr>
+<tr><td>&nbsp; &nbsp; &nbsp; SubclassResponsibilityError</td><td>Common.py</td></tr>
+<tr><td>Tombstone</td><td>Common.py</td></tr>
+<tr><td>WKFCGI</td><td>FCGIAdaptor.py</td></tr>
+</table></p>
 
 <a name=Debugging><h2>Debugging</h2></a>
 
