@@ -1,8 +1,10 @@
+from UserDict import UserDict
 from ModelObject import ModelObject
 from MiscUtils import NoDefault
+import types
 
 
-class Klass(ModelObject):
+class Klass(UserDict, ModelObject):
 	'''
 	A Klass represents a class specification consisting primarily of a name and a list of attributes.
 	'''
@@ -11,6 +13,7 @@ class Klass(ModelObject):
 
 	def __init__(self, dict=None):
 		''' Initializes a Klass definition with a raw dictionary, typically read from a file. The 'Class' field contains the name and can also contain the name of the superclass (like "Name : SuperName"). Multiple inheritance is not yet supported. '''
+		UserDict.__init__(self, {})
 		self._attrsList = []
 		self._attrsByName = {}
 		self._superklass = None
@@ -41,6 +44,14 @@ class Klass(ModelObject):
 			self._name = name
 			self._supername = dict.get('Super', 'MiddleObject')
 		self._isAbstract = dict.get('isAbstract', 0)
+
+		# fill in UserDict with the contents of this dict
+		for key, value in dict.items():
+			# @@ 2001-02-21 ce: should we always strip string fields? Probably.
+			if type(value) is types.StringType and value.strip()=='':
+				value = None
+			self[key] = value
+
 
 	def awakeFromRead(self):
 		''' Performs further initialization. Invoked by Klasses after all basic Klass definitions have been read. '''
