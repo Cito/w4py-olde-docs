@@ -94,6 +94,17 @@ If you have general comments or questions or contributions, please contact webwa
 
 <refinements/improvements>
 
+	[ ] Make sure that when a store fetches objects that the objects point back to that store and not to the global store.
+
+	[ ]  Per Dave R:
+ def __init__(self, store=None): # @@ 2000-09-21 ce: do we really need the store here?
+  self.__dict__['_mk_initing'] = 1
+  if store is None:
+   self._mk_store = ObjectStore.Store
+
+
+			- maybe this should assert that there is a non-None store
+
 	[ ] Per Dave Rogers (and I agree), isRequired should default to 0, not 1.
 
 	[ ] The documentation generation for Webware doesn't pick up on MiddleKit very well, which is the first component to have subpackages (and mix-ins!).
@@ -159,6 +170,8 @@ If you have general comments or questions or contributions, please contact webwa
 	[ ] We could possibly provide a WebKit servlet factory for *.mkmodel. Actually, I don't know if WebKit likes servlet factories that match directories rather than files. Never tried it before.
 
 	[ ] The object model doesn't allow specification as to whether or not accessor methods, such as the getter and setter, should be provided.
+
+	[ ] Allow the object model to specify an index for a particular attribute
 
 </refinements/improvements>
 
