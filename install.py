@@ -89,7 +89,8 @@ class Installer:
 		exec contents in results
 		# get rid of stuff like '__builtins__'
 		for key in results.keys():
-			if key.startswith('__'):
+#			if key.startswith('__'):
+			if key[:2]=='__':
 				del results[key]
 		return results
 
