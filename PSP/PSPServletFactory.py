@@ -36,16 +36,16 @@ class PSPServletFactory(ServletFactory):
 	'''
 	Servlet Factory for PSP files.
 	Very sloppy.  Need to come back and do a serious cleanup.
-        
+
 	'''
 
 	def __init__(self,application):
 		ServletFactory.__init__(self,application)
 		self.apppath = application.serverDir()
-		self.cacheDir = os.path.join(self.apppath, 'cache')
+		self.cacheDir = os.path.join(self.apppath, 'Cache/PSP')
 		self._classcache={}
 		sys.path.append(self.cacheDir)
-	    
+
 
 	def uniqueness(self):
             return 'file'
@@ -95,21 +95,21 @@ class PSPServletFactory(ServletFactory):
 			return self._classcache[classname]['code']()
 	    return None
 
-	
+
 	def servletForTransaction(self, trans):
 		fullname = trans.request().serverSidePath()
 		path,pagename = os.path.split(fullname)
 		mtime = os.path.getmtime(fullname)
-	    
+
 		classname = self.computeClassName(fullname)
 
 	    #see if we can just create a new instance
 		instance = self.checkClassCache(classname,mtime)
 		if instance != None:
 			return instance
-	    
+
 		cachedfilename = os.path.join(self.cacheDir,str(classname + '.py'))
-	    
+
 		if os.path.exists(cachedfilename) and os.stat(cachedfilename)[6] > 0:
 			if os.path.getmtime(cachedfilename) > mtime:
 				instance = self.createInstanceFromFile(cachedfilename,classname,mtime,0)
@@ -120,14 +120,14 @@ class PSPServletFactory(ServletFactory):
 		context = Context.PSPCLContext(fullname,trans)
 		context.setClassName(classname)
 		context.setPythonFileName(pythonfilename)
-	
+
 
 		clc = PSPCompiler.Compiler(context)
 
 		print 'creating python class: ' , classname
 		clc.compile()
 
-		instance = self.createInstanceFromFile(cachedfilename,classname,mtime,1)	    
+		instance = self.createInstanceFromFile(cachedfilename,classname,mtime,1)
 		return instance
 
 
