@@ -21,8 +21,8 @@
 <body>
 
 <h1>WebKit Install Guide</h1>
-WebKit 0.4.1
-<br>Webware for Python 0.4.1
+WebKit 0.5
+<br>Webware for Python 0.5
 
 
 <a name=TOC><h2>Table of Contents</h2></a>
@@ -49,7 +49,9 @@ WebKit 0.4.1
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Reloading"><font size=>Reloading Servlets</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_OneShot"><font size=>OneShot Adapter</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_FastCGI"><font size=>FastCGI Adapter</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_mod_python"><font size=>Mod_python Adapter</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_mod_python"><font size=>ModPython Adapter</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_mod_snake"><font size=>ModSnake Adapter</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_mod_webkit"><font size=>ModWebKit Adapter</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_AOLserver"><font size=>AOLserver Adapter</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Renaming"><font size=>Renaming Adapters</font></a>
 <br>  <a href="#Configuration"><font size=+1>Configuration</font></a>
@@ -82,9 +84,22 @@ WebKit 0.4.1
 <p> You can always e-mail <a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a> to give feedback, discuss features and get help using WebKit.
 
 
+<h2>Quick Start</h2>
+<p>If you would like to jump right in and see WebKit in action, here's what you can do.  WebKit comes with a lightweight Webserver, called AsyncThreadedHTTPServer.  Don't let the name frighten you.  To see WebKit in action without having to set up a webserver and do other configuration, do this:
+<p>At a command prompt, do this:
+
+<p><code>cd (path/to/WebWare/WebKit)</code>
+<p><code>python Launch.py AsyncThreadedHTTPServer</code>
+
+<p>This will start the sample webserver provided with WebKit.
+<p>Now, in your browser, type <code>http://localhost:8086</code>
+<p>Hopefully, you'll be looking at WebKit!  
+<p> To stop the server, switch back to the terminal you started the webserver from, and press control-c.
+
+
 <a name=Python><h2>Python</h2></a>
 
-<p> WebKit 0.4.1 was tested with both Python 1.5.2 and 2.0b2. In fact, this release was driven by fixes in support of Python 2.0b2 as well as improvements to this guide. If you have any problems whatsoever with Python 1.5.2 and up, please let us know so we can fix them (<a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>).
+<p> WebKit 0.5 was tested with both Python 1.5.2 and 2.0. If you have any problems whatsoever with Python 1.5.2 and up, please let us know so we can fix them (<a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>).
 
 <p> Your installation of Python must be multi-threaded, even if you are using the OneShot adapter (which logically doesn't require threads). It's not uncommon for third party web host providers to leave this disabled in Python because they don't expect that it's needed and/or because the default installation of Python does not turn threads on. If your Python installation is not multi-threaded, you will have to reinstall it. If you're using a third party host provider in this situation, you may be able to install it yourself into your home directory via a telnet or ssh account. See the <a href=http://www.python.org>Python</a> site for instructions.
 
@@ -93,7 +108,7 @@ WebKit 0.4.1
 
 <a name=WebwareVersion><h2>Webware Version</h2></a>
 
-<p> Unless you just downloaded Webware (and therefore WebKit), you should check to see if you have the latest version. This version you are looking at is 0.4. You can check for the latest version at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>.
+<p> Unless you just downloaded Webware (and therefore WebKit), you should check to see if you have the latest version. This version you are looking at is 0.5. You can check for the latest version at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>.
 
 <p> If you're feeling adventurous, you can get the latest in-development source code from the public repository. Instructions are located at the <a href=https://sourceforge.net/cvs/?group_id=4866>Webware CVS page</a>. You can find more information about CVS in general at <a href=http://www.cvshome.org>http://www.cvshome.org</a>.
 
@@ -109,7 +124,7 @@ WebKit 0.4.1
 
 <a name=OpSys><h2>Operating Systems</h2></a>
 
-<p> WebKit actively supports UNIX, Windows and their various flavors.
+<p> WebKit actively supports UNIX, Windows (95/98/NT/2000) and their various flavors.
 
 <p> Note that you don't have to develop and deploy on the same platform. One of the WebKit developers develops everything on Windows 98 2nd edition and deploys his web sites on BSD (<a href=http://www.bsd.org/>http://www.bsd.org/</a>).
 
@@ -134,8 +149,6 @@ WebKit 0.4.1
 	<li> <code>r'C:\All\Web'</code>
 </ul>
 
-<p> [WinMe] [Win2k] To our knowledge, as of this release, no one has used WebKit on Windows Me or 2000. If you do so, please report the results to <a href=webware-discuss@lists.sourceforge.net>webware-discuss</a>. These probably work fine since these products are the successors to Windows 98 and Windows NT, respectfully, both of which have been tested.
-
 
 <a name=WebServers><h2>Web Servers</h2></a>
 
@@ -145,7 +158,7 @@ WebKit 0.4.1
 
 <p> Apache is the world's most popular web server, which means it's also well tested. The Apache home page is located at <a href=http://www.apache.org>http://www.apache.org</a>.
 
-<p> You can use WebKit CGI adapters with Apache or you can try out the new <a href=#Adapters_mod_python>mod_python adapter</a> described below.
+<p> In the simplest case, you can use WebKit CGI adapters with Apache.  For better performance, other apache adapters are the new <a href=#Adapters_mod_webkit>mod_webkit adapter</a>, the <a href=#Adapters_FastCGI>FastCGI adapter</a>, <a href=#Adapters_mod_python>mod_python adapter</a>, or the <a href=#Adapters_mod_snake>mod_snake adapter</a>
 
 
 <a name=WebServers_IIS><h3>IIS</h3></a>
@@ -163,10 +176,12 @@ WebKit 0.4.1
 
 <p> In order to convert WebKit.cgi into WebKit.exe using the Standalone utility, you first have to rename it to WebKit.py, and add <code>import socket</code> to the top of the file (you could use a configuration file instead, but this is easier).
 
+<p> We hope to provide a native Windows executable cgi program written in C in the near future, as well as a DLL for apache and an ISAPI module for IIS.  If you would like to implement any of these, please do so.  The mod_webkit adapter source includes all of the WebKit specific code you'll need.
+
 
 <a name=WebServers_AOLserver><h3>AOLserver</h3></a>
 
-<p> The PyWX project aims to meld Python and AOLserver and as part of that, they created an AOLserver "stay resident" WebKit adapter for tighter integration. More information can be found at <a href=http://pywx.idyll.org>http://pywx.idyll.org</a>.
+<p> The PyWX project aims to meld Python and AOLserver and as part of that, they created an AOLserver "stay resident" WebKit adapter for tighter integration. More information can be found at <a href=http://pywx.idyll.org>http://pywx.idyll.org</a> @@ JSL: Has that been updated?.
 
 
 <a name=Architecture><h2>Architecture</h2></a>
@@ -197,7 +212,9 @@ WebKit 0.4.1
 	<li> FastCGI
 	<li> OneShot
 	<li> mod_python
+	<li> mod_snake
 	<li> AOLserver
+	<li> mod_webkit
 </ol>
 
 
@@ -255,11 +272,15 @@ WebKit 0.4.1
 
 <a name=Adapters_Stopping><h3>Stopping the App Server</h3></a>
 
-<p> Stopping the app server is accomplished by simply going to its terminal/command window and hitting Control-C. The app server is designed to intercept this interruption and shut down gracefully. This includes saving session data to disk, if necessary.
+<p> The recommended method of stopping the AppServer is through the Application Control interface.  This is a servlet located in the Admin context.  A username and password are required, and these default to "admin" and "webware".  (If your system is open to the internet, please change the password immediately.  It's set in the WebKit/Configs/Application.config file).  This shutdown method is safer than doing a ctrl-c from a terminal, as described below.
+
+<p> On all OSs, stopping the app server may also be accomplished by simply going to its terminal/command window and hitting Control-C. The app server is designed to intercept this interruption and shut down as gracefully as possible. This includes saving session data to disk, if necessary.
+
+<p> On UNIX, a running appserver may be stopped from a terminal by typing "AppServer stop".
 
 <p> [Windows] Control-C normally shuts the app server down <i>gracefully</i>, where as Control-Break does not. Keep that in mind and use Control-C, unless the server is unresponsive to it.
 
-<p> [UNIX] If you don't have access to the terminal window of the app server (perhaps because you used rlogin, telnet or ssh to remotely access the machine), you can use <code>ps -ax | grep AppServer</code> to get the pid and <code>kill -s 2 &lt;pid&gt;</code> to effect a Control-C.
+<p> [UNIX] If you don't have access to the terminal window of the app server (perhaps because you used rlogin, telnet or ssh to remotely access the machine), and "AppServer stop" doesn't work, you can use <code>ps -ax | grep AppServer</code> to get the pid and <code>kill &lt;pid&gt;</code> to effect a Control-C.
 
 
 <a name=Adapters_Reloading><h3>Reloading Servlets</h3></a>
@@ -269,6 +290,8 @@ WebKit 0.4.1
 <p> However, reloading fails in two areas. The first is that WebKit doesn't check ancestor classes of servlets for modifications. So if you modify an abstract class (for example, SitePage, AccountPage, etc.), it won't be reloaded. The second is that WebKit can't check non-servlet classes. So if you modify a utility class (for example, ShoppingCart, Story, etc.), it won't be reloaded.
 
 <p> You can deal with reloading problems by stopping the app server (Control-C in its terminal/command window) and restarting it. If this gets too bothersome during development (and it probably will), use the OneShot adapter.
+
+<p> A new alternative way of reloading ancestor classes is through the Application Control servlet, in the Admin context, which will provide a list of all of the currently loaded modules, and allow you to reload selected modules.
 
 
 <a name=Adapters_OneShot><h3>OneShot Adapter</h3></a>
@@ -297,7 +320,6 @@ WebKit 0.4.1
 <ol>
 	<li> Work with OneShot.cgi (not WebKit.cgi).
 	<li> Do not launch the app server (OneShot will not use it even if it's loaded).
-	<li> Change WebKit/Configs/Application.config's <code>'SessionStore'</code> from <code>'Memory'</code> to <code>'File'</code>. See <a href=#Configuration_Sessions>Sessions</a> for more information.
 </ol>
 
 
@@ -322,7 +344,7 @@ WebKit 0.4.1
 
 <p> mod_python itself and the adapter are both somewhat new, which makes this approach the least tested among the bunch.
 
-<p> The top of modpHandler.py contains a doc sting explaining the setup.
+<p> The top of ModPythonAdapter.py contains a doc sting explaining the setup.
 
 <p> This has been tested on both UNIX and Windows.
 
@@ -330,6 +352,20 @@ WebKit 0.4.1
 
 <p> Another adapter that provides the same type of benefit is the <a href=#Adapters_FastCGI>FastCGI adapter</a> described above.
 
+
+<a name=Adapters_mod_snake><h3>ModSnake Adapter</h3></a>
+
+<p> This adapter is similar to ModPython, but written for the mod_snake apache module.  mod_snake is another method of embedding a python interpreter into apache.  mod_snake may be preferable over mod_python if you need to work with Apache 2.0, or if you would like greater access to the internals of Apache than is available through mod_python.
+
+<p> A doc string is included at the top of ModSnakeAdapter.py which describes the configuration steps to use this adapter.
+
+<a name=Adapters_mod_webkit><h3>ModWebkit Adapter</h3></a>
+
+<p> This is a native apache module designed solely to communicate with WebKit.  It is written in C, and has only been tested on Linux.
+
+<p> This adapter is the fastest of the adapters available for WebKit. 
+
+<p> The source code and a README file describing how to configure and build mod_webkit are located in the Webware/WebKit/mod_webkit directory.
 
 <a name=Adapters_AOLserver><h3>AOLserver Adapter</h3></a>
 
@@ -350,15 +386,15 @@ WebKit 0.4.1
 
 <a name=Configuration_Sessions><h3>Sessions</h3></a>
 
-<p> WebKit provides a Session utility class for storing data on the server side that relates to an individual user's session with your site. The <code>SessionStore</code> setting determines where the data is stored and can currently be set to <code>Memory</code> or <code>File</code>.
+<p> WebKit provides a Session utility class for storing data on the server side that relates to an individual user's session with your site. The <code>SessionStore</code> setting determines where the data is stored and can currently be set to <code>Dynamic</code> or <code>File</code>.
 
-<p> Storing to memory is the fastest solution and works well with a persistent app server. Note that the session data will be saved to disk periodically (as a backup measure) and upon app server shutdown. It will then be automatically reloaded upon app server startup.
+<p> Storing to the Dynamic session store is the fastest solution and is the default. This session storage method keeps the most recently used sessions in memory, and moves older sessions to disk periodocally. All sessions will be moved to disk when the server is stopped.  This storage mechanism works with both the persistant, long running AppServers and OneShot.  There are two settings in Application.config relating to this Session store.  <code>MaxDynamicMemorySessions</code> specifies the maximum number of sessions that can be in memory at any one time.   <code>DynamicSessionTimeout</code> specifies after what period of time sessions will be moved from memory to file. ( Note:  this setting is unrealted to the <code>SessionTimeout</code> setting below.  Sessions which are moved to disk by the Dynamic Session store are not deleted). 
 
 <p> Storing to files is provided mainly in support of the OneShot adapter. It may also prove useful in the future in support of load balancing. In this scenario, each individual session is stored in its own file, loaded for every request and saved when delivering the corresponding response.
 
 <p> All on-disk session information is located in WebKit/Sessions.
 
-<p> Also, the <code>SessionTimeout</code> setting lets you set the number of minutes of inactivity before a user's session becomes invalid. The default is 60.
+<p> Also, the <code>SessionTimeout</code> setting lets you set the number of minutes of inactivity before a user's session becomes invalid and is deleted. The default is 60.  The Session Timeout value can also be changed dynamically on a per session basis.
 
 
 <a name=Configuration_ActivityLog><h3>Activity Log</h3></a>
