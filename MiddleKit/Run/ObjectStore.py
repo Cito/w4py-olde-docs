@@ -316,7 +316,12 @@ class ObjectStore(ModelUser):
 	## Other ##
 
 	def clear(self):
-		''' Clears all objects from the memory of the store. This does not delete the objects in the persistent backing. This method can only be invoked if there are no outstanding changes to be saved. You can check for that with hasChanges(). '''
+		"""
+		Clears all objects from the memory of the store. This does not
+		delete the objects in the persistent backing. This method can
+		only be invoked if there are no outstanding changes to be
+		saved. You can check for that with hasChanges().
+		"""
 		assert not self.hasChanges()
 		assert len(self._newObjects)==0
 		assert len(self._deletedObjects)==0

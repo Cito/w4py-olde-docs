@@ -34,7 +34,9 @@ class SQLGenerator(CodeGenerator):
 	'''
 
 	def dbName(self):
-		''' Returns the name of the database by asked the generator's model for dbName(). '''
+		"""
+		Returns the name of the database by asked the generator's model for dbName().
+		"""
 		return self.model().dbName()
 
 	def configFilename(self):
@@ -73,7 +75,9 @@ class ModelObject:
 class Model:
 
 	def writeCreateSQL(self, generator, dirname):
-		''' Creates the directory if necessary, sets the klasses' generator, and tells klasses to writeCreateSQL(). '''
+		"""
+		Creates the directory if necessary, sets the klasses' generator, and tells klasses to writeCreateSQL().
+		"""
 		if not os.path.exists(dirname):
 			os.mkdir(dirname)
 		assert os.path.isdir(dirname)
