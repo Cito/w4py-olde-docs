@@ -1,5 +1,5 @@
 from AdminPage import AdminPage
-import string, types, whrandom
+import string, types, random
 from time import time, localtime
 
 class LoginPage(AdminPage):
@@ -49,7 +49,7 @@ class LoginPage(AdminPage):
 					self.writeln('<input type="hidden" name="%s" value="%s">' % (key, value))
 		# Create a "unique" login id and put it in the form as well as in the session.
 		# Login will only be allowed if they match.
-		loginid = string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + str(whrandom.whrandom().randint(10000, 99999))
+		loginid = string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + str(random.randint(10000, 99999))
 		self.writeln('<input type="hidden" name="loginid" value="%s">' % loginid)
 		self.session().setValue('loginid', loginid)
 		self.write('''

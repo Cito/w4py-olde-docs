@@ -10,7 +10,7 @@ from time import time, localtime, gmtime, asctime
 serverStartTime  = time()
 
 # Some imports
-import cgi, os, string, sys, traceback, whrandom
+import cgi, os, string, sys, traceback, random
 from types import *
 
 if '' not in sys.path:
@@ -346,7 +346,7 @@ class CGIWrapper(NamedValueAccess):
 		return 'Error-%s-%s-%d.html' % (
 			os.path.split(self._scriptPathname)[1],
 			string.join(map(lambda x: '%02d' % x, localtime(self._scriptEndTime)[:6]), '-'),
-			whrandom.whrandom().randint(10000, 99999))
+			random.randint(10000, 99999))
 			# @@ 2000-04-21 ce: Using the timestamp & a random number is a poor technique for filename uniqueness, but this works for now
 
 	def logExceptionToDisk(self, errorMsgFilename='', excInfo=None):

@@ -1,5 +1,5 @@
 from Common import *
-import string, time, traceback, types, whrandom, sys, MimeWriter, smtplib, StringIO
+import string, time, traceback, types, random, sys, MimeWriter, smtplib, StringIO
 from time import asctime, localtime
 from MiscUtils.Funcs import dateForEmail
 from WebUtils.HTMLForException import HTMLForException
@@ -474,7 +474,7 @@ class ExceptionHandler(Object):
 		return 'Error-%s-%s-%d.html' % (
 			self.basicServletName(),
 			string.join(map(lambda x: '%02d' % x, localtime(self._time)[:6]), '-'),
-			whrandom.whrandom().randint(10000, 99999))
+			random.randint(10000, 99999))
 			# @@ 2000-04-21 ce: Using the timestamp & a
 			# random number is a poor technique for
 			# filename uniqueness, but this works for now

@@ -39,7 +39,7 @@ from glob import glob
 from socket import *
 from marshal import dumps
 from thread import start_new_thread
-from whrandom import randint
+from random import randint
 from time import asctime, localtime, time, sleep
 from threading import Thread
 

@@ -182,9 +182,9 @@ class Installer:
 				# The random function gives back a real number.
 				characters = string.letters + string.digits
 
-				import whrandom
+				import random
 				for i in range(8):
-					password = password + whrandom.choice(characters)
+					password = password + random.choice(characters)
 
 		try:
 			data = open('WebKit/Configs/Application.config', 'r').read()
