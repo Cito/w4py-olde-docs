@@ -241,7 +241,7 @@ class Application(Configurable,CanContainer):
 		return self._webwareVersion
 
 	def webKitVersion(self):
-		return '0.4'
+		return '0.4.1'
 
 	def version(self):
 		"""

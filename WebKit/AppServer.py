@@ -144,7 +144,7 @@ class AppServer(Configurable):
 
 	def version(self):
 		# @@ 2000-07-10 ce: Resolve this with the fooVersion() methods in Application
-		return '0.4'
+		return '0.4.1'
 
 	def application(self):
 		return self._app
