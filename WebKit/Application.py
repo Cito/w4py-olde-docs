@@ -627,7 +627,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		req = transaction.request()
 		editlink = req.adapterName() + "/Admin/EditFile"
-		self._exceptionHandler(self, transaction, excInfo,
+		self._exceptionHandlerClass(self, transaction, excInfo,
 						 {"editlink": editlink})
 
 	def rootURLParser(self):
