@@ -27,12 +27,15 @@ class MySQLObjectStore(SQLObjectStore):
 	'''
 
 	def newConnection(self):
-		return self.dbapiModule().connect(**self._dbArgs)
+		args = self._dbArgs.copy()
+		args['db'] = self._model.sqlDatabaseName()
+		return self.dbapiModule().connect(**args)
 
-	def retrieveLastInsertId(self):
-		conn, cur = self.executeSQL('select last_insert_id();')
-		# @@ 2001-05-23 ce: there is a specific Python call for this in MySQLdb that we should try
-		return cur.fetchone()[0]
+	def retrieveLastInsertId(self, conn, cur):
+		return cur.insert_id()
+		# The above is more efficient.
+		# conn, cur = self.executeSQL('select last_insert_id();', conn)
+		# return cur.fetchone()[0]
 
 	def dbapiModule(self):
 		return MySQLdb

@@ -92,14 +92,12 @@ class SQLObjectStore(ObjectStore):
 		provided that the store has a valid model.
 
 		The default implementation of connect() is usually sufficient
-		provided that subclasses have implemented
-		createDBAPIConnection() and useDatabase().
+		provided that subclasses have implemented newConnection().
 		'''
 		assert self._model, 'Cannot connect: No model has been attached to this store yet.'
 		if not self._connected:
 			self._connection = self.newConnection()
 			self._connected = 1
-			self.useDB()
 			self.readKlassIds()
 
 	def newConnection(self):
@@ -107,24 +105,11 @@ class SQLObjectStore(ObjectStore):
 		Returns a DB API 2.0 connection. This is a utility method
 		invoked by connect(). Subclasses should implement this, making
 		use of self._dbArgs (a dictionary specifying host, username,
-		etc.).
+		etc.) as well as self._model.sqlDatabaseName().
 
 		Subclass responsibility.
-		Example implementation:
-			return MySQLdb.connect(**self._dbArgs)
 		'''
 		raise SubclassResponsibilityError
-
-	def useDB(self):
-		'''
-		Takes whatever action necessary to use the appropriate database
-		associated with the object store, usually named after
-		self._model.name().
-
-		This implementation performs a SQL "use MODELNAME;" so
-		subclasses only need override if that doesn't work.
-		'''
-		self.executeSQL('use %s;' % self._model.name())
 
 	def readKlassIds(self):
 		'''
@@ -148,10 +133,10 @@ class SQLObjectStore(ObjectStore):
 
 			# SQL insert
 			sql = object.sqlInsertStmt()
-			self.executeSQL(sql)
+			conn, cur = self.executeSQL(sql)
 
 			# Get new id/serial num
-			idNum = self.retrieveLastInsertId()
+			idNum = self.retrieveLastInsertId(conn, cur)
 
 			# Update object
 			object.setSerialNum(idNum)
@@ -163,7 +148,7 @@ class SQLObjectStore(ObjectStore):
 
 		self._newObjects = []
 
-	def retrieveLastInsertId(self):
+	def retrieveLastInsertId(self, conn, cur):
 		''' Returns the id (typically a 32-bit int) of the last INSERT operation by this connection. Used by commitInserts() to get the correct serial number for the last inserted object.
 		Subclass responsibility. '''
 		raise SubclassResponsibilityError
@@ -389,6 +374,14 @@ class SQLObjectStore(ObjectStore):
 		for klass in self.model().klasses().values():
 			out.write('%25s %2i\n' % (klass.name(), klass.id()))
 		out.write('\n')
+
+
+class Model:
+
+	def sqlDatabaseName(self):
+		# @@ 2001-06-15 ce: someday we might allow this to be set
+		# or at least read from a config file
+		return self.name()
 
 
 class MiddleObjectMixIn:

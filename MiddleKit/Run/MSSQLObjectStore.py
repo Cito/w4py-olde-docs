@@ -28,9 +28,8 @@ class MSSQLObjectStore(SQLObjectStore):
 		'''
 		return apply(ODBC.Windows.Connect, (), self._dbArgs)
 
-	def retrieveLastInsertId(self):
-		query = 'select @@IDENTITY'
-		result = self.executeSQL(query)
+	def retrieveLastInsertId(self, conn, cur):
+		result = self.executeSQL('select @@IDENTITY', conn)
 		return int(self._cursor.fetchone()[0])
 
 
