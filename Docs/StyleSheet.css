@@ -1,1 +1,77 @@
-	body {				background-color: #FFFFFF;			font-family: Verdana, Arial, Helvetica, sans-serif;			font-size: 10pt;			padding: 15px;	}	td {			background-color: #FFFFFF;			font-family: Verdana, Arial, Helvetica, sans-serif;			font-size: 10pt;	}	p {		margin: 8px 0 8px 0;	}	h1, h2 {		font-family: Verdana, Arial, Helvetica, sans-serif;		color: #002352;	}	h3, h4 {		font-family: Verdana, Arial, Helvetica, sans-serif;		color: #002352;		margin: 8px 0 0 0;	}	.TitleBar {		font-family: Tahoma, Arial, Helvetica, sans-serif;		font-size: 18pt;		color: white;		background-color: #002352;	}	.Footer {		font-family: Tahoma, Arial, Helvetica, sans-serif;		font-size: smaller;	}	.ToC {		font-family: Tahoma, Arial, Helvetica, sans-serif;		font-size: smaller;	}    span.name {        font-weight: bold;    }    span.filename {        font-family: Tahoma, Arial, Helvetica, sans-serif;        font-size: smaller;    }    pre.py {        color: darkblue;        background-color: #EEE;        padding-left: 2.5em;		font-size: 10pt;		margin: 0;    }	.pyInline {        color: darkblue;		font-family: Monaco, "Courier New", Courier, mono;		font-size: 10pt;        background-color: #EEE;    }    span.typed {        font-weight: bold;    }	/*** Configuration documentation ***/	dl.config {	}	dt.config {	}	dd.config {	}	span.setting {		font-family: Tahoma, Arial, Helvetica, sans-serif;		font-size: smaller;		font-weight: bolder;	}
+	body {	
+			background-color: #FFFFFF;
+			font-family: Verdana, Arial, Helvetica, sans-serif;
+			font-size: 10pt;
+			padding: 15px;
+	}
+	td {
+			background-color: #FFFFFF;
+			font-family: Verdana, Arial, Helvetica, sans-serif;
+			font-size: 10pt;
+	}
+	p {
+		margin: 8px 0 8px 0;
+	}
+	h1, h2 {
+		font-family: Verdana, Arial, Helvetica, sans-serif;
+		color: #002352;
+	}
+	h3, h4 {
+		font-family: Verdana, Arial, Helvetica, sans-serif;
+		color: #002352;
+		margin: 8px 0 0 0;
+	}
+
+	.TitleBar {
+		font-family: Tahoma, Arial, Helvetica, sans-serif;
+		font-size: 18pt;
+		color: white;
+		background-color: #002352;
+	}
+	.Footer {
+		font-family: Tahoma, Arial, Helvetica, sans-serif;
+		font-size: smaller;
+	}
+	.ToC {
+		font-family: Tahoma, Arial, Helvetica, sans-serif;
+		font-size: smaller;
+	}
+    span.name {
+        font-weight: bold;
+    }
+    span.filename {
+        font-family: Tahoma, Arial, Helvetica, sans-serif;
+        font-size: smaller;
+    }
+    pre.py {
+        color: darkblue;
+        background-color: #EEE;
+        padding-left: 2.5em;
+		font-size: 10pt;
+		margin: 0;
+    }
+	.pyInline {
+        color: darkblue;
+		font-family: Monaco, "Courier New", Courier, mono;
+		font-size: 10pt;
+        background-color: #EEE;
+    }
+    span.typed {
+        font-weight: bold;
+    }
+
+
+	/*** Configuration documentation ***/
+
+	dl.config {
+	}
+	dt.config {
+	}
+	dd.config {
+	}
+	span.setting {
+		font-family: Tahoma, Arial, Helvetica, sans-serif;
+		font-size: smaller;
+		font-weight: bolder;
+	}
+

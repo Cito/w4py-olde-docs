@@ -15,7 +15,8 @@ from MiscUtils.PickleCache import *
 
 # the directory that this file is in.
 progDir = os.path.dirname( __file__ )
-assert progDir.endswith('Webware/MiscUtils/Testing')
+assert progDir.endswith('MiscUtils/Testing'), 'progDir="%s"' % progDir
+
 
 
 class TestPickleCache(unittest.TestCase):
