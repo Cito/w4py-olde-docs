@@ -16,7 +16,17 @@ Release 0.5 on 3/1/2001
 <h2>Synopsis</h2>
 
 
-<p> Webware for Python is a suite of software components for developing web-based applications that are object-oriented, cached and multi-threaded. The suite uses well known design patterns such as servlets and server pages (as found in ASP, PHP and JSP).
+<p> Webware for Python is a suite of software components for developing object-oriented, web-based applications. The suite uses well known design patterns and includes popular features such as:
+
+<ul>
+	<li> A fast, multi-threaded, easy-to-use application server
+	<li> Servlets
+	<li> Python Server Pages (PSP, similar to ASP, PHP and JSP)
+	<li> An object-relational mapper
+	<li> Task scheduling
+	<li> User management and authentication
+	<li> A CGI wrapper
+</ul>
 
 <p> Key goals of the project include:
 
@@ -31,45 +41,44 @@ Release 0.5 on 3/1/2001
 
 <h2>Feedback and Support</h2>
 
-<p> You can e-mail <a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a> to give feedback, discuss features and get help using Webware.
+<p> You can e-mail <a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a> to give feedback, discuss features and get help using Webware. You can visit the <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>webware-discuss page</a> to join the list.
 
 
 <h2>Installation</h2>
 
-<p> Be sure to run <b>install.py</b> in the Webware directory before proceeding. Some portions of the documentation will not be accessible until this is done.
+<p> Be sure to run <span class=filename>install.py</span> in the Webware directory before proceeding. Some portions of the documentation will not be accessible until this is done.
 
 
-<h2>Description</h2>
+<h2>Components</h2>
 
-<p> Each Webware component has a focused purpose and can often be used on it's own. At the same time, the components are designed to work together where appropriate. As a user of Webware, you can bite off as much or as little as you want to chew.
+<p> Each Webware component has a focused purpose and can often be used on its own. At the same time, the components are designed to work together where appropriate. You can use as much or as little of Webware as you want to.
 
-<p> Most people start with <a href=../WebKit/Documentation/index.html>WebKit</a>, which is the Webware application server.
+<p>The components are summarized in the <a href=ComponentIndex.html>Component Index</a>.
 
-<p>All the components are summarized in the <a href=ComponentIndex.html>Component Index</a>.
+<p> Most people start with <a href=../WebKit/Docs/index.html>WebKit</a>, which is the Webware application server.
 
 
-<h2>Status</h2>
 
-<p> Webware is currently being used in at least three known commercial endeavors, two of which are by people outside the main Webware project. This recent use has lead to a host of improvements in the API, stability, test suites and documentation, that have contributed to this latest release.
+<a name=Status><h2>Status</h2></a>
 
-<p> With support from the <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>webware-discuss</a> mailing list, you should feel comfortable developing with Webware.
+<p> Webware is already being used for real work by a variety of people in different environments. With support from the <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>webware-discuss</a> mailing list, you should feel comfortable developing with Webware.
 
-<p> However, there are a few warnings:
+<p> In the <a href=ComponentIndex.html>Component Index</a> you will see the status of each component such as <span class=name>alpha</span> and <span class=beta>beta</span>. For beta components we are successfully striving for backwards compatibility of the API as the components mature.
 
-<ul>
-	<li> The servlet and PSP APIs are fairly stable, but we're not guaranteeing backwards compatibility in new releases (designing the best API is the first priority).
-	<li> You will still find some features lacking as with any work-in-progress.
-	<li> There is no set timeline for when Webware will be final, production quality (although you have access to the source and could always fix what you need for your site, usually with the help of the team). Some goals for 1.0 include:
+<p> The plan is for the next release to be 1.0, approximately 4 months after this release, e.g. July 2001.
+
+<p> Some goals in order to realize official production quality include:
 	<ul>
 		<li> Larger regression test suite.
 		<li> Even better documentation.
 		<li> Tutorial.
-		<li> Even more real-life applications.
+		<li> Take all beta components to production.
+		<li> Take all alpha components to beta.
 		<li> WebKit AppServer:
 		<ul>
-			<li> Better handling of its own uncaught exceptions (it already deals well with servlet-generated exceptions).
-			<li> Fault tolerance
-			<li> Load balancing
+			<li> Better handling of its own errors (it already deals well with servlet errors).
+			<li> Better application directory structue.
+			<li> Other items.
 		</ul>
 	</ul>
 </ul>
@@ -93,18 +102,23 @@ Release 0.5 on 3/1/2001
 <p> If you are interested in contributing please contact <a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>.
 
 
-<h2>Information</h2>
+<h2>Summary Information</h2>
 
 <table style="padding-left: 2em">
 <tr> <td valign=top> Home: </td> <td> <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a> </td> </tr>
 <tr> <td valign=top> Version: </td> <td> 0.5 </td> </tr>
-<tr> <td valign=top> Requirements: </td> <td> Python 1.5.2. Tested on UNIX (FreeBSD, Linux, et al) and Windows (98, NT). </td> </tr>
+<tr> <td valign=top> Requirements: </td> <td> Python 1.5.2 or 2.0.
+	<br> Tested on UNIX (FreeBSD, Linux, et al) and
+	<br> Windows (2K, NT, Me, et al). </td> </tr>
+<tr> <td valign=top> Status: </td> <td> beta </td> </tr>
 <tr> <td valign=top> Announcements: </td> <td> join: <a href=http://lists.sourceforge.net/mailman/listinfo/webware-announce>http://lists.sourceforge.net/mailman/listinfo/webware-announce</a> (very low traffic) </td> </tr>
 <tr> <td valign=top> Discussion: </td> <td> e-mail: <a href="mailto:webware-discuss@lists.sourceforge.net">webware-discuss@lists.sourceforge.net</a>
 										<br> join: <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>http://lists.sourceforge.net/mailman/listinfo/webware-discuss</a> </td> </tr>
-<tr> <td valign=top> Copyright: </td> <td> See the <a href="#Copyright">Copyright, License and Disclaimer</a> below. </td> </tr>
+<tr> <td valign=top> Copyright: </td> <td> See the <a href=Copyright.html>Copyright, License and Disclaimer</a>. </td> </tr>
 <tr> <td valign=top> Primary Authors: </td> <td> Chuck Esterbrook, <a href="mailto:echuck@mindspring.com">echuck@mindspring.com</a>
-						<br> Jay Love, <a href="mailto:jsliv@jslove.net">jsliv@jslove.net</a> </td> </tr>
+						<br> Jay Love, <a href="mailto:jsliv@jslove.net">jsliv@jslove.net</a>
+						<br> Geoff Talvola, <a href="mailto:gtalvola@NameConnector.com">gtalvola@NameConnector.com</a>
+						</td> </tr>
 </table>
 
 
@@ -136,8 +150,7 @@ Release 0.5 on 3/1/2001
 <h2>Future</h2>
 
 <ul>
-	<li> Document MiscUtils.
-	<li> Implement MiddleKit.
+	<li> The plan is for the next release to be 1.0, approximately 4 months after this release, e.g. July 2001. See <a href=#Status>Status</a> above.
 	<li> Get gendoc or pythondoc going on the source code.
 	<li> Consider switching docs to <a href=http://www.zanshin.com/latte/home.html>Latte</a>.
 	<li> Write an article for <a href=www.oreillynet.com/topics/python/internet>www.oreillynet.com/topics/python/internet</a>.
@@ -147,14 +160,14 @@ Release 0.5 on 3/1/2001
 		<li> <a href=http://www.xs4all.nl/~irmen/pyro.html>Pyro</a> - distributed objects
 		<li> <a href=http://www.fusebox.org>Fusebox</a>
 		<li> <a href=http://starship.python.net/crew/lemburg/>Lemburg's page</a> which contains something called mxCGIPython.
-		<li> <a href=http://www.valdyas.org/python/index.html>Python stuff/dbObj</a> and <a href=http://www.valdyas.org:8000/>Kura Grammar Server</a>.
 		<li> <a href=http://dustman.net/andy/python>HyperText</a> by Andy Dustman
 		<li> Other packages at <a href=http://www.vex.net/parnassus>V of P</a>
 	</ul>
-	<li> See the Future sections of the documentation for each component for more info.
+	<li> See the Future or TO DO sections of the documentation for each component for more info.
 </ul>
 
 
+<!--
 <a name=Copyright><h2>Copyright, License and Disclaimer</h2></a>
 
 <p> Webware for Python is open source. The Webware for Python source is copyrighted, but you can freely use and copy it as long as you don't change or remove this copyright notice. The license is a clone of the <a href=http://www.opensource.org/licenses/>OSI-approved</a> <a href=http://www.python.org/docs/Copyright.html>Python license</a>.
@@ -183,19 +196,20 @@ PERFORMANCE OF THIS SOFTWARE.
 <h2>Trademarks</h2>
 
 <p> All trademarks are reserved by their respective owners.
+-->
 
 
 <h2>Thanks to...</h2>
 
-<p> <a href=http://www.python.org/~guido/>Guido van Rossum</a> for <a href=http://www.python.org>Python</a>
+<p> Members of <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>webware-discuss</a> and <a href=http://www.egroups.com/group/python-web-modules>python-web-modules</a> for discussion and feedback.
 
 <p> <a href=http://www.sourceforge.net>SourceForge</a> for hosting <a href=http://webware.sourceforge.net>Webware for Python</a>
 
-<p> Members of <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>webware-discuss</a> and <a href=http://www.egroups.com/group/python-web-modules>python-web-modules</a> for discussion and feedback.
+<p> <a href=http://www.python.org/~guido/>Guido van Rossum</a> for <a href=http://www.python.org>Python</a>
 
 
 <p><br><hr>
-Copyright &copy; 1999-2000 by Chuck Esterbrook. All Rights Reserved.
+Copyright &copy; 1999-2001 by Chuck Esterbrook. All Rights Reserved.
 <br>See copyright notice above for full details.
 
 </body>
