@@ -3,8 +3,9 @@ from ExamplePage import ExamplePage
 
 class CountVisits(ExamplePage):
 	def writeBody(self):
-		count = self._session.value('count', 0)+1
-		self._session.setValue('count', count)
+		
+		count = self.session().value('count', 0)+1
+		self.session().setValue('count', count)
 		if count>1:
 			plural = 's'
 		else:
