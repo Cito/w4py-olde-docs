@@ -26,7 +26,7 @@ _real_stdout = sys.stdout
 sys.stdout = _console = StringIO()  # to capture the console output of the application
 
 import os, string
-from Adapter import Adapter
+from Adapter import *
 from MiscUtils.Funcs import CharWrap
 
 
