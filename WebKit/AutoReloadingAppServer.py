@@ -165,7 +165,7 @@ class AutoReloadingAppServer(AppServer):
 		"""Tell the main thread to restart the server."""
 		self._shouldRestart = 1
 
-	def fileMonitorThreadLoop(self, getmtime=os.path.getmtime):
+	def fileMonitorThreadLoop(self):
 		"""
 		This the the main loop for the monitoring thread.
 		Runs in its own thread, polling the files for changes
@@ -178,17 +178,34 @@ class AutoReloadingAppServer(AppServer):
 		while self._autoReload:
 			time.sleep(pollInterval)
 			for f, mtime in modloader.fileList().items():
-				try:
-					if mtime < getmtime(f):
-						print '*** The file', f, 'has changed.  The server is restarting now.'
-						self._autoReload = 0
-						return self.shouldRestart()
-				except OSError:
-					print '*** The file', f, 'is no longer accessible.  The server is restarting now.'
+				if self.fileUpdated(f, mtime):
+					print '*** The file', f, 'has changed.  The server is restarting now.'
 					self._autoReload = 0
 					return self.shouldRestart()
 		print 'Autoreload Monitor stopped'
 		sys.stdout.flush()
+
+	def fileUpdated(self, filename, mtime, getmtime=os.path.getmtime):
+		"""
+		Checks if a file has been updated in such a way that
+		we should restart the server.
+		"""
+		try:
+			if mtime < getmtime(filename):
+				for name, mod in sys.modules.items():
+					if getattr(mod, '__file__', None) == filename:
+						break
+				else:
+					# It's not a module, we must reload
+					return 1
+				if getattr(mod, '__donotreload__', None):
+					modloader.fileList()[filename] = getmtime(filename)
+					return 0
+				return 1
+			else:
+				return 0
+		except OSError:
+			return 1
 
 	def fileMonitorThreadLoopFAM(self, getmtime=os.path.getmtime):
 		"""
@@ -201,16 +218,10 @@ class AutoReloadingAppServer(AppServer):
 		# for all of the modules which have _already_ been loaded, we check
 		# to see if they've already been modified or deleted
 		for f, mtime in modloader.fileList().items():
-			if mtime < getmtime(f):
-				try:
-					if mtime < getmtime(f):
-						print '*** The file', f, 'has changed.  The server is restarting now.'
-						self._autoReload = 0
-						return self.shouldRestart()
-				except OSError:
-					print '*** The file', f, 'is no longer accessible  The server is restarting now.'
-					self._autoReload = 0
-					return self.shouldRestart()
+			if self.fileUpdated(f, mtime):
+				print '*** The file', f, 'has changed.  The server is restarting now.'
+				self._autoReload = 0
+				return self.shouldRestart()
 			# request that this file be monitored for changes
 			self._requests.append( fc.monitorFile(f, f) )
 
@@ -235,7 +246,8 @@ class AutoReloadingAppServer(AppServer):
 					sys.exit(1)
 			while fc.pending():
 				fe = fc.nextEvent()
-				if fe.code2str() in ['changed','deleted','created']:
+				if (fe.code2str() in ['changed','deleted','created']
+				    and self.fileUpdated(fe.userData, modloader.fileList()[fe.userData])):
 					print '*** The file %s has changed.  The server is restarting now.' % fe.userData
 					self._autoReload = 0
 					return self.shouldRestart()

@@ -118,6 +118,7 @@ class ServletFactory(Object):
 			modname=os.path.splitext(os.path.basename(serverSidePathToImport))[0]
 			fp, pathname, stuff = imp.find_module(modname, [os.path.dirname(serverSidePathToImport)])
 			module = imp.load_module(fullmodname, fp, pathname, stuff)
+			module.__donotreload__ = 1
 			return module
 
 
@@ -181,6 +182,7 @@ class ServletFactory(Object):
 		finally:
 			if fp is not None:
 				fp.close()
+		module.__donotreload__ = 1
 		return module
 
 	def flushCache(self):
