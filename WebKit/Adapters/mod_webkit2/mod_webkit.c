@@ -388,11 +388,12 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
             /* read */
             apr_bucket_read(bucket, &data, &len, APR_BLOCK_READ);
             
-	    do {
-		aprlen=len;
-		rv = apr_send(aprsock, data, &aprlen);
-		len = len-aprlen;
-	    } while (len >0 && rv==APR_SUCCESS);
+            do {
+                aprlen=len;
+                rv = apr_send(aprsock, data, &aprlen);
+                len = len-aprlen;
+                data += aprlen;
+            } while (len >0 && rv==APR_SUCCESS);
 
 	    if (rv != APR_SUCCESS) {
                 /* silly server stopped reading, soak up remaining message */
