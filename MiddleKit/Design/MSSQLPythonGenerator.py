@@ -12,9 +12,10 @@ try:
 except ImportError:
 	DateTime = None
 
+
 class AnyDateTimeAttr:
 
-	def writePySetChecks(self, out):
+	def _delme_writePySetChecks(self, out):
 		Attr.writePySetChecks.im_func(self, out)
 		if DateTime:
 			out.write('''\
@@ -35,21 +36,3 @@ class AnyDateTimeAttr:
 			if isinstance(value, StringTypes):
 				raise TypeError, 'expecting string type, but got value %r of type %r instead' % (value, type(value))
 ''')
-
-
-class DateAttr:
-
-	def mxDateTimeTypeName(self):
-		return 'DateTimeType'
-
-
-class TimeAttr:
-
-	def mxDateTimeTypeName(self):
-		return 'DateTimeType'
-
-
-class DateTimeAttr:
-
-	def mxDateTimeTypeName(self):
-		return 'DateTimeType'
