@@ -390,7 +390,7 @@ Known bugs and future work in general are documented in Future_.
 
 Credit
 
-Authors: Chuck Esterbrook, Jay Love, Geoff Talvola.
+Authors: Chuck Esterbrook, Jay Love, Geoff Talvola, Ian Bicking.
 @@ ib: We should add more names.
 
 Many people, mostly on the webware-discuss mailing list, have provided
