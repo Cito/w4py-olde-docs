@@ -118,7 +118,6 @@ class UserManagerToSomewhereTest(UserManagerTest):
 		assert user
 		assert user.password()=='bar'
 
-
 	def checkUserAccess(self):
 		mgr = self.mgr
 		user = mgr.createUser('foo', 'bar')
@@ -134,6 +133,17 @@ class UserManagerToSomewhereTest(UserManagerTest):
 		assert mgr.userForSerialNum(1000, 1)==1
 		assert mgr.userForExternalId('asdf', 1)==1
 		assert mgr.userForName('asdf', 1)==1
+
+	def checkDuplicateUser(self):
+		print
+		print 'dup user'
+		mgr = self.mgr
+		user = self.user = mgr.createUser('foo', 'bar')
+
+		self.assertRaises(AssertionError, mgr.createUser, 'foo', 'bar')
+
+		userClass = mgr.userClass()
+		self.assertRaises(AssertionError, userClass, mgr, 'foo', 'bar')
 
 
 class UserManagerToFileTest(UserManagerToSomewhereTest):

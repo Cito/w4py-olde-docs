@@ -19,10 +19,10 @@ class User:
 		self._isActive = 0
 		self._externalId = None
 
-		if manager is not None:
-			self.setManager(manager)
 		if name is not None:
 			self.setName(name)
+		if manager is not None:
+			self.setManager(manager)
 		if password is not None:
 			self.setPassword(password)
 
@@ -37,6 +37,8 @@ class User:
 		assert self._manager is None
 		from UserManager import UserManager
 		assert isinstance(manager, UserManager)
+		assert manager.userForName(self.name(), None) is None, \
+			'There is already a user named %r.' % self.name()
 		self._manager = manager
 
 	def serialNum(self):
