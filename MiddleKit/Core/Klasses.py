@@ -138,6 +138,8 @@ class Klasses(ModelObject, UserDict):
 		self._klasses.append(klass)
 		self[klass.name()] = klass
 
+		# @@ 2004-03-05 ce: should do the superklass connection in awakeFromRead()
+		# so that the model can have "forward references" to klasses
 		supername = klass.supername()
 		if supername!='MiddleObject':
 			klass.setSuperklass(self._model.klass(supername))
