@@ -18,7 +18,7 @@ def main(args):
 	import WebKit
 	code = 'from WebKit.%s import main' % server
 	exec code
-	args = args[1:]
+	args = args[2:]
 	main(args)
 
 if __name__=='__main__':
