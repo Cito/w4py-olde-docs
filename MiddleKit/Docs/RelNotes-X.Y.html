@@ -78,6 +78,7 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 	<li> A setting called "DatabaseArgs" was added in which you can pass necessary arguments for establishing the database connection. <a href=UsersGuide.html#Configuration_DatabaseArgs>docs</a>
 	<li> You can clone Middle objects (recursively, if you want). <a href=UsersGuide.html#MT_Cloning>docs</a>
 	<li> In sample data files, you can put a comment after an obj ref value to remind you of what it points to; you do so in the same cell. For example, instead of just "User.17", you can say "User.17 - John Smith". One space is required after the number and the rest is ignored.
+	<li> A new setting, <b>GenerateSQLReferencesForObjRefsToSingleClasses<b>, causes MiddleKit to generate "references <i>TargetTable<i>(SerialNum)" in Create.sql for each obj ref column whose target class has no subclasses. This helps preserve data integrity at the database level.
 </ul>
 
 
