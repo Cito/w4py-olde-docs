@@ -86,7 +86,7 @@ class CharDataGenerator(GenericGenerator):
 		#self.chars = string.replace(self.chars,'"','\\"')
 		#self.chars = string.replace(self.chars,'\t','\\\\t')
 		#self.chars = string.replace(self.chars, "'", "\\'")
-		self.chars = string.replace(self.chars,'"""',r'\"""')
+		self.chars = string.replace(self.chars,'"',r'\"')
 		
 		self.generateChunk(writer)
 
