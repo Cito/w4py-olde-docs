@@ -33,10 +33,16 @@ class MySQLObjectStore(SQLObjectStore):
 		return self.dbapiModule().connect(**args)
 
 	def retrieveLastInsertId(self, conn, cur):
-		return cur.insert_id()
-		# The above is more efficient.
+		try:
+			# MySQLdb module 1.2.0 and later
+			id = conn.insert_id()
+		except AttributeError:
+			# MySQLdb module 1.0.0 and earlier
+			id = cur.insert_id()
+		# The above is more efficient than this:
 		# conn, cur = self.executeSQL('select last_insert_id();', conn)
-		# return cur.fetchone()[0]
+		# id = cur.fetchone()[0]
+		return id
 
 	def dbapiModule(self):
 		return MySQLdb
