@@ -1,4 +1,5 @@
 from CodeGenerator import CodeGenerator
+from MiscUtils import SubclassResponsibilityError
 from time import asctime, localtime, time
 import string
 import os, sys
