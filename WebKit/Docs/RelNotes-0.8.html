@@ -38,6 +38,15 @@ Version 0.8 beta 1
 
 <ul>
 	<li> Added experimental HTTPAdapter.py written by Ian Bicking.  This is an adapter that serves HTTP directly, eliminating the need for a separate web server.  <b>Note that this is experimental!  Please do not use this to serve a production web site!</b>
+	<li> <b>AutoReload</b> - A new setting in AppServer.config, 'AutoReload' enables the
+	AutoReloadingAppServer module..  This module is designed to notice changes
+	to source files, including servlets, PSP's templates, or changes to the Webware
+	source files, and reload the server as necessary to pick up the changes.
+	<p>This uses the python FAM (fam = File Alteration Monitor) if present.
+	Otherwise it resorts to polling.  The polling interval can be 
+	set with the <b>AutoReloadPollInterval</b> setting which defaults
+	to 1 second.
+
 </ul>
 
 
