@@ -84,10 +84,10 @@ class SessionStore(Object):
 	## Convenience methods ##
 
 	def items(self):
-		items = map(lambda key, self=self: (key, self[key]), self.keys())
+		return map(lambda key, self=self: (key, self[key]), self.keys())
 
 	def values(self):
-		values = map(lambda key, self=self: self[key], self.keys())
+		return map(lambda key, self=self: self[key], self.keys())
 
 	def get(self, key, default=None):
 		if self.has_key(key):
