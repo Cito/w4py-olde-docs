@@ -10,7 +10,7 @@ for the purpose of making requests and receiving the responses.
 	30
 
 
-See also: Webkit.PickleRPCServlet, WebKit.Examples.PickleRPCExample
+See also: Server, Webkit.PickleRPCServlet, WebKit.Examples.PickleRPCExample
 
 The implementation of this module was taken directly from Python 2.2's
 xmlrpclib and then transformed from XML-orientation to Pickle-orientation.
