@@ -380,6 +380,9 @@ foo.addToBars(newBar)
 	<li> <b>DeleteObjectWithReferencesError</b> - This is raised when you try to delete an object that references other objects, with a reference attribute that has the property onDeleteSelf=deny.  To avoid this exception, either set the reference to None before deleting, or switch to a different setting for onDeleteSelf on the reference attribute.
 </ul>
 
+<p> See <a href="#DT_ObjRef">Object references</a> for the specifications of onDeleteSelf and onDeleteOther.
+
+
 <a name=MT_DerivedAttributes><h3>Derived attributes</h3></a>
 
 <p> Sometimes it can be convenient to define an attribute in MiddleKit that does not exist in the SQL database back end.
