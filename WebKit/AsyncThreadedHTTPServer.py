@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 """
+********************************************************************************
+WARNING:  This is not a full webserver.  It supports only GET and POST requests.  
+********************************************************************************
+
 This is an EXPERIMENTAL web server version of WebKit.  It
 serves http directly, without needing to be run in conjunction with
 an external web server.  As a result, it should be very fast.  It
@@ -32,10 +36,6 @@ To-Do:
       probably preferable because of the unusual way we're using
       BaseHTTPRequestHandler.)
     
-    - Perform additional testing.  It has been very lightly tested with Python
-      1.5.2 and 2.0 on Windows NT 4.0 only.  It ought to work on other
-      platforms without modification but hasn't yet been tested.
-
     - Comment the code in HTTPRequestHandler.      
 """
 
@@ -49,6 +49,8 @@ import sys
 
 global monitor
 monitor=0
+
+debug=0
 
 class AsyncThreadedHTTPServer(AsyncThreadedAppServer.AsyncThreadedAppServer):
 	'''
@@ -185,11 +187,9 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 	def handle_read(self):
 		if not self.haveheader:
 			data = string.strip(self.clientf.readline())
-			#print "received header: ", data
 			if data:
 				self.request_data.append(data+"\r\n")
 				return
-			#print "have header"
 			self.haveheader = 1
 			self.request_data.append("\r\n")
 			try:
@@ -199,11 +199,8 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			if string.lower(self.reqtype) == "get":
 				self.reqdata = string.join(self.request_data,"")
 				self.have_request = 1
-				#print "have get request"
 				self.server.requestQueue.put(self)
-				#self.shutdown(0)
 			elif string.lower(self.reqtype) == "post":
-				#find content length
 				for i in self.request_data:
 					if string.lower(string.split(i,":")[0]) =="content-length":
 						self.datalength = int(string.split(i)[1]) + 2
@@ -211,31 +208,14 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			data = self.recv(self.datalength)
 			self.request_data.append(data)
 			self.datalength = self.datalength - len(data)
-			#print "received post: ", data
 			if self.datalength > 0:
 				return
 			self.reqdata = string.join(self.request_data,"")
-			#print "have post request"
-			#print self.reqdata
 			self.have_request = 1
 			self.server.requestQueue.put(self)
 
 			
-##		data = self.recv(8192)
-##		if data:			
-##			self.reqdata = self.reqdata + data
-##			marker = string.rfind(self.reqdata,"\r\n")
-##			if marker > 0:
-##				self.have_headers = 1
-##				methMark=string.find(self.reqdata, " ")
-##				method = self.reqdata[:methMark]
-##				if string.lower(method) == "get":
-##					self.have_request=1
-##				else:
-##					self.have_header = 1
-##		else:
-##				self.have_request=1
-##				self.server.requestQueue.put(self)
+
 
 	def handle_write(self):
 		if not self.have_response: return
@@ -245,12 +225,9 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			self.close()
 		else:
 			MainRelease.release()
-		if __debug__:
+		if debug:
 			sys.stdout.write(".")
 			sys.stdout.flush()
-
-##	def handle_close(self):
-##		print "Handling Close"
 		
 
 	def close(self):
@@ -259,7 +236,6 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			self.shutdown(1)
 		except:
 			pass
-##		print "Closing"
 		try:
 			asyncore.dispatcher.close(self)
 		except:
@@ -347,56 +323,114 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		self.end_headers()
 		self.wfile.write(rawResponse['contents'])
 
+	def log_message(self, format, *args):
+		if debug:
+			BaseHTTPServer.log_message(self, format, args)
 
-def main(use_monitor = 0):
-	import select
+
+
+
+
+
+def run(useMonitor=0):
 	from errno import EINTR
+	import select
 	global server
 	global monitor
-	monitor = use_monitor
 	try:
 		server = None
-		server = AsyncThreadedHTTPServer()
-		AsyncThreadedAppServer.server = server
-
-		if monitor:
-			monitor_socket = Monitor(server)
 		try:
-			asyncore.loop(2)
-		except select.error, v:
-			if v[0] == EINTR:
-				print "Shutdown may not be clean."
-			elif v[0] == 0: pass
-			else:raise
-	except Exception, e: #Need to kill the Sweeper thread somehow
-		print "Exiting AppServer from main"
-		if 1: #See the traceback from an exception
+			server = AsyncThreadedHTTPServer()
+			print __doc__
+		except Exception, e:
+			print "Error starting the AppServer"
 			tb = sys.exc_info()
+			print "Traceback:\n"
 			print tb[0]
 			print tb[1]
 			import traceback
 			traceback.print_tb(tb[2])
+			sys.exit()
+
+		if useMonitor:
+			monitor = 1
+			monitor_socket = Monitor(server)
+		else:
+			monitor = 0
+
+		try:
+			asyncore.loop(2)
+		except select.error, v:
+			if v[0] == EINTR:
+				print "Shutdown not completely clean"
+			elif v[0] == 0: pass
+			else: raise
+		except KeyboardInterrupt, e:
+			print "Initiating Shutdown"
+		except Exception, e:
+			print e
+			print "Error, Exiting AppServer"
+			if 1: #See the traceback from an exception
+				tb = sys.exc_info()
+				print "Traceback:\n"
+				print tb[0]
+				print tb[1]
+				import traceback
+			traceback.print_tb(tb[2])
+	finally:
 		if server:
-			server.running=0
-			#server.shutDown()
-		#return
-		sys.exit()
-		raise Exception()
-	if server:
-		if server.running:
-			server.shutDown()
-		else:
+			if server.running:
+				server.initiateShutdown()
 			server._closeThread.join()
+	sys.exit()
 
 
-if __name__=='__main__':
-	import sys
-	if len(sys.argv) > 1 and sys.argv[1] == "-monitor":
-		print "Using Monitor"
-		main(1)
-	else:
-		if 0:
-			import profile
-			profile.run("main()","profile.txt")
+def shutDown(arg1,arg2):
+	global server
+	print "Shutdown Called"
+	server.initiateShutdown()
+
+import signal
+signal.signal(signal.SIGINT, shutDown)
+signal.signal(signal.SIGTERM, shutDown)
+
+
+usage = """
+The AppServer is the main process of WebKit.  It handles requests for servlets from webservers.
+AsyncThreadedAppServer takes the following command line arguments:
+stop:  Stop the currently running Apperver.
+daemon: run as a daemon
+If AppServer is called with no arguments, it will start the AppServer and record the pid of the process in appserverpid.txt
+"""
+
+
+def main(args):
+##	if len(args)>1:
+	monitor=0
+	function=run
+	daemon=0
+	
+	for i in args[1:]:
+		if i == "monitor":
+			print "Enabling Monitoring"
+			monitor=1
+		elif i == "stop":
+			import AppServer
+			function=AppServer.stop
+		elif i == "daemon":
+			daemon=1
 		else:
-			main(0)
+			print usage
+
+	if 0:
+		import profile
+		profile.run("main()", "profile.txt")
+	else:
+		if daemon:
+			if os.name == "posix":
+				pid=os.fork()
+				if pid:
+					sys.exit()
+			else:
+				print "daemon mode not available on your OS"
+		function(monitor)
