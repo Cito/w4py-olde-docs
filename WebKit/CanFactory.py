@@ -11,6 +11,7 @@ class CanFactory:
 		self._canDirs=app._canDirs
 
 	def _createCan(self,canName,*args,**kargs):
+		##Old version, only looks in one directory
 		if self.__CanClasses.has_key(canName):
 			klass=self.__CanClasses[canName]
 		else:
@@ -33,14 +34,15 @@ class CanFactory:
 		return instance
 
 	def createCan(self, canName, *args, **kwargs):
+		##Looks in the directories specified in the application.canDirs List
 		if self._canClasses.has_key(canName):
-			return self._canClasses[canName]()
-		
-		self.canDirs = self._app._canDirs
-		res = imp.find_module(canName,self._canDirs)
-		mod = imp.load_module(canName, res[0], res[1], res[2])
-		klass = mod.__dict__[canName]
-		self._canClasses[canName]=klass
+			klass = self._canClasses[canName]
+		else:
+			self.canDirs = self._app._canDirs
+			res = imp.find_module(canName,self._canDirs)
+			mod = imp.load_module(canName, res[0], res[1], res[2])
+			klass = mod.__dict__[canName]
+			self._canClasses[canName]=klass
 		
 		if len(args)==0 and len(kwargs)==0:
 			instance = klass()
