@@ -83,7 +83,7 @@ class ServletFactory(Object):
 		moduleDir = os.path.dirname(serverSidePathToImport)
 		name, ext = os.path.splitext(moduleFileName)
 		fullname = fullname + '.' + name
-		module = self._importModuleFromDirectory(fullname, name, moduleDir)
+		module = self._importModuleFromDirectory(fullname, name, moduleDir, forceReload=1)
 		return module
 
 	def _importModuleFromDirectory(self, fullModuleName, moduleName, directory, isPackageDir=0, forceReload=0):
