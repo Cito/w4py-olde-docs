@@ -27,46 +27,49 @@ WebKit 0.5
 
 <a name=TOC><h2>Table of Contents</h2></a>
 
-<p><font face="Helvetica">
-<br>  <a href="#Introduction"><font size=+1>Introduction</font></a>
-<br>  <a href="#Python"><font size=+1>Python</font></a>
-<br>  <a href="#WebwareVersion"><font size=+1>Webware Version</font></a>
-<br>  <a href="#InstallingWebware"><font size=+1>Installing Webware</font></a>
-<br>  <a href="#OpSys"><font size=+1>Operating Systems</font></a>
-<br>  <a href="#WebServers"><font size=+1>Web Servers</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#WebServers_Apache"><font size=>Apache</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#WebServers_IIS"><font size=>IIS</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#WebServers_AOLserver"><font size=>AOLserver</font></a>
-<br>  <a href="#Architecture"><font size=+1>Architecture</font></a>
-<br>  <a href="#Adapters"><font size=+1>Adapters</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Permissions"><font size=>Permissions</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_CGI"><font size=>CGI Adapter</font></a>
-<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  <a href="#None"><font size=>1. Review and fix permissions</font></a>
-<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  <a href="#None"><font size=>2. Set up WebKit.cgi</font></a>
-<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  <a href="#None"><font size=>3. Launch the servers</font></a>
-<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  <a href="#None"><font size=>4. Try it out</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Stopping"><font size=>Stopping the App Server</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Reloading"><font size=>Reloading Servlets</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_OneShot"><font size=>OneShot Adapter</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_FastCGI"><font size=>FastCGI Adapter</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_mod_python"><font size=>ModPython Adapter</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_mod_snake"><font size=>ModSnake Adapter</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_mod_webkit"><font size=>ModWebKit Adapter</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_AOLserver"><font size=>AOLserver Adapter</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Renaming"><font size=>Renaming Adapters</font></a>
-<br>  <a href="#Configuration"><font size=+1>Configuration</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Configuration_Sessions"><font size=>Sessions</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Configuration_ActivityLog"><font size=>Activity Log</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Configuration_EmailErrors"><font size=>E-mail Errors</font></a>
-<br>  <a href="#Contexts"><font size=+1>Contexts</font></a>
-<br>  <a href="#AppServerNotes"><font size=+1>AppServer Notes</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#AppServerNotes_Threaded"><font size=>ThreadedAppServer</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#AppServerNotes_Async"><font size=>AsyncThreadedAppServer</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#AppServerNotes_Monitoring"><font size=>Monitoring</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#AppServerNotes_Other"><font size=>Other Notes</font></a>
-<br>  <a href="#Future"><font size=+1>Future</font></a>
-<br>  <a href="#Credit"><font size=+1>Credit</font></a>
-</font></p>
+<p><span class=ToC>
+     <a href="#Introduction"><font size=+1>Introduction</font></a>
+<br> <a href="#None"><font size=+1>Quick Start</font></a>
+<br> <a href="#Python"><font size=+1>Python</font></a>
+<br> <a href="#WebwareVersion"><font size=+1>Webware Version</font></a>
+<br> <a href="#InstallingWebware"><font size=+1>Installing Webware</font></a>
+<br> <a href="#OpSys"><font size=+1>Operating Systems</font></a>
+<br> <a href="#WebServers"><font size=+1>Web Servers</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#WebServers_Apache">Apache</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#WebServers_IIS">IIS</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#WebServers_AOLserver">AOLserver</a>
+<br> <a href="#Architecture"><font size=+1>Architecture</font></a>
+<br> <a href="#Adapters"><font size=+1>Adapters</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_Permissions">Permissions</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_CGI">CGI Adapter</a>
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="#None">1. Review and fix permissions</a>
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="#None">2. Set up WebKit.cgi</a>
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="#None">3. Launch the servers</a>
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="#None">4. Try it out</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_Stopping">Stopping the App Server</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_Reloading">Reloading Servlets</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_OneShot">OneShot Adapter</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_FastCGI">FastCGI Adapter</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_mod_python">Mod_python Adapter</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_mod_snake">ModSnake Adapter</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_mod_webkit">ModWebkit Adapter</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_AOLserver">AOLserver Adapter</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Adapters_Renaming">Renaming Adapters</a>
+<br> <a href="#Configuration"><font size=+1>Configuration</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Configuration_Sessions">Sessions</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Configuration_ActivityLog">Activity Log</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Configuration_EmailErrors">E-mail Errors</a>
+<br> <a href="#Contexts"><font size=+1>Contexts</font></a>
+<br> <a href="#AppServerNotes"><font size=+1>AppServer Notes</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_Threaded">ThreadedAppServer</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_Async">AsyncThreadedAppServer</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_AsyncHTTP">AsyncThreadedHTTPServer</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_Monitoring">Monitoring</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_NTService">Running ThreadedAppServer as a Windows NT/2000 Service</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#AppServerNotes_Other">Other Notes</a>
+<br> <a href="#Future"><font size=+1>Future</font></a>
+<br> <a href="#Credit"><font size=+1>Credit</font></a>
+</span>
 
 
 <a name=Introduction><h2>Introduction</h2></a>
@@ -93,7 +96,7 @@ WebKit 0.5
 
 <p>This will start the sample webserver provided with WebKit.
 <p>Now, in your browser, type <code>http://localhost:8086</code>
-<p>Hopefully, you'll be looking at WebKit!  
+<p>Hopefully, you'll be looking at WebKit!
 <p> To stop the server, switch back to the terminal you started the webserver from, and press control-c.
 
 
@@ -363,7 +366,7 @@ WebKit 0.5
 
 <p> This is a native apache module designed solely to communicate with WebKit.  It is written in C, and has only been tested on Linux.
 
-<p> This adapter is the fastest of the adapters available for WebKit. 
+<p> This adapter is the fastest of the adapters available for WebKit.
 
 <p> The source code and a README file describing how to configure and build mod_webkit are located in the Webware/WebKit/mod_webkit directory.
 
@@ -388,7 +391,7 @@ WebKit 0.5
 
 <p> WebKit provides a Session utility class for storing data on the server side that relates to an individual user's session with your site. The <code>SessionStore</code> setting determines where the data is stored and can currently be set to <code>Dynamic</code> or <code>File</code>.
 
-<p> Storing to the Dynamic session store is the fastest solution and is the default. This session storage method keeps the most recently used sessions in memory, and moves older sessions to disk periodocally. All sessions will be moved to disk when the server is stopped.  This storage mechanism works with both the persistant, long running AppServers and OneShot.  There are two settings in Application.config relating to this Session store.  <code>MaxDynamicMemorySessions</code> specifies the maximum number of sessions that can be in memory at any one time.   <code>DynamicSessionTimeout</code> specifies after what period of time sessions will be moved from memory to file. ( Note:  this setting is unrealted to the <code>SessionTimeout</code> setting below.  Sessions which are moved to disk by the Dynamic Session store are not deleted). 
+<p> Storing to the Dynamic session store is the fastest solution and is the default. This session storage method keeps the most recently used sessions in memory, and moves older sessions to disk periodocally. All sessions will be moved to disk when the server is stopped.  This storage mechanism works with both the persistant, long running AppServers and OneShot.  There are two settings in Application.config relating to this Session store.  <code>MaxDynamicMemorySessions</code> specifies the maximum number of sessions that can be in memory at any one time.   <code>DynamicSessionTimeout</code> specifies after what period of time sessions will be moved from memory to file. ( Note:  this setting is unrealted to the <code>SessionTimeout</code> setting below.  Sessions which are moved to disk by the Dynamic Session store are not deleted).
 
 <p> Storing to files is provided mainly in support of the OneShot adapter. It may also prove useful in the future in support of load balancing. In this scenario, each individual session is stored in its own file, loaded for every request and saved when delivering the corresponding response.
 

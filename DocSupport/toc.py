@@ -25,6 +25,8 @@ def toc(filename, indentFactor=3, fontSizes=[None, None, '+1', '', '', '']):
 			groups = match.groups()
 			#print 'groups:', match.groups()
 			identifier, level, name = groups[1:4]
+			if string.lower(name)=='table of contents':
+				continue
 			level = int(level)
 			if level>1:
 				indenter = '&nbsp; '*indentFactor*(level-2)
