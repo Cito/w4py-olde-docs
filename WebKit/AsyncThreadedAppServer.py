@@ -333,8 +333,7 @@ class RequestHandler(asyncore.dispatcher):
 		self._strmOut.pop(sent)
 		
 		 #if the servlet has returned and there is no more data in the buffer
-		if self._strmOut.closed() and not self._strmOut._buffer: 
-##			self.socket.shutdown(1)
+		if self._strmOut._closed and not self._strmOut._buffer: 
 			self.close()
 			#For testing
 		elif self._strmOut._buffer:
@@ -365,14 +364,15 @@ class RequestHandler(asyncore.dispatcher):
 		pass
 
 	def handle_error(self, x, y, z):
-		t, v, tbinfo = sys.exc_info()
-		if t != exceptions.KeyboardInterrupt:
-			print "Error caught in asyncore."
-			print "The type is %s, %s" % (t,v)
-			import traceback
-			traceback.print_tb(tbinfo)
-		else:
-			self.server.shutDown()
+   		t, v, tbinfo = sys.exc_info()
+	   	if t == exceptions.KeyboardInterrupt:
+	   		self.server.shutDown()
+	   	else:
+			if debug:
+				print "Error caught in asyncore."
+				print "The type is %s, %s" % (t,v)
+				import traceback
+				traceback.print_tb(tbinfo)
 
 class Monitor(asyncore.dispatcher):
 	"""
