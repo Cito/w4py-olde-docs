@@ -20,8 +20,7 @@ Version 0.1
 <a name=ToC><h2>Table of Contents</h2></a>
 
 <p><span class=ToC>
-     <a href="#ToC"><font size=+1>Table of Contents</font></a>
-<br> <a href="#Synopsis"><font size=+1>Synopsis</font></a>
+     <a href="#Synopsis"><font size=+1>Synopsis</font></a>
 <br> <a href="#DataTypes"><font size=+1>Data Types</font></a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#DT_BasicTypes">Basic Types</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#DT_DateTime">Date and time types</a>
@@ -122,14 +121,51 @@ Version 0.1
 
 <a name=DT_DateTime><h3>Date and time types</h3></a>
 
-<p> Woops. Not documented yet. Not implemented for that matter, either.
+<p> MiddleKit supports types of date, time and datetime. With a default Python installation and MiddleKit, these are expressed as Python strings such as <code>'2001-02-27'</code>. If you have installed the <a href=http://www.lemburg.com/files/python/mxDateTime.html>mxDateTime</a> package, then these values will be expressed as instances of DateTime and DateTimeDelta.
+
+<p> With a default Python installation and MiddleKit, you can pass strings
+
+<p> <table border align=center style="border-collapse: collapse" cellpadding=2>
+	<tr>
+		<th colspan=4 align=center> Date/Time Types </th>
+	<tr>
+
+	<tr>
+		<th> MiddleKit </th>
+		<th> Python </th>
+		<th> MySQL </th>
+		<th> Notes </th>
+	</tr>
+
+	<tr>
+		<td> datetime </td>
+		<td> string/DateTime </td>
+		<td> datetime </td>
+		<td> &nbsp; </td>
+	</tr>
+
+	<tr>
+		<td> date </td>
+		<td> string/DateTime </td>
+		<td> datetime </td>
+		<td> &nbsp; </td>
+	</tr>
+
+	<tr>
+		<td> time </td>
+		<td> string/DateTimeDelta </td>
+		<td> time </td>
+		<td> &nbsp; </td>
+	</tr>
+</table>
 
 
 <a name=DT_Enums><h3>Enumerations</h3></a>
 
-<p> Woops. Not documented or implemented yet, although it *might* work. e.g., the enumeration might come in as an integer in Python. Or maybe a string with the name.
+<p> Enumerations are provided through the <a href=name>enum</a> type which is directly supported in MySQL. In Python, these enumerations are kept as case sensitive strings. The object model must specify the valid values of the enumeration. While that be done via a column named "Enums", this is more frequently specified in the "Extras" column, where less common attribute specs are usually placed:
 
-<p> Try it.
+<center><code>Enums='red, green, blue'</code></center>
+
 
 
 <a name=DT_ObjRef><h3>Object references</h3></a>
@@ -175,6 +211,10 @@ Version 0.1
 	</tr>
 </table>
 
+
+<!--
+@@ 2002-02-26 ce: not yet
+
 <p> There is an additional property that applies only to attributes whose types are object references.
 
 <p> For the purpose of discussion, the object containing the attribute is the <i>source</i> while the objects being referred to are the <i>targets</i>. Now then, the <b>onRequired</b> property specifies what happens to the target object(s) when the source object is deleted:
@@ -187,6 +227,7 @@ Version 0.1
 </ol>
 
 <p> The default value of onDelete is disconnect. An example specification would be <code>onDelete=cascade</code>.
+-->
 
 
 <a name=ModelFiles><h2>Model Files</h2></a>
@@ -200,14 +241,14 @@ Version 0.1
 
 <p> This is an optional file containing sample data for the model. See the <a href=QuickStart.html>Quick Start</a> for an example.
 
-<p> Note that a blank field in the samples will be substituted with the default value of the attribute (as specified in the object model, e.g., <span class=filename>Classes.csv</a>). To force a None value (NULL in SQL), use 'none' (without the quotes).
+<p> Note that a blank field in the samples will be substituted with the default value of the attribute (as specified in the object model, e.g., <span class=filename>Classes.csv</span>). To force a None value (NULL in SQL), use 'none' (without the quotes).
 
 
 <a name=Configuration><h3>Configuration</h3></a>
 
 <p> An MK model can have configuration files inside it that affect things like code generation.
 
-<p> The only configuration file supported and used is <span class=filename>SQLGenerator.config</a>. The one setting currently supported is <span class=name>DropStatements</span> whose potential values are:
+<p> The only configuration file supported and used is <span class=filename>SQLGenerator.config</span>. The one setting currently supported is <span class=name>DropStatements</span> whose potential values are:
 
 <ul>
 	<li> database - This causes a DROP DATABASE to be used in <span class=filename>Create.sql</span>. This is the cleanest way to handle models and also the default.
@@ -223,11 +264,16 @@ Version 0.1
 
 <a name=GeneratedPy><h2>Generated Python</h2></a>
 
+<a name=GP_addToBars><h3>Attributes: foo() and setFoo()</h3></a>
+
+<p> For each attribute, foo, MiddleKit stores its value in the attribute _foo, returns it in the accessor method foo() and allows you to set it with setFoo(). You should always use foo() to get the value of an attribute, as there could be some logic there behind the scenes.
+
+
 <a name=GP_addToBars><h3>Lists: addToBars()</h3></a>
 
 <p> Given an attribute of type list, with the name "bars", MK will generate a Python method named addToBars() that will make it easy for you to add a new object to the list:
 
-<pre class=code>newBar = Bar()
+<pre class=py>newBar = Bar()
 newBar.setXY(1, 2)
 foo.addToBars(newBar)
 </pre>
@@ -243,7 +289,9 @@ foo.addToBars(newBar)
 	<li> set newBar's foo-reference to foo
 </ul>
 
-<p> You don't have to remember the details since this behavior is both supplied and what you would expected. Just remember to use the various addToBars() methods.
+<p> You don't have to remember the details since this behavior is both supplied and what you would expect. Just remember to use the various addToBars() methods.
+
+<p> Not setBars() method is provided for list typed attributes.
 
 
 <a name=MiscTopics><h2>Miscellaneous Topics</h2></a>
@@ -252,13 +300,15 @@ foo.addToBars(newBar)
 
 <p> Every once in a while, you might get a hankering for iterating over the attributes of an MK object. You can do so like this:
 
-<pre class=code>for attr in obj.klass().allAttrs():
+<pre class=py>for attr in obj.klass().allAttrs():
 	print attr.name()
 </pre>
 
+<p> The klass() method seen above, returns the object's MiddleKit Klass, which is the class specification that came from the object model you created. The allAttrs() method returns a klass' list of attributes.
+
 <p> The attributes are instances of MiddleKit.Core.Attr (or one of its subclasses such as ObjRefAttr) which inherits from UserDict and acquires additional methods from mix-ins located in MiddleKit.Design and MiddleKit.Run. Since attributes are essentially dictionaries, you can treat them like so, although if you modify them you are asking for serious trouble.
 
-<pre class=code>for attr in obj.klass().allAttrs():
+<pre class=py>for attr in obj.klass().allAttrs():
 	keys = attr.keys()
 	keys.sort()
 	print '%s: %s' % (attr.name(), keys)
