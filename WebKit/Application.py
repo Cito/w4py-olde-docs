@@ -223,6 +223,23 @@ class Application(ConfigurableForServerSidePath, Object):
 			},
 			'EnterDebuggerOnException': 0,
 			'OldStyleActions': 0,
+			'DirectoryFile': ['index', 'Index', 'main', 'Main'],
+			'UseCascadingExtensions': 1,
+			'ExtensionCascadeOrder': ['.py','.psp','.kid','.html'],
+			'ExtraPathInfo': 1,
+			'ExtensionsToIgnore': ['.pyc', '.pyo', '.py~',
+					       '.psp~', '.html~', '.bak',
+					       '.tmpl'],
+			'ExtensionsToServe': [],
+			'FilesToHide': ['.*','*~', '*.bak', '*.tmpl',
+					'*.config', '__init__.*',
+					'*.pyc', '*.pyo'],
+			'FilesToServe': [],
+			'UnknownFileTypes': {
+				'ReuseServlets': 1,
+				'Technique': 'serveContent',
+				'CacheContent': 0,
+				},
 		}
 
 	def configFilename(self):
