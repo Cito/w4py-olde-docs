@@ -6,7 +6,7 @@ from ExceptionHandler import ExceptionHandler
 from Object import Object
 from Servlet import Servlet
 from ServletFactory import *
-from UnknownFileType import UnknownFileTypeServletFactory
+from UnknownFileTypeServlet import UnknownFileTypeServletFactory
 from types import FloatType
 from glob import glob
 import Queue
