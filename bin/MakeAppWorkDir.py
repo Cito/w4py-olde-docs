@@ -71,7 +71,7 @@ class MakeAppWorkDir:
 		if makeLibrary:
 			self._substVals['libraryPath'] = 'sys.path.append(%s)\n' % repr(os.path.join(self._substVals['WORKDIR'], 'lib'))
 		else:
-			self._substVals['LibraryPath'] = ''
+			self._substVals['libraryPath'] = ''
 		self._sample = sampleContext
 		if sampleContext is not None:
 			self._substVals["DEFAULT"] = sampleContext
