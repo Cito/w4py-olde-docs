@@ -142,6 +142,7 @@ class ParseEventHandler:
 
 
 	directiveHandlers = {'imports':importHandler,
+						'import':importHandler,
 						 'extends':extendsHandler,
 						 'method':mainMethodHandler,
 						 'isThreadSafe':threadSafeHandler,
