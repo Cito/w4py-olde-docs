@@ -30,5 +30,6 @@ WebKitConfig = {
 		'FileUpload',
 		'PushServlet',
 		'RequestInformation',
+		'Image',
 	]
 }
