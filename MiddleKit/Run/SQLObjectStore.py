@@ -118,6 +118,7 @@ class SQLObjectStore(ObjectStore):
 		conn, cur = self.executeSQL('select id, name from _MKClassIds;')
 		klassesById = {}
 		for (id, name) in cur.fetchall():
+			assert id, "Id must be a non-zero int. id=%r, name=%r" % (id, name)
 			klass = self._model.klass(name)
 			klassesById[id] = klass
 			klass.setId(id)
@@ -326,7 +327,7 @@ class SQLObjectStore(ObjectStore):
 			return 'where deleted is null and (%s) %s' % (where, orderBy)
 		else:
 			return 'where deleted is null %s' % clauses
-	
+
 	## Obj refs ##
 
 	def fetchObjRef(self, objRef):
