@@ -1,0 +1,80 @@
+<html>
+
+<head>
+	<link rel=STYLESHEET href="StyleSheet.css" type="text/css">
+	<title>WebKit Future Work</title>
+</head>
+
+<body>
+
+<h1>WebKit Future Work</h1>
+Version 0.3
+<br>Webware for Python 0.3
+
+
+<a name=Future><h2>Future Work/Limitations</h2></a>
+
+<p> Sprinkled throughout the code are comments tagged with <b>@@</b> which are hopefully accompanied by a date and someone's initials. These comments represent "TO BE DONE"s. The double at-sign (@@) convention was chosen because it doesn't appear to be used for anything else.
+
+<p> In addition to the inline comments, some significant items have been recorded below. These are future ideas, with no committments or timelines as to when/if they'll be realized. The Python WebKit is open source, so feel free to jump in!
+
+<p> The numbers below are mostly for reference, although longer term items tend to be pushed towards the bottom.
+
+
+<a name=KnownBugs><h3>Known Bugs</h3></a>
+
+<ol>
+	<li> Fairly small memory leaks under stressful conditions (many simultaneous, repeated requests).
+	<li> One user on Windows, reports that the Colors example does not work correctly. Only part of the output appears. Another Windows user does not have this problem. Cause is unknown
+</ol>
+
+
+<a name=ToDo><h3>To Do</h3></a>
+
+<ol>
+	<li> Hunt down: @@ tags (which signify "To Be Done"s), FUTURE items in class doc strings, NotImplementedErrors, -- tags
+	<li> Right now, if the Application itself (as opposed to Servlets) throws an exception, it doesn't get captured nicely. However, it is displayed in the app server's console.
+	<li> Fix log/CSV problems involving quotes and commas.
+	<li> Consider this statement from the FastCGI docs: Redirects are handled similar to CGI.  Location headers with values that begin with "/" are treated as internal-redirects; otherwise, they are treated as external redirects (302).
+	<li> Have Transaction.session() handle the obtaining or creating of a session on demand for better efficiency? (per Jay Love)
+	<li> Docs: Create a caching section to discuss the virtues of doing so. Color example became 12 X faster on the server side.
+	<li> When browsing through the Servlet examples, the [BACK] button of the browser (Netscape 4.7 in my case) doesn't seem to keep a history. This is pretty strange.
+	<li> Consider how Pages might be nested. Consider if a different name is in order.
+	<li> Consider changing the '_' convention for admin scripts. Maybe the admin scripts should be another application.
+	<li> Generalize WebKit's handling of directories so that the list of files (such as 'index.py', 'index.html') is configurable.
+	<li> Consider if we need to support &lt;form action="x.py?a=1" method="POST"&gt; where you will have both a query string and posted data.
+	<li> The exception handler is pretty nice and has features like logging, e-mail, gathering debugging info, etc. However, on occasions it can throw exceptions too. There should be a simpler, secondary exception handler for when this happens.
+	<li> Create a tutorial.
+	<li> Review the timestamp caching logic and its relation to .pyc files if any.
+	<li> AppServer: Servlets get reloaded when they are changed, but not the Servlets ancestor classes.
+	<li> What are the implications of multi-threading for servlets?
+	<li> Implement all of AppServer's settings.
+	<li> Examples/ViewSource.py: Use py2html so the source is syntax highlighted.
+	<li> Docs: Provide links to 'pythondoc' generated documentation of the classes as well as links to syntax highlighted source.
+	<li> Testing: Create a more formalized test suite.
+	<li> Testing: Provide testing web page where people can report their testing results including version numbers, etc.
+	<li> Role-based security and user-authentication. Goal is to eliminate, as much as possible, developer-written security logic. This should be provided by the WebKit and be configurable.
+	<li> Write a custom adaptor for Apache, Netscape, MS, etc.
+	<li> Write a CGI adaptor in C for increased performance.
+	<li> Application modifies sys.path so that servlets can say "from SuperServlet import SuperServlet" where SuperServlet is located in the same directory as the Servlet. We'd prefer a more sophisticated technique which does not modify sys.path and does not affect other servlets.
+	<li> Distribution and load balancing.
+	<li> More sophisticated admin tools including password protection, clearing logs, displaying a maximum of information at a time, etc. Consider using module 'resource'.
+	<li> Check out
+		<ul>
+		<li> <a href=http://www.modpython.org>mod_python</a>
+		<li> <a href=http://www.zope.org/Members/Amos/WhatIsAcquisition>http://www.zope.org/Members/Amos/WhatIsAcquisition</a>
+		<li> <a href=http://www.zope.org/Members/jim/Info/IPC8/AcquisitionAlgebra/index.html>http://www.zope.org/Members/jim/Info/IPC8/AcquisitionAlgebra/index.html</a>
+		<li> PASS (a python web module from Benjamin Saller Bender <case@appliedtheory.com>)
+		<li> <a href=http://www.x-works.com>http://www.x-works.com</a>
+		<li> FastCGI related: <a href=http://www.tfarmbruster.com/fcgi_sa.htm>http://www.tfarmbruster.com/fcgi_sa.htm</a>
+
+		</ul>
+	<li> Multi-language support/localization (e.g., vend data to clients in their preferred written language)
+	<li> Consider CORBA standard RMI-IIOP and it's potential interaction with WebKit. This technology has been marked for inclusion in J2EE. I imagine the idea might be that an app server could be used by more than just web browsers. e.g., it could be used programmatically (in a more natural way than simulating a web client).
+</ol>
+
+
+<p><hr>
+
+</body>
+</html>
