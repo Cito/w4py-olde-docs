@@ -66,12 +66,13 @@ running = 0
 debug = 1
 
 
-def createServer():
+def createServer(changeDirectory=0):
 	"""Unix only, after forking"""
 	print "Starting Server"
-	os.chdir(os.pardir)
-	if '' not in sys.path:
-		sys.path = [''] + sys.path
+	if changeDirectory:
+		os.chdir(os.pardir)
+		if '' not in sys.path:
+			sys.path = [''] + sys.path
 	import WebKit
 	code = 'from WebKit.%s import main' % serverName
 	exec code
@@ -109,7 +110,7 @@ def startServer(killcurrent = 1):
 			os.waitpid(srvpid,0) #prevent zombies
 		srvpid = os.fork()
 		if srvpid == 0:
-			createServer()
+			createServer(not killCurrent)
 			sys.exit()
 	
 	
