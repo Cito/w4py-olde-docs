@@ -68,7 +68,6 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 	"""
 
 	def respondToPost(self, trans):
-		transReponse = trans.response()
 		try:
 			request = trans.request()
 			data = request.rawInput(rewind=1)
