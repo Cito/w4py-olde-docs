@@ -1,5 +1,6 @@
 from MiscUtils import NoDefault
-import time, whrandom
+from MiscUtils.Funcs import uniqueId
+import time
 
 
 class User:
@@ -47,10 +48,9 @@ class User:
 	def externalId(self):
 		if self._externalId is None:
 			from time import localtime, time
-			prefix = ''.join([('%02d'%x) for x in localtime(time())[:6]])
 			attempts = 0
 			while attempts<10000:
-				self._externalId = prefix + str(whrandom.randint(10000, 99999))
+				self._externalId = uniqueId(self)
 				# @@ 2001-02-17 ce: check that manager doesn't already have this
 				# if mgr.userForExternalId(self._externalId, None) is None:
 				#	break
