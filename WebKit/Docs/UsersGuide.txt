@@ -1,7 +1,10 @@
 WebKit User's Guide
 +++++++++++++++++++
 
-Version 0.8, Webware for Python
+Webware for Python
+
+:Version: X.Y
+:Released: @@/@@/@@
 
 .. contents::
 

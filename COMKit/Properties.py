@@ -1,6 +1,6 @@
 name = 'COMKit'
 
-version = (0, 8, 0)
+version = ('X', 'Y', 0)
 
 docs = [
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},

@@ -38,6 +38,11 @@ class PropertiesObject(UserDict):
 		if filename:
 			self.readFileNamed(filename)
 
+	def loadValues(self, dict):
+		self.update(dict)
+		self.cleanPrivateItems()
+
+		
 	def readFileNamed(self, filename):
 		self['filename'] = filename
 		results = {}

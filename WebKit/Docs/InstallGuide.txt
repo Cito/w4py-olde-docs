@@ -249,9 +249,14 @@ Webware Version
 ---------------
 
 Unless you just downloaded Webware (and therefore WebKit), you should
-check to see if you have the latest version. This version you are
-looking at is 0.8. You can check for the latest version at
-http://webware.sf.net.
+check to see if you have the latest version. This is:
+
+Webware for Python
+
+:Version: X.Y
+:Released: @@/@@/@@
+
+You can check for the latest version at http://webware.sf.net.
 
 If you're feeling adventurous, you can get the latest in-development
 source code from the public repository. Instructions are located at
