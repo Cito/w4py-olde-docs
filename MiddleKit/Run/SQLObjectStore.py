@@ -63,7 +63,7 @@ class SQLObjectStore(ObjectStore):
 		setting 'SQLLog'. See the User's Guide for more info. Invoked by
 		modelWasSet().
 		'''
-		setting = self.setting('LogSQL', None)
+		setting = self.setting('SQLLog', None)
 		if setting==None or setting=={}:
 			self._sqlEcho = None
 		else:
