@@ -21,8 +21,9 @@ from threading import Thread, Event
 
 DefaultConfig = {
 	'PrintConfigAtStartUp': 1,
-	'Verbose':			  1,
-	'PlugIns':			  ['../PSP']
+	'Verbose':              1,
+	'PlugIns':              ['../PSP'],
+	'CheckInterval':        100,
 
 	# @@ 2000-04-27 ce: None of the following settings are implemented
 #	'ApplicationClassName': 'Application',
@@ -50,6 +51,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 		self.config() # cache the config
 		self.printStartUpMessage()
+		sys.setcheckinterval(self.setting('CheckInterval'))
 		self._app = self.createApplication()
 		self.loadPlugIns()
 
@@ -60,7 +62,6 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			self._closeThread = Thread(target=self.closeThread)
 ##			self._closeThread.setDaemon(1)
 			self._closeThread.start()
-
 
 	def closeThread(self):
 		self._closeEvent.wait()
