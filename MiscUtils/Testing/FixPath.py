@@ -11,3 +11,6 @@ doesn't hurt anything.
 
 import os, sys
 sys.path.insert(0, os.path.abspath(os.pardir))
+
+progPath = os.path.normpath(os.path.join(os.getcwd(), sys.argv[0]))
+progDir = os.path.dirname(progPath)
