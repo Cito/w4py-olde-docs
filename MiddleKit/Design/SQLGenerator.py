@@ -506,7 +506,8 @@ class Attr:
 				defaultSQL = ' ' + defaultSQL
 		else:
 			defaultSQL = ''
-		out.write('\t%s %s%s%s' % (name, self.sqlTypeOrOverride(), notNullSQL, defaultSQL))
+		uniqueSQL = self.boolForKey('isUnique') and ' unique' or ''
+		out.write('\t%s %s%s%s%s' % (name, self.sqlTypeOrOverride(), uniqueSQL, notNullSQL, defaultSQL))
 
 	def writeAuxiliaryCreateTable(self, generator, out):
 		# most attribute types have no such beast
