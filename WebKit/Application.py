@@ -376,13 +376,13 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		if sid:
 			if self._sessions.has_key(sid):
 				if (time()-request.session().lastAccessTime()) >= self.setting('SessionTimeout')*60:
-					if debug: print prefix, 'session expired:', sid
+					if debug: print prefix, 'session expired: %s' % repr(sid)
 					del self._sessions[sid]
 					problematic = 1
 				else:
 					problematic = 0
 			else:
-				if debug: print prefix, 'session does not exist:', sid
+				if debug: print prefix, 'session does not exist: %s' % repr(sid)
 				problematic = 1
 		else:
 			problematic = 0
