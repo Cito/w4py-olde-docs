@@ -298,6 +298,9 @@ class Model(Configurable):
 			sorter.visitedKlasses = {}
 			klass.sortByDependency(sorter)
 		allKlasses = sorter.allKlasses
+		# jdh 2004-07-02: the following assertion failed for me when using inherited models with 
+		# UsePickledClassesCache enabled.  Setting UsePickledClassesCache to False in each of the models 
+		# fixed the problem.  Haven't investigated the cause.
 		assert len(allKlasses)==len(self._allKlassesInOrder)
 		return allKlasses
 
@@ -372,5 +375,7 @@ class Model(Configurable):
 	def printWarnings(self, out=None):
 		if out is None:
 			out = sys.stdout
+		if len(self._klasses.klassesInOrder()) < 1:
+			out.write("warning: Model '%s' doesn't contain any class definitions.\n" % self.name())
 		for klass in self.klasses().klassesInOrder():
 			klass.printWarnings(out)
