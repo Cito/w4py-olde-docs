@@ -34,7 +34,7 @@ The text below comes from another jsp page which was inserted into this one with
 
 <p>
 <p>There are actually two ways to insert the contents of another file into a PSP page.  use &lt%@ include file="somefile" %&gt will effectively insert the contents of the other file before class creation time.<br>
-Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>after</i> page creation.  In other words, the file won't be parsed for jsp codes.  It'll just be output as is in the response stream.  (I haven't finalized this yet, so don't use it.)
+Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>after</i> page creation.  In other words, the file won't be parsed for jsp codes.  It'll just be output as is in the response stream. 
 <p>
 
 
@@ -64,7 +64,7 @@ self.write(i)%>&nbsp;
 %>
 </table>
 <hr>
-<p><b>Path Info: <%=req.pathInfo()%>
+<p><b>Path Info: <%=req.pathInfo()%></b>
 <hr>
 <p><b>Environment Variables</b>
 <p><table>
@@ -77,14 +77,18 @@ for i in os.environ.keys():
 
 
 <br><%=  time.ctime(time.time())%>
-<%-- Comment check --%>
-<!-- Comment Check -->
+
+<%-- Comment check --%> <%-- #This kind not even in python file created. --%>
+<!-- Comment Check -->  
+
+
 <psp:method name="testing" params="val">
-self._response.write('<br>boo\n')
+self._response.write('<br>I\'m a method. ')
 self._response.write(val)
 </psp:method>
 
-<%self.testing('value')%>
+<p>Testing a class method defined in the psp code.<br>
+<%self.testing('Howdy!')%>
 
 <% pass %>
 
