@@ -131,6 +131,7 @@ del sys.path[0]
 		wr = self._pyOut.write
 		wr('\n\nclass Gen%s(%s):\n' % (self.name(), self.supername()))
 		self.writePyInit()
+		self.writePyInitFromRow()
 		self.writePyAccessors()
 		wr('\n')
 
@@ -150,6 +151,19 @@ del sys.path[0]
 			name = string.ljust(attr.name(), maxLen)
 			wr('\t\tself._%s = %r\n' % (name, attr.defaultValue()))
 		wr('\n')
+
+	def writePyInitFromRow(self):
+		wr = self._pyOut.write
+		statements = [attr.pyInitFromRowStatement() for attr in self.attrs()]
+		statements = [s for s in statements if s]
+		if statements:
+			wr('''
+	def initFromRow(self, row):
+		if not self._mk_inStore:
+''')
+			for s in statements:
+				wr(s)
+			wr('\t\t%s.initFromRow(self, row)\n\n' % self.supername())
 
 	def writePyAccessors(self):
 		''' Write Python accessors for attributes simply by asking each one to do so. '''
@@ -182,6 +196,9 @@ class Attr:
 		Subclass responsibility.
 		'''
 		raise SubclassResponsibilityError
+
+	def pyInitFromRowStatement(self):
+		return None
 
 	def writePyAccessors(self, out):
 		self.writePyGet(out)
@@ -418,6 +435,16 @@ class ObjRefAttr:
 
 
 class ListAttr:
+
+	def defaultValue(self):
+		''' Returns the default value as a legal Pythonic value. '''
+		assert not self.get('Default', 0), 'Cannot have default values for lists.'
+		return []
+
+	def pyInitFromRowStatement(self):
+		# Set the lists to None on the very first read from the store
+		# so the list get methods will fetch the lists from the store.
+		return '\t\t\tself._%s = None\n' % self.name()
 
 	def writePyAccessors(self, out):
 		# Create various name values that are needed in code generation
