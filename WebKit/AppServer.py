@@ -138,6 +138,17 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		''' Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. '''
 		return self._plugIns
 
+	def plugIn(self, name, default=NoDefault):
+		''' Returns the plug-in with the given name. '''
+		# @@ 2001-04-25 ce: linear search. yuck. Plus we should guarantee plug-in name uniqueness anyway
+		for pi in self._plugIns:
+			if pi.name()==name:
+				return pi
+		if default is NoDefault:
+			raise KeyError, name
+		else:
+			return default
+
 	def loadPlugIn(self, path):
 		''' Loads and returns the given plug-in. May return None if loading was unsuccessful (in which case this method prints a message saying so). Used by loadPlugIns(). '''
 		plugIn = None
