@@ -51,7 +51,7 @@ class PythonServletFactory(ServletFactory):
 		return 'file'
 
 	def extensions(self):
-		return ['', '.py']
+		return ['.py']
 
 	def old_servletForTransaction(self, transaction):
 		path = transaction.request().serverSidePath()
