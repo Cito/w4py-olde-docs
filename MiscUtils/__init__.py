@@ -2,7 +2,7 @@
 # Webware for Python
 # See Documentation/MiscUtils.html
 
-__all__ = ['Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error', 'Funcs', 'NamedValueAccess', 'Properties.py']
+__all__ = ['Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error', 'Funcs', 'MixIn', 'NamedValueAccess', 'PropertiesObject']
 
 
 def InstallInWebKit(appServer):
