@@ -105,23 +105,27 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		return self._plugIns
 
 	def loadPlugIn(self, path):
-		''' Loads the given plug-in. Used by loadPlugIns(). '''
+		''' Loads and returns the given plug-in. May return None if loading was unsuccessful (in which case this method prints a message saying so). Used by loadPlugIns(). '''
+		plugIn = None
+		path = self.serverSidePath(path)
 		try:
-			path = self.serverSidePath(path)
 			plugIn = PlugIn(self, path)
-			self._plugIns.append(plugIn)
-			plugIn.load()
+			result = plugIn.load()
+			if result:
+				print '    Plug-in %s cannot be loaded because:\n    %s' % (path, result)
+				return None
 			plugIn.install()
 		except:
 			import traceback
 			traceback.print_exc(file=sys.stderr)
 			self.error('Plug-in %s raised exception.' % path)
+		return plugIn
 
 	def loadPlugIns(self):
 		"""
 		A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source. Plug-ins are loaded by AppServer at startup time, just before listening for requests. See the docs for PlugIn.py for more info.
 		"""
-		plugIns = self.setting('PlugIns')[:]
+		plugIns = self.setting('PlugIns')
 		plugIns = map(lambda path: os.path.normpath(path), plugIns)
 
 		# Scan each directory named in the PlugInDirs list.
@@ -142,8 +146,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 		# Now that we have our plug-in list, load them...
 		for plugInPath in plugIns:
-			self.loadPlugIn(plugInPath)
-
+			plugIn = self.loadPlugIn(plugInPath)
+			if plugIn:
+				self._plugIns.append(plugIn)
 		print
 
 

@@ -1,5 +1,7 @@
 from UserDict import UserDict
-import string, sys
+import os, string, sys, types
+
+class WillNotRunError(Exception): pass
 
 
 class PropertiesObject(UserDict):
@@ -15,6 +17,7 @@ class PropertiesObject(UserDict):
 		* versionString - a nicely printable string of the version
 		* requiredPyVersionString - like versionString but for requiredPyVersion instead
 		* willRun - 1 if the component will run. So far that means having the right Python version.
+		* willNotRunReason - defined only if willRun is 0. contains a readable error message
 
 	Using a PropertiesObject is better than investigating the Properties.py file directly, because the rules for determining derived keys and any future convenience methods will all be provided here.
 
@@ -80,9 +83,23 @@ class PropertiesObject(UserDict):
 		self['requiredPyVersionString'] = self._versionString(self['requiredPyVersion'])
 
 	def createWillRun(self):
-		willRun = 1
+		self['willRun'] = 0
+		try:
+			# Invoke each of the checkFoo() methods
+			for key in self.willRunKeys():
+				methodName = 'check' + string.upper(key[0]) + key[1:]
+				method = getattr(self, methodName)
+				method()
+		except WillNotRunError, msg:
+			self['willNotRunReason'] = msg
+			return
+		self['willRun'] = 1  # we passed all the tests
 
-		# Check Python version
+	def willRunKeys(self):
+		''' Returns a list of keys whose values should be examined in order to determine if the component will run. Used by createWillRun(). '''
+		return ['requiredPyVersion', 'requiredOpSys', 'deniedOpSys', 'willRunFunc']
+
+	def checkRequiredPyVersion(self):
 		pyVer = getattr(sys, 'version_info', None)
 		if not pyVer:
 			# Prior 2.0 there was no version_info
@@ -90,11 +107,44 @@ class PropertiesObject(UserDict):
 			pyVer = string.split(sys.version)[0]
 			pyVer = string.split(pyVer, '.')
 			pyVer = map(lambda x: int(x), pyVer)
-		willRun = pyVer>=self['requiredPyVersion']
+		if pyVer<self['requiredPyVersion']:
+			raise WillNotRunError, 'Required python ver is %s, but actual ver is %s.' % (self['requiredPyVersion'], pyVer)
 
-		# Check op sys
-		if willRun:
-			# well, not yet...
-			pass
+	def checkRequiredOpSys(self):
+		requiredOpSys = self.get('requiredOpSys', None)
+		if requiredOpSys:
+			# We accept a string or list of strings
+			if type(requiredOpSys)==types.StringType:
+				requiredOpSys = [requiredOpSys]
+			if not os.name in requiredOpSys:
+				raise WillNotRunError, 'Required op sys is %s, but actual op sys is %s.' % (requiredOpSys, os.name)
 
-		self['willRun'] = willRun
+	def checkDeniedOpSys(self):
+		deniedOpSys = self.get('deniedOpSys', None)
+		if deniedOpSys:
+			# We accept a string or list of strings
+			if type(deniedOpSys)==types.StringType:
+				deniedOpSys = [deniedOpSys]
+			if os.name in deniedOpSys:
+				raise WillNotRunError, 'Will not run on op sys %s and actual op sys is %s.' % (deniedOpSys, os.name)
+
+	def checkRequiredSoftware(self):
+		''' Not implemented. No op right now. '''
+		# Check required software
+		# @@ 2001-01-24 ce: TBD
+		# Issues include:
+		#     - order of dependencies
+		#     - circular dependencies
+		#     - examining Properties and willRun of dependencies
+		reqSoft = self.get('requiredSoftware', None)
+		if reqSoft:
+			for soft in reqSoft:
+				# type, name, version
+				pass
+
+	def checkWillRunFunc(self):
+		willRunFunc = self.get('willRunFunc', None)
+		if willRunFunc:
+			whyNotMsg = willRunFunc()
+			if whyNotMsg:
+				raise WillNotRunError, whyNotMsg

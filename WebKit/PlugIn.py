@@ -1,4 +1,5 @@
 from Common import *
+from MiscUtils.PropertiesObject import PropertiesObject
 
 
 class PlugInError(Exception):
@@ -37,10 +38,15 @@ class PlugIn(Object):
 		self._ver = '(unknown)'
 
 	def load(self):
-		''' Loads the plug-in into memory, but does not yet install it. '''
+		''' Loads the plug-in into memory, but does not yet install it. Will return None on success, otherwise a message (string) that says why the plug-in could not be loaded. '''
 		print 'Loading plug-in: %s at %s' % (self._name, self._path)
 
 		assert os.path.exists(self._path)
+
+		# Grab the Properties.py
+		self._properties = PropertiesObject(self.serverSidePath('Properties.py'))
+		if not self._properties['willRun']:
+			return self._properties['willNotRunReason']
 
 		# Update sys.path
 		if not self._dir in sys.path:
