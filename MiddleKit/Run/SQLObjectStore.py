@@ -90,7 +90,6 @@ class SQLObjectStore(ObjectStore):
 		ObjectStore.modelWasSet(self)
 
 		# Check thread safety
-		self._threaded = self.setting('Threaded')
 		self._threadSafety = self.threadSafety()
 		if self._threaded and self._threadSafety==0:
 			raise SQLObjectStoreThreadingError, 'Threaded is 1, but the DB API threadsafety is 0.'
@@ -188,15 +187,15 @@ class SQLObjectStore(ObjectStore):
 
 	## Changes ##
 
-	def commitInserts(self):
+	def commitInserts(self,allThreads=0):
 		unknownSerialNums = []
-		for object in self._newObjects:
+		for object in self._newObjects.items(allThreads):
 			self._insertObject(object, unknownSerialNums)
 
 		for unknownInfo in unknownSerialNums:
 			stmt = unknownInfo.updateStmt()
 			self.executeSQL(stmt)
-		self._newObjects = []
+		self._newObjects.clear(allThreads)
 
 	def _insertObject(self, object, unknownSerialNums):
 		# New objects not in the persistent store have serial numbers less than 1
@@ -227,17 +226,18 @@ class SQLObjectStore(ObjectStore):
 		Subclass responsibility. """
 		raise SubclassResponsibilityError
 
-	def commitUpdates(self):
-		for object in self._changedObjects.values():
+	def commitUpdates(self,allThreads=0):
+		for object in self._changedObjects.values(allThreads):
 			sql = object.sqlUpdateStmt()
 			self.executeSQL(sql)
-		self._changedObjects.clear()
+			object.setChanged(0)
+		self._changedObjects.clear(allThreads)
 
-	def commitDeletions(self):
-		for object in self._deletedObjects:
+	def commitDeletions(self,allThreads=0):
+		for object in self._deletedObjects.items(allThreads):
 			sql = object.sqlDeleteStmt()
 			self.executeSQL(sql)
-		self._deletedObjects[:] = []
+		self._deletedObjects.clear(allThreads)
 
 
 	## Fetching ##

@@ -9,6 +9,9 @@ from MiddleKit.Core.ListAttr import ListAttr
 	# ^^^ for use in _klassForClass() below
 	# Can't import as Klass or Core.ModelUser (our superclass)
 	# will try to mix it in.
+from PerThreadList import PerThreadList, NonThreadedList
+from PerThreadDict import PerThreadDict, NonThreadedDict
+import thread
 
 
 class UnknownObjectError(LookupError):
@@ -69,14 +72,27 @@ class ObjectStore(ModelUser):
 
 	def __init__(self):
 		self._model          = None
-		self._hasChanges     = 0
 		self._objects        = {} # keyed by ObjectKeys
-		self._newObjects     = [] # @@ 2000-10-06 ce: should be a set?
-		self._deletedObjects = []
-		self._changedObjects = {} # a set
 		self._newSerialNum   = -1
 		self._verboseDelete  =  0
 
+
+	def modelWasSet(self):
+		"""
+		Performs additional set up of the store after the model is set.
+		"""
+		ModelUser.modelWasSet(self)
+		self._threaded = self.setting('Threaded')
+		if self._threaded:
+			self._hasChanges     = {} # keep track on a per-thread basis
+			self._newObjects	 = PerThreadList()
+			self._deletedObjects = PerThreadList()
+			self._changedObjects = PerThreadDict()
+		else:
+			self._hasChanges     = 0
+			self._newObjects     = NonThreadedList()
+			self._deletedObjects = NonThreadedList()
+			self._changedObjects = NonThreadedDict()
 
 	## Settings ##
 
@@ -117,7 +133,7 @@ class ObjectStore(ModelUser):
 		if not object.isInStore():
 			assert object.key()==None
 			# Make the store aware of this new object
-			self._hasChanges = 1
+			self.willChange()
 			self._newObjects.append(object)
 			object.setStore(self)
 			if not noRecurse:
@@ -144,7 +160,7 @@ class ObjectStore(ModelUser):
 		objectsToDel = {}
 		detaches = []
 		self._deleteObject(object, objectsToDel, detaches)  # compute objectsToDel and detaches
-		self._hasChanges = 1
+		self.willChange()
 
 		# detaches
 		for obj, attr in detaches:
@@ -266,15 +282,43 @@ class ObjectStore(ModelUser):
 
 	## Changes ##
 
+	def hasChangesForCurrentThread(self):
+		''' return whether the current thread has changes to be committed '''
+		if self._threaded:
+			threadid = thread.get_ident()
+			return self._hasChanges.get(threadid,0)
+		else:
+			return self._hasChanges
+
 	def hasChanges(self):
+		''' return whether any thread has changes to be committed '''
+		if self._threaded:
+			return 1 in self._hasChanges.values()
 		return self._hasChanges
+
+	def willChange(self):
+		if self._threaded:
+			threadid = thread.get_ident()
+			self._hasChanges[threadid] = 1
+		else:
+			self._hasChanges = 1
+
+	def saveAllChanges(self):
+		""" Commits object changes to the object store by invoking commitInserts(), commitUpdates() and commitDeletions() all of which must by implemented by a concrete subclass. """
+		self.commitDeletions(allThreads=1)
+		self.commitInserts(allThreads=1)
+		self.commitUpdates(allThreads=1)
+		self._hasChanges = {}
 
 	def saveChanges(self):
 		""" Commits object changes to the object store by invoking commitInserts(), commitUpdates() and commitDeletions() all of which must by implemented by a concrete subclass. """
 		self.commitDeletions()
 		self.commitInserts()
 		self.commitUpdates()
-		self._hasChanges = 0
+		if self._threaded:
+			self._hasChanges[thread.get_ident()] = 0
+		else:
+			self._hasChanges = 0
 
 	def commitInserts(self):
 		""" Invoked by saveChanges() to insert any news objects add since the last save. Subclass responsibility. """
@@ -314,9 +358,9 @@ class ObjectStore(ModelUser):
 		saved. You can check for that with hasChanges().
 		"""
 		assert not self.hasChanges()
-		assert len(self._newObjects)==0
-		assert len(self._deletedObjects)==0
-		assert len(self._changedObjects)==0
+		assert self._newObjects.isEmpty()
+		assert self._deletedObjects.isEmpty()
+		assert self._changedObjects.isEmpty()
 
 		self._objects        = {}
 		self._newSerialNum   = -1
@@ -330,11 +374,14 @@ class ObjectStore(ModelUser):
 		This method is a severe form of clear() and is typically used
 		only for debugging or production emergencies.
 		"""
-		self._hasChanges     = 0
+		if self._threaded:
+			self._hasChanges     = {}
+		else:
+			self._hasChanges     = 0
 		self._objects        = {}
-		self._newObjects     = []
-		self._deletedObjects = []
-		self._changedObjects = {}
+		self._newObjects.clear()
+		self._deletedObjects.clear()
+		self._changedObjects.clear()
 		self._newSerialNum   = -1
 
 
@@ -346,7 +393,7 @@ class ObjectStore(ModelUser):
 		This method records the object in a set for later processing when the store's changes are saved.
 		If you subclass MiddleObject, then you're taken care of.
 		"""
-		self._hasChanges = 1
+		self.willChange()
 		self._changedObjects[object] = object  ## @@ 2000-10-06 ce: Should this be keyed by the object.key()? Does it matter?
 
 
