@@ -293,8 +293,9 @@ class Application(Configurable,CanContainer):
 			self.writeActivityLog(transaction)
 
 		##store session##
-		if transaction._session:
-			self._sessions.storeSession(transaction.session())
+		# @@ 2000-08-12 ce: throws an exception for me
+		#if transaction._session:
+		#	self._sessions.storeSession(transaction.session())
 
 		path = request.serverSidePath()
 		self.returnInstance(transaction, path)
@@ -391,25 +392,19 @@ class Application(Configurable,CanContainer):
 
 	## Transactions ##
 
-	# @@ 2000-05-10 ce: should just send the message to the transaction and let it handle the rest.
-
 	def awake(self, transaction):
-		if transaction._session:
-			transaction.session().awake(transaction)
-		transaction.servlet().awake(transaction)
+		transaction.awake()
 
 	def respond(self, transaction):
-		if transaction._session:
-			transaction.session().respond(transaction)
-		transaction.servlet().respond(transaction)
+		transaction.respond()
 
 	def sleep(self, transaction):
 		# Force a store of the session because non-memory session stores need this.
 		if transaction.hasSession():
 			sess = transaction.session()
-##			self._sessions[sess.identifier()] = sess
-			sess.sleep(transaction) # @@ 2000-08-11 ce: should go in transaction
-		transaction.servlet().sleep(transaction)
+			self._sessions[sess.identifier()] = sess
+			# @@ 2000-08-12 ce: finalize this
+		transaction.sleep()
 
 
 	## Sessions ##
