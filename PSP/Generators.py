@@ -160,10 +160,11 @@ class MethodGenerator(GenericGenerator):
 		writer.printChars('):\n')
 		if self.attrs['name'] == 'awake':  #This is hacky, need better method, but it works: MAybe I should require a standard parent and do the intPSP call in that awake???????
 			AwakeCreated = 1
-		writer.pushIndent()
-		writer.println('self.initPSP()\n')
-		writer.popIndent()
-		writer.println()
+			#below indented on 6/1/00, was outside if block
+			writer.pushIndent()
+			writer.println('self.initPSP()\n')
+			writer.popIndent()
+			writer.println()
 
 class MethodEndGenerator(GenericGenerator):
     """ Part of class method generation.  After MethodGenerator, MethodEndGenerator actually generates
@@ -208,19 +209,7 @@ class IncludeGenerator(GenericGenerator):
 		#	writer.println('res.write("""'+i+'""")\n')
 		data = open(self.page).read()
 		data=string.replace(data,'"""',r'\"""')
-		writer.println('res.write("""'+data+'"""\n)')
+		writer.println('res.write("""'+data+'""")')
 		writer.println()
 		
-	
-	
-	
-    
-	
-	
 
-
-    
-
-    
-    
-	
