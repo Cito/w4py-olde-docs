@@ -312,12 +312,27 @@ class PythonServletFactory(ServletFactory):
 		return ['.py']
 
 	def loadClass(self, transaction, path):
-		name = os.path.splitext(os.path.split(path)[1])[0]
 		# Import the module as part of the context's package
 		module = self.importAsPackage(transaction, path)
-		assert module.__dict__.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
-		# Pull the servlet class out of the module
-		theClass = getattr(module, name)
+
+		# Compute the potential names for the servlet
+		name = os.path.splitext(os.path.split(path)[1])[0]
+		potentialNames = [name]
+		# So you can have a url with a dash. url "foo-bar" maps to Python identifier "foo_bar":
+		potentialNames.append(name.replace('-', '_'))
+		# So you can have a url that ends in a Python reserved word. url "in" maps to Python identifier "in_":
+		potentialNames.append(name+'_')
+
+		# Extract the class
+		theClass = None
+		for name in potentialNames:
+			theClass = getattr(module, name, None)  # Pull the servlet class out of the module
+			if theClass is not None:
+				break
+		if theClass is None:
+			raise ValueError, 'Cannot find expected servlet class in %r. Looking for one of these: %s' % (
+				path, ', '.join([repr(n) for n in potentialNames]))
+
 		# new-style classes aren't ClassType, but they
 		# are okay to use.  They are subclasses of
 		# type.  But type isn't a class in older
