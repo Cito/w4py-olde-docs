@@ -125,4 +125,4 @@ class PickleRPCServlet(RPCServlet):
 		Timestamp the response dict and send it.
 		"""
 		response['timeResponded'] = time()
-		self.sendOK('text/python/pickle/dict', dumps(response), trans)
+		self.sendOK('text/x-python-pickled-dict', dumps(response), trans)
