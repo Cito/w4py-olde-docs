@@ -55,7 +55,7 @@ class ExceptionHandler(Object):
 
 		def contextInitialize(app, ctxPath):
 			app._exceptionHandlerClass = ExceptionHandler
-	'''
+	"""
 
 	hideValuesForFields = ['creditcard', 'credit card', 'cc', 'password', 'passwd']
 		# ^ keep all lower case to support case insensitivity
