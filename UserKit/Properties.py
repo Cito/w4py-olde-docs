@@ -1,6 +1,6 @@
 name = 'UserKit'
 
-version = (0, 1, 0, 'pre')
+version = (0, 1, 0)
 
 docs = [
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},

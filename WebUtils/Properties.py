@@ -1,6 +1,6 @@
 name = 'WebUtils'
 
-version = (0, 2, 0)
+version = (0, 2, 1)
 
 docs = [
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},

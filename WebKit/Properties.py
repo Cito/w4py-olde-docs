@@ -1,6 +1,6 @@
 name = 'WebKit'
 
-version = (0, 5, 0, 'pre')
+version = (0, 5, 0)
 
 docs = [
 	{'name': 'Install Guide', 'file': 'InstallGuide.html'},
