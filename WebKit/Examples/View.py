@@ -15,7 +15,7 @@ class View(ExamplePage):
 	"""
 
 	def writeBody(self):
-		req = self._request
+		req = self.request()
 		if not req.hasField('filename'):
 			self.writeln('<p>', self.__class__.__doc__)
 		else:
@@ -31,5 +31,5 @@ class View(ExamplePage):
 ##			contents = string.replace(contents, '<', '&lt;')
 ##			contents = string.replace(contents, '>', '&gt;')
 ##			self.writeln('<br><i>%s</i><hr><pre>%s</pre>' % (filename, contents))
-
-			self._transaction._application.forwardRequest(self._transaction,"Colorize.py")
+			trans = self.transaction()
+			trans.application().forwardRequest(trans, "Colorize.py")

@@ -41,7 +41,7 @@ class ExamplePage(Page):
 
 		# handle case of which directory the client thinks we're in
 		self.write('<p><center> <a href="')
-		#if string.find(self._request._environ['PATH_INFO'],'/Examples/')>0: self.write('../')
+		#if string.find(self.request()._environ['PATH_INFO'],'/Examples/')>0: self.write('../')
 		self.writeln(self.request().uriWebKitRoot() + 'PSPExamples/Hello.psp">PSP</a></center>')
 		# end special case
 
@@ -54,9 +54,9 @@ class ExamplePage(Page):
 		self.writeln('<p><center>Contexts: ', string.join(ctxs, ' | '), '</center>')
 
 		if self.isDebugging():
-			self.writeln('<p><center>', self._session.identifier(), '</center>')
+			self.writeln('<p><center>', self.session().identifier(), '</center>')
 			from WebUtils.WebFuncs import HTMLEncode
-			self.writeln('<p><center>', HTMLEncode(str(self._request.cookies())), '</center>')
+			self.writeln('<p><center>', HTMLEncode(str(self.request().cookies())), '</center>')
 
 		self.writeln('<hr>')
 
@@ -66,9 +66,9 @@ class ExamplePage(Page):
 		from stat import *
 		import os
 		scripts = []
-		#dir = self._request.serverSideDir()
-		dir = self._request.uriWebKitRoot() + "Examples"
-		examples = eval(open(os.path.join(self.application()._serverDir,'Examples','Examples.list')).read())  #eval(open(self._request.relativePath('Examples.list'), 'r').read())
+		#dir = self.request().serverSideDir()
+		dir = self.request().uriWebKitRoot() + "Examples"
+		examples = eval(open(os.path.join(self.application()._serverDir,'Examples','Examples.list')).read())  #eval(open(self.request().relativePath('Examples.list'), 'r').read())
 		for filename in map(lambda x: x+'.py', examples):
 			if len(filename)>3  and  filename[-3:]=='.py':
 				script = {}
@@ -82,7 +82,7 @@ class ExamplePage(Page):
 		self.writeln('<center>')
 
 		# View the source of the current servlet
-		viewpath = self._request.uriWebKitRoot() + "Examples/"+"View"
+		viewpath = self.request().uriWebKitRoot() + "Examples/"+"View"
 		self.write('<br><a href=%s?filename=%s>source</a>' % (viewpath,self.request().serverSidePath()))#self.__class__.__name__)
 
 		# WebKit docs

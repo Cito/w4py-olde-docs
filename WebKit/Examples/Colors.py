@@ -18,8 +18,9 @@ class Colors(ExamplePage):
 		ExamplePage.awake(self, ctx)
 		self._bgcolor = ''
 		self._bgcolorArg = ''
-		if self._request.hasField('bgcolor'):
-			self._bgcolor = string.strip(self._request.field('bgcolor'))
+		req = self.request()
+		if req.hasField('bgcolor'):
+			self._bgcolor = string.strip(req.field('bgcolor'))
 			if self._bgcolor!='':
 				self._bgcolorArg = 'bgcolor=' + self._bgcolor
 
@@ -38,7 +39,7 @@ class Colors(ExamplePage):
 		''' % (self._bgcolor))
 
 		self.write(self.htColorTable())
-	
+
 	def htColorTable(self):
 		if self._htColorTable is None:
 			colorTable = ['<p><table align=center>']

@@ -35,11 +35,11 @@ class ListBox(ExamplePage):
 		self._error = None
 
 	def writeBody(self):
-		sess = self._transaction.session()
+		sess = self.session()
 
 		# Debugging
 		if 0:
-			self.writeln('<br>fields = ', HTMLEncode(str(self._request.fields())))
+			self.writeln('<br>fields = ', HTMLEncode(str(self.request().fields())))
 			self.writeln('<br>vars = ', HTMLEncode(str(self.vars())))
 			self.writeln('<p> <br>')
 
@@ -98,7 +98,7 @@ class ListBox(ExamplePage):
 
 	def vars(self):
 		''' Returns a dictionary of values, stored in the session, for this page only. '''
-		return self._transaction.session().value('form')
+		return self.session().value('form')
 
 	def new(self, trans):
 		vars = self.vars()

@@ -16,7 +16,7 @@ class Colorize(Page):
 		write out a syntax hilighted version of the file.  The filename is an attribute of the request object
 		"""
 		res=transaction._response
-		req=self._request
+		req=self.request()
 		if not req.hasField('filename'):
 			res.write("No filename given to syntax color!")
 			return
@@ -52,4 +52,4 @@ class Colorize(Page):
 
 		sys.stdout=realout
 
-		
+
