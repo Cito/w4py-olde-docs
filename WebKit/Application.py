@@ -83,12 +83,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._exceptionHandlerClass = ExceptionHandler
 
 		# For session store:
-		from SessionMemoryStore import SessionMemoryStore
-		from SessionFileStore import SessionFileStore
-		from SessionDynamicStore import SessionDynamicStore
-		klass = locals()['Session'
-				 + self.setting('SessionStore','File')
-				 + 'Store']
+		sessionStore = 'Session%sStore' % self.setting('SessionStore')
+		exec 'from %s import %s' % (sessionStore, sessionStore)
+		klass = locals()[sessionStore]
 		assert type(klass) is ClassType
 		self._sessions = klass(self)
 
@@ -190,7 +187,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			 'servlet.name', 'request.timeStamp',
 			 'transaction.duration',
 			 'transaction.errorOccurred'],
-			'SessionStore':         'Memory',  # can be File or Memory
+			'SessionStore':         'Dynamic',
 			'SessionTimeout':        60,  # minutes
 			'IgnoreInvalidSession': 1,
 			'UseAutomaticPathSessions': 0,
