@@ -80,3 +80,9 @@ class Attr(UserDict, ModelObject):
 
 	def awakeFromRead(self):
 		pass
+
+
+	## Warnings ##
+
+	def printWarnings(self, out):
+		pass

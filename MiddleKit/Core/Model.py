@@ -344,3 +344,12 @@ class Model(Configurable):
 			flag = self.setting('ExternalEnumsSQLNames')['Enable']
 			self._usesExternalSQLEnums = flag
 		return flag
+
+
+	## Warnings ##
+
+	def printWarnings(self, out=None):
+		if out is None:
+			out = sys.stdout
+		for klass in self.klasses().klassesInOrder():
+			klass.printWarnings(out)

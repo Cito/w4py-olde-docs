@@ -297,3 +297,10 @@ class Klass(UserDict, ModelObject):
 
 	def __str__(self):
 		return self.asShortString()
+
+
+	## Warnings ##
+
+	def printWarnings(self, out):
+		for attr in self.attrs():
+			attr.printWarnings(out)

@@ -48,6 +48,8 @@ class Generate:
 				model=opt['model'],
 				configFilename=opt.get('config'),
 				outdir=outdir)
+		model = MiddleKit.Core.Model.Model(opt['model'], configFilename=opt.get('config'), havePythonClasses=0)
+		model.printWarnings()
 
 	def usage(self, errorMsg=None):
 		progName = os.path.basename(sys.argv[0])
