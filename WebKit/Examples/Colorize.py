@@ -22,8 +22,10 @@ class Colorize(Page):
 			res.write("No filename given to syntax color!")
 			return
 		filename = req.field('filename')
+		filename = self.request().serverSidePath(os.path.basename(filename))
 		if not os.path.exists(filename):
-			res.write(filename+" does not exist.")
+			res.write("The requested file, %s, does not exist in the proper directory" % os.path.basename(filename))
+##			res.write(filename+" does not exist.")
 			return
 
 		from DocSupport import py2html

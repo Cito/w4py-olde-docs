@@ -1,4 +1,4 @@
-import string
+import string, os
 from ExamplePage import ExamplePage
 
 
@@ -14,4 +14,10 @@ class View(ExamplePage):
 			self.writeln('<p>', self.__class__.__doc__)
 		else:
 			trans = self.transaction()
-			trans.application().forwardRequest(trans, "Colorize.py")
+			fn = req.field('filename')
+			if os.sep in fn:
+				self.write("Cannot request a file outside of this directory %s" % fn)
+				return
+			fn = self.request().serverSidePath(fn)
+			self.request().fields()['filename'] = fn 
+			trans.application().forwardRequestFast(trans, "Colorize.py")
