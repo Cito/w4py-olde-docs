@@ -39,7 +39,7 @@ class Klasses:
 		strList = []
 		strList.append('use %s\ngo\n' % dbName)
 		self._klasses.reverse()		
-		for klass in self._model._allKlasses:
+		for klass in self._model._allKlassesInOrder:
 		# If table exists drop.
 			strList.append("print 'Dropping table %s'\n" % klass.name())
 			strList.append("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % klass.name() )
@@ -81,7 +81,7 @@ create table _MKClassIds (
 ''')
 		wr('delete from _MKClassIds\n\n')
 		id = 1
-		for klass in self._model._allKlasses:
+		for klass in self._model._allKlassesInOrder:
 			wr('insert into _MKClassIds (id, name) values\n')
 			wr ('\t(%s, %r)\n' % (id, klass.name()))
 			klass.setId(id)
