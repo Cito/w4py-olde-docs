@@ -45,7 +45,7 @@ import AsyncThreadedAppServer
 from cStringIO import StringIO
 from BaseHTTPServer import BaseHTTPRequestHandler
 import urllib, string, time, asyncore, socket
-import sys
+import sys, os
 
 global monitor
 monitor=0
