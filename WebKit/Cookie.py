@@ -1,9 +1,13 @@
 from Common import *
 
-# Import zCookieEngine
+# If this is Python 2.2 or greater, import the standard Cookie module as CookieEngine.
+# Otherwise, import WebUtils.Cookie as CookieEngine.  This is because there is a nasty
+# bug in the Cookie.py module included in Python 2.1 and earlier, and Python 1.5.2
+# doesn't even include Cookie.py at all.
+
 pyVer = getattr(sys, 'version_info', None)
-if pyVer and pyVer[0]>=2:
-	# Get Python's Cookie module
+if pyVer and pyVer[:2] >= (2, 2):
+	# Get Python's Cookie module.
 	# We have to do some work since it has the same name as we do.  So we'll strip out
 	# anything from the path that might cause us to import from the WebKit directory, then
 	# import Cookie using that restricted path -- that ought to ensure that we're using Python's
@@ -14,15 +18,16 @@ if pyVer and pyVer[0]>=2:
 	path = filter(ok, sys.path)
 	try:
 		(file, pathname, description) = imp.find_module('Cookie', path)
-		zCookieEngine = imp.load_module('Cookie', file, pathname, description)
+		CookieEngine = imp.load_module('Cookie', file, pathname, description)
 	except:
 		if file:
 			file.close()
 else:
-	# For Python versions < 2.0, we including a copy of Tim O'Malley's
-	# Cookie.py as "zCookieEngine"
-	import zCookieEngine
-
+	# For Python versions < 2.2, we are including a copy of the standard Cookie.py module from
+	# Python 2.2, but modified to work with Python 1.5.2 and up.
+	from WebUtils import Cookie
+	CookieEngine = Cookie
+	del Cookie
 
 
 class Cookie(Object):
@@ -48,7 +53,7 @@ class Cookie(Object):
 	## Init ##
 
 	def __init__(self, name, value):
-		self._cookies = zCookieEngine.SmartCookie()
+		self._cookies = CookieEngine.SmartCookie()
 		self._name = name
 		self._value = value
 		self._cookies[name] = value
