@@ -71,6 +71,7 @@ class Installer:
 
 	def installDocs(self):
 		self.propagateStyleSheet()
+		self.processRawFiles()
 		self.createBrowsableSource()
 
 	def propagateStyleSheet(self):
@@ -81,6 +82,14 @@ class Installer:
 			print '  %s...' % comp
 			target = os.path.join(comp, 'Documentation', 'StyleSheet.css')
 			open(target, 'wb').write(stylesheet)
+		print
+
+	def processRawFiles(self):
+		print 'Processing raw files...'
+		self.requirePath('DocSupport')
+		from RawToHTML import RawToHTML
+		processor = RawToHTML()
+		processor.main(['install.RawToHTML', 'Documentation/*.raw'])
 		print
 
 	def createBrowsableSource(self):
