@@ -28,3 +28,7 @@ class CanContainer:
 		if not self.__dict__.has_key("_Cans"):
 			self._Cans={}
 		self._Cans[ID]=item
+
+	def _delCans(self):
+		for i in self.cans():
+			self.delCan(i)
