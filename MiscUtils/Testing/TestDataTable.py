@@ -157,9 +157,17 @@ Class,Attribute,Type,Extras
 		raise Exception, 'Failed to raise exception for unfinished multiline record'
 
 
+def testExcel():
+	if canReadExcel():
+		heading('Testing Excel...')
+		t = DataTable('Sample2.xls')
+		assert t[0][0]==1.0, t[0]
+
+
 def main():
 	print 'Testing DataTable.py'
 	test01()
+	testExcel()
 	print 'Done.'
 
 

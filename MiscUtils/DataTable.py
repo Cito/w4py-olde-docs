@@ -102,6 +102,17 @@ than the tab delimited format, and can easily be edited and manipulated
 by popular spreadsheets and databases.
 
 
+MICROSOFT EXCEL
+
+On Microsoft Windows systems with Excel and the win32all package
+(http://starship.python.net/crew/mhammond/), DataTable will use Excel
+(via COM) to read ".xls" files.
+
+from MiscUtils import DataTable
+assert DataTable.canReadExcel()
+table = DataTable.DataTable('foo.xls')
+
+
 TABLES FROM SCRATCH
 
 Here's an example that constructs a table from scratch:
@@ -185,15 +196,27 @@ TO DO
 """
 
 
-import string, sys
+import os, string, sys
 from CSVParser import CSVParser
 from string import join, replace, split, strip
 from types import *
-from MiscUtils import NoDefault
+
+try:
+	StringTypes
+except NameError:
+	StringTypes = StringType
+
+try:
+	from MiscUtils import NoDefault
+except ImportError:
+	class NoDefault:
+		pass
+
 try:
 	from mx.DateTime import DateTimeType, DateTimeFrom
 except ImportError:
 	pass
+
 
 ## Types ##
 
@@ -208,6 +231,18 @@ _types = {
 	'datetime':	DateTimeType,
 	'object':	ObjectType,
 }
+
+
+## Functions ##
+
+def canReadExcel():
+	try:
+		from win32com.client import Dispatch
+		Dispatch("Excel.Application")
+	except:
+		return False
+	else:
+		return True
 
 
 ## Classes ##
@@ -256,8 +291,8 @@ class TableColumn:
 				raise DataTableError, 'Unknown type %s' % repr(type)
 
 	def __repr__(self):
-		return '<TableColumn %s with %s at %x>' % (
-			repr(self._name), repr(self._type), id(self))
+		return '<%s %s with %s at %x>' % (
+			self.__class__.__name__, repr(self._name), repr(self._type), id(self))
 
 	def __str__(self):
 		return self._name
@@ -290,7 +325,8 @@ class TableColumn:
 		elif self._type is ObjectType:
 			value = rawValue
 		else:
-			raise DataTableError, 'Unknown column type "%s"' % self._type
+			# no type set, leave values as they are
+			value = rawValue
 		return value
 
 
@@ -304,12 +340,12 @@ class DataTable:
 
 	## Init ##
 
-	def __init__(self, filenameOrHeadings=None, delimiter=',', allowComments=1, stripWhite=1, defaultType='string', usePickleCache=None):
+	def __init__(self, filenameOrHeadings=None, delimiter=',', allowComments=1, stripWhite=1, defaultType=None, usePickleCache=None):
 		if usePickleCache is None:
 			self.usePickleCache = self.usePickleCache  # grab the class-level attr
 		else:
 			self.usePickleCache = usePickleCache
-		if not _types.has_key(defaultType):
+		if defaultType and not _types.has_key(defaultType):
 			raise DataTableError, 'Unknown type for default type: %s' % repr(defaultType)
 		self._defaultType = defaultType
 		self._filename = None
@@ -331,9 +367,12 @@ class DataTable:
 			from PickleCache import readPickleCache, writePickleCache
 			data = readPickleCache(filename, pickleVersion=1, source='MiscUtils.DataTable')
 		if data is None:
-			file = open(self._filename, 'r')
-			self.readFile(file, delimiter, allowComments, stripWhite)
-			file.close()
+			if self._filename.endswith('.xls'):
+				self.readExcel()
+			else:
+				file = open(self._filename, 'r')
+				self.readFile(file, delimiter, allowComments, stripWhite)
+				file.close()
 			if self.usePickleCache:
 				writePickleCache(self, filename, pickleVersion=1, source='MiscUtils.DataTable')
 		else:
@@ -347,6 +386,8 @@ class DataTable:
 		return self.readLines(split(string, '\n'), delimiter, allowComments, stripWhite)
 
 	def readLines(self, lines, delimiter=',', allowComments=1, stripWhite=1):
+		if self._defaultType is None:
+			self._defaultType = 'string'
 		haveReadHeadings = 0
 		parse = CSVParser(fieldSep=delimiter, allowComments=allowComments, stripWhitespace=stripWhite).parse
 		for line in lines:
@@ -358,11 +399,57 @@ class DataTable:
 					self._rows.append(row)
 				else:
 					self.setHeadings(values)
-					self.createNameToIndexMap()
 					haveReadHeadings = 1
 		if values is None:
 			raise DataTableError, "Unfinished multiline record."
 		return self
+
+	def canReadExcel(self):
+		return canReadExcel()
+
+	def readExcel(self):
+		maxBlankRows = 10
+
+		from win32com.client import Dispatch
+		xl = Dispatch("Excel.Application")
+		wb = xl.Workbooks.Open(os.path.abspath(self._filename))
+		try:
+			sh = wb.Worksheets(1)
+			sh.Cells(1, 1)
+
+			# determine max column
+			numCols = 1
+			while 1:
+				if sh.Cells(1, numCols).Value in [None, '']:
+					numCols -= 1
+					break
+				numCols += 1
+			if numCols<=0:
+				return
+
+			# read rows of data
+			numCols = range(1, numCols+1)
+			haveReadHeadings = 0
+			rowNum = 1
+			numBlankRows = 0
+			while 1:
+				values = [sh.Cells(rowNum, i).Value for i in numCols]
+				nonEmpty = [value for value in values if value]
+				if nonEmpty:
+					if haveReadHeadings:
+						row = TableRecord(self, values)
+						self._rows.append(row)
+					else:
+						self.setHeadings(values)
+						haveReadHeadings = 1
+				else:
+					numBlankRows += 1
+					if numBlankRows>maxBlankRows:
+						# consider end of spreadsheet
+						break
+				rowNum += 1
+		finally:
+			wb.Close()
 
 	def save(self):
 		self.writeFileNamed(self._filename)
@@ -420,7 +507,7 @@ class DataTable:
 		""" Headings can be a list of strings (like ['name', 'age:int']) or a list of TableColumns or None. """
 		if not headings:
 			self._headings = []
-		elif type(headings[0]) is StringType:
+		elif isinstance(headings[0], StringTypes):
 			self._headings = map(lambda h: TableColumn(h), headings)
 		elif isinstance(headings[0], TableColumn):
 			self._headings = list(headings)
@@ -524,6 +611,7 @@ BlankValues = {
 	IntType:      0,
 	FloatType:    0.0,
 	DateTimeType: '',
+	None:         None,
 }
 
 
