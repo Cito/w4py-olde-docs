@@ -19,6 +19,8 @@ class HTTPRequest(Request):
 	## Initialization ##
 
 	def __init__(self, dict={}):
+##		import pprint
+##		pprint.pprint(dict)
 		Request.__init__(self)
 		self._parents = []
 		if dict:
@@ -34,7 +36,9 @@ class HTTPRequest(Request):
 				self._input = StringIO('')
 			else:
 				self._xmlInput = None
+
 			self._fields  = cgi.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
+
 			self._cookies = Cookie()
 			if self._environ.has_key('HTTP_COOKIE'):
 				self._cookies.load(self._environ['HTTP_COOKIE'])
@@ -125,7 +129,8 @@ class HTTPRequest(Request):
 			sidstring = '_SID_=' +  self._pathSession +'/'
 			self._environ['REQUEST_URI'] = self._environ['REQUEST_URI'].replace(sidstring,'')
 			self._environ['PATH_INFO'] = self._environ['PATH_INFO'].replace(sidstring,'')
-			self._environ['PATH_TRANSLATED'] = self._environ['PATH_TRANSLATED'].replace(sidstring,'')
+			if self._environ.has_key('PATH_TRANSLATED'):
+				self._environ['PATH_TRANSLATED'] = self._environ['PATH_TRANSLATED'].replace(sidstring,'')
 			assert(not self._environ.has_key('WK_URI')) # obsolete?
 
 		self._expiredSession = 0
