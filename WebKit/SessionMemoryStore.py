@@ -1,4 +1,5 @@
 from SessionStore import SessionStore
+import os
 
 
 class SessionMemoryStore(SessionStore):
@@ -57,4 +58,4 @@ class SessionMemoryStore(SessionStore):
 		if 0:
 			print "Storing all sessions"
 		file = open("Sessions/AllSessions.ses", "w")
-		dump(self._store, file)
+		self.encoder()(self._store, file)
