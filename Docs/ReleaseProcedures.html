@@ -16,32 +16,48 @@ These notes have expanded and changed upon every release. Carefully,
 consider each step as you make it. Look for opportunities to
 improve. Also, update these notes immediately following a release.
 
-
 <h2>To Do</h2>
-* ReleaseHelper.py
-  * cvs tags
+* Document tests to run.
 * Add notes on download mirror
   scp Webware-VER.tar.gz esterbro@ebad.pair.com:public_html/python/webware/
+  @@ sgd 2003-02-13 Is the mirror really used? 
 
+<h2>Changes encountered in the 0.8 Release</h2>
+* Download mirror requires updating by Chuck, the instructuions for 
 
 <h2>Last minute tweaks</h2>
 * Run all regression test suites
   > cd SomeKit/Tests
   > python Test.py
-* Update all version numbers:
-  * Properties.py
-  * */Properties.py
-  * WebKit/AppServer.py
-  * WebKit/Application.py
-  * */Docs/*.html
-* Make sure there are no empty directories or zero length files
-  (such as __init__.py). Old unarchivers often ignore these, leading
-  to problems for users.
+
 * Release notes
   * Search webware-discuss and webware-devel archives for "update"
     in the subject, since the date of the last release.
+
+* Update all version numbers using bin/serversion.py
+
+  * edit bin/setversion.py and set the version numbers to match the release.
+
+  * Copy */Docs/RelNotes-X.Y.html to RelNotes-#.#.html where #.# matches the
+    major and minor version numbers on the release.    bin/setversion.py will
+    only update RelNotes* files that are named according to the version 
+    number so that it will not update old RelNotes files.
+
+  * run bin/setversion.py  this will change the version in the following files
+    according to defined rules.  See setversion.py for more information.
+    * Properties.py
+    * */Properties.py
+    * */Docs/*.html
+    * */Docs/*.txt
+    * */Docs/RelNotes-#.#.html
+
+* Make sure there are no empty directories or zero length files
+  (such as __init__.py). Old unarchivers often ignore these, leading
+  to problems for users.
+
 * Make sure the workspace is up to date and all files are checked in.
   > cvs upd -dP
+
 * Skim through docs one final time
   * Make sure all the version numbers and release dates are correct.
 
@@ -56,18 +72,44 @@ For CVS tagging only:  Use _ instead of .  No .:, or other symbols
 For example,
    VER = 0.4
    CVS_VER = 0_4
+Look at the existing tags to make sure your new tag is of a 
+suitable style.  For example Release-0_8 is the tag for the
+0.8 release.
 
-* Make sure Properties.py's version has an a1, a2, b1, or b2, etc.
-* Check out a copy and upload:
-  > cvs -z3 -d:ext:$USER@cvs.Webware.sourceforge.net:/cvsroot/webware co Webware
-  > Webware/bin/ReleaseHelper.py
-* Download the release, install and test
-  * Check that the right versions show up in the WebKit examples, including b1.
+* Make sure Properties.py's version has an a1, a2, b1, or b2, etc. 
+  (see bin/setversion.py)
+
+* Make sure verything is committed and current in CVS.
+
 * Tag the release
   > cvs -q tag Release-CVS_VER
+
+* Use ReleaseHelper to create the release. This performs a a CVS 
+  EXPORT of the repository to create a directory without the CVS 
+  control files, and then build a tarball from that directory.
+
+  > Webware/bin/ReleaseHelper.py [tag=CVS_TAG]
+
+  If you specify the tag=TAG, the tarball is built using the revision 
+  informationfound in the release.  Otherwise the tarball is built
+  and named with the current date indicating a snapshot build.
+
+* Install and test
+  * Check that the right versions show up in the WebKit examples, and
+    in the documentation.
+
 * If you want to get a particular release:
   > cvs co -r Release-CVS_VER Webware
 
+* If you need to update something because you discovered a problem
+  while confirming the release, and need to update the tag on
+  the files, you can use "-F" option on cvs as in:
+  > cvs -q tag -F Release-CVS_VER
+  This forces the tag to move rather than giving an error that the
+  tag already exists.
+
+* Following these procedures assures that the CVS tagged version 
+  is what is actually in the released tarball.
 
 <h2>Release on SourceForge</h2>
 FTP to SourceForge.net:
@@ -90,6 +132,13 @@ FTP to SourceForge.net:
 
 <h2>Update Home Page</h2>
 <a href=http://webware.sourceforge.net>Webware Home Page</a>:
+
+* Updates to the home page should go through CVS. In general
+  you should not be editing files directly on the HomePage site
+  because that site only has read-only access to CVS.
+
+  * Update your own copy of the HomePage
+    > cvs co HomePage
     * Update:
       * Last updated (at top of page)
       * Version number, including links
@@ -97,33 +146,40 @@ FTP to SourceForge.net:
       * Project status
       * Testimonials
     * Review all text and links
-
+    * commit the changes to CVS
+    
 * You have to copy and install Webware in the web page directory so
-  the documentation can be browsed online:
+  the documentation can be browsed online:  Make sure you install
+  this from the tarball.
 
-  > scp index.html USER@shell.sourceforge.net:/home/groups/webware/htdocs
-  > ssh -l echuck webware.sourceforge.net
-    > cd ... @@ complete this
-    # @@ instead of FTP, try scp or ncftpget
-    > ftp download.sourceforge.net
-      > bin
-      > hash
-      > cd /pub/sourceforge/Webware
-      > get Webware-VER.tar.gz
-      > quit
+  * copy the tarball to your source forge account.
+  > scp Webware-VER.tar.gz $USER@webware.sf.net:
+
+  * login to the source forge account and extract the tarball.
+  > ssh $USER@webware.sourceforge.net
+
+    * Note: this assumes you are extracting into Webware/
+      If the tarball extracts into a directory with the version
+      number appended you will need to take that into account.
+
+    > cd /home/groups/w/we/webware/htdocs/
     > rm -rf Webware
-    > tar xzf Webware-VER.tar.gz
+    > tar xzf ~/Webware-VER.tar.gz
     > cd Webware
     > python install.py
 
+    * Update the HomePage on SF from CVS.
+    > cvs -q update -dP
+
+  * verify that the home page changes are correct by browsing to
+    <a href="http://webware.sf.net">Webware.sourceforge.net</a> and double-checking
+    all of the updated links, including the download link.
+
 * Add a news item to the <a href=https://sourceforge.net/project/?group_id=4866>Webware Project Page</a> @ SourceForge
-
-
 <h2>Notify</h2>
 Create a new announcement text file containing the text for the
 general announcement, SourceForge news and freshmeat.net update. Use
 the previous releases as examples.
-
 
 For pre-releases, just the following:
   * To: <a href=webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>
@@ -141,15 +197,14 @@ Announce on mailing lists:
     [ ] <a href=mailto:python-list@python.org>python-list@python.org</a>
     [ ] <a href=mailto:python-announce@python.org>python-announce@python.org</a>
     [ ] <a href=mailto:webware-announce@lists.sourceforge.net>webware-announce@lists.sourceforge.net</a>
-    [ ] <a href=mailto:python-web-modules@yahoogroups.com>python-web-modules@yahoogroups.com</a>
     [ ] <a href=mailto:pywx@idyll.org>pywx@idyll.org</a>
     [ ] <a href=mailto:db-sig@python.org>db-sig@python.org</a>
         - Only if MiddleKit was updated
         - Make custom message focused on MiddleKit
+    [ ] <a href=http://www.crosswinds.net/~pboddie/Python/web_modules.html>Python Web Modules</a> (the pboddie page, not the mailing list)
 
 Update:
     [ ] <a href=http://www.vex.net/parnassus>Vaults of Parnassus</a>
-    [ ] <a href=http://www.crosswinds.net/~pboddie/Python/web_modules.html>Python Web Modules</a> (the pboddie page, not the mailing list)
     [ ] <a href=http://freshmeat.net>freshmeat.net</a>
 
 [ ] Review/search for other places where the announcement can be made.
@@ -160,7 +215,6 @@ Update:
 
 [ ] Check that the following were updated:
     [ ] <a href=http://www.vex.net/parnassus>Vaults of Parnassus</a>
-    [ ] <a href=http://www.paul.boddie.net/Python/web_modules.html>Python Web Modules</a>
     [ ] <a href=http://freshmeat.net>freshmeat.net</a>
 
 [ ] Look for follow up messages on <a href=news:comp.lang.python>comp.lang.python</a>
