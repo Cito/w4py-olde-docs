@@ -42,7 +42,7 @@ b:int,i:int,l:long,f:float,s:string
 			assert results[0]._get(attr)==values[attr]
 
 		different = 0.000001    # @@ 2000-11-25 ce: more work needed on floats
-		assert abs(t._get('f')-values['f'])<different
+		assert abs(results[0]._get('f')-values['f'])<different
 
 		# Reset
 		store.clear()
