@@ -11,7 +11,7 @@ def usage():
 	print 'usage: %s <input filename>' % sys.argv[0]
 	sys.exit(1)
 
-def toc(filename, indentFactor=3, fontSize=[None, None, '+1', '', '', '']):
+def toc(filename, indentFactor=3, fontSizes=[None, None, '+1', '', '', '']):
 	f = open(filename)
 	expr = re.compile("(<a name=(.*)>)?<[hH]([1-9])>(.*)</[hH][1-9]>")
 	while 1:
@@ -27,7 +27,10 @@ def toc(filename, indentFactor=3, fontSize=[None, None, '+1', '', '', '']):
 			level = int(level)
 			if level>1:
 				indenter = '&nbsp; '*indentFactor*(level-2)
-				print '<br> %s <a href="#%s"><font size=%s>%s</font></a>' % (indenter, identifier, fontSize[level], name)
+				fontSize = fontSizes[level]
+				if fontSize:
+					name = '<font size=%s>%s</font>' % (fontSize, name)
+				print '<br> %s<a href="#%s">%s</a>' % (indenter, identifier, name)
 			#print
 	f.close()
 
