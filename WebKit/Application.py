@@ -198,6 +198,23 @@ class Application(ConfigurableForServerSidePath, Object):
 				# Fall back on a simple string
 				self._404Page = """404 Error<p>File Not Found: %s"""
 
+		# @@ ISB 09/02: make this default or get rid of it eventually
+		if self.setting('UseNewPathAlgorithm', 0):
+			print 'Using new path algorithm'
+			self.serverSideInfoForRequestOld = self.serverSideInfoForRequest
+			self.serverSideInfoForRequest = self.serverSideInfoForRequestNewAlgorithm
+			self._serverSideInfoCacheByPathNew = {}
+			self._filesToHideRegexes = []
+			self._filesToServeRegexes = []
+			from fnmatch import translate as fnTranslate
+			import re
+			for pattern in self.setting('FilesToHide'):
+				self._filesToHideRegexes.append(
+					re.compile(fnTranslate(pattern)))
+			for pattern in self.setting('FilesToServe'):
+				self._filesToServeRegexes.append(
+					re.compile(fnTranslate(pattern)))
+
 
 	def initVersions(self):
 		"""
@@ -1326,6 +1343,126 @@ class Application(ConfigurableForServerSidePath, Object):
 		# added to the exception reports by the Application.
 		# See ExceptionHandler.py for more info.
 		pass
+
+
+	## New Path Algorithm ##
+
+	def serverSideInfoForRequestNewAlgorithm(self, request):
+		"""
+		Returns a tuple (requestPath, contextPath,
+		contextName) where requestPath is the server-side path
+		of this request, contextPath is the server-side path
+		of the context for this request, and contextName is
+		the name of the context, which is not necessarily the
+		same as the name of the directory that houses the
+		context.
+		
+		Returns (None, None, None) if there is no
+		corresponding server side path for the URL.
+		"""
+
+		info = self.serverSideInfoForRequestOld(request)
+		extraPath = request._extraURLPath
+		print 'serverSideInfo should be:', info, extraPath
+
+		fullPath = request.urlPath()
+		contextPath, contextName, rest = self.findContext(fullPath)
+		servletPath, extraPath = self.findServlet(contextPath, rest)
+		request._extraURLPath = extraPath
+		print 'serverSideInfo is      :', (servletPath, contextPath, contextName), extraPath
+		return (servletPath, contextPath, contextName)
+
+
+	def findContext(self, fullPath):
+		"""
+		Internal method: returns (contextPath, contextName, restOfPath)
+		restOfPath will start with a /
+		"""
+
+		assert not fullPath or fullPath[0] == '/'
+		if not fullPath or fullPath == '/':
+			contextName, contextPath = self.defaultContextNameAndPath()
+			return (contextPath, contextName, fullPath)
+		pathParts = string.split(fullPath, '/', 2)
+		if len(pathParts) == 3:
+			blank, first, rest = pathParts
+		elif len(pathParts) == 2:
+			first, rest = pathParts[1], ''
+		else:
+			first, rest = '', ''
+		if not self._contexts.has_key(first):
+			contextName, contextPath = self.defaultContextNameAndPath()
+			return (contextPath, contextName, fullPath)
+		else:
+			return (self._contexts[first], first, '/' + rest)
+
+	def findServlet(self, contextPath, urlPath):
+		"""
+		Internal method: returns (servletPath, extraURLPath)
+		extraURLPath will start with '/' (unless no extraURLPath
+		was given, in which case extraURLPath will be '')
+		"""
+		cache = self._serverSideInfoCacheByPathNew
+		if cache.has_key(urlPath):
+			return (cache[urlPath], '')
+		parts = string.split(urlPath, '/')
+		for i in range(len(parts)):
+			url = string.join(parts[:-i], '/')
+			if cache.has_key(url):
+				return cache[url], string.join(parts[-i:], '/')
+		currentPath = contextPath
+		while 1:
+			if not parts:
+				filename = self.findDirectoryIndex(currentPath)
+				if filename:
+					return (filename, '')
+				else:
+					return None, None # 404 Not Found
+			first = parts[0]
+			if os.path.isdir(os.path.join(currentPath, first)):
+				currentPath = os.path.join(currentPath, first)
+				parts = parts[1:]
+				continue
+			filenames = self.filenamesForBaseNameNew(os.path.join(currentPath, first))
+			if filenames:
+				if len(filenames) == 1:
+					return (filenames[0], 
+						'/'.join(parts[1:]))
+				print "WARNING: More than one file matches basename %s (%s)" % (repr(os.path.join(currentPath, first)), filenames)
+				return None, None
+			else:
+				return None, None
+
+	def filenamesForBaseNameNew(self, baseName):
+		if string.find(baseName, '*') != -1:
+			return []
+		filenames = glob(baseName + "*")
+		good = []
+		toIgnore = self.setting('ExtensionsToIgnore')
+		toServer = self.setting('ExtensionsToServe')
+		for filename in filenames:
+			ext = os.path.splitext(filename)[1]
+			shortFilename = os.path.basename(filename)
+			if ext in toIgnore and filename != baseName:
+				continue
+			for regex in self._filesToHideRegexes:
+				if regex.match(shortFilename):
+					continue
+			if self._filesToServeRegexes:
+				shouldServe = 0
+				for regex in self._filesToServeRegexes:
+					if regex.match(shortFilename):
+						shouldServe = 1
+						break
+				if not shouldServe:
+					continue
+			good.append(filename)
+		if len(good) > 1 and self.setting('UseCascadingExtensions'):
+			for extension in self.setting('ExtensionCascadeOrder'):
+				if baseName + extension in good:
+					return [baseName + extension]
+		return good
+
 
 
 	## Deprecated ##
