@@ -616,17 +616,25 @@ class Application(ConfigurableForServerSidePath, Object):
 		currentContextName = req._contextName
 		req.setURLPath(urlPath)
 		req.addParent(currentServlet)
-
-		servlet = self._rootURLParser.findServletForTransaction(trans)
-		trans._servlet = servlet
-		servlet.runTransaction(trans)
-		self.returnServlet(servlet, trans)
-		req.setURLPath(currentPath)
-		req._serverSidePath = currentServerSidePath
-		req._serverSideContextPath = currentServerSideContextPath
-		req._contextName = currentContextName
-		req.popParent()
-		trans._servlet = currentServlet
+		# We use a try/finally to make sure everything gets restored properly
+		# in the event of an exception in an included servlet.
+		try:
+			servlet = self._rootURLParser.findServletForTransaction(trans)
+			trans._servlet = servlet
+			# We will interpret an EndResponse in an included page to mean that 
+			# the current page may continue processing.
+			try:
+				servlet.runTransaction(trans)
+			except EndResponse:
+				pass
+			self.returnServlet(servlet, trans)
+		finally:
+			req.popParent()
+			req.setURLPath(currentPath)
+			req._serverSidePath = currentServerSidePath
+			req._serverSideContextPath = currentServerSideContextPath
+			req._contextName = currentContextName
+			trans._servlet = currentServlet
 
 	def resolveInternalRelativePath(self, trans, url, context=None):
 		"""
