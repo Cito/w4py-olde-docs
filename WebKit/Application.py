@@ -156,11 +156,10 @@ class Application(Configurable,CanContainer):
 	def sweepSessions(self):
 		''' Removes stale sessions by checking their lastAccessTime(). Session life time is configured via the SessionTimeout setting. '''
 		sessions = self._sessions
-		timeout = self.setting('SessionTimeout') * 60  # in seconds
-		assert timeout>=0
 		curTime = time()
 		for key in sessions.keys():
-			if (curTime - sessions[key].lastAccessTime()) >= sessions[key].getTimeout():
+			timeout = sessions[key].timeout()
+			if ((curTime - sessions[key].lastAccessTime()) >= timeout) or not timeout:
 				sessions[key].expiring()
 				del sessions[key]
 		sessions.storeAllSessions()
@@ -293,9 +292,8 @@ class Application(Configurable,CanContainer):
 			self.writeActivityLog(transaction)
 
 		##store session##
-		# @@ 2000-08-12 ce: throws an exception for me
-		#if transaction._session:
-		#	self._sessions.storeSession(transaction.session())
+		if transaction.hasSession():
+			self._sessions.storeSession(transaction.session())
 
 		path = request.serverSidePath()
 		self.returnInstance(transaction, path)
@@ -402,8 +400,8 @@ class Application(Configurable,CanContainer):
 		# Force a store of the session because non-memory session stores need this.
 		if transaction.hasSession():
 			sess = transaction.session()
-			self._sessions[sess.identifier()] = sess
-			# @@ 2000-08-12 ce: finalize this
+##			self._sessions[sess.identifier()] = sess
+##			# @@ 2000-08-12 ce: finalize this
 		transaction.sleep()
 
 

@@ -6,6 +6,9 @@ except:
 	from pickle  import load, dump
 import os
 
+
+
+
 class SessionMemoryStore(SessionStore):
 	'''
 	Stores the session in memory as a dictionary.
@@ -20,8 +23,11 @@ class SessionMemoryStore(SessionStore):
 		SessionStore.__init__(self, app)
 		self._store = {}
 		if os.path.exists("Sessions/AllSessions.ses"):
-			file = open("Sessions/AllSessions.ses","r")
-			self._store = load(file)
+			try:
+				file = open("Sessions/AllSessions.ses","r")
+				self._store = load(file)
+			except:
+				self._store = {}
 
 
 	## Access ##
@@ -48,8 +54,11 @@ class SessionMemoryStore(SessionStore):
 		self._store.clear()
 
 	def storeAllSessions(self):
+		if 0:
+			print "Storing all sessions"
 		file = open("Sessions/AllSessions.ses","w")
 		dump(self._store,file)
+
 
 	def storeSession(self,session):
 		pass
