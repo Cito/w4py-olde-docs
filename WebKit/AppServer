@@ -4,6 +4,6 @@
 
 retcode=3
 while test $retcode -eq 3; do
-    /usr/bin/env python2.2 Launch.py ThreadedAppServer $*
+    /usr/bin/env python Launch.py ThreadedAppServer $*
     retcode=$?
 done
