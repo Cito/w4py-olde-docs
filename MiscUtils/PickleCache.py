@@ -129,6 +129,9 @@ class PickleCacheReader(PickleCache):
 					except EOFError:
 						#if v: print 'EOFError - not loading'
 						shouldDeletePickle = 1
+					except Exception, exc:
+						print 'WARNING: %s: %s: %s' % (self.__class__.__name__, exc.__class__, exc)
+						shouldDeletePickle = 1
 					else:
 						file.close()
 						#if v: print 'finished reading'
