@@ -105,7 +105,6 @@ class Scheduler(Thread):
 	def hasScheduled(self, name):
 		"""
 		Is the task with he given name in the scheduled list?
-		If so, return it.
 		"""
 		return self._scheduled.has_key(name)
 
@@ -135,7 +134,6 @@ class Scheduler(Thread):
 	def hasOnDemand(self, name):
 		"""
 		Is the task with he given name in the onDemand list?
-		If so, return it.
 		"""		
 		return self._onDemand.has_key(name)
 
@@ -398,7 +396,7 @@ class Scheduler(Thread):
 
 	def stop(self):
 		"""
-		This method terminates the scheduler ad its associated tasks.
+		This method terminates the scheduler and its associated tasks.
 		"""
 		self._isRunning = 0
 		self.notify()
