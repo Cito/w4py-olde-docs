@@ -26,7 +26,7 @@ b:int,i:int,l:long,f:float,s:string,d:int
 
 		# Try an immediate fetch
 		results = store.fetchObjectsOfClass(Thing)
-		assert len(results)==1
+		assert len(results)==1, 'len=%s, results=%s' % (len(results), results)
 		# This tests the uniquing feature of MiddleKit:
 		assert id(results[0])==id(t)
 
