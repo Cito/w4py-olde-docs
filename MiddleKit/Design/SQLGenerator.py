@@ -344,29 +344,24 @@ class Klass:
 			wr(self.primaryKeySQLDef(generator))
 			if generator.model().setting('DeleteBehavior', 'delete') == 'mark':
 				wr(self.deletedSQLDef(generator))
-			allAttrs = self.allAttrs()
-			# We have to make sure we don't put an extra comma after the
-			# last SQL attribute definition. Some attributes don't have
-			# SQL columns, but still print a comment, so this adds to
-			# our work.
-			i = len(allAttrs)-1
-			lastSQLAttr = -1
-			while i>=0:
-				if allAttrs[i].hasSQLColumn():
-					lastSQLAttr = i
-					break
-				i -= 1
-			sqlAttrs = [attr for attr in allAttrs if attr.hasSQLColumn()]
-			for attr in sqlAttrs:
-				attr.writeCreateSQL(generator, out)
-				if attr is sqlAttrs[-1]:
-					out.write('\n')
+			first = 1
+			sqlAttrs = []
+			nonSQLAttrs = []
+			for attr in self.allAttrs():
+				if attr.hasSQLColumn():
+					sqlAttrs.append(attr)
 				else:
-					out.write(',\n')
-			nonSQLAttrs = [attr for attr in allAttrs if not attr.hasSQLColumn()]
+					nonSQLAttrs.append(attr)
+			for attr in sqlAttrs:
+				if first:
+					first = 0
+				else:
+					wr(',\n')
+				attr.writeCreateSQL(generator, out)
+			self.writeIndexSQLDefs(wr)
 			for attr in nonSQLAttrs:
 				attr.writeCreateSQL(generator, out)
-				out.write('\n')
+				wr('\n')
 			wr(');\n\n\n')
 
 	def primaryKeySQLDef(self, generator):
@@ -391,6 +386,12 @@ class Klass:
 	def maxNameWidth(self):
 		return 30   # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
 
+	def writeIndexSQLDefs(self, wr):
+		for attr in self.allAttrs():
+			if attr.get('isIndexed', 0) and attr.hasSQLColumn():
+				wr(',\n')
+				wr('\tindex (%s)' % attr.sqlName())
+		wr('\n')
 
 class Attr:
 
