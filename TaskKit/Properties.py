@@ -3,7 +3,7 @@ name = 'TaskKit'
 version = (0, 1, 1)
 
 docs = [
-	{'name': "Quick Start",  'file': 'QuickStart.html'}
+	{'name': "Quick Start",  'file': 'QuickStart.html'},
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
 	{'name': 'To Do',        'file': 'TODO-TaskKit.text'},
 ]
