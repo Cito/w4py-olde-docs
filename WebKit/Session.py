@@ -88,9 +88,12 @@ class Session(Object, CanContainer):
 	## Invalidate ##
 
 	def invalidate(self):
-		''' Invalidates the session. @@ 2000-05-09 ce: Not implemented. '''
-		raise NotImplementedError
-
+		"""
+		Invalidates the session.
+		It will be discarded the next time it is accessed.
+		"""
+		self._lastAccessTime = 0
+		self._values = {}
 
 	## Values ##
 
@@ -112,6 +115,15 @@ class Session(Object, CanContainer):
 	def values(self):
 		return self._values
 
+	def __getitem__(self, name):
+		return self.value(name)
+
+	def __setitem__(self, name, value):
+		self.setValue(name, value)
+
+	def __delitem__(self, name):
+		self.delValue(self, name)
+		
 
 	## Transactions ##
 
