@@ -9,19 +9,22 @@ class AppControl(AdminSecurity):
 
 		action = self.request().field("action",None)
 		if action == None:
+			if not self.application().server().isPersistent():
+				self.write('<b>You are running the <i>OneShot</i> version WebKit. None of the options below are applicable.</b> <p>')
 			self.write( """
-		 <form method=post>
+		<form method=post>
 		<table cellspacing = '0' cellpadding = '0'>
-		<tr><td><input type=submit name="action" value="Shutdown"</td></tr>
-		<tr>
-		<td><input type=submit name="action" value="ClearCache"></td>
-		<td>Clear the Servlet instance cache in Application and the class caches of each servlet factory</td>
-		</tr>
-
-		<tr>
-		<td><input type=submit name="action" value="Reload"></td>
-		<td>Reload the selected modules.  Be Careful!</td>
-		</tr>
+			<tr>
+				<td><input type=submit name="action" value="Shutdown"></td>
+			</tr>
+			<tr>
+				<td><input type=submit name="action" value="ClearCache"></td>
+				<td>Clear the Servlet instance cache in Application and the class caches of each servlet factory</td>
+			</tr>
+			<tr>
+				<td><input type=submit name="action" value="Reload"></td>
+				<td>Reload the selected modules.  Be Careful!</td>
+			</tr>
 		""")
 			mods = sys.modules.keys()
 			mods.sort()
