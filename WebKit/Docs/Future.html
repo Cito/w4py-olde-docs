@@ -8,8 +8,8 @@
 <body>
 
 <h1>WebKit Future Work</h1>
-Version 0.7
-<br>Webware for Python 0.7
+Version 0.8 beta 1
+<br>Webware for Python 0.8 beta 1
 
 
 <a name=Future><h2>Warning</h2></a>
@@ -70,6 +70,14 @@ Version 0.7
 		<li> AppServer: Servlets get reloaded when they are changed, but not the Servlets ancestor classes.
 		<li> Add "Last-modified:" to generic files that are served via WebKit.
 		<li> If a Python file has only one class that inherits from Servlet, then use that as the Servlet class (rather than requiring the name be the same as the file).
+
+		<!-- These have been discussed on the devel list prior to the 0.8 release. 
+		Expect to see these changing in the near future in CVS after the 0.8 release. -->
+
+		<li> Incoproate If-Modified-Since - addressed in patch 608957
+		<li> Adopt the code in NewThreadedAppServer as a new model for the ThreadedAppServer.
+		<li> Adopt the code in serverSideInfoForRequestNewAlgorithm in Application.
+		<li> Make ThreadeAppServer easily subclassed to allow for customization to AppServer behavior.
 		</ol>
 
 	<li> <b>Testing</b>
