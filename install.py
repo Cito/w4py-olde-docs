@@ -286,6 +286,11 @@ class Installer:
 		ht = self.htFragment('Copyright')
 		self.writeDocFile('Webware Copyright et al', 'Docs/Copyright.html', ht)
 
+		# @@ 2001-03-11 ce: Uh, we sneak in RelNotes.html here, as well
+		ht = self.htFragment('RelNotes')
+		self.writeDocFile('Webware Release Notes', 'Docs/RelNotes.html', ht)
+
+
 	def createComponentIndexes(self):
 		print "Creating components' index.html..."
 		indexFrag = self.htFragment('indexOfComponent')
