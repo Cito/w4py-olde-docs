@@ -44,7 +44,6 @@ case "$1" in
 	start)
 		echo -n  "Starting WebKit: "
 		pushd $WEBKIT_DIR > /dev/null
-		LAUNCH='./AppServer'
 		LAUNCH='python Launch.py ThreadedAppServer'
 
 		# run as root:
