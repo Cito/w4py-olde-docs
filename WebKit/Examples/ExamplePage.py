@@ -47,8 +47,7 @@ class ExamplePage(SidebarPage):
 		viewPath = self.request().uriWebKitRoot() + "Examples/View"
 		self.menuItem(
 			'View source of %s' % self.title(),
-			self.request().uriWebKitRoot() + 'Examples/View?filename=%s' % os.path.basename(self.request().serverSidePath()))
-#string.replace(self.request().serverSidePath(), '\\', '/'))
+			self.request().uriWebKitRoot() + 'Examples/View?filename=%s' % os.path.basename(self.request().serverSidePath()))  #string.replace(self.request().serverSidePath(), '\\', '/'))
 
 		if self.application().hasContext('Documentation'):
 			filename = 'Documentation/WebKit.html'
