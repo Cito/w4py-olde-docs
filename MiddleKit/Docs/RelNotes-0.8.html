@@ -20,10 +20,31 @@ Version 0.8
 
 <a name=Changes><h2>Changes</h2></a>
 <ul>
+	<li><p>The ObjectStore keeps track of new objects, modified objects and to-be-deleted objects on a per-thread basis.  This prevents the ObjectStore from trying to save the same changes twice, and prevents the situation where one thread commits an object which a different thread modified (and wasn't necessarily ready to commit).</p>
+	<p>This new tracking is enabled when your ObjectStore is in "Threaded" mode, which is enabled by default.  You can run in single-threaded mode by adding the following line to the Settings.config file in your model directory:
+		<pre>'Threaded': 0,</pre>
+	</p>
+
+	<p>The behaviour of the following methods has changed:
+	<ul>
+	    <li>saveChanges() - commits only objects which were modified by the current thread</li>
+	</ul>
+	</p>
+
+	<p>New ObjectStore methods:
+	<ul>
+	    <li>hasChangesForCurrentThread() - returns whether the store has any uncommitted changes for the current thread</li>
+	    <li><p>saveAllChanges() - commits <b>all</b> added/modified/deleted objects to the database, regardless of which thread made the changes.  This could be called on application exit just to be extra safe.</p>
+		<p>When using MiddleKit from WebKit, though, you be calling saveChanges() at the end of any request which modifies MK objects, so I recommend putting <pre>assert not store.hasChangesForCurrentThread()</pre> into your SitePage.sleep() method to catch programming errors early.</p></li>
+	</ul>
+    </p>
+	<p>For <b>upgrading older MiddleKit applications</b>, you'll probably want to replace calls to store.hasChanges() with store.hasChangesForCurrentThread().  Nothing else should need to change.</p>
+	</li>
+
 	<li> A new 'Database' setting in Settings.config. Set this if the model name isn't the same as the database name.
 	<li> Also, the database name can be passed via the constructor. See the <a href=UsersGuide.html#MT_DatabaseName>User's Guide</a> for more info.
-</ul>
 
+	<li>
 <p> "Dangling obj refs" now print much more useful information. The old message:
 
 <pre class=py>WARNING: Obj ref dangles. dec=266287972390  hex=3e00000026  class.obj=Stop.97.
