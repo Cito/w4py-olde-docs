@@ -1,7 +1,7 @@
 
 
 
-<%@ page imports = "sys,os,time,PSPExamplePage:PSPExamplePage"%> <%-- Here's the modules that I need in this file --%>
+<%@ page imports = "sys,os,time,PSP.Examples.PSPExamplePage:PSPExamplePage"%> <%-- Here's the modules that I need in this file --%>
 <%@ page method="writeContent" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
 <%@ page extends="PSPExamplePage"%> <%--This is the base class for this page.  Page is the default --%>
 <%@ page indentType="braces" %>
