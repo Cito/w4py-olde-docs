@@ -10,6 +10,7 @@ from UnknownFileType import UnknownFileTypeServletFactory
 from types import FloatType
 from glob import glob
 import Queue
+import imp
 from threading import Lock, Thread
 from CanContainer import *
 
@@ -479,19 +480,17 @@ class Application(Configurable,CanContainer):
 		return self._contexts
 
 	def addContext(self, name, dir):
-		import imp
 		if self._contexts.has_key(name):
 			print 'WARNING: Overwriting context %s (=%s) with %s' % (
 				repr(name), repr(self._contents[name]), repr(value))
 		try:
-			localdir,pkgname = os.path.split(dir)
-			res = imp.find_module(pkgname,[localdir])
-			#question, do we want the package name to be the dir name or the context name?
-			imp.load_module(name,res[0],res[1],res[2])
-		except:
-			print "%s is not a package" % (name,)
+			localdir, pkgname = os.path.split(dir)
+			res = imp.find_module(pkgname, [localdir])
+			# @@ question, do we want the package name to be the dir name or the context name?
+			imp.load_module(name, res[0], res[1], res[2])
+		except ImportError:
+			print "%s is not a package" % name
 		self._contexts[name] = dir
-
 
 
 	## Factory access ##
