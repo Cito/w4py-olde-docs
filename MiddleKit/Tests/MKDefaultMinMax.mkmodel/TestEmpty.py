@@ -14,6 +14,7 @@ def test():
 	assert f.l()==3
 	assert f.f()==4
 	assert f.s()=='5'
+	assert f.e()=='x'
 
 	# Test min max
 	# These should pass

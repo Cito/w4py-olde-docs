@@ -320,7 +320,7 @@ class StringAttr:
 class EnumAttr:
 
 	def stringToValue(self, string):
-		return repr(string)
+		return string
 
 	def writePySetChecks(self, out):
 		Attr.writePySetChecks.im_func(self, out)
