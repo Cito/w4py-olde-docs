@@ -1,8 +1,8 @@
-name = 'CheetahKit'
+name = 'KidKit'
 
 version = ('X', 'Y', 0)
 
-docs = [ {'name': "Read Me", 'file': 'README.html'} ]
+docs = [ {'name': "Users Guide", 'file': 'UsersGuide.html'} ]
 
 status = 'alpha'
 

@@ -15,7 +15,8 @@ class HierRole(Role):
 
 	def playsRole(self, role):
 		"""
-		Returns 1 if the receiving role plays the role that is passed in. This implementation provides for the inheritance that HierRole supports.
+		Returns 1 if the receiving role plays the role that is passed in. This
+		implementation provides for the inheritance that HierRole supports.
 		"""
 		if self==role:
 			return 1

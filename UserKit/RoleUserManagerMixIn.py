@@ -5,7 +5,8 @@ from MiscUtils import NoDefault
 
 class RoleUserManagerMixIn:
 	"""
-	RoleUserManagerMixIn adds the functionality of keeping a dictionary mapping names to role instances. Several accessor methods are provided for this.
+	RoleUserManagerMixIn adds the functionality of keeping a dictionary mapping 
+	names to role instances. Several accessor methods are provided for this.
 	"""
 
 

@@ -13,9 +13,13 @@ class UserManagerToMiddleKit(UserManager):
 	"""
 	UserManagerToMiddleKit stores the users in a given MiddleKit object store.
 
-	However, the manager itself does not keep any information there. This might change in the future.
+	However, the manager itself does not keep any information there. This might
+	change in the future.
 
-	In your MiddleKit model, your User class should have the attributes: name, password and externalId; all of type string. The max len for external id should be at least 14. You can decide what you like for the others. Only name and password have to be required.
+	In your MiddleKit model, your User class should have the attributes: name,
+	password and externalId; all of type string. The max len for external id
+	should be at least 14. You can decide what you like for the others. Only
+	name and password have to be required.
 
 	Then you must edit User.py so that:
 		* In addition to inheriting GenUser, it also inherits UserKit.User

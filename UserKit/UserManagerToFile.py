@@ -7,9 +7,13 @@ from User import User
 
 class UserManagerToFile(UserManager):
 	"""
-	When using this user manager, make sure you invoke setUserDir() and that this directory is writeable by your application. It will contain 1 file per user with the user's serial number as the main filename and an extension of '.user'.
+	When using this user manager, make sure you invoke setUserDir() and that
+	this directory is writeable by your application. It will contain 1 file per
+	user with the user's serial number as the main filename and an extension of
+	'.user'.
 
-	The default user directory is the current working directory, but relying on the current directory is often a bad practice.
+	The default user directory is the current working directory, but relying on
+	the current directory is often a bad practice.
 	"""
 
 	baseOfUserManagerToFile = UserManager
