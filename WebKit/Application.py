@@ -229,8 +229,16 @@ class Application(Configurable,CanContainer):
 
 	## Versions ##
 
+	def webwareVersion(self):
+		''' Returns the version of Webware as a string as taken from the file ../_VERSION. '''
+		if not hasattr(self, '_webwareVersion'):
+			s = open('../_VERSION').readlines()[0]
+			s = string.strip(s[len('Webware'):])
+			self._webwareVersion = s
+		return self._webwareVersion
+
 	def webKitVersion(self):
-		return '0.3'
+		return '0.4 PR 1'
 
 	def version(self):
 		"""
