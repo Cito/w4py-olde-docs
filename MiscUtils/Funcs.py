@@ -53,6 +53,26 @@ def charWrap(s, width, hanging=0):
 	return string.join(lines, '\n')
 
 
+import tempfile
+def mktemp(suffix="", dir=None):
+	"""
+	User-callable function to return a unique temporary file name.
+	
+	Duplicated from Python's own tempfile with the optional "dir"
+	argument added. This allows customization of the directory, without
+	having to take over the module level variable, tempdir.
+	
+	@@ 2002-12-08 ce: should submit this to Python
+	"""
+	if not dir: dir = tempfile.gettempdir()
+	pre = tempfile.gettempprefix()
+	while 1:
+		i = tempfile._counter.get_next()
+		file = os.path.join(dir, pre + str(i) + suffix)
+		if not os.path.exists(file):
+			return file
+
+
 def wordWrap(s, width=78):
 	"""
 	Returns a version of the string word wrapped to the given width.
