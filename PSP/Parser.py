@@ -229,7 +229,7 @@ class PSPParser:
 			reader.Advance(len(end_open))
 			reader.skipSpaces()
 			PSPUtils.checkAttributes('Script', attrs, ValidAttributes)
-		reader.skipSpaces() #don't skip as spaces may be significant, leave this for the generator
+		#reader.skipSpaces() #don't skip as spaces may be significant, leave this for the generator
 		start = reader.Mark()
 		try:
 			stop = reader.skipUntil(close)
