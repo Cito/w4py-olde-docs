@@ -180,7 +180,7 @@ class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 
 	def tearDown(self):
 		# clean out generated files
-		filenames = ['UserForMKTest.py', 'UserForMKTest.pyc', 'GenUser.py', 'GenUser.pyc', 'Create.sql', 'InsertSamples.sql', '_Info.text']
+		filenames = ['UserForMKTest.py', 'UserForMKTest.pyc', 'GenUser.py', 'GenUser.pyc', 'Create.sql', 'InsertSamples.sql', 'Info.text']
 		for filename in filenames:
 			if os.path.exists(filename):
 				os.remove(filename)
