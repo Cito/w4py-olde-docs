@@ -240,14 +240,15 @@ class RequestHandler:
 
 def main():
 	try:
+		server = None
 		server = ThreadedAppServer()
 		print 'Ready\n'
 		server.mainloop()
 	except Exception, e: #Need to kill the Sweeper thread somehow
 		print e
 		print "Exiting AppServer"
-		server.shutDown()
-		del server
+		if server:
+			server.shutDown()
 		sys.exit()
 
 

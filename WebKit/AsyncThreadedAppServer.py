@@ -280,10 +280,11 @@ class Monitor(asyncore.dispatcher):
 	def log(self, message):
 		pass
 
-		
+
 
 def main(monitor = 0):
 	try:
+		server = None
 		server = AsyncThreadedAppServer()
 		if monitor:
 			monitor = Monitor(server)
@@ -291,9 +292,9 @@ def main(monitor = 0):
 	except Exception, e: #Need to kill the Sweeper thread somehow
 		print e
 		print "Exiting AppServer"
-		server.running=0
-		server.shutDown()
-		del server
+		if server:
+			server.running=0
+			server.shutDown()
 		sys.exit()
 		raise Exception()
 
