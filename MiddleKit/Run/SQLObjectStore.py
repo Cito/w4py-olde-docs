@@ -172,7 +172,12 @@ class SQLObjectStore(ObjectStore):
 
 	def _insertObject(self, object, unknownSerialNums):
 		# New objects not in the persistent store have serial numbers less than 1
-		assert object.serialNum()<1
+		if object.serialNum()>0:
+			try:
+				rep = repr(object)
+			except:
+				rep = '(repr exception)'
+			assert object.serialNum()<1, 'object=%s' % rep
 
 		# SQL insert
 		sql = object.sqlInsertStmt(unknownSerialNums)
