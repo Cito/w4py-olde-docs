@@ -1,14 +1,17 @@
 from RPCServlet import RPCServlet
 import sys, traceback, types
 from time import time
-from MiscUtils.PickleRPC import RequestError
+from MiscUtils.PickleRPC import RequestError, SafeUnpickler
 try:
-	from cPickle import dumps, load
+	from cPickle import dumps, PickleError
 except ImportError:
-	from pickle import dumps, load
+	from pickle import dumps, PickleError
+try:
+	import zlib
+except ImportError:
+	zlib = None
 
-
-class PickleRPCServlet(RPCServlet):
+class PickleRPCServlet(RPCServlet, SafeUnpickler):
 	"""
 	PickleRPCServlet is a base class for Dict-RPC servlets.
 
@@ -24,10 +27,8 @@ class PickleRPCServlet(RPCServlet):
 	  * Longs that are outside the 32-bit int boundaries
 	  * Keyword arguments
 
-	Pickles should also be faster than XML.
-
-	One possible drawback is security. See MiscUtils.PickleRPC for more
-	details.
+	Pickles should also be faster than XML, especially now that
+	we support binary pickling and compression.
 
 	To make your own PickleRPCServlet, create a subclass and implement a
 	method which is then named in exposedMethods():
@@ -64,24 +65,33 @@ class PickleRPCServlet(RPCServlet):
 
 	For the dictionary formats and more information see the docs
 	for MiscUtils.PickleRPC.
-
-	TO DO
-
-	* Geoff T mentioned that security concerns were mentioned when
-	  pickling was discussed before. What are they?
 	"""
 
 	def respondToPost(self, trans):
 		transReponse = trans.response()
 		try:
-			data = trans.request().rawInput(rewind=1)
+			request = trans.request()
+			data = request.rawInput(rewind=1)
 			response = {
 				'timeReceived': trans.request().time(),
 			}
 			try:
 				try:
-					req = load(data)
-				except:
+					encoding = request.environ().get('HTTP_CONTENT_ENCODING', None)
+					if encoding == 'x-gzip':
+						if zlib is not None:
+							try:
+								rawstring = data.read()
+								req = self.loads(zlib.decompress(rawstring))
+							except zlib.error:
+								raise RequestError, 'Cannot uncompress compressed dict-rpc request'
+						else:
+							raise RequestError, 'Cannot handle compressed dict-rpc request'
+					elif encoding:
+						raise RequestError, 'Cannot handle Content-Encoding of %s' % encoding
+					else:
+						req = self.load(data)
+				except PickleError:
 					raise RequestError, 'Cannot unpickle dict-rpc request.'
 				if not isinstance(req, types.DictType):
 					raise RequestError, 'Expecting a dictionary for dict-rpc requests, but got %s instead.' % type(dict)
@@ -96,7 +106,7 @@ class PickleRPCServlet(RPCServlet):
 				args = req.get('args', ())
 				if methodName=='__methods__.__getitem__':
 					# support PythonWin autoname completion
-					response = self.exposedMethods()[args[0]]
+					response['value'] = self.exposedMethods()[args[0]]
 				else:
 					response['value'] = self.call(methodName, *args, **req.get('keywords', {}))
 			except RequestError, e:
@@ -124,5 +134,36 @@ class PickleRPCServlet(RPCServlet):
 		"""
 		Timestamp the response dict and send it.
 		"""
+		# Generated a pickle string
 		response['timeResponded'] = time()
-		self.sendOK('text/x-python-pickled-dict', dumps(response), trans)
+		if self.useBinaryPickle():
+			contentType = 'application/x-python-binary-pickled-dict'
+			response = dumps(response, 1)
+		else:
+			contentType = 'text/x-python-pickled-dict'
+			response = dumps(response)
+		
+		# Get list of accepted encodings
+		try:
+			accept_encoding = trans.request().environ()["HTTP_ACCEPT_ENCODING"]
+			if accept_encoding:
+				accept_encoding = [enc.strip() for enc in accept_encoding.split(',')]
+			else:
+				accept_encoding = []
+		except KeyError:
+			accept_encoding = []
+
+		# Compress the output if we are allowed to.  We'll avoid compressing short responses and
+		# we'll use the fastest possible compression -- level 1.
+		if zlib is not None and "gzip" in accept_encoding and len(response) > 1000:
+			contentEncoding = 'x-gzip'
+			response = zlib.compress(response, 1)
+		else:
+			contentEncoding = None
+		self.sendOK(contentType, response, trans, contentEncoding)
+
+	def useBinaryPickle(self):
+		"""
+		Override this to return 0 to use the less-efficient text pickling format
+		"""
+		return 1

@@ -57,71 +57,44 @@ Value, exception and requestError are all exclusive to each other.
 
 SECURITY
 
-There are no security precautions taken by Pickle RPC at this time.
-You should run your Pickle RPC clients and servers on a trusted
-network behind a firewall, or tackle the issues:
+Pickle RPC uses the SafeUnpickler class (in this module) to
+prevent unpickling of unauthorized classes.  By default, it
+doesn't allow _any_ classes to be unpickled.  You can override
+allowedGlobals() or findGlobal() in a subclass as needed to
+allow specific class instances to be unpickled.
 
-Per Geoff T:
-
-http://www.python.org/doc/current/lib/pickle-sec.html talks about security
-issues with unpickling untrusted strings.  It seems from my quick reading
-that you ought to be able to tell it never to unpickle class instances, and
-then it would be secure.  Perhaps then you could add in hooks for the
-servlets to register particular classes that are known to be safe.
-
-I think a discussion about this happened on comp.lang.python a while ago --
-you could probably find it with Google.
-
-http://www.zope.org/Members/htrd/howto/MiniPickle is another article about
-safe unpickling.
-
-Attempt at safe unpickling:
-
-import cPickle
-
-class SafeUnpickler:
-
-	def __init__(self, file, allowedGlobals=[]):
-        '''
-        Pass in a list of (moduleName, klassName) tuples for all classes that
-        you want to allow to be unpickled.
-
-        Example: allowedGlobals=[('mx.DateTime', '_DT')]
-        '''
-        self._file = file
-        self._allowedGlobals = allowedGlobals
-
-    def _findGlobal(self, module, klass):
-        if (module, klass) not in self._allowedGlobals:
-            raise cPickle.UnpicklingError, 'For security reasons, you can\'t unpickle a %s . %s' % (module, klass)
-        globals = {}
-        exec 'from %s import %s as theClass' % (module, klass) in globals
-        return globals['theClass']
-
-    def load(self):
-        safeUnpickler = cPickle.Unpickler(self._file)
-        safeUnpickler.find_global = self._findGlobal
-        return safeUnpickler.load()
-
-
-Chuck: I wonder if Pyro deals with secure pickling?
+Note that both Transport in this module and PickleRPCServlet in
+WebKit are derived from SafeUnpickler.
 
 
 CREDIT
 
 The implementation of this module was taken directly from Python 2.2's
 xmlrpclib and then transformed from XML-orientation to Pickle-orientation.
+
+The zlib compression was adapted from code by Skip Montanaro that I found
+here: http://manatee.mojam.com/~skip/python/
 """
 
 
 __version__ = 1   # version of PickleRPC protocol
 
+import types
 
 try:
-	from cPickle import dumps, load
+	from cPickle import dumps, Unpickler, UnpicklingError
 except ImportError:
-	from pickle import dumps, load
+	from pickle import dumps, Unpickler, UnpicklingError
 
+try:
+	import zlib
+except ImportError:
+	zlib = None
+
+try:
+	from cStringIO import StringIO
+except ImportError:
+	from StringIO import StringIO
 
 class Error(Exception):
 	"""
@@ -176,6 +149,45 @@ class InvalidContentTypeError(ResponseError):
 	__str__ = __repr__
 
 
+class SafeUnpickler:
+	"""
+	For security reasons, we don't want to allow just anyone to unpickle
+	anything.  That can cause arbitrary code to be executed.
+	So this SafeUnpickler base class is used to control
+	what can be unpickled.  By default it doesn't let you unpickle
+	any class instances at all, but you can create subclass that
+	overrides allowedGlobals().
+
+	Note that the PickleRPCServlet class in WebKit is derived from this class
+	and uses its load() and loads() methods to do all unpickling.
+	"""
+	def allowedGlobals(self):
+		"""
+		Must return a list of (moduleName, klassName) tuples for all
+		classes that you want to allow to be unpickled.
+
+		Example:
+			return [('mx.DateTime', '_DT')]
+		allows mx.DateTime instances to be unpickled.
+		"""
+		return []
+
+	def findGlobal(self, module, klass):
+		if (module, klass) not in self.allowedGlobals():
+			raise UnpicklingError, 'For security reasons, you can\'t unpickle objects from module %s with type %s' % (module, klass)
+		globals = {}
+		exec 'from %s import %s as theClass' % (module, klass) in globals
+		return globals['theClass']
+
+	def load(self, file):
+		safeUnpickler = Unpickler(file)
+		safeUnpickler.find_global = self.findGlobal
+		return safeUnpickler.load()
+
+	def loads(self, str):
+		return self.load(StringIO(str))
+
+
 # @@ 2002-01-31 ce: Could we reduce code duplication and automatically
 # inherit future improvements by actually importing and using the
 # xmlrpclib classes below either as base classes or mix-ins?
@@ -197,7 +209,7 @@ class Server:
 	See the module doc string for more information.
 	"""
 
-	def __init__(self, uri, transport=None, verbose=0):
+	def __init__(self, uri, transport=None, verbose=0, binary=1, compressRequest=1, acceptCompressedResponse=1):
 		# establish a "logical" server connection
 
 		# get the url
@@ -217,6 +229,9 @@ class Server:
 		self.__transport = transport
 
 		self.__verbose = verbose
+		self.__binary = binary
+		self.__compressRequest = compressRequest
+		self.__acceptCompressedResponse = acceptCompressedResponse
 
 	def _request(self, methodName, args, keywords):
 		"""
@@ -229,13 +244,24 @@ class Server:
 			'args':       args,
 			'keywords':   keywords,
 		}
-		request = dumps(request)
+		if self.__binary:
+			request = dumps(request, 1)
+		else:
+			request = dumps(request)
+		if zlib is not None and self.__compressRequest and len(request) > 1000:
+			request = zlib.compress(request, 1)
+			compressed = 1
+		else:
+			compressed = 0
 
 		response = self.__transport.request(
 			self.__host,
 			self.__handler,
 			request,
-			verbose=self.__verbose
+			verbose=self.__verbose,
+			binary=self.__binary,
+			compressed=compressed,
+			acceptCompressedResponse=self.__acceptCompressedResponse
 			)
 
 		return response
@@ -285,7 +311,7 @@ class _Method:
 		return self.__send(self.__name, args, keywords)
 
 
-class Transport:
+class Transport(SafeUnpickler):
 	"""
 	Handles an HTTP transaction to a Pickle-RPC server.
 	"""
@@ -293,7 +319,8 @@ class Transport:
 	# client identifier (may be overridden)
 	user_agent = "PickleRPC/%s (by http://webware.sf.net/)" % __version__
 
-	def request(self, host, handler, request_body, verbose=0):
+	def request(self, host, handler, request_body, verbose=0, binary=0, compressed=0,
+				acceptCompressedResponse=0):
 		# issue Pickle-RPC request
 
 		h = self.make_connection(host)
@@ -303,7 +330,7 @@ class Transport:
 		self.send_request(h, handler, request_body)
 		self.send_host(h, host)
 		self.send_user_agent(h)
-		self.send_content(h, request_body)
+		self.send_content(h, request_body, binary, compressed, acceptCompressedResponse)
 
 		errcode, errmsg, headers = h.getreply()
 
@@ -316,11 +343,25 @@ class Transport:
 
 		self.verbose = verbose
 
-		if h.headers['content-type']!='text/x-python-pickled-dict':
+		if h.headers['content-type'] not in ['text/x-python-pickled-dict', 'application/x-python-binary-pickled-dict']:
 			headers = h.headers.headers
 			content = h.getfile().read()
 			raise InvalidContentTypeError(headers, content)
-		return self.parse_response(h.getfile())
+
+		try:
+			content_encoding = headers["content-encoding"]
+			if content_encoding and content_encoding == "x-gzip":
+				return self.parse_response_gzip(h.getfile())
+			elif content_encoding:
+				raise ProtocolError(host + handler,
+									500,
+									"Unknown encoding type: %s" %
+									content_encoding,
+									headers)
+			else:
+				return self.parse_response(h.getfile())
+		except KeyError:
+			return self.parse_response(h.getfile())
 
 	def make_connection(self, host):
 		# create a HTTP connection object from a host descriptor
@@ -336,33 +377,28 @@ class Transport:
 	def send_user_agent(self, connection):
 		connection.putheader("User-Agent", self.user_agent)
 
-	def send_content(self, connection, request_body):
-		connection.putheader("Content-Type", "text/x-python-pickled-dict")
+	def send_content(self, connection, request_body, binary=0, compressed=0,
+					 acceptCompressedResponse=0):
+		if binary:
+			connection.putheader("Content-Type", "application/x-python-binary-pickled-dict")
+		else:
+			connection.putheader("Content-Type", "text/x-python-pickled-dict")
 		connection.putheader("Content-Length", str(len(request_body)))
+		if compressed:
+			connection.putheader("Content-Encoding", "x-gzip")
+		if zlib is not None and acceptCompressedResponse:
+			connection.putheader("Accept-Encoding", "gzip")
 		connection.endheaders()
 		if request_body:
 			connection.send(request_body)
 
 	def parse_response(self, f):
-		# read response from input file, and parse it
-		return load(f)
+		return self.load(f)
 
-		if 0:  # @@ axe this
-			p, u = self.getparser()
-
-			while 1:
-				response = f.read(1024)
-				if not response:
-					break
-				if self.verbose:
-					print "body:", repr(response)
-				p.feed(response)
-
-			f.close()
-			p.close()
-
-			return u.close()
-
+	def parse_response_gzip(self, f):
+		# read response from input file, decompress it, and parse it
+		# @@ gat: could this be made more memory-efficient?
+		return self.loads(zlib.decompress(f.read()))
 
 class SafeTransport(Transport):
 	"""
@@ -373,7 +409,7 @@ class SafeTransport(Transport):
 		# create a HTTPS connection object from a host descriptor
 		# host may be a string, or a (host, x509-dict) tuple
 		import httplib
-		if isinstance(host, TupleType):
+		if isinstance(host, types.TupleType):
 			host, x509 = host
 		else:
 			x509 = {}
@@ -386,6 +422,7 @@ class SafeTransport(Transport):
 			return apply(HTTPS, (host, None), x509)
 
 	def send_host(self, connection, host):
-		if isinstance(host, TupleType):
+		if isinstance(host, types.TupleType):
 			host, x509 = host
 		connection.putheader("Host", host)
+

@@ -73,6 +73,15 @@ Version 0.8
 		</ul>
 
 	<li> New setting 'MaxValueLengthInExceptionReport'.  If set to an integer, it truncates values in the exception report to the specified length.  If set to None, no truncation happens.  Defaults to 500.
+
+	<li> Enhancements to PickleRPCServlet (and the client library MiscUtils.PickleRPC):
+		<ul>
+			<li>Now supports gzip compression of both request and response (enabled by default).
+			<li>Now uses binary pickle instead of text pickle by default for improved speed and memory usage.
+			<li>Now uses a "SafeUnpickler" class which allows you to specify exactly which class instances are allowed to be unpickled.
+				By default classes are not allowed to be unpickled at all for security reasons.
+			<li>MiscUtils.M2PickleRPC allows you to use the M2Crypto package to do SSL-secured PickleRPC requests.
+		</ul>
 </ul>
 
 
@@ -98,7 +107,9 @@ We don't track every change to the interface, but here are some notables:
 
 <ul>
 
-	<li> Fixed a race condition that caused problems when multiple simultaneuos requests were made for a servlet that hadn't yet been imported.
+	<li> Fixed a race condition that caused problems when multiple simultaneous requests were made for a servlet that hadn't yet been imported.
+	
+	<li> Fixed another rare problem that could eventually cause a servlet to hang until another request for that servlet came in.  Like the above problem, it is provoked by multiple simultaneous requests for the same servlet, but only if it happens hundreds or thousands of times.
 
 </ul>
 

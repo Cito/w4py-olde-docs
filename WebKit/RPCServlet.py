@@ -38,7 +38,7 @@ class RPCServlet(HTTPServlet):
 			result = ''.join(traceback.format_exception(*sys.exc_info()))
 		return result
 
-	def sendOK(self, contentType, contents, trans):
+	def sendOK(self, contentType, contents, trans, contentEncoding=None):
 		"""
 		Sends a 200 OK response with the given contents.
 		"""
@@ -46,6 +46,8 @@ class RPCServlet(HTTPServlet):
 		response.setStatus(200, 'OK')
 		response.setHeader('Content-type', contentType)
 		response.setHeader('Content-length', str(len(contents)))
+		if contentEncoding:
+			response.setHeader('Content-encoding', contentEncoding)
 		response.write(contents)
 
 	def handleException(self, transaction):
