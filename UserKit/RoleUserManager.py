@@ -4,12 +4,26 @@ from MiscUtils import NoDefault
 
 
 class RoleUserManager(UserManager):
+	'''
+	RoleUserManager adds the functionality of keeping a dictionary mapping names to role instances. Several accessor methods are provided for this.
+	'''
+
 
 	## Init ##
 
-	def __init__(self):
-		UserManager.__init__(self)
+	def __init__(self, userClass=None):
+		UserManager.__init__(self, userClass)
 		self._roles = {}
+
+
+	## Settings ##
+
+	def userClass(self):
+		''' Returns the userClass. This implementation overrides the inherited one to make RoleUser the default user class. '''
+		if self._userClass is None:
+			from RoleUser import RoleUser
+			self.setUserClass(RoleUser)
+		return self._userClass
 
 
 	## Roles ##

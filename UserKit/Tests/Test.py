@@ -171,7 +171,6 @@ class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 		from UserKit.User import User
 		UserForMKTest.__bases__ = UserForMKTest.__bases__ + (User,)
 		assert issubclass(UserForMKTest, MiddleObject)
-		assert issubclass(UserForMKTest, MiddleObject)
 
 		def __init__(self, manager, name, password):
 			base1 = self.__class__.__bases__[0]
@@ -192,10 +191,14 @@ class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 
 
 def makeTestSuite():
-	suite1 = unittest.makeSuite(UserManagerTest, 'check')
-	suite2 = unittest.makeSuite(UserManagerToFileTest, 'check')
-	suite3 = unittest.makeSuite(UserManagerToMiddleKitTest, 'check')
-	return unittest.TestSuite((suite1, suite2, suite3))
+	testClasses = [
+		UserManagerTest,
+		UserManagerToFileTest,
+		UserManagerToMiddleKitTest
+	]
+	make = unittest.makeSuite
+	suites = [make(clazz, 'check') for clazz in testClasses]
+	return unittest.TestSuite(suites)
 
 
 if __name__=='__main__':

@@ -4,7 +4,7 @@ from User import User
 
 class RoleUser(User):
 	'''
-	RoleUser in conjunction with Role, provides for role-based users and security.
+	RoleUser, in conjunction with Role, provides for role-based users and security.
 
 	See the doc for playsRole() for an example.
 
@@ -27,7 +27,7 @@ class RoleUser(User):
 	## Accessing roles ##
 
 	def roles(self):
-		''' Returns a directly list of the user's roles. Do not modify. '''
+		''' Returns a direct list of the user's roles. Do not modify. '''
 		return self._roles
 
 	def setRoles(self, listOfRoles):
@@ -58,8 +58,8 @@ class RoleUser(User):
 		'''
 		Returns 1 if the user plays the given role. More specifically, if any of the user's roles return true for role.playsRole(otherRole), this method returns true.
 		The application of this popular method often looks like this:
-			if someUser.playsRole('admin'):
-				self.doAdminStuff()
+			if user.playsRole('admin'):
+				self.displayAdminMenuItems()
 		'''
 		if type(roleOrName) is types.StringType:
 			roleOrName = self._manager.roleForName(roleOrName)

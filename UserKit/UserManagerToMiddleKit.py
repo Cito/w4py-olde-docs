@@ -14,7 +14,7 @@ class UserManagerToMiddleKit(UserManager):
 
 	However, the manager itself does not keep any information there. This might change in the future.
 
-	In your MiddleKit model, your User class should have attributes, name, password and externalId; all of type string. The max len for external id should be at least 14. You can decide what you like for the others. Only name and password have to be required.
+	In your MiddleKit model, your User class should have the attributes: name, password and externalId; all of type string. The max len for external id should be at least 14. You can decide what you like for the others. Only name and password have to be required.
 
 	Then you must edit User.py so that:
 		* In addition to inheriting GenUser, it also inherits UserKit.User
@@ -42,18 +42,18 @@ class UserManagerToMiddleKit(UserManager):
 		'''
 		@@ 2001-02-18 ce: docs
 		'''
-		if store is None:
-			from MiddleKit.ObjectStore.Store import Store
-			store = Store
-		assert store, "Unknown MiddleKit store."
-		self._store = store
-
 		# If no userClass was specified, try to pull 'User'
 		# out of the object model.
 		if userClass is None:
 			userClass = store.model().klasses('User', None)
 
 		UserManager.__init__(self, userClass)
+
+		if store is None:
+			from MiddleKit.ObjectStore.Store import Store
+			store = Store
+		assert store, 'MiddleKit store is None.'
+		self._store = store
 
 		# If the user didn't say whether or not to useSQL, then
 		# we'll check if this looks like a SQLObjectStore. If so,
@@ -76,7 +76,7 @@ class UserManagerToMiddleKit(UserManager):
 	def loadUser(self, serialNum, default=NoDefault):
 		user = self._store.fetchObject(self._userClass, serialNum, default)
 		if user is default:
-			if default is NoDefault:
+			if default is NoDefault: # @@ 2002-03-30 ce: doesn't really work like this. The store will raise an exception all its own
 				raise KeyError, serialNum
 			else:
 				return default

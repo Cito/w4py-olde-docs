@@ -30,7 +30,7 @@ class User:
 	def externalId(self):
 		if self._externalId is None:
 			from time import localtime, time
-			prefix = ''.join(map(lambda x: '%02d' % x, localtime(time())[:6]))
+			prefix = ''.join([('%02d'%x) for x in localtime(time())[:6]])
 			attempts = 0
 			while attempts<10000:
 				self._externalId = prefix + str(whrandom.randint(10000, 99999))
@@ -48,14 +48,17 @@ class User:
 
 	def setName(self, name):
 		self._name = name
-		# @@ 2001-02-15 ce: do we need to notify the manager which may have us keyed by name?
+		# @@ 2001-02-15 ce: do we need to notify the manager
+		# which may have us keyed by name?
 
 	def password(self):
 		return self._password
 
 	def setPassword(self, password):
 		self._password = password
-		# @@ 2001-02-15 ce: should we make some attempt to cryptify the password so it's not real obvious when inspecting memory?
+		# @@ 2001-02-15 ce: should we make some attempt to
+		# cryptify the password so it's not real obvious
+		# when inspecting memory?
 
 	def isActive(self):
 		return self._isActive
