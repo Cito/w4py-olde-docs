@@ -234,6 +234,7 @@ class ParseEventHandler:
 		self._writer.println('\n')
 		self.generateMainMethod()
 		self.optimizeCharData()
+		self.gobbleWhitespace()
 		self.generateAll('Service')
 		self._writer.println()
 		self.generateFooter()
@@ -375,8 +376,36 @@ class ParseEventHandler:
 				gencount = gencount-1
 			else:
 				count = count+1
+ 
 
+	def gobbleWhitespace(self):
+		"""
+		This method looks for a character block between two psp blocks that contains only whitespace.
+		If it finds one, it deletes it.
+		This is necessary so that a write()  line can't sneek in between a if/else, try/except etc.
+		"""
+		debug=0
+		gens=self._gens
+		sideClasses=(ScriptGenerator, EndBlockGenerator)##, ExpressionGenerator)
+		count=1
+		gencount = len(gens)
+		if debug:
+			for i in gens:
+				print "Generator type=%s" % i.__class__
+		while count < gencount-1:
+			if isinstance(gens[count],CharDataGenerator) and gens[count+1].__class__ in sideClasses and gens[count-1].__class__ in sideClasses:
+				if checkForTextHavingOnlyGivenChars(gens[count].chars):
+					gens.remove(gens[count])
+					gencount=gencount-1
+			count = count+1
+		
 
-
-
-
+def checkForTextHavingOnlyGivenChars(text,ws=(" ","\n","\r")):
+	""" Does the given text contain anything other than the ws characters?
+	Return true if text is only ws characters
+	Should redo this as a regex.
+	"""
+	for i in text:
+		if i not in ws:
+			return 0
+	return 1
