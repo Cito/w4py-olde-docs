@@ -212,8 +212,8 @@ class HTTPResponse(Response):
 
 		assert self._committed==0, "Headers already sent"
 
-   		self.setHeader('Status', '302 Redirect')
-	   	self.setHeader('Location', url)
+		self.setHeader('Status', '302 Redirect')
+		self.setHeader('Location', url)
 		self.setHeader('Content-type', 'text/html')
 
 		self.write('<html> <body> This page has been redirected to <a href="%s">%s</a>. </body> </html>' % (url, url))
@@ -313,7 +313,7 @@ class HTTPResponse(Response):
 
 		assert self._committed == 0
 		self._headers = {}
-	   	self.setHeader('Content-type','text/html')
+		self.setHeader('Content-type','text/html')
 		self._cookies = {}
 		self._strmOut.clear()
 

@@ -539,7 +539,7 @@ class TableRecord:
 			3. A dictionary
 			4. Any object responding to hasValueForKey() and valueForKey().
 		"""
- 		self._headings = table.headings()
+		self._headings = table.headings()
 		self._nameToIndexMap = table.nameToIndexMap()
 		# @@ 2000-07-20 ce: Take out the headings arg to the init method since we have an attribute for that
 

@@ -73,7 +73,7 @@ class ASStreamOut:
 			self._chunkLen = 0
 		return 1
 
- 	def buffer(self):
+	def buffer(self):
 		"""
 		Return accumulated data which has not yet been
 		flushed.  We want to be able to get at this data
@@ -148,7 +148,7 @@ class ASStreamOut:
 		return self._committed
 
 
-   	def needCommit(self):
+	def needCommit(self):
 		"""
 		Called by the HTTPResponse instance that is using this instance
 		to ask if the response needs to be prepared to be delivered.

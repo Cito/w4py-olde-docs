@@ -1,31 +1,31 @@
 
 
 """
-    This module holds the classes that generate the python code reulting from the PSP template file.
-    As the parser encounters PSP elements, it creates a new Generator object for that type of element.
-    Each of these elements is put into a list maintained by the ParseEventHandler object.  When it comes
-    time to output the Source Code, each generator is called in turn to create it's source.
+	This module holds the classes that generate the python code reulting from the PSP template file.
+	As the parser encounters PSP elements, it creates a new Generator object for that type of element.
+	Each of these elements is put into a list maintained by the ParseEventHandler object.  When it comes
+	time to output the Source Code, each generator is called in turn to create it's source.
 
-    
+	
 --------------------------------------------------------------------------------
-    (c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.net)
+	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.net)
 
-    Permission to use, copy, modify, and distribute this software and its
-    documentation for any purpose and without fee or royalty is hereby granted,
-    provided that the above copyright notice appear in all copies and that
-    both that copyright notice and this permission notice appear in
-    supporting documentation or portions thereof, including modifications,
-    that you make.
+	Permission to use, copy, modify, and distribute this software and its
+	documentation for any purpose and without fee or royalty is hereby granted,
+	provided that the above copyright notice appear in all copies and that
+	both that copyright notice and this permission notice appear in
+	supporting documentation or portions thereof, including modifications,
+	that you make.
 
-    THE AUTHORS DISCLAIM ALL WARRANTIES WITH REGARD TO
-    THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-    FITNESS, IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL,
-    INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
-    FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
-    NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
-    WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
+	THE AUTHORS DISCLAIM ALL WARRANTIES WITH REGARD TO
+	THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+	FITNESS, IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL,
+	INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
+	FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
+	NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
+	WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
 
-        This software is based in part on work done by the Jakarta group.
+		This software is based in part on work done by the Jakarta group.
 
 """
 
@@ -35,14 +35,14 @@
 import PSPUtils
 import BraceConverter
 try:
-    import string
+	import string
 except:
-    pass
+	pass
 
 try:
-    import os
+	import os
 except:
-    pass
+	pass
 
 #these are global so that the ParseEventHandler and this module agree.
 ResponseObject = 'res'
@@ -50,22 +50,22 @@ AwakeCreated = 0
 
 
 class GenericGenerator:
-    """ Base class for the generators """
-    def __init__(self, ctxt=None):
+	""" Base class for the generators """
+	def __init__(self, ctxt=None):
 		self._ctxt = ctxt
 		self.phase='Service'
 
 
 class ExpressionGenerator(GenericGenerator):
-    """ This class handles expression blocks.  It simply outputs
-    the (hopefully) python expression within the block wrapped
-    with a _formatter() call. """
+	""" This class handles expression blocks.  It simply outputs
+	the (hopefully) python expression within the block wrapped
+	with a _formatter() call. """
 
-    def __init__(self, chars):
+	def __init__(self, chars):
 		self.chars = chars
 		GenericGenerator.__init__(self)
 
-    def generate(self, writer, phase=None):
+	def generate(self, writer, phase=None):
 		writer.println('res.write(_formatter(' + PSPUtils.removeQuotes(self.chars) + '))')
 
 
@@ -80,10 +80,10 @@ class CharDataGenerator(GenericGenerator):
 		self.chars = chars
 
 	def generate(self, writer, phase=None):
-                # Quote any existing backslash so generated python will not interpret it when running.
-                self.chars = string.replace(self.chars, '\\', r'\\')
+		# Quote any existing backslash so generated python will not interpret it when running.
+		self.chars = string.replace(self.chars, '\\', r'\\')
 
-                # quote any single quotes so it does not get confused with our triple-quotes
+		# quote any single quotes so it does not get confused with our triple-quotes
 		self.chars = string.replace(self.chars,'"',r'\"')
 
 		self.generateChunk(writer)
@@ -99,12 +99,12 @@ class CharDataGenerator(GenericGenerator):
 		self.chars = self.chars + cdGen.chars
 
 class ScriptGenerator(GenericGenerator):
-    """generates scripts"""
-    def __init__(self, chars, attrs):
+	"""generates scripts"""
+	def __init__(self, chars, attrs):
 		GenericGenerator.__init__(self)	
 		self.chars = chars
 
-    def generate(self, writer, phase=None):
+	def generate(self, writer, phase=None):
 
 		if writer._useBraces:
 			# send lines to be output by the braces generator
@@ -170,14 +170,14 @@ class EndBlockGenerator(GenericGenerator):
 		
 
 class MethodGenerator(GenericGenerator):
-    """ generates class methods defined in the PSP page.  There are two parts to method generation.  This
-    class handles getting the method name and parameters set up."""
-    def __init__(self, chars, attrs):
+	""" generates class methods defined in the PSP page.  There are two parts to method generation.  This
+	class handles getting the method name and parameters set up."""
+	def __init__(self, chars, attrs):
 		GenericGenerator.__init__(self)
 		self.phase='Declarations'
 		self.attrs=attrs
 	
-    def generate(self, writer, phase=None):
+	def generate(self, writer, phase=None):
 		writer.printIndent()
 		writer.printChars('def ')
 		writer.printChars(self.attrs['name'])
@@ -197,15 +197,15 @@ class MethodGenerator(GenericGenerator):
 			writer.println()
 
 class MethodEndGenerator(GenericGenerator):
-    """ Part of class method generation.  After MethodGenerator, MethodEndGenerator actually generates
-    the code for th method body."""
-    def __init__(self, chars, attrs):
+	""" Part of class method generation.  After MethodGenerator, MethodEndGenerator actually generates
+	the code for th method body."""
+	def __init__(self, chars, attrs):
 		GenericGenerator.__init__(self)
 		self.phase='Declarations'
 		self.attrs=attrs
 		self.chars=chars
 
-    def generate(self, writer, phase=None):
+	def generate(self, writer, phase=None):
 		writer.pushIndent()
 		writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
 		writer.printChars('\n')
@@ -235,7 +235,7 @@ self.transaction().application().includeURL(self.transaction(), __pspincludepath
 		self.url = attrs.get('path')
 		if self.url == None:
 			raise "No path attribute in Include"
-    
+	
 		self.scriptgen = ScriptGenerator(self._theFunction % self.url, None)
 	
 
@@ -247,11 +247,11 @@ self.transaction().application().includeURL(self.transaction(), __pspincludepath
 
 
 class InsertGenerator(GenericGenerator):
-    """ Include files designated by the psp:insert syntax.
+	""" Include files designated by the psp:insert syntax.
 	If the attribute static is set to true or 1, we include the file now, at compile time.
 	Otherwise, we use a function added to every PSP page named __includeFile, which reads the file at run time.
 	"""
-    def __init__(self, attrs, param, ctxt):
+	def __init__(self, attrs, param, ctxt):
 		GenericGenerator.__init__(self,ctxt)
 		self.attrs = attrs
 		self.param = param
@@ -267,7 +267,7 @@ class InsertGenerator(GenericGenerator):
 		self.static = attrs.get('static', None)
 		if self.static == string.lower("true") or self.static == "1":
 			self.static=1
-    
+	
 		if not os.path.exists(thepath):
 			print self.page
 			raise "Invalid included file",thepath
@@ -276,7 +276,7 @@ class InsertGenerator(GenericGenerator):
 		if not self.static:
 			self.scriptgen = ScriptGenerator("self.__includeFile('%s')" % string.replace(thepath, '\\', '\\\\'), None)
 
-    def generate(self, writer, phase=None):
+	def generate(self, writer, phase=None):
 		""" JSP does this in the servlet.  I'm doing it here because I have triple quotes.
 		Note: res.write statements inflate the size of the resulting classfile when it is cached.
 		Cut down on those by using a single res.write on the whole file, after escaping any triple-double quotes."""
