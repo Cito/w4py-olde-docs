@@ -146,6 +146,18 @@ if it will read a file:
 The data table is printed to stdout.
 
 
+CACHING
+
+DataTable uses "pickle caching" so that it can read .csv files faster
+on subsequent loads. You can disable this across the board with:
+	from MiscUtils.DataTable import DataTable
+	DataTable.usePickleCache = 0
+
+Or per instance by passing "usePickleCache=0" to the constructor.
+
+See the docstring of PickleCache.py for more information.
+
+
 MORE DOCS
 
 Some of the methods in this module have worthwhile doc strings to look
@@ -284,11 +296,19 @@ class TableColumn:
 
 class DataTable:
 	"""
+	See the doc string for this module.
 	"""
+
+	usePickleCache = 1
+
 
 	## Init ##
 
-	def __init__(self, filenameOrHeadings=None, delimiter=',', allowComments=1, stripWhite=1, defaultType='string'):
+	def __init__(self, filenameOrHeadings=None, delimiter=',', allowComments=1, stripWhite=1, defaultType='string', usePickleCache=None):
+		if usePickleCache is None:
+			self.usePickleCache = self.usePickleCache  # grab the class-level attr
+		else:
+			self.usePickleCache = usePickleCache
 		if not _types.has_key(defaultType):
 			raise DataTableError, 'Unknown type for default type: %s' % repr(defaultType)
 		self._defaultType = defaultType
@@ -306,9 +326,18 @@ class DataTable:
 
 	def readFileNamed(self, filename, delimiter=',', allowComments=1, stripWhite=1):
 		self._filename = filename
-		file = open(self._filename, 'r')
-		self.readFile(file, delimiter, allowComments, stripWhite)
-		file.close()
+		data = None
+		if self.usePickleCache:
+			from PickleCache import readPickleCache, writePickleCache
+			data = readPickleCache(filename, pickleVersion=1, source='MiscUtils.DataTable')
+		if data is None:
+			file = open(self._filename, 'r')
+			self.readFile(file, delimiter, allowComments, stripWhite)
+			file.close()
+			if self.usePickleCache:
+				writePickleCache(self, filename, pickleVersion=1, source='MiscUtils.DataTable')
+		else:
+			self.__dict__ = data.__dict__
 		return self
 
 	def readFile(self, file, delimiter=',', allowComments=1, stripWhite=1):
