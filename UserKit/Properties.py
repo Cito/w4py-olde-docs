@@ -7,7 +7,7 @@ docs = [
 	{'name': 'To Do',        'file': 'TODO-UserKit.text'},
 ]
 
-status = 'prealpha'
+status = 'alpha'
 
 requiredPyVersion = (2, 0, 0)
 
