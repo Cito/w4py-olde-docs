@@ -802,6 +802,11 @@ settingRE = re.compile(r'^--([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
 from MiscUtils import Configurable
 
 def main(args):
+	"""
+	Run by `Launch`, this is the main entrance and command-line
+	interface for AppServer.
+	"""
+	
 	monitor = 0
 	http = 0
 	function = run
