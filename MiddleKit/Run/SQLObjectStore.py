@@ -217,7 +217,7 @@ class SQLObjectStore(ObjectStore):
 
 	def fetchObjRef(self, objRef):
 		''' Given an unarchived object referece, this method returns the actual object for it (or None if the reference is NULL or dangling). While this method assumes that obj refs are stored as 64-bit numbers containing the class id and object serial number, subclasses are certainly able to override that assumption by overriding this method. '''
-		assert type(objRef) is LongType
+		assert type(objRef) is LongType, 'type=%r, objRef=%r' % (type(objRef), objRef)
 		if objRef is None or objRef==0:
 			return None
 		else:
