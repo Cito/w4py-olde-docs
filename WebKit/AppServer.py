@@ -20,6 +20,8 @@ from Configurable import Configurable
 from Application import Application
 from SocketServer import ThreadingTCPServer, ForkingTCPServer, TCPServer, BaseRequestHandler
 from marshal import loads
+import sys
+
 
 
 DefaultConfig = {
@@ -120,6 +122,8 @@ class WebKitAppServer(Configurable):
 		print 'WebKit and Webware are open source.'
 		print 'Please visit:  http://webware.sourceforge.net'
 		print
+		import os
+		print 'Process ID is :', os.getpid()
 		if self.setting('PrintConfigAtStartUp'):
 			self.printConfig()
 	
@@ -127,15 +131,15 @@ class WebKitAppServer(Configurable):
 	## Plug-ins ##
 
 	def plugIns(self):
-		''' Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. '''
+		""" Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. """
 		return self._plugIns
 
 	def loadPlugIn(self, name, dir):
-		''' Loads the given plug-in. Used by loadPlugIns() '''
+		""" Loads the given plug-in. Used by loadPlugIns() """
 		print 'Plug-in: %s in %s' % (name, dir)
 			
 		# Update sys.path
-		if not dir in sys.path:
+		if not dir in sys.path:	 
 			sys.path.append(dir)
 
 		print '>>', sys.path
@@ -153,15 +157,14 @@ class WebKitAppServer(Configurable):
 		
 	def loadPlugIns(self):
 		# @@ 2000-05-21 ce: We should really have an AddPlugIns and RemovePlugIns setting
-		''' A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source.
+		""" A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source.
 		
 		* Plug-ins are loaded by AppServer at startup time, just before listening for requests.
 		* A plug-in is a Python package. Therefore, it is a directory containing an __init__.py file.
 		* The directory of the package is added to sys.path and the package is imported.
 		* The __init__.py must contain a function, InstallInWebKit(appServer). AppServer invokes this at start-up so that the plug-in can do what it needs to.
-		
-		file:/Local/Documentation/Python-1.5.2/Doc/tut/packages.html
-		'''
+		"""
+
 
 		for plugIn in self.setting('PlugIns'):
 			dir, name = os.path.split(plugIn)
@@ -204,6 +207,8 @@ class WebKitAppServer(Configurable):
 class RequestHandler(BaseRequestHandler):
 
 	def handle(self):
+		#JSL-Looking for memory leak
+		import sys
 		# according to BaseRequestHandler docs, we have access to self.[request, client_address, server]
 		verbose = self.server.wkVerbose
 
@@ -230,9 +235,9 @@ class RequestHandler(BaseRequestHandler):
 			if verbose:
 				print 'request has keys:', string.join(dict.keys(), ', ')
 
-			transaction = self.server.wkApp.dispatchRawRequest(dict)	
+			transaction = self.server.wkApp.dispatchRawRequest(dict)
 			results = transaction.response().contents()
-		
+			
 			if verbose:
 				print 'about to send %d bytes' % len(results)
 			conn.send(results)
@@ -247,12 +252,19 @@ class RequestHandler(BaseRequestHandler):
 			print '%0.2f secs' % (time.time() - startTime)
 			print 'END REQUEST'
 			print
+
 		transaction.die()
+
+
 
 
 def main():
 	server = WebKitAppServer()
-	server.serve()
+	try:
+		server.serve()
+	except KeyboardInterrupt: #Need to kill the Sweeper thread somehow
+		print "Exiting AppServer"
+		sys.exit()
 
 	
 if __name__=='__main__':

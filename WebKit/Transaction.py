@@ -40,6 +40,7 @@ class Transaction(Object):
 
 	def servlet(self):
 		''' Return the current servlet that is processing. Remember that servlets can be nested. '''
+		#print ">> Someone asked for the servlet"
 		return self._servlet
 
 	def setServlet(self, servlet):
@@ -55,6 +56,7 @@ class Transaction(Object):
 	def setErrorOccurred(self, flag):
 		''' Invoked by the application if an exception is raised to the application level. '''
 		self._errorOccurred = flag
+		self._servlet=None
 
 		
 	## Debugging ##
@@ -71,6 +73,8 @@ class Transaction(Object):
 	
 	def die(self):
 		''' This method should be invoked when the entire transaction is finished with. Currently, this is invoked by AppServer. This method removes references to the different objects in the transaction, breaking cyclic reference chains and allowing Python to collect garbage. '''		
+
+		
 		from types import InstanceType
 		for attrName in dir(self):
 			# @@ 2000-05-21 ce: there's got to be a better way!
@@ -79,3 +83,6 @@ class Transaction(Object):
 				#print '>> resetting'
 				attr.resetKeyBindings()
 			delattr(self, attrName)
+
+
+

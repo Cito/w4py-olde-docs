@@ -24,6 +24,9 @@ class Servlet(Object):
 		''' Subclasses must invoke super. '''
 		Object.__init__(self)
 
+##	def __del__(self):
+##		print '>> del ',self
+
 
 	## Access ##
 

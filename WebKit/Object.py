@@ -7,7 +7,6 @@ except:
 	import WebUtils
 from MiddleKit.KeyValueAccess import KeyValueAccess
 
-
 class Object(KeyValueAccess):
 	'''
 	Object is the root class for all classes in the WebKit.

@@ -10,27 +10,26 @@ class CanFactory:
 	    self.__CanDir=canDir
 
     def createCan(self,canName,*args,**kargs):
+		if self.__CanClasses.has_key(canName):
+			klass=self.__CanClasses[canName]
+		else:
+			fullpath = os.path.join(self.__CanDir,canName+'.py')
+			if not os.path.exists(fullpath):
+				raise "CanNotFound"
+			globals={}
+			execfile(fullpath,globals)
+			assert globals.has_key(canName)
+			klass = self.__CanClasses[canName] = globals[canName]
 
-	if self.__CanClasses.has_key(canName):
-	    klass=self.__CanClasses[canName]
-	else:
-	    fullpath = os.path.join(self.__CanDir,canName+'.py')
-	    if not os.path.exists(fullpath):
-		raise "CanNotFound"
-	    globals={}
-	    execfile(fullpath,globals)
-	    assert globals.has_key(canName)
-	    klass = self.__CanClasses[canName] = globals[canName]
+		if len(args)==0 and len(kargs)==0:
+			instance = klass()
+		elif len(args)==0:
+			instance = apply(klass,kargs)
+		elif len(kargs)==0:
+			instance = apply(klass,args)
+		else: instance = apply(klass,args,kargs)
 
-	if len(args)==0 and len(kargs)==0:
-	    instance = klass()
-	elif len(args)==0:
-	    instance = apply(klass,kargs)
-	elif len(kargs)==0:
-	    instance = apply(klass,args)
-	else: instance = apply(klass,args,kargs)
-
-	return instance
+		return instance
 	
 	
 	

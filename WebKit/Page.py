@@ -30,6 +30,7 @@ class Page(HTTPServlet):
 		assert self._request  is not None
 		# @@ 2000-05-08 ce: yes/no: assert self._session is not None
 
+
 	def respondToGet(self, transaction):
 		''' Invokes _respond() to handle the transaction. '''
 		self._respond(transaction)
