@@ -43,7 +43,7 @@ class TaskHandler:
 		if self._suspend:
 			self._scheduler.notifyCompletion(self)
 			return
-		self._rerurn = 0
+		self._rerun = 0
 		self._thread = Thread(None, self._task._run, self.name(), (self,))
 		self._isRunning = 1
 		self._thread.start()
