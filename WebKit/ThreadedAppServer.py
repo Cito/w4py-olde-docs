@@ -672,6 +672,9 @@ daemon: run as a daemon
 If AppServer is called with no arguments, it will start the AppServer and record the pid of the process in appserverpid.txt
 """
 
+import re
+settingRE = re.compile(r'^--([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
+from MiscUtils import Configurable
 
 def main(args):
 	monitor=0
@@ -680,7 +683,12 @@ def main(args):
 	workDir=None
 
 	for i in args[:]:
-		if i == "monitor":
+		if settingRE.match(i):
+			match = settingRE.match(i)
+			name = match.group(1)
+			value = i[match.end():]
+			Configurable.addCommandLineSetting(name, value)
+		elif i == "monitor":
 			print "Enabling Monitoring"
 			monitor=1
 		elif i == "stop":

@@ -1,4 +1,4 @@
-import string, sys
+import string, sys, os
 from types import DictType
 from MiscUtils import AbstractError, NoDefault
 from WebKit.ImportSpy import modloader
@@ -54,6 +54,7 @@ class Configurable:
 		if self._config is None:
 			self._config = self.defaultConfig()
 			self._config.update(self.userConfig())
+			self._config.update(self.commandLineConfig())
 		return self._config
 
 	def setting(self, name, default=NoDefault):
@@ -73,6 +74,13 @@ class Configurable:
 	def configFilename(self):
 		""" Returns the filename by which users can override the configuration. Subclasses must override to specify a name. Returning None is valid, in which case no user config file will be loaded. """
 		raise AbstractError, self.__class__
+
+	def configName(self):
+		"""
+		Returns the name of the configuration file (the portion
+		before the '.config').  This is used on the command-line.
+		"""
+		return os.path.splitext(os.path.basename(self.configFilename()))[0]
 
 	def configReplacementValues(self):
 		"""
@@ -121,3 +129,43 @@ class Configurable:
 		for key in keys:
 			dest.write(string.ljust(key, width)+' = '+str(self.setting(key))+'\n')
 		dest.write('\n')
+
+	def commandLineConfig(self):
+		"""
+		Settings that came from the command line (via
+		addCommandLineSetting).
+		"""
+		return _settings.get(self.configName(), {})
+
+_settings = {}
+def addCommandLineSetting(name, value):
+	"""
+	Take a setting, like --AppServer.Verbose=0, and call
+	addCommandLineSetting('AppServer.Verbose', '0'), and
+	it will override any settings in AppServer.config
+	"""
+	configName, settingName = string.split(name, '.', 1)
+	value = convertValue(value)
+	if not _settings.has_key(configName):
+		_settings[configName] = {}
+	_settings[configName][settingName] = value
+
+def convertValue(value):
+	"""
+	Takes a string and tries to convert it into a Python
+	type (integer, list, etc.) -- if nothing works, then it
+	leaves it as a string.
+	"""
+	if not value:
+		return ''
+	try:
+		return int(value)
+	except ValueError:
+		pass
+	try:
+		return float(value)
+	except ValueError:
+		pass
+	if value[0] in '[({"\'':
+		return eval(value)
+	return value
