@@ -206,7 +206,7 @@ def html_repr(value):
 	if len(enc_value) > html_repr_instance.maxstring:
 		plain_value = pydoc.html.escape(repr(value))
 		return '%s <a href="#" onClick="popup_repr(\'Long repr\', \'Full representation:&lt;br&gt;\\n%s\'); return false">(complete)</a>' \
-			   % (enc_value, string.replace(pydoc.html.escape(plain_value), "'", "\\'"))
+			   % (enc_value, string.replace(string.replace(pydoc.html.escape(plain_value), "'", "\\'"), '"', '&quot;'))
 	else:
 		return enc_value
 
