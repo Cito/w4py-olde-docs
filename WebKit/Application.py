@@ -81,7 +81,7 @@ class Application(Configurable,CanContainer):
 
 	## Init ##
 
-	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None, Contexts=None, useSessionSweeper=1):
+	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None, contexts=None, useSessionSweeper=1):
 
 
 		Configurable.__init__(self)
@@ -127,10 +127,10 @@ class Application(Configurable,CanContainer):
 		self._cacheDictLock = Lock()
 		self._instanceCacheSize=10 # self._server.setting('ServerThreads') #CHANGED 6/21/00
 
-		if Contexts: #Try to get this from the Config file
-			self._Contexts = Contexts
+		if contexts: #Try to get this from the Config file
+			self._contexts = contexts
 		else: #Get it from Configurable object, which gets it from defaults or the user config file
-			self._Contexts=self.setting('Contexts')
+			self._contexts = self.setting('Contexts')
 
 		# Set up servlet factories
 		self._factoryList = []  # the list of factories
@@ -224,6 +224,7 @@ class Application(Configurable,CanContainer):
 				                        'Subject':      'Error'
 									  },
 			'Contexts':               { 'default':       'Examples',
+							            'Admin':         'Admin',
 							            'Examples':      'Examples',
 							            'Documentation': 'Documentation',
 							            'Testing':       'Testing',
@@ -254,23 +255,24 @@ class Application(Configurable,CanContainer):
 		return self.dispatchRequest(self.createRequestForDict(newRequestDict))
 
 
-	def dispatchRequest(self, newRequest):
+	def dispatchRequest(self, request):
 		"""
 		Creates the transaction, session, response and servlet for the new request which is then dispatched. The transaction is returned.
 		"""
 		transaction = None
 		try:
-			request     = newRequest
 			transaction = self.createTransactionForRequest(request)
-			session     = self.createSessionForTransaction(transaction)
 			response    = self.createResponseInTransaction(transaction)
-			self.createServletInTransaction(transaction)
 
-			self.awake(transaction)
-			self.respond(transaction)
-			self.sleep(transaction)
+			ssPath = request.serverSidePath()
+			if ssPath is None:
+				self.handleBadURL(transaction)
+			elif os.path.isdir(ssPath) and request.uri()[-1]!='/':
+				self.fixDirectoryURL(transaction)
+			else:
+				self.serveURL(transaction)
 
-			transaction.response().deliver(transaction)
+			response.deliver(transaction)
 
 		except:
 			if transaction:
@@ -282,12 +284,43 @@ class Application(Configurable,CanContainer):
 		if self.setting('LogActivity'):
 			self.writeActivityLog(transaction)
 
-		path = transaction._request.serverSidePath()
-		self.returnInstance(transaction,path)
+		path = request.serverSidePath()
+		self.returnInstance(transaction, path)
 
-		#possible circular reference, so delete it
-		transaction._request._transaction=None
+		# possible circular reference, so delete it
+		# @@ 2000-06-26 ce: we should have a more general solution for this
+		request._transaction = None
+
 		return transaction
+
+	def handleBadURL(self, transaction):
+		res = transaction.response()
+		res.setHeader('Status', 404)
+		res.write('<p> 404 Not found: %s' % transaction.request().uri())
+		# @@ 2000-06-26 ce: This error page is pretty primitive
+		# @@ 2000-06-26 ce: We should probably load a separate template file and display that
+
+	def fixDirectoryURL(self, transaction):
+		newURL = transaction.request().uri() + '/'
+		res = transaction.response()
+		res.setHeader('Status', '301')
+		res.setHeader('Location', newURL)
+		res.write('''<html>
+	<head>
+		<title>301 Moved Permanently</title>
+	</head>
+	<body>
+		<h1>Moved Permanently</h1>
+		<p> The document has moved to <a href="%s">%s</a>.
+	</body>
+</html>''' % (newURL, newURL))
+
+	def serveURL(self, transaction):
+		session     = self.createSessionForTransaction(transaction)
+		self.createServletInTransaction(transaction)
+		self.awake(transaction)
+		self.respond(transaction)
+		self.sleep(transaction)
 
 	def forwardRequest(self, trans, URL):
 		"""Enable a servlet to pass a request to another servlet.  This implementation handles chaining and requestDispatch in Java.
@@ -370,6 +403,28 @@ class Application(Configurable,CanContainer):
 	def setResponseClass(self, newClass):
 		assert isclass(newClass)
 		self._responseClass = newClass
+
+
+	## Contexts ##
+
+	def context(self, name, default=Tombstone):
+		''' Returns the value of the specified context. '''
+		if default is Tombstone:
+			return self._contexts[name]
+		else:
+			return self._contexts.get(name, default)
+
+	def hasCookie(self, name):
+		return self._contexts.has_key(name)
+
+	def setContext(self, name, value):
+		if self._contexts.has_key(name):
+			print 'WARNING: Overwriting context %s (=%s) with %s' % (
+				repr(name), repr(self._contents[name]), repr(value))
+		self._contexts[name] = value
+
+	def contexts(self):
+		return self._contexts
 
 
 	## Factory access ##
@@ -532,7 +587,7 @@ class Application(Configurable,CanContainer):
 	def returnInstance(self, transaction, path):
 		""" The only case I care about now is threadsafe=0 and reuseable=1"""
 		cache = self._servletCacheByPath.get(path, None)
-		if cache['reuseable'] and not cache['threadsafe']:
+		if cache and cache['reuseable'] and not cache['threadsafe']:
 			try:
 				cache['instances'].put(transaction.servlet())
 				#cache['instances'].put_nowait(transaction.servlet())
@@ -702,7 +757,7 @@ class Application(Configurable,CanContainer):
 
 		# case: no URL then use the default context
 		if not urlPath:
-			urlPath = self._Contexts['default']
+			urlPath = self._contexts['default']
 			if debug:
 				print '>> no urlPath, so using default context path: %s' % repr(urlPath)
 
@@ -715,10 +770,10 @@ class Application(Configurable,CanContainer):
 
 		# Look for Context
 		try:
-			prepath = self._Contexts[contextName]
+			prepath = self._contexts[contextName]
 		except KeyError:
 			restOfPath = urlPath  # put the old path back, there's no context here
-			prepath = self._Contexts['default']
+			prepath = self._contexts['default']
 			if debug:
 				print '>> context not found so assuming default:'
 		if debug: print '>> prepath=%s, restOfPath=%s' % (repr(prepath), repr(restOfPath))
