@@ -36,6 +36,10 @@ int sendCgiRequest(int sock, DictHolder* alldicts) {
 	length = alldicts->whole_dict->ptr - alldicts->whole_dict->str;
 	while (totalsent < length) {	  
 		bs = send( sock, alldicts->whole_dict->str + totalsent, buflen>(length-totalsent)?length-totalsent:buflen, 0);
+		if( bs < 0 ) {
+			log_message("send() returned error code");
+			return -1;
+		}
 		totalsent = totalsent + bs;
 	}
 
@@ -45,12 +49,18 @@ int sendCgiRequest(int sock, DictHolder* alldicts) {
 	if (len_str !=NULL) {
 	  int read=0;
 	  int sent=0;
+	  int sent_this_time=0;
 	  content_length = atoi(getenv("CONTENT_LENGTH"));
 	  log_message("There is post data");
 	  buffer = (char*) calloc(8092,1);
 	  while (read < content_length) {
 		read = read + fread(buffer, 1, content_length-read, stdin);
-		sent = sent + send(sock, buffer, read-sent, 0);
+		sent_this_time = send(sock, buffer, read-sent, 0);
+		if( sent_this_time<0 ) {
+			log_message("send() returned error code");
+			return -1;
+		}
+		sent += sent_this_time;
 	  }
 	}
 
@@ -109,7 +119,7 @@ int main(char* argc, char* argv[]) {
 	EnvItem **envItems;
 	//	int retryattempts = 10;
 	//	int retrydelay = 1;
-	int retrycount = 30;
+	int retrycount = 0;
 	Configuration* config;
 #ifdef WIN32
 	char configFile[500];
@@ -163,13 +173,15 @@ int main(char* argc, char* argv[]) {
 	  log_message(msgbuf);
 	  retrycount++;
 #ifdef WIN32
-	  Sleep(config->retry_delay*100);
+	  Sleep(config->retry_delay*1000);
 #else
 	  sleep(config->retry_delay);
 #endif
 	}
 
-
+	if( sock <= 0 ) {
+		return 1;
+	}
 
 	envItems = extractEnviron();
 	dicts = createDicts(envItems);
@@ -188,7 +200,7 @@ int main(char* argc, char* argv[]) {
 
 	processCgiResponse(sock);
 
-
+	return 0;
 }
 
 

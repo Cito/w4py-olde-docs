@@ -48,8 +48,8 @@ DictHolder* createDicts(EnvItem ** envItems) {
 			key = envItems[i]->key;
 			val = envItems[i]->val;
 
-			sprintf(msg, "Adding dict key=%s, val=%s", key, val);
-			log_message(msg);
+			//sprintf(msg, "Adding dict key=%.100s, val=%.100s", key, val);
+			//log_message(msg);
 
 			write_string(key, (int) strlen(key), env_dict);
 			if (val != NULL) write_string(val, strlen(val), env_dict);

@@ -68,17 +68,17 @@ int freeEnviron( EnvItem** env) {
 	int i;
 	char msg[400];
 
-	sprintf(msg, "Starting to free environment\r\n");
-	log_message(msg);
+	//sprintf(msg, "Starting to free environment\r\n");
+	//log_message(msg);
 
 	for(i=0; env[i] != NULL; i++) {
-		sprintf(msg, "Freeing item %i", i);
-		log_message(msg);
-		sprintf(msg, "Freeing key %s", env[i]->key);
-		log_message(msg);
+		//sprintf(msg, "Freeing item %i", i);
+		//log_message(msg);
+		//sprintf(msg, "Freeing key %.100s", env[i]->key);
+		//log_message(msg);
 		if (env[i]->key !=NULL) free(env[i]->key);
-		sprintf(msg, "Freeing val %s", env[i]->val);
-		log_message(msg);
+		//sprintf(msg, "Freeing val %.100s", env[i]->val);
+		//log_message(msg);
 		if (env[i]->val !=NULL) free(env[i]->val);
 		free(env[i]);
 	}
