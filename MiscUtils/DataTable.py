@@ -488,6 +488,16 @@ class DataTable:
 		return join(s, '')
 
 
+	## As a dictionary ##
+
+	def dictKeyedBy(self, key):
+		''' Returns a dictionary containing the contents of the table indexed by the particular key. This is useful for tables that have a column which represents a unique key (such as a name, serial number, etc.). '''
+		dict = {}
+		for row in self:
+			dict[row[key]] = row
+		return dict
+
+
 	## Misc access ##
 
 	def filename(self):
