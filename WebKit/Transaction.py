@@ -2,7 +2,7 @@ from Common import *
 
 
 class Transaction(Object):
-	'''
+	"""
 	A transaction serves as:
 
 		* A container for all objects involved in the transaction. The
@@ -17,7 +17,7 @@ class Transaction(Object):
 
 	The life cycle of a transaction begins and ends with Application's
 	dispatchRequest().
-	'''
+	"""
 
 
 	## Init ##
@@ -30,6 +30,15 @@ class Transaction(Object):
 		self._session       = None
 		self._servlet       = None
 		self._errorOccurred = 0
+
+	attrNames = 'application request response session servlet errorOccurred'.split()
+
+	def __repr__(self):
+		s = []
+		for name in self.attrNames:
+			s.append('%s=%r' % (name, getattr(self, '_'+name, '(no attr)')))
+		s = ' '.join(s)
+		return '<%s %s>' % (self.__class__.__name__, s)
 
 
 	## Access ##
@@ -76,7 +85,8 @@ class Transaction(Object):
 	def setErrorOccurred(self, flag):
 		''' Invoked by the application if an exception is raised to the application level. '''
 		self._errorOccurred = flag
-		self._servlet = None
+		#self._servlet = None
+		# @@ 2002-02-05 ce: disabled above statement so that custom exception handlers can examine the servlet
 
 
 	## Transaction stages ##
