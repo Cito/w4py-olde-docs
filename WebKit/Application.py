@@ -2,7 +2,6 @@
 
 from Common import *
 from UserDict import UserDict
-from ExceptionHandler import ExceptionHandler
 from Object import Object
 from Servlet import Servlet
 from ServletFactory import *
@@ -104,8 +103,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		if exceptionHandlerClass:
 			self._exceptionHandlerClass = exceptionHandlerClass
 		else:
-			from ExceptionHandler import ExceptionHandler
-			self._exceptionHandlerClass = ExceptionHandler
+			self._exceptionHandlerClass = None
 
 		# Init other attributes
 		self._servletCacheByPath = {}
@@ -1047,6 +1045,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		transaction.setServlet(inst)
 
 	def handleExceptionInTransaction(self, excInfo, transaction):
+		if self._exceptionHandlerClass is None:
+			from ExceptionHandler import ExceptionHandler  # import ExceptionHandler only when we need to
+			self._exceptionHandlerClass = ExceptionHandler
 		self._exceptionHandlerClass(self, transaction, excInfo)
 
 	def filenamesForBaseName(self, baseName):
