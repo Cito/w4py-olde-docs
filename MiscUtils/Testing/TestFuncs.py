@@ -17,6 +17,11 @@ def TestCommas():
 		11.0 '11.0'
 		1.15 '1.15'
 		12345.127 '12,345.127'
+		-1 '-1'
+		-11 '-11'
+		-111 '-111'
+		-1111 '-1,111'
+		-11111 '-11,111'
 	'''
 	tests = string.split(testSpec)
 	count = len(tests)
@@ -25,12 +30,12 @@ def TestCommas():
 		source = eval(tests[i])
 		result = eval(tests[i+1])
 		#print '%r yields %r' % (source, result)
-		assert commas(source)==result
+		assert commas(source)==result, '%r %r' % (commas(source), result)
 
 		# Now try the source as a string instead of a number:
 		source = eval("'%s'" % tests[i])
 		#print '%r yields %r' % (source, result)
-		assert commas(source)==result
+		assert commas(source)==result, '%r %r' % (commas(source), result)
 
 		i = i+2
 

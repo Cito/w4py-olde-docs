@@ -21,7 +21,7 @@ def commas(number):
 		i = len(number)
 	while 1:
 		i = i-3
-		if i<=0:
+		if i<=0 or number[i-1]=='-':
 			break
 		number[i:i] = [',']
 	return string.join(number, '')
