@@ -1,0 +1,7 @@
+Class,Attribute,Type,isRequired
+Foo,,,
+,x,int,0
+Bar,,,
+,foo,Foo,0
+BarReq,,,
+,foo,Foo,1

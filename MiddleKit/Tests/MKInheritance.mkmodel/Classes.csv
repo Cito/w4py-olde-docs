@@ -1,0 +1,7 @@
+Class,Attribute,Type,Default,Min,Max
+One,,,,,
+,a,string,,,8
+,b,string,,,9
+Two(One),,,,,
+,c,string,,,10
+,d,string,,,11

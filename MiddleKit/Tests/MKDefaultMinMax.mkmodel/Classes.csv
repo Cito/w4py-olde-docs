@@ -1,0 +1,7 @@
+Class,Attribute,Type,Default,Min,Max
+Foo,,,,,
+,b,bool,1,,
+,i,int,2,0,10
+,l,long,3,0,10
+,f,float,4,0,10
+,s,string,5,5,10
