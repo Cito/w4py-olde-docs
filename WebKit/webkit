@@ -24,7 +24,7 @@ case "$1" in
 	start)
 		echo -n  "Starting WebKit: "
 		pushd $WEBKIT_DIR > /dev/null
-		PYTHONPATH="$PYTHONPATH:$PYTHONPATH_ADDONS" ./AppServer >> $LOG 2>&1 &
+		PYTHONPATH="$PYTHONPATH $PYTHONPATH_ADDONS" ./AppServer >> $LOG 2>&1 &
 		echo $! > $PID_FILE
 		popd > /dev/null
 		success "Starting WebKit"
