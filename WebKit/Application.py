@@ -981,8 +981,6 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				return None
 		elif not os.path.exists(ssPath):
 			return None
-		else:
-			raise AssertionError, "Unexpected if-else fall through."
 
 		self._serverSidePathCacheByPath[urlPath] = ssPath
 
