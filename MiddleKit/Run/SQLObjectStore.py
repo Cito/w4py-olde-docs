@@ -395,9 +395,16 @@ class SQLObjectStore(ObjectStore):
 	## Obj refs ##
 
 	def fetchObjRef(self, objRef):
-		''' Given an unarchived object referece, this method returns the actual object for it (or None if the reference is NULL or dangling). While this method assumes that obj refs are stored as 64-bit numbers containing the class id and object serial number, subclasses are certainly able to override that assumption by overriding this method. '''
+		"""
+		Given an unarchived object reference, this method returns the
+		actual object for it (or None if the reference is NULL or
+		dangling). While this method assumes that obj refs are stored
+		as 64-bit numbers containing the class id and object serial
+		number, subclasses are certainly able to override that
+		assumption by overriding this method.
+		"""
 		assert type(objRef) is LongType, 'type=%r, objRef=%r' % (type(objRef), objRef)
-		if objRef is None or objRef==0:
+		if objRef==0:
 			return None
 		else:
 			klassId, serialNum = objRefSplit(objRef)
@@ -416,10 +423,10 @@ class SQLObjectStore(ObjectStore):
 
 			clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
 			objs = self.fetchObjectsOfClass(klass, clauses, isDeep=0)
-			if len(objs)>1:
-				raise ValueError, 'Multiple objects.' # @@ 2000-11-22 ce: expand the msg with more information
-			elif len(objs)==1:
+			if len(objs)==1:
 				return objs[0]
+			elif len(objs)>1:
+				raise ValueError, 'Multiple objects.' # @@ 2000-11-22 ce: expand the msg with more information
 			else:
 				return self.objRefDangles(objRef)
 
