@@ -197,12 +197,12 @@ class Application(Configurable):
 	## Versions ##
 
 	def webKitVersion(self):
-		return '0.2'
+		return '0.3'
 
 	def version(self):
 		''' Returns the version of the application. This implementation returns '0.1'. Subclasses should override to return the correct version number. '''
 		## @@ 2000-05-01 ce: Maybe this could be a setting 'AppVersion'
-		return '0.2'
+		return '0.1'
 
 
 	## Dispatching Requests ##
