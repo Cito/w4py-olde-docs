@@ -148,6 +148,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] are any awake() methods appropriate?: fetch, insert
 
+	[ ] We could possibly provide a WebKit servlet factory for *.mkmodel. Actually, I don't know if WebKit likes servlet factories that match directories rather than files. Never tried it before.
+
 	[ ] The object model doesn't allow specification as to whether or not accessor methods, such as the getter and setter, should be provided.
 
 </refinements/improvements>
