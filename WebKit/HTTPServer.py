@@ -44,6 +44,10 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		if self.headers.has_key('Content-Type'):
 			env['CONTENT_TYPE'] = self.headers['Content-Type']
 			del self.headers['Content-Type']
+		key = 'If-Modified-Since'
+		if self.headers.has_key(key):
+			env[key] = self.headers[key]
+			del self.headers[key]
 		self.headersToEnviron(self.headers, env)
 		env['REMOTE_ADDR'], env['REMOTE_PORT'] = map(str, self.client_address)
 		env['REQUEST_METHOD'] = self.command
@@ -115,6 +119,10 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 	def sendBody(self, bodyFile):
 		self.wfile.write(bodyFile.read())
 		bodyFile.close()
+
+	def log_request(self, code='-', size='-'):
+		# Set LogActivity instead.
+		pass
 
 
 class HTTPAppServerHandler(Handler, HTTPHandler):
