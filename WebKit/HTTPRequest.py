@@ -1,7 +1,7 @@
 from Common import *
 from Request import Request
 from WebUtils.Cookie import Cookie
-import os, cgi
+import os, cgi, sys, traceback
 from types import ListType
 from WebUtils.Funcs import requestURI
 from WebUtils import FieldStorage
@@ -41,7 +41,12 @@ class HTTPRequest(Request):
 			self._fields.parse_qs()
 			self._cookies = Cookie()
 			if self._environ.has_key('HTTP_COOKIE'):
-				self._cookies.load(self._environ['HTTP_COOKIE'])
+				# Protect the loading of cookies with an exception handler, because some cookies
+				# from IE are known to break the cookie module.
+				try:
+					self._cookies.load(self._environ['HTTP_COOKIE'])
+				except:
+					traceback.print_exc(file=sys.stderr)
 		else:
 			# If there's no dictionary, we pretend we're a CGI script and see what happens...
 			import time

@@ -28,6 +28,7 @@ import socket
 import threading
 import time
 import errno
+import traceback
 from WebUtils import Funcs
 
 debug = 0
@@ -243,7 +244,10 @@ class ThreadedAppServer(AppServer):
 						break
 					if self.running:
 						t.processing=1
-						rh.handleRequest()
+						try:
+							rh.handleRequest()
+						except:
+							traceback.print_exc(file=sys.stderr)
 						t.processing=0
 					rh.close()
 				except Queue.Empty:
