@@ -23,6 +23,7 @@ from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 
 from TaskKit.Scheduler import Scheduler
 
+from ASStreamOut import ASStreamOut
 
 debug = 0
 
@@ -348,6 +349,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			# (*) We have to use pathInfo() instead of uri() when looking for the trailing slash, because some webservers, notably Apache, append a trailing / to REQUEST_URI in some circumstances even though the user did not specify that (for example: http://localhost/WebKit.cgi).
 
 		except:
+			if debug: print "*** ERROR ***"
 			if transaction:
 				transaction.setErrorOccurred(1)
 			self.handleExceptionInTransaction(sys.exc_info(), transaction)
@@ -362,7 +364,6 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		self.returnInstance(transaction, path)
 
 		# possible circular reference, so delete it
-		# @@ 2000-06-26 ce: we should have a more general solution for this
 		request.clearTransaction()
 		response.clearTransaction()
 
@@ -455,11 +456,15 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 	def forwardRequest(self, trans, URL):
 		"""
-		Enable a servlet to pass a request to another servlet.  No information is passed from one servlet to the next.
-		New Request, Response and Transaction objects are created.
+		Enable a servlet to pass a request to another servlet. The Request object is kept the same, and may be used
+		to pass information to the next servlet.  The next servlet may access the parent servlet through request.parent(),
+		which will return the parent servlet.  The first servlet will not be able to send any new response data once
+		the call to forwardRequest returns.
+		New Response and Transaction objects are created.
 		Currently the URL is always relative to the existing URL.
 		"""
 		if debug: print "forwardRequest called"
+
 		req = trans.request()
 
 		# URL is relative to the original
@@ -472,25 +477,25 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			lastSlash = string.rfind(urlPath, '/')
 			urlPath = urlPath[:lastSlash+1] + URL
 
-		newRequest = self.createRequestForDict(req.rawRequest())
-		newRequest.setURLPath(urlPath)
-		import ASStreamOut
-		strmOut = ASStreamOut.ASStreamOut()
-		newTrans = self.dispatchRequest(newRequest, strmOut)
-		textHeaders1 = string.find(strmOut._buffer,"\r\n\r\n")
-		textHeaders2 = string.find(strmOut._buffer,"\n\n")
-		if textHeaders1 and textHeaders2:
-			if textHeaders1 < textHeaders2:
-				textHeaders = textHeaders1
-			else:
-				textHeaders = textHeaders2
-		else: textHeaders = textHeaders1 or textHeaders2
-		trans.response().mergeTextHeaders(strmOut._buffer[:textHeaders])
-		trans.response().write(strmOut._buffer[textHeaders+1:])
-##		trans.response().appendRawResponse(newTrans.response().rawResponse())
+		#save the original URL
+		oldURL = req.urlPath()
+		req.setURLPath(urlPath)
 
+		#add a reference to the parent servlet
+		req.addParent(req.transaction()._servlet)
 
-	def forwardRequestFast(self, trans, URL):
+		#get the output stream and set it in the new response
+		strmOut = req.transaction().response().streamOut()
+		strmOut.clear()
+		newTrans = self.dispatchRequest(req, strmOut)
+		req.popParent()
+		req.setURLPath(oldURL)
+
+		#give the old response a dummy streamout- nasty hack, better idea anyone?
+		trans.response()._strmOut = ASStreamOut()
+		req._transaction = trans  #this is needed by dispatchRequest
+
+	def includeServlet(self, trans, URL):
 		"""
 		Enable a servlet to pass a request to another servlet.  This implementation
 		handles chaining and requestDispatch in Java.
@@ -499,10 +504,12 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		that is called may receive information through those objects.  The catch is that
 		the function WILL return to the calling servlet, so the calling servlet should either
 		take advantage of that or return immediately.
+		Also, if the response has already been partially sent, it can't be reversed.
 		"""
 
 
 		req = trans.request()
+		
 		#Save the things we're gonna change.
 		currentPath=req.urlPath()
 		currentServlet=trans._servlet
@@ -516,9 +523,11 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		else:
 			lastSlash = string.rfind(urlPath, '/')
 			urlPath = urlPath[:lastSlash+1] + URL
-		req.setURLPath(urlPath)
 
-		#Get the servlet
+		req.setURLPath(urlPath)
+		req.addParent(currentServlet)
+
+		#Get the new servlet
 		self.createServletInTransaction(trans)
 
 		#call the servlet, but not session, it's already alive
@@ -531,6 +540,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		#replace things like they were
 		#trans.request()._serverSidePath=currentPath
 		req.setURLPath(currentPath)
+		req.popParent()
 		trans._servlet=currentServlet
 
 
@@ -783,6 +793,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 		inst = None
 		cache = None
+
 
 		# Cached?
 		if self._cacheServletInstances:
