@@ -1,6 +1,7 @@
 from Common import *
 import string, time, traceback, types, whrandom, sys
 from time import asctime, localtime
+from MiscUtils.Funcs import dateForEmail
 from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict, htmlEncode
 from HTTPResponse import HTTPResponse
@@ -376,17 +377,3 @@ def osIdTable():
 			value = getattr(os, funcName)()
 			table.append({'name': funcName, 'value': value})
 	return table
-
-def dateForEmail():
-    """ Returns a properly formatted date/time string for email messages """
-    # @@ gat: this should be moved to MiscUtils
-    now = time.localtime(time.time())
-    if now[8] == 1:
-        offset = -time.altzone / 60
-    else:
-        offset = -time.timezone / 60
-    if offset<0:
-        plusminus = '-'
-    else:
-        plusminus = '+'
-    return time.strftime('%a, %d %b %Y %H:%M:%S ', now) + plusminus + '%02d%02d' % (abs(offset/60), abs(offset%60))

@@ -53,6 +53,21 @@ def charWrap(s, width, hanging=0):
 	return string.join(lines, '\n')
 
 
+def dateForEmail(now=None):
+	""" Returns a properly formatted date/time string for email messages """
+	if now is None:
+		now = time.localtime(time.time())
+	if now[8]==1:
+		offset = -time.altzone / 60
+	else:
+		offset = -time.timezone / 60
+	if offset<0:
+		plusminus = '-'
+	else:
+		plusminus = '+'
+	return time.strftime('%a, %d %b %Y %H:%M:%S ', now) + plusminus + '%02d%02d' % (abs(offset/60), abs(offset%60))
+
+
 def hostName():
 	'''
 	Returns the host name which is taken first from the os environment and failing that, from the 'hostname' executable. May return None if neither attempt succeeded.
