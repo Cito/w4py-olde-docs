@@ -133,7 +133,7 @@ class ModSnakeAdapter(Adapter):
 		headers = respdict[:headerend]
 		for i in string.split(headers, "\n"):
 			header = string.split(i, ":")
-			req.headers_out[header[0]] = header[1]
+			req.headers_out[header[0]] = string.join(header[1:], ":")
 			if string.lower(header[0]) == 'content-type': req.content_type = header[1]
 			if string.lower(header[0]) == 'status': req.status = int(string.split(string.lstrip(header[1]),' ')[0])
 		req.send_http_header()
