@@ -2,7 +2,7 @@ from Common import *
 from WebKit.Servlet import Servlet
 import sys
 from types import ClassType
-import imp
+import ImportSpy as imp   # ImportSpy provides find_module and load_module
 import threading
 
 

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import ImportSpy
 import os, sys, string
 
 

@@ -19,4 +19,8 @@
 
 ('CheckInterval', '100', 'The number of virtual instructions after which Python will check for thread switches, signal handlers, etc. This is passed directly to sys.setcheckinterval(). Benchmarks have shown 100 to give a worthwhile performance boost with higher values resulting in little gain.'),
 
+('AutoReload', '0', 'If true, the application server will monitor all source files for modifications, and will restart itself as necessary to pick up changes.  This feature only works on posix systems.'),
+
+('AutoReloadPollInterval', '1', 'If AutoReload is activated and FAM (File Alternation Monitor) is not installed, the application server will periodically check for source files for changes.  This setting specifies the number of seconds to wait between checking the source files.'),
+
 ]

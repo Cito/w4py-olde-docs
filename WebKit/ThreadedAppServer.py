@@ -16,7 +16,7 @@ FUTURE
 
 
 from Common import *
-from AppServer import AppServer
+from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 from MiscUtils.Funcs import timestamp
 from marshal import dumps, loads
 import os, sys
@@ -169,6 +169,8 @@ class ThreadedAppServer(AppServer):
 				threadCheck=0
 				self.manageThreadCount()
 			else: threadCheck = threadCheck+1
+
+			self.restartIfNecessary()
 
 	def activeThreadCount(self):
 		"""

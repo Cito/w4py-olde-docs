@@ -274,6 +274,7 @@ class ParseEventHandler:
 ##		self._writer.pushIndent()
 ##		self._writer.println('pass\n')
 ##		self._writer.popIndent()
+		self._writer.println("__orig_file__ = '%s'" % self._ctxt.getFullPspFileName())
 
 	def generateDeclarations(self):
 		# The PSP "extends" directive allows you to use a shortcut -- if the module name
