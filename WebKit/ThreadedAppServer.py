@@ -321,8 +321,8 @@ class RequestHandler:
 		self._buffer = ''
 		for item in rawResponse['headers']:
 			if string.lower(item[0]) == string.lower("Status"):
-				self._buffer = item[0] + ":" + str(item[1]) + "\n" + self._buffer
-			else: self._buffer = self._buffer + item[0] + ":" + str(item[1]) + "\n"
+				self._buffer = item[0] + ": " + str(item[1]) + "\n" + self._buffer
+			else: self._buffer = self._buffer + item[0] + ": " + str(item[1]) + "\n"
 
 		self._buffer = self._buffer + "\n" + rawResponse['contents']
 

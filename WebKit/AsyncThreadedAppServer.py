@@ -248,10 +248,12 @@ class RequestHandler(asyncore.dispatcher):
 
 		for item in rawResponse['headers']:
 			if string.lower(item[0]) == string.lower("Status"):
-				self._buffer = item[0] + ":" + str(item[1]) + "\n" + self._buffer
-			else: self._buffer = self._buffer + item[0] + ":" + str(item[1]) + "\n"
+				self._buffer = item[0] + ": " + str(item[1]) + "\n" + self._buffer
+			else: self._buffer = self._buffer + item[0] + ": " + str(item[1]) + "\n"
 
 		self._buffer = self._buffer + "\n" + rawResponse['contents']
+
+		if verbose: print self._buffer[:50]
 
 		self.have_response = 1
 
