@@ -230,8 +230,11 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	## Access ##
 
 	def version(self):
-		# @@ 2000-07-10 ce: Resolve this with the version methods in Application
-		return '0.7' # @@ 2002-02-26 ce: should pull from Properties.py
+		if not hasattr(self,'_webKitVersionString'):
+			from MiscUtils.PropertiesObject import PropertiesObject
+			props = PropertiesObject(os.path.join(self.webKitPath(), 'Properties.py'))
+			self._webKitVersionString = props['versionString']
+		return self._webKitVersionString
 
 	def application(self):
 		return self._app
