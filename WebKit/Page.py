@@ -176,6 +176,18 @@ class Page(HTTPServlet):
 		return instance
 
 
+	def sessionEncode(url=None):
+		"""
+		Utility function to access session.sessionEncode.
+		Takes a url and adds the session ID as a parameter.  This is for cases where
+		you don't know if the client will accepts cookies.
+		"""
+		if url == None:
+			url = self.request().uri()
+		return self.session().sessionEncode(url)
+
+
+
 	## Private utility ##
 
 	def _actionSet(self):
@@ -185,4 +197,5 @@ class Page(HTTPServlet):
 			for action in self.actions():
 				self._actionDict[action] = 1
 		return self._actionDict
+
 

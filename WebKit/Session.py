@@ -131,3 +131,22 @@ class Session(Object, CanContainer):
 	def expiring(self):
 		""" Called when session is expired by the application. """
 		pass
+
+
+	## Utility ##
+
+	def sessionEncode(self, url):
+		"""
+		Encode the session ID as a parameter to a url.
+		"""
+		import urlparse
+		sid = '__SID__' + self.identifier()
+		url=list(urlparse.urlparse(url)) #make a list
+		if url[4] == '':
+			url.pop(4)
+			url.insert(4, sid)
+		else:
+			params=url.pop(4)
+			url.insert(4, params + "&" + sid)
+		url = urlparse.urlunparse(url)
+		return url
