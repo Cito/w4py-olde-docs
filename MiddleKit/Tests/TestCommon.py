@@ -16,11 +16,7 @@ except ImportError:
 	FixPathForMiddleKit()
 	import MiddleKit
 
-try:
-	import MiscUtils
-except ImportError:
-	FixPathForMiscUtils()
-	import MiscUtils
+import MiscUtils
 
 
 from MiddleKit.Core.Klasses import Klasses

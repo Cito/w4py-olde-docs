@@ -13,17 +13,5 @@ def FixPathForMiddleKit():
 		index = 1
 	else:
 		index = 0
-	sys.path.insert(index, os.path.normpath('../..'))
+	sys.path.insert(index, os.path.abspath('../..'))
 	import MiddleKit
-
-
-def FixPathForMiscUtils():
-	''' If MiscUtils can't be imported, this method will be invoked to add ~/Projects/Webware to sys.path. '''
-	import os, sys
-	home = os.environ['HOME']
-	pjoin = os.path.join
-	if len(sys.path) and sys.path[0]=='':
-		index = 1
-	else:
-		index = 0
-	sys.path.insert(index, pjoin(home, 'Projects/Webware'))

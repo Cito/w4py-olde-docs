@@ -7,11 +7,7 @@ except ImportError:
 	FixPathForMiddleKit()
 	import MiddleKit
 
-try:
-	import MiscUtils
-except ImportError:
-	FixPathForMiscUtils()
-	import MiscUtils
+import MiscUtils
 
 
 import os, sys
