@@ -143,10 +143,11 @@ class ObjectStore(ModelUser):
 		"""
 		# First check if the delete is possible.  Then do the actual delete.  This avoids partially deleting
 		# objects only to have an exception halt the process in the middle.
-		objectsToDel = []
+		objectsToDel = {}
 		detaches = []
 		self._deleteObject(object, objectsToDel, detaches)
 		self.willChange()
+		objectsToDel = objectsToDel.values()
 		self._deletedObjects.extend(objectsToDel)
 		for obj in objectsToDel:
 			del self._objects[obj.key()]
@@ -161,7 +162,7 @@ class ObjectStore(ModelUser):
 		method since deleting one object might be deleting others.
 
 		object       - the object to delete
-		objectsToDel - a running list of all objects to delete
+		objectsToDel - a running dictionary of all objects to delete
 		detaches     - a running list of all detaches (eg, obj.attr=None)
 		superobject  - the object that was the cause of this invocation
 		"""
@@ -179,7 +180,7 @@ class ObjectStore(ModelUser):
 				cascadeString = dueTo = ''
 			print 'checking %sdelete of %s.%d%s' % (cascadeString, object.klass().name(), object.serialNum(), dueTo)
 
-		objectsToDel.append(object)
+		objectsToDel[id(object)] = object
 
 		# Deal with all other objects that reference or are referenced by this object.  By default, you are not allowed
 		# to delete an object that has an ObjRef pointing to it.  But if the ObjRef has
@@ -194,7 +195,7 @@ class ObjectStore(ModelUser):
 		# Get the objects/attrs that reference this object
 		referencingObjectsAndAttrs = object.referencingObjectsAndAttrs()
 		# Remove from that list anything in the cascaded list
-		referencingObjectsAndAttrs = [(o,a) for o,a in referencingObjectsAndAttrs if o not in objectsToDel]
+		referencingObjectsAndAttrs = [(o,a) for o,a in referencingObjectsAndAttrs if not objectsToDel.has_key(id(o))]
 
 		# Determine all referenced objects, constructing a list of (attr, referencedObject) tuples.
 		referencedAttrsAndObjects = []
@@ -207,7 +208,7 @@ class ObjectStore(ModelUser):
 				for obj in object.valueForAttr(attr):
 					referencedAttrsAndObjects.append((attr, obj))
 		# Remove from that list anything in the cascaded list
-		referencedAttrsAndObjects = [(a,o) for a,o in referencedAttrsAndObjects if o not in objectsToDel]
+		referencedAttrsAndObjects = [(a,o) for a,o in referencedAttrsAndObjects if not objectsToDel.has_key(id(o))]
 
 		# Check for onDeleteOther=deny
 		badObjectsAndAttrs = []
