@@ -49,6 +49,7 @@ class Installer:
 		self._verbose = verbose
 		if self._verbose: self.printMsg = self._printMsg
 		else: self.printMsg = self._nop
+		self.clearInstalledFile()
 		self.printHello()
 		self.detectComponents()
 		self.installDocs()
@@ -57,6 +58,14 @@ class Installer:
 		self.finished()
 		self.printGoodbye()
 		return self
+
+	def clearInstalledFile(self):
+		'''
+		Removes the _installed file which will get created at the very
+		end of installation, provided there are no errors.
+		'''
+		if os.path.exists('_installed'):
+			os.remove('_installed')
 
 	def printHello(self):
 		print '%(name)s %(versionString)s' % self._props
@@ -341,8 +350,11 @@ class Installer:
 			self.writeDocFile(title, filename, contents, extraHead=cssLink)
 
 	def finished(self):
-		''' This method is invoked just before printGoodbye(). It is a hook for subclasses. This implementation does nothing. '''
-		pass
+		'''
+		This method is invoked just before printGoodbye().
+		It writes the _installed file to disk.
+		'''
+		open('_installed', 'w').write('This file is written upon successful installation.\nLeave this file in place.\n')
 
 	def printGoodbye(self):
 		print '''

@@ -52,6 +52,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self._plugIns = []
 		self._reqCount = 0
 
+		self.checkForInstall()
 		self.config() # cache the config
 		self.printStartUpMessage()
 		sys.setcheckinterval(self.setting('CheckInterval'))
@@ -65,6 +66,20 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			self._closeThread = Thread(target=self.closeThread)
 ##			self._closeThread.setDaemon(1)
 			self._closeThread.start()
+
+	def checkForInstall(self):
+		'''
+		Exits with an error message if Webware was not installed.
+		'''
+		if not os.path.exists(os.path.join(self._webwarePath, '_installed')):
+			sys.stdout = sys.stderr
+			print 'ERROR: You have not installed Webware.'
+			print 'Please run install.py from inside the Webware directory.'
+			print 'For example:'
+			print '> cd ..'
+			print '> python install.py'
+			print
+			sys.exit(0)
 
 	def closeThread(self):
 		self._closeEvent.wait()
