@@ -26,5 +26,7 @@ WebKitConfig = {
 		'ListBox',
 		'Forward',
 		'SecureCountVisits',
+		'FileUpload',
+		'PushServlet',
 	]
 }
