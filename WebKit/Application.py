@@ -10,8 +10,9 @@ from UnknownFileType import UnknownFileTypeServletFactory
 from types import FloatType
 from glob import glob
 import Queue
-from threading import Lock
+from threading import Lock, Thread
 from CanContainer import *
+
 
 
 try:
@@ -80,14 +81,13 @@ class Application(Configurable):
 	
 	## Init ##
 	
-	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None):
+	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None, Contexts=None):
 
-		self._Contexts={'default':'Examples',
-				'':'Examples',
-				}
+
 		Configurable.__init__(self)
 
 		self._server = server
+
 
 		if transactionClass:
 			self._transactionClass = transactionClass
@@ -125,6 +125,11 @@ class Application(Configurable):
 		self._serverSidePathCacheByPath = {}
 		self._serverDir = os.getcwd()
 		self._cacheDictLock = Lock()
+		
+		if Contexts: #Try to get this from the Config file
+			self._Contexts = Contexts
+		else: #Get it from Configurable object, which gets it from defaults or the user config file
+			self._Contexts=self.setting('Contexts')
 
 		# Set up servlet factories		
 		self._factoryList = []  # the list of factories
@@ -142,6 +147,15 @@ class Application(Configurable):
 		import CanFactory
 		self._canFactory = CanFactory.CanFactory(self,os.path.join(os.getcwd(),'Cans'))
 		#JSL
+
+		#JSL
+		self._startSessionSweeper()
+
+	def _startSessionSweeper(self):
+		from Session import Sweeper
+		self._sessSweepThread=Thread(None, Sweeper, 'SessionSweeper', (self._sessions,self.setting('SessionTimeout')))
+		self._sessSweepThread.start()
+		
 
 		
 	## Config ##
@@ -167,7 +181,10 @@ class Application(Configurable):
 				                        'Reply-to':     '-@-.com',
 				                        'Content-type': 'text/html',
 				                        'Subject':      'Error'
-									}
+									},
+			'Contexts':{'default':'Examples',
+							'Examples':'Examples',},
+			'SessionTimeout':60, #seconds, s/b 1800 (30 min) in real life
 		}
 	
 	def configFilename(self):
@@ -182,7 +199,7 @@ class Application(Configurable):
 	def version(self):
 		''' Returns the version of the application. This implementation returns '0.1'. Subclasses should override to return the correct version number. '''
 		## @@ 2000-05-01 ce: Maybe this could be a setting 'AppVersion'
-		return '0.1'
+		return '0.2'
 
 			
 	## Dispatching Requests ##
@@ -199,6 +216,8 @@ class Application(Configurable):
 			session     = self.createSessionForTransaction(transaction)
 			response    = self.createResponseInTransaction(transaction)
 			self.createServletInTransaction(transaction)
+			#print ">> refcount1=",sys.getrefcount(transaction.servlet())
+			
 
 			self.awake(transaction)
 			self.respond(transaction)
@@ -217,10 +236,35 @@ class Application(Configurable):
 		
 		#JSL
 		path = transaction._request.serverSidePath()
+
 		self.returnInstance(transaction,path)
 		#JSL
-		
+
+		transaction.request()._transaction=None
+		#print ">> refcount2=",sys.getrefcount(transaction.servlet())
 		return transaction
+
+	def forwardRequest(self, trans, URL):
+		"""Enable a servlet to pass a request to another servlet.  This implementation handles chaining and requestDispatch in Java.
+		The catch is that the function WILL return to the calling servlet, so it should either take advantage of that or return
+		immediately."""
+		currentPath=trans.request().serverSidePath()
+		currentServlet=trans._servlet
+		trans.request()._serverSidePath=self.serverSidePathForRequest(trans.request(),URL)
+		#print ">> ",trans.request()._serverSidePath
+		self.createServletInTransaction(trans)
+		
+		trans.servlet().awake(trans)
+		trans.servlet().respond(trans)
+		trans.servlet().sleep(trans)
+		
+		self.returnInstance(trans,trans.request().serverSidePath())
+		
+		trans.request()._serverSidePath=currentPath
+		trans._servlet=currentServlet
+
+		return
+	
 
 
 	## Transactions ##
@@ -417,6 +461,8 @@ class Application(Configurable):
 		if not dir in sys.path:
 			sys.path.insert(0, dir)
 		inst = factory.servletForTransaction(transaction)
+		#print ">> servlet refcnt after creation=", sys.getrefcount(inst)
+		#print ">> trans refcnt after creation=", sys.getrefcount(transaction)
 		assert inst is not None, 'Factory (%s) failed to create a servlet upon request.' % factory.name()
 
 		if cache:
@@ -430,8 +476,12 @@ class Application(Configurable):
 		if not cache['threadsafe']:
 			try:
 				cache['instances'].put_nowait(transaction.servlet())
+				return
 			except Queue.Full:
-				print '>> queue full' #do nothing, don't want to block queue for this
+				pass
+##				print '>> queue full' #do nothing, don't want to block queue for this
+		import sys
+		#print ">> ",sys.getrefcount(transaction._servlet)
 			
 	def newServletCacheItem(self,key,item):
 		""" Safely add new item to the main cache.  Not woried about the retrieval for now.
@@ -459,7 +509,7 @@ class Application(Configurable):
 	
 		if not cache:
 			cache = {
-				'instances':  Queue.Queue(self.MAX_QUEUE_SIZE), #no max size on the Queue, should be configurable
+				'instances':  Queue.Queue(self.MAX_QUEUE_SIZE), #max size on the Queue, should be configurable
 				'path':       path,
 				'timestamp':  os.path.getmtime(path),
 				'threadsafe': 0,
@@ -481,11 +531,11 @@ class Application(Configurable):
 
 		elif not cache['threadsafe']:
 			""" Not threadsafe, so need multiple instances"""
-			print '>> Queue size:', cache['instances'].qsize()
+##			print '>> Queue size:', cache['instances'].qsize()
 			try:
 				inst = cache['instances'].get_nowait()
 			except Queue.Empty:
-				print ">> Instance cache queue is empty"
+##				print ">> Instance cache queue is empty"
 				if not cache['instances'].empty:
 					inst = cache['instances'].get() # block, it's really there
 				else:
@@ -493,7 +543,6 @@ class Application(Configurable):
 		
 		# Must be reuseable and threadsafe, get it and put it right back, I'm assuming this will be a rare case
 		else:
-			print 'in else'
 			inst = cache['instances'].get()
 			cache['instances'].put(inst)
 				
@@ -523,7 +572,7 @@ class Application(Configurable):
 				try:
 					prepath = self._Contexts[contextName]
 				except KeyError:
-					print 'KeyError'
+					print '>> KeyError'
 					head=urlPath #put the old path back, there's no context here
 					prepath = self._Contexts['default']
 				#prepath = self.setting('ServletsDir')
@@ -540,7 +589,6 @@ class Application(Configurable):
 				else:
 					return None  # that's right: return None and don't modify the cache
 			self._serverSidePathCacheByPath[urlPath] = ssPath
-
 			
 		return ssPath
 
