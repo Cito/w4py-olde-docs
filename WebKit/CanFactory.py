@@ -6,9 +6,11 @@ import sys
 class CanFactory:
 	"""Creates Cans on demand.  Looks only in the Cans directories.
 	Unfortunately, this is a nasty hack, at least as far as directories are concerned.  The situation is that
-	we want to be able to store Cans in he session object.  Session objects can be stored in files via pickling.
+	we want to be able to store Cans int he session object.  Session objects can be stored in files via pickling.
 	When they are unpickled, the class module must be in sys.path.  The solution to this is custom importing,
 	and apparently no one has time to get to that.
+	So the current situation is that we continue to use a list of Can directories for Can creation, but we
+	add that path to sys.path so that unpickling works correctly.
 	"""
 	def __init__(self, app):
 		self._canClasses={}
@@ -20,6 +22,7 @@ class CanFactory:
 				sys.path.append(i)
 
 	def addCanDir(self, newdir):
+		#Nasty Hack
 		self._canDirs.append(newdir)
 		sys.path.append(newdir)
 

@@ -5,14 +5,13 @@ class CanContainer:
 	def __init__(self):
 		self._Cans={}
 
-	def getCan(self, CanID):
+	def getCan(self, CanID, *args, **kwargs):
 		try:
 			return self._Cans.get(CanID)
 		except AttributeError:
+			#The init function for this class won't get called.  So an AttributeError means self._Cans doesn't exist yet.
 			self._Cans={}
-			return None
-		
-			
+			return None			
 
 	def delCan(self, CanID):
 		del self._Cans[CanID]
