@@ -1,9 +1,12 @@
 MiddleKit
 TO DO
 
+
 Update
 ------
 [ ] Implement all ***
+
+[ ] Resolve issue with MiddleObjects pointing back to their store
 
 [ ] Make sure all changes are documented.
 
@@ -74,10 +77,6 @@ If you have general comments or questions or contributions, please contact webwa
 			- dangle (very dangerous)
 		Use UML terminology if such a thing exists.
 
-EODeleteRuleNullify
-EODeleteRuleCascade
-EODeleteRuleDeny
-EODeleteRuleNoAction
 	[ ] Distinct lists: An object such as "Video" cannot have a directors and writers attribute that are both typed "list of Person". Might want to review UML relationships before calling the deal on this.
 
 	[ ] Support defaults in both Python code gen and SQL code gen
@@ -235,6 +234,8 @@ specification."
 
 	[ ] (per Dave R) fault tolerance: If the database connection goes down, re-establish it.
 
+	[ ] SQL supports macroscopic operations on columns such as MIN, MAX, AVG, etc. that are fast. MK ObjectStore and company should provide an interface that can tap into this power, while still maintaining independence from SQL (for the interface, not the implementation) and while supporting inheritance.
+
 	[ ] error checking: validate that class names and attribute names are valid
 
 	[ ] Should __setattr__ invoke willChange() when changes really occur so that willChange() can be come a hook for subclasses (for example, to implement notifications which could then be used in a GUI environment)?
@@ -306,7 +307,7 @@ specification."
 		- Also, assert that there are no outstanding changes. Maybe:
 			assert not self.isChanged()
 
-	*** [ ] Convert all uses of _NoDefault to MiscUtils.NoDefault
+	[x] Convert all uses of _NoDefault to MiscUtils.NoDefault
 
 	*** [ ] rename initFromRow() to readRow() or something
 
