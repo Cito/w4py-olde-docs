@@ -55,15 +55,15 @@ class PSPServletFactory(ServletFactory):
             return ['.psp']
 
 	def computeClassName(self,pagename):
-	    tail=None
-		junk,pagename=os.path.splitdrive(pagename)
-	    head,tail = os.path.split(pagename)
-	    className = string.replace(tail,'.','_')
-	    while head != '/' and head != '':
-		head, tail = os.path.split(head)
-		className = tail + '_'+ className
-	    className=string.replace(className,'.','_')
-	    return className
+		tail = None
+		junk, pagename = os.path.splitdrive(pagename)
+		head,tail = os.path.split(pagename)
+		className = string.replace(tail,'.','_')
+		while os.path.isdir(head) and tail != '':
+			head, tail = os.path.split(head)
+			className = tail + '_'+ className
+			className=string.replace(className,'.','_')
+		return className
 
 	def createInstanceFromFile(self,filename,classname,mtime):
 	    globals={}
