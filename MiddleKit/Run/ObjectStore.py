@@ -147,19 +147,25 @@ class ObjectStore(ModelUser):
 		if not checkOnly:
 			self.doDeleteObject(object, 0)
 		
-	def doDeleteObject(self, object, checkOnly):
+	def doDeleteObject(self, object, checkOnly, cascaded=[]):
 		'''
 		Do the work of deleting the object.  If checkOnly is true then only do the checks, don't actually delete anything.
 		If checkOnly is false then go ahead and delete, assuming all checks have already been done.
+		cascaded is a list of objects that have already been deleted higher up in a cascade-delete.
 		'''
 		# Some basic assertions
 		assert self.hasObject(object)
 		assert object.key() is not None
-		
-		if checkOnly:
-			print 'checking delete of %s.%d' % (object.klass().name(), object.serialNum())
+
+		if cascaded:
+			cascadeString = 'cascade-'
+			dueTo = ' due to deletion of ' + ', '.join(['%s.%d' % (o.klass().name(), o.serialNum()) for o in cascaded])
 		else:
-			print 'deleting %s.%d' % (object.klass().name(), object.serialNum())
+			cascadeString = dueTo = ''
+		if checkOnly:
+			print 'checking %sdelete of %s.%d%s' % (cascadeString, object.klass().name(), object.serialNum(), dueTo)
+		else:
+			print '%sdeleting %s.%d%s' % (cascadeString, object.klass().name(), object.serialNum(), dueTo)
 
 		# Deal with all other objects that reference or are referenced by this object.  By default, you are not allowed
 		# to delete an object that has an ObjRef pointing to it.  But if the ObjRef has
@@ -173,6 +179,8 @@ class ObjectStore(ModelUser):
 
 		# Get the objects/attrs that reference this object
 		referencingObjectsAndAttrs = object.referencingObjectsAndAttrs()
+		# Remove from that list anything in the cascaded list
+		referencingObjectsAndAttrs = [(o,a) for o,a in referencingObjectsAndAttrs if o not in cascaded]
 
 		# Determine all referenced objects, constructing a list of (attr, referencedObject) tuples.
 		referencedAttrsAndObjects = []
@@ -184,6 +192,8 @@ class ObjectStore(ModelUser):
 			elif isinstance(attr, ListAttr):
 				for obj in object.valueForAttr(attr):
 					referencedAttrsAndObjects.append((attr, obj))
+		# Remove from that list anything in the cascaded list
+		referencedAttrsAndObjects = [(a,o) for a,o in referencedAttrsAndObjects if o not in cascaded]
 
 		# Check for onDeleteOther=deny
 		badObjectsAndAttrs = []
@@ -217,23 +227,13 @@ class ObjectStore(ModelUser):
 		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
 			onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
 			if onDeleteOther == 'cascade':
-				# @@ gat: should protect against infinite recursion here.
-				if checkOnly:
-					print 'checking cascade-delete of %s.%d' % (referencingObject.klass().name(), referencingObject.serialNum())
-				else:
-					print 'cascade-deleting %s.%d' % (referencingObject.klass().name(), referencingObject.serialNum())
-				self.doDeleteObject(referencingObject, checkOnly=checkOnly)
+				self.doDeleteObject(referencingObject, checkOnly=checkOnly, cascaded=cascaded+[object])
 
 		# Check if it's possible to cascade-delete objects with onDeleteSelf=cascade
 		for referencedAttr, referencedObject in referencedAttrsAndObjects:
 			onDeleteSelf = referencedAttr.get('onDeleteSelf', 'detach')
 			if onDeleteSelf == 'cascade':
-				# @@ gat: should protect against infinite recursion here.
-				if checkOnly:
-					print 'checking cascade-delete of %s.%d' % (referencedObject.klass().name(), referencedObject.serialNum())
-				else:
-					print 'cascade-deleting %s.%d' % (referencedObject.klass().name(), referencedObject.serialNum())
-				self.doDeleteObject(referencedObject, checkOnly=checkOnly)
+				self.doDeleteObject(referencedObject, checkOnly=checkOnly, cascaded=cascaded+[object])
 
 		# Detach objects with onDeleteOther=detach
 		if not checkOnly:

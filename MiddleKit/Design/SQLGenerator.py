@@ -352,12 +352,17 @@ class Klass:
 					lastSQLAttr = i
 					break
 				i -= 1
-			for i in range(len(allAttrs)):
-				if i<lastSQLAttr:
-					lineTerm = ',\n'
+			sqlAttrs = [attr for attr in allAttrs if attr.hasSQLColumn()]
+			for attr in sqlAttrs:
+				attr.writeCreateSQL(generator, out)
+				if attr is sqlAttrs[-1]:
+					out.write('\n')
 				else:
-					lineTerm = '\n'
-				allAttrs[i].writeCreateSQL(generator, out, lineTerm)
+					out.write(',\n')
+			nonSQLAttrs = [attr for attr in allAttrs if not attr.hasSQLColumn()]
+			for attr in nonSQLAttrs:
+				attr.writeCreateSQL(generator, out)
+				out.write('\n')
 			wr(');\n\n\n')
 
 	def primaryKeySQLDef(self, generator):
@@ -402,7 +407,7 @@ class Attr:
 			# make _sqlValue()
 		return value
 
-	def writeCreateSQL(self, generator, out, lineTerm):
+	def writeCreateSQL(self, generator, out):
 		if self.hasSQLColumn():
 			name = self.sqlName().ljust(self.maxNameWidth())
 			if self.isRequired():
@@ -415,9 +420,9 @@ class Attr:
 					defaultSQL = ' ' + defaultSQL
 			else:
 				defaultSQL = ''
-			out.write('\t%s %s%s%s%s' % (name, self.sqlType(), notNullSQL, defaultSQL, lineTerm))
+			out.write('\t%s %s%s%s' % (name, self.sqlType(), notNullSQL, defaultSQL))
 		else:
-			out.write('\t/* %(Name)s %(Type)s - not a SQL column */\n' % self)
+			out.write('\t/* %(Name)s %(Type)s - not a SQL column */' % self)
 
 	def createDefaultSQL(self):
 		default = self.get('Default', None)
