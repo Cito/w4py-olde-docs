@@ -8,12 +8,8 @@ class MSSQLSQLGenerator(SQLGenerator):
 	def sqlSupportsDefaultValues(self):
 		return 0 # I think it does but I do not know how it is implemented
 
+
 	pass
-
-
-# @@ 2000-09-14 ce: Some of the methods here are generic enough for SQLGenerator,
-# but our class fusing code doesn't handle classes found in the modules of
-# ancestor classes of the generator class.
 
 
 class Model:
@@ -29,35 +25,51 @@ class Model:
 class Klasses:
 
 	def dropDatabaseSQL(self, dbName):
-		"""
+		'''
 		Rather than drop the database, I prefer to drop just the tables.
 		The reason is that the database in MSSQL can contain users and diagrams that would then need to be re-added or re-created
 		Its better to drop the tables than delete them because if you delete the data, the identities need to be reset.
 		What is even worse is that identity resets behave differently depending on whether data has existed in them at any given point.
 		Its safer to drop the table.  dr 4-11-2001
-		"""
+		'''
 		strList = []
-		strList.append('use %s\ngo\n' % dbName)
-		self._klasses.reverse()		
-		for klass in self._model._allKlassesInOrder:
+#		strList.append('use %s\ngo\n' % dbName)
+		strList.append('use Master\ngo\n')
+		strList.append("if exists( select * from master.dbo.sysdatabases where name = N'%s') drop database %s;\ngo \n" % (dbName, dbName))
+
+		if 0:
+			self._klasses.reverse()
+			for klass in self._klasses:
+			# If table exists drop.
+				strList.append("print 'Dropping table %s'\n" % klass.name())
+				strList.append("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % klass.name() )
+				strList.append('drop table [dbo].%s\n' % klass.sqlTableName())
+				strList.append('go\n\n')
+			self._klasses.reverse()
+
+		return ''.join(strList) 
+
+	def dropTablesSQL(self):		
+		strList = []
+		self._klasses.reverse()
+		for klass in self._klasses:
 		# If table exists drop.
 			strList.append("print 'Dropping table %s'\n" % klass.name())
 			strList.append("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % klass.name() )
-			strList.append('drop table [dbo].[%s]\n' % klass.name())
+			strList.append('drop table [dbo].%s\n' % klass.sqlTableName())
 			strList.append('go\n\n')
 		self._klasses.reverse()
-
-		return ''.join(strList) # I do not want to drop by dbase since I lose my users I've added to it
-		# return 'drop database %s;\n' % dbName
+		return ''.join(strList)
+	
 
 	def createDatabaseSQL(self, dbName):
-		""" 
+		'''
 		Creates the database only if it does not already exist
-		"""
-		return 'Use Master\n' + 'go\n\n' + "if not exists( select * from master.dbo.sysdatabases where name = N'%s' ) create database %s; \n" % (dbName, dbName)
+		'''
+		return 'Use Master\n' + 'go\n\n' + "if not exists( select * from master.dbo.sysdatabases where name = N'%s' ) create database %s;\ngo \n" % (dbName, dbName)
 
 	def useDatabaseSQL(self, dbName):
-		return 'use %s;\n\n' % dbName
+		return 'USE %s;\n\n' % dbName
 
 	def sqlGenerator(self):
 		return generator
@@ -67,10 +79,10 @@ class Klasses:
 
 	def writeClassIdsSQL(self, generator, out):
 		wr = out.write
-# If _MKClassIds table exists drop it before creating it again.	
+# If _MKClassIds table exists drop it before creating it again.
 		wr('''\
 
-if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[_MKClassIds]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)		
+if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[_MKClassIds]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)
 drop table [dbo].[_MKClassIds]
 go
 
@@ -81,16 +93,19 @@ create table _MKClassIds (
 ''')
 		wr('delete from _MKClassIds\n\n')
 		id = 1
-		for klass in self._model._allKlassesInOrder:
+		for klass in self._klasses:
 			wr('insert into _MKClassIds (id, name) values\n')
-			wr ('\t(%s, %r)\n' % (id, klass.name()))
+			name = klass.name()
+#			name = name.replace('[','')
+#			name = name.replace(']','')
+			wr ('\t(%s, %r)\n' % (id, name))
 			klass.setId(id)
 			id += 1
 		wr('\ngo\n\n')
 
 
 	def writeKeyValue(self, out, key, value):
-		""" Used by willWriteSQL(). """
+		''' Used by willWriteSQL(). '''
 		key = ljust(key, 12)
 		out.write('# %s = %s\n' % (key, value))
 
@@ -105,7 +120,7 @@ create table _MKClassIds (
 		kv(out, 'Cur dir', os.getcwd())
 		kv(out, 'Num classes', len(self._klasses))
 		wr('\nClasses:\n')
-		for klass in self._model._allKlasses:
+		for klass in self._klasses:
 			wr('\t%s\n' % klass.name())
 		wr('*/\n\n')
 
@@ -115,10 +130,10 @@ create table _MKClassIds (
 
 # If database doesn't exist create it.
 		dbName = generator.dbName()
-		wr('Use %s\ngo\n\n' % dbName)\
-		
+#		wr('Use %s\ngo\n\n' % dbName)\
 
-		rList = self._model._allKlassesInOrder[:]
+
+		rList = self._klasses[:]
 		rList.reverse()
 #		print str(type(rList))
 #		for klass in rList:
@@ -145,14 +160,14 @@ class Klass:
 #			wr('create table [%s] (\n' % name)
 #			wr('	%s bigint primary key not null IDENTITY (1, 1),\n' % ljust(sqlIdName, self.maxNameWidth()))
 
-#			for attr in self.allDataAttrs():
+#			for attr in self.allAttrs():
 #				attr.writeSQL(generator, out)
-				
+
 #			wr('	unique (%s)\n' % sqlIdName)
 #			wr(')\ngo\n\n\n')
 
 	def sqlIdName(self):
-		name = self.name()
+		name = self._name # do not need or want protected name
 		if name:
 			name = lower(name[0]) + name[1:] + 'Id'
 		return name
@@ -161,15 +176,9 @@ class Klass:
 		return 30   # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
 
 	def primaryKeySQLDef(self, generator):
-		"""
-		Returns a one liner that becomes part of the CREATE
-		statement for creating the primary key of the
-		table. SQL generators often override this mix-in
-		method to customize the creation of the primary key
-		for their SQL variant. This method should use
-		self.sqlIdName() and often ljust()s it by
-		self.maxNameWidth().
-		"""
+		'''
+		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
+		'''
 
 #		print("print 'Creating table %s'\n" % name)
 #		print('create table [%s] (\n' % name)
@@ -178,12 +187,28 @@ class Klass:
 		return z
 
 
+#	def name(self):
+#		return '[' + self._name + ']'
+
+
+	def sqlTableName(self):
+		"""
+		Returns "[name]" so that table names do not conflict with SQL
+		reserved words.
+		"""
+		return '[%s]' % self.name()
+
+
+
 class Attr:
+
+	def sqlNullSpec(self):
+		return ' null'
 
 	def _writeSQL(self, generator, out):
 		if self.hasSQLColumn():
 			name = ljust(self.sqlName(), self.maxNameWidth())
-			out.write('\t%s %s null,\n' % (name, self.sqlType()))
+			out.write('\t[%s] %s null,\n' % (name, self.sqlType()))
 		else:
 			out.write('\t/* %(Name)s %(Type)s - not a SQL column */\n' % self)
 
@@ -194,6 +219,16 @@ class Attr:
 		return self['Type']
 		# @@ 2000-10-18 ce: reenable this when other types are implemented
 		raise SubclassResponsibilityError
+
+	def sqlName(self):
+		return '[' + self.name() + ']'
+
+	def sqlColumnName(self):
+		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
+		if not self._sqlColumnName:
+			self._sqlColumnName = self.name() # + self.sqlTypeSuffix()
+		return '[' + self._sqlColumnName + ']'
+
 
 class DateTimeAttr:
 	def sqlType(self):
@@ -210,7 +245,7 @@ class TimeAttr:
 class BoolAttr:
 
 	def sqlType(self):
-		# @@ 
+		# @@
 		return 'bit'
 
 class DecimalAttr:
@@ -227,7 +262,7 @@ class DecimalAttr:
 			precision = self['numDecimalPlaces']
 
 		return 'decimal(%s,%s)' % (length,precision)
-		
+
 
 class LongAttr:
 
@@ -267,7 +302,7 @@ class ObjRefAttr:
 			return 'bigint foreign key references %(Type)s(%(Type)sID) ' % self
 		else:
 			return 'bigint /* relates to %s */ ' % self['Type']
-		
+
 
 
 class ListAttr:
@@ -287,3 +322,5 @@ class FloatAttr:
 	def sampleValue(self, value):
 		float(value) # raises exception if value is invalid
 		return value
+
+
