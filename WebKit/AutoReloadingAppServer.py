@@ -30,6 +30,7 @@ except:
 
 from ImportSpy import modloader
 
+
 DefaultConfig = {
 	'AutoReload':                 0,
 	'AutoReloadPollInterval':     1,  # in seconds
@@ -98,16 +99,20 @@ class AutoReloadingAppServer(AppServer):
 	## Restart methods
 
 	def restartIfNecessary(self):
-		"""This should be called regularly to see if a restart is required,
-		and if so, reinitialize the process using os.execve()
+		"""
+		This should be called regularly to see if a restart is
+		required, and if so, reinitialize the process using
+		os.execve()
 
-		Tavis Rudd claims: "this method can only be called by the main thread.
-		If a worker thread calls it, the process will freeze up."  
+		Tavis Rudd claims: "this method can only be called by
+		the main thread.  If a worker thread calls it, the
+		process will freeze up."
 
-		I've implemented it so that the ThreadedAppServer's control thread
-		calls this.  That thread is _not_ the MainThread (the initial thread 
-		created by the Python interpreter), but I've never encountered any 
-		problems.  Most likely Tavis meant a freeze would occur if a 
+		I've implemented it so that the ThreadedAppServer's
+		control thread calls this.  That thread is _not_ the
+		MainThread (the initial thread created by the Python
+		interpreter), but I've never encountered any problems.
+		Most likely Tavis meant a freeze would occur if a
 		_worker_ called this.
 		"""
 		if self._shouldRestart:
@@ -127,10 +132,13 @@ class AutoReloadingAppServer(AppServer):
 	
 	## Callbacks
 
-	def monitorNewModule(self,filepath,mtime):
-		""" This is a callback which ImportSpy invokes to notify us
-		of new files to monitor.  This is only used when we are using FAM."""
-		self._requests.append( self._fc.monitorFile(filepath, filepath) )
+	def monitorNewModule(self, filepath, mtime):
+		"""
+		This is a callback which ImportSpy invokes to notify
+		us of new files to monitor.  This is only used when we
+		are using FAM.
+		"""
+		self._requests.append(self._fc.monitorFile(filepath, filepath) )
 
 
 	## Internal methods
@@ -143,7 +151,6 @@ class AutoReloadingAppServer(AppServer):
 		pollInterval = self.setting('AutoReloadPollInterval')
 		while self._autoReload:
 			time.sleep(pollInterval)
-
 			for f, mtime in modloader.fileList().items():
 				try:
 					if mtime < getmtime(f):

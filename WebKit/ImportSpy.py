@@ -1,7 +1,9 @@
 import ihooks
 import os
+import sys
 
-''' ImportSpy.py
+"""
+ImportSpy.py
 
 The purpose of this module is to record the filepath of every module which 
 is imported.  This is used by the AutoReloadingAppServer (see doc strings 
@@ -9,8 +11,8 @@ for more information) to restart the server if any source files change.
 
 Other than keeping track of the filepaths, the behaviour of this module
 loader is identical to Python's default behaviour.
+"""
 
-'''
 
 class ModuleLoader(ihooks.ModuleLoader):
 
@@ -18,33 +20,46 @@ class ModuleLoader(ihooks.ModuleLoader):
 		ihooks.ModuleLoader.__init__(self)
 		self._fileList = {}
 		self._notifyHook = None
+		self.recordModules(sys.modules.keys())
 
 	def load_module(self,name,stuff):
 		try:
-			mod = ihooks.ModuleLoader.load_module(self,name,stuff)
-			self.recordFileName(stuff,mod)
+			mod = ihooks.ModuleLoader.load_module(self, name, stuff)
+			self.recordFileName(stuff, mod)
 		except:
-			self.recordFileName(stuff,None)
+			self.recordFileName(stuff, None)
 			raise
 		return mod
+
+	def recordModules(self, moduleNames):
+		for name in moduleNames:
+			mod = sys.modules[name]
+			if not hasattr(mod, '__file__'):
+				# If we can't find it, we can't monitor it
+				continue
+			file = mod.__file__
+			pathname = os.path.dirname(file)
+			desc = None
+			self.recordFileName((file, pathname, desc),
+					    sys.modules[name])
 
 	def fileList(self):
 		return self._fileList
 
-	def notifyOfNewFiles(self,hook):
-		''' Called by someone else to register that they'd like to 
-		be know when a new file is imported '''
+	def notifyOfNewFiles(self, hook):
+		""" Called by someone else to register that they'd like to 
+		be know when a new file is imported """
 		self._notifyHook = hook
 
-	def addToFileList(self,filepath,getmtime=os.path.getmtime):
+	def addToFileList(self, filepath, getmtime=os.path.getmtime):
 		modtime = getmtime(filepath)
 		self._fileList[filepath] = modtime
 		# send notification that this file was imported 
 		if self._notifyHook:
 			self._notifyHook(filepath,modtime)
 
-	def recordFileName(self,stuff,mod,isfile=os.path.isfile):
-		file,pathname,desc = stuff
+	def recordFileName(self, stuff, mod, isfile=os.path.isfile):
+		file, pathname, desc = stuff
 
 		fileList = self._fileList
 		if mod:
@@ -71,9 +86,10 @@ class ModuleLoader(ihooks.ModuleLoader):
 				except OSError:
 					pass
 
-		# also record filepaths which weren't successfully loaded, which
-		# may happen due to a syntax error in a servlet, because we also want
-		# to know when such a file is modified
+		# also record filepaths which weren't successfully
+		# loaded, which may happen due to a syntax error in a
+		# servlet, because we also want to know when such a
+		# file is modified
 		elif pathname:
 			if isfile(pathname):
 				self.addToFileList(pathname)
@@ -86,10 +102,10 @@ modloader = ModuleLoader()
 imp = ihooks.ModuleImporter(loader=modloader)
 ihooks.install(imp)
 
-''' These two methods are compatible with the 'imp' module (and can
+""" These two methods are compatible with the 'imp' module (and can
 therefore be useds as drop-in replacements), but will use the
 above ModuleLoader to record the pathnames of imported modules.
-'''
+"""
 
 def load_module(name, file, filename, description):
 	return modloader.load_module(name,(file,filename,description))
