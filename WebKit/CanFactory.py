@@ -5,44 +5,40 @@ import sys
 import string
 
 class CanFactory:
-	"""Creates Cans on demand.  Looks only in the Cans directories.
-	Unfortunately, this is a nasty hack, at least as far as directories are concerned.  The situation is that
-	we want to be able to store Cans int he session object.  Session objects can be stored in files via pickling.
-	When they are unpickled, the class module must be in sys.path.  The solution to this is custom importing,
-	and apparently no one has time to get to that.
-	So the current situation is that we continue to use a list of Can directories for Can creation, but we
-	add that path to sys.path so that unpickling works correctly.
+	"""
+	Creates Cans on demand.
+	Call createCan with a full package name, and any args to be passed to the Can's constructor.
+
+	This Factory is used by the utility methods in Page and Servlet.
+
+	The factory is placed in Application._canFactory.
 	"""
 	def __init__(self, app):
 		self._canClasses={}
 		self._app = app
-		self._canDirs = []
-		for i in self._canDirs:
-			if not i in sys.path:
-				sys.path.append(i)
-
-	def addCanDir(self, newdir):
-		"""
-		Add the specified directory to the search path for Cans.
-		If the given directory is not an absolute path, it will be joined with the WebKit directory.
-		"""
-		if not os.path.isabs(newdir):
-			newdir = self._app.serverSidePath(newdir)
-		self._canDirs.append(newdir)
-		sys.path.append(newdir)
-		# @@ 2002-02-26 ce: fix up this sys.path stuff
 
 
 
 	def createCan(self, canName, *args, **kwargs):
-		##Looks in the directories specified in the application.canDirs List
-		if self._canClasses.has_key(canName):
-			klass = self._canClasses[canName]
-		else:
-			res = imp.find_module(canName, self._canDirs)
-			mod = imp.load_module(canName, res[0], res[1], res[2])
-			klass = mod.__dict__[canName]
-			self._canClasses[canName]=klass
+
+		debug = 0
+		if debug: from pprint import pprint
+		klass = self._canClasses.get(canName, None)
+		if not klass:
+			
+			if debug: print "Creating can for ", canName
+			className = string.split(canName,".")[-1]
+			mod = __import__(canName,locals(), globals(), [canName])
+			if debug:
+				pprint( mod )
+		
+			klass = mod.__dict__[className]
+				
+		self._canClasses[canName]=klass
+
+		if debug:
+			print klass
+			print type(klass)
 
 		if len(args)==0 and len(kwargs)==0:
 			instance = klass()
@@ -52,5 +48,9 @@ class CanFactory:
 			instance = apply(klass,args)
 		else:
 			instance = apply(klass,args,kwargs)
+
+		if debug:
+			pprint( instance )
+			pprint (dir(instance))
 		return instance
 

@@ -6,8 +6,10 @@ class CanContainer:
 		self._Cans={}
 
 	def getCan(self, CanID, *args, **kwargs):
+		debug = 0
+		if debug: print __file__,"getCan: ", CanID 
 		try:
-			return self._Cans.get(CanID)
+			return self._Cans.get(CanID, None)
 		except AttributeError:
 			#The init function for this class won't get called.  So an AttributeError means self._Cans doesn't exist yet.
 			self._Cans={}
@@ -29,6 +31,7 @@ class CanContainer:
 		self._Cans[ID]=item
 
 	def _delCans(self):
+		""" Deleted all cans in this container """
 		if self.cans():
 			for i in self.cans():
 				self.delCan(i)
