@@ -147,7 +147,11 @@ class SessionDynamicStore(SessionStore):
 		finally:
 			self._lock.release()
 
-
+	def setEncoderDecoder(self, encoder, decoder):
+		# @@ 2002-11-26 jdh: # propogate the encoder/decoder to the 
+		# underlying SessionFileStore
+		self._fileStore.setEncoderDecoder(encoder, decoder)
+		SessionStore.setEncoderDecoder(self,encoder,decoder)
 
 	## Application support ##
 
