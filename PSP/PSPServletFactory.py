@@ -52,7 +52,8 @@ class PSPServletFactory(ServletFactory):
 			l[ord(c)] = c
 		self._classNameTrans = string.join(l, '')
 
-		self.clearFileCache()
+		if application.setting('ClearPSPCacheOnStart', 1):
+			self.clearFileCache()
 
 	def uniqueness(self):
 		 return 'file'
