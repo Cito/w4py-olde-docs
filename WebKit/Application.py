@@ -511,6 +511,7 @@ class Application(Configurable):
 	def createServletInTransaction(self, transaction):
 		# Get the path
 		path = transaction.request().serverSidePath()
+		assert path is not None
 
 		inst = None
 
@@ -601,6 +602,7 @@ class Application(Configurable):
 				if len(filenames)==1:
 					ssPath = filenames[0]
 				else:
+					print 'WARNING: For %s, got multiple filenames: %s' % (urlPath, filenames)
 					return None  # that's right: return None and don't modify the cache
 			self._serverSidePathCacheByPath[urlPath] = ssPath
 
