@@ -329,10 +329,17 @@ class RequestHandler:
 
 		reslen = len(self._buffer)
 		while sent < reslen:
-			sent = sent + conn.send(self._buffer[sent:sent+8192])
+			try:
+				sent = sent + conn.send(self._buffer[sent:sent+8192])
+			except socket.error, e:
+				print e
+				break
 
-		conn.shutdown(1)
-		conn.close()
+		try:
+			conn.shutdown(1)
+			conn.close()
+		except:
+			pass
 
 		if verbose:
 			print 'connection closed.'

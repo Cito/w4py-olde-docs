@@ -295,7 +295,12 @@ class RequestHandler(asyncore.dispatcher):
 		if not self._buffer and not self.have_response:
 			print ">> Handle write called before response is ready\n"
 			return
-		sent = self.send(self._buffer[:8192])
+		try:
+			sent = self.send(self._buffer[:8192])
+		except socket.error, e:
+			if e[0] == 32: #bad file descriptor
+				self.close()
+				return
 		self._buffer = self._buffer[sent:]
 		if self.have_response and not self._buffer:  #if the servlet has returned and there is no more data in the buffer
 			self.socket.shutdown(1)
@@ -327,14 +332,15 @@ class RequestHandler(asyncore.dispatcher):
 	def log(self, message):
 		pass
 
-	def handle_error(self):
+	def handle_error(self, x, y, z):
 		t, v, tbinfo = sys.exc_info()
 		if t != exceptions.KeyboardInterrupt:
 			print "Error caught in asyncore."
 			print "The type is %s, %s" % (t,v)
 			import traceback
 			traceback.print_tb(tbinfo)
-		self.server.shutDown()
+		else:
+			self.server.shutDown()
 
 class Monitor(asyncore.dispatcher):
 	"""
