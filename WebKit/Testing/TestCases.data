@@ -32,13 +32,21 @@
 /Examples/Welcome/     --> "
 
 # Bad: Unknown URLs
-/BadURL --> 404 Not Found
-/BadURL/ --> "
-/Examples/BadURL --> "
-/Examples/BadURL/ --> "
+/BadURL \ 
+/BadURL/ \
+/Examples/BadURL \
+/Examples/BadURL/ \
+/Examples/BadURL/MoreBad --> 404 Not Found<br>or if ExtraPathInfo is set,<br>then the Examples/Welcome<br> page with extraURLPath<br> information displayed.
 /File.badext --> "
 /Examples/File.badext  --> "
 
 # Embedded Servlets
-/Testing/Servlet/Extra/Path/Info  --> *** not yet supported ***
-/Testing/Servlet/Extra/Path/Info/ --> "
+/Testing/Servlet/Extra/Path/Info  \
+/Testing/Servlet/Extra/Path/Info/ --> Only when ExtraPathInfo=1,<br>otherwise 404.
+
+/Testing/IncludeURLTest --> shows includeURL test.
+/Testing/Dir/IncludeURLTest2 --> shows lower level includeURL test.
+
+/Testing/Forward1 --> Forward1Target
+/Testing/Forward2 --> Dir/Forward2Target
+/Testing/Dir/Forward3 --> Forward3Target

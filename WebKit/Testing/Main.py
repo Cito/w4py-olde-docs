@@ -40,7 +40,7 @@ class Main(Page):
 				urlName = self.htmlEncode(url)
 				urls.append((url, urlName))
 
-			expectation = self.htmlEncode(case['Expectation'])
+			expectation = case['Expectation'] #self.htmlEncode(case['Expectation'])
 			bgcolor = ['EEEEEE', 'DDDDDD'][caseNum % 2]
 			wr('<tr bgcolor=%s> <td> %d. </td>  <td>' % (bgcolor, caseNum))
 			for url, urlName in urls:
