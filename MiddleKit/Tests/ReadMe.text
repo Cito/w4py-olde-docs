@@ -50,7 +50,7 @@ If you are creating a new test model, here are some additional notes for you:
 
 * You can put a TestSamples.py in the model that the test suite will execute
   with after the sample values have been loaded into the database. See the
-  TestEmpty.py files in the existing test models for details.
+  TestSamples.py files in the existing test models for details.
 
 * You can have more than one config file for the model which will cause the
   test suite to run the model tests for each one. Name them to match
