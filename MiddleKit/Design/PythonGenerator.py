@@ -126,9 +126,13 @@ class Klass:
 			pkg = self._klasses._model.setting('Package', '')
 			if pkg:
 				pkg += '.'
-			backPath = repr('../' * (pkg.count('.')+1))
+			#backPath = repr('../' * (pkg.count('.')+1))
+			backPath = 'dirname(__file__)'
+			for i in xrange(pkg.count('.')+1):
+				backPath = 'dirname(%s)' % backPath
 			wr('''\
 import sys
+from os.path import dirname
 sys.path.insert(0, %(backPath)s)
 from %(pkg)s%(supername)s import %(supername)s
 del sys.path[0]
