@@ -23,6 +23,8 @@ from threading import Lock, Thread
 import Queue
 import select
 import socket
+import threading
+import time
 from WebUtils.WebFuncs import RequestURI
 
 
@@ -81,17 +83,15 @@ class ThreadedAppServer(AppServer):
 	def isPersistent(self):
 		return 1
 
-	def mainloop(self, monitor, timeout=1):
+	def mainloop(self, monitor=None, timeout=1):
 
 		inputsockets = [self.mainsocket,]
 		if monitor:
 			inputsockets.append(monitor.insock)
 
 		while 1:
-			if not self.running:#this won't happen for now, the only way to kill this thread is with KeyboardInterrupt
-				self.mainsocket.close()
-				for i in range(self._poolsize):
-					self.requestQueue.put(None)#kill all threads
+			if not self.running:
+				self.shutDown()
 				break
 
 			#block for timeout seconds waiting for connections
@@ -115,12 +115,13 @@ class ThreadedAppServer(AppServer):
 	def threadloop(self):
 		self.initThread()
 		try:
-			while self.running:
+			while 1:
 				try:
 					rh=self.requestQueue.get()
 					if rh == None: #None means time to quit
 						break
-					rh.handleRequest()
+					if self.running:
+						rh.handleRequest()
 					rh.close()
 ##					try:
 ##						self.rhQueue.put(rh)
@@ -326,7 +327,22 @@ def main(monitor = 0):
 		server = ThreadedAppServer()
 		if monitor:
 			monitor = Monitor(server)
-		server.mainloop(monitor)
+		# On NT, run mainloop in a different thread because it's not safe for
+		# Ctrl-C to be caught while manipulating the queues.
+		# It's not safe on Linux either, but there, it appears that Ctrl-C
+		# will trigger an exception in ANY thread, so this fix doesn't help.
+		if os.name == 'nt':
+			t = threading.Thread(target=server.mainloop, args=(monitor,))
+			t.start()
+			try:
+				while server.running:
+					time.sleep(1.0)
+			except KeyboardInterrupt:
+				pass
+			server.running = 0
+			t.join()
+		else:
+			server.mainloop(monitor)
 	except Exception, e: #Need to kill the Sweeper thread somehow
 		print e
 		print "Exiting AppServer"

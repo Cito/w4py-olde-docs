@@ -49,10 +49,17 @@ FUTURE
 	  mechanism.
 """
 
+# Fix the current working directory -- this gets initialized incorrectly
+# for some reason when run as an NT service.
+import os
+try:
+	os.chdir(os.path.abspath(os.path.dirname(__file__)))
+except:
+	pass
 
 import win32serviceutil
 import win32service
-import win32event
+import sys, time
 
 class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 	_svc_name_ = 'WebKit'
@@ -64,25 +71,24 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 		### the service to crash, believe it or not.
 		### For debugging, you can instead open up real files, if
 		### necessary.
-		import sys
 		sys.stdout = open('nul', 'w')
 		sys.stderr = open('nul', 'w')
-		# Create an event which we will use to wait on.
-		# The "service stop" request will set this event.
-		self.hStopEvent = win32event.CreateEvent(None, 0, 0, None)
+		self.server = None
 
 	def SvcStop(self):
 		# Before we do anything, tell the SCM we are starting the stop process
 		self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
-		# And set my event.
-		win32event.SetEvent(self.hStopEvent)
+		# And set running to 0 in the server.  If it hasn't started yet, we'll
+		# have to wait until it does.
+		while self.server is None:
+			time.sleep(1.0)
+		self.server.running = 0
 
 	def SvcDoRun(self):
 		try:
-			from ThreadedAppServerServiceClass import ThreadedAppServer
-			server = None
-			server = ThreadedAppServer()
-			server.mainloop(hStopEvent=self.hStopEvent)
+			from ThreadedAppServer import ThreadedAppServer
+			self.server = ThreadedAppServer()
+			self.server.mainloop()
 		except Exception, e: #Need to kill the Sweeper thread somehow
 			print e
 			print "Exiting AppServer"
@@ -92,9 +98,9 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 				print tb[1]
 				import traceback
 				traceback.print_tb(tb[2])
-			if server:
-				server.running=0
-				server.shutDown()
+			if self.server:
+				self.server.running=0
+				self.server.shutDown()
 			raise
 
 if __name__=='__main__':

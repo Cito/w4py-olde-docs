@@ -107,70 +107,50 @@ def HTMLEncode(s, codes=HTMLCodes):
 		s = string.replace(s, code[0], code[1])
 	return s
 
+from Adapter import Adapter
 
-def FCGICallback(fcg,env,form):
-	"""This function is called whenever a request comes in"""
-	import sys
+class FCGIAdapter(Adapter):
+	def FCGICallback(fcg,env,form):
+		"""This function is called whenever a request comes in"""
+		import sys
 
-	try:
+		try:
+			# Transact with the app server
+			response = self.transactWithAppServer(env, form, host, port)
 
-		dict = {
-			'format':  'CGI',
-			'time':    timestamp,
-			'environ': env,
-			'input':   form
-		}
+			# deliver it!
+			write = fcg.req.out.write
+			for pair in response['headers']:
+				write('%s: %s\n' % pair)
+			write('\n')
+			write(response['contents'])
+			fcg.req.out.flush()
 
+		except:
+			import traceback
 
+			# Log the problem to stderr
+			stderr = fcg.req.err
+			stderr.write('[%s] [error] WebKitFCGIAdaptor: Error while responding to request (unknown)\n' % (
+				time.asctime(time.localtime(time.time()))))
+			stderr.write('Python exception:\n')
+			traceback.print_exc(file=stderr)
 
-		bufsize = 32*1024
-
-		s = socket(AF_INET, SOCK_STREAM)
-		s.connect((host, port))
-		s.send(dumps(dict))
-		s.shutdown(1)
-
-		# read the raw reponse (which is a marshalled dictionary)
-		response = ''
-		while 1:
-			chunk = s.recv(bufsize)
-			if not chunk:
-				break
-			response = response + chunk
-		response = loads(response)  # decode ita
-
-		# deliver it!
-		write = fcg.req.out.write
-		for pair in response['headers']:
-			write('%s: %s\n' % pair)
-		write('\n')
-		write(response['contents'])
-		fcg.req.out.flush()
-
-	except:
-		import traceback
-
-		# Log the problem to stderr
-		stderr = fcg.req.err
-		stderr.write('[%s] [error] WebKitFCGIAdaptor: Error while responding to request (unknown)\n' % (
-			time.asctime(time.localtime(time.time()))))
-		stderr.write('Python exception:\n')
-		traceback.print_exc(file=stderr)
-
-		# Report the problem to the browser
-		output = apply(traceback.format_exception, sys.exc_info())
-		output = string.join(output, '')
-		output = HTMLEncode(output)
-		fcg.pr('''Content-type: text/html
+			# Report the problem to the browser
+			output = apply(traceback.format_exception, sys.exc_info())
+			output = string.join(output, '')
+			output = HTMLEncode(output)
+			fcg.pr('''Content-type: text/html
 
 <html><body>
 <p><pre>ERROR
 
 %s</pre>
 </body></html>\n''' % output)
-	fcg.finish()
-	return
+		fcg.finish()
+		return
 
+_adapter = FCGIAdapter()
 
 class WKFCGI:
 	"""This class handles calls from the web server"""
@@ -202,7 +182,7 @@ class WKFCGI:
 	    self.req.Finish()
 
 
-fcgiloop = WKFCGI(FCGICallback)
+fcgiloop = WKFCGI(_adapter.FCGICallback)
 fcgiloop.run()
 
 if __name__=='__main__':

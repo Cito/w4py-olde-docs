@@ -3,7 +3,7 @@
 # 
 #
 # Contributed by: Dave Wallace
-# Modified by Jay Love
+# Modified by Jay Love and Geoff Talvola
 #
 ##########################################
 
@@ -33,275 +33,163 @@ PythonHandler modpHandler::pspHandler
 
 """
 
+# Fix the current working directory -- this gets initialized incorrectly
+# for some reason when run using mod_python.
+import os
+try:
+	os.chdir(os.path.abspath(os.path.dirname(__file__)))
+except:
+	pass
+
 from mod_python import apache
 import time
 
 from socket import *
-from marshal import dumps
-from marshal import loads
 import sys
 import string
 
-debug=0
+from Adapter import Adapter
 
-host = None
-port = None
+debug=0
+_adapter = None
 bufsize = 32*1024
 
-WEBWARE_ADDRESS_FILE='/data/Linux/python/Webware/WebKit/address.text'
+WEBWARE_ADDRESS_FILE=r'd:\progra~1\webware\webkit\address.text'
 
 
-if not port:
+class ModPythonAdapter(Adapter):
+	def __init__(self, host, port):
+		Adapter.__init__(self)
+		self.host = host
+		self.port = port
+		
+	def handler(self, req):
+		try:
+			# Get input
+			myInput = self.input(req)
+
+			# get the apache module to do the grunt work of
+			#   building the environment
+			env=apache.build_cgi_env(req)
+
+			# Fix up the path			
+			if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info
+
+			# Communicate with the app server
+			respdict = self.transactWithAppServer(env, myInput, self.host, self.port)
+
+			# Respond back to Apache			
+			self.respond(req, respdict)
+
+		except:
+			self.handleException(req)
+		return apache.OK
+
+
+	def pspHandler(self, req):
+		try:
+			# Get input
+			myInput = self.input(req)
+
+			# get the apache module to do the grunt work of
+			#   building the environment
+			env=apache.build_cgi_env(req)
+
+			# Special environment setup needed for psp handler			
+			env['WK_ABSOLUTE']=1
+
+			# Fix up the path			
+			if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info
+
+			# Communicate with the app server
+			respdict = self.transactWithAppServer(env, myInput, self.host, self.port)
+
+			# Respond back to Apache			
+			self.respond(req, respdict)
+
+		except:
+			self.handleException(req)
+		return apache.OK
+
+
+	def typehandler(self, req):
+		""" Not being used yet.
+		Probably never be used, b/c the req.handler field is read only."""
+		debug=1
+		if debug:
+			ot = open("/tmp/log2.txt","a")
+			ot.write("In Type Handler\n")
+			ot.flush()
+
+		if req.filename == None:
+			return apache.DECLINED
+		fn = req.filename
+		if debug:
+			ot.write("TH: Filename: %s\n"%fn)
+		ext = fn[string.rfind(fn,"."):]
+		if debug:
+			ot.write("TH: Extension: %s\n"%ext)
+
+		if debug:
+			ot.write("Req_Handler = %s\n"%req.handler)
+			ot.flush()
+			ot.close()
+
+		if ext == ".psp":
+			req.handler = "python-program"
+			return apache.OK
+		else:
+			return apache.DECLINED
+
+
+	def input(self, req):
+		myInput = ''
+		inp = req.read(bufsize)
+		# this looks like bad performance if we don't get it all
+		#  in the first buffer
+		while inp:
+			myInput = myInput + inp
+			inp = req.read(bufsize)
+		return myInput
+
+
+	def respond(self, req, respdict):
+		for pair in respdict['headers']:
+			req.headers_out[pair[0]] = str(pair[1])
+		req.content_type = req.headers_out['content-type']
+		if req.headers_out.has_key('status'):
+			req.status = int(req.headers_out['status'])
+		req.send_http_header()
+		req.write(respdict['contents'])
+
+
+	def handleException(self, req):
+		import traceback
+
+		apache.log_error('WebKit mod_python: Error while responding to request\n')
+		apache.log_error('Python exception:\n')
+		traceback.print_exc(file=sys.stderr)
+		
+		output = apply(traceback.format_exception, sys.exc_info())
+		output = string.join(output, '')
+		output = string.replace(output, '&', '&amp;')
+		output = string.replace(output, '<', '&lt;')
+		output = string.replace(output, '>', '&gt;')
+		req.write('''
+<html><body>
+<p><pre>ERROR
+
+%s</pre>
+</body></html>\n''' % output)
+
+if _adapter is None:
 	(host, port) = string.split(open(WEBWARE_ADDRESS_FILE).read(), ':')
 	port = int(port)
+	_adapter = ModPythonAdapter(host, port)
 
 def handler(req):
-	global host
-	global port
-
-	if debug:
-		ot = open("/tmp/log2.txt","a")
-		ot.write("req.path_info=%s\n"%req.path_info)
-	try:
-
-		timestamp = time.time()
-		myInput = ""
-		inp = req.read(bufsize)
-		# this looks like bad performance if we don't get it all
-		#  in the first buffer
-		while inp:
-			myInput = myInput + inp
-			inp = req.read(bufsize)
-
-		if debug:
-			ot.write("*************\n%s\n************\n"% len(myInput))
-			for name in req.headers_in.keys():
-				ot.write("%s=%s\n"%(name,req.headers_in[name]))
-			ot.write(req.uri)
-			ot.write("\n*************************\n")
-
-		# get the apache module to do the grunt work of
-		#   building the environment
-		env=apache.build_cgi_env(req)
-		
-##		WK_URI = env['REQUEST_URI'][len(env['SCRIPT_NAME']):]
-##		WK_URI = env['SCRIPT_URL'][len(env['SCRIPT_NAME']):]
-##		env['PATH_INFO'] = WK_URI  #Hack to accomodate the current cgi-centric approach WK uses to find the path
-##		env['WK_URI'] = WK_URI
-##		if env["WK_URI"] == "": env["WK_URI"]="/"
-		if debug: ot.write("PATH_INFO=%s\n"% env.get('PATH_INFO'))
-		if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info #"/"
-
-		dict = {
-				'format': 'CGI',
-				'time':   timestamp,
-				'environ': env,
-				'input':   myInput
-				}
-
-
-		s = socket(AF_INET, SOCK_STREAM)
-		s.connect((host, port))
-		s.send(dumps(dict))
-		s.shutdown(1)
-
-		#
-		# Get the response from the AppServer, extract the headers,
-		#  and send everything to Apache through mod_python's req object
-		#
-		inheader=1
-		header = ""
-		resp = ''
-		while 1:
-			data = s.recv(bufsize)
-			if not data:
-				break
-			resp = resp+data
-
-		respdict = loads(resp)
-		for pair in respdict['headers']:
-			req.headers_out[pair[0]] = str(pair[1])
-		req.content_type = req.headers_out['content-type']
-		if req.headers_out.has_key('status'):
-			req.status = int(req.headers_out['status'])
-		req.send_http_header()
-		req.write(respdict['contents'])
-
-
-		if debug:
-			ot.write("+++\n\n")
-			ot.close()
-
-
-	except:
-		import traceback
-
-		apache.log_error('WebKit mod_python: Error while responding to request\n')
-		apache.log_error('Python exception:\n')
-		traceback.print_exc(file=sys.stderr)
-		
-		output = apply(traceback.format_exception, sys.exc_info())
-		output = string.join(output, '')
-		output = string.replace(output, '&', '&amp;')
-		output = string.replace(output, '<', '&lt;')
-		output = string.replace(output, '>', '&gt;')
-		req.write('''
-<html><body>
-<p><pre>ERROR
-
-%s</pre>
-</body></html>\n''' % output)
-
-	return apache.OK
-
-
-
-
-
-
+	return _adapter.handler(req)
 def pspHandler(req):
-	global host
-	global port
-
-	if debug:
-		ot = open("/tmp/log2.txt","a")
-		ot.write("req.path_info=%s\n"%req.path_info)
-	try:
-		if not port:
-			(host, port) = string.split(open(WEBWARE_ADDRESS_FILE).read(), ':')
-			port = int(port)
-		
-		timestamp = time.time()
-		myInput = ""
-		inp = req.read(bufsize)
-		# this looks like bad performance if we don't get it all
-		#  in the first buffer
-		while inp:
-			myInput = myInput + inp
-			inp = req.read(bufsize)
-
-		if debug:
-			ot.write("*************\n%s\n************\n"% len(myInput))
-			for name in req.headers_in.keys():
-				ot.write("%s=%s\n"%(name,req.headers_in[name]))
-				ot.write("*************************\n")
-				ot.write(req.uri)
-				ot.write("\n")
-
-		# get the apache module to do the grunt work of
-		#   building the environment
-		env=apache.build_cgi_env(req)
-		env['WK_ABSOLUTE']=1
-		if debug:
-			ot.write("%s"%env)
-		#fix PATH_INFO
-##		if not env.has_key('PATH_INFO'):
-##			env['PATH_INFO']='/'
-
-		dict = {
-				'format': 'CGI',
-				'time':   timestamp,
-				'environ': env,
-				'input':   myInput
-				}
-
-
-		s = socket(AF_INET, SOCK_STREAM)
-		s.connect((host, port))
-		s.send(dumps(dict))
-		s.shutdown(1)
-
-		#
-		# Get the response from the AppServer, extract the headers,
-		#  and send everything to Apache through mod_python's req object
-		#
-		inheader=1
-		header = ""
-		resp = ''
-		while 1:
-			data = s.recv(bufsize)
-			if not data:
-				break
-			resp = resp+data
-
-		respdict = loads(resp)
-		for pair in respdict['headers']:
-			req.headers_out[pair[0]] = str(pair[1])
-		req.content_type = req.headers_out['content-type']
-		if req.headers_out.has_key('status'):
-			req.status = int(req.headers_out['status'])
-		req.send_http_header()
-		req.write(respdict['contents'])
-
-
-		if debug:
-			ot.write("+++\n\n")
-			ot.close()
-
-
-	except:
-		import traceback
-
-		apache.log_error('WebKit mod_python: Error while responding to request\n')
-		apache.log_error('Python exception:\n')
-		traceback.print_exc(file=sys.stderr)
-		
-		output = apply(traceback.format_exception, sys.exc_info())
-		output = string.join(output, '')
-		output = string.replace(output, '&', '&amp;')
-		output = string.replace(output, '<', '&lt;')
-		output = string.replace(output, '>', '&gt;')
-		req.write('''
-<html><body>
-<p><pre>ERROR
-
-%s</pre>
-</body></html>\n''' % output)
-
-	return apache.OK
-
-
-
-
-
-
-
-
-
-
-
-
-import string
-
+	return _adapter.pspHandler(req)
 def typehandler(req):
-	""" Not being used yet.
-	Probably never be used, b/c the req.handler field is read only."""
-	debug=1
-	if debug:
-		ot = open("/tmp/log2.txt","a")
-		ot.write("In Type Handler\n")
-		ot.flush()
-
-	if req.filename == None:
-		return apache.DECLINED
-	fn = req.filename
-	if debug:
-		ot.write("TH: Filename: %s\n"%fn)
-	ext = fn[string.rfind(fn,"."):]
-	if debug:
-		ot.write("TH: Extension: %s\n"%ext)
-
-	if debug:
-		ot.write("Req_Handler = %s\n"%req.handler)
-		ot.flush()
-		ot.close()
-
-	if ext == ".psp":
-		req.handler = "python-program"
-		return apache.OK
-	else:
-		return apache.DECLINED
-
-
-
-	
+	return _adapter.typehandler(req)

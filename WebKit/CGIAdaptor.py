@@ -31,86 +31,66 @@ timestamp = time.time()
 
 from socket import *
 from marshal import dumps, loads
-
+from Adapter import Adapter
 
 debugging = 0   # set 1 if you want to see the raw response dictionary, instead of a normal page
 
+class CGIAdapter(Adapter):
+    def main(self):
+        import os, sys
 
-def main():
-	import os, sys
+        try:
+            # MS Windows: no special translation of end-of-lines
+            if os.name=='nt':
+                import msvcrt
+                msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+                msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 
-	try:
-		# MS Windows: no special translation of end-of-lines
-		if os.name=='nt':
-			import msvcrt
-			msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-			msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+            myInput = ''
+            if os.environ.has_key('CONTENT_LENGTH'):
+                length = int(os.environ['CONTENT_LENGTH'])
+                if length:
+                    myInput = sys.stdin.read(length)
 
-		myInput = ''
-		if os.environ.has_key('CONTENT_LENGTH'):
-			length = int(os.environ['CONTENT_LENGTH'])
-			if length:
-				myInput = sys.stdin.read(length)
+            # 2000-05-20 ce: For use in collecting raw request dictionaries for use in Testing/stress.py
+            # Leave this code here in case it's needed again
+            #
+            #counter = int(open('counter.text').read())
+            #counter = counter + 1
+            #open('counter.text', 'w').write(str(counter))
+            #open('rr-%02d.rr' % counter, 'w').write(str(dict))
 
-		dict = {
-			'format':  'CGI',
-			'time':    timestamp,
-			'environ': os.environ.data, # ce: a little tricky. We use marshal which only works on built-in types, so we need environ's dictionary
-			'input':   myInput
-		}
+            (host, port) = string.split(open('address.text').read(), ':')
+            if os.name=='nt' and host=='': # MS Windows doesn't like a blank host name
+                host = 'localhost'
+            port = int(port)
 
-		# 2000-05-20 ce: For use in collecting raw request dictionaries for use in Testing/stress.py
-		# Leave this code here in case it's needed again
-		#
-		#counter = int(open('counter.text').read())
-		#counter = counter + 1
-		#open('counter.text', 'w').write(str(counter))
-		#open('rr-%02d.rr' % counter, 'w').write(str(dict))
+            response = self.transactWithAppServer(os.environ.data, myInput, host, port)
 
-		(host, port) = string.split(open('address.text').read(), ':')
-		if os.name=='nt' and host=='': # MS Windows doesn't like a blank host name
-			host = 'localhost'
-		port = int(port)
-		bufsize = 32*1024  # @@ 2000-04-26 ce: this should be configurable, also we should run some tests on different sizes
+            # deliver it!
+            write = sys.stdout.write
+            if debugging:
+                write('Content-type: text/html\n\n<html><body>')
+                write('<p> Your adapter has <b>debugging</b> set to true. <p>')
+                write(HTMLEncode(str(response)))
+                write('</body></html>')
+            else:
+                for pair in response['headers']:
+                    write('%s: %s\n' % pair)
+                write('\n')
+                write(response['contents'])
 
-		s = socket(AF_INET, SOCK_STREAM)
-		s.connect((host, port))
-		s.send(dumps(dict))
-		s.shutdown(1)
+        except:
+            import traceback
 
-		# read the raw reponse (which is a marshalled dictionary)
-		response = ''
-		while 1:
-			chunk = s.recv(bufsize)
-			if not chunk:
-				break
-			response = response + chunk
-		response = loads(response)  # decode it
+            sys.stderr.write('[%s] [error] WebKitCGIAdaptor: Error while responding to request (unknown)\n' % (time.asctime(time.localtime(time.time()))))
+            sys.stderr.write('Python exception:\n')
+            traceback.print_exc(file=sys.stderr)
 
-		# deliver it!
-		write = sys.stdout.write
-		if debugging:
-			write('Content-type: text/html\n\n<html><body>')
-			write('<p> Your adapter has <b>debugging</b> set to true. <p>')
-			write(HTMLEncode(str(response)))
-			write('</body></html>')
-		else:
-			for pair in response['headers']:
-				write('%s: %s\n' % pair)
-			write('\n')
-			write(response['contents'])
-
-	except:
-		import traceback
-
-		sys.stderr.write('[%s] [error] WebKitCGIAdaptor: Error while responding to request (unknown)\n' % (time.asctime(time.localtime(time.time()))))
-		sys.stderr.write('Python exception:\n')
-		traceback.print_exc(file=sys.stderr)
-
-		output = apply(traceback.format_exception, sys.exc_info())
-		output = string.join(output, '')
-		output = HTMLEncode(output)
-		sys.stdout.write('''Content-type: text/html
+            output = apply(traceback.format_exception, sys.exc_info())
+            output = string.join(output, '')
+            output = HTMLEncode(output)
+            sys.stdout.write('''Content-type: text/html
 
 <html><body>
 <p><pre>ERROR
@@ -120,18 +100,20 @@ def main():
 
 
 HTMLCodes = [
-	['&', '&amp;'],
-	['<', '&lt;'],
-	['>', '&gt;'],
-	['"', '&quot;'],
+    ['&', '&amp;'],
+    ['<', '&lt;'],
+    ['>', '&gt;'],
+    ['"', '&quot;'],
 ]
 
 def HTMLEncode(s, codes=HTMLCodes):
-	''' Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdaptor independent of everything but standard Python.) '''
-	for code in codes:
-		s = string.replace(s, code[0], code[1])
-	return s
+    ''' Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdaptor independent of everything but standard Python.) '''
+    for code in codes:
+        s = string.replace(s, code[0], code[1])
+    return s
 
+def main():
+    CGIAdapter().main()
 
 if __name__=='__main__':
 	main()
