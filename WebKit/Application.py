@@ -56,6 +56,9 @@ class Application(Configurable,CanContainer):
 
 		Configurable.__init__(self)
 
+		if self.setting('PrintConfigAtStartUp'):
+			self.printConfig()
+
 		self._server = server
 
 		if transactionClass:
@@ -108,10 +111,11 @@ class Application(Configurable,CanContainer):
 			defctxt = contexts
 		else: #Get it from Configurable object, which gets it from defaults or the user config file
 			defctxt = self.setting('Contexts')
-		#New context loading routine
+		# New context loading routine
 		self._contexts={}
 		for i in defctxt.keys():
 			self.addContext(i,defctxt[i])
+		print
 
 		# Set up servlet factories
 		self._factoryList = []  # the list of factories
@@ -120,16 +124,15 @@ class Application(Configurable,CanContainer):
 		self.addServletFactory(UnknownFileTypeServletFactory(self))
 		# ^ @@ 2000-05-03 ce: make this customizable at least through a method (that can be overridden) if not a config file (or both)
 
-		if self.setting('PrintConfigAtStartUp'):
-			self.printConfig()
-
-		print 'Current directory is', os.getcwd()
+		print 'Current directory:', os.getcwd()
 
 		self.initializeCans()
 
 		self.running = 1
 		if useSessionSweeper:
 			self.startSessionSweeper()
+
+		print
 
 	def initializeCans(self):
 		"""
@@ -158,8 +161,8 @@ class Application(Configurable,CanContainer):
 		sessions = self._sessions
 		curTime = time()
 		for key in sessions.keys():
-			timeout = sessions[key].timeout()
-			if ((curTime - sessions[key].lastAccessTime()) >= timeout) or not timeout:
+			sess = sessions[key]
+			if (curTime - sess.lastAccessTime()) >= sess.timeout()  or  timeout==0:
 				sessions[key].expiring()
 				del sessions[key]
 		sessions.storeAllSessions()
@@ -291,10 +294,6 @@ class Application(Configurable,CanContainer):
 		if self.setting('LogActivity'):
 			self.writeActivityLog(transaction)
 
-		##store session##
-		if transaction.hasSession():
-			self._sessions.storeSession(transaction.session())
-
 		path = request.serverSidePath()
 		self.returnInstance(transaction, path)
 
@@ -397,11 +396,9 @@ class Application(Configurable,CanContainer):
 		transaction.respond()
 
 	def sleep(self, transaction):
-		# Force a store of the session because non-memory session stores need this.
+		# Store the session
 		if transaction.hasSession():
-			sess = transaction.session()
-##			self._sessions[sess.identifier()] = sess
-##			# @@ 2000-08-12 ce: finalize this
+			self._sessions.storeSession(transaction.session())
 		transaction.sleep()
 
 
@@ -468,6 +465,7 @@ class Application(Configurable,CanContainer):
 		if self._contexts.has_key(name):
 			print 'WARNING: Overwriting context %s (=%s) with %s' % (
 				repr(name), repr(self._contents[name]), repr(value))
+		print 'Loading context: %s at %s' % (name, dir)
 		try:
 			localdir, pkgname = os.path.split(dir)
 			res = imp.find_module(pkgname, [localdir])
@@ -476,7 +474,7 @@ class Application(Configurable,CanContainer):
 			if mod.__dict__.has_key('contextInitialize'):
 				mod.__dict__['contextInitialize'](self, os.path.normpath(os.path.join(os.getcwd(),dir)))
 		except ImportError:
-			print "%s is not a package" % name
+			pass
 		self._contexts[name] = dir
 
 

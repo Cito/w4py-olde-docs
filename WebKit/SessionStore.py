@@ -5,6 +5,8 @@ class SessionStore(Object):
 	'''
 	SessionStores are dictionary-like objects used by Application to store session state. This class is abstract and it's up to the concrete subclass to implement several key methods that determine how sessions are stored (such as in memory, on disk or in a database).
 
+	Subclasses often encode sessions for storage somewhere. In light of that, this class also defines methods encoder(), decoder() and setEncoderDecoder(). The encoder and decoder default to the load() and dump() functions of the cPickle or pickle module. However, using the setEncoderDecoder() method, you can use the functions from marshal (if appropriate) or your own encoding scheme. Subclasses should use encoder() and decoder() (and not pickle.load() and pickle.dump()).
+
 	Subclasses may rely on the attribute self._app to point to the application.
 
 	Subclasses should be named SessionFooStore since Application expects "Foo" to appear for the "SessionStore" setting and automatically prepends Session and appends Store. Currently, you will also need to add another import statement in Application.py. Search for SessionStore and you'll find the place.
@@ -22,17 +24,17 @@ class SessionStore(Object):
 		Object.__init__(self)
 		self._app = app
 
+		try:
+			from cPickle import load, dump
+		except ImportError:
+			from pickle import load, dump
+		self.setEncoderDecoder(dump, load)
+
 
 	## Access ##
 
 	def application(self):
 		return self._app
-
-	def storeAllSessions(self):
-		raise SubclassResponsibilityError
-
-	def storeSession(self, session):
-		raise SubclassResponsibilityError		
 
 
 	## Dictionary-style access ##
@@ -59,6 +61,15 @@ class SessionStore(Object):
 		raise SubclassResponsibilityError
 
 
+	## Application support ##
+
+	def storeSession(self, session):
+		raise SubclassResponsibilityError
+
+	def storeAllSessions(self):
+		raise SubclassResponsibilityError
+
+
 	## Convenience methods ##
 
 	def items(self):
@@ -72,6 +83,19 @@ class SessionStore(Object):
 			return self[key]
 		else:
 			return default
+
+
+	## Encoder/decoder ##
+
+	def encoder(self):
+		return self._encoder
+
+	def decoder(self):
+		return self._decoder
+
+	def setEncoderDecoder(self, encoder, decoder):
+		self._encoder = encoder
+		self._decoder = decoder
 
 
 	## As a string ##

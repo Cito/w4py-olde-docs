@@ -1,13 +1,5 @@
 from SessionStore import SessionStore
 
-try:
-	from cPickle import load, dump
-except:
-	from pickle  import load, dump
-import os
-
-
-
 
 class SessionMemoryStore(SessionStore):
 	'''
@@ -22,11 +14,13 @@ class SessionMemoryStore(SessionStore):
 	def __init__(self, app):
 		SessionStore.__init__(self, app)
 		self._store = {}
-		if os.path.exists("Sessions/AllSessions.ses"):
+		filename = 'Sessions/AllSessions.ses'
+		if os.path.exists(filename):
 			try:
-				file = open("Sessions/AllSessions.ses","r")
-				self._store = load(file)
+				file = open(filename)
+				self._store = self.decoder()(file)
 			except:
+				print 'WARNING: Found %s, but could not load.' % filename
 				self._store = {}
 
 
@@ -53,13 +47,14 @@ class SessionMemoryStore(SessionStore):
 	def clear(self):
 		self._store.clear()
 
+
+	## Application support ##
+
+	def storeSession(self, session):
+		pass
+
 	def storeAllSessions(self):
 		if 0:
 			print "Storing all sessions"
-		file = open("Sessions/AllSessions.ses","w")
-		dump(self._store,file)
-
-
-	def storeSession(self,session):
-		pass
-		
+		file = open("Sessions/AllSessions.ses", "w")
+		dump(self._store, file)

@@ -7,7 +7,8 @@ debug = 0
 
 class SessionFileStore(SessionStore):
 	'''
-	Stores the session on disk in Sessions/ one file per session.
+	Stores the sessions on disk in the Sessions/ directory, one file
+	per session.
 
 	This is useful for various situations:
 		1. Using the OneShot adapter
@@ -16,7 +17,8 @@ class SessionFileStore(SessionStore):
 		3. Fault tolerance
 		4. Clustering
 
-	Note that the last two are not yet support by WebKit (as of 0.4, 8/2000).
+	Note that the last two are not yet support by WebKit (as of 0.4,
+	8/2000).
 	'''
 
 
@@ -24,37 +26,6 @@ class SessionFileStore(SessionStore):
 
 	def __init__(self, app):
 		SessionStore.__init__(self, app)
-		self._store = {}
-
-		try:
-			from cPickle import load, dump
-		except ImportError:
-			from pickle import load, dump
-		self.setEncoderDecoder(dump, load)
-
-
-	## Explicit Calls from Application ##
-
-	def storeSession(self, session):
-		key = session.identifier()
-		self[key]=session
-
-	def storeAllSessions(self):
-		pass
-		
-
-
-	## Encode/decode ##
-
-	def encoder(self):
-		return self._encoder
-
-	def decoder(self):
-		return self._decoder
-
-	def setEncoderDecoder(self, encoder, decoder):
-		self._encoder = encoder
-		self._decoder = decoder
 
 
 	## Access ##
@@ -72,7 +43,7 @@ class SessionFileStore(SessionStore):
 			file = open(filename)
 		except IOError:
 			raise KeyError, key
-		item = self._decoder(file)
+		item = self.decoder()(file)
 		file.close()
 		return item
 
@@ -81,7 +52,7 @@ class SessionFileStore(SessionStore):
 			print '>> setitem(%s,%s)' % (key, item)
 		filename = self.filenameForKey(key)
 		file = open(filename, 'w')
-		self._encoder(item, file)
+		self.encoder()(item, file)
 
 	def __delitem__(self, key):
 		filename = self.filenameForKey(key)
@@ -104,6 +75,16 @@ class SessionFileStore(SessionStore):
 	def clear(self):
 		for filename in glob('Sessions/*.ses'):
 			os.remove(filename)
+
+
+	## Application support ##
+
+	def storeSession(self, session):
+		key = session.identifier()
+		self[key] = session
+
+	def storeAllSessions(self):
+		pass
 
 
 	## Self utility ##

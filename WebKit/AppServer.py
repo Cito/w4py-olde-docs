@@ -139,6 +139,8 @@ class AppServer(Configurable):
 		for plugInPath in plugIns:
 			self.loadPlugIn(plugInPath)
 
+		print
+
 
 	## Misc ##
 

@@ -41,11 +41,10 @@ class Session(Object, CanContainer):
 
 	def __init__(self, trans):
 		Object.__init__(self)
-		self._maxIdleInterval = 0
 		self._lastAccessTime  = self._creationTime = time()
 		self._numTrans        = 0
 		self._values          = {}
-		self._timeout = trans.application().setting("SessionTimeout")
+		self._timeout = trans.application().setting('SessionTimeout')*60
 
 		attempts = 0
 		while attempts<10000:
@@ -67,12 +66,6 @@ class Session(Object, CanContainer):
 		''' Returns the last time the user accessed the session through interaction. This attribute is updated in awake(), which is invoked at the beginning of a transaction. '''
 		return self._lastAccessTime
 
-	def maxIdleInterval(self):
-		return self._maxIdleInterval
-
-	def setMaxIdleInterval(self, seconds):
-		self._maxIdleInterval = seconds
-
 	def identifier(self):
 		''' Returns a string that uniquely identifies the session. This method will create the identifier if needed. '''
 		return self._identifier
@@ -80,13 +73,13 @@ class Session(Object, CanContainer):
 	def isNew(self):
 		return self._numTrans<2
 
-	def setTimeout(self, timeout):
-		"""Set the timeout on this session"""
-		self._timeout = timeout*60   #convert to seconds
-
 	def timeout(self):
-		""" Get the timeout for this session IN SECONDS """
+		""" Returns the timeout for this session in seconds. """
 		return self._timeout
+
+	def setTimeout(self, timeout):
+		""" Set the timeout on this session in seconds. """
+		self._timeout = timeout
 
 
 	## Invalidate ##
@@ -130,5 +123,5 @@ class Session(Object, CanContainer):
 		pass
 
 	def expiring(self):
-		""" Called when session is expired"""
+		""" Called when session is expired by the application. """
 		pass

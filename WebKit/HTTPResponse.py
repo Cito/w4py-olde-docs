@@ -4,15 +4,12 @@ from Cookie import Cookie
 
 
 class HTTPResponse(Response):
-	'''
-	FUTURE
-		* how to deal with auto-including the session id. this also should consider sendRedirect()
-	'''
+
 
 	## Init ##
 
 	def __init__(self, headers=None):
-		''' Initializes the request. You should pass the arguments by name rather than position. '''
+		''' Initializes the request. '''
 
 		Response.__init__(self)
 
@@ -21,9 +18,9 @@ class HTTPResponse(Response):
 		else:
 			self._headers = headers
 
-		self._cookies = {}
+		self._cookies   = {}
 		self._committed = 0
-		self._contents = []
+		self._contents  = []
 
 
 	## Headers ##
@@ -168,4 +165,3 @@ class HTTPResponse(Response):
 			if not self._headers.has_key(key):
 				self._headers[key] = value
 		self.write(rawRes['contents'])
-		

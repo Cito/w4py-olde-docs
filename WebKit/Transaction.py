@@ -3,7 +3,20 @@ from Common import *
 
 class Transaction(Object):
 	'''
-	A transaction serves as a container for all objects involved in a transaction, and a message dissemination point. The objects include application, request, response and session. The messages include awake(), respond() and sleep().
+	A transaction serves as:
+
+		* A container for all objects involved in the transaction. The
+		  objects include application, request, response, session and
+		  servlet.
+
+		* A message dissemination point. The messages include awake(),
+		  respond() and sleep().
+
+	When first created, a transaction has no session. However, it will
+	create or retrieve one upon being asked for session().
+
+	The life cycle of a transaction begins and ends with Application's
+	dispatchRequest().
 	'''
 
 
@@ -63,7 +76,7 @@ class Transaction(Object):
 	def setErrorOccurred(self, flag):
 		''' Invoked by the application if an exception is raised to the application level. '''
 		self._errorOccurred = flag
-		self._servlet=None
+		self._servlet = None
 
 
 	## Transaction stages ##
@@ -108,6 +121,3 @@ class Transaction(Object):
 				#print '>> resetting'
 				attr.resetKeyBindings()
 			delattr(self, attrName)
-
-
-
