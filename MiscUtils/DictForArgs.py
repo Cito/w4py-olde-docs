@@ -25,9 +25,14 @@ def DictForArgs(s):
 			first='john' last='doe'
 			required border=3
 
-	And returns a dictionary representing the same. For keys that aren't given an explicit value (such as 'required' above), the value is '1'.
+	And returns a dictionary representing the same. For keys that aren't
+	given an explicit value (such as 'required' above), the value is '1'.
 
-	All values are interpreted as strings. If you want ints and floats, you'll have to convert them yourself.
+	All values are interpreted as strings. If you want ints and floats,
+	you'll have to convert them yourself.
+
+	This syntax is equivalent to what you find in HTML and close to other
+	ML languages such as XML.
 
 	Returns {} for an empty string.
 
@@ -35,12 +40,15 @@ def DictForArgs(s):
 		(NAME [=NAME|STRING])*
 
 	Will raise DictForArgsError if the string is invalid.
+
+	See also: PyDictForArgs() and ExpandDictWithExtras() in this module
 	'''
 
 	s = string.strip(s)
 
 	# Tokenize
 
+	# @@ 2001-09-29 ce: push these outside for better performance
 	nameRE   = re.compile(r'\w+')
 	equalsRE = re.compile(r'\=')
 	stringRE = re.compile(r'''
@@ -133,8 +141,49 @@ def DictForArgs(s):
 	return dict
 
 
+from string import letters
 
-def ExpandDictWithExtras(dict, key='Extras', delKey=1):
+def PyDictForArgs(s):
+	'''
+	Takes an input such as:
+			x=3
+			name="foo"
+			first='john'; last='doe'
+			list=[1, 2, 3]; name='foo'
+
+	And returns a dictionary representing the same.
+
+	All values are interpreted as Python expressions. Any error in these
+	expressions will raise the appropriate Python exception. This syntax
+	allows much more power than DictForArgs() since you can include
+	lists, dictionaries, actual ints and floats, etc.
+
+	This could also open the door to hacking your software if the input
+	comes from a tainted source such as an HTML form or an unprotected
+	configuration file.
+
+	Returns {} for an empty string.
+
+	See also: DictForArgs() and ExpandDictWithExtras() in this module
+	'''
+	s = s.strip()
+	if not s:
+		return {}
+
+	# special case: just a name
+	# meaning: name=1
+	# example: isAbstract
+	if s.find(' ')==-1 and s.find('=')==-1 and s[0] in letters:
+		s += '=1'
+
+	results = {}
+	exec s in results
+
+	del results['__builtins__']
+	return results
+
+
+def ExpandDictWithExtras(dict, key='Extras', delKey=1, dictForArgs=DictForArgs):
 	'''
 	Returns a dictionary with the 'Extras' column expanded by DictForArgs(). For example, given:
 		{ 'Name': 'foo', 'Extras': 'x=1 y=2' }
@@ -153,7 +202,7 @@ def ExpandDictWithExtras(dict, key='Extras', delKey=1):
 			newDict[k] = v
 		if delKey:
 			del newDict[key]
-		newDict.update(DictForArgs(dict[key]))
+		newDict.update(dictForArgs(dict[key]))
 		return newDict
 	else:
 		return dict

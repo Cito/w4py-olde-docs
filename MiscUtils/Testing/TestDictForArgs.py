@@ -4,6 +4,11 @@ from DictForArgs import *
 
 
 def Test():
+	TestDictForArgs()
+	TestPyDictForArgs()
+
+
+def TestDictForArgs():
 	print 'Testing DictForArgs()...'
 	errCount = TestPositives()
 	errCount = errCount + TestNegatives()
@@ -109,6 +114,25 @@ def TestNegative(input):
 	if not success:
 		print 'ERROR\nExpecting DictForArgError.\nGot: %s.\n' % repr(result)
 	return success
+
+
+def TestPyDictForArgs():
+	cases = '''\
+		x=1 == {'x': 1}
+		x=1; y=2 == {'x': 1, 'y': 2}
+		x='a' == {'x': 'a'}
+		x="a"; y="""b""" == {'x': 'a', 'y': 'b'}
+		x=(1, 2, 3) == {'x': (1, 2, 3)}
+		x=['a', 'b'] == {'x': ['a', 'b']}
+		x='a b'.split() == {'x': ['a', 'b']}
+		x=['a b'.split(), 1]; y={'a': 1} == {'x': [['a', 'b'], 1], 'y': {'a': 1}}
+'''.split('\n')
+	for case in cases:
+		case = case.strip()
+		if case:
+			source, answer = case.split('==')
+			answer = eval(answer)
+			assert PyDictForArgs(source)==answer
 
 
 if __name__=='__main__':
