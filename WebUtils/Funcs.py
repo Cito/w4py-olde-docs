@@ -61,7 +61,7 @@ def urlDecode(s):
 	return string.join(parts, '')
 
 
-def htmlForDict(dict, addSpace=None, filterValueCallBack=None):
+def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=None):
 	''' Returns an HTML string with a <table> where each row is a key-value pair. '''
 	keys = dict.keys()
 	keys.sort()
@@ -74,7 +74,10 @@ def htmlForDict(dict, addSpace=None, filterValueCallBack=None):
 			value = string.join(string.split(value, target), '%s '%target)
 		if filterValueCallBack:
 			value = filterValueCallBack(value, key, dict)
-		html.append('<tr bgcolor=#F0F0F0> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (key, value))
+		value = str(value)
+		if maxValueLength and len(value) > maxValueLength:
+			value = value[:maxValueLength] + '...'
+		html.append('<tr bgcolor=#F0F0F0> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (htmlEncode(key), htmlEncode(value)))
 	html.append('</table>')
 	return string.join(html, '')
 

@@ -295,6 +295,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			                           'content-type': 'text/html',
 			                           'Subject':      'Error'
 			                         },
+			'MaxValueLengthInExceptionReport': 500,
 			'RPCExceptionReturn':    'traceback',
 			'ReportRPCExceptionsInWebKit':   1,
 			'Contexts':              { 'default':       'Examples',

@@ -74,8 +74,8 @@ Version 0.8
 				current servlet.  This is useful for saving the path to the current servlet
 				in a database, for example.
 		</ul>
-
-	<li> Actions now work with <b>&lt;input type=image ...&gt;</b> buttons as well as regular <b>&lt;input type=submit ...&gt;</b> buttons.
+	
+	<li> New setting 'MaxValueLengthInExceptionReport'.  If set to an integer, it truncates values in the exception report to the specified length.  If set to None, no truncation happens.  Defaults to 500.
 </ul>
 
 
@@ -83,7 +83,7 @@ Version 0.8
 <h2>Security</h2>
 
 <ul>
-	<li> A buffer overflow in wkcgi was fixed.  Not only was this a security hole, but it also prevented large requests (&gt;8K) from working at all.  For Windows users who don't have Visual C++ handy, a compiled wkcgi.exe is available on the Webware home page in the MiscDownloads area.
+	<li> *
 </ul>
 
 
@@ -101,9 +101,8 @@ We don't track every change to the interface, but here are some notables:
 
 <ul>
 
-	<li> Fixed a bug in the config setting UseCascadingExtensions and added .tmpl (used by Cheetah) to the default list of extensions to ignore.
+	<li> *
 
-	<li> Modified session code so that the session cookie is removed from the client when the session expires.
 </ul>
 
 

@@ -86,6 +86,9 @@ class ExceptionHandler(Object):
 			self._res = HTTPResponse()
 			self._tra.setResponse(self._res)
 
+		# Cache MaxValueLengthInExceptionReport for speed
+		self._maxValueLength = self.setting('MaxValueLengthInExceptionReport')
+
 		# Get to work
 		self.work()
 
@@ -202,7 +205,7 @@ class ExceptionHandler(Object):
 		self.writeln(htTitle(s))
 
 	def writeDict(self, d):
-		self.writeln(htmlForDict(d, filterValueCallBack=self.filterDictValue))
+		self.writeln(htmlForDict(d, filterValueCallBack=self.filterDictValue, maxValueLength=self._maxValueLength))
 
 	def writeTable(self, listOfDicts, keys=None):
 		"""
@@ -351,48 +354,48 @@ class ExceptionHandler(Object):
 
 	def emailException(self, htmlErrMsg):
 		message = StringIO.StringIO()
- 		writer = MimeWriter.MimeWriter(message)
+		writer = MimeWriter.MimeWriter(message)
 
- 		## Construct the message headers
- 		headers = self.setting('ErrorEmailHeaders').copy()
- 		headers['Date'] = dateForEmail()
- 		headers['Subject'] = headers.get('Subject','[WebKit Error]') + ' ' \
- 				     + str(sys.exc_info()[0]) + ': ' \
-				     + str(sys.exc_info()[1])
- 		for h,v in headers.items():
+		## Construct the message headers
+		headers = self.setting('ErrorEmailHeaders').copy()
+		headers['Date'] = dateForEmail()
+		headers['Subject'] = headers.get('Subject','[WebKit Error]') + ' ' \
+					 + str(sys.exc_info()[0]) + ': ' \
+					 + str(sys.exc_info()[1])
+		for h,v in headers.items():
 			if isinstance(v, types.ListType):
-                                v = ','.join(v)
- 			writer.addheader(h, v)
+				v = ','.join(v)
+			writer.addheader(h, v)
 
- 		## Construct the message body
+		## Construct the message body
 
- 		if self.setting('EmailErrorReportAsAttachment'):
- 			writer.startmultipartbody('mixed')
- 			# start off with a text/plain part
- 			part = writer.nextpart()
- 			body = part.startbody('text/plain')
- 			body.write(
- 				'WebKit caught an exception while processing ' +
- 				'a request for "%s" ' % self.servletPathname() +
- 				'at %s (timestamp: %s).  ' %
- 				(asctime(localtime(self._res.endTime())), self._res.endTime()) +
- 				'The plain text traceback from Python is printed below and ' +
- 				'the full HTML error report from WebKit is attached.\n\n'
- 				)
- 			traceback.print_exc(file=body)
+		if self.setting('EmailErrorReportAsAttachment'):
+			writer.startmultipartbody('mixed')
+			# start off with a text/plain part
+			part = writer.nextpart()
+			body = part.startbody('text/plain')
+			body.write(
+				'WebKit caught an exception while processing ' +
+				'a request for "%s" ' % self.servletPathname() +
+				'at %s (timestamp: %s).  ' %
+				(asctime(localtime(self._res.endTime())), self._res.endTime()) +
+				'The plain text traceback from Python is printed below and ' +
+				'the full HTML error report from WebKit is attached.\n\n'
+				)
+			traceback.print_exc(file=body)
 			
- 			# now add htmlErrMsg
- 			part = writer.nextpart()
- 			part.addheader('Content-Transfer-Encoding', '7bit')
- 			part.addheader('Content-Description', 'HTML version of WebKit error message')
- 			body = part.startbody('text/html; name=WebKitErrorMsg.html')
- 			body.write(htmlErrMsg)
+			# now add htmlErrMsg
+			part = writer.nextpart()
+			part.addheader('Content-Transfer-Encoding', '7bit')
+			part.addheader('Content-Description', 'HTML version of WebKit error message')
+			body = part.startbody('text/html; name=WebKitErrorMsg.html')
+			body.write(htmlErrMsg)
 			
- 			# finish off
- 			writer.lastpart()
-     		else:
- 			body = writer.startbody('text/html')
- 			body.write(htmlErrMsg)
+			# finish off
+			writer.lastpart()
+		else:
+			body = writer.startbody('text/html')
+			body.write(htmlErrMsg)
 			
 		# Send the message
 		server = smtplib.SMTP(self.setting('ErrorEmailServer'))
@@ -440,9 +443,12 @@ class ExceptionHandler(Object):
 		This is a utility method for writeAttrs.
 		"""
 		if type(x) is DictType:
-			return htmlForDict(x, filterValueCallBack=self.filterDictValue)
+			return htmlForDict(x, filterValueCallBack=self.filterDictValue, maxValueLength=self._maxValueLength)
 		else:
-			return htmlEncode(repr(x))
+			rep = repr(x)
+			if self._maxValueLength and len(rep) > self._maxValueLength:
+				rep = rep[:self._maxValueLength] + '...'
+			return htmlEncode(rep)
 
 
 # Some misc functions
