@@ -5,29 +5,38 @@
 # Lines that are blank or begin with '#' are ignored.
 
 
-                       --> display Examples/Welcome
-/                      --> "
+# Good URLs
+/                      --> Show /Examples/Welcome
 /Welcome               --> "
-/Welcome/              --> "
 /Examples/Welcome      --> "
-/Examples/Welcome/     --> Error: 404 Not found
-/Examples              --> "
 /Examples/             --> "
-/Admin                 --> Show admin pages
-/Admin/                --> "
-/Testing/Dir/File.html --> display the file
+/Admin/                --> Show admin pages
+/Testing/Dir/File.html --> Display the file
 
-/Testing/EmbeddedServlet/Extra/Path/Info  --> *** not yet supported ***
-/Testing/EmbeddedServlet/Extra/Path/Info/ --> "
+# Redirects
+                       --> Redirect to /
+/Admin                 --> Redirect to /Admin/
+/Examples              --> Redirect to /Examples/
 
+# Combo cases
 /Testing/Dir \
 /Testing/Dir/File.html --> display
 
+/Examples \
+/Examples/Welcome \
+/Examples/Welcome     --> shows the Welcome page each time
+
+# Bad: Slashes after files
+/Welcome/              --> Error: 404 Not found
+/Examples/Welcome/     --> "
+
+# Bad: Unknown URLs
 /BadURL --> 404 Not Found
 /BadURL/ --> "
 /Examples/BadURL --> "
 /Examples/BadURL/ --> "
 
-/Examples \
-/Examples/Welcome \
-/Examples/Welcome     --> shows the Welcome page each time
+# Embedded Servlets
+/Testing/Servlet/Extra/Path/Info  --> *** not yet supported ***
+/Testing/Servlet/Extra/Path/Info/ --> "
+

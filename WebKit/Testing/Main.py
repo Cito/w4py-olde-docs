@@ -17,7 +17,7 @@ class Main(Page):
 		raise Exception, msg
 
 	def writeBody(self):
-		self.writeln('<p><font size=+1>WebKit Testing</font> <p>')
+		self.writeln('<p><center><font size=+1>WebKit Testing</font></center> <p>')
 		self.writeTestCases()
 		self.writeNotes()
 
