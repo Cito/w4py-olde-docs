@@ -24,6 +24,10 @@ suites = [
 	'MiscUtils.Testing.TestNamedValueAccess.makeTestSuite',
 	'MiscUtils.Testing.TestError.TestError',
 	'MiscUtils.Testing.TestFuncs.TestFuncs',
+	'MiscUtils.Testing.TestPickleCache.TestPickleCache',
+	'MiscUtils.Testing.TestDataTable.TestDataTable',
+	'MiscUtils.Testing.TestDictForArgs',
+	
 	'PSP.Tests.PSPUtilsTest',
 	'PSP.Tests.CompileTest',
 
