@@ -1,8 +1,10 @@
 <%-- This is a PSP comment. It won't show up in the HTML or even in the class that this file will generate --%>
 
 <%@ page imports = "sys,os,time"%> <%-- Here's the modules that I need in this file --%>
-<%@ page method="writeHTML" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
-<%@ page extends="WebKit.Page"%> <%--This is the base class for this page.  Page is the default --%>
+<%-- You normally don't need any of the other page directives used here. --%>
+<%@ page imports = "PSP.Examples.PSPExamplePage" %>
+<%@ page method="writeContent" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
+<%@ page extends="PSP.Examples.PSPExamplePage"%> <%--This is the base class for this page.  Page is the default --%>
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="tabs" %>
 

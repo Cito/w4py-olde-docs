@@ -1,22 +1,23 @@
 import string
-from WebKit.Page import Page
+#from WebKit.Page import Page
+from PSP.Examples.PSPExamplePage import PSPExamplePage
 import os
 
-class View(Page):
+class View(PSPExamplePage):
 	"""
 
 	"""
 
-	def writeBody(self):
+	def writeContent(self):
 		req = self.request()
 		if req.hasField('filename'):
 			self.writeln('<p>', self.__class__.__doc__)
 
 			filename = req.field('filename')
-
-			filename = self.request().serverSidePath(os.path.basename(filename))
+			basename = os.path.basename(filename)
+			filename = self.request().serverSidePath(basename)
 			if not os.path.exists(filename):
-				self.write("No such file %s exists" % filename)
+				self.write("No such file %s exists" % basename)
 				return
 
 			text = open(filename).read()

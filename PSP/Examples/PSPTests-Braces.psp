@@ -1,13 +1,16 @@
 <%-- This is a PSP comment. It won't show up in the HTML or even in the class that this file will generate --%>
 
 <%@ page imports = "sys,os,time"%> <%-- Here's the modules that I need in this file --%>
-<%@ page method="writeHTML" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
-<%@ page extends="WebKit.Page"%> <%--This is the base class for this page.  Page is the default --%>
+<%-- You normally don't need any of the other page directives used here. --%>
+
+<%@ page imports = "PSP.Examples.PSPExamplePage" %> <%-- One more import, the base class, which isn't normally needed --%>
+<%@ page method="writeContent" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
+<%@ page extends="PSP.Examples.PSPExamplePage"%> <%--This is the base class for this page.  Page is the default --%>
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="braces" %>
 
 
-<%--  Method declaration Test --%>
+<%--  Method declaration --%>
 <psp:method name="title" params="">
 return "PSP Tests Page - Braces"
 </psp:method>
@@ -57,7 +60,7 @@ Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>
 
 
 <b>Below is a loop test</b>
-<br> Loops are the trickiest part of PSP due to Python Indentation for blocks syntax.  The uses of bracs, while not good for normal python, does make things easier here where we are dealing with HTML.
+<br> Loops are the trickiest part of PSP due to Python Indentation for blocks syntax.  The uses of braces, while not good for normal python, does make things easier here where we are dealing with HTML.
 <br>
 
 
