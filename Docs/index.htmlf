@@ -1,6 +1,6 @@
 <center><b>
-Version %(version)s
-<br>January @@, 2001
+Version %(versionString)s
+<br>%(releaseDate)s
 </b></center>
 
 

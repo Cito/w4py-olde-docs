@@ -17,6 +17,7 @@ import os, string, sys
 from time import time, localtime, asctime
 from string import count, join, rfind, split, strip, replace
 from glob import glob
+from MiscUtils.PropertiesObject import PropertiesObject
 
 try:
 	from cStringIO import StringIO
@@ -26,17 +27,16 @@ except ImportError:
 
 class Installer:
 	'''
-	The _comps attribute is a list of components, each of which is a dictionary initialized mostly from the component's Properties.py.
+	The _comps attribute is a list of components, each of which is an instance of MiscUtils.PropertiesObject.
 	'''
 
 	## Init ##
 
 	def __init__(self):
-		self._nameAndVer = strip(open('_VERSION').readlines()[0])
-		self._ver = split(self._nameAndVer)[1]
-		self._comps = []
+		self._props = PropertiesObject('Properties.py')
 		self._htHeader = self.htFragment('Header')
 		self._htFooter = self.htFragment('Footer')
+		self._comps = []
 
 
 	## Running the installation ##
@@ -52,7 +52,7 @@ class Installer:
 		return self
 
 	def printHello(self):
-		print self._nameAndVer
+		print '%(name)s %(versionString)s' % self._props
 		print 'Installer'
 		print
 		self.printKeyValue('Date', asctime(localtime(time())))
@@ -68,7 +68,7 @@ class Installer:
 			if os.path.isdir(filename):
 				propName = os.path.join(filename, 'Properties.py')
 				if os.path.exists(propName):
-					comp = self.readProperties(propName)
+					comp = PropertiesObject(propName)
 					comp['filename'] = filename
 					self._comps.append(comp)
 					print '  yes', filename
@@ -76,23 +76,6 @@ class Installer:
 					print '   no', filename
 		print
 		self._comps.sort(lambda a, b: cmp(a['name'], b['name']))
-
-	def readProperties(self, filename):
-		''' Returns a dictionary of values from executing the given Python properties file. '''
-		results = {}
-		contents = open(filename).read()
-		if os.name=='posix':
-			# get rid of CRs on posix, cuz Python's exec statement
-			# will barf on them (even though a straight out script
-			# works fine)
-			contents = string.replace(contents, '\015', '')
-		exec contents in results
-		# get rid of stuff like '__builtins__'
-		for key in results.keys():
-#			if key.startswith('__'):
-			if key[:2]=='__':
-				del results[key]
-		return results
 
 	def installDocs(self):
 		self.propagateStyleSheet()
@@ -234,31 +217,24 @@ class Installer:
 		wr('<tr class=ComponentHeadings> <td nowrap>Component</td> <td>Status</td> <td nowrap>Py ver</td> <td>Summary</td> </tr>')
 		row = 0
 		for comp in self._comps:
-			comp = comp.copy()
-			comp['name'] = '<a href=../%(filename)s/Docs/index.html>%(name)s</a>' % comp
-			#comp['version'] = '.'.join([str(x) for x in comp['version']])
-			comp['version'] = join(map(lambda x: str(x), comp['version']), '.')
-			#comp['requiredPyVersion'] = '.'.join([str(x) for x in comp['requiredPyVersion']])
-			comp['requiredPyVersion'] = join(map(lambda x: str(x), comp['requiredPyVersion']), '.')
-			comp['row'] = row+1
+			comp['nameAsLink'] = '<a href=../%(filename)s/Docs/index.html>%(name)s</a>' % comp
+			comp['indexRow'] = row+1
 			wr('''\
-<tr valign=top class=ComponentRow%(row)i>
-	<td class=NameVersionCell> <span class=Name>%(name)s</span><br><span class=Version>%(version)s</span> </td>
+<tr valign=top class=ComponentRow%(indexRow)i>
+	<td class=NameVersionCell> <span class=Name>%(nameAsLink)s</span><br><span class=Version>%(versionString)s</span> </td>
 	<td> %(status)s </td>
-	<td> %(requiredPyVersion)s </td>
+	<td> %(requiredPyVersionString)s </td>
 	<td> %(synopsis)s </td>
 </tr>''' % comp)
 			row = (row+1)%2  # e.g., 1, 2, 1, 2, ...
 		wr('</table>')
-#		ht = '\n'.join(ht)
 		ht = string.join(ht, '\n')
 		self.writeDocFile('Webware Component Index', 'Docs/ComponentIndex.html', ht, extraHead='<link rel=stylesheet href=ComponentIndex.css type=text/css>')
 
 	def createIndex(self):
 		print 'Creating index.html...'
-		version = self._ver
 		ht = self.htFragment('index')
-		ht = ht % locals()
+		ht = ht % self._props
 		self.writeDocFile('Webware Documentation', 'Docs/index.html', ht, extraHead='<link rel=stylesheet href=index.css type=text/css>')
 
 		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until
@@ -267,27 +243,20 @@ class Installer:
 		ht = self.htFragment('Copyright')
 		self.writeDocFile('Webware Copyright et al', 'Docs/Copyright.html', ht)
 
-
 	def createComponentIndexes(self):
 		print "Creating components' index.html..."
 		indexFrag = self.htFragment('indexOfComponent')
-		webwareVersion = self._ver
 		link = '<a href=%s>%s</a> <br>\n'
 		for comp in self._comps:
-			comp = comp.copy()
-#			comp['version'] = '.'.join([str(x) for x in comp['version']])
-			comp['version'] = join(map(lambda x: str(x), comp['version']), '.')
-#			comp['requiredPyVersion'] = '.'.join([str(x) for x in comp['requiredPyVersion']])
-			comp['requiredPyVersion'] = join(map(lambda x: str(x), comp['requiredPyVersion']), '.')
-			comp['webwareVersion'] = webwareVersion
+			comp['webwareVersion'] = self._props['version']
+			comp['webwareVersionString'] = self._props['versionString']
 
-			# Replace comp['docs'] with a readable HTML version of itself
+			# Create 'htDocs' as a readable HTML version comp['docs']
 			ht = []
 			for doc in comp['docs']:
 				ht.append(link % (doc['file'], doc['name']))
-#			ht = ''.join(ht)
 			ht = string.join(ht, '')
-			comp['docs'] = ht
+			comp['htDocs'] = ht
 
 			# Set up release notes
 			ht = []
@@ -301,16 +270,14 @@ class Installer:
 
 				for item in releaseNotes:
 					filename = item['filename']
-#					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
-					item['name'] = filename[rfind(filename,'-')+1:rfind(filename,'.')]
+					item['name'] = filename[string.rfind(filename,'-')+1:string.rfind(filename,'.')]
 				releaseNotes.sort(self.sortReleaseNotes)
 				for item in releaseNotes:
 					ht.append(link % (item['filename'], item['name']))
 			else:
 				ht.append('None\n')
-#			ht = ''.join(ht)
 			ht = string.join(ht, '')
-			comp['releaseNotes'] = ht
+			comp['htReleaseNotes'] = ht
 
 			# Write file
 			title = comp['name'] + ' Documentation'
@@ -359,12 +326,10 @@ Installation is finished.'''
 		# We append '.0' below so that values like 'x.y' and 'x.y.z'
 		# compare the way we want them too (x.y.z is newer than x.y)
 		a = a['name']
-#		if a.count('.')==1:
-		if count(a, '.')==1:
+		if string.count(a, '.')==1:
 			a = a + '.0'
 		b = b['name']
-#		if b.count('.')==1:
-		if count(b, '.')==1:
+		if string.count(b, '.')==1:
 			b = b + '.0'
 		return -cmp(a, b)
 
