@@ -10,6 +10,18 @@ For more information on the DB API, see:
 	http://www.python.org/topics/database/DatabaseAPI-2.0.html
 
 
+The idea behind DBPool is that it's completely seamless, so once you have established your connection, use it just as you would any other DB-API compliant module. For example:
+
+	dbPool = DBPool(MySQLdb, 5, host=xxx, user=xxx, ...)
+	db = dbPool.getConnection()
+
+Now use "db" exactly as if it were a MySQLdb module. It's really
+just a proxy class.
+
+db.close() will return the connection to the pool, not actually
+close it. This is so your existing code works nicely.
+
+
 FUTURE
 
 * If in the presence of WebKit, register ourselves as a Can.
@@ -22,6 +34,7 @@ CREDIT
 * Fixes by Geoff Talvola (thread safety in _threadsafe_getConnection()).
 * Clean up by Chuck Esterbrook.
 * Fix unthreadsafe functions which were leaking, Jay Love
+* Eli Green's webware-discuss comments were lifted for additional docs.
 """
 
 
@@ -99,7 +112,7 @@ class DBPool:
 		return
 
 	# These functions are used with DB modules that have connection level threadsafety, like PostgreSQL.
-	# 
+	#
 	def _unthreadsafe_addConnection(self, con):
 		self._queue.put(con)
 
@@ -111,4 +124,4 @@ class DBPool:
 		This should never be called explicitly outside of this module.
 		"""
 		self.addConnection(conpool._con)
-		
+
