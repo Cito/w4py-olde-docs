@@ -5,6 +5,7 @@ import os, cgi, sys, traceback
 from types import ListType
 from WebUtils.Funcs import requestURI
 from WebUtils import FieldStorage
+import HTTPResponse
 
 debug=0
 
@@ -138,6 +139,9 @@ class HTTPRequest(Request):
 
 
 	## Transactions ##
+
+	def responseClass(self):
+		return HTTPResponse.HTTPResponse
 
 	def transaction(self):
 		return self._transaction
