@@ -40,13 +40,16 @@ class PostgreSQLObjectStore(SQLObjectStore):
 		if not args.get('database'):
 			args['database'] = self._model.sqlDatabaseName()
 
+	def newCursorForConnection(self, conn, dictMode=0):
+		return conn.cursor()
+	
 	def _insertObject(self, object, unknownSerialNums):
 		# basically the same as the SQLObjectStore-
 		# version but modified to retrieve the
 		# serialNum via the oid (for which we need
 		# class-name, unfortunately)
 		object.klass
-		seqname = "%s_%s_seq" % (object.klass().name(), object.klass().sqlIdName())
+		seqname = "%s_%s_seq" % (object.klass().name(), object.klass().sqlSerialColumnName())
 		conn, curs = self.executeSQL("select nextval('%s')" % seqname)
 		id = curs.fetchone()[0]
 		assert id, "Didn't get next id value from sequence"
@@ -85,7 +88,10 @@ class PostgreSQLObjectStore(SQLObjectStore):
 				raise
 		conn.commit()
 
-	
+	def sqlCaseInsensitiveLike(self, a, b):
+		return "%s ilike %s" % (a,b)
+
+
 class Klass:
 
 	def insertSQLStart(self):
@@ -96,9 +102,9 @@ class Klass:
 			res = ['insert into %s (' % self.sqlTableName()]
 			attrs = self.allDataAttrs()
 			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
-			fieldNames = [self.sqlIdName()] + [attr.sqlColumnName() for attr in attrs]
+			fieldNames = [self.sqlSerialColumnName()] + [attr.sqlColumnName() for attr in attrs]
 			if len(fieldNames)==0:
-				fieldNames = [self.sqlIdName()]
+				fieldNames = [self.sqlSerialColumnName()]
 			res.append(','.join(fieldNames))
 			res.append(') values (')
 			self._insertSQLStart = ''.join(res)
