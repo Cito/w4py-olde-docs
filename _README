@@ -9,13 +9,13 @@ Be sure to run, in this directory:
 
 See the files:
 
-	./_COPYRIGHT
-	./Documentation/Webware.html
+	_COPYRIGHT
+	Documentation/Webware.html
 
 
 You might also check out:
 
-	./_VERSION
+	_VERSION
 
 
 And get more information and the latest version at:
