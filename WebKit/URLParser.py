@@ -180,6 +180,7 @@ class ContextParser(URLParser):
 				print 'Default context aliases to: %s' % (dest)
 				return
 
+		e = None
 		try:
 			importAsName = name
 			localDir, packageName = os.path.split(dir)
@@ -191,8 +192,11 @@ class ContextParser(URLParser):
 					raise ImportError, '__init__.py could not be found'
 				mod = imp.load_module(name, *res)
 		except ImportError, e:
-			print 'Error loading context: %s: %s: dir=%s' \
-			      % (name, e, dir)
+			pass
+		except TypeError, e:  # TypeError can be raised by imp.load_module() when context path does not exist
+			pass
+		if e:
+			print 'Error loading context: %s: %s: dir=%s' % (name, e, dir)
 			return
 
 		if hasattr(mod, 'contextInitialize'):
