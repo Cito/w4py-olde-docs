@@ -90,6 +90,7 @@ class HTTPRequest(Request):
 
 		self._transaction    = None
 		self._serverRootPath = None
+		self._extraPathInfo  = None
 
 
 	## Transactions ##
@@ -114,6 +115,9 @@ class HTTPRequest(Request):
 
 	def hasValue(self, name):
 		return self._fields.has_key(name) or self._cookies.has_key(name)
+
+	def extraPathInfo(self):
+		return self._extraPathInfo
 
 
 	## Fields ##
@@ -182,7 +186,7 @@ class HTTPRequest(Request):
 ##		if self._environ.has_key('WK_URI'): #added by the adaptor
 ##			self._environ['PATH_INFO'] = self._environ['WK_URI']
 ##			return self._environ['WK_URI']
-		if self._environ.has_key('WK_ABSOLUTE'): #set by the adaptor
+		if self._environ.has_key('WK_ABSOLUTE'): #set by the adaptor, used by modpHandler
 			self._absolutepath = 1
 			return self.fsPath()
 		return self._environ['PATH_INFO']
@@ -215,10 +219,13 @@ class HTTPRequest(Request):
 
 	def servletURI(self):
 		"""This is the URI of the servlet, without any query strings or extra path info"""
-
+		
 		sspath=self.serverSidePath()#ensure that extraPathInfo has been stripped
 		pinfo=self.pathInfo()
-		URI=pinfo[:string.rfind(pinfo,self.value("extraPathInfo",''))]
+		if not self._extraPathInfo:
+			if pinfo[-1]=="/": pinfo = pinfo[:-1]
+			return pinfo
+		URI=pinfo[:string.rfind(pinfo,self._extraPathInfo)]
 		if URI[-1]=="/": URI=URI[:-1]
 		return URI
 
@@ -243,6 +250,25 @@ class HTTPRequest(Request):
 			requri = requri[:-qslength] ##pull off the query string and the ?-mark
 		fspath = os.path.join(docroot,requri)
 		return fspath
+
+	def serverURL(self):
+		""" Returns the full internet path to this request, without any extra path info or query strings.
+		ie: www.my.own.host.com/WebKit/TestPage.py
+		"""
+		host = self._environ['HTTP_HOST']
+		adaptor = self.adapterName()
+		path = self.urlPath()
+		return host+adaptor+path
+
+	def serverURLDir(self):
+		"""
+		Returns the Directory of the URL in full internet form.  This is the same as serverURL,
+		but removes the actual page name if it was included.
+		"""
+		fullurl = self.serverURL()
+		if fullurl[-1]!="/":
+			fullurl = fullurl[:string.rfind(fullurl,"/")+1]
+		return fullurl
 
 
 

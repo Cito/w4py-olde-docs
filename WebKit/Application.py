@@ -770,7 +770,10 @@ class Application(Configurable, CanContainer, Object):
 				repr(baseName), repr(filenames))
 		return filenames
 
-	def serverSidePathForRequest(self, request, debug=0):
+
+
+
+	def serverSidePathForRequest(self, request, debug=1):
 		"""
 		Returns what it says. This is a 'private' service method for use by HTTPRequest.
 		Returns None if there is no corresponding server side path for the URL.
@@ -782,8 +785,10 @@ class Application(Configurable, CanContainer, Object):
 			* For directories, auto discovery of file, configured by DirectoryFile
 			* For files, auto discovery of extension, configured by ExtensionsToIgnore
 			* Rejection of files (not directories) that end in a slash (/)
-			* NOT YET: "Extra path" URLs where the servlet is actually embedded in the path
-			  as opposed to being at the end of it. (ex: http://foo.com/servlet/extra/path)
+			* "Extra path" URLs where the servlet is actually embedded in the path
+			  as opposed to being at the end of it. (ex: http://foo.com/servlet/extra/path).
+			  The ExtraPath information will be available through request.extraPathInfo().
+			  The Application.config file must have ExtraPathInfo set to 1 for this to be functional.
 
 		IF YOU CHANGE THIS VERY IMPORTANT, SUBTLE METHOD, THEN PLEASE REVIEW
 		AND COMPLETE http://localhost/WebKit.cgi/Testing/ BEFORE CHECKING IN
@@ -807,32 +812,11 @@ class Application(Configurable, CanContainer, Object):
 			if debug: print '>> returning path from cache: %s' % repr(ssPath)
 			return ssPath
 
-		# check for extraPathInfo type url in cache, like http://localhost/SomeServlet/e/p/i
-		if 0: # @@ 2000-06-22 ce: disabled, have to rethink the logic here
-			if debug: print '>> looking for extraPathInfo type url in cache'
-			extraPathInfo = ''
-			strippedPath = urlPath
-			while strippedPath!='' and ssPath==None:
-				strippedPath, extraPathInfo = os.path.split(strippedPath)
-				ssPath = self._serverSidePathCacheByPath.get(strippedPath, None)
-				#if extraPathInfo!='': # avoid a trailing /
-				#	   extraPathInfo = os.path.join(extra, extraPathInfo)
-				#else:
-				#	   extraPathInfo = extra
-			if ssPath==None:
-				# we failed to find one in the cache
-				extraPathInfo = ''
-				if debug: print '>> did not find one'
-			else:
-				request._fields['extraPathInfo'] = extraPathInfo
-				if debug:
-					print '>> returning path %s with extraPathInfo %s' % (
-						repr(ssPath), extraPathInfo)
-				return ssPath
 
 		# case: no URL then use the default context
 		if urlPath=='' or urlPath=='/':
 			ssPath = self._contexts['default']
+			contextName= 'default'
 			if debug:
 				print '>> no urlPath, so using default context path: %s' % repr(ssPath)
 		else:
@@ -850,6 +834,7 @@ class Application(Configurable, CanContainer, Object):
 			except KeyError:
 				restOfPath = urlPath[1:]  # put the old path back, there's no context here
 				prepath = self._contexts['default']
+				contextName = 'default'
 				if debug:
 					print '>> context not found so assuming default:'
 			if debug: print '>> prepath=%s, restOfPath=%s' % (repr(prepath), repr(restOfPath))
@@ -870,20 +855,66 @@ class Application(Configurable, CanContainer, Object):
 
 		if debug: print '>> normalized ssPath =', repr(ssPath)
 
-		if 0: # @@ 2000-06-22 ce: disabled, have to rethink the logic here
-			extraPathInfo=''
-			if not isdir(os.path.split(ssPath)[0]):
-				while restOfPath != '':  #don't go too far
-					if not isdir(os.path.join(basePath,os.path.split(restOfPath)[0])): #strip down to the first real directory
-						restOfPath,extra = os.path.split(restOfPath)
-						if extraPathInfo != '': #avoid a trailing '/'
-							extraPathInfo=os.path.join(extra,extraPathInfo)
+		######### NEW-jsl-12/14/00 - ExtraPathInfo routine #############	
+		extraPathInfo=''
+		if self.setting('ExtraPathInfo'):	
+			#Search for extra path info style from left to right.
+			if debug: print "Checking for extra path info"
+			index=0 #start
+			workPath=ssPath
+			loopagain=1
+			while loopagain:
+				index = string.find(ssPath,os.sep,index+1)
+				if index == -1:
+					path = ssPath
+					loopagain=0
+					index=0
+
+				else:
+					path, extra = (ssPath[:index],ssPath[index:])
+					if debug: print ">> Checking path=%s, extra=%s" % (path,extra)
+
+
+				if not os.path.exists(path):
+					# At this point we have a file (or a bad path)
+					filenames = self.filenamesForBaseName(path, debug)
+					if len(filenames)>0:
+						workPath=path
+						if path == ssPath:
+							extraPathInfo=''
 						else:
-							extraPathInfo=extra
-					else: # if I get here, I'm either at the real Servlet, or I'm at basePath
-						ssPath = os.path.join(basePath,restOfPath)
-						urlPath = urlPath[:string.rindex(urlPath,extraPathInfo)-1]#remove trailing /
+							extraPathInfo = ssPath[len(workPath):]
 						break
+					else:
+						extraPathInfo = ssPath[len(workPath):]
+						ssPath = workPath
+						break
+				else:
+					extraPathInfo = ssPath[len(path):]
+
+				workPath = path
+
+			ssPath = workPath
+			if len(extraPathInfo) != 0:
+				request._extraPathInfo = urlPath[-len(extraPathInfo):] #get extraPathInfo from urlPath so the slashes are going the right direction
+			else:
+				request._extraPathInfo = None
+			if urlPath != '/' and extraPathInfo != '':
+				urlPath = urlPath[:-len(extraPathInfo)]
+			request.setURLPath(urlPath)
+
+
+			if debug:
+				print "*** After EPI Checks:\n\turlPath=%s\n\textraPathInfo=%s\n\tssPath=%s\n" % (urlPath,extraPathInfo,ssPath)
+				print "request.getURL() says %s" % request.urlPath()
+
+			##Finish extraPathInfo checks
+			##Check cache again
+			cachePath = self._serverSidePathCacheByPath.get(urlPath, None)
+			if cachePath is not None:
+				if debug: print '>> returning path from cache: %s' % repr(ssPath)
+				return cachePath
+			
 
 		if isdir(ssPath):
 			# URLs that map to directories need to have a trailing slash.
@@ -891,7 +922,7 @@ class Application(Configurable, CanContainer, Object):
 			# constructed correctly by the browser.
 			# So in the following if statement, we're bailing out for such URLs.
 			# dispatchRequest() will detect the situation and handle the redirect.
-			if urlPath=='' or urlPath[-1]!='/':
+			if extraPathInfo == None and (urlPath=='' or urlPath[-1]!='/'):
 				if debug:
 					print '>> BAILING on directory url: %s' % repr(urlPath)
 				return ssPath
@@ -930,6 +961,9 @@ class Application(Configurable, CanContainer, Object):
 		if debug:
 			print '>> returning %s\n' % repr(ssPath)
 		return ssPath
+
+
+
 
 
 def isdir(s):

@@ -15,7 +15,8 @@
 	'SessionStore':         'Memory',  # can be File or Memory
 	'SessionTimeout':       60,  # minutes
 	'IgnoreInvalidSession': 0,
-
+	'ExtraPathInfo'       : 1, ##Set to 1 to allow extra path info to be
+attached to URLs     
 
 	# Error handling
 	'ShowDebugInfoOnErrors':  1,
