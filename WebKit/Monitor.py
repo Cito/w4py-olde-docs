@@ -14,12 +14,12 @@ it will start a new copy of the AppServer, after killing the previous process.
 USE:
 
 
-"Monitor start"
+"Monitor.py start"
  or
-"Monitor stop"
+"Monitor.py stop"
 
 
-The default specified below will be used, or you can list the AppServer you would like after "start".
+The default AppServer specified below will be used, or you can list the AppServer you would like after "start".
 
 You can have the whole process run as a daemon by specifying "daemon" after "start" on the command line.
 
@@ -59,7 +59,7 @@ serverName = defaultServer
 global srvpid
 srvpid=0
 checkInterval = 10  #add to config if this implementation is adopted, seconds between checks
-maxStartTime = 120  #time to wait for a AppServer to start before killing it and trying again
+maxStartTime = 120  #seconds to wait for a AppServer to start before killing it and trying again
 global addr
 global running
 running = 0
@@ -67,13 +67,10 @@ running = 0
 debug = 0
 
 
-def createServer(changeDirectory=0):
+def createServer(setupPath=0):
 	"""Unix only, after forking"""
 	print "Starting Server"
-	if changeDirectory:
-		os.chdir(os.pardir)
-		if '' not in sys.path:
-			sys.path = [''] + sys.path
+
 	import WebKit
 	code = 'from WebKit.%s import main' % serverName
 	exec code
@@ -86,18 +83,19 @@ def startupCheck():
 	"""
 	global debug
 	count = 0
-	while 1: #give the server a chance to start
+	print "Waiting for start"
+	time.sleep(checkInterval/2) #give the server a chance to start
+	while 1:
 		if checkServer(0):
 			break
-		print "Waiting for start"
-		time.sleep(checkInterval)
 		count = count + checkInterval
 		if count > maxStartTime:
 			print "Couldn't start AppServer"
 			print "Killing AppServer"
 			os.kill(srvpid,signal.SIGKILL)
 			sys.exit(1)
-
+		print "Waiting for start"
+		time.sleep(checkInterval)
 
 def startServer(killcurrent = 1):
 	"""
@@ -107,8 +105,10 @@ def startServer(killcurrent = 1):
 	global debug
 	if os.name == 'posix':
 		if killcurrent:
-			os.kill(srvpid,signal.SIGTERM)
-			os.waitpid(srvpid,0) #prevent zombies
+			try: os.kill(srvpid,signal.SIGTERM)
+			except: pass
+			try: os.waitpid(srvpid,0)
+			except: pass
 		srvpid = os.fork()
 		if srvpid == 0:
 			createServer(not killcurrent)
@@ -163,24 +163,32 @@ def main(args):
 	startServer(0)
 	try:
 		startupCheck()
-		while running:
-			try: 
-				checkServer()
-				if debug:
-					print "Checking Server"
-				time.sleep(checkInterval)
-			except Exception, e:
-				if debug:
-					print "Exception %s" % e
-				print "Exiting Monitor"
-				os.kill(srvpid,signal.SIGTERM)
-				sys.exit()
+
 	except Exception, e:
 		if debug:
-			print "Exception %s" % e
+			print "Startup Check Exception %s" % e
 			print "Exiting Monitor"
-		os.kill(srvpid,signal.SIGTERM)
+		try:	os.kill(srvpid,signal.SIGTERM)
+		except: pass
 		sys.exit()		
+
+	while running:
+		try: 
+			if debug:
+				print "Checking Server"
+			checkServer()
+			time.sleep(checkInterval)
+		except Exception, e:
+			if debug:
+				print "Exception %s" % e
+			if not running:
+				return
+			print "Exiting Monitor"
+			try: os.kill(srvpid,signal.SIGTERM)
+			except: sys.exit(0)
+			try: os.waitpid(srvpid,0) #prevent zombies
+			except: sys.exit(0)
+ 
 
 
 def shutDown(arg1,arg2):
@@ -195,21 +203,26 @@ def shutDown(arg1,arg2):
 		s.shutdown(1)
 		resp = s.recv(10)
 		s.close()
-		print "Server response to shutdown request:", resp
+		print "AppServer response to shutdown request:", resp
 	except Exception, e:
+		print e
 		print "No Response to Shutdown Request, performing hard kill"
-		os.kill(srvpid, signal.SIGTERM)
+		os.kill(srvpid, signal.SIGINT)
 		os.waitpid(srvpid,0)
+	return 0
 
 import signal
 signal.signal(signal.SIGINT, shutDown)
 signal.signal(signal.SIGTERM, shutDown)
 
+######################################################################
 
 def stop():
 		pid = int(open("monitorpid.txt","r").read())
 		os.kill(pid,signal.SIGINT)    #this goes to the other running instance of this module
 
+
+#######################################################################
 
 def usage():
 	print """
@@ -218,11 +231,9 @@ The required command line argument is one of:
 start: Starts the monitor and default appserver
 stop:  Stops the currently running Monitor process and the AppServer it is running.  This is the only way to stop the process other than hunting down the individual process ID's and killing them.
 
-
 Optional arguments:
 "AppServerClass":  The AppServer class to use (AsyncThreadedAppServer or ThreadedAppServer)
 daemon:  If "daemon" is specified, the Monitor will run in the background.\n
-Stopping:
 	
 """
 
@@ -247,7 +258,20 @@ if __name__=='__main__':
 		usage()
 		sys.exit()
 
-	cfg = open("Configs/AppServer.config")
+	if 1: ##setupPath:
+		if '' not in sys.path:
+			sys.path = [''] + sys.path
+		try:
+			import WebwarePathLocation
+			wwdir = os.path.abspath(os.path.join(os.path.dirname(WebwarePathLocation.__file__),".."))
+		except Exception, e:
+			print e
+			usage()
+		if not wwdir in sys.path:
+			sys.path.insert(0,wwdir)
+
+
+	cfg = open(os.path.join(wwdir,"WebKit","Configs/AppServer.config"))
 	cfg = eval(cfg.read())
 	addr = ((cfg['Host'],cfg['Port']-1))
 

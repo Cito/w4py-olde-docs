@@ -181,7 +181,10 @@ class ThreadedAppServer(AppServer):
 		for i in range(self._poolsize):
 			self.requestQueue.put(None)#kill all threads
 		for i in self.threadPool:
-			i.join()
+			try:
+				i.join()
+			except:
+				pass
 		AppServer.shutDown(self)
 		print "ThreadedAppServer:  All services have been shut down."
 
@@ -211,6 +214,7 @@ class Monitor:
 		self.insock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.insock.bind([server.address()[0],server.address()[1]-1])
 		self.insock.listen(1)
+		print "******** Listening to Monitor Socket ************"
 
 	def activate(self, socket):
 		self.sock = socket
@@ -221,7 +225,6 @@ class Monitor:
 	def handleRequest(self):
 
 		verbose = self.server._verbose
-
 		startTime = time.time()
 		if verbose:
 			print 'BEGIN REQUEST'
@@ -244,8 +247,9 @@ class Monitor:
 			conn.send(str(self.server._reqCount))
 
 		if data == 'QUIT':
+			conn.send("OK")
+			conn.close()
 			self.server.shutDown()
-		conn.close()
 
 
 
@@ -421,7 +425,7 @@ def run(useMonitor = 0):
 			t.join()
 		else:
 			try:
-				server.mainloop(monitor)
+				server.mainloop(monitor_socket)
 			except KeyboardInterrupt, e:
 				server.shutDown()
 	except Exception, e:
@@ -462,7 +466,7 @@ def main(args):
 	monitor=0
 	function=run
 	daemon=0
-	for i in args[1:]:
+	for i in args[:]:
 		if i == "monitor":
 			print "Enabling Monitoring"
 			monitor=1
