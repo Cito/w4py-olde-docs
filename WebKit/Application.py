@@ -548,7 +548,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		newSid = transaction.session().identifier()
 		request = transaction.request()
-		url = request.adapterName() + '/_SID_='+ newSid + '/' + request.pathInfo()
+		url = request.adapterName() + '/_SID_='+ newSid + '/' + request.pathInfo() + (request.extraURLPath() or '')
+
 		if request.queryString():
 			url = url + '?' + request.queryString()
 		if self.setting('Debug')['Sessions']:
