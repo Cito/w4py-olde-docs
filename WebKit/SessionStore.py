@@ -73,15 +73,12 @@ class SessionStore(Object):
 		"""
 		Called by the Application to tell this store to clean out all sessions that
 		have exceeded their lifetime.
-		
 		"""
 		curTime = time.time()
-		for key in self.keys():
-			sess = self[key]
+		for key, sess in self.items():
 			if (curTime - sess.lastAccessTime()) >= sess.timeout()  or  sess.timeout()==0:
-				self[key].expiring()
+				sess.expiring()
 				del self[key]
-
 
 
 	## Convenience methods ##
