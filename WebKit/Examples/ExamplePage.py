@@ -37,6 +37,7 @@ class ExamplePage(Page):
 		scripts = filter(lambda script, hidden=hidden: not script['name'] in hidden, self.scripts())
 		scripts = map(lambda scriptDict: '<a href="%s">%s</a>' % (scriptDict['name'], scriptDict['name']), scripts)
 		self.writeln('<p><center>', string.join(scripts, ' | '), '</center>')
+		self.writeln('<p><center> <a href="PSPExamples/Hello.psp">PSP</a>') #Annoy Chuck!
 		if self.isDebugging():
 			self.writeln('<p><center>', self._session.identifier(), '</center>')
 			from WebUtils.WebFuncs import HTMLEncode
@@ -65,14 +66,14 @@ class ExamplePage(Page):
 		self.write('<br><a href=View?filename=%s>source</a>' % self.__class__.__name__)
 
 		# WebKit docs
-		filename = '../Documentation/WebKit.html'
+		filename = 'Documentation/WebKit.html'
 		if os.path.exists(filename):
-			self.write(' | <a href=%s>%s</a>' % (filename, 'WebKit'))
+			self.write(' | <a href=%s>%s</a>' % (filename, 'WebKit Docs'))
 
 		# Webware docs
-		filename = '../../Documentation/Webware.html'
+		filename = '../Documentation/Webware.html'
 		if os.path.exists(filename):
-			self.write(' | <a href=%s>%s</a>' % (filename, 'Webware'))
+			self.write(' | <a href=%s>%s</a>' % (filename, 'Webware Docs'))
 
 		# admin
 		self.write(' | <a href=_admin>admin</a>')
