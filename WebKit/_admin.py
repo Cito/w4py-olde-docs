@@ -31,7 +31,7 @@ class _admin(AdminPage):
 		activityLogURL = '_dumpCSV?filename=%s' % URLEncode(app.setting('ActivityLogFilename'))
 		errorLogURL = '_dumpErrors?filename=%s' % URLEncode(app.setting('ErrorLogFilename'))
 		self.menuItem('Activity log', activityLogURL, self.fileSize('ActivityLogFilename'))
-		self.menuItem('Error log', activityLogURL, self.fileSize('ErrorLogFilename'))
+		self.menuItem('Error log', errorLogURL, self.fileSize('ErrorLogFilename'))
 		self.menuItem('Show config', '_showConfig')
 		self.endMenu()
 
