@@ -37,10 +37,7 @@ Version 0.8
 <h2>New Features</h2>
 
 <ul>
-	<li> *
-
-</ul>
-
+	<li> Added experimental HTTPAdapter.py written by Ian Bicking.  This is an adapter that serves HTTP directly, eliminating the need for a separate web server.  <b>Note that this is experimental!  Please do not use this to serve a production web site!</b>
 </ul>
 
 
@@ -74,7 +71,7 @@ Version 0.8
 				current servlet.  This is useful for saving the path to the current servlet
 				in a database, for example.
 		</ul>
-	
+
 	<li> New setting 'MaxValueLengthInExceptionReport'.  If set to an integer, it truncates values in the exception report to the specified length.  If set to None, no truncation happens.  Defaults to 500.
 </ul>
 
