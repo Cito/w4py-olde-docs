@@ -230,9 +230,10 @@ _types = {
 	'string':	StringType,
 	'int':		IntType,
 	'long':		LongType,
+	'decimal':	FloatType,
 	'float':	FloatType,
 	'datetime':	DateTimeType,
-	'object':	ObjectType,
+	'object':	ObjectType
 }
 
 
@@ -289,7 +290,7 @@ class TableColumn:
 			self._type = None
 		else:
 			try:
-				self._type = _types[type]
+				self._type = _types[type.lower()]
 			except:
 				raise DataTableError, 'Unknown type %s' % repr(type)
 
