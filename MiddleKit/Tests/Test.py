@@ -1,8 +1,17 @@
 #!/usr/bin/env python
+import time
+startTime = time.time()
+
 import os, sys
 from TestCommon import *
 from glob import glob
 
+
+class RunError(Exception):
+	"""
+	Raised by Test.run() if the process exits with a non-zero status, which indicates an error.
+	"""
+	pass
 
 class Test:
 
@@ -27,16 +36,37 @@ class Test:
 	def main(self, args=sys.argv):
 		# We explicitly list the tests rather than scanning for them (via glob) in order to perform them in a certain order (simplest to most complex)
 		self.readArgs(args)
+		results = []
 		for self._modelName in self.modelNames():
 			print '*** %s ***\n' % self._modelName
 			if not self._modelName.endswith('.mkmodel'):
 				self._modelName += '.mkmodel'
-			self.testDesign()
-			self.testEmpty()
-			self.insertSamples()
-			self.testSamples()
-			rmdir(workDir)
-			print '\n'
+			didFail = 0
+			try:
+				self.testDesign()
+				self.testEmpty()
+				self.insertSamples()
+				self.testSamples()
+				rmdir(workDir)
+				print '\n'
+			except RunError:
+				didFail = 1
+			results.append((self._modelName, didFail))
+
+		# summarize the results of each test
+		print 'RESULTS'
+		print '-------'
+		for name, didFail in results:
+			if didFail:
+				outcome = '*** FAILED ***'
+			else:
+				outcome = '     succeeded'
+			print outcome, name
+
+		# print duration for curiosity's sake
+		print
+		duration = time.time() - startTime
+		print '%.0f seconds' % (duration)
 
 	def readArgs(self, args):
 		if len(args)>1:
@@ -94,7 +124,17 @@ class Test:
 	## Self utility ##
 
 	def run(self, cmd):
-		""" Self utility method to run a system command. """
+		"""
+		Self utility method to run a system command. If the command
+		has a non-zero exit status, raises RunError. Otherwise,
+		returns 0.
+
+		Note that on Windows ME, os.system() always returns 0 even if
+		the program was a Python program that exited via sys.exit(1) or
+		an uncaught exception. On Windows XP Pro SP 1, this problem
+		does not occur. Windows ME has plenty of other problems as
+		well; avoid it.
+		"""
 		print '<cmd>', cmd
 		sys.stdout.flush()
 		sys.stderr.flush()
@@ -102,10 +142,11 @@ class Test:
 		sys.stdout.flush()
 		sys.stderr.flush()
 
-		# @@ 2001-02-02 ce: we have a problem, at least on Windows ME,
-		# that the return code of os.system() is always 0, even if
-		# the program was a Python program exited via sys.exit(1)
+		if returnCode:
+			raise RunError, returnCode
+
 		#print '>> RETURN CODE =', returnCode
+		return returnCode
 
 
 if __name__=='__main__':
