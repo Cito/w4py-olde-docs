@@ -640,11 +640,19 @@ class Application(ConfigurableForServerSidePath, Object):
 				origDir = os.path.dirname(origPath)
 				if not origDir.endswith('/'):
 					origDir += '/'
-			return origDir + url
+			path = origDir + url
 		else:
 			if context is None:
 				context = req._contextName
-			return '/%s%s' % (context, url)
+			path = '/%s%s' % (context, url)
+		# Deal with .. in the path
+		parts = []
+		for part in path.split('/'):
+			if part == '..':
+				parts.pop()
+			else:
+				parts.append(part)
+		return '/'.join(parts)
 			
 	def returnServlet(self, servlet, trans):
 		servlet.close(trans)
