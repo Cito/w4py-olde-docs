@@ -232,21 +232,41 @@ class Monitor:
 		conn = self.sock
 		if verbose:
 			print 'receiving request from', conn
-		recv = conn.recv
+			
 		BUFSIZE = 8*1024
 
-		data = []
-		while 1:
-			chunk = recv(BUFSIZE)
-			if not chunk:
-				break
-			data.append(chunk)
-		data = string.join(data, '')
+		
+		chunk = ''
+		while len(chunk) < int_length:
+			chunk = chunk + conn.recv(int_length)
+		dict_length = loads(chunk)
+		if type(dict_length) != type(1):
+			conn.close()
+			print "Error: Invalid AppServer protocol"
+			return 0
 
-		if data == "STATUS":
+		chunk = ''
+		missing = dict_length
+		while missing > 0:
+			chunk = chunk + conn.recv(missing)
+			missing = dict_length - len(chunk)
+
+		dict = loads(chunk)
+
+##		data = []
+##		while 1:
+##			chunk = recv(BUFSIZE)
+##			if not chunk:
+##				break
+##			data.append(chunk)
+##		data = string.join(data, '')
+
+##		dict = loads(data)
+
+		if dict['format'] == "STATUS":
 			conn.send(str(self.server._reqCount))
 
-		if data == 'QUIT':
+		if dict['format'] == 'QUIT':
 			conn.send("OK")
 			conn.close()
 			self.server.shutDown()
@@ -327,15 +347,15 @@ class RequestHandler:
 			
 		if verbose: print "Comm Delay=%s" % (time.time() - dict['time'])
 
-		while 1:
-			chunk = conn.recv(BUFSIZE)
-			if not chunk:
-				break
-			data.append(chunk)
-		data = string.join(data, '')
-		conn.shutdown(0)
+##		while 1:
+##			chunk = conn.recv(BUFSIZE)
+##			if not chunk:
+##				break
+##			data.append(chunk)
+##		data = string.join(data, '')
+##		conn.shutdown(0)
 
-		dict['input'] = data
+		dict['input'] = conn.makefile("r",8012)
 
 		if dict:
 			if verbose:
