@@ -1,0 +1,104 @@
+<html>
+
+<head>
+	<link rel=stylesheet href=StyleSheet.css type=text/css>
+	<style type=text/css>
+	<!--
+			li	{	padding-bottom: 0.75em;
+				}
+	-->
+	</style>
+
+	<title>WebKit 0.5 Release Notes</title>
+</head>
+
+<body>
+
+<h1>WebKit 0.5 Release Notes</h1>
+Version 0.5
+<br>Webware for Python 0.5
+
+
+<a name=Introduction><h2>Introduction</h2></a>
+<ul>
+	<li> Version 0.5 was released on 3/1/2001.
+</ul>
+
+<h2>New Features</h2>
+
+<ul>
+
+	<li> There is a new SecurePage example for securing pages with a login id and password. [Geoff T]
+
+	<li> There is a new ThreadedAppServerService.py, which is a Windows NT/2K Service version of ThreadedAppServer. This lets you install WebKit as a service that will start automatically when your machine is rebooted, and can be accessed via the Control Panel like any other service. [Geoff T] @@ 2001-02-21 ce: is this documented in the install guide and/or user's guide?
+
+	<li> Added <span class=filename>XMLRPCServlet.py</span>, a base class for servlets that act as XML-RPC servers. This is also a <span class=filename>XMLRPCExample.py</span>. If you need programmatic access to your WebKit server, this is a great and easy way to do it. [Geoff T]
+
+	<li> Added <span class=name>SessionDynamicStore</span> and made it the default session store. It will move inactive, but unexpired sessions out of memory and onto disk. @@ 2001-02-22 ce: what are the settings for this? [Jay L]
+
+</ul>
+
+
+<h2>Improvements and Refinements</h2>
+
+<ul>
+
+	<li> The adapters will now retry if they can't get to the app server.  This is configurable via settings <span class=name>NumRetries</span> and <span class=name>SecondsBetweenRetries</span>. This improves reliability and gives you, as an admin, the opportunity to shutdown and restart the app server if necessary, with less chance of losing connections to clients. [Geoff T]
+
+	<li> SessionMemoryStore: The backup-to-disk format now matches SessionFileStore (as well as SessionDynamicStore) so that you can switch session stores without losing data. [Jay L]
+
+	<li> The usual slew of code clean-ups. [everyone]
+</ul>
+
+
+<h2>Documentation</h2>
+<ul>
+	<li> X
+</ul>
+
+
+<h2>Testing</h2>
+
+<ul>
+	<li> X
+</ul>
+
+
+<h2>API Changes</h2>
+
+We don't track every change to the interface, but here are some notables:
+
+<ul>
+	<li> The Configurable class has moved to <a href=../../MiscUtils/Docs/index.html>MiscUtils</a> since it is generic enough to be used in other places. [Chuck]
+
+	<li> Renamed all "Adaptor"s to "Adapter", including the files [F]CGIAdapt[oe]r.py and *.cgi. [?]
+
+</ul>
+
+
+<h2>Bugfixes</h2>
+
+<ul>
+
+	<li> ThreadedAppServer would sometimes degenerate into a mode where it stopped handling requests in a timely manner.  This behavior could be provoked by hitting it with more simultaneous requests than it could handle at once. [Geoff T]
+
+	<li> Application now properly destroys all servlets upon exiting. [Geoff T]
+
+	<li> ThreadedAppServer is now smarter about how it handles the requestQueue during shutdown, eliminating a source of hanging problems when the request queue was full and the app server was stopped. [Geoff T]
+
+	<li> The app servers now shut down cleanly on a Control-C. [Geoff T, Jay L]
+
+</ul>
+
+
+<h2>Other</h2>
+
+<ul>
+	<li> X
+</ul>
+
+
+<p><hr>
+
+</body>
+</html>
