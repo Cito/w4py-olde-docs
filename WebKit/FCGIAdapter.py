@@ -5,6 +5,8 @@ FCGIAdapter.py
 
 FCGI Adapter for the WebKit application environment.
 
+Note: FCGI for Webware is not available on Windows.
+
 This script is started by the Web Server and is kept running.
 When a request comes through here, this script collects information
 about the request, puts it into a package, and then invokes the
@@ -111,6 +113,10 @@ def HTMLEncode(s, codes=HTMLCodes):
 	for code in codes:
 		s = string.replace(s, code[0], code[1])
 	return s
+
+if os.name != 'posix':
+	print "This adapter is only available on UNIX"
+	sys.exit(1)
 
 fcgi._startup()
 if not fcgi.isFCGI():
