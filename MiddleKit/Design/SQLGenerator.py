@@ -88,6 +88,7 @@ class Model:
 		if self._filename is not None:
 			file = open(os.path.join(dirname, 'InsertSamples.sql'), 'w')
 			file.write('use %s;\n\n' % self.dbName())
+			self._klasses.writeDeleteAllRecords(generator, file)
 			filenames = glob(os.path.join(self._filename, 'Sample*.csv'))
 			for filename in filenames:
 				lines = open(filename).readlines()
@@ -98,7 +99,6 @@ class Model:
 		# @@ 2001-02-04 ce: this method is too long
 		#	break into additional methods
 		#	some of these methods may even go into other mix-ins
-		self._klasses.writeDeleteAllRecords(generator, file)
 		readColumns = 1
 		# @@ 2000-10-29 ce: put in error checking that the column names are valid
 		for line in lines:
