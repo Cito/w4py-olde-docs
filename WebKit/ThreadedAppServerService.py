@@ -2,12 +2,12 @@
 """
 ThreadedAppServerService
 
-For general notes, see ThreadedAppServer.py.
+For general notes, see `ThreadedAppServer`.
 
 This version of the app server is a threaded app server that runs as
 a Windows NT Service.  This means it can be started and stopped from
-the Control Panel or from the command line using "net start" and
-"net stop", and it can be configured in the Control Panel to
+the Control Panel or from the command line using ``net start`` and
+``net stop``, and it can be configured in the Control Panel to
 auto-start when the machine boots.
 
 This requires the win32all package to have been installed.
@@ -15,39 +15,41 @@ This requires the win32all package to have been installed.
 To see the options for installing, removing, starting, and stopping
 the service, just run this program with no arguments.  Typical usage is
 to install the service to run under a particular user account and startup
-automatically on reboot with
+automatically on reboot with::
 
-python ThreadedAppServerService.py --username mydomain\myusername --password mypassword --startup auto install
+    python ThreadedAppServerService.py --username mydomain\myusername \
+           --password mypassword --startup auto install
 
 Then, you can start the service from the Services applet in the Control Panel,
 where it will be listed as "WebKit Threaded Application Server".  Or, from
-the command line, it can be started with either of the following commands:
+the command line, it can be started with either of the following commands::
 
-net start WebKit
-python ThreadedAppServerService.py start
+    net start WebKit
+    python ThreadedAppServerService.py start
 
-The service can be stopped from the Control Panel or with:
+The service can be stopped from the Control Panel or with::
 
-net stop WebKit
-python ThreadedAppServerService.py stop
+    net stop WebKit
+    python ThreadedAppServerService.py stop
 
-And finally, to uninstall the service, stop it and then run:
+And finally, to uninstall the service, stop it and then run::
 
-python ThreadedAppServerService.py remove
-
-FUTURE
-	* This shares a lot of code with ThreadedAppServer.py --
-	  instead it should inherit from ThreadedAppServer and have
-	  very little code of its own.
-	* Have an option for sys.stdout and sys.stderr to go to a logfile instead
-	  of going nowhere.
-	* Optional NT event log messages on start, stop, and errors.
-	* Allow the option of installing multiple copies of WebKit with
-	  different configurations and different service names.
-	* Figure out why I need the Python service hacks marked with ### below.
-	* Allow it to work with wkMonitor, or some other fault tolerance
-	  mechanism.
+    python ThreadedAppServerService.py remove
 """
+
+## FUTURE
+## 	* This shares a lot of code with ThreadedAppServer.py --
+## 	  instead it should inherit from ThreadedAppServer and have
+## 	  very little code of its own.
+## 	* Have an option for sys.stdout and sys.stderr to go to a logfile
+##	  instead of going nowhere.
+## 	* Optional NT event log messages on start, stop, and errors.
+## 	* Allow the option of installing multiple copies of WebKit with
+## 	  different configurations and different service names.
+## 	* Figure out why I need the Python service hacks marked with ### below.
+## 	* Allow it to work with wkMonitor, or some other fault tolerance
+## 	  mechanism.
+
 
 import time
 startTime = time.time()
@@ -56,6 +58,7 @@ import win32service
 import os, sys, cStringIO
 
 class ThreadedAppServerService(win32serviceutil.ServiceFramework):
+
 	_svc_name_ = 'WebKit'
 	_svc_display_name_ = 'WebKit Threaded Application Server'
 

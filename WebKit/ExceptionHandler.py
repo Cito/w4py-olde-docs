@@ -16,36 +16,34 @@ class ExceptionHandler(Object):
 	to handle a particular exception. The object is a one-shot deal.
 	After handling an exception, it should be removed.
 
-	At some point, the exception handler sends "writeExceptionReport"
-	to the transaction (if present), which in turn sends it to the other
-	transactional objects (application, request, response, etc.)
-	The handler is the single argument for this message.
+	At some point, the exception handler sends
+	`writeExceptionReport` to the transaction (if present), which
+	in turn sends it to the other transactional objects
+	(application, request, response, etc.)  The handler is the
+	single argument for this message.
 
-	Classes may find it useful to do things like this:
+	Classes may find it useful to do things like this::
 
-	exceptionReportAttrs = 'foo bar baz'.split()
-	def writeExceptionReport(self, handler):
-		handler.writeTitle(self.__class__.__name__)
-		handler.writeAttrs(self, self.exceptionReportAttrs)
+		exceptionReportAttrs = 'foo bar baz'.split()
+		def writeExceptionReport(self, handler):
+			handler.writeTitle(self.__class__.__name__)
+			handler.writeAttrs(self, self.exceptionReportAttrs)
 
 	The handler write methods that may be useful are:
-		def write(self, s):
-		def writeln(self, s):
-		def writeTitle(self, s):
-		def writeDict(self, d):
-		def writeTable(self, listOfDicts, keys=None):
-		def writeAttrs(self, obj, attrNames):
+
+	.. inline:: write
+	.. inline:: writeTitle
+	.. inline:: writeDict
+	.. inline:: writeTable
+	.. inline: writeAttrs
 
 	Derived classes must not assume that the error occured in a
 	transaction.  self._tra may be None for exceptions outside
 	of transactions.
 
-	See the WebKit.html documentation for other information.
+	**HOW TO CREATE A CUSTOM EXCEPTION HANDLER**
 
-
-	HOW TO CREATE A CUSTOM EXCEPTION HANDLER
-
-	In the __init__.py of your context:
+	In the ``__init__.py`` of your context::
 
 		from WebKit.ExceptionHandler import ExceptionHandler as _ExceptionHandler
 
@@ -74,6 +72,13 @@ class ExceptionHandler(Object):
 
 	def __init__(self, application, transaction, excInfo,
 				 formatOptions=None):
+		"""
+		ExceptionHandler instances are created anew for
+		each exception.  Instantiating ExceptionHandler
+		completes the process -- the caller need not
+		do anything else.
+		"""
+		
 		Object.__init__(self)
 
 		# Keep references to the objects
@@ -88,9 +93,15 @@ class ExceptionHandler(Object):
 
 		self._formatOptions = formatOptions
 
-		# Make some repairs, if needed. We use the transaction & response to get the error page back out
-		# @@ 2000-05-09 ce: Maybe a fresh transaction and response should always be made for that purpose
-		## @@ 2003-01-10 sd: This requires a transaction which we do not have.
+		# Make some repairs, if needed. We use the transaction
+		# & response to get the error page back out
+
+		# @@ 2000-05-09 ce: Maybe a fresh transaction and
+		# response should always be made for that purpose
+
+		## @@ 2003-01-10 sd: This requires a transaction which
+		## we do not have.
+
 		## Making remaining code safe for no transaction.
 		##
                 ##if self._res is None:
@@ -106,13 +117,21 @@ class ExceptionHandler(Object):
 		# Get to work
 		self.work()
 
-
-	## Utilities ##
+	"""
+	**Accessors**
+	"""
 
 	def setting(self, name):
+		"""
+		Settings are inherited from Application.
+		"""
 		return self._app.setting(name)
 
 	def servletPathname(self):
+		"""
+		The full filesystem path for the servlet.
+		"""
+		
 		try:
 			return self._tra.request().serverSidePath()
 		except:
@@ -120,17 +139,30 @@ class ExceptionHandler(Object):
 			return None
 
 	def basicServletName(self):
+		"""
+		The base name for the servlet (sans directory).
+		"""
 		name = self.servletPathname()
 		if name is None:
 			return 'unknown'
 		else:
 			return os.path.basename(name)
 
-
-	## Exception handling ##
+	"""
+	**Exception Handling**
+	"""
 
 	def work(self):
-		''' Invoked by __init__ to do the main work. '''
+		"""
+		Invoked by `__init__` to do the main work.
+		This calls `logExceptionToConsole`, then checks
+		settings to see if it should call `saveErrorPage`
+		(to save the error to disk) and `emailException`.
+
+		It also sends gives a page from `privateErrorPage`
+		or `publicErrorPage` (which one based on
+		``ShowDebugInfoOnErrors``).
+		"""
 
 		if self._res:
 			self._res.recordEndTime()
@@ -163,7 +195,13 @@ class ExceptionHandler(Object):
 			self.emailException(privateErrorPage)
 
 	def logExceptionToConsole(self, stderr=None):
-		''' Logs the time, servlet name and traceback to the console (typically stderr). This usually results in the information appearing in console/terminal from which AppServer was launched. '''
+		"""
+		Logs the time, servlet name and traceback to the
+		console (typically stderr). This usually results in
+		the information appearing in console/terminal from
+		which AppServer was launched.
+		"""
+
 		if stderr is None:
 			stderr = sys.stderr
 		stderr.write('[%s] [error] WebKit: Error while executing script %s\n' % (
@@ -171,6 +209,12 @@ class ExceptionHandler(Object):
 		traceback.print_exc(file=stderr)
 
 	def publicErrorPage(self):
+		"""
+		Returns a brief error pae telling the user that an
+		error has occurred.  Body of the message comes from
+		``UserErrorMessage`` setting.
+		"""
+		
 		return '''<html>
 	<head>
 		<title>Error</title>
@@ -183,7 +227,13 @@ class ExceptionHandler(Object):
 ''' % (htTitle('Error'), self.setting('UserErrorMessage'))
 
 	def privateErrorPage(self):
-		''' Returns an HTML page intended for the developer with useful information such as the traceback. '''
+		"""
+		Returns an HTML page intended for the developer with
+		useful information such as the traceback. '''
+
+		Most of the contents are generated in `htmlDebugInfo`.
+		"""
+		
 		html = ['''
 <html>
 	<head>
@@ -199,7 +249,12 @@ class ExceptionHandler(Object):
 		return string.join(html, '')
 
 	def htmlDebugInfo(self):
-		''' Return HTML-formatted debugging information about the current exception. '''
+		"""
+		Return HTML-formatted debugging information about the
+		current exception.  Calls `writeHTML`, which uses
+		``self.write(...)`` to add content.
+		"""
+		
 		self.html = []
 		self.writeHTML()
 		html = ''.join(self.html)
@@ -207,6 +262,15 @@ class ExceptionHandler(Object):
 		return html
 
 	def writeHTML(self):
+		"""
+		Writes all the parts of the traceback, invoking:
+		* `writeTraceback`
+		* `writeMiscInfo`
+		* `writeTransaction`
+		* `writeEnvironment`
+		* `writeIds`
+		* `writeFancyTraceback`
+		"""
 		self.writeTraceback()
 		self.writeMiscInfo()
 		self.writeTransaction()
@@ -214,36 +278,52 @@ class ExceptionHandler(Object):
 		self.writeIds()
 		self.writeFancyTraceback()
 
-
-	## Write utility methods ##
+	"""
+	**Write Methods**
+	"""
 
 	def write(self, s):
+		"""
+		Write `s` to the body
+		"""
 		self.html.append(str(s))
 
 	def writeln(self, s):
+		"""
+		Write `s` plus a newline
+		"""
 		self.html.append(str(s))
 		self.html.append('\n')
 
 	def writeTitle(self, s):
+		"""
+		Write a title line (a sub-heading, really, to define
+		a section)
+		"""
 		self.writeln(htTitle(s))
 
 	def writeDict(self, d):
+		"""
+		Write a table-formated dictionary
+		"""
 		self.writeln(htmlForDict(d, filterValueCallBack=self.filterDictValue, maxValueLength=self._maxValueLength))
 
 	def writeTable(self, listOfDicts, keys=None):
 		"""
-		Writes a table whose contents are given by listOfDicts. The
-		keys of each dictionary are expected to be the same. If the
-		keys arg is None, the headings are taken in alphabetical order
-		from the first dictionary. If listOfDicts is "false", nothing
+		Writes a table whose contents are given by
+		`listOfDicts`. The keys of each dictionary are
+		expected to be the same. If the `keys` arg is None,
+		the headings are taken in alphabetical order from the
+		first dictionary. If listOfDicts is false, nothing
 		happens.
 
-		The keys and values are already considered to be HTML.
+		The keys and values are already considered to be HTML,
+		and no quoting is applied.
 
 		Caveat: There's no way to influence the formatting or to use
 		column titles that are different than the keys.
 
-		Note: Used by writeAttrs().
+		Used by `writeAttrs`
 		"""
 		if not listOfDicts:
 			return
@@ -269,8 +349,9 @@ class ExceptionHandler(Object):
 	def writeAttrs(self, obj, attrNames):
 		"""
 		Writes the attributes of the object as given by attrNames.
-		Tries obj._name first, followed by obj.name(). Is resilient
-		regarding exceptions so as not to spoil the exception report.
+		Tries ``obj._name` first, followed by ``obj.name()``.
+		Is resilient regarding exceptions so as not to spoil the
+		exception report.
 		"""
 		rows = []
 		for name in attrNames:
@@ -294,15 +375,26 @@ class ExceptionHandler(Object):
 			rows.append({'attr': name, 'value': value})
 		self.writeTable(rows, ('attr', 'value'))
 
-
-	## Write specific parts ##
+	"""
+	**Traceback sections**
+	"""
 
 	def writeTraceback(self):
+		"""
+		Writes the traceback, with most of the work done
+		by `WebUtils.HTMLForException.HTMLForException`
+		"""
+		
 		self.writeTitle('Traceback')
 		self.write('<p> <i>%s</i>' % self.servletPathname())
 		self.write(HTMLForException(self._exc, self._formatOptions))
 
 	def writeMiscInfo(self):
+		"""
+		Write a couple little pieces of information about
+		the environment.
+		"""
+		
 		self.writeTitle('MiscInfo')
 		info = {
 			'time':          asctime(localtime(self._time)),
@@ -313,6 +405,10 @@ class ExceptionHandler(Object):
 		self.writeDict(info)
 
 	def writeTransaction(self):
+		"""
+		Lets the transaction talk about itself, using
+		`Transaction.writeExceptionReport`
+		"""
 		if self._tra:
 			self._tra.writeExceptionReport(self)
 		else:
@@ -320,14 +416,28 @@ class ExceptionHandler(Object):
 			
 
 	def writeEnvironment(self):
+		"""
+		Writes the environment this is being run in.  This
+		is *not* the environment that was passed in with
+		the request (holding the CGI information) -- it's
+		just the information from the environment that the
+		AppServer is being executed in.
+		"""
 		self.writeTitle('Environment')
 		self.writeDict(os.environ)
 
 	def writeIds(self):
+		"""
+		Prints some values from the OS (like processor ID)
+		"""
 		self.writeTitle('Ids')
 		self.writeTable(osIdTable(), ['name', 'value'])
 
 	def writeFancyTraceback(self):
+		"""
+		Writes a fancy traceback, using cgitb
+		"""
+		
 		if self.setting('IncludeFancyTraceback'):
 			self.writeTitle('Fancy Traceback')
 			try:
@@ -341,7 +451,10 @@ class ExceptionHandler(Object):
 					self.write('<br>Unable to even generate a normal traceback of the exception in fancy traceback!')
 
 	def saveErrorPage(self, html):
-		''' Saves the given HTML error page for later viewing by the developer, and returns the filename used. '''
+		"""
+		Saves the given HTML error page for later viewing by
+		the developer, and returns the filename used.  """
+		
 		filename = self._app.serverSidePath(os.path.join(self.setting('ErrorMessagesDir'), self.errorPageFilename()))
 		f = open(filename, 'w')
 		f.write(html)
@@ -349,15 +462,26 @@ class ExceptionHandler(Object):
 		return filename
 
 	def errorPageFilename(self):
-		''' Construct a filename for an HTML error page, not including the 'ErrorMessagesDir' setting. '''
+		"""
+		Construct a filename for an HTML error page, not
+		including the ``ErrorMessagesDir`` setting
+		(which `saveError` adds on)"""
+
 		return 'Error-%s-%s-%d.html' % (
 			self.basicServletName(),
 			string.join(map(lambda x: '%02d' % x, localtime(self._time)[:6]), '-'),
 			whrandom.whrandom().randint(10000, 99999))
-			# @@ 2000-04-21 ce: Using the timestamp & a random number is a poor technique for filename uniqueness, but this works for now
+			# @@ 2000-04-21 ce: Using the timestamp & a
+			# random number is a poor technique for
+			# filename uniqueness, but this works for now
 
 	def logExceptionToDisk(self, errorMsgFilename=''):
-		''' Writes a tuple containing (date-time, filename, pathname, exception-name, exception-data,error report filename) to the errors file (typically 'Errors.csv') in CSV format. Invoked by handleException(). '''
+		"""
+		Writes a tuple containing (date-time, filename,
+		pathname, exception-name, exception-data,error report
+		filename) to the errors file (typically 'Errors.csv')
+		in CSV format. Invoked by `handleException`. """
+		
 		logline = (
 			asctime(localtime(self._time)),
 			self.basicServletName(),
@@ -385,6 +509,11 @@ class ExceptionHandler(Object):
 		f.close()
 
 	def emailException(self, htmlErrMsg):
+		"""
+		Emails the exception, either as an attachment, or in the
+		body of the mail.
+		"""
+		
 		message = StringIO.StringIO()
 		writer = MimeWriter.MimeWriter(message)
 
@@ -436,9 +565,16 @@ class ExceptionHandler(Object):
 		server.quit()
 
 
-	## Filtering Values ##
+	"""
+	**Filtering**
+	"""
 
 	def filterDictValue(self, value, key, dict):
+		"""
+		Filters keys from a dict.  Currently ignores the
+		dictionary, and just filters based on the key.
+		"""
+		
 		return self.filterValue(value, key)
 
 	def filterTableValue(self, value, key, row, table):
@@ -466,13 +602,17 @@ class ExceptionHandler(Object):
 			return value
 
 
-	## Self utility ##
+	"""
+	**Utility**
+	"""
 
 	def repr(self, x):
 		"""
-		Returns the repr() of x already html encoded. As a special case, dictionaries are nicely formatted in table.
+		Returns the repr() of x already html encoded. As a
+		special case, dictionaries are nicely formatted in
+		table.
 
-		This is a utility method for writeAttrs.
+		This is a utility method for `writeAttrs`.
 		"""
 		if type(x) is DictType:
 			return htmlForDict(x, filterValueCallBack=self.filterDictValue, maxValueLength=self._maxValueLength)
@@ -485,6 +625,10 @@ class ExceptionHandler(Object):
 
 # Some misc functions
 def htTitle(name):
+	"""
+	Formats a `name` as a section title
+	"""
+	
 	return '''
 <p> <br> <table border=0 cellpadding=4 cellspacing=0 bgcolor=#A00000 width=100%%> <tr> <td align=center>
 	<font face="Tahoma, Arial, Helvetica" color=white> <b> %s </b> </font>
@@ -492,9 +636,13 @@ def htTitle(name):
 
 
 def osIdTable():
-	''' Returns a list of dictionaries contained id information such as uid, gid, etc.,
-		all obtained from the os module. Dictionary keys are 'name' and 'value'. '''
-	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp', 'getpid', 'getppid', 'getuid']
+	"""
+	Returns a list of dictionaries contained id information such
+	as uid, gid, etc., all obtained from the os module. Dictionary
+	keys are ``"name"`` and ``"value"``. """
+		
+	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp', 'getpid',
+		 'getppid', 'getuid']
 	table = []
 	for funcName in funcs:
 		if hasattr(os, funcName):

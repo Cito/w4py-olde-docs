@@ -14,18 +14,21 @@ class InvalidCommandSequence(exceptions.Exception):
 class ASStreamOut:
 	"""
 	This is a response stream to the client.
+	
 	The key attributes of this class are:
 	
-	autoCommit: if True (1), the stream will automatically start sending data once
-	it has accumulated bufferSize data.  This means that it will ask the response
-	to commit itself, without developer interaction.
-
-	bufferSize: The size of the data buffer.  This is only used when autocommit is true (1).
-	If not using autocommit, the whole response is buffered and sent in one shot when the
-	servlet is done..
-
-	flush(): Send the accumulated response data now. Will ask the Response to commit if
-	it hasn't already done so.
+	`_autoCommit`:
+	    if True (1), the stream will automatically start sending data
+	    once it has accumulated `_bufferSize` data.  This means that
+	    it will ask the response to commit itself, without developer
+	    interaction.
+	`_bufferSize`:
+	    The size of the data buffer.  This is only used when autocommit
+	    is true (1).  If not using autocommit, the whole response is
+	    buffered and sent in one shot when the servlet is done.
+	`flush()`:
+	    Send the accumulated response data now. Will ask the `Response`
+	    to commit if it hasn't already done so.
 	"""
 
 	def __init__(self):
@@ -38,14 +41,19 @@ class ASStreamOut:
 		self._chunkLen=0
 		self._closed = 0
 
-
 	def autoCommit(self, val=0):
-		"""Get/Set the value of autoCommit."""
+		# @@ 2003-03 ib: doing both get and set in the same
+		# function is not good.
+		"""
+		Get/Set the value of _autoCommit.
+		"""
+		
 		assert type(val) is types.IntType, "autoCommit must be an integer"
 		self._autoCommit = val
 		return val
 
 	def bufferSize(self, size=8192):
+		# @@ 2003-03 ib: again, get/set not good
 		"""
 		Returns the size of the buffer, and sets a new size if one is
 		provided.
@@ -57,7 +65,8 @@ class ASStreamOut:
 	def flush(self):
 		"""
 		Send available data as soon as possible, ie Now
-		Returns 1 if we are ready to send, otherwise 0
+		Returns 1 if we are ready to send, otherwise 0 (i.e.,
+		if the buffer is full enough).
 		"""
 		assert not self._closed, "Trying to flush when already closed"
 		if debug: print ">>> Flushing ASStreamOut"
@@ -89,7 +98,8 @@ class ASStreamOut:
 
 	def clear(self):
 		"""
-		Try to clear any accumulated response data.  Will fail if the response is already sommitted.
+		Try to clear any accumulated response data.  Will fail
+		if the response is already sommitted.
 		"""
 		if debug: print ">>> strmOut clear called"
 		if self._committed: raise InvalidCommandSequence()
@@ -150,7 +160,7 @@ class ASStreamOut:
 
 	def needCommit(self):
 		"""
-		Called by the HTTPResponse instance that is using this instance
+		Called by the `HTTPResponse` instance that is using this instance
 		to ask if the response needs to be prepared to be delivered.
 		The response should then commit it's headers, etc.
 		"""
@@ -158,9 +168,10 @@ class ASStreamOut:
 
 	def commit(self, autoCommit=1):
 		"""
-		Called by the Response to tell us to go.
-		If autoCommit is 1, then we will be placed into autoCommit mode.
+		Called by the Response to tell us to go.  If `_autoCommit`
+		is 1, then we will be placed into autoCommit mode.
 		"""
+		
 		if debug: print ">>> ASStreamOut Committing"
 		self._committed = 1
 		self._autoCommit = autoCommit
@@ -170,6 +181,7 @@ class ASStreamOut:
 		"""
 		Write a string to the buffer.
 		"""
+		
 		if debug: print ">>> ASStreamOut writing %s characters" % len(charstr)
 		assert not self._closed, "Stream Already Closed"
 		self._chunks.append(charstr)
