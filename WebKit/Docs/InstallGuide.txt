@@ -1019,7 +1019,7 @@ Debian
 
 Now put this script in ``/etc/init.d`` and do this::
 
-    # cd /etc/rc.d/init.d
+    # cd /etc/init.d
     # chmod a+rx webkit
     # update-rc.d webkit defaults
 
