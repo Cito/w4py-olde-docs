@@ -593,34 +593,62 @@ class Application(Configurable,CanContainer):
 		self._exceptionHandlerClass(self, transaction, excInfo)
 
 	def serverSidePathForRequest(self, request, urlPath):
-		''' Returns what it says. This is a 'private' service method for use by HTTPRequest. '''
+		""" Returns what it says. This is a 'private' service method for use by HTTPRequest. """
+		extraPathInfo=''
 		ssPath = self._serverSidePathCacheByPath.get(urlPath, None)
-		if ssPath is None:
+		
+		if ssPath is not None:
+			return ssPath #get out now!
+		else: #check for extraPathInfo type url in cache
+			strippedPath = urlPath
+			while strippedPath != '' and ssPath == None:
+				strippedPath,extra=os.path.split(strippedPath)
+				ssPath = self._serverSidePathCacheByPath.get(strippedPath, None)
+				extraPathInfo = os.path.join(extra,extraPathInfo)
+				
+   		if ssPath is not None:
+			request._fields['extraPathInfo']=extraPathInfo
+			return ssPath  #get out now!
+
+
+		else:
 			if not urlPath: urlPath = os.path.join(self._Contexts['default'],"index.html") #handle no filename, should be configurable
 			if urlPath[0]=='_':  # special administration scripts are denoted by a preceding underscore and are located with the app server. @@ 2000-05-19 ce: redesign this
 				ssPath = os.path.join(self.serverDir(), urlPath)
 			else:
-				tail=None
-				contextName='default'
-				head=newhead=''
-				tail,head=os.path.split(urlPath)
-				while tail != '':   #A lot of work just to get the first directory name
-					contextName=tail
-					head=os.path.join(newhead,head)
-					tail,newhead=os.path.split(tail)
+				#handle case of no /
+				if string.find(urlPath,os.sep) > -1: 
+					contextName,restOfPath = string.split(urlPath,os.sep,1) #is this OS specific????
+				else:
+					contextName = urlPath
+
+				#Look for Context
 				try:
 					prepath = self._Contexts[contextName]
 				except KeyError:
 					#print '>> Context Not Found'
-					head=urlPath #put the old path back, there's no context here
+					restOfPath=urlPath #put the old path back, there's no context here
 					prepath = self._Contexts['default']
-				#prepath = self.setting('ServletsDir')
+
+				#is this an absolute path?  If not, make it one
 				if not os.path.isabs(prepath):
-					prepath = os.path.join(self.serverDir(), prepath)
-				#ssPath = os.path.join(prepath, urlPath)
-				if head == '': head="index.html"  #Again, should be configurable
-				ssPath = os.path.join(prepath, head)
-				ssPath=os.path.normpath(ssPath)
+					basePath = os.path.join(self.serverDir(), prepath)
+				if restOfPath == '': restOfPath = "index.html"  #Again, should be configurable
+				ssPath = os.path.join(basePath, restOfPath)
+				ssPath = os.path.normpath(ssPath)
+
+			extraPathInfo=''
+			if not os.path.isdir(os.path.split(ssPath)[0]):
+				while restOfPath != '':  #don't go too far
+					if not os.path.isdir(os.path.join(basePath,os.path.split(restOfPath)[0])): #strip down to the first real directory
+						restOfPath,extra = os.path.split(restOfPath)
+						if extraPathInfo != '': #avoid a trailing os.sep
+							extraPathInfo=os.path.join(extra,extraPathInfo)
+						else: extraPathInfo=extra
+					else: # if I get here, I'm either at the real Servlet, or I'm at basePath
+						ssPath = os.path.join(basePath,restOfPath)
+						urlPath = urlPath[:string.rindex(urlPath,extraPathInfo)-1]#remove trailing /
+						break
 
 			if os.path.splitext(ssPath)[1]=='':
 				filenames = glob(ssPath+'.*')
@@ -637,8 +665,10 @@ class Application(Configurable,CanContainer):
 				else:
 					print 'WARNING: For %s, got multiple filenames: %s' % (urlPath, filenames)
 					return None  # that's right: return None and don't modify the cache
+				
 			self._serverSidePathCacheByPath[urlPath] = ssPath
-
+			request._fields['extraPathInfo']=extraPathInfo
+			
 		return ssPath
 
 
