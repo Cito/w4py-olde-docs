@@ -199,6 +199,7 @@ class Application(Configurable,CanContainer):
 			'ActivityLogColumns':   ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'],
 			'SessionStore':         'Memory',  # can be File or Memory
 			'SessionTimeout':        60,  # minutes
+			'IgnoreInvalidSession': 0,
 
 			# Error handling
 			'ShowDebugInfoOnErrors': 1,
@@ -361,10 +362,16 @@ class Application(Configurable,CanContainer):
 		cookie.setPath('/')
 		res.addCookie(cookie)
 		if debug: print prefix, "set _SID_ to ''"
-		res.write('''<html> <head> <title>Session expired</title> </head>
-			<body> <h1>Session Expired</h1>
-			<p> Your session has expired and all information related to your previous working session with this site has been cleared. <p> You may try this URL again by choosing Refresh/Reload, or revisit the front page. ''')
-		# @@ 2000-08-10 ce: This is a little cheesy. We could load a template...
+		if self.setting('IgnoreInvalidSession'):
+			# Delete the session ID cookie from the request, then handle the servlet
+			# as though there was no session
+			del transaction.request().cookies()['_SID_']
+			self.handleGoodURL(transaction)
+		else:
+			res.write('''<html> <head> <title>Session expired</title> </head>
+				<body> <h1>Session Expired</h1>
+				<p> Your session has expired and all information related to your previous working session with this site has been cleared. <p> You may try this URL again by choosing Refresh/Reload, or revisit the front page. ''')
+			# @@ 2000-08-10 ce: This is a little cheesy. We could load a template...
 
 	def handleGoodURL(self, transaction):
 		self.createServletInTransaction(transaction)

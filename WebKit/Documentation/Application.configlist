@@ -42,6 +42,8 @@
 
 ('SessionTimeout', "60*60", "Determines the amount of time (expressed in seconds) that passes before a user's session will timeout. When a session times out, all data associated with that session is lost."),
 
+('IgnoreInvalidSession', "0", "If false, then an error message will be returned if the user's session has timed out or doesn't exist.  If true, then if the session has timed out, no error will be returned and the servlet will be processed with no session data."),
+
 ('InstanceCacheSize', "10", "Determines the maximum number of servlet instances that will be kept in memory to serve a particular URL. This limit keeps the server from overflowing objects under the stress of many simultaneous requests.")
 
 ]
