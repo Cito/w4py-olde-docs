@@ -37,10 +37,10 @@ class SessionDynamicStore(SessionStore):
 		#moveToFileInterval specifies after what period of time a session is automatically moved to file
 		self.moveToFileInterval = self.application().setting('DynamicSessionTimeout', 15) * 60
 
-		#minMemoryInterval is the minimum amount of time Sessions will stay in memory
+		#minMemoryInterval is the minimum amount of time Sessions will stay in memory, used in interval seeking
 		self.minMemoryInterval = 300 #5 minutes
 
-		#maxMemoryInterval is the maximum amount of time Sessions will stay in memory
+		#maxMemoryInterval is the maximum amount of time Sessions will stay in memory, used in interval seeking
 		self.maxMemoryInterval = self.moveToFileInterval * 48 #12 hours by default
 
 		#maxDynamicMemorySessions is what the user actually sets in Application.config
