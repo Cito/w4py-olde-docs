@@ -39,7 +39,7 @@ b:int,i:int,l:long,f:float,s:string
 
 		# Make sure what we got from the store is what we put in
 		for attr in list('bils'):
-			assert t._get(attr)==values[attr]
+			assert results[0]._get(attr)==values[attr]
 
 		different = 0.000001    # @@ 2000-11-25 ce: more work needed on floats
 		assert abs(t._get('f')-values['f'])<different
