@@ -681,7 +681,7 @@ import MiddleKit.Design.KlassSQLSerialColumnName
 class Klass:
 
 	_fetchSQLStart = None  # help out the caching mechanism in fetchSQLStart()
-	_insertSQLStart = None  # help out the caching mechanism in fetchSQLStart()
+	_insertSQLStart = None  # help out the caching mechanism in insertSQLStart()
 
 	def sqlTableName(self):
 		"""
