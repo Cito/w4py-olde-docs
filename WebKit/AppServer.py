@@ -27,6 +27,8 @@ DefaultConfig = {
 	'Verbose':              1,
 	'PlugIns':              ['../PSP'],
 	'CheckInterval':        100,
+	'PlugInPackages':       [],
+	'PidFile':				'appserverpid.txt',
 
 	# @@ 2000-04-27 ce: None of the following settings are implemented
 #	'ApplicationClassName': 'Application',
@@ -76,7 +78,6 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self._webKitPath = os.path.abspath(os.path.dirname(__file__))
 		self._webwarePath = os.path.dirname(self._webKitPath)
 
-		self.checkPID()
 		self.recordPID()
 
 		self._verbose = self.setting('Verbose')
@@ -142,17 +143,19 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		
 		self._closeEvent.set()
 
-	def pidFilePath(self):
-		return os.path.join(self._serverSidePath, "appserverpid.txt")
-
-	def checkPID(self):
-		assert not os.path.exists(self.pidFilePath()), "\n%s exists, indicating that\nthe AppServer may already be running.\nIf this is not the case, please delete this file and restart the AppServer." % self.pidFilePath()
 
 	def recordPID(self):
 		"""
 		Save the pid of the AppServer to a file
 		"""
-		self._pidFile = PidFile.PidFile(self.pidFilePath())
+		if self.setting('PidFile') is None:
+			return
+			
+		pidpath = self.serverSidePath(self.setting('PidFile'))
+		try:
+			self._pidFile = PidFile.PidFile(pidpath)
+		except PidFile.ProcessRunning:
+			assert 0, "\n%s exists and contains a process id corresponding to a running process.\nThis indicates that there is an AppServer already running.\nIf this is not the case, please delete this file and restart the AppServer." % pidpath
 
 	def shutDown(self):
 		"""
@@ -168,7 +171,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self._app.shutDown()
 		del self._plugIns
 		del self._app
-		del self._pidFile
+		self._pidFile.remove()  # remove the pid file
 		if Profiler.profiler:
 			print 'Writing profile stats to %s...' % Profiler.statsFilename
 			Profiler.dumpStats()  # you might also considering having a page/servlet that lets you dump the stats on demand

@@ -10,8 +10,8 @@
 
 # Configuration section
 
-WEBKIT_DIR=/opt/Webware/WebKit
-PID_FILE=/var/run/webkit.pid
+WORKDIR=/opt/Webware/WebKit  # working dir or path to webkit
+PID_FILE=/var/run/webkit.pid  
 LOG=/var/log/webkit
 PYTHONPATH=
 
@@ -38,13 +38,13 @@ else
 fi
 
 
-[ -x $WEBKIT_DIR/AppServer ] || exit 0
+[ -x $WORKDIR/AppServer ] || exit 0
 
 case "$1" in
 	start)
 		echo -n  "Starting WebKit: "
-		pushd $WEBKIT_DIR > /dev/null
-		LAUNCH='python Launch.py ThreadedAppServer'
+		pushd $WORKDIR > /dev/null
+		LAUNCH="python Launch.py ThreadedAppServer --AppServer.PidFile=$PID_FILE"
 
 		# log separator
 		echo "----------------------------------------------------------------------" >> $LOG
@@ -55,7 +55,6 @@ case "$1" in
 		# run as a user named 'webware':
 		#su -c "$LAUNCH" webware >> $LOG 2>&1 &
 
-		echo $! > $PID_FILE
 		popd > /dev/null
 		success "Starting WebKit"
 		echo
@@ -66,7 +65,7 @@ case "$1" in
 		if test -f "$PID_FILE" ; then
 			PID=`cat $PID_FILE`
 			if kill $PID >> $LOG 2>&1 ; then
-				/bin/rm $PID_FILE
+				/bin/rm -f $PID_FILE
 				success "Shutting down WebKit"
 			else
 				echo ""

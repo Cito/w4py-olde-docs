@@ -86,14 +86,22 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 	     server).
 	<li> XMLRPCServlet now allows xmlrpclib.Fault exceptions to be
 	     passed through unmolested.
-	<li> The AppServer now removes the appserverpid.txt file when it exits,
-		 and will refuse to start if this file is present.  Previously, 
-		 attempting to start an already-running AppServer would fail when it 
-		 couldn't grab the socket to listen on, but it would have already 
-		 overwritten the pid file.
+	<li> <p>Previously, attempting to start an already-running AppServer 
+		 would fail when it couldn't grab the socket to listen on, but it 
+		 would have already overwritten the pid file.</p>
 
-		 Note that if the AppServer crashes a stale pid file will be left 
-		 around, which must be removed before the AppServer can be restarted. 
+		 <p>Now pid file handling is much improved:
+
+		 <ul>
+		 <li>The AppServer will refuse to start if it detects that the pid file 
+		 exists and the process is still running.
+		 <li>A stale pid file left over from a crash or forcible termination
+		 will be detected and removed.
+		 <li>You can override the path of the pid file using the "PidFile" 
+		 setting in AppServer.config.  By default, the pid is written to the 
+		 "appserverpid.txt" in the working directory (or webkit path if you're 
+		 not using a working dir)
+		 </ul>
 
 	<li> Page has been refactored into HTTPContent and Page.  HTTPContent
 		 can be used as a base class for servlets which generate non-HTML

@@ -370,6 +370,11 @@ experimental.  Default: <tt class="literal"><span class="pre">0</span></tt> (fal
 <dt><tt class="literal"><span class="pre">HTTPPort</span></tt>:</dt>
 <dd>The port the built-in HTTP server listens on.  You can point a
 browser to this port.  Default: <tt class="literal"><span class="pre">8080</span></tt>.</dd>
+<dt><tt class="literal"><span class="pre">PidFile</span></tt>:</dt>
+<dd>When the AppServer starts up, the process id will be written
+into this file.  The path will be relative to the working directory
+(or WebKit path, if you're not using a working directory), or you
+can specify an absolute path.  Default <tt class="literal"><span class="pre">WORKDIR/appserverpid.txt</span></tt></dd>
 <dt><tt class="literal"><span class="pre">PluginDirs</span></tt>:</dt>
 <dd><p class="first">When the application server starts up, it looks in these locations
 for plugins.  Each plugin is a subdirectory of its own.  By
