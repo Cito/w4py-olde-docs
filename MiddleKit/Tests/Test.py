@@ -164,7 +164,7 @@ class Test:
 
 		out = sys.stdout
 		out.write('modules with versions:\n')
-		modules = [m for m in sys.modules.values() if m is not None]
+		modules = [m for m in sys.modules.values() if m is not None and m.__name__!='sys']
 		modules.sort(lambda a, b: cmp(a.__name__, b.__name__))
 		for mod in modules:
 			ver = getattr(mod, 'version', None)
