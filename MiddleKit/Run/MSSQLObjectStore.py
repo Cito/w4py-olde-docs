@@ -33,6 +33,17 @@ class MSSQLObjectStore(SQLObjectStore):
 		result = self.executeSQL(query)
 		return int(self._cursor.fetchone()[0])
 
+
+def Klass:
+
+	def sqlTableName(self):
+		'''
+		Returns "[name]" so that table names do not conflict with SQL
+		reserved words.
+		'''
+		return '[%s]' % self.sqlTableName()
+
+
 class StringAttr:
 
 	def sqlValue(self, value):

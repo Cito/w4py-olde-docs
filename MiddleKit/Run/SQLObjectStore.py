@@ -83,7 +83,7 @@ class SQLObjectStore(ObjectStore):
 			klass.setId(id)
 		self._klassesById = klassesById
 		self.closeCursor()
-		
+
 	def closeCursor(self):
 		if self._cursor != None:
 			self._cursor.close()
@@ -174,8 +174,8 @@ class SQLObjectStore(ObjectStore):
 			className = klass.name()
 			if serialNum is not None:
 				clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
-			count = self.executeSQL('select %s from [%s] %s;' % (
-				','.join(colNames), className, clauses))# dr 4-10-2001 added [] for mssql support of keywords as table names
+			count = self.executeSQL('select %s from %s %s;' % (
+				','.join(colNames), klass.sqlTableName(), clauses))
 			for row in self._cursor.fetchall():
 				serialNum = row[0]
 				key = ObjectKey().initFromClassNameAndSerialNum(className, serialNum)
@@ -309,7 +309,7 @@ class MiddleObjectMixIn:
 			insert into table (name, ...) values (value, ...);
 		'''
 		klass = self.klass()
-		res = ['insert into %s (' % klass.name()]
+		res = ['insert into %s (' % klass.sqlTableName()]
 		attrs = klass.allAttrs()
 		attrs = [attr for attr in attrs if attr.hasSQLColumn()]
 		fieldNames = [attr.sqlColumnName() for attr in attrs]
@@ -336,7 +336,7 @@ class MiddleObjectMixIn:
 		klass = self.klass()
 		assert klass is not None
 
-		res = ['update %s set ' % klass.name()]
+		res = ['update %s set ' % klass.sqlTableName()]
 		for attr in self._mk_changedAttrs.values():
 			colName = attr.sqlColumnName()
 			res.append('%s=%s, ' % (colName, self.sqlValueForName(attr.name())))
@@ -357,6 +357,15 @@ MixIn(MiddleObject, MiddleObjectMixIn)
 
 
 class Klass:
+
+	def sqlTableName(self):
+		'''
+		Returns the name of the SQL table for this class.
+		Returns self.name().
+		Subclasses may wish to override to provide special quoting that
+		prevents name collisions between table names and reserved words.
+		'''
+		return self.name()
 
 	def sqlIdName(self):
 		name = self.name()
