@@ -24,7 +24,7 @@ class Main(Page):
 	def writeTestCases(self):
 		wr = self.writeln
 		req = self.request()
-		filename = os.path.join(req.serverSideDir(), 'TestCases.data')
+		filename = self.serverSidePath('TestCases.data')
 		self._cases = self.readFileNamed(filename)
 		wr('''
 			<table align=center border=0 cellpadding=3 cellspacing=0>
