@@ -249,6 +249,7 @@ class RequestHandler(asyncore.dispatcher):
 		if self.reqdata == 'QUIT':
 			self._strmOut.write('OK')
 			self._strmOut.close()
+			time.sleep(2)
 			self.server.initiateShutdown()
 			return
 
