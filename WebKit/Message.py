@@ -1,5 +1,5 @@
 from Common import *
-
+# @@ 2003-03 ib: NO DOC - this class seems dumb.
 
 class Message(Object):
 	"""

@@ -540,6 +540,10 @@ class Application(ConfigurableForServerSidePath, Object):
 		instead of `respond`, `method` is called (`method` should
 		be a string, ``*args`` and ``**kw`` are passed as
 		arguments to that method).
+
+		A `context` keyword argument (as used in `forward`)
+		is also allowed, though it isn't present in the
+		method signature.
 		"""
 		
 		# 3-03 ib@@: Does anyone actually use this method?

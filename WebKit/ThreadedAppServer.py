@@ -773,7 +773,10 @@ def shutDown(arg1,arg2):
 	"""
 	Shut down the server.
 	"""
+	print "I AM HERE"
 	global server
+	print "S", server
+	print
 	print "Shutdown Called", time.asctime(time.localtime(time.time()))
 	if server:
 		server.initiateShutdown()

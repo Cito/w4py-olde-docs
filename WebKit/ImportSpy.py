@@ -4,53 +4,68 @@ import sys
 import imp
 
 """
-ImportSpy.py
+NO DOCS - this can all be more easily implemented by looking at
+sys.modules, along with select files (like config files).  It's fast
+to poll sys.modules, then we don't need this fanciness.
 
-The purpose of this module is to record the filepath of every module which 
-is imported.  This is used by the AutoReloadingAppServer (see doc strings 
-for more information) to restart the server if any source files change.
+This module helps save the filepath of every module which is imported.
+This is used by the `AutoReloadingAppServer` (see doc strings for more
+information) to restart the server if any source files change.
 
 Other than keeping track of the filepaths, the behaviour of this module
 loader is identical to Python's default behaviour.
+
+It will intercept normal imports, and can be used as a replacement for
+the builtin `imp` module, most easily like::
+
+    import ImportSpy as imp
+
+The functions `load_module` and `find_module` act like their equivalents
+in the `imp` module, and you may use the `watchFile(filename)` function
+to add more files to watch without importing them (configuration files,
+for instance).
+
+.. inline:: load_module
+.. inline:: find_module
+.. inline:: watchFile
 """
 
 True, False = 1==1, 0==1
 
 class ImportLock:
-	""" Provides a lock for protecting against concurrent imports.  This
-	is necessary because WebKit is multithreaded and uses its own import
-	hook.  
+	"""
+	Provides a lock for protecting against concurrent imports.
+	This is necessary because WebKit is multithreaded and uses its
+	own import hook.
 	
-	This class abstracts the difference between using the Python interpreter's
-	global import lock, and using our own RLock.  The global lock is
-	the correct solution, but is only available in recent Python versions 
-	(2.3 or 2.2.3).  If it's not available, we fall back to using an RLock 
-	(which is not as good, but better than nothing).  """
+	This class abstracts the difference between using the Python
+	interpreter's global import lock, and using our own RLock.
+	The global lock is the correct solution, but is only available
+	in recent Python versions (2.3 or 2.2.3).  If it's not
+	available, we fall back to using an RLock (which is not as
+	good, but better than nothing).
+	"""
 
 	def __init__(self):
+		"""
+		Aliases the `acquire` and `release` methods to
+		`imp.acquire_lock` and `imp.release_lock` (if
+		available), or to acquire and release our own RLock.
+		"""
 		if hasattr(imp,'acquire_lock'):
-			self.acquire = self.acquireBuiltin
-			self.release = self.releaseBuiltin
+			self.acquire = imp.acquire_lock
+			self.release = imp.release_lock
 		else:
 			from threading import RLock
 			self._lock = RLock()
-			self.acquire = self.acquireRLock
-			self.release = self.releaseRLock
-
-	def acquireBuiltin(self):
-		imp.acquire_lock()
-
-	def releaseBuiltin(self):
-		imp.release_lock()
-
-	def acquireRLock(self):
-		self._lock.acquire()
-
-	def releaseRLock(self):
-		self._lock.release()
-
+			self.acquire = self._lock.acquire
+			self.release = self._lock.release
 
 class ModuleLoader(ihooks.ModuleLoader):
+	"""
+	Implements the ihook module loader that tracks imported
+	modules.  
+	"""
 
 	def __init__(self):
 		assert modloader is None, \
@@ -148,13 +163,22 @@ class ModuleLoader(ihooks.ModuleLoader):
 modloader = None
 modloader = ModuleLoader()
 
-""" These two methods are compatible with the 'imp' module (and can
-therefore be useds as drop-in replacements), but will use the
-above ModuleLoader to record the pathnames of imported modules.
-"""
 
 def load_module(name, file, filename, description):
+	"""
+	.. inline:: ModuleLoader.load_module
+	"""
 	return modloader.load_module(name,(file,filename,description))
 
 def find_module(name,path=None):
+	"""
+	.. inline:: ModuleLoader.find_module
+	"""
 	return modloader.find_module(name,path)
+
+def watchFile(*args):
+	"""
+	.. inline:: ModuleLoader.watchFile
+	"""
+	return modloader.watchFile(*args)
+

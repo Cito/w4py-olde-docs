@@ -3,46 +3,62 @@
 """
 Fault tolerance system for WebKit
 
-author: Jay Love
+:author: Jay Love
 
-This module is intended to provide additional assurance that the AppServer continues running
-at all times.  This module will be reponsible for starting the AppServer, and monitoring its
-health.  It does that by periodically sending a status check message to the AppServer to ensure
-that it is responding.  If it finds that the AppServer does not respond within a specified time,
-it will start a new copy of the AppServer, after killing the previous process.
-*******************************************************************************************
-USE:
+This module is intended to provide additional assurance that the
+AppServer continues running at all times.  This module will be
+reponsible for starting the AppServer, and monitoring its health.  It
+does that by periodically sending a status check message to the
+AppServer to ensure that it is responding.  If it finds that the
+AppServer does not respond within a specified time, it will start a
+new copy of the AppServer, after killing the previous process.
+
+Use::
+
+    $ python Monitor.py start
+    $ python Monitor.py stop
 
 
-"Monitor.py start"
- or
-"Monitor.py stop"
+The default AppServer specified below will be used, or you can list
+the AppServer you would like after ``start``.
 
+You can have the whole process run as a daemon by specifying ``daemon``
+after ``start`` on the command line.
 
-The default AppServer specified below will be used, or you can list the AppServer you would like after "start".
-
-You can have the whole process run as a daemon by specifying "daemon" after "start" on the command line.
-
-To stop the processes, run "Monitor.py stop".
-
-********************************************************************************************
-Future:
-Add ability to limit number of requests served.  When some count is reached, send
-a message to the server to save it's sessions, then exit.  Then start a new AppServer
-that will pick up those sessions.
-
-It should be possible on both Unix and Windows to monitor the AppServer process in 2 ways:
-1) The method used here, ie can it service requests?
-2) is the process still running?
-
-Combining these with a timer lends itself to load balancing of some kind.
-
+To stop the processes, run ``Monitor.py stop``.
 
 """
 
 
+# Future:
+# Add ability to limit number of requests served.  When some count is reached, send
+# a message to the server to save it's sessions, then exit.  Then start a new AppServer
+# that will pick up those sessions.
 
-defaultServer = "AsyncThreadedAppServer"
+# It should be possible on both Unix and Windows to monitor the AppServer process in 2 ways:
+# 1) The method used here, ie can it service requests?
+# 2) is the process still running?
+
+# Combining these with a timer lends itself to load balancing of some kind.
+
+
+
+"""
+Module global:
+`defaultServer`:
+    default ``"ThreadedAppServer"``.  The type of AppServer to start up
+    (as listed in ``Launch.py``)
+`checkInterval`:
+    default 10.  Seconds between checks
+`maxStartTime`:
+    deafult 120.  Seconds to wait for AppServer to start before killing
+    it and trying again.
+"""
+
+defaultServer = "ThreadedAppServer"
+checkInterval = 10  #add to config if this implementation is adopted
+maxStartTime = 120
+
 
 
 
@@ -59,8 +75,7 @@ global serverName
 serverName = defaultServer
 global srvpid
 srvpid=0
-checkInterval = 10  #add to config if this implementation is adopted, seconds between checks
-maxStartTime = 120  #seconds to wait for a AppServer to start before killing it and trying again
+
 global addr
 global running
 running = 0
@@ -74,7 +89,7 @@ debug = 1
 
 
 def createServer(setupPath=0):
-	"""Unix only, after forking"""
+	"""Unix only, executed after forking for daemonization"""
 	print "Starting Server"
 
 	import WebKit
@@ -105,7 +120,8 @@ def startupCheck():
 
 def startServer(killcurrent = 1):
 	"""
-	Start the AppServer.
+	Start the AppServer.  If `killcurrent` is true or not provided,
+	kill the current AppServer.
 	"""
 	global srvpid
 	global debug
@@ -127,8 +143,9 @@ def checkServer(restart = 1):
 	Send a check request to the AppServer.  If restart is 1, then
 	attempt to restart the server if we can't connect to it.
 
-	This function could also be used to see how busy an AppServer is by measuring the delay in
-	getting a response when using the standard port.
+	This function could also be used to see how busy an AppServer
+	is by measuring the delay in getting a response when using the
+	standard port.
 	"""
 	global addr
 	global running
@@ -155,6 +172,12 @@ def checkServer(restart = 1):
 
 
 def main(args):
+	"""
+	The main loop.  Starts the server with `startServer(0)`,
+	checks it's started up (`startupCheck`), and does a
+	loop checking the server (`checkServer`)
+	"""
+	
 	global debug
 	global serverName
 	global running
@@ -198,6 +221,10 @@ def main(args):
 
 
 def shutDown(arg1,arg2):
+	"""
+	Shutdown handler, for when Ctrl-C has been hit, or this
+	process is being cleanly killed.
+	"""
 	global running
 	print "Monitor Shutdown Called"
 	running = 0
@@ -224,8 +251,12 @@ signal.signal(signal.SIGTERM, shutDown)
 ######################################################################
 
 def stop():
-		pid = int(open("monitorpid.txt","r").read())
-		os.kill(pid,signal.SIGINT)    #this goes to the other running instance of this module
+	"""
+	Stop the monitor -- killing the other monitor process that
+	has been opened (from the PID file ``monitorpid.txt``).
+	"""
+	pid = int(open("monitorpid.txt","r").read())
+	os.kill(pid,signal.SIGINT)    #this goes to the other running instance of this module
 
 
 #######################################################################
