@@ -71,7 +71,7 @@ class Cookie(Object):
 		`value` are set with methods.
 		"""
 		
-		self._cookies = CookieEngine.SmartCookie()
+		self._cookies = CookieEngine.SimpleCookie()
 		self._name = name
 		self._value = value
 		self._cookies[name] = value

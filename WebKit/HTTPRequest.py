@@ -1,6 +1,7 @@
 from Common import *
 from Request import Request
-from WebUtils.Cookie import Cookie
+from WebKit.Cookie import CookieEngine
+Cookie = CookieEngine.SimpleCookie
 import os, cgi, sys, traceback
 from types import ListType
 from WebUtils.Funcs import requestURI
