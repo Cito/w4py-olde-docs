@@ -601,7 +601,10 @@ class HTTPRequest(Request):
 
 		# Information methods
 		for method in _infoMethods:
-			info.append((method.__name__, apply(method, (self,))))
+			try:
+				info.append((method.__name__, apply(method, (self,))))
+			except:
+				info.append((method.__name__, None))
 
 		return info
 
