@@ -39,6 +39,8 @@ typedef struct wkcfg {
     int port;                  /* Which port is the Appserver listening on? */
     char *host;                /* Which host is the AppServer running on? */
 		unsigned long addr;    /*resolved host address*/
+  int retrydelay;   
+  int retryattempts;
 } wkcfg;
 
 
@@ -114,6 +116,42 @@ unsigned long resolve_host(char *value) {
 }
 
 
+/* ================================================================== */
+/*
+ *  Command handler for the WKServer command.
+ *  Takes 1 argument, the number of attempts to make to connect to the appserver.
+ */
+/* ================================================================= */
+ static const char *handle_maxconnectattempts(cmd_parms *cmd, void *mconfig, char *word1)
+{
+		wkcfg* cfg;
+		int attempts;
+
+		cfg = (wkcfg *) mconfig;
+
+		if (word1 != NULL) cfg->retryattempts = atoi(word1);
+		return NULL;
+}
+
+/* ================================================================== */
+/*
+ *  Command handler for the WKServer command.
+ *  Takes 1 argument, the delay to wait after a failed connection attempt before retrying.
+ */
+/* ================================================================= */
+ static const char *handle_connectretrydelay(cmd_parms *cmd, void *mconfig, char *word1)
+{
+		wkcfg* cfg;
+		int attempts;
+
+		cfg = (wkcfg *) mconfig;
+
+		if (word1 != NULL) cfg->retrydelay = atoi(word1);
+		return NULL;
+}
+
+
+
 
 /*
  * This function gets called to create a per-directory configuration
@@ -144,6 +182,8 @@ static void *wk_create_dir_config(pool *p, char *dirspec)
     cfg->port = 8086;
     cfg->host = "localhost";
 	cfg->addr = resolve_host(cfg->host);
+	cfg->retryattempts = 10;
+	cfg->retrydelay = 1;
     return (void *) cfg;
 }
 
@@ -418,13 +458,13 @@ static int content_handler(request_rec *r)
 	ap_hard_timeout("wk_send", r);
 
 	while (sock <= 0 ) {
-	sock = wksock_open(r, cfg->addr, cfg->port, cfg);
-	if (sock > 0 || (conn_attempt > max_conn_attempt)) break;
+	  sock = wksock_open(r, cfg->addr, cfg->port, cfg);
+	  if (sock > 0 || (conn_attempt > cfg->retryattempts)) break;
 	//	if (errno != EAGAIN) break;
-	sprintf(msgbuf, "Couldn't connect to AppServer,attempt %i of %i", conn_attempt, max_conn_attempt);
-	log_message(msgbuf, r);
-	conn_attempt++;
-	sleep(1);
+	  sprintf(msgbuf, "Couldn't connect to AppServer,attempt %i of %i", conn_attempt, cfg->retryattempts);
+	  log_message(msgbuf, r);
+	  conn_attempt++;
+	  sleep(cfg->retrydelay);
 	}
 
 	if (sock <= 0) {
@@ -557,6 +597,25 @@ static const command_rec webkit_cmds[] =
         "WKServer directive.  Arguments are Host and then Port"
                                 /* directive description */
     },
+    {
+        "MaxConnectAttempts",              /* directive name */
+        handle_maxconnectattempts,            /* config action routine */
+        NULL,                   /* argument to include in call */
+        OR_OPTIONS,             /* where available, allow directory to overide if AllowOverride Options is specified */
+        TAKE1,                /* arguments */
+        "MaxConnectAttempts directive.  One argument, giving the number of attempts to make to connect to the AppServer."
+                                /* directive description */
+    },
+    {
+        "ConnectRetryDelay",              /* directive name */
+        handle_connectretrydelay,            /* config action routine */
+        NULL,                   /* argument to include in call */
+        OR_OPTIONS,             /* where available, allow directory to overide if AllowOverride Options is specified */
+        TAKE1,                /* arguments */
+        "ConnectRetryDelay directive.  One argument, an integer giving the number of seconds to wait before retrying a connect to an AppServer that didn't respond."
+                                /* directive description */
+    },
+
     {NULL}
 };
 
