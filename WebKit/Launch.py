@@ -14,9 +14,18 @@ def main(args):
 	server = args[1]
 	if server[-3:]=='.py':
 		server = server[:-3]
-	os.chdir(os.pardir)
+		
 	if '' not in sys.path:
 		sys.path = [''] + sys.path
+	try:
+		import WebwarePathLocation
+		wwdir = os.path.abspath(os.path.join(os.path.dirname(WebwarePathLocation.__file__),".."))
+	except Exception, e:
+		print e
+		usage()
+
+	if not wwdir in sys.path:
+		sys.path.insert(0,wwdir)
 	import WebKit
 	code = 'from WebKit.%s import main' % server
 	exec code
