@@ -214,7 +214,7 @@ class ExceptionHandler(Object):
 
 	def publicErrorPage(self):
 		"""
-		Returns a brief error pae telling the user that an
+		Returns a brief error page telling the user that an
 		error has occurred.  Body of the message comes from
 		``UserErrorMessage`` setting.
 		"""
@@ -404,7 +404,8 @@ class ExceptionHandler(Object):
 			'time':          asctime(localtime(self._time)),
 			'filename':      self.servletPathname(),
 			'os.getcwd()':   os.getcwd(),
-			'sys.path':      sys.path
+			'sys.path':      sys.path,
+			'sys.version':   sys.version,
 		}
 		self.writeDict(info)
 
