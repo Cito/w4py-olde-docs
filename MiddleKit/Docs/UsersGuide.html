@@ -416,8 +416,8 @@ deleted.
 classes. If you already have some data in the database, you will need to dump and reload the data, possibly 
 manipulating the data to fit the new schema. 
 
-<p>You can dump your existing data into a file in the same format as the Samples.csv file. This allows you to 
-dump the object database, re-generate the base classes, re-create the database schema and then reload the data.
+<p>You can dump your existing data into a file in the same format as the Samples.csv file.  Then you can rename or remove columns in Samples.csv to match your schema changes, and then run generate, create, insert to recreate your database 
+and reload the data (this procedure is described in the <a href=QuickStart.html>Quick Start</a> guide).
 
 <pre>
 python /Projects/Webware/MiddleKit/Run/Dump.py --db MySQL --model Videos >Videos.mkmodel/Samples.csv
@@ -691,9 +691,12 @@ You will have to write your own setter and getter methods for the attribute.
 
 <ul> <li> <a href=http://developer.apple.com/techpubs/webobjects/webobjects.html>WebObjects Developer Documentation</a> </ul>
 
-<p> The only other Python ORM that we're aware of is dbObj by Boudewijn Rempt:
+<p> Other Python ORMs that we're aware of:
 
-<ul> <li> <a href=http://www.xs4all.nl/~bsarempt/python/dbobj.html>dbObj</a> </ul>
+<ul> 
+<li> <a href=http://www.xs4all.nl/~bsarempt/python/dbobj.html>dbObj</a> by Boudewijn Rempt
+<li> <a href="http://modeling.sourceforge.net/">Modeling</a> by Sébastien Bigaret
+</ul>
 
 <p> Here's a Perl ORM that someone recommended as interesting:
 
