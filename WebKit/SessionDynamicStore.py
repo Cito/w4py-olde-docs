@@ -31,6 +31,9 @@ class SessionDynamicStore(SessionStore):
 		self._memoryStore = SessionMemoryStore.SessionMemoryStore(app, restoreFiles=0)
 		self._memoryStore.clear()  #fileStore will have the files on disk
 
+		#Should we adapt the move to file interval with the load on the server?
+		self.intelligentSessionArchive = self.application().setting("IntelligentSessionArchive",0)
+
 		#moveToFileInterval specifies after what period of time a session is automatically moved to file
 		self.moveToFileInterval = self.application().setting('DynamicSessionTimeout', 15) * 60
 
@@ -156,15 +159,27 @@ class SessionDynamicStore(SessionStore):
 			if self._memoryStore[i].lastAccessTime() < delta:
 				self.MovetoFile(i)
 
-		#If we didn't get enough, find a tighter interval for next time
-		if len(self._memoryStore) > self._maxDynamicMemorySessions \
-		   and self.moveToFileInterval > self.minMemoryInterval:
-			self.moveToFileInterval = self.findInterval()
-			
-		#IF we have excess capacity in memory, increase the interval
-		elif len(self._memoryStore) < (.5 * self._maxDynamicMemorySessions)\
-			 and self.moveToFileInterval < self.maxMemoryInterval:
-			self.moveToFileInterval = self.moveToFileInterval * 2
+
+		if len(self._memoryStore) > self._maxDynamicMemorySessions:
+			keys = self._memoryStore.keys()
+			keys.sort(self.sortFunc)
+			excess = len(self._memoryStore) - self._maxDynamicMemorySessions
+			if debug:
+				print excess, "sessions beyond the limit"
+			for i in keys[:-excess]:
+				self.MovetoFile(i)
+
+		## This is disabled for now		
+		if self.intelligentSessionArchive:
+			#If we didn't get enough, find a tighter interval for next time
+			if len(self._memoryStore) > self._maxDynamicMemorySessions \
+			   and self.moveToFileInterval > self.minMemoryInterval:
+				self.moveToFileInterval = self.findInterval()
+
+			#IF we have excess capacity in memory, increase the interval
+			elif len(self._memoryStore) < (.5 * self._maxDynamicMemorySessions)\
+				 and self.moveToFileInterval < self.maxMemoryInterval:
+				self.moveToFileInterval = self.moveToFileInterval * 2
 
 			
 		if debug: print "Finished interval Sweep at %s" % time.ctime(time.time())
@@ -173,7 +188,9 @@ class SessionDynamicStore(SessionStore):
 		
 	def findInterval(self):
 		"""
-		Intelligently (?) find a period of time that will get the memory store down to it's maximum level
+		Intelligently (?) find a period of time that will get the memory store down to it's maximum level.
+
+		Not used for now.
 		"""
 		global debug
 		if debug: print "Finding Interval"
