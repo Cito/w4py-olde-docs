@@ -1,7 +1,7 @@
 import sys, time
 from types import InstanceType, LongType, StringType
 
-from MiscUtils import NoDefault
+from MiscUtils import NoDefault, SubclassResponsibilityError
 from MiscUtils import Funcs as funcs
 
 from MiddleObject import MiddleObject
