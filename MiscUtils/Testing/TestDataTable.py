@@ -160,7 +160,7 @@ Class,Attribute,Type,Extras
 def testExcel():
 	if canReadExcel():
 		heading('Testing Excel...')
-		t = DataTable('Sample2.xls')
+		t = DataTable('Sample3.xls')
 		assert t[0][0]==1.0, t[0]
 
 
