@@ -562,8 +562,20 @@ class Handler:
 			missing = intLength - len(chunk)
 		try:
 			dictLength = loads(chunk)
-		except ValueError:
-			print 'ERROR: bad marshal data'
+		except ValueError, msg:
+			# Common error: client is speaking HTTP.
+			if chunk[:3] == 'GET':
+				self._sock.sendall('''\
+HTTP/1.0 505 HTTP Version Not Supported\r
+Content-type: text/plain\r
+\r
+Error: Invalid AppServer protocol: %s.\r
+Sorry, I don't speak HTTP.  You must connect via an adaptor.\r
+See the Troubleshooting section of the WebKit Install Guide.\r
+''' % msg)
+				self._sock.close()
+				return None
+			print 'ERROR:', msg
 			print 'ERROR: you can only connect to %s via an adapter, like mod_webkit or' % self._serverAddress[1]
 			print '       wkcgi, not with a browser)'
 			raise
