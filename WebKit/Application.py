@@ -454,7 +454,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		self.respond(transaction)
 		self.sleep(transaction)
 
-	def forwardRequest(self, trans, URL):
+	def forward(self, trans, URL):
 		"""
 		Enable a servlet to pass a request to another servlet. The Request object is kept the same, and may be used
 		to pass information to the next servlet.  The next servlet may access the parent servlet through request.parent(),
@@ -495,7 +495,15 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		trans.response()._strmOut = ASStreamOut()
 		req._transaction = trans  #this is needed by dispatchRequest
 
-	def includeServlet(self, trans, URL):
+
+
+	def forwardRequest(self, trans, URL):
+		print "forwardRequest is deprecated.  Use forward()"
+		return self.forward(trans, URL)
+
+
+
+	def includeURL(self, trans, URL):
 		"""
 		Enable a servlet to pass a request to another servlet.  This implementation
 		handles chaining and requestDispatch in Java.
@@ -542,6 +550,11 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		req.setURLPath(currentPath)
 		req.popParent()
 		trans._servlet=currentServlet
+
+
+	def forwardRequestFast(self, trans, url):
+		print "forwardRequestFast is deprecated.  Use includeURL()"
+		return self.includeURL(trans, url)
 
 
 	## Transactions ##
