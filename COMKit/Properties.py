@@ -23,7 +23,11 @@ def willRunFunc():
 	# So we do so:
 	success = 0
 	try:
-		import pythoncom
+		# For reasons described in the __init__.py, we can't actually import pythoncom
+		# here, but we need to see if the module is available.  We can use the "imp"
+		# standard module to accomplish this.
+		import imp
+		imp.find_module('pythoncom')
 		success = 1
 	except ImportError:
 		pass
