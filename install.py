@@ -90,8 +90,7 @@ class Installer:
 	def installDocs(self):
 		self.propagateStyleSheet()
 		self.processRawFiles()
-		# @@ 2000-12-22 ce: uncomment the following
-		#self.createBrowsableSource()
+		self.createBrowsableSource()
 		self.createComponentIndex()
 		self.createIndex()
 		self.createComponentIndexes()
@@ -251,6 +250,13 @@ class Installer:
 		ht = self.htFragment('index')
 		ht %= locals()
 		self.writeDocFile('Webware Documentation', 'Documentation/index.html', ht, extraHead='<link rel=stylesheet href=index.css type=text/css>')
+
+		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until
+		# we have a more general mechanism for adding the header
+		# and footer to various documents
+		ht = self.htFragment('Copyright')
+		self.writeDocFile('Webware Copyright et al', 'Documentation/Copyright.html', ht)
+
 
 	def createComponentIndexes(self):
 		print "Creating components' index.html..."
