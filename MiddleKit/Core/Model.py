@@ -18,7 +18,7 @@ class Model(Configurable):
 		self._klasses = None
 		self._parents = []  # e.g., parent models
 		self._pyClassForName = {}
-		
+
 		# _allModelsByFilename is used to avoid loading the same parent model twice
 		if rootModel:
 			self._allModelsByFilename = rootModel._allModelsByFilename
@@ -210,8 +210,14 @@ class Model(Configurable):
 			pkg = self.setting('Package', '')
 			if pkg:
 				pkg += '.'
-			exec 'from %s%s import %s' % (pkg, name, name) in results
-			pyClass = results[name]
+			exec 'import %s%s as module' % (pkg, name) in results
+			pyClass = getattr(results['module'], 'pyClass', None)
+			if pyClass is None:
+				pyClass = getattr(results['module'], name)
+			# Note: The 'pyClass' variable name that is first looked for is a hook for
+			# those modules that have replaced the class variable by something else,
+			# like a function. I did this in a project with a class called UniqueString()
+			# in order to guarantee uniqueness per string.
 			self._pyClassForName[name] = pyClass
 		return pyClass
 
