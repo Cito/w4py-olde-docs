@@ -14,18 +14,18 @@ try:
 	if WebwareDir:
 		sys.path.insert(1, WebwareDir)
 	else:
-		WebwareDir = os.path.dirname(os.getcwd())
+		WebwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
 	webKitDir = os.path.join(WebwareDir, 'WebKit')
 	if AppWorkDir is None:
 		AppWorkDir = webKitDir
 	else:
 		sys.path.insert(1, AppWorkDir)
 
-	import WebKit.OneShotAdapter
-	WebKit.OneShotAdapter.main(AppWorkDir)
+	import WebKit.Adapters.OneShotAdapter
+	WebKit.Adapters.OneShotAdapter.main(AppWorkDir)
 except:
 	import string, sys, traceback
-	from time import asctime, localtime, time
+	from time importx asctime, localtime, time
 
 	sys.stderr.write('[%s] [error] WebKit: Error in adapter\n' % asctime(localtime(time())))
 	sys.stderr.write('Error while executing script\n')

@@ -20,7 +20,7 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* $Id: parsecfg.h,v 1.2 2001/10/08 17:15:44 echuck Exp $ */
+/* $Id: parsecfg.h,v 1.1 2002/10/09 05:24:04 ianbicking Exp $ */
 
 #ifndef PARSECFG_H_INCLUDED
 #define PARSECFG_H_INCLUDED

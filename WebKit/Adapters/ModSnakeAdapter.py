@@ -48,7 +48,7 @@ PER_SVR_CHUNKSIZE = 3      # Size of chunks to read and write
 
 DEFAULT_CHUNKSIZE = 32 * 1024
 
-from WebKit.Adapter import Adapter
+from WebKit.Adapters.Adapter import Adapter
 
 class ModSnakeAdapter(Adapter):
 	def __init__(self, module):

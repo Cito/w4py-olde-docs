@@ -160,35 +160,69 @@ WebKit 0.7
 
 <p> Apache is the world's most popular web server, which means it's also well tested. The Apache home page is located at <a href=http://www.apache.org>http://www.apache.org</a>.
 
-<p> In the simplest case, you can use WebKit CGI adapters with Apache.  For better performance, other apache adapters are the new <a href=#Adapters_mod_webkit>mod_webkit adapter</a>, the <a href=#Adapters_FastCGI>FastCGI adapter</a>, <a href=#Adapters_mod_python>mod_python adapter</a>, or the <a href=#Adapters_mod_snake>mod_snake adapter</a>
+<p> In the simplest case, you can use WebKit CGI adapters with Apache.  For better performance, other apache adapters are:
+
+<ul> 
+<li> <a href="#Adapters_mod_webkit">mod_webkit</a>
+<li> <a href="#Adapters_wkcgi">
+<li> <a href="#Adapters_FastCGI">FastCGI adapter</a>
+<li> <a href="#Adapters_mod_python">mod_python adapter</a>
+<li> <a href="#Adapters_mod_snake">mod_snake adapter</a>
+</ul>
 
 
 <a name=WebServers_IIS><h3>IIS</h3></a>
 
 <p> Microsoft's Internet Information Server, or IIS, requires some special configuration due to its default non-standard CGI behavior. You have to do two things:
 
-<p> 1) For IIS 4.0, configure it to handle PATH_INFO and PATH_TRANSLATED according to the CGI specification, by running the following command:
+<p> For IIS 4.0, configure it to handle PATH_INFO and PATH_TRANSLATED according to the CGI specification, by running the following command:
 
 <p> <code>cscript adsutil.vbs SET W3SVC/1/AllowPathInfoForScriptMappings 1</code>
 
 <p> This is lightly documented in
 <a href=http://support.microsoft.com/support/kb/articles/Q184/3/20.ASP>http://support.microsoft.com/support/kb/articles/Q184/3/20.ASP</a>.
 
-<p> 2) Use Gordon McMillan's Standalone utility, which is part of his Installer package, to convert WebKit.cgi into an executable program, WebKit.exe.  IIS apparently will not handle requests with additional path components after the name of the script, like <code>http://localhost/WebKit.cgi/foo/bar</code> where WebKit.cgi is a script, but will handle requests like <code>http://localhost/WebKit.exe/foo/bar</code> where WebKit.exe is an executable. In any case, using the Standalone utility probably results in a speed increase, so this is probably a good thing to do anyway.
+<p> A <a href="http://Adapters_wkcgi">CGI adapter</a>, written in C,
+is available in <code>WebKit/Adapters/wkcgi/WebKit.exe</code>.  The
+standard <a href="#Adapters_CGI">Python-based CGI adapter</a>
+also works, but you must either configure IIS to run Python CGI
+scripts, or you must use Gordon McMillan's Standalone utility
+(part of his Installer package) or some other program to create
+an executable from the Python.
 
-<p> In order to convert WebKit.cgi into WebKit.exe using the Standalone utility, you first have to rename it to WebKit.py, and add <code>import socket</code> to the top of the file (you could use a configuration file instead, but this is easier). After creating the .exe file, delete WebKit.pyc and rename WebKit.py to _WebKit.py. This will avoid conflicts with the .exe.
+<p> In order to convert WebKit.cgi into WebKit.exe using the
+Standalone utility, you first have to rename it to WebKit.py, and add
+<code>import socket</code> to the top of the file (you could use a
+configuration file instead, but this is easier). After creating the
+.exe file, delete WebKit.pyc and rename WebKit.py to _WebKit.py. This
+will avoid conflicts with the .exe.
 
-<p> We hope to provide a native Windows executable cgi program written in C in the near future, as well as a DLL for apache and an ISAPI module for IIS.  If you would like to implement any of these, please do so.  The mod_webkit adapter source includes all of the WebKit specific code you'll need.
-
+<p> There is an ISAPI module for Webware in
+<code>WebKit/Adapters/wkISAPI</code> that needs to be compiled before
+use.  However, there have been problems with memory leaks in this
+adapter.
 
 <a name=WebServers_AOLserver><h3>AOLserver</h3></a>
 
-<p> The PyWX project aims to meld Python and AOLserver and as part of that, they created an AOLserver "stay resident" WebKit adapter for tighter integration. More information can be found at <a href=http://pywx.idyll.org>http://pywx.idyll.org</a>.  If you find that this adapter does not work with the latest release of Webware, please notify the PyWX project.
+<p> The PyWX project aims to meld Python and AOLserver and as part of
+that, they created an AOLserver "stay resident" WebKit adapter for
+tighter integration. More information can be found at <a
+href=http://pywx.idyll.org>http://pywx.idyll.org</a>.  If you find
+that this adapter does not work with the latest release of Webware,
+please notify the PyWX project.
 
+<a name="WebServers_Xitami"><h3>Xitami</h3></a>
+
+The <a href="http://www.xitami.com">Xitami</a> web server purports
+to be smaller, and potentially easier to install than some of the
+other web servers.  It can run the CGI adapters, but for more
+speed the <a href="Adapter_LRWP">LRWP</a> adapter uses a 
+persistent process for greater performance.
 
 <a name=Architecture><h2>Architecture</h2></a>
 
-<p> The WebKit architecture involves three main entities at the top level:
+<p> The WebKit architecture involves three main entities at the top
+level:
 
 <ol>
 	<li> The web browser
@@ -205,15 +239,19 @@ WebKit 0.7
 
 <a name=BadMarshalData><h2>Bad Marshal Data</h2></a>
 
-<p> The most common installation problem is a Python exception appearing in your browser that says "bad marshal data". This is always caused by pointing the web browser to the app server:
+<p> The most common installation problem is a Python exception
+appearing in your browser that says "bad marshal data". This is always
+caused by pointing the web browser to the app server:
 
 	<blockquote>http://localhost:8086/WebKit.cgi/</blockquote>
 
-<p> But the app server hides behind a web server so the correct URL would be:
+<p> But the app server hides behind a web server so the correct URL
+would be:
 
 	<blockquote>http://localhost/WebKit.cgi/</blockquote>
 
-<p> That requires that web server and app server are set up to talk to each other. And that's what the next section is all about...
+<p> That requires that web server and app server are set up to talk to
+each other. And that's what the next section is all about...
 
 
 <a name=Adapters><h2>Adapters</h2></a>
@@ -223,32 +261,52 @@ WebKit 0.7
 <p> The current suite of adapters for WebKit are:
 
 <ol>
-	<li> CGI
-	<li> FastCGI
-	<li> OneShot
-	<li> mod_python
-	<li> mod_snake
-	<li> AOLserver
-	<li> mod_webkit
+	<li> <a href="#Adapters_CGI">Python CGI script</a>
+        <li> <a href="#Adatpers_wkcgi">wkcgi, C-based CGI script</a>
+	<li> <a href="#Adapters_mod_webkit">mod_webkit (fastest!)</a>
+	<li> <a href="#Adapters_OneShot">OneShot (for development)</a>
+	<li> <a href="#Adapters_FastCGI">FastCGI</a>
+	<li> <a href="#Adapters_mod_python">mod_python</a>
+	<li> <a href="#Adapters_mod_snake">mod_snake</a>
+	<li> <a href="#WebServers_AOLserver">AOLServer</a>
+        <li> <a href="#Adapters_LRWP">LRWP (Xitami)</a>
+        <li> <a href="#Adapters_ISAPI">ISAPI (<i>alpha</i>, for IIS)</a>
 </ol>
 
 
 <a name=Adapters_Permissions><h3>Permissions</h3></a>
 
-<p> Note that on UNIX and NT, regardless of which adapter you use, you may need to set some permissions so that the app server can write files to the WebKit directories Cache, ErrorMsgs, Logs and Sessions.
+<p> Note that on UNIX and NT, regardless of which adapter you use, you
+may need to set some permissions so that the app server can write
+files to the WebKit directories Cache, ErrorMsgs, Logs and Sessions.
 
-<p> The easiest way to do this is to make these directories writeable by all (on UNIX, that would be <code>cd Webware/WebKit; chmod -R a+rwX Cache ErrorMsgs Logs Sessions</code>).
+<p> The easiest way to do this is to make these directories writeable
+by all (on UNIX, that would be <code>cd Webware/WebKit; chmod -R a+rwX
+Cache ErrorMsgs Logs Sessions</code>).
 
-<p> The most secure way to do this, is to make sure the app server and its adapter are executed by a specific user and that the specific user has write permissions to these directories (but no one else). This requires some savvy with both your operating system and your web server. You may wish to take the easy approach first in order to bootstrap yourself and then come back to this.
+<p> The most secure way to do this, is to make sure the app server and
+its adapter are executed by a specific user and that the specific user
+has write permissions to these directories (but no one else). This
+requires some savvy with both your operating system and your web
+server. You may wish to take the easy approach first in order to
+bootstrap yourself and then come back to this.
 
 
 <a name=Adapters_CGI><h3>CGI Adapter</h3></a>
 
-<p> The "classic" WebKit setup uses the CGI adapter, known as WebKit.cgi. Almost all web servers support CGI so it was obvious that WebKit should, too.
+<p> The "classic" WebKit setup uses the CGI adapter, known as
+WebKit.cgi. Almost all web servers support CGI so it was obvious that
+WebKit should, too.
 
-<p> In this configuration, the app server stays resident (similar to the web server) and is tapped for responses by a small CGI program that forwards the request to the app server.
+<p> In this configuration, the app server stays resident (similar to
+the web server) and is tapped for responses by a small CGI program
+that forwards the request to the app server.
 
-<p> Note that even though this approach uses CGI, such a WebKit application will run faster than the equivalent all-CGI solution. The reason is that that the app server (and possibly your servlets) can do quite a bit of caching, and the CGI adapter is fairly small. On the other hand, this is one of the slower adapters out of the bunch.
+<p> Note that even though this approach uses CGI, such a WebKit
+application will run faster than the equivalent all-CGI solution. The
+reason is that that the app server (and possibly your servlets) can do
+quite a bit of caching, and the CGI adapter is fairly small. On the
+other hand, this is one of the slower adapters out of the bunch.
 
 <p> To set this up, do the following:
 
@@ -260,11 +318,11 @@ WebKit 0.7
 
 <h4>2. Set up WebKit.cgi</h4>
 <ul>
-	<li> Copy WebKit/WebKit.cgi to a location where your web server has CGI execute permissions.
+	<li> Copy WebKit/Adapters/WebKit.cgi to a location where your web server has CGI execute permissions.
 	<li> [IIS] See the <a href=#WebServers_IIS>IIS configuration notes</a> above.
 	<li> [Windows and Apache] With a text editor, modify the first line of WebKit.cgi to read <code>#!python</code> rather than <code>#!/usr/bin/env python</code>. Make sure that python is in your search path as defined in AUTOEXEC.BAT. You can check this by typing <code>python</code> at the command prompt to see if Python launches.
-	<li> [UNIX] On most UNIX systems, the WebKit.cgi startup line, <code>#!/usr/bin/env python</code>, works just fine. You can check this by typing <code>/usr/bin/env python</code> at the command line to verify that Python launches. In the event that it does not, or if you wish to point to a different installation, you can change the line to something else, for example, <code>/usr/local/bin/python</code> or <code>/home/me/bin/python</code>.
-	<li> Using a text editor, change the line in WebKit.cgi that reads <code>WebwareDir = None</code> to point to Webware. For example, <code>WebwareDir = '/home/me/Webware'</code>.
+	<li> [UNIX] On most UNIX systems, the WebKit.cgi startup line, <code>#!/usr/bin/env python</code>, works just fine. You can check this by typing <code>/usr/bin/env python</code> at the command line to verify that Python launches. In the event that it does not, or if you wish to point to a different installation, you can change the line to something else, for example, <code>#!/usr/local/bin/python</code> or <code>#!/home/me/bin/python</code>.
+	<li> [All web servers] Using a text editor, change the line in WebKit.cgi that reads <code>WebwareDir = None</code> to point to Webware. For example, <code>WebwareDir = '/home/me/Webware'</code>.
 </ul>
 
 <h4>3. Launch the servers</h4>
@@ -272,7 +330,7 @@ WebKit 0.7
 	<li> Verify that your web server is running and launch it if not.
 	<li> At the command line, change directories to the WebKit directory, for example, <code>cd ~/Webware/WebKit</code> on UNIX and <code>cd \Webware\WebKit</code> on Windows).
 	<li> Still at the command line, type <code>AppServer</code> and press return. You should see the startup messages for the app server. This works on both Windows and UNIX, via the <code>AppServer.bat</code> and <code>AppServer</code> startup scripts. You will see that they are very simple scripts and simply point to the recommended default app server.
-</ul>
+(<i>Sometimes in unix you must type <code>./AppServer</code></i>)</ul>
 
 
 <h4>4. Try it out</h4>
@@ -340,64 +398,111 @@ WebKit 0.7
 
 <a name=Adapters_FastCGI><h3>FastCGI Adapter</h3></a>
 
-<p> The essence of the FastCGI protocol is to keep the CGI program resident. In our case, that program is a combination of the Python interpreter, several standard Python modules and the WebKit adapter code. By eliminating the constant reloading of these components, a substantial speedup can be obtained (2 X in informal tests).
+<p> The essence of the FastCGI protocol is to keep the CGI program
+resident. In our case, that program is a combination of the Python
+interpreter, several standard Python modules and the WebKit adapter
+code. By eliminating the constant reloading of these components, a
+substantial speedup can be obtained (2 X in informal tests).
 
-<p> Your web server will have to be FastCGI enabled, which you may be able to accomplish by downloading software at <a href=http://www.FastCGI.com>http://www.FastCGI.com</a> where you can also learn more about FastCGI.
+<p> Your web server will have to be FastCGI enabled, which you may be
+able to accomplish by downloading software at <a
+href=http://www.FastCGI.com>http://www.FastCGI.com</a> where you can
+also learn more about FastCGI.
 
-<p> The top of FCGIAdapter.py contains a doc string explaining its setup.
+<p> The top of FCGIAdapter.py contains a doc string explaining its
+setup.
 
 <p> Note that to date, we have only gotten this to work on UNIX.
 
-<p> For development purposes, the FastCGI adapter doesn't offer anything substantial. However, for deploying your site for real use, the extra configuration effort could be well worth the performance boost.
+<p> For development purposes, the FastCGI adapter doesn't offer
+anything substantial. However, for deploying your site for real use,
+the extra configuration effort could be well worth the performance
+boost. 
 
-<p> Another adapter that provides the same type of benefit is the <a href=#Adapters_mod_python>mod_python adapter</a>, described below.
+<p> Note, though, that the <a
+href="#Adapters_mod_webkit">mod_webkit</a> and <a
+href="#Adapters_wkcgi">wkcgi</a> should be as fast or faster, and
+probably easier to set up.
+
 
 
 <a name=Adapters_mod_python><h3>Mod_python Adapter</h3></a>
 
-<p> Mod_python is a module that embeds the Python interpreter into the Apache web server. This can make for a substantial speedup over WebKit.cgi which reloads the Python interpreter and various modules for each request.
+<p> Mod_python is a module that embeds the Python interpreter into the
+Apache web server. This can make for a substantial speedup over
+WebKit.cgi which reloads the Python interpreter and various modules
+for each request.
 
-<p> mod_python itself and the adapter are both somewhat new, which makes this approach the least tested among the bunch.
+<p> The top of ModPythonAdapter.py contains a doc sting explaining the
+setup.
 
-<p> The top of ModPythonAdapter.py contains a doc sting explaining the setup.
+<p> This has been tested on both UNIX and Windows.  On Windows, you
+should use mod_python 2.7.4 or later because there is a bug in earlier
+versions of mod_python for Windows that can cause Apache to crash or
+return incorrect responses under heavy load.
 
-<p> This has been tested on both UNIX and Windows.  On Windows, you should use mod_python 2.7.4 or later because there is a bug in earlier versions of mod_python for Windows that can cause Apache to crash or return incorrect responses under heavy load.
-
-<p> More information about mod_python can be found at <a href=http://www.modpython.org>http://www.modpython.org</a>.
-
-<p> Another adapter that provides the same type of benefit is the <a href=#Adapters_FastCGI>FastCGI adapter</a> described above.
-
+<p> More information about mod_python can be found at <a
+href=http://www.modpython.org>http://www.modpython.org</a>.
 
 <a name=Adapters_mod_snake><h3>ModSnake Adapter</h3></a>
 
-<p> This adapter is similar to ModPython, but written for the mod_snake apache module.  mod_snake is another method of embedding a python interpreter into apache.  mod_snake may be preferable over mod_python if you need to work with Apache 2.0, or if you would like greater access to the internals of Apache than is available through mod_python.
+<p> This adapter is similar to ModPython, but written for the
+mod_snake apache module.  mod_snake is another method of embedding a
+python interpreter into apache.  mod_snake may be preferable over
+mod_python if you need to work with Apache 2.0, or if you would like
+greater access to the internals of Apache than is available through
+mod_python.
 
-<p> A doc string is included at the top of ModSnakeAdapter.py which describes the configuration steps to use this adapter.
+<p> A doc string is included at the top of ModSnakeAdapter.py which
+describes the configuration steps to use this adapter.
 
 <a name=Adapters_mod_webkit><h3>ModWebkit Adapter</h3></a>
 
-<p> This is a native apache module designed solely to communicate with WebKit.  It is written in C, and has been tested on Linux and Windows.
+<p> This is a native apache module designed solely to communicate with
+WebKit.  It is written in C, and has been tested on Linux and Windows.
 
 <p> This adapter is the fastest of the adapters available for WebKit.
 
-<p> The source code and a README file describing how to configure and build mod_webkit are located in the Webware/WebKit/Native/mod_webkit directory.
+<p> The source code and a README file describing how to configure and
+build mod_webkit are located in the Webware/WebKit/Native/mod_webkit
+directory.
+
+<p> It is not compatible with Apache 2.0.  
 
 <a name=Adapters_AOLserver><h3>AOLserver Adapter</h3></a>
 
-<p> This adapter comes with the Python-enhanced AOLserver created by the <a href=http://pywx.idyll.org>PyWX project</a> and is described there.
+<p> This adapter comes with the Python-enhanced AOLserver created by
+the <a href=http://pywx.idyll.org>PyWX project</a> and is described
+there.
 
 
 <a name=Adapters_Renaming><h3>Renaming Adapters</h3></a>
 
-<p> Adapters such as WebKit.cgi and OneShot.cgi do not rely on their name. Consequently, when you deploy your web site, you can rename the adapter to something like <code>serve.cgi</code>. This allows you to switch adapters later without affecting the URLs and therefore the bookmarks of your users (provided you're still using some form of CGI adapter).
+<p> Adapters such as WebKit.cgi and OneShot.cgi do not rely on their
+name. Consequently, when you deploy your web site, you can rename the
+adapter to something like <code>serve.cgi</code>. This allows you to
+switch adapters later without affecting the URLs and therefore the
+bookmarks of your users (provided you're still using some form of CGI
+adapter).  <a href="http://webware.colorstudy.net/twiki/bin/view/Webware/ModRewriteRecipes">mod_rewrite</a> also offers several possibilities
+for changing names, redirecting the root of a site to a specific
+context, or other URL manipulations.
 
 <a name=Adapters_Problems><h3>Adapter Problems</h3></a>
 
-<p> There is one gotcha in setting up the adapters that don't rely on CGI.  For mod_webkit, ModPython and ModSnake, the name that you give to the adapter location in your Apache configuration file must not actually exist in your apache document root.  Also, you may not have a file or directory in your document root with the same name as one of WebKit's contexts.  So, you can't have a directory named Examples in your document root.
+<p> There is one gotcha in setting up the adapters that don't rely on
+CGI.  For mod_webkit, ModPython and ModSnake, the name that you give
+to the adapter location in your Apache configuration file must not
+actually exist in your apache document root.  Also, you may not have a
+file or directory in your document root with the same name as one of
+WebKit's contexts.  So, you can't have a directory named Examples in
+your document root.
 
 <a name=Configuration><h2>Configuration</h2></a>
 
-<p> In this section, we'll briefly touch on some of the configuration options related to installing and running WebKit. A full reference to these options can be found in the User's Guide under <a href=UsersGuide.html#Configuration>Configuration</a>.
+<p> In this section, we'll briefly touch on some of the configuration
+options related to installing and running WebKit. A full reference to
+these options can be found in the User's Guide under <a
+href=UsersGuide.html#Configuration>Configuration</a>.
 
 <p> The settings referenced below are found in the configuration file, Configs/Application.config.
 

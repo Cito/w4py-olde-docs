@@ -14,7 +14,7 @@ try:
 	if WebwareDir:
 		sys.path.insert(1, WebwareDir)
 	else:
-		WebwareDir = os.path.dirname(os.getcwd())
+		WebwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
 	webKitDir = os.path.join(WebwareDir, 'WebKit')
 	if AppWorkDir is None:
 		AppWorkDir = webKitDir
@@ -22,7 +22,7 @@ try:
 		sys.path.insert(1, AppWorkDir)
 
 	try:
-		import WebKit.CGIAdapter
+		import WebKit.Adapters.CGIAdapter
 	except ImportError:
 		cgiAdapter = os.path.join(webKitDir, 'CGIAdapter.py')
 		if not os.path.exists(cgiAdapter):

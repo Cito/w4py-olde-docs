@@ -1,6 +1,6 @@
 import os, sys, time, socket
 from marshal import dumps, loads
-from Object import Object
+from WebKit.Object import Object
 from MiscUtils.Configurable import Configurable
 import struct, errno
 

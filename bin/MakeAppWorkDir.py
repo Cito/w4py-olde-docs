@@ -122,8 +122,8 @@ class MakeAppWorkDir:
 		otherFiles = [("404Text.txt",   0),
 					  ("AppServer",     1),
 					  ("AppServer.bat", 1),
-					  ("OneShot.cgi",   0),
-					  ("WebKit.cgi",    0),
+					  ("Adapters/OneShot.cgi",   0),
+					  ("Adapters/WebKit.cgi",    0),
 					  ]
 		for name, doChmod in otherFiles:
 			oldname = os.path.join(self._webKitDir, name)

@@ -72,7 +72,7 @@ class OneShotAdapter(Adapter):
 
 			# It is important to call transaction.die() after using it, rather than just
 			# letting it fall out of scope, to avoid circular references
-			from ASStreamOut import ASStreamOut
+			from WebKit.ASStreamOut import ASStreamOut
 			rs = ASStreamOut()
 			transaction = appSvr.dispatchRawRequest(dict, rs)
 			rs.close()
