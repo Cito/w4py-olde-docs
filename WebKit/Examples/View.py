@@ -20,4 +20,4 @@ class View(ExamplePage):
 				return
 			fn = self.request().serverSidePath(fn)
 			self.request().fields()['filename'] = fn 
-			trans.application().forwardRequestFast(trans, "Colorize.py")
+			trans.application().forwardRequest(trans, "Colorize.py")
