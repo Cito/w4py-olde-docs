@@ -2,8 +2,8 @@
 
 from Common import *
 from UserDict import UserDict
-from Configurable import Configurable
 from ExceptionHandler import ExceptionHandler
+from Object import Object
 from Servlet import Servlet
 from ServletFactory import *
 from UnknownFileType import UnknownFileTypeServletFactory
@@ -19,13 +19,14 @@ from Cookie import Cookie
 from WebUtils.WebFuncs import HTMLEncode
 from WebUtils.HTMLForException import HTMLForException
 
+from MiscUtils.Configurable import Configurable
 
 
 class ApplicationError(Exception):
 	pass
 
 
-class Application(Configurable,CanContainer):
+class Application(Configurable, CanContainer, Object):
 	"""
 	FUTURE
 		* 2000-04-09 ce: Automatically open in browser.
@@ -52,6 +53,7 @@ class Application(Configurable,CanContainer):
 	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None, contexts=None, useSessionSweeper=1):
 
 		Configurable.__init__(self)
+		Object.__init__(self)
 
 		if self.setting('PrintConfigAtStartUp'):
 			self.printConfig()

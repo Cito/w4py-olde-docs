@@ -1,4 +1,4 @@
-from Common import *
+import string, sys
 from types import DictType
 
 
@@ -10,7 +10,7 @@ class _NoDefault:
 	pass
 
 
-class Configurable(Object):
+class Configurable:
 	'''
 	Configurable is an abstract superclass that provides configuration
 	file functionality for subclasses.
@@ -44,7 +44,6 @@ class Configurable(Object):
 	## Init ##
 
 	def __init__(self):
-		Object.__init__(self)
 		self._config = None
 
 

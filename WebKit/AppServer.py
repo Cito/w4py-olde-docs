@@ -10,7 +10,8 @@ FUTURE
 
 
 from Common import *
-from Configurable import Configurable
+from Object import Object
+from MiscUtils.Configurable import Configurable
 from Application import Application
 from PlugIn import PlugIn
 import os, sys
@@ -30,13 +31,14 @@ class AppServerError(Exception):
 	pass
 
 
-class AppServer(Configurable):
+class AppServer(Configurable, Object):
 
 	## Init ##
 
 	def __init__(self):
 		self._startTime = time.time()
 		Configurable.__init__(self)
+		Object.__init__(self)
 		self._verbose = self.setting('Verbose')
 		self._plugIns = []
 		self._reqCount = 0

@@ -10,8 +10,15 @@ except ImportError:
 	import WebUtils
 from WebUtils.WebFuncs import HTMLEncode
 
+from Object import Object
+from MiscUtils.Configurable import Configurable
 
-class Adapter(Configurable):
+
+class Adapter(Configurable, Object):
+
+	def __init__(self):
+		Configurable.__init__(self)
+		Object.__init__(self)
 
 	def name(self):
 		return self.__class__.__name__
