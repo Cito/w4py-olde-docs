@@ -5,10 +5,14 @@
 # -O with optimization (.pyo instead of .pyc)
 # -u unbuffered output (useful for debugging)
 unset OPTIONS
+NUM_PY_OPTS=0
 while getopts ":Ou" OPT; do    
-	case $OPT in O | u) OPTIONS="$OPTIONS -$OPT";; esac
+	case $OPT in O | u) OPTIONS="$OPTIONS -$OPT"
+					    NUM_PY_OPTS=$(( $NUM_PY_OPTS + 1 ))
+						;; 
+	esac
 done
-shift `expr $OPTIND - 1`
+shift $NUM_PY_OPTS
 
 # as long as the appserver returns a 3, it wants to be restarted
 retcode=3
