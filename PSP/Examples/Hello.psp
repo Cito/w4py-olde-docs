@@ -1,9 +1,9 @@
 <%-- This is a PSP comment. It won't show up in the HTML or even in the class that this file will generate --%>
 
 
-<%@ page imports = "sys,os,time,Examples:ExamplePage"%> <%-- Here's the modules that I need in this file --%>
+<%@ page imports = "sys,os,time,PSPExamplePage:PSPExamplePage"%> <%-- Here's the modules that I need in this file --%>
 <%@ page method="writeContent" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
-<%@ page extends="ExamplePage"%> <%--This is the base class for this page.  Page is the default --%>
+<%@ page extends="PSPExamplePage"%> <%--This is the base class for this page.  Page is the default --%>
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="tabs" %> <%-- use tabs to indent the sourcefile that this template will produce --%>
 
