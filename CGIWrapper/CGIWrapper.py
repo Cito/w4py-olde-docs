@@ -20,8 +20,8 @@ except:
 	import WebUtils
 from WebUtils.HTMLForException import HTMLForException
 
-import MiddleKit
-from MiddleKit.KeyValueAccess import KeyValueAccess
+import MiscUtils
+from MiscUtils.NamedValueAccess import NamedValueAccess
 from UserDict import UserDict
 
 # @@ 2000-05-01 ce:
@@ -35,13 +35,14 @@ import WebUtils.HTTPStatusCodes
 # end
 
 
-# Beef up UserDict with the KeyValueAccess base class and custom versions of
+# Beef up UserDict with the NamedValueAccess base class and custom versions of
 # hasValueForKey() and valueForKey(). This all means that UserDict's (such as
 # os.environ) are key/value accessible. At some point, this probably needs to
 # move somewhere else as other Webware components will need this "patch".
+# @@ 2000-01-14 ce: move this
 #
-if not KeyValueAccess in UserDict.__bases__:
-	UserDict.__bases__ = UserDict.__bases__ + (KeyValueAccess,)
+if not NamedValueAccess in UserDict.__bases__:
+	UserDict.__bases__ = UserDict.__bases__ + (NamedValueAccess,)
 
 	def _UserDict_hasValueForKey(self, key):
 		return self.has_key(key)
@@ -58,11 +59,11 @@ except ImportError:
 	from StringIO import StringIO
 
 
-class CGIWrapper(KeyValueAccess):
+class CGIWrapper(NamedValueAccess):
 	'''
 	A CGIWrapper executes a target script and provides various services for
 	the both the script and website developer and administrator.
-	
+
 	See the CGIWrapper.html documentation for full information.
 	'''
 
@@ -72,7 +73,7 @@ class CGIWrapper(KeyValueAccess):
 	def __init__(self):
 		self._config = self.config()
 
-		
+
 	## Configuration ##
 
 	def defaultConfig(self):
@@ -100,7 +101,7 @@ class CGIWrapper(KeyValueAccess):
 				                        'Subject':      'Error'
 									}
 		}
-	
+
 	def configFilename(self):
 		''' Used by userConfig(). '''
 		return 'Config.dict'
@@ -116,7 +117,7 @@ class CGIWrapper(KeyValueAccess):
 			file.close()
 			assert type(config) is type({})
 			return config
-		
+
 	def config(self):
 		''' Returns the configuration for the wrapper which is a combination of defaultConfig() and userConfig(). This method does no caching. '''
 		config = self.defaultConfig()
@@ -133,12 +134,12 @@ class CGIWrapper(KeyValueAccess):
 	def makeHeaders(self):
 		''' Returns a default header dictionary containing {'Content-type': 'text/html'}. '''
 		return {'Content-type': 'text/html'}
-	
+
 	def makeFieldStorage(self):
 		''' Returns a default field storage object created from the cgi module. '''
 		return cgi.FieldStorage()
 
-	def enhanceThePath(self):	
+	def enhanceThePath(self):
 		''' Enhance sys.path according to our configuration. '''
 		extraPathsIndex = self.setting('ExtraPathsIndex')
 		sys.path[extraPathsIndex:extraPathsIndex] = self.setting('ExtraPaths')
@@ -166,7 +167,7 @@ class CGIWrapper(KeyValueAccess):
 			if filename[0]=='_':
 				# underscores denote private scripts packaged with CGI Wrapper, such as '_admin.py'
 				filename = os.path.join(pathname, filename+'.py')
-			else:			
+			else:
 				# all other scripts are based in the directory named by the 'ScriptsHomeDir' setting
 				filename = os.path.join(pathname, self.setting('ScriptsHomeDir'), filename+'.py')
 			self._servingScript = 1
@@ -198,12 +199,12 @@ class CGIWrapper(KeyValueAccess):
 	def version(self):
 		return '0.2'
 
-		
+
 	## Exception handling ##
 
 	def handleException(self, excInfo):
 		''' Invoked by self when an exception occurs in the target script. <code>excInfo</code> is a sys.exc_info()-style tuple of information about the exception. '''
-		
+
 		self._scriptEndTime = time() # Note the duration of the script and time of the exception
 		self.logExceptionToConsole()
 		self.reset()
@@ -217,26 +218,26 @@ class CGIWrapper(KeyValueAccess):
 		self.logExceptionToDisk(filename)
 		if self.setting('EmailErrors'):
 			if fullErrorMsg is None:
-				fullErrorMsg = self.htmlErrorPage(showDebugInfo=1)		
+				fullErrorMsg = self.htmlErrorPage(showDebugInfo=1)
 			self.emailException(fullErrorMsg)
-	
+
 	def logExceptionToConsole(self, stderr=sys.stderr):
 		''' Logs the time, script name and traceback to the console (typically stderr). This usually results in the information appearing in the web server's error log. Used by handleException(). '''
 		# stderr logging
 		stderr.write('[%s] [error] CGI Wrapper: Error while executing script %s\n' % (
 			asctime(localtime(self._scriptEndTime)), self._scriptPathname))
 		traceback.print_exc(file=stderr)
-	
-	def reset(self):	
+
+	def reset(self):
 		''' Used by handleException() to clear out the current CGI output results in preparation of delivering an HTML error message page. Currently resets headers and deletes cookies, if present. '''
-		
+
 		# Set headers to basic text/html. We don't want stray headers from a script that failed.
 		headers = {'Content-Type': 'text/html'}
 
 		# Get rid of cookies, too
 		if self._namespace.has_key('cookies'):
 			del self._namespace['cookies']
-		
+
 	def htmlErrorPage(self, showDebugInfo=1):
 		''' Returns an HTML page explaining that there is an error. There could be more options in the future so using named arguments (e.g., 'showDebugInfo=1') is recommended. Invoked by handleException(). '''
 		html = ['''
@@ -258,10 +259,10 @@ class CGIWrapper(KeyValueAccess):
 %s
 <p> <i>%s</i>
 ''' % (htTitle('Traceback'), self._scriptPathname)]
-		
+
 		html.append(HTMLForException())
 
-		html.extend([		
+		html.extend([
 			htTitle('Misc Info'),
 			htDictionary({
 				'time':          asctime(localtime(self._scriptEndTime)),
@@ -325,21 +326,21 @@ class CGIWrapper(KeyValueAccess):
 		msg.append('\n')
 		msg.append(html)
 		msg = string.join(msg, '')
-		
+
 		# dbg code, in case you're having problems with your e-mail
 		# open('error-email-msg.text', 'w').write(msg)
 
-		# Send the message		
+		# Send the message
 		import smtplib
 		server = smtplib.SMTP(self.setting('ErrorEmailServer'))
 		server.set_debuglevel(0)
 		server.sendmail(headers['From'], headers['To'], msg)
 		server.quit()
-		
-				
-	
+
+
+
 	## Serve ##
-	
+
 	def serve(self, environ=os.environ):
 		# Record the time
 		if globals().has_key('isMain'):
@@ -347,10 +348,10 @@ class CGIWrapper(KeyValueAccess):
 		else:
 			self._serverStartTime = time()
 		self._serverStartTimeStamp = asctime(localtime(self._serverStartTime))
-		
+
 		# Set up environment
 		self._environ = environ
-		
+
 		# Ensure that filenames and paths have been provided
 		self.requireEnvs(['SCRIPT_FILENAME', 'PATH_INFO'])
 
@@ -380,7 +381,7 @@ class CGIWrapper(KeyValueAccess):
 		#
 		self._realStdout = sys.stdout
 		sys.stdout = StringIO()
-		
+
 		# Change directories if needed
 		if self.setting('ChangeDir'):
 			origDir = os.getcwd()
@@ -392,7 +393,7 @@ class CGIWrapper(KeyValueAccess):
 		self._errorOccurred = 0
 		self._scriptStartTime = time()
 
-		# Run the target script		
+		# Run the target script
 		try:
 			if self._servingScript:
 				execfile(self._scriptPathname, self._namespace)
@@ -404,7 +405,7 @@ class CGIWrapper(KeyValueAccess):
 						break
 			else:
 				self._headers = { 'Location': os.path.split(self._environ['SCRIPT_NAME'])[0] + self._environ['PATH_INFO'] }
-			
+
 			# Note the end time of the script
 			self._scriptEndTime = time()
 			self._scriptDuration = self._scriptEndTime - self._scriptStartTime
@@ -412,42 +413,42 @@ class CGIWrapper(KeyValueAccess):
 			# Note the end time of the script
 			self._scriptEndTime = time()
 			self._scriptDuration = self._scriptEndTime - self._scriptStartTime
-			
+
 			self._errorOccurred = 1
-			
+
 			# Not really an error, if it was sys.exit(0)
 			excInfo = sys.exc_info()
 			if excInfo[0]==SystemExit:
 				code = excInfo[1].code
 				if code==0 or code==None:
 					self._errorOccurred = 0
-			
+
 			# Clean up
 			if self._errorOccurred:
 				if origDir:
 					os.chdir(origDir)
 					origDir = None
-				
+
 				# Handle exception
-				self.handleException(sys.exc_info())	
+				self.handleException(sys.exc_info())
 
 		self.deliver()
 
 		# Restore original directory
 		if origDir:
 			os.chdir(origDir)
-		
+
 		# Note the duration of server processing (as late as we possibly can)
 		self._serverDuration = time() - self._serverStartTime
-		
+
 		# Log it
 		if self.setting('LogScripts'):
 			self.writeScriptLog()
 
-	
+
 	def deliver(self):
 		''' Deliver the HTML, whether it came from the script being served, or from our own error reporting. '''
-		
+
 		# Compile the headers & cookies
 		headers = StringIO()
 		for header, value in self._headers.items():
@@ -455,14 +456,14 @@ class CGIWrapper(KeyValueAccess):
 		if self._namespace.has_key('cookies'):
 			headers.write(str(self._namespace['cookies']))
 		headers.write('\n')
-		
+
 		# Get the string buffer values
 		headersOut = headers.getvalue()
 		stdoutOut  = sys.stdout.getvalue()
-		
+
 		# Compute size
 		self._responseSize = len(headersOut) + len(stdoutOut)
-		
+
 		# Send to the real stdout
 		self._realStdout.write(headersOut)
 		self._realStdout.write(stdoutOut)
@@ -499,26 +500,26 @@ def osIdTable():
 		name = func.__name__[3:]
 		table.append({'name': name, 'value': value})
 	return table
-	
+
 def htTable(listOfDicts, keys=None):
 	''' The listOfDicts parameter is expected to be a list of dictionaries whose keys are always the same.
 		This function returns an HTML string with the contents of the table.
 		If keys is None, the headings are taken from the first row in alphabetical order.
 		Returns an empty string if listOfDicts is none or empty.
 		Deficiencies: There's no way to influence the formatting or to use column titles that are different than the keys. '''
-	
+
 	if not listOfDicts:
 		return ''
-	
+
 	if keys is None:
 		keys = listOfDicts[0].keys()
 		keys.sort()
-	
+
 	s = '<table border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>\n<tr>'
 	for key in keys:
 		s = '%s<td><b>%s</b></td>' % (s, key)
 	s = s + '</tr>\n'
-	
+
 	for row in listOfDicts:
 		s = s + '<tr>'
 		for key in keys:
@@ -540,12 +541,12 @@ def main():
 		# catch exceptions here that might come from the wrapper, including
 		# ones generated while it's handling exceptions.
 		import traceback
-		
+
 		sys.stderr.write('[%s] [error] CGI Wrapper: Error while executing script (unknown)\n' % (
 			asctime(localtime(time()))))
 		sys.stderr.write('Error while executing script\n')
 		traceback.print_exc(file=sys.stderr)
-		
+
 		output = apply(traceback.format_exception, sys.exc_info())
 		output = string.join(output, '')
 		output = string.replace(output, '&', '&amp;')
