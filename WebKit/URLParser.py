@@ -89,35 +89,29 @@ class ContextParser(URLParser):
 		"""
 		
 		URLParser.__init__(self)
+
+		# need to set this here because we need for initialization,
+		# during which AppServer.globalAppServer.application() doesn't
+		# yet exist
+		self._app = app
+
 		# self._context will be a dictionary of context
 		# names and context directories.  It is set by
 		# `addContext`.
 		self._contexts = {}
 		
+
+		# add all contexts except the default, which we save until
+		# the end
 		contexts = app.setting('Contexts')
-		contextDirs = {}
-
-		# Figure out what the default context is:
-		for name, path in contexts.items():
-			if name != 'default':
-				contextDirs[self.absContextPath(path)] = name
-
-		if contexts.has_key('default'):
-			if contexts.has_key(contexts['default']):
-				# The default context refers to another context,
-				# not a unique context
-				self._defaultContext = contexts['default']
-				del contexts['default']
-				
-			elif contextDirs.has_key(self.absContextPath(contexts['default'])):
-				# The default context has the same directory
-				# as another context, so it's still not unique
-				self._defaultContext = contextDirs[self.absContextPath(contexts['default'])]
-				del contexts['default']
+		defaultContext = ''
+		for name, dir in contexts.items():
+			if name == 'default':
+				defaultContext = dir
 			else:
-				# The default context has no other name
-				self._defaultContext = 'default'
-		else:
+				self.addContext(name, dir)
+
+		if not defaultContext:
 			# Examples is a last-case default context, otherwise
 			# use a context that isn't built into Webware as
 			# the default
@@ -126,9 +120,37 @@ class ContextParser(URLParser):
 				if name not in ('Admin', 'Examples', 'Docs', 'Testing'):
 					self._defaultContext = name
 					break
+		self.addContext('default', defaultContext)
 
-		for name, dir in contexts.items():
-			self.addContext(name, dir)
+	def resolveDefaultContext(self, name, dest):
+		""" 
+		Figure out if the default context refers to an existing context,
+		the same directory as an existing context, or a unique directory.
+
+		Returns the name of the context that the default context refers to,
+		or 'default' if the default context is unique.
+		"""
+		contexts = self._contexts
+		contextDirs = {}
+		app = self._app
+
+		# make a list of existing context paths
+		for name, path in contexts.items():
+			if name != 'default':
+				contextDirs[self.absContextPath(path)] = name
+
+		if contexts.has_key(dest):
+			# The default context refers to another context,
+			# not a unique context.  Return the name of that context.
+			return dest
+			
+		elif contextDirs.has_key(self.absContextPath(dest)):
+			# The default context has the same directory
+			# as another context, so it's still not unique
+			return contextDirs[self.absContextPath(dest)]
+		else:
+			# The default context has no other name
+			return 'default'
 
 	def addContext(self, name, dir):
 		"""
@@ -138,9 +160,15 @@ class ContextParser(URLParser):
 		match the context name.
 		"""
 
-		# @@ 2003-03 ib: maybe adding a default context should
-		# be possible
-		assert name != 'default', 'You cannot add a default context after the contexts have been set up (you must define a default in Application.config)'
+		if name == 'default':
+			dest = self.resolveDefaultContext(name, dir)
+			self._defaultContext = dest
+			if dest != 'default':
+				# in this case default refers to an existing context, so
+				# there's not much to do
+				print 'Default context aliases to: %s' % (dest)
+				return
+
 		try:
 			importAsName = name
 			localDir, packageName = os.path.split(dir)
@@ -172,7 +200,7 @@ class ContextParser(URLParser):
 		if os.path.isabs(path):
 			return path
 		else:
-			return application().serverSidePath(path)
+			return self._app.serverSidePath(path)
 
 	def parse(self, trans, requestPath):
 		"""
@@ -285,8 +313,8 @@ class _FileParser(URLParser):
 			return fpp.parse(trans, restPart)
 
 		trans.request()._extraURLPath = restPart
-		trans.request()._serverSidePath = os.path.join(self._path, name)
-		return ServletFactoryManager.servletForFile(trans, os.path.join(self._path, name))
+		trans.request()._serverSidePath = name
+		return ServletFactoryManager.servletForFile(trans, name)
 
 
 	def filenamesForBaseName(self, baseName):
@@ -404,6 +432,7 @@ class _FileParser(URLParser):
 		a Python servlet, etc.
 		"""
 
+
 		# if requestPath is empty, then we're missing the trailing /
 		if not requestPath:
 			raise HTTPMovedPermanently(webkitLocation=trans.request().urlPath() + "/")
@@ -417,9 +446,9 @@ class _FileParser(URLParser):
 					      % (directoryFile, self._path, names))
 				raise HTTPNotFound
 			elif names:
-				trans.request()._serverSidePath = os.path.join(self._path, names[0])
+				trans.request()._serverSidePath = names[0]
 				trans.request()._extraURLPath = requestPath
-				return ServletFactoryManager.servletForFile(trans, os.path.join(self._path, names[0]))
+				return ServletFactoryManager.servletForFile(trans, names[0])
 		# @@: add correct information here
 		raise HTTPNotFound
 
