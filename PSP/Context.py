@@ -36,127 +36,127 @@ The items in this class will be used by both the compiler and the class generato
 
 
 class PSPContext:
-    ''' PSPContext is an abstract base class for Context classes.'''
-    def __init__(self):
-	raise NotImplementedError
-    
-    
-    def getClassPath(self):
-	raise NotImplementedError
+	''' PSPContext is an abstract base class for Context classes.'''
+	def __init__(self):
+		raise NotImplementedError
 
-    def getReader(self):
-	raise NotImplementedError
 
-    def getWriter(self):
-	raise NotImplementedError
+	def getClassPath(self):
+		raise NotImplementedError
 
-    def getOutputDirectory(self):
-	'''provide directory to dump PSP source file to'''
-	raise NotImplementedError
+	def getReader(self):
+		raise NotImplementedError
 
-    def getServletClassName(self):
-	'''returns the class name of the servlet being generated'''
-	raise NotImplementedError
+	def getWriter(self):
+		raise NotImplementedError
 
-    def getFullClassName(self):
-	'''return class name including package prefixes
-	Wont use this for now'''
-	raise NotImplementedError
+	def getOutputDirectory(self):
+		'''provide directory to dump PSP source file to'''
+		raise NotImplementedError
 
-    def getPythonFileName(self):
-	'''the filename that we are generating to'''
-	raise NotImplementedError
+	def getServletClassName(self):
+		'''returns the class name of the servlet being generated'''
+		raise NotImplementedError
 
-    def setPSPReader(self):
-	'''set the PSPReader for this context'''
-	raise NotImplementedError
+	def getFullClassName(self):
+		'''return class name including package prefixes
+		Wont use this for now'''
+		raise NotImplementedError
 
-    def setServletWriter(self):
-	'''set the PSPWriter instance for this context'''
-	raise NotImplementedError
-    
+	def getPythonFileName(self):
+		'''the filename that we are generating to'''
+		raise NotImplementedError
 
-    def setPythonFileName(self):
-	'''sets the name of the .py file to generate'''
-	raise NotImplementedError
+	def setPSPReader(self):
+		'''set the PSPReader for this context'''
+		raise NotImplementedError
+
+	def setServletWriter(self):
+		'''set the PSPWriter instance for this context'''
+		raise NotImplementedError
+
+
+	def setPythonFileName(self):
+		'''sets the name of the .py file to generate'''
+		raise NotImplementedError
 
 
 
 #I'll implement this as I need it
 class PSPCLContext(PSPContext):
-    '''a context for command line compilation.  Currently used for both cammand line and PSPServletEngine compilation.
-    This class provides all the information necessary during the parsing and page generation steps of the PSP compilation
-    process.'''
-    
-    def __init__(self, pspfile, trans):
-	self._transactrion = trans
-	self._baseUri, self._pspfile = os.path.split(pspfile)
-	self._fullpath = pspfile#os.path.join(path,pspfile)#trans.application().pathForServletInTransaction(trans)
+	'''a context for command line compilation.  Currently used for both cammand line and PSPServletEngine compilation.
+	This class provides all the information necessary during the parsing and page generation steps of the PSP compilation
+	process.'''
+	
+	def __init__(self, pspfile, trans):
+		#self._transactrion = trans #I don't think I need this
+		self._baseUri, self._pspfile = os.path.split(pspfile)
+		self._fullpath = pspfile#os.path.join(path,pspfile)#trans.application().pathForServletInTransaction(trans)
 
     
     
-    def getClassPath(self):
-	raise NotImplementedError
+	def getClassPath(self):
+		raise NotImplementedError
 
-    def getReader(self):
-	'''return the PSPReader object assigned to this context'''
-	return self._pspReader
+	def getReader(self):
+		'''return the PSPReader object assigned to this context'''
+		return self._pspReader
 
-    def getServletWriter(self):
-	'''Return the ServletWriter object assigned to this context'''
-	return self._servletWriter
+	def getServletWriter(self):
+		'''Return the ServletWriter object assigned to this context'''
+		return self._servletWriter
 
-    def getOutputDirectory(self):
-	'''provide directory to dump PSP source file to.  I am probably doing this in reverse order at the moment.
-	I should start with this and get the python filename from it.'''
-	return os.path.split(self._pyFileName)[0]
+	def getOutputDirectory(self):
+		'''provide directory to dump PSP source file to.  I am probably doing this in reverse order at the moment.
+		I should start with this and get the python filename from it.'''
+		return os.path.split(self._pyFileName)[0]
 
-    def getServletClassName(self):
-	'''returns the class name of the servlet being generated'''
-	return self._className
+	def getServletClassName(self):
+		'''returns the class name of the servlet being generated'''
+		return self._className
 
-    def getFullClassName(self):
-	'''return class name including package prefixes
-	Wont use this for now'''
-	raise NotImplementedError
+	def getFullClassName(self):
+		'''return class name including package prefixes
+		Wont use this for now'''
+		raise NotImplementedError
 
-    def getPythonFileName(self):
-	'''the filename that we are generating to'''
-	return self._pyFileName
+	def getPythonFileName(self):
+		'''the filename that we are generating to'''
+		return self._pyFileName
 
-    def getPspFileName(self):
-	return self._pspfile
+	def getPspFileName(self):
+		return self._pspfile
 
-    def getFullPspFileName(self):
-	return self._fullpath
+	def getFullPspFileName(self):
+		return self._fullpath
 
-    def setPSPReader(self, reader):
-	'''set the PSPReader for this context'''
-	self._pspReader = reader
-
-    def setServletWriter(self, writer):
-	'''set the ServletWriter instance for this context'''
-	self._servletWriter = writer
+	def setPSPReader(self, reader):
+		'''set the PSPReader for this context'''
+		self._pspReader = reader
+		
+	def setServletWriter(self, writer):
+		'''set the ServletWriter instance for this context'''
+		self._servletWriter = writer
     
 
-    def setPythonFileName(self,name):
-	'''sets the name of the .py file to generate'''
-	self._pyFileName = name
+	def setPythonFileName(self,name):
+		'''sets the name of the .py file to generate'''
+		self._pyFileName = name
 
-    def setClassName(self , name):
-	'''set the class name to create'''
-	self._className = name
+	def setClassName(self , name):
+		'''set the class name to create'''
+		self._className = name
 
-    def resolveRelativeURI(self, uri):
-	"""This is used mainly for including files.  It simply returns the location relative to the base context
-	directory, ie Examples/.  If the filename has a leading /, it is assumed to be an absolute path. """
-	if uri[0] == '/':
-	    return uri
-	else:
-	    return os.path.join(self._baseUri, uri)
+	def resolveRelativeURI(self, uri):
+		"""This is used mainly for including files.  It simply returns the location relative to the base context
+		directory, ie Examples/.  If the filename has a leading /, it is assumed to be an absolute path. """
+		if uri[0] == '/':
+			return uri
+		else:
+			return os.path.join(self._baseUri, uri)
 
-    def getBaseUri(self):
-	return self._baseUri
+	def getBaseUri(self):
+		return self._baseUri
     
 
     

@@ -1,17 +1,20 @@
+<%-- This is a PSP comment. It won't show up in the HTML or even in the class that this file will generate --%>
 
-<%@ page imports = "sys,os,time,termios"%>
-<%@ page method="writeHTML" %>
-<%@ page extends="Page"%>
-<%@ page isInstanceSafe="no" %>
-
+<%@ page imports = "sys,os,time,termios"%> <%-- Here's the modules that I need in this file --%>
+<%@ page method="writeHTML" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
+<%@ page extends="Page"%> <%--This is the base class for this page.  Page is the default --%>
+<%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
+<%@ page indentType="tabs" %>
 
 
 <HTML>
 <BODY bgcolor='white'>
-<p align = center><img src="psplogo.png">
+<p align = center><img src="psplogo.png"><%-- This image is served by WebKit --%>
 <h1 align=center><font color='blue'  face='helvetica'>Hello from PSP!</font></h1><br><br>
 
 <center><h2>This is the sample/test page for an implmentation of Python Server Pages.</h2></center>
+<p>What happens if I put a triple quote here? """
+<% self.test=5 %>
 
 <p><h3>Read the documentation <a href="PSPDocs.psp">here</a>.</h3>
 
@@ -47,7 +50,8 @@ Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>
 self.write(i)%>&nbsp;
 <% for n in range(2): %>
 <p><i> &nbsp;&nbsp;Inner Loop: <%= n %><br> </i>
-<% pass %>
+<%self.write('Still in the inner loop') %>
+<% end %>
 <% end %>
 
 
@@ -72,22 +76,12 @@ self._response.write(val)
 
 <% pass %>
 
-<%--
-<% mycan=self.getCan("mycan","TestCan","session")%>
-<%=mycan.test()%>
-
-<% 
-if mycan.__dict__.has_key("persistence"):
-	self.write("\nGot persistence")
-else:
-	mycan.persistence="Yes!"
-%> 
---%>
 
 <p>Here is a list of the pages you have been to that are tracking compatible:<br>
 
-<% locationCan = self.getCan("locationCan","LocationCan","session")
-locationCan.addLocation(req.pathInfo())
+<% locationCan = self.getCan("locationCan","LocationCan","session")%>
+
+<%locationCan.addLocation(req.pathInfo())
 for i in locationCan.locationList():%>
 <p><b><%= i %></b>
 <% end %>

@@ -32,85 +32,106 @@ from PSPReader import *
 
 class ServletWriter:
     
-    ''' This file creates the servlet source code. Well, it writes it out to a file at least.'''
+	''' This file creates the servlet source code. Well, it writes it out to a file at least.'''
 
-    TAB = '\t'
-    SPACES = '        ' # 8 spaces
+	TAB = '\t'
+	SPACES = '    ' # 4 spaces
     
-    def __init__(self,ctxt):
+	def __init__(self,ctxt):
 	
-	self._pyfilename = ctxt.getPythonFileName()
-	self._filehandle = open(self._pyfilename,'w+')
-	self.tabcnt = 0
-	self._blockcount = 0 # a hack to handle nested blocks of python code
+		self._pyfilename = ctxt.getPythonFileName()
+		self._filehandle = open(self._pyfilename,'w+')
+		self._tabcnt = 0
+		self._blockcount = 0 # a hack to handle nested blocks of python code
+		self._indentSpaces = self.SPACES
+		self._useTabs=1
+		self._indent='\t'
+
+	def setIndentSpaces(self,amt):
+		self._indentSpaces=' '*amt
+		self.setIndention()
+
+	def setIndention(self):
+		if self._useTabs:
+			self._indent='\t'
+		else:
+			self._indent=' '*self._indentSpaces
+
+	def setIndentType(self, type):
+		if type=="tabs":
+			self._useTabs=1
+			self.setIndention()
+		elif type=="spaces":
+			self._useTabs=0
+			self._setIndention()
+			
 	
-    def close(self):
-	self._filehandle.close()
+	def close(self):
+		self._filehandle.close()
 
-    def pushIndent(self):
-	'''this is very key, have to think more about it'''
-	self.tabcnt = self.tabcnt + 1
+	def pushIndent(self):
+		'''this is very key, have to think more about it'''
+		self._tabcnt = self._tabcnt + 1
 
-    def popIndent(self):
-	if self.tabcnt > 0:
-	    self.tabcnt = self.tabcnt - 1
+	def popIndent(self):
+		if self._tabcnt > 0:
+			self._tabcnt = self._tabcnt - 1
 	    
 	
-    def printComment(self, start, stop, chars):
+	def printComment(self, start, stop, chars):
 
-	if start and stop:
-	    self.println('## from ' + str(start))
-	    self.println('## from ' + str(stop))
+		if start and stop:
+			self.println('## from ' + str(start))
+			self.println('## from ' + str(stop))
 
-	if chars:
-	    sp = string.split(chars,'\n')
-	    for i in sp:
-		self._filehandle.write(self.indent(''))
-		self._filehandle.write('##')
-		self._filehandle.write(i)
+		if chars:
+			sp = string.split(chars,'\n')
+			for i in sp:
+				self._filehandle.write(self.indent(''))
+				self._filehandle.write('##')
+				self._filehandle.write(i)
 
-    def quoteString(self, s):
-	'''escape the string'''
-	#None
-	if s == None:
-	    return 'None'
+	def quoteString(self, s):
+		'''escape the string'''
+		#None
+		if s == None:
+			return 'None'
+			#this probably wont work, Ill be back for this
+		return 'r'+s
+
+	def indent(self,st):
+		if self._tabcnt>0:
+			return self._indent*self._tabcnt + st
+		return st
 	
-	#this probably wont work, Ill be back for this
-	return 'r'+s
-
-    def indent(self,st):
-	if self.tabcnt>0:
-	    return '\t'*self.tabcnt + st
-	return st
-	
-    def println(self, line=None):
-	'''Prints with Indentation and a newline if none supplied'''
-	if line:
-	    self._filehandle.write(self.indent(line))
-	else:
-	    self._filehandle.write(self.indent('\n'))
+	def println(self, line=None):
+		'''Prints with Indentation and a newline if none supplied'''
+		if line:
+			self._filehandle.write(self.indent(line))
+		else:
+			self._filehandle.write(self.indent('\n'))
 	    
 	
-	if line and line[:-1] != '\n':
-	    self._filehandle.write('\n')
+		if line and line[:-1] != '\n':
+			self._filehandle.write('\n')
 
-    def printChars(self, st):
-	'''just prints what its given'''
-	self._filehandle.write(st)
+	def printChars(self, st):
+		'''just prints what its given'''
+		self._filehandle.write(st)
 
-    def printMultiLn(self, st):
-	raise 'NotImplemented Error'
+	def printMultiLn(self, st):
+		raise 'NotImplemented Error'
 
 
-    def printList(self, strlist):
-	'''prints a list of strings with indentation and a newline'''
-	for i in strlist:
-	    self.printChars(self.indent(i))
-	    self.printChars('\n')
+	def printList(self, strlist):
+		'''prints a list of strings with indentation and a newline'''
+		for i in strlist:
+			self.printChars(self.indent(i))
+			self.printChars('\n')
 
-    def printIndent(self):
-	'''just prints tabs'''
-	self.printChars(self.indent(''))
+	def printIndent(self):
+		'''just prints tabs'''
+		self.printChars(self.indent(''))
 	
 
     

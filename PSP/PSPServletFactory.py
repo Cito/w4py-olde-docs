@@ -43,9 +43,8 @@ class PSPServletFactory(ServletFactory):
 	    ServletFactory.__init__(self,application)
 
 	    self.application = application
-	    self.instances={}
 	    self.apppath = application.serverDir()
-	    self.cacheDir = self.apppath + '/cache'
+	    self.cacheDir = os.path.join(self.apppath, 'cache')
 	    self._classcache={}
 	    
 
@@ -79,43 +78,43 @@ class PSPServletFactory(ServletFactory):
 
 	def checkClassCache(self, classname, mtime):
 	    if self._classcache.has_key(classname) and self._classcache[classname]['mtime'] > mtime:
-		return self._classcache[classname]['code']()
+			return self._classcache[classname]['code']()
 	    return None
 
 	
 	def servletForTransaction(self, trans):
-	    fullname = trans.request().serverSidePath()
-            path,pagename = os.path.split(fullname)
-	    mtime = os.path.getmtime(fullname)
+		fullname = trans.request().serverSidePath()
+		path,pagename = os.path.split(fullname)
+		mtime = os.path.getmtime(fullname)
 	    
-	    classname = self.computeClassName(fullname)
+		classname = self.computeClassName(fullname)
 
 	    #see if we can just create a new instance
-	    instance = self.checkClassCache(classname,mtime)
-	    if instance != None:
-		return instance
+		instance = self.checkClassCache(classname,mtime)
+		if instance != None:
+			return instance
 	    
-	    cachedfilename= os.path.join(self.cacheDir,str(classname + '.py'))
+		cachedfilename = os.path.join(self.cacheDir,str(classname + '.py'))
 	    
-	    if os.path.exists(cachedfilename) and os.stat(cachedfilename)[6] > 0:
-		if os.path.getmtime(cachedfilename) > mtime:
-		    instance = self.createInstanceFromFile(cachedfilename,classname,mtime)
-		    return instance
+		if os.path.exists(cachedfilename) and os.stat(cachedfilename)[6] > 0:
+			if os.path.getmtime(cachedfilename) > mtime:
+				instance = self.createInstanceFromFile(cachedfilename,classname,mtime)
+				return instance
 
-	    pythonfilename = cachedfilename
+		pythonfilename = cachedfilename
 
-	    context = Context.PSPCLContext(fullname,trans)
-	    context.setClassName(classname)
-	    context.setPythonFileName(pythonfilename)
+		context = Context.PSPCLContext(fullname,trans)
+		context.setClassName(classname)
+		context.setPythonFileName(pythonfilename)
 	
 
-	    clc = PSPCompiler.Compiler(context)
+		clc = PSPCompiler.Compiler(context)
 
-	    print 'creating python class: ' , classname
-	    clc.compile()
+		print 'creating python class: ' , classname
+		clc.compile()
 
-	    instance = self.createInstanceFromFile(cachedfilename,classname,mtime)	    
-            return instance
+		instance = self.createInstanceFromFile(cachedfilename,classname,mtime)	    
+		return instance
 
 
 

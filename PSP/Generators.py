@@ -104,7 +104,10 @@ class ScriptGenerator(GenericGenerator):
 		GenericGenerator.__init__(self)	
 		self.chars = chars
 
-    def generate(self, writer, phase=None):	
+    def generate(self, writer, phase=None):
+		#check for whitespace at the beginning and if less than 2 spaces, remove
+		if self.chars[:1]==' ' and self.chars[:2]!= '  ':
+			self.chars=string.lstrip(self.chars)
 		writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
 		
 		writer.printChars('\n')
