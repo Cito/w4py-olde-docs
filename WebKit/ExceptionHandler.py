@@ -1,5 +1,5 @@
 from Common import *
-import string, time, traceback, types, whrandom
+import string, time, traceback, types, whrandom, sys
 from time import asctime, localtime
 from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict
@@ -87,8 +87,10 @@ class ExceptionHandler(Object):
 				privateErrorPage = self.privateErrorPage()
 			self.emailException(privateErrorPage)
 
-	def logExceptionToConsole(self, stderr=sys.stderr):
+	def logExceptionToConsole(self, stderr=None):
 		''' Logs the time, servlet name and traceback to the console (typically stderr). This usually results in the information appearing in console/terminal from which AppServer was launched. '''
+		if stderr is None:
+			stderr = sys.stderr
 		stderr.write('[%s] [error] WebKit: Error while executing script %s\n' % (
 			asctime(localtime(self._res.endTime())), self.servletPathname()))
 		traceback.print_exc(file=stderr)
