@@ -6,6 +6,14 @@
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="tabs" %>
 
+
+<%--  Method declaration Test --%>
+<psp:method name="title" params="">
+return "PSP Tests Page"
+</psp:method>
+
+
+
 <HTML>
 <BODY bgcolor='white'>
 
@@ -72,7 +80,7 @@ self.write(i)%>&nbsp;
 </table>
 <hr>
 <p>Path Info: <%=req.pathInfo()%>
-<p>extraPathInfo: <%=req.extraPathInfo()%>
+<p>extraPathInfo: <%=req.extraURLPath()%>
 <p>Fields: <%= req.fields() %>
 <p>servletURI = <%= req.servletURI()%>
 <p>uriWebKitRoot = <%= req.uriWebKitRoot() %>
