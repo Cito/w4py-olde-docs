@@ -8,6 +8,10 @@ import os, re, string, string, sys, time
 from glob import glob
 
 
+def EmptyString(klass):
+	return ''
+
+
 class Klass:
 	''' Represents a Python class for our purposes. '''
 	def __init__(self, name, filename=''):
@@ -27,10 +31,13 @@ class Klass:
 		if klass not in self._derived:
 			self._derived.append(klass)
 
+	def filename(self):
+		return self._filename
+
 	def setFilename(self, filename):
 		self._filename = filename
 
-	def printHier(self, file=sys.stdout, indent=0, indentString='    ', prefix='', filenamePrefix=' (', filenamePostfix=')', multipleBasesMarker='*'):
+	def printHier(self, file=sys.stdout, indent=0, indentString='    ', prefix='', func=EmptyString, filenamePrefix=' (', filenamePostfix=')', multipleBasesMarker='*'):
 		filename = self._filename
 		if os.path.splitext(filename)[0]==self._name:
 			filename = ''
@@ -38,10 +45,10 @@ class Klass:
 			star = ''
 		else:
 			star = multipleBasesMarker
-		file.write('%s%s%s%s%s%s%s\n' % (prefix, indentString*indent, self._name, star, filenamePrefix, filename, filenamePostfix))
+		file.write('%s%s%s%s%s%s%s%s\n' % (prefix, func(self), indentString*indent, self._name, star, filenamePrefix, filename, filenamePostfix))
 		indent = indent + 1
 		for klass in self._derived:
-			klass.printHier(file, indent, indentString, prefix, filenamePrefix, filenamePostfix)
+			klass.printHier(file, indent, indentString, prefix, func, filenamePrefix, filenamePostfix)
 
 	def __repr__(self):
 		return '<%s, %s>' % (self.__class__.__name__, self._name)
@@ -141,13 +148,22 @@ class ClassHier:
 			klass.printHier(file=file)
 
 	def printForWeb(self, file=sys.stdout):
-		file.write('<table cellpadding=2 cellspacing=0>\n')
-		file.write('<tr><td><b>Class</b></td><td><b>File</b></td></tr>\n')
+		file.write('<table cellpadding=2 cellspacing=0 style="font-family: Arial, Helvetica, sans-serif; font-size: 14;">\n')
+		file.write('<tr><td><b>Source</b></td><td><b>Class</b></td><td><b>File</b></td></tr>\n')
 		roots = self.roots()
 		roots.sort(lambda a, b: cmp(a._name, b._name))
 		for klass in roots:
-			klass.printHier(file=file, prefix='<tr><td>', indentString = '&nbsp; &nbsp; &nbsp; ', filenamePrefix='</td><td>', filenamePostfix='</td></tr>')
+			klass.printHier(file=file, prefix='<tr>', func=self.srcLink, indentString = '&nbsp;'*6, filenamePrefix='</td><td>', filenamePostfix='</td></tr>')
 		file.write('</table>')
+
+	def srcLink(self, klass):
+		''' In support of printForWeb(). '''
+		filename = klass.filename()
+		if os.path.exists('Documentation/Source/%s.html' % filename):
+			return '<td> <a href="Source/%s.html">source</a> </td> <td>' % filename
+		else:
+			return '<td> &nbsp; </td> <td>'
+
 
 def main(args):
 	ch = ClassHier()
