@@ -2,7 +2,7 @@
 
 def InstallInWebKit( appServer ):
 	try:
-		import kidx
+		import kid
 	except:
 		print '\tCould not import kid library.  Not loading KidKit.'
 		return
