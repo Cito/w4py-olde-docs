@@ -26,6 +26,10 @@ def test(store):
 
 	print '*** passed testSelfList'
 
+	testListUpdate(store, I.I, DELETE_OBJECT)
+
+	print '*** passed testListUpdate'
+
 # These are possible values for expectedResult
 DELETE_FOO = 1
 DELETE_OBJECT = 2
@@ -72,6 +76,22 @@ def testSelfList(store, klass, expectedResult):
 	finally:
 		cleanupTest(store, klass)
 
+def testListUpdate(store, klass, expectedResult):
+	"""
+	Test creating an instance of a specified class, pointed to by the list attribute in
+	an instance of Foo, which itself points to an instance of Bar.  Then try to delete the specified class,
+	and make sure that Foo's list attribute is updated automatically.
+	"""
+	# Run the test, deleting the specified object and verifying the expected result
+	object, foo, bar = setupListTest(store, klass)
+	assert len(foo.listOfI()) == 1
+	try:
+		runTest(store, klass, object, expectedResult)
+		assert len(foo.listOfI()) == 0
+	finally:
+		cleanupTest(store, klass)
+    
+
 def setupTest(store, klass):
 	"""
 	Setup 3 objects: one of the specified klass, pointing to a Foo, pointing to a Bar.
@@ -95,10 +115,6 @@ def setupTest(store, klass):
 	return object, foo, bar
 
 def setupListTest(store, klass):
-	"""
-	Setup 3 objects: one of the specified klass, pointing to a Foo, pointing to a Bar.
-	Returns tuple (object of specified klass, foo, bar).
-	"""
 	# Create a Foo and a Bar, with the Foo pointing to the Bar
 	bar = Bar()
 	bar.setX(42)
