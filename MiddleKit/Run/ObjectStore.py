@@ -52,9 +52,9 @@ class ObjectStore(ModelUser):
 	def object(self, key, default=NoDefault):
 		''' Returns an object from the store by it's given key. If no default is given and the object is not in the store, then an exception is raised. Note: This method doesn't currently fetch objects from the persistent store. '''
 		if default is NoDefault:
-			return objects[key]
+			return self._objects[key]
 		else:
-			return objects.get(key, default)
+			return self._objects.get(key, default)
 
 	def addObject(self, object):
 		''' Restrictions: You cannot insert the same object twice. You cannot insert an object that was loaded from the store. '''
