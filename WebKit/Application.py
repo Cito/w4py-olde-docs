@@ -572,6 +572,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		req = trans.request()
 		currentPath = req.urlPath()
 		currentServlet = trans._servlet
+		currentServerSidePath = req._serverSidePath
+		currentServerSideContextPath = req._serverSideContextPath
+		currentContextName = req._contextName
 		req.setURLPath(urlPath)
 		req.addParent(currentServlet)
 		
@@ -586,6 +589,9 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		# Put things back
 		req.setURLPath(currentPath)
+		req._serverSidePath = currentServerSidePath
+		req._serverSideContextPath = currentServerSideContextPath
+		req._contextName = currentContextName
 		req.popParent()
 		trans._servlet = currentServlet
 
@@ -602,6 +608,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		req = trans.request()
 		currentPath = req.urlPath()
 		currentServlet = trans._servlet
+		currentServerSidePath = req._serverSidePath
+		currentServerSideContextPath = req._serverSideContextPath
+		currentContextName = req._contextName
 		req.setURLPath(urlPath)
 		req.addParent(currentServlet)
 
@@ -609,6 +618,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		trans._servlet = servlet
 		servlet.runTransaction(trans)
 		req.setURLPath(currentPath)
+		req._serverSidePath = currentServerSidePath
+		req._serverSideContextPath = currentServerSideContextPath
+		req._contextName = currentContextName
 		req.popParent()
 		trans._servlet = currentServlet
 
