@@ -17,7 +17,7 @@ class PSPPage(Page):
 		self.parent=Page
 		self.parent.__init__(self)
 
-    def awake(self, trans):
+	def awake(self, trans):
 		self.parent.awake(self, trans)
 		self.out = trans.response()
 
