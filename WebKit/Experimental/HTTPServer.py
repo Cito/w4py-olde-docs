@@ -1,48 +1,3 @@
-#!/usr/bin/env python
-## HTTPAdapter 0.0
-## Serves HTTP, connecting to the Webware AppServer
-## Ian Bicking <ianb@colorstudy.com>, 10 Apr 2002
-##
-## Modified by gtalvola 18 May 2002 to add multi-threading
-## and to disallow a missing content-length on a POST
-## request
-
-# If the Webware installation is located somewhere else,
-# then set the WebwareDir variable to point to it.
-# For example, WebwareDir = '/Servers/Webware'
-WebwareDir = '/home/gtalvola/cvs_staging/Webware'
-
-# If you used the MakeAppWorkDir.py script to make a separate
-# application working directory, specify it here.
-AppWorkDir = None
-
-# The address (?) and port that the server will serve
-ServerAddress = ('', 8080)
-
-try:
-	import os, sys, string
-	if WebwareDir:
-		sys.path.insert(1, WebwareDir)
-	else:
-		WebwareDir = os.path.dirname(os.getcwd())
-	webKitDir = os.path.join(WebwareDir, 'WebKit')
-	if AppWorkDir is None:
-		AppWorkDir = webKitDir
-	else:
-		sys.path.insert(1, AppWorkDir)
-
-	from WebKit import Adapter
-        (host, port) = string.split(open(os.path.join(webKitDir, 'address.text')).read(), ':')
-        if os.name=='nt' and host=='': # MS Windows doesn't like a blank host name
-            host = 'localhost'
-        port = int(port)
-except 0:
-    ## @@: Is there something we should do with exceptions here?
-    ## I'm apt to just let them print to stderr and quit like normal,
-    ## but I'm not sure.
-    pass
-
-
 import BaseHTTPServer, mimetools
 try:
     from cStringIO import StringIO
@@ -50,7 +5,9 @@ except ImportError:
     from StringIO import StringIO
 import threading, socket
 
-class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler, Adapter.Adapter):
+class HaltServer(Exception): pass
+
+class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     """Handles incoming requests.  Recreated with every request."""
 
     ## This sends certain CGI variables.  These are some that
@@ -73,31 +30,15 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler, Adapter.Adapter):
     ## SCRIPT_FILENAME (?)
     ## SERVER_ADMIN (?)
 
-    def __init__(self, *vars):
-        Adapter.Adapter.__init__(self, webKitDir)
-        BaseHTTPServer.BaseHTTPRequestHandler.__init__(self, *vars)
-
-    def do_GET(self):
-        self.requestMethod = 'GET'
-        self.doRequest()
-
-    def do_POST(self):
-        self.requestMethod = 'POST'
-        self.doRequest()
-
-    def do_HEAD(self):
-        self.requestMethod = 'HEAD'
-        self.doRequest()
-
     def doRequest(self):
-        self.server_version = 'Webware/0.0'
+        self.server_version = 'Webware/0.1'
         env = {}
         if self.headers.has_key('Content-Type'):
             env['CONTENT_TYPE'] = self.headers['Content-Type']
             del self.headers['Content-Type']
         self.headersToEnviron(self.headers, env)
         env['REMOTE_ADDR'], env['REMOTE_PORT'] = map(str, self.client_address)
-        env['REQUEST_METHOD'] = self.requestMethod
+        env['REQUEST_METHOD'] = self.command
         path = self.path
         if path.find('?') != -1:
             env['REQUEST_URI'], env['QUERY_STRING'] = path.split('?', 1)
@@ -108,7 +49,10 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler, Adapter.Adapter):
         myInput = ''
         if self.headers.has_key('Content-Length'):
             myInput = self.rfile.read(int(self.headers['Content-Length']))
-        self.transactWithAppServer(env, myInput, host, port)
+	self.doTransaction(env, myInput)
+
+    do_GET = do_POST = do_HEAD = doRequest
+    
 
     def headersToEnviron(self, headers, env):
         """Use a simple heuristic to convert all the headers to
@@ -157,31 +101,57 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler, Adapter.Adapter):
         self.wfile.write(bodyFile.read())
         bodyFile.close()
 
-
 class ThreadedHTTPServer(BaseHTTPServer.HTTPServer):
     """
     Stolen from a 2001 comp.lang.python post by Michael Abbott.
     """
+
+    def __init__(self, *args):
+        self._threads = {}
+	self._threadID = 1
+	BaseHTTPServer.HTTPServer.__init__(self, *args)
+
     def handle_request(self):
         try:
             request, client_address = self.get_request()
         except socket.error:
             return
-        threading.Thread(target=self.handle_request_body,
-                         args=(request, client_address)).start()
-
+        t = threading.Thread(target=self.handle_request_body,
+                         args=(request, client_address, self._threadID))
+	t.start()
+	self._threads[self._threadID] = t
+	self._threadID += 1
+	
     # This part of the processing is run in its own thread
-    def handle_request_body(self, request, client_address):
+    def handle_request_body(self, request, client_address, threadID):
         if self.verify_request(request, client_address):
             try:
                 self.process_request(request, client_address)
             except:
                 self.handle_error(request, client_address)
         self.close_request(request)
+	del self._threads[threadID]
 
-def run():
-    httpd = ThreadedHTTPServer(ServerAddress, HTTPHandler)
-    httpd.serve_forever()
+    def serve_forever(self):
+        self._keepGoing = 1
+	while self._keepGoing:
+	    self.handle_request()
+	self.socket.close()
+
+    def shutDown(self):
+        self._keepGoing = 0
+	for thread in self._threads.values():
+	    thread.join()
+	self.socket.shutdown(2)
+	self.socket.close()
+
+
+def run(serverAddress, klass=HTTPHandler):
+    httpd = ThreadedHTTPServer(serverAddress, klass)
+    try:
+        httpd.serve_forever()
+    except HaltServer:
+        pass
 
 if __name__ == '__main__':
     if len(sys.argv) > 1 and \
