@@ -75,6 +75,12 @@ CHANGES
 	* Added notes about how I set this up with Apache to what was already there.
 """
 
+if __name__=='__main__':
+	print 'There is no use for running this module from the command line.'
+	print 'See the doc string for information on usage.'
+	import sys
+	sys.exit(1)
+
 import fcgi, time
 from marshal import dumps, loads
 from socket import *
@@ -103,7 +109,8 @@ addrfile=os.path.join(WebKitDir, _AddressFile)
 port = int(port)
 
 os.chdir(WebKitDir)
-sys.path.append(os.path.join(WebKitDir, ".."))
+sys.path.append(os.path.abspath(os.path.join(WebKitDir, "..")))
+# @@ 2001-03-13 ce: is the above line really necessary?
 
 def HTMLEncode(s, codes=HTMLCodes):
 	""" Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdapter independent of everything but standard Python.) """
@@ -114,6 +121,7 @@ def HTMLEncode(s, codes=HTMLCodes):
 from Adapter import Adapter
 
 class FCGIAdapter(Adapter):
+
 	def FCGICallback(self,fcg,env,form):
 		"""This function is called whenever a request comes in"""
 		import sys
@@ -151,7 +159,7 @@ class FCGIAdapter(Adapter):
 		fcg.finish()
 		return
 
-_adapter = FCGIAdapter()
+_adapter = FCGIAdapter(WebKitDir)
 
 class WKFCGI:
 	"""This class handles calls from the web server"""
@@ -185,6 +193,3 @@ class WKFCGI:
 
 fcgiloop = WKFCGI(_adapter.FCGICallback)
 fcgiloop.run()
-
-if __name__=='__main__':
-	print 'You can\'t call this from the command-line'
