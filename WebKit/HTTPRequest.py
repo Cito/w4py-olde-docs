@@ -4,6 +4,7 @@ from WebUtils.Cookie import Cookie
 import cgi
 from types import ListType
 
+
 class HTTPRequest(Request):
 	'''
 	FUTURE
@@ -11,12 +12,14 @@ class HTTPRequest(Request):
 		* The "Information" section is a bit screwed up. Because the WebKit server adaptor is a CGI script, these values are oriented towards that rather than the servlet.
 	'''
 
+
 	## Initialization ##
 
 	def __init__(self, dict={}):
+		Request.__init__(self)
+		self._rawRequest = dict.copy()
 		if dict:
 			# Dictionaries come in from web server adaptors like the CGIAdaptor
-			from StringIO import StringIO
 			assert dict['format']=='CGI'
 			self._time    = dict['time']
 			self._environ = dict['environ']
@@ -34,12 +37,27 @@ class HTTPRequest(Request):
 			self._fields  = cgi.FieldStorage(keep_blank_values=1)
 			self._cookies = Cookie()
 
+		# Debugging
+		if 0:
+			f = open('env.text', 'a')
+			save = sys.stdout
+			sys.stdout = f
+			print '>> env for request:'
+			keys = self._environ.keys()
+			keys.sort()
+			for key in keys:
+				print '%s: %s' % (repr(key), repr(self._environ[key]))
+			print
+			sys.stdout = save
+			f.close()
+
 		# Fix up environ if it doesn't look right.
-		# This happens when there is no extra path info past the adapter.
+		# This can happen when there is no extra path info past the adapter.
 		# e.g., http://localhost/WebKit.cgi
 		if not self._environ.has_key('PATH_INFO'):
-			self._environ['PATH_INFO'] = '/'
-			self._environ['PATH_TRANSLATED'] = self._environ['DOCUMENT_ROOT']
+			self._environ['PATH_INFO'] = ''
+
+		self._adapterName = self._environ.get('SCRIPT_NAME', '')
 
 		# We use the cgi module to get the fields, but then change them into an ordinary dictionary of values
 		dict = {}
@@ -72,12 +90,6 @@ class HTTPRequest(Request):
 	def setTransaction(self, trans):
 		''' This method should be invoked after the transaction is created for this request. '''
 		self._transaction = trans
-
-
-	## Special ##
-
-	def environ(self):
-		return self._environ  # @@ 2000-05-01 ce: To implement ExceptionHandler.py
 
 
 	## Values ##
@@ -153,13 +165,24 @@ class HTTPRequest(Request):
 
 	## Path ##
 
+	def urlPath(self):
+		''' Returns the URL path of the servlet sans host, adaptor and query string. For example, http://host/WebKit.cgi/Context/Servlet?x=1 yields '/Context/Servlet'. '''
+		return self._environ['PATH_INFO']
+
+	def setURLPath(self, path):
+		''' Sets the URL path of the request. There is rarely a need to do this. Proceed with caution. The only known current use for this is Application.forwardRequest(). '''
+		if hasattr(self, '_serverSidePath'):
+			del self._serverSidePath
+		if hasattr(self, '_serverSideDir'):
+			del self._serverSideDir
+		self._environ['PATH_INFO'] = path
+		self._environ['REQUEST_URI'] = self.adapterName() + path
+
 	def serverSidePath(self):
 		''' Returns the complete, unambiguous server-side path for the request. '''
 		if not hasattr(self, '_serverSidePath'):
-			path = self._environ['PATH_INFO'][1:] # This is the path after the adapter name (for example, WebKit.cgi) i.e. Welcome.py
-			# The [1:] above strips the preceding '/' that we get with Apache 1.3
 			app = self._transaction.application()
-			self._serverSidePath = app.serverSidePathForRequest(self, path)
+			self._serverSidePath = app.serverSidePathForRequest(self)
 		return self._serverSidePath
 
 	def serverSideDir(self):
@@ -182,6 +205,22 @@ class HTTPRequest(Request):
 		return URI
 
 
+	## Special ##
+
+	def adapterName(self):
+		'''
+		Returns the name of the adapter as it appears in the URL.
+		Example: '/WebKit.cgi'
+		This is useful in special cases when you are constructing URLs. See Testing/Main.py for an example use.
+		'''
+		return self._adapterName
+
+	def rawRequest(self):
+		''' Returns the raw request that was used to initialize this request object. '''
+		return self._rawRequest
+
+	def environ(self):
+		return self._environ  # @@ 2000-05-01 ce: To implement ExceptionHandler.py
 
 
 	## Information ##

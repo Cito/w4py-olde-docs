@@ -13,13 +13,6 @@ import Queue
 from threading import Lock, Thread
 from CanContainer import *
 
-
-
-try:
-	import WebUtils
-except:
-	sys.path.append('..')
-	import WebUtils
 from WebUtils.WebFuncs import HTMLEncode
 from WebUtils.HTMLForException import HTMLForException
 
@@ -83,11 +76,9 @@ class Application(Configurable,CanContainer):
 
 	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None, contexts=None, useSessionSweeper=1):
 
-
 		Configurable.__init__(self)
 
 		self._server = server
-
 
 		if transactionClass:
 			self._transactionClass = transactionClass
@@ -254,25 +245,36 @@ class Application(Configurable,CanContainer):
 	def dispatchRawRequest(self, newRequestDict):
 		return self.dispatchRequest(self.createRequestForDict(newRequestDict))
 
-
 	def dispatchRequest(self, request):
 		"""
 		Creates the transaction, session, response and servlet for the new request which is then dispatched. The transaction is returned.
 		"""
 		transaction = None
-		try:
-			transaction = self.createTransactionForRequest(request)
-			response    = self.createResponseInTransaction(transaction)
+		if request.value('_captureOut_', 0):
+			real_stdout = sys.stdout
+			sys.stdout = StringIO()
 
+		transaction = self.createTransactionForRequest(request)
+		response    = self.createResponseInTransaction(transaction)
+
+		try:
 			ssPath = request.serverSidePath()
+
 			if ssPath is None:
 				self.handleBadURL(transaction)
-			elif os.path.isdir(ssPath) and request.uri()[-1]!='/':
+			elif isdir(ssPath) and noslash(request.pathInfo()): # (*) see below
 				self.fixDirectoryURL(transaction)
 			else:
 				self.serveURL(transaction)
 
+			if request.value('_captureOut_', 0):
+				response.write('''<br><p><table><tr><td bgcolor=#EEEEEE>
+					<pre>%s</pre></td></tr></table>''' % sys.stdout.getvalue())
+				sys.stdout = real_stdout
+
 			response.deliver(transaction)
+
+			# (*) We have to use pathInfo() instead of uri() when looking for the trailing slash, because some webservers, notably Apache, append a trailing / to REQUEST_URI in some circumstances even though the user did not specify that (for example: http://localhost/WebKit.cgi).
 
 		except:
 			if transaction:
@@ -323,31 +325,55 @@ class Application(Configurable,CanContainer):
 		self.sleep(transaction)
 
 	def forwardRequest(self, trans, URL):
-		"""Enable a servlet to pass a request to another servlet.  This implementation handles chaining and requestDispatch in Java.
-		The catch is that the function WILL return to the calling servlet, so the calling servlet should either take advantage
-		of that or return immediately."""
+		"""
+		Enable a servlet to pass a request to another servlet.  This implementation handles chaining and requestDispatch in Java.
+		The catch is that the function WILL return to the calling servlet, so the calling servlet should either take advantage of that or return immediately.
+		Currently the URL is always relative to the existing URL.
+		"""
 
-		#Save the things we're gonna change.
-		currentPath=trans.request().serverSidePath()
-		currentServlet=trans._servlet
+		req = trans.request()
 
-		#get the path to the next servlet.
-		trans.request()._serverSidePath=self.serverSidePathForRequest(trans.request(),URL)
+		# URL is relative to the original
+		urlPath = req.urlPath()
+		if urlPath=='':
+			urlPath = '/' + URL
+		elif urlPath[-1]=='/':
+			urlPath = urlPath + URL
+		else:
+			lastSlash = string.rfind(urlPath, '/')
+			urlPath = urlPath[:lastSlash+1] + URL
 
-		#Get the servlet
-		self.createServletInTransaction(trans)
+		newRequest = self.createRequestForDict(req.rawRequest())
+		newRequest.setURLPath(urlPath)
+		newTrans = self.dispatchRequest(newRequest)
+		trans.response().appendRawResponse(newTrans.response().rawResponse())
+		return
 
-		#call the servlet, but not session, it's already alive
-		trans.servlet().awake(trans)
-		trans.servlet().respond(trans)
-		trans.servlet().sleep(trans)
+		# Save the things we're gonna change.
+		currentPath = req.serverSidePath()
+		currentServlet = trans.servlet()
 
-		self.returnInstance(trans,trans.request().serverSidePath())
+		# Get the path to the next servlet.
+		req.setURLPath(urlPath)
+#		req._serverSidePath = self.serverSidePathForRequest(req)
 
-		#replace things like they were
-		trans.request()._serverSidePath=currentPath
-		trans._servlet=currentServlet
+		# Get the servlet
+		self.dispatchRequest(req)
 
+		if 0:
+			# the old way
+			self.createServletInTransaction(trans)
+
+			# Call the servlet, but not session, it's already alive
+			trans.servlet().awake(trans)
+			trans.servlet().respond(trans)
+			trans.servlet().sleep(trans)
+
+			self.returnInstance(trans, req.serverSidePath())
+
+		# Replace things like they were
+		req.setURLPath(currentPath)
+		trans.setServlet(currentServlet)
 
 
 	## Transactions ##
@@ -605,7 +631,7 @@ class Application(Configurable,CanContainer):
 		""" Safely add new item to the main cache.  Not woried about the retrieval for now.
 		I'm not even sure this is necessary, as it's a one bytecode op, but it doesn't cost much of anything speed wise."""
 		#self._cacheDictLock.acquire()
-		self._servletCacheByPath[key]=item
+		self._servletCacheByPath[key] = item
 		#self._cacheDictLock.release()
 
 
@@ -620,9 +646,9 @@ class Application(Configurable,CanContainer):
 		cache = self._servletCacheByPath.get(path, None)
 
 		# File is not newer?
-		if cache and self._servletCacheByPath[path]['timestamp']<os.path.getmtime(path):
+		if cache and cache['timestamp']<os.path.getmtime(path):
 			try:
-				while cache['instances'].qsize > 0: #don't leave instances out there, right?
+				while cache['instances'].qsize > 0: # don't leave instances out there, right?
 					cache['instances'].get_nowait()
 				cache = None
 			except Queue.Empty:
@@ -635,8 +661,8 @@ class Application(Configurable,CanContainer):
 				'timestamp':  os.path.getmtime(path),
 				'threadsafe': 0,
 				'reuseable':  0,
-				'created':1,
-				'lock': Lock(),#used for the created count
+				'created':    1,
+				'lock':       Lock(), # used for the created count
 				}
 
 			self.newServletCacheItem(path,cache)
@@ -696,7 +722,7 @@ class Application(Configurable,CanContainer):
 				repr(baseName), repr(filenames))
 		return filenames
 
-	def serverSidePathForRequest(self, request, urlPath, debug=0):
+	def serverSidePathForRequest(self, request, debug=0):
 		"""
 		Returns what it says. This is a 'private' service method for use by HTTPRequest.
 		Returns None if there is no corresponding server side path for the URL.
@@ -707,24 +733,20 @@ class Application(Configurable,CanContainer):
 			* Auto discovery of directory vs. file
 			* For directories, auto discovery of file, configured by DirectoryFile
 			* For files, auto discovery of extension, configured by ExtensionsToIgnore
+			* Rejection of files (not directories) that end in a slash (/)
 			* NOT YET: "Extra path" URLs where the servlet is actually embedded in the path
 			  as opposed to being at the end of it. (ex: http://foo.com/servlet/extra/path)
 
-		IF YOU CHANGE THIS VERY IMPORTANT, SUBTLE METHOD, THEN PLEASE
-		REVIEW AND COMPLETE Testing/PathTesting.text BEFORE CHECKING
-		IN OR SUBMITTING YOUR CHANGES.
+		IF YOU CHANGE THIS VERY IMPORTANT, SUBTLE METHOD, THEN PLEASE REVIEW
+		AND COMPLETE http://localhost/WebKit.cgi/Testing/ BEFORE CHECKING IN
+		OR SUBMITTING YOUR CHANGES.
 		"""
 
 		if debug:
-			print '>> serverSidePathForRequest(request=%s, urlPath=%s)' % (
-				HTMLEncode(repr(request)), repr(urlPath))
+			print '>> serverSidePathForRequest(request=%s)' % repr(request)
 
-		# take off trailing / if it exists.
-		# we determine automatically if the URL is file vs. directory
-
-		# @@ 2000-06-22 ce: not yet
-		#if len(urlPath)>1 and urlPath[-1]=='/':
-		#	urlPath = urlPath[:-1]
+		urlPath = request.urlPath()
+		if debug: print '>> urlPath =', repr(urlPath)
 
 		# try the cache first
 		ssPath = self._serverSidePathCacheByPath.get(urlPath, None)
@@ -756,39 +778,49 @@ class Application(Configurable,CanContainer):
 				return ssPath
 
 		# case: no URL then use the default context
-		if not urlPath:
-			urlPath = self._contexts['default']
+		if urlPath=='' or urlPath=='/':
+			ssPath = self._contexts['default']
 			if debug:
-				print '>> no urlPath, so using default context path: %s' % repr(urlPath)
-
-		# handle case of no / in the url
-		if string.find(urlPath, '/')!=-1:
-			contextName, restOfPath = string.split(urlPath, '/', 1)
+				print '>> no urlPath, so using default context path: %s' % repr(ssPath)
 		else:
-			contextName, restOfPath = urlPath, ''
-		if debug: print '>> contextName=%s, restOfPath=%s' % (repr(contextName), repr(restOfPath))
+			# Check for and process context name:
+			assert urlPath[0]=='/', 'urlPath=%s' % repr(urlPath)
+			if string.rfind(urlPath, '/')>0: # no / in url (other than the preceding /)
+				blank, contextName, restOfPath = string.split(urlPath, '/', 2)
+			else:
+				contextName, restOfPath = urlPath[1:], ''
+			if debug: print '>> contextName=%s, restOfPath=%s' % (repr(contextName), repr(restOfPath))
 
-		# Look for Context
-		try:
-			prepath = self._contexts[contextName]
-		except KeyError:
-			restOfPath = urlPath  # put the old path back, there's no context here
-			prepath = self._contexts['default']
-			if debug:
-				print '>> context not found so assuming default:'
-		if debug: print '>> prepath=%s, restOfPath=%s' % (repr(prepath), repr(restOfPath))
+			# Look for context
+			try:
+				prepath = self._contexts[contextName]
+			except KeyError:
+				restOfPath = urlPath[1:]  # put the old path back, there's no context here
+				prepath = self._contexts['default']
+				if debug:
+					print '>> context not found so assuming default:'
+			if debug: print '>> prepath=%s, restOfPath=%s' % (repr(prepath), repr(restOfPath))
+			ssPath = os.path.join(prepath, restOfPath)
 
-		# If we have a relative path, prepend the server directory
-		if not os.path.isabs(prepath):
-			basePath = os.path.join(self.serverDir(), prepath)
-		ssPath = os.path.join(prepath, restOfPath)
+		lastChar = ssPath[-1]
 		ssPath = os.path.normpath(ssPath)
+
+		# 2000-07-06 ce: normpath() chops off a trailing / (or \)
+		# which is NOT what we want. This makes the test case
+		# http://localhost/WebKit.cgi/Welcome/ pass when it should
+		# fail. URLs that name files must not end in slashes because
+		# relative URLs in the resulting document will get appended
+		# to the URL, instead of replacing the last component.
+		if lastChar=='\\' or lastChar=='/':
+			ssPath = ssPath + os.sep
+
+		if debug: print '>> normalized ssPath =', repr(ssPath)
 
 		if 0: # @@ 2000-06-22 ce: disabled, have to rethink the logic here
 			extraPathInfo=''
-			if not os.path.isdir(os.path.split(ssPath)[0]):
+			if not isdir(os.path.split(ssPath)[0]):
 				while restOfPath != '':  #don't go too far
-					if not os.path.isdir(os.path.join(basePath,os.path.split(restOfPath)[0])): #strip down to the first real directory
+					if not isdir(os.path.join(basePath,os.path.split(restOfPath)[0])): #strip down to the first real directory
 						restOfPath,extra = os.path.split(restOfPath)
 						if extraPathInfo != '': #avoid a trailing '/'
 							extraPathInfo=os.path.join(extra,extraPathInfo)
@@ -799,7 +831,17 @@ class Application(Configurable,CanContainer):
 						urlPath = urlPath[:string.rindex(urlPath,extraPathInfo)-1]#remove trailing /
 						break
 
-		if os.path.isdir(ssPath):
+		if isdir(ssPath):
+			# URLs that map to directories need to have a trailing slash.
+			# If they don't, then relative links in the web page will not be
+			# constructed correctly by the browser.
+			# So in the following if statement, we're bailing out for such URLs.
+			# dispatchRequest() will detect the situation and handle the redirect.
+			if urlPath=='' or urlPath[-1]!='/':
+				if debug:
+					print '>> BAILING on directory url: %s' % repr(urlPath)
+				return ssPath
+
 			# Handle directories
 			if debug: print '>> directory = %s' % repr(ssPath)
 			for dirFilename in self.setting('DirectoryFile'):
@@ -834,6 +876,25 @@ class Application(Configurable,CanContainer):
 		if debug:
 			print '>> returning %s\n' % repr(ssPath)
 		return ssPath
+
+
+def isdir(s):
+	'''
+	*** Be sure to use this isdir() function rather than os.path.isdir()
+	    in this file.
+
+	2000-07-06 ce: Only on Windows, does an isdir() call with a
+	path ending in a slash fail to return 1. e.g.,
+	isdir('C:\\tmp\\')==0 while on UNIX isdir('/tmp/')==1.
+	'''
+	if s and os.name=='nt' and s[-1]==os.sep:
+		return os.path.isdir(s[:-1])
+	else:
+		return os.path.isdir(s)
+
+def noslash(s):
+	''' Return 1 if s is blank or does end in /.  A little utility for dispatchRequest(). '''
+	return s=='' or s[-1]!='/'
 
 
 def main(requestDict):

@@ -139,9 +139,22 @@ class HTTPResponse(Response):
 			'headers': headers,
 			'contents': self._contents
 		}
-		return self._contents
 
 	def size(self):
 		''' Returns the size of the final contents of the response. Don't invoke this method until after deliver(). '''
 		assert self._contents is not None, 'Contents are not set. Perhaps deliver() has not been invoked.'
 		return len(self._contents)
+
+	def appendRawResponse(self, rawRes):
+		'''
+		Appends the contents of the raw response (as returned by some transaction's rawResponse() method) to this response.
+		The headers of the receiving response take precedence over the appended response.
+		This method was built primarily to support Application.forwardRequest().
+		'''
+		assert self._committed==0
+		headers = rawRes.get('headers', [])
+		for key, value in headers:
+			if not self._headers.has_key(key):
+				self._headers[key] = value
+		self.write(rawRes['contents'])
+		
