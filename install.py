@@ -15,7 +15,7 @@ FUTURE
 
 import os, string, sys
 from time import time, localtime, asctime
-from string import strip, replace
+from string import join, split, strip, replace
 from glob import glob
 
 try:
@@ -33,7 +33,7 @@ class Installer:
 
 	def __init__(self):
 		self._nameAndVer = strip(open('_VERSION').readlines()[0])
-		self._ver = self._nameAndVer.split()[1]
+		self._ver = split(self._nameAndVer)[1]
 		self._comps = []
 		self._htHeader = self.htFragment('Header')
 		self._htFooter = self.htFragment('Footer')
@@ -229,8 +229,10 @@ class Installer:
 		for comp in self._comps:
 			comp = comp.copy()
 			comp['name'] = '<a href=../%(filename)s/Documentation/index.html>%(name)s</a>' % comp
-			comp['version'] = '.'.join([str(x) for x in comp['version']])
-			comp['requiredPyVersion'] = '.'.join([str(x) for x in comp['requiredPyVersion']])
+			#comp['version'] = '.'.join([str(x) for x in comp['version']])
+			comp['version'] = join(map(lambda x: str(x), comp['version']), '.')
+			#comp['requiredPyVersion'] = '.'.join([str(x) for x in comp['requiredPyVersion']])
+			comp['requiredPyVersion'] = join(map(lambda x: str(x), comp['requiredPyVersion']), '.')
 			comp['row'] = row+1
 			wr('''\
 <tr valign=top class=ComponentRow%(row)i>
@@ -265,8 +267,10 @@ class Installer:
 		link = '<a href=%s>%s</a> <br>\n'
 		for comp in self._comps:
 			comp = comp.copy()
-			comp['version'] = '.'.join([str(x) for x in comp['version']])
-			comp['requiredPyVersion'] = '.'.join([str(x) for x in comp['requiredPyVersion']])
+#			comp['version'] = '.'.join([str(x) for x in comp['version']])
+			comp['version'] = join(map(lambda x: str(x), comp['version']), '.')
+#			comp['requiredPyVersion'] = '.'.join([str(x) for x in comp['requiredPyVersion']])
+			comp['requiredPyVersion'] = join(map(lambda x: str(x), comp['requiredPyVersion']), '.')
 			comp['webwareVersion'] = webwareVersion
 
 			# Replace comp['docs'] with a readable HTML version of itself
@@ -280,7 +284,12 @@ class Installer:
 			ht = []
 			releaseNotes = glob(os.path.join(comp['filename'], 'Documentation', 'RelNotes-*.html'))
 			if releaseNotes:
-				releaseNotes = [{'filename': os.path.basename(filename)} for filename in releaseNotes]
+#				releaseNotes = [{'filename': os.path.basename(filename)} for filename in releaseNotes]
+				results = []
+				for filename in releaseNotes:
+					results.append({'filename': os.path.basename(filename)})
+				releaseNotes = results
+
 				for item in releaseNotes:
 					filename = item['filename']
 					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
