@@ -49,11 +49,19 @@ class SessionFileStore(SessionStore):
 		return item
 
 	def __setitem__(self, key, item):
+		# @@ 2001-11-12 ce: It's still possible that two threads are updating the same
+		# session as the same time (due to the user having two windows open) in which
+		# case one will clobber the results of the other! Probably need file locking
+		# to solve this.
+
 		if debug:
 			print '>> setitem(%s,%s)' % (key, item)
 		filename = self.filenameForKey(key)
-		file = open(filename, 'w')
+		tmpName = os.tempnam(os.path.dirname(filename), 'tmp')
+		file = open(tmpName, 'w')
 		self.encoder()(item, file)
+		file.close()
+		os.rename(tmpName, filename)
 
 	def __delitem__(self, key):
 		filename = self.filenameForKey(key)
