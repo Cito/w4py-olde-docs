@@ -48,10 +48,14 @@ class FieldStorage(cgi.FieldStorage):
 					dict[name] = [value]
 					##print "no append"
 
+		# Only append values that aren't already in the FieldStorage's keys;
+		# This makes POSTed vars override vars on the query string
+		keys = self.keys()
 		for key, values in dict.items():
-			for value in values:
-				self.list.append(cgi.MiniFieldStorage(key,value))
-##				print "adding %s=%s" % (str(key),str(value))
+			if key not in keys:
+				for value in values:
+					self.list.append(cgi.MiniFieldStorage(key,value))
+##					print "adding %s=%s" % (str(key),str(value))
 			
 
 
