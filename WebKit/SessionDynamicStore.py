@@ -5,11 +5,22 @@ import os, time
 debug = 1
 
 class SessionDynamicStore(SessionStore):
-	'''
+	"""
 	Stores the session in Memory and Files.
 
 	This can be used either in a persistent app server or a cgi framework.
-	'''
+
+	To use this Session Store, set SessionStore in Application.config to 'Dynamic'.
+	Other variables which can be set in Application.config are:
+	
+	'MaxDynamicMemorySessions', which sets the maximum number of sessions that can be
+	in the Memory SessionStore at one time. Default is 10,000.
+	
+	'DynamicSessionTimeout', which sets the default time for a session to stay in memory
+	with no activity.  Default is 15 minutes. When specifying this in Application.config, use minutes.
+	
+	
+	"""
 
 
 	## Init ##
@@ -33,6 +44,7 @@ class SessionDynamicStore(SessionStore):
 		#maxDynamicMemorySessions is what the user actually sets in Application.config
 		self._maxDynamicMemorySessions = self.application().setting('MaxDynamicMemorySessions', 10000)
 
+		self._fileSweepCount = 0
 		
 	## Access ##
 
@@ -97,18 +109,29 @@ class SessionDynamicStore(SessionStore):
 		Called by the Application to tell this store to clean out all sessions that have
 		exceeded their lifetime.
 		We want to have their native class functions handle it, though.
+
+		Ideally, intervalSweep would be run more often than the cleanStaleSessions functions
+		for the actual stores.  This may need to wait until we get the TaskKit in place, though.
+		
+		The problem is the FileStore.cleanStaleSessions can take a while to run.
+		So here, we only run the file sweep every fourth time.
 		"""
+		
 		try:
-			self._fileStore.cleanStaleSessions()
+			if self._fileSweepCount = 0:
+				self._fileStore.cleanStaleSessions()
 			self._memoryStore.cleanStaleSessions()
 		except KeyError:
 			pass
-
+		if self._fileSweepCount < 4:
+			self._fileSweepCount = self._fileSweepCount + 1
+		else:
+			self._fileSweepCount = 0
 		#now move sessions from memory to file as necessary
 		self.intervalSweep()
 
 		
-#It's OK for a session to moved from memory to file or vice versa in between the time we get the keys and the time we actually ask for the session's access time.  It make take a while for the fileStore sweep to get completed.  
+#It's OK for a session to moved from memory to file or vice versa in between the time we get the keys and the time we actually ask for the session's access time.  It may take a while for the fileStore sweep to get completed.  
 
 
 	def intervalSweep(self):
@@ -135,9 +158,12 @@ class SessionDynamicStore(SessionStore):
 		if len(self._memoryStore) > self._maxDynamicMemorySessions \
 		   and self.moveToFileInterval > self.minMemoryInterval:
 			self.moveToFileInterval = self.findInterval()
+			
+		#IF we have excess capacity in memory, increase the interval
 		elif len(self._memoryStore) < (.5 * self._maxDynamicMemorySessions)\
 			 and self.moveToFileInterval < self.maxMemoryInterval:
 			self.moveToFileInterval = self.moveToFileInterval * 2
+
 			
 		if debug: print "Finished interval Sweep at %s\n" % time.ctime(time.time())
 		if debug: print "Memory Sessions: %s   FileSessions: %s\n" % (len(self._memoryStore), len(self._fileStore))
@@ -149,6 +175,7 @@ class SessionDynamicStore(SessionStore):
 		"""
 		global debug
 		if debug: print "Finding Interval"
+		
 		keys = self._memoryStore.keys()
 		keys.sort(self.sortFunc)
 		count = 0
