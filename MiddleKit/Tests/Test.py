@@ -150,7 +150,7 @@ class Test:
 		print 'sys.platform =', sys.platform
 		print 'os.name =', os.name
 		if hasattr(sys, 'getwindowsversion'):
-			print 'sys.getwindowsversion =', sys.getwindowsversion()
+			print 'sys.getwindowsversion() =', sys.getwindowsversion()
 		print 'os.getcwd() =', os.getcwd()
 		print 'dbName =', dbName
 		if sqlVersionCommand:
