@@ -10,7 +10,6 @@ from ObjectKey import ObjectKey
 from MiscUtils.MixIn import MixIn
 from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
 
-
 class SQLObjectStoreError(Exception): pass
 class SQLObjectStoreThreadingError(SQLObjectStoreError): pass
 
@@ -310,8 +309,17 @@ class SQLObjectStore(ObjectStore):
 			self._sqlEcho.write('SQL %04i. %s %s\n' % (self._sqlCount, timestamp, sql))
 			self._sqlEcho.flush()
 		conn, cur = self.connectionAndCursor(connection)
-		cur.execute(sql.strip())
+		self._executeSQL(cur, sql.strip())
 		return conn, cur
+
+	def _executeSQL(self, cur, sql):
+		"""
+		Invokes execute on the cursor with the given SQL. This is a
+		hook for subclasses that wish to influence this event. Invoked
+		by executeSQL().
+		"""
+		cur.execute(sql)
+
 
 	def setSQLEcho(self, file):
 		''' Sets a file to echo sql statements to, as sent through executeSQL(). None can be passed to turn echo off. '''

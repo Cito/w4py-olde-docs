@@ -1,9 +1,10 @@
 from SQLObjectStore import SQLObjectStore
 import MySQLdb
+from MySQLdb import Warning
 
 
 class MySQLObjectStore(SQLObjectStore):
-	'''
+	"""
 	MySQLObjectStore does the obvious: it implements an object store backed by a MySQL database.
 
 	MySQL notes:
@@ -24,7 +25,7 @@ class MySQLObjectStore(SQLObjectStore):
 
 	See the MySQLdb docs or the DB API 2.0 docs for more information.
 	  http://www.python.org/topics/database/DatabaseAPI-2.0.html
-	'''
+	"""
 
 	def newConnection(self):
 		args = self._dbArgs.copy()
@@ -40,6 +41,12 @@ class MySQLObjectStore(SQLObjectStore):
 	def dbapiModule(self):
 		return MySQLdb
 
+	def _executeSQL(self, cur, sql):
+		try:
+			cur.execute(sql)
+		except Exception, e:
+			if not self.setting('IgnoreSQLWarnings', 0):
+				raise
 
 # Mixins
 
