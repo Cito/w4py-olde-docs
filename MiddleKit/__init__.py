@@ -2,7 +2,7 @@
 # Webware for Python
 # See ../README
 
-__all__ = ['KeyValueAccess']
+#__all__ = []
 
 __version__ = '0.0'
 
