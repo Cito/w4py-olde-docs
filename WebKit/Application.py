@@ -488,6 +488,15 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		#add a reference to the parent servlet
 		req.addParent(req.transaction()._servlet)
 
+		# We might have created a brand-new session prior to this call.  If so, we need
+		# to set the _SID_ identifier in the request so that the new transaction will
+		# know about the new session.
+		# gat 200-06-21: this feels like a hack, but it is necessary to prevent losing
+		# session information.
+		if trans.hasSession() and not req.hasValue('_SID_'):
+			if debug: print 'Application.forward(): propagating new session ID into request'
+			req.setField('_SID_', trans.session().identifier())
+
 		#get the output stream and set it in the new response
 		strmOut = req.transaction().response().streamOut()
 		strmOut.clear()

@@ -66,6 +66,9 @@ class Cookie(Object):
 	def maxAge(self):
 		return self._cookie['max-age']
 
+	def expires(self):
+		return self._cookie['expires']
+
 	def name(self):
 		return self._name
 
@@ -89,6 +92,9 @@ class Cookie(Object):
 
 	def setDomain(self, domain):
 		self._cookie['domain'] = domain
+
+	def setExpires(self, expires):
+		self._cookie['expires'] = expires
 
 	def setMaxAge(self, maxAge):
 		self._cookie['max-age'] = maxAge

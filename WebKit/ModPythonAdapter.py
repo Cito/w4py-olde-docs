@@ -169,11 +169,13 @@ class ModPythonAdapter(Adapter):
 		if headerend < 0:
 			return
 		headers = headerData[:headerend]
-		for i in string.split(headers, "\r\n"):
-			header = string.split(i, ":")
-			req.headers_out[header[0]] = header[1]
-			if string.lower(header[0]) == 'content-type': req.content_type = header[1]
-			if string.lower(header[0]) == 'status': req.status = int(string.split(string.lstrip(header[1]),' ')[0])
+		for header in string.split(headers, "\r\n"):
+			colon = string.find(header, ':')
+			name = header[:colon]
+			value = header[colon+1:]
+			req.headers_out.add(name, value)
+			if string.lower(name) == 'content-type': req.content_type = value
+			if string.lower(name) == 'status': req.status = int(string.split(string.lstrip(value),' ')[0])
 		req.send_http_header()
 		req.write(headerData[headerend+4:])
 		self.setDoneHeader(1)
