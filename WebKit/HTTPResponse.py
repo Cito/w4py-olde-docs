@@ -34,7 +34,7 @@ class HTTPResponse(Response):
 		else:
 			return self._headers.get(string.lower(name), default)
 
-	def hasHeader(self):
+	def hasHeader(self, name):
 		return self._headers.has_key(string.lower(name))
 
 	def setHeader(self, name, value):
@@ -164,7 +164,7 @@ class HTTPResponse(Response):
 			self.commit()
 		self._strmOut.flush()
 		self._strmOut.autoCommit(1)
-		
+
 
 	def isCommitted(self):
 		"""
@@ -231,7 +231,7 @@ class HTTPResponse(Response):
 		"""
 		Resets the response (such as headers, cookies and contents).
 		"""
-		
+
 		assert self._committed == 0
 		self._headers = {}
 	   	self.setHeader('Content-type','text/html')
@@ -242,7 +242,7 @@ class HTTPResponse(Response):
 	def rawResponse(self):
 		""" Returns the final contents of the response. Don't invoke this method until after deliver().
 		Returns a dictionary representing the response containing only strings, numbers, lists, tuples, etc. with no backreferences. That means you don't need any special imports to examine the contents and you can marshal it. Currently there are two keys. 'headers' is list of tuples each of which contains two strings: the header and it's value. 'contents' is a string (that may be binary (for example, if an image were being returned)). """
-		
+
 		headers = []
 		for key, value in self._headers.items():
 			headers.append((key, value))
@@ -278,10 +278,10 @@ class HTTPResponse(Response):
 		Given a string of headers (separated by newlines), merge them into our headers.
 		"""
 		linesep = "\n"
-		
+
 		lines = string.split(headerstr,"\n")
 		for i in lines:
 			sep = string.find(i, ":")
 			if sep:
 				self.setHeader(i[:sep], string.rstrip(i[sep+1:]))
-				
+
