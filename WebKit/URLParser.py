@@ -24,12 +24,13 @@ import AppServer
 # an entire path into a module name.
 moduleNameRE = re.compile('[^a-zA-Z_]')
 
+_globalApplication = None
 def application():
 	"""
 	Returns the global Application.
 	:ignore:
 	"""
-	return AppServer.globalAppServer.application()
+	return _globalApplication
 
 class URLParser:
 
@@ -738,13 +739,17 @@ ServletFactoryManager = ServletFactoryManagerClass()
 
 def initApp(app):
 	"""
-	Installs the propert servlet factories, and gets some
-	settings from Application.config.
+	Installs the proper servlet factories, and gets some
+	settings from Application.config.  Also saves the
+	application in _globalApplication for future calls
+	to the application() function.
 
-	We don't run this at the module level (using application())
-	because the application hasn't been set up when this module
-	is first imported.
+	This needs to be called before any of the URLParser-
+	derived	classes are instantiated.
 	"""
+
+	global _globalApplication
+	_globalApplication = app
 	
 	from UnknownFileTypeServlet import UnknownFileTypeServletFactory
 	from ServletFactory import PythonServletFactory
@@ -767,5 +772,4 @@ def initApp(app):
 	cls._useCascading = app.setting('UseCascadingExtensions')
 	cls._cascadeOrder = app.setting('ExtensionCascadeOrder')
 	cls._directoryFile = app.setting('DirectoryFile')
-
 
