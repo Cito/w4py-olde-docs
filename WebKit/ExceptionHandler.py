@@ -40,7 +40,8 @@ class ExceptionHandler(Object):
 
 	maxValueLen = 20
 
-	hideValuesForFields = 'cc creditcard password passwd'.split()  # keep all lower case to support case insensitivity
+	hideValuesForFields = ['creditcard', 'credit card', 'cc', 'password', 'passwd']
+		# ^ keep all lower case to support case insensitivity
 	if 0: # for testing
 		hideValuesForFields.extend('application uri http_accept userid'.split())
 
