@@ -16,11 +16,16 @@ import asyncore
 from WebUtils.WebFuncs import RequestURI
 
 try:
-	from selectRelease import Release
-	MainRelease=Release()
+	from SelectRelease import SelectRelease
+	MainRelease=SelectRelease()
 except:
 	MainRelease = lambda:()
 
+debug = 0
+
+#Need to know this value for communications
+#Note that this limits the size of the dictionary we receive from the AppServer to 2,147,483,647 bytes
+int_length = len(dumps(int(1)))
 
 class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 	"""
@@ -58,7 +63,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 	    #self.asyn_thread = Thread(target=self.asynloop)
 	    #self.asyn_thread.start()
 
-		self.listen(64) # @@ 2000-07-14 ce: hard coded constant should be a setting
+		self.listen(self._poolsize*2) # @@ 2000-07-14 ce: hard coded constant should be a setting
 		print "Ready\n"
 
 
@@ -181,6 +186,7 @@ class RequestHandler(asyncore.dispatcher):
 			return
 
 		verbose = self.server._verbose
+		verbose = 1
 
 		startTime = time.time()
 		if verbose:
@@ -197,7 +203,9 @@ class RequestHandler(asyncore.dispatcher):
 		if verbose:
 			print 'received %d bytes' % len(self.reqdata)
 		if self.reqdata:
-			dict = loads(self.reqdata)
+			dict_length = loads(self.reqdata[:int_length])
+			dict = loads(self.reqdata[int_length:int_length+dict_length])
+			dict['input'] = self.reqdata[int_length+dict_length:]
 			if verbose:
 				print 'request has keys:', string.join(dict.keys(), ', ')
 				if dict.has_key('environ'):
@@ -208,16 +216,16 @@ class RequestHandler(asyncore.dispatcher):
 
 
 		transaction = self.server._app.dispatchRawRequest(dict)
-		rawResponse = dumps(transaction.response().rawResponse())
 
-		self._buffer = rawResponse
+
+		rawResponse = transaction.response().rawResponse()
+
+		for item in rawResponse['headers']:
+			self._buffer = self._buffer + item[0] + ":" + item[1] + "\n"
+		
+		self._buffer = self._buffer + "\n" + rawResponse['contents']
+		
 		self.have_response = 1
-
-		if verbose:
-			print 'connection closed.'
-			print '%0.2f secs' % (time.time() - startTime)
-			print 'END REQUEST'
-			print
 
 		transaction._application=None
 		transaction.die()
@@ -233,44 +241,55 @@ class RequestHandler(asyncore.dispatcher):
 		return self.active and not self.have_request
 
 	def writable(self):
-		"""
-		Always ready to write, otherwise we might have to wait for a timeout to be asked again
-		"""
-		#return self.active
 		return self.have_response
 
 	def handle_connect(self):
 		pass
 
 	def handle_read(self):
-		data = self.recv(8192)
-		if len(data) == 8192:
+		if self.have_request:
+			print ">> Received Spurious Write"
+			return
+		data = self.recv(8192) #socket is non-blocking
+		if data:
 			self.reqdata.append(data)
-		else:
-			self.reqdata.append(data)
+		else: #we have it all
 			self.reqdata = string.join(self.reqdata,'')
 			self.have_request=1
 			self.server.requestQueue.put(self)
-			#self.socket.shutdown(0)
+
+
 
 	def handle_write(self):
-		if not self.have_response: return
+		if not self.have_response:
+			print ">> Handle write called before response is ready\n"
+			return
 		sent = self.send(self._buffer)
 		self._buffer = self._buffer[sent:]
 		if len(self._buffer) == 0:
+			self.socket.shutdown(1)
 			self.close()
 			#For testing
-		if __debug__:
+		if debug:
 			sys.stdout.write(".")
 			sys.stdout.flush()
 
 	def close(self):
+		#print ">>Close Called"
+		self.recycle()
+
+	def handle_close(self):
+		print ">>Handling Close"
+		#self.recycle()
+		
+	def recycle(self):
+		#print "Recycling\n"
 		self.active = 0
 		self.have_request = 0
 		self.have_response = 0
 		self.reqdata=[]
 		asyncore.dispatcher.close(self)
-		self.server.rhQueue.put(self)
+		self.server.rhQueue.put(self)		
 
 	def log(self, message):
 		pass
@@ -317,7 +336,7 @@ def main(monitor = 0):
 	except Exception, e: #Need to kill the Sweeper thread somehow
 		print e
 		print "Exiting AppServer"
-		if 0: #See the traceback from an exception
+		if 1: #See the traceback from an exception
 			tb = sys.exc_info()
 			print tb[0]
 			print tb[1]

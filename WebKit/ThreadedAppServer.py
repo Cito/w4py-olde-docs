@@ -44,6 +44,10 @@ DefaultConfig = {
 #ReStartLock=Lock()
 #ReqCount=0
 
+#Need to know this value for communications
+#Note that this limits the size of the dictionary we receive from the AppServer to 2,147,483,647 bytes
+int_length = len(dumps(int(1)))
+
 
 class ThreadedAppServer(AppServer):
 	"""
@@ -226,7 +230,7 @@ class RequestHandler:
 	def handleRequest(self):
 
 		verbose = self.server._verbose
-
+		verbose = 1
 		startTime = time.time()
 		if verbose:
 			print 'BEGIN REQUEST'
@@ -238,17 +242,38 @@ class RequestHandler:
 		BUFSIZE = 8*1024
 
 		data = []
+
+		chunk = ''
+		while len(chunk) < int_length:
+			chunk = chunk + recv(int_length)
+		dict_length = loads(chunk)
+		if type(dict_length) != type(1):
+			conn.close()
+			print "Error: Invalid AppServer protocol"
+			return 0
+
+		chunk = ''
+		missing = dict_length
+		while missing > 0:
+			chunk = chunk + recv(missing)
+			missing = dict_length - len(chunk)
+
+		dict = loads(chunk)
+		
 		while 1:
 			chunk = recv(BUFSIZE)
 			if not chunk:
 				break
 			data.append(chunk)
 		data = string.join(data, '')
+		conn.shutdown(0)
+
+		dict['input'] = data
 
 		if verbose:
-			print 'received %d bytes' % len(data)
-		if data:
-			dict = loads(data)
+			print '>>> received %d bytes' % len(data)
+		if dict:
+			#dict = loads(data)
 			if verbose:
 				print 'request has keys:', string.join(dict.keys(), ', ')
 				if dict.has_key('environ'):
@@ -258,14 +283,23 @@ class RequestHandler:
 				print 'request uri =', requestURI
 
 		transaction = self.server._app.dispatchRawRequest(dict)
-		rawResponse = dumps(transaction.response().rawResponse())
+		rawResponse = transaction.response().rawResponse()
 
 
 		reslen = len(rawResponse)
 		sent = 0
-		while sent < reslen:
-			sent = sent + conn.send(rawResponse[sent:sent+8192])
 
+		self._buffer = ''
+		for item in rawResponse['headers']:
+			self._buffer = self._buffer + item[0] + ": " + item[1] + "\n"
+		
+		self._buffer = self._buffer + "\n" + rawResponse['contents']
+
+		
+		while sent < reslen:
+			sent = sent + conn.send(self._buffer[sent:sent+8192])
+
+		conn.shutdown(1)
 		conn.close()
 
 		if verbose:
@@ -307,19 +341,6 @@ class RequestHandler:
 				currApp=None
 			ReStartLock.release()
 
-
-##def main():
-##	try:
-##		server = None
-##		server = ThreadedAppServer()
-##		print 'Ready\n'
-##		server.mainloop()
-##	except Exception, e: #Need to kill the Sweeper thread somehow
-##		print e
-##		print "Exiting AppServer"
-##		if server:
-##			server.shutDown()
-##		sys.exit()
 
 def main(monitor = 0):
 	try:
