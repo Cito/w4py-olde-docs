@@ -258,11 +258,11 @@ class Application(Configurable, CanContainer, Object):
 	## Versions ##
 
 	def webwareVersion(self):
-		''' Returns the version of Webware as a string as taken from the file ../_VERSION. '''
+		''' Returns the version of Webware as a string. '''
 		if not hasattr(self, '_webwareVersion'):
-			s = open('../_VERSION').readlines()[0]
-			s = string.strip(s[len('Webware'):])
-			self._webwareVersion = s
+			from MiscUtils.PropertiesObject import PropertiesObject
+			props = PropertiesObject('../Properties.py')
+			self._webwareVersion = props['versionString']
 		return self._webwareVersion
 
 	def webKitVersion(self):
