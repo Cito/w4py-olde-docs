@@ -119,8 +119,8 @@ class ThreadedAppServer(AppServer):
 		if monitor:
 			inputsockets.append(monitor.insock)
 
-		threadCheckInterval = 100  #does this need to be configurable???
-		threadUpdateDivisor = 10 #grabstat interval
+		threadCheckInterval = self.maxServerThreads*2
+		threadUpdateDivisor = 5 #grabstat interval
 		threadCheck=0
 
 		while 1:
@@ -179,7 +179,7 @@ class ThreadedAppServer(AppServer):
 		Update the threadUseCounter list.
 		"""
 		count = self.activeThreadCount()
-		if len(self.threadUseCounter) > 10:
+		if len(self.threadUseCounter) > self.maxServerThreads:
 			self.threadUseCounter.pop(0)
 		self.threadUseCounter.append(count)
 
@@ -193,7 +193,9 @@ class ThreadedAppServer(AppServer):
 
 		avg=0
 		max=0
+		debug=0
 
+		if debug: print "ThreadUse Samples=%s" % str(self.threadUseCounter)
 		for i in self.threadUseCounter:
 			avg = avg + i
 			if i > max:
@@ -203,20 +205,25 @@ class ThreadedAppServer(AppServer):
 		if debug: print "Max Thread Use: ", max
 		if debug: print "ThreadCount: ", self.threadCount
 
-		if len(self.threadUseCounter) < 10: return #we have no observations to use
+		if len(self.threadUseCounter) < self.maxServerThreads: return #not enough samples
 
-		margin = self.threadCount / 4 #smoothing factor
+		margin = self.threadCount / 2 #smoothing factor
 		if debug: print "margin=", margin
 
 		if avg > self.threadCount - margin and self.threadCount < self.maxServerThreads:
 			# Running low: double thread count
 			n = min(self.threadCount, self.maxServerThreads-self.threadCount)
+			if debug: print "Adding %s threads" % n
 			for i in range(n):
 				self.spawnThread()
 		elif avg < self.threadCount - margin and self.threadCount > self.minServerThreads:
-			self.absorbThread()
+			n=min(self.threadCount - self.minServerThreads, self.threadCount - max) 
+			self.absorbThread(n)
+		else:  #cleanup any stale threads that we killed but haven't joined
+			self.absorbThread(0)
 
 	def spawnThread(self):
+		debug=0
 		if debug: print "Spawning new thread"
 		t = Thread(target=self.threadloop)
 		t.processing=0
@@ -224,18 +231,28 @@ class ThreadedAppServer(AppServer):
 		self.threadPool.append(t)
 		self.threadCount = self.threadCount+1
 		if debug: print "New Thread Spawned, threadCount=", self.threadCount
-		self.threadUseCounter=[] #reset
+##		self.threadUseCounter=[] #reset
 
-	def absorbThread(self):
-		if debug: print "Absorbing Thread"
-		self.requestQueue.put(None)
+	def absorbThread(self,count=1):
+		"""  Absorb a thread.
+		We do this by putting a None on the Queue.  When a thread gets it,
+		that tells it to exit.  BUT, even though we put it on, the thread may not
+		have retrieved it before we exit this function.  So we need to decrement
+		the thread count even if we didn't find a thread that isn't alive. We'll
+		get it the next time through.
+		"""
+		debug=0
+		if debug: print "Absorbing %s Threads" % count
+		for i in range(count):
+					   self.requestQueue.put(None)
+					   self.threadCount = self.threadCount-1
 		for i in self.threadPool:
 			if not i.isAlive():
 				rv=i.join() #Don't need a timeout, it isn't alive
 				self.threadPool.remove(i)
-				self.threadCount = self.threadCount-1
-				if debug: print "Thread Absorbed, threadCount=", self.threadCount
-		self.threadUseCounter=[]
+				if debug: print "Thread Absorbed, Real Thread Count=", len(self.threadPool)
+##		self.threadUseCounter=[] #reset
+
 
 	def threadloop(self):
 		self.initThread()
