@@ -93,7 +93,7 @@ class SafeUnpickler:
 
     def _findGlobal(self, module, klass):
         if (module, klass) not in self._allowedGlobals:
-            raise cPickle.UnpicklingError, "For security reasons, you can't unpickle a %s . %s" % (module, klass)
+            raise cPickle.UnpicklingError, 'For security reasons, you can\'t unpickle a %s . %s' % (module, klass)
         globals = {}
         exec 'from %s import %s as theClass' % (module, klass) in globals
         return globals['theClass']
@@ -170,7 +170,7 @@ class InvalidContentTypeError(ResponseError):
 
 	def __repr__(self):
 		content = self.content
-		return '%s: Content type is not text/python/pickle/dict.\nheaders = %s\ncontent =\n%s' % (
+		return '%s: Content type is not text/x-python-pickled-dict\nheaders = %s\ncontent =\n%s' % (
 			self.__class__.__name__, self.headers, content)
 
 	__str__ = __repr__
@@ -316,7 +316,7 @@ class Transport:
 
 		self.verbose = verbose
 
-		if h.headers['content-type']!='text/python/pickle/dict':
+		if h.headers['content-type']!='text/x-python-pickled-dict':
 			headers = h.headers.headers
 			content = h.getfile().read()
 			raise InvalidContentTypeError(headers, content)
@@ -337,7 +337,7 @@ class Transport:
 		connection.putheader("User-Agent", self.user_agent)
 
 	def send_content(self, connection, request_body):
-		connection.putheader("Content-Type", "text/python/pickled/dict")
+		connection.putheader("Content-Type", "text/x-python-pickled-dict")
 		connection.putheader("Content-Length", str(len(request_body)))
 		connection.endheaders()
 		if request_body:

@@ -29,7 +29,7 @@ class XMLRPCServlet(RPCServlet):
 		"""
 		try:
 			# get arguments
-			data = transaction.request().xmlInput().read()
+			data = transaction.request().rawInput(rewind=1).read()
 			params, method = xmlrpclib.loads(data)
 
 			# generate response

@@ -50,6 +50,10 @@ class FieldStorage(cgi.FieldStorage):
 
 		# Only append values that aren't already in the FieldStorage's keys;
 		# This makes POSTed vars override vars on the query string
+		if not self.list:
+			# This makes sure self.keys() are available, even
+			# when valid POST data wasn't encountered.
+			self.list = [] 
 		keys = self.keys()
 		for key, values in dict.items():
 			if key not in keys:

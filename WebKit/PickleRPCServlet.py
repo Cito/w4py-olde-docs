@@ -74,7 +74,7 @@ class PickleRPCServlet(RPCServlet):
 	def respondToPost(self, trans):
 		transReponse = trans.response()
 		try:
-			data = trans.request().dictInput()
+			data = trans.request().rawInput(rewind=1)
 			response = {
 				'timeReceived': trans.request().time(),
 			}

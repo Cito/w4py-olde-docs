@@ -9,11 +9,11 @@ from WebUtils import FieldStorage
 debug=0
 
 class HTTPRequest(Request):
-	'''
+	"""
 	FUTURE
 		* How about some documentation?
 		* The "Information" section is a bit screwed up. Because the WebKit server adapter is a CGI script, these values are oriented towards that rather than the servlet.
-	'''
+	"""
 
 
 	## Initialization ##
@@ -29,16 +29,6 @@ class HTTPRequest(Request):
 			self._time    = dict['time']
 			self._environ = dict['environ']
 			self._input   = dict['input']
-			self._xmlInput = None
-			self._pickleInput = None
-			# If the content type is text/xml, don't run self._input through cgi.FieldStorage; instead, save it in
-			# self._xmlInput to be processed by a servlet.  This is needed for XML-RPC.
-			if self._environ.get('CONTENT_TYPE', None)=='text/xml':
-				self._xmlInput = self._input
-				self._input = StringIO('')
-			if self._environ.get('CONTENT_TYPE', None)=='text/python/pickled/dict':
-				self._dictInput = self._input
-				self._input = StringIO('')
 			self._fields  = FieldStorage.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._fields.parse_qs()
 			self._cookies = Cookie()
@@ -55,7 +45,6 @@ class HTTPRequest(Request):
 			self._time    = time.time()
 			self._environ = os.environ.copy()
 			self._input   = None
-			self._xmlInput = None
 			self._fields  = cgi.FieldStorage(keep_blank_values=1)
 			self._cookies = Cookie()
 
@@ -110,6 +99,7 @@ class HTTPRequest(Request):
 				value = map(lambda miniFieldStorage: miniFieldStorage.value, value) # extract those .value's
 
 			dict[key] = value
+		self._fieldStorage = self._fields
 		self._fields = dict
 		self._pathInfo = None
 
@@ -154,14 +144,14 @@ class HTTPRequest(Request):
 
 
 	def setTransaction(self, trans):
-		''' This method should be invoked after the transaction is created for this request. '''
+		""" This method should be invoked after the transaction is created for this request. """
 		self._transaction = trans
 
 
 	## Values ##
 
 	def value(self, name, default=Tombstone):
-		''' Returns the value with the given name. Values are fields or cookies. Use this method when you're field/cookie agnostic. '''
+		""" Returns the value with the given name. Values are fields or cookies. Use this method when you're field/cookie agnostic. """
 		if self._fields.has_key(name):
 			return self._fields[name]
 		else:
@@ -175,6 +165,9 @@ class HTTPRequest(Request):
 
 
 	## Fields ##
+
+	def fieldStorage(self):
+		return self._fieldStorage
 
 	def field(self, name, default=Tombstone):
 		if default is Tombstone:
@@ -198,7 +191,7 @@ class HTTPRequest(Request):
 	## Cookies ##
 
 	def cookie(self, name, default=Tombstone):
-		''' Returns the value of the specified cookie. '''
+		""" Returns the value of the specified cookie. """
 		if default is Tombstone:
 			return self._cookies[name]
 		else:
@@ -208,7 +201,7 @@ class HTTPRequest(Request):
 		return self._cookies.has_key(name)
 
 	def cookies(self):
-		''' Returns a dictionary-style object of all Cookie objects the client sent with this request. '''
+		""" Returns a dictionary-style object of all Cookie objects the client sent with this request. """
 		return self._cookies
 
 
@@ -224,15 +217,15 @@ class HTTPRequest(Request):
 	## Sessions ##
 
 	def session(self):
-		''' Returns the session associated with this request, either as specified by sessionId() or newly created. This is a convenience for transaction.session() '''
+		""" Returns the session associated with this request, either as specified by sessionId() or newly created. This is a convenience for transaction.session() """
 		return self._transaction.session()
 
 	def isSessionExpired(self):
-		'''
+		"""
 		Returns bool: whether or not this request originally contained an expired session ID.  Only works if
 		the Application.config setting "IgnoreInvalidSession" is set to 1; otherwise you get a canned error page
 		on an invalid session, so your servlet never gets processed.
-		'''
+		"""
 		return self._sessionExpired
 	
 	def setSessionExpired(self, sessionExpired):
@@ -242,7 +235,7 @@ class HTTPRequest(Request):
 	## Authentication ##
 
 	def remoteUser(self):
-		''' Always returns None since authentication is not yet supported. Take from CGI variable REMOTE_USER. '''
+		""" Always returns None since authentication is not yet supported. Take from CGI variable REMOTE_USER. """
 		# @@ 2000-03-26 ce: maybe belongs in section below. clean up docs
 		return self._environ['REMOTE_USER']
 
@@ -250,18 +243,18 @@ class HTTPRequest(Request):
 	## Remote info ##
 
 	def remoteAddress(self):
-		''' Returns a string containing the Internet Protocol (IP) address of the client that sent the request. '''
+		""" Returns a string containing the Internet Protocol (IP) address of the client that sent the request. """
 		return self._environ['REMOTE_ADDR']
 
 	def remoteName(self):
-		''' Returns the fully qualified name of the client that sent the request, or the IP address of the client if the name cannot be determined. '''
+		""" Returns the fully qualified name of the client that sent the request, or the IP address of the client if the name cannot be determined. """
 		raise self.remoteName()
 
 
 	## Path ##
 
 	def urlPath(self):
-		''' Returns the URL path of the servlet sans host, adapter and query string. For example, http://host/WebKit.cgi/Context/Servlet?x=1 yields '/Context/Servlet'. '''
+		""" Returns the URL path of the servlet sans host, adapter and query string. For example, http://host/WebKit.cgi/Context/Servlet?x=1 yields '/Context/Servlet'. """
 		self._absolutepath = 0
 ##		if self._environ.has_key('WK_URI'): #added by the adapter
 ##			self._environ['PATH_INFO'] = self._environ['WK_URI']
@@ -272,7 +265,7 @@ class HTTPRequest(Request):
 		return self._environ['PATH_INFO']
 
 	def originalURLPath(self):
-		''' Returns the URL path of the _original_ servlet before any forwarding. '''
+		""" Returns the URL path of the _original_ servlet before any forwarding. """
 		return self._originalURLPath
 		
 	def urlPathDir(self):
@@ -286,7 +279,7 @@ class HTTPRequest(Request):
 
 
 	def setURLPath(self, path):
-		''' Sets the URL path of the request. There is rarely a need to do this. Proceed with caution. The only known current use for this is Application.forwardRequest(). '''
+		""" Sets the URL path of the request. There is rarely a need to do this. Proceed with caution. The only known current use for this is Application.forwardRequest(). """
 		if hasattr(self, '_serverSidePath'):
 			del self._serverSidePath
 			del self._serverSideContextPath
@@ -296,8 +289,8 @@ class HTTPRequest(Request):
 		self._environ['REQUEST_URI'] = self.adapterName() + path
 
 	def serverSidePath(self, path=None):
-		'''	Returns the absolute server-side path of the request. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the object.
-		'''
+		"""	Returns the absolute server-side path of the request. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the object.
+		"""
 		if not hasattr(self, '_serverSidePath'):
 			app = self._transaction.application()
 			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
@@ -307,12 +300,12 @@ class HTTPRequest(Request):
 			return self._serverSidePath
 
 	def serverSideContextPath(self, path=None):
-		''' Returns the absolute server-side path of the context of this request.
+		""" Returns the absolute server-side path of the context of this request.
 		If the optional path is passed in, then it is joined with the server side context directory
 		to form a path relative to the object.
 
 		This directory could be different from the result of serverSidePath() if the request
-		is in a subdirectory of the main context directory.'''
+		is in a subdirectory of the main context directory."""
 		if not hasattr(self, '_serverSideContextPath'):
 			app = self._transaction.application()
 			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
@@ -322,7 +315,7 @@ class HTTPRequest(Request):
 			return self._serverSideContextPath
 
 	def contextName(self):
-		''' Returns the name of the context of this request.  This isn't necessarily the same as the name of the directory containing the context. '''
+		""" Returns the name of the context of this request.  This isn't necessarily the same as the name of the directory containing the context. """
 		if not hasattr(self, '_contextName'):
 			app = self._transaction.application()
 			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
@@ -445,15 +438,15 @@ class HTTPRequest(Request):
 	## Special ##
 
 	def adapterName(self):
-		'''
+		"""
 		Returns the name of the adapter as it appears in the URL.
 		Example: '/WebKit.cgi'
 		This is useful in special cases when you are constructing URLs. See Testing/Main.py for an example use.
-		'''
+		"""
 		return self._adapterName
 
 	def rawRequest(self):
-		''' Returns the raw request that was used to initialize this request object. '''
+		""" Returns the raw request that was used to initialize this request object. """
 		return self._rawRequest
 
 	def environ(self):
@@ -479,20 +472,20 @@ class HTTPRequest(Request):
 		"""
 		return self._parents
 
-	def xmlInput(self):
+	def rawInput(self, rewind=0):
 		"""
-		If content-type "text/xml" was POST'ed, this will return a file-like object
-		ready to read the XML.  Otherwise, it returns None.
-		"""
-		return self._xmlInput
+		This gives you a file-like object for the data that was
+		sent with the request (e.g., the body of a POST request,
+		or the documented uploaded in a PUT request).
 
-	def dictInput(self):
+		The file might not be rewound to the beginning if there
+		was valid, form-encoded POST data.  Pass rewind=1 if
+		you want to be sure you get the entire body of the request.
 		"""
-		If content-type "text/python/pickled/dict" was POST'ed, this
-		will return a file-like object ready to read the XML.
-		Otherwise, it returns None.
-		"""
-		return self._dictInput
+		fs = self.fieldStorage()
+		if rewind:
+			fs.file.seek(0)
+		return fs.file
 
 	def time(self):
 		"""
@@ -510,37 +503,37 @@ class HTTPRequest(Request):
 		return self._environ['SCRIPT_NAME']
 
 	def contextPath(self):
-		''' Returns the portion of the request URI that is the context of the request. '''
+		""" Returns the portion of the request URI that is the context of the request. """
 		# @@ 2000-03-26 ce: this comes straight from Java servlets. Do we want this?
 		raise NotImplementedError
 
 	def pathInfo(self):
-		''' Returns any extra path information associated with the URL the client sent with this request. Equivalent to CGI variable PATH_INFO. '''
+		""" Returns any extra path information associated with the URL the client sent with this request. Equivalent to CGI variable PATH_INFO. """
 		if self._pathInfo is None:
 			self._pathInfo = self._environ['PATH_INFO'][1:]
 			# The [1:] above strips the preceding '/' that we get with Apache 1.3
 		return self._pathInfo
 
 	def pathTranslated(self):
-		''' Returns any extra path information after the servlet name but before the query string, translated to a file system path. Equivalent to CGI variable PATH_TRANSLATED. '''
+		""" Returns any extra path information after the servlet name but before the query string, translated to a file system path. Equivalent to CGI variable PATH_TRANSLATED. """
 #		return self._environ['PATH_TRANSLATED']
 # @@ 2000-06-22 ce: resolve this
 		return self._environ.get('PATH_TRANSLATED', None)
 
 	def queryString(self):
-		''' Returns the query string portion of the URL for this request. Taken from the CGI variable QUERY_STRING. '''
+		""" Returns the query string portion of the URL for this request. Taken from the CGI variable QUERY_STRING. """
 		return self._environ.get('QUERY_STRING', '')
 
 	def uri(self):
-		''' Returns the request URI, which is the entire URL except for the query string. '''
+		""" Returns the request URI, which is the entire URL except for the query string. """
 		return self._environ['REQUEST_URI']
 
 	def method(self):
-		''' Returns the HTTP request method (in all uppercase), typically from the set GET, POST, PUT, DELETE, OPTIONS and TRACE. '''
+		""" Returns the HTTP request method (in all uppercase), typically from the set GET, POST, PUT, DELETE, OPTIONS and TRACE. """
 		return string.upper(self._environ['REQUEST_METHOD'])
 
 	def sessionId(self):
-		''' Returns a string with the session id specified by the client, or None if there isn't one. '''
+		""" Returns a string with the session id specified by the client, or None if there isn't one. """
 		sid = self.value('_SID_', None)
 		if self._transaction.application().setting('Debug')['Sessions']:
 			print '>> sessionId: returning sid =', sid
@@ -553,13 +546,14 @@ class HTTPRequest(Request):
 	## Inspection ##
 
 	def info(self):
-		''' Returns a list of tuples where each tuple has a key/label (a string) and a value (any kind of object). Values are typically atomic values such as numbers and strings or another list of tuples in the same fashion. This is for debugging only. '''
+		""" Returns a list of tuples where each tuple has a key/label (a string) and a value (any kind of object). Values are typically atomic values such as numbers and strings or another list of tuples in the same fashion. This is for debugging only. """
 		# @@ 2000-04-10 ce: implement and invoke super if appropriate
+		# @@ 2002-06-08 ib: should this also return the unparsed body
+		# of the request?
 		info = [
 			('time',    self._time),
 			('environ', self._environ),
 			('input',   self._input),
-			('xmlInput',self._xmlInput),
 			('fields',  self._fields),
 			('cookies', self._cookies)
 		]
@@ -571,7 +565,7 @@ class HTTPRequest(Request):
 		return info
 
 	def htmlInfo(self):
-		''' Returns a single HTML string that represents info(). Useful for inspecting objects via web browsers. '''
+		""" Returns a single HTML string that represents info(). Useful for inspecting objects via web browsers. """
 		return htmlInfo(self.info())
 		info = self.info()
 		res = ['<table border=1>\n']
@@ -589,14 +583,14 @@ class HTTPRequest(Request):
 	## Deprecated ##
 
 	def serverSideDir(self):
-		''' deprecated: HTTPRequest.serverSideDir() on 01/24/01 in 0.5. use serverSidePath() instead. @ Returns the directory of the Servlet (as given through __init__()'s path). '''
+		""" deprecated: HTTPRequest.serverSideDir() on 01/24/01 in 0.5. use serverSidePath() instead. @ Returns the directory of the Servlet (as given through __init__()'s path). """
 		self.deprecated(self.serverSideDir)
 		if not hasattr(self, '_serverSideDir'):
 			self._serverSideDir = os.path.dirname(self.serverSidePath())
 		return self._serverSideDir
 
 	def relativePath(self, joinPath):
-		''' deprecated: HTTPRequest.relativePath() on 01/24/01 in 0.5. use serverSidePath() instead. @ Returns a new path which includes the servlet's path appended by 'joinPath'. Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned. '''
+		""" deprecated: HTTPRequest.relativePath() on 01/24/01 in 0.5. use serverSidePath() instead. @ Returns a new path which includes the servlet's path appended by 'joinPath'. Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned. """
 		self.deprecated(self.relativePath)
 		return os.path.join(self.serverSideDir(), joinPath)
 
@@ -614,7 +608,7 @@ _infoMethods = (
 
 
 def htmlInfo(info):
-	''' Returns a single HTML string that represents the info structure. Useful for inspecting objects via web browsers. '''
+	""" Returns a single HTML string that represents the info structure. Useful for inspecting objects via web browsers. """
 	res = ['<table border=1>\n']
 	for pair in info:
 		value = pair[1]
@@ -625,7 +619,7 @@ def htmlInfo(info):
 	return string.join(res, '')
 
 def _infoForDict(dict):
-	''' Returns an "info" structure for any dictionary-like object. '''
+	""" Returns an "info" structure for any dictionary-like object. """
 	items = dict.items()
 	items.sort(lambda a, b: cmp(a[0], b[0]))
 	return items
