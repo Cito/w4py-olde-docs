@@ -36,6 +36,17 @@ class HTMLTagTest(unittest.TestCase):
 		tag.pprint(out)
 		assert out.getvalue()=='<html>\n</html>\n'
 
+	def checkReuseReader(self):
+		reader = HTMLReader()
+		reader.readString('<html> </html>')
+		tag = reader.readString('<html> <body> </body> </html>')
+		assert reader.rootTag() is not None
+		assert reader.rootTag()==tag
+
+		tag = reader.readString('<html> </html>', retainRootTag=0)
+		assert tag is not None
+		assert reader.rootTag() is None
+
 	def checkAccess(self):
 		html = HTMLReader().readString(self._html)
 
@@ -70,12 +81,23 @@ class HTMLTagTest(unittest.TestCase):
 		assert html.tagWithMatchingAttr('id', 'dataTable').name()=='table'
 		assert html.tagWithId('dataTable').name()=='table'
 
+	def checkInvalidHTML(self):
+		from WebUtils.HTMLTag import HTMLTagUnbalancedError, HTMLTagIncompleteError
+
+		reader = HTMLReader()
+
+		html = '<html> <body> <table> </body> </html>'
+		self.assertRaises(HTMLTagUnbalancedError, reader.readString, html)
+
+		html = '<html> <body>'
+		self.assertRaises(HTMLTagIncompleteError, reader.readString, html)
+
 	def tearDown(self):
 		del self._html
 
 
 def makeTestSuite():
-	cases = ['Basics', 'Access', 'MatchingAttr']
+	cases = ['Basics', 'ReuseReader', 'Access', 'MatchingAttr', 'InvalidHTML']
 	tests = [HTMLTagTest('check'+case) for case in cases]
 	return unittest.TestSuite(tests)
 

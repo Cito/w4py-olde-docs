@@ -23,26 +23,41 @@ CAVEATS
 
 * HTMLReader needs special attention with regards to tags like <p> and <li> which sometimes are closed (</p> </li>) and sometimes not. See its doc string for full information.
 
-* This module hasn't been well tested or designed for malformed HTML. I assume that some bizarre exception would be raised at some point.
+* HTMLReader is picky about the correctness of the HTML you feed it. Again see the class docs for full info.
 
 
 TO DO
 
 * See the TO DO sections for each class.
+
+
+CREDITS
+
+* I didn't grok how to write an SGMLParser subclass until I read the very small example by Sean McGrath at http://www.digitome.com/html2pyx.py (which I believe is broken for empty tags).
+
+* Determined what HTML tags are empty be scanning O'Reilly's HTML Pocket Reference.
 '''
 
 
-from sgmllib import SGMLParser
-from MiscUtils import NoDefault
-import sys, types
-
-
+# Check for Python 2.0
+import sys
 pyVer = getattr(sys, 'version_info', None)
 if pyVer is None  or  pyVer[0]<2:
 	raise Exception, 'HTMLTag requires Python 2.0 or greater.'
 
 
-class HTMLTagAttrLookupError(LookupError): pass
+from sgmllib import SGMLParser
+from MiscUtils import NoDefault
+import types
+
+
+class HTMLTagError(Exception): pass
+class HTMLTagAttrLookupError(LookupError, HTMLTagError): pass
+class HTMLTagUnbalancedError(HTMLTagError): pass
+class HTMLTagIncompleteError(HTMLTagError): pass
+
+
+DefaultEmptyTags = 'area basefont base bgsound br col colgroup frame hr img input isindex link meta spacer wbr'.split()
 
 
 class HTMLTag:
@@ -231,15 +246,19 @@ class HTMLReader(SGMLParser):
 		* the file doesn't change conventions for a given tag
 		* the reader knows ahead of time what to expect
 
-	Be default, HTMLReader assumes that <p> and <li> will be closed with </p> and </li> as the official HTML spec, as well as upcomer XHTML, encourage or require. That leaves <br> and <hr> as the tags that the reader is aware of as being "empty tags".
+	Be default, HTMLReader assumes that <p> and <li> will be closed with </p> and </li> as the official HTML spec, as well as upcomer XHTML, encourage or require, respectively.
 
-	If your files don't close certain tags besides <br> and <hr>, you can do this:
+	But if your files don't close certain tags that are supposed to be required, you can do this:
+		HTMLReader(extraEmptyTags=['p', 'li'])
+	or:
 		reader.extendEmptyTags(['p', 'li'])
 
 	Or just set them entirely:
+		HTMLReader(emptyTags=['br', 'hr', 'p'])
 		reader.setEmptyTags(['br', 'hr', 'p'])
+	Although there are quite a few. Consider the DefaultEmptyTags global list (which is used to initialize the reader's tags) which contains about 16 tag names.
 
-	If an HTML file doesn't conform to the reader's expectation, the most likely result would be a Python exception, probably involving the "_tagStack" of the reader. @@ 2002-03-21 ce: confirm this in the test cases
+	If an HTML file doesn't conform to the reader's expectation, you will get an except (see more below for details).
 
 	Besides fixing your reader manually, you could conceivably loop through the permutations of the various empty tags to see if one of them resulted in a correct read.
 
@@ -248,6 +267,8 @@ class HTMLReader(SGMLParser):
 	* The reader ignores extra preceding and trailing whitespace by stripping it from strings. I suppose this is a little harsher than reducing spans of preceding and trailing whitespace down to one space, which is what really happens in an HTML browser.
 
 	* The reader will not read past the closing </html> tag.
+
+	* The reader is picky about the correctness of the HTML you feed it. If tags are not closed, overlap (instead of nest) or left unfinished, an exception is thrown. These include HTMLTagUnbalancedError and HTMLTagIncompleteError both of which inherit HTMLTagError. I believe it is possible that others kinds of HTML errors could raise exceptions from sgmlib.SGMLParser (from which HTMLReader inherits).
 
 
 	TO DO
@@ -260,9 +281,8 @@ class HTMLReader(SGMLParser):
 
 	## Init ##
 
-	def __init__(self):
+	def __init__(self, emptyTags=None, extraEmptyTags=None):
 		SGMLParser.__init__(self)
-
 		self._filename  = None
 		self._rootTag   = None
 		self._tagStack  = []
@@ -272,12 +292,19 @@ class HTMLReader(SGMLParser):
 		self._printsStack = 0
 		self._ignoreWS   = 1
 		self._endingTag  = 'html'
-		self.setEmptyTags(['br', 'hr'])
+
+		# Handle optional args
+		if emptyTags is not None:
+			self.setEmptyTags(emptyTags)
+		else:
+			self.setEmptyTags(DefaultEmptyTags)
+		if extraEmptyTags is not None:
+			self.extendEmptyTags(extraEmptyTags)
 
 
 	## Reading ##
 
-	def readFileNamed(self, filename):
+	def readFileNamed(self, filename, retainRootTag=1):
 		'''
 		Reads the given file. Relies on readString(). See that method for more information.
 		'''
@@ -285,14 +312,25 @@ class HTMLReader(SGMLParser):
 		contents = open(filename).read()
 		return self.readString(contents)
 
-	def readString(self, string):
+	def readString(self, string, retainRootTag=1):
 		'''
 		Reads the given string, storing the results and returning the root tag. You could continue to use HTMLReader object or disregard it and simply use the root tag.
 		'''
+		self._rootTag  = None
+		self._tagStack = []
 		self._finished = 0
-		self.feed(string)
-		self.close()
-		return self._rootTag
+		self.reset()
+		try:
+			self.feed(string)
+			self.close()
+		finally:
+			self.reset()
+		if retainRootTag:
+			return self._rootTag
+		else:
+			tag = self._rootTag
+			self._rootTag = None
+			return tag
 
 
 	## Printing ##
@@ -315,7 +353,7 @@ class HTMLReader(SGMLParser):
 
 	def rootTag(self):
 		'''
-		Returns the root tag. May return None if no HTML has been read yet.
+		Returns the root tag. May return None if no HTML has been read yet, or if the last invocation of one of the read methods was passed retainRootTag=0.
 		'''
 		return self._rootTag
 
@@ -334,7 +372,7 @@ class HTMLReader(SGMLParser):
 	def setEmptyTags(self, tagList):
 		'''
 		Sets the HTML tags that are considered empty such as <br> and <hr>.
-		The default is ['br', 'hr'].
+		The default is found in the global, DefaultEmptyTags, and is fairly thorough, but does not include <p>, <li> and some other tags that HTML authors often use as empty tags.
 		'''
 		self._emptyTagList = list(tagList)
 		self._updateEmptyTagDict()
@@ -352,11 +390,11 @@ class HTMLReader(SGMLParser):
 	def printsStack(self):
 		return self._printsStack
 
-	def setPrintsStack(self, value):
+	def setPrintsStack(self, flag):
 		'''
 		Sets the boolean value of the "prints stack" option. This is a debugging option which will print the internal tag stack during HTML processing. The default value is 0.
 		'''
-		self._printsStack = value
+		self._printsStack = flag
 
 
 	## Command line ##
@@ -421,12 +459,15 @@ class HTMLReader(SGMLParser):
 			return
 		if name==self._endingTag:
 			self._finished = 1
-		self._tagStack.pop()
+		openingTag = self._tagStack.pop()
 		if self._printsStack:
 			print 'END   %s: %r' % (name.ljust(6), self._tagStack)
+		if openingTag.name()!=name:
+			raise HTMLTagUnbalancedError, 'Opening is %r, but closing is %r' % (openingTag.name(), name)
 
 	def close(self):
-		assert len(self._tagStack)==0, 'tagStack = %r' % self._tagStack
+		if len(self._tagStack)>0:
+			raise HTMLTagIncompleteError, 'tagStack = %r' % self._tagStack
 		SGMLParser.close(self)
 
 
