@@ -59,7 +59,7 @@ class MiddleObject(NamedValueAccess):
 			assert self._mk_store is store, 'Cannot refresh data from a different store.'
 			if self._mk_changed and not self._mk_initing:
 				if not store.setting('AllowRefreshOfChangedObject', False):
-					assert 0, "attempted to refresh changed object %s.%d\nYour app needs to call store.saveChanges() before doing anything which can cause objects to be refreshed from the database (i.e. calling store.deleteObject()), otherwise your changes will be lost." % (self.klass().name(), self.serialNum())
+					assert 0, "attempted to refresh changed object %s.%d\nchanges=%r\nYour app needs to call store.saveChanges() before doing anything which can cause objects to be refreshed from the database (i.e. calling store.deleteObject()), otherwise your changes will be lost." % (self.klass().name(), self.serialNum(), self._mk_changedAttrs)
 		else:
 			self.setStore(store)
 		if store.setting('UseBigIntObjRefColumns', False):
@@ -305,33 +305,28 @@ class MiddleObject(NamedValueAccess):
 
 	## Accessing attributes by name ##
 
-# Delete in May 2005 if still commented out. - Winston Jan 05
-#	 I don't think this is needed.  It's more powerful to use NamedValueAccess's implementation
-#	 since that will handle these cases, plus any custom accessors writen
-#	 by user in the subclass of ModelObject.  - winston jan 05
-#
-#  	def valueForKey(self, attrName, default=NoDefault):
-#  		"""
-#  		Returns the value of the named attribute by invoking its "get"
-#  		accessor method. You can use this when you want a value whose
-#  		name is determined at runtime.
-#  
-#  		It also insulates you from the naming convention used for the
-#  		accessor methods as defined in Attr.pyGetName(). For example,
-#  		the test suites use this instead of directly invoking the "get"
-#  		methods.
-#  
-#  		If the attribute is not found, the default argument is returned
-#  		if specified, otherwise LookupError is raised with the attrName.
-#  		"""
-# 		attr = self.klass().lookupAttr(attrName, None)
-# 		if attr:
-# 			return self.valueForAttr(attr, default)
-# 		else:
-# 			if default is NoDefault:
-# 				raise LookupError, attrName
-# 			else:
-# 				return default
+  	def valueForKey(self, attrName, default=NoDefault):
+		"""
+		Returns the value of the named attribute by invoking its "get"
+		accessor method. You can use this when you want a value whose
+		name is determined at runtime.
+
+		It also insulates you from the naming convention used for the
+		accessor methods as defined in Attr.pyGetName(). For example,
+		the test suites use this instead of directly invoking the "get"
+		methods.
+
+		If the attribute is not found, the default argument is returned
+		if specified, otherwise LookupError is raised with the attrName.
+		"""
+		attr = self.klass().lookupAttr(attrName, None)
+		if attr:
+			return self.valueForAttr(attr, default)
+		else:
+			if default is NoDefault:
+				raise LookupError, attrName
+			else:
+				return default
 
 	def setValueForKey(self, attrName, value):
 		"""
@@ -410,8 +405,8 @@ class MiddleObject(NamedValueAccess):
 	# @@ 2001-04-29 ce: This is for backwards compatibility only:
 	# We can take out after the post 0.5.x version (e.g., 0.6 or 1.0)
 	# or after 4 months, whichever comes later.
-#	_get = valueForKey
-#	_set = setValueForKey
+	_get = valueForKey
+	_set = setValueForKey
 
 	def clone(self,memo=None,depthAttr=None):
 		'''
