@@ -18,7 +18,7 @@ FUTURE
 from Common import *
 from Configurable import Configurable
 from Application import Application
-from SocketServer import ThreadingTCPServer, ForkingTCPServer, TCPServer, BaseRequestHandler
+from WebKitSocketServer import ThreadingTCPServer, ForkingTCPServer, TCPServer, BaseRequestHandler
 from marshal import loads
 import os, sys
 
@@ -68,6 +68,7 @@ class WebKitAppServer(Configurable):
 	def __init__(self):
 		Configurable.__init__(self)
 
+		self._startTime = time.time()
 		self._addr = None
 		self._plugIns = []
 
@@ -194,6 +195,14 @@ class WebKitAppServer(Configurable):
 	def application(self):
 		return self._app
 
+	def startTime(self):
+		''' Returns the time the app server was started (as seconds, like time()). '''
+		return self._startTime
+
+	def numRequests(self):
+		''' Return the number of requests received by this server since it was launched. '''
+		return self._server.num_requests
+
 
 	## Warnings and Errors ##
 
@@ -260,8 +269,6 @@ class RequestHandler(BaseRequestHandler):
 			print
 
 		transaction.die()
-
-
 
 
 def main():
