@@ -125,6 +125,7 @@ class Application(Configurable):
 		self._serverSidePathCacheByPath = {}
 		self._serverDir = os.getcwd()
 		self._cacheDictLock = Lock()
+		self._instanceCacheSize=self.setting('InstanceCacheSize')
 		
 		if Contexts: #Try to get this from the Config file
 			self._Contexts = Contexts
@@ -185,6 +186,7 @@ class Application(Configurable):
 			'Contexts':{'default':'Examples',
 							'Examples':'Examples',},
 			'SessionTimeout':60, #seconds, s/b 1800 (30 min) in real life
+			'InstanceCacheSize':10,
 		}
 	
 	def configFilename(self):
@@ -240,30 +242,35 @@ class Application(Configurable):
 		self.returnInstance(transaction,path)
 		#JSL
 
+		#possible circular reference, so delete it
 		transaction.request()._transaction=None
-		#print ">> refcount2=",sys.getrefcount(transaction.servlet())
 		return transaction
 
 	def forwardRequest(self, trans, URL):
 		"""Enable a servlet to pass a request to another servlet.  This implementation handles chaining and requestDispatch in Java.
-		The catch is that the function WILL return to the calling servlet, so it should either take advantage of that or return
-		immediately."""
+		The catch is that the function WILL return to the calling servlet, so the calling servlet should either take advantage
+		of that or return immediately."""
+
+		#Save the things we're gonna change.
 		currentPath=trans.request().serverSidePath()
 		currentServlet=trans._servlet
+
+		#get the path to the next servlet.
 		trans.request()._serverSidePath=self.serverSidePathForRequest(trans.request(),URL)
-		#print ">> ",trans.request()._serverSidePath
+
+		#Get the servlet
 		self.createServletInTransaction(trans)
-		
+
+		#call the servlet, but not session, it's already alive
 		trans.servlet().awake(trans)
 		trans.servlet().respond(trans)
 		trans.servlet().sleep(trans)
 		
 		self.returnInstance(trans,trans.request().serverSidePath())
-		
+
+		#replace things like they were
 		trans.request()._serverSidePath=currentPath
 		trans._servlet=currentServlet
-
-		return
 	
 
 
@@ -364,6 +371,9 @@ class Application(Configurable):
 			values.append(value)
 		file.write(string.join(values, ',')+'\n')
 		file.close()
+
+		for i in objects.keys():
+			objects[i]=None
 
 
 	## Utilities/Hooks ##
@@ -479,9 +489,12 @@ class Application(Configurable):
 				return
 			except Queue.Full:
 				pass
-##				print '>> queue full' #do nothing, don't want to block queue for this
-		import sys
-		#print ">> ",sys.getrefcount(transaction._servlet)
+				#print '>> queue full' #do nothing, don't want to block queue for this
+
+		transaction._servlet._map = None
+			
+##		print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
+		
 			
 	def newServletCacheItem(self,key,item):
 		""" Safely add new item to the main cache.  Not woried about the retrieval for now.
@@ -492,7 +505,6 @@ class Application(Configurable):
 		
 
 
-	MAX_QUEUE_SIZE = 10
 
 	def createServletInTransaction(self, transaction):
 		# Get the path
@@ -509,7 +521,7 @@ class Application(Configurable):
 	
 		if not cache:
 			cache = {
-				'instances':  Queue.Queue(self.MAX_QUEUE_SIZE), #max size on the Queue, should be configurable
+				'instances':  Queue.Queue(self._instanceCacheSize),
 				'path':       path,
 				'timestamp':  os.path.getmtime(path),
 				'threadsafe': 0,
@@ -572,7 +584,7 @@ class Application(Configurable):
 				try:
 					prepath = self._Contexts[contextName]
 				except KeyError:
-					print '>> KeyError'
+					#print '>> Context Not Found'
 					head=urlPath #put the old path back, there's no context here
 					prepath = self._Contexts['default']
 				#prepath = self.setting('ServletsDir')
