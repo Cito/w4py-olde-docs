@@ -81,7 +81,7 @@ class MakeAppWorkDir:
 				if not os.path.exists(dir):
 					os.makedirs(dir)
 					open(os.path.join(dir, '__init__.py'), 'w').write('#\n')
-					
+
 			self._substVals['libraryPath'] = 'sys.path.extend(%r)\n' % expandedLibraryDirs
 		else:
 			self._substVals['libraryPath'] = ''
@@ -137,7 +137,7 @@ class MakeAppWorkDir:
 		for name in configs:
 			newname = os.path.join(self._workDir, "Configs", os.path.basename(name))
 			shutil.copyfile(name, newname)
-			mode = os.stat(newname)[stat.ST_MODE] 
+			mode = os.stat(newname)[stat.ST_MODE]
 
 			# remove public read/write/exec perms
 			os.chmod(newname, mode & 0770)
@@ -280,17 +280,20 @@ class MakeAppWorkDir:
 
 
 	def printCompleted(self):
+		default = os.path.normpath(self._substVals['DEFAULT'])
+		workDir = os.path.normpath(self._substVals['WORKDIR'])
+		runName = os.name=='nt' and 'AppServer' or './AppServer'
 		print """\n\n
 Congratulations, you've just created a runtime working directory for
 Webware.  To start the app server you can run these commands:
 
-	cd %(WORKDIR)s
-	./AppServer
+	cd %(workDir)s
+	%(runName)s
 
 Copy WebKit.cgi to your web server's cgi-bin directory, or
 anywhere else that it will execute CGIs from.  Then point your browser
 to http://localhost/cgi-bin/WebKit.cgi/ .  The page you
-see is generated from the code in the %(DEFAULT)s directory and is
+see is generated from the code in the %(default)s directory and is
 there for you to play with and to build upon.
 
 If you see import errors, then you may need to modify the permissions
@@ -302,7 +305,7 @@ allow you to connect from the web server to the WebKit AppServer
 without using CGI.
 
 Have fun!
-""" % self._substVals
+""" % locals()
 
 
 	def msg(self, text):
