@@ -8,4 +8,4 @@ from PSPServletFactory import PSPServletFactory
 def InstallInWebKit(appServer):
 	app = appServer.application()
 	app.addServletFactory(PSPServletFactory(app))
-	app.addContext('PSPExamples', os.path.normpath('../PSP/Examples'))
+	app.addContext('PSPExamples', appServer.serverSidePath('../PSP/Examples'))
