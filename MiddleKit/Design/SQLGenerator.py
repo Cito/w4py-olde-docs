@@ -586,7 +586,7 @@ class DecimalAttr:
 		# SQL docs I read say:  decimal(precision, scale)
 		precision = self.get('Precision', None)
 		if precision is None:
-			if self.klass().klasses()._model.setting('UseMaxForDecimalPrecision'):  # that setting is for backwards compatibility
+			if self.klass().klasses()._model.setting('UseMaxForDecimalPrecision', 0):  # that setting is for backwards compatibility
 				precision = self.get('Max', None)
 				if not precision:
 					precision = None
