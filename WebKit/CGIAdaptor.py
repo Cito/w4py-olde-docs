@@ -74,7 +74,7 @@ def main():
 		bufsize = 32*1024  # @@ 2000-04-26 ce: this should be configurable, also we should run some tests on different sizes
 
 		s = socket(AF_INET, SOCK_STREAM)
-		s.connect(host, port)
+		s.connect((host, port))
 		s.send(dumps(dict))
 		s.shutdown(1)
 

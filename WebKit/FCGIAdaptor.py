@@ -126,7 +126,7 @@ def FCGICallback(fcg,env,form):
 		bufsize = 32*1024
 
 		s = socket(AF_INET, SOCK_STREAM)
-		s.connect(host, port)
+		s.connect((host, port))
 		s.send(dumps(dict))
 		s.shutdown(1)
 
