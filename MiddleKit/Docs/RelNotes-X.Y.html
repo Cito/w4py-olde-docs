@@ -39,6 +39,8 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 <p> The new approach is to break these values into two SQL columns. If the attribute name is "foo" then the SQL columns will be named "fooClassId" and "fooObjId". If, for some reason, you don't like those suffixes, you can customize them through the setting <a href=UsersGuide.html#Configuration_ObjRefSuffixes >ObjRefSuffixes</a>. As always, the class ids are stored in the _MKClassIds table that MiddleKit automatically generates.
 
+<p> Another useful benefit is that the fooClassId columns are now given default values to match the class id of the target class (in other words, the integer id of class Foo). When the target class has no subclasses then the fooClassId column can be safely ignored in INSERTs, UPDATEs and SELECTs. The point of this is to make the database even easier to work with from SQL.
+
 <p> <font color=red>If you are upgrading Webware then your database schema will no longer be compatible with MiddleKit.</font> The easy way to fix this is to set UseBigIntObjRefColumns to True in Settings.config (see <a href=UsersGuide.html#Configuration_UseBigIntObjRefColumns>User's Guide - Configuration</a> for more information). This will give you the old behavior. The hard way is to fix up your schema and migrate the data from the old columns to the new.
 
 
