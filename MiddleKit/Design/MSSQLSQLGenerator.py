@@ -171,6 +171,18 @@ class Klass:
 				indexName = cleanConstraintName('IX__%s__%s' % (self.name(), attr.name()))
 				wr('create%s index [%s] on %s(%s);\n' % (
 					unique, indexName, self.sqlTableName(), attr.sqlColumnName()))
+			elif attr.boolForKey('isBackRefAttr') and not attr.boolForKey('isDerived'):
+				# this index will speed up the fetching of lists
+				if self.setting('UseBigIntObjRefColumns', False):
+					# not bothering supporting the old obj ref approach
+					pass
+				else:
+					attrName = attr.name()
+					classIdName, objIdName = attr.sqlName().split(',')
+					tableName = self.sqlTableName()
+					indexName = 'IX__%(tableName)s__BackRef__%(attrName)s' % locals()
+					indexName = cleanConstraintName(indexName)
+					wr('create index [%(indexName)s] on %(tableName)s(%(classIdName)s, %(objIdName)s);\n' % locals())
 		wr('\n')
 
 
