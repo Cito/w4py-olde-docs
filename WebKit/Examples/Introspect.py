@@ -5,7 +5,7 @@ import string
 class Introspect(ExamplePage):
 	
 	def writeBody(self):
-		self.writeln("<p>The following table shows the values for various Python expressions, all of which are related to <i>introspection</i>. That is to say, all the expressions examine the environment such as the object, the object'c class, the module and so on.")
+		self.writeln("<p>The following table shows the values for various Python expressions, all of which are related to <i>introspection</i>. That is to say, all the expressions examine the environment such as the object, the object's class, the module and so on.")
 		self.writeln('<table align=center bgcolor=#EEEEFF border=0 cellpadding=2 cellspacing=2 width=100%>')
 		self.pair('locals().keys()', locals().keys())
 		self.list('globals().keys()')
