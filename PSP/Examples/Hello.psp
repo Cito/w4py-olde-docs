@@ -1,16 +1,17 @@
 <%-- This is a PSP comment. It won't show up in the HTML or even in the class that this file will generate --%>
 
-<%@ page imports = "sys,os,time"%> <%-- Here's the modules that I need in this file --%>
-<%@ page method="writeHTML" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
-<%@ page extends="Page"%> <%--This is the base class for this page.  Page is the default --%>
+
+<%@ page imports = "sys,os,time,Examples:ExamplePage"%> <%-- Here's the modules that I need in this file --%>
+<%@ page method="writeBody" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
+<%@ page extends="ExamplePage"%> <%--This is the base class for this page.  Page is the default --%>
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="tabs" %> <%-- use tabs to indent the sourcefile that this template will produce --%>
-
 
 <HTML>
 <BODY bgcolor='white'>
 <p align = center><img src="psplogo.png"><%-- This image is served by WebKit --%>
 <h1 align=center><font color='blue'  face='helvetica'>Hello from PSP!</font></h1><br><br>
+
 
 <p>If you're running WebKit on Windows with the cgi adaptor, the image above will be broken.  You'll need to serve binary files from the WebServer itself.  We're working on a fix.  Sorry!
 

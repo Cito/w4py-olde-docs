@@ -113,10 +113,18 @@ class Application(Configurable,CanContainer):
 		self._cacheDictLock = Lock()
 		self._instanceCacheSize=10 # self._server.setting('ServerThreads') #CHANGED 6/21/00
 
+##		if contexts: #Try to get this from the Config file
+##			self._contexts = contexts
+##		else: #Get it from Configurable object, which gets it from defaults or the user config file
+##			self._contexts = self.setting('Contexts')
 		if contexts: #Try to get this from the Config file
-			self._contexts = contexts
+			defctxt = contexts
 		else: #Get it from Configurable object, which gets it from defaults or the user config file
-			self._contexts = self.setting('Contexts')
+			defctxt = self.setting('Contexts')
+		#New context loading routine
+		self._contexts={}
+		for i in defctxt.keys():
+			self.addContext(i,defctxt[i])
 
 		# Set up servlet factories
 		self._factoryList = []  # the list of factories
@@ -142,6 +150,8 @@ class Application(Configurable,CanContainer):
 		"""
 		import CanFactory
 		self._canFactory = CanFactory.CanFactory(self,os.path.join(os.getcwd(),'Cans'))
+
+		
 
 	def startSessionSweeper(self):
 		self._sessSweepThread=Thread(None, self.sweeperThreadFunc, 'SessionSweeper', (self._sessions,self.setting('SessionTimeout')))
@@ -459,7 +469,7 @@ class Application(Configurable,CanContainer):
 	def hasContext(self, name):
 		return self._contexts.has_key(name)
 
-	def setContext(self, name, value):
+	def _setContext(self, name, value):#use addContext
 		if self._contexts.has_key(name):
 			print 'WARNING: Overwriting context %s (=%s) with %s' % (
 				repr(name), repr(self._contents[name]), repr(value))
@@ -467,6 +477,21 @@ class Application(Configurable,CanContainer):
 
 	def contexts(self):
 		return self._contexts
+
+	def addContext(self, name, dir):
+		import imp
+		if self._contexts.has_key(name):
+			print 'WARNING: Overwriting context %s (=%s) with %s' % (
+				repr(name), repr(self._contents[name]), repr(value))
+		try:
+			localdir,pkgname = os.path.split(dir)
+			res = imp.find_module(pkgname,[localdir])
+			#question, do we want the package name to be the dir name or the context name?
+			imp.load_module(name,res[0],res[1],res[2]) 
+		except:
+			print "%s is not a package" % (name,)
+		self._contexts[name] = dir
+
 
 
 	## Factory access ##

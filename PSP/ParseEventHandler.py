@@ -231,16 +231,24 @@ class ParseEventHandler:
 		self.tmplStop = stop
 
 	def generateHeader(self):
-		self._writer.println('from ' +self._baseClass+ ' import ' +self._baseClass +'\n')
-
 		for i in self._imports:
 			self._writer.println(i)
+		self._writer.println('try:\n')
+		self._writer.pushIndent()
+		#self._writer.println('from ' +self._baseClass+ ' import ' +self._baseClass +'\n')
+		self._writer.println('import '+self._baseClass + '\n')
+		self._writer.popIndent()
+		self._writer.println('except:\n')
+		self._writer.pushIndent()
+		self._writer.println('pass\n')
+		self._writer.popIndent()
 	
 	def generateDeclarations(self):
 		self._writer.println()
 		self._writer.printChars('class ')
 		self._writer.printChars(self._ctxt.getServletClassName())
-		self._writer.printChars('('+self._baseClass+'):')
+		self._writer.printChars('('+self._baseClass+'.'+self._baseClass+'):')
+		#self._writer.printChars('('+self._baseClass+'):')
 		self._writer.printChars('\n')
 		self._writer.pushIndent()
 		self._writer.println('def canBeThreaded(self):') # I Hope to take this out soon!
@@ -264,7 +272,7 @@ class ParseEventHandler:
 		if not AwakeCreated:
 			self._writer.println('def awake(self,trans):')
 			self._writer.pushIndent()
-			self._writer.println(self._baseClass+'.awake(self, trans)\n')
+			self._writer.println('self.__class__.__bases__[0]'+'.awake(self, trans)\n')
 ##commented out for new awake version per conversation w/ chuck
 ##	    self._writer.println('if "init" in dir(self) and type(self.init) == type(self.__init__):\n')
 ##	    self._writer.pushIndent()
