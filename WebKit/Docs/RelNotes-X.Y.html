@@ -74,6 +74,11 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 	<li> The AppServer now includes an experimental built-in web server.
 		 See the InstallGuide for more details.
 
+	<li> Added new Application.config option "UseCookieSessions" that
+		 defaults to True.  If set to False, then a session cookie will
+		 never be sent in the response.  Use this along with
+		 UseAutomaticPathSessions to ONLY use path sessions and never
+		 use cookie sessions.
 </ul>
 
 
