@@ -47,6 +47,13 @@ Version 0.8
 
 	<li> New setting 'ReportRPCExceptionsInWebKit': 1 means report exceptions in RPC servlets in the same way as exceptions in other servlets, i.e. in the logfiles, the error log, and/or by email.  0 means don't report the exceptions on the server side at all; this is useful if your RPC servlets are raising exceptions by design and you don't want to be notified.  Note that in release 0.7, there was no exception reporting on the server side in RPC servlets; if you want to get the same behavior in this release you'll have to set this setting to 0.
 
+	<li> Updates to includeURL(), forward(), and callMethodOfServlet()
+		<ul>
+		<li>The URL reference is now relative to the servlet, where absolute references are rooted at the context in which the servlet is running.  A URL reference of "/foo" will reference the servlet foo.py out of the context root directory.  A reference to "foo/bar" will refer to the servlet relative to the current servlet.
+		<li>Note: Referencing a directory without a trailing '/' is discouraged, as it will have unusual results depending on your configuration.
+		</ul>
+	 
+	
 	<li> New methods in HTTPRequest:
 		<ul>
 			<li><b>originalURLPath()</b> - Returns the URL path of the original servlet before any forwarding.

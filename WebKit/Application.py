@@ -465,7 +465,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		# a client redirect instead of a server redirect.  This fixes problems on IIS.
 		uri[0] = './' + uriEnd + '/'
 		newURL = string.join(uri, '?')
-
+		if debug: print "* handleDeficientDirectoryURL - reditrect to",newURL
+		
 		res = transaction.response()
 		res.setHeader('Status', '301 Redirect')
 		res.setHeader('Location', newURL)
@@ -570,6 +571,34 @@ class Application(ConfigurableForServerSidePath, Object):
 		except EndResponse:
 			pass
 
+	def processURLPath(self, req, URL):
+		"""
+		Return a URL Path relative to the current request and context.
+		Absolute references in the URL (starting with '/' are treated
+		absolute to the current context.
+		"""
+		
+		# Construct the url path for the servlet we're calling
+		urlPath = req.urlPath()
+		if urlPath=='':
+			urlPath = '/'
+		elif urlPath[-1]=='/':
+			urlPath = urlPath
+		else:
+			lastSlash = string.rfind(urlPath, '/')
+			urlPath = urlPath[:lastSlash+1] 
+
+		extraPath = ''
+		if URL[:1] == "/":
+			extraPath = req.siteRootFromCurrentServlet()
+
+		urlPath = WebUtils.Funcs.normURL(urlPath + extraPath + URL)
+
+		if debug:
+			print "*processURLPath(%s)=%s" % (URL, urlPath)
+
+		return urlPath
+
 	def forward(self, trans, URL):
 		"""
 		Enable a servlet to pass a request to another servlet. The Request object is kept the same, and may be used
@@ -578,21 +607,25 @@ class Application(ConfigurableForServerSidePath, Object):
 		the call to forwardRequest returns.
 		New Response and Transaction objects are created.
 		Currently the URL is always relative to the existing URL.
+
+		NOTE: @@ sgd 2003-01-15 - presently this goes through dispatchRequest() which
+		under some circumstances can result in sending a redirect() which causes the
+		browser to re-get the URL.  This defeats the purpose of passing information
+		to a servlet in the request or transaction objects.  This only happens in
+		cases like a forward to a directory where no trailing / was specified.
 		"""
-		if debug: print "forward called"
+
+		# @@ sgd 2003-01-15
+		# to fix the above warning about using dispatchRequest() consider
+		# using the includeURL() code but handle the session and clearing
+		# the output stream here.
+		
+		if debug: print "> forward(%s)" % str(URL)
 
 		req = trans.request()
 
-		# URL is relative to the original
-		urlPath = req.urlPath()
-		if urlPath=='':
-			urlPath = '/' + URL
-		elif urlPath[-1]=='/':
-			urlPath = urlPath + URL
-		else:
-			lastSlash = string.rfind(urlPath, '/')
-			urlPath = urlPath[:lastSlash+1] + URL
-
+		urlPath = self.processURLPath(req, URL)
+		
 		#save the original URL
 		oldURL = req.urlPath()
 		req.setURLPath(urlPath)
@@ -632,9 +665,7 @@ class Application(ConfigurableForServerSidePath, Object):
 	def forwardRequest(self, trans, URL):
 		print "forwardRequest is deprecated.  Use forward()"
 		return self.forward(trans, URL)
-
-
-
+		
 	def includeURL(self, trans, URL):
 		"""
 		Enable a servlet to pass a request to another servlet.  This implementation
@@ -647,6 +678,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		Also, if the response has already been partially sent, it can't be reversed.
 		"""
 
+		if debug: print "> includeURL(%s)" % str(URL)
 
 		req = trans.request()
 
@@ -654,16 +686,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		currentPath=req.urlPath()
 		currentServlet=trans._servlet
 
-
-		urlPath = req.urlPath()
-		if urlPath=='':
-			urlPath = '/' + URL
-		elif urlPath[-1]=='/':
-			urlPath = urlPath + URL
-		else:
-			lastSlash = string.rfind(urlPath, '/')
-			urlPath = urlPath[:lastSlash+1] + URL
-
+		urlPath = self.processURLPath(req, URL)
+		
 		req.setURLPath(urlPath)
 		req.addParent(currentServlet)
 
@@ -694,7 +718,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		print "forwardRequestFast is deprecated.  Use includeURL()"
 		return self.includeURL(trans, url)
 
-
 	def callMethodOfServlet(self, trans, URL, method, *args, **kwargs):
 		"""
 		Enable a servlet to call a method of another servlet.  Note: the servlet's awake() is called,
@@ -703,20 +726,14 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		req = trans.request()
 
+		if debug: print "> callMethodOfServlet(%s, %s)" % (URL, method)
+
 		# Save the current url path and servlet
 		currentPath = req.urlPath()
 		currentServlet = trans._servlet
 
-		# Construct the url path for the servlet we're calling
-		urlPath = req.urlPath()
-		if urlPath=='':
-			urlPath = '/' + URL
-		elif urlPath[-1]=='/':
-			urlPath = urlPath + URL
-		else:
-			lastSlash = string.rfind(urlPath, '/')
-			urlPath = urlPath[:lastSlash+1] + URL
-
+		urlPath = self.processURLPath( req, URL )
+		
 		# Modify the request to use the new URL path
 		req.setURLPath(urlPath)
 
@@ -728,6 +745,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		# Awaken, call the method, and sleep
 		servlet = trans.servlet()
+
 		try:
 			servlet.awake(trans)
 			try:
@@ -1083,6 +1101,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		filenames = []
 		ignoreExts = self.setting('ExtensionsToIgnore')
 		for filename in glob(baseName+'.*'):
+			# consider this because CVS leaves files with extensions like '*.py.~1.2.3~'
+			# filename[-1:] == '~':	continue
 			if os.path.splitext(filename)[1] not in ignoreExts:
 				# @@ 2000-06-22 ce: linear search
 				filenames.append(filename)
@@ -1356,6 +1376,8 @@ class Application(ConfigurableForServerSidePath, Object):
 			urlPath, extraURLPath = urlPath[:-extralen] , urlPath[-extralen:]
 			ssPath = ssPath[:-extralen]
 
+		if extraURLPath and extraURLPath[0] != '/':
+			extraURLPath = '/' + extraURLPath
 		if debug: print "processExtraURLPath returning %s, %s, %s" % ( ssPath, urlPath, extraURLPath )
 		return ssPath, urlPath, extraURLPath
 
@@ -1386,6 +1408,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		contextPath, contextName, rest = self.findContext(fullPath)
 		servletPath, extraPath = self.findServlet(contextPath, rest)
 		request._extraURLPath = extraPath
+		if debug: print "> ssifr na:",(servletPath, contextPath, contextName, extraPath, request.urlPath())
 		return (servletPath, contextPath, contextName)
 
 

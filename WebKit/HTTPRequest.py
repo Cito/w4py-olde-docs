@@ -110,8 +110,8 @@ class HTTPRequest(Request):
 		self._cookies = dict
 
 		self._transaction    = None
-		self._serverRootPath = None
-		self._extraURLPath  = None
+		self._serverRootPath = ""
+		self._extraURLPath  = ""
 
 		# try to get automatic path session
 		# if UseAutomaticPathSessions is enabled in Application.config
@@ -278,6 +278,27 @@ class HTTPRequest(Request):
 		return path
 
 
+	_evars = ('PATH_INFO', 'REQUEST_URI', 'SCRIPT_NAME')
+	_pvars = ('_absolutepath', '_serverSidePath', '_serverSideContextPath',
+		  '_adapterName')
+
+		
+	def printstate(self,msg=""):
+		print "** request state **",msg
+		print self.getstate()
+
+	def getstate(self):
+		rv = []
+		env = self._environ
+		for key in self._evars:
+			rv.append("  * env['%s'] = %s" % (key, env.get(key,"* no def *")))
+		for key in self._pvars + ('_contextName', '_extraURLPath'):
+			if not hasattr(self,key):
+				# reload cached values.
+				self.serverSideContextPath()
+			rv.append("  * req.%s = %s" % (key, getattr(self,key, "* no def *")))
+		return string.join(rv, '\n')
+		
 	def setURLPath(self, path):
 		""" Sets the URL path of the request. There is rarely a need to do this. Proceed with caution. The only known current use for this is Application.forwardRequest(). """
 		if hasattr(self, '_serverSidePath'):
