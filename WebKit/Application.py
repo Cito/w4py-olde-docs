@@ -46,11 +46,11 @@ if not KeyValueAccess in UserDict.__bases__:
 	setattr(UserDict, 'hasValueForKey', _UserDict_hasValueForKey)
 	setattr(UserDict, 'valueForKey', _UserDict_valueForKey)
 
-	
+
 class ApplicationError(Exception,CanContainer):
 	pass
-	
-		
+
+
 class Application(Configurable):
 	'''
 	FUTURE
@@ -78,9 +78,9 @@ class Application(Configurable):
 			  - Probably, as we may want request handlers for various file types.
 		* 2000-04-09 ce: Concurrent request handling (probably through multi-threading)
 	'''
-	
+
 	## Init ##
-	
+
 	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None, Contexts=None):
 
 
@@ -94,13 +94,13 @@ class Application(Configurable):
 		else:
 			from Transaction import Transaction
 			self._transactionClass = Transaction
-		
+
 		if sessionClass:
 			self._sessionClass = sessionClass
 		else:
 			from Session import Session
 			self._sessionClass = Session
-		
+
 		if requestClass:
 			self._requestClass = requestClass
 		else:
@@ -126,13 +126,13 @@ class Application(Configurable):
 		self._serverDir = os.getcwd()
 		self._cacheDictLock = Lock()
 		self._instanceCacheSize=self.setting('InstanceCacheSize')
-		
+
 		if Contexts: #Try to get this from the Config file
 			self._Contexts = Contexts
 		else: #Get it from Configurable object, which gets it from defaults or the user config file
 			self._Contexts=self.setting('Contexts')
 
-		# Set up servlet factories		
+		# Set up servlet factories
 		self._factoryList = []  # the list of factories
 		self._factoryByExt = {} # a dictionary that maps all known extensions to their factories, for quick look up
 		self.addServletFactory(PythonServletFactory(self))
@@ -156,11 +156,11 @@ class Application(Configurable):
 		from Session import Sweeper
 		self._sessSweepThread=Thread(None, Sweeper, 'SessionSweeper', (self._sessions,self.setting('SessionTimeout')))
 		self._sessSweepThread.start()
-		
 
-		
+
+
 	## Config ##
-	
+
 	def defaultConfig(self):
 		return {
 			'PrintConfigAtStartUp': 1,
@@ -168,7 +168,7 @@ class Application(Configurable):
 			'LogActivity':          1,
 			'ActivityLogFilename':  'Logs/Activity.csv',
 			'ActivityLogColumns':   ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'],
-			
+
 			# Error handling
 			'ShowDebugInfoOnErrors':  1,
 			'UserErrorMessage':       'The site is having technical difficulties with this page. An error has been logged, and the problem will be fixed as soon as possible. Sorry!',
@@ -188,27 +188,27 @@ class Application(Configurable):
 			'SessionTimeout':60, #seconds, s/b 1800 (30 min) in real life
 			'InstanceCacheSize':10,
 		}
-	
+
 	def configFilename(self):
 		return 'Configs/Application.config'
 
 
 	## Versions ##
-	
+
 	def webKitVersion(self):
 		return '0.2'
-		
+
 	def version(self):
 		''' Returns the version of the application. This implementation returns '0.1'. Subclasses should override to return the correct version number. '''
 		## @@ 2000-05-01 ce: Maybe this could be a setting 'AppVersion'
 		return '0.2'
 
-			
+
 	## Dispatching Requests ##
-	
+
 	def dispatchRawRequest(self, newRequestDict):
 		return self.dispatchRequest(self.createRequestForDict(newRequestDict))
-	
+
 	def dispatchRequest(self, newRequest):
 		''' Creates the transaction, session, response and servlet for the new request which is then dispatched. The transaction is returned. '''
 		transaction = None
@@ -219,14 +219,14 @@ class Application(Configurable):
 			response    = self.createResponseInTransaction(transaction)
 			self.createServletInTransaction(transaction)
 			#print ">> refcount1=",sys.getrefcount(transaction.servlet())
-			
+
 
 			self.awake(transaction)
 			self.respond(transaction)
 			self.sleep(transaction)
-			
+
 			transaction.response().deliver(transaction)
-		
+
 		except:
 			if transaction:
 				transaction.setErrorOccurred(1)
@@ -235,7 +235,7 @@ class Application(Configurable):
 
 		if self.setting('LogActivity'):
 			self.writeActivityLog(transaction)
-		
+
 		#JSL
 		path = transaction._request.serverSidePath()
 
@@ -265,34 +265,34 @@ class Application(Configurable):
 		trans.servlet().awake(trans)
 		trans.servlet().respond(trans)
 		trans.servlet().sleep(trans)
-		
+
 		self.returnInstance(trans,trans.request().serverSidePath())
 
 		#replace things like they were
 		trans.request()._serverSidePath=currentPath
 		trans._servlet=currentServlet
-	
+
 
 
 	## Transactions ##
 
 	# @@ 2000-05-10 ce: should just send the message to the transaction and let it handle the rest.
-	
+
 	def awake(self, transaction):
 		transaction.session().awake(transaction)
 		transaction.servlet().awake(transaction)
-	
+
 	def respond(self, transaction):
 		transaction.session().respond(transaction)
 		transaction.servlet().respond(transaction)
-	
+
 	def sleep(self, transaction):
 		transaction.session().sleep(transaction)
 		transaction.servlet().sleep(transaction)
 
 
 	## Sessions ##
-	
+
 	def session(self, sessionId, default=Tombstone):
 		if default is Tombstone:
 			return self._sessions[sessionId]
@@ -305,7 +305,7 @@ class Application(Configurable):
 	def sessions(self):
 		return self._sessions
 
-		
+
 	## Misc Access ##
 
 	def server(self):
@@ -313,14 +313,14 @@ class Application(Configurable):
 
 	def name(self):
 		return sys.argv[0]
-	
+
 	def transactionClass(self):
 		return self._transactionClass
-	
+
 	def setTransactionClass(self, newClass):
 		assert isclass(newClass)
 		self._transactionClass = newClass
-	
+
 	def responseClass(self, newClass):
 		return self._responseClass
 
@@ -331,7 +331,7 @@ class Application(Configurable):
 
 	## Factory access ##
 
-	def addServletFactory(self, factory):			
+	def addServletFactory(self, factory):
 		assert isinstance(factory, ServletFactory)
 		self._factoryList.append(factory)
 		for ext in factory.extensions():
@@ -340,10 +340,10 @@ class Application(Configurable):
 
 	def factories(self):
 		return self._factoryList
-		
+
 
 	## Activity Log ##
-	
+
 	def writeActivityLog(self, transaction):
 		''' Writes an entry to the script log file. Uses settings ActivityLogFilename and ActivityLogColumns. '''
 		filename = os.path.join(self._serverDir, self.setting('ActivityLogFilename'))
@@ -363,7 +363,11 @@ class Application(Configurable):
 			'session':     transaction.session()
 		})
 		for column in self.setting('ActivityLogColumns'):
-			value = objects.valueForName(column)
+			try:
+				value = objects.valueForName(column)
+			except:
+				print 'WARNING: Cannot get %s for activity log.' % column
+				value = '(unknown)'
 			if type(value) is FloatType:
 				value = '%0.2f' % value   # probably need more flexibility in the future
 			else:
@@ -377,7 +381,7 @@ class Application(Configurable):
 
 
 	## Utilities/Hooks ##
-	
+
 	def serverDir(self):
 		''' Returns the directory where the application server is located. '''
 		return self._serverDir
@@ -413,20 +417,20 @@ class Application(Configurable):
 
 		# Cached?
 		cache = self._servletCacheByPath.get(path, None)
-		
+
 		# File is not newer?
 		if cache and self._servletCacheByPath[path]['timestamp']<os.path.getmtime(path):
 			cache = None
-			
+
 		# Instance can be reused?
 		if cache and not cache['instance'].canBeReused():
 			cache = None
 
-		# Create the cache?		
+		# Create the cache?
 		if not cache:
 			# Add the path to sys.path. @@ 2000-05-09 ce: not the most ideal solution, but works for now
 			dir = os.path.split(path)[0]
-			
+
 			if not dir in sys.path:
 				sys.path.insert(0, dir)
 
@@ -440,7 +444,7 @@ class Application(Configurable):
 					# ^ @@ 2000-05-03 ce: Maybe the web browser doesn't want an exception for bad extensions. We probably need a nicer message to the user...
 					#                     On the other hand, that can always be done by providing a factory for '.*'
 			assert factory.uniqueness()=='file', '%s uniqueness is not supported.' % factory.uniqueness()
-			
+
 			# Get the servlet and create the cache
 			cache = {
 				'instance':  factory.servletForTransaction(transaction),
@@ -452,7 +456,7 @@ class Application(Configurable):
 
 		# Set the transaction's servlet
 		transaction.setServlet(cache['instance'])
-	
+
 	##JSL
 	def getServlet(self, transaction, path, cache=None): #send the cache if you want the cache info set
 		ext = os.path.splitext(path)[1]
@@ -467,7 +471,7 @@ class Application(Configurable):
 			# ^ @@ 2000-05-03 ce: Maybe the web browser doesn't want an exception for bad extensions. We probably need a nicer message to the user...
 			#                     On the other hand, that can always be done by providing a factory for '.*'
 		assert factory.uniqueness()=='file', '%s uniqueness is not supported.' % factory.uniqueness()
-			
+
 		if not dir in sys.path:
 			sys.path.insert(0, dir)
 		inst = factory.servletForTransaction(transaction)
@@ -492,17 +496,17 @@ class Application(Configurable):
 				#print '>> queue full' #do nothing, don't want to block queue for this
 
 		transaction._servlet._map = None
-			
+
 ##		print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
-		
-			
+
+
 	def newServletCacheItem(self,key,item):
 		""" Safely add new item to the main cache.  Not woried about the retrieval for now.
 		I'm not even sure this is necessary, as it's a one bytecode op, but it doesn't cost much of anything speed wise."""
 		self._cacheDictLock.acquire()
 		self._servletCacheByPath[key]=item
 		self._cacheDictLock.release()
-		
+
 
 
 
@@ -518,7 +522,7 @@ class Application(Configurable):
 		# File is not newer?
 		if cache and self._servletCacheByPath[path]['timestamp']<os.path.getmtime(path):
 			cache = None
-	
+
 		if not cache:
 			cache = {
 				'instances':  Queue.Queue(self._instanceCacheSize),
@@ -552,17 +556,17 @@ class Application(Configurable):
 					inst = cache['instances'].get() # block, it's really there
 				else:
 					inst = self.getServlet(transaction, path) # really need to create a new one
-		
+
 		# Must be reuseable and threadsafe, get it and put it right back, I'm assuming this will be a rare case
 		else:
 			inst = cache['instances'].get()
 			cache['instances'].put(inst)
-				
+
 		# Set the transaction's servlet
 		transaction.setServlet(inst)
 
 	##END JSL threadpool
-	
+
 	def handleExceptionInTransaction(self, excInfo, transaction):
 		self._exceptionHandlerClass(self, transaction, excInfo)
 
@@ -588,12 +592,12 @@ class Application(Configurable):
 					head=urlPath #put the old path back, there's no context here
 					prepath = self._Contexts['default']
 				#prepath = self.setting('ServletsDir')
-				if not os.path.isabs(prepath): 
+				if not os.path.isabs(prepath):
 					prepath = os.path.join(self.serverDir(), prepath)
 				#ssPath = os.path.join(prepath, urlPath)
 				ssPath = os.path.join(prepath, head)
 				ssPath=os.path.normpath(ssPath)
-			
+
 			if os.path.splitext(ssPath)[1]=='':
 				filenames = glob(ssPath+'.*')
 				if len(filenames)==1:
@@ -601,7 +605,7 @@ class Application(Configurable):
 				else:
 					return None  # that's right: return None and don't modify the cache
 			self._serverSidePathCacheByPath[urlPath] = ssPath
-			
+
 		return ssPath
 
 
