@@ -321,21 +321,20 @@ create table _MKClassIds (
 	name varchar(100)
 );
 ''')
-		wr('insert into _MKClassIds (id, name) values\n')
 		id = 1
 		values = []
 		for klass in self._model._allKlassesInOrder:
-			values.append('\t(%s, %r)' % (id, klass.name()))
+			wr('insert into _MKClassIds (id, name) values ')
+			wr('\t(%s, %r);\n' % (id, klass.name()))
 			klass.setId(id)
 			id += 1
-		wr(',\n'.join(values))
-		wr(';\n\n')
+		wr('\n')
 
 	def didWriteCreateSQL(self, generator, out):
 		sql = generator.setting('PostSQL', None)
 		if sql:
 			out.write('/* PostSQL start */\n' + sql + '\n/* PostSQL end */\n\n')
-		out.write('show tables\n\n')
+		out.write('\d\n\n')
 		out.write('/* end of generated SQL */\n')
 
 	def writeDeleteAllRecords(self, generator, file):
