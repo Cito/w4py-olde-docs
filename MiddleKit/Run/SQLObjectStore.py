@@ -131,8 +131,7 @@ class SQLObjectStore(ObjectStore):
 		Raises an exception if theClass parameter is invalid, or the object cannot be located.
 		'''
 		klass = self._klassForClass(aClass)
-		where = 'where %s=%d' % (klass.sqlIdName(), serialNum)
-		objects = self.fetchObjectsOfClass(klass, where)
+		objects = self.fetchObjectsOfClass(klass, serialNum=serialNum)
 		count = len(objects)
 		if count==0:
 			if default is NoDefault:
@@ -143,11 +142,12 @@ class SQLObjectStore(ObjectStore):
 			assert count==1
 			return objects[0]
 
-	def fetchObjectsOfClass(self, aClass, clauses='', isDeep=1):
+	def fetchObjectsOfClass(self, aClass, clauses='', isDeep=1, serialNum=None):
 		'''
 		Fetches a list of objects of a specific class. The list may be empty if no objects are found.
 		aClass can be a Klass object (from the MiddleKit object model), the name of the class (e.g., a string) or a Python class.
 		The clauses argument can be any SQL clauses such as 'where x<5 order by x'. Obviously, these could be specific to your SQL database, thereby making your code non-portable. Use your best judgement.
+		serialNum can be a specific serial number if you are looking for a specific object.  If serialNum is provided, it overrides the clauses.
 		You should label all arguments other than aClass:
 			objs = store.fetchObjectsOfClass('Foo', clauses='where x<5')
 		The reason for labeling is that this method is likely to undergo improvements in the future which could include additional arguments. No guarantees are made about the order of the arguments except that aClass will always be the first.
@@ -162,6 +162,8 @@ class SQLObjectStore(ObjectStore):
 			colNames = [klass.sqlIdName()]
 			colNames.extend([attr.sqlColumnName() for attr in attrs])
 			className = klass.name()
+			if serialNum is not None:
+				clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
 			count = self.executeSQL('select %s from %s %s;' % (
 				','.join(colNames), className, clauses))
 			for row in self._cursor.fetchall():
@@ -186,7 +188,7 @@ class SQLObjectStore(ObjectStore):
 				objs.append(obj)
 		if isDeep:
 			for klass in klass.subklasses():
-				objs.extend(self.fetchObjectsOfClass(klass, clauses, isDeep))
+				objs.extend(self.fetchObjectsOfClass(klass, clauses, isDeep, serialNum))
 		return objs
 
 
