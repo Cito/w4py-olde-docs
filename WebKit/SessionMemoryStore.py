@@ -1,4 +1,5 @@
 from SessionStore import SessionStore
+from SessionFileStore import SessionFileStore
 import os
 
 
@@ -16,13 +17,11 @@ class SessionMemoryStore(SessionStore):
 		SessionStore.__init__(self, app)
 		self._store = {}
 		if self._app.server().isPersistent():
-			filename = 'Sessions/AllSessions.ses'
-			if os.path.exists(filename):
-				try:
-					file = open(filename)
-					self._store = self.decoder()(file)
-				except:
-					print 'WARNING: Found %s, but could not load.' % filename
+			filestore = SessionFileStore(app)
+			keys = filestore.keys()
+			for i in keys:
+				self[i] = filestore[i]
+
 
 
 	## Access ##
@@ -55,6 +54,8 @@ class SessionMemoryStore(SessionStore):
 		pass
 
 	def storeAllSessions(self):
+		print "Storing Sessions to file.\n"
 		if self._app.server().isPersistent():
-			file = open("Sessions/AllSessions.ses", "w")
-			self.encoder()(self._store, file)
+			filestore = SessionFileStore(self._app)
+			for i in self.keys():
+				filestore[i]=self[i]

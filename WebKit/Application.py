@@ -120,6 +120,7 @@ class Application(Configurable, CanContainer, Object):
 		# Create the session store
 		from SessionMemoryStore import SessionMemoryStore
 		from SessionFileStore import SessionFileStore
+		from SessionDynamicStore import SessionDynamicStore
 		klass = locals()['Session'+self.setting('SessionStore')+'Store']
 		assert type(klass) is ClassType
 		self._sessions = klass(self)
@@ -165,7 +166,8 @@ class Application(Configurable, CanContainer, Object):
 		self._sessSweepThread.start()
 
 	def sweepSessionsContinuously(self,close):
-		"""Invoked by __init__ via a new thread to clean out stale sessions in the background. This method doesn't exit until self.running is 0.
+		"""
+		Invoked by __init__ via a new thread to clean out stale sessions in the background. This method doesn't exit until self.running is 0.
 		"""
 		while self.running:
 			self.sweepSessions()
@@ -175,19 +177,12 @@ class Application(Configurable, CanContainer, Object):
 				# @@ 2000-08-04 ce: make sleep interval or div factor a setting
 			except IOError:
 				pass
+		self._sessions.storeAllSessions()
 
 	def sweepSessions(self):
 		''' Removes stale sessions by checking their lastAccessTime(). Session life time is configured via the SessionTimeout setting. '''
-		sessions = self._sessions
-		curTime = time()
-		for key in sessions.keys():
-			sess = sessions[key]
-			if (curTime - sess.lastAccessTime()) >= sess.timeout()  or  sess.timeout()==0:
-				sessions[key].expiring()
-				del sessions[key]
-		sessions.storeAllSessions()
-
-
+		self._sessions.cleanStaleSessions()
+		
 
 
 	def shutDown(self):
