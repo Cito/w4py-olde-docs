@@ -58,7 +58,7 @@ class Klasses(ModelObject, UserDict):
 		for klass in self._model._allKlassesInOrder:
 			klass.setId(id)
 			id += 1
-        
+
 
 	## Accessing ##
 
@@ -136,7 +136,11 @@ class Klasses(ModelObject, UserDict):
 	## Self utility ##
 
 	def pyClassNameForAttrDict(self, dict):
-		""" Given a raw attribute definition (in the form of a dictionary), this method returns the name of the Python class that should be instantiated for it. This method relies primarily on dict['Type']. """
+		"""
+		Given a raw attribute definition (in the form of a dictionary), this method
+		returns the name of the Python class that should be instantiated for it.
+		This method relies primarily on dict['Type'].
+		"""
 		typeName = dict['Type']
 		if not typeName:
 			raise Exception, 'Blank type for dict: %s' % dict
