@@ -18,7 +18,12 @@ improve. Also, update these notes immediately following a release.
 
 
 <h2>To Do</h2>
-* nothing except as noted below with @@
+* merge notes on release candidates vs. final version
+* ReleaseHelper.py
+  * extract version from Properties.py rather than prompting for it
+  * cvs tags
+* Add notes on download mirror
+  scp Webware-VER.tar.gz esterbro@ebad.pair.com:public_html/python/webware/
 
 
 <h2>Last minute tweaks</h2>
@@ -46,17 +51,10 @@ improve. Also, update these notes immediately following a release.
 
 <h2>Cut release candidate</h2>
 # Must be done on UNIX (or permissions are lost)
-* Make sure Properties.py's version has an 'rcX' added to it.
-* Make a fresh workspace as an anon user:
-  > cvs -d:pserver:anonymous@cvs.Webware.sourceforge.net:/cvsroot/webware login
+* Make sure Properties.py's version has an a1, a2, b1, or b2, etc.
+* Check out a copy and upload:
   > cvs -z3 -d:pserver:anonymous@cvs.Webware.sourceforge.net:/cvsroot/webware co Webware
-  > cd Webware
-  > cvs update -P
-  > find . -name '.cvs*' -exec rm {} \;
-  > find . -name 'CVS' -exec rm -rf {} \;
-  > cd ..
-  > tar czf Webware-VERrcX.tar.gz Webware
-  > scp Webware-VERrcX.tar.gz USER@shell1.sourceforge.net:/home/groups/ftp/pub/webware
+  > Webware/bin/ReleaseHelper.py
 * Download the release candidate, install and test
   * Check that the right version show up in the WebKit examples, including rcX.
 * Announce:
@@ -100,22 +98,11 @@ FTP to SourceForge.net:
 
 > ncftpput -V upload.sourceforge.net /incoming Webware-VER.tar.gz
 
-The long way only if you need it:
-
-> ftp upload.sourceforge.net
-  > user: ftp
-  > pwd: <e-mail addr>
-  > cd incoming
-  > bin
-  > hash
-  > put Webware-VER.tar.gz
-
-
 * Log into <a href=http://sourceforge.net>sourceforge.net</a>.
 * Go to the <a href=https://sourceforge.net/project/?group_id=4866>Webware Project Page</a> @ SourceForge.
 * Click 'Admin' in the top menu bar.
 * Click 'Edit/Release Files' in the second menu bar.
-* Proceed to completion, bug don't send users notification of
+* Proceed to completion, but don't send users notification of
   release until final test is performed and the web site is updated.
 * Reference for the above: <a href=http://sfdocs.sourceforge.net/sfdocs/display_topic.php?topicid=22>"Making File Releases"</a>
 
