@@ -70,6 +70,9 @@ class TaskHandler:
 		
 	## Attributes ##
 	
+	def isRunning(self):
+		return self._isRunning
+	
 	def runAgain(self):
 		"""
 		This method lets the Scheduler check to see whether this task should be 
