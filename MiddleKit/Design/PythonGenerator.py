@@ -455,9 +455,19 @@ class AnyDateTimeAttr:
 ''' % self.mxDateTimeTypeName().replace('Type', 'From'))
 		dateTimeTypes = []
 		if nativeDateTime:
-			dateTimeTypes.append('datetime.'+self.nativeDateTimeTypeName()) # python
+			# Python's datetime types
+			typeNames = self.nativeDateTimeTypeName()
+			if not isinstance(typeNames, tuple):
+				typeNames = (typeNames,)
+			for typeName in typeNames:
+				dateTimeTypes.append('datetime.'+typeName)
 		if mxDateTime:
-			dateTimeTypes.append('mxDateTime.' + self.mxDateTimeTypeName()) # egenix
+			# egenix's mx.DateTime types
+			typeNames = self.mxDateTimeTypeName()
+			if not isinstance(typeNames, tuple):
+				typeNames = (typeNames,)
+			for typeName in typeNames:
+				dateTimeTypes.append('mxDateTime.' + typeName)
 		assert dateTimeTypes
 		if len(dateTimeTypes)>1:
 			dateTimeTypes = '(' + ', '.join(dateTimeTypes) + ')'
@@ -481,7 +491,7 @@ class DateAttr:
 class TimeAttr:
 
 	def nativeDateTimeTypeName(self):
-		return 'time'
+		return ('time', 'timedelta')
 
 	def mxDateTimeTypeName(self):
 		return 'DateTimeDeltaType'
