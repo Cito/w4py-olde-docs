@@ -56,14 +56,17 @@ class Scheduler(Thread):
 
 
 	## Attributes ##
+	
+	def runningTasks(self):
+		return self._running
 
 	def running(self, name, default=None):
 		"""
-		Returns a task with the given name from the "running" list, if it
-		is present there.
+		Returns a task with the given name from the "running" list, 
+		if it is present there.
 		"""
 		return self._running.get(name, default)
-
+			
 	def hasRunning(self, name):
 		"""
 		Check to see if a task with the given name is currently running.
@@ -89,12 +92,15 @@ class Scheduler(Thread):
 		except:
 			return None
 
+	def scheduledTasks(self):
+		return self._scheduled
+
 	def scheduled(self, name, default=None):
 		"""
 		Returns a task from the scheduled list.
-		"""
+		"""			
 		return self._scheduled.get(name, default)
-
+					
 	def hasScheduled(self, name):
 		"""
 		Is the task with he given name in the scheduled list?
@@ -118,6 +124,9 @@ class Scheduler(Thread):
 		except:
 			return None
 
+	def onDemandTasks(self):
+		return self._onDemand
+		
 	def onDemand(self, name, default=None):
 		"""
 		Returns a task from the onDemand list.
@@ -201,7 +210,7 @@ class Scheduler(Thread):
 		if minute > currMin:
 			minuteDifference = minute - currMin
 		elif minute < currMin:
-			minute_difference = 60 - currMin + minute
+			minuteDifference = 60 - currMin + minute
 		else: #equal
 			minuteDifference = 0
 
