@@ -103,12 +103,16 @@ class PSPServletFactory(ServletFactory):
 	def loadClass(self, transaction, path):
 		classname = self.computeClassName(path)
 		classfile = os.path.join(self.cacheDir, classname + ".py")
-		if not os.path.exists(classfile):
+		mtime = os.path.getmtime(path)
+		if not os.path.exists(classfile) or os.path.getmtime(classfile) != mtime:
 			context = Context.PSPCLContext(path, transaction)
 			context.setClassName(classname)
 			context.setPythonFileName(classfile)
 			clc = PSPCompiler.Compiler(context)
 			clc.compile()
+			# Set the modification time of the compiled file to be the same as the source file;
+			# that's how we'll know if it needs to be recompiled
+			os.utime(classfile, (os.path.getatime(classfile), mtime))
 		theClass = self.loadClassFromFile(transaction, classfile, classname)
 		return theClass
 			
