@@ -53,6 +53,20 @@ def charWrap(s, width, hanging=0):
 		i = i + 1
 	return string.join(lines, '\n')
 
+
+def excstr(e):
+	"""
+	Returns a string for the exception in the format that Python normally outputs in interactive
+	shells and such:
+		<ExceptionName>: <message>
+		AttributeError: 'object' object has no attribute 'bar'
+	Neither str(e) nor repr(e) do that.
+	"""
+	if e is None:
+		return None
+	return '%s: %s' % (e.__class__.__name__, e)
+
+
 # Python 2.3 contains mktemp and mkstemp, both of which accept a
 # directory argument.  Earlier versions of Python only contained
 # mktemp which didn't accept a directory argument.  So we have to
