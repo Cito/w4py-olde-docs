@@ -58,6 +58,7 @@ WebKit 0.4
 <br> &nbsp; &nbsp; &nbsp;  <a href="#AppServerNotes_Threaded"><font size=>ThreadedAppServer</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#AppServerNotes_Async"><font size=>AsyncThreadedAppServer</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#AppServerNotes_Monitoring"><font size=>Monitoring</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#AppServerNotes_Other"><font size=>Other Notes</font></a>
 <br>  <a href="#Future"><font size=+1>Future</font></a>
 <br>  <a href="#Credit"><font size=+1>Credit</font></a>
 </font></p>
@@ -254,6 +255,8 @@ the CGI specification, by running the following command:
 
 <p> Stopping the app server is accomplished by simply going to it's terminal/command window and hitting Control-C. The app server is designed to intercept this interruption and shut down gracefully. This includes saving session data to disk, if necessary.
 
+<p> [Windows] If Control-C doesn't work, try Control-Break.
+
 <p> [UNIX] If you don't have access to the terminal window of the app server (perhaps because you used rlogin, telnet or ssh to remotely access the machine), you can use <code>ps -ax | grep AppServer</code> to get the pid <code>kill -s 2 &lt;pid&gt;</code> to effect a Control-C.
 
 
@@ -422,6 +425,11 @@ the CGI specification, by running the following command:
 <p> [UNIX] In order to provide additional stability and peace of mind, a monitor process has been developed.  The monitor is responsible for starting the AppServer and monitoring it's health.  If it detects that the AppServer is not responding, it will start a new AppServer and clean up the old one.  In order to use the monitor, run the file wkMonitor.py.  The wkMonitor process will handle the starting of the main AppServer. In order to shut down WebKit when using the monitor process, run stopMonitor.py.
 
 <p> This process will be available on Windows systems in the near future.
+
+
+<a name=AppServerNotes_Other><h3>Other Notes</h3></a>
+
+<p> See <a href=#Adapters_Stopping>Stopping the App Server</a> and <a href=#Adapters_Reloading>Reloading Servlets</a> above in <a href=#Adapters>Adapters</a>.
 
 
 <a name=Future><h2>Future</h2></a>
