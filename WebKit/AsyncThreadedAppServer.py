@@ -50,7 +50,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		addr = self.address()
 		self.bind(addr)
 		print "Listening on", addr
-		open('address.text', 'w').write('%s:%d' % (addr[0], addr[1]))
+		open(self.serverSidePath('address.text'), 'w').write('%s:%d' % (addr[0], addr[1]))
 
 		self.running=1
 

@@ -60,6 +60,7 @@ class ThreadedAppServer(AppServer):
 		AppServer.__init__(self)
 		self._addr = None
 		self._poolsize = self.setting('ServerThreads')
+		self.monitorPort = None
 		self.threadPool = []
 		self.requestQueue = Queue.Queue(self._poolsize*2) # twice the number of threads we have
 		self.rhQueue = Queue.Queue(0) # This will grow to a limit of the number of
@@ -70,8 +71,8 @@ class ThreadedAppServer(AppServer):
 		addr = self.address()
 		self.mainsocket.bind(addr)
 		print "Listening on", addr
-		open('address.text', 'w').write('%s:%d' % (addr[0], addr[1]))
-		self.monitorPort=addr[1]-1
+		open(self.serverSidePath('address.text'), 'w').write('%s:%d' % (addr[0], addr[1]))
+		self.monitorPort = addr[1]-1
 
 		out = sys.stdout
 		out.write('Creating %d threads' % self._poolsize)
