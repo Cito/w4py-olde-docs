@@ -18,6 +18,7 @@ from Application import Application
 from PlugIn import PlugIn
 import sys, os
 
+from threading import Thread, Event
 
 DefaultConfig = {
 	'PrintConfigAtStartUp': 1,
@@ -55,6 +56,20 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 		self.running = 1
 
+		if self.isPersistent():
+			self._closeEvent = Event()
+			self._closeThread = Thread(target=self.closeThread)
+##			self._closeThread.setDaemon(1)
+			self._closeThread.start()
+		
+
+	def closeThread(self):
+		self._closeEvent.wait()
+		self.shutDown()
+		
+	def initiateShutdown(self):
+		self._closeEvent.set()		
+		
 
 
 	def recordPID(self):

@@ -8,7 +8,7 @@ from AppServer import AppServer
 from Application import Application
 from marshal import dumps, loads
 import os, sys
-from threading import Lock, Thread
+from threading import Lock, Thread, Event
 import Queue
 import select
 import socket
@@ -26,6 +26,10 @@ except:
 
 debug = 0
 global server
+server = None
+global monitor
+monitor = 0
+
 
 #Need to know this value for communications
 #Note that this limits the size of the dictionary we receive from the AppServer to 2,147,483,647 bytes
@@ -58,21 +62,19 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		out.write('Creating %d threads' % self._poolsize)
 		for i in range(self._poolsize): #change to threadcount
 			t = Thread(target=self.threadloop)
-			t.setDaemon(1)
+##			t.setDaemon(1)  #if the thread is a daemon, then thread.join appears to return immediately
 			t.start()
 			self.threadPool.append(t)
 			out.write(".")
 			out.flush()
 		out.write("\n")
 
-	    #self.asyn_thread = Thread(target=self.asynloop)
-	    #self.asyn_thread.start()
-
 		self.setRequestHandlerClass(RequestHandler)
 
 		self.listen(self._poolsize*2) # @@ 2000-07-14 ce: hard coded constant should be a setting
 
 		self.recordPID()
+
 		print "Ready\n"
 
 
@@ -164,14 +166,21 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		Cleanup when being shut down.
 		"""
 		print "AppServer: Shutting Down AsyncThreadedAppServer"
-		self.running = 0
+		self.running=0
 		self.close()
 		for i in range(self._poolsize):
-			self.requestQueue.put(None) #tells threads to exit
+			self.requestQueue.put(None) #tells threads to exit, in addition to the self.running=0
+		for i in self.threadPool:
+			i.join()  #don't continue 'till we have all the threads
+		print "Socket Count: %s" % len(asyncore.socket_map)
+##		for i in asyncore.socket_map.keys():
+##			print asyncore.socket_map[i]
+		if len(asyncore.socket_map) > monitor+1:
+			time.sleep(5)  #try to allow for connections to close, but don't wait too long.  Sometimes, they never close?
+		print "Socket Count: %s" % len(asyncore.socket_map)
 		asyncore.close_all()
 		AppServer.shutDown(self)
 		print "AppServer: All Services have been shutdown"
-
 
 
 
@@ -356,10 +365,12 @@ class Monitor(asyncore.dispatcher):
 
 
 
+
 def run(useMonitor=0):
 	from errno import EINTR
 	import select
 	global server
+	global monitor
 	try:
 		server = None
 		try:
@@ -373,15 +384,20 @@ def run(useMonitor=0):
 			import traceback
 			traceback.print_tb(tb[2])
 			sys.exit()
+
 		if useMonitor:
-			monitor = Monitor(server)
+			monitor = 1
+			monitor_socket = Monitor(server)
 		else:
 			monitor = 0
+
 		try:
-			asyncore.loop()
+			asyncore.loop(2)
 		except select.error, v:
-			print "error caught in asyncore.loop"
-			if v[0] != EINTR: raise
+			if v[0] == EINTR:
+				print "Shutdown not completely clean"
+			elif v[0] == 0: pass
+			else: raise
 		except KeyboardInterrupt, e:
 			print "Initiating Shutdown"
 		except Exception, e:
@@ -395,15 +411,17 @@ def run(useMonitor=0):
 				import traceback
 			traceback.print_tb(tb[2])
 	finally:
-		if server and server.running:
-			server.shutDown()
+		if server:
+			if server.running:
+				server.initiateShutdown()
+			server._closeThread.join()
 	sys.exit()
 
 
 def shutDown(arg1,arg2):
 	global server
 	print "Shutdown Called"
-	server.shutDown()
+	server.initiateShutdown()
 
 import signal
 signal.signal(signal.SIGINT, shutDown)

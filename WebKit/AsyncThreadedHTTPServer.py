@@ -39,14 +39,17 @@ To-Do:
     - Comment the code in HTTPRequestHandler.      
 """
 
-from AsyncThreadedAppServer import AsyncThreadedAppServer, Monitor, MainRelease
+from AsyncThreadedAppServer import Monitor, MainRelease
+import AsyncThreadedAppServer
 
 from cStringIO import StringIO
 from BaseHTTPServer import BaseHTTPRequestHandler
 import urllib, string, time, asyncore, socket
 
+global monitor
+monitor=0
 
-class AsyncThreadedHTTPServer(AsyncThreadedAppServer):
+class AsyncThreadedHTTPServer(AsyncThreadedAppServer.AsyncThreadedAppServer):
 	'''
 	This derived class customizes AsyncThreadedAppServer so that it
 	can serve HTTP requests directly, using a different implementation
@@ -54,7 +57,7 @@ class AsyncThreadedHTTPServer(AsyncThreadedAppServer):
 	See below for the modified version of RequestHandler.
 	'''
 	def __init__(self):
-		AsyncThreadedAppServer.__init__(self)
+		AsyncThreadedAppServer.AsyncThreadedAppServer.__init__(self)
 		# Use a custom request handler class that is designed to respond
 		# to http directly
 		self.setRequestHandlerClass(HTTPRequestHandler)
@@ -66,10 +69,13 @@ class AsyncThreadedHTTPServer(AsyncThreadedAppServer):
 		'''
 		# I didn't write this code myself, but I can't remember where I got it
 		# from.  In any case, it seems to do what we need.
+		return 'localhost'
 		if self._serverName is None:
 			host, port = self.address()
+			print "Using hostname %s" % host
 			if not host or host == '0.0.0.0':
 				host = socket.gethostname()
+
 			hostname, hostnames, hostaddrs = socket.gethostbyaddr(host)
 			if '.' not in hostname:
 				for host in hostnames:
@@ -275,17 +281,30 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		self.wfile.write(rawResponse['contents'])
 
 
-def main(monitor = 0):
+def main(use_monitor = 0):
+	import select
+	from errno import EINTR
+	global server
+	global monitor
+	monitor = use_monitor
 	try:
 		server = None
 		server = AsyncThreadedHTTPServer()
+		AsyncThreadedAppServer.server = server
+
 		if monitor:
-			monitor = Monitor(server)
-		asyncore.loop()
+			monitor_socket = Monitor(server)
+		try:
+			asyncore.loop(2)
+		except select.error, v:
+			if v[0] == EINTR:
+				print "Shutdown may not be clean."
+				print v
+			elif v[0] == 0: pass
+			else:raise
 	except Exception, e: #Need to kill the Sweeper thread somehow
-		print e
-		print "Exiting AppServer"
-		if 0: #See the traceback from an exception
+		print "Exiting AppServer from main"
+		if 1: #See the traceback from an exception
 			tb = sys.exc_info()
 			print tb[0]
 			print tb[1]
@@ -293,10 +312,15 @@ def main(monitor = 0):
 			traceback.print_tb(tb[2])
 		if server:
 			server.running=0
-			server.shutDown()
+			#server.shutDown()
 		#return
 		sys.exit()
 		raise Exception()
+	if server:
+		if server.running:
+			server.shutDown()
+		else:
+			server._closeThread.join()
 
 
 if __name__=='__main__':

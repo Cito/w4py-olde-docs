@@ -19,7 +19,7 @@ from Common import *
 from AppServer import AppServer
 from marshal import dumps, loads
 import os, sys
-from threading import Lock, Thread
+from threading import Lock, Thread, Event
 import Queue
 import select
 import socket
@@ -86,7 +86,11 @@ class ThreadedAppServer(AppServer):
 
 		self.mainsocket.listen(64) # @@ 2000-07-10 ce: hard coded constant should be a setting
 		self.recordPID()
+
+		
 		print "Ready\n"
+
+		
 
 	def isPersistent(self):
 		return 1
@@ -155,14 +159,16 @@ class ThreadedAppServer(AppServer):
 
 
 	def shutDown(self):
-		print "Shutting Down Threaded AppServer"
-		self.running = 0
+		self.running=0
+		self._shuttingdown=1  #jsl-is this used anywhere?
+		print "ThreadedAppServer: Shutting Down"
 		self.mainsocket.close()
 		for i in range(self._poolsize):
 			self.requestQueue.put(None)#kill all threads
 		for i in self.threadPool:
 			i.join()
 		AppServer.shutDown(self)
+		print "ThreadedAppServer:  All services have been shut down."
 
 
 
@@ -241,7 +247,7 @@ class RequestHandler:
 	def handleRequest(self):
 
 		verbose = self.server._verbose
-		verbose = 1
+		
 		startTime = time.time()
 		if verbose:
 			print 'BEGIN REQUEST'
@@ -353,15 +359,18 @@ class RequestHandler:
 
 
 
-def run(useMonitor=0):
+def run(useMonitor = 0):
 	global server
+	global monitor
+	monitor = useMonitor
 	try:
 		server = None
 		server = ThreadedAppServer()
 		if useMonitor:
-			monitor = Monitor(server)
+			monitor_socket = Monitor(server)
 		else:
 			monitor = 0
+
 		# On NT, run mainloop in a different thread because it's not safe for
 		# Ctrl-C to be caught while manipulating the queues.
 		# It's not safe on Linux either, but there, it appears that Ctrl-C
@@ -381,22 +390,23 @@ def run(useMonitor=0):
 				server.mainloop(monitor)
 			except KeyboardInterrupt, e:
 				server.shutDown()
-	except Exception, e: #Need to kill the Sweeper thread somehow
+	except Exception, e:
 		import traceback
 		traceback.print_exc(file=sys.stderr)
 		#print e
 		print
 		print "Exiting AppServer"
-		if server.running:
-			server.running=0
-			server.shutDown()
-		sys.exit()
+		if server:
+			if server.running:
+				server.initiateShutdown()
+			server._closeThread.join()
+	sys.exit()
 
 
 def shutDown(arg1,arg2):
 	global server
 	print "Shutdown Called"
-	server.shutDown()
+	server.initiateShutdown()
 
 import signal
 signal.signal(signal.SIGINT, shutDown)
