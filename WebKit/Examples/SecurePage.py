@@ -39,7 +39,7 @@ else:
 				# Check if this is a valid user/password
 				username = request.field('username')
 				password = request.field('password')
-				if self.is_valid_user_and_password(username, password) and request.field('loginid', 'nologin')==loginid:
+				if self.isValidUserAndPassword(username, password) and request.field('loginid', 'nologin')==loginid:
 					# Success; log them in and send the page
 					session.setValue('authenticated_user', username)
 					ExamplePage.writeHTML(self)
@@ -56,7 +56,7 @@ else:
 				session.values().clear()
 				app.forwardRequestFast(trans, 'LoginPage')
 		
-		def is_valid_user_and_password(self, username, password):
+		def isValidUserAndPassword(self, username, password):
 			# Replace this with a database lookup, or whatever you're using for
 			# authentication...
 			users = [('Alice', 'Alice'), ('Bob', 'Bob')]
