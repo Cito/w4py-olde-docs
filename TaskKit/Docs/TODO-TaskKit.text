@@ -1,21 +1,11 @@
-
-Update
-------
-
-Added Docs/, Docs/TODO-TaskKit.text
-
-Added Tests/
-	- Moved the test in the main code of TaskManager.py to Tests/BasicTest.py
-	- I added Test.py in the same vain as UserKit/Tests/Test.py. It uses MiscUtils.unittest.
+TaskKit
+Webware for Python
+TO DO
 
 
-Broke TaskManager into separate files for each class, like we do for the other components. I was amused to find there's not even a class named TaskManager...  :^)
-
-WebKit's taskManager() returns a Scheduler(). Seems like the method should be renamed scheduler() (or the class gets renamed).
-
-We are in serious need of quality doc strings. Right now there are practically no doc strings for anything.
-
-Tom & Jay, since you have done the work on this Kit, could you please add some ASAP?
+<misc>
+<tests>
+<docs>
 
 
 <misc>
@@ -27,6 +17,14 @@ Tom & Jay, since you have done the work on this Kit, could you please add some A
 	[ ] Does a Task's run() really always have to invoke self.proceed()?
 
 </misc>
+
+
+<tests>
+
+	[ ] make tests that cover all methods and features
+
+</tests>
+
 
 
 <docs>
@@ -43,12 +41,3 @@ Tom & Jay, since you have done the work on this Kit, could you please add some A
 	[ ] Properties: Better synopsis
 
 </docs>
-
-
-<testing>
-
-	[ ] add a Tests/ directory
-
-	[ ] make tests that cover all methods and features
-
-</testing>
