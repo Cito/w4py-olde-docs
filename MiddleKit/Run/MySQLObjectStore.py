@@ -29,7 +29,7 @@ class MySQLObjectStore(SQLObjectStore):
 
 	def newConnection(self):
 		args = self._dbArgs.copy()
-		args['db'] = self._model.sqlDatabaseName()
+		self.augmentDatabaseArgs(args)
 		return self.dbapiModule().connect(**args)
 
 	def retrieveLastInsertId(self, conn, cur):
@@ -41,7 +41,7 @@ class MySQLObjectStore(SQLObjectStore):
 	def dbapiModule(self):
 		return MySQLdb
 
-	def augmentDBArgsForPoolIfNeeded(self, args):
+	def augmentDatabaseArgs(self, args, pool=0):
 		if not args.get('db'):
 			args['db'] = self._model.sqlDatabaseName()
 

@@ -138,6 +138,8 @@ class Model:
 				if samples is not None:
 					for line in samples:
 						file.write(line)
+
+			self.writePostSamplesSQL(generator, file)
 			file.close()
 
 			del self._klassSamples
@@ -233,6 +235,9 @@ class Model:
 			if field:
 				return 0
 		return 1
+
+	def writePostSamplesSQL(self, generator, output):
+		pass
 
 
 class Klasses:
@@ -871,6 +876,12 @@ class PrimaryKey:
 		self._name = name
 		self._klassid = klass.id()
 		self._props = {'isDerived': 0}
+
+		# this stuff is for PostgreSQLSQLGenerator, but it is awkward 
+		# to keep it there.
+		self._klass = klass
+		if not hasattr(klass, '_maxSerialNum'):
+			klass._maxSerialNum = 0
 
 	def name(self):
 		return self._name

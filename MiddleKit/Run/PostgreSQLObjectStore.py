@@ -1,8 +1,12 @@
 import sys
 from SQLObjectStore import SQLObjectStore
 from MiddleKit.Run.ObjectKey import ObjectKey
-import pgdb as dbi
-from pgdb import Warning, DatabaseError
+from MiddleObject import MiddleObject
+from MiscUtils.MixIn import MixIn
+import psycopg as dbi  # psycopg adapter; apt-get install python2.2-psycopg
+from psycopg import Warning, DatabaseError
+from SQLObjectStore import UnknownSerialNumberError
+from MiscUtils import NoDefault
 
 class PostgreSQLObjectStore(SQLObjectStore):
 	"""
@@ -19,26 +23,39 @@ class PostgreSQLObjectStore(SQLObjectStore):
 	You wouldn't use the 'db' argument, since that is determined by the model.
 	"""
 
+	def setting(self, name, default=NoDefault):
+		# jdh: psycopg doesn't seem to work well with DBPool -- I've experienced
+		# requests blocking indefinitely (deadlock?).  Besides, it does its
+		# own connection pooling internally, so DBPool is unnecessary.
+		if name == 'SQLConnectionPoolSize':
+			return 0
+		return SQLObjectStore.setting(self, name, default)
+
 	def newConnection(self):
 		args = self._dbArgs.copy()
-		args['database'] = self._model.sqlDatabaseName()
+		self.augmentDatabaseArgs(args)
 		return self.dbapiModule().connect(**args)
+
+	def augmentDatabaseArgs(self, args, pool=0):
+		if not args.get('database'):
+			args['database'] = self._model.sqlDatabaseName()
 
 	def _insertObject(self, object, unknownSerialNums):
 		# basically the same as the SQLObjectStore-
 		# version but modified to retrieve the
 		# serialNum via the oid (for which we need
 		# class-name, unfortunately)
-		sql = object.sqlInsertStmt(unknownSerialNums)
-		conn, curs = self.executeSQL(sql)
+		object.klass
+		seqname = "%s_%s_seq" % (object.klass().name(), object.klass().sqlIdName())
+		conn, curs = self.executeSQL("select nextval('%s')" % seqname)
+		id = curs.fetchone()[0]
+		assert id, "Didn't get next id value from sequence"
 
-		oid = curs.lastoid()
-		className = object.__class__.__name__
-		curs.execute("select %s from %s where oid=%d" %
-			( className + "id", className, oid ) )
+		sql = object.sqlInsertStmt(unknownSerialNums,id=id)
+		conn, curs = self.executeSQL(sql,conn)
 		conn.commit()
 
-		object.setSerialNum(curs.fetchone()[0])
+		object.setSerialNum(id)
 		object.setKey(ObjectKey().initFromObject(object))
 		object.setChanged(0)
 
@@ -66,14 +83,66 @@ class PostgreSQLObjectStore(SQLObjectStore):
 			if not self.setting('IgnoreSQLWarnings', 0):
 				conn.rollback()
 				raise
-
-		sys.stderr.write("Committing changes\n")
 		conn.commit()
 
-# Mixins
+	
+class Klass:
+
+	def insertSQLStart(self):
+		"""
+		We override this so that the id column is always specified explicitly.
+		"""
+		if self._insertSQLStart is None:
+			res = ['insert into %s (' % self.sqlTableName()]
+			attrs = self.allDataAttrs()
+			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
+			fieldNames = [self.sqlIdName()] + [attr.sqlColumnName() for attr in attrs]
+			if len(fieldNames)==0:
+				fieldNames = [self.sqlIdName()]
+			res.append(','.join(fieldNames))
+			res.append(') values (')
+			self._insertSQLStart = ''.join(res)
+			self._sqlAttrs = attrs
+		return self._insertSQLStart, self._sqlAttrs
+
+class MiddleObjectMixIn:
+
+
+	def sqlInsertStmt(self, unknowns, id):
+		"""
+		We override this so that the id column is always specified explicitly.
+		"""
+		klass = self.klass()
+		insertSQLStart, sqlAttrs = klass.insertSQLStart()
+		values = []
+		append = values.append
+		append(str(id))
+		for attr in sqlAttrs:
+			try:
+				value = attr.sqlValue(self.valueForAttr(attr))
+			except UnknownSerialNumberError, exc:
+				exc.info.sourceObject = self
+				unknowns.append(exc.info)
+				value = 'NULL'
+			append(value)
+		if len(values)==0:
+			values = ['0']
+		values = ','.join(values)
+		return insertSQLStart+values+');'
+
+MixIn(MiddleObject, MiddleObjectMixIn)
+	# Normally we don't have to invoke MixIn()--it's done automatically.
+	# However, that only works when augmenting MiddleKit.Core classes
+	# (MiddleObject belongs to MiddleKit.Run).
 
 class StringAttr:
-
 	def sqlForNonNone(self, value):
-		# Postgres provides a quoting function for string -- use it.
-		return str(dbi._quote(value))
+		""" psycopg provides a quoting function for string -- use it. """
+		return "%s" % dbi.QuotedString(value)
+
+class BoolAttr:
+	def sqlForNonNone(self, value):
+		if value:
+			return 'TRUE'
+		else:
+			return 'FALSE'

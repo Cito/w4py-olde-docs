@@ -172,11 +172,12 @@ class SQLObjectStore(ObjectStore):
 			poolSize = self.setting('SQLConnectionPoolSize', 0)
 			if poolSize:
 				args = self._dbArgs.copy()
-				self.augmentDBArgsForPoolIfNeeded(args)
+				self.augmentDatabaseArgs(args, pool=1)
 				self._pool = DBPool(self.dbapiModule(), poolSize, **args)
 
-	def augmentDBArgsForPoolIfNeeded(self, args):
-		# see subclasses for examples
+	def augmentDatabaseArgs(self, args, pool=0):
+		# give subclasses the opportunity to add or change 
+		# database arguments
 		pass
 
 	def newConnection(self):
