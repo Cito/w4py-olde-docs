@@ -4,5 +4,8 @@ __version__ = '0.1'
 
 __all__ = ['Core', 'Design', 'Run']
 
+import os
+
 def InstallInWebKit(appServer):
-	pass
+	app = appServer.application()
+	app.addContext('MKBrowser', os.path.normpath('../MiddleKit/WebBrowser'))
