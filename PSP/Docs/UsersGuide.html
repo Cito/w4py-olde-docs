@@ -124,12 +124,15 @@ override.
 <p><b>Example</b> - <i> &lt;%@ page indentSpaces="8" %&gt;</i>
 </ul>
 <p>
+
 <p><li><h3><b>Include Directive</b>- <i>&lt;%@ include</i></h3>
 <p>The include directive tells the parser to insert another file at this point in the page and to parse it for psp content.
 It is generally no problem to include an html file this way.  However, if you do not want your include file to be parsed,
 you may use the <i>&lt;psp:include</i> tag described below.
 <p><b>Example</b> - <i>&lt;%@ include file="myfile.txt"%&gt;</i>
 </ul>
+
+
 <h2>Expression Tag - &lt;%=</h2>
 <p>The expression tag simply evaluates a python variable and inserts its text representation
 into the HTML response.  You may include anything that will evaluate to a value that can
@@ -198,10 +201,10 @@ This is &lt;i&gt;Straight HTML&lt;/i&gt;&lt;br&gt;<br>
 for i in range(5): { %&gt;# Now I'm starting a block for this loop<br>
 z = i*i<br>
 %&gt;<br>
-&lt;!-- Now I've ending the scripting tag that started the block,<br> 
+&lt;!-- Now I'm ending the scripting tag that started the block,<br> 
 but the following lines are still in the block --&gt;<br>
 More straight HTML.  But this is inside the loop started above.&lt;br&gt;<br>
-My i value is now <%= i %>&lt;br&gt;<br>
+My i value is now &lt;%= i %&gt;&lt;br&gt;<br>
 Now I will process it again.&lt;br&gt;<br>
 &lt;%<br> 
 v = z*z <br>
@@ -240,16 +243,26 @@ in the code that PSP generates.
 <p>A PSP:Method can be declared anywhere in the psp sourcefile and will be available throughout the
 PSP file through the standard <i>self.PSPMethodName(parameters)</i> syntax.
 <p>
+
 <h2>Include Tag - "<i>&lt;psp:include"</i></h2>
 <p>
-<p>The include tag inserts a file into the output stream that the psp page will produce, but does not parse that included file for psp content.
-The main parameter is <i>file</i>, which should be set to the filename to be included.  If the filename starts with a "/", it is
-assumed to be an absolute path.  If it doesn't start with a "/", the file path is assumed to be relative to the psp file.  The contents of the include file will not be escaped in any way except for triple-double-quotes ("""), which will be escaped. 
-<p>At every request of this servlet, this file will be read from disk and sent along with the rest of the ouput of the page.
-<p> This tag accepts one additional parameter, "static", which can be set to "true" or "1".  Setting this attribute to true will cause the included file's contents to be embedded in the PSP class at generation time.  Any subsequent changes to the file will not be seen by the servlet. (This was the default behavior prior to PSP 0.4).
+<p>The include tag pauses processing on the page and immediately passes the request on the the specified URL.  THe output of that URL will be inserted into the output stream, and then processing will continue on the original page.
+The main parameter is <i>path</i>, which should be set to the path to the resources to be included.  This will be relative to the current page, unless the path is specified as absolute by having the first character as "/". The path parameter can point to any valid url on this WebKit AppServer. This functionality is accomplshed using the WebKit Application's forwardRequestFast function, which means that the current Request, Response and Session objects will also be used by the URL to which this request is sent. 
 <p>
 <p><b>Example</b> - <i>&lt;psp:include file="myfile.html" &gt;</i>
 <p>
+
+<h2>Insert Tag - "<i>&lt;psp:insert"</i></h2>
+<p>
+<p>The insert tag inserts a file into the output stream that the psp page will produce, but does not parse that included file for psp content.
+The main parameter is <i>file</i>, which should be set to the filename to be inserted.  If the filename starts with a "/", it is
+assumed to be an absolute path.  If it doesn't start with a "/", the file path is assumed to be relative to the psp file.  The contents of the insert file will not be escaped in any way except for triple-double-quotes ("""), which will be escaped. 
+<p>At every request of this servlet, this file will be read from disk and sent along with the rest of the ouput of the page.
+<p> This tag accepts one additional parameter, "static", which can be set to "true" or "1".  Setting this attribute to true will cause the inserted file's contents to be embedded in the PSP class at generation time.  Any subsequent changes to the file will not be seen by the servlet. (This was the default behavior prior to PSP 0.4).
+<p>
+<p><b>Example</b> - <i>&lt;psp:insert file="myfile.html" &gt;</i>
+<p>
+
 <h2>JSP Tags not Supported</h2>
 <ul>
 <li>Declaration (&lt;%!)- No need for this tag.  Simply use script tags to declare local variables.
