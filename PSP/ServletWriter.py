@@ -25,23 +25,22 @@ This module holds the actual file writer class.
 
 from Context import *
 
+from MiscUtils.Funcs import mktemp
 import string, os, sys, tempfile
 from PSPReader import *
 
 
 class ServletWriter:
-    
+
 	""" This file creates the servlet source code. Well, it writes it out to a file at least."""
 
 	TAB = '\t'
 	SPACES = '    ' # 4 spaces
 	EMPTY_STRING=''
-    
+
 	def __init__(self,ctxt):
-	
 		self._pyfilename = ctxt.getPythonFileName()
-		tempfile.tempdir=os.path.dirname(self._pyfilename)
-		self._temp = tempfile.mktemp('tmp')
+		self._temp = mktemp('tmp', dir=os.path.dirname(self._pyfilename))
 		self._filehandle = open(self._temp,'w+')
 		self._tabcnt = 0
 		self._blockcount = 0 # a hack to handle nested blocks of python code
