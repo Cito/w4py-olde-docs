@@ -2,6 +2,8 @@ from UserDict import UserDict
 from ModelObject import ModelObject
 from MiscUtils import NoDefault
 import types
+from MiddleKit.Core.ListAttr import ListAttr
+from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 
 
 class Klass(UserDict, ModelObject):
@@ -65,6 +67,7 @@ class Klass(UserDict, ModelObject):
 		Makes two list attributes accessible via methods:
 			allAttrs - every attr of the klass including inherited and derived attributes
 			allDataAttrs - every attr of the klass including inherited, but NOT derived
+			allDataRefAttrs - same as allDataAttrs, but only obj refs and lists
 
 		...and a dictionary attribute used by lookupAttr().
 		"""
@@ -79,15 +82,19 @@ class Klass(UserDict, ModelObject):
 
 		allAttrs = []
 		allDataAttrs = []
+		allDataRefAttrs = []
 		for klass in klasses:
 			attrs = klass.attrs()
 			allAttrs.extend(attrs)
 			for attr in attrs:
 				if not attr.get('isDerived', 0):
 					allDataAttrs.append(attr)
+					if isinstance(attr, ObjRefAttr) or isinstance(attr, ListAttr):
+						allDataRefAttrs.append(attr)
 
 		self._allAttrs = allAttrs
 		self._allDataAttrs = allDataAttrs
+		self._allDataRefAttrs = allDataRefAttrs
 
 		# set up _allAttrsByName which is used by lookupAttr()
 		self._allAttrsByName = {}
@@ -207,6 +214,13 @@ class Klass(UserDict, ModelObject):
 		in the list.
 		"""
 		return self._allDataAttrs
+
+	def allDataRefAttrs(self):
+		"""
+		Returns a list of all data attributes that are obj refs or
+		lists, including those that are inherited.
+		"""
+		return self._allDataRefAttrs
 
 
 	## Klasses access ##

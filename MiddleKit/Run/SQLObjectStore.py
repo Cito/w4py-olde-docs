@@ -483,11 +483,10 @@ class MiddleObjectMixIn:
 		klass = self.klass()
 		insertSQLStart, sqlAttrs = klass.insertSQLStart()
 		values = []
-		sqlValueForName = self.sqlValueForName
 		append = values.append
 		for attr in sqlAttrs:
 			try:
-				value = sqlValueForName(attr.name())
+				value = attr.sqlValue(self.valueForAttr(attr))
 			except UnknownSerialNumberError, exc:
 				exc.info.sourceObject = self
 				unknowns.append(exc.info)
@@ -531,11 +530,6 @@ class MiddleObjectMixIn:
 
 	def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
 		return {'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(), self.sqlObjRef())}
-
-	def sqlValueForName(self, name):
-		# Our valueForKey() comes courtesy of MiscUtils.NamedValueAccess
-		value = self.valueForKey(name)
-		return self.klass().lookupAttr(name).sqlValue(value)
 
 MixIn(MiddleObject, MiddleObjectMixIn)
 	# Normally we don't have to invoke MixIn()--it's done automatically.

@@ -249,7 +249,7 @@ class MiddleObject(NamedValueAccess):
 
 	def addReferencedObjectsToStore(self, store):
 		""" Adds all MK objects referenced by this object to the store """
-		values = [self.valueForAttr(attr) for attr in self.klass().allDataAttrs()]
+		values = [self.valueForAttr(attr) for attr in self.klass().allDataRefAttrs()]
 		for value in values:
 			if isinstance(value, MiddleObject):
 				store.addObject(value)
