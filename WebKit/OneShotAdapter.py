@@ -150,7 +150,3 @@ def main(webKitDir=None):
 
 %s</pre>
 </body></html>\n''' % output)
-
-
-if __name__=='__main__':
-	main()
