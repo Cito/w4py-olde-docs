@@ -258,7 +258,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		''' Returns the version of Webware as a string. '''
 		if not hasattr(self, '_webwareVersion'):
 			from MiscUtils.PropertiesObject import PropertiesObject
-			props = PropertiesObject('../Properties.py')
+			props = PropertiesObject(self.serverSidePath('../Properties.py'))
 			self._webwareVersion = props['versionString']
 		return self._webwareVersion
 
