@@ -104,6 +104,61 @@ def hostName():
 	return hostName
 
 
+_localIP = None
+
+def localIP(remote=('www.yahoo.com', 80), useCache=1):
+	"""
+	Gets the "public" address of the local machine, i.e. that address
+	which is connected to the general Internet.
+
+	This function connects to a remote HTTP server the first time it is
+	invoked (or every time it is invoked with useCache=0). If that is
+	not acceptable, pass remote=None, but be warned that the result is
+	less likely to be externally visible.
+
+	Getting your local ip is actually quite complex. If this function
+	is not serving your needs then you probably need to think deeply
+	about what you really want and how your network is really set up.
+	Search comp.lang.python for "local ip" for more information.
+	http://groups.google.com/groups?q=%22local+ip%22+group:comp.lang.python.*
+	"""
+	global _localIP
+	if useCache and _localIP:
+		return _localIP
+	import socket
+	if remote:
+		# code from Donn Cave on comp.lang.python
+
+		# My notes:
+		# Q: Why not use this?  socket.gethostbyname(socket.gethostname())
+		# A: On some machines, it returns '127.0.0.1' - not what we had in mind.
+		#
+		# Q: Why not use this?  socket.gethostbyname_ex(socket.gethostname())[2]
+		# A: Because some machines have more than one IP (think "VPN", etc.) and
+		#    there is no easy way to tell which one is the externally visible IP.
+
+		try:
+			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			s.connect(remote)
+			ip, port = s.getsockname()
+			s.close()
+			_localIP = ip
+			return _localIP
+		except socket.error:
+			# oh, well. we'll use the local method
+			pass
+
+	addresses = socket.gethostbyname_ex(socket.gethostname())[2]
+	for address in addresses:
+		if address!='127.0.0.1':
+			if useCache:
+				_localIP = address
+			return address
+	if useCache:
+		_localIP = addresses[0]
+	return _localIP
+
+
 def timestamp(numSecs=None):
 	"""
 	Returns a dictionary whose keys give different versions of the timestamp:

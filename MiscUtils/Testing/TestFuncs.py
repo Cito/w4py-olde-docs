@@ -35,6 +35,14 @@ def TestCommas():
 		i = i+2
 
 
+def TestLocalIP():
+	ip = localIP()
+	assert localIP()==ip  # second invocation
+	assert localIP(useCache=None)==ip
+	assert localIP(remote=None, useCache=None)==ip
+	assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80), useCache=None)==ip
+
+
 def TestHostName():
 	# About all we can do is invoke hostName() to see that no
 	# exceptions are thrown, and do a little type checking on the
@@ -79,6 +87,7 @@ def TestUniqueId():
 def Test():
 	TestCommas()
 	TestHostName()
+	TestLocalIP()
 	TestWordWrap()
 	TestUniqueId()
 
