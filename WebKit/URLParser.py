@@ -183,7 +183,9 @@ class ContextParser(URLParser):
 			return
 
 		if hasattr(mod, 'contextInitialize'):
-			result = mod.contextInitialize(self, os.path.normpath(os.path.join(os.getcwd(), dir)))
+			# @@ gat 2003-07-23: switched back to old method of passing application as first parameter
+			# @@ to contextInitialize for backward compatibility
+			result = mod.contextInitialize(application(), os.path.normpath(os.path.join(os.getcwd(), dir)))
 			# @@: funny hack...?
 			if result != None and result.has_key('ContentLocation'):
 				dir = result['ContentLocation']
@@ -309,7 +311,7 @@ class _FileParser(URLParser):
 		if os.path.isdir(name):
 			# directories are dispatched to FileParsers rooted
 			# in that directory
-			fpp = FileParser(os.path.join(self._path, name))
+			fpp = FileParser(name)
 			return fpp.parse(trans, restPart)
 
 		trans.request()._extraURLPath = restPart
@@ -359,15 +361,19 @@ class _FileParser(URLParser):
 		fileStart = os.path.basename(baseName)
 		dir = os.path.dirname(baseName)
 		filenames = []
+		dirnames = []
 		for filename in os.listdir(dir):
 			if filename.startswith('.'):
 				continue
 			elif filename == fileStart:
-				filenames.append(os.path.join(dir, filename))
+				if os.path.isdir(os.path.join(dir, filename)):
+					dirnames.append(os.path.join(dir, filename))
+				else:
+					filenames.append(os.path.join(dir, filename))
 			elif filename.startswith(fileStart) \
 			     and os.path.splitext(filename)[0] == fileStart:
 				filenames.append(os.path.join(dir, filename))
-		good = []
+		good = dirnames
 
 		# Here's where all the settings (except cascading) come
 		# into play -- we filter the possible files based on settings
