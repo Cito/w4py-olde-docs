@@ -217,7 +217,7 @@ class Installer:
 		if os.name=='posix':
 			print 'Fixing permissions on CGI scripts...'
 			for comp in self._comps:
-				print '  %s...' % comp
+				print '  %s...' % comp['name']
 				for filename in glob('%s/*.cgi' % comp):
 					#if self._verbose: print '    %s...' % os.path.basename(filename)
 					cmd = 'chmod a+rx %s' % filename
