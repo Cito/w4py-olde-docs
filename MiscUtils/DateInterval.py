@@ -54,4 +54,17 @@ def timeDecode(s):
         time += int(match.group(0)[:-1]) * timeValues[char]
     return time
 
+# @@-sgd 2002-12-23 - this function does not belong in this module, find a better place.
+def allMatches(source, regex):
+    """Return a list of matches for regex in source
+    """
+    pos = 0
+    end = len(source)
+    rv = []
+    match = regex.search(source, pos)
+    while match:
+        rv.append(match)
+        match = regex.search(source, match.end() )
+    return rv
+
 __all__ = [timeEncode, timeDecode]
