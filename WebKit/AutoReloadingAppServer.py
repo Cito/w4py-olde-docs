@@ -13,10 +13,6 @@ The server will also be restarted if a file which Webware _tried_ to import
 is modified.  This is so that changes to a file containing a syntax error 
 (which would have prevented it from being imported) will also cause the server 
 to restart.
-
-The server is restarted using exec, and uses the same command-line parameters
-are were initially given.  Since exec replaces the existing process, there
-should be no permissions issues and the process id (PID) will remain the same.
 '''
 
 # Attempt to use python-fam (fam = File Alteration Monitor) instead of polling
@@ -104,8 +100,7 @@ class AutoReloadingAppServer(AppServer):
 	def restartIfNecessary(self):
 		"""
 		This should be called regularly to see if a restart is
-		required, and if so, reinitialize the process using
-		os.execve()
+		required.
 
 		Tavis Rudd claims: "this method can only be called by
 		the main thread.  If a worker thread calls it, the
@@ -127,10 +122,11 @@ class AutoReloadingAppServer(AppServer):
 		self._closeThread.join()
 		sys.stdout.flush()
 		sys.stderr.flush()
-		L = [sys.executable]
-		# shutdown has already completed so 'start' not 'restart'
-		L.extend([i.replace('restart','start') for i in sys.argv])
-		os.execve(L[0], L, os.environ)
+		# calling execve() is problematic, since the file descriptors don't
+		# get closed by the OS.  This can result in leaked database connections.
+		# Instead, we exit with a special return code which is recognized by
+		# the AppServer script, which will restart us upon receiving that code.
+		sys.exit(3)
 
 	
 	## Callbacks

@@ -625,6 +625,11 @@ def run(useMonitor = 0, workDir=None):
 			if server.running:
 				server.initiateShutdown()
 			server._closeThread.join()
+		# if we're here as a result of exit() being called,
+		# exit with that return code.
+		if isinstance(e,SystemExit):
+			sys.exit(e)
+
 	sys.exit()
 
 
