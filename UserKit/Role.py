@@ -14,7 +14,7 @@ class Role:
 
 	## Init ##
 
-	def __init__(self, name, description):
+	def __init__(self, name, description=None):
 		self._name = name
 		self._description = description
 
@@ -32,6 +32,15 @@ class Role:
 
 	def setDescription(self, description):
 		self._description = description
+
+
+	## As strings ##
+
+	def __str__(self):
+		return str(self._name)
+
+	def __repr__(self):
+		return '<%s %r instance at %X>' % (self.__class__, self._name, id(self))
 
 
 	## The big question ##
