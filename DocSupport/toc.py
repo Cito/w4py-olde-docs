@@ -14,6 +14,7 @@ def usage():
 def toc(filename, indentFactor=3, fontSizes=[None, None, '+1', '', '', '']):
 	f = open(filename)
 	expr = re.compile("(<a name=(.*)>)?<[hH]([1-9])>(.*)</[hH][1-9]>")
+	first = 1
 	while 1:
 		line = f.readline()
 		if not line:
@@ -30,7 +31,12 @@ def toc(filename, indentFactor=3, fontSizes=[None, None, '+1', '', '', '']):
 				fontSize = fontSizes[level]
 				if fontSize:
 					name = '<font size=%s>%s</font>' % (fontSize, name)
-				print '<br> %s<a href="#%s">%s</a>' % (indenter, identifier, name)
+				if first:
+					br = '     '
+					first = 0
+				else:
+					br = '<br> '
+				print '%s%s<a href="#%s">%s</a>' % (br, indenter, identifier, name)
 			#print
 	f.close()
 
@@ -39,9 +45,9 @@ def main(args):
 		usage()
 	# header
 	print '<html> <head><title>TOC</title></head> <body>'
-	print '<p><font face="Helvetica">'
+	print '<p><span class=ToC>'
 	toc(args[1])
-	print '</font></p>'
+	print '</span>'
 	print '</body></html>'
 
 
