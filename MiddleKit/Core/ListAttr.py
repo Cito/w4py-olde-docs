@@ -11,7 +11,11 @@ class ListAttr(Attr):
 		Attr.__init__(self, dict)
 		self._className = dict['Type'].split()[-1]
 		# @@ 2000-11-25 ce: check that the class really exists
-		
+		if self.get('Max') is not None:
+			self['Max'] = int(self['Max'])
+		if self.get('Min') is not None:
+			self['Min'] = int(self['Min'])
+
 	def className(self):
 		""" Returns the name of the base class that this obj ref attribute points to. """
 		return self._className
