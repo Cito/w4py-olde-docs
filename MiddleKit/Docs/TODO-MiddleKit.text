@@ -5,6 +5,9 @@ Update
 ------
 Create.sql now includes NOT NULL as appropriate.
 
+Create.sql now uses a PRIMARY KEY instead of just a generic index on the object serial number.
+
+
 For providers of SQL adapters:
 
 Added SQLGenerator.sqlSupportsDefaultValues(self) so that concrete subclasses can advertise whether or not their CREATE statement supports DEFAULT <value>. (MySQL & PostgreSQL do; MSSQL does not.)
@@ -154,7 +157,7 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] Standardize the parameters names that SQLStore.connect() takes. host, user, password
 
-	*** [ ] Create.sql: Drop the drop statements. Not needed.
+	[x] Create.sql: Drop the drop statements. Not needed.
 
 	[ ] Improve Resources/Template.mkmodel.
 

@@ -95,6 +95,7 @@ class Model:
 		# @@ 2001-02-04 ce: this method is too long
 		#	break into additional methods
 		#	some of these methods may even go into other mix-ins
+		self._klasses.writeDeleteAllRecords(generator, file)
 		readColumns = 1
 		# @@ 2000-10-29 ce: put in error checking that the column names are valid
 		for line in lines:
@@ -107,7 +108,7 @@ class Model:
 			if fields[0].endswith(' objects'):
 				tableName = fields[0].split()[0]
 				klass = self.klass(tableName)
-				file.write('\ndelete from %s;\n' % tableName)
+				file.write('\n\n/* %s */\n\n' % fields[0])
 				#print '>> table:', tableName
 				readColumns = 1
 				continue
@@ -298,6 +299,30 @@ create table _MKClassIds (
 			out.write('/* PostSQL start */\n' + sql + '\n/* PostSQL end */\n\n')
 		out.write('show tables\n\n')
 		out.write('/* end of generated SQL */\n')
+
+	def writeDeleteAllRecords(self, generator, file):
+		'''
+		Writes a delete statement for each data table in the model. This is used for InsertSamples.sql to wipe out all data prior to inserting sample values.
+		SQL generators rarely have to customize this method.
+		'''
+		wr = file.write
+		if 0:
+			# Woops. Our only auxiliary table is _MKClassIds, which we
+			# *don't* want to delete. In the future we will likely
+			# have other aux tables for lists and relationships. When
+			# that happens, we'll need more granularity regarding
+			# aux tables.
+			names = self.auxiliaryTableNames()[:]
+			names.reverse()
+			for tableName in names:
+				wr('delete from %s;\n' % tableName)
+		klasses = self.klassesInOrder()[:]
+		klasses.reverse()
+		for klass in klasses:
+			if not klass.isAbstract():
+				wr('delete from %s;\n' % klass.name())
+		wr('\n')
+
 
 
 class Klass:
