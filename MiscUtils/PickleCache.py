@@ -118,7 +118,7 @@ class PickleCacheReader(PickleCache):
 			else:
 				try:
 					#if v: print 'about to open for read %r' % picklePath
-					file = open(picklePath)
+					file = open(picklePath, 'rb')
 				except IOError, e:
 					#if v: print 'cannot open cache file: %s: %s' % (e.__class__.__name__, e)
 					pass
@@ -195,7 +195,7 @@ class PickleCacheWriter(PickleCache):
 			pprint(dict)
 		try:
 			if v: print 'about to open for write %r' % picklePath
-			file = open(picklePath, 'w')
+			file = open(picklePath, 'wb')
 		except IOError, e:
 			if v: print 'error. not writing. %s: %s' % (e.__class__.__name__, e)
 		else:
