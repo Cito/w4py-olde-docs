@@ -599,7 +599,11 @@ class ExceptionHandler(Object):
 		in self.hideValuesForField (case insensitive). Subclasses
 		could override for more elaborate filtering techniques.
 		"""
-		if key.lower() in self.hideValuesForFields:
+		try:
+			key = key.lower()
+		except:
+			pass
+		if key in self.hideValuesForFields:
 			return self.hiddenString
 		else:
 			return value

@@ -77,7 +77,7 @@ def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=No
 		value = str(value)
 		if maxValueLength and len(value) > maxValueLength:
 			value = value[:maxValueLength] + '...'
-		html.append('<tr bgcolor=#F0F0F0> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (htmlEncode(key), htmlEncode(value)))
+		html.append('<tr bgcolor=#F0F0F0> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (htmlEncode(str(key)), htmlEncode(value)))
 	html.append('</table>')
 	return string.join(html, '')
 
