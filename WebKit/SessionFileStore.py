@@ -17,7 +17,7 @@ class SessionFileStore(SessionStore):
 		3. Fault tolerance
 		4. Clustering
 
-	Note that the last two are not yet support by WebKit (as of 0.4,
+	Note that the last two are not yet supported by WebKit (as of 0.4,
 	8/2000).
 	'''
 
