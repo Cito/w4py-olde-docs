@@ -830,13 +830,7 @@ class Application(Configurable,CanContainer):
 
 		# case: no URL then use the default context
 		if urlPath=='' or urlPath=='/':
-##			fspath = request.fsPath()
-##			if debug:
-##				print "fsPath: %s"%fspath
-##			if os.path.exists(fspath):
-##				return fspath
 			ssPath = self._contexts['default']
-			if urlPath=='': urlPath='/'
 			if debug:
 				print '>> no urlPath, so using default context path: %s' % repr(ssPath)
 		else:
