@@ -192,6 +192,9 @@ Version 0.4.1
 <tr valign=top>
 <td> <b>InstanceCacheSize</b><br> &nbsp; &nbsp; <font size=-1>= 10</font> </td> <td> Determines the maximum number of servlet instances that will be kept in memory to serve a particular URL. This limit keeps the server from overflowing objects under the stress of many simultaneous requests. </td>
 </tr>
+<tr valign=top>
+<td> <b>IgnoreInvalidSession</b><br> &nbsp; &nbsp; <font size=-1>= 0</font> </td> <td> If true, treats an invalid or expired session the same as no session at all.  Defaults to false, which causes an error message to be displayed on invalid or expired session. </td>
+</tr>
 </table>
 
 
