@@ -24,6 +24,28 @@ class UnknownFileTypeServletFactory(ServletFactory):
 from HTTPServlet import HTTPServlet
 from MiscUtils.Configurable import Configurable
 class UnknownFileTypeServlet(HTTPServlet, Configurable):
+	"""
+	Normally this class is just a "private" utility class for WebKit's
+	purposes. However, you may find it useful to subclass on occasion,
+	such when the server side file path is determined by something other
+	than a direct correlation to the URL. Here is such an example:
+
+
+	from WebKit.AppServer import globalServer
+	from WebKit.UnknownFileTypeServlet import UnknownFileTypeServlet
+	from Core.Config.Picks import picksGraphDir
+	import os
+
+	class Graph(UnknownFileTypeServlet):
+
+		def __init__(self):
+			UnknownFileTypeServlet.__init__(self, globalServer.application())
+
+		def filename(self, trans):
+			filename = trans.request().field('g')
+			filename = os.path.join(picksGraphDir, filename)
+			return filename
+	"""
 
 	def __init__(self, application):
 		HTTPServlet.__init__(self)
@@ -78,7 +100,9 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 
 	def filename(self, trans):
 		"""
-		Returns the filename to be served. A subclass could override this in order to serve files from other disk locations based on some logic.
+		Returns the filename to be served. A subclass could override
+		this in order to serve files from other disk locations based
+		on some logic.
 		"""
 		return trans.request().serverSidePath()
 
