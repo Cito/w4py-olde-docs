@@ -339,6 +339,10 @@ Installation is finished.'''
 	## Self utility ##
 
 	def printKeyValue(self, key, value):
+		# Handle values with line breaks by indenting extra lines
+		value = str(value)
+		value = string.replace(value, '\n', '\n'+' '*14)
+
 		print '%12s: %s' % (key, value)
 
 	def makeDir(self, dirName):
