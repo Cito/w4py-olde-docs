@@ -855,8 +855,8 @@ class Application(Configurable, CanContainer, Object):
 
 		if debug: print '>> normalized ssPath =', repr(ssPath)
 
-		######### NEW-jsl-12/14/00 - ExtraPathInfo routine #############	
-		extraPathInfo=''
+		######### NEW-jsl-12/14/00 - ExtraURLPath routine #############	
+		extraURLPath=''
 		if self.setting('ExtraPathInfo'):	
 			#Search for extra path info style from left to right.
 			if debug: print "Checking for extra path info"
@@ -881,34 +881,34 @@ class Application(Configurable, CanContainer, Object):
 					if len(filenames)>0:
 						workPath=path
 						if path == ssPath:
-							extraPathInfo=''
+							extraURLPath=''
 						else:
-							extraPathInfo = ssPath[len(workPath):]
+							extraURLPath = ssPath[len(workPath):]
 						break
 					else:
-						extraPathInfo = ssPath[len(workPath):]
+						extraURLPath = ssPath[len(workPath):]
 						ssPath = workPath
 						break
 				else:
-					extraPathInfo = ssPath[len(path):]
+					extraURLPath = ssPath[len(path):]
 
 				workPath = path
 
 			ssPath = workPath
-			if len(extraPathInfo) != 0:
-				request._extraPathInfo = urlPath[-len(extraPathInfo):] #get extraPathInfo from urlPath so the slashes are going the right direction
+			if len(extraURLPath) != 0:
+				request._extraURLPath = urlPath[-len(extraURLPath):] #get extraPathInfo from urlPath so the slashes are going the right direction
 			else:
-				request._extraPathInfo = None
-			if urlPath != '/' and extraPathInfo != '':
-				urlPath = urlPath[:-len(extraPathInfo)]
+				request._extraURLPath = None
+			if urlPath != '/' and extraURLPath != '':
+				urlPath = urlPath[:-len(extraURLPath)]
 			request.setURLPath(urlPath)
 
 
 			if debug:
-				print "*** After EPI Checks:\n\turlPath=%s\n\textraPathInfo=%s\n\tssPath=%s\n" % (urlPath,extraPathInfo,ssPath)
+				print "*** After EPI Checks:\n\turlPath=%s\n\textraPathInfo=%s\n\tssPath=%s\n" % (urlPath,extraURLPath,ssPath)
 				print "request.getURL() says %s" % request.urlPath()
 
-			##Finish extraPathInfo checks
+			##Finish extraURLPath checks
 			##Check cache again
 			cachePath = self._serverSidePathCacheByPath.get(urlPath, None)
 			if cachePath is not None:
@@ -922,7 +922,7 @@ class Application(Configurable, CanContainer, Object):
 			# constructed correctly by the browser.
 			# So in the following if statement, we're bailing out for such URLs.
 			# dispatchRequest() will detect the situation and handle the redirect.
-			if extraPathInfo == None and (urlPath=='' or urlPath[-1]!='/'):
+			if extraURLPath == None and (urlPath=='' or urlPath[-1]!='/'):
 				if debug:
 					print '>> BAILING on directory url: %s' % repr(urlPath)
 				return ssPath
@@ -954,9 +954,6 @@ class Application(Configurable, CanContainer, Object):
 				return None
 
 		self._serverSidePathCacheByPath[urlPath] = ssPath
-		if 0: # @@ 2000-06-22 ce: disabled, have to rethink the logic here
-			if extraPathInfo:
-				request._fields['extraPathInfo'] = extraPathInfo
 
 		if debug:
 			print '>> returning %s\n' % repr(ssPath)

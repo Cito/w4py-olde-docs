@@ -90,7 +90,7 @@ class HTTPRequest(Request):
 
 		self._transaction    = None
 		self._serverRootPath = None
-		self._extraPathInfo  = None
+		self._extraURLPath  = None
 
 
 	## Transactions ##
@@ -116,8 +116,8 @@ class HTTPRequest(Request):
 	def hasValue(self, name):
 		return self._fields.has_key(name) or self._cookies.has_key(name)
 
-	def extraPathInfo(self):
-		return self._extraPathInfo
+	def extraURLPath(self):
+		return self._extraURLPath
 
 
 	## Fields ##
@@ -220,12 +220,12 @@ class HTTPRequest(Request):
 	def servletURI(self):
 		"""This is the URI of the servlet, without any query strings or extra path info"""
 		
-		sspath=self.serverSidePath()#ensure that extraPathInfo has been stripped
+		sspath=self.serverSidePath()#ensure that extraURLPath has been stripped
 		pinfo=self.pathInfo()
-		if not self._extraPathInfo:
+		if not self._extraURLPath:
 			if pinfo[-1]=="/": pinfo = pinfo[:-1]
 			return pinfo
-		URI=pinfo[:string.rfind(pinfo,self._extraPathInfo)]
+		URI=pinfo[:string.rfind(pinfo,self._extraURLPath)]
 		if URI[-1]=="/": URI=URI[:-1]
 		return URI
 
