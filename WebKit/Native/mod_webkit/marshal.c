@@ -29,21 +29,26 @@ char* expand_memory(WFILE* p, long add)
 		char* newptr;
 		long currsize;
 		long newsize = 0;
+		char log_msg[500];
+		
+		//log_message("Expanding Memory",p->r);
 
-		log_message("Expanding memory", p->r);
-
-		currsize = p->ptr - p->str;
+		currsize = p->end - p->str;
 		if (add == 0) add = 4096;
 
 		newsize = currsize + add;
 		
-		newptr = ap_pcalloc(p->appool, newsize);
+		//sprintf(log_msg,"Expanding Memory from %i to %i", currsize, newsize);
+		//log_message(log_msg, p->r);
+		newptr = ap_pcalloc(p->r->pool, newsize);
 		//if !newptr  //need a check here 
 
 		memcpy( newptr, p->str, currsize);
 		p->end = newptr + newsize;
-		p->ptr = newptr + (currsize);
+		p->ptr = newptr + (p->ptr - p->str);
 		p->str = newptr;
+
+		//log_message("Memory Expanded", p->r);
 		return newptr;
 }
 
@@ -54,17 +59,19 @@ void
 insert_data(WFILE* dest, WFILE* src) {
 
 		long src_len, dest_avail, len_need;
+		char logmsg[500];
 		
-
+		//log_message("inserting data", dest->r);
 
 		src_len = src->ptr - src->str;
 		dest_avail = dest->end - dest->ptr;
 		len_need = src_len - dest_avail;
 		if (len_need > 0) {  // potential off by one here
-				expand_memory(dest, len_need+1);
+				expand_memory(dest, len_need+2);
 		}
 		memcpy(dest->ptr, src->str, src_len);
 		dest->ptr = dest->ptr + src_len;
+		//log_message("done inserting data", dest->r);
 		
 }
 
@@ -147,6 +154,7 @@ write_string( char* s, long len, WFILE* p){
 		w_long(len, p);
 		if (len > 0)
 				w_string( s, len, p);
+		//log_message(s,p->r);
 }
 
 void
