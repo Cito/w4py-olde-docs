@@ -75,6 +75,14 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 		before the session sweeper thread had cleaned it out, you'd get that expired session for
 		one request, but on the second request you'd get a new session.  Now it correctly returns
 		a new empty session with a new session ID on the first request after expiration.
+
+    <li> New debugging feature: by turning on the configuration
+  variable IncludeErrorLink in Application.config, an [edit] link
+  will be put next to each line in tracebacks.  That link will
+  point to a file of type application/x-webkit-edit-file, which
+  you should configure your browser to run with 
+  Webware/bin/editfile.py (and edit editfile.py so that it opens
+  your editor).
 </ul>
 
 
