@@ -304,7 +304,7 @@ static int wksock_open(request_rec *r, unsigned long address, int port, wkcfg* c
 #ifdef WIN32
         if (ret==SOCKET_ERROR) errno=WSAGetLastError()-WSABASEERR;
 #endif /* WIN32 */
-    } while (ret==-1 && errno==EINTR);
+    } while (ret==-1 && (errno==EINTR || errno==EAGAIN) );
 
     /* Check if we connected */
     if (ret==-1) {
@@ -460,7 +460,6 @@ static int content_handler(request_rec *r)
 	while (sock <= 0 ) {
 	  sock = wksock_open(r, cfg->addr, cfg->port, cfg);
 	  if (sock > 0 || (conn_attempt > cfg->retryattempts)) break;
-	//	if (errno != EAGAIN) break;
 	  sprintf(msgbuf, "Couldn't connect to AppServer,attempt %i of %i", conn_attempt, cfg->retryattempts);
 	  log_message(msgbuf, r);
 	  conn_attempt++;
@@ -490,17 +489,32 @@ static int content_handler(request_rec *r)
 			return ret;
 	if (ap_should_client_block(r)) {
 			char * buff = ap_pcalloc(r->pool, MAX_STRING_LEN);
-			int n;
+			int n; 
+			int sent = 0;
+			int retry = 0;
 			
 			while ((n = ap_get_client_block(r, buff, MAX_STRING_LEN)) > 0) {
-					if (ap_bwrite( buffsocket, buff, n) < n) {
+			  retry=0;
+			  sent=0;
+			  while (retry < 10) {
+				sent = sent + ap_bwrite( buffsocket, buff+sent, n-sent);
+					  if (sent < n) {
+						retry++;
+						sleep(1);
+						log_message("Have to retry sending input to appserver",r);
+					  }
+					  else break;
+			  if (retry == 10) {
+						
+
 							// AppServer stopped reading
 							// absorb any remaining input
-							while (ap_get_client_block( r, buff, MAX_STRING_LEN) > 0)
-									// Dump it
-									;
-							break;
-					}
+				while (ap_get_client_block( r, buff, MAX_STRING_LEN) > 0)
+				  // Dump it
+				  ;
+				break;
+			  }
+			  }
 			}
 	}
 
