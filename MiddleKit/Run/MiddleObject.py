@@ -1,4 +1,5 @@
 from MiscUtils.NamedValueAccess import NamedValueAccess
+from MiscUtils import NoDefault
 import ObjectStore
 import sys
 
@@ -198,18 +199,59 @@ class MiddleObject(NamedValueAccess):
 		dict[name] = value
 
 
-	## Testing ##
+	## Accessing attributes by name ##
 
-	def _get(self, attrName):
-		''' Invokes the "get" method, whose name can change according to settings. The test suites must use this instead of directly invoking the "get" methods. '''
+	def attr(self, attrName, default=NoDefault):
+		'''
+		Returns the value of the named attribute by invoking its "get"
+		accessor method. You can use this when you want a value whose
+		name is determined at runtime.
+
+		It also insulates you from the naming convention used for the
+		accessor methods as defined in Attr.pyGetName(). For example,
+		the test suites use this instead of directly invoking the "get"
+		methods.
+
+		If the attribute is not found, the default argument is returned
+		if specified, otherwise LookupError is raised with the attrName.
+		'''
 		attr = self.klass().lookupAttr(attrName)
 		pyGetName = attr.pyGetName()
-		method = getattr(self, pyGetName)
-		return method()
+		method = getattr(self, pyGetName, None)
+		if method is None:
+			if default is NoDefault:
+				raise LookupError, attrName
+			else:
+				return default
+		else:
+			return method()
 
-	def _set(self, attrName, value):
-		''' Invokes the "set" method, whose name can change according to settings. The test suites must use this instead of directly invoking the "set" methods. '''
+	def setAttr(self, attrName, value):
+		'''
+		Sets the value of the named attribute by invoking its "set"
+		accessor method. You can use this when you want a value whose
+		name is determined at runtime.
+
+		It also insulates you from the naming convention used for the
+		accessor methods as defined in Attr.pySetName(). For example,
+		the test suites use this instead of directly invoking the "set"
+		methods.
+
+		If the required set method is not found, a NameError is raised
+		with the attrName.
+		'''
 		attr = self.klass().lookupAttr(attrName)
 		pySetName = attr.pySetName()
-		method = getattr(self, pySetName)
+		method = getattr(self, pySetName, None)
+		if method is None:
+			raise NameError, attrName
 		return method(value)
+
+	# @@ 2001-04-29 ce: We should probably do this as well:
+	# valueForKey = attr
+
+	# @@ 2001-04-29 ce: This is for backwards compatibility only:
+	# We can take out after the post 0.5.x version (e.g., 0.6 or 1.0)
+	# or after 4 months, whichever comes later.
+	_get = attr
+	_set = setAttr
