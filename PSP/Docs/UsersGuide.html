@@ -4,7 +4,7 @@
 </head>
 <body bgcolor='white'>
 <H1> Python Server Pages for Webware</h1>
-Release 0.3<br>
+Release 0.4<br>
 <a href="http://webware.sourceforge.net">http://webware.sourceforge.net</a>
 <h2> Summary</h2>
 <p> Python Server Pages (PSP) provides the capability for producing dynamic web pages
@@ -190,7 +190,7 @@ You could also start a new script block that just continues at the same indentat
 <p>
 <p><b>Braces</b>
 <p>PSP also supports using braces to handle indentation.  This goes against the grain of python, we know, but is useful for this specific application.  To use this feature, specify it as you indentation style in a page directive, like so: <i>&lt;%@page indentType="braces" %&gt;</i><br>
-Now use braces to signify the start and end of blocks.  The braces can span multiple script tags. No automatic indentation will occur. <b>(???? Verify)</b>
+Now use braces to signify the start and end of blocks.  The braces can span multiple script tags. No automatic indentation will occur. However, you must use braces for all blocks! Tabs and spaces at the start of lines will be ignored and removed!
 <p><b>Example</b><br>
 This is &lt;i&gt;Straight HTML&lt;/i&gt;&lt;br&gt;<br>
 &lt;% <br>
