@@ -385,7 +385,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		# way to do this, as it seems to contradict the docstring of
 		# uri(), but it works.  Needs further investigation.
 		uri = string.split(transaction.request().uri(), '?')
-		uri[0] = uri[0] + '/'
+		uriEnd = string.split(uri[0], '/')[-1]
+		# @@ gat 2000-05-19: this was changed to use a relative redirect starting with "." to force
+		# a client redirect instead of a server redirect.  This fixes problems on IIS.
+		uri[0] = './' + uriEnd + '/'
 		newURL = string.join(uri, '?')
 
 		res = transaction.response()
