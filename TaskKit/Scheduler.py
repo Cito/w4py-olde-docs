@@ -1,10 +1,30 @@
+"""
+This is the TaskManager python package.  It provides a system for running any number of
+predefined tasks in separate threads in an organized and controlled manner.
+
+A task in this package is a class derived from the Task class.  The task should have a run
+method that, when called, performs some task.
+
+The Scheduler class is the organizing object.  It manages the addition, execution, deletion,
+and well being of a number of tasks.  Once you have created your task class, you call the Scheduler to
+get it added to the tasks to be run.
+
+"""
+
+
+
 from threading import Thread, Event
-from SchedulerHandler import SchedulerHandler
+from TaskHandler import TaskHandler
 from time import time, sleep
 from exceptions import IOError
 
 class Scheduler(Thread):
-
+	"""
+	The top level class of the TaskManager system.  The Scheduler is a thread that handles organizing and
+	running tasks.  The Sheduler class should be instantiated to start a TaskManager sessions.  It's run
+	method should be called to start the TaskManager.  It's stop method should be called to end the
+	TaskManager session.
+"""
 
 	## Init ##
 
@@ -44,15 +64,30 @@ class Scheduler(Thread):
 	## Value Methods ##
 
 	def running(self, name, default=None):
+		"""
+		Returns a task with the given name from the "running" list, if it
+		is present there.
+		"""
 		return self._running.get(name, default)
 
 	def hasRunning(self, name):
+		"""
+		Check to see if a task with the given name is currently running.
+		"""
 		return self._running.has_key(name)
 
 	def setRunning(self, handle):
+		"""
+		Add a task to the running dictionary.
+		Used internally only.
+		"""
 		self._running[handle.name()] = handle
 
 	def delRunning(self, name):
+		"""
+		Delete a task from the running list.
+		Used Internally.
+		"""
 		try:
 			handle = self._running[name]
 			del self._running[name]
@@ -61,12 +96,22 @@ class Scheduler(Thread):
 			return None
 
 	def scheduled(self, name, default=None):
+		"""
+		Returns a task from the Scheduled list.
+		"""
 		return self._scheduled.get(name, default)
 
 	def hasScheduled(self, name):
+		"""
+		Is the task with he given name in the Scheduled list?
+		If so, return it.
+		"""
 		return self._scheduled.has_key(name)
 
 	def setScheduled(self, handle):
+		"""
+		Add the given task to the scheduled list.
+		"""
 		self._scheduled[handle.name()] = handle
 
 	def delScheduled(self, name):
@@ -109,7 +154,7 @@ class Scheduler(Thread):
 	def addTimedAction(self, time, task, name):
 		handle = self.unregisterTask(name)
 		if not handle:
-			handle = SchedulerHandler(self, time, 0, task, name)
+			handle = TaskHandler(self, time, 0, task, name)
 		else:
 			handle.reset(time, 0, task, 1)
 		self.scheduleTask(handle)
@@ -117,13 +162,15 @@ class Scheduler(Thread):
 	def addActionOnDemand(self, task, name):
 		handle = self.unregisterTask(name)
 		if not handle:
-			handle = SchedulerHandler(self, time(), 0, task, name)
+			handle = TaskHandler(self, time(), 0, task, name)
 		else:
 			handle.reset(time(), 0, task, 1)
 		self.setOnDemand(handle)
 
 	def addDailyAction(self, hour, minute, task, name):
 		"""
+		Add a task to be run every day at the given time.
+		
 		Can we make this addCalendarAction?  What if we want to run something once a week?
 		We probably don't need that for Webware, but this is a more generally useful module.
 		This could be a difficult function, though.  Particularly without mxDateTime.
@@ -150,16 +197,13 @@ class Scheduler(Thread):
 			hour_difference = 0
 
 		delay = (minute_difference + (hour_difference * 60)) * 60
-
-		print "daily task %s scheduled for %s seconds" % (name,delay)
-
 		self.addPeriodicAction(time.time()+delay, 24*60*60, task, name)
 
 
 	def addPeriodicAction(self, start, period, task, name):
 		handle = self.unregisterTask(name)
 		if not handle:
-			handle = SchedulerHandler(self, start, period, task, name)
+			handle = TaskHandler(self, start, period, task, name)
 		else:
 			handle.reset(start, period, task, 1)
 		self.scheduleTask(handle)
