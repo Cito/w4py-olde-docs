@@ -56,6 +56,7 @@ class PSPServletFactory(ServletFactory):
 
 	def computeClassName(self,pagename):
 	    tail=None
+		junk,pagename=os.path.splitdrive(pagename)
 	    head,tail = os.path.split(pagename)
 	    className = string.replace(tail,'.','_')
 	    while head != '/' and head != '':
