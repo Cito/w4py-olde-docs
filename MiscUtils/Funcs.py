@@ -4,7 +4,7 @@ Funcs.py
 Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else.
 '''
 
-import string, time
+import os, string, time
 
 
 def commas(number):
@@ -51,6 +51,24 @@ def charWrap(s, width, hanging=0):
 			lines[i] = s
 		i = i + 1
 	return string.join(lines, '\n')
+
+
+def hostName():
+	'''
+	Returns the host name which is taken first from the os environment and failing that, from the 'hostname' executable. May return None if neither attempt succeeded.
+	The environment keys checked are HOST and HOSTNAME both upper and lower case.
+	'''
+	for name in ['HOST', 'HOSTNAME', 'host', 'hostname']:
+		hostName = os.environ.get(name, None)
+		if hostName:
+			break
+	if not hostName:
+		hostName = string.strip(os.popen('hostname').read())
+	if not hostName:
+		hostName = None
+	else:
+		hostName = string.lower(hostName)
+	return hostName
 
 
 def timestamp(numSecs=None):

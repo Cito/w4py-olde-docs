@@ -35,8 +35,18 @@ def TestCommas():
 		i = i+2
 
 
+def TestHostName():
+	# About all we can do is invoke hostName() to see that no
+	# exceptions are thrown, and do a little type checking on the
+	# return type.
+	host = hostName()
+	assert host is None  or  type(host) is type(''), \
+		'host type = %s, host = %s' % (type(host), repr(host))
+
+
 def Test():
 	TestCommas()
+	TestHostName()
 
 
 if __name__=='__main__':
