@@ -1,0 +1,261 @@
+<html>
+
+<head>
+	<link rel=STYLESHEET href="StyleSheet.css" type="text/css">
+	<style type=text/css>
+	<!--
+		th				{ font-family: Arial, Helvetica, sans-serif; font-size: smaller; text-align: left; }
+	-->
+	</style>
+	<title>MiddleKit User's Guide</title>
+</head>
+
+<body>
+
+<h1>MiddleKit User's Guide</h1>
+Version 0.1
+<br>Webware for Python 0.5
+
+
+<a name=Synopsis><h2>Synopsis</h2></a>
+
+<p> MiddleKit provides an object-relational mapping layer that enables developers to write object-oriented, Python-centric code while enjoying the benefits of a relational database.
+
+<p> The benefits of Python include: generality, OOP (encapsulation, inheritance, polymorphism), a mature language, and many libraries, both standard and 3rd party.
+
+<p> The benefits of a relational database include: data storage, concurrent access and 3rd party tools (such as report generators).
+
+
+<a name=DataTypes><h2>Data Types</h2></a>
+
+<p> All attributes in an object model must be typed. MiddleKit divides types into 4 major categories:
+
+<ol>
+	<li> <a href=#DT_Basic>Basic types</a>
+	<li> <a href=#DT_DateTime>Date and time types</a>
+	<li> <a href=#DT_Enums>Enumerations</a>
+	<li> <a href=#DT_ObjRef>Object references</a>
+</ol>
+
+
+<a name=DT_BasicTypes><h3>Basic Types</h3></a>
+
+<p> The basic types are easy to work with and do what you expect. They are the same as the Python types with the addition of one special case: <code>bool</code>.
+
+<p> While MiddleKit is designed to be generic and therefore, database agnostic, concrete examples pay good dividends. So the following table includes the type equivalents for MySQL.
+
+<p> <table border align=center style="border-collapse: collapse" cellpadding=2>
+	<tr>
+		<th colspan=4 align=center> Basic Types </th>
+	<tr>
+
+	<tr>
+		<th> MiddleKit </th>
+		<th> Python </th>
+		<th> MySQL </th>
+		<th> Notes </th>
+	</tr>
+
+	<tr>
+		<td> bool </td>
+		<td> int </td>
+		<td> bool </td>
+		<td> Py int = 0 or 1 </td>
+	</tr>
+
+	<tr>
+		<td> int </td>
+		<td> int </td>
+		<td> int </td>
+		<td> &nbsp; </td>
+	</tr>
+
+	<tr>
+		<td> long </td>
+		<td> long </td>
+		<td> bigint </td>
+		<td> 64-bit int </td>
+	</tr>
+
+	<tr>
+		<td> float </td>
+		<td> float </td>
+		<td> double </td>
+		<td> 64-bit float </td>
+	</tr>
+
+	<tr>
+		<td> string </td>
+		<td> string </td>
+		<td> varchar <sup><font size=-1>(*)</font></sup> </td>
+		<td> &nbsp; </td>
+	</tr>
+</table>
+
+<p> <sup><font size=-1>(*)</font></sup> The MySQL type is <code>char</code> if the minimum and maximum length are equal.
+
+
+<a name=DT_DateTime><h3>Date and time types</h3></a>
+
+<p> Woops. Not documented yet. Not implemented for that matter, either.
+
+
+<a name=DT_Enums><h3>Enumerations</h3></a>
+
+<p> Woops. Not documented or implemented yet, although it *might* work. e.g., the enumeration might come in as an integer in Python. Or maybe a string with the name.
+
+<p> Try it.
+
+
+<a name=DT_ObjRef><h3>Object references</h3></a>
+
+<p> There are two types of object references: a single reference and a list of references. In relational terminology, that would be "1 to 1" and "1 to many" respectively.
+
+<p> The type for a single reference in Python is indicated by simply naming the class of the object that can be referred to. That class must be defined in the object model and will therefore have it's own table in the database. User-defined classes are required to be capitalized (while other types are lower case). For example:
+
+<p> <table border align=center style="border-collapse: collapse" cellpadding=2>
+	<tr>
+		<th> Attribute </th>
+		<th> Type </th>
+	</tr>
+
+	<tr>
+		<td> address </td>
+		<td> Address </td>
+	</tr>
+
+	<tr>
+		<td> billingInfo </td>
+		<td> BillingInfo </td>
+	</tr>
+</table>
+
+
+<p> The type for a list of references is specified by <code>list of <i>ClassName</i></code> and represents the 1-to-many relationship. This will be an ordinary Python list, except that some invisible MiddleKit machinery in the background will perform various services (fetch objects on demand, insert new objects, etc.). For example:
+
+<p> <table border align=center style="border-collapse: collapse" cellpadding=2>
+	<tr>
+		<th> Attribute </th>
+		<th> Type </th>
+	</tr>
+
+	<tr>
+		<td> contacts </td>
+		<td> list of Contact </td>
+	</tr>
+
+	<tr>
+		<td> customers </td>
+		<td> list of Customer </td>
+	</tr>
+</table>
+
+<p> There is an additional property that applies only to attributes whose types are object references.
+
+<p> For the purpose of discussion, the object containing the attribute is the <i>source</i> while the objects being referred to are the <i>targets</i>. Now then, the <b>onRequired</b> property specifies what happens to the target object(s) when the source object is deleted:
+
+<ol>
+	<li> disconnect - leave the target intact, but remove any back reference it might have to the source
+	<li> cascade - delete the target as well
+	<li> refuse - do not delete the source if the target exists
+	<li> dangle - delete the source and do nothing to the target. This is very dangerous.
+</ol>
+
+<p> The default value of onDelete is disconnect. An example specification would be <code>onDelete=cascade</code>.
+
+
+<a name=GeneratedPy><h2>Generated Python</h2></a>
+
+<a name=GP_addToBars><h3>Lists: addToBars()</h3></a>
+
+<p> Given an attribute of type list, with the name "bars", MK will generate a Python method named addToBars() that will make it easy for you to add a new object to the list:
+
+<pre class=code>newBar = Bar()
+newBar.setXY(1, 2)
+foo.addToBars(newBar)
+</pre>
+
+<p> This method actually does a lot more for you, ensuring that you're not adding an object of the wrong type, adding the same object twice, etc. Here is a complete list:
+
+<ul>
+	<li> assert newBar is not None
+	<li> assert newBar inherits from Bar
+	<li> assert newBar is not already in bars
+	<li> add newBar to bars
+	<li> add newBar to foo's object store, if needed
+	<li> set newBar's foo-reference to foo
+</ul>
+
+<p> You don't have to remember the details since this behavior is both supplied and what you would expected. Just remember to use the various addToBars() methods.
+
+
+<a name=MiscTopics><h2>Miscellaneous Topics</h2></a>
+
+<a name=MT_IteratingAttrs><h3>Iterating over attributes</h3></a>
+
+<p> Every once in a while, you might get a hankering for iterating over the attributes of an MK object. You can do so like this:
+
+<pre class=code>for attr in obj.klass().allAttrs():
+	print attr.name()
+</pre>
+
+<p> The attributes are instances of MiddleKit.Core.Attr (or one of its subclasses such as ObjRefAttr) which inherits from UserDict and acquires additional methods from mix-ins located in MiddleKit.Design and MiddleKit.Run. Since attributes are essentially dictionaries, you can treat them like so, although if you modify them you are asking for serious trouble.
+
+<pre class=code>for attr in obj.klass().allAttrs():
+	keys = attr.keys()
+	keys.sort()
+	print '%s: %s' % (attr.name(), keys)
+</pre>
+
+<p> If you had asked the klass for its attrs() instead of allAttrs(), you would have missed out on attributes that were inherited.
+
+<p> If you want to get a dictionary of all the attribute values for a particular object, don't roll your own code. You can already ask your middle objects for allAttrs(), in which case you get values instead of definitions (which is what Klass returns for allAttrs()).
+
+
+<a name=RelatedLinks><h2>Related Links</h2></a>
+
+<p> The topic of object-relational mapping (ORM) is an old one. Here are some related links if you wish to explore the topic further:
+
+<p> Scott Ambler has written some papers on the topic of ORM and also maintains a set of ORM related links:
+
+<ul>
+	<li> <a href=http://www.ambysoft.com/mappingObjects.html>Mapping Objects to Relational Databases</a>
+	<li> <a href=http://www.ambysoft.com/persistenceLayer.html>The Design of a Robust Persistence Layer for Relational Databases</a>
+</ul>
+
+<p> Apple has a very mature (and perhaps complex) ORM framework named Enterprise Objects Framework, or EOF, available in both Java and Objective-C. All the docs are online at the WebObjects page:
+
+<ul> <li> <a href=http://developer.apple.com/techpubs/webobjects/webobjects.html>WebObjects Developer Documentation</a> </ul>
+
+<p> The only other Python ORM that we're aware of is dbObj by Boudewijn Rempt:
+
+<ul> <li> <a href=http://www.xs4all.nl/~bsarempt/python/dbobj.html>dbObj</a> </ul>
+
+
+<!--
+<a name=KnownBugs><h2>Known Bugs</h2></a>
+
+<p> Known bugs and future work in general, is documented in <a href=Future.html>Future.html</a>.
+-->
+
+
+<a name=Credit><h2>Credit</h2></a>
+
+<p> Authors: Chuck Esterbrook
+
+
+<h1>Implementor's Guide</h1>
+
+<p> @@ 2000-10-28 ce: This should be a separate guide.
+
+
+<h2> Test Cases </h2>
+
+<p> In the Tests directory of MiddleKit you will find several test case object models.
+
+<p> Inside each model is a TestRun.py file containing a <code>test()</code> function. ...
+
+<p><hr>
+
+</body>
+</html>

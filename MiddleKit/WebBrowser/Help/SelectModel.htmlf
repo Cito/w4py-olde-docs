@@ -1,0 +1,7 @@
+<p> The MiddleKit browser allows you to browse the objects in a MiddleKit store. It uses the MiddleKit object model to do so. The object model is stored as a file, on the same server as this web site.
+
+<p> You can enter the filename of the object model in the form above.
+
+<p> Or, if you have browsed models at this site before, you can choose one from the recent list.
+
+<p> Or, you may choose a "known model" if the site admin has configured this site.
