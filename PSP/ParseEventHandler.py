@@ -27,7 +27,7 @@ output their source code.
 """
 
 
-from Generators import * #this gets the ResponseObject
+from Generators import *
 import string
 
 
@@ -89,10 +89,19 @@ class ParseEventHandler:
 
 
 	def handleInclude(self, attrs,param):
-		''' this is for includes of the form <psp:include ...>
-		This type of include is not parsed, it is just inserted in the output stream.'''
+		'''
+		this is for includes of the form <psp:include ...>
+		This function essentially forwards the request to the specified URL and includes that output.
+		'''
 		self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		gen = IncludeGenerator(attrs, param,self._ctxt)
+		self.addGenerator(gen)
+
+	def handleInsert(self, attrs,param):
+		''' this is for includes of the form <psp:insert ...>
+		This type of include is not parsed, it is just inserted in the output stream.'''
+		self._parser.flushCharData(self.tmplStart, self.tmplStop)
+		gen = InsertGenerator(attrs, param,self._ctxt)
 		self.addGenerator(gen)
 
 
