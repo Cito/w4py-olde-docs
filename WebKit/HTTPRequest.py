@@ -220,7 +220,7 @@ class HTTPRequest(Request):
 	def servletURI(self):
 		"""This is the URI of the servlet, without any query strings or extra path info"""
 
-		sspath=self.serverSidePath()#ensure that extraURLPath has been stripped
+		sspath=self.serverSidePath() #ensure that extraURLPath has been stripped
 		pinfo=self.pathInfo()
 		if not self._extraURLPath:
 			if pinfo[-1]=="/": pinfo = pinfo[:-1]
