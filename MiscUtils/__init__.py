@@ -1,6 +1,6 @@
-# MiscUtils package
+# MiscUtils component
 # Webware for Python
-# See Documentation/MiscUtils.html
+# See Docs/index.html
 
 __all__ = ['Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error', 'Funcs', 'MixIn', 'NamedValueAccess', 'PropertiesObject', 'unittest']
 
