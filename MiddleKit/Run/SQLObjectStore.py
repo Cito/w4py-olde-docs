@@ -59,13 +59,6 @@ class SQLObjectStore(ObjectStore):
 		self.connect()
 
 
-	## Settings ##
-
-	def setting(self, name, default=NoDefault):
-		''' Returns the given setting for the store, which is actually just taken from the model. '''
-		return self._model.setting(name, default)
-
-
 	## Connecting to the db ##
 
 	def isConnected(self):
