@@ -73,9 +73,13 @@ class ThreadedAppServer(AppServer):
 		self.threadCount=0
 		self.threadUseCounter=[]
 		self.requestQueue = Queue.Queue(self.maxServerThreads * 2) # twice the number of threads we have
-		self.rhQueue = Queue.Queue(0) # This will grow to a limit of the number of
-		                              # threads plus the size of the requestQueue plus one.
-		                              # But it's easier to just let it be unlimited.
+		self.rhCache = [] # This will grow to a limit of the number of
+		                  # threads plus the size of the requestQueue plus one.
+		                  # It used to be a Queue but since we don't make
+		                  # use of the blocking behavior and because of problems
+		                  # with Queue.Empty being raised on .get_nowait()
+		                  # when the queue isn't in fact empty, we have switched
+		                  # to using a list instead.
 
 		self.mainsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		# Must use SO_REUSEADDR to avoid problems restarting the app server
@@ -151,8 +155,8 @@ class ThreadedAppServer(AppServer):
 					rh = None
 					client,addr = sock.accept()
 					try:
-						rh = self.rhQueue.get_nowait()
-					except Queue.Empty:
+						rh = self.rhCache.pop()
+					except IndexError:
 						rh = RequestHandler(self)
 					rh.activate(client, self._reqCount)
 					self.requestQueue.put(rh)
@@ -461,7 +465,7 @@ class RequestHandler:
 	def close(self):
 		self.sock = None
 #		self._strmOut = None
-		self.server.rhQueue.put(self)
+		self.server.rhCache.append(self)
 
 	def handleRequest(self):
 

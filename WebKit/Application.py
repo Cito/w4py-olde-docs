@@ -9,7 +9,6 @@ from ServletFactory import *
 from UnknownFileTypeServlet import UnknownFileTypeServletFactory
 from types import FloatType
 from glob import glob
-import Queue
 import imp
 import string
 from threading import Lock, Thread, Event
@@ -694,7 +693,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		result = getattr(servlet, method)(*args, **kwargs)
 		servlet.sleep(trans)
 
-		# Return the servlet instance to the queue
+		# Return the servlet instance to the cache
 		self.returnInstance(trans, trans.request().serverSidePath())
 
 		# Replace things like they were
@@ -927,20 +926,10 @@ class Application(ConfigurableForServerSidePath, Object):
 		""" The only case I care about now is threadsafe=0 and reuseable=1"""
 		cache = self._servletCacheByPath.get(path, None)
 		if cache and cache['reuseable'] and not cache['threadsafe']:
-			try:
-				srv = transaction.servlet()
-				if srv:
-					cache['instances'].put(transaction.servlet())
-					#cache['instances'].put_nowait(transaction.servlet())
-					#print "returned Instance"
-					return
-				else:
-					#error in executing servlet, drop it?
-					cache['created'] = cache['created']-1
-			except Queue.Full: #full or blocked
-				pass
-				print '>> queue full for:', cache['path'] #do nothing, don't want to block queue for this
-				print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
+			srv = transaction.servlet()
+			if srv:
+				cache['instances'].append(transaction.servlet())
+				return
 
 	def newServletCacheItem(self,key,item):
 		""" Safely add new item to the main cache.  Not worried about the retrieval for now.
@@ -969,22 +958,16 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		# File is not newer?
 		if cache and cache['timestamp']<os.path.getmtime(path):
-			try:
-				while cache['instances'].qsize > 0: # don't leave instances out there, right?
-					cache['instances'].get_nowait()
-				cache = None
-			except Queue.Empty:
-				cache = None
+			cache['instances'][:] = []
+			cache = None
 
 		if not cache:
 			cache = {
-				'instances':  Queue.Queue(self._instanceCacheSize+1), # +1 is for safety
+				'instances':  [],
 				'path':	      path,
 				'timestamp':  os.path.getmtime(path),
 				'threadsafe': 0,
 				'reuseable':  0,
-				'created':    1,
-				'lock':       Lock(), # used for the created count
 				}
 
 			self.newServletCacheItem(path,cache)
@@ -994,31 +977,22 @@ class Application(ConfigurableForServerSidePath, Object):
 				"""special case, put in the cache now"""
 				cache['instances'].put(inst)
 
-
 		# Instance can be reused?
 		elif not cache['reuseable']:
-			"""One time servlet"""
+			# One time servlet
 			inst = self.getServlet(transaction, path)
 
 		elif not cache['threadsafe']:
-			""" Not threadsafe, so need multiple instances"""
-##					  print '>> Queue size:', cache['instances'].qsize()
+			# Not threadsafe, so need multiple instances
 			try:
-				inst = cache['instances'].get_nowait()
-			except Queue.Empty: #happens if empty or blocked
-				cache['lock'].acquire()
-				if cache['created'] < self._instanceCacheSize:
-					inst = self.getServlet(transaction, path) # really need to create a new one
-					cache['created'] = cache['created']+1
-				else:
-					inst = cache['instances'].get() # block, it's really there
-				cache['lock'].release()
+				inst = cache['instances'].pop()
+			except IndexError: # happens if list was empty
+				inst = self.getServlet(transaction, path)
 
-
-		# Must be reuseable and threadsafe, get it and put it right back, I'm assuming this will be a rare case
 		else:
-			inst = cache['instances'].get()
-			cache['instances'].put(inst)
+			# Must be reuseable and threadsafe - just use the instance in the cache
+			# without removing it
+			inst = cache['instances'][0]
 
 		# Set the transaction's servlet
 		transaction.setServlet(inst)
