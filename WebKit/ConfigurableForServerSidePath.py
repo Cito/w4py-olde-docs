@@ -1,4 +1,4 @@
-from MiscUtils.Configurable import Configurable, _NoDefault
+from MiscUtils.Configurable import Configurable, NoDefault
 
 
 class ConfigurableForServerSidePath(Configurable):
@@ -10,7 +10,7 @@ class ConfigurableForServerSidePath(Configurable):
 	Application and AppServer are two well known users of this mix-in. Any class that has a serverSidePath() method and a Configurable base class, should inherit this class instead.
 	'''
 
-	def setting(self, name, default=_NoDefault):
+	def setting(self, name, default=NoDefault):
 		''' Returns the setting, filtered by self.serverSidePath(), if the name ends with 'Filename' or 'Dir'. '''
 		value = Configurable.setting(self, name, default)
 		if name[-8:]=='Filename' or name[-3:]=='Dir':

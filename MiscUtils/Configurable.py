@@ -1,12 +1,9 @@
 import string, sys
 from types import DictType
+from MiscUtils import NoDefault
 
 
 class ConfigurationError(Exception):
-	pass
-
-
-class _NoDefault:
 	pass
 
 
@@ -59,9 +56,9 @@ class Configurable:
 			self._config.update(self.userConfig())
 		return self._config
 
-	def setting(self, name, default=_NoDefault):
+	def setting(self, name, default=NoDefault):
 		''' Returns the value of a particular setting in the configuration. '''
-		if default is _NoDefault:
+		if default is NoDefault:
 			return self.config()[name]
 		else:
 			return self.config().get(name, default)

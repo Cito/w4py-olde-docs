@@ -1,6 +1,7 @@
 from types import *
 import string, sys
 from time import time
+from MiscUtils import NoDefault
 
 
 # if technique is zero, use bound methods in the _kvGetBindings cache, otherwise use unbound
@@ -9,9 +10,6 @@ technique = 1
 
 
 class NamedValueAccessError(Exception):
-	pass
-
-class _NoDefault:
 	pass
 
 
@@ -69,7 +67,7 @@ class NamedValueAccess:
 		return self._bindingForGetKey(key)!=None
 
 
-	def valueForKey(self, key, default=_NoDefault):
+	def valueForKey(self, key, default=NoDefault):
 		''' Suppose key is 'foo'. This method returns the value with the following precedence:
 				1. Methods before non-methods
 				2. Public attributes before private attributes
@@ -91,7 +89,7 @@ class NamedValueAccess:
 		binding = self._bindingForGetKey(key)
 
 		if not binding:
-			if default is _NoDefault:
+			if default is NoDefault:
 				return self.handleUnknownGetKey(key)
 			else:
 				return default

@@ -107,10 +107,9 @@ Maybe: Experiment with including the name of the last seen method/function with 
 
 import re, string, sys, os
 from types import *
-
-
-class _NoDefault:
+class NoDefault:
 	pass
+
 
 class CheckSrc:
 
@@ -330,8 +329,8 @@ Error codes and their messages:
 
 		self._config = dict
 
-	def setting(self, name, default=_NoDefault):
-		if default==_NoDefault:
+	def setting(self, name, default=NoDefault):
+		if default==NoDefault:
 			return self._config[name]
 		else:
 			return self._config.get(name, default)
