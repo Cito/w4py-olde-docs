@@ -40,9 +40,9 @@ class HTTPResponse(Response):
 
 	## Headers ##
 
-	def header(self, name, default=Tombstone):
+	def header(self, name, default=NoDefault):
 		""" Returns the value of the specified header. """
-		if default is Tombstone:
+		if default is NoDefault:
 			return self._headers[string.lower(name)]
 		else:
 			return self._headers.get(string.lower(name), default)

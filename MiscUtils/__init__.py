@@ -39,8 +39,11 @@ class NoDefault:
 			else:
 				return self._bars.get(name, default)
 
-	Consistently using a particular singleton is useful due to
-	subclassing considerations:
+	The value None does not suffice for "default=" because it does not
+	indicate whether or not a value was passed.
+
+	Consistently using this singleton is valuable due to subclassing
+	situations:
 
 		def bar(self, name, default=NoDefault):
 			if someCondition:

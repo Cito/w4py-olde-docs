@@ -11,7 +11,6 @@ The globals provided are:
 	* the root class, Object
 	* the package WebUtils
 	* the class SubclassResponsibilityError, an exception that methods in abstract classes often raise.
-	* the class Tombstone when something unique and not-None is needed
 """
 
 
@@ -35,6 +34,5 @@ def asclocaltime():
 	return time.asctime(time.localtime(time.time()))
 
 
-class Tombstone:
-	""" Tombstone is used directly as a unique place holder object. It's an alternative to None when None can't be used (because it might be a valid value). This class is never instantiated. The Tombstone class itself, provides the identity needed. For example uses, search the source code. """
-	pass
+# @@ 2002-11-10 ce: Tombstone is now deprecated (post 0.7)
+Tombstone = NoDefault

@@ -764,8 +764,8 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	## Sessions ##
 
-	def session(self, sessionId, default=Tombstone):
-		if default is Tombstone:
+	def session(self, sessionId, default=NoDefault):
+		if default is NoDefault:
 			return self._sessions[sessionId]
 		else:
 			return self._sessions.get(sessionId, default)
@@ -817,9 +817,9 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	## Contexts ##
 
-	def context(self, name, default=Tombstone):
+	def context(self, name, default=NoDefault):
 		""" Returns the value of the specified context. """
-		if default is Tombstone:
+		if default is NoDefault:
 			return self._contexts[name]
 		else:
 			return self._contexts.get(name, default)

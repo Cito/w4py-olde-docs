@@ -150,7 +150,7 @@ class HTTPRequest(Request):
 
 	## Values ##
 
-	def value(self, name, default=Tombstone):
+	def value(self, name, default=NoDefault):
 		""" Returns the value with the given name. Values are fields or cookies. Use this method when you're field/cookie agnostic. """
 		if self._fields.has_key(name):
 			return self._fields[name]
@@ -169,8 +169,8 @@ class HTTPRequest(Request):
 	def fieldStorage(self):
 		return self._fieldStorage
 
-	def field(self, name, default=Tombstone):
-		if default is Tombstone:
+	def field(self, name, default=NoDefault):
+		if default is NoDefault:
 			return self._fields[name]
 		else:
 			return self._fields.get(name, default)
@@ -190,9 +190,9 @@ class HTTPRequest(Request):
 
 	## Cookies ##
 
-	def cookie(self, name, default=Tombstone):
+	def cookie(self, name, default=NoDefault):
 		""" Returns the value of the specified cookie. """
-		if default is Tombstone:
+		if default is NoDefault:
 			return self._cookies[name]
 		else:
 			return self._cookies.get(name, default)

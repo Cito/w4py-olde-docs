@@ -117,8 +117,8 @@ class Session(Object):
 
 	## Values ##
 
-	def value(self, name, default=Tombstone):
-		if default is Tombstone:
+	def value(self, name, default=NoDefault):
+		if default is NoDefault:
 			return self._values[name]
 		else:
 			return self._values.get(name, default)

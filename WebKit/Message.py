@@ -46,8 +46,8 @@ class Message(Object):
 
 	# @@ 2000-05-10 ce: Are arguments really used for anything?
 
-	def arg(self, name, default=Tombstone):
-		if default is Tombstone:
+	def arg(self, name, default=NoDefault):
+		if default is NoDefault:
 			return self._args[name]
 		else:
 			return self._args.get(name, default)
