@@ -504,16 +504,15 @@ def run(useMonitor = 0, http=0, workDir=None):
 			# that we can re-call it in the main thread.
 			global exitStatus
 			exitStatus = None
-			def windowsmainloop(server, monitor):
+			def windowsmainloop(server):
 				global exitStatus
 				try:
-					server.mainloop(monitor)
+					server.mainloop()
 				except SystemExit, e:
 					exitStatus = e.code
 
 			# Run the server thread
-			t = threading.Thread(target=windowsmainloop,
-					     args=(server, monitor))
+			t = threading.Thread(target=windowsmainloop, args=(server,))
 			t.start()
 			try:
 				while server.running:
