@@ -58,7 +58,7 @@ def charWrap(s, width, hanging=0):
 # mktemp which didn't accept a directory argument.  So we have to
 # implement our own versions here.
 if sys.version_info >= (2, 3, None, None):
-    # Just use the Python 2.3 built-in versions.
+	# Just use the Python 2.3 built-in versions.
 	from tempfile import mktemp, mkstemp
 else:
 	def mktemp(suffix="", dir=None):
@@ -83,8 +83,8 @@ else:
 			- a os-level file handle for the temp file, open for read/write
 			- the absolute path of that file
 
-        Note that this version of the function is not as secure as the
-        version included in Python 2.3.
+		Note that this version of the function is not as secure as the
+		version included in Python 2.3.
 		"""
 		path = mktemp(suffix, dir)
 		return os.open(path, os.O_RDWR|os.O_CREAT|os.O_EXCL, 0600), path
