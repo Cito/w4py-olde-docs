@@ -8,8 +8,8 @@
 <body>
 
 <h1>WebKit Future Work</h1>
-Version 0.6
-<br>Webware for Python 0.6
+Version 0.7
+<br>Webware for Python 0.7
 
 
 <a name=Future><h2>Future Work/Limitations</h2></a>
@@ -20,12 +20,11 @@ Version 0.6
 
 <p> The numbers below are mostly for reference, although longer term items tend to be pushed towards the bottom.
 
-<p> <i>Warning:</i> This list hasn't been seriously combed over in some time. It may be out of date.
+<p> <i>Warning:</i> This list hasn't been seriously combed over in some time.  It is probably out of date.  You can find better information about known bugs and future work in the Wiki and in the SourceForge bug tracker, both accessible from the <a href="http://webware.sourceforge.net/">Webware Home Page<a>.
 
 <a name=KnownBugs><h3>Known Bugs</h3></a>
 
 <ol>
-	<li> The <i>wkcgi.exe</i> script doesn't handle long URLs well.
 	<li> The <i>stop</i> command for the <i>webkit</i> "rc" script does not work.
 	<li> There is one report that indicates that Application.serverSidePath() may be broken when using MakeAppWorkDir.
 	<li> Contexts do not have separate name spaces.
@@ -44,10 +43,8 @@ Version 0.6
 		<li> Rearchitect app servers, applications, contexts, etc. One process per application (not several applications per process). Don't worry though. 99% of servlet code will be unaffected by these changes.
 		<li> CheckSource.py: A program to check the source code conventions.
 		<li> FormKit: A plug-in to aid the construction and validation of forms. (Already in progress.)
-		<li> Page: Add features for style sheets.
 		<li> Role-based security and user-authentication. Goal is to eliminate, as much as possible, developer-written security logic. This should be provided by the WebKit and be configurable.
 		<li> Write a custom adaptor for Apache, Netscape, MS, etc.
-		<li> Write a CGI adaptor in C for increased performance.
 		<li> Distribution and load balancing.
 		<li> Fault tolerance.
 		<li> More sophisticated admin tools including password protection, clearing logs, displaying a maximum of information at a time, etc. Consider using module 'resource'.

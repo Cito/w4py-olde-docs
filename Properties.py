@@ -1,10 +1,10 @@
 name = 'Webware for Python'
 
-version = (0, 6, 1, 'b1')
+version = (0, 7, 0, 'b1')
 
 status = 'beta'
 
-releaseDate = 'December 9, 2001'
+releaseDate = 'March 6, 2002'
 
 requiredPyVersion = (1, 5, 2)
 
