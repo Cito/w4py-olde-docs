@@ -50,7 +50,7 @@ cfg = open("Configs/AppServer.config")
 cfg = eval(cfg.read())
 addr = ((cfg['Host'],cfg['Port']))
 
-debug = 1
+debug = 0
 
 
 def createServer():
@@ -110,6 +110,10 @@ def checkServer(restart = 1):
 	attempt to restart the server if we can't connect to it.
 	This function needs more thought, b/c this will kill a server that is
 	running but is VERY busy.
+
+A good fix:
+Have this communicate with the AppServer on a port different than the standard (maybe -1).  That way it won't get blocked if a busy server reaches it's maximum connection queue.
+	
 	"""
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
