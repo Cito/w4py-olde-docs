@@ -4,7 +4,7 @@
 </head>
 <body bgcolor='white'>
 <H1> Python Server Pages for Webware</h1>
-Release 0.3 August 31, 2000<br>
+Release 0.3<br>
 <a href="http://webware.sourceforge.net">http://webware.sourceforge.net</a>
 <h2> Summary</h2>
 <p> Python Server Pages (PSP) provides the capability for producing dynamic web pages
@@ -173,10 +173,10 @@ statement will reduce the block indent by one.<br>
 <p>
 <p><b>Manual Blocks</b><br>
 It is also possible to force a block of HTML statements to be included in a block.  You might want to do this if your start a loop
- of some kind in a script tag, but need the first line of the loop to also be inside the script tag.  In this case, the automatic 
+ of some kind in a script tag, but need the first line of the loop to also be inside the script tag.  In this case, the automatic
 indenting described above wouldn't notice the block, because the last line in the script tag wouldn't be a ":".  In this case, you need to end the script tag with $%&gt;.  When a script tag ends with $%&gt;, the PSP Parser will indent the following HTML at the same level as the last line of the script tag.  To end this level of indentation, just start another script tag.  Easy.
 <br><b> Example of Manual Indention Script/HTML block</b><br>
-<i>&lt% for i in range(5): </i><br> 
+<i>&lt% for i in range(5): </i><br>
 <i>&nbsp &nbsp &nbsp &nbsp &nbsp icubed = i*i $%&gt;</i> ##The following lines of straight HTML will be included in the same block this line is on<br>
 <i>&lt;tr&gt;&lt;td&gt;&lt;%= icubed%&gt;&lt;/td&gt;&lt;/tr&gt;<br>
 &lt;% pass %&gt;</i>  ##Any new script statement resets the HTML indentation level<br>
