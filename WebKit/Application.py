@@ -547,6 +547,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		
 		# 3-03 ib@@: Does anyone actually use this method?
+		# 2003-04-08 jdh: I use callMethodOfServlet, but I don't use
+		# this little context trick.  Not sure what you were referring to.  
 		if kw.has_key('context'):
 			context = kw['context']
 			del kw['context']
