@@ -12,6 +12,7 @@
 /Examples/             --> "
 /Admin/                --> Show admin pages
 /Testing/Dir/File.html --> Display the file
+/Examples/Welcome.py   --> Display the file
 
 # Redirects
                        --> Redirect to /
