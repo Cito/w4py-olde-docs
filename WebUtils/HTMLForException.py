@@ -1,5 +1,5 @@
 import string, sys, traceback
-from WebFuncs import HTMLEncode
+from Funcs import htmlEncode
 
 
 # @@ 2000-04-10 ce: change these so they're general args to the tags rather than just the colors
@@ -25,7 +25,7 @@ def HTMLForException(excInfo=None, options=None):
 		opt.update(options)
 	else:
 		opt = HTMLForExceptionOptions
-	
+
 	# Create the HTML
 	res = [
 		'<table bgcolor=%s width=100%% cellpadding=4><tr><td>\n' % opt['table.bgcolor'],
@@ -35,13 +35,13 @@ def HTMLForException(excInfo=None, options=None):
 	for line in out:
 		if string.find(line, 'File ')!=-1:
 			parts = string.split(line, '\n')
-			parts = map(lambda s: HTMLEncode(s), parts)
+			parts = map(lambda s: htmlEncode(s), parts)
 			parts[0] = '<font color=%s>%s</font>' % (opt['row.location.fgcolor'], parts[0])
 			parts[1] = '<font color=%s>%s</font>' % (opt['row.code.fgcolor'], parts[1])
 			line = string.join(parts, '\n')
 			res.append(line)
 		else:
-			res.append(HTMLEncode(line))
+			res.append(htmlEncode(line))
 	if out:
 		if res[-1][-1]=='\n':
 			res[-1] = string.rstrip(res[-1])

@@ -1,5 +1,4 @@
 from ExamplePage import ExamplePage
-from WebUtils.WebFuncs import HTMLEncode
 import string
 from types import ListType
 
@@ -29,8 +28,8 @@ class ListBox(ExamplePage):
 
 		# Debugging
 		if 0:
-			self.writeln('<br>fields = ', HTMLEncode(str(self.request().fields())))
-			self.writeln('<br>vars = ', HTMLEncode(str(self.vars())))
+			self.writeln('<br>fields = ', self.htmlEncode(str(self.request().fields())))
+			self.writeln('<br>vars = ', self.htmlEncode(str(self.vars())))
 			self.writeln('<p> <br>')
 
 		# Intro text is provided by our class' doc string
@@ -47,7 +46,7 @@ class ListBox(ExamplePage):
 		index = 0
 		vars = self.vars()
 		for item in vars['list']:
-			self.writeln('<option value=%d>%s</option>' % (index, HTMLEncode(item['name'])))
+			self.writeln('<option value=%d>%s</option>' % (index, self.htmlEncode(item['name'])))
 			index = index + 1
 
 		self.writeln('''

@@ -25,7 +25,7 @@ import select
 import socket
 import threading
 import time
-from WebUtils.WebFuncs import RequestURI
+from WebUtils import Funcs
 
 
 DefaultConfig = {
@@ -87,10 +87,10 @@ class ThreadedAppServer(AppServer):
 		self.mainsocket.listen(64) # @@ 2000-07-10 ce: hard coded constant should be a setting
 		self.recordPID()
 
-		
+
 		print "Ready\n"
 
-		
+
 
 	def isPersistent(self):
 		return 1
@@ -248,7 +248,7 @@ class RequestHandler:
 	def handleRequest(self):
 
 		verbose = self.server._verbose
-		
+
 		startTime = time.time()
 		if verbose:
 			print 'BEGIN REQUEST'
@@ -294,7 +294,7 @@ class RequestHandler:
 			if verbose:
 				print 'request has keys:', string.join(dict.keys(), ', ')
 				if dict.has_key('environ'):
-					requestURI = RequestURI(dict['environ'])
+					requestURI = Funcs.requestURI(dict['environ'])
 				else:
 					requestURI = None
 				print 'request uri =', requestURI

@@ -7,7 +7,7 @@ If you add another mix-in then update the list of names found in InstallMixIns()
 
 '''
 
-from WebUtils.WebFuncs import HTMLEncode
+from WebUtils.Funcs import htmlEncode
 from types import LongType
 
 
@@ -99,7 +99,7 @@ class MiddleObject:
 class Attr:
 
 	def htValue(self, value, obj):
-		return HTMLEncode(str(value))
+		return htmlEncode(str(value))
 
 
 class ObjRefAttr:
@@ -112,7 +112,7 @@ class ObjRefAttr:
 			klassName = klass.name()
 			return '<a href=BrowseObject?class=%s&serialNum=%i>%s.%i</a>' % (klassName, objSerialNum, klassName, objSerialNum)
 		else:
-			return HTMLEncode(str(value))
+			return htmlEncode(str(value))
 
 
 class ListAttr:

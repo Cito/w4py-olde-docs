@@ -1,5 +1,4 @@
 from ExamplePage import ExamplePage
-from WebUtils.WebFuncs import HTMLEncode
 import string
 
 class Introspect(ExamplePage):
@@ -19,7 +18,7 @@ class Introspect(ExamplePage):
 		valueType = type(value)
 		if valueType is type([])  or  valueType is type(()):
 			value = string.join(map(lambda x: str(x), value), ', ')
-		self.writeln('<tr valign=top><td>%s</td><td>%s</td></tr>' % (key, HTMLEncode(str(value))))
+		self.writeln('<tr valign=top><td>%s</td><td>%s</td></tr>' % (key, self.htmlEncode(str(value))))
 
 	def list(self, codeString):
 		list = eval(codeString)

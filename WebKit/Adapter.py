@@ -2,7 +2,6 @@ import os, sys, time, socket
 from marshal import dumps, loads
 from Object import Object
 from MiscUtils.Configurable import Configurable
-from WebUtils.WebFuncs import HTMLEncode
 
 
 class Adapter(Configurable, Object):

@@ -1,5 +1,4 @@
 from AdminPage import AdminPage
-from WebUtils.WebFuncs import HTMLEncode
 import string, types, whrandom
 from time import time, localtime
 
@@ -12,8 +11,8 @@ class LoginPage(AdminPage):
 
 		extra = self.request().field('extra', None)
 		if extra:
-			self.write('<tr><td align="left">%s</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>' % HTMLEncode(extra))
-			
+			self.write('<tr><td align="left">%s</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>' % self.htmlEncode(extra))
+
 		self.write('''
 		<tr>
 			<td align="left">Please log in:</td>

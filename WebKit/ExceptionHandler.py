@@ -2,7 +2,7 @@ from Common import *
 import traceback, whrandom
 from time import asctime, localtime
 from WebUtils.HTMLForException import HTMLForException
-from WebUtils.WebFuncs import HTMLForDictionary
+from WebUtils.Funcs import htmlForDict
 from HTTPResponse import HTTPResponse
 
 
@@ -128,15 +128,15 @@ class ExceptionHandler(Object):
 
 		html.extend([
 			htTitle('Misc Info'),
-			HTMLForDictionary({
+			htmlForDict({
 				'time':          asctime(localtime(self._res.endTime())),
 				'filename':      self.servletPathname(),
 				'os.getcwd()':   os.getcwd(),
 				'sys.path':      sys.path
 			}),
-			htTitle('Fields'),        HTMLForDictionary(self._req.fields()),
-			htTitle('Headers'),       HTMLForDictionary(self._res.headers()),
-			htTitle('Environment'),   HTMLForDictionary(self._req.environ(), {'PATH': ';'}),
+			htTitle('Fields'),        htmlForDict(self._req.fields()),
+			htTitle('Headers'),       htmlForDict(self._res.headers()),
+			htTitle('Environment'),   htmlForDict(self._req.environ(), {'PATH': ';'}),
 			htTitle('Ids'),           htTable(osIdTable(), ['name', 'value'])])
 			# @@ 2000-05-01 ce: Shouldn't we be asking each of the objects (transaction, request, response, ...) for it's debugging info to append? That would be more OOPish.
 

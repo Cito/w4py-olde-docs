@@ -1,5 +1,6 @@
 from Common import *
 from HTTPServlet import HTTPServlet
+from WebUtils import Funcs
 
 
 class PageError(Exception):
@@ -154,6 +155,21 @@ class Page(HTTPServlet):
 		self.writeln('</html>')
 
 
+	## Convenience ##
+
+	def htmlEncode(self, s):
+		return Funcs.htmlEncode(s)
+
+	def htmlDecode(self, s):
+		return Funcs.htmlDecode(s)
+
+	def urlEncode(self, s):
+		return Funcs.urlEncode(s)
+
+	def urlDecode(self, s):
+		return Funcs.urlDecode(s)
+
+
 	## Self utility ##
 
 	def getCan(self, ID, klass, storage,*args, **kargs):
@@ -197,5 +213,3 @@ class Page(HTTPServlet):
 			for action in self.actions():
 				self._actionDict[action] = 1
 		return self._actionDict
-
-

@@ -1,6 +1,5 @@
 import os, sys
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
-from WebUtils.WebFuncs import URLEncode
 
 
 from SitePage import SitePage
@@ -62,9 +61,9 @@ class StorePage(SitePage):
 		klasses = self.store().model().klasses()
 		names = klasses.keys()
 		names.sort()
-		modelFilename = URLEncode(self.modelFilename())
+		modelFilename = self.urlEncode(self.modelFilename())
 		for name in names:
-			urlName = URLEncode(name)
+			urlName = self.urlEncode(name)
 			if name==curClassName:
 				style = 'CurClassLink'
 			else:

@@ -1,6 +1,5 @@
 from AdminPage import AdminPage
 from AdminSecurity import AdminSecurity
-from WebUtils.WebFuncs import HTMLEncode
 import sys
 
 
@@ -18,7 +17,7 @@ class AppControl(AdminSecurity):
 		<td><input type=submit name="action" value="ClearCache"></td>
 		<td>Clear the Servlet instance cache in Application and the class caches of each servlet factory</td>
 		</tr>
-		
+
 		<tr>
 		<td><input type=submit name="action" value="Reload"></td>
 		<td>Reload the selected modules.  Be Careful!</td>
@@ -51,13 +50,13 @@ class AppControl(AdminSecurity):
 
 		elif action == "Reload":
 			self.write("""<p>Reloading selected modules.  Any existing classes will continue to use the old module definitions, as will any functions/variables imported using 'from'.  Use ClearCache to clean out any Servlets in this condition.<p>""")
-			
+
 			reloadnames = self.request().field("reloads",None)
 			if not type(reloadnames) == type([]):
 				reloadnames = [reloadnames,]
 			for i in reloadnames:
 				if i and sys.modules.get(i,None):
-					self.write("<br>Reloading %s, %s" % (i, HTMLEncode(str(sys.modules[i]))))					
+					self.write("<br>Reloading %s, %s" % (i, self.htmlEncode(str(sys.modules[i]))))
 					try:
 						reload(sys.modules[i])
 					except Exception, e:
@@ -68,4 +67,4 @@ class AppControl(AdminSecurity):
 			self.write("<B> Shutting down the Application server")
 			self.application()._server.initiateShutdown()
 			self.write("<p>Good Luck!</b>")
-			
+

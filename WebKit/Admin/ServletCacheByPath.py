@@ -1,7 +1,7 @@
 from AdminPage import AdminPage
 from string import join
-from WebUtils.WebFuncs import HTMLEncode
 from Queue import Queue
+from WebUtils.Funcs import htmlEncode
 
 
 class ServletCacheByPath(AdminPage):
@@ -47,7 +47,7 @@ def htRecord(record):
 	keys = record.keys()
 	keys.sort()
 	for key in keys:
-		htKey = HTMLEncode(key)
+		htKey = htmlEncode(key)
 
 		# determine the HTML for the value
 		value = record[key]
@@ -58,7 +58,7 @@ def htRecord(record):
 				htValue = htQueue(value)
 		if not htValue:
 			# the default is just the str() of the value
-			htValue = HTMLEncode(str(value))
+			htValue = htmlEncode(str(value))
 
 		ap('<tr> <td> %s </td> <td> %s </td> </tr>' % (htKey, htValue))
 	ap('</table>')
@@ -66,5 +66,5 @@ def htRecord(record):
 
 
 def htQueue(queue):
-	return 'Queue: ' + HTMLEncode(str(queue.queue))
+	return 'Queue: ' + htmlEncode(str(queue.queue))
 	

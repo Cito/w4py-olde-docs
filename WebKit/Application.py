@@ -17,7 +17,6 @@ from time import *
 from CanContainer import *
 from WebKit.Cookie import Cookie
 
-from WebUtils.WebFuncs import HTMLEncode
 from WebUtils.HTMLForException import HTMLForException
 
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath

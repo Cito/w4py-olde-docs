@@ -1,5 +1,4 @@
 from StorePage import StorePage
-from WebUtils.WebFuncs import URLEncode
 
 
 class BrowseClasses(StorePage):

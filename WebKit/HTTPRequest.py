@@ -1,10 +1,9 @@
 from Common import *
 from Request import Request
 from WebUtils.Cookie import Cookie
-import cgi
+import cgi, os
 from types import ListType
-import os
-from WebUtils.WebFuncs import RequestURI
+from WebUtils.Funcs import requestURI
 
 
 class HTTPRequest(Request):
@@ -65,7 +64,7 @@ class HTTPRequest(Request):
 		# REQUEST_URI isn't actually part of the CGI standard and some
 		# web servers like IIS don't set it (as of 8/22/2000).
 		if not self._environ.has_key('REQUEST_URI'):
-			self._environ['REQUEST_URI'] = RequestURI(self._environ)
+			self._environ['REQUEST_URI'] = requestURI(self._environ)
 
 		self._adapterName = self._environ.get('SCRIPT_NAME', '')
 

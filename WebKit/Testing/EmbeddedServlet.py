@@ -1,5 +1,4 @@
 from WebKit.Page import Page
-from WebUtils.WebFuncs import HTMLEncode
 
 
 class EmbeddedServlet(Page):
@@ -18,7 +17,7 @@ class EmbeddedServlet(Page):
 		self.writeln('<pre>%s</pre>' % self.__class__.__doc__)
 		self.writeln('<hr>\n<p>Fields: %d\n<p>' % len(fields))
 		for key, value in fields.items():
-			self.writeln('<br> %s = %s' % (HTMLEncode(key), HTMLEncode(value)))
+			self.writeln('<br> %s = %s' % (self.htmlEncode(key), self.htmlEncode(value)))
 		self.writeln('<p><hr>')
 
 		

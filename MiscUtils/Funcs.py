@@ -74,11 +74,11 @@ def timestamp(numSecs=None):
 	return locals()
 
 
+### Deprecated
 
 def Commas(number):
 	print 'DEPRECATED: MiscUtils.Funcs.Commas() on 02/23/01 in ver 0.5. Use commas() instead.'
 	return commas(number)
-
 
 def CharWrap(s, width, hanging=0):
 	print 'DEPRECATED: MiscUtils.Funcs.CharWrap() on 02/23/01 in ver 0.5. Use charWrap() instead.'

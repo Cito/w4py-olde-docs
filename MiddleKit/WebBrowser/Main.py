@@ -1,6 +1,5 @@
 from SitePage import SitePage
 import os, sys
-from WebUtils.WebFuncs import HTMLEncode
 
 
 class Main(SitePage):

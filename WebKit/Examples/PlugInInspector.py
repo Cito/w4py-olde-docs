@@ -1,5 +1,4 @@
 from ExamplePage import ExamplePage
-from WebUtils.WebFuncs import HTMLEncode
 from types import StringType
 
 
@@ -13,7 +12,7 @@ class PlugInInspector(ExamplePage):
 	def writeContent(self):
 		wr = self.writeln
 		for pi in self.application().server().plugIns():
-			wr('<b>%s</b>' % HTMLEncode(repr(pi)))
+			wr('<b>%s</b>' % self.htmlEncode(repr(pi)))
 			for item in dir(pi):
-				wr('<br> %s == %s' % (item, HTMLEncode(str(getattr(pi, item)))))
+				wr('<br> %s == %s' % (item, self.htmlEncode(str(getattr(pi, item)))))
 			self.writeln('<hr>')

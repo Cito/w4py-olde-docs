@@ -1,6 +1,5 @@
 from WebKit.Page import Page
 from WebKit.Application import Application
-from WebUtils.WebFuncs import HTMLEncode
 from string import replace, split, strip
 import os
 
@@ -38,10 +37,10 @@ class Main(Page):
 			urls = []
 			for url in case['URLs']:
 				url = req.adapterName() + url
-				urlName = HTMLEncode(url)
+				urlName = self.htmlEncode(url)
 				urls.append((url, urlName))
 
-			expectation = HTMLEncode(case['Expectation'])
+			expectation = self.htmlEncode(case['Expectation'])
 			bgcolor = ['EEEEEE', 'DDDDDD'][caseNum % 2]
 			wr('<tr bgcolor=%s> <td> %d. </td>  <td>' % (bgcolor, caseNum))
 			for url, urlName in urls:

@@ -16,7 +16,7 @@ import asyncore
 import string
 import time
 import exceptions
-from WebUtils.WebFuncs import RequestURI
+from WebUtils import Funcs
 
 try:
 	from SelectRelease import SelectRelease
@@ -235,7 +235,7 @@ class RequestHandler(asyncore.dispatcher):
 			if verbose:
 				print 'request has keys:', string.join(dict.keys(), ', ')
 				if dict.has_key('environ'):
-					requestURI = RequestURI(dict['environ'])
+					requestURI = Funcs.requestURI(dict['environ'])
 				else:
 					requestURI = None
 				print 'request uri =', requestURI

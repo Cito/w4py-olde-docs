@@ -1,4 +1,4 @@
-from Page import Page
+from WebKit.Page import Page
 from MiscUtils.Configurable import Configurable
 import os
 
