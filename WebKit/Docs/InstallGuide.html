@@ -152,8 +152,7 @@ WebKit 0.4.1
 
 <p> Microsoft's Internet Information Server, or IIS, requires some special configuration due to its default non-standard CGI behavior. You have to do two things:
 
-<p> 1) Configure IIS to handle PATH_INFO and PATH_TRANSLATED according to
-the CGI specification, by running the following command:
+<p> 1) For IIS 4.0, configure it to handle PATH_INFO and PATH_TRANSLATED according to the CGI specification, by running the following command:
 
 <p> <code>cscript adsutil.vbs SET W3SVC/1/AllowPathInfoForScriptMappings 1</code>
 
