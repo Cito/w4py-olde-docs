@@ -16,6 +16,12 @@ The globals provided are:
 
 
 import os, string, sys, time
+
+try:
+	from cStringIO import StringIO
+except ImportError:
+	from StringIO import StringIO
+
 from Object import Object
 
 
@@ -31,12 +37,12 @@ except:
 class SubclassResponsibilityError(NotImplementedError):
 	pass
 
-	
+
 def asclocaltime():
 	''' Returns a readable string of the current, local time. Useful for time stamps in log files. '''
 	return time.asctime(time.localtime(time.time()))
 
-	
+
 class Tombstone:
 	''' Tombstone is used directly as a unique place holder object. It's an alternative to None when None can't be used (because it might be a valid value). This class is never instantiated. The Tombstone class itself, provides the identity needed. For example uses, search the source code. '''
 	pass
