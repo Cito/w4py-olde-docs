@@ -482,7 +482,10 @@ def valueForKey(obj, key, default=NoDefault):
 		else:
 			return obj.get(key, default)
 	else:
-		klass    = obj.__class__
+		try:
+			klass    = obj.__class__
+		except AttributeError:
+			raise AttributeError, '__class__ obj type=%r, obj=%r' % (type(obj), obj)
 		method   = getattr(klass, key, None)
 		if not method:
 			underKey = '_' + key
