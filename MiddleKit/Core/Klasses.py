@@ -58,6 +58,10 @@ class Klasses(ModelObject, UserDict):
 	def filename(self):
 		return self._filename
 
+	def klassesInOrder(self):
+		''' Returns a list of all the Klasses in the order they were declared. Do not modify the list. '''
+		return self._klasses
+
 
 	## Reading files ##
 
