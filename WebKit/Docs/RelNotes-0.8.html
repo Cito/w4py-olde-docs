@@ -82,6 +82,25 @@ Version 0.8
 				By default classes are not allowed to be unpickled at all for security reasons.
 			<li>MiscUtils.M2PickleRPC allows you to use the M2Crypto package to do SSL-secured PickleRPC requests.
 		</ul>
+
+	<li> New method Page.endResponse() which does the following:
+		<ul>
+			<li>If called from within an awake() or sleep() method, it immediately skips all further awake(), respond(), and sleep() processing and
+				sends the accumulated response.
+			<li>If called from within respond() (and this includes the writeXXX() methods called by respond()), it skips the rest of the respond()
+				processing, calls sleep(), and then sends the accumulated response.  (This is because awake() must have already succeeded, so we
+				ought to call sleep() to clean up whatever awake() did.)
+		</ul>
+		This is mainly useful if you want to call self.forward() or self.response().sendRedirect() within a deeply nested hierarchy of method calls
+		and skip the rest of your processing without having to contort your code.
+		It is implemented internally by raising an EndResponse exception which is silently caught at the appropriate place within Application.
+		Typical usage is:
+		<pre>
+	if some_conditions_are_satisfied():
+		self.forward('some/other/servlet')
+		# or self.response().sendRedirect('somewhere')
+		self.endResponse()
+	# continue processing...</pre>
 </ul>
 
 

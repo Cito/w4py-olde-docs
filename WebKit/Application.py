@@ -30,6 +30,15 @@ debug = 0
 class ApplicationError(Exception):
 	pass
 
+class EndResponse(Exception):
+	"""
+	Used to prematurely break out of the awake()/respond()/sleep() cycle
+	without reporting a traceback.  During servlet processing, if this
+	exception is caught during respond() then sleep() is called and the
+	response is sent.  If caught during awake() then both respond() and
+	sleep() are skipped and the response is sent.
+	"""
+	pass
 
 class Application(ConfigurableForServerSidePath, Object):
 	"""
@@ -533,9 +542,15 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	def handleGoodURL(self, transaction):
 		self.createServletInTransaction(transaction)
-		self.awake(transaction)
-		self.respond(transaction)
-		self.sleep(transaction)
+		try:
+			self.awake(transaction)
+			try:
+				self.respond(transaction)
+			except EndResponse:
+				pass
+			self.sleep(transaction)
+		except EndResponse:
+			pass
 
 	def forward(self, trans, URL):
 		"""
@@ -638,9 +653,15 @@ class Application(ConfigurableForServerSidePath, Object):
 		self.createServletInTransaction(trans)
 
 		#call the servlet, but not session, it's already alive
-		trans.servlet().awake(trans)
-		trans.servlet().respond(trans)
-		trans.servlet().sleep(trans)
+		try:
+			trans.servlet().awake(trans)
+			try:
+				trans.servlet().respond(trans)
+			except EndResponse:
+				pass
+			trans.servlet().sleep(trans)
+		except ReponseDone:
+			pass
 
 		self.returnInstance(trans,trans.request().serverSidePath())
 
@@ -689,9 +710,15 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		# Awaken, call the method, and sleep
 		servlet = trans.servlet()
-		servlet.awake(trans)
-		result = getattr(servlet, method)(*args, **kwargs)
-		servlet.sleep(trans)
+		try:
+			servlet.awake(trans)
+			try:
+				result = getattr(servlet, method)(*args, **kwargs)
+			except EndResponse:
+				pass
+			servlet.sleep(trans)
+		except ReponseDone:
+			pass
 
 		# Return the servlet instance to the cache
 		self.returnInstance(trans, trans.request().serverSidePath())

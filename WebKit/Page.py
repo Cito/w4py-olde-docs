@@ -1,6 +1,7 @@
 from Common import *
 from HTTPServlet import HTTPServlet
 from WebUtils import Funcs
+from Application import EndResponse
 
 
 class PageError(Exception):
@@ -338,6 +339,15 @@ class Page(HTTPServlet):
 		The main difference is that here you don't have to pass in the transaction as the first argument.
 		"""
 		return apply(self.application().callMethodOfServlet, (self.transaction(), URL, method) + args, kwargs)
+
+	def endResponse(self):
+		"""
+		If this is called during sleep() or awake() then the rest of awake(), response(), and
+		sleep() are skipped and the accumulated response is sent immediately with no further
+		processing.  If this is called during respond() then the rest of respond() is
+		skipped but awake() is called, then the accumulated response is sent.
+		"""
+		raise EndResponse
 
 
 	## Self utility ##
