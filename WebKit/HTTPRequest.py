@@ -346,8 +346,8 @@ class HTTPRequest(Request):
 		""" The filesystem path of the request, using the webserver's docroot"""
 		docroot = self._environ['DOCUMENT_ROOT']
 		requri = self._environ['REQUEST_URI'][1:]#strip leading /
-		if self._environ['QUERY_STRING']:
-			qslength = len(self._environ['QUERY_STRING'])+1
+		if self.queryString():
+			qslength = len(self.queryString())+1
 			requri = requri[:-qslength] ##pull off the query string and the ?-mark
 		fspath = os.path.join(docroot,requri)
 		return fspath
@@ -445,7 +445,7 @@ class HTTPRequest(Request):
 
 	def queryString(self):
 		''' Returns the query string portion of the URL for this request. Taken from the CGI variable QUERY_STRING. '''
-		return self._environ['QUERY_STRING']
+		return self._environ.get('QUERY_STRING', '')
 
 	def uri(self):
 		''' Returns the request URI, which is the entire URL except for the query string. '''

@@ -29,7 +29,7 @@ Version 0.6.1
 
 <ul>
 
-	<li> "File" is the new default session store, since "Dynamic" has concurrency issues.
+	<li> Fixed concurrency issues in Dynamic session store.
 
 	<li> The webkit unix init script...
 	<ul>
@@ -39,6 +39,10 @@ Version 0.6.1
 	</ul>
 
 	<li> Fixed Session.sessionEncode() so that it produces the proper query string.
+
+	<li> Fixed some methods of HTTPRequest so they work properly with IIS.
+
+	<li> Fixed hanging and crashing problems in wkcgi.exe.
 
 </ul>
 
