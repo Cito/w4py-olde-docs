@@ -159,7 +159,7 @@ class Application(Configurable,CanContainer):
 		curTime = time()
 		for key in sessions.keys():
 			sess = sessions[key]
-			if (curTime - sess.lastAccessTime()) >= sess.timeout()  or  timeout==0:
+			if (curTime - sess.lastAccessTime()) >= sess.timeout()  or  sess.timeout()==0:
 				sessions[key].expiring()
 				del sessions[key]
 		sessions.storeAllSessions()
