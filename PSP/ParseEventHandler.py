@@ -330,7 +330,15 @@ class ParseEventHandler:
 		if not AwakeCreated:
 			self._writer.println('def awake(self,trans):')
 			self._writer.pushIndent()
-			self._writer.println('self.__class__.__bases__[0]'+'.awake(self, trans)\n')
+			self._writer.println('for baseclass in self.__class__.__bases__:')
+			self._writer.pushIndent()
+			self._writer.println('if hasattr(baseclass, "awake"):')
+			self._writer.pushIndent()
+			self._writer.println('baseclass.awake(self, trans)')
+			self._writer.println('break\n')
+			self._writer.popIndent() # end if statement
+			self._writer.popIndent() # end for statement
+
 ##commented out for new awake version per conversation w/ chuck
 ##	    self._writer.println('if "init" in dir(self) and type(self.init) == type(self.__init__):\n')
 ##	    self._writer.pushIndent()
