@@ -11,7 +11,7 @@ class ServletFactory(Object):
 
 	Servlet factories are used by the Application to create servlets for transactions.
 
-	A factory must inherit from this class and override uniqueness(), extensions() and createServletForTransaction(). Do not invoke the base class methods as they all raise SubclassResponsibilityErrors.
+	A factory must inherit from this class and override uniqueness(), extensions() and servletForTransaction(). Do not invoke the base class methods as they all raise SubclassResponsibilityErrors.
 
 	Each method is documented below.
 	'''
@@ -33,10 +33,6 @@ class ServletFactory(Object):
 
 	def extensions(self):
 		''' Return a list of extensions that match this handler. Extensions should include the dot. An empty string indicates a file with no extension and is a valid value. The extension '.*' is a special case that is looked for a URL's extension doesn't match anything. '''
-		raise SubclassResponsibilityError
-
-	def createServletForTransaction(self, transaction):
-		''' Returns a new servlet that will handle the transaction. This method should do no caching (e.g., it should really create the servlet upon each invocation) since caching is already done at the Application level. '''
 		raise SubclassResponsibilityError
 
 	def flushCache(self):
