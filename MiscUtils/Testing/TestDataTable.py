@@ -2,7 +2,6 @@ import sys
 sys.path.insert(0, '..')
 from DataTable import *
 import string
-from string import ljust
 
 
 def heading(title):
@@ -24,9 +23,15 @@ def test01():
 	t = DataTable()
 	t.setHeadings(['name', 'age:int', 'rating:float'])
 
-	heading('Adding data:')
-	t.append(['John', '26', '7.2'])
-	t.append(['Mary', 32, 8.3])
+	heading('Adding and accessing data:')
+	a = ['John', '26', '7.2']
+	b = ['Mary', 32, 8.3]
+	t.append(a)
+	t.append(b)
+	assert t[-1].asList()==b
+	assert t[-2].asDict()=={'name':'John', 'age':26, 'rating':7.2}
+	assert t[-1]['name']=='Mary'
+	assert t[-2]['name']=='John'
 
 	heading('Printing:')
 	print t
@@ -36,22 +41,22 @@ def test01():
 
 	heading('Accessing rows:')
 	for row in t:
-		print row['name'], row['age'], row['rating']
-		print row[0], row[1], row[2]
+		assert row['name']==row[0]
+		assert row['age']==row[1]
+		assert row['rating']==row[2]
 		for item in row:
-			print item,
-		print
+			pass
 
 	heading('Default type:')
 	t = DataTable(defaultType='int')
 	t.setHeadings(list('xyz'))
 	t.append([1, 2, 3])
 	t.append([4, 5, 6])
-	print '<assert>'
 	assert t[0]['x'] - t[1]['z'] == -5
 
 	heading('Quoted values:')
 	t = DataTable()
+	# "x",'y,y',z # to do
 	lines = split('''x,y,z
 		a,b,c
 		a,b,"c,d"
@@ -62,20 +67,33 @@ def test01():
 		"","",""
 		"a","",
 ''', '\n')
+
 	t.readLines(lines)
+	assert t.headings()[0].name()=='x'
+	assert t.headings()[1].name()=='y'
+	assert t.headings()[2].name()=='z'
 
-	# clean up lines for printing and comparison to table
-	lines = lines[1:]  # strip heading line (x,y,z)
-	lines = map(strip, lines)
-	maxLen = 0
-	for line in lines:
-		if maxLen<len(line):
-			maxLen = len(line)
-	lines = map(lambda line, ljust=ljust, maxLen=maxLen: ljust(line, maxLen), lines)
+	matches = [
+		['a', 'b', 'c'],
+		['a', 'b', 'c,d'],
+		['a,b', 'c', 'd'],
+		['a', 'b', 'c'],
+		['a', 'b', 'c'],
+		['a,b,c', '', ''],
+		['', '', ''],
+		['a', '', '']
+	]
+	i = 0
+	while i<len(t):
+		match = matches[i]
+		if t[i].asList()!=match:
+			print 'mismatch'
+			print 'i     :', i
+			print 'match :', match
+			print 't[i]  :', t[i]
+			raise AssertionError
+		i = i + 1
 
-	# print lines and table for visual inspection
-	for i in range(len(t)):
-		print '%02i. %s ==> %s' % (i, lines[i], t[i])
 	print
 
 
