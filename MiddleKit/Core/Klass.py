@@ -11,13 +11,15 @@ class Klass(UserDict, ModelObject):
 
 	## Init ##
 
-	def __init__(self, dict=None):
+	def __init__(self, klassContainer, dict=None):
 		''' Initializes a Klass definition with a raw dictionary, typically read from a file. The 'Class' field contains the name and can also contain the name of the superclass (like "Name : SuperName"). Multiple inheritance is not yet supported. '''
 		UserDict.__init__(self, {})
+		self._klassContainer = klassContainer
 		self._attrsList = []
 		self._attrsByName = {}
 		self._superklass = None
 		self._subklasses = []
+		self._pyClass = None
 		if dict is not None:
 			self.readDict(dict)
 
@@ -222,6 +224,16 @@ class Klass(UserDict, ModelObject):
 
 	def isAbstract(self):
 		return self._isAbstract
+
+	def pyClass(self):
+		"""
+		Returns the Python class that corresponds to this class. This
+		request will even result in the Python class' module being
+		imported if necessary.
+		"""
+		if self._pyClass is None:
+			self._pyClass = self._klassContainer._model.pyClassForName(self.name())
+		return self._pyClass
 
 
 	## As string ##

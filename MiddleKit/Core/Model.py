@@ -17,7 +17,8 @@ class Model(Configurable):
 		self._coreClasses = customCoreClasses
 		self._klasses = None
 		self._parents = []  # e.g., parent models
-
+		self._pyClassForName = {}
+		
 		# _allModelsByFilename is used to avoid loading the same parent model twice
 		if rootModel:
 			self._allModelsByFilename = rootModel._allModelsByFilename
@@ -193,6 +194,26 @@ class Model(Configurable):
 		by name, including klasses inherited from parent models.
 		"""
 		return self._allKlassesByName
+
+	def pyClassForName(self, name):
+		"""
+		Returns the Python class for the given name, which must be
+		present in the object model. Accounts for
+		self.setting('Package').
+
+		If you already have a reference to the model klass, then
+		you can just ask it for klass.pyClass().
+		"""
+		pyClass = self._pyClassForName.get(name, None)
+		if pyClass is None:
+			results = {}
+			pkg = self.setting('Package', '')
+			if pkg:
+				pkg += '.'
+			exec 'from %s%s import %s' % (pkg, name, name) in results
+			pyClass = results[name]
+			self._pyClassForName[name] = pyClass
+		return pyClass
 
 
 	## Being configurable ##

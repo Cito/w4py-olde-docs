@@ -83,7 +83,7 @@ class Klasses(ModelObject, UserDict):
 					print row[key]  # throws exception
 			if row['Class']:
 				pyClass = self._model.coreClass('Klass')
-				klass = pyClass(row)
+				klass = pyClass(self, row)
 				self.addKlass(klass)
 			else:
 				name = row['Attribute']

@@ -68,7 +68,6 @@ class SQLObjectStore(ObjectStore):
 		self._connected = 0
 		self._sqlEcho   = None
 		self._sqlCount  = 0
-		self._pyClassForName = {}   # cache. see corresponding method
 		self._pool = None   # an optional DBPool
 
 	def modelWasSet(self):
@@ -276,7 +275,7 @@ class SQLObjectStore(ObjectStore):
 				key = ObjectKey().initFromClassNameAndSerialNum(className, serialNum)
 				obj = self._objects.get(key, None)
 				if obj is None:
-					pyClass = self.pyClassForName(className)
+					pyClass = klass.pyClass()
 					obj = pyClass()
 					assert isinstance(obj, MiddleObject), 'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r' % (obj, type(obj), MiddleObject)
 					obj._mk_store = self
@@ -386,17 +385,6 @@ class SQLObjectStore(ObjectStore):
 		else:
 			return 'where deleted is null %s' % clauses
 
-	def pyClassForName(self, name):
-		pyClass = self._pyClassForName.get(name, None)
-		if pyClass is None:
-			results = {}
-			pkg = self._model.setting('Package', '')
-			if pkg:
-				pkg += '.'
-			exec 'from %s%s import %s' % (pkg, name, name) in results
-			pyClass = results[name]
-			self._pyClassForName[name] = pyClass
-		return pyClass
 
 	## Obj refs ##
 
