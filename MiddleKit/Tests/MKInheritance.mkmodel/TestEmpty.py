@@ -48,3 +48,11 @@ def test():
 	assert obj.b()=='2'
 	assert obj.c()=='3'
 	assert obj.d()=='4'
+
+	# Using fetchObject to fetch individual objects of both base class and subclass
+	objs = store.fetchObjectsOfClass(One)
+	assert len(objs)==2
+	for obj in objs:
+		fetchedObj = store.fetchObject(obj.__class__, obj.serialNum())	
+		assert fetchedObj.__class__ == obj.__class__
+		assert fetchedObj.a() == obj.a()
