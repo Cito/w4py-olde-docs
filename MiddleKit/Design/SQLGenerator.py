@@ -4,6 +4,7 @@ from glob import glob
 from types import StringType
 from time import asctime, localtime, time
 from MiddleKit.Core.ObjRefAttr import objRefJoin
+from MiscUtils import CSVParser
 import string
 
 class SampleError:
@@ -124,12 +125,17 @@ class Model:
 		#	break into additional methods
 		#	some of these methods may even go into other mix-ins
 		readColumns = 1
-		# @@ 2000-10-29 ce: put in error checking that the column names are valid
+		parse = CSVParser.CSVParser().parse
 		linenum = 0
 		for line in lines:
 			linenum += 1
-			fields = line.strip().split(',')
-			fields = [self.unquote(field) for field in fields]
+			try:
+				fields = parse(line)
+			except CSVParser.ParseError, err:
+				raise SampleError( linenum, 'Syntax error: %s' % err)
+			if fields is None:	# parser got embedded newline; continue with the next line
+				continue
+
 			if self.areFieldsBlank(fields):
 				continue  # skip blank lines
 			if fields[0] and str(fields[0])[0]=='#':
@@ -196,13 +202,6 @@ class Model:
 			values = ', '.join(values)
 			stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
 			file.write(stmt)
-
-	def unquote(self, string):
-		""" Removes preceding and trailing quotes. This is a utility method for writeInsertSamplesSQLForLines(). """
-		if string:
-			if string.startswith('"') and string.endswith('"'):
-				string = string[1:-1]
-		return string
 
 	def areFieldsBlank(self, fields):
 		""" Utility method for writeInsertSamplesSQLForLines(). """
@@ -309,6 +308,8 @@ class Klasses:
 		raise AbstractError, self.__class__
 
 	def _writeCreateSQL(self, generator, out):
+		# assign the class ids up-front, so that we can resolve forward object references
+		self.assignClassIds(generator)
 		for klass in self._model._allKlassesInOrder:
 			klass.writeCreateSQL(self._sqlGenerator, out)
 		self.writeClassIdsSQL(generator, out)
@@ -321,13 +322,10 @@ create table _MKClassIds (
 	name varchar(100)
 );
 ''')
-		id = 1
 		values = []
 		for klass in self._model._allKlassesInOrder:
 			wr('insert into _MKClassIds (id, name) values ')
-			wr('\t(%s, %r);\n' % (id, klass.name()))
-			klass.setId(id)
-			id += 1
+			wr('\t(%s, %r);\n' % (klass.id(), klass.name()))
 		wr('\n')
 
 
@@ -587,8 +585,10 @@ class StringAttr:
 			value = ''
 		elif value.find('\\')!=-1:
 			if 1:
-				value = eval('"""'+str(value)+'"""')
-				value = repr(value)
+				# add spaces before and after, to prevent
+				# syntax error if value begins or ends with "
+				value = eval('""" '+str(value)+' """')  
+				value = repr(value[1:-1])	# trim off the spaces
 				value = value.replace('\\011', '\\t')
 				value = value.replace('\\012', '\\n')
 				return value
@@ -643,3 +643,26 @@ class ListAttr:
 		# @@ 2000-11-24 ce: need specific extension?
 		# @@ 2001-02-04 ce: ^^^ what does that mean???
 		raise Exception, 'Lists are implicit. They cannot have sample values.'
+
+class PrimaryKey:
+	'''
+	This class is not a 'standard' attribute, but just a helper class for the 
+	writeInsertSamplesSQLForLines method, in case the samples.csv file contains
+	a primary key column (i.e. the serial numbers are specified explicitly).
+	'''
+	def __init__(self,name,klass):
+		self._name = name
+		self._klassid = klass.id()
+		self._props = {'isDerived':0}
+
+	def name(self):
+		return self._name
+
+	def sqlName(self):
+		return self.name()
+
+	def get(self,key,default=0):
+		return self._props.get(key,default)
+
+	def sampleValue(self,value):
+		return value

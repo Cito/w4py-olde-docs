@@ -53,6 +53,13 @@ class Klasses(ModelObject, UserDict):
 		self._typeNamesToAttrClassNames = map
 
 
+	def assignClassIds(self, generator):
+		id = 1
+		for klass in self._model._allKlassesInOrder:
+			klass.setId(id)
+			id += 1
+        
+
 	## Accessing ##
 
 	def filename(self):

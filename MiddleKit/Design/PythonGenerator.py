@@ -4,6 +4,8 @@ from time import asctime, localtime, time
 import string
 import os, sys
 from types import *
+from MiddleKit.Core.ObjRefAttr import objRefJoin
+
 
 try:
 	from mx import DateTime
@@ -30,6 +32,8 @@ class PythonGenerator(CodeGenerator):
 class Model:
 
 	def writePy(self, generator, dirname):
+		self._klasses.assignClassIds(generator)
+
 		if self.hasSetting('Package'):
 			filename = os.path.join(dirname, '__init__.py')
 			if not os.path.exists(filename):
@@ -58,7 +62,6 @@ class ModelObject:
 		self._writePy(generator, out)
 		if close:
 			out.close()
-
 
 class Klass:
 
@@ -411,6 +414,19 @@ class DateTimeAttr:
 
 
 class ObjRefAttr:
+
+	def stringToValue(self, string):
+		parts = string.split('.')
+		if len(parts)==2:
+			className = parts[0]
+			objSerialNum = parts[1]
+		else:
+			className = self.className()
+			objSerialNum = string
+		klass = self.klass().klasses()._model.klass(className)
+		klassId = klass.id()
+		objRef = objRefJoin(klassId, int(objSerialNum))
+		return objRef
 
 	def writePySet(self, out):
 		name = self.name()

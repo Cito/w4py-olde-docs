@@ -9,6 +9,7 @@ from ObjectStore import ObjectStore, UnknownObjectError
 from ObjectKey import ObjectKey
 from MiscUtils.MixIn import MixIn
 from MiscUtils.DBPool import DBPool
+from MiscUtils import CSVJoiner
 from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
 
 class SQLObjectStoreError(Exception): pass
@@ -481,6 +482,42 @@ class SQLObjectStore(ObjectStore):
 			out.write('%25s %2i\n' % (klass.name(), klass.id()))
 		out.write('\n')
 
+	def dumpObjectStore(self, out=None, progress=0):
+		if out is None:
+			out = sys.stdout
+		for klass in self.model().klasses().values():
+			if progress:
+				sys.stderr.write( "." )
+			out.write('%s objects\n' % ( klass.name() ) )
+			attrs = [ attr for attr in klass.allAttrs() if attr.hasSQLColumn() ]
+			colNames = [ attr.name() for attr in attrs ]
+			colNames.insert(0, klass.sqlIdName())
+			out.write(CSVJoiner.joinCSVFields(colNames) + "\n")
+
+			# write out a line for each object in this class
+			objlist = self.fetchObjectsOfClass(klass.name(),isDeep=0)
+			for obj in objlist:
+				fields = []
+				fields.append( str(obj.serialNum()))
+				for attr in attrs:
+					# jdh 2003-03-07: if the attribute is a dangling object reference, the value 
+					# will be None.  This means that dangling references will _not_ be remembered
+					# across dump/generate/create/insert procedures.
+					method = getattr( obj, attr.pyGetName() )
+					value = apply(method,())
+					if value is None:
+						fields.append('')
+					elif isinstance( value, MiddleObject ):
+						fields.append( value.klass().name() + "." + str( value.serialNum() ) )
+					else:
+						fields.append( str(value))
+				out.write(CSVJoiner.joinCSVFields(fields).replace('\r','\\r'))
+
+				out.write('\n')
+			out.write('\n')
+		out.write('\n')
+		if progress:
+			sys.stderr.write( "\n" )
 
 class Model:
 
