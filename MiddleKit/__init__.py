@@ -9,10 +9,10 @@ import os
 def InstallInWebKit(appServer):
 	app = appServer.application()
 	mkPathVia__file__ = os.path.join(os.getcwd(), os.path.dirname(__file__))
-	mkPathViaAppServer = app.serverSidePath(os.path.join(os.pardir, 'MiddleKit'))
-	assert mkPathVia__file__==mkPathViaAppServer, '\nmkPathVia__file__=%r\nmkPathViaAppServer=%r\n' % (
-		mkPathVia__file__, mkPathViaAppServer)
-	path = os.path.join(mkPathViaAppServer, 'WebBrowser')
+	mkPathViaApp = app.serverSidePath(os.path.join(os.pardir, 'MiddleKit'))
+	assert mkPathVia__file__==mkPathViaApp, '\nmkPathVia__file__=%r\nmkPathViaApp=%r\n' % (
+		mkPathVia__file__, mkPathViaApp)
+	path = os.path.join(mkPathViaApp, 'WebBrowser')
 	if os.path.exists(path):
 		app.addContext('MKBrowser', path)
 	else:
