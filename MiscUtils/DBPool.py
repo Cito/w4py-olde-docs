@@ -1,8 +1,7 @@
-'''
+"""
 DBPool.py
 
 Implements a pool of cached connections to a database. This should result in a speedup for persistent apps.
-
 The pool of connections is threadsafe regardless of whether the DB API module question in general has a threadsafety of 1 or 2.
 
 Reportedly there has been no speed up in tests with MySQL.
@@ -22,7 +21,8 @@ CREDIT
 * thread safety bug found by Tom Schwaller
 * Fixes by Geoff Talvola (thread safety in _threadsafe_getConnection()).
 * Clean up by Chuck Esterbrook.
-'''
+* Fix unthreadsafe functions which were leaking, Jay Love
+"""
 
 
 import threading
@@ -33,15 +33,15 @@ class UnsupportedError(DBPoolError): pass
 
 
 class PooledConnection:
-	''' A wrapper for database connections to help with DBPool. You don't normally deal with this class directly, but use DBPool to get new connections. '''
+	""" A wrapper for database connections to help with DBPool. You don't normally deal with this class directly, but use DBPool to get new connections. """
 
 	def __init__(self, pool, con):
 		self._con = con
 		self._pool = pool
 
 	def close(self):
-		if self._con!=None:
-			self._pool.returnConnection(self._con)
+		if self._con != None:
+			self._pool.returnConnection(self)
 			self._con = None
 
 	def __getattr__(self, name):
@@ -61,7 +61,7 @@ class DBPool:
 			self._queue = Queue(maxConnections)
 			self.addConnection = self._unthreadsafe_addConnection
 			self.getConnection = self._unthreadsafe_getConnection
-			self.returnConnection = self._unthreadsafe_addConnection
+			self.returnConnection = self._unthreadsafe_returnConnection
 		elif dbModule.threadsafety>=2:
 			self._lock = threading.Lock()
 			self._nextCon = 0
@@ -98,9 +98,17 @@ class DBPool:
 	def _threadsafe_returnConnection(self, con):
 		return
 
-	# We'd MUCH rather use the other versions, but oh well..
+	# These functions are used with DB modules that have connection level threadsafety, like PostgreSQL.
+	# 
 	def _unthreadsafe_addConnection(self, con):
 		self._queue.put(con)
 
 	def _unthreadsafe_getConnection(self):
 		return PooledConnection(self, self._queue.get())
+
+	def _unthreadsafe_returnConnection(self, conpool):
+		"""
+		This should never be called explicitly outside of this module.
+		"""
+		self.addConnection(conpool._con)
+		
