@@ -157,9 +157,8 @@ class ASStreamOut:
 		if debug: print ">>> ASStreamOut writing %s characters" % len(charstr)
 		assert not self._closed, "Stream Already Closed"
 		self._chunks.append(charstr)
-		if  self._autoCommit:
-			self._chunkLen = self._chunkLen + len(charstr)
-			if self._chunkLen > self._bufferSize:
+		self._chunkLen = self._chunkLen + len(charstr)
+		if  self._autoCommit and self._chunkLen > self._bufferSize:
 				if debug: print ">>> ASStreamOut.write flushing"
 				self.flush()
 			
