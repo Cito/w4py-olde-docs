@@ -19,7 +19,7 @@ Here's how I set up my Apache conf:
    PythonDebug On
 </Location>
 
-If you used the MakeAppWorkDir.py script to make a separate
+If you used the MakeAppWorkDir.py script to make a seperate
 application working directory, specify that path for the AppWorkDir
 option, otherwise it should be in your WebKit directory in which case
 you should use /path/to/WebKit/address.text
@@ -28,7 +28,7 @@ http://localhost/WK/Welcome
 
 
 You may also send all requests with a .psp extension to WebKit by adding these lines, outside
-of any location or dircetory.
+of any location or directory.
 
 AddHandler python-program .psp
 PythonPath "sys.path+['/path/to/WebKit']"
@@ -74,6 +74,9 @@ class ModPythonAdapter(Adapter):
 			#   building the environment
 			env=apache.build_cgi_env(req)
 
+			#make sure env is a dictionary (may not be for Apache2)
+			env=dict(env)
+			
 			# Fix up the path
 			if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info
 
@@ -98,6 +101,9 @@ class ModPythonAdapter(Adapter):
 			#   building the environment
 			env=apache.build_cgi_env(req)
 
+			#make sure env is a dictionary (may not be for Apache2)
+			env=dict(env)
+			
 			# Special environment setup needed for psp handler
 			env['WK_ABSOLUTE']=1
 
