@@ -141,93 +141,148 @@ class Model:
 				if samples is not None:
 					for line in samples:
 						file.write(line)
+				self.writePostKlassSamplesSQL(generator, file)
 
 			self.writePostSamplesSQL(generator, file)
 			file.close()
 
 			del self._klassSamples
 
+	def writePostKlassSamplesSQL(self, generator, file):
+		pass
+
 	def writeInsertSamplesSQLForLines(self, lines, generator, file, filename):
 		readColumns = 1
 		parse = CSVParser.CSVParser().parse
 		linenum = 0
 		klass = None
-		for line in lines:
-			linenum += 1
-			try:
-				fields = parse(line)
-			except CSVParser.ParseError, err:
-				raise SampleError(linenum, 'Syntax error: %s' % err)
-			if fields is None:	# parser got embedded newline; continue with the next line
-				continue
+		attrs = []
+		try:
+			for line in lines:
+				linenum += 1
+				try:
+					fields = parse(line)
+				except CSVParser.ParseError, err:
+					raise SampleError(linenum, 'Syntax error: %s' % err)
+				if fields is None:	# parser got embedded newline; continue with the next line
+					continue
 
-			try:
-				if self.areFieldsBlank(fields):
-					continue  # skip blank lines
-				if fields[0] and str(fields[0])[0]=='#':
-					continue
-				if fields[0].lower().endswith(' objects'):
-					klassName = fields[0].split()[0]
-					try:
-						klass = self.klass(klassName)
-					except KeyError:
-						raise SampleError(linenum, "Class '%s' has not been defined" % tableName)
-					samples = self._klassSamples.get(klass, None)
-					if samples is None:
-						samples = self._klassSamples[klass] = []
-						samples.append('\n\n/* %s */\n\n' % klass.name())
-					tableName = klass.sqlTableName()
-					#print '>> table:', tableName
-					readColumns = 1
-					continue
-				if readColumns:
+				try:
+					if self.areFieldsBlank(fields):
+						continue  # skip blank lines
+					if fields[0] and str(fields[0])[0]=='#':
+						continue
+					if fields[0].lower().endswith(' objects'):
+						klassName = fields[0].split()[0]
+						try:
+							klass = self.klass(klassName)
+						except KeyError:
+							raise SampleError(linenum, "Class '%s' is not defined" % tableName)
+						samples = self._klassSamples.get(klass, None)
+						if samples is None:
+							samples = self._klassSamples[klass] = []
+							samples.append('\n\n/* %s */\n\n' % klass.name())
+						tableName = klass.sqlTableName()
+						#print '>> table:', tableName
+						readColumns = 1
+						for attr in attrs:
+							attr.refByAttrName = None
+						attrs = []
+						continue
+					if readColumns:
+						if klass is None:
+							raise SampleError(linenum, "Have not yet seen an 'objects' declaration.")
+						names = [name for name in fields if name]
+						for name in names:
+							if name==klass.sqlSerialColumnName():
+								attrs.append(PrimaryKey(name, klass))
+							else:
+								# support "foo by bar"
+								name = name.strip()
+								parts = name.split(' ')
+								if len(parts)==1:
+									refByAttrName = None
+								else:
+									parts = [p.strip() for p in parts]
+									if len(parts)!=3 or parts[1].lower()!='by' or len(parts[2])==0:
+										raise SampleError(linenum, "Attribute '%s' of class '%s' is not in format 'foo' or 'foo-by-bar'" % (name, klass.name()))
+									name = parts[0]
+									refByAttrName = parts[2]
+									#print '>> refByAttrName:', name, refByAttrName
+								# locate the attr definiton
+								try:
+									attr = klass.lookupAttr(name)
+									attrs.append(attr)
+								except KeyError:
+									raise SampleError(linenum, "Class '%s' has no attribute '%s'" % (klass.name(), name))
+								# error checking for "foo by bar" and set refByAttre
+								if refByAttrName:
+									from MiddleKit.Core.ObjRefAttr import ObjRefAttr as ObjRefAttrClass
+									if not isinstance(attr, ObjRefAttrClass):
+										raise SampleError(linenum, "Cannot use 'by' feature with non-obj ref attributes. Attr %r of class %r is a %r." % (name, klass.name(), attr.__class__.__name__))
+									try:
+										refByAttr = attr.targetKlass().lookupAttr(refByAttrName)
+									except KeyError:
+										raise SampleError(linenum, "Attribute %r of class %r has a 'by' of %r but no such attribute can be found in target class %r." % (name, klass.name(), refByAttrName, attr.targetKlass().name()))
+									attr.refByAttr = refByAttr
+								else:
+									attr.refByAttr = None
+
+						# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
+						for attr in attrs:
+							assert not attr.get('isDerived', 0)
+						colNames = [attr.sqlName() for attr in attrs]
+						#print '>> cols:', columns
+						colSql = ','.join(colNames)
+						readColumns = 0
+						continue
 					if klass is None:
 						raise SampleError(linenum, "Have not yet seen an 'objects' declaration.")
-					names = [name for name in fields if name]
-					attrs = []
-					for name in names:
-						if name==klass.sqlSerialColumnName():
-							attrs.append(PrimaryKey(name, klass))
-						else:
-							try:
-								attrs.append(klass.lookupAttr(name))
-							except KeyError:
-								raise SampleError(linenum, "Class '%s' has no attribute '%s'" % (klass.name(), name))
-					# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
+					values = fields[:len(attrs)]
+					preinsertSQL = []
+					i = 0
 					for attr in attrs:
-						assert not attr.get('isDerived', 0)
-					colNames = [attr.sqlName() for attr in attrs]
-					#print '>> cols:', columns
-					colSql = ','.join(colNames)
-					readColumns = 0
-					continue
-				if klass is None:
-					raise SampleError(linenum, "Have not yet seen an 'objects' declaration.")
-				values = fields[:len(attrs)]
-				i = 0
-				for attr in attrs:
-					try:
-						value = values[i]
-					except IndexError:
-						raise SampleError(linenum, "Couldn't find value for attribute '%s'" % attr.name())
-					values[i] = attr.sqlForSampleInput(value)
-					assert len(values[i])>0, repr(values[i])  # SQL value cannot be blank
-					i += 1
-				#print
-				#values = [self.valueFilter(value) for value in values]
-				values = ', '.join(values)
-				stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
-				samples.append(stmt)
-			except:
-				print
-				print 'Samples error:'
-				try:
-					print '%s:%s' % (filename, linenum)
-					print line
+						try:
+							value = values[i]
+						except IndexError:
+							if i==0:
+								# too early to accept nulls?
+								raise SampleError(linenum, "Couldn't find value for attribute '%s'\nattrs = %r\nvalues for line = %r" % (attr.name(), [a.name() for a in attrs], values))
+							else:
+								# assume blank. Excel sometimes does not include all the commas
+								value = ''
+						value = attr.sqlForSampleInput(value)
+						if isinstance(value, tuple):
+							# sqlForSampleInput can return a 2 tuple: (presql, sqlValue)
+							assert len(value)==2
+							preinsertSQL.append(value[0])
+							value = value[1]
+						assert value, 'sql value cannot be blank: %r' % value
+						try:
+							values[i] = value
+						except IndexError:
+							values.append(value)
+						i += 1
+					values = ', '.join(values)
+					for stmt in preinsertSQL:
+						#print '>>', stmt
+						samples.append(stmt)
+					stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
+					#print '>>', stmt
+					samples.append(stmt)
 				except:
-					pass
-				print
-				raise
+					print
+					print 'Samples error:'
+					try:
+						print '%s:%s' % (filename, linenum)
+						print line
+					except:
+						pass
+					print
+					raise
+		finally:
+			for attr in attrs:
+				attr.refByAttr = None
 
 
 	def areFieldsBlank(self, fields):
@@ -483,13 +538,19 @@ class Attr:
 		return not self.get('isDerived', 0)
 
 	def sqlForSampleInput(self, input):
+		"""
+		Users of Attr should invoke this method, but subclasses and mixins
+		should implement sqlForNonNoneSampleInput() instead.
+		"""
 		input = input.strip()
 		if input=='':
 			input = self.get('Default', '')
 		if input in (None, 'None', 'none'):
 			return self.sqlForNone()
 		else:
-			return str(self.sqlForNonNoneSampleInput(input))
+			s = self.sqlForNonNoneSampleInput(input)
+			assert isinstance(s, str) or isinstance(s, tuple), '%r, %r, %r' % (s, type(s), self)
+			return s
 
 	def sqlForNone(self):
 		return 'NULL'
@@ -622,8 +683,11 @@ class IntAttr:
 			if value.endswith('.0'):
 				# numeric values from Excel-based models are always float
 				value = value[:-2]
-			int(value) # raises exception if value is invalid
-			return value
+			try:
+				int(value) # raises exception if value is invalid
+			except ValueError, e:
+				raise ValueError, str(e)+'. attr is '+self.name()
+			return str(value)
 
 
 class LongAttr:
@@ -634,7 +698,7 @@ class LongAttr:
 
 	def sqlForNonNoneSampleInput(self, input):
 		long(input) # raises exception if value is invalid
-		return input
+		return str(input)
 
 
 class FloatAttr:
@@ -644,7 +708,7 @@ class FloatAttr:
 
 	def sqlForNonNoneSampleInput(self, input):
 		float(input) # raises exception if value is invalid
-		return input
+		return str(input)
 
 
 class DecimalAttr:
@@ -666,7 +730,7 @@ class DecimalAttr:
 		return 'decimal(%s,%s)' % (precision, scale)
 
 	def sqlForNonNoneSampleInput(self, input):
-		return input
+		return str(input)
 
 
 class StringAttr:
@@ -778,21 +842,38 @@ class ObjRefAttr:
 		know what the obj ref value is referring to without having
 		to look it up. MiddleKit only looks at the first part ("User.3").
 		"""
-		input = input.split()[0]  # this gets rid of the sample value comment described above
-		parts = input.split('.')
-		if len(parts)==2:
-			className = parts[0]
-			objSerialNum = parts[1]
+		if self.refByAttr:
+			# the column was spec'ed as "foo by bar".
+			# so match by "bar" value, not serial number.
+			# refByAttr holds the "bar" attr
+			targetKlass = self.targetKlass()
+			refByAttr = self.refByAttr
+			assert targetKlass is refByAttr.klass()
+			sql = '(select %s from %s where %s=%s)' % (
+				targetKlass.sqlSerialColumnName(), targetKlass.sqlTableName(), refByAttr.sqlColumnName(), refByAttr.sqlForSampleInput(input))
+			sql = str(targetKlass.id()) + ',' + sql
+			# print '>> sql =', sql
+			return sql
+			# caveat: this only works if the object is found directly in the target class. i.e., inheritance is not supported
+			# caveat: this does not work if the UseBigIntObjRefColumns setting is true (by default it is false)
+			# caveat: MS SQL Server supports subselects but complains "Subqueries are not allowed in this context. Only scalar expressions are allowed." so more work is needed in its SQL generator
 		else:
-			className = self.targetClassName()
-			objSerialNum = input
-		klass = self.klass().klasses()._model.klass(className)
-		klassId = klass.id()
-		if self.setting('UseBigIntObjRefColumns', False):
-			objRef = objRefJoin(klassId, objSerialNum)
-			return str(objRef)
-		else:
-			return '%s,%s' % (klassId, objSerialNum)
+			# the de facto technique of <serialnum> or <class name>.<serial num>
+			input = input.split()[0]  # this gets rid of the sample value comment described above
+			parts = input.split('.')
+			if len(parts)==2:
+				className = parts[0]
+				objSerialNum = parts[1]
+			else:
+				className = self.targetClassName()
+				objSerialNum = input
+			klass = self.klass().klasses()._model.klass(className)
+			klassId = klass.id()
+			if self.setting('UseBigIntObjRefColumns', False):
+				objRef = objRefJoin(klassId, objSerialNum)
+				return str(objRef)
+			else:
+				return '%s,%s' % (klassId, objSerialNum)
 
 
 class ListAttr:
@@ -822,7 +903,7 @@ class EnumAttr:
 
 	def sqlForNonNoneSampleInput(self, input):
 		if self.usesExternalSQLEnums():
-			return self.intValueForString(input)
+			return str(self.intValueForString(input))
 		else:
 			assert input in self._enums, 'input=%r, enums=%r' % (input, self._enums)
 			return repr(input)
