@@ -56,15 +56,17 @@ bufsize = 32*1024
 
 WEBWARE_ADDRESS_FILE='/path/to/Webware/WebKit/address.text'
 
-
 class ModPythonAdapter(Adapter):
 	def __init__(self, host, port):
 		webkitdir = os.path.dirname(WEBWARE_ADDRESS_FILE)
 		Adapter.__init__(self, webkitdir)
 		self.host = host
 		self.port = port
+		self._doneHeader = 0
 		
 	def handler(self, req):
+		self.reset()
+		self.req=req
 		try:
 			# Get input
 			myInput = self.input(req)
@@ -80,7 +82,7 @@ class ModPythonAdapter(Adapter):
 			respdict = self.transactWithAppServer(env, myInput, self.host, self.port)
 
 			# Respond back to Apache			
-			self.respond(req, respdict)
+			#self.respond(req, respdict)
 
 		except:
 			self.handleException(req)
@@ -88,6 +90,8 @@ class ModPythonAdapter(Adapter):
 
 
 	def pspHandler(self, req):
+		self.reset()
+		self.req=req
 		try:
 			# Get input
 			myInput = self.input(req)
@@ -117,6 +121,8 @@ class ModPythonAdapter(Adapter):
 		""" Not being used yet.
 		Probably never be used, b/c the req.handler field is read only in mod_python.
 		"""
+		self.reset()
+		self.req=req
 		debug=1
 		if debug:
 			ot = open("/tmp/log2.txt","a")
@@ -155,17 +161,24 @@ class ModPythonAdapter(Adapter):
 		return myInput
 
 
-	def respond(self, req, respdict):
-		headerend = string.find(respdict, "\r\n\r\n")
-		headers = respdict[:headerend]
+	def processResponse(self, data):
+		req = self.req
+		if self._doneHeader:
+			req.write(data)
+			return
+		self._headerData = self._headerData + data
+		headerend = string.find(self._headerData, "\r\n\r\n")
+		if headerend < 0:
+			return
+		headers = self._headerData[:headerend]
 		for i in string.split(headers, "\r\n"):
 			header = string.split(i, ":")
 			req.headers_out[header[0]] = header[1]
 			if string.lower(header[0]) == 'content-type': req.content_type = header[1]
 			if string.lower(header[0]) == 'status': req.status = int(string.split(string.lstrip(header[1]),' ')[0])
 		req.send_http_header()
-		req.write(respdict[headerend+4:])
-
+		req.write(self._headerData[headerend+4:])
+		self._doneHeader=1
 
 	def handleException(self, req):
 		import traceback
@@ -185,6 +198,12 @@ class ModPythonAdapter(Adapter):
 
 %s</pre>
 </body></html>\n''' % output)
+
+
+	def reset(self):
+		self._doneHeader=0
+		self._headerData=''
+		self.req = None
 
 if _adapter is None:
 	(host, port) = string.split(open(WEBWARE_ADDRESS_FILE).read(), ':')
