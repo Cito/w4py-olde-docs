@@ -176,7 +176,7 @@ class SQLObjectStore(ObjectStore):
 				self._pool = DBPool(self.dbapiModule(), poolSize, **args)
 
 	def augmentDatabaseArgs(self, args, pool=0):
-		# give subclasses the opportunity to add or change 
+		# give subclasses the opportunity to add or change
 		# database arguments
 		pass
 
@@ -196,12 +196,16 @@ class SQLObjectStore(ObjectStore):
 		Reads the klass ids from the SQL database. Invoked by connect().
 		"""
 		conn, cur = self.executeSQL('select id, name from _MKClassIds;')
-		klassesById = {}
-		for (id, name) in cur.fetchall():
-			assert id, "Id must be a non-zero int. id=%r, name=%r" % (id, name)
-			klass = self._model.klass(name)
-			klassesById[id] = klass
-			klass.setId(id)
+		try:
+			klassesById = {}
+			for (id, name) in cur.fetchall():
+				assert id, "Id must be a non-zero int. id=%r, name=%r" % (id, name)
+				klass = self._model.klass(name)
+				klassesById[id] = klass
+				klass.setId(id)
+		finally:
+			if conn is not None:
+				conn.close()
 		self._klassesById = klassesById
 
 
@@ -212,9 +216,14 @@ class SQLObjectStore(ObjectStore):
 		for object in self._newObjects.items(allThreads):
 			self._insertObject(object, unknownSerialNums)
 
-		for unknownInfo in unknownSerialNums:
-			stmt = unknownInfo.updateStmt()
-			self.executeSQL(stmt)
+		conn = None
+		try:
+			for unknownInfo in unknownSerialNums:
+				stmt = unknownInfo.updateStmt()
+				conn, cur = self.executeSQL(stmt, conn)
+		finally:
+			if conn is not None:
+				conn.close()
 		self._newObjects.clear(allThreads)
 
 	def _insertObject(self, object, unknownSerialNums):
@@ -232,22 +241,25 @@ class SQLObjectStore(ObjectStore):
 		# SQL insert
 		sql = object.sqlInsertStmt(unknownSerialNums, idNum)
 		conn, cur = self.executeSQL(sql)
+		try:
+			# Get new id/serial num
+			if idNum is None:
+				idNum = self.retrieveLastInsertId(conn, cur)
 
-		# Get new id/serial num
-		if idNum is None:
-			idNum = self.retrieveLastInsertId(conn, cur)
+			# Update object
+			object.setSerialNum(idNum)
+			object.setKey(ObjectKey().initFromObject(object))
+			object.setChanged(0)
 
-		# Update object
-		object.setSerialNum(idNum)
-		object.setKey(ObjectKey().initFromObject(object))
-		object.setChanged(0)
-
-		# Update our object pool
-		self._objects[object.key()] = object
+			# Update our object pool
+			self._objects[object.key()] = object
+		finally:
+			if conn is not None:
+				conn.close()
 
 	def retrieveNextInsertId(self, klass):
 		""" Returns the id for the next new object of this class.  Databases which cannot determine
-		the id until the object has been added return None, signifying that retrieveLastInsertId 
+		the id until the object has been added return None, signifying that retrieveLastInsertId
 		should be called to get the id after the insert has been made. """
 		return None
 
@@ -257,16 +269,26 @@ class SQLObjectStore(ObjectStore):
 		raise AbstractError, self.__class__
 
 	def commitUpdates(self,allThreads=0):
-		for object in self._changedObjects.values(allThreads):
-			sql = object.sqlUpdateStmt()
-			self.executeSQL(sql)
-			object.setChanged(0)
+		conn = None
+		try:
+			for object in self._changedObjects.values(allThreads):
+				sql = object.sqlUpdateStmt()
+				conn, cur = self.executeSQL(sql, conn)
+				object.setChanged(0)
+		finally:
+			if conn is not None:
+				conn.close()
 		self._changedObjects.clear(allThreads)
 
 	def commitDeletions(self,allThreads=0):
-		for object in self._deletedObjects.items(allThreads):
-			sql = object.sqlDeleteStmt()
-			self.executeSQL(sql)
+		conn = None
+		try:
+			for object in self._deletedObjects.items(allThreads):
+				sql = object.sqlDeleteStmt()
+				conn, cur = self.executeSQL(sql, conn)
+		finally:
+			if conn is not None:
+				conn.close()
 		self._deletedObjects.clear(allThreads)
 
 
@@ -317,22 +339,26 @@ class SQLObjectStore(ObjectStore):
 			if self._markDeletes:
 				clauses = self.addDeletedToClauses(clauses)
 			conn, cur = self.executeSQL(fetchSQLStart + clauses + ';')
-			for row in cur.fetchall():
-				serialNum = row[0]
-				key = ObjectKey().initFromClassNameAndSerialNum(className, serialNum)
-				obj = self._objects.get(key, None)
-				if obj is None:
-					pyClass = klass.pyClass()
-					obj = pyClass()
-					assert isinstance(obj, MiddleObject), 'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r' % (obj, type(obj), MiddleObject)
-					obj.readStoreData(self, row)
-					obj.setKey(key)
-					self._objects[key] = obj
-				else:
-					# Existing object
-					if refreshAttrs:
+			try:
+				for row in cur.fetchall():
+					serialNum = row[0]
+					key = ObjectKey().initFromClassNameAndSerialNum(className, serialNum)
+					obj = self._objects.get(key, None)
+					if obj is None:
+						pyClass = klass.pyClass()
+						obj = pyClass()
+						assert isinstance(obj, MiddleObject), 'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r' % (obj, type(obj), MiddleObject)
 						obj.readStoreData(self, row)
-				objs.append(obj)
+						obj.setKey(key)
+						self._objects[key] = obj
+					else:
+						# Existing object
+						if refreshAttrs:
+							obj.readStoreData(self, row)
+					objs.append(obj)
+			finally:
+				if conn is not None:
+					conn.close()
 		objs.extend(deepObjs)
 		return objs
 
@@ -531,11 +557,16 @@ class SQLObjectStore(ObjectStore):
 			out = sys.stdout
 		out.write('DUMPING TABLES\n')
 		out.write('BEGIN\n')
-		for klass in self.model().klasses().values():
-			out.write(klass.name()+'\n')
-			self.executeSQL('select * from %s;' % klass.name())
-			out.write(str(self._cursor.fetchall()))
-			out.write('\n')
+		conn = None
+		try:
+			for klass in self.model().klasses().values():
+				out.write(klass.name()+'\n')
+				conn, cur = self.executeSQL('select * from %s;' % klass.name(), conn)
+				out.write(str(self._cursor.fetchall()))
+				out.write('\n')
+		finally:
+			if conn is not None:
+				conn.close()
 		out.write('END\n')
 
 	def dumpKlassIds(self, out=None):
