@@ -87,7 +87,7 @@ class ModSnakeAdapter(Adapter):
 		(host, port) = string.split(open(file).read(), ':')
 		per_svr[PER_SVR_PORT]    = int(port)
 		per_svr[PER_SVR_ADDRESS] = host
-		self._webKitDir = os.path.basename(file)
+		self._webKitDir = os.path.dirname(file)
 		
 	def content_handler(self, per_dir, per_svr, request):
 		if request.handler != 'webware':

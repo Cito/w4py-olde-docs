@@ -54,12 +54,12 @@ debug=0
 _adapter = None
 bufsize = 32*1024
 
-WEBWARE_ADDRESS_FILE='/data/Linux/python/Webware/WebKit/address.text'
+WEBWARE_ADDRESS_FILE='/path/to/Webware/WebKit/address.text'
 
 
 class ModPythonAdapter(Adapter):
 	def __init__(self, host, port):
-		webkitdir = os.path.basename(WEBWARE_ADDRESS_FILE)
+		webkitdir = os.path.dirname(WEBWARE_ADDRESS_FILE)
 		Adapter.__init__(self, webkitdir)
 		self.host = host
 		self.port = port
