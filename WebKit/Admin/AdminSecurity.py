@@ -70,12 +70,3 @@ else:
 			else:
 				return 0
 
-		def loginDisabled(self):
-			"""
-			Return None if login is enabled, else a message
-			about why not
-			"""
-			if self.application().setting('AdminPassword'):
-				return None
-			else:
-				return """Logins to admin pages are disabled until you supply an AdminPassword in Application.config"""
