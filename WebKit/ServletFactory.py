@@ -19,6 +19,7 @@ class ServletFactory(Object):
 		''' Stores a reference to the application in self._app, because subclasses may or may not need to talk back to the application to do their work. '''
 		Object.__init__(self)
 		self._app = application
+		self._cacheClasses = self._app.setting("CacheServletClasses",1)
 
 	def name(self):
 		''' Returns the name of the factory. This is a convenience for the class name. '''
@@ -37,6 +38,12 @@ class ServletFactory(Object):
 		''' Returns a new servlet that will handle the transaction. This method should do no caching (e.g., it should really create the servlet upon each invocation) since caching is already done at the Application level. '''
 		raise SubclassResponsibilityError
 
+	def flushCache(self):
+		"""
+		Clear any caches and start fesh.
+		"""
+		raise SubclassResponsibilityError
+
 
 class PythonServletFactory(ServletFactory):
 	'''
@@ -52,6 +59,9 @@ class PythonServletFactory(ServletFactory):
 
 	def extensions(self):
 		return ['.py']
+
+	def flushCache(self):
+		self._cache = {}
 
 	def old_servletForTransaction(self, transaction):
 		path = transaction.request().serverSidePath()
@@ -70,7 +80,7 @@ class PythonServletFactory(ServletFactory):
 		name = os.path.splitext(os.path.split(path)[1])[0]
 		if not self._cache.has_key(path):
 			self._cache[path] = {}
-		if os.path.getmtime(path)>self._cache[path].get('mtime', 0):
+		if os.path.getmtime(path) > self._cache[path].get('mtime', 0):
 			globals = {'transaction': transaction}
 			execfile(path, globals)
 			assert globals.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
@@ -81,6 +91,8 @@ class PythonServletFactory(ServletFactory):
 			self._cache[path]['class'] = theClass
 		else:
 			theClass = self._cache[path]['class']
+			if not self._cacheClasses:
+				del self._cache[path]
 		return theClass()
 
 	def import_servletForTransaction(self, transaction):
