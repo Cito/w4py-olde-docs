@@ -1,6 +1,7 @@
 from SessionStore import SessionStore
 import os
 from glob import glob
+import threading
 
 debug = 0
 
@@ -27,6 +28,7 @@ class SessionFileStore(SessionStore):
 	def __init__(self, app):
 		SessionStore.__init__(self, app)
 		self._sessionDir = app.serverSidePath('Sessions')
+		self._lock = threading.Lock()
 
 
 	## Access ##
@@ -40,28 +42,29 @@ class SessionFileStore(SessionStore):
 		if debug:
 			print '>> get (%s)' % key
 		filename = self.filenameForKey(key)
+		self._lock.acquire()
 		try:
-			file = open(filename)
-		except IOError:
-			raise KeyError, key
-		item = self.decoder()(file)
-		file.close()
+			try:
+				file = open(filename)
+			except IOError:
+				raise KeyError, key
+			item = self.decoder()(file)
+			file.close()
+		finally:
+			self._lock.release()
 		return item
 
 	def __setitem__(self, key, item):
-		# @@ 2001-11-12 ce: It's still possible that two threads are updating the same
-		# session as the same time (due to the user having two windows open) in which
-		# case one will clobber the results of the other! Probably need file locking
-		# to solve this.
-
 		if debug:
 			print '>> setitem(%s,%s)' % (key, item)
 		filename = self.filenameForKey(key)
-		tmpName = os.tempnam(os.path.dirname(filename), 'tmp')
-		file = open(tmpName, 'w')
-		self.encoder()(item, file)
-		file.close()
-		os.rename(tmpName, filename)
+		self._lock.acquire()
+		try:
+			file = open(filename, 'w')
+			self.encoder()(item, file)
+			file.close()
+		finally:
+			self._lock.release()
 
 	def __delitem__(self, key):
 		filename = self.filenameForKey(key)
