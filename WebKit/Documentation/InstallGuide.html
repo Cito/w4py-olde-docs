@@ -9,6 +9,9 @@
 						font-weight: bold;
 						color: white;
 					}
+		code		{	color: darkblue;
+						font-weight: bold;
+					}
 	-->
 	</style>
 	<title>WebKit Install Guide</title>
@@ -255,9 +258,9 @@ the CGI specification, by running the following command:
 
 <p> Stopping the app server is accomplished by simply going to it's terminal/command window and hitting Control-C. The app server is designed to intercept this interruption and shut down gracefully. This includes saving session data to disk, if necessary.
 
-<p> [Windows] If Control-C doesn't work, try Control-Break.
+<p> [Windows] Control-C normally shuts the app server down <i>gracefully</i>, where as Control-Break does not. Keep that in mind and use Control-C, unless the server is unresponsive to it.
 
-<p> [UNIX] If you don't have access to the terminal window of the app server (perhaps because you used rlogin, telnet or ssh to remotely access the machine), you can use <code>ps -ax | grep AppServer</code> to get the pid <code>kill -s 2 &lt;pid&gt;</code> to effect a Control-C.
+<p> [UNIX] If you don't have access to the terminal window of the app server (perhaps because you used rlogin, telnet or ssh to remotely access the machine), you can use <code>ps -ax | grep AppServer</code> to get the pid and <code>kill -s 2 &lt;pid&gt;</code> to effect a Control-C.
 
 
 <a name=Adapters_Reloading><h3>Reloading Servlets</h3></a>
