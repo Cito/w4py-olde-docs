@@ -604,7 +604,9 @@ class Application(Configurable,CanContainer):
 			while strippedPath != '' and ssPath == None:
 				strippedPath,extra=os.path.split(strippedPath)
 				ssPath = self._serverSidePathCacheByPath.get(strippedPath, None)
-				extraPathInfo = os.path.join(extra,extraPathInfo)
+				if extraPathInfo != '': #avoid a trailing os.sep
+					extraPathInfo=os.path.join(extra,extraPathInfo)
+				else: extraPathInfo=extra
 				
    		if ssPath is not None:
 			request._fields['extraPathInfo']=extraPathInfo
