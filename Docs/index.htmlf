@@ -24,7 +24,7 @@ Version %(versionString)s
 
 <td valign=top>
 	<ul>
-		<li> <a href=RelNotes-0.5.html class=BigLink>Release Notes</a>
+		<li> <a href=RelNotes.html class=BigLink>Release Notes</a>
 		<br> (release notes for Webware)
 
 		<li> <a href=StyleGuidelines.html class=BigLink>Style Guidelines</a>
