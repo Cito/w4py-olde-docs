@@ -38,6 +38,9 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		""" Get the user config from the 'UnknownFileTypes' section in the Application's configuration. """
 		return self._application.setting('UnknownFileTypes')
 
+	def configFilename(self):
+		return self._application.configFilename()
+
 	def canBeReused(self):
 		return self.setting('ReuseServlets')
 
