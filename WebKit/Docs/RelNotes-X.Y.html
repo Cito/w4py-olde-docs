@@ -1,0 +1,83 @@
+<html>
+
+<head>
+	<link rel=stylesheet href=StyleSheet.css type=text/css>
+	<style type=text/css>
+	<!--
+			li	{	padding-bottom: 0.75em;
+				}
+	-->
+	</style>
+
+	<title>WebKit @@ Release Notes</title>
+</head>
+
+<body>
+
+<h1>WebKit @@ Release Notes</h1>
+Version @@
+<br>Webware for Python @@
+
+
+<a name=Introduction><h2>Introduction</h2></a>
+<ul>
+	<li> Version @@ was released on @@/@@/2001.
+</ul>
+
+<h2>Major API Changes</h2>
+
+<ul>
+
+	<li> The Page class interface was refactored with regards to various writeFoo() methods. The changes make it much easier for a subclass to customize and extend what it inherits from its superclass.
+
+	<p> If you have existing subclasses, you will need to make some quick changes before your pages look right. The largest change is to rename writeBody() methods to writeContent(). Also, if you override writeHeader(), you will want to refactor it, possibly by overriding writeStyleSheet() and writeHeadParts() (taking care to invoke super before adding your customizations).
+
+	<p> Please review the Page <a href=Source/Summaries/Page.py.html>summary</a> and doc strings in the <a href=Source/Files/Page.py.html>source code</a> for details.
+
+	<p> If you feel burdened by updating your existing page methods, you can quickly change their inheritance to Page051 (<a href=Source/Summaries/Page051.py.html>summary</a>, <a href=Source/Files/Page051.py.html>source</a>), a new class which sports the old style of write methods found in WebKit 0.5.1.
+
+</ul>
+
+
+<h2>New Features</h2>
+
+<ul>
+
+	<li> @@
+
+</ul>
+
+
+<h2>Improvements and Refinements</h2>
+
+<ul>
+
+	<li> @@
+
+</ul>
+
+
+
+<h2>Minor API Changes</h2>
+
+We don't track every change to the interface, but here are some notables:
+
+<ul>
+	<li> @@
+
+</ul>
+
+
+<h2>Bugfixes</h2>
+
+<ul>
+
+	<li> @@
+
+</ul>
+
+
+<p><hr>
+
+</body>
+</html>
