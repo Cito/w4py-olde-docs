@@ -377,7 +377,7 @@ class RequestHandler(asyncore.dispatcher):
 	def log(self, message):
 		pass
 
-	def handle_error(self, x, y, z):
+	def handle_error(self, *info):
    		t, v, tbinfo = sys.exc_info()
 	   	if t == exceptions.KeyboardInterrupt:
 	   		self.server.shutDown()
