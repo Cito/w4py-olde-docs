@@ -165,6 +165,7 @@ TO DO
 import string
 from string import join, replace, split, strip
 from types import *
+from MiscUtils import NoDefault
 
 
 ## Types ##
@@ -651,3 +652,15 @@ class TableRecord:
 		for key in nameToIndexMap.keys():
 			dict[key] = self._values[nameToIndexMap[key]]
 		return dict
+
+
+	## valueForFoo() family ##
+
+	def valueForKey(self, key, default=NoDefault):
+		if default is NoDefault:
+			return self[key]
+		else:
+			return self.get(key, default)
+
+	def valueForAttr(self, attr, default=NoDefault):
+		return self.valueForKey(attr['Name'], default)
