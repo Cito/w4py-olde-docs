@@ -47,7 +47,7 @@ class AppControl(AdminSecurity):
 				self.write("Done")
 			self.write("""<p>
 			Cache Flushed
-			<p>Click here to view the Servlet cache: <a href="ServletCacheByPath">Servlet Cache </a>
+			<p>Click here to view the Servlet cache: <a href="ServletCache">Servlet Cache </a>
 			""" \
 					   )
 
