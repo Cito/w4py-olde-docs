@@ -24,14 +24,14 @@ updated without disturbing your applications.
 
 COMMAND LINE USAGE
 
-	python MakeAppWorkDir.py [-c SampleContextName] [--cvsignore] SomeDir
+python MakeAppWorkDir.py [OPTIONS] SomeDir
 
-If SampleContextName is given that name will be used for the
-installed context.  Otherwise a context "MyContext" will be created.
-
-If --cvsignore is used, .cvsignore files will be added to the working
-dir.
-
+OPTIONS:
+-c SampleContextName    "SampleContextName" will be used for the pre-
+                        installed context.  (Default "MyContext")
+--cvsignore             .cvsignore files will be added
+-l or --library         A lib/ directory will be added, which will
+                        added to the Python the path for the AppServer
 """
 
 #----------------------------------------------------------------------
@@ -52,7 +52,7 @@ class MakeAppWorkDir:
 
 	def __init__(self, webWareDir, workDir, verbose=1,
 		     sampleContext="MyContext", osType=None,
-		     addCVSIgnore=0):
+		     addCVSIgnore=0, makeLibrary=0):
 		"""Initializer for MakeAppWorkDir.  Pass in at least the
 		Webware directory and the target working directory.  If you
 		pass None for sampleContext then the default context will the
@@ -68,6 +68,10 @@ class MakeAppWorkDir:
 		    "WORKDIR": string.replace(self._workDir,	'\\', '/'),
 		    "DEFAULT": "%s/Examples" % string.replace(self._webKitDir,	'\\', '/'),
 		    }
+		if makeLibrary:
+			self._substVals['libraryPath'] = 'sys.path.append(%s)\n' % repr(os.path.join(self._substVals['WORKDIR'], 'lib'))
+		else:
+			self._substVals['LibraryPath'] = ''
 		self._sample = sampleContext
 		if sampleContext is not None:
 			self._substVals["DEFAULT"] = sampleContext
@@ -75,6 +79,7 @@ class MakeAppWorkDir:
 			osType = os.name
 		self._osType = osType
 		self._addCVSIgnore = addCVSIgnore
+		self._makeLibrary = makeLibrary
 
 	def buildWorkDir(self):
 		"""These are all the (overridable) steps needed to make a new runtime direcotry."""
@@ -83,6 +88,8 @@ class MakeAppWorkDir:
 		self.copyOtherFiles()
 		self.makeLauncherScripts()
 		self.makeDefaultContext()
+		if self._makeLibrary:
+			self.makeLibrary()
 		if self._addCVSIgnore:
 			self.addCVSIgnore()
 		self.printCompleted()
@@ -206,15 +213,24 @@ class MakeAppWorkDir:
 				output.write(line)
 		self.msg("\n")
 
+	def makeLibrary(self):
+		print "Creating lib/ library directory."
+		os.mkdir(os.path.join(self._workDir, 'lib'))
+		f = open(os.path.join(self._workDir, 'lib', '__init__.py'), 'w')
+		f.write('#')
+		f.close()
+
 	def addCVSIgnore(self):
 		print "Creating .cvsignore files."
 		files = {'.': '*.pyc\naddress.*\nhttpd.*\nappserverpid.*',
-			 'Cache': '*',
-			 'ErrorMsgs': '*',
-			 'Logs': '*',
-			 'Sessions': '*',
+			 'Cache': '[a-zA-Z0-9]*',
+			 'ErrorMsgs': '[a-zA-Z0-9]*',
+			 'Logs': '[a-zA-Z0-9]*',
+			 'Sessions': '[a-zA-Z0-9]*',
 			 self._sample: '*.pyc',
 			 }
+		if self._makeLibrary:
+			files['lib'] = '*.pyc'
 		for dir, contents in files.items():
 			filename = os.path.join(self._workDir, dir, '.cvsignore')
 			f = open(filename, 'w')
@@ -266,7 +282,7 @@ import os, sys
 
 webwarePath = '%(WEBWARE)s'
 appWorkPath = '%(WORKDIR)s'
-
+%(libraryPath)s
 
 def main(args):
 	global webwarePath, appWorkPath
@@ -376,6 +392,7 @@ if __name__ == "__main__":
 	targetDir = None
 	contextName = 'MyContext'
 	addCVSIgnore = 0
+	makeLibrary = 0
 	args = sys.argv[1:]
 	# lame little command-line handler
 	while args:
@@ -390,11 +407,16 @@ if __name__ == "__main__":
 			contextName = args[1]
 			args = args[2:]
 			continue
+		if args[0] in ['-l', '--library']:
+			makeLibrary = 1
+			args = args[1:]
+			continue
 		if not targetDir and not args[0].startswith('-'):
 			targetDir = args[0]
 			args = args[1:]
 			continue
 		# Must be an error:
+		print "Unknown option: %s" % args[0]
 		print __doc__
 		sys.exit(1)
 	if not targetDir:
@@ -407,6 +429,7 @@ if __name__ == "__main__":
 
 	mawd = MakeAppWorkDir(webWareDir, targetDir,
 	                      sampleContext=contextName,
-			      addCVSIgnore=addCVSIgnore)
+			      addCVSIgnore=addCVSIgnore,
+			      makeLibrary=makeLibrary)
 	mawd.buildWorkDir()
 
