@@ -45,3 +45,6 @@ class Error(UserDict):
 
 	def __str__(self):
 		return 'ERROR: %s' % self._message
+
+	def __nonzero__(self):
+		return 1
