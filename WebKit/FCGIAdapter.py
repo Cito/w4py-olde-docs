@@ -85,7 +85,7 @@ import sys
 timestamp = time.time()
 
 """Set WebKitDir to the directory where WebKit is located"""
-WebKitDir = ''
+WebKitDir = '/data/Linux/python/Webware/WebKit'
 
 _AddressFile='address.text'
 
@@ -124,10 +124,7 @@ class FCGIAdapter(Adapter):
 
 			# deliver it!
 			write = fcg.req.out.write
-			for pair in response['headers']:
-				write('%s: %s\n' % pair)
-			write('\n')
-			write(response['contents'])
+			write(response)
 			fcg.req.out.flush()
 
 		except:
