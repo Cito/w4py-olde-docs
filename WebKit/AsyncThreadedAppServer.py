@@ -195,6 +195,7 @@ class ASTASStreamOut(ASStreamOut):
 		self._trigger = trigger
 
 	def close(self):
+		self.flush()
 		ASStreamOut.close(self)
 		self._trigger.release()
 
@@ -225,6 +226,8 @@ class ASTASStreamOut(ASStreamOut):
 		self._lock.release()
 
 
+from ATASStreamIn import ATASStreamIn
+
 class RequestHandler(asyncore.dispatcher):
 	"""
 	Has the methods that process the request.
@@ -234,26 +237,33 @@ class RequestHandler(asyncore.dispatcher):
 
 	def __init__(self, server):
 		self.server=server
-		self.have_request = 0
+##		self.have_request = 0
 		self.have_response = 0
-		self.reqdata=[]
 		self._strmOut = None
+		self.readfile = ATASStreamIn(self,8192)
 		
 	def handleRequest(self):
-		#check for status message
-		if self.reqdata == "STATUS":
-			self._strmOut.write( str(self.server._reqCount))
-			self._strmOut.close()
-			return
 
-		if self.reqdata == 'QUIT':
-			self._strmOut.write('OK')
-			self._strmOut.close()
-			time.sleep(2)
-			self.server.initiateShutdown()
-			return
+		dictlen = loads(self.readfile.read(int_length))
 
+		dict = loads(self.readfile.read(dictlen))
+		
+##		check for status message
+   		if dict.get('format') == "STATUS":
+   			self._strmOut.write( str(self.server._reqCount))
+			self._strmOut.commit()
+   			self._strmOut.close()
+			time.sleep(1)
+   			return
+   		if dict.get('format') == 'QUIT':
+   			self._strmOut.write('OK')
+			self._strmOut.commit()
+   			self._strmOut.close()
+   			time.sleep(2)
+   			self.server.initiateShutdown()
+   			return
 
+			
 		verbose = self.server._verbose
 
 		startTime = time.time()
@@ -264,16 +274,17 @@ class RequestHandler(asyncore.dispatcher):
 		if verbose:
 			print 'receiving request from', self.socket
 
-		while not self.have_request:
-			print ">> Should always have request before we get here"
-			time.sleep(0.01)
+#		while not self.have_request:
+#			print ">> Should always have request before we get here"
+#			time.sleep(0.01)
 
-		if verbose:
-			print 'received %d bytes' % len(self.reqdata)
-		if self.reqdata:
-			dict_length = loads(self.reqdata[:int_length])
-			dict = loads(self.reqdata[int_length:int_length+dict_length])
-			dict['input'] = self.reqdata[int_length+dict_length:]
+#		if verbose:
+#			print 'received %d bytes' % len(self.reqdata)
+		if 1:
+##			dict_length = loads(self.reqdata[:int_length])
+##			dict = loads(self.reqdata[int_length:int_length+dict_length])
+##			dict['input'] = self.reqdata[int_length+dict_length:]
+			dict['input'] = self.readfile
 			if verbose:
 				print 'request has keys:', string.join(dict.keys(), ', ')
 				if dict.has_key('environ'):
@@ -301,7 +312,8 @@ class RequestHandler(asyncore.dispatcher):
 
 
 	def readable(self):
-		return self.active and not self.have_request
+		return self.active and self.readfile.canRecv()
+##		return self.active and not self.have_request
 
 	def writable(self):
 		return self.active and self._strmOut.writable()
@@ -310,16 +322,17 @@ class RequestHandler(asyncore.dispatcher):
 		pass
 
 	def handle_read(self):
-		if self.have_request:
-			print ">> Received Spurious Write"
-			return
-		data = self.recv(8192) #socket is non-blocking
-		if data:
-			self.reqdata.append(data)
-		else: #we have it all
-			self.reqdata = string.join(self.reqdata,'')
-			self.have_request=1
-			self.server.requestQueue.put(self)
+##		if self.have_request:
+##			print ">> Received Spurious Write"
+##			return
+##		data = self.recv(8192) #socket is non-blocking
+##		if data:
+##			self.reqdata.append(data)
+##		else: #we have it all
+##			self.reqdata = string.join(self.reqdata,'')
+##			self.have_request=1
+##			self.server.requestQueue.put(self)
+		self.readfile.recv()
 
 
 
@@ -354,11 +367,12 @@ class RequestHandler(asyncore.dispatcher):
 
 	def recycle(self):
 		self.active = 0
-		self.have_request = 0
-		self.reqdata=[]
+##		self.have_request = 0
+##		self.reqdata=[]
 		asyncore.dispatcher.close(self)
 		self._strmOut = None
 		self.server.rhQueue.put(self)
+		self.readfile.reset()
 
 	def log(self, message):
 		pass
