@@ -16,7 +16,7 @@ class SessionMemoryStore(SessionStore):
 	def __init__(self, app, restoreFiles=1):
 		SessionStore.__init__(self, app)
 		self._store = {}
-		if self._app.server().isPersistent() and restoreFiles == 1:
+		if restoreFiles == 1:
 			filestore = SessionFileStore(app)
 			keys = filestore.keys()
 			for i in keys:
@@ -56,8 +56,6 @@ class SessionMemoryStore(SessionStore):
 		pass
 
 	def storeAllSessions(self):
-		print "Storing Sessions to file.\n"
-		if self._app.server().isPersistent():
-			filestore = SessionFileStore(self._app)
-			for i in self.keys():
-				filestore[i]=self[i]
+		filestore = SessionFileStore(self._app)
+		for i in self.keys():
+			filestore[i]=self[i]
