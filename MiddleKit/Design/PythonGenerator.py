@@ -45,29 +45,16 @@ class ModelObject:
 			close = 1
 		else:
 			close = 0
-		self.willWritePy(generator, out)
 		self._writePy(generator, out)
-		self.didWritePy(generator, out)
 		if close:
 			out.close()
-
-
-	# @@ 2000-09-16 ce: Do we need the willWritePy() and didWritePy()?
-
-	def willWritePy(self, generator, out):
-		pass
-
-	def didWritePy(self, generator, out):
-		pass
 
 
 class Klasses:
 
 	def writePy(self, generator, outdir):
 		self._pyOutDir = outdir
-		self.willWritePy(generator, outdir)
 		self._writePy(generator, outdir)
-		self.didWritePy(generator, outdir)
 
 	def _writePy(self, generator, outdir):
 		for klass in self._klasses:
