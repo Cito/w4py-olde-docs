@@ -63,7 +63,10 @@ class Configurable:
 	def setting(self, name, default=NoDefault):
 		""" Returns the value of a particular setting in the configuration. """
 		if default is NoDefault:
-			return self.config()[name]
+			try:
+				return self.config()[name]
+			except KeyError:
+				raise KeyError, '%s config keys are: %s' % (name, self.config().keys())
 		else:
 			return self.config().get(name, default)
 
