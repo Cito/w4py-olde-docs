@@ -112,6 +112,7 @@ class ServletFactory(Object):
 		If isPackageDir is true, then this function creates an empty __init__.py
 		if that file doesn't already exist.
 		"""
+		debug = 0
 		if debug: print fullModuleName, moduleName, directory
 		if not forceReload:
 			module = sys.modules.get(fullModuleName, None)
