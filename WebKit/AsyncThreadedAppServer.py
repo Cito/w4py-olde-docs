@@ -253,7 +253,6 @@ class RequestHandler(asyncore.dispatcher):
 
 		self._buffer = self._buffer + "\n" + rawResponse['contents']
 
-
 		self.have_response = 1
 
 		transaction._application=None
