@@ -87,7 +87,7 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
 		if delay:
 			sleep(delay)
 		complete = complete +1
-		totalbuytes = totalbytes+len(data)
+		totalbytes = totalbytes+len(data)
 
 def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0, slowconn=0):
 	''' Executes a stress test on the AppServer according to the arguments. '''
