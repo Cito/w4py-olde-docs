@@ -4,7 +4,6 @@ import time; startTime = time.time()
 
 runProfile = 0   # as in Python's profile module. See doc string of Profiler.py
 
-import ImportSpy
 import os, sys, string
 
 profiler = None  # Forget this and read the doc string of Profiler.py
