@@ -1,19 +1,19 @@
 from ModelObject import ModelObject
-from UserDict import UserDict
 from MiscUtils import NoDefault
 import re
 from MiddleKit import StringTypes
+from MiddleDict import MiddleDict
 
 nameRE = re.compile(r'^([A-Za-z_][A-Za-z_0-9]*)$')
 
 
-class Attr(UserDict, ModelObject):
+class Attr(MiddleDict, ModelObject):
 	"""
 	An Attr represents an attribute of a Klass mostly be being a dictionary-like object.
 	"""
 
 	def __init__(self, dict):
-		UserDict.__init__(self, {})
+		MiddleDict.__init__(self, {})
 		for key, value in dict.items():
 			if key=='Attribute':
 				key = 'Name'
@@ -27,24 +27,6 @@ class Attr(UserDict, ModelObject):
 
 	def name(self):
 		return self.data['Name']
-
-	def boolForKey(self, key):
-		"""
-		Returns True or False for the given key. Returns False if the
-		key does not even exist. Raises a value error if the key
-		exists, but cannot be parsed as a bool.
-		"""
-		original = self.get(key, '')
-		s = original
-		if isinstance(s, StringTypes):
-			s = s.lower().strip()
-		if s in (False, '', None, 0, 0.0, '0', 'false'):
-			return False
-		elif s in (True, 1, '1', 1.0, 'true'):
-			return True
-		else:
-			raise ValueError, '%r for attr %r should be a boolean value (1, 0, True, False) but is %r instead' % (
-				key, self.get('Name', '(UNNAMED)'), original)
 
 	def isRequired(self):
 		"""

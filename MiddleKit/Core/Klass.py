@@ -1,12 +1,12 @@
-from UserDict import UserDict
 from ModelObject import ModelObject
 from MiscUtils import NoDefault
 from MiddleKit import StringTypes
 from MiddleKit.Core.ListAttr import ListAttr
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
+from MiddleDict import MiddleDict
 
 
-class Klass(UserDict, ModelObject):
+class Klass(MiddleDict, ModelObject):
 	"""
 	A Klass represents a class specification consisting primarily of a name and a list of attributes.
 	"""
@@ -15,7 +15,7 @@ class Klass(UserDict, ModelObject):
 
 	def __init__(self, klassContainer, dict=None):
 		""" Initializes a Klass definition with a raw dictionary, typically read from a file. The 'Class' field contains the name and can also contain the name of the superclass (like "Name : SuperName"). Multiple inheritance is not yet supported. """
-		UserDict.__init__(self, {})
+		MiddleDict.__init__(self, {})
 		self._klassContainer = klassContainer
 		self._attrsList = []
 		self._attrsByName = {}
@@ -52,7 +52,7 @@ class Klass(UserDict, ModelObject):
 			self._supername = dict.get('Super', 'MiddleObject')
 		self._isAbstract = dict.get('isAbstract', 0)
 
-		# fill in UserDict with the contents of this dict
+		# fill in dictionary (self) with the contents of the dict argument
 		for key, value in dict.items():
 			# @@ 2001-02-21 ce: should we always strip string fields? Probably.
 			if isinstance(value, StringTypes) and value.strip()=='':
