@@ -25,10 +25,20 @@ This module holds the actual file writer class.
 
 from Context import *
 
-import string
+import string, os, sys
 from PSPReader import *
 
+if sys.hexversion > 0x10502f0: py2=1
+else:
+	py2=0
+	import tempfile
 
+def maketempfilename(dir,ext):
+	""" Trying to keep Py1.5 compatibility"""
+	if py2:
+		return os.tempnam(dir,ext)
+	else:
+		return tempfile.mktemp(ext)
 
 class ServletWriter:
     
@@ -41,7 +51,8 @@ class ServletWriter:
 	def __init__(self,ctxt):
 	
 		self._pyfilename = ctxt.getPythonFileName()
-		self._filehandle = open(self._pyfilename,'w+')
+		self._temp = maketempfilename(os.path.dirname(self._pyfilename), 'tmp.')
+		self._filehandle = open(self._temp,'w+')
 		self._tabcnt = 0
 		self._blockcount = 0 # a hack to handle nested blocks of python code
 		self._indentSpaces = self.SPACES
@@ -74,6 +85,7 @@ class ServletWriter:
 	
 	def close(self):
 		self._filehandle.close()
+		os.rename(self._temp, self._pyfilename)
 
 	def pushIndent(self):
 		'''this is very key, have to think more about it'''
