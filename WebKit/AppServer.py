@@ -22,6 +22,7 @@ from PlugIn import PlugIn
 from WebKitSocketServer import ThreadingTCPServer, ForkingTCPServer, TCPServer, BaseRequestHandler
 from marshal import loads
 import os, sys
+from threading import Lock
 
 
 
@@ -46,6 +47,9 @@ TCPServerMap = {
 	'seq': TCPServer
 }
 
+#Below used with the RestartApplication function
+#ReStartLock=Lock()
+#ReqCount=0
 
 class AppServerError(Exception):
 	pass
@@ -194,12 +198,17 @@ class WebKitAppServer(Configurable):
 		sys.stderr.flush()
 		sys.exit(1)  # @@ 2000-05-29 ce: Doesn't work. Perhaps because of threads
 
+	def shutDown(self):
+		self._app.shutDown()
+
+
 
 class RequestHandler(BaseRequestHandler):
 
 	def handle(self):
 		#JSL-Looking for memory leak
 		import sys
+		
 		# according to BaseRequestHandler docs, we have access to self.[request, client_address, server]
 		verbose = self.server.wkVerbose
 
@@ -228,7 +237,7 @@ class RequestHandler(BaseRequestHandler):
 
 			transaction = self.server.wkApp.dispatchRawRequest(dict)
 			results = transaction.response().contents()
-
+			
 			if verbose:
 				print 'about to send %d bytes' % len(results)
 			conn.send(results)
@@ -244,7 +253,37 @@ class RequestHandler(BaseRequestHandler):
 			print 'END REQUEST'
 			print
 
+
+		transaction._application=None
 		transaction.die()
+		del transaction
+
+	def restartApp(self):
+		"""Not used"""
+		if self.server.num_requests> 200:
+			print "Trying to get lock"
+			ReStartLock.acquire()
+			if self.server.num_requests> 200: #check again to make sure another thread didn't do it
+				print "Restarting Application"
+				currApp=self.server.wkApp
+				wkAppServer=currApp._server
+				newApp = wkAppServer.createApplication()
+				newApp._sessions = currApp._sessions
+				wkAppServer._app=newApp
+				self.server.wkApp=newApp
+				for i in currApp._factoryList:
+					currApp._factoryList.remove(i)
+				for i in currApp._factoryByExt.keys():
+					currApp._factoryByExt[i]=None
+				currApp._canFactory=None
+				wkAppServer._plugIns=[]
+				wkAppServer.loadPlugIns()
+
+
+				self.server.num_requests=0
+				print "Refs to old App=",sys.getrefcount(currApp)
+				currApp=None
+			ReStartLock.release()
 
 
 def main():
@@ -253,6 +292,8 @@ def main():
 		server.serve()
 	except KeyboardInterrupt: #Need to kill the Sweeper thread somehow
 		print "Exiting AppServer"
+		server.shutDown()
+		del server
 		sys.exit()
 
 

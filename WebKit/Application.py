@@ -47,11 +47,11 @@ if not KeyValueAccess in UserDict.__bases__:
 	setattr(UserDict, 'valueForKey', _UserDict_valueForKey)
 
 
-class ApplicationError(Exception,CanContainer):
+class ApplicationError(Exception):
 	pass
 
 
-class Application(Configurable):
+class Application(Configurable,CanContainer):
 	'''
 	FUTURE
 		* 2000-04-09 ce: Actions: URLs that are bound to specific methods of a servlet
@@ -153,9 +153,31 @@ class Application(Configurable):
 		self._startSessionSweeper()
 
 	def _startSessionSweeper(self):
-		from Session import Sweeper
-		self._sessSweepThread=Thread(None, Sweeper, 'SessionSweeper', (self._sessions,self.setting('SessionTimeout')))
+		self._sessSweepThread=Thread(None, self.Sweeper, 'SessionSweeper', (self._sessions,self.setting('SessionTimeout')))
 		self._sessSweepThread.start()
+
+	def Sweeper(self,sessions,timeout): #JSL, moved this here so I can control it better, later
+		"""This function runs in a separate thread and clenas out stale sessions periodically.
+		It probably doesn't belong in this file.  Also, should I lock the sessions dictionary before
+		deleting from it? Or is the session() function atomic enough?"""
+		import sys
+		while 1:
+
+			currtime=time.time()
+			keys=sessions.keys()
+			#print ">> Cleaning up to",len(keys)," stale sessions"
+			for i in keys:
+				if (currtime - sessions[i].lastAccessTime()) > timeout:
+					del sessions[i]
+			time.sleep(30)#sleep for 30 seconds, should probably be 60 in production use
+
+	def shutDown(self):
+		""" Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due
+		to circular references."""
+		del self._canFactory
+		del self._sessions
+		self._delCans()
+		print "Exiting Application"
 
 
 
@@ -210,6 +232,7 @@ class Application(Configurable):
 	def dispatchRawRequest(self, newRequestDict):
 		return self.dispatchRequest(self.createRequestForDict(newRequestDict))
 
+
 	def dispatchRequest(self, newRequest):
 		''' Creates the transaction, session, response and servlet for the new request which is then dispatched. The transaction is returned. '''
 		transaction = None
@@ -219,8 +242,6 @@ class Application(Configurable):
 			session     = self.createSessionForTransaction(transaction)
 			response    = self.createResponseInTransaction(transaction)
 			self.createServletInTransaction(transaction)
-			#print ">> refcount1=",sys.getrefcount(transaction.servlet())
-
 
 			self.awake(transaction)
 			self.respond(transaction)
@@ -244,7 +265,7 @@ class Application(Configurable):
 		#JSL
 
 		#possible circular reference, so delete it
-		transaction.request()._transaction=None
+		transaction._request._transaction=None
 		return transaction
 
 	def forwardRequest(self, trans, URL):
@@ -497,6 +518,7 @@ class Application(Configurable):
 				#print '>> queue full' #do nothing, don't want to block queue for this
 
 ##		print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
+
 
 
 	def newServletCacheItem(self,key,item):
