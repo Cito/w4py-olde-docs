@@ -16,8 +16,8 @@ class Klasses(ModelObject, UserDict):
 	Note that Klasses inherits UserDict, allowing you to access class specifications by name.
 	'''
 
-	## Init ##
 
+	## Init ##
 
 	def __init__(self, model):
 		UserDict.__init__(self)
@@ -73,7 +73,7 @@ class Klasses(ModelObject, UserDict):
 		self._tableHeadings = table.headings()
 
 		for row in table:
-			row = ExpandDictWithExtras(row)
+			row = ExpandDictWithExtras(row, dictForArgs=PyDictForArgs)
 			for key in ['Class', 'Attribute']:
 				if not row.has_key(key):
 					print 'ERROR'
