@@ -1,9 +1,10 @@
 from Common import *
 from Request import Request
 from WebUtils.Cookie import Cookie
-import cgi, os
+import os, cgi
 from types import ListType
 from WebUtils.Funcs import requestURI
+
 
 debug=0
 
@@ -19,7 +20,7 @@ class HTTPRequest(Request):
 
 	def __init__(self, dict={}):
 		Request.__init__(self)
-		self._rawRequest = dict.copy()
+		self._parents = []
 		if dict:
 			# Dictionaries come in from web server adapters like the CGIAdapter
 			assert dict['format']=='CGI'
@@ -33,7 +34,6 @@ class HTTPRequest(Request):
 				self._input = StringIO('')
 			else:
 				self._xmlInput = None
-##			self._fields  = cgi.FieldStorage(fp=StringIO(self._input), environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._fields  = cgi.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._cookies = Cookie()
 			if self._environ.has_key('HTTP_COOKIE'):
@@ -113,6 +113,7 @@ class HTTPRequest(Request):
 		self._serverRootPath = None
 		self._extraURLPath  = None
 
+		if debug: print "Done setting up request, found keys %s" % repr(self._fields.keys())
 
 	## Transactions ##
 
@@ -222,6 +223,16 @@ class HTTPRequest(Request):
 			return self.fsPath()
 		return self._environ['PATH_INFO']
 
+	def urlPathDir(self):
+		"""
+		Same as urlPath, but only gives the directory
+		"""
+		path = self.urlPath()
+		if not path[:-1] == "/":
+			path = path[:string.rfind("/", path)+1]
+		return path
+		
+ 
 	def setURLPath(self, path):
 		''' Sets the URL path of the request. There is rarely a need to do this. Proceed with caution. The only known current use for this is Application.forwardRequest(). '''
 		if hasattr(self, '_serverSidePath'):
@@ -336,6 +347,26 @@ class HTTPRequest(Request):
 
 	def environ(self):
 		return self._environ  # @@ 2000-05-01 ce: To implement ExceptionHandler.py
+
+	def addParent(self, servlet):
+		self._parents.append(servlet)
+
+	def popParent(self):
+		if self._parents:
+			self._parents.pop()
+
+	def parent(self):
+		"""
+		Get the servlet that passed this request to us, if any.
+		"""
+		if self._parents:
+			return self._parents[len(self._parents)-1]
+
+	def parents(self):
+		"""
+		Returns the parents list
+		"""
+		return self._parents
 
 	def xmlInput(self):
 		"""
