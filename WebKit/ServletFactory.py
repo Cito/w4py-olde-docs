@@ -55,28 +55,28 @@ class ServletFactory(Object):
 
 		Note that the module imported may have a different name from the servlet name specified in the URL.  This is used in PSP.
 		"""
-		# Pull out the full server side path and the context path		
+		# Pull out the full server side path and the context path
 		request = transaction.request()
 		path = request.serverSidePath()
 		contextPath = request.serverSideContextPath()
 		fullname = request.contextName()
-		
+
 		# First, we'll import the context's package.
 		directory, contextDirName = os.path.split(contextPath)
 		self._importModuleFromDirectory(fullname, contextDirName, directory, isPackageDir=1)
 		directory = contextPath
-				
+
 		# Now we'll break up the rest of the path into components.
 		remainder = path[len(contextPath)+1:]
 		remainder = string.replace(remainder, '\\', '/')
 		remainder = string.split(remainder, '/')
-		
+
 		# Import all subpackages of the context package
 		for name in remainder[:-1]:
 			fullname = fullname + '.' + name
 			self._importModuleFromDirectory(fullname, name, directory, isPackageDir=1)
 			directory = os.path.join(directory, name)
-					
+
 		# Finally, import the module itself as though it was part of the package
 		# or subpackage, even though it may be located somewhere else.
 		moduleFileName = os.path.basename(serverSidePathToImport)
@@ -84,7 +84,7 @@ class ServletFactory(Object):
 		name, ext = os.path.splitext(moduleFileName)
 		fullname = fullname + '.' + name
 		module = self._importModuleFromDirectory(fullname, name, moduleDir)
-		return module		
+		return module
 
 	def _importModuleFromDirectory(self, fullModuleName, moduleName, directory, isPackageDir=0, forceReload=0):
 		"""
@@ -108,7 +108,9 @@ class ServletFactory(Object):
 				packageDir = os.path.join(directory, moduleName)
 				initPy = os.path.join(packageDir, '__init__.py')
 				if not os.path.exists(initPy):
-					open(initPy, 'w').close()
+					file = open(initPy, 'w')
+					file.write('#')
+					file.close()
 			fp, pathname, stuff = imp.find_module(moduleName, [directory])
 			module = imp.load_module(fullModuleName, fp, pathname, stuff)
 		finally:
