@@ -32,6 +32,8 @@ class DeleteReferencedError(Exception):
 		Exception.__init__(self, text)
 		self._object = object
 		self._referencingObjectsAndAttrs = referencingObjectsAndAttrs
+	def object(self):
+		return self._object
 	def referencingObjects(self):
 		return self._referencingObjectsAndAttrs
 
@@ -48,6 +50,8 @@ class DeleteObjectWithReferencesError(Exception):
 		Exception.__init__(self, text)
 		self._object = object
 		self._attrs = attrs
+	def object(self):
+		return self._object
 	def attrs(self):
 		return self._attrs
 
