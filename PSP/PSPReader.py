@@ -419,9 +419,7 @@ class PSPReader:
 						ch = self.peekChar()
 						if ch == '\"' or ch == "'" or ch == '>' or ch == '%':
 							ch = self.nextChar()
-
 					buffer.append(ch)
-
 		return string.join(buffer,'')
 	
 			    
