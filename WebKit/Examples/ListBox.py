@@ -4,16 +4,6 @@ import string
 from types import ListType
 
 
-class Item:
-	''' Items are the objects that are added, deleted and edited by the
-		user in this example. '''
-	def __init__(self, name):
-		self._name = name
-
-	def name(self):
-		return self._name
-
-
 class ListBox(ExamplePage):
 	'''
 	This page provides a list box interface with controls for changing
@@ -57,7 +47,7 @@ class ListBox(ExamplePage):
 		index = 0
 		vars = self.vars()
 		for item in vars['list']:
-			self.writeln('<option value=%d>%s</option>' % (index, HTMLEncode(item.name())))
+			self.writeln('<option value=%d>%s</option>' % (index, HTMLEncode(item['name'])))
 			index = index + 1
 
 		self.writeln('''
@@ -102,7 +92,7 @@ class ListBox(ExamplePage):
 
 	def new(self, trans):
 		vars = self.vars()
-		vars['list'].append(Item('New item %d'%vars['newCount']))
+		vars['list'].append({'name': 'New item %d'%vars['newCount']})
 		vars['newCount'] = vars['newCount'] + 1
 		self.writeBody()
 
