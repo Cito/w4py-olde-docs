@@ -117,7 +117,7 @@ class Model:
 			reverseKlasses.reverse()
 			for klass in reverseKlasses:
 				if not klass.isAbstract():
-					wr('delete from %s;\n' % klass.sqlTableName()) # dr 7-12-02: changed from klass.name()
+					wr('delete from %s;\n' % klass.sqlTableName())
 			wr('\n')
 
 			self._klassSamples = {}  # keyed by klass, value is list of SQL strings (comments or INSERT statements)
@@ -877,7 +877,7 @@ class PrimaryKey:
 		self._klassid = klass.id()
 		self._props = {'isDerived': 0}
 
-		# this stuff is for PostgreSQLSQLGenerator, but it is awkward 
+		# this stuff is for PostgreSQLSQLGenerator, but it is awkward
 		# to keep it there.
 		self._klass = klass
 		if not hasattr(klass, '_maxSerialNum'):
