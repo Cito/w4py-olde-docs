@@ -484,6 +484,18 @@ class Attr:
 			return repr(value)
 
 
+class IntAttr:
+
+	def sqlValue(self, value):
+		if value is None:
+			return 'NULL'
+		else:
+			return str(value)
+			# it's important to use str() since an int might
+			# point to a long (whose repr() would be suffixed
+			# with an 'L')
+
+
 class LongAttr:
 
 	def sqlValue(self, value):

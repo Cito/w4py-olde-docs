@@ -44,6 +44,16 @@ b:int,i:int,l:long,f:float,s:string
 		different = 0.000001    # @@ 2000-11-25 ce: more work needed on floats
 		assert abs(results[0]._get('f')-values['f'])<different
 
+		# Insert the fetched attributes
+		t2 = Thing()
+		for attr in list('bilfs'):
+			t2._set(attr, results[0]._get(attr))
+		store.addObject(t2)
+		store.saveChanges()
+		results = store.fetchObjectsOfClass(Thing)
+		assert len(results)==2, 'len=%r' % len(results)
+		assert results[0].allAttrs()==results[1].allAttrs()
+
 		# Reset
 		store.clear()
 		store.executeSQL('delete from Thing;')

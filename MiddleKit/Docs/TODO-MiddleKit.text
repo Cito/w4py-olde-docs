@@ -118,6 +118,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 <refinements/improvements>
 
+	[ ] Use a persistent connection per thread.  You can get the name of the current thread with threading.currentThread().getName() and you can use that as a dictionary key into a global dictionary of connections. [per Geoff T]
+
 	[ ] Combine SQLGenerator.config into Settings.config.
 
 	[ ] optimization: we use unsigned ints for serial numbers in the database. Since they exceed the high end of a signed int in Python, they end up selected as longs, which are slower than ints. We should probably leave the SQL signed. 2 billion objects for one class is plenty for most apps.
