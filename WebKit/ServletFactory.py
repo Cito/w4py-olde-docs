@@ -70,8 +70,8 @@ class PythonServletFactory(ServletFactory):
 		name = os.path.splitext(os.path.split(path)[1])[0]
 		if not self._cache.has_key(path):
 			self._cache[path] = {}
-		if os.path.getmtime(path)>self._cache[path].get('mtime',0):
-			globals = {}
+		if os.path.getmtime(path)>self._cache[path].get('mtime', 0):
+			globals = {'transaction': transaction}
 			execfile(path, globals)
 			assert globals.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
 			theClass = globals[name]
@@ -107,7 +107,7 @@ class UnknownFileTypeServletFactory(ServletFactory):
 	'''
 
 	def uniqueness(self):
-		return 'file' # should really be 'application', but that's not supported yet.
+		return 'file'  # should really be 'application', but that's not supported yet.
 
 	def extensions(self):
 		return ['.*']
