@@ -38,12 +38,6 @@ class FileUpload(ExamplePage):
 <p>
 <input type="SUBMIT" name="_action_" value="fileupload">
 </form>
-    <hr>
-    <address><a href="mailto:jslove@localhost.localdomain">Jay Love</a></address>
-<!-- Created: Sat Apr 21 11:57:46 EDT 2001 -->
-<!-- hhmts start -->
-Last modified: Sun Apr 22 22:24:13 EDT 2001
-<!-- hhmts end -->
   </body>
 </html>
 
