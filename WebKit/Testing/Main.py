@@ -1,5 +1,5 @@
-from Page import Page
-from Application import Application
+from WebKit.Page import Page
+from WebKit.Application import Application
 from WebUtils.WebFuncs import HTMLEncode
 from string import replace, split, strip
 import os

@@ -1,4 +1,4 @@
-from Page import Page
+from WebKit.Page import Page
 from WebUtils.WebFuncs import HTMLEncode
 
 
