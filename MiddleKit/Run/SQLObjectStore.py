@@ -525,6 +525,9 @@ class MiddleObjectMixIn:
 		else:
 			return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
 
+	def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
+		return {'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(), self.sqlObjRef())}
+
 	def sqlValueForName(self, name):
 		# Our valueForKey() comes courtesy of MiscUtils.NamedValueAccess
 		value = self.valueForKey(name)

@@ -4,6 +4,7 @@ import ObjectStore
 import sys, types
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 
+
 class MiddleObject(NamedValueAccess):
 	"""
 	MiddleObject is the abstract superclass of objects that are
@@ -179,19 +180,22 @@ class MiddleObject(NamedValueAccess):
 		"""
 		Returns a list of tuples of (object, attr) for all objects that have
 		ObjRefAttrs that reference this object.
-
-		@@ gat: This is implemented correctly, but inefficiently.  It does a full
-		query of all tables in the model.  I don't understand the caching
-		ramifications well enough to know if I can safely use a WHERE clause to
-		reduce the load on the database.
 		"""
 		referencingObjectsAndAttrs = []
+		selfSqlObjRef = self.sqlObjRef()
 		for backObjRefAttr in self.backObjRefAttrs():
-			objects = self.store().fetchObjectsOfClass(backObjRefAttr.klass())
+			objects = self.store().fetchObjectsOfClass(backObjRefAttr.klass(), **self.referencingObjectsAndAttrsFetchKeywordArgs(backObjRefAttr))
 			for object in objects:
-				if object.valueForAttr(backObjRefAttr) == self:
-					referencingObjectsAndAttrs.append((object, backObjRefAttr))
+				assert object.valueForAttr(backObjRefAttr)==self
+				referencingObjectsAndAttrs.append((object, backObjRefAttr))
 		return referencingObjectsAndAttrs
+
+	def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
+		"""
+		Used by referencingObjectsAndAttrs() to reduce the load on the persistent store.
+		Specific object stores replace this as appropriate.
+		"""
+		return {}
 
 
 	## Debugging ##
