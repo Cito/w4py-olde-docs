@@ -4,7 +4,7 @@ from WebUtils.Funcs import htmlEncode
 import os, string, time
 
 
-class ServletCacheByPath(AdminSecurity):
+class ServletCache(AdminSecurity):
 	'''
 	This servlet displays, in a readable form, the internal data
 	structure of the application known as the "servlet cache by path".
@@ -14,7 +14,7 @@ class ServletCacheByPath(AdminSecurity):
 	'''
 
 	def title(self):
-		return 'Servlet Cache by Path'
+		return 'Servlet Cache'
 
 	def writeContent(self):
 		cache = self.application()._servletCacheByPath

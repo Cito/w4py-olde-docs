@@ -28,7 +28,7 @@ class AdminPage(SidebarPage):
 		self.menuItem('Error log', 'Errors', self.fileSize('ErrorLogFilename'))
 		self.menuItem('Config', 'Config')
 		self.menuItem('Plug-ins', 'PlugIns')
-		self.menuItem('Servlet cache by path', 'ServletCacheByPath')
+		self.menuItem('Servlet cache', 'ServletCache')
 		self.menuItem('Application Control','AppControl')
 
 	def fileSize(self, filename):
