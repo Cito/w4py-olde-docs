@@ -11,7 +11,7 @@ def usage():
 	print 'usage: %s <input filename>' % sys.argv[0]
 	sys.exit(1)
 
-def toc(filename, indentFactor=3, fontSize=[None, None, '+1', '']):
+def toc(filename, indentFactor=3, fontSize=[None, None, '+1', '', '', '']):
 	f = open(filename)
 	expr = re.compile("(<a name=(.*)>)?<[hH]([1-9])>(.*)</[hH][1-9]>")
 	while 1:
@@ -40,7 +40,7 @@ def main(args):
 	toc(args[1])
 	print '</font></p>'
 	print '</body></html>'
-	
+
 
 if __name__=='__main__':
 	main(sys.argv)
