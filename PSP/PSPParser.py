@@ -24,7 +24,6 @@ with the characters it found.
         This software is based in part on work done by the Jakarta group.
 
 """
-##TODO:  Rewrite this with mxTextTools and Tagging Engine.
 
 
 from Generators import *
@@ -287,9 +286,9 @@ class PSPParser:
 
 
     def checkInclude(self, handler, reader):
-		"""Check for straight character dumps.  No big hurry for this.  It's almost the same as
-		as the page include directive.  This is only a partial implementation of what JSP does.
-		JSP can pull it from another server, servlet, JSP page, etc."""
+		"""
+		Check for inserting another pages output in this spot.
+		"""
 	
 		OPEN_INCLUDE = '<psp:include'
 		CLOSE_INCLUDE_NO_BODY = "/>"
@@ -317,7 +316,39 @@ class PSPParser:
 
     checklist.append(checkInclude)
 	
-	    
+
+
+    def checkInsert(self, handler, reader):
+		"""Check for straight character dumps.  No big hurry for this.  It's almost the same as
+		as the page include directive.  This is only a partial implementation of what JSP does.
+		JSP can pull it from another server, servlet, JSP page, etc."""
+	
+		OPEN_INSERT = '<psp:insert'
+		CLOSE_INSERT_NO_BODY = "/>"
+		CLOSE_INSERT_BODY = ">"
+		CLOSE_INSERT = "</psp:insert>"
+		OPEN_INDIVIDUAL_PARAM = "<psp:param"
+		CLOSE_INDIVIDUAL_PARAM = "/>"
+
+		if reader.Matches(OPEN_INSERT):
+			param={}
+			start = reader.Mark()
+			reader.Advance(len(OPEN_INSERT))
+			reader.skipSpaces()
+			attrs = reader.parseTagAttributes()
+			#PSPUtils.checkTagAttributes()....
+			reader.skipSpaces()
+			if not reader.Matches(CLOSE_INSERT_BODY):
+				raise "Insert bodies not implemented"
+			reader.Advance(len(CLOSE_INSERT_BODY))
+			stop = reader.Mark()
+			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+			handler.handleInsert(attrs, param)
+			return 1
+		return 0
+
+    checklist.append(checkInsert)
+
 
     def parse(self, until=None, accept=None):
 		""" Parse the PSP file"""
