@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 ********************************************************************************
-WARNING:  This is not a full webserver.  It supports only GET and POST requests.  
+WARNING:  This is not a full webserver.  It supports only GET and POST requests.
 ********************************************************************************
 
 This is an EXPERIMENTAL web server version of WebKit.  It
@@ -18,7 +18,7 @@ Apache or another web server to run along with your product.
 
 I repeat, this is EXPERIMENTAL.  If you try it out, please
 let us know how it works by dropping an email to the Webware discussion
-list at webware-discuss@lists.sourceforge.net 
+list at webware-discuss@lists.sourceforge.net
 
 To use this, you'll have to get your web browser to connect to
 the port specified in AppServer.config, which defaults to
@@ -35,9 +35,16 @@ To-Do:
       cut-and-paste isn't the best way to reuse code, but in this case it's
       probably preferable because of the unusual way we're using
       BaseHTTPRequestHandler.)
-    
-    - Comment the code in HTTPRequestHandler.      
+
+    - Comment the code in HTTPRequestHandler.
 """
+
+if __name__=='__main__':
+	import sys
+	print 'To run this server, try this instead:'
+	print 'python Launch.py AsyncThreadedHTTPServer'
+	sys.exit(1)
+
 
 from AsyncThreadedAppServer import Monitor, MainRelease
 import AsyncThreadedAppServer
@@ -64,8 +71,8 @@ class AsyncThreadedHTTPServer(AsyncThreadedAppServer.AsyncThreadedAppServer):
 		# Use a custom request handler class that is designed to respond
 		# to http directly
 		self.setRequestHandlerClass(HTTPRequestHandler)
-		self._serverName = None		
-	
+		self._serverName = None
+
 	def serverName(self):
 		'''
 		Returns the server name.
@@ -102,7 +109,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 	BaseHTTPRequestHandler but uses it in a somewhat strange way.  It would
 	probably be better to eliminate BaseHTTPRequestHandler as a base class
 	and instead simply move the necessary code into this class.
-	
+
 	An instance of this class is activated by AsyncThreadedHTTPServer.
 	When activated, it is listening for the request to come in.  asyncore will
 	call handle_read when there is data to be read.  ONce all the request has
@@ -171,7 +178,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		self._buffer=''
 		self.active = 1
 		self.client_address = addr
-		
+
 	def readable(self):
 		return self.active and not self.have_request
 
@@ -214,7 +221,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			self.have_request = 1
 			self.server.requestQueue.put(self)
 
-			
+
 
 
 	def handle_write(self):
@@ -228,7 +235,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		if debug:
 			sys.stdout.write(".")
 			sys.stdout.flush()
-		
+
 
 	def close(self):
 		self.clientf=None
@@ -256,11 +263,11 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 
 	def do_POST(self):
 		self.handleHTTPRequest()
-		
+
 	def do_GET(self):
 		self.handleHTTPRequest()
 
-	def handleHTTPRequest(self):        
+	def handleHTTPRequest(self):
 		path = self.path
 		i = string.rfind(path, '?')
 		if i >= 0:
@@ -314,7 +321,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 				}
 
 		self.transaction = self.server._app.dispatchRawRequest(dict)
-		
+
 		response = self.transaction.response()
 		self.send_response(response.header('Status', 200))
 		rawResponse = response.rawResponse()
@@ -409,7 +416,7 @@ def main(args):
 	monitor=0
 	function=run
 	daemon=0
-	
+
 	for i in args[1:]:
 		if i == "monitor":
 			print "Enabling Monitoring"
