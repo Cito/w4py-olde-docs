@@ -4,15 +4,14 @@ from Common import *
 pyVer = getattr(sys, 'version_info', None)
 if pyVer and pyVer[0]>=2:
 	# Get Python's Cookie module
-	# We have to do some work since it has the same name as we do
-	import imp, string
-	path = sys.path[:]
-	try:
-		index = path.index('')
-	except ValueError:
-		pass
-	else:
-		del path[index]
+	# We have to do some work since it has the same name as we do.  So we'll strip out
+	# anything from the path that might cause us to import from the WebKit directory, then
+	# import Cookie using that restricted path -- that ought to ensure that we're using Python's
+	# module.
+	import imp, string, sys
+	def ok(directory):
+		return directory not in ['', '.'] and directory[-6:].lower() != 'webkit'
+	path = filter(ok, sys.path)
 	try:
 		(file, pathname, description) = imp.find_module('Cookie', path)
 		zCookieEngine = imp.load_module('Cookie', file, pathname, description)
