@@ -88,6 +88,10 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		print 'Current directory:', os.getcwd()
 
+		# define this before initializing URLParser, so that contexts
+		# have a chance to override this.
+		self._exceptionHandlerClass = ExceptionHandler
+
 		URLParser.initApp(self)
 		self._rootURLParser = URLParser.ContextParser(self)
 
@@ -95,7 +99,6 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		self.startSessionSweeper()
 
-		self._exceptionHandlerClass = ExceptionHandler
 
 	def initVersions(self):
 		"""
