@@ -5,6 +5,9 @@ import os, sys
 
 
 class MSSQLSQLGenerator(SQLGenerator):
+	def sqlSupportsDefaultValues(self):
+		return 0 # I think it does but I do not know how it is implemented
+
 	pass
 
 
@@ -24,6 +27,37 @@ class Model:
 
 
 class Klasses:
+
+	def dropDatabaseSQL(self, dbName):
+		'''
+		Rather than drop the database, I prefer to drop just the tables.
+		The reason is that the database in MSSQL can contain users and diagrams that would then need to be re-added or re-created
+		Its better to drop the tables than delete them because if you delete the data, the identities need to be reset.
+		What is even worse is that identity resets behave differently depending on whether data has existed in them at any given point.
+		Its safer to drop the table.  dr 4-11-2001
+		'''
+		strList = []
+		strList.append('use %s\ngo\n' % dbName)
+		self._klasses.reverse()		
+		for klass in self._klasses:
+		# If table exists drop.
+			strList.append("print 'Dropping table %s'\n" % klass.name())
+			strList.append("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % klass.name() )
+			strList.append('drop table [dbo].[%s]\n' % klass.name())
+			strList.append('go\n\n')
+		self._klasses.reverse()
+
+		return ''.join(strList) # I do not want to drop by dbase since I lose my users I've added to it
+		# return 'drop database %s;\n' % dbName
+
+	def createDatabaseSQL(self, dbName):
+		''' 
+		Creates the database only if it does not already exist
+		'''
+		return 'Use Master\n' + 'go\n\n' + "if not exists( select * from master.dbo.sysdatabases where name = N'%s' ) create database %s; \n" % (dbName, dbName)
+
+	def useDatabaseSQL(self, dbName):
+		return 'use %s;\n\n' % dbName
 
 	def sqlGenerator(self):
 		return generator
@@ -81,10 +115,6 @@ create table _MKClassIds (
 
 # If database doesn't exist create it.
 		dbName = generator.dbName()
-		wr( 'Use Master\n' )
-		wr( 'go\n\n' )
-		wr( "if not exists( select * from master.dbo.sysdatabases where name = N'%s' ) create database %s; \n" % (dbName, dbName))
-		wr( 'go\n\n' )
 		wr('Use %s\ngo\n\n' % dbName)\
 		
 
@@ -96,41 +126,30 @@ create table _MKClassIds (
 #			wr("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % klass.name() )
 #			wr('drop table [dbo].[%s]\n' % klass.name() )
 #			wr('go\n\n')
-			
-	def _writeSQL(self, generator, out):
-		for klass in self._klasses:
-			klass.writeSQL(self._sqlGenerator, out)
-		self.writeClassIdsSQL(generator, out)
 
-	def didWriteSQL(self, generator, out):
+	def didWriteCreateSQL(self, generator, out):
 		sql = generator.setting('PostSQL', None)
 		if sql:
 			out.write('/* PostSQL start */\n' + sql + '\n/* PostSQL end */\n\n')
-#		out.write('sp_tables\nGO\n')
+#		out.write('sp_tables\n\n') # not real effective
 		out.write('/* end of generated SQL */\n')
+
 
 
 class Klass:
 
-	def _writeSQL(self, generator, out):
-		if not self.isAbstract():
-			name = self.name()
-			wr = out.write
-			sqlIdName = self.sqlIdName()
-			if generator.setting('DropStatements'):
-# If table exists drop.
-				wr ("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % name )
-				wr ('drop table [dbo].[%s]\n' % name)
-				wr ('go\n\n')
-# Create table.
-			wr('create table [%s] (\n' % name)
-			wr('	%s bigint primary key not null IDENTITY (1, 1),\n' % ljust(sqlIdName, self.maxNameWidth()))
 
-			for attr in self.allAttrs():
-				attr.writeSQL(generator, out)
+
+# Create table.
+#			wr("print 'Creating table %s'\n" % name)
+#			wr('create table [%s] (\n' % name)
+#			wr('	%s bigint primary key not null IDENTITY (1, 1),\n' % ljust(sqlIdName, self.maxNameWidth()))
+
+#			for attr in self.allAttrs():
+#				attr.writeSQL(generator, out)
 				
 #			wr('	unique (%s)\n' % sqlIdName)
-			wr(')\ngo\n\n\n')
+#			wr(')\ngo\n\n\n')
 
 	def sqlIdName(self):
 		name = self.name()
@@ -140,6 +159,17 @@ class Klass:
 
 	def maxNameWidth(self):
 		return 30   # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
+
+	def primaryKeySQLDef(self, generator):
+		'''
+		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
+		'''
+
+#		print("print 'Creating table %s'\n" % name)
+#		print('create table [%s] (\n' % name)
+		z = '	%s bigint primary key not null IDENTITY (1, 1),\n' % self.sqlIdName().ljust(self.maxNameWidth())
+#		print(z)
+		return z
 
 
 class Attr:
@@ -209,7 +239,12 @@ class StringAttr:
 		elif self['Min']==self['Max']:
 			return 'char(%s)' % self['Max']
 		else:
-			return 'varchar(%s) %s' % (self['Max'],self.get('Ref',''))
+			ref = self.get('Ref','')
+			if not ref:
+				ref = '' # for some reason ref was none instead of ''
+			else:
+				ref = ' ' + ref
+			return 'varchar(%s)%s' % (self['Max'],ref)
 
 class EnumAttr:
 
