@@ -1,6 +1,0 @@
-<IfModule mod_fastcgi.c>
-AddHandler fastcgi-script fcgi
-# FastCgiSuexec On
-# FastCgiExternalServer WebKit.fcgi -host localhost:33333
-</IfModule>
-
