@@ -458,7 +458,7 @@ class RequestHandler:
 ##		data = string.join(data, '')
 ##		conn.shutdown(0)
 
-		dict['input'] = conn.makefile("r",8012)
+		dict['input'] = conn.makefile("rb",8012)
 
 		if dict:
 			if verbose:

@@ -52,6 +52,11 @@ class OneShotAdapter(Adapter):
 #					myInput = sys.stdin.read(length)
 			#myInput = sys.stdin.read()
 
+			# MS Windows: no special translation of end-of-lines
+			if os.name=='nt':
+				import msvcrt
+				msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
+				
 			dict = {
 				'format':  'CGI',
 				'time':    _timestamp,
@@ -78,11 +83,12 @@ class OneShotAdapter(Adapter):
 			appSvr = None
 
 			sys.stdout = _real_stdout
+
 			# MS Windows: no special translation of end-of-lines
 			if os.name=='nt':
 				import msvcrt
 				msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
-
+				
 			write = sys.stdout.write
 			write(rs._buffer)
 
