@@ -34,7 +34,6 @@ class ExamplePage(SidebarPage):
 		self.writeExamplesMenu()
 		self.writeOtherMenu()
 		self.writeWebKitSidebarSections()
-		self.writeMenuBarMinWidthImage()
 		self.endMenu()
 
 	def writeExamplesMenu(self):

@@ -19,7 +19,6 @@ class AdminPage(SidebarPage):
 		self.startMenu()
 		self.writeAdminMenu()
 		self.writeWebKitSidebarSections()
-		self.writeMenuBarMinWidthImage()
 		self.endMenu()
 
 	def writeAdminMenu(self):
