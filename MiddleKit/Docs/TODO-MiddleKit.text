@@ -259,6 +259,10 @@ specification."
 
 	[ ] With "list of SomeClass", there is no error reported if SomeClass does not exist
 
+	[ ] MiddleKit already partially handles dangling ObjRefs by just pretending
+they are None, but it still complains if the klass ID is invalid.  MK should
+ also handle dangling klass IDs gracefully. [per Geoff T]
+
 	[ ] Change Samples*.csv convention to Sample*.csv; also print the names of each sample file as it is being processed so the user realizes that multiple files are picked up
 
 	[ ] are any awake() methods appropriate?: fetch, insert
