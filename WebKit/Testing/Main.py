@@ -98,13 +98,8 @@ Test functionality of interactive pages, like CountVisits and ListBox.
 Test each link more than once.
 
 Test with multiple adapters (WebKit.cgi, OneShot.cgi, etc.)
-
-Application's serverSideInfoForRequest() method is fairly involved. It supports a variety of functionalities as described in it's doc string: <pre>%(serverSideInfoForRequestDoc)s</pre>
 """
-		doc = Application.serverSideInfoForRequest.__doc__
-		doc = replace(doc, '\t', '    ')
 		fields = {
-			'serverSideInfoForRequestDoc': doc,
 		}
 		lines = split(rawNotes, '\n')
 		lines = map(lambda line: strip(line), lines)
