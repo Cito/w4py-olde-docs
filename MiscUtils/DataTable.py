@@ -112,6 +112,9 @@ from MiscUtils import DataTable
 assert DataTable.canReadExcel()
 table = DataTable.DataTable('foo.xls')
 
+With consistency to its CSV processing, DataTable will ignore any row
+whose first cell is '#' and strip surrounding whitespace around strings.
+
 
 TABLES FROM SCRATCH
 
@@ -409,6 +412,7 @@ class DataTable:
 
 	def readExcel(self):
 		maxBlankRows = 10
+		numRowsToReadPerCall = 20
 
 		from win32com.client import Dispatch
 		xl = Dispatch("Excel.Application")
@@ -427,21 +431,46 @@ class DataTable:
 			if numCols<=0:
 				return
 
+			def strip(x):
+				try:
+					return x.strip()
+				except:
+					return x
+
 			# read rows of data
-			numCols = range(1, numCols+1)
+			maxCol = chr(ord('A') + numCols - 1)
 			haveReadHeadings = 0
 			rowNum = 1
 			numBlankRows = 0
+			valuesBuffer = {}   # keyed by row number
 			while 1:
-				values = [sh.Cells(rowNum, i).Value for i in numCols]
-				nonEmpty = [value for value in values if value]
+				try:
+					# grab a single row
+					values = valuesBuffer[rowNum]
+				except KeyError:
+					# woops. read buffer is out of fresh rows
+					valuesRows = sh.Range('A%i:%s%i' % (rowNum, maxCol, rowNum+numRowsToReadPerCall-1)).Value
+					valuesBuffer.clear()
+					j = rowNum
+					for valuesRow in valuesRows:
+						valuesBuffer[j] = valuesRow
+						j += 1
+					values = valuesBuffer[rowNum]
+
+				# non-"buffered" version, one row at a time:
+				# values = sh.Range('A%i:%s%i' % (rowNum, maxCol, rowNum)).Value[0]
+
+				values = [strip(v) for v in values]
+				nonEmpty = [v for v in values if v]
 				if nonEmpty:
-					if haveReadHeadings:
-						row = TableRecord(self, values)
-						self._rows.append(row)
-					else:
-						self.setHeadings(values)
-						haveReadHeadings = 1
+					if values[0] not in ('#', u'#'):
+						if haveReadHeadings:
+							row = TableRecord(self, values)
+							self._rows.append(row)
+						else:
+							self.setHeadings(values)
+							haveReadHeadings = 1
+					numBlankRows = 0
 				else:
 					numBlankRows += 1
 					if numBlankRows>maxBlankRows:
@@ -690,9 +719,12 @@ class TableRecord:
 		return len(self._values)
 
 	def __getitem__(self, key):
-		if type(key) is StringType:
+		if isinstance(key, StringTypes):
 			key = self._nameToIndexMap[key]
-		return self._values[key]
+		try:
+			return self._values[key]
+		except TypeError:
+			raise TypeError, 'key=%r, key type=%r, self._values=%r' % (key, type(key), self._values)
 
 	def __setitem__(self, key, value):
 		if type(key) is StringType:
