@@ -116,6 +116,13 @@ class SQLObjectStore(ObjectStore):
 				attr._sqlColumnName = None
 				attr._sqlColumnNames = None
 
+		# use dbargs from settings file as defaults
+		# (args passed to __init__ take precedence)
+		args = self._dbArgs
+		self._dbArgs = self.setting('DatabaseArgs',{})
+		self._dbArgs.update(args)
+		print 'dbArgs = %s' % self._dbArgs
+
 		# Connect
 		self.connect()
 

@@ -221,7 +221,7 @@ Generating Python...
 <tr class=dataTable1> <td class=dataTable1> 2 </td> <td class=dataTable1> Nadia </td> <td class=dataTable1> 5 </td> </tr>
 </table>
 
-<p> You can see that in sample data, references to objects (sometimes called "obj refs", "references" or "pointers") are made by referring to the implicit serial number of the target object (1, 2, 3, ...).
+<p> You can see that in sample data, references to objects (sometimes called "obj refs", "references" or "pointers") are made by referring to the implicit serial number of the target object (1, 2, 3, ...).  Alternatively, you may specify the serial numbers explicitly by adding a "serialNum" column and putting in a serial number for each object.  This is useful since it allows you to remove objects from your Samples.csv file without affecting the numbering of other objects of that class.
 
 <p> Warning: If an obj ref attribute points to a base class that has subclasses (such as Video) you may need to qualify your sample data by specifying the exact class of the reference. For example, instead of simply a number, an obj ref could be Movie.2 or TVSeries.2.
 

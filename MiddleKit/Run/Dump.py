@@ -78,12 +78,12 @@ class Dump:
 		classname = '%sObjectStore' % opt['db'] 
 		module = __import__('MiddleKit.Run.%s' % classname, globals(), locals(), [classname])
 		pyClass = getattr(module, classname)
-		try:
-			conn = os.environ['MK_STORE_INIT']
-		except KeyError:
-			sys.stderr.write('Enter %s init args: ' % classname)
-			conn = raw_input()
-		store = eval('pyClass(%s)' % conn)
+		if opt.has_key('prompt-for-args'):
+		    sys.stderr.write('Enter %s init args: ' % classname)
+		    conn = raw_input()
+		    store = eval('pyClass(%s)' % conn)
+		else:
+		    store = pyClass()
 		store.readModelFileNamed(opt['model'])
 		store.dumpObjectStore(out,progress=opt.has_key('show-progress'))
 
@@ -95,8 +95,9 @@ class Dump:
 		print '       %s -h | --help' % progName
 		print 
 		print 'Options:'
-		print '    --show-progress  Print a dot on stderr as each class is processed'
-		print '                     (useful when dumping large databases)'
+		print '    --prompt-for-args Prompt for args to use for initializing store (i.e. password)'
+		print '    --show-progress   Print a dot on stderr as each class is processed'
+		print '                      (useful when dumping large databases)'
 		print
 		print '       * DBNAME can be: %s' % ', '.join(self.databases())
 		print
@@ -106,7 +107,7 @@ class Dump:
 		# Command line dissection
 		if type(args)==type(''):
 			args = args.split()
-		optPairs, files = getopt(args[1:], 'h', ['help', 'show-progress', 'db=', 'model=','outfile=',])
+		optPairs, files = getopt(args[1:], 'h', ['help', 'show-progress', 'db=', 'model=','outfile=','prompt-for-args'])
 		if len(optPairs)<1:
 			self.usage('Missing options.')
 		if len(files)>0:
