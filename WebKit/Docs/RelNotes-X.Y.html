@@ -118,6 +118,15 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 		 content.  As Page inherits from HTTPContent (which inherits from 
 		 HTTPServlet), Page still contains all the methods it previously did,
 		 and this change should not require any changes to end-user code.
+		 
+	<li> XMLRPCServlets are now allowed to return None as part of their
+		 marshalled response.  This improves usability in an all-Python
+		 environment at the possible cost of compatibility problems
+		 with non-Python clients.  To revert to the old behavior, where an
+		 attempt to respond with None caused an exception, add
+		 "allow_none = False" to your XMLRPCServlet-derived servlets at class
+		 level (adding "self.allow_none = False" in the __init__ should
+		 also work).
 </ul>
 
 

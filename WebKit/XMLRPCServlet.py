@@ -21,6 +21,11 @@ class XMLRPCServlet(RPCServlet):
 	For more Pythonic convenience at the cost of language independence,
 	see PickleRPCServlet.
 	"""
+	
+	# Set to False if you do not want to allow None to be marshalled
+	# as part of a response.
+	allow_none = True
+	
 	def respondToPost(self, transaction):
 		"""
 		This is similar to the xmlrpcserver.py example from the xmlrpc
@@ -45,21 +50,21 @@ class XMLRPCServlet(RPCServlet):
 				if type(response) != type(()):
 					response = (response,)
 			except xmlrpclib.Fault, fault:
-				response = xmlrpclib.dumps(fault, encoding=encoding)
+				response = xmlrpclib.dumps(fault, encoding=encoding, allow_none=self.allow_none)
 				self.sendOK('text/xml', response, transaction)
 				self.handleException(transaction)
 			except Exception, e:
 				fault = self.resultForException(e, transaction)
-				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault), encoding=encoding)
+				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault), encoding=encoding, allow_none=self.allow_none)
 				self.sendOK('text/xml', response, transaction)
 				self.handleException(transaction)
 			except:  # if it's a string exception, this gets triggered
 				fault = self.resultForException(sys.exc_info()[0], transaction)
-				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault), encoding=encoding)
+				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault), encoding=encoding, allow_none=self.allow_none)
 				self.sendOK('text/xml', response, transaction)
 				self.handleException(transaction)
 			else:
-				response = xmlrpclib.dumps(response, methodresponse=1, encoding=encoding)
+				response = xmlrpclib.dumps(response, methodresponse=1, encoding=encoding, allow_none=self.allow_none)
 				self.sendOK('text/xml', response, transaction)
 		except:
 			# internal error, report as HTTP server error
