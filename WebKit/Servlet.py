@@ -35,6 +35,17 @@ class Servlet(Object):
 
 	## Request-response cycles ##
 
+	def runTransaction(self, trans):
+		self.awake(trans)
+		self.respond(trans)
+		self.sleep(trans)
+
+	def runMethodForTransaction(self, trans, method, *args, **kw):
+		self.awake(trans)
+		result = getattr(self, method)(*args, **kw)
+		self.sleep(trans)
+		return result
+
 	def awake(self, trans):
 		""" This message is sent to all objects that participate in the request-response cycle in a top-down fashion, prior to respond(). Subclasses must invoke super. """
 		self._transaction = trans
