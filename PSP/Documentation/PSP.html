@@ -1,19 +1,19 @@
 <html><head>
 <title> Python Server Pages for the Webware WebKit </title>
-<link rel = STYLESHEET href="../Documentation/StyleSheet.css" type="text/css">
+<link rel=STYLESHEET href="StyleSheet.css" type="text/css">
 </head>
 <body bgcolor='white'>
 <H1> Python Server Pages for Webware</h1>
-Release 0.1 June 3, 2000<br>
+Release 0.1 June 6, 2000<br>
 <a href="http://webware.sourceforge.net">http://webware.sourceforge.net</a>
 <h2> Summary</h2>
-<p> Python Server Pages (PSP) provides the capability for producing dynamic web pages 
+<p> Python Server Pages (PSP) provides the capability for producing dynamic web pages
 for use with the Webware WebKit Python Servlet engine simply by writing standard HTML.
 The HTML code is interspersed with special tags that indicate special actions that should
 be taken when the page is served.  The general syntax for PSP has been based on the popular
 Java Server Pages specification used with the Java Servlet framework.
 <p> Since the Webware WebKit is analogous to Java Servlets, PSP provides a scripting language
-for use with it that includes all of the power of Python.  You will find that PSP compares 
+for use with it that includes all of the power of Python.  You will find that PSP compares
 favorably to other server side web scripting languages, such as ASP, PHP and JSP.
 <p> Features of PSP include:
 <ul>
@@ -24,7 +24,7 @@ favorably to other server side web scripting languages, such as ASP, PHP and JSP
 	<li>Ability to add additional methods to the class produced by PSP
 </ul>
 <h2>Feedback</h2>
-<p>The PSP for Webware project is fully open source.  Help in all areas is encouraged 
+<p>The PSP for Webware project is fully open source.  Help in all areas is encouraged
 and appreciated.  The primary author of PSP is Jay Love (jsliv@jslove.net).  Comments
 should be directed to the Webware Discussion mailing list. This is a relatively low volume list
 and you are encouraged to join the list if you wish to participate in the development
@@ -36,11 +36,11 @@ of PSP or Webware, or if you plan on developing an application using the framewo
 The general process for creating PSP files is similar to creating an HTML page.
 Simply create a standard HTML page, interspersed with the special PSP tags that
 your needs require.  The file should be saved with an extension of .psp.  Place
-this file in a directory that is served by the WebKit.  When a request comes in 
+this file in a directory that is served by the WebKit.  When a request comes in
 for this page, it will be dynamically compiled into a WebKit servlet class, and an
-instance of this class will be instantiated to serve requests for that page. 
+instance of this class will be instantiated to serve requests for that page.
 
-There are two general types of PSP tags, &lt;% and &lt;psp:.  Each of these tags have 
+There are two general types of PSP tags, &lt;% and &lt;psp:.  Each of these tags have
 special characteristics, described below.
 
 Whether or not you will need to include standard HTML tags in the start of your PSP page,
@@ -65,15 +65,15 @@ to the elements in the current PSP source file and to any included files.
 <p>Supported Page parameters:
 <ul>
 <p><li><i><b>import</b></i> - The import attribute of the page directive tells the PSP parser
-to import certain pyton modules into the PSP Class source file.  
+to import certain pyton modules into the PSP Class source file.
 <p>The format of this directive is as follows:
 <p><b>Example</b><i>&lt;%@ page import="sys,os"%&gt;</i>
 <p>The value of the import parameter may have multiple, comma separated items.  At this time,
- the <i>from X import X</i> syntax is not supported for imports to minimize namespace 
+ the <i>from X import X</i> syntax is not supported for imports to minimize namespace
 pollution. (Maybe I should permit this with a semicolon separating the from:import inj the list above)
 <p><li>
 <i><b>extends</b></i> - The extends attribute of the page tells the PSP parser what base class this
- Servlet should be derived from.  The PSP servlet produced by parsing the PSP file will 
+ Servlet should be derived from.  The PSP servlet produced by parsing the PSP file will
 inherit all of the attributes and methods of the base class.  The Servlet will have access
 to each of those atributes and methods.  They will still need to be accessed using the self.
 sytax of Python.
@@ -87,8 +87,8 @@ In conjunction with the <i>BaseMethod</i> page attribute, described below, and/o
 Page.py servlet.</li>
 <p>
 <p><li><i><b>method</b></i> - The <i>method</i> attribute of the <i>page</i> directive tells the
- PSP parser which method of the base class the HTML of this PSP page should be placed in and 
-override.  
+ PSP parser which method of the base class the HTML of this PSP page should be placed in and
+override.
 <p><b>Example</b> - <i>&lt;%@ page method="WriteHTML"%&gt;</i>
 
 <p>Standard methods are WriteHTML, of the standard HTTPServlet class, and writeBody, of the Page and PSPPage
@@ -109,7 +109,7 @@ override.
 <p>Valid values are "yes" and "no".  The default is "yes".
 <p>
 <p><li><i><b>indentType</b></i> - The <i>indentType </i> attribute of the page directive tells the parser how to handle block indention in the python sourcefile it creates.  The <i> indentType</i> attribute sets whether the sourcefile will be indented with tabs or spaces.  Valid values are "tabs" or "spaces". If this is set to "spaces", see <i>indentSpaces</i> for setting the number of spaces to be used. (also, see blocks, below).  The default is "tabs"
-<p><b>Example</b> - <i>&lt;%@ page indentType="tabs"%&gt;</i> 
+<p><b>Example</b> - <i>&lt;%@ page indentType="tabs"%&gt;</i>
 <p>This is a bit of a tricky item, because many editors will automatically replace tabs with spaces in their output, without the user realizing it.  If you are having trouble with complex blocks, look at that first.
 <p>
 <p><li><i><b>indentSpaces</b></i> - Sets the number of spaces to be used for indentation when <i>indentType</i> is set to spaces.  The default is "4".
@@ -117,15 +117,15 @@ override.
 </ul>
 <p>
 <p><h4>Include - <i>&lt;%@ include</i></h4>
-<p>The include directive tells the parser to insert another file at this point in the page and to parse it for psp content. 
-It is generally no problem to include an html file this way.  However, if you do not want your include file to be parsed, 
+<p>The include directive tells the parser to insert another file at this point in the page and to parse it for psp content.
+It is generally no problem to include an html file this way.  However, if you do not want your include file to be parsed,
 you may use the <i>&lt;psp:include</i> tag described below.
 <p><b>Example</b> - <i>&lt;%@ include file="myfile.txt"%&gt;</i>
 
 <h3>Expression Tag - &lt;%=</h3>
 <p>The expression tag simply evaluates a python variable and inserts its text representation
 into the HTML response.  You may include anything that will evaluate to a value that can
-be represented as a string inside the tag.  
+be represented as a string inside the tag.
 <p><b>Example</b> - <i> The current time is &lt;%=time.time()%&gt;</i>
 <p>
 <p>When the PSP parsing engine encounters Expression tags, it wraps the contents in a call to the
@@ -134,51 +134,51 @@ python <i>str()</i> function.  Multiple lines are not supported in a PSP express
 <h3>Script Tag - <i>&lt;% "script code" %&gt;</i></h3>
 <p>The script tag is used to enclose python code that should be run by the WebKit Servlet
  runner when requests are processed by the Servlet which this PSP page produces.  Any valid Python
-code can be used in Script tags.  Inside a script tag, indentation is up to the author, and is used 
-just like in regular python. (MOre info on blocks below)  The PSP Engine actually just outputs the strings in a Script tag 
+code can be used in Script tags.  Inside a script tag, indentation is up to the author, and is used
+just like in regular python. (MOre info on blocks below)  The PSP Engine actually just outputs the strings in a Script tag
 into the method body that is being produced by this PSP page.
 <p><b>Example</b>
 <p>&lt;% for i in range(5):<br>
     &nbsp;&nbsp;&nbsp; res.write("&lt;b&gt;This is number" + str(i) + "&lt;/b&gt;&lt;br&gt;")
 %&gt;</i>
-<p>The Python code within script tags has access to all local and class variables declared in the PSP page, 
+<p>The Python code within script tags has access to all local and class variables declared in the PSP page,
 as well as to all variables of the enclosing class of this PSP page.
 <p>Special local variables that will be available in all PSP pages are:
 <p><ul><li><i>req</I> - the HTTRequest object for this page
-<li><i>res</i> - the HTTPResponse object for this page.  The HTTPResponse object includes the 
+<li><i>res</i> - the HTTPResponse object for this page.  The HTTPResponse object includes the
 <i>write</i> method that is used to output HTML to the client.
-<li><i>trans</i> - The Transaction object for this client request.  The Transaction object 
+<li><i>trans</i> - The Transaction object for this client request.  The Transaction object
 provides access to the objects involved in servicing this client request.
 <li><B>Others?</b>
 </ul>
 <p>
 <b>Python Code Blocks that span PSP Script Tags</b><br>
-The Python code structure, which uses whitespace to siginify blocks of code, presents a 
-special challenge in PSP pages.  In order to allow for readable HTML code that does not impose 
- restrictions on straight HTML within PSP pages, PSP uses a special syntax 
-to handle Python blocks that span script tags.  
+The Python code structure, which uses whitespace to siginify blocks of code, presents a
+special challenge in PSP pages.  In order to allow for readable HTML code that does not impose
+ restrictions on straight HTML within PSP pages, PSP uses a special syntax
+to handle Python blocks that span script tags.
 <p>Any script tag with Python code that ends with a colon (:) is considered to begin a block. (a
  comment tag may follow the colon).  After this tag, any following HTML is considered to be part
  of the block begun within the previous script tag.  To end the block, insert a new script tag with the word "end" as the only statement.
 <p><b> Example of Script/HTML block</b><br>
 <i>&lt% for i in range(5): %&gt </i>     &nbsp    #the blocks starts here, no need for indenting the following HTML<br>
 <i>&lt;tr&gt;&lt;td&gt;&lt;%= i%&gt;&lt;/td&gt;&lt;/tr&gt;<br>
-&lt;% end %&gt;</i>  The "end" statement ends the block.<br> 
-These blocks can be nested, with no need for special indentation, and each script tag that only contains a solitary end 
+&lt;% end %&gt;</i>  The "end" statement ends the block.<br>
+These blocks can be nested, with no need for special indentation, and each script tag that only contains a solitary end
 statement will reduce the block indent by one.<br>
 <p>
 <h3>Method Tag - "&lt;psp:method&gt;&lt;/psp:method&gt;"</h3>
 <p>
-<p>The Method tag is used to declare new methods of the Servlet class this page is producing. 
+<p>The Method tag is used to declare new methods of the Servlet class this page is producing.
 It will generally be more effective to place method declarations in a Servlet class and then have
- the PSP page inherit from that class, but this tag is here for quick methods.  The Method tag 
-may also be usefull for over-riding the default functionality of a base class method, as opposed to 
+ the PSP page inherit from that class, but this tag is here for quick methods.  The Method tag
+may also be usefull for over-riding the default functionality of a base class method, as opposed to
 creating a Servlet class with only a slight change from another.
-<p>The syntax for PSP methods is a little different from that of other tags.  The PSP Method 
-declaration uses a compound tag.  There is a beginning tag <i>&lt;psp:method name="methname" params="param1, param2"&gt;</i> 
+<p>The syntax for PSP methods is a little different from that of other tags.  The PSP Method
+declaration uses a compound tag.  There is a beginning tag <i>&lt;psp:method name="methname" params="param1, param2"&gt;</i>
 that designates the start of the method definition and defines the method name and the names
- of its parameters.  The text following this tag is the actual Python code for the method. 
-This is standard Python code, with indentation used to mark blocks and no raw HTML support. It is 
+ of its parameters.  The text following this tag is the actual Python code for the method.
+This is standard Python code, with indentation used to mark blocks and no raw HTML support. It is
 not necessary to start the method definition with indentation, the first level of indention is provided by PSP.
 <p>To end the method definition block, the close tag <i>&lt;/psp:method&gt;</i> is used.
 <p>
@@ -187,16 +187,16 @@ not necessary to start the method definition with indentation, the first level o
 import string<br>
 return string.join((var1,var2),'')<br>
 &lt;/psp:method &gt;</i><br>
-<p>This is a silly function that just joins two strings.  Please note that it is not necessary 
-to declare the self parameter as one of the function's parameters.  This will be done automatically 
+<p>This is a silly function that just joins two strings.  Please note that it is not necessary
+to declare the self parameter as one of the function's parameters.  This will be done automatically
 in the code that PSP generates.
-<p>A PSP:Method can be declared anywhere in the psp sourcefile and will be available throughout the 
+<p>A PSP:Method can be declared anywhere in the psp sourcefile and will be available throughout the
 PSP file through the standard <i>self.PSPMethodName(parameters)</i> syntax.
 <p>
 <h3>Include Tag - "<i>&lt;psp:include"</i></h3>
 <p>
-<p>The include tag inserts a file into the output stream that the psp page will produce, but does not parse that included file for psp content. 
-The only parameter is <i>file</i>, which should be set to the filename to be included.  If the filename starts with a "/", it is 
+<p>The include tag inserts a file into the output stream that the psp page will produce, but does not parse that included file for psp content.
+The only parameter is <i>file</i>, which should be set to the filename to be included.  If the filename starts with a "/", it is
 assumed to be an absolute path.  If it doesn't start with a "/", the file path is assumed to be relative to the psp file.  The contents of the include file will not be escaped in any way except for triple-double-quotes ("""), which will be escaped.
 <p>
 <p><b>Example</b> - <i>&lt;psp:include file="myfile.html" &gt;</i>
