@@ -730,11 +730,11 @@ class ObjRefAttr:
 				notNull = self.sqlNullSpec()
 			classIdDefault = ' default %s' % self.targetKlass().id()
 			#   ^ this makes the table a little to easier to work with in some cases (you can often just insert the obj id)
+			objIdRef = ''
 			if self.get('Ref', None) or \
 			  (self.setting('GenerateSQLReferencesForObjRefsToSingleClasses', False) and len(self.targetKlass().subklasses())==0):
-			  	objIdRef = self.objIdReferences()
-			else:
-				objIdRef = ''
+			  	if self.get('Ref', None) not in ('0', 0, 0.0, False):
+				  	objIdRef = self.objIdReferences()
 			out.write('\t%s %s%s%s%s, /* %s */ \n' % (classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault, self.classIdReferences(), self.targetClassName()))
 			out.write('\t%s %s%s%s' % (objIdName, self.sqlTypeOrOverride(), notNull, objIdRef))
 

@@ -361,7 +361,7 @@ class Klass(MiddleDict, ModelObject):
 		for attr in self.allAttrs():
 			if isinstance(attr, ObjRefAttr):
 				targetKlass = attr.targetKlass()
-				if targetKlass is not self and not sorter.visitedKlasses.has_key(targetKlass):
+				if targetKlass is not self and not sorter.visitedKlasses.has_key(targetKlass) and attr.boolForKey('Ref', True):
 					targetKlass.sortByDependency(sorter)  # recursive call
 		# end of the dependency road
 		if not sorter.recordedKlasses.has_key(self):
