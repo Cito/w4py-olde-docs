@@ -33,6 +33,7 @@ Version 0.3
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Debugging_Restarting"><font size=>Restarting the Server</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Assertions"><font size=>Assertions</font></a>
 <br>  <a href="#NamingConventions"><font size=+1>Naming Conventions</font></a>
+<br>  <a href="#Actions"><font size=+1>Actions</font></a>
 <br>  <a href="#PlugIns"><font size=+1>PlugIns</font></a>
 <br>  <a href="#Files"><font size=+1>Files</font></a>
 <br>  <a href="#How"><font size=+1>How do I develop an app?</font></a>
@@ -334,6 +335,30 @@ Version 0.3
 <a name=NamingConventions><h2>Naming Conventions</h2></a>
 
 <p>Cookies and form values that are named with surrounding underscores (such as <code>_sid_</code> and <code>_action_</code>) are reserved by WebKit for it's own internal purposes. If you refrain from using surrounding underscores in your own names, then [a] you won't accidentally clobber an already existing internal name and [b] when new names are introduced by future versions of WebKit, they won't break your application.
+
+
+<a name=Actions><h2>Actions</h2></a>
+
+<p> Suppose you have a web page with a form and one or more buttons. Normally, when the form is submitted, a method such as Servlet's <code>respondToPost()</code> or Page's <code>writeHTML()</code>, will be invoked. However, you may find it more useful to bind the button to a specific method of your servlet such as <code>new()</code>, <code>remove()</code> etc. to implement the command, and reserve <code>writeHTML()</code> for displaying the page. Note that your "command methods" can then invoke <code>writeHTML()</code> after performing their task.
+
+<p> The <i>action</i> feature of Page let's you do this. The process goes like this:
+
+<p> <b>1.</b> Add buttons to your HTML form of type <code>submit</code> and name <code>_action_</code>. For example:
+
+<p><code>&lt;input name=_action_ type=submit value=New&gt;
+<br>&lt;input name=_action_ type=submit value=Delete&gt;</code>
+
+<p> <b>2.</b> Add an <code>actions()</code> method to your class to state which actions are valid. This is security requirement is important. Without it, hackers could invoke any servlet method they wanted! For example:
+
+<p> <code>def actions(self): return <i>SuperClass</i>.actions(self) + ['New', 'Delete']</code>
+
+<p> <b>3.</b> Unfortunately, the HTML submit button does not separate it's value from it's title/label. If your button labels don't match your method names, you will need to implement <code>methodNameForAction()</code> to provide the mapping. You could simply use a dictionary to create the mapping, or if you know there is some relationship you could write the logic for it. For example,
+
+<p><code>def methodNameForAction(self, name): return string.lower(name)</code>
+
+<p> <b>4.</b> Now you implement your action methods.
+
+<p> The ListBox example shows the use of actions.
 
 
 <a name=PlugIns><h2>Plug-ins</h2></a>
