@@ -34,7 +34,7 @@ AppServer.config
     ``[".."]``.  See `Creating Plugins`_ for information on creating
     your own plug-ins. @@ ib: are these really differently cased?
 
-.. _`Creating Plugins`: Developing.html#creatingplugins
+    .. _`Creating Plugins`: Developing.html#creatingplugins
 
     The advantage of a plug-in directory is that you can add new
     plug-ins to the app server simply by dropping them into the
@@ -120,7 +120,6 @@ Application.config
     'request.timeStamp', 'transaction.duration',
     'transaction.errorOccurred']``.
 ``Contexts``:
-
     This dictionary maps context names to the directory holding the
     context content. Since the default contexts all reside in WebKit,
     the paths are simple and relative. The context name appears as the
@@ -178,7 +177,6 @@ Application.config
     memory requirements, especially for busy sites. This is used only
     if the ``SessionStore`` is set to ``Dynamic``.  Default: ``15``.
 ``SessionPrefix``:
-
     This setting can be used to prefix the session IDs with a string.
     Possible values are ``None`` (don't use a prefix), ``"hostname"``
     (use the hostname as the prefix), or any other string (use that
@@ -189,7 +187,7 @@ Application.config
     backend servers do not have to share session data.  Default:
     ``None``.  @@ ib: need a better mod_rewrite link.
 
-.. _mod_rewrite: UserGuide.html 
+    .. _mod_rewrite: UserGuide.html 
 
 ``ExtraPathInfo``:
     When enabled, this setting allows a servlet to be followed by
@@ -219,14 +217,13 @@ Application.config
     environment and process ids. You will most likely want to turn
     this off when deploying the site for users.  Default ``1``.
 ``IncludeFancyTraceback``:
-
     If true, then display a fancy, detailed traceback at the end of
     the error page.  It will include the values of local variables in
     the traceback.  This makes use of a modified version of
     ``cgitb.py`` which is included with Webware.  The `original
     version`_ was written by Ka-Ping Yee.  Default ``0`` (off).
 
-.. _`original version`: http://web.lfw.org/python/
+    .. _`original version`: http://web.lfw.org/python/
 
 ``FancyTracebackContext``:
     The number of lines of source code context to show if
@@ -265,7 +262,6 @@ Application.config
     The SMTP server to use for sending e-mail error messages.
     Default: ``"mail.-.com"`` (i.e., unset)
 ``ErrorEmailHeaders``:
-
     The e-mail headers used for e-mailing error messages. Be sure to
     configure ``"From"``, ``"To"`` and ``"Reply-to"`` before turning
     ``EmailErrors`` on.  Default::
@@ -279,7 +275,6 @@ Application.config
         }
 
 ``UnknownFileTypes``:
-
     This setting controls the manner in which WebKit serves "unknown
     extensions" such as .html, .gif, .jpeg, etc. The default settings
     specify that the servlet matching the file be cached in memory,
@@ -294,8 +289,6 @@ Application.config
     ``"CheckDate"`` to ``0`` for (slightly) better performance.  If
     you are concerned about performance, use mod_rewrite_ to avoid
     accessing WebKit for static content. @@ ib: link to mod_rewrite
-
-.. _mod_rewrite: somewhere
 
     The ``Technique`` setting can be switch to
     ``"redirectSansAdapter"``, but this is an experimental setting

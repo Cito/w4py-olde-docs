@@ -199,126 +199,200 @@ are no longer useful. For example::
    class=filename>WebKit/Configs/OneShotAdapter.config</span>. @@ ib:
    shall we kill this?
 
-<a name=Debugging_Raising><h3>Raising Exceptions</h3></a>
+Raising Exceptions
+------------------
 
-<p> Uncaught expections are trapped at the application level where a useful error page is saved with information such as the traceback, environment, fields, etc. You can configure the application to automatically e-mail you this information. Here is an <a href=SampleError.html>example error page</a>.
+Uncaught expections are trapped at the application level where a
+useful error page is saved with information such as the traceback,
+environment, fields, etc. You can configure the application to
+automatically e-mail you this information. Here is an `example error
+page`_.
 
-<p> When an application isn't behaving correctly, raising an exception can be useful because of the additional information that comes with it. Exceptions can be coupled with messages, thereby turning them into more powerful versions of the <code>print</code> statement. For example:
+.. _`example error page`: SampleError.html
 
-<p><code>raise Exception, 'self = %s' % self</code>
+When an application isn't behaving correctly, raising an exception can
+be useful because of the additional information that comes with
+it. Exceptions can be coupled with messages, thereby turning them into
+more powerful versions of the ``print`` statement. For example::
+
+    raise Exception, 'self = %s' % self
+
+Restarting the Server
+---------------------
+
+When a servlet's source code changes, it is reloaded. However,
+ancestor classes of servlets and library modules are not.  You may wish
+to use the `auto-reloading feature`_ to mitigate this problem.
+
+.. _`auto-reloading feature`: @@fixme
+
+In any case, when having problems, consider restarting the app server.
+
+Another option is to use the AppControl page of the Admin_ context
+to clear the servlet instance and class cache.
+
+.. _Admin: Administration_
+
+Assertions
+----------
+
+Assertions are used to ensure that the internal conditions of the
+application are as expected. An assertion is equivalent to an ``if``
+statement coupled with an exception. For example::
+
+    assert shoppingCart.total()>=0.0, \
+        'shopping cart total is %0.2f' % shoppingCart.total()
+
+HTML Validation
+---------------
+
+You can validate the HTML in your pages using the `Web Designer
+Group's HTML Validator`_.  It is available as a `RPM package`_, in
+Debian as ``wdg-html-validator`` and you can also install the source_.
+
+.. _`Web Designer Group's HTML Validator`: http://www.htmlhelp.com/tools/validator/
+.. _`RPM package`: http://www.htmlhelp.com/tools/validator/packages/
+.. _source: http://www.htmlhelp.com/tools/validator/source.html
+
+To enable the validation, you have to override ``.writeBodyParts()``
+in your ``SitePage``, as::
+
+    def writeBodyParts(self):
+        Page.writeBodyParts()
+        self.validateHTML()
+
+If your pages contain invalid HTML, a message will be appended to the
+page.
+
+Naming Conventions
+==================
+
+Cookies and form values that are named with surrounding underscores
+(such as ``_sid_`` and ``_action_``) are generally reserved by WebKit
+and various plugins and extensions for their own internal purposes. If
+you refrain from using surrounding underscores in your own names, then
+[a] you won't accidentally clobber an already existing internal name
+and [b] when new names are introduced by future versions of WebKit,
+they won't break your application.
+
+Actions
+=======
+
+Suppose you have a web page with a form and one or more
+buttons. Normally, when the form is submitted, a method such as
+Servlet's ``respondToPost()`` or Page's ``writeHTML()``, will be
+invoked. However, you may find it more useful to bind the button to a
+specific method of your servlet such as ``new()``, ``remove()``
+etc. to implement the command, and reserve ``writeHTML()`` for
+displaying the page and the form that invokes these methods.  Note
+that your "command methods" can then invoke ``writeHTML()`` after
+performing their task.
+
+The *action* feature of ``Page`` let's you do this. The process goes
+like this:
+
+1. Add buttons to your HTML form of type ``submit`` and name
+   ``_action_``. For example::
+
+       <input name="_action_" type="submit" value="New">
+       <input name="_action_" type="submit" value="Delete">
+
+2. Alternately, name the submit button ``_action_methodName``.  For
+   example:: 
+
+       <input name="_action_New" type="submit" value="Create New Item">
+
+3. Add an ``actions()`` method to your class to state which actions
+   are valid.  (If WebKit didn't force you to do this, someone could
+   potentially submit data that would cause any method of your servlet
+   to be run).  For example::
+
+       def actions(self): 
+           return SuperClass.actions(self) + ['New', 'Delete']
+
+4. Now you implement your action methods.
+
+The ``ListBox`` example shows the use of actions (in
+``WebKit/Examples/ListBox.py``)
+
+Plug-ins
+--------
+
+A plug-in is a software component that is loaded by WebKit in order to
+provide additional WebKit functionality without necessarily having to
+modify WebKit's source.
+
+The most infamous plug-in is PSP (Python Server Pages) which ships
+with Webware.
+
+Plug-ins often provide additional servlet factories, servlet
+subclasses, examples and documentation. Ultimately, it is the plug-in
+author's choice as to what to provide and in what manner.
+
+Technically, plug-ins are Python packages that follow a few simple
+conventions in order to work with WebKit. See `Creating Plugins`_ for
+information about writing your own.
+
+.. _`Creating Plugins`: Developing.html#creatingplugins
+
+How do I develop an app?
+------------------------
+
+The answer to that question might not seem clear after being deluged
+with all the details. Here's a summary:
+
+* Make sure you can run the WebKit AppServer. See the `Install Guide`_
+  for more information.
+
+.. _`Install Guide`: InstallGuide.html
+	
+* Read the source to the examples (in ``WebKit/Examples``), then
+  modify one of them to get your toes wet.
+	
+* Create your own new example from scratch. Ninety-nine percent of the
+  time you will be subclassing the ``Page`` class.
+	
+* Familiarize yourself with the class docs in order to take advantage
+  of classes like Page, HTTPRequest, HTTPResponse and
+  Session. Unfortunately, I couldn't get generated class docs working
+  for this release, so you'll have to resort to breezing through the
+  source code which is coupled with documentation strings. Read the
+  examples first.
+	
+* With this additional knowledge, create more sophisticated pages.
+
+* If you need to secure your pages using a login screen, you'll want
+  to look at the SecurePage, LoginPage, and SecureCountVisits examples
+  in ``WebKit/Examples``.  You'll need to modify them to suit your
+  particular needs.
+
+* Contribute enhancements and bug fixes back to the project. ``:-)``
+
+* The Webware user community is quite supportive and friendly:
+
+  - Discussion mailing list:
+    http://lists.sourceforge.net/mailman/listinfo/webware-discuss
+
+  - Make sure you find out about new versions when they're released,
+    via the announce list:
+    http://lists.sourceforge.net/mailman/listinfo/webware-announce
 
 
-<a name=Debugging_Restarting><h3>Restarting the Server</h3></a>
+Known Bugs
+----------
 
-<p> When a servlet's source code changes, it is reloaded. However, ancestor classes of servlets are not. That is why web sites are often developed with the <a href=InstallGuide.html#Adapters_OneShot>One Shot adapter</a> and deployed with a more advanced, high performance adapter.
+Known bugs and future work in general are documented in Future_.
 
-<p> In any case, when having problems, consider restarting the app server.
+.. _Future: Future.html
 
-<p> Another option is to use the AppControl page of the <a href=#Administration>Admin</a> context to clear the servlet instance and class cache.
+Credit
 
+Authors: Chuck Esterbrook, Jay Love, Geoff Talvola.
+@@ ib: We should add more names.
 
-<a name=Assertions><h3>Assertions</h3></a>
+Many people, mostly on the webware-discuss mailing list, have provided
+feedback and testing.
 
-<p> Assertions are used to ensure that the internal conditions of the application are as expected. An assertion is equivalent to an <code>if</code> statement coupled with an exception. For example:
+The design was inspired by both Apple's WebObjects and Java's
+Servlets.
 
-<p><code>assert shoppingCart.total()>=0.0, 'shopping cart total is %0.2f' % shoppingCart.total()</code>
-
-<a name="Debugging_html_validate"><h3>HTML Validation</h3></a>
-
-<p> You can validate the HTML in your pages using the
-<a href="http://www.htmlhelp.com/tools/validator/">Web Designer Groups
-HTML Validator</a>. 
-<a href="http://www.htmlhelp.com/tools/validator/packages/">RPM packages
-are available</a>, it is available in Debian as <tt>wdg-html-validator</tt>,
-and you can install it from 
-<a href="http://www.htmlhelp.com/tools/validator/source.html">source</a>.
-
-<p> To enable the validation, you have to override
-<code>.writeBodyParts()</code> in your <code>SitePage</code>, as:
-
-<p><code>def writeBodyParts(self):
-<br>&nbsp; &nbsp; Page.writeBodyParts()
-<br>&nbsp; &nbsp; self.validateHTML()
-</code>
-
-<p> If your pages contain invalid HTML, a message will be appended to
-the page.
-
-<a name=NamingConventions><h2>Naming Conventions</h2></a>
-
-<p>Cookies and form values that are named with surrounding underscores (such as <code>_sid_</code> and <code>_action_</code>) are reserved by WebKit for its own internal purposes. If you refrain from using surrounding underscores in your own names, then [a] you won't accidentally clobber an already existing internal name and [b] when new names are introduced by future versions of WebKit, they won't break your application.
-
-
-<a name=Actions><h2>Actions</h2></a>
-
-<p> Suppose you have a web page with a form and one or more buttons. Normally, when the form is submitted, a method such as Servlet's <code>respondToPost()</code> or Page's <code>writeHTML()</code>, will be invoked. However, you may find it more useful to bind the button to a specific method of your servlet such as <code>new()</code>, <code>remove()</code> etc. to implement the command, and reserve <code>writeHTML()</code> for displaying the page. Note that your "command methods" can then invoke <code>writeHTML()</code> after performing their task.
-
-<p> The <i>action</i> feature of Page let's you do this. The process goes like this:
-
-<p> <b>1.</b> Add buttons to your HTML form of type <code>submit</code> and name <code>_action_</code>. For example:
-
-<p><code>&lt;input name=_action_ type=submit value=New&gt;
-<br>&lt;input name=_action_ type=submit value=Delete&gt;</code>
-
-<p> <b>2.</b> Alternately, name the submit button <code>_action_<i>methodName</i></code>.  For example:
-
-<p><code>&lt;input name=_action_New type=submit value="Create New Item"&gt;</code>
-
-<p> <b>3.</b> Add an <code>actions()</code> method to your class to state which actions are valid. This is security requirement is important. Without it, hackers could invoke any servlet method they wanted! For example:
-
-<p> <code>def actions(self): return <i>SuperClass</i>.actions(self) + ['New', 'Delete']</code>
-
-<p> <b>4.</b> Now you implement your action methods.
-
-<p> The ListBox example shows the use of actions.
-
-
-<a name=PlugIns><h2>Plug-ins</h2></a>
-
-<p>	A plug-in is a software component that is loaded by WebKit in order to provide additional WebKit functionality without necessarily having to modify WebKit's source.
-
-<p>The most infamous plug-in is PSP (Python Server Pages) which ships with Webware.
-
-<p> Plug-ins often provide additional servlet factories, servlet subclasses, examples and documentation. Ultimately, it is the plug-in author's choice as to what to provide and in what manner.
-
-<p> Technically, plug-ins are Python packages that follow a few simple conventions in order to work with WebKit. More information can be found in PlugIn.py's doc strings. You can learn more about Python packages in the Python Tutorial, <a href=http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000>6.4: "Packages"</a>.
-
-
-<a name=How><h2>How do I develop an app?</h2></a>
-
-<p> The answer to that question might not seem clear after being deluged with all the details. Here's a summary:
-
-<ol>
-	<li> Make sure you can run the WebKit AppServer. See the <a href=InstallGuide.html>Install Guide</a> for more information.
-	<li> Read the source to the examples (in <span class=filename>WebKit/Examples</span>), then modify one of them to get your toes wet.
-	<li> Create your own new example from scratch. Ninety-nine percent of the time you will be subclassing the <b>Page</b> class.
-	<li> Familiarize yourself with the class docs in order to take advantage of classes like Page, HTTPRequest, HTTPResponse and Session. Unfortunately, I couldn't get generated class docs working for this release, so you'll have to resort to breezing through the source code which is coupled with documentation strings. Read the examples first.
-	<li> With this additional knowledge, create more sophisticated pages.
-	<li> If you need to secure your pages using a login screen, you'll want to look at the SecurePage, LoginPage, and SecureCountVisits examples in WebKit/Examples.  You'll need to modify them to suit your particular needs.
-	<li> Contribute enhancements and bug fixes back to the project. &nbsp; <kbd>:-)</kbd>
-	<li> The Webware user community is quite supportive and friendly:
-		<br> <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>http://lists.sourceforge.net/mailman/listinfo/webware-discuss</a>
-	<li> Make sure you find out about new versions when they're released:
-		<br> <a href=http://lists.sourceforge.net/mailman/listinfo/webware-announce>http://lists.sourceforge.net/mailman/listinfo/webware-announce</a>
-
-</ol>
-
-
-<a name=KnownBugs><h2>Known Bugs</h2></a>
-
-<p> Known bugs and future work in general, is documented in <a href=Future.html>Future.html</a>.
-
-
-<a name=Credit><h2>Credit</h2></a>
-
-<p> Authors: Chuck Esterbrook, Jay Love, Geoff Talvola
-
-<p> Many people, mostly on the webware-discuss mailing list, have provided feedback and testing.
-
-<p> The design was inspired by both Apple's WebObjects and Java's Servlets.
-
-
-<p><hr>
-
-</body>
-</html>

@@ -1,11 +1,18 @@
-Developing Webware, WebKit, and Components
-++++++++++++++++++++++++++++++++++++++++++
+Developing Webware
+++++++++++++++++++
+
+This document should outline the details you need to understand to
+Webware and WebKit internals, and assist in becoming an advanced
+Webware programmer.
 
 Creating Plugins
 ================
 
-Each plugin is a directory.  WebKit finds plugins using the
-``PlugIns`` and ``PluginDirs`` -- see Configuration_.
+Each plugin is a Python Package.  WebKit finds plugins using the
+``PlugIns`` and ``PluginDirs`` -- see Configuration_.  See also the
+`Python tutorial on packages`__ and the ``Plugin.py`` doc string.
+
+.. __: http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000
 
 .. _Configuration: Configuration.html#appserverconfig
 
@@ -13,3 +20,4 @@ A plug-in must have ``__init__.py`` and ``Properties.py`` files. You
 can disable a specific plug-in by placing a ``dontload`` file in it.
 
 @@ ib: document __init__.py, Properties.py
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.2.7: http://docutils.sourceforge.net/" />
+<title>Developing Webware</title>
+<link rel="stylesheet" href="default.css" type="text/css" />
+</head>
+<body>
+<div class="document" id="developing-webware">
+<h1 class="title">Developing Webware</h1>
+<p>This document should outline the details you need to understand to
+Webware and WebKit internals, and assist in becoming an advanced
+Webware programmer.</p>
+<div class="section" id="creating-plugins">
+<h1><a name="creating-plugins">Creating Plugins</a></h1>
+<p>Each plugin is a Python Package.  WebKit finds plugins using the
+<tt class="literal"><span class="pre">PlugIns</span></tt> and <tt class="literal"><span class="pre">PluginDirs</span></tt> -- see <a class="reference" href="Configuration.html#appserverconfig">Configuration</a>.  See also the
+<a class="reference" href="http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000">Python tutorial on packages</a> and the <tt class="literal"><span class="pre">Plugin.py</span></tt> doc string.</p>
+<p>A plug-in must have <tt class="literal"><span class="pre">__init__.py</span></tt> and <tt class="literal"><span class="pre">Properties.py</span></tt> files. You
+can disable a specific plug-in by placing a <tt class="literal"><span class="pre">dontload</span></tt> file in it.</p>
+<p>&#64;&#64; ib: document __init__.py, Properties.py</p>
+</div>
+</div>
+</body>
+</html>
