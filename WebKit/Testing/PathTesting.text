@@ -1,0 +1,32 @@
+Application's serverSidePathForRequest() method is fairly involved. It supports a variety of functionalites as described in it's doc string.
+
+Here is a list of test cases, which should be executed ideally for every adapter, but at least for WebKit.cgi and OneShot.cgi. Assume a prefix, such as http://localhost/<Adapter>/. Also, try each one more than once in order to test that the caching is not buggy.
+
+(blank)
+/
+Welcome
+Welcome/
+Examples/Welcome
+Examples/Welcome/
+Examples
+Examples/
+_admin
+_admin/
+Testing/EmbeddedServlet/Extra/Path/Info
+Testing/EmbeddedServlet/Extra/Path/Info/
+
+----
+
+Another test case should be:
+
+http://host/context/dir
+http://host/context/dir/file
+
+In that order. This could flush out problems with embedded servlets.
+
+This hasn't been set up yet.
+
+----
+
+* All examples.
+* All admin scripts.

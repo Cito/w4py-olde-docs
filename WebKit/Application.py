@@ -166,7 +166,7 @@ class Application(Configurable,CanContainer):
 		import sys
 		count = 0
 		frequency = 30 #how often to run *2
-		
+
 		while 1:
 			if not self.running:
 				break #time to quit
@@ -182,7 +182,7 @@ class Application(Configurable,CanContainer):
 				time.sleep(2)#sleep for 2 secs, then check to see if its time to quit or run
 			except IOError, e:
 				pass
-				
+
 
 	def shutDown(self):
 		""" Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references."""
@@ -203,7 +203,7 @@ class Application(Configurable,CanContainer):
 	def defaultConfig(self):
 		return {
 			'PrintConfigAtStartUp': 1,
-			'ServletsDir':          'Examples',
+			'DirectoryFile':        ['index', 'Main'],
 			'ExtensionsToIgnore':	['.pyc', '.pyo', '.py~', '.bak'],
 			'LogActivity':          1,
 			'ActivityLogFilename':  'Logs/Activity.csv',
@@ -223,8 +223,10 @@ class Application(Configurable,CanContainer):
 				                        'Content-type': 'text/html',
 				                        'Subject':      'Error'
 									  },
-			'Contexts':               { 'default':  'Examples',
-							            'Examples': 'Examples',
+			'Contexts':               { 'default':       'Examples',
+							            'Examples':      'Examples',
+							            'Documentation': 'Documentation',
+							            'Testing':       'Testing',
 			                          },
 			'SessionTimeout':         60*60, # seconds
 		}
@@ -623,85 +625,163 @@ class Application(Configurable,CanContainer):
 	def handleExceptionInTransaction(self, excInfo, transaction):
 		self._exceptionHandlerClass(self, transaction, excInfo)
 
-	def serverSidePathForRequest(self, request, urlPath):
-		""" Returns what it says. This is a 'private' service method for use by HTTPRequest. """
-		extraPathInfo=''
+	def filenamesForBaseName(self, baseName, debug=0):
+		'''
+		Returns a list of all filenames with extensions existing for baseName, but not including extension found in the setting ExtensionsToIgnore. This utility method is used by serverSidePathForRequest().
+		Example: '/a/b/c' could yield ['/a/b/c.py', '/a/b/c.html'], but will never yield a '/a/b/c.pyc' filename since .pyc files are ignored.
+		'''
+		filenames = glob(baseName+'.*')
+		ignoreExts = self.setting('ExtensionsToIgnore')
+		for i in range(len(filenames)):
+			if os.path.splitext(filenames[i])[1] in ignoreExts: # @@ 2000-06-22 ce: linear search
+				filenames[i] = None
+		filenames = filter(None, filenames)
+		if debug:
+			print '>> filenamesForBaseName(%s) returning %s' % (
+				repr(baseName), repr(filenames))
+		return filenames
+
+	def serverSidePathForRequest(self, request, urlPath, debug=1):
+		"""
+		Returns what it says. This is a 'private' service method for use by HTTPRequest.
+		Returns None if there is no corresponding server side path for the URL.
+
+		This method supports:
+			* Contexts
+			* A default context
+			* Auto discovery of directory vs. file
+			* For directories, auto discovery of file, configured by DirectoryFile
+			* For files, auto discovery of extension, configured by ExtensionsToIgnore
+			* NOT YET: "Extra path" URLs where the servlet is actually embedded in the path
+			  as opposed to being at the end of it. (ex: http://foo.com/servlet/extra/path)
+
+		IF YOU CHANGE THIS VERY IMPORTANT, SUBTLE METHOD, THEN PLEASE
+		REVIEW AND COMPLETE Testing/PathTesting.text BEFORE CHECKING
+		IN OR SUBMITTING YOUR CHANGES.
+		"""
+
+		if debug:
+			print '>> serverSidePathForRequest(request=%s, urlPath=%s)' % (
+				HTMLEncode(repr(request)), repr(urlPath))
+
+		# take off trailing / if it exists.
+		# we determine automatically if the URL is file vs. directory
+
+		# @@ 2000-06-22 ce: not yet
+		#if len(urlPath)>1 and urlPath[-1]=='/':
+		#	urlPath = urlPath[:-1]
+
+		# try the cache first
 		ssPath = self._serverSidePathCacheByPath.get(urlPath, None)
-		
 		if ssPath is not None:
-			return ssPath #get out now!
-		else: #check for extraPathInfo type url in cache
+			if debug: print '>> returning path from cache: %s' % repr(ssPath)
+			return ssPath
+
+		# check for extraPathInfo type url in cache, like http://localhost/SomeServlet/e/p/i
+		if 0: # @@ 2000-06-22 ce: disabled, have to rethink the logic here
+			if debug: print '>> looking for extraPathInfo type url in cache'
+			extraPathInfo = ''
 			strippedPath = urlPath
-			while strippedPath != '' and ssPath == None:
-				strippedPath,extra=os.path.split(strippedPath)
+			while strippedPath!='' and ssPath==None:
+				strippedPath, extraPathInfo = os.path.split(strippedPath)
 				ssPath = self._serverSidePathCacheByPath.get(strippedPath, None)
-				if extraPathInfo != '': #avoid a trailing os.sep
-					extraPathInfo=os.path.join(extra,extraPathInfo)
-				else: extraPathInfo=extra
-				
-   		if ssPath is not None:
-			request._fields['extraPathInfo']=extraPathInfo
-			return ssPath  #get out now!
-
-
-		else:
-			if not urlPath: urlPath = os.path.join(self._Contexts['default'],"index.html") #handle no filename, should be configurable
-			if urlPath[0]=='_':  # special administration scripts are denoted by a preceding underscore and are located with the app server. @@ 2000-05-19 ce: redesign this
-				ssPath = os.path.join(self.serverDir(), urlPath)
+				#if extraPathInfo!='': # avoid a trailing /
+				#	extraPathInfo = os.path.join(extra, extraPathInfo)
+				#else:
+				#	extraPathInfo = extra
+			if ssPath==None:
+				# we failed to find one in the cache
+				extraPathInfo = ''
+				if debug: print '>> did not find one'
 			else:
-				#handle case of no /
-				if string.find(urlPath,os.sep) > -1: 
-					contextName,restOfPath = string.split(urlPath,os.sep,1) #is this OS specific????
-				else:
-					contextName = urlPath
+				request._fields['extraPathInfo'] = extraPathInfo
+				if debug:
+					print '>> returning path %s with extraPathInfo %s' % (
+						repr(ssPath), extraPathInfo)
+				return ssPath
 
-				#Look for Context
-				try:
-					prepath = self._Contexts[contextName]
-				except KeyError:
-					#print '>> Context Not Found'
-					restOfPath=urlPath #put the old path back, there's no context here
-					prepath = self._Contexts['default']
+		# case: no URL then use the default context
+		if not urlPath:
+			urlPath = self._Contexts['default']
+			if debug:
+				print '>> no urlPath, so using default context path: %s' % repr(urlPath)
 
-				#is this an absolute path?  If not, make it one
-				if not os.path.isabs(prepath):
-					basePath = os.path.join(self.serverDir(), prepath)
-				if restOfPath == '': restOfPath = "index.html"  #Again, should be configurable
-				ssPath = os.path.join(basePath, restOfPath)
-				ssPath = os.path.normpath(ssPath)
+		# special administration scripts are denoted by a preceding underscore and are located with the app server. @@ 2000-05-19 ce: redesign this
+		if urlPath[0]=='_':
+			ssPath = os.path.join(self.serverDir(), urlPath)
+			if debug: print '>> leading underscore indicates admin script. trying: %s' % repr(ssPath)
+		else:
+			# handle case of no / in the url
+			if string.find(urlPath, '/')!=-1:
+				contextName, restOfPath = string.split(urlPath, '/', 1)
+			else:
+				contextName, restOfPath = urlPath, ''
+			if debug: print '>> contextName=%s, restOfPath=%s' % (repr(contextName), repr(restOfPath))
 
+			# Look for Context
+			try:
+				prepath = self._Contexts[contextName]
+			except KeyError:
+				restOfPath = urlPath  # put the old path back, there's no context here
+				prepath = self._Contexts['default']
+				if debug:
+					print '>> context not found so assuming default:'
+			if debug: print '>> prepath=%s, restOfPath=%s' % (repr(prepath), repr(restOfPath))
+
+			# If we have a relative path, prepend the server directory
+			if not os.path.isabs(prepath):
+				basePath = os.path.join(self.serverDir(), prepath)
+			ssPath = os.path.join(prepath, restOfPath)
+			ssPath = os.path.normpath(ssPath)
+
+		if 0: # @@ 2000-06-22 ce: disabled, have to rethink the logic here
 			extraPathInfo=''
 			if not os.path.isdir(os.path.split(ssPath)[0]):
 				while restOfPath != '':  #don't go too far
 					if not os.path.isdir(os.path.join(basePath,os.path.split(restOfPath)[0])): #strip down to the first real directory
 						restOfPath,extra = os.path.split(restOfPath)
-						if extraPathInfo != '': #avoid a trailing os.sep
+						if extraPathInfo != '': #avoid a trailing '/'
 							extraPathInfo=os.path.join(extra,extraPathInfo)
-						else: extraPathInfo=extra
+						else:
+							extraPathInfo=extra
 					else: # if I get here, I'm either at the real Servlet, or I'm at basePath
 						ssPath = os.path.join(basePath,restOfPath)
 						urlPath = urlPath[:string.rindex(urlPath,extraPathInfo)-1]#remove trailing /
 						break
 
-			if os.path.splitext(ssPath)[1]=='':
-				filenames = glob(ssPath+'.*')
+		if os.path.isdir(ssPath):
+			# Handle directories
+			if debug: print '>> directory = %s' % repr(ssPath)
+			for dirFilename in self.setting('DirectoryFile'):
+				filenames = self.filenamesForBaseName(os.path.join(ssPath, dirFilename), debug)
+				num = len(filenames)
+				if num==1:
+					break  # we found a file to handle the directory
+				elif num>1:
+					print 'WARNING: For %s, the directory is %s which contains more than 1 directory file: %s' % (urlPath, ssPath, filenames)
+					return None
+			if num==0:
+				print 'WARNING: For %s, the directory is %s which contains no directory file.' % (urlPath, ssPath)
+				return None
+			ssPath = filenames[0] # our path now includes the filename within the directory
+			if debug: print '>> discovered directory file = %s' % repr(ssPath)
 
-				# Ignore files with extensions we don't care about
-				ignoreExts = self.setting('ExtensionsToIgnore')
-				for i in range(len(filenames)):
-					if os.path.splitext(filenames[i])[1] in ignoreExts:
-						filenames[i] = None
-				filenames = filter(lambda filename: filename!=None, filenames)
+		elif os.path.splitext(ssPath)[1]=='':
+			# At this point we have a file (or a bad path)
+			filenames = self.filenamesForBaseName(ssPath, debug)
+			if len(filenames)==1:
+				ssPath = filenames[0]
+				if debug: print '>> discovered extension, file = %s' % repr(ssPath)
+			else:
+				print 'WARNING: For %s, did not get precisely 1 filename: %s' % (urlPath, filenames)
+				return None
 
-				if len(filenames)==1:
-					ssPath = filenames[0]
-				else:
-					print 'WARNING: For %s, got multiple filenames: %s' % (urlPath, filenames)
-					return None  # that's right: return None and don't modify the cache
-				
-			self._serverSidePathCacheByPath[urlPath] = ssPath
-			request._fields['extraPathInfo']=extraPathInfo
-			
+		self._serverSidePathCacheByPath[urlPath] = ssPath
+		if 0: # @@ 2000-06-22 ce: disabled, have to rethink the logic here
+			if extraPathInfo:
+				request._fields['extraPathInfo'] = extraPathInfo
+
+		print '>> returning %s\n' % repr(ssPath)
 		return ssPath
 
 

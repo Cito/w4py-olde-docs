@@ -1,8 +1,8 @@
 {
 	'PrintConfigAtStartUp': 1,
-	'ServletsDir':          'Examples',
+	'DirectoryFile':        ['index', 'Main'],
 	'ExtensionsToIgnore':	['.pyc', '.pyo', '.py~', '.bak'],
-	'LogActivity':          1,
+	'LogActivity':          0,
 	'ActivityLogFilename':  'Logs/Activity.csv',
 	'ActivityLogColumns':   ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'],
 
@@ -20,9 +20,10 @@
 		                        'Content-type': 'text/html',
 		                        'Subject':      'Error',
 	                          },
-	'Contexts':               {'default':'Examples',
-							   'Examples':'Examples',
-							   'Documentation':'Documentation',
+	'Contexts':               {'default':       'Examples',
+							   'Examples':      'Examples',
+							   'Documentation': 'Documentation',
+							   'Testing':       'Testing',
 							  },
 	'SessionTimeout':         60*60, # seconds
 }
