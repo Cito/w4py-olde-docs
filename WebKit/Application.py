@@ -637,7 +637,9 @@ class Application(ConfigurableForServerSidePath, Object):
 			if origPath.endswith('/'):
 				origDir = origPath
 			else:
-				origDir = os.path.dirname(origPath) + '/'
+				origDir = os.path.dirname(origPath)
+				if not origDir.endswith('/'):
+					origDir += '/'
 			return origDir + url
 		else:
 			if context is None:
