@@ -83,7 +83,3 @@ class SitePage(Page, Configurable):
 		res = self.response()
 		for name, value in self.request().fields().items():
 			res.setCookie(name, value)
-
-	def hostName(self):
-		''' Returns the name of the host, using the external command 'hostname' found on most flavors of UNIX and recent flavors of Windows. We can't rely on os.environ because in a web environment it might not be passed. We can't rely on the CGI standard HTTP_HOST, because it often returns 127.0.0.1, when it's the name that we want. '''
-		return os.popen('hostname').read().strip()

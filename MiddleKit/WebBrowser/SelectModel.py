@@ -1,5 +1,6 @@
 from SitePage import SitePage
 import os
+from MiscUtils.Funcs import hostName as HostName
 
 
 class SelectModel(SitePage):
@@ -46,7 +47,7 @@ class SelectModel(SitePage):
 		wr = self.writeln
 		self.writeHeading('Select a known model:')
 		knownModels = self.setting('KnownModels')
-		hostName = self.hostName()
+		hostName = HostName()
 		if not hostName:
 			hostName = '_default_'
 		filenames = knownModels.get(hostName, []) + knownModels.get('_all_', [])

@@ -1,5 +1,6 @@
 from SitePage import SitePage
 from MiscUtils.DataTable import DataTable
+from MiscUtils.Funcs import hostName as HostName
 
 
 class SelectDatabase(SitePage):
@@ -48,7 +49,7 @@ password,password
 	def writeKnownDatabases(self):
 		self.writeHeading('Select a known database:')
 		knownDBs = self.setting('KnownDatabases')
-		hostName = self.hostName()
+		hostName = HostName()
 		if not hostName:
 			hostName = '_default_'
 		dbs = knownDBs.get(hostName, []) + knownDBs.get('_all_', [])
