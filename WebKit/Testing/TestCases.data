@@ -35,8 +35,9 @@
 /BadURL/ --> "
 /Examples/BadURL --> "
 /Examples/BadURL/ --> "
+/File.badext --> "
+/Examples/File.badext  --> "
 
 # Embedded Servlets
 /Testing/Servlet/Extra/Path/Info  --> *** not yet supported ***
 /Testing/Servlet/Extra/Path/Info/ --> "
-
