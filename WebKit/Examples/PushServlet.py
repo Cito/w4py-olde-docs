@@ -39,5 +39,5 @@ class PushServlet(Page):
 	def writeContent(self,count):
 		self.write("Content-type: text/html\r\n\r\n")
 		self.write("<HTML><BODY><h1 align=center>")
-		self.write("Count = %s" % count)
+		self.write("Count = %s<p>This won't work in IE.  You'll just see '5'." % count)
 		self.write("</h1></body></html>")
