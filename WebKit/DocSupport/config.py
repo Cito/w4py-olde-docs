@@ -13,29 +13,39 @@ def toc(filename):
 	list = eval(contents)
 	for item in list:
 		name, default, descr = item
-		print '<p><dl>'
+		print '<p><dl class=config>'
 		if len(default)<20:
-			print '<dt><font face="Arial, Helvetica"><b>%s</b></font>' % name
+			print '<dt class=config><span class=setting>%s</span>' % name
 			print '&nbsp; <code> = %s</code></dt>' % default
-			print '<dd>'
+			print '<dd class=config>'
 			print '%s' % descr
 			print '</dd>'
 		else:
-			print '<dt><font face="Arial, Helvetica"><b>%s</b></font></dt>' % name
-			print '<dd>'
-			print '<code>= %s</code>' % default
-			print '<br> <hr> %s' % descr
-			print '</dd>'		
+			print '<dt class=config><span class=setting>%s</span>' % name
+			print '&nbsp; <code> = </code></dt>'
+			print '<dd class=config>'
+			print '<code>%s</code>' % string.strip(default)
+			print '<br> %s' % descr
+			print '</dd>'
 		print '</dl></p>'
 		print
 
 def main(filename):
 	# header
-	print '<html> <head><title>Config</title></head> <body>'
-	print '<p>'
+	print '''
+<html>
+	<head>
+		<title>Config</title>
+		<link rel=stylesheet href=StyleSheet.css type=text/css>
+	</head>
+<body>
+<p>
+'''
 	toc(filename)
-	print '</body></html>'
-	
+	print '''
+</body>
+</html>'''
+
 
 if __name__=='__main__':
 	for filename in sys.argv[1:]:

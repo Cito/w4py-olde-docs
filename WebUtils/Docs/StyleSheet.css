@@ -70,5 +70,19 @@
         font-weight: bold;
     }
 
+	/*** Configuration documentation ***/
+
+	dl.config {
+	}
+	dt.config {
+	}
+	dd.config {
+	}
+	span.setting {
+		font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+		font-size: smaller;
+		font-weight: bolder;
+	}
+
 -->
 </style>

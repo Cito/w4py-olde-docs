@@ -8,34 +8,37 @@
 <body>
 
 <h1>WebKit User's Guide</h1>
-Version 0.4.1
-<br>Webware for Python 0.4.1
+Version 0.5
+<br>Webware for Python 0.5
 
 
 <a name=TOC><h2>Table of Contents</h2></a>
 
-<p><font face="Helvetica">
-<br>  <a href="#Synopsis"><font size=+1>Synopsis</font></a>
-<br>  <a href="#Feedback"><font size=+1>Feedback</font></a>
-<br>  <a href="#Introduction"><font size=+1>Introduction</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Overview"><font size=>Overview</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#CompareCGIs"><font size=>Compared to CGI "apps"</font></a>
-<br>  <a href="#Errors"><font size=+1>Errors / Uncaught Exceptions</font></a>
-<br>  <a href="#Configuration"><font size=+1>Configuration</font></a>
-<br>  <a href="#Administration"><font size=+1>Administration</font></a>
-<br>  <a href="#Debugging"><font size=+1>Debugging</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Debugging_print"><font size=>print</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Debugging_Raising"><font size=>Raising Exceptions</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Debugging_Restarting"><font size=>Restarting the Server</font></a>
-<br> &nbsp; &nbsp; &nbsp;  <a href="#Assertions"><font size=>Assertions</font></a>
-<br>  <a href="#NamingConventions"><font size=+1>Naming Conventions</font></a>
-<br>  <a href="#Actions"><font size=+1>Actions</font></a>
-<br>  <a href="#PlugIns"><font size=+1>PlugIns</font></a>
-<br>  <a href="#Files"><font size=+1>Files</font></a>
-<br>  <a href="#How"><font size=+1>How do I develop an app?</font></a>
-<br>  <a href="#KnownBugs"><font size=+1>Known Bugs</font></a>
-<br>  <a href="#Credit"><font size=+1>Credit</font></a>
-</font></p>
+<p><span class=ToC>
+     <a href="#TOC"><font size=+1>Table of Contents</font></a>
+<br> <a href="#Synopsis"><font size=+1>Synopsis</font></a>
+<br> <a href="#Feedback"><font size=+1>Feedback</font></a>
+<br> <a href="#Introduction"><font size=+1>Introduction</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Overview">Overview</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#CompareCGIs">Compared to CGI "apps"</a>
+<br> <a href="#Errors"><font size=+1>Errors / Uncaught Exceptions</font></a>
+<br> <a href="#Configuration"><font size=+1>Configuration</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Config_AppServer">AppServer.config</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Config_Application">Application.config</a>
+<br> <a href="#Administration"><font size=+1>Administration</font></a>
+<br> <a href="#Debugging"><font size=+1>Debugging</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Debugging_print">print</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Debugging_Raising">Raising Exceptions</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Debugging_Restarting">Restarting the Server</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Assertions">Assertions</a>
+<br> <a href="#NamingConventions"><font size=+1>Naming Conventions</font></a>
+<br> <a href="#Actions"><font size=+1>Actions</font></a>
+<br> <a href="#PlugIns"><font size=+1>Plug-ins</font></a>
+<br> <a href="#Files"><font size=+1>Files</font></a>
+<br> <a href="#How"><font size=+1>How do I develop an app?</font></a>
+<br> <a href="#KnownBugs"><font size=+1>Known Bugs</font></a>
+<br> <a href="#Credit"><font size=+1>Credit</font></a>
+</span>
 
 
 <a name=Synopsis><h2>Synopsis</h2></a>
@@ -108,94 +111,306 @@ Version 0.4.1
 <p>There are several configuration parameters through which you can alter how WebKit behaves. They are described below, including their default values. Note that you can override the defaults by placing config files in the <code>Configs/</code> directory. A config file simply contains a Python dictionary containing the items you wish to override. For example:
 
 <p><code>{
-<br>&nbsp; &nbsp; &nbsp; 'ServletsDir': MyApp,
+<br>&nbsp; &nbsp; &nbsp; 'SessionStore': 'Memory',
 <br>&nbsp; &nbsp; &nbsp; 'ShowDebugInfoOnErrors': 1
 <br>}</code>
 
-<p><br><b>Configs/AppServer.config:</b>
+<a name=Config_AppServer><h3>AppServer.config</h3></a>
 
-<p>
-<table border=2 align=center width=80% cellpadding=2 cellspacing=2>
-<tr valign=top>
-<td> <b>PrintConfigAtStartUp</b><br> &nbsp; &nbsp; <font size=-1>= 1</font> </td> <td> Does pretty much what it says. It's generally a good idea to leave this on. </td>
-</tr>
-<tr valign=top>
-<td> <b>Verbose</b><br> &nbsp; &nbsp; <font size=-1>= 1</font> </td> <td> If true, then additional messages are printed while the AppServer runs, most notably information about each request such as size and response time. </td>
-</tr>
-<tr valign=top>
-<td> <b>Port</b><br> &nbsp; &nbsp; <font size=-1>= 8086</font> </td> <td> The port that the application server runs on. Change this if there is a conflict with another application on your server. </td>
-</tr>
-<tr valign=top>
-<td> <b>Multitasking</b><br> &nbsp; &nbsp; <font size=-1>= threading</font> </td> <td> Determines if and how the application server will multitask requests. Must be one of: threading, forking, sequencing. </td>
-</tr>
-<tr valign=top>
-<td> <b>PlugIns</b><br> &nbsp; &nbsp; <font size=-1>= ['../PSP']</font> </td> <td> Loads the plug-ins from the given locations when the application server starts up. </td>
-</tr>
-</table>
+<p><dl class=config>
+<dt class=config><span class=setting>PrintConfigAtStartUp</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+Does what it says. It's generally a good idea to leave this on.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>Verbose</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+If true, then additional messages are printed while the AppServer runs, most notably information about each request such as size and response time.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>Host</span>
+&nbsp; <code> = 127.0.0.1</code></dt>
+<dd class=config>
+The host that the application server runs on. There is little reason to ever change this.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>Port</span>
+&nbsp; <code> = 8086</code></dt>
+<dd class=config>
+The port that the application server runs on. Change this if there is a conflict with another application on your server.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>PlugIns</span>
+&nbsp; <code> = []</code></dt>
+<dd class=config>
+Loads the plug-ins from the given locations when the application server starts up. This setting isn't as popular as <span class=name>PlugInDirs</span> below since it requires an update for every new plug-in created.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>PlugInDirs</span>
+&nbsp; <code> = ['..']</code></dt>
+<dd class=config>
+A list of directories where WebKit plug-ins can be detected and loaded when the application server starts up. Relative paths are relative to the WebKit directory. Webware already ships with several plug-ins (hence the '..'). You can also create your own plug-ins.
+
+	<br><br> A plug-in must have <span class=filename>__init__.py</span> and <span class=filename>Properties.py</span> files. You can disable a specific plug-in by placing a <span class=filename>dontload</span> file in it.
+
+	<br><br> The advantage of a plug-in directory is that you can add new plug-ins to the app server simply by dropping them into the directory; no additional configuration is necessary.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ServerThreads</span>
+&nbsp; <code> = 10</code></dt>
+<dd class=config>
+The maximum number of threads in the request handler thread pool, and therefore, the maximum number of concurrent requests that can be served. Unless you have a serious load on a high end machine, the default is generally sufficient.
+</dd>
+</dl></p>
 
 
-<p><br><b>Configs/Application.config:</b>
+<a name=Config_Application><h3>Application.config</h3></a>
 
-<p>
-<table border=2 align=center width=80% cellpadding=2 cellspacing=2>
-<tr valign=top>
-<td> <b>PrintConfigAtStartUp</b><br> &nbsp; &nbsp; <font size=-1>= 1</font> </td> <td> Does pretty much what it says. It's generally a good idea to leave this on. </td>
-</tr>
-<tr valign=top>
-<td> <b>ServletsDir</b><br> &nbsp; &nbsp; <font size=-1>= 'Examples'</font> </td> <td> This is where the application always looks for the servlets. This location does <b>not</b> appear in URLs; it's implicit. The path can be relative to the WebKit location, or an absolute path. </td>
-</tr>
-<tr valign=top>
-<td> <b>LogActivity</b><br> &nbsp; &nbsp; <font size=-1>= 1</font> </td> <td> If true, then the execution of each servlet is logged with useful information such as time, duration and whether or not an error occurred. </td>
-</tr>
-<tr valign=top>
-<td> <b>ActivityLogFilename</b><br> &nbsp; &nbsp; <font size=-1>= 'Logs/Activity.csv'</font> </td> <td> This is the name of the file that servlet executions are logged to. This value makes no difference if <code>LogActivity</code> is false/0. The path can be relative to the WebKit location, or an absolute path. </td>
-</tr>
-<tr valign=top>
-<td> <b>ActivityLogColumns</b><br> &nbsp; &nbsp; <font size=-1>--></font> </td> <td> <center><code>['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred']</code></center><hr>Specifies the columns that will be stored in the activity log. Each column can refer to an object from the set [application, transaction, request, response, servlet, session] and then refer to its attributes using "dot notation". The attributes can be methods or instance attributes and can be qualified arbitrarily deep. </td>
-</tr>
-<tr valign=top>
-<td> <b>ShowDebugInfoOnErrors</b><br> &nbsp; &nbsp; <font size=-1>= 1</font> </td> <td> If true, then uncaught exceptions will not only display a message for the user, but debugging information for the developer as well. This includes the traceback, HTTP headers, form fields, environment and process ids. </td>
-</tr>
-<tr valign=top>
-<td> <b>UserErrorMessage</b><br> &nbsp; &nbsp; <font size=-1>--></font> </td> <td> <center><code>'The site is having technical difficulties with this page. An error has been logged, and the problem will be fixed as soon as possible. Sorry!'</code></center><hr>This is the error message that is displayed to the user when an uncaught exception escapes the target CGI script. </td>
-</tr>
-<tr valign=top>
-<td> <b>ErrorLogFilename</b><br> &nbsp; &nbsp; <font size=-1>= 'Logs/Errors.csv'</font> </td> <td> This is the name of the file where exceptions are logged. Each entry contains the date & time, filename, pathname, exception name & data, and the HTML error message filename (assuming there is one). </td>
-</tr>
-<tr valign=top>
-<td> <b>SaveErrorMessages</b><br> &nbsp; &nbsp; <font size=-1>= 1</font> </td> <td> If true, then errors (e.g., uncaught exceptions) will produce an HTML file with both the user message and debugging information. Developers/administrators can view these files after the fact, to see the details of what went wrong. </td>
-</tr>
-<tr valign=top>
-<td> <b>ErrorMessagesDir</b><br> &nbsp; &nbsp; <font size=-1>= 'ErrorMsgs'</font> </td> <td> This is the name of the directory where HTML error messages get stored. </td>
-</tr>
-<tr valign=top>
-<td> <b>EmailErrors</b><br> &nbsp; &nbsp; <font size=-1>= 0</font> </td> <td> If true, error messages are e-mail out according to the ErrorEmailServer and ErrorEmailHeaders settings. This setting defaults to false because the other settings need to be configured first. </td>
-</tr>
-<tr valign=top>
-<td> <b>ErrorEmailServer</b><br> &nbsp; &nbsp; <font size=-1>= 'mail.-.com'</font> </td> <td> The SMTP server to use for sending e-mail error messages. </td>
-</tr>
-<tr valign=top>
-<td> <b>ErrorEmailHeaders</b><br> &nbsp; &nbsp; <font size=-1>--></font> </td> <td> <code><pre>{
-    'From':         '-@-.com',
-    'To':           ['-@-.com'],
-    'Reply-to':     '-@-.com',
-    'Content-type': 'text/html',
-    'Subject':      'Error'
-}</pre></code><hr>The e-mail MIME headers used for e-mailing error messages. Be sure to configure 'From', 'To' and 'Reply-to' before using this feature. </td>
-</tr>
-<tr valign=top>
-<td> <b>Contexts</b><br> &nbsp; &nbsp; <font size=-1>--></font> </td> <td> <center><code>{ 'default':'Examples', 'Examples':'Examples'}</code></center><hr>Provides the directory locations for various 'contexts' which are determined from the URL. The key is the context name and the value is the directory, which can be a relative (to WebKit) or absolute path. The special key 'default' is used when a URL is not context specific. </td>
-</tr>
-<tr valign=top>
-<td> <b>SessionTimeout</b><br> &nbsp; &nbsp; <font size=-1>= 60*60</font> </td> <td> Determines the amount of time (expressed in seconds) that passes before a user's session will timeout. When a session times out, all data associated with that session is lost. </td>
-</tr>
-<tr valign=top>
-<td> <b>InstanceCacheSize</b><br> &nbsp; &nbsp; <font size=-1>= 10</font> </td> <td> Determines the maximum number of servlet instances that will be kept in memory to serve a particular URL. This limit keeps the server from overflowing objects under the stress of many simultaneous requests. </td>
-</tr>
-<tr valign=top>
-<td> <b>IgnoreInvalidSession</b><br> &nbsp; &nbsp; <font size=-1>= 0</font> </td> <td> If true, treats an invalid or expired session the same as no session at all.  Defaults to false, which causes an error message to be displayed on invalid or expired session. </td>
-</tr>
-</table>
+<p><dl class=config>
+<dt class=config><span class=setting>AdminPassword</span>
+&nbsp; <code> = 'webware'</code></dt>
+<dd class=config>
+The password that, combined with the <span class=name>admin</span> id, allows access to the AppControl page of the Admin context. You should change this after installation so that outsiders cannot tamper with your app server.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>DirectoryFile</span>
+&nbsp; <code> = ['index', 'Main']</code></dt>
+<dd class=config>
+The list of basic filenames that WebKit searches for when serving up a directory. Note that the extensions are absent since WebKit autodetects extensions (for example, index.py, index.html, index.psp, etc.).
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>PrintConfigAtStartUp</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+Does what it says. It's generally a good idea to leave this on.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ExtensionsToIgnore</span>
+&nbsp; <code> = </code></dt>
+<dd class=config>
+<code>['.pyc', '.pyo', '.py~', '.bak']</code>
+<br> This is a list of extensions that WebKit will ignore when autodetecting extensions. Note that this does not prevent WebKit from serving such a file if it is named explicitly in a URL.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>LogActivity</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+If true, then the execution of each servlet is logged with useful information such as time, duration and whether or not an error occurred.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ActivityLogFilename</span>
+&nbsp; <code> = 'Logs/Activity.csv'</code></dt>
+<dd class=config>
+This is the name of the file that servlet executions are logged to. This setting has no effect if <span class=name>LogActivity</span> is 0. The path can be relative to the WebKit location, or an absolute path.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ActivityLogColumns</span>
+&nbsp; <code> = </code></dt>
+<dd class=config>
+<code>['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred']</code>
+<br> Specifies the columns that will be stored in the activity log. Each column can refer to an object from the set: [application, transaction, request, response, servlet, session] and then refer to its attributes using "dot notation". The attributes can be methods or instance attributes and can be qualified arbitrarily deep.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>Contexts</span>
+&nbsp; <code> = </code></dt>
+<dd class=config>
+<code>{
+<br> &nbsp; &nbsp; 'default':   'Examples',
+<br> &nbsp; &nbsp; 'Admin':     'Admin',
+<br> &nbsp; &nbsp; 'Examples':  'Examples',
+<br> &nbsp; &nbsp; 'Docs':      'Docs',
+<br> &nbsp; &nbsp; 'Testing':   'Testing',
+<br>}</code>
+<br> This dictionary maps context names to the directory holding the context content. Since the default contexts all reside in WebKit, the paths are simple and relative. The context name appears as the first path component of a URL, otherwise Contexts['default'] is used when none is specified. When creating your own application, you will add a key such as 'MyApp' with a value such as '/home/apps/MyApp'. That directory will then contain content such as Main.py, SomeServlet.py, SomePage.psp, etc.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>SessionStore</span>
+&nbsp; <code> = 'Dynamic'</code></dt>
+<dd class=config>
+This setting determines which of the three session stores is used by the application: File, Dynamic or Memory. The file store always gets sessions from disk and puts them back when finished. Memory always keeps all sessions in memory, but will periodically back them up to disk. Dynamic is a good cross between the two, which pushes excessive or inactive sessions out to disk.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>SessionTimeout</span>
+&nbsp; <code> = 60</code></dt>
+<dd class=config>
+Determines the amount of time (expressed in minutes) that passes before a user's session will timeout. When a session times out, all data associated with that session is lost.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>IgnoreInvalidSession</span>
+&nbsp; <code> = 0</code></dt>
+<dd class=config>
+If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>MaxDynamicMemorySessions</span>
+&nbsp; <code> = 10000</code></dt>
+<dd class=config>
+The maximum number of dynamic memory sessions that will be retained in memory. When this number is exceeded, the least recently used, excess sessions will be pushed out to disk. This setting can be used to help control memory requirements, especially for busy sites. This is used only if the SessionStore is set to Dynamic.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>DynamicSessionTimeout</span>
+&nbsp; <code> = 15</code></dt>
+<dd class=config>
+The number of minutes of inactivity after which a session is pushed out to disk. This setting can be used to help control memory requirements, especially for busy sites. This is used only if the SessionStore is set to Dynamic.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ExtraPathInfo</span>
+&nbsp; <code> = 0</code></dt>
+<dd class=config>
+When enabled, this setting allows a servlet to be followed by additional path components which are accessible via HTTPRequest's extraURLPath(). For subclassers of Page, this would be self.request().extraURLPath(). This may degrade performance when turned on.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>CacheServletClasses</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+When set to zero, the app server will not cache the classes that are loaded for servlets. This is for development and debugging.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>CacheServletInstances</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+When set to zero, the app server will not cache the instances that are created for servlets. This is for development and debugging.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ShowDebugInfoOnErrors</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+If true, then uncaught exceptions will not only display a message for the user, but debugging information for the developer as well. This includes the traceback, HTTP headers, form fields, environment and process ids. You will most likely want to turn this off when deploying the site for users.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>UserErrorMessage</span>
+&nbsp; <code> = </code></dt>
+<dd class=config>
+<code>'The site is having technical difficulties with this page. An error has been logged, and the problem will be fixed as soon as possible. Sorry!'</code>
+<br> This is the error message that is displayed to the user when an uncaught exception escapes a servlet.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ErrorLogFilename</span>
+&nbsp; <code> = 'Logs/Errors.csv'</code></dt>
+<dd class=config>
+The name of the file where exceptions are logged. Each entry contains the date & time, filename, pathname, exception name & data, and the HTML error message filename (assuming there is one).
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>SaveErrorMessages</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+If true, then errors (e.g., uncaught exceptions) will produce an HTML file with both the user message and debugging information. Developers/administrators can view these files after the fact, to see the details of what went wrong.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ErrorMessagesDir</span>
+&nbsp; <code> = 'ErrorMsgs'</code></dt>
+<dd class=config>
+This is the name of the directory where HTML error messages get stored.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>EmailErrors</span>
+&nbsp; <code> = 0</code></dt>
+<dd class=config>
+If true, error messages are e-mailed out according to the ErrorEmailServer and ErrorEmailHeaders settings. This setting defaults to false because <span class=name>ErrorEmailServer</span> and <span>ErrorEmailHeaders</span> must be configured first.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ErrorEmailServer</span>
+&nbsp; <code> = 'mail.-.com'</code></dt>
+<dd class=config>
+The SMTP server to use for sending e-mail error messages.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>ErrorEmailHeaders</span>
+&nbsp; <code> = </code></dt>
+<dd class=config>
+<code>{
+<br> &nbsp; &nbsp; 'From':         '-@-.com',
+<br> &nbsp; &nbsp; 'To':           ['-@-.com'],
+<br> &nbsp; &nbsp; 'Reply-to':     '-@-.com',
+<br> &nbsp; &nbsp; 'Content-type': 'text/html',
+<br> &nbsp; &nbsp; 'Subject':      'Error'
+<br>}</code>
+<br> The e-mail MIME headers used for e-mailing error messages. Be sure to configure 'From', 'To' and 'Reply-to' before turning <span class=name>EmailErrors</span> on.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>UnknownFileTypes</span>
+&nbsp; <code> = </code></dt>
+<dd class=config>
+<code>{
+<br> &nbsp; &nbsp; 'ReuseServlets': 1,
+<br>
+<br> &nbsp; &nbsp; # Technique choices:
+<br> &nbsp; &nbsp; # serveContent, redirectSansAdapter
+<br> &nbsp; &nbsp; 'Technique': 'serveContent',
+<br>
+<br> &nbsp; &nbsp; # If serving content:
+<br> &nbsp; &nbsp; 'CacheContent': 1,  # set to 0 to reduce memory use
+<br> &nbsp; &nbsp; 'CheckDate':    1,
+<br>}</code>
+<br> This setting controls the manner in which WebKit serves "unknown extensions" such as .html, .gif, .jpeg, etc. The default settings specify that the servlet matching the file be cached in memory, that the contents of the file be cached in memory and that the file timestamp to be checked on every request. This works well for most sites.
+
+	<br><br> If your site has a large amount of static files being served via WebKit, you should consider changing 'CacheContent' to 0. If you are confident that your static files do not get updated while the app server is live, then you might consider changing 'CheckDate' to 0 for better performance.
+
+	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems.
+</dd>
+</dl></p>
 
 
 <a name=Administration><h2>Administration</h2></a>
@@ -333,14 +548,11 @@ Version 0.4.1
 
 <a name=Credit><h2>Credit</h2></a>
 
-<p> Authors: Chuck Esterbrook, Jay Love
+<p> Authors: Chuck Esterbrook, Jay Love, Geoff Talvola
 
 <p> Several people, mostly on the webware-discuss mailing list, have provided feedback and testing.
 
 <p> The design was inspired by both Apple's WebObjects and Java's Servlets.
-
-<p> The Python SocketServer module was useful in creating the app server.
-
 
 
 <p><hr>
