@@ -163,7 +163,7 @@ class ModPythonAdapter(Adapter):
 			if string.lower(header[0]) == 'content-type': req.content_type = header[1]
 			if header[0] == 'status': req.status = int(header1)
 		req.send_http_header()
-		req.write(respdict[headerend:])
+		req.write(respdict[headerend+2:])
 
 
 	def handleException(self, req):
