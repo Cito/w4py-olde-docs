@@ -15,7 +15,7 @@ Here's how I set up my Apache conf:
    # add the directory that contains ModPythonAdapter.py
    PythonPath "sys.path+['/path/to/WebKit']"
    PythonOption AppWorkDir /path/to/dir/with/address.text
-   PythonHandler ModPythonAdapter
+   PythonHandler WebKit.Adapters.ModPythonAdapter
    PythonDebug On
 </Location>
 
