@@ -153,7 +153,9 @@ class ExceptionHandler(Object):
 
 	def publicErrorPage(self):
 		return '''<html>
-	<title>Error</title>
+	<head>
+		<title>Error</title>
+	</head>
 	<body fgcolor=black bgcolor=white>
 		%s
 		<p> %s
@@ -165,7 +167,9 @@ class ExceptionHandler(Object):
 		''' Returns an HTML page intended for the developer with useful information such as the traceback. '''
 		html = ['''
 <html>
-	<title>Error</title>
+	<head>
+		<title>Error</title>
+	</head>
 	<body fgcolor=black bgcolor=white>
 %s
 <p> %s''' % (htTitle('Error'), self.setting('UserErrorMessage'))]
