@@ -25,12 +25,12 @@ def TestCommas():
 		source = eval(tests[i])
 		result = eval(tests[i+1])
 		#print '%r yields %r' % (source, result)
-		assert Commas(source)==result
+		assert commas(source)==result
 
 		# Now try the source as a string instead of a number:
 		source = eval("'%s'" % tests[i])
 		#print '%r yields %r' % (source, result)
-		assert Commas(source)==result
+		assert commas(source)==result
 
 		i = i+2
 
