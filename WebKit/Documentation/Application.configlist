@@ -36,6 +36,12 @@
     'Content-type': 'text/html',
     'Subject':      'Error'
 }</pre>''',
-	"The e-mail MIME headers used for e-mailing error messages. Be sure to configure 'From', 'To' and 'Reply-to' before using this feature.")
+	"The e-mail MIME headers used for e-mailing error messages. Be sure to configure 'From', 'To' and 'Reply-to' before using this feature."),
+
+('Contexts', "{ 'default':'Examples', 'Examples':'Examples'}", "Provides the directory locations for various 'contexts' which are determined from the URL. The key is the context name and the value is the directory, which can be a relative (to WebKit) or absolute path. The special key 'default' is used when a URL is not context specific."),
+
+('SessionTimeout', "60*60", "Determines the amount of time (expressed in seconds) that passes before a user's session will timeout. When a session times out, all data associated with that session is lost."),
+
+('InstanceCacheSize', "10", "Determines the maximum number of servlet instances that will be kept in memory to serve a particular URL. This limit keeps the server from overflowing objects under the stress of many simultaneous requests.")
 
 ]

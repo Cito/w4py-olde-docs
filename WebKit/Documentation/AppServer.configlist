@@ -6,4 +6,6 @@
 ('Port', '8086', "The port that the application server runs on. Change this if there is a conflict with another application on your server."),
 
 ('Multitasking', 'threading', "Determines if and how the application server will multitask requests. Must be one of: threading, forking, sequencing."),
+
+('PlugIns', "['../PSP']", "Loads the plug-ins from the given locations when the application server starts up."),
 ]

@@ -26,6 +26,9 @@ Version 0.3
 <ol>
 	<li> Fairly small memory leaks under stressful conditions (many simultaneous, repeated requests).
 	<li> One user on Windows, reports that the Colors example does not work correctly. Only part of the output appears. Another Windows user does not have this problem. Cause is unknown
+	<li> The ListBox example does not take kindly to a Refresh/Reload after a delete operation. In essence, you are telling the ListBox to delete the same object twice. We'll bullet proof this in the next release.
+	<li> On Windows only, WebKit cannot serve binary files through it's CGI adaptor, hence, you cannot see graphic images such as the PSP logo. This is due to the notorious end-of-line '\r\n' vs. '\n' behavior of DOS/Windows. This will also be fixed next release.
+	<li> Bad things happen when a Session expires, such as exceptions about None not having attributes and such. Currently, sessions expire by default in 60 minutes, although you can change that in WebKit/Configs/Application.config. Also targeted for next release.
 </ol>
 
 

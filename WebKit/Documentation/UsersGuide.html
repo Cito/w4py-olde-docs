@@ -37,6 +37,7 @@ Version 0.3
 <br>  <a href="#PlugIns"><font size=+1>PlugIns</font></a>
 <br>  <a href="#Files"><font size=+1>Files</font></a>
 <br>  <a href="#How"><font size=+1>How do I develop an app?</font></a>
+<br>  <a href="#KnownBugs"><font size=+1>Known Bugs</font></a>
 <br>  <a href="#Credit"><font size=+1>Credit</font></a>
 </font></p>
 
@@ -91,10 +92,10 @@ Version 0.3
 
 <a name=GettingStarted><h3>Getting Started</h3></a>
 
-<p> You can put the whole Webware distribution in a directory such that your web server will accept URLs there, including CGIs, or you can put the distribution somewhere else and just put the WebKit.cgi file in an executable area of your Web Server's document tree.  If you choose to put only the WebKit.cgi file in your WebServer's path, you'll need to edit the WebKit.cgi and set the variable WebKitDir at the top of the file to the location of the <b>WebKit</b> directory, as in WebKitDir="/usr/local/Webware/WebKit". 
+<p> You can put the whole Webware distribution in a directory such that your web server will accept URLs there, including CGIs, or you can put the distribution somewhere else and just put the WebKit.cgi file in an executable area of your Web Server's document tree.  If you choose to put only the WebKit.cgi file in your WebServer's path, you'll need to edit the WebKit.cgi and set the variable WebKitDir at the top of the file to the location of the <b>WebKit</b> directory, as in WebKitDir="/usr/local/Webware/WebKit".
 
 For testing purposes, a URL might look something like:
-<p><code>http://localhost/~echuck/Projects/Webware/WebKit/WebKit.cgi/Welcome</code>
+<p><code>http://localhost/Projects/Webware/WebKit/WebKit.cgi/Welcome</code>
 <p>or
 <p><code>http://localhost/cgi-bin/WebKit.cgi/</code>
 
@@ -111,9 +112,18 @@ For testing purposes, a URL might look something like:
 <br>
 <br><i>&lt;a display of all settings and their values&gt;</i>
 <br>
+<br>Current directory is /usr/local/Webware/WebKit
+<br>Plug-in: PSP in ../PSP
 <br>Listening at ('', 8086)
 <br>OK
 </code>
+
+<p><table bgcolor=#FFFFEE><tr><td>
+Also, if you're on Windows, you will need to change the first line of WebKit.cgi, which specifies that the CGI script is a Python script. Try <code>#!python</code> which usually works, otherwise include the full path such as <code>#!\python\python</code>.
+<br>
+<br> Even on a UNIX system, you sometimes have to modify this first line, depending on whether or not you have <code>/usr/bin/env</code> and Python is in the search path. If not, then try using an absolute path such as <code>#!/usr/bin/python</code>.
+</td></tr></table></p>
+
 
 <p> Upon entering the URL, the results of the Welcome page should be displayed in your browser. Some diagnostic information will be printed in the terminal window of the server. You'll notice after the first page is served, that additional pages are served much faster. You can verify this in the console of the AppServer which reports the response time for each request. As the application warms up (e.g., caches classes, objects, files and settings) performance increases.
 
@@ -160,7 +170,8 @@ For testing purposes, a URL might look something like:
 
 <p><br><b>Configs/AppServer.config:</b>
 
-<p><table border=2 align=center width=80% cellpadding=2 cellspacing=2>
+<p>
+<table border=2 align=center width=80% cellpadding=2 cellspacing=2>
 <tr valign=top>
 <td> <b>PrintConfigAtStartUp</b><br> &nbsp; &nbsp; <font size=-1>= 1</font> </td> <td> Does pretty much what it says. It's generally a good idea to leave this on. </td>
 </tr>
@@ -173,11 +184,16 @@ For testing purposes, a URL might look something like:
 <tr valign=top>
 <td> <b>Multitasking</b><br> &nbsp; &nbsp; <font size=-1>= threading</font> </td> <td> Determines if and how the application server will multitask requests. Must be one of: threading, forking, sequencing. </td>
 </tr>
+<tr valign=top>
+<td> <b>PlugIns</b><br> &nbsp; &nbsp; <font size=-1>= ['../PSP']</font> </td> <td> Loads the plug-ins from the given locations when the application server starts up. </td>
+</tr>
 </table>
+
 
 <p><br><b>Configs/Application.config:</b>
 
-<p><table border=2 align=center width=80% cellpadding=2 cellspacing=2>
+<p>
+<table border=2 align=center width=80% cellpadding=2 cellspacing=2>
 <tr valign=top>
 <td> <b>PrintConfigAtStartUp</b><br> &nbsp; &nbsp; <font size=-1>= 1</font> </td> <td> Does pretty much what it says. It's generally a good idea to leave this on. </td>
 </tr>
@@ -221,7 +237,16 @@ For testing purposes, a URL might look something like:
     'Reply-to':     '-@-.com',
     'Content-type': 'text/html',
     'Subject':      'Error'
-}</pre></code></center><hr>The e-mail MIME headers used for e-mailing error messages. Be sure to configure 'From', 'To' and 'Reply-to' before using this feature. </td>
+}</pre></code><hr>The e-mail MIME headers used for e-mailing error messages. Be sure to configure 'From', 'To' and 'Reply-to' before using this feature. </td>
+</tr>
+<tr valign=top>
+<td> <b>Contexts</b><br> &nbsp; &nbsp; <font size=-1>--></font> </td> <td> <center><code>{ 'default':'Examples', 'Examples':'Examples'}</code></center><hr>Provides the directory locations for various 'contexts' which are determined from the URL. The key is the context name and the value is the directory, which can be a relative (to WebKit) or absolute path. The special key 'default' is used when a URL is not context specific. </td>
+</tr>
+<tr valign=top>
+<td> <b>SessionTimeout</b><br> &nbsp; &nbsp; <font size=-1>= 60*60</font> </td> <td> Determines the amount of time (expressed in seconds) that passes before a user's session will timeout. When a session times out, all data associated with that session is lost. </td>
+</tr>
+<tr valign=top>
+<td> <b>InstanceCacheSize</b><br> &nbsp; &nbsp; <font size=-1>= 10</font> </td> <td> Determines the maximum number of servlet instances that will be kept in memory to serve a particular URL. This limit keeps the server from overflowing objects under the stress of many simultaneous requests. </td>
 </tr>
 </table>
 
@@ -248,7 +273,7 @@ For testing purposes, a URL might look something like:
 <p> <font size=-1>(This table was generated using the classhier.py script found in Webware/DocSupport.)</font>
 
 <p>
-<table cellpadding=2 cellspacing=0>
+<table cellpadding=0 cellspacing=0>
 <tr><td><b>Class</b></td><td><b>File</b></td></tr>
 <tr><td>BaseRequestHandler</td><td></td></tr>
 <tr><td>&nbsp; &nbsp; &nbsp; RequestHandler</td><td>AppServer.py</td></tr>
@@ -411,6 +436,11 @@ For testing purposes, a URL might look something like:
 	<li> Make sure you find out about new versions when they're released: Subscribe to the announcements list at <a href=http://lists.sourceforge.net/mailman/listinfo/webware-announce>http://lists.sourceforge.net/mailman/listinfo/webware-announce</a>.
 
 </ol>
+
+
+<a name=KnownBugs><h2>Known Bugs</h2></a>
+
+<p> Known bugs and future work in general, is documented in <a href=Future.html>Future.html</a>.
 
 
 <a name=Credit><h2>Credit</h2></a>
