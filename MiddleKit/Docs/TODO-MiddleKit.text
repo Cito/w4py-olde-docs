@@ -147,7 +147,7 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] addToBars() will add the target to object store if needed. Does setBar()? If not, make it so.
 
-	*** [ ] SQL code gen: use a primary key instead of a unique index
+	[x] SQL code gen: use a primary key instead of a unique index
 
 	*** [ ] what is the policy for setInt, setLong, setFloat, setString, etc.? Do we assert the type or do a type conversion with int(), float(), etc.
 		- I think we assert the type, except for numbers we may allow coercion, especially if Python's coerce() helps out in this area

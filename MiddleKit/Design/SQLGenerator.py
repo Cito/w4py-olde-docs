@@ -64,25 +64,7 @@ class SQLGenerator(CodeGenerator):
 
 
 class ModelObject:
-
-	def writeCreateSQL(self, generator, out):
-		''' Writes the SQL to define a table for the class. The target can be a file or a filename. '''
-		if type(out) is StringType:
-			out = open(out, 'w')
-			close = 1
-		else:
-			close = 0
-		self.willWriteCreateSQL(generator, out)
-		self._writeCreateSQL(generator, out)
-		self.didWriteCreateSQL(generator, out)
-		if close:
-			out.close()
-
-	def willWriteCreateSQL(self, generator, out):
-		pass
-
-	def didWriteCreateSQL(self, generator, out):
-		pass
+	pass
 
 
 class Model:
@@ -210,6 +192,19 @@ class Klasses:
 		key = key.ljust(12)
 		out.write('# %s = %s\n' % (key, value))
 
+	def writeCreateSQL(self, generator, out):
+		''' Writes the SQL to define the tables for a set of classes. The target can be a file or a filename. '''
+		if type(out) is StringType:
+			out = open(out, 'w')
+			close = 1
+		else:
+			close = 0
+		self.willWriteCreateSQL(generator, out)
+		self._writeCreateSQL(generator, out)
+		self.didWriteCreateSQL(generator, out)
+		if close:
+			out.close()
+
 	def willWriteCreateSQL(self, generator, out):
 		# @@ 2001-02-04 ce: break up this method
 		wr = out.write
@@ -307,16 +302,31 @@ create table _MKClassIds (
 
 class Klass:
 
-	def _writeCreateSQL(self, generator, out):
+	def writeCreateSQL(self, generator, out):
 		if not self.isAbstract():
 			name = self.name()
 			wr = out.write
 			sqlIdName = self.sqlIdName()
 			wr('create table %s (\n' % name)
 			wr(self.primaryKeySQLDef(generator))
-			for attr in self.allAttrs():
-				attr.writeCreateSQL(generator, out)
-			wr('asdfkljasdflsdf int\n')
+			allAttrs = self.allAttrs()
+			# We have to make sure we don't put an extra comma after the
+			# last SQL attribute definition. Some attributes don't have
+			# SQL columns, but still print a comment, so this adds to
+			# our work.
+			i = len(allAttrs)-1
+			lastSQLAttr = -1
+			while i>=0:
+				if allAttrs[i].hasSQLColumn():
+					lastSQLAttr = i
+					break
+				i -= 1
+			for i in range(len(allAttrs)):
+				if i<lastSQLAttr:
+					lineTerm = ',\n'
+				else:
+					lineTerm = '\n'
+				allAttrs[i].writeCreateSQL(generator, out, lineTerm)
 			wr(');\n\n\n')
 
 	def primaryKeySQLDef(self, generator):
@@ -354,7 +364,7 @@ class Attr:
 			# make _sqlValue()
 		return value
 
-	def _writeCreateSQL(self, generator, out):
+	def writeCreateSQL(self, generator, out, lineTerm):
 		if self.hasSQLColumn():
 			name = self.sqlName().ljust(self.maxNameWidth())
 			if self.isRequired():
@@ -367,7 +377,7 @@ class Attr:
 					defaultSQL = ' ' + defaultSQL
 			else:
 				defaultSQL = ''
-			out.write('\t%s %s%s%s,\n' % (name, self.sqlType(), notNullSQL, defaultSQL))
+			out.write('\t%s %s%s%s%s' % (name, self.sqlType(), notNullSQL, defaultSQL, lineTerm))
 		else:
 			out.write('\t/* %(Name)s %(Type)s - not a SQL column */\n' % self)
 
