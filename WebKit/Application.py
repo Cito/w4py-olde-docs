@@ -135,6 +135,9 @@ class Application(Configurable, CanContainer, Object):
 ##	def __del__(self):			
 ##		self.shutDown()
 
+
+
+##Can Stuff
 	def initializeCans(self):
 		"""
 		@@ Overhaul by 0.4
@@ -150,7 +153,12 @@ class Application(Configurable, CanContainer, Object):
 		"""
 		print "Adding Can directory: %s" % newDir
 		self._canFactory.addCanDir(newDir)
+		
+	def addCan(self, ID, klass, *args, **kwargs):
+		instance = apply(self._canFactory.createCan,(klass,)+args,kwargs)
+		self.setCan(ID, instance)
 
+##Session Stuff
 	def startSessionSweeper(self):
 		self._closeEvent = Event()
 		self._sessSweepThread = Thread(None, self.sweepSessionsContinuously, 'SessionSweeper',(self._closeEvent,))
@@ -178,6 +186,9 @@ class Application(Configurable, CanContainer, Object):
 				sessions[key].expiring()
 				del sessions[key]
 		sessions.storeAllSessions()
+
+
+
 
 	def shutDown(self):
 		"""
@@ -851,7 +862,12 @@ class Application(Configurable, CanContainer, Object):
 				if debug:
 					print '>> context not found so assuming default:'
 			if debug: print '>> prepath=%s, restOfPath=%s' % (repr(prepath), repr(restOfPath))
-			ssPath = os.path.join(prepath, restOfPath)
+			#ssPath = os.path.join(prepath, restOfPath)
+			if restOfPath != '':
+				ssPath = prepath + os.sep + restOfPath
+			else:
+				ssPath = prepath
+			if debug: print ">> ssPath= %s" % ssPath
 
 		lastChar = ssPath[-1]
 		ssPath = os.path.normpath(ssPath)
@@ -935,7 +951,7 @@ class Application(Configurable, CanContainer, Object):
 			# constructed correctly by the browser.
 			# So in the following if statement, we're bailing out for such URLs.
 			# dispatchRequest() will detect the situation and handle the redirect.
-			if extraURLPath == None and (urlPath=='' or urlPath[-1]!='/'):
+			if extraURLPath == '' and (urlPath=='' or urlPath[-1]!='/'):
 				if debug:
 					print '>> BAILING on directory url: %s' % repr(urlPath)
 				return ssPath
