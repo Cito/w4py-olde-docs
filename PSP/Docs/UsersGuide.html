@@ -4,7 +4,7 @@
 </head>
 <body bgcolor='white'>
 <H1> Python Server Pages for Webware</h1>
-Release 0.5<br>
+Release 0.7<br>
 <a href="http://webware.sourceforge.net">http://webware.sourceforge.net</a>
 <h2> Summary</h2>
 <p> Python Server Pages (PSP) provides the capability for producing dynamic web pages
@@ -122,7 +122,7 @@ override.
 <p><li><b><i><font color="blue">indentSpaces</font></i></b> - Sets the number of spaces to be used for indentation when <i>indentType</i> is set to spaces.  The default is "4".
 <p><b>Example</b> - <i> &lt;%@ page indentSpaces="8" %&gt;</i>
 <p>
-<li><b><i><font color="blue">gobbleWhitespace</font></i></b> - The <i>gobblewhitespace</i> attribute of the <i>page</i> directive tells the PSP
+<li><b><i><font color="blue">gobbleWhitespace</font></i></b> -  The <i>gobblewhitespace</i> attribute of the <i>page</i> directive tells the PSP
  parser whether it can safely assume that whitespace characters that it finds between two script tags can be safely ignored.  This is a special case directive.  It applies when there are two script tags of some kind, and there is only whitespace characters between the two tags.  If there is only whitespace, the parser will ignore the whitespace.  This is necessary for multipart blocks to function correctly.  For example, if you are writing an if/else block, you would have your first script block that starts the if, and then you would end that block and start a new script block that contains the else portion.  If there is any whitespace between these two script blocks, and gobbleWhitespace is turned off, then the parser will add a write statement between the two blocks to output the whitespace into the page.  The problem is that the write statement will have the indentation level of the start of the if block.  So when the else statement starts, it will not be properly associated with the preceding if, and you'll get an error.<br>
 If you do need whitespace between two script blocks, use the &amp;nbsp; code.
 <p><b>Example</b> - <i> &lt;%@ page gobbleWhitspace="No"%&gt;</i>
