@@ -121,7 +121,7 @@ class SQLObjectStore(ObjectStore):
 		args = self._dbArgs
 		self._dbArgs = self.setting('DatabaseArgs',{})
 		self._dbArgs.update(args)
-		print 'dbArgs = %s' % self._dbArgs
+		#print 'dbArgs = %s' % self._dbArgs
 
 		# Connect
 		self.connect()
