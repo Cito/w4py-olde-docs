@@ -535,7 +535,13 @@ class Handler:
 					raise NotEnoughDataError, 'received only %d of %d bytes when receiving dictLength' % (len(chunk), intLength)
 			chunk += block
 			missing = intLength - len(chunk)
-		dictLength = loads(chunk)
+		try:
+			dictLength = loads(chunk)
+		except ValueError:
+			print 'ERROR: bad marshal data'
+			print 'ERROR: you can only connect to %s via an adapter, like mod_webkit or' % self._serverAddress[1]
+			print '       wkcgi, not with a browser)'
+			raise
 		if type(dictLength) != type(1):
 			self._sock.close()
 			raise ProtocolError, "Invalid AppServer protocol"
