@@ -18,7 +18,8 @@ FUTURE
 
 CREDIT
 
-* Contributed by Tom Schwaller.
+* Contributed by Dan Green
+* thread safety bug found by Tom Schwaller
 * Fixes by Geoff Talvola (thread safety in _threadsafe_getConnection()).
 * Clean up by Chuck Esterbrook.
 '''
