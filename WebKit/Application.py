@@ -17,24 +17,24 @@ from CanContainer import *
 from WebUtils.WebFuncs import HTMLEncode
 from WebUtils.HTMLForException import HTMLForException
 
-# @@ import MiddleKit
-# @@ from MiddleKit.KeyValueAccess import KeyValueAccess
+# @@ import MiscUtils
+# @@ from MiscUtils.NamedValueAccess import NamedValueAccess
 import MiscUtils.CSV
 
-# Beef up UserDict with the KeyValueAccess base class and custom versions of
+# Beef up UserDict with the NamedValueAccess base class and custom versions of
 # hasValueForKey() and valueForKey(). This all means that UserDict's (such as
 # os.environ) are key/value accessible. At some point, this probably needs to
 # move somewhere else as other Webware components will need this "patch".
 # (@@ 2000-05-07 ce: Plus I just duplicated this from CGIWrapper.py. Doh!)
-import MiddleKit
-from MiddleKit.KeyValueAccess import KeyValueAccess
-if not KeyValueAccess in UserDict.__bases__:
-	UserDict.__bases__ = UserDict.__bases__ + (KeyValueAccess,)
+import MiscUtils
+from MiscUtils.NamedValueAccess import NamedValueAccess
+if not NamedValueAccess in UserDict.__bases__:
+	UserDict.__bases__ = UserDict.__bases__ + (NamedValueAccess,)
 
 	def _UserDict_hasValueForKey(self, key):
 		return self.has_key(key)
 
-	def _UserDict_valueForKey(self, key, default=None): # @@ 2000-05-10 ce: does Tombstone fit here and possibly in KeyValueAccess?
+	def _UserDict_valueForKey(self, key, default=None): # @@ 2000-05-10 ce: does Tombstone fit here and possibly in NamedValueAccess?
 		return self.get(key, default)
 
 	setattr(UserDict, 'hasValueForKey', _UserDict_hasValueForKey)
@@ -163,6 +163,7 @@ class Application(Configurable,CanContainer):
 		This function runs in a separate thread and cleans out stale sessions periodically.
 		"""
 		import sys
+		timeout = timeout * 60  # convert minutes to seconds
 		count = 0
 		frequency = 30 #how often to run *2
 
@@ -237,7 +238,7 @@ class Application(Configurable,CanContainer):
 			                           'Documentation': 'Documentation',
 			                           'Testing':       'Testing',
 			                         },
-			'SessionTimeout':        60*60, # seconds
+			'SessionTimeout':        60,  # minutes
 		}
 
 	def configFilename(self):
@@ -519,7 +520,7 @@ class Application(Configurable,CanContainer):
 			file = open(filename, 'w')
 			file.write(string.join(self.setting('ActivityLogColumns'), ',')+'\n')
 		values = []
-		# We use UserDict on the next line because we know it inherits KeyValueAccess and reponds to valueForName()
+		# We use UserDict on the next line because we know it inherits NamedValueAccess and reponds to valueForName()
 		objects = UserDict({
 			'application': self,
 			'transaction': transaction,
