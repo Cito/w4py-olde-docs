@@ -495,8 +495,6 @@ class Application(Configurable):
 				pass
 				#print '>> queue full' #do nothing, don't want to block queue for this
 
-		transaction._servlet._map = None
-
 ##		print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
 
 
