@@ -266,6 +266,25 @@ class StringAttr:
 					ref = ' ' + ref
 				return 'varchar(%s)%s' % (int(self['Max']), ref)
 
+	def sqlForNonNoneSampleInput(self, input):
+		value = input
+		if value=="''":
+			value = ''
+		elif value.find('\\')!=-1:
+			if 1:
+				# add spaces before and after, to prevent
+				# syntax error if value begins or ends with "
+				value = eval('""" '+str(value)+' """')
+				value = repr(value[1:-1])	# trim off the spaces
+				value = value.replace('\\011', '\\t')
+				value = value.replace('\\012', '\\n')
+				value = value.replace("\\'", "''")
+				return value
+		value = repr(value)
+		value = value.replace("\\'", "''")
+		#print '>> value:', value
+		return value
+
 
 class ObjRefAttr:
 
