@@ -47,9 +47,13 @@ CREDITS
 example by Sean McGrath at http://www.digitome.com/html2pyx.py (which I believe
 is broken for empty tags).
 
-* Determined what HTML tags are empty be scanning O'Reilly's HTML Pocket
+* Determined what HTML tags are empty by scanning O'Reilly's HTML Pocket
 Reference.
 """
+
+# - report line numbers for errors
+# - extra checking about what tags are allowed or disallowed inside other tags
+# - minor tweaks
 
 
 # Check for Python 2.0
@@ -62,11 +66,19 @@ if pyVer is None  or  pyVer[0]<2:
 from sgmllib import SGMLParser
 from MiscUtils import NoDefault
 import types
+from types import StringType
 
 
-class HTMLTagError(Exception): pass
-class HTMLTagAttrLookupError(LookupError, HTMLTagError): pass
+class HTMLTagError(Exception):
+
+	def __init__(self, msg, **values):
+		Exception.__init__(self, msg)
+		self.values = values.copy()
+
+class HTMLTagAttrLookupError(HTMLTagError, LookupError): pass
 class HTMLTagUnbalancedError(HTMLTagError): pass
+class HTMLNotAllowedError(HTMLTagError): pass
+class HTMLTagProcessingInstructionError(HTMLTagError): pass
 class HTMLTagIncompleteError(HTMLTagError): pass
 
 
@@ -234,7 +246,7 @@ class HTMLTag:
 		tag = self._tagWithMatchingAttr(name, value)
 		if tag is None:
 			if default is NoDefault:
-				raise HTMLTagAttrLookupError, 'name = %r, value = %r' % (name, value)
+				raise HTMLTagAttrLookupError('name = %r, value = %r' % (name, value), name=name, value=value)
 			else:
 				return default
 		else:
@@ -322,10 +334,15 @@ class HTMLReader(SGMLParser):
 
 	* The reader is picky about the correctness of the HTML you feed it. If tags
 	  are not closed, overlap (instead of nest) or left unfinished, an exception is
-	  thrown. These include HTMLTagUnbalancedError and HTMLTagIncompleteError both of
-	  which inherit HTMLTagError. I believe it is possible that others kinds of HTML
-	  errors could raise exceptions from sgmlib.SGMLParser (from which HTMLReader
-	  inherits).
+	  thrown. These include HTMLTagUnbalancedError, HTMLTagIncompleteError and
+	  HTMLNotAllowedError which all inherit HTMLTagError.
+
+	  This pickiness can be quite useful for the validation of the HTML of your
+	  own applications.
+
+	  I believe it is possible that others kinds of HTML errors could raise
+	  exceptions from sgmlib.SGMLParser (from which HTMLReader inherits),
+	  although in practice, I have not seen them.
 
 
 	TO DO
@@ -335,6 +352,9 @@ class HTMLReader(SGMLParser):
 	  other major tags were encountered such as <p>, <li>, <table>, <center>, etc.?
 
 	* Readers don't handle processing instructions: <? foobar ?>.
+
+	* The tagContainmentConfig class var can certainly be expanded for even better
+	  validation.
 	"""
 
 	## Init ##
@@ -383,8 +403,12 @@ class HTMLReader(SGMLParser):
 		self._tagStack = []
 		self._finished = 0
 		self.reset()
+		self._lineNumber = 1
+		self.computeTagContainmentConfig()
 		try:
-			self.feed(string)
+			for line in string.split('\n'):
+				self.feed(line+'\n')
+				self._lineNumber += 1
 			self.close()
 		finally:
 			self.reset()
@@ -496,7 +520,7 @@ class HTMLReader(SGMLParser):
 		self._tagStack[-1].addChild(data)
 
 	def handle_pi(self, data):
-		raise Exception, 'Was not expecting a processing instruction: %r' % data
+		raise HTMLTagProcessingInstructionError, 'Was not expecting a processing instruction: %r' % data
 
 	def unknown_starttag(self, name, attrs):
 		if self._finished:
@@ -514,8 +538,14 @@ class HTMLReader(SGMLParser):
 			# Also, if this is the first tag, then make it the root.
 			# If it's the first tag and it isn't an <html> tag,
 			# create a fake "container" html tag.
-			if self._rootTag:
-				self._tagStack[-1].addChild(tag)
+			if self._tagStack:
+				lastTag = self._tagStack[-1]
+				# is this legal?
+				tagConfig = self._tagContainmentConfig.get(lastTag.name())
+				if tagConfig:
+					tagConfig.encounteredTag(name, self._lineNumber)
+				# tell last tag about his new child
+				lastTag.addChild(tag)
 			elif name != 'html' and self._fakeRootTagIfNeeded:
 				self._rootTag = HTMLTag('html')
 				self._tagStack.append(self._rootTag)
@@ -538,12 +568,12 @@ class HTMLReader(SGMLParser):
 		if self._printsStack:
 			print 'END   %s: %r' % (name.ljust(6), self._tagStack)
 		if openingTag.name()!=name:
-			raise HTMLTagUnbalancedError, 'Opening is %r, but closing is %r' % \
-				(openingTag.name(), name)
+			raise HTMLTagUnbalancedError('line %i: opening is %r, but closing is %r' % \
+				(self._lineNumber, openingTag.name(), name), line=self._lineNumber, opening=openingTag.name(), closing=name)
 
 	def close(self):
 		if len(self._tagStack)>0 and not (len(self._tagStack)==1 and self._usedFakeRootTag):
-			raise HTMLTagIncompleteError, 'tagStack = %r' % self._tagStack
+			raise HTMLTagIncompleteError('line %i: tagStack = %r' % (self._lineNumber, self._tagStack), line=line, tagStack=repr(self._tagStack))
 		SGMLParser.close(self)
 
 
@@ -558,6 +588,71 @@ class HTMLReader(SGMLParser):
 		for tag in self._emptyTagList:
 			dict[tag] = 1
 		self._emptyTagDict = dict
+
+	# The following dict defines for various tags either:
+	#    + the complete set of tags that can be contained within
+	#    - a set of tags that cannot be contained within
+	# This information helps HTMLReader detect some types of errors
+	# earlier and other types of errors, it would never detect.
+	tagContainmentConfig = {
+		'html':   'canOnlyHave head body',
+		'head':   'cannotHave  html head body',
+		'body':   'cannotHave  html head body',
+		'table':  'canOnlyHave th tr tbody a',  # a because in IE you can wrap a row in <a> to make the entire row clickable
+		'tr':     'canOnlyHave td',
+		'td':     'cannotHave  td tr',
+		'select': 'canOnlyHave option',
+	}
+
+	def computeTagContainmentConfig(self):
+		config = {}
+		for key, value in self.tagContainmentConfig.items():
+			if isinstance(value, StringType):
+				value = value.split()
+				configClass = configClassForName.get(value[0])
+				if configClass is None:
+					raise KeyError, 'Unknown config name %r for value %r in %s.tagContainmentConfig' % (key, value, self.__class__.__name__)
+				config[key] = configClass(key, value[1:])
+			else:
+				assert isinstance(value, TagConfig), 'key=%r, value=%r' % (key, value)
+				config[key] = value
+		self._tagContainmentConfig = config
+
+
+class TagConfig:
+
+	def __init__(self, name, tags):
+		self.name = name
+		# turn list of tags into a dict/set for fast lookup (e.g., avoid linear searches)
+		dict = {}
+		for tag in tags:
+			dict[tag] = 1
+		self.tags = dict
+
+	def encounteredTag(self, tag, lineNum):
+		raise SubclassResponsiblityError, self.__class__
+
+
+class TagCanOnlyHaveConfig(TagConfig):
+
+	def encounteredTag(self, tag, lineNum):
+		if not self.tags.has_key(tag.lower()):
+			raise HTMLNotAllowedError('line %i: the tag %r is not allowed in %r which can only have %r.' % (
+				lineNum, tag, self.name, self.tags.keys()), line=lineNum, encounteredTag=tag, containingTag=self.name, canOnlyHave=self.tags.keys())
+
+
+class TagCannotHaveConfig(TagConfig):
+
+	def encounteredTag(self, tag, lineNum):
+		if self.tags.has_key(tag.lower()):
+			raise HTMLNotAllowedError('line %i: The tag %r is not allowed in %r which cannot have %r.' % (
+				lineNum, tag, self.name, self.tags.keys()), line=lineNum, enounteredTag=tag, containingTag=self.name, cannotHave=self.tags.keys())
+
+
+configClassForName = {
+	'canOnlyHave':   TagCanOnlyHaveConfig,
+	'cannotHave': TagCannotHaveConfig,
+}
 
 
 if __name__=='__main__':
