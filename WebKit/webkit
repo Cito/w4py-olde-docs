@@ -17,7 +17,7 @@ LOG=/var/log/webkit
 PYTHONPATH=
 
 
-[ -f $WEBKIT_DIR/AppServer ] || exit 0
+[ -x $WEBKIT_DIR/AppServer ] || exit 0
 
 case "$1" in
 	start)
