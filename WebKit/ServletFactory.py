@@ -1,5 +1,6 @@
 from Common import *
 from Servlet import Servlet
+import sys
 
 
 class ServletFactory(Object):
@@ -41,13 +42,18 @@ class PythonServletFactory(ServletFactory):
 	This is the factory for ordinary, Python servlets whose extensions are empty or .py. The servlets are unique per file since the file itself defines the servlet.
 	'''
 
+	def __init__(self,app):
+		ServletFactory.__init__(self,app)
+		self.cache={}
+		
+
 	def uniqueness(self):
 		return 'file'
 
 	def extensions(self):
 		return ['', '.py']
 	
-	def servletForTransaction(self, transaction):
+	def old_servletForTransaction(self, transaction):
 		path = transaction.request().serverSidePath()
 		globals = {}
 		execfile(path, globals)
@@ -56,8 +62,40 @@ class PythonServletFactory(ServletFactory):
 		assert globals.has_key(name), 'Cannot find expected servlet class named "%s".' % name
 		theClass = globals[name]
 		assert type(theClass) is ClassType
-		assert issubclass(theClass, Servlet)
+		assert issubclass(theClass, Servlet)		
 		return theClass()
+
+	def servletForTransaction(self, transaction):
+		path = transaction.request().serverSidePath()
+		name = os.path.splitext(os.path.split(path)[1])[0]
+		if not self.cache.has_key(name): self.cache[name]={}
+		if os.path.getmtime(path) > self.cache[name].get('mtime',0):
+			globals = {}
+			execfile(path, globals)
+			from types import ClassType
+			assert globals.has_key(name), 'Cannot find expected servlet class named "%s".' % name
+			theClass = globals[name]
+			assert type(theClass) is ClassType
+			assert issubclass(theClass, Servlet)
+			self.cache[name]['mtime'] = os.path.getmtime(path)
+			self.cache[name]['class'] = theClass
+		else:
+			theClass = self.cache[name]['class']
+		return theClass()
+		
+	def import_servletForTransaction(self, transaction):
+		path = transaction.request().serverSidePath()
+		name = os.path.splitext(os.path.split(path)[1])[0]
+		if not self.cache.has_key(name): self.cache[name]={}
+		if os.path.getmtime(path) > self.cache[name].get('mtime',0):
+			if not os.path.split(path)[0] in sys.path: sys.path.append(os.path.split(path[0]))
+			module_obj=__import__(name)	
+			reload(module_obj)#force reload
+			inst =  module_obj.__dict__[name]()
+			self.cache[name]['mtime']=os.path.getmtime(path)
+		else:
+			inst = sys.modules[name].__dict__[name]()
+		return inst
 
 
 class UnknownFileTypeServletFactory(ServletFactory):
