@@ -5,6 +5,15 @@
 	'LogActivity':          0,
 	'ActivityLogFilename':  'Logs/Activity.csv',
 	'ActivityLogColumns':   ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'],
+	'Contexts':             {'default':       'Examples',
+							 'Admin':         'Admin',
+							 'Examples':      'Examples',
+							 'Documentation': 'Documentation',
+							 'Testing':       'Testing',
+							},
+
+	'SessionStore':         'Memory',  # can be File or Memory
+	'SessionTimeout':       60,  # minutes
 
 	# Error handling
 	'ShowDebugInfoOnErrors':  1,
@@ -20,11 +29,4 @@
 		                        'Content-type': 'text/html',
 		                        'Subject':      'Error',
 	                          },
-	'Contexts':               {'default':       'Examples',
-							   'Admin':         'Admin',
-							   'Examples':      'Examples',
-							   'Documentation': 'Documentation',
-							   'Testing':       'Testing',
-							  },
-	'SessionTimeout':         60,  # minutes
 }
