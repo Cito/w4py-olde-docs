@@ -19,6 +19,9 @@ class EnumAttr(Attr):
 		self._enumSet = set
 
 	def enums(self):
+		"""
+		Returns a sequence of the enum values in their string form.
+		"""
 		return self._enums
 
 	def hasEnum(self, value):
