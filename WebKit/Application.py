@@ -89,13 +89,6 @@ class Application(Configurable,CanContainer):
 			from ExceptionHandler import ExceptionHandler
 			self._exceptionHandlerClass = ExceptionHandler
 
-		# Create the session store
-		from SessionMemoryStore import SessionMemoryStore
-		from SessionFileStore import SessionFileStore
-		klass = locals()['Session'+self.setting('SessionStore')+'Store']
-		assert type(klass) is ClassType
-		self._sessions = klass(self)
-
 		# Init other attributes
 		self._servletCacheByPath = {}
 		self._serverSidePathCacheByPath = {}
@@ -106,6 +99,12 @@ class Application(Configurable,CanContainer):
 
 		self.initializeCans()
 
+		# Set up servlet factories
+		self._factoryList = []  # the list of factories
+		self._factoryByExt = {} # a dictionary that maps all known extensions to their factories, for quick look up
+		self.addServletFactory(PythonServletFactory(self))
+		self.addServletFactory(UnknownFileTypeServletFactory(self))
+		# ^ @@ 2000-05-03 ce: make this customizable at least through a method (that can be overridden) if not a config file (or both)
 
 		if contexts: #Try to get this from the Config file
 			defctxt = contexts
@@ -117,12 +116,12 @@ class Application(Configurable,CanContainer):
 			self.addContext(i,defctxt[i])
 		print
 
-		# Set up servlet factories
-		self._factoryList = []  # the list of factories
-		self._factoryByExt = {} # a dictionary that maps all known extensions to their factories, for quick look up
-		self.addServletFactory(PythonServletFactory(self))
-		self.addServletFactory(UnknownFileTypeServletFactory(self))
-		# ^ @@ 2000-05-03 ce: make this customizable at least through a method (that can be overridden) if not a config file (or both)
+		# Create the session store
+		from SessionMemoryStore import SessionMemoryStore
+		from SessionFileStore import SessionFileStore
+		klass = locals()['Session'+self.setting('SessionStore')+'Store']
+		assert type(klass) is ClassType
+		self._sessions = klass(self)
 
 		print 'Current directory:', os.getcwd()
 
