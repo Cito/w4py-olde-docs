@@ -80,11 +80,11 @@ class Session(Object, CanContainer):
 	def isNew(self):
 		return self._numTrans<2
 
-	def timeout(self, timeout):
+	def setTimeout(self, timeout):
 		"""Set the timeout on this session"""
 		self._timeout = timeout*60   #convert to seconds
 
-	def getTimeout(self):
+	def timeout(self):
 		""" Get the timeout for this session IN SECONDS """
 		return self._timeout
 
