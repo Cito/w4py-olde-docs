@@ -546,7 +546,7 @@ if __name__=='__main__':
 			if o in ("--set-password",):
 				defaultpass=a
 				passprompt=0
-			if o in ("-h", "--help"):
+			if o in ("-h", "--help", "h", "help"):
 				printHelp()
 				sys.exit(0)
 
