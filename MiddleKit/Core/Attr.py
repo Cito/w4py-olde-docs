@@ -1,5 +1,6 @@
 from ModelObject import ModelObject
 from UserDict import UserDict
+import types
 
 
 class Attr(UserDict, ModelObject):
@@ -12,6 +13,8 @@ class Attr(UserDict, ModelObject):
 		for key, value in dict.items():
 			if key=='Attribute':
 				key = 'Name'
+			if value.strip()=='':
+				value = None
 			self[key] = value
 
 	def name(self):
@@ -20,11 +23,17 @@ class Attr(UserDict, ModelObject):
 	def isRequired(self):
 		''' Returns true if a value is required for this attribute. In Python, that means the value cannot be None. In relational theory terms, that means the value cannot be NULL. '''
 		if not self.has_key('isRequired'):
-			req = 1
+			req = 0
 		else:
 			req = self['isRequired']
-			if req=='':
-				req = '1'
+			if type(req) is types.StringType:
+				req = req.lower()
+			if req in ['', None, '0', 'false']:
+				req = 0
+			elif req in ['1', 'true']:
+				req = 1
+			else:
+				raise ValueError, 'isRequired should be 0 or 1, but == %r' % isRequired
 		return int(req)
 		# @@ 2000-11-11 ce: we say int() above, but in the future we
 		# should provide specific types for the columns of the model

@@ -176,7 +176,11 @@ class SQLObjectStore(ObjectStore):
 					results = {}
 					exec 'from %s import %s' % (className, className) in results
 					pyClass = results[className]
-					obj = pyClass().initFromRow(row)
+					obj = pyClass()
+					obj._mk_store = self
+					# ^^^ a store is the only outsider that is allowed
+					# to directly set a MiddleObject's store like this
+					obj.initFromRow(row)
 					obj.setKey(key)
 					self._objects[key] = obj
 				else:

@@ -1,6 +1,16 @@
 MiddleKit
 TO DO
 
+Update
+------
+
+[ ] find out from Dave if NOT NULL and DEFAULT <value> are supported in MSSQL. Check docs for Postgres and Gadfly.
+
+[ ] Implement all ***
+
+[ ] Make sure all changes are documented.
+
+
 
 <overview>
 <major functionality>
@@ -59,11 +69,9 @@ If you have general comments or questions or contributions, please contact webwa
 
 <major functionality>
 
-	[ ] Review the whole configuration file situation. MK models should be able to have a config file inside them, probably called Settings.config.
-
 	[ ] deleting objects
 
-	[ ] Distinct lists: An object such as "Video" cannot have a directors and writers attribute that are both typed "list of Person".
+	[ ] Distinct lists: An object such as "Video" cannot have a directors and writers attribute that are both typed "list of Person". Might want to review UML relationships before calling the deal on this.
 
 	[ ] Support defaults in both Python code gen and SQL code gen
 		in python __init__()
@@ -96,23 +104,24 @@ If you have general comments or questions or contributions, please contact webwa
 
 <refinements/improvements>
 
-	[ ] For MSSQL per Dave:
+	[ ] resolve issues about setting a MiddleObject's store
+	- this needs to be resolved really soon
+		- review EOF
+		- consider initialization for new objects as well as awakeFromRead()
+		- consider that objects should never switch stores
+			- add an assertion for that
+
+	[x] For MSSQL per Dave:
 		- Need to have an option for create, not to drop the database. This takes too long on MSSQL
 		- Since we're not dropping the DB, we need to drop the tables. They should be dropped in reverse order because:
 			1. that's good shut down policy
 			2. REF feature requires that
-	[ ] Make sure that when a store fetches objects that the objects point back to that store and not to the global store.
 
-	[ ]  Per Dave R:
- def __init__(self, store=None): # @@ 2000-09-21 ce: do we really need the store here?
-  self.__dict__['_mk_initing'] = 1
-  if store is None:
-   self._mk_store = ObjectStore.Store
+	[x] Make sure that when a store fetches objects that the objects point back to that store and not to the global store.
 
+	[x] Per Dave Rogers (and I agree), isRequired should default to 0, not 1.
 
-			- maybe this should assert that there is a non-None store
-
-	[ ] Per Dave Rogers (and I agree), isRequired should default to 0, not 1.
+	*** [ ] Use the upcoming MiscUtils.unquoteForCSV() for InsertSamples (and DataTable).
 
 	[ ] The documentation generation for Webware doesn't pick up on MiddleKit very well, which is the first component to have subpackages (and mix-ins!).
 
@@ -120,9 +129,11 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] Investigate dbinfo.py: http://www.lemburg.com/files/python/dbinfo.py
 
-	[ ] Prior to inserting or updating an object in the store, validate the requirements on it's attributes.
+	*** [ ] Prior to inserting or updating an object in the store, validate the requirements on it's attributes.
+		- review EOF's validation policies
+		- should the accessor assertions be inside a different method? That way you could validate a value for an attribute without necessarily having to set it. The default implementation could invoke self.klass().attr('name').validate(value). Subclasses could override, invoke super, and perform additional checks.
 
-	[ ] support "not null" in SQL
+	*** [ ] support "not null" in SQL. e.g. if isRequired: then add NOT NULL.
 
 	[ ] SQL store: allow connection info to be passed in connect(). e.g., don't require it in __init__
 
@@ -130,20 +141,22 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] addToBars() will add the target to object store if needed. Does setBar()? If not, make it so.
 
-	[ ] SQL code gen: use a primary key instead of a unique index
+	*** [ ] SQL code gen: use a primary key instead of a unique index
 
-	[ ] what is the policy for setInt, setLong, setFloat, setString, etc.? Do we assert the type or do a type conversion with int(), float(), etc.
+	*** [ ] what is the policy for setInt, setLong, setFloat, setString, etc.? Do we assert the type or do a type conversion with int(), float(), etc.
 		- I think we assert the type, except for numbers we may allow coercion, especially if Python's coerce() helps out in this area
 
 	[ ] Standardize the parameters names that SQLStore.connect() takes. host, user, password
 
-	[ ] Create.sql: Drop the drop statements. Not needed.
+	*** [ ] Create.sql: Drop the drop statements. Not needed.
 
 	[ ] Improve Resources/Template.mkmodel.
 
+	[ ] Test that we can use NamedValueAccess. Reconcile this with _get and _set. Make sure that this all works when the getter and setter methods can be customized.
+
 	[ ] In Classes.csv, provide an option for an attribute not to be archived. Accessors and type checking would still be provided.
 
-	[ ] Should MK also cover methods (it already does attributes)?
+	[ ] Should MK also cover methods (it already does attributes)? Review UML.
 
 	[ ] put types in for headings of classes.csv. Create "defaultTypes" feature for DataTable
 
@@ -151,11 +164,11 @@ If you have general comments or questions or contributions, please contact webwa
 		If so, consider that MySQL takes some extra args:
 			port, unix_socket, client_flag
 
-	[ ] In sample code generation, do all deletes first, one time for each table. That way you can have multiple groups of objects
+	*** [ ] In sample code generation, do all deletes first, one time for each table. That way you can have multiple groups of objects
 
 	[ ] Add a parameter to the config for the database name, which right now is assumed to be the same name as the CSV file.
 
-	[ ] enforce min and max for attributes in generated python
+	*** [ ] enforce min and max for attributes in generated python
 
 	[ ] Consider breaking obj refs in the SQL tables into two fields so that non-MK entities, like stored procedures, can have a fighting chance of using them.
 
@@ -272,7 +285,12 @@ If you have general comments or questions or contributions, please contact webwa
 
 <testing>
 
+	[ ] We should pass the store into the test() function instead of requiring:
+		from MiddleKit.Run.ObjectStore import Store as store
+
 	[ ] Now that we have configuration files (at least SQLGenerator.config) we need to run the entire test suite through all configuration options.
+
+	[ ] The Videos model from the tutorial should be included in the automatic, regression test suite.
 
 	[ ] Add a test where certain columns in the object model are not required: Min, Max
 
@@ -300,6 +318,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] I think we already have this: make sure there is a test for it:
 		support relationships where the name of the referencing attribute is not the same as the type of object being pointed. A good example is the 'manager' attribute of an employee. It will point to another employee. So the type still matches (e.g., the type 'Employee' matches the name of the table), but the foreign key and primary key have different names.
+
+	[ ] test that sample data with values out of the min/max range are flagged by MK
 
 </testing>
 

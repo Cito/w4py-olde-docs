@@ -155,7 +155,9 @@ class Attr:
 	def defaultValue(self):
 		''' Returns the default value as a string of legal Python text. '''
 		if self.has_key('Default'):
-			default = self['Default'].strip()
+			default = self['Default']
+			if type(default) is type(''):
+				default = default.strip()
 			if not default:
 				return None
 			else:

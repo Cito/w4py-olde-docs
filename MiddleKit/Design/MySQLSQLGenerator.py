@@ -12,10 +12,14 @@ class Klasses:
 
 	def dropTablesSQL(self):
 		sql = []
-		for klass in self.klassesInOrder():
-			sql.append('drop table if exists %s;\n' % klass.name())
-		for tableName in self.auxiliaryTableNames():
+		names = self.auxiliaryTableNames()[:]
+		names.reverse()
+		for tableName in names:
 			sql.append('drop table if exists %s;\n' % tableName)
+		klasses = self.klassesInOrder()[:]
+		klasses.reverse()
+		for klass in klasses:
+			sql.append('drop table if exists %s;\n' % klass.name())
 		sql.append('\n')
 		return ''.join(sql)
 

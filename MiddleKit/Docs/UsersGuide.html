@@ -20,15 +20,19 @@ Version 0.1
 <a name=ToC><h2>Table of Contents</h2></a>
 
 <p><span class=ToC>
-     <a href="#Synopsis"><font size=+1>Synopsis</font></a>
+     <a href="#ToC"><font size=+1>Table of Contents</font></a>
+<br> <a href="#Synopsis"><font size=+1>Synopsis</font></a>
 <br> <a href="#DataTypes"><font size=+1>Data Types</font></a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#DT_BasicTypes">Basic Types</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#DT_DateTime">Date and time types</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#DT_Enums">Enumerations</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#DT_ObjRef">Object references</a>
+<br> <a href="#ModelFiles"><font size=+1>Model Files</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#MF_Classes">Classes.csv</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#SampleData">Samples.csv</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Configuration">Configuration</a>
 <br> <a href="#GeneratedPy"><font size=+1>Generated Python</font></a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#GP_addToBars">Lists: addToBars()</a>
-<br> <a href="#Configuration"><font size=+1>Configuration</font></a>
 <br> <a href="#MiscTopics"><font size=+1>Miscellaneous Topics</font></a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_IteratingAttrs">Iterating over attributes</a>
 <br> <a href="#RelatedLinks"><font size=+1>Related Links</font></a>
@@ -185,6 +189,38 @@ Version 0.1
 <p> The default value of onDelete is disconnect. An example specification would be <code>onDelete=cascade</code>.
 
 
+<a name=ModelFiles><h2>Model Files</h2></a>
+
+<a name=MF_Classes><h3>Classes.csv</h3></a>
+
+<p> This is the object model where classes and attributes are defined. See the <a href=QuickStart.html>Quick Start</a> for an example.
+
+
+<a name=SampleData><h3>Samples.csv</h3></a>
+
+<p> This is an optional file containing sample data for the model. See the <a href=QuickStart.html>Quick Start</a> for an example.
+
+<p> Note that a blank field in the samples will be substituted with the default value of the attribute (as specified in the object model, e.g., <span class=filename>Classes.csv</a>). To force a None value (NULL in SQL), use 'none' (without the quotes).
+
+
+<a name=Configuration><h3>Configuration</h3></a>
+
+<p> An MK model can have configuration files inside it that affect things like code generation.
+
+<p> The only configuration file supported and used is <span class=filename>SQLGenerator.config</a>. The one setting currently supported is <span class=name>DropStatements</span> whose potential values are:
+
+<ul>
+	<li> database - This causes a DROP DATABASE to be used in <span class=filename>Create.sql</span>. This is the cleanest way to handle models and also the default.
+	<li> tables - This assumes the database already exists and does a DROP TABLE for each table in the model. There is a small danger here that if you remove a class from a model, then its old SQL table will remain in the database. The main use for this setting is for database servers that are slow creating new databases. One user reported a 1 minute lag for Microsoft SQL Server 2000, which is too much of a lag when running the test suite.
+</ul>
+
+<p> An example <a name=filename>SQLGenerator.config</a>:
+
+<pre>{
+    'DropDatabases': 'database',  # database, tables
+}</pre>
+
+
 <a name=GeneratedPy><h2>Generated Python</h2></a>
 
 <a name=GP_addToBars><h3>Lists: addToBars()</h3></a>
@@ -208,24 +244,6 @@ foo.addToBars(newBar)
 </ul>
 
 <p> You don't have to remember the details since this behavior is both supplied and what you would expected. Just remember to use the various addToBars() methods.
-
-
-<a name=Configuration><h2>Configuration</h2></a>
-
-<p> An MK model can have configuration files inside it that affect things like code generation.
-
-<p> The only configuration file supported and used is <span class=filename>SQLGenerator.config</a>. The one setting currently supported is <span class=name>DropStatements</span> whose potential values are:
-
-<ul>
-	<li> database - This causes a DROP DATABASE to be used in <span class=filename>Create.sql</span>. This is the cleanest way to handle models and also the default.
-	<li> tables - This assumes the database already exists and does a DROP TABLE for each table in the model. There is a small danger here that if you remove a class from a model, then its old SQL table will remain in the database. The main use for this setting is for database servers that are slow creating new databases. One user reported a 1 minute lag for Microsoft SQL Server 2000, which is too much of a lag when running the test suite.
-</ul>
-
-<p> An example <a name=filename>SQLGenerator.config</a>:
-
-<pre>{
-    'DropDatabases': 'database',  # database, tables
-}</pre>
 
 
 <a name=MiscTopics><h2>Miscellaneous Topics</h2></a>

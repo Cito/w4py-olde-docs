@@ -145,6 +145,12 @@ class Model:
 				value = value.strip()
 				#print '>> (%s, %s)' % (value, attr)
 				if value=='':
+					value = attr.get('Default', None)
+					if value is None:
+						value = 'NULL'
+					else:
+						value = attr.sampleValue(value)
+				elif value.lower()=='none':
 					value = 'NULL'
 				else:
 					value = attr.sampleValue(value)
@@ -329,14 +335,28 @@ class Attr:
 		''' Returns a string suitable for a SQL insert statement including any necessary SQL syntax. Subclasses should override to perform type checking and handle any special capabilities.
 		The invoker of this method already strips preceding and trailing whitespace, as well detects blanks as NULLs.
 		'''
+		# @@ 2001-02-20 ce: restructure this
+			# sqlValue() instead of sampleValue()
+			# w.s. stripping, blanks as default value, none as NULL
+			# make _sqlValue()
 		return value
 
 	def _writeCreateSQL(self, generator, out):
 		if self.hasSQLColumn():
 			name = self.sqlName().ljust(self.maxNameWidth())
-			out.write('\t%s %s,\n' % (name, self.sqlType()))
+			out.write('\t%s %s %s,\n' % (name, self.sqlType(), self.createDefaultSQL()))
 		else:
 			out.write('\t/* %(Name)s %(Type)s - not a SQL column */\n' % self)
+
+	def createDefaultSQL(self):
+		default = self.get('Default', None)
+		if default is not None:
+			default = default.strip()
+			if default.lower()=='none':  # kind of redundant
+				default = None
+			return 'default ' + self.sampleValue(default)
+		else:
+			return ''
 
 	def maxNameWidth(self):
 		return 30  # @@ 2000-09-14 ce: should compute that from names rather than hard code
