@@ -100,13 +100,14 @@ class Installer:
 		self.createComponentIndexes()
 
 	def propagateStyleSheet(self):
-		''' Copy Docs/StyleSheet.css into other Docs dirs. '''
-		print 'Propagating stylesheet...'
-		stylesheet = open('Docs/StyleSheet.css', 'rb').read()
-		for comp in self._comps:
-			#print '  %s...' % comp['filename']
-			target = os.path.join(comp['filename'], 'Docs', 'StyleSheet.css')
-			open(target, 'wb').write(stylesheet)
+		''' Copy Docs/StyleSheet.css and GenIndex.css into other Docs dirs. '''
+		print 'Propagating stylesheets...'
+		for name in ['StyleSheet.css', 'GenIndex.css']:
+			stylesheet = open('Docs/%s' % name, 'rb').read()
+			for comp in self._comps:
+				#print '  %s...' % comp['filename']
+				target = os.path.join(comp['filename'], 'Docs', name)
+				open(target, 'wb').write(stylesheet)
 		print
 
 	def processRawFiles(self):
@@ -322,7 +323,7 @@ class Installer:
 			title = comp['name'] + ' Documentation'
 			filename = os.path.join(comp['filename'], 'Docs', 'index.html')
 			contents = indexFrag % comp
-			cssLink = '<link rel=stylesheet href=../../Docs/index.css type=text/css>'
+			cssLink = '<link rel=stylesheet href=GenIndex.css type=text/css>'
 			self.writeDocFile(title, filename, contents, extraHead=cssLink)
 
 	def finished(self):
