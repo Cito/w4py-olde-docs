@@ -1,7 +1,7 @@
 from MiscUtils.NamedValueAccess import NamedValueAccess
 from MiscUtils import NoDefault
 import ObjectStore
-import sys
+import sys, types
 
 
 class MiddleObject(NamedValueAccess):
@@ -208,6 +208,15 @@ class MiddleObject(NamedValueAccess):
 		# Set the attribute
 		dict[name] = value
 
+	def addReferencedObjectsToStore(self, store):
+		""" Adds all MK objects referenced by this object to the store """
+		for value in self.allAttrs().values():
+			if isinstance(value, MiddleObject):
+				store.addObject(value)
+			elif isinstance(value, types.ListType):
+				for obj in value:
+					if isinstance(obj, MiddleObject):
+						store.addObject(obj)
 
 	## Accessing attributes by name ##
 

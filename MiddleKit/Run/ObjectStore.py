@@ -66,22 +66,33 @@ class ObjectStore(ModelUser):
 		else:
 			return self._objects.get(key, default)
 
-	def addObject(self, object):
-		''' Restrictions: You cannot insert the same object twice. You cannot insert an object that was loaded from the store. '''
-		#assert not self.hasObject(object)
-		assert object.key()==None
-		assert not object.isInStore()
-		self.willChange()
-		self._newObjects.append(object)
-		object.setInStore(1)
-		# 2000-10-07 ce: Decided not to allow keys for non-persisted objects
-		# Because the serial num, and therefore the key, will change
-		# upon saving.
-		#key = object.key()
-		#if key is None:
-		#	key = ObjectKey(object, self)
-		#	object.setKey(key)
-		#self._objects[key] = object
+	def addObject(self, object, noRecurse=0):
+		"""
+		Add the object and all referenced objects to the store.
+		You can insert the same object multiple times, and you can insert an object that was
+		loaded from the store.  In those cases, this is a no-op.
+		The noRecurse flag is used internally, and should be avoided in regular
+		MiddleKit usage; it causes only this object to be added to the store,
+		not any dependent objects.
+		"""
+		if not object.isInStore():
+			assert object.key()==None
+			# Make the store aware of this new object
+			self.willChange()
+			self._newObjects.append(object)
+			object.setInStore(1)
+			if not noRecurse:
+				# Recursively add referenced objects to the store
+				object.addReferencedObjectsToStore(self)
+			
+			# 2000-10-07 ce: Decided not to allow keys for non-persisted objects
+			# Because the serial num, and therefore the key, will change
+			# upon saving.
+			#key = object.key()
+			#if key is None:
+			#	key = ObjectKey(object, self)
+			#	object.setKey(key)
+			#self._objects[key] = object
 
 	def deleteObject(self, object):
 		''' Restrictions: The object must be contained in the store and obviously you cannot remove it more than once. '''
