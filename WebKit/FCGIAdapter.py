@@ -85,7 +85,7 @@ import sys
 timestamp = time.time()
 
 """Set WebKitDir to the directory where WebKit is located"""
-WebKitDir = '/data/Linux/python/Webware/WebKit'
+WebKitDir = ''
 
 _AddressFile='address.text'
 
