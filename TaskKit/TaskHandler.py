@@ -45,8 +45,8 @@ class TaskHandler:
 			return
 		self._rerurn = 0
 		self._thread = Thread(None, self._task._run, self.name(), (self,))
-		self._thread.start()
 		self._isRunning = 1
+		self._thread.start()
 
 	def reschedule(self):
 		"""
