@@ -11,7 +11,7 @@ def heading(title):
 
 
 def testSource(name, src, headings, data):
-	heading(name+':')
+	heading(name)
 	dt = DataTable()
 	lines = split(src, '\n')
 	dt.readLines(lines)
@@ -21,9 +21,9 @@ def testSource(name, src, headings, data):
 		match = data[i]
 		if dt[i].asList()!=match:
 			print 'mismatch'
-			print 'i      :', i
-			print 'match  :', match
-			print 'dt[i]  :', dt[i]
+			print 'i        :', i
+			print 'expected :', match
+			print 'got      :', dt[i]
 			raise AssertionError
 		i = i + 1
 
@@ -31,18 +31,18 @@ def testSource(name, src, headings, data):
 def test01():
 	print 'Simple tests...'
 
-	heading('Create table:')
+	heading('Create table')
 	t = DataTable()
 
-	heading('Headings 1:')
+	heading('Headings 1')
 	t = DataTable()
 	t.setHeadings([TableColumn('name'), TableColumn('age:int'), TableColumn('rating:float')])
 
-	heading('Headings 2:')
+	heading('Headings 2')
 	t = DataTable()
 	t.setHeadings(['name', 'age:int', 'rating:float'])
 
-	heading('Adding and accessing data:')
+	heading('Adding and accessing data')
 	a = ['John', '26', '7.2']
 	b = ['Mary', 32, 8.3]
 	t.append(a)
@@ -52,10 +52,10 @@ def test01():
 	assert t[-1]['name']=='Mary'
 	assert t[-2]['name']=='John'
 
-	heading('Printing:')
+	heading('Printing')
 	print t
 
-	heading('Writing file (CSV):')
+	heading('Writing file (CSV)')
 	answer = '''\
 name,age,rating
 John,26,7.2
@@ -66,7 +66,7 @@ Mary,32,8.3
 	results = out.getvalue()
 	assert results==answer, '\n%r\n%r\n' % (results, answer)
 
-	heading('Accessing rows:')
+	heading('Accessing rows')
 	for row in t:
 		assert row['name']==row[0]
 		assert row['age']==row[1]
@@ -74,7 +74,7 @@ Mary,32,8.3
 		for item in row:
 			pass
 
-	heading('Default type:')
+	heading('Default type')
 	t = DataTable(defaultType='int')
 	t.setHeadings(list('xyz'))
 	t.append([1, 2, 3])
@@ -124,20 +124,44 @@ a:int,b:int
 	# Multiline records
 	src = '''\
 a
-"""Hi""",
+"""Hi
+there"""
 '''
 	headings = ['a']
-	data = ['"Hi"']
-	#testSource('Multiline records', src, headings, data)
+	data = [
+		['"Hi\nthere"'],
+	]
+	testSource('Multiline records', src, headings, data)
 
-	print
+	# MiddleKit enums
+	src = '''\
+Class,Attribute,Type,Extras
+#Foo,
+,what,enum,"Enums=""foo, bar"""
+,what,enum,"Enums='foo, bar'"
+'''
+	headings = 'Class,Attribute,Type,Extras'.split(',')
+	data = [
+		['', 'what', 'enum', 'Enums="foo, bar"'],
+		['', 'what', 'enum', "Enums='foo, bar'"],
+	]
+	testSource('MK enums', src, headings, data)
 
 
-def test():
+	heading('Unfinished multiline record')
+	try:
+		DataTable().readString('a\n"1\n')
+	except DataTableError:
+		pass  # just what we were expecting
+	else:
+		raise Exception, 'Failed to raise exception for unfinished multiline record'
+
+
+def main():
 	print 'Testing DataTable.py'
 	test01()
 	print 'Done.'
 
 
 if __name__=='__main__':
-	test()
+	main()

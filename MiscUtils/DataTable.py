@@ -126,14 +126,24 @@ A simple query mechanism is supported for equality of fields:
 
 COMMON USES
 
-* Servers can use DataTable to read and write log files.
-
 * Programs can keep configuration and other data in simple comma-
 separated text files and use DataTable to access them. For example, a
 web site could read it's sidebar links from such a file, thereby
 allowing people who don't know Python (or even HTML) to edit these
 links without having to understand other implementation parts of the
 site.
+
+* Servers can use DataTable to read and write log files.
+
+
+FROM THE COMMAND LINE
+
+The only purpose in invoking DataTable from the command line is to see
+if it will read a file:
+
+> python DataTable.py foo.csv
+
+The data table is printed to stdout.
 
 
 MORE DOCS
@@ -162,7 +172,8 @@ TO DO
 '''
 
 
-import string
+import string, sys
+from CSVParser import CSVParser
 from string import join, replace, split, strip
 from types import *
 from MiscUtils import NoDefault
@@ -303,76 +314,21 @@ class DataTable:
 		return self.readLines(split(string, '\n'), delimiter, allowComments, stripWhite)
 
 	def readLines(self, lines, delimiter=',', allowComments=1, stripWhite=1):
-		if not lines:
-			return self
 		haveReadHeadings = 0
-		lineNumber = 0
-		lenLines = len(lines)
-		while lineNumber<lenLines:
-			line = lines[lineNumber]
-
-			if not line:
-				# skip blanks
-				pass
-			elif line[0]=='#':
-				# skip comments
-				pass
-			else:
-				# process row, either headings or data
-
-				# Split into a list of values
-				if '"' in line:
-					# handle quoted values
-					inside = 0
-					newLine = []
-					for i in range(len(line)):
-						c = line[i]
-						if c=='"':
-							if inside:
-								inside = 0
-							else:
-								inside = 1
-							newLine.append(c)
-						elif c==delimiter:
-							if inside:
-								newLine.append('\0')
-							else:
-								newLine.append(c)
-						else:
-							newLine.append(c)
-					#print '>> newLine =', newLine
-					line = join(newLine, '')
-					#print '>> line =', line
-					fixLine = 1
-				else:
-					fixLine = 0
-
-				values = split(line, delimiter)
-
-				if stripWhite  or  not haveReadHeadings:
-					values = map(strip, values)
-
-				if fixLine:
-					def fixValue(value, delimiter=delimiter):
-						value = replace(value, '\0', delimiter)
-						if value[:1] == value[-1:] == '"':
-							value = replace(value[1:-1], '""', '"')
-						return value
-					values = map(fixValue, values)
-
+		parse = CSVParser(fieldSep=delimiter, allowComments=allowComments, stripWhitespace=stripWhite).parse
+		for line in lines:
+			# process a row, either headings or data
+			values = parse(line)
+			if values:
 				if haveReadHeadings:
-					# Create a record using the headings and the current values
 					row = TableRecord(self, values)
 					self._rows.append(row)
 				else:
-					if values==None  or  len(values)==0:
-						raise DataTableError, "Couldn't read valid headings"
 					self.setHeadings(values)
 					self.createNameToIndexMap()
 					haveReadHeadings = 1
-
-			lineNumber = lineNumber + 1
-
+		if values is None:
+			raise DataTableError, "Unfinished multiline record."
 		return self
 
 	def save(self):
@@ -518,7 +474,10 @@ class DataTable:
 	## Self utilities ##
 
 	def createNameToIndexMap(self):
-		''' Invoked by self to create the nameToIndexMap after the table's headings have been read/initialized. '''
+		"""
+		Invoked by self to create the nameToIndexMap after the table's
+		headings have been read/initialized.
+		"""
 		map = {}
 		for i in range(len(self._headings)):
 			map[self._headings[i].name()] = i
@@ -587,7 +546,14 @@ class TableRecord:
 				self._values.append(BlankValues[heading.type()])
 
 	def initFromObject(self, object):
-		''' The object is expected to response to hasValueForKey(name) and valueForKey(name) for each of the headings in the table. It's alright if the object returns 0 for hasValueForKey(). In that case, a "blank" value is assumed (such as zero or an empty string). If hasValueForKey() returns 1, then valueForKey() must return a value. '''
+		"""
+		The object is expected to response to hasValueForKey(name) and
+		valueForKey(name) for each of the headings in the table. It's
+		alright if the object returns 0 for hasValueForKey(). In that
+		case, a "blank" value is assumed (such as zero or an empty
+		string). If hasValueForKey() returns 1, then valueForKey() must
+		return a value.
+		"""
 		self._values = []
 		for heading in self._headings:
 			name = heading.name()
@@ -641,7 +607,10 @@ class TableRecord:
 	## Additional access ##
 
 	def asList(self):
-		''' Returns a sequence whose values are the same at the record's and in the order defined by the table. '''
+		"""
+		Returns a sequence whose values are the same at the record's
+		and in the order defined by the table.
+		"""
 		# It just so happens that our implementation already has this
 		return self._values[:]
 
@@ -664,3 +633,18 @@ class TableRecord:
 
 	def valueForAttr(self, attr, default=NoDefault):
 		return self.valueForKey(attr['Name'], default)
+
+
+
+def main(args=None):
+	if args is None:
+		args = sys.argv
+	for arg in args[1:]:
+		dt = DataTable(arg)
+		print '*** %s ***' % arg
+		print dt
+		print
+
+
+if __name__=='__main__':
+	main()
