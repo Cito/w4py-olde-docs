@@ -1,6 +1,8 @@
 import sys
 sys.path.insert(0, '..')
 from DataTable import *
+import string
+from string import ljust
 
 
 def heading(title):
@@ -47,6 +49,34 @@ def test01():
 	t.append([4, 5, 6])
 	print '<assert>'
 	assert t[0]['x'] - t[1]['z'] == -5
+
+	heading('Quoted values:')
+	t = DataTable()
+	lines = split('''x,y,z
+		a,b,c
+		a,b,"c,d"
+		"a,b",c,d
+		"a","b","c"
+		"a",b,"c"
+		"a,b,c"
+		"","",""
+		"a","",
+''', '\n')
+	t.readLines(lines)
+
+	# clean up lines for printing and comparison to table
+	lines = lines[1:]  # strip heading line (x,y,z)
+	lines = map(strip, lines)
+	maxLen = 0
+	for line in lines:
+		if maxLen<len(line):
+			maxLen = len(line)
+	lines = map(lambda line, ljust=ljust, maxLen=maxLen: ljust(line, maxLen), lines)
+
+	# print lines and table for visual inspection
+	for i in range(len(t)):
+		print '%02i. %s ==> %s' % (i, lines[i], t[i])
+	print
 
 
 def test():

@@ -144,7 +144,7 @@ TO DO
 
 
 import string
-from string import join, split, strip
+from string import join, replace, split, strip
 from types import *
 
 
@@ -285,7 +285,6 @@ class DataTable:
 		while lineNumber<lenLines:
 			line = lines[lineNumber]
 
-			# skip comments
 			if not line:
 				# skip blanks
 				pass
@@ -296,9 +295,38 @@ class DataTable:
 				# process data rows
 
 				# Split into a list of values
+				if '"' in line:
+					# handle quoted values
+					inside = 0
+					newLine = []
+					for i in range(len(line)):
+						c = line[i]
+						if c=='"':
+							if inside:
+								inside = 0
+							else:
+								inside = 1
+						elif c==delimiter:
+							if inside:
+								newLine.append('\0')
+							else:
+								newLine.append(c)
+						else:
+							newLine.append(c)
+					#print '>> newLine =', newLine
+					line = join(newLine, '')
+					#print '>> line =', line
+					fixLine = 1
+				else:
+					fixLine = 0
+
 				values = split(line, delimiter)
+
 				if stripWhite:
 					values = map(strip, values)
+
+				if fixLine:
+					values = map(lambda v, d=delimiter: replace(v, '\0', d), values)
 
 				# Create a record using the headings and the current values
 				row = TableRecord(self, values)
