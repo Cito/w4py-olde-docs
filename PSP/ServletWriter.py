@@ -75,6 +75,8 @@ class ServletWriter:
 	
 	def close(self):
 		self._filehandle.close()
+		if os.path.exists(self._pyfilename):
+			os.remove(self._pyfilename)
 		os.rename(self._temp, self._pyfilename)
 
 	def pushIndent(self):
