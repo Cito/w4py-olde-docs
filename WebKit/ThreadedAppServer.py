@@ -296,8 +296,6 @@ class ThreadedAppServer(AppServer):
 			except:
 				pass
 		AppServer.shutDown(self)
-		print "ThreadedAppServer:  All services have been shut down."
-
 
 
 	## Network Server ##
