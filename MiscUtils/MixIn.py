@@ -2,7 +2,7 @@ from types import MethodType
 import sys
 
 if hasattr(sys, 'version_info') and sys.version_info[0]>=2:
-	def MixIn(pyClass, mixInClass, makeAncestor=0):
+	def MixIn(pyClass, mixInClass, makeAncestor=0, mixInSuperMethods=0):
 		"""
 		Mixes in the attributes of the mixInClass into the pyClass. These attributes are typically methods (but don't have to be). Note that private attributes, denoted by a double underscore, are not mixed in. Collisions are resolved by the mixInClass' attribute overwriting the pyClass'. This gives mix-ins the power to override the behavior of the pyClass.
 
@@ -19,6 +19,14 @@ if hasattr(sys, 'version_info') and sys.version_info[0]>=2:
 		An example, that resides in Webware, is MiddleKit.Core.ModelUser.py, which install mix-ins for SQL adapters. Search for "MixIn(".
 
 		If makeAncestor is 1, then a different technique is employed: the mixInClass is made the first base class of the pyClass. You probably don't need to use this and if you do, be aware that your mix-in can no longer override attributes/methods in pyClass.
+
+		If mixInSuperMethods is 1, then support will be enabled for you to be able to call the original or 
+		"parent" method from the mixed-in method.  This is done like so:
+
+		    class MyMixInClass:
+			def foo(self):
+			    MyMixInClass.mixInSuperFoo(self)	# call the original method
+			    # now do whatever you want
 
 		This function only exists if you are using Python 2.0 or later. Python 1.5.2 has a problem where functions (as in aMethod.im_func) are tied to their class, when in fact, they should be totally generic with only the methods being tied to their class. Apparently this was fixed in Py 2.0.
 		"""
@@ -52,6 +60,11 @@ if hasattr(sys, 'version_info') and sys.version_info[0]>=2:
 			for name in dir(mixInClass):
 				if not name.startswith('__'): # skip private members
 					member = getattr(mixInClass, name)
+
+					if type(member) is MethodType and mixInSuperMethods:
+						if hasattr(pyClass, name):
+							origmember = getattr(pyClass, name)
+							setattr(mixInClass, 'mixInSuper' + name[0].upper() + name[1:], origmember)
 					if type(member) is MethodType:
 						member = member.im_func
 					setattr(pyClass, name, member)
