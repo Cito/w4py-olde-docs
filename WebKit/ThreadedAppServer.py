@@ -28,6 +28,9 @@ debug = 0
 
 DefaultConfig = {
 	'Port':                 8086,
+	'Host':                 '127.0.0.1',
+	'MonitorPort':          8085,
+	'HTTPPort':             8080,
 	'MaxServerThreads':        20,
 	'MinServerThreads':        5,
 	'StartServerThreads':      10,
@@ -36,7 +39,6 @@ DefaultConfig = {
 #	'RequestQueueSize':     16,#	'RequestBufferSize':    64*1024,
 #	'SocketType':           'inet',      # inet, unix
 }
-
 
 #Need to know this value for communications
 #Note that this limits the size of the dictionary we receive from the AppServer to 2,147,483,647 bytes
@@ -73,6 +75,7 @@ class ThreadedAppServer(AppServer):
 		unlike monitor or http).
 		"""
 		
+		self._defaultConfig = None
 		AppServer.__init__(self, path)
 		threadCount = self.setting('StartServerThreads')
 		self._maxServerThreads = self.setting('MaxServerThreads')
@@ -82,7 +85,7 @@ class ThreadedAppServer(AppServer):
 		self._threadUseCounter = []
 		# twice the number of threads we have:
 		self._requestQueue = Queue.Queue(self._maxServerThreads * 2)
-		self._addr = None
+		self._addr = {}
 		self._requestID = 0
 
 		out = sys.stdout
@@ -100,11 +103,11 @@ class ThreadedAppServer(AppServer):
 		self._handlerCache = {}
 		self._sockets = {}
 
-		self.addSocketHandler(self.address(), AdapterHandler)
+		self.addSocketHandler(AdapterHandler)
 
 		self.readyForRequests()
 
-	def addSocketHandler(self, serverAddress, handlerClass):
+	def addSocketHandler(self, handlerClass, serverAddress=None):
 		"""
 		Adds a socket handler for `serverAddress` -- `serverAddress`
 		is a tuple (*host*, *port*), where *host* is the interface
@@ -118,7 +121,9 @@ class ThreadedAppServer(AppServer):
 		back to ThreadedAppServer in some fashion.  See `Handler`
 		for more.
 		"""
-		
+
+		if serverAddress is None:
+			serverAddress = self.address(handlerClass.settingPrefix)
 		self._socketHandlers[serverAddress] = handlerClass
 		self._handlerCache[serverAddress] = []
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -141,6 +146,12 @@ class ThreadedAppServer(AppServer):
 	def isPersistent(self):
 		":ignore:"
 		return 1
+
+	def defaultConfig(self):
+		if self._defaultConfig is None:
+			self._defaultConfig = AppServer.defaultConfig(self).copy()
+			self._defaultConfig.update(DefaultConfig)
+		return self._defaultConfig
 
 	def mainloop(self, timeout=1):
 		"""
@@ -433,15 +444,21 @@ class ThreadedAppServer(AppServer):
 	**Misc**
 	"""
 
-	def address(self):
+	def address(self, settingPrefix):
 		"""
 		The address for the Adapter (Host/interface, and port),
 		taken from ``Configs/Application.config``, setting
 		``Host`` and ``Port``.
 		"""
-		if self._addr is None:
-			self._addr = (self.setting('Host'), self.setting('Port'))
-		return self._addr
+		try:
+			return self._addr[settingPrefix]
+		except KeyError:
+			host = self.setting(settingPrefix + 'Host',
+					    self.setting('Host'))
+			self._addr[settingPrefix] = (
+				host,
+				self.setting(settingPrefix + 'Port'))
+			return self._addr[settingPrefix]
 
 class Handler:
 
@@ -552,6 +569,7 @@ class MonitorHandler(Handler):
 	# perhaps better status indicators (# of threads, etc).
 
 	protocolName = 'monitor'
+	settingPrefix = 'Monitor'
 
 	def handleRequest(self):
 
@@ -641,6 +659,7 @@ class AdapterHandler(Handler):
 	"""
 
 	protocolName = 'address'
+	settingPrefix = ''
 
 	def handleRequest(self):
 		"""
@@ -715,13 +734,11 @@ def run(useMonitor = 0, http=0, workDir=None):
 		server = None
 		server = ThreadedAppServer(workDir)
 		if useMonitor:
-			addr = server.address()
-			server.addSocketHandler((addr[0], addr[1]-1),
-						MonitorHandler)
+			addr = server.address('Monitor')
+			server.addSocketHandler(MonitorHandler)
 		if http:
 			from WebKit.HTTPServer import HTTPAppServerHandler
-			addr = ('127.0.0.1', 8080)
-			server.addSocketHandler(addr, HTTPAppServerHandler)
+			server.addSocketHandler(HTTPAppServerHandler)
 
 		# On NT, run mainloop in a different thread because
 		# it's not safe for Ctrl-C to be caught while
