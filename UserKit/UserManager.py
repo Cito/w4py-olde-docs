@@ -10,12 +10,12 @@ class UserManager:
 		* UserManagerToMiddleKit
 
 
-	You can create a user through the manager:
+	You can create a user through the manager (preferred):
 		user = manager.createUser(name, password)
 
 	Or directly through the user class:
 		user = RoleUser(manager, name, password)
-
+		manager.addUser(user)
 
 	The manager tracks users by whether or not they are "active" (e.g., logged in) and indexes them by:
 		* user serial number
@@ -51,7 +51,7 @@ class UserManager:
 		def logout(self, user):
 
 
-	There are three important user states that are important to the manager:
+	There are three user states that are important to the manager:
 		* modified
 		* cached
 		* authenticated or "active"
@@ -92,7 +92,7 @@ class UserManager:
 		self._numActive = 0
 
 	def shutDown(self):
-		''' Performs any tasks necessary to shot down the user manager. Subclasses may override and must invoke super as their *last* step. '''
+		''' Performs any tasks necessary to shut down the user manager. Subclasses may override and must invoke super as their *last* step. '''
 		pass
 
 
