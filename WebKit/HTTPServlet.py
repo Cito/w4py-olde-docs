@@ -5,8 +5,9 @@ from Servlet import Servlet
 class HTTPServlet(Servlet):
 	'''
 	HTTPServlet implements the respond() method to invoke methods such as respondToGet() and respondToPut() depending on the type of HTTP request.
-	Current supported request are GET, POST, PUT, DELETE, OPTIONS and TRACE.
-	The dictionary _methodForRequestType contains the information about the types of requests and their corresponding methods.
+	Example HTTP request methods are GET, POST, HEAD, etc.
+	Subclasses implement HTTP method FOO in the Python method respondToFoo.
+	Unsupported methods return a "501 Not Implemented" status.
 
 	Note that HTTPServlet inherits awake() and respond() methods from Servlet and that subclasses may make use of these.
 
@@ -20,37 +21,30 @@ class HTTPServlet(Servlet):
 
 	def __init__(self):
 		Servlet.__init__(self)
-		self._methodForRequestType = {
-			'GET':     self.__class__.respondToGet,
-			'POST':    self.__class__.respondToPost,
-			'PUT':     self.__class__.respondToPut,
-			'DELETE':  self.__class__.respondToDelete,
-			'OPTIONS': self.__class__.respondToOptions,
-			'TRACE':   self.__class__.respondToTrace,
-		}
+		self._methodForRequestType = {}  # a cache; see respond()
 
 
 	## Transactions ##
 
 	def respond(self, trans):
 		''' Invokes the appropriate respondToSomething() method depending on the type of request (e.g., GET, POST, PUT, ...). '''
-		method = self._methodForRequestType[trans.request().method()]
-		method(self, trans)
+		httpMethodName = trans.request().method()
+		method = self._methodForRequestType.get(httpMethodName, None)
+		if not method:
+			methName = 'respondTo' + httpMethodName.capitalize()
+			method = getattr(self, methName, self.notImplemented)
+		method(trans)
 
-	def respondToGet(self, trans):
-		raise SubclassResponsibilityError
+	def notImplemented(self, trans):
+		trans.response().setHeader('Status', '501 Not Implemented')
 
-	def respondToPost(self, trans):
-		raise SubclassResponsibilityError
-
-	def respondToPut(self, trans):
-		raise SubclassResponsibilityError
-
-	def respondToDelete(self, trans):
-		raise SubclassResponsibilityError
-
-	def respondToOptions(self, trans):
-		raise SubclassResponsibilityError
-
-	def respondToTrace(self, trans):
-		raise SubclassResponsibilityError
+	def respondToHead(self, trans):
+		'''
+		A correct but inefficient implementation.
+		Should at least provide Last-Modified and Content-Length.
+		'''
+		res = trans.response()
+		w = res.write
+		res.write = lambda *args: None
+		self.respondToGet(trans)
+		res.write = w
