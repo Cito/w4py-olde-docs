@@ -156,15 +156,15 @@ class ModPythonAdapter(Adapter):
 
 
 	def respond(self, req, respdict):
-		headerend = string.find(respdict, "\n\n")
+		headerend = string.find(respdict, "\r\n\r\n")
 		headers = respdict[:headerend]
-		for i in string.split(headers, "\n"):
+		for i in string.split(headers, "\r\n"):
 			header = string.split(i, ":")
 			req.headers_out[header[0]] = header[1]
 			if string.lower(header[0]) == 'content-type': req.content_type = header[1]
 			if string.lower(header[0]) == 'status': req.status = int(string.split(string.lstrip(header[1]),' ')[0])
 		req.send_http_header()
-		req.write(respdict[headerend+2:])
+		req.write(respdict[headerend+4:])
 
 
 	def handleException(self, req):
