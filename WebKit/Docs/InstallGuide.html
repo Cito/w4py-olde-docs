@@ -467,7 +467,7 @@ WebKit 0.5
 
 <a name=AppServerNotes_Monitoring><h3>Monitoring</h3></a>
 
-<p> [UNIX] In order to provide additional stability and peace of mind, a monitor process has been developed.  The monitor is responsible for starting the AppServer and monitoring its health.  If it detects that the AppServer is not responding, it will start a new AppServer and clean up the old one.  In order to use the monitor, run the file wkMonitor.py.  The wkMonitor process will handle the starting of the main AppServer. In order to shut down WebKit when using the monitor process, run stopMonitor.py.
+<p> [UNIX] In order to provide additional stability and peace of mind, a monitor process has been developed.  The monitor is responsible for starting the AppServer and monitoring its health.  If it detects that the AppServer is not responding, it will start a new AppServer and clean up the old one.  In order to use the monitor, run the file Monitor.py with the argument start or stop. Optionally, you can also specify "daemon" on the command line to run the process as a daemon. The Monitor process will handle the starting of the main AppServer. In order to shut down WebKit when using the monitor process, run Monitor.py with "stop" as an argument.
 
 <p> This process will be available on Windows systems in the near future.
 
