@@ -131,7 +131,7 @@ class SQLObjectStore(ObjectStore):
 		Raises an exception if theClass parameter is invalid, or the object cannot be located.
 		'''
 		klass = self._klassForClass(aClass)
-		objects = self.fetchObjectsOfClass(klass, serialNum=serialNum)
+		objects = self.fetchObjectsOfClass(klass, serialNum=serialNum, isDeep=0)
 		count = len(objects)
 		if count==0:
 			if default is NoDefault:
