@@ -1,0 +1,108 @@
+<html>
+
+<head><title>Release Procedures (Webware for Python)</title></head>
+
+<body>
+
+<pre>
+
+<h1>Webware for Python</h1>
+Release Procedures
+
+
+TO DO
+-----
+* cvs tagging didn't work last time
+* format these docs
+
+
+Final tweaking
+--------------
+* Search for @@ in both source docs
+* Skim through docs one final time
+    * Make sure all the version numbers and dates are correct.
+
+
+Final testing
+-------------
+* Close all source files (to reduce the chances of making changes that
+  go untested)
+* Check out a _new_ copy of the repository.
+* Restart webserver
+* Restart web client
+* Test CGI Wrapper by trying all examples
+* Test WebKit
+	* Test _admin first. Check that viewing empty logs is handled gracefully.
+	* Test the examples.
+    * When testing examples, be sure to test links at bottom of page for
+      things like viewing the source
+    * Run Testing/stress.py
+
+
+Pack up
+-------
+cvs -q tag Release-VER
+cvs co -r Release-VER Webware
+tar czvf Webware-VER.tar.gz
+
+
+Release on SourceForge
+----------------------
+FTP to SourceForge.net -
+
+> ftp download.sourceforge.net
+  > user: ftp
+  > pwd: <e-mail addr>
+  > cd incoming
+  > bin
+  > hash
+  > put Webware-<version>.tar.gz
+
+or:
+
+> ncftpput -V download.sourceforge.net /incoming Webware-<version>.tar.gz
+
+
+Log into www.sourceforge.net
+Go to project page:
+    https://sourceforge.net/project/?group_id=4866
+Choose 'File Release' and proceed
+
+Reference: "Making File Releases",
+    http://sfdocs.sourceforge.net/sfdocs/display_topic.php?topicid=22
+
+
+Notify
+------
+Review http://webware.sourceforge.net and make appropriate changes including
+version number.
+
+Add a news item to the SourceForge project page
+    https://sourceforge.net/project/?group_id=4866
+
+Announce on comp.lang.python
+
+Update on http://www.vex.net/parnassus
+
+Announce on mailing lists:
+	pywx@idyll.org
+	python-web-modules@egroups.com
+	webware-announce@lists.sourceforge.net
+
+Review/search for other places where the announcement can be made
+
+
+Post
+----
+Check that Parnassus was updated.
+
+Look for follow up messages on comp.lang.python
+
+Test drive the home page, project page and download.
+
+Check the download counter on SourceForge.
+
+</pre>
+
+<hr>
+</body>
