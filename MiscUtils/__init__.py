@@ -1,6 +1,6 @@
 # MiscUtils package
 # Webware for Python
-# See Documentation/MiscUtils.py
+# See Documentation/MiscUtils.html
 
 __all__ = ['Configurable', 'DataTable', 'DictForArgs', 'Error', 'Funcs', 'NamedValueAccess']
 
