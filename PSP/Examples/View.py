@@ -1,5 +1,5 @@
 import string
-from Page import Page
+from WebKit.Page import Page
 import os
 
 class View(Page):
