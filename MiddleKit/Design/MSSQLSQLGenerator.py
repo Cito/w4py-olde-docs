@@ -31,6 +31,9 @@ class Model:
 		self._klasses.setSQLGenerator(generator)
 		self._klasses.writeSQL(generator, os.path.join(dirname, 'Create.sql'))
 
+	def writePostKlassSamplesSQL(self, generator, file):
+		file.write('go\n')
+
 
 class Klasses:
 
@@ -300,6 +303,8 @@ class StringAttr:
 
 class ObjRefAttr:
 
+	refVarCount = 1
+
 	def sqlType(self):
 		if self.setting('UseBigIntObjRefColumns', False):
 			if self.get('Ref', None):
@@ -323,6 +328,21 @@ class ObjRefAttr:
 		return ' constraint [%s] references %s(%s) ' % (
 			constraintName, targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
 
+	def sqlForNonNoneSampleInput(self, input):
+		sql = ObjRefAttr.mixInSuperSqlForNonNoneSampleInput(self, input)
+		if sql.find('(select')!=-1:
+			# MS SQL 2000 does not allow a subselect where an INSERT value is expected.
+			# It will complain:
+			# "Subqueries are not allowed in this context. Only scalar expressions are allowed."
+			# So we pass back some "pre-statements" to set up the scalar in a temp variable.
+			classId, objId = sql.split(',', 1)  # objId is the '(select...' part
+			refVarName = str('@ref_%03i_%s' % (ObjRefAttr.refVarCount, self.targetKlass().name()))
+			ObjRefAttr.refVarCount += 1
+			preSql = str('declare %s as int; set %s = %s;\n' % (refVarName, refVarName, objId))
+			sqlForValue = classId + ',' + refVarName
+			return (preSql, sqlForValue)
+		else:
+			return sql
 
 
 class ListAttr:
