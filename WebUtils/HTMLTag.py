@@ -226,7 +226,7 @@ class HTMLTag:
 			if isinstance(child, HTMLTag):
 				child.pprint(out, indent)
 			else:
-				wr('%s    %r\n' % (spacer, child))
+				wr('%s    %s\n' % (spacer, child))
 		wr('%s</%s>\n' % (spacer, self._name))
 		# ^^^
 		# Printing a closing tag for an empty tag (such as <br>)
