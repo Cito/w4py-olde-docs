@@ -92,6 +92,7 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 			from WebKit.ThreadedAppServer import ThreadedAppServer
 			self.server = ThreadedAppServer()
 			self.server.mainloop()
+			self.server.shutDown()
 		except Exception, e: #Need to kill the Sweeper thread somehow
 			print e
 			print "Exiting AppServer"
