@@ -48,6 +48,7 @@ DefaultConfig = {
 #Note that this limits the size of the dictionary we receive from the AppServer to 2,147,483,647 bytes
 int_length = len(dumps(int(1)))
 
+server = None
 
 class ThreadedAppServer(AppServer):
 	"""
@@ -83,11 +84,14 @@ class ThreadedAppServer(AppServer):
 		out.write("\n")
 
 		self.mainsocket.listen(64) # @@ 2000-07-10 ce: hard coded constant should be a setting
+		self.recordPID()
+		print "Ready\n"
 
 	def isPersistent(self):
 		return 1
 
 	def mainloop(self, monitor=None, timeout=1):
+		from errno import EINTR
 
 		inputsockets = [self.mainsocket,]
 		if monitor:
@@ -95,11 +99,16 @@ class ThreadedAppServer(AppServer):
 
 		while 1:
 			if not self.running:
-				self.shutDown()
 				break
 
 			#block for timeout seconds waiting for connections
-			input, output, exc = select.select(inputsockets,[],[],timeout)
+			try:
+				input, output, exc = select.select(inputsockets,[],[],timeout)
+			except select.error, v:
+				# if the error is EINTR/interrupt, then self.running should be set to 0 and
+				# we'll exit on the next loop
+				if v[0] != EINTR: raise
+				else: break
 			for sock in input:
 				if sock.getsockname()[1] == self.monitorPort:
 					client,addr = sock.accept()
@@ -127,11 +136,6 @@ class ThreadedAppServer(AppServer):
 					if self.running:
 						rh.handleRequest()
 					rh.close()
-##					try:
-##						self.rhQueue.put(rh)
-##					except Queue.Full:
-##						#print ">> rhQueue Full"
-##						pass				#do I want this?
 				except Queue.Empty:
 					pass
 		finally:
@@ -147,7 +151,7 @@ class ThreadedAppServer(AppServer):
 
 
 	def shutDown(self):
-		self._shuttingDown = 1
+		print "Shutting Down Threaded AppServer"
 		self.mainsocket.close()
 		for i in range(self._poolsize):
 			self.requestQueue.put(None)#kill all threads
@@ -173,7 +177,6 @@ class ThreadedAppServer(AppServer):
 
 
 class Monitor:
-
 	def __init__(self, server):
 		self.server = server
 		self.port = server.monitorPort
@@ -211,6 +214,9 @@ class Monitor:
 
 		if data == "STATUS":
 			conn.send(str(self.server._reqCount))
+
+		if data == 'QUIT':
+			self.server.shutDown()
 		conn.close()
 
 
@@ -259,6 +265,8 @@ class RequestHandler:
 			missing = dict_length - len(chunk)
 
 		dict = loads(chunk)
+		if verbose:
+			chucklen1 = len(chunk)
 		
 		while 1:
 			chunk = recv(BUFSIZE)
@@ -270,10 +278,7 @@ class RequestHandler:
 
 		dict['input'] = data
 
-		if verbose:
-			print '>>> received %d bytes' % len(data)
 		if dict:
-			#dict = loads(data)
 			if verbose:
 				print 'request has keys:', string.join(dict.keys(), ', ')
 				if dict.has_key('environ'):
@@ -342,7 +347,9 @@ class RequestHandler:
 			ReStartLock.release()
 
 
+
 def main(monitor = 0):
+	global server
 	try:
 		server = None
 		server = ThreadedAppServer()
@@ -363,24 +370,50 @@ def main(monitor = 0):
 			server.running = 0
 			t.join()
 		else:
-			server.mainloop(monitor)
+			try:
+				server.mainloop(monitor)
+			except KeyboardInterrupt, e:
+				server.shutDown()
 	except Exception, e: #Need to kill the Sweeper thread somehow
 		import traceback
 		traceback.print_exc(file=sys.stderr)
 		#print e
 		print
 		print "Exiting AppServer"
-		if server:
+		if server.running:
 			server.running=0
 			server.shutDown()
 		sys.exit()
 
 
+def shutDown(arg1,arg2):
+	global server
+	print "Shutdown Called"
+	server.shutDown()
+
+import signal
+signal.signal(signal.SIGINT, shutDown)
+
+
+
+usage = """
+The AppServer is the main process of WebKit.  It handles requests for servlets from webservers.
+ThreadedAppServer takes the following command line arguments:
+-stop:  Stop the currently running Apperver.
+If AppServer is called with no arguments, it will start the AppServer and record the pid of the process in appserverpid.txt
+"""
+
 if __name__=='__main__':
 	import sys
-	if len(sys.argv) > 1 and sys.argv[1] == "-monitor":
-		print "Using Monitor"
-		main(1)
+	if len(sys.argv) > 1:
+		if sys.argv[1] == "-monitor":
+			print "Enabling Monitoring"
+			main(1)
+		elif sys.argv[1] == "-stop":
+			import AppServer
+			AppServer.stop()
+		else:
+			print usage
 	else:
 		if 0:
 			import profile

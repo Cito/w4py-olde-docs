@@ -8,13 +8,14 @@ FUTURE
 	* Implement the additional settings that are commented out below.
 """
 
+import os, sys
+sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 
 from Common import *
 from Object import Object
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 from Application import Application
 from PlugIn import PlugIn
-import os, sys
 
 
 DefaultConfig = {
@@ -40,7 +41,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		ConfigurableForServerSidePath.__init__(self)
 		Object.__init__(self)
 		if path is None:
-			path = os.getcwd()
+			path = os.path.dirname(__file__)  #os.getcwd()
 		self._serverSidePath = os.path.abspath(path)
 		self._verbose = self.setting('Verbose')
 		self._plugIns = []
@@ -52,7 +53,21 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self.loadPlugIns()
 
 		self.running = 1
+		
 
+
+	def recordPID(self):
+		"""
+		Save the pid of the AppServer to a file name appserverpid.txt.
+		"""
+		import os
+		pidfile = open(os.path.join(self._serverSidePath, "appserverpid.txt"),"w")
+
+		if os.name == 'posix':
+			pidfile.write(str(os.getpid()))
+		else:
+			import win32api
+			pidfile.write(str(win32api.GetCurrentProcess()))
 
 	def shutDown(self):
 		"""
@@ -61,12 +76,13 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			2. class specific statements for shutting down
 			3. Invoke super's shutDown() e.g., AppServer.shutDown(self)
 		"""
-
+		print "Shutting down the AppServer"
 		self._shuttingDown = 1
 		self.running = 0
 		self._app.shutDown()
 		del self._plugIns
 		del self._app
+		print "AppServer has been shutdown"
 
 
 	## Configuration ##
@@ -213,6 +229,19 @@ def main():
 		server.shutDown()
 		del server
 		sys.exit()
+
+
+def stop():
+	pidfile = os.path.join(os.path.dirname(__file__),"appserverpid.txt")
+	pid = int(open(pidfile,"r").read())
+	#now what for windows?
+	if os.name == 'posix':
+		import signal
+		os.kill(pid,signal.SIGINT)
+	else:
+		import win32process
+		win32process.TerminateProcess(pid,0)
+
 
 
 if __name__=='__main__':

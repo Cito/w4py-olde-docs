@@ -13,6 +13,9 @@ import Queue
 import select
 import socket
 import asyncore
+import string
+import time
+import exceptions
 from WebUtils.WebFuncs import RequestURI
 
 try:
@@ -54,6 +57,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		out.write('Creating %d threads' % self._poolsize)
 		for i in range(self._poolsize): #change to threadcount
 			t = Thread(target=self.threadloop)
+			t.setDaemon(1)
 			t.start()
 			self.threadPool.append(t)
 			out.write(".")
@@ -66,6 +70,8 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		self.setRequestHandlerClass(RequestHandler)
 
 		self.listen(self._poolsize*2) # @@ 2000-07-14 ce: hard coded constant should be a setting
+
+		self.recordPID()
 		print "Ready\n"
 
 
@@ -80,6 +86,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		"""
 		This is the function that starts the request processing cycle.  When asyncore senses a write on the main socket, it calls this function.  We then accept the connection, and hand it off to a RequestHandler instance by calling the RequestHandler instance's activate method.  When we call that activate method, the RH registers itself with asyncore by calling set_socket, so that asyncore now will include that socket, and thus the RH, in it's network select loop.
 		"""
+
 		rh = None
 		try:
 			rh=self.rhQueue.get_nowait()
@@ -155,19 +162,17 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		"""
 		Cleanup when being shut down.
 		"""
-		self._app.shutDown()
-		#self.mainsocket.close()
+		print "AppServer: Shutting Down AsyncThreadedAppServer"
+		self.running = 0
+		self.close()
 		for i in range(self._poolsize):
-			self.requestQueue.put(None)#kill all threads
-		for i in self.threadPool:
-			i.join()
-		del self._plugIns[:]
-
-		del self._app
-
+			self.requestQueue.put(None) #tells threads to exit
+		asyncore.close_all()
+		AppServer.shutDown(self)
+		print "AppServer: All Services have been shutdown"
+		
 
 
-import string, time
 
 class RequestHandler(asyncore.dispatcher):
 	"""
@@ -190,8 +195,14 @@ class RequestHandler(asyncore.dispatcher):
 			self.have_response = 1
 			return
 
+		if self.reqdata == 'QUIT':
+			self._buffer = 'OK'
+			self.have_response = 1
+			self.server.shutDown()
+			return
+			
+
 		verbose = self.server._verbose
-		verbose = 1
 
 		startTime = time.time()
 		if verbose:
@@ -246,7 +257,8 @@ class RequestHandler(asyncore.dispatcher):
 		return self.active and not self.have_request
 
 	def writable(self):
-		return self.have_response
+		return self._buffer
+		#return self.have_response and self._buffer
 
 	def handle_connect(self):
 		pass
@@ -266,25 +278,27 @@ class RequestHandler(asyncore.dispatcher):
 
 
 	def handle_write(self):
-		if not self.have_response:
+		if not self._buffer and not self.have_response:
 			print ">> Handle write called before response is ready\n"
 			return
-		sent = self.send(self._buffer)
+		sent = self.send(self._buffer[:8192])
 		self._buffer = self._buffer[sent:]
-		if len(self._buffer) == 0:
+		if self.have_response and not self._buffer:  #if the servlet has returned and there is no more data in the buffer
 			self.socket.shutdown(1)
 			self.close()
 			#For testing
+		else:
+			pass
 		if debug:
 			sys.stdout.write(".")
 			sys.stdout.flush()
 
 	def close(self):
-		#print ">>Close Called"
 		self.recycle()
 
 	def handle_close(self):
-		print ">>Handling Close"
+		pass
+		#print ">>Handling Close"
 		#self.recycle()
 		
 	def recycle(self):
@@ -299,6 +313,15 @@ class RequestHandler(asyncore.dispatcher):
 	def log(self, message):
 		pass
 
+	def handle_error(self):
+		t, v, tbinfo = sys.exc_info()
+		if t != exceptions.KeyboardInterrupt:
+			print "Error caught in asyncore."
+			print "The type is %s, %s" % (t,v)
+			import traceback
+			traceback.print_tb(tbinfo)
+		self.server.shutDown()
+
 class Monitor(asyncore.dispatcher):
 	"""
 	This is a dispatch class that handles requests on the monitor port.
@@ -307,6 +330,7 @@ class Monitor(asyncore.dispatcher):
 	def __init__(self, server):
 		self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
 		addr = ((server.address()[0],server.address()[1]-1))
+		self.addr = addr
 		self.bind(addr)
 		self.listen(5)
 		self.server = server
@@ -324,7 +348,7 @@ class Monitor(asyncore.dispatcher):
 				return
 		conn,addr = self.accept()
 		conn.setblocking(0)
-		rh.activate(conn)
+		rh.activate(conn, self.addr)
 
 	def log(self, message):
 		pass
@@ -332,34 +356,75 @@ class Monitor(asyncore.dispatcher):
 
 
 def main(monitor = 0):
+	from errno import EINTR
+	import select
 	try:
 		server = None
-		server = AsyncThreadedAppServer()
-		if monitor:
-			monitor = Monitor(server)
-		asyncore.loop()
-	except Exception, e: #Need to kill the Sweeper thread somehow
-		print e
-		print "Exiting AppServer"
-		if 1: #See the traceback from an exception
+		try:
+			server = AsyncThreadedAppServer()
+		except Exception, e:
+			print "Error starting the AppServer"
 			tb = sys.exc_info()
+			print "Traceback:\n"
 			print tb[0]
 			print tb[1]
-			import traceback
+			import traceback			
 			traceback.print_tb(tb[2])
-		if server:
-			server.running=0
+			sys.exit()
+		if monitor:
+			monitor = Monitor(server)
+		try:
+			asyncore.loop()
+		except select.error, v:
+			print "error caught in asyncore.loop"
+			if v[0] != EINTR: raise
+		except KeyboardInterrupt, e:
+			print "Initiating Shutdown"
+		except Exception, e:
+			print e
+			print "Error, Exiting AppServer"
+			if 1: #See the traceback from an exception
+				tb = sys.exc_info()
+				print "Traceback:\n"
+				print tb[0]
+				print tb[1]
+				import traceback
+			traceback.print_tb(tb[2])
+	finally:
+		if server and server.running:
 			server.shutDown()
-		#return
-		sys.exit()
-		raise Exception()
+	sys.exit()
+
+
+def shutDown(arg1,arg2):
+	print "Shutdown Called"
+	raise KeyboardInterrupt
+
+import signal
+signal.signal(signal.SIGINT, shutDown)
+
+
+
+usage = """
+The AppServer is the main process of WebKit.  It handles requests for servlets from webservers.
+ThreadedAppServer takes the following command line arguments:
+-stop:  Stop the currently running Apperver.
+If AppServer is called with no arguments, it will start the AppServer and record the pid of the process in appserverpid.txt
+"""
+
 
 
 if __name__=='__main__':
 	import sys
-	if len(sys.argv) > 1 and sys.argv[1] == "-monitor":
-		print "Using Monitor"
-		main(1)
+	if len(sys.argv) > 1:
+		if sys.argv[1] == "-monitor":
+			print "Enabling Monitoring"
+			main(1)
+		elif sys.argv[1] == '-stop':
+			import AppServer
+			AppServer.stop()
+		else:
+			print usage
 	else:
 		if 0:
 			import profile
