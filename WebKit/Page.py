@@ -182,7 +182,11 @@ class Page(HTTPServlet):
 		self.writeBodyParts() in between.
 		'''
 		wr = self.writeln
-		wr('<body %s>' % self.htBodyArgs())
+		bodyArgs = self.htBodyArgs()
+		if bodyArgs:
+			wr('<body %s>' % bodyArgs)
+		else:
+			wr('<body>')
 		self.writeBodyParts()
 		wr('</body>')
 
