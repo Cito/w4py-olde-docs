@@ -24,7 +24,7 @@ char* expand_memory(WFILE* p, long add)
 		long currsize;
 		long newsize = 0;
 
-		currsize = p->ptr - p->str;
+		currsize = p->end - p->str;
 		if (add == 0) add = 4096;
 
 		newsize = currsize + add;
@@ -34,7 +34,7 @@ char* expand_memory(WFILE* p, long add)
 
 		memcpy( newptr, p->str, currsize);
 		p->end = newptr + newsize;
-		p->ptr = newptr + currsize;
+		p->ptr = newptr + (p->ptr - p->str);
 		free(p->str);
 		p->str = newptr;
 		return newptr;
