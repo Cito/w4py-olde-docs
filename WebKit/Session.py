@@ -45,6 +45,7 @@ class Session(Object, CanContainer):
 		self._lastAccessTime  = self._creationTime = time()
 		self._numTrans        = 0
 		self._values          = {}
+		self._timeout = trans.application().setting("SessionTimeout")
 
 		attempts = 0
 		while attempts<10000:
@@ -78,6 +79,14 @@ class Session(Object, CanContainer):
 
 	def isNew(self):
 		return self._numTrans<2
+
+	def setTimeout(self, timeout):
+		"""Set the timeout on this session"""
+		self._timeout = timeout*60   #convert to seconds
+
+	def getTimeout(self):
+		""" Get the timeout for this session IN SECONDS """
+		return self._timeout
 
 
 	## Invalidate ##
@@ -118,4 +127,8 @@ class Session(Object, CanContainer):
 
 	def sleep(self, trans):
 		''' Invoked during the ending of a transaction, giving a Session an opportunity to perform any required shutdown. The default implementation does nothing, but could do something in the future. Subclasses should invoke super. '''
+		pass
+
+	def expiring(self):
+		""" Called when session is expired"""
 		pass

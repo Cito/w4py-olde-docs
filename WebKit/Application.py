@@ -138,7 +138,8 @@ class Application(Configurable,CanContainer):
 		@@ Overhaul by 0.4
 		"""
 		import CanFactory
-		self._canFactory = CanFactory.CanFactory(self,os.path.join(os.getcwd(),'Cans'))
+		self._canDirs = ["Cans",]
+		self._canFactory = CanFactory.CanFactory(self)
 
 	def startSessionSweeper(self):
 		self._sessSweepThread = Thread(None, self.sweepSessionsContinuously, 'SessionSweeper')
@@ -161,7 +162,7 @@ class Application(Configurable,CanContainer):
 		assert timeout>=0
 		curTime = time()
 		for key in sessions.keys():
-			if (curTime - sessions[key].lastAccessTime()) >= timeout:
+			if (curTime - sessions[key].lastAccessTime()) >= sessions[key].getTimeout():
 				del sessions[key]
 
 	def shutDown(self):
@@ -264,6 +265,7 @@ class Application(Configurable,CanContainer):
 			if ssPath is None:
 				self.handleBadURL(transaction)
 			elif isdir(ssPath) and noslash(request.pathInfo()): # (*) see below
+				print ssPath
 				self.handleDeficientDirectoryURL(transaction)
 			elif self.isSessionIdProblematic(request):
 				self.handleInvalidSession(transaction)
@@ -699,7 +701,7 @@ class Application(Configurable,CanContainer):
 				repr(baseName), repr(filenames))
 		return filenames
 
-	def serverSidePathForRequest(self, request, debug=0):
+	def serverSidePathForRequest(self, request, debug=1):
 		"""
 		Returns what it says. This is a 'private' service method for use by HTTPRequest.
 		Returns None if there is no corresponding server side path for the URL.
@@ -794,6 +796,7 @@ class Application(Configurable,CanContainer):
 		# relative URLs in the resulting document will get appended
 		# to the URL, instead of replacing the last component.
 		if lastChar=='\\' or lastChar=='/':
+			if debug: print "lastChar was %s" % lastChar 
 			ssPath = ssPath + os.sep
 
 		if debug: print '>> normalized ssPath =', repr(ssPath)
