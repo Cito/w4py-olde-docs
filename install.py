@@ -38,11 +38,17 @@ class Installer:
 		self._htFooter = self.htFragment('Footer')
 		self._comps = []
 
+	## debug printing facility
+	def _nop (self, msg): pass
+	def _printMsg (self, msg): print msg
+
 
 	## Running the installation ##
 
 	def run(self, verbose=0):
 		self._verbose = verbose
+		if self._verbose: self.printMsg = self._printMsg
+		else: self.printMsg = self._nop
 		self.printHello()
 		self.detectComponents()
 		self.installDocs()
@@ -152,7 +158,7 @@ class Installer:
 	def createHighlightedSource(self, filename, dir):
 		import py2html
 		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
-		if self._verbose: print '    Creating %s...' % targetName
+		self.printMsg('    Creating %s...' % targetName)
 		realout = sys.stdout
 		sys.stdout = StringIO()
 #		py2html.main([None, '-stdout', '-format:rawhtml', '-files', filename])
@@ -165,7 +171,7 @@ class Installer:
 	def createSummary(self, filename, dir):
 		from PySummary import PySummary
 		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
-		if self._verbose: print '    Creating %s...' % targetName
+		self.printMsg('    Creating %s...' % targetName)
 		sum = PySummary()
 		sum.readConfig('DocSupport/PySummary.config')
 		sum.readFileNamed(filename)
@@ -175,7 +181,7 @@ class Installer:
 	def createDocs(self, filename, dir):
 		from PySummary import PySummary
 		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
-		if self._verbose: print '    Creating %s...' % targetName
+		self.printMsg('    Creating %s...' % targetName)
 		# @@ 2000-08-17 ce: use something like pydoc or gendoc here
 		raise NotImplementedError
 
@@ -242,7 +248,7 @@ class Installer:
 			for comp in self._comps:
 				#print '  %s...' % comp['name']
 				for filename in glob('%s/*.cgi' % comp['filename']):
-					#if self._verbose: print '    %s...' % os.path.basename(filename)
+					#self.printMsg('    %s...' % os.path.basename(filename))
 					cmd = 'chmod a+rx %s' % filename
 					print '  %s' % cmd
 					os.system(cmd)
@@ -362,7 +368,7 @@ Installation is finished.'''
 
 	def makeDir(self, dirName):
 		if not os.path.exists(dirName):
-			if self._verbose: print '    Making %s...' % dirName
+			self.printMsg('    Making %s...' % dirName)
 			os.mkdir(dirName)
 
 	def requirePath(self, path):
@@ -395,4 +401,9 @@ Installation is finished.'''
 
 
 if __name__=='__main__':
-	Installer().run(verbose=0)
+	import sys, getopt
+	verbose=0
+	opts, args = getopt.getopt(sys.argv[1:], "v")
+	for o, a in opts:
+		if o in ("-v", ): verbose=1
+	Installer().run(verbose=verbose)

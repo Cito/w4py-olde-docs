@@ -8,6 +8,8 @@ Be sure to run, in this directory:
 
 	> python install.py
 
+(use "python install.py -v" to get verbose output)
+
 
 See the files:
 
