@@ -440,7 +440,8 @@ class AnyDateTimeAttr:
 		if value is None:
 			return 'NULL'
 		else:
-			return "'%s'" % str(value)
+			# Chop off the milliseconds -- SQL databases seem to dislike that.
+			return "'%s'" % str(value).split('.')[0]
 
 
 class DateAttr:
