@@ -44,12 +44,8 @@ class Main(AdminPage):
 	def writeMenu(self):
 		app = self.application()
 		self.startMenu()
-		#activityLogURL = '_dumpCSV?filename=%s' % URLEncode(app.setting('ActivityLogFilename'))
-		activityLogURL = 'Access'
-#		errorLogURL = '_dumpErrors?filename=%s' % URLEncode(app.setting('ErrorLogFilename'))
-		errorLogURL = 'Errors'
-		self.menuItem('Activity log', activityLogURL, self.fileSize('ActivityLogFilename'))
-		self.menuItem('Error log', errorLogURL, self.fileSize('ErrorLogFilename'))
+		self.menuItem('Activity log', 'Access', self.fileSize('ActivityLogFilename'))
+		self.menuItem('Error log', 'Errors', self.fileSize('ErrorLogFilename'))
 		self.menuItem('Show config', 'Config')
 		self.endMenu()
 
@@ -82,7 +78,6 @@ class Main(AdminPage):
 		# @@ 2000-06-02 ce: We should allow a custom admin link for each plug-in (if it provides one)
 		# @@ 2000-06-02 ce: We should have a link to the plug-in's docs
 		plugIns = self.application().server().plugIns()
-		print '>> plug in', plugIns
 		if plugIns:
 			self.writeln('''<p><table align=center border=0 cellspacing=2 cellpadding=2>
 <tr bgcolor=black><td align=center colspan=3><font face="Arial, Helvetica" color=white><b>Plug-ins</b></font></td></tr>''')
