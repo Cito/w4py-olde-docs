@@ -318,7 +318,16 @@ class Application(Configurable, CanContainer, Object):
 		# @@ 2000-06-26 ce: We should probably load a separate template file and display that
 
 	def handleDeficientDirectoryURL(self, transaction):
-		newURL = transaction.request().uri() + '/'
+		# @@ 2000-11-29 gat:
+		# This splitting and rejoining is necessary in order to handle
+		# url's like http://localhost/WebKit.cgi/Examples?foo=1
+		# without infinite looping.  I'm not sure this is the "right"
+		# way to do this, as it seems to contradict the docstring of
+		# uri(), but it works.  Needs further investigation.
+		uri = string.split(transaction.request().uri(), '?')
+		uri[0] = uri[0] + '/'
+		newURL = string.join(uri, '?')
+		
 		res = transaction.response()
 		res.setHeader('Status', '301')
 		res.setHeader('Location', newURL)
