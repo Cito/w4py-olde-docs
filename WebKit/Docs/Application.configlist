@@ -13,9 +13,9 @@
 
 ('ExtensionCascadeOrder', "['.psp', '.py', '.html']", 'This is a list of extensions that WebKit will cascade through when autodetecting extensions. Note that this has no effect if the extension is named explicitly in a URL.'),
 
-('FilesToHide', "['.*','*~', '*bak', '*.tmpl', ]", 'File patterns to protect from browsing.'),
+('FilesToHide', "['.*', '*~', '*bak', '*.tmpl', '*.pyc', '*.pyo', '*.config']", 'File patterns to protect from browsing.  This affects all requests, not just requests with autodetected extensions.'),
 
-('FilesToServe', "[]", 'File patterns to serve from exclusively. If the file being served for a particulary request does not match one of these patterns an HTTP403 Forbidden error will be return.'),
+('FilesToServe', "[]", 'File patterns to serve from exclusively. If the file being served for a particulary request does not match one of these patterns an HTTP403 Forbidden error will be return.  This affects all requests, not just requests with autodetected extensions.'),
 
 ('LogActivity', '1', "If true, then the execution of each servlet is logged with useful information such as time, duration and whether or not an error occurred."),
 

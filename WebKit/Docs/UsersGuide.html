@@ -254,8 +254,8 @@ Should extension cascading be used when autodetecting extensions
 <dt class=config><span class=setting>FilesToHide</span>
 &nbsp; <code> = </code></dt>
 <dd class=config>
-<code>['.*','*~', '*bak', '*.tmpl', ]</code>
-<br> File patterns to protect from browsing.
+<code>['.*', '*~', '*bak', '*.tmpl', '*.pyc', '*.pyo', '*.config']</code>
+<br> File patterns to protect from browsing.  This affects all requests, not just requests with autodetected extensions.
 </dd>
 </dl></p>
 
@@ -263,7 +263,7 @@ Should extension cascading be used when autodetecting extensions
 <dt class=config><span class=setting>FilesToServe</span>
 &nbsp; <code> = []</code></dt>
 <dd class=config>
-File patterns to serve from exclusively. If the file being served for a particulary request does not match one of these patterns an HTTP403 Forbidden error will be return.
+File patterns to serve from exclusively. If the file being served for a particulary request does not match one of these patterns an HTTP403 Forbidden error will be return.  This affects all requests, not just requests with autodetected extensions.
 </dd>
 </dl></p>
 
@@ -327,7 +327,7 @@ Determines the amount of time (expressed in minutes) that passes before a user's
 <dt class=config><span class=setting>IgnoreInvalidSession</span>
 &nbsp; <code> = 1</code></dt>
 <dd class=config>
-If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->.
+If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->. 
 </dd>
 </dl></p>
 
@@ -335,7 +335,7 @@ If false, then an error message will be returned to the user if the user's sessi
 <dt class=config><span class=setting>UseAutomaticPathSessions</span>
 &nbsp; <code> = 0</code></dt>
 <dd class=config>
-If true, then the app server will include the session ID in the URL by inserting a component of the form _SID_=8098302983 into the URL, and will parse the URL to determine the session ID.  This is useful for situations where you want to use sessions, but it has to work even if the users can't use cookies.
+If true, then the app server will include the session ID in the URL by inserting a component of the form _SID_=8098302983 into the URL, and will parse the URL to determine the session ID.  This is useful for situations where you want to use sessions, but it has to work even if the users can't use cookies. 
 </dd>
 </dl></p>
 
@@ -494,7 +494,7 @@ The SMTP server to use for sending e-mail error messages.
 
 	<br><br> If your site has a large amount of static files being served via WebKit, you should consider changing 'CacheContent' to 0. If you are confident that your static files do not get updated while the app server is live, then you might consider changing 'CheckDate' to 0 for better performance.
 
-	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems.
+	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems. 
 </dd>
 </dl></p>
 

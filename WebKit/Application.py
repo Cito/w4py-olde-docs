@@ -254,7 +254,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			'ExtensionCascadeOrder':['.psp','.py','.html',],
 			
 
-			'FilesToHide': ['.*','*~', '*bak', '*.tmpl', '*.config' ],
+			'FilesToHide': ['.*', '*~', '*bak', '*.tmpl', '*.pyc', '*.pyo', '*.config'],
 			'FilesToServe': None,
 			
 			'LogActivity':          1,
