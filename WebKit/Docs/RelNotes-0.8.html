@@ -172,7 +172,8 @@ We don't track every change to the interface, but here are some notables:
 	<li> Fixed a race condition that caused problems when multiple simultaneous requests were made for a servlet that hadn't yet been imported.
 	
 	<li> Fixed another rare problem that could eventually cause a servlet to hang until another request for that servlet came in.  Like the above problem, it is provoked by multiple simultaneous requests for the same servlet, but only if it happens hundreds or thousands of times.
-	<li> Fixed SesssionFileStore to fail safely and call the applications exception handler on a pickling error. <b>Note: While using the currently supported SessionStore settings, sessions may not contain data which can not be pickled, such as open files, or database connections. Doing so will generate an error when attempting to save the session to disk.</b>
+	<li> Fixed SessionFileStore to fail safely and call the applications exception handler on a pickling error. <b>Note: While using the currently supported SessionStore settings, sessions may not contain data which can not be pickled, such as open files, or database connections. Doing so will generate an error when attempting to save the session to disk.</b>
+	<li> Fixed PSP so that it works with Python 2.3.
 
 </ul>
 

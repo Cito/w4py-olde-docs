@@ -4,7 +4,7 @@ Funcs.py
 Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else.
 """
 
-import md5, os, random, string, time
+import md5, os, random, string, time, sys, tempfile
 True, False = 1==1, 1==0
 
 
@@ -53,26 +53,41 @@ def charWrap(s, width, hanging=0):
 		i = i + 1
 	return string.join(lines, '\n')
 
+# Python 2.3 contains mktemp and mkstemp, both of which accept a
+# directory argument.  Earlier versions of Python only contained
+# mktemp which didn't accept a directory argument.  So we have to
+# implement our own versions here.
+if sys.version_info >= (2, 3, None, None):
+    # Just use the Python 2.3 built-in versions.
+	from tempfile import mktemp, mkstemp
+else:
+	def mktemp(suffix="", dir=None):
+		"""
+		User-callable function to return a unique temporary file name.
+		
+		Duplicated from Python's own tempfile with the optional "dir"
+		argument added. This allows customization of the directory, without
+		having to take over the module level variable, tempdir.
+		"""
+		if not dir: dir = tempfile.gettempdir()
+		pre = tempfile.gettempprefix()
+		while 1:
+			i = tempfile._counter.get_next()
+			file = os.path.join(dir, pre + str(i) + suffix)
+			if not os.path.exists(file):
+				return file
 
-import tempfile
-def mktemp(suffix="", dir=None):
-	"""
-	User-callable function to return a unique temporary file name.
-	
-	Duplicated from Python's own tempfile with the optional "dir"
-	argument added. This allows customization of the directory, without
-	having to take over the module level variable, tempdir.
-	
-	@@ 2002-12-08 ce: should submit this to Python
-	"""
-	if not dir: dir = tempfile.gettempdir()
-	pre = tempfile.gettempprefix()
-	while 1:
-		i = tempfile._counter.get_next()
-		file = os.path.join(dir, pre + str(i) + suffix)
-		if not os.path.exists(file):
-			return file
+	def mkstemp(suffix="", dir=None):
+		"""
+		User-callable function to return a tuple containing:
+			- a os-level file handle for the temp file, open for read/write
+			- the absolute path of that file
 
+        Note that this version of the function is not as secure as the
+        version included in Python 2.3.
+		"""
+		path = mktemp(suffix, dir)
+		return os.open(path, os.O_RDWR|os.O_CREAT|os.O_EXCL, 0600), path
 
 def wordWrap(s, width=78):
 	"""
