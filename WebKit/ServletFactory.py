@@ -3,6 +3,7 @@ from WebKit.Servlet import Servlet
 import sys
 from types import ClassType
 import imp
+import threading
 
 
 class ServletFactory(Object):
@@ -145,6 +146,7 @@ class PythonServletFactory(ServletFactory):
 	def __init__(self,app):
 		ServletFactory.__init__(self,app)
 		self._cache = {}
+		self._lock = threading.RLock()
 
 	def uniqueness(self):
 		return 'file'
@@ -171,23 +173,28 @@ class PythonServletFactory(ServletFactory):
 		request = transaction.request()
 		path = request.serverSidePath()
 		name = os.path.splitext(os.path.split(path)[1])[0]
-		if not self._cache.has_key(path):
-			self._cache[path] = {}
-		if os.path.getmtime(path) > self._cache[path].get('mtime', 0):
-			# Import the module as part of the context's package
-			module = self.importAsPackage(transaction, path)
-			assert module.__dict__.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
-			# Pull the servlet class out of the module
-			theClass = getattr(module, name)
-			assert type(theClass) is ClassType
-			assert issubclass(theClass, Servlet)
-			self._cache[path]['mtime'] = os.path.getmtime(path)
-			self._cache[path]['class'] = theClass
-		else:
-			theClass = self._cache[path]['class']
-			if not self._cacheClasses:
-				del self._cache[path]
-		return theClass()
+		# Use a lock to prevent multiple simultaneous imports of the same module
+		self._lock.acquire()
+		try:
+			if not self._cache.has_key(path):
+				self._cache[path] = {}
+			if os.path.getmtime(path) > self._cache[path].get('mtime', 0):
+				# Import the module as part of the context's package
+				module = self.importAsPackage(transaction, path)
+				assert module.__dict__.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
+				# Pull the servlet class out of the module
+				theClass = getattr(module, name)
+				assert type(theClass) is ClassType
+				assert issubclass(theClass, Servlet)
+				self._cache[path]['mtime'] = os.path.getmtime(path)
+				self._cache[path]['class'] = theClass
+			else:
+				theClass = self._cache[path]['class']
+				if not self._cacheClasses:
+					del self._cache[path]
+			return theClass()
+		finally:
+			self._lock.release()
 
 #	def import_servletForTransaction(self, transaction):
 #		path = transaction.request().serverSidePath()

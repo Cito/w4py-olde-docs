@@ -29,7 +29,7 @@ from WebKit.ServletFactory import ServletFactory
 import string
 import os,sys,string
 from PSP import Context, PSPCompiler
-import time
+import time, threading
 
 
 class PSPServletFactory(ServletFactory):
@@ -54,6 +54,7 @@ class PSPServletFactory(ServletFactory):
 
 		if application.setting('ClearPSPCacheOnStart', 1):
 			self.clearFileCache()
+		self._lock = threading.RLock()
 
 	def uniqueness(self):
 		 return 'file'
@@ -151,33 +152,36 @@ class PSPServletFactory(ServletFactory):
 
 		classname = self.computeClassName(fullname)
 
-		#see if we can just create a new instance
-		if self._cacheClasses:
-			instance = self.checkClassCache(classname,mtime)
-		if instance != None:
-			return instance
-
-		cachedfilename = os.path.join(self.cacheDir,str(classname + '.py'))
-
-		if self._cacheClassFiles and os.path.exists(cachedfilename) and os.stat(cachedfilename)[6] > 0:
-			if os.path.getmtime(cachedfilename) > mtime:
-				instance = self.createInstanceFromFile(trans,cachedfilename,classname,mtime,0)
+		# Use a lock to prevent multiple simultaneous compilations/imports of the same PSP
+		self._lock.acquire()
+		try:
+			#see if we can just create a new instance
+			if self._cacheClasses:
+				instance = self.checkClassCache(classname,mtime)
+			if instance != None:
 				return instance
 
-		pythonfilename = cachedfilename
+			cachedfilename = os.path.join(self.cacheDir,str(classname + '.py'))
 
-		context = Context.PSPCLContext(fullname,trans)
-		context.setClassName(classname)
-		context.setPythonFileName(pythonfilename)
+			if self._cacheClassFiles and os.path.exists(cachedfilename) and os.stat(cachedfilename)[6] > 0:
+				if os.path.getmtime(cachedfilename) > mtime:
+					instance = self.createInstanceFromFile(trans,cachedfilename,classname,mtime,0)
+					return instance
 
+			pythonfilename = cachedfilename
 
-		clc = PSPCompiler.Compiler(context)
-
-		#print 'creating python class: ' , classname
-		clc.compile()
-
-		instance = self.createInstanceFromFile(trans,cachedfilename,classname,mtime,1)
-		return instance
+			context = Context.PSPCLContext(fullname,trans)
+			context.setClassName(classname)
+			context.setPythonFileName(pythonfilename)
 
 
+			clc = PSPCompiler.Compiler(context)
+
+			#print 'creating python class: ' , classname
+			clc.compile()
+
+			instance = self.createInstanceFromFile(trans,cachedfilename,classname,mtime,1)
+			return instance
+		finally:
+			self._lock.release()
 
