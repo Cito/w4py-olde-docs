@@ -122,6 +122,7 @@ class MiddleObjectMixIn:
 		insertSQLStart, sqlAttrs = klass.insertSQLStart()
 		values = []
 		append = values.append
+		extend = values.extend
 		append(str(id))
 		for attr in sqlAttrs:
 			try:
@@ -130,7 +131,10 @@ class MiddleObjectMixIn:
 				exc.info.sourceObject = self
 				unknowns.append(exc.info)
 				value = 'NULL'
-			append(value)
+			if isinstance(value, str):
+				append(value)
+			else:
+				extend(value) # value could be sequence for attrs that require multiple SQL columns
 		if len(values)==0:
 			values = ['0']
 		values = ','.join(values)
