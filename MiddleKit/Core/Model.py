@@ -7,6 +7,20 @@ try:
 except ImportError:
 	from pickle import load, dump
 
+class ModelError(Exception):
+	def __init__(self,error,line=None):
+		self._line = line
+		self._error = error
+
+	def setLine(self, line):
+		self._line = line
+	
+	def printError(self,filename):
+		if self._line:
+			print '%s:%d: %s' % ( filename, self._line, self._error )
+		else:
+			print '%s: %s' % ( filename, self._error )
+
 
 class Model(Configurable):
 	"""
@@ -60,8 +74,12 @@ class Model(Configurable):
 		self._filename = os.path.abspath(filename)
 		self._name = None
 		self.readParents()
-		self.readKlasses()
-		self.awakeFromRead()
+		try:
+			self.readKlasses()
+			self.awakeFromRead()
+		except ModelError, e:
+			e.printError(filename)
+			sys.exit(1)
 
 	def readKlasses(self):
 		"""
@@ -247,7 +265,10 @@ class Model(Configurable):
 			pkg = self.setting('Package', '')
 			if pkg:
 				pkg += '.'
-			exec 'import %s%s as module' % (pkg, name) in results
+			try:
+				exec 'import %s%s as module' % (pkg, name) in results
+			except ImportError:
+				raise ModelError("Could not import module for class '%s'.  If you've added this class recently, you need to re-generate your model." % name)
 			pyClass = getattr(results['module'], 'pyClass', None)
 			if pyClass is None:
 				pyClass = getattr(results['module'], name)

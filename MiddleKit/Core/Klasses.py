@@ -1,5 +1,5 @@
 from ModelObject import ModelObject
-from Model import Model
+from Model import Model, ModelError
 from Klass import Klass
 from Attr import Attr
 from MiscUtils.DataTable import DataTable
@@ -7,6 +7,7 @@ from MiscUtils.DictForArgs import *
 from UserDict import UserDict
 from types import *
 import os
+import sys
 
 
 class Klasses(ModelObject, UserDict):
@@ -79,25 +80,31 @@ class Klasses(ModelObject, UserDict):
 		# in case we want to look at these later:
 		self._tableHeadings = table.headings()
 
-		for row in table:
-			row = ExpandDictWithExtras(row, dictForArgs=PyDictForArgs)
-			for key in ['Class', 'Attribute']:
-				if not row.has_key(key):
-					print 'ERROR'
-					print 'Required key %s not found in row:' % key
-					print 'row:', row
-					print 'keys:', row.keys()
-					print row[key]  # throws exception
-			if row['Class']:
-				pyClass = self._model.coreClass('Klass')
-				klass = pyClass(self, row)
-				self.addKlass(klass)
-			else:
-				name = row['Attribute']
-				if name and name[0]!='#' and name[-1]!=':':
-					pyClassName = self.pyClassNameForAttrDict(row)
-					pyClass = self._model.coreClass(pyClassName)
-					klass.addAttr(pyClass(row))
+		try:
+			line = 2
+			for row in table:
+				row = ExpandDictWithExtras(row, dictForArgs=PyDictForArgs)
+				for key in ['Class', 'Attribute']:
+					if not row.has_key(key):
+						print 'ERROR'
+						print 'Required key %s not found in row:' % key
+						print 'row:', row
+						print 'keys:', row.keys()
+						print row[key]  # throws exception
+				if row['Class']:
+					pyClass = self._model.coreClass('Klass')
+					klass = pyClass(self, row)
+					self.addKlass(klass)
+				else:
+					name = row['Attribute']
+					if name and name[0]!='#' and name[-1]!=':':
+						pyClassName = self.pyClassNameForAttrDict(row)
+						pyClass = self._model.coreClass(pyClassName)
+						klass.addAttr(pyClass(row))
+				line += 1
+		except ModelError, e:
+			e.setLine(line)
+			raise
 
 	def awakeFromRead(self):
 		"""
@@ -143,7 +150,11 @@ class Klasses(ModelObject, UserDict):
 		"""
 		typeName = dict['Type']
 		if not typeName:
-			raise Exception, 'Blank type for dict: %s' % dict
+			if dict['Attribute']:
+				raise ModelError("no type specified for attribute '%s'" % dict['Attribute'])
+			else:
+				raise ModelError('type specifier missing')
+			
 
 		if typeName[0].upper()==typeName[0]:
 			return 'ObjRefAttr'
@@ -153,8 +164,8 @@ class Klasses(ModelObject, UserDict):
 
 		try:
 			return self._typeNamesToAttrClassNames[typeName]
-		except IndexError:
-			raise Exception, 'Unknown type %s.' % typeName
+		except KeyError:
+			raise ModelError("Unknown type %s." % typeName)
 
 
 	## Debugging ##
