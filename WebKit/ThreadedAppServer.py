@@ -484,6 +484,8 @@ class RequestHandler:
 
 
 		try:
+			# @@ This next print statement mysteriously fixes a shutdown problem on FreeBSD.
+			print "."
 			conn.shutdown(1)
 			conn.close()
 		except:
