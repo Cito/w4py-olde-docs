@@ -165,12 +165,11 @@ class ObjectStore(ModelUser):
 			if not objectsToDel.has_key(id(obj)):
 				obj.setValueForAttr(attr, None)
 
-		# deleted objects
+		# process final list of objects
 		objectsToDel = objectsToDel.values()
-		self._deletedObjects.extend(objectsToDel)
-
-		# remove deleted objects from main list of objects
 		for obj in objectsToDel:
+			obj._mk_isDeleted = True
+			self._deletedObjects.append(obj)
 			obj.updateReferencingListAttrs()
 			del self._objects[obj.key()]
 

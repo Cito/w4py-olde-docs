@@ -34,6 +34,9 @@ class MiddleObject(object, NamedValueAccess):
 	"""
 
 
+	_mk_isDeleted = False
+
+
 	## Init ##
 
 	def __init__(self):
@@ -62,6 +65,7 @@ class MiddleObject(object, NamedValueAccess):
 					assert 0, "attempted to refresh changed object %s.%d\nchanges=%r\nYour app needs to call store.saveChanges() before doing anything which can cause objects to be refreshed from the database (i.e. calling store.deleteObject()), otherwise your changes will be lost." % (self.klass().name(), self.serialNum(), self._mk_changedAttrs)
 		else:
 			self.setStore(store)
+		assert not self._mk_isDeleted, 'Cannot refresh a deleted object.'
 		if store.setting('UseBigIntObjRefColumns', False):
 			fullClassName = self.__class__.__module__ + '.' + self.__class__.__name__
 			cache = self._mk_setCache.setdefault(fullClassName, [])
@@ -146,6 +150,8 @@ class MiddleObject(object, NamedValueAccess):
 		"""
 		return self._mk_serialNum<1
 
+	def isDeleted(self):
+		return self._mk_isDeleted;
 
 	## Keys ##
 
