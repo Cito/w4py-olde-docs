@@ -6,44 +6,48 @@ class ConfigurationError(Exception):
 	pass
 
 
+class _NoDefault:
+	pass
+
+
 class Configurable(Object):
 	'''
 	Configurable is an abstract superclass that provides configuration
 	file functionality for subclasses.
-	
+
 	Subclasses should override:
-		
+
 		* defaultConfig()  to return a dictionary of default settings
 		                   such as { 'Frequency': 5 }
-		
+
 		* configFilename() to return the filename by which users can
 		                   override the configuration such as
 		                   'Pinger.config'
 
-	
+
 	Subclasses typically use the setting() method, for example:
-	
+
 		time.sleep(self.setting('Frequency'))
-	
-	
+
+
 	They might also use the printConfig() method, for example:
-	
+
 		self.printConfig()      # or
 		self.printConfig(file)
-	
-	
+
+
 	Users of your software can create a file with the same name as
 	configFilename() and selectively override settings. The format of
 	the file is a Python dictionary.
 	'''
 
 	## Init ##
-	
+
 	def __init__(self):
 		Object.__init__(self)
 		self._config = None
 
-	
+
 	## Configuration
 
 	def config(self):
@@ -52,11 +56,14 @@ class Configurable(Object):
 			self._config = self.defaultConfig()
 			self._config.update(self.userConfig())
 		return self._config
-	
-	def setting(self, name):
+
+	def setting(self, name, default=_NoDefault):
 		''' Returns the value of a particular setting in the configuration. '''
-		return self.config()[name]
-	
+		if default is _NoDefault:
+			return self.config()[name]
+		else:
+			return self.config().get(name, default)
+
 	def defaultConfig(self):
 		''' Returns a dictionary containing all the default values for the settings. This implementation returns {}. Subclasses should override. '''
 		return {}
@@ -81,7 +88,7 @@ class Configurable(Object):
 			if type(config) is not DictType:
 				raise ConfigurationError, 'Invalid type of configuration. Expecting dictionary, but got %s.'  % type(config)
 			return config
-	
+
 	def printConfig(self, dest=sys.stdout):
 		''' Prints the configuration to the given destination, which defaults to stdout. A fixed with font is assumed for aligning the values to start at the same column. '''
 		keys = self.config().keys()
