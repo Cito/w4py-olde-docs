@@ -4,7 +4,7 @@ version = (0, 7, 0)
 
 status = 'beta'
 
-releaseDate = 'March 16, 2002'
+releaseDate = 'March 30, 2002'
 
 requiredPyVersion = (2, 0, 0)
 
