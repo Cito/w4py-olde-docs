@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/env python
 
 # If the Webware installation is located somewhere else,
 # then set the WebwareDir variable to point to it.
