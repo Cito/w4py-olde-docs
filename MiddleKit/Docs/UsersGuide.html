@@ -345,7 +345,7 @@ In many cases it makes sense to name this object using a verb, such as
 
 <a name="DT_Recursive"><h4>Recursive structures</h4></a>
 
-It was mentioned above that, when using a list attribute, MiddleKit requires a "back reference" and by default 
+It was mentioned above that, when using a list attribute, MiddleKit requires a "back reference" and by default
 assumes this attribute will be named according to the name of the referencing.  If you ever want to create recursive structures such as trees you may need to override the default using the "BackRefAttr" attribute.  A tree node can be implemented by having a reference to its parent node, and a list of children nodes like so:
 
 <p> <table border align=center style="border-collapse: collapse" cellpadding=2>
@@ -378,13 +378,13 @@ assumes this attribute will be named according to the name of the referencing.  
 	</tr>
 </table>
 
-<p>By specifying the attribute to use a back reference, you've told MiddleKit that it can fetch children of a 
+<p>By specifying the attribute to use a back reference, you've told MiddleKit that it can fetch children of a
 specific node by fetching all children whose "parent" attribute matches that node.</p>
 
 
 <h4>Object references and deletion</h4>
 
-<p> There are two additional properties to control how object references are handled when an objects is 
+<p> There are two additional properties to control how object references are handled when an objects is
 deleted.
 
 <p> For the purpose of discussion, the object containing the attribute is <i>self</i> while the objects being referred to are the <i>others</i>. Now then, the <b>onDeleteSelf</b> property specifies what happens to the other object(s) when the self object is deleted:
@@ -422,11 +422,11 @@ deleted.
 
 <a name="Dump"><h3>Dumping your MiddleKit data</h3></a>
 
-<p>During development you will likely need to modify your MiddleKit model (Classes.csv) and re-generate the 
-classes. If you already have some data in the database, you will need to dump and reload the data, possibly 
-manipulating the data to fit the new schema. 
+<p>During development you will likely need to modify your MiddleKit model (Classes.csv) and re-generate the
+classes. If you already have some data in the database, you will need to dump and reload the data, possibly
+manipulating the data to fit the new schema.
 
-<p>You can dump your existing data into a file in the same format as the Samples.csv file.  Then you can rename or remove columns in Samples.csv to match your schema changes, and then run generate, create, insert to recreate your database 
+<p>You can dump your existing data into a file in the same format as the Samples.csv file.  Then you can rename or remove columns in Samples.csv to match your schema changes, and then run generate, create, insert to recreate your database
 and reload the data (this procedure is described in the <a href=QuickStart.html>Quick Start</a> guide).
 
 <pre>
@@ -531,7 +531,7 @@ This setting has no effect on the visible behavior of MiddleKit; it only changes
 
 
 
-<p> <a name=Configuration_UsePickledClassesCache></a> The <span class=name>UsePickledClassesCache</span> setting defaults to 1 and causes MiddleKit to cache the <span class=filename>Classes.csv</span> text file as a binary pickle file named <span class=filename>Classes.pickle.cache</span>. This reduces subsequent load times by about 40%. The cache will be ignored if it can't be read, is older than the CSV file, has a different Python version, etc. You don't normally even need to think about this, but if for some reason you would like to turn off the use of the cache, you can do so through this setting.
+<p> <a name=Configuration_UsePickledClassesCache></a> The <span class=name>UsePickledClassesCache</span> setting defaults to False. <span class=warning>This feature has proven to be unreliable which is why it now defaults to False.</span> When True, it causes MiddleKit to cache the <span class=filename>Classes.csv</span> text file as a binary pickle file named <span class=filename>Classes.pickle.cache</span>. This reduces subsequent load times by about 40%. The cache will be ignored if it can't be read, is older than the CSV file, has a different Python version, etc. You don't normally even need to think about this, but if for some reason you would like to turn off the use of the cache, you can do so through this setting.
 
 <p> <a name=Configuration_DropStatements></a> The <span class=name>DropStatements</span> setting has these potential values:
 
@@ -549,12 +549,30 @@ This setting has no effect on the visible behavior of MiddleKit; it only changes
     'CacheObjectsForever': True,  # keep objects in memory indefinitely
 }</pre>
 
+<p> <a name=Configuration_AccessorStyle></a> The <span class=name>AccessorStyle</span> setting can take the values <span class=value>'methods'</span>--the default--and <span class=value>'properties'</span>. With methods, your code will look like this:
+<pre class=py>if email.isVerified():
+    pass
+user.setName('Chuck')</pre>
+With properties, it will look like this:
+<pre class=py>if email.isVerified:
+    pass
+user.name = 'Chuck'</pre>
+<pre>{
+    'AccessorStyle': 'methods',
+}</pre>
+
+<p> <a name=Configuration_UseHashForClassIds></a> The <span class=name>UseHashForClassIds</span> setting defaults to False. When False, class ids are numbered 1, 2, 3, ... which implies that as you add and remove classes during development the class ids will change. While not a strict problem, this can cause your production, test and development environments to use different class ids. That can make data comparisons, data migration and sometimes even schema comparisons more difficult. By setting UseHashForClassIds to True, the class ids will be hashed from the class names greatly improving the chances that class ids remain consistent. Caveat 1: The class id will change if you rename the class. Caveat 2: There is no way to dictate the id of a class in the model to make the original id stick when you hit Caveat 1. Despite the caveats, this is still likely a better approach than the serial numbering.
+<pre>{
+    'UseHashForClassIds': False,
+}</pre>
 
 <a name=GeneratedPy><h2>Generated Python</h2></a>
 
 <a name=GP_addToBars><h3>Attributes: foo() and setFoo()</h3></a>
 
 <p> For each attribute, foo, MiddleKit stores its value in the attribute _foo, returns it in the accessor method foo() and allows you to set it with setFoo(). You should always use foo() to get the value of an attribute, as there could be some logic there behind the scenes.
+
+<p> Note: MiddleKit 0.9 added an <a href=#Configuration_AccessorStyle>AccessorStyle</a> setting which you should learn about if you prefer Python properties over Python methods.
 
 
 <a name=GP_addToBars><h3>Lists: addToBars()</h3></a>
@@ -654,7 +672,7 @@ You will have to write your own setter and getter methods for the attribute.
 
 <p> In many situations it is useful to clone a MiddleKit object.  One example is to allow a user to create a copy of some record (and all of its values) without having to enter a new record from scratch.  Every MiddleKit object has a <b>clone()</b> method which can be used to create a clone of the object.  All attribute values of the clone will be set to the same values as the original object.</p>
 
-<p>Depending on your model, you may or may not want sub-objects referenced by the original object to be cloned in 
+<p>Depending on your model, you may or may not want sub-objects referenced by the original object to be cloned in
 addition to the object itself.  You can control this by adding a "Copy" column in your Classes.csv file, and set the value for each object reference (single reference or list reference).  The possible values are:</p>
 
 <ul>
@@ -751,7 +769,7 @@ addition to the object itself.  You can control this by adding a "Copy" column i
 
 <p> Other Python ORMs that we're aware of:
 
-<ul> 
+<ul>
 <li> <a href=http://www.xs4all.nl/~bsarempt/python/dbobj.html>dbObj</a> by Boudewijn Rempt
 <li> <a href="http://modeling.sourceforge.net/">Modeling</a> by Sébastien Bigaret
 </ul>

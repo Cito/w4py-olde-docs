@@ -30,7 +30,7 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 <a name=Incompatible><h2>Incompatible Changes</h2></a>
 
-<p> <font color=red>There are some MiddleKit improvements that break compatibility with previous versions of MiddleKit, although all are easy to address.</font> In a nutshell, if you are upgrading MiddleKit for an existing project, take the following steps:
+<p> <font color=red>There are some MiddleKit improvements that break compatibility with previous versions of MiddleKit, although all are easy to address.</font> In a nutshell, if you are upgrading MiddleKit <i>for an existing project</i>, take the following steps:
 
 <ul>
 	<li> Add these to Settings.config inside the model:
@@ -75,7 +75,7 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 <p>
 Depending on the application, certain call sequences can cause uncommitted changes to be lost.  This might be due to
 programmer error (i.e. forgetting to call saveChanges when necessary), but can also happen due to the implementation
-of store.deleteObject(), which executes SQL queries (and refreshes objects) when locating and resolving object 
+of store.deleteObject(), which executes SQL queries (and refreshes objects) when locating and resolving object
 references (i.e. cascade, detach).
 </p>
 
@@ -102,6 +102,7 @@ set it to true to avoid ever getting an assertion failure.  </p>
 	<li> MiddleKit will now generate CREATE TABLE statements in order of dependency (least to most) so that foreign key declarations always work. This relieves you of having to get the order of your classes "just right" in the model--in other words, you can have "forward references"--and presents another advantage over straight SQL.
 	<p> And MiddleKit does the same for your sample data as well.
 	<p> This change is unlikely to interfere with any existing projects, but just in case, you can turn it off with the <b>DoNotSortSQLCreateStatementsByDependency</b> setting (set it to True).
+	<li> A new setting, <b>AccessorStyle</b>, can be set to <b>'properties'</b> in which case MiddleKit will generate Python properties for attributes instead of the traditional methods foo() and setFoo(). <a href=UsersGuide.html#Configuration_AccessorStyle>docs</a>
 </ul>
 
 
@@ -114,24 +115,19 @@ set it to true to avoid ever getting an assertion failure.  </p>
 	<li>When you delete an object, it is automatically removed from any list attributes in other objects.</li>
 
 	<li>There is a new setting called '<b>CacheObjectsForever</b>', which defaults to False.  If set to True, the object store will cache objects indefinitely, which, depending on the size of your database, can use a lot of memory (this is the behaviour of previous versions of MiddleKit).  If set to False, the object store uses "weak references" to cache the objects, which allows the Python garbage collector to collect an object as long as there are no other reachable references to that object.  This change is unlikely to interfere with existing applications, but you can always set 'CacheObjectsForever' to True to get the old behaviour if you want.
-</ul>
 
+	<li>MiddleKit previously supporting using strings or mx.DateTime-et-al for any attributes typed date, time or datetime. String support has been dropped and support for Python's own datetime module has been added. You can still use mx.
 
-<h2>Security</h2>
-<ul>
-	<li> *
-</ul>
+	<li>A new setting, <b>UseHashForClassIds</b>, can be set to true to cause internal class ids to be hashed from the class name, instead of numbered serially (1, 2, 3, ...). <a href=UsersGuide.html#Configuration_UseHashForClassIds>docs</a>
 
-
-<h2>Minor API Changes</h2>
-<ul>
-	<li> *
+	<li>There are good instructions on how to run the test suite in MiddleKit/Tests/ReadMe.text.
 </ul>
 
 
 <h2>Bugfixes</h2>
 <ul>
-	<li> *
+	<li> The default for the <b>UsePickledClassesCache<b> setting is now false. It occasionally created problems for multiple developers.
+
 </ul>
 
 
