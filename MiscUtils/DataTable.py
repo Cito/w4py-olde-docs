@@ -125,6 +125,7 @@ at.
 
 TO DO
 
+* Perhaps TableRecord should inherit UserList and UserDict and override methods as appropriate...?
 * Better support for datetime.
 * Add error checking that a column name is not a number (which could
   cause problems).
@@ -580,6 +581,9 @@ class TableRecord:
 			return default
 		else:
 			return self._values[index]
+
+	def has_key(self, key):
+		return self._nameToIndexMap.has_key(key)
 
 	def keys(self):
 		return self._nameToIndexMap.keys()
