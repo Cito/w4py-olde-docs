@@ -37,7 +37,7 @@ class Servlet(Object):
 
 	def awake(self, trans):
 		""" This message is sent to all objects that participate in the request-response cycle in a top-down fashion, prior to respond(). Subclasses must invoke super. """
-		pass
+		self._transaction = trans
 
 	def respond(self, trans):
 		raise AbstractError, self.__class__
@@ -69,7 +69,10 @@ class Servlet(Object):
 	def serverSidePath(self, path=None):
 		""" Returns the filesystem path of the page on the server. """
 		if self._serverSidePath is None:
-			self._serverSidePath = self._request.serverSidePath()
+			if hasattr(self, "_request") and self._request is not None:
+				self._serverSidePath = self._request.serverSidePath()
+			else:
+				self._serverSidePath = self._transaction.request().serverSidePath()
 		if path:
 			return os.path.normpath(os.path.join(os.path.dirname(self._serverSidePath), path))
 		else:

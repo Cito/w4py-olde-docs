@@ -22,7 +22,6 @@ class Page(HTTPServlet):
 
 	def awake(self, transaction):
 		HTTPServlet.awake(self, transaction)
-		self._transaction = transaction
 		self._response    = transaction.response()
 		self._request     = transaction.request()
 		self._session     = None  # don't create unless needed
