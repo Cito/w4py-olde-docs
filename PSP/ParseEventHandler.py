@@ -2,7 +2,7 @@
 This module is called when the Parser encounters psp tokens.  It creates a generator to handle the psp
 token.  When the PSP source file is fully parsed, this module calls all of the generators in turn to
 output their source code.
-    
+
 
 -----------------------------------------------------------------------------------------------------
     (c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.net)
@@ -35,23 +35,23 @@ import string
 
 class ParseEventHandler:
 	"""This is a key class.  It implements the handling of all the parsing elements.  Note:  This files JSP cousin is called ParseEventListener, I don\'t know why, but Handler seemed more appropriate to me."""
-	
+
 	aspace=' '
-	defaults = {'BASE_CLASS':'Page',
+	defaults = {'BASE_CLASS':'WebKit.Page',
 				'BASE_METHOD':'writeHTML',
 				'imports':{'filename':'classes'},
 				'threadSafe':'no',
 				'instanceSafe':'yes',
 				'indent':int(4),
 				}
-    
+
 
 	def __init__(self, ctxt, parser):
-		
+
 		self._ctxt = ctxt
-		
+
 		self._gens=[]
-		
+
 		self._reader = ctxt.getReader()
 		self._writer = ctxt.getServletWriter()
 		self._parser = parser
@@ -82,13 +82,13 @@ class ParseEventHandler:
 			self.addGenerator(gen)
 
 
-	def handleComment(self, start, stop):		
+	def handleComment(self, start, stop):
 		'''Comments get swallowed into nothing'''
 		self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		return #just eats the comment
 
 
-	def handleInclude(self, attrs,param):		
+	def handleInclude(self, attrs,param):
 		''' this is for includes of the form <psp:include ...>
 		This type of include is not parsed, it is just inserted in the output stream.'''
 		self._parser.flushCharData(self.tmplStart, self.tmplStop)
@@ -118,12 +118,12 @@ class ParseEventHandler:
 		of this PSP page over-rides.  The default is WriteHTML. This value should be set to either WriteHTML
 		or writeBody.  See the PSPPage.py and Page.py servlet classes for more information.'''
 		self._baseMethod=method
-	
+
 	def threadSafeHandler(self, bool, start, stop):
 		"""isThreadSafe is a page directive.  The value can be "yes" or "no".  Default is no because the default base class,
 		PAge.py, isn't thread safe."""
 		self._threadSafe=bool
-		
+
 	def instanceSafeHandler(self, bool, start, stop):
 		'''isInstanceSafe tells the Servlet Engine whether it is safe to use object instances of this page
 	multiple times. The default is "yes".  Saying "no" here hurts performance.'''
@@ -132,12 +132,12 @@ class ParseEventHandler:
 	def indentTypeHandler(self,type,start, stop):
 		"""Use tabs to indent source code?"""
 		type = string.lower(type)
-		
+
 		if type !="tabs" and type !="spaces" and type !="braces":
 			raise "Invalid Indentation Type"
 		self._writer.setIndentType(type)
 
-	
+
 	def indentSpacesHandler(self,amount,start,stop):
 		"""set number of spaces used to indent in generated source"""
 		self._indentSpaces=int(amount)#don't really need this
@@ -153,8 +153,8 @@ class ParseEventHandler:
 						 'BaseClass':extendsHandler,
 						 'indentSpaces':indentSpacesHandler,
 						 'indentType':indentTypeHandler}
-    
-    
+
+
 	def handleDirective(self, directive, start, stop, attrs):
 		validDirectives = ['page','include']
 		'''Flush any template data into a CharGen and then create a new Directive Gen'''
@@ -169,7 +169,7 @@ class ParseEventHandler:
 				else:
 					print i
 					raise 'No Page Directive Handler'
-				
+
 		elif directive == 'include':
 			try:
 				filenm = attrs['file']
@@ -186,8 +186,8 @@ class ParseEventHandler:
 		else:
 			print directive
 			raise "Invalid Directive"
-	    
-	    
+
+
 
 	def handleScript(self, start, stop, attrs):
 		'''handling scripting elements'''
@@ -209,11 +209,11 @@ class ParseEventHandler:
 		#self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		gen = MethodEndGenerator(self._reader.getChars(start, stop),attrs)
 		self.addGenerator(gen)
-    
+
     #####################################################################
     ##The generation of the page begins here
     ####################################################################3
-    
+
 	def beginProcessing(self):
    		pass
 
@@ -240,6 +240,8 @@ class ParseEventHandler:
 ##		self._writer.println('try:\n')
 ##		self._writer.pushIndent()
 		#self._writer.println('from ' +self._baseClass+ ' import ' +self._baseClass +'\n')
+		self._writer.println('import WebKit')
+		self._writer.println('from WebKit import Page')
 		for baseClass in self._baseClasses:
 			if string.find(baseClass,'.')<0 and baseClass not in self._importedSymbols:
 				self._writer.println('import ' + baseClass)
@@ -248,7 +250,7 @@ class ParseEventHandler:
 ##		self._writer.pushIndent()
 ##		self._writer.println('pass\n')
 ##		self._writer.popIndent()
-	
+
 	def generateDeclarations(self):
 		# The PSP "extends" directive allows you to use a shortcut -- if the module name
 		# is the same as the class name, you can say "Classname" instead of "ClassName.ClassName".
@@ -280,7 +282,7 @@ class ParseEventHandler:
 		self._writer.printChars('):')
 		#self._writer.printChars('('+self._baseClass+'):')
 		self._writer.printChars('\n')
-		
+
 		self._writer.pushIndent()
 		self._writer.println('def canBeThreaded(self):') # I Hope to take this out soon!
 		self._writer.pushIndent()
@@ -290,7 +292,7 @@ class ParseEventHandler:
 			self._writer.println('return 1')
 		self._writer.popIndent()
 		self._writer.println()
-	
+
 		self._writer.println('def canBeReused(self):') # I Hope to take this out soon!
 		self._writer.pushIndent()
 		if string.lower(self._instanceSafe) == 'no':
@@ -357,8 +359,8 @@ class ParseEventHandler:
 				gencount = gencount-1
 			else:
 				count = count+1
-	
 
-    
 
-    
+
+
+

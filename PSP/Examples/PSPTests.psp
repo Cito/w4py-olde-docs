@@ -2,7 +2,7 @@
 
 <%@ page imports = "sys,os,time"%> <%-- Here's the modules that I need in this file --%>
 <%@ page method="writeHTML" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
-<%@ page extends="Page"%> <%--This is the base class for this page.  Page is the default --%>
+<%@ page extends="WebKit.Page"%> <%--This is the base class for this page.  Page is the default --%>
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="tabs" %>
 
@@ -47,7 +47,7 @@ The text below comes from another psp page which was inserted into this one with
 
 <p>
 <p>There are actually two ways to insert the contents of another file into a PSP page.  use &lt%@ include file="somefile" %&gt will effectively insert the contents of the other file before class creation time.<br>
-Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>after</i> page creation.  In other words, the file won't be parsed for psp codes.  It'll just be output as is in the response stream. 
+Using &lt psp:include page="somefile"/&gt will insert the file into the page <i>after</i> page creation.  In other words, the file won't be parsed for psp codes.  It'll just be output as is in the response stream.
 <p>
 
 
@@ -106,7 +106,7 @@ for i in os.environ.keys():
 <br><%=  time.ctime(time.time())%>
 
 <%-- Comment check --%> <%-- #This kind not even in python file created. --%>
-<!-- Comment Check -->  
+<!-- Comment Check -->
 
 <%--  Method declaration Test --%>
 <psp:method name="testing" params="val">
