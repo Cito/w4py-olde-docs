@@ -80,16 +80,16 @@ WebKit 0.4
 
 <a name=Python><h2>Python</h2></a>
 
-<p> WebKit 0.4 was developed and tested primarily with Python 1.5.2. Some light testing has been done with Python 1.6 with no known problems.
+<p> WebKit 0.4 was developed and tested primarily with Python 1.5.2. Some light testing has been done with Python 1.6 with no known problems. Some fixes have been made in response to users of Python 2.0b2, but no serious testing has been done with it. If you have any problems whatsoever with Python 1.6 and 2.0b2, please let us know so we can fix them (<a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>).
 
-<p> Your installation of Python must be multi-threaded, even if you are using the OneShot adapter (which logically doesn't require threads). It's not uncommon for third party web host providers to leave this disabled in Python because they don't expect that it's needed and/or because the default installation of Python does not turn threads on. If your Python installation is not multi-threaded, you will have to reinstall it. If you're using a third party host provider in this situation, you may be able to install it yourself into your home directory via a telnet or ssh account. See <a href=http://www.python.org>Python</a> for instructions.
+<p> Your installation of Python must be multi-threaded, even if you are using the OneShot adapter (which logically doesn't require threads). It's not uncommon for third party web host providers to leave this disabled in Python because they don't expect that it's needed and/or because the default installation of Python does not turn threads on. If your Python installation is not multi-threaded, you will have to reinstall it. If you're using a third party host provider in this situation, you may be able to install it yourself into your home directory via a telnet or ssh account. See the <a href=http://www.python.org>Python</a> site for instructions.
 
 <p> To determine if threading is enabled, start the Python interpreter from the command line and enter <code>import thread</code>. If you don't get an exception, all is well.
 
 
 <a name=WebwareVersion><h2>Webware Version</h2></a>
 
-<p> Unless you just downloaded Webware (and therefore WebKit), you should check to see if you have the latest version. This version you are looking at is 0.4 Release Candidate 2. You can check for the latest version at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>.
+<p> Unless you just downloaded Webware (and therefore WebKit), you should check to see if you have the latest version. This version you are looking at is 0.4. You can check for the latest version at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>.
 
 <p> If you're feeling adventurous, you can get the latest in-development source code from the public repository. Instructions are located at the <a href=https://sourceforge.net/cvs/?group_id=4866>Webware CVS page</a>. You can find more information about CVS in general at <a href=http://www.cvshome.org>http://www.cvshome.org</a>.
 
@@ -107,7 +107,7 @@ WebKit 0.4
 
 <p> WebKit actively supports UNIX, Windows and their various flavors.
 
-<p> Note that you don't have to develop and deploy on the same platform. One of the WebKit developers develops everything on Windows 98 2nd edition and deploys his web sites on BSD (http://www.bsd.org/).
+<p> Note that you don't have to develop and deploy on the same platform. One of the WebKit developers develops everything on Windows 98 2nd edition and deploys his web sites on BSD (<a href=http://www.bsd.org/>http://www.bsd.org/</a>).
 
 <p> What follows are some OS specific notes:
 
@@ -156,7 +156,7 @@ the CGI specification, by running the following command:
 <p> This is lightly documented in
 <a href=http://support.microsoft.com/support/kb/articles/Q184/3/20.ASP>http://support.microsoft.com/support/kb/articles/Q184/3/20.ASP</a>.
 
-<p> 2) Use Gordon McMillan's Standalone utility, which is part of his Installer package, to convert WebKit.cgi into an executable program, WebKit.exe.  IIS apparently will not handle requests with additional path components after the name of the script, like <code>http://localhost/WebKit.cgi/foo/bar</code> where WebKit.cgi is a script, but will handle requests like <code>http://localhost/WebKit.exe/foo/bar</code> where WebKit.exe is an executable. In any case, using the Standalone utility probably results in a speed increase, so it's not such a terrible thing to do this.
+<p> 2) Use Gordon McMillan's Standalone utility, which is part of his Installer package, to convert WebKit.cgi into an executable program, WebKit.exe.  IIS apparently will not handle requests with additional path components after the name of the script, like <code>http://localhost/WebKit.cgi/foo/bar</code> where WebKit.cgi is a script, but will handle requests like <code>http://localhost/WebKit.exe/foo/bar</code> where WebKit.exe is an executable. In any case, using the Standalone utility probably results in a speed increase, so this is probably a good thing to do anyway.
 
 <p> In order to convert WebKit.cgi into WebKit.exe using the Standalone utility, you first have to rename it to WebKit.py, and add <code>import socket</code> to the top of the file (you could use a configuration file instead, but this is easier).
 
@@ -202,15 +202,18 @@ the CGI specification, by running the following command:
 
 <p> Note that on UNIX and NT, regardless of which adapter you use, you may need to set some permissions so that the app server can write files to the WebKit directories Cache, ErrorMsgs, Logs and Sessions.
 
-<p> The easiest way to do this is to make these directories writeable by all (on UNIX, that would be <code>cd WebKit/Webware; chmod -R a+rX Cache ErrorMsgs Logs Sessions</code>).
+<p> The easiest way to do this is to make these directories writeable by all (on UNIX, that would be <code>cd Webware/WebKit; chmod -R a+rX Cache ErrorMsgs Logs Sessions</code>).
 
-<p> The most secure way to do this, is to make sure the app server and it's adapter are executed by a specific user and that the specific user has write permissions to these directories (but no one else). This requires some savvy with both your operating system and you web server. You may wish to take the easy approach first in order to bootstrap yourself and then come back to this.
+<p> The most secure way to do this, is to make sure the app server and it's adapter are executed by a specific user and that the specific user has write permissions to these directories (but no one else). This requires some savvy with both your operating system and your web server. You may wish to take the easy approach first in order to bootstrap yourself and then come back to this.
 
 
 <a name=Adapters_CGI><h3>CGI Adapter</h3></a>
 
-<p> The classic set up uses the CGI adapter, known as WebKit.cgi. In this configuration, the app server stays resident (similar to the web server) and is tapped for responses by a small CGI program that forwards the request to it from the web server.
+<p> The "classic" WebKit set up uses the CGI adapter, known as WebKit.cgi. Almost all web servers support CGI so it was obvious that WebKit should, too.
 
+<p> In this configuration, the app server stays resident (similar to the web server) and is tapped for responses by a small CGI program that forwards the request to the app server.
+
+<p> Note that even though this approach uses CGI, such a WebKit application will run faster than the equivalent all-CGI solution. The reason is that that the app server (and possibly your servlets) can do quite a bit of caching, and the CGI adapter is fairly small. On the other hand, this is one of the slower adapters out of the bunch.
 
 <p> To set this up, do the following:
 
@@ -243,7 +246,7 @@ the CGI specification, by running the following command:
 	<li> You can now try a URL such as <code>http://localhost/WebKit.cgi/</code>. By default, the WebKit app server will display the Examples page. A sidebar provides navigation of the various examples which you can look through. Note that for any example, you can view it's source code by clicking the <b>View source of...</b> link in the sidebar.
 	<li> Some diagnostic information will be printed in the terminal window of the server. You'll notice after the first page is served, that additional pages are served much faster. You can verify this in the console of the app server which reports the response time for each request. As the application warms up (e.g., caches classes, objects, files and settings) performance increases.
 	<li> You will also notice a list of "contexts" in the sidebar. Each context has it's own directory and to create your own web applications, you will create a new context, perhaps even setting it to be the default. See <a href=#Contexts>Contexts</a> below.
-	<li> One context you should look at now is <b>Admin</b>. These pages let you view the WebKit logs, configurations, installed plug-ins, etc.
+	<li> One context you should look at now is <b>Admin</b>. These pages let you view the WebKit logs, configuration, installed plug-ins, etc.
 </ul>
 
 
@@ -251,7 +254,7 @@ the CGI specification, by running the following command:
 
 <p> Stopping the app server is accomplished by simply going to it's terminal/command window and hitting Control-C. The app server is designed to intercept this interruption and shut down gracefully. This includes saving session data to disk, if necessary.
 
-<p> [UNIX] If you don't have access to the terminal window of the app server (perhaps because you used to rlogin, telnet or ssh to remotely access the machine), you can use <code>kill -s 2 &lt;pid&gt;</code> to effect a Control-C and <code>ps -ax | grep AppServer</code> to get the pid.
+<p> [UNIX] If you don't have access to the terminal window of the app server (perhaps because you used rlogin, telnet or ssh to remotely access the machine), you can use <code>ps -ax | grep AppServer</code> to get the pid <code>kill -s 2 &lt;pid&gt;</code> to effect a Control-C.
 
 
 <a name=Adapters_Reloading><h3>Reloading Servlets</h3></a>
@@ -269,15 +272,20 @@ the CGI specification, by running the following command:
 
 <p> There are three major reasons to use the OneShot adapter:
 
-<ul>
-	<li> When developing a web site. OneShot avoids the reloading problems described in the previous section, because the app server is loaded fresh for every request.
-	<li> When developing WebKit itself and/or plug-ins. Restarting the app server is required in these circumstances, so again, OneShot becomes a convenient way to do this.
-	<li> To ensure absolute stability. Stability problems and memory leaks are unlikely to occur with OneShot since the lifetime of the app server is so short. However, the persistent app server is fairly well tested so this particular purpose is somewhat weak.
-</ul>
+<dl>
+	<p><dt>1. When developing a web site. </dt>
+	<dd> OneShot avoids the reloading problems described in the previous section, because the app server is loaded fresh for every request. </dd>
+
+	<p><dt>2. When developing WebKit itself and/or plug-ins. </dt>
+	<dd> Restarting the app server is required in these circumstances, so again, OneShot becomes a convenient way to do this. </dd>
+
+	<p><dt>3. To ensure absolute stability. </dt>
+	<dd> Stability problems and memory leaks are unlikely to occur with OneShot since the lifetime of the app server is so short. However, the persistent app server is fairly well tested so this particular reason is somewhat weak. </dd>
+</dl>
 
 <p> Of course, the cost of these benefits is performance. OneShot is at least an order of magnitude slower than a persistent app server. For development, that's not a problem. But for a deployed site with multiple users it could be.
 
-<p> We generally recommend that you develop with OneShot and deploy with something else, like <a href=#Adapters_WebKit>WebKit.cgi</a> or <a href=#Adapters_FastCGI>FastCGI</a> (see below).
+<p> We generally recommend that you develop with OneShot and deploy with something else, like <a href=#Adapters_CGI>WebKit.cgi</a> or <a href=#Adapters_FastCGI>FastCGI</a> (see below).
 
 <p> To set up OneShot, follow the same instructions as for WebKit.cgi with two exceptions and one addition:
 
@@ -325,14 +333,14 @@ the CGI specification, by running the following command:
 
 <a name=Adapters_Renaming><h3>Renaming Adapters</h3></a>
 
-<p> Adapters like WebKit.cgi and OneShot.cgi do not rely on their name. Consequently, when you deploy your web site, you can rename the adapter to something like <code>serve.cgi</code>. This allows you to switch adapters later without affecting the URLs and therefore the bookmarks of your users (provided you're still using some form of CGI adapter).
+<p> Adapters such as WebKit.cgi and OneShot.cgi do not rely on their name. Consequently, when you deploy your web site, you can rename the adapter to something like <code>serve.cgi</code>. This allows you to switch adapters later without affecting the URLs and therefore the bookmarks of your users (provided you're still using some form of CGI adapter).
 
 
 <a name=Configuration><h2>Configuration</h2></a>
 
 <p> In this section, we'll briefly touch on some of the configuration options related to installing and running WebKit. A full reference to these options can be found in the User's Guide under <a href=UsersGuide.html#Configuration>Configuration</a>.
 
-<p> The settings reference below are found in the configuration file, Configs/Application.config.
+<p> The settings referenced below are found in the configuration file, Configs/Application.config.
 
 
 <a name=Configuration_Sessions><h3>Sessions</h3></a>
@@ -341,7 +349,7 @@ the CGI specification, by running the following command:
 
 <p> Storing to memory is the fastest solution and works well with a persistent app server. Note that the session data will be saved to disk periodically (as a backup measure) and upon app server shutdown. It will then be automatically reloaded upon app server startup.
 
-<p> Storing to disk is provided mainly in support of the OneShot adapter. It may also prove useful in the future in support of load balancing. In this scenario, each individual session is stored in it's own file, loaded for every request and saved when delivering the corresponding response.
+<p> Storing to files is provided mainly in support of the OneShot adapter. It may also prove useful in the future in support of load balancing. In this scenario, each individual session is stored in it's own file, loaded for every request and saved when delivering the corresponding response.
 
 <p> All on-disk session information is located in WebKit/Sessions.
 
@@ -372,7 +380,7 @@ the CGI specification, by running the following command:
 
 <p> WebKit divides the world into <i>contexts</i>, each of which is a directory with it's own files and servlets. WebKit will only serve files out of it's list of known contexts.
 
-<p> Some of the contexts you will find out of the box are Examples, Documentation and Admin. When viewing either an example or admin page, you will see a sidebar that lists all the contexts for your browsing.
+<p> Some of the contexts you will find out of the box are Examples, Documentation and Admin. When viewing either an example or admin page, you will see a sidebar that links to all the contexts.
 
 <p> Another way to look at contexts is a means for "directory partitioning". If you have two distinct web applications (for example, PythonTutor and DayTrader), you will likely put each of these in their own context.
 
@@ -386,14 +394,14 @@ the CGI specification, by running the following command:
 
 <p> The special name <code>default</code> is reserved to specify what context is served when none is specified (as in <code>http://localhost/WebKit.cgi/</code>). Upon installation, this is the Examples context, which is convenient during development since it provides links to all the other contexts.
 
-<p> Note that a context can contain an <code>__init__.py</code> which will be executed when the context is loaded at app server start up. You can put any kind of initialization code you deem appropriate here.
+<p> Note that a context can contain an <code>__init__.py</code> which will be executed when the context is loaded at app server start up. You can put any kind of initialization code you deem appropriate there.
 
 
 <a name=AppServerNotes><h2>AppServer Notes</h2></a>
 
 <a name=AppServerNotes_Threaded><h3>ThreadedAppServer</h3></a>
 
-<p>WebKit uses a process called an AppServer to handle requests.  The AppServer is responsible for receiving a request from the adapter, and then running it through the Application, and then sending the response back to the adapter.  The default AppServer is called ThreadedAppServer.  This AppServer uses a set number of threads to process requests.  The number of threads used is configurable.  As each request comes in, a thread from the threadpool will be handed that request and will be responsible for receiving the request from the adapter, running the request through the Application, and then sending the response back to the adapter.
+<p>WebKit uses a process called an AppServer to handle requests.  The AppServer is responsible for receiving a request from the adapter, and then running it through the Application, and then sending the response back to the adapter.  The default AppServer is called ThreadedAppServer.  This AppServer uses a set number of threads to process requests.  The number of threads used is configurable.  As each request comes in, a thread from the thread pool will be handed that request and will be responsible for receiving the request from the adapter, running the request through the Application, and then sending the response back to the adapter.
 
 
 <a name=AppServerNotes_Async><h3>AsyncThreadedAppServer</h3></a>
@@ -423,6 +431,7 @@ the CGI specification, by running the following command:
 <ul>
 	<li> A verbatim actual install on a box such as BSD.
 	<li> Notes on third party web host providers.
+	<li> Some example web pages of the start up screen, examples page, admin page, etc.
 </ul>
 
 
