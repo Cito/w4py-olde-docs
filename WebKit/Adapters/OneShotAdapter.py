@@ -67,7 +67,7 @@ class OneShotAdapter(Adapter):
 
 			print 'ONE SHOT MODE\n'
 
-			from OneShotAppServer import OneShotAppServer
+			from WebKit.OneShotAppServer import OneShotAppServer
 			appSvr = OneShotAppServer(self._webKitDir)
 
 			# It is important to call transaction.die() after using it, rather than just
@@ -144,7 +144,7 @@ class OneShotAdapter(Adapter):
 def main(webKitDir=None):
 	if webKitDir is None:
 		import os
-		webKitDir = os.getcwd()
+		webKitDir = os.path.dirname(os.getcwd())
 	try:
 		OneShotAdapter(webKitDir).run()
 	except:

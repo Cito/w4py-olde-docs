@@ -11,10 +11,9 @@ AppWorkDir = None
 
 try:
 	import os, sys
-	if WebwareDir:
-		sys.path.insert(1, WebwareDir)
-	else:
+	if not WebwareDir:
 		WebwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
+	sys.path.insert(1, WebwareDir)
 	webKitDir = os.path.join(WebwareDir, 'WebKit')
 	if AppWorkDir is None:
 		AppWorkDir = webKitDir
@@ -25,7 +24,7 @@ try:
 	WebKit.Adapters.OneShotAdapter.main(AppWorkDir)
 except:
 	import string, sys, traceback
-	from time importx asctime, localtime, time
+	from time import asctime, localtime, time
 
 	sys.stderr.write('[%s] [error] WebKit: Error in adapter\n' % asctime(localtime(time())))
 	sys.stderr.write('Error while executing script\n')
