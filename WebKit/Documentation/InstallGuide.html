@@ -383,6 +383,15 @@ the CGI specification, by running the following command:
 
 <p> Note that a context can contain an <code>__init__.py</code> which will be executed when the context is loaded at app server start up. You can put any kind of initialization code you deem appropriate here.
 
+<a name=Other><h2>Other Notes</h2></a>
+<p><h3>AppServers</h3>
+<p>WebKit uses a process called an AppServer to handle requests.  The AppServer is responsible for receiving a request from the Adaptor, and then running it through the Application, and then sending the response back to the adptor.  The default AppServer is called ThreadedAppServer.  This AppServer uses a set number of threads to process requests.  The number of threads used is configurable.  As each request comes in, a thread from the threadpool will be handed that request and will be responsible for receiving the request from the Adaptor, running the request through the Application, and then sending the response back to the Adaptor.
+
+<p>There is also a slightly modified version of the ThreadedAppServer, called AsyncThreadedAppServer.  The difference with AsyncThreadedAppServer is that the threads are only responsible for running a request through the Application.  Threads are not used for any network I/O. The python asyncore module handles all I/O.  The reason for this alternate form is that heavy network traffic could theoretically tie up threads if they are responsible for sending the response, thus leaving the potential for the AppServer to run out of threads to process requests.  In testing on Linux systems, AsyncThreadedAppServer has shown a slight drop in performance for light loads, but has held up better than the threaded version under very heavy loads.  On Windows, testers have reported little difference between the two AppServers under heavy loads, and a slight slowdown when using the Async version under light loads. (You can change which AppServer is used by editing the file AppServer (on UNIX) or AppServer.bat (On Windows)).
+
+<p><h3>Monitor Process</h3>
+<p><b> [UNIX Only]</b>  In order to provide additional stability and peace of mind, a monitor process has been developed.  The monitor is responsible for starting the AppServer and monitoring it's health.  If it detects that the AppServer is not responding, it will start a new AppServer and clean up the old one.  In order to use the monitor, run the file wkMonitor.py.  The wkMonitor process will handle the starting of the main AppServer. In order to shut down WebKit when using the monitor process, run stopMonitor.py. <br>
+Note:  This process will be available on Windows systems in the near future.
 
 <a name=Future><h2>Future</h2></a>
 
@@ -391,8 +400,7 @@ the CGI specification, by running the following command:
 <ul>
 	<li> A verbatim actual install on a box such as BSD.
 	<li> Notes on third party web host providers.
-	<li> Document AsyncThreadedAppServer.
-	<li> For stopping the app server, add the appropriate UNIX kill command (that would be equivalent to Control-C).
+<!--  The kill command on Unix is ctrl-C as well -->
 </ul>
 
 
