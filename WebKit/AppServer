@@ -1,9 +1,18 @@
 #!/bin/sh
 
-# as long as the appserver returns a 3, it wants to be restarted
+# You may give the following Python parameters in advance
+# followed by the parameters passed on to ThreadedAppServer
+# -O with optimization (.pyo instead of .pyc)
+# -u unbuffered output (useful for debugging)
+unset OPTIONS
+while getopts ":Ou" OPT; do    
+	case $OPT in O | u) OPTIONS="$OPTIONS -$OPT";; esac
+done
+shift `expr $OPTIND - 1`
 
+# as long as the appserver returns a 3, it wants to be restarted
 retcode=3
 while test $retcode -eq 3; do
-    /usr/bin/env python Launch.py ThreadedAppServer $*
+    /usr/bin/env python $OPTIONS Launch.py ThreadedAppServer $*
     retcode=$?
 done
