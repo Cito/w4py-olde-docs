@@ -351,11 +351,17 @@ class Attr:
 	def _writeCreateSQL(self, generator, out):
 		if self.hasSQLColumn():
 			name = self.sqlName().ljust(self.maxNameWidth())
+			if self.isRequired():
+				notNullSQL = ' NOT NULL'
+			else:
+				notNullSQL = ''
 			if generator.sqlSupportsDefaultValues():
 				defaultSQL = self.createDefaultSQL()
+				if defaultSQL:
+					defaultSQL = ' ' + defaultSQL
 			else:
 				defaultSQL = ''
-			out.write('\t%s %s %s,\n' % (name, self.sqlType(), defaultSQL))
+			out.write('\t%s %s%s%s,\n' % (name, self.sqlType(), notNullSQL, defaultSQL))
 		else:
 			out.write('\t/* %(Name)s %(Type)s - not a SQL column */\n' % self)
 
