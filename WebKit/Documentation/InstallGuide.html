@@ -206,7 +206,7 @@ the CGI specification, by running the following command:
 
 <p> Note that on UNIX and NT, regardless of which adapter you use, you may need to set some permissions so that the app server can write files to the WebKit directories Cache, ErrorMsgs, Logs and Sessions.
 
-<p> The easiest way to do this is to make these directories writeable by all (on UNIX, that would be <code>cd Webware/WebKit; chmod -R a+rX Cache ErrorMsgs Logs Sessions</code>).
+<p> The easiest way to do this is to make these directories writeable by all (on UNIX, that would be <code>cd Webware/WebKit; chmod -R a+rwX Cache ErrorMsgs Logs Sessions</code>).
 
 <p> The most secure way to do this, is to make sure the app server and it's adapter are executed by a specific user and that the specific user has write permissions to these directories (but no one else). This requires some savvy with both your operating system and your web server. You may wish to take the easy approach first in order to bootstrap yourself and then come back to this.
 
