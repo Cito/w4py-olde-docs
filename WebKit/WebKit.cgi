@@ -1,4 +1,4 @@
-#!python
+#!/usr/bin/env python
 
 # If the WebKit installation is located somewhere else,
 # then set the WebKitDir variable to point to it.
