@@ -229,10 +229,12 @@ ObjectType = "<type 'Object'>"
 _types = {
 	'string':	StringType,
 	'int':		IntType,
+	'bool':		IntType,
 	'long':		LongType,
 	'decimal':	FloatType,
 	'float':	FloatType,
 	'datetime':	DateTimeType,
+	'date' : DateTimeType,
 	'object':	ObjectType
 }
 
