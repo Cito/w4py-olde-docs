@@ -32,11 +32,11 @@ class ModelUser(Configurable):
 		self._model = model
 		self.modelWasSet()
 
-	def readModelFileNamed(self, filename, modelClass=None):
+	def readModelFileNamed(self, filename, modelClass=None, **keywords):
 		assert self._model is None, 'Cannot re-read a model.'
 		if modelClass==None:
 			from MiddleKit.Core.Model import Model as modelClass
-		self._model = modelClass()
+		self._model = modelClass(**keywords)
 		self._model.read(filename)
 		self.modelWasSet()
 
