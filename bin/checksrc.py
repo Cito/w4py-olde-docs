@@ -212,6 +212,9 @@ class CheckSrc:
 				self.setVerbose(1)
 			elif arg=='-V':
 				self.setVerbose(0)
+			elif arg[0]=='-':
+				self.usage()
+				return 0
 			else:
 				if not setDir:
 					self.setDirectory(arg)
