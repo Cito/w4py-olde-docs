@@ -2,6 +2,7 @@ from ModelObject import ModelObject
 from Model import Model, ModelError
 from Klass import Klass
 from Attr import Attr
+from MiscUtils import NoDefault
 from MiscUtils.DataTable import DataTable
 from MiscUtils.DictForArgs import *
 from UserDict import UserDict
@@ -55,10 +56,21 @@ class Klasses(ModelObject, UserDict):
 
 
 	def assignClassIds(self, generator):
-		id = 1
-		for klass in self._model._allKlassesInOrder:
-			klass.setId(id)
-			id += 1
+		if self.setting('UseHashForClassIds', False):
+			# This is better because class ids will likely stay the same even as
+			# you change your MiddleKit model. For example, class ids across
+			# different sandboxes of your application (development, test and
+			# production) would match up even as you add and remove classes.
+			# However, renaming classes changes the id!
+			from sets import Set
+			allIds = Set()
+			for klass in self._model._allKlassesInOrder:
+				klass.setId(allIds)
+		else:
+			id = 1
+			for klass in self._model._allKlassesInOrder:
+				klass.setId(id)
+				id += 1
 
 
 	## Accessing ##
@@ -170,6 +182,13 @@ class Klasses(ModelObject, UserDict):
 			return self._typeNamesToAttrClassNames[typeName]
 		except KeyError:
 			return 'ObjRefAttr'
+
+	def setting(self, name, default=NoDefault):
+		"""
+		Returns the value of a particular configuration setting taken
+		from the model.
+		"""
+		return self._model.setting(name, default)
 
 
 	## Debugging ##

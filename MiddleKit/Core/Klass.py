@@ -4,6 +4,7 @@ from MiddleKit import StringTypes
 from MiddleKit.Core.ListAttr import ListAttr
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleDict import MiddleDict
+from sets import Set
 
 
 class Klass(MiddleDict, ModelObject):
@@ -135,7 +136,20 @@ class Klass(MiddleDict, ModelObject):
 		return self._id
 
 	def setId(self, id):
-		self._id = id
+		if isinstance(id, Set):
+			# create an id that is a hash of the klass name
+			# see Klasses.assignClassIds()
+			allIds = id
+			limit = 2000000000  # the limit of 2 billion keeps the id easily in the range of a 32 bit signed int without going negative
+			id = abs(hash(self.name()) % limit)
+			assert id>0 and id<limit
+			while id in allIds:
+				# adjust for collision
+				id += 1
+			assert id>0 and id<limit
+			self._id = id
+		else:
+			self._id = id
 
 
 	## Superklass ##
@@ -317,7 +331,7 @@ class Klass(MiddleDict, ModelObject):
 		Returns the value of a particular configuration setting taken
 		from the model.
 		"""
-		return self._klassContainer._model.setting(name, default)
+		return self._klassContainer.setting(name, default)
 
 
 	## As string ##
