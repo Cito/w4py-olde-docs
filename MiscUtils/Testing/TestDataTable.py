@@ -12,8 +12,6 @@ from MiscUtils.DataTable import *
 # that respond to hasValueForKey() and valueForKey(), can be added to a table
 # (as opposed to a sequence, dictionary or TableRecord instance).
 
-# def heading(title):
-# 	print 'Testing %s...' % title
 
 class TestDataTable( unittest.TestCase):
 
@@ -24,7 +22,7 @@ class TestDataTable( unittest.TestCase):
 			os.remove(name)
 
 	def _testSource(self, name, src, headings, data):
-#		heading(name)
+		#		heading(name)
 		dt = DataTable()
 		lines = split(src, '\n')
 		dt.readLines(lines)
@@ -34,12 +32,6 @@ class TestDataTable( unittest.TestCase):
 			match = data[i]
 			self.assertEquals( dt[i].asList(), match, 
 				'For element %d, I expected "%s" but got "%s"' % (i, match, dt[i].asList() ) )
-# 			if dt[i].asList()!=match:
-# 				print 'mismatch'
-# 				print 'i        :', i
-# 				print 'expected :', match
-# 				print 'got      :', dt[i]
-# 				raise AssertionError
 			i = i + 1
 	
 	def test01_withPickle(self):
@@ -52,20 +44,20 @@ class TestDataTable( unittest.TestCase):
 		self._test01()
 
 	def _test01(self ):
-#		print 'Simple tests...'
+		'''Simple tests...'''
 	
-#		heading('Create table')
+		# Create table
 		t = DataTable()
 	
-#		heading('Headings 1')
+		# Headings 1
 		t = DataTable()
 		t.setHeadings([TableColumn('name'), TableColumn('age:int'), TableColumn('rating:float')])
 	
-#		heading('Headings 2')
+		# Headings 2
 		t = DataTable()
 		t.setHeadings(['name', 'age:int', 'rating:float'])
 	
-#		heading('Adding and accessing data')
+		# Adding and accessing data
 		a = ['John', '26', '7.2']
 		b = ['Mary', 32, 8.3]
 		t.append(a)
@@ -75,10 +67,10 @@ class TestDataTable( unittest.TestCase):
 		assert t[-1]['name']=='Mary'
 		assert t[-2]['name']=='John'
 	
-#		heading('Printing')
+		# Printing
 #		print t
 	
-#		heading('Writing file (CSV)')
+		# Writing file (CSV)
 		answer = '''\
 name,age,rating
 John,26,7.2
@@ -89,7 +81,7 @@ Mary,32,8.3
 		results = out.getvalue()
 		assert results==answer, '\n%r\n%r\n' % (results, answer)
 	
-#		heading('Accessing rows')
+		# Accessing rows
 		for row in t:
 			assert row['name']==row[0]
 			assert row['age']==row[1]
@@ -97,7 +89,7 @@ Mary,32,8.3
 			for item in row:
 				pass
 	
-#		heading('Default type')
+		# Default type
 		t = DataTable(defaultType='int')
 		t.setHeadings(list('xyz'))
 		t.append([1, 2, 3])
@@ -173,7 +165,7 @@ Class,Attribute,Type,Extras
 		self._testSource('MK enums', src, headings, data)
 	
 	
-#		heading('Unfinished multiline record')
+		# Unfinished multiline record
 		try:
 			DataTable().readString('a\n"1\n')
 		except DataTableError:
@@ -199,95 +191,3 @@ Class,Attribute,Type,Extras
 			t = DataTable('Sample3.xls')
 			assert t[0][0]==1.0, t[0]
 
-
-# def main():
-# 	print 'Testing DataTable.py'
-# 
-# 	import os
-# 	from glob import glob
-# 	for name in glob('*.cache'):
-# 		print 'Removing', name
-# 		os.remove(name)
-# 
-# 	DataTable.usePickleCache = 0
-# 
-# 	test01()
-# 	testExcel()
-# 
-# 	DataTable.usePickleCache = 1
-# 
-# 	test01()
-# 	testExcel()
-# 
-# 	test01()
-# 	testExcel()
-# 
-# 	print 'Done.'
-
-
-# if __name__=='__main__':
-# 	main()
-
-
-# Testing DataTable.py
-# Simple tests...
-# Testing Create table...
-# Testing Headings 1...
-# Testing Headings 2...
-# Testing Adding and accessing data...
-# Testing Printing...
-# DataTable: None
-# 2 rows
-#      name, age, rating
-#   0. John, 26, 7.2
-#   1. Mary, 32, 8.3
-# 
-# Testing Writing file (CSV)...
-# Testing Accessing rows...
-# Testing Default type...
-# Testing Basics...
-# Testing Comments...
-# Testing Multiline records...
-# Testing MK enums...
-# Testing Unfinished multiline record...
-# Simple tests...
-# Testing Create table...
-# Testing Headings 1...
-# Testing Headings 2...
-# Testing Adding and accessing data...
-# Testing Printing...
-# DataTable: None
-# 2 rows
-#      name, age, rating
-#   0. John, 26, 7.2
-#   1. Mary, 32, 8.3
-# 
-# Testing Writing file (CSV)...
-# Testing Accessing rows...
-# Testing Default type...
-# Testing Basics...
-# Testing Comments...
-# Testing Multiline records...
-# Testing MK enums...
-# Testing Unfinished multiline record...
-# Simple tests...
-# Testing Create table...
-# Testing Headings 1...
-# Testing Headings 2...
-# Testing Adding and accessing data...
-# Testing Printing...
-# DataTable: None
-# 2 rows
-#      name, age, rating
-#   0. John, 26, 7.2
-#   1. Mary, 32, 8.3
-# 
-# Testing Writing file (CSV)...
-# Testing Accessing rows...
-# Testing Default type...
-# Testing Basics...
-# Testing Comments...
-# Testing Multiline records...
-# Testing MK enums...
-# Testing Unfinished multiline record...
-# Done.
