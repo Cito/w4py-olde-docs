@@ -4,7 +4,7 @@ Funcs.py
 Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else.
 '''
 
-import string
+import string, time
 
 
 def Commas(number):
@@ -51,3 +51,24 @@ def CharWrap(s, width, hanging=0):
 			lines[i] = s
 		i = i + 1
 	return string.join(lines, '\n')
+
+
+def timestamp(numSecs=None):
+	'''
+	Returns a dictionary whose keys give different versions of the timestamp:
+		'numSecs': the number of seconds
+		'tuple': (year, month, day, hour, min, sec)
+		'pretty': 'YYYY-MM-DD HH:MM:SS'
+		'condensed': 'YYYYMMDDHHMMSS'
+		'dashed': 'YYYY-MM-DD-HH-MM-SS'
+	The focus is on the year, month, day, hour and second, with no additional information such as timezone or day of year. This form of timestamp is often ideal for print statements, logs and filenames.
+	If the current number of seconds is not passed, then the current time is taken.
+	The 'pretty' format is ideal for print statements, while the 'condensed' and 'dashed' formats are generally more appropriate for filenames.
+	'''
+	if numSecs is None:
+		numSecs = time.time()
+	tuple     = time.localtime(numSecs)[:6]
+	pretty    = '%4i-%02i-%02i %02i:%02i:%02i' % tuple
+	condensed = '%4i%02i%02i%02i%02i%02i' % tuple
+	dashed    = '%4i-%02i-%02i-%02i-%02i-%02i' % tuple
+	return locals()
