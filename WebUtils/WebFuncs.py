@@ -21,6 +21,7 @@ HTMLCodes = [
 	['&', '&amp;'],
 	['<', '&lt;'],
 	['>', '&gt;'],
+	['"', '&quot;'],
 #	['\n', '<br>']
 ]
 
@@ -29,7 +30,7 @@ HTMLCodesReversed.reverse()
 
 
 def HTMLEncode(s, codes=HTMLCodes):
-	''' Returns the HTML encoded version of the given string. This is useful to display an plain ASCII text string on a web page.'''
+	''' Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page.'''
 	for code in codes:
 		s = string.replace(s, code[0], code[1])
 	return s
@@ -40,7 +41,7 @@ def HTMLDecode(s, codes=HTMLCodesReversed):
 		s = string.replace(s, code[1], code[0])
 	return s
 
-	
+
 
 _URLEncode = {}
 for i in range(256):
@@ -63,7 +64,7 @@ def URLDecode(s):
 		parts[i] = mychr(atoi(part[:2], 16)) + part[2:]
 	return string.join(parts, '')
 
-	
+
 def HTMLForDictionary(dict, addSpace=None):
 	''' Returns an HTML string with a <table> where each row is a key-value pair. '''
 	keys = dict.keys()
