@@ -1,5 +1,29 @@
 from Common import *
-import zCookieEngine
+
+# Import zCookieEngine
+pyVer = getattr(sys, 'version_info', None)
+if pyVer and pyVer[0]>=2:
+	# Get Python's Cookie module
+	# We have to do some work since it has the same name as we do
+	import imp, string
+	path = sys.path[:]
+	try:
+		index = path.index('')
+	except ValueError:
+		pass
+	else:
+		del path[index]
+	try:
+		(file, pathname, description) = imp.find_module('Cookie', path)
+		zCookieEngine = imp.load_module('Cookie', file, pathname, description)
+	except:
+		if file:
+			file.close()
+else:
+	# For Python versions < 2.0, we including a copy of Tim O'Malley's
+	# Cookie.py as "zCookieEngine"
+	import zCookieEngine
+
 
 
 class Cookie(Object):
