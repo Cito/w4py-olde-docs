@@ -2,12 +2,6 @@
 """
 AppServer
 
-The WebKit app server is a TCP/IP server that accepts requests, hands them
-off to the Application and sends the request back over the connection.
-
-The fact that the app server stays resident is what makes it so much quicker
-than traditional CGI programming. Everything gets cached.
-
 
 FUTURE
 
@@ -19,159 +13,65 @@ from Common import *
 from Configurable import Configurable
 from Application import Application
 from PlugIn import PlugIn
-from WebKitSocketServer import ThreadingTCPServer, ForkingTCPServer, TCPServer, BaseRequestHandler
-from marshal import dumps, loads
 import os, sys
-from threading import Lock, Thread
-import Queue
-import select
-import socket
 
 
 DefaultConfig = {
 	'PrintConfigAtStartUp': 1,
 	'Verbose':              1,
-	'Port':                 8086,
-	'ServerThreads':        10, 
 	'PlugIns':              ['../PSP']
 
 	# @@ 2000-04-27 ce: None of the following settings are implemented
 #	'ApplicationClassName': 'Application',
-#	'RequestQueueSize':     16,
-#	'RequestBufferSize':    64*1024,
-#	'SocketType':           'inet',      # inet, unix
 }
 
-
-
-#Below used with the RestartApplication function
-#ReStartLock=Lock()
-#ReqCount=0
 
 class AppServerError(Exception):
 	pass
 
 
-class WebKitAppServer(Configurable):
+class AppServer(Configurable):
 	"""
-	Public Attrs - in the network server
-		* wkApp: A public object that points to the application object. This is used by the request handler.
-
-	Private Attrs
-		* _addr:   The address of the server; a tuple containing server name and port.
-		* _app:    The single instance of the Application.
 	"""
 
 	## Init ##
 
 	def __init__(self):
-		Configurable.__init__(self)
-
-		self.wkVerbose = self.setting('Verbose')
-
 		self._startTime = time.time()
-		self._addr = None
+		Configurable.__init__(self)
+		self._verbose = self.setting('Verbose')
 		self._plugIns = []
-		self._reqCount=0
+		self._reqCount = 0
 
 		self.config() # cache the config
 		self.printStartUpMessage()
 		self._app = self.createApplication()
-
-		self._poolsize=self.setting('ServerThreads')
-		
 		self.loadPlugIns()
-		
-		self.threadPool=[]
-		self.requestQueue=Queue.Queue(self._poolsize*2)#twice the number of threads we have
-		self.rhQueue=Queue.Queue(self._poolsize)#same size as threadQueue
 
+		self.running = 1
 
-		self.mainsocket=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-		self.mainsocket.bind(('localhost',self.setting('Port')))
-		print "listening on",self.address()
-		
-		addr=self.address()
-		open('address.text', 'w').write('%s:%d' % (addr[0], addr[1]))
-
-
-		print 'OK'
-		print
-		self.running=1
-
-		print "spawning threads "
-		for i in range(self._poolsize): #change to threadcount
-			t=Thread(target=self.threadloop)
-			t.start()
-			self.threadPool.append(t)
-			sys.stdout.write(".")
-		sys.stdout.write("\n")
-
-		self.mainsocket.listen(20)
-		print "Ready"
-
-
-	def mainloop(self,timeout=1):
-
-		while 1:
-			if not self.running:#this won't happen for now, the only way to kill this thread is with KeyboardInterrupt
-				self.mainsocket.close()
-				for i in range(self._poolsize):
-					self.requestQueue.put(None)#kill all threads
-				break
-
-			#block for timeout seconds waiting for connections
-			input, output, exc = select.select([self.mainsocket,],[],[],timeout)
-			for sock in input:
-				self._reqCount = self._reqCount+1
-				rh = None
-				client,addr = sock.accept()
-				try:
-					rh=self.rhQueue.get_nowait()
-				except Queue.Empty:
-					rh = RequestHandler(self)
-				rh.activate(client)
-				self.requestQueue.put(rh)
-				
-		
-
-	def threadloop(self):
-		while self.running:
-			try:
-				rh=self.requestQueue.get()
-				if rh == None: #None means time to quit
-					break
-								
-				rh.handleRequest()
-				rh.close()
-				try:
-					self.rhQueue.put(rh)
-				except Queue.Full:
-					print ">> rhQueue Full"
-					pass				#do I want this?
-##				sys.stdout.write(".")
-##				sys.stdout.flush()				
-			except Queue.Empty:
-				pass
 
 	def shutDown(self):
+		'''
+		Subclasses may override and normally follow this sequence:
+			1. set self._shuttingDown to 1
+			2. class specific statements for shutting down
+			3. Invoke super's shutDown() e.g., AppServer.shutDown(self)
+		'''
+
+		self._shuttingDown = 1
+		self.running = 0
 		self._app.shutDown()
-		self.mainsocket.close()
-		for i in range(self._poolsize):
-			self.requestQueue.put(None)#kill all threads
-		for i in self.threadPool:
-			i.join()
-		del self._plugIns[:]
+		del self._plugIns
+
+		# @@ 2000-07-10 ce Most of these should be in the app.
 		del self._app._factoryByExt
 		del self._app._factoryList
 		del self._app._server
-		del self._app._sessSweepThread
+		if hasattr(self._app, '_sessSweepThread'):
+			del self._app._sessSweepThread
 		del self._app
 
-##	def __del__(self):
-##		print "AppServer deleted"
-		
-			
 
 	## Configuration ##
 
@@ -185,18 +85,11 @@ class WebKitAppServer(Configurable):
 	## Network Server ##
 
 	def createApplication(self):
-		"""
-		Creates and returns an application object. Used by __init__.
-		"""
+		''' Creates and returns an application object. Invoked by __init__. '''
 		return Application(server=self)
 
-	def address(self):
-		if self._addr is None:
-			self._addr = ('', self.setting('Port'))
-		return self._addr
-
-
 	def printStartUpMessage(self):
+		''' Invoked by __init__. '''
 		print 'WebKit AppServer', self.version()
 		print 'part of Webware for Python'
 		print 'Copyright 1999-2000 by Chuck Esterbrook. All Rights Reserved.'
@@ -212,15 +105,11 @@ class WebKitAppServer(Configurable):
 	## Plug-ins ##
 
 	def plugIns(self):
-		"""
-		Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package.
-		"""
+		''' Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. '''
 		return self._plugIns
 
 	def loadPlugIn(self, path):
-		"""
-		Loads the given plug-in. Used by loadPlugIns().
-		"""
+		''' Loads the given plug-in. Used by loadPlugIns(). '''
 		try:
 			plugIn = PlugIn(self, path)
 			self._plugIns.append(plugIn)
@@ -242,16 +131,9 @@ class WebKitAppServer(Configurable):
 
 	## Misc ##
 
-	def setRequestQueueSize(self, value):
-		assert value>=1
-		self.__class__.request_queue_size = value
-
 	def version(self):
+		# @@ 2000-07-10 ce: Resolve this with the fooVersion() methods in Application
 		return '0.4 PRERELEASE'
-
-	def serve(self):
-		''' Starts serving requests and does so indefinitely. Sends serve_forever() to the TCP server. '''
-		self._server.serve_forever()
 
 	def application(self):
 		return self._app
@@ -282,109 +164,17 @@ class WebKitAppServer(Configurable):
 		sys.exit(1)  # @@ 2000-05-29 ce: Doesn't work. Perhaps because of threads
 
 
-
-
-class RequestHandler:
-
-
-	def __init__(self, server):
-		self.server=server
-
-	def activate(self, socket):
-		self.sock = socket
-		
-	def close(self):
-		self.sock = None
-
-	def handleRequest(self):
-		
-		verbose = self.server.wkVerbose
-
-		startTime = time.time()
-		if verbose:
-			print 'BEGIN REQUEST'
-			print time.asctime(time.localtime(startTime))
-		conn = self.sock
-		if verbose:
-			print 'receiving request from', conn
-		recv = conn.recv
-		BUFSIZE = 8*1024
-		
-		data = []
-		while 1:
-			chunk = recv(BUFSIZE)
-			if not chunk:
-				break
-			data.append(chunk)
-		data = string.join(data, '')
-		
-		if verbose:
-			print 'received %d bytes' % len(data)
-		if data:
-			dict = loads(data)
-			if verbose:
-				print 'request has keys:', string.join(dict.keys(), ', ')
-
-
-		transaction = self.server._app.dispatchRawRequest(dict)
-		rawResponse = dumps(transaction.response().rawResponse())
-
-				
-		reslen = len(rawResponse)
-		sent = 0
-		while sent < reslen:
-			sent = sent + conn.send(rawResponse[sent:sent+8192])
-
-		conn.close()
-		
-		if verbose:
-			print 'connection closed.'
-			print '%0.2f secs' % (time.time() - startTime)
-			print 'END REQUEST'
-			print
-
-		transaction._application=None
-		transaction.die()
-		del transaction
-
-	def restartApp(self):
-		"""
-		Not used
-		"""
-		if self.server.num_requests> 200:
-			print "Trying to get lock"
-			ReStartLock.acquire()
-			if self.server.num_requests> 200: #check again to make sure another thread didn't do it
-				print "Restarting Application"
-				currApp=self.server.wkApp
-				wkAppServer=currApp._server
-				newApp = wkAppServer.createApplication()
-				newApp._sessions = currApp._sessions
-				wkAppServer._app=newApp
-				self.server.wkApp=newApp
-				for i in currApp._factoryList:
-					currApp._factoryList.remove(i)
-				for i in currApp._factoryByExt.keys():
-					currApp._factoryByExt[i]=None
-				currApp._canFactory=None
-				wkAppServer._plugIns=[]
-				wkAppServer.loadPlugIns()
-
-
-				self.server.num_requests=0
-				print "Refs to old App=",sys.getrefcount(currApp)
-				currApp=None
-			ReStartLock.release()
-
-
 def main():
 	try:
-		server = WebKitAppServer()
-		server.mainloop()
-	except Exception, e: #Need to kill the Sweeper thread somehow
-		print e
+		server = AppServer()
+		return
+		print "Ready"
+		print
+		print 'WARNING: There is nothing to do here with the abstract AppServer. Use one of the adapters such as WebKit.cgi (with ThreadedAppServer) or OneShot.cgi'
+		server.shutDown()
+	except Exception, exc:  # Need to kill the Sweeper thread somehow
+		print 'Caught exception:', exc
 		print "Exiting AppServer"
-		server.running=0
 		server.shutDown()
 		del server
 		sys.exit()

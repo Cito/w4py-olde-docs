@@ -19,6 +19,13 @@ except ImportError:
 	from StringIO import StringIO
 
 
+# @@ 2000-07-10 ce fix this up
+import sys
+sys.path.append('..')
+import WebUtils
+from WebUtils.WebFuncs import HTMLEncode
+
+
 def main():
 	import os, string, sys
 
@@ -34,8 +41,14 @@ def main():
 
 		real_stdout = sys.stdout
 		sys.stdout = console = StringIO()  # to capture the console output of the application
-		import Application
-		response = Application.main(dict)
+		print 'ONE SHOT MODE\n'
+
+		from OneShotAppServer import OneShotAppServer
+		appSvr = OneShotAppServer()
+		response = appSvr.dispatchRawRequest(dict).response().rawResponse()
+		appSvr.shutDown()
+		appSvr = None
+
 		sys.stdout = real_stdout
 		if os.name=='nt': # MS Windows: no special translation of end-of-lines
 			import msvcrt
@@ -45,7 +58,7 @@ def main():
 			write('%s: %s\n' % pair)
 		write('\n')
 		write(response['contents'])
-		write('<br><p><table><tr><td bgcolor=#EEEEEE><pre>%s</pre></td></tr></table>' % console.getvalue())
+		write('<br><p><table><tr><td bgcolor=#EEEEEE><pre>%s</pre></td></tr></table>' % HTMLEncode(console.getvalue()))
 	except:
 		import traceback
 
