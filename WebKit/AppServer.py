@@ -153,6 +153,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		print 'Please visit:  http://webware.sourceforge.net'
 		print
 		print 'Process id is', os.getpid()
+		print 'Date/time is', time.asctime(time.localtime(time.time()))
 		print
 		if self.setting('PrintConfigAtStartUp'):
 			self.printConfig()
@@ -231,7 +232,6 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	def version(self):
 		# @@ 2000-07-10 ce: Resolve this with the version methods in Application
 		return '0.6.1b1' # @@ 2002-02-26 ce: should pull from Properties.py
-
 
 	def application(self):
 		return self._app
