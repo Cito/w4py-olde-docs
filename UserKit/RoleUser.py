@@ -18,8 +18,8 @@ class RoleUser(User):
 
 	## Init ##
 
-	def __init__(self):
-		User.__init__(self)
+	def __init__(self, manager, name, password):
+		User.__init__(self, manager, name, password)
 		self._roles = []
 		self._rolesByName = {}
 
