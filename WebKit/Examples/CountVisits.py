@@ -1,9 +1,12 @@
+print '>> globals =', globals().keys()
+
+
 from ExamplePage import ExamplePage
 
 
 class CountVisits(ExamplePage):
-	def writeBody(self):
-		
+
+	def writeContent(self):
 		count = self.session().value('count', 0)+1
 		self.session().setValue('count', count)
 		if count>1:

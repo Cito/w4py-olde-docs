@@ -28,7 +28,7 @@ class Colors(ExamplePage):
 		''' Overridden to throw in the custom background color that the user can specify in our form. '''
 		return 'color=black ' + self._bgcolorArg
 
-	def writeBody(self):
+	def writeContent(self):
 		self.write('''
 			<center>
 			<form>

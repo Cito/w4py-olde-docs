@@ -3,6 +3,6 @@ from time import *
 
 
 class Time(ExamplePage):
-	
-	def writeBody(self):
+
+	def writeContent(self):
 		self.write('<p>', asctime(localtime(time())))

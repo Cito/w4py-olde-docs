@@ -34,7 +34,7 @@ class ListBox(ExamplePage):
 			} )
 		self._error = None
 
-	def writeBody(self):
+	def writeContent(self):
 		sess = self.session()
 
 		# Debugging
