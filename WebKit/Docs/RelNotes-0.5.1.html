@@ -56,6 +56,8 @@ If you previously had WebKit in your Python path please remove it.
 	<li> The FastCGI adapter was not functional in the last release.  It works now.  However, we discovered in the process of fixing this that the FastCGI library we are using does not work on Windows.  We have no plans to rectify this situation at the moment.
 	
 	<li> Added some error checking for socket communications.
+
+	<li> Corrected bug in AsyncThreadedAppServer where errors in asyncore were not caught properly.  This was due to a change in asyncore between Python 1.5.x and Python 2.x.
 </ul>
 
 
