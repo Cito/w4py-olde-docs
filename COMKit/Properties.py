@@ -3,7 +3,7 @@ name = 'COMKit'
 version = (0, 1, 0)
 
 docs = [
-	#{'name': "User's Guide", 'file': 'UsersGuide.html'},
+	{'name': "User's Guide", 'file': 'UsersGuide.html'},
 ]
 
 status = 'alpha'
