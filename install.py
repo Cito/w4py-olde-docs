@@ -250,7 +250,7 @@ class Installer:
 		print 'Creating index.html...'
 		version = self._ver
 		ht = self.htFragment('index')
-		ht %= locals()
+		ht = ht % locals()
 		self.writeDocFile('Webware Documentation', 'Documentation/index.html', ht, extraHead='<link rel=stylesheet href=index.css type=text/css>')
 
 		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until
