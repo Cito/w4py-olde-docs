@@ -8,4 +8,9 @@ import os
 
 def InstallInWebKit(appServer):
 	app = appServer.application()
-	app.addContext('MKBrowser', os.path.normpath('../MiddleKit/WebBrowser'))
+	relPath = '../MiddleKit/WebBrowser'
+	path = app.serverSidePath(relPath)
+	if os.path.exists(path):
+		app.addContext('MKBrowser', path)
+	else:
+		print 'WARNING: Cannot locate %s.' % relPath
