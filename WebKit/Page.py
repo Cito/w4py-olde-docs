@@ -230,13 +230,13 @@ class Page(HTTPServlet):
 		return []
 
 	def preAction(self, actionName):
-		''' Invoked by self prior to invoking a action method. This implementation basically invokes writeHeader(). Subclasses may override to customize and may or may not invoke super as they see fit. The actionName is passed to this method, although it seems a generally bad idea to rely on this. However, it's still provided just in case you need that hook. '''
+		''' Invoked by self prior to invoking a action method. The implementation basically writes everything up to but not including the body tag.  Subclasses may override to customize and may or may not invoke super as they see fit. The actionName is passed to this method, although it seems a generally bad idea to rely on this. However, it's still provided just in case you need that hook. '''
+		self.writeDocType()
 		self.writeln('<html>')
-		self.writeHeader()
+		self.writeHead()
 
 	def postAction(self, actionName):
-		''' Invoked by self after invoking a action method. This implementation basically invokes writeFooter(). Subclasses may override to customize and may or may not invoke super as they see fit. The actionName is passed to this method, although it seems a generally bad idea to rely on this. However, it's still provided just in case you need that hook. '''
-		self.writeFooter()
+		''' Invoked by self after invoking a action method. The implementation basically writes everything after the close of the body tag (in other words, just the </html> tag).  Subclasses may override to customize and may or may not invoke super as they see fit. The actionName is passed to this method, although it seems a generally bad idea to rely on this. However, it's still provided just in case you need that hook. '''
 		self.writeln('</html>')
 
 
