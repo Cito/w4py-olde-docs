@@ -218,14 +218,15 @@ class MakeAppWorkDir:
 		Make a very simple context for the newbie user to play with.
 		"""
 		self.msg("Creating default context.")
-		if self._contextDir:
-			contextDir = os.path.join(self._workDir, self._contextDir or self._sample)
-			if contextDir.startswith(self._workDir):
-				configDir = contextDir[len(self._workDir):]
-				while configDir.startswith('/'):
-					configDir = configDir[1:]
-			else:
-				configDir = contextDir
+		contextDir = os.path.join(
+			self._workDir,
+			self._contextDir or self._sample)
+		if contextDir.startswith(self._workDir):
+			configDir = contextDir[len(self._workDir):]
+			while configDir.startswith('/'):
+				configDir = configDir[1:]
+		else:
+			configDir = contextDir
 		if not os.path.exists(contextDir):
 			os.makedirs(contextDir)
 		name2 = os.path.join(contextDir, 'Main.py')
@@ -267,8 +268,6 @@ class MakeAppWorkDir:
 			 'Sessions': '[a-zA-Z0-9]*',
 			 self._sample: '*.pyc',
 			 }
-		if self._makeLibrary:
-			files['lib'] = '*.pyc'
 		for dir, contents in files.items():
 			filename = os.path.join(self._workDir, dir, '.cvsignore')
 			f = open(filename, 'w')
@@ -428,7 +427,7 @@ class Main(Page):
 
 if __name__ == "__main__":
 	targetDir = None
-	contextName = 'MyContext'
+	contextName = None
 	contextDir = ''
 	addCVSIgnore = 0
 	libraryDirs = []
@@ -475,6 +474,11 @@ if __name__ == "__main__":
 		print "Give a target directory"
 		print __doc__
 		sys.exit(1)
+
+	if contextDir and contextName is None:
+		contextName = os.path.basename(contextDir)
+	elif contextName is None:
+		contextName = 'MyContext'
 
 	# this assumes that this script is still located in Webware/bin
 	p = os.path
