@@ -989,7 +989,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 				if not os.path.exists(path):
 					# At this point we have a file (or a bad path)
-					filenames = self.filenamesForBaseName(path, debug)
+					filenames = self.filenamesForBaseName(path)
 					if len(filenames)>0:
 						workPath=path
 						if path == ssPath:
