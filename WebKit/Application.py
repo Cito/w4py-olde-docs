@@ -100,7 +100,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		self._servletCacheByPath = {}
 		self._serverSideInfoCacheByPath = {}
 		self._cacheDictLock = Lock()
-		self._instanceCacheSize = self._server.setting('ServerThreads')
+		self._instanceCacheSize = self._server.setting('MaxServerThreads')
 		self._canDirs = []
 
 		self.initializeCans()

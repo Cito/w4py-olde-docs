@@ -21,18 +21,22 @@ from MiscUtils.Funcs import timestamp
 from marshal import dumps, loads
 import os, sys
 from threading import Lock, Thread, Event
+import threading
 import Queue
 import select
 import socket
 import threading
 import time
+import errno
 from WebUtils import Funcs
 
-debug = 0
+debug = 1
 
 DefaultConfig = {
 	'Port':                 8086,
-	'ServerThreads':        10,
+	'MaxServerThreads':        20,
+	'MinServerThreads':        5,
+	'StartServerThreads':      10,
 
 	# @@ 2000-04-27 ce: None of the following settings are implemented
 #	'RequestQueueSize':     16,#	'RequestBufferSize':    64*1024,
@@ -60,10 +64,12 @@ class ThreadedAppServer(AppServer):
 	def __init__(self):
 		AppServer.__init__(self)
 		self._addr = None
-		self._poolsize = self.setting('ServerThreads')
+		threadCount = self.setting('StartServerThreads')
+		self.maxServerThreads = self.setting('MaxServerThreads')
+		self.minServerThreads = self.setting('MinServerThreads')
 		self.monitorPort = None
 		self.threadPool = []
-		self.requestQueue = Queue.Queue(self._poolsize*2) # twice the number of threads we have
+		self.requestQueue = Queue.Queue(self.maxServerThreads * 2) # twice the number of threads we have
 		self.rhQueue = Queue.Queue(0) # This will grow to a limit of the number of
 		                              # threads plus the size of the requestQueue plus one.
 		                              # But it's easier to just let it be unlimited.
@@ -76,16 +82,17 @@ class ThreadedAppServer(AppServer):
 		self.monitorPort = addr[1]-1
 
 		out = sys.stdout
-		out.write('Creating %d threads' % self._poolsize)
-		for i in range(self._poolsize): #change to threadcount
-			t = Thread(target=self.threadloop)
-			t.start()
-			self.threadPool.append(t)
+
+		self.threadCount=0
+		self.threadUseCounter=[]
+		out.write('Creating %d threads' % threadCount)
+		for i in range(threadCount):
+			self.spawnThread()
 			out.write(".")
 			out.flush()
 		out.write("\n")
 
-		# @@ 2001-05-30 ce: another hard coded number:
+		# @@ 2001-05-30 ce: another hard coded number:  @@jsl- not everything needs to be configurable....
 		self.mainsocket.listen(1024)
 		self.recordPID()
 
@@ -101,6 +108,10 @@ class ThreadedAppServer(AppServer):
 		if monitor:
 			inputsockets.append(monitor.insock)
 
+		threadCheckInterval = 100  #does this need to be configurable???
+		threadUpdateDivisor = 10 #grabstat interval
+		threadCheck=0
+			
 		while 1:
 			if not self.running:
 				return
@@ -133,21 +144,107 @@ class ThreadedAppServer(AppServer):
 					rh.activate(client, self._reqCount)
 					self.requestQueue.put(rh)
 
+			if threadCheck % threadUpdateDivisor == 0:
+				self.updateThreadUsage()
+				
+			if threadCheck > threadCheckInterval:
+				if debug: print "Busy Threads: ", self.activeThreadCount()
+				threadCheck=0
+				self.manageThreadCount()
+			else: threadCheck = threadCheck+1
+
+	def activeThreadCount(self):
+		"""
+		Get a snapshot of the number of threads currently in use.
+		"""
+		count=0
+		for i in self.threadPool:
+			if i.processing: count = count+1
+		return count
+
+
+	def updateThreadUsage(self):
+		"""
+		Update the threadUseCounter list.
+		"""
+		count = self.activeThreadCount()
+		if len(self.threadUseCounter) > 10:
+			self.threadUseCounter.pop(0)
+		self.threadUseCounter.append(count)
+		
+
+	def manageThreadCount(self):
+		"""
+		Adjust the number of threads in use.
+		This algorithm needs work.  The edges (ie at the minserverthreads) are tricky.
+		When working with this, remember thread creation is CHEAP
+		"""
+
+		avg=0
+		max=0
+		 
+		for i in self.threadUseCounter:
+			avg = avg + i
+			if i > max:
+				max = i
+		avg = avg / len(self.threadUseCounter)
+		if debug: print "Average Thread Use: ", avg
+		if debug: print "Max Thread Use: ", max
+		if debug: print "ThreadCount: ", self.threadCount
+
+		if avg==0: return #we have no observations to use
+
+		margin = self.threadCount / 4 #smoothing factor
+		if debug: print "margin=", margin
+
+		if avg == self.threadCount and self.threadCount < self.maxServerThreads:
+			self.spawnThread()
+		elif avg < self.threadCount - margin and self.threadCount > self.minServerThreads:
+			self.absorbThread()
+
+	def spawnThread(self):
+		if debug: print "Spawning new thread"
+		t = Thread(target=self.threadloop)
+		t.processing=0
+		t.start()
+		self.threadPool.append(t)
+		self.threadCount = self.threadCount+1
+		if debug: print "New Thread Spawned, threadCount=", self.threadCount
+		self.threadUseCounter=[] #reset
+
+	def absorbThread(self):
+		if debug: print "Absorbing Thread"
+		self.requestQueue.put(None)
+		self.threadCount = self.threadCount-1		
+		for i in self.threadPool:
+			if not i.isAlive():
+				rv=i.join() #Don't need a timeout, it isn't alive
+				self.threadPool.remove(i)
+				if debug: print "Thread Absorbed, threadCount=", self.threadCount
+		self.threadUseCounter=[]
+
 	def threadloop(self):
 		self.initThread()
+		
+		t=threading.currentThread()
+		t.processing=0
 		try:
 			while 1:
 				try:
 					rh=self.requestQueue.get()
 					if rh == None: #None means time to quit
+						if debug: print "Thread retrieved None, quitting"
 						break
 					if self.running:
+						t.processing=1
 						rh.handleRequest()
+						t.processing=0
 					rh.close()
 				except Queue.Empty:
 					pass
 		finally:
 			self.delThread()
+		if debug: print threading.currentThread(), "Quitting"
 
 	def initThread(self):
 		''' Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. '''
@@ -177,7 +274,7 @@ class ThreadedAppServer(AppServer):
 		self._shuttingdown=1  #jsl-is this used anywhere?
 		print "ThreadedAppServer: Shutting Down"
 		self.mainsocket.close()
-		for i in range(self._poolsize):
+		for i in range(self.threadCount):
 			self.requestQueue.put(None)#kill all threads
 		for i in self.threadPool:
 			try:
@@ -280,6 +377,7 @@ class TASASStreamOut(ASStreamOut):
 		self._socket = sock
 
 	def flush(self):
+		debug=0
 		result = ASStreamOut.flush(self)
 		if result: ##a true return value means we can send
 			reslen = len(self._buffer)
@@ -289,7 +387,10 @@ class TASASStreamOut(ASStreamOut):
 				try:
 					sent = sent + self._socket.send(self._buffer[sent:sent+8192])
 				except socket.error, e:
-					print e
+					if e[0]==errno.EPIPE: #broken pipe
+						pass
+					else:
+						print "StreamOut Error: ", e
 					break
 			self.pop(sent)
 
