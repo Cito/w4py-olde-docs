@@ -24,7 +24,23 @@ try:
 except ImportError:
 	from StringIO import StringIO
 
-MinimumVersionErrorMsg="""\nThis Release of Webware requires Python %s.  Your current version of Python is:\n %s.\nPlease go to http://www.python.org for the latest version of Python.\nYou may continue to install, but Webware may not perform as expected.\nDo you wish to continue with the installation? [yes/no]"""
+MinimumVersionErrorMsg="""
+!!! This Release of Webware requires Python %s.  Your current version
+of Python is:
+  %s.
+Please go to http://www.python.org for the latest version of Python.
+You may continue to install, but Webware may not perform as expected.
+Do you wish to continue with the installation?  [yes/no]
+"""
+
+ThreadingEnabled = """
+!!! Webware requires that Python be compiled with threading support.
+This version of Python does not appear to support threading.  You may
+continue, but you will have to run the AppServer with a Python
+interpreter that has threading enabled.
+
+Do you wish to continue with the installation? [yes/NO]
+"""
 
 class Installer:
 	"""
@@ -53,6 +69,7 @@ class Installer:
 		self.clearInstalledFile()
 		self.printHello()
 		if not self.checkPyVersion(): return
+		if not self.checkThreading(): return
 		self.detectComponents()
 		self.installDocs()
 		self.backupConfigs()
@@ -97,6 +114,17 @@ class Installer:
 		else:
 			rtncode = 1
 		return rtncode
+
+	def checkThreading(self):
+		try:
+			import threading
+		except ImportError:
+			response=raw_input(ThreadingEnabled)
+			if response and string.upper(response)[0] == "Y":
+				return 1
+			else:
+				return 0
+		return 1
 
 	def detectComponents(self):
 		print 'Scanning for components...'
