@@ -45,18 +45,18 @@ class PySummary:
 		for line in file.readlines():
 			if line and line[-1]=='\n':
 				line = line[:-1]
-			strippedLine = strip(line)
-			if not strippedLine:
+			sline = strip(line)
+			if not sline:
 				continue
-			if strippedLine[:6]=='class ':
-				self._lines.append(Line('class', line))
-				continue
-			if strippedLine[:4]=='def ':
-				self._lines.append(Line('def', line))
-				continue
-			if strippedLine[:3]=='## ':
-				self._lines.append(Line('category', line))
-				continue
+			try:
+				if sline[:6]=='class ' and sline[6]!='_':
+					self._lines.append(Line('class', line))
+				elif sline[:4]=='def ' and (sline[4]!='_' or sline[5]=='_'):
+					self._lines.append(Line('def', line))
+				elif sline[:3]=='## ':
+					self._lines.append(Line('category', line))
+			except IndexError:
+				pass
 
 
 	## Reports ##
