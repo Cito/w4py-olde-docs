@@ -137,7 +137,7 @@ class HTTPRequestHandler(asyncore.dispatcher):
 
 	An instance of this class is activated by AsyncThreadedHTTPServer.
 	When activated, it is listening for the request to come in.  asyncore will
-	call handle_read when there is data to be read.  ONce all the request has
+	call handle_read when there is data to be read.  Once all the request has
 	been read, it will put itself in the requestQueue to be picked up by a
 	thread and processed by calling handleRequest. Once the processing is
 	complete, the thread drops the instance and tries to find another one.
@@ -236,7 +236,8 @@ class HTTPRequestHandler(asyncore.dispatcher):
 			elif string.lower(self.reqtype) == "post":
 				for i in self.request_data:
 					if string.lower(string.split(i,":")[0]) =="content-length":
-						self.datalength = int(string.split(i)[1]) + 2
+						self.datalength = int(string.split(i)[1])
+						break
 				self.path = string.split(self.request_data[0])[1]
 				self.reqdata=string.join(self.request_data,"")
 				self.request_data = []
@@ -347,7 +348,7 @@ class HTTPRequestHandler(asyncore.dispatcher):
 			env['CONTENT_TYPE'] = self.headers.typeheader
 		length = self.headers.getheader('Content-Length')
 		if length:
-			print "*******Length=",length
+			#print "*******Length=",length
 			env['CONTENT_LENGTH'] = length
 			input = self.inputdata
 		else:
