@@ -81,7 +81,7 @@ class Session(Object):
 		Returns true if the session has been previously expired.
 		See also: expiring()
 		"""
-		return self._isExpired
+		return getattr(self, '_isExpired', 0)
 
 	def isNew(self):
 		return self._numTrans<2
