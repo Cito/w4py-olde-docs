@@ -29,7 +29,7 @@ Version 0.5.1
 
 <ul>
 
-	<li> The Admin context was not password protected, with the exception of the AppControl servlet.  Protection has been added to most of the other servlets in the Admin context.  Also, the Security servlet for the Admin context shared a session variable with the example security servlet, meaning that a client which tried out the security servlet was also given access to the Admin servlets.  We found this disturbing and corrected it.
+	<li> The Admin context was not password protected, with the exception of the AppControl servlet.  Protection has been added to the other servlets in the Admin context.  Also, the Security servlet for the Admin context shared a session variable with the example security servlet, meaning that a client which tried out the security servlet was also given access to the Admin servlets.  We found this disturbing and corrected it.
 
 	<li> The servlet used to view the source code of the examples was also able to view any file on the system to which the WebKit process had access.  This has been corrected so that only files in the Examples dirtectory can be viewed.  A similar issue existed in the PSP Examples context and was also corrected.
 
@@ -38,6 +38,8 @@ Version 0.5.1
 	<li> The XMLRPC servlet in the 0.5.0 release was non-functioning.  It is now functional.
 
     <li> <span class=filename>Testing/stress.py</span> now works properly (by killing HTTP cookies, in the test requests, which contain stale session ids).
+
+	<li> The FastCGI adapter was not functional in the last release.  It works now.  However, we discovered in the process of fixing this that the FastCGI library we are using does not work on Windows.  We have no plans to rectify this situation at the moment.
 </ul>
 
 
