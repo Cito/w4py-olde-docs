@@ -10,7 +10,7 @@ Usage:
 	python AllTests.py                  - Runs all the unittests
 	python AllTests.py mypackage.MyFile - Runs the unittests in 'mypackage/MyFile'
 '''
-#from MiscUtils import unittest
+
 import unittest
 import sys
 
