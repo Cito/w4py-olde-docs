@@ -35,6 +35,7 @@ class CanFactory:
 
 	def createCan(self, canName, *args, **kwargs):
 		##Looks in the directories specified in the application.canDirs List
+		self._canDirs = self._app._canDirs
 		if self._canClasses.has_key(canName):
 			klass = self._canClasses[canName]
 		else:
@@ -50,6 +51,7 @@ class CanFactory:
 			instance = apply(klass,kwargs)
 		elif len(kwargs)==0:
 			instance = apply(klass,args)
-		else: instance = apply(klass,args,kwargs)
+		else:
+			instance = apply(klass,args,kwargs)
 		return instance
 	
