@@ -13,9 +13,9 @@ class Colors(ExamplePage):
 		ExamplePage.__init__(self)
 		self._htColorTable = None
 
-	def awake(self, ctx):
+	def awake(self, trans):
 		''' Set _bgcolor and _bgcolorArg according to our fields. '''
-		ExamplePage.awake(self, ctx)
+		ExamplePage.awake(self, trans)
 		self._bgcolor = ''
 		self._bgcolorArg = ''
 		req = self.request()
@@ -47,13 +47,16 @@ class Colors(ExamplePage):
 			space = '&nbsp;'*10
 			gamma = 2.2  # an approximation for today's CRTs, see "brightness =" below
 
-			for r in range(11):
-				r = r/10.0
-				for g in range(11):
-					g = g/10.0
+			numSteps = 8
+			steps = map(lambda x: float(x), range(numSteps))
+			denominator = float(numSteps-1)
+			for r in steps:
+				r = r/denominator
+				for g in steps:
+					g = g/denominator
 					colorTable.append('<tr>\n')
-					for b in range(11):
-						b = b/10.0
+					for b in steps:
+						b = b/denominator
 						color = '#%02x%02x%02x' % (r*255, g*255, b*255)
 						# Compute brightness given RGB
 						brightness = (0.3*r**gamma + 0.6*g**gamma + 0.1*b**gamma)**(1/gamma)
