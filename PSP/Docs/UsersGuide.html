@@ -66,7 +66,7 @@ to the elements in the current PSP source file and to any included files.
 <p>Supported Page parameters:
 <ul>
 <p><li><b><i><font color="blue">imports</font></i></b> - The imports attribute of the page directive tells the PSP parser
-to import certain pyton modules into the PSP Class source file.
+to import certain python modules into the PSP Class source file.
 <p>The format of this directive is as follows:
 <p><b>Example</b><i>&lt;%@ page imports="sys,os"%&gt;</i>
 <p>The value of the imports parameter may have multiple, comma separated items.
@@ -139,7 +139,7 @@ python <i>str()</i> function.  Multiple lines are not supported in a PSP express
 <p>The script tag is used to enclose python code that should be run by the WebKit Servlet
  runner when requests are processed by the Servlet which this PSP page produces.  Any valid Python
 code can be used in Script tags.  Inside a script tag, indentation is up to the author, and is used
-just like in regular python. (MOre info on blocks below)  The PSP Engine actually just outputs the strings in a Script tag
+just like in regular python. (More info on blocks below)  The PSP Engine actually just outputs the strings in a Script tag
 into the method body that is being produced by this PSP page.
 <p><b>Example</b>
 <p>&lt;% for i in range(5):<br>
@@ -214,7 +214,7 @@ Now it is &lt;%=v &gt;<br>
 <p>The Method tag is used to declare new methods of the Servlet class this page is producing.
 It will generally be more effective to place method declarations in a Servlet class and then have
  the PSP page inherit from that class, but this tag is here for quick methods.  The Method tag
-may also be usefull for over-riding the default functionality of a base class method, as opposed to
+may also be useful for over-riding the default functionality of a base class method, as opposed to
 creating a Servlet class with only a slight change from another.
 <p>The syntax for PSP methods is a little different from that of other tags.  The PSP Method
 declaration uses a compound tag.  There is a beginning tag <i>&lt;psp:method name="methname" params="param1, param2"&gt;</i>
