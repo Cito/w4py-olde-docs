@@ -19,7 +19,7 @@
 #include <netdb.h>
 #include <errno.h>
 #include <netinet/in.h>
-#ifdef __APPLE__
+#if defined(__MACH__) && defined(__APPLE__)
 #include <nameser.h>
 #endif
 #include <resolv.h>
