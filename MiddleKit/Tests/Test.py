@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import os, sys
 from TestCommon import *
+from glob import glob
 
 
 class Test:
@@ -31,7 +32,6 @@ class Test:
 			if not self._modelName.endswith('.mkmodel'):
 				self._modelName += '.mkmodel'
 			self.testDesign()
-			self.createDatabase()
 			self.testEmpty()
 			self.insertSamples()
 			self.testSamples()
@@ -45,7 +45,14 @@ class Test:
 			self._modelNames = 'MKBasic MKNone MKString MKDateTime MKDefaultMinMax MKTypeValueChecking MKInheritance MKInheritanceAbstract MKList MKObjRef MKObjRefReuse MKDelete MKDeleteMark'.split()
 
 	def testEmpty(self):
-		self.testRun('TestEmpty.py', deleteData=0)
+		'''
+		Run all TestEmpty*.py files in the model, in alphabetical order by name.
+		'''
+		names = glob(os.path.join(self._modelName, 'TestEmpty*.py'))
+		names.sort()
+		for name in names:
+			self.createDatabase()
+			self.testRun(os.path.basename(name), deleteData=0)
 
 	def testSamples(self):
 		self.testRun('TestSamples.py', deleteData=0)
