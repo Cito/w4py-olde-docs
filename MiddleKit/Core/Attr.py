@@ -54,3 +54,8 @@ class Attr(UserDict, ModelObject):
 		''' Returns the name that should be used for the Python "set" accessor method for this attribute. This implementation returns setName, as in obj.setFoo(). '''
 		name = self.name()
 		return 'set'+name[0].upper()+name[1:]
+
+	def __setitem__(self, key, value):
+		if key=='Name':
+			assert value!='attr', "Attributes cannot be named 'attr'. That is reserved since Run.MiddleObject has an important attr() method."
+		UserDict.__setitem__(self, key, value)
