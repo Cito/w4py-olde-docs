@@ -268,9 +268,9 @@ class BoolAttr:
 			string = string.upper()
 		except:
 			pass
-		if string in ('TRUE', 'YES', '1', '1.0', 1, 1.0):
+		if string in (True, 'TRUE', 'YES', '1', '1.0', 1, 1.0):
 			value = 1
-		elif string in ('FALSE', 'NO', '0', '0.0', 0, 0.0):
+		elif string in (False, 'FALSE', 'NO', '0', '0.0', 0, 0.0):
 			value = 0
 		else:
 			value = int(string)

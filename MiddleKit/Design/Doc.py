@@ -271,7 +271,7 @@ class Values(UserDict):
 
 	def __init__(self, data):
 		UserDict.__init__(self, data)
-		if self.get('isRequired') not in ('0', 0, 0.0, None):
+		if self.get('isRequired') not in (False, '0', 0, 0.0, None):
 			self['isRequired'] = 'required'
 		else:
 			self['isRequired'] = ''
