@@ -66,6 +66,7 @@ class MiddleObject(NamedValueAccess):
 		''' Sets the serial number of the object and invalidates the object's key.
 		There are some restrictions: Once the serial number is a positive value, indicating a legitimate value from the object store, it cannot be set to anything else. Also, if the serial number is negative, indicating a temporary serial number for new objects that haven't been committed to the database, it can only be set to a positive value.
 		'''
+		assert type(value) in [type(0), type(0L)], "Type is: %r, value is: %r" % (type(value), value)
 		if self._mk_serialNum<0:
 			assert value>0
 		else:
