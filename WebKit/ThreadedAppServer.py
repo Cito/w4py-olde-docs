@@ -600,7 +600,19 @@ def run(useMonitor = 0, workDir=None):
 		# It's not safe on Linux either, but there, it appears that Ctrl-C
 		# will trigger an exception in ANY thread, so this fix doesn't help.
 		if os.name == 'nt':
-			t = threading.Thread(target=server.mainloop, args=(monitor,))
+			# catch the exception raised by sys.exit so that we can re-call it
+			# in the main thread.
+			global exitStatus
+			exitStatus = None
+			def windowsmainloop(server, monitor):
+				global exitStatus
+				try:
+					server.mainloop(monitor)
+				except SystemExit, e:
+					exitStatus = e.code
+
+			# Run the server thread
+			t = threading.Thread(target=windowsmainloop, args=(server, monitor))
 			t.start()
 			try:
 				while server.running:
@@ -609,6 +621,10 @@ def run(useMonitor = 0, workDir=None):
 				pass
 			server.running = 0
 			t.join()
+
+			# re-call sys.exit if necessary
+			if exitStatus:
+				sys.exit(exitStatus)
 		else:
 			try:
 				server.mainloop(monitor_socket)

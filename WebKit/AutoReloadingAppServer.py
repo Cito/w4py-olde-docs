@@ -47,9 +47,7 @@ class AutoReloadingAppServer(AppServer):
 		self._pipe = None
 
 		if self.isPersistent():
-			# I don't think something like exec() exists in Win32, so we 
-			# can only support auto-reloading under posix
-			if self.setting('AutoReload') and os.name == 'posix':
+			if self.setting('AutoReload'):
 				self.activateAutoReload()
 
 	def defaultConfig(self):
