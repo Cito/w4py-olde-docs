@@ -61,7 +61,7 @@ DefaultEmptyTags = 'area basefont base bgsound br col colgroup frame hr img inpu
 
 
 class HTMLTag:
-	'''
+	"""
 	Tags essentially have 4 major attributes:
 		* name
 		* attributes
@@ -104,11 +104,12 @@ class HTMLTag:
 	* Do we need to convert tag names and attribute names to lower case, or does SGMLParser already do that?
 	* Should attribute values be strip()ed?
 	  Probably not. SGMLParser probably strips them already unless they really do have spaces as in "  quoted  ". But that's speculation.
-	'''
+	"""
 
 	## Init and reading ##
 
 	def __init__(self, name):
+		assert '\n' not in name
 		self._name = name
 		self._attrs = {}
 		self._children = []
@@ -196,10 +197,10 @@ class HTMLTag:
 	## Searching ##
 
 	def tagWithMatchingAttr(self, name, value, default=NoDefault):
-		'''
+		"""
 		Performs a depth-first search for a tag with an attribute that matches the given value. If the tag cannot be found, a KeyError will be raised *unless* a default value was specified, which is then returned.
 			tag = tag.tagWithMatchingAttr('bgcolor', '#FFFF', None)
-		'''
+		"""
 		tag = self._tagWithMatchingAttr(name, value)
 		if tag is None:
 			if default is NoDefault:
@@ -211,14 +212,14 @@ class HTMLTag:
 
 
 	def tagWithId(self, id, default=NoDefault):
-		'''
+		"""
 		Finds and returns the tag with the given id. As in:
 			<td id=foo> bar </td>
 		This is just a cover for:
 			tagWithMatchingAttr('id', id, default)
 		But searching for id's is so popular (at least in regression testing web sites) that this convenience method is provided.
 		Why is it so popular? Because by attaching ids to logical portions of your HTML, your regression test suite can quickly zero in on them for examination.
-		'''
+		"""
 		return self.tagWithMatchingAttr('id', id, default)
 
 
@@ -239,7 +240,7 @@ class HTMLTag:
 
 
 class HTMLReader(SGMLParser):
-	'''
+	"""
 	NOTES
 
 	* Special attention is required regarding tags like <p> and <li> which sometimes are closed and sometimes not. HTMLReader can deal with both situations (closed and not) provided that:
@@ -276,8 +277,7 @@ class HTMLReader(SGMLParser):
 	* Could the "empty" tag issue be dealt with more sophistication by automatically closing <p> and <li> (e.g., popping them off the _tagStack) when other major tags were encountered such as <p>, <li>, <table>, <center>, etc.?
 
 	* Readers don't handle processing instructions: <? foobar ?>.
-	'''
-
+	"""
 
 	## Init ##
 
@@ -305,9 +305,9 @@ class HTMLReader(SGMLParser):
 	## Reading ##
 
 	def readFileNamed(self, filename, retainRootTag=1):
-		'''
+		"""
 		Reads the given file. Relies on readString(). See that method for more information.
-		'''
+		"""
 		self._filename = filename
 		contents = open(filename).read()
 		return self.readString(contents)
