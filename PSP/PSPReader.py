@@ -232,22 +232,22 @@ class PSPReader:
 		return 0
 
     def Advance(self,length):
-			if length + self.current.col <= len(self.current.linearray[self.current.row]):# -1 is to handle '\n'
-				self.current.cursor = self.current.cursor + length
-				self.current.col = self.current.col + length
-				return
+		if length + self.current.col <= len(self.current.linearray[self.current.row]):# -1 is to handle '\n'
+			self.current.cursor = self.current.cursor + length
+			self.current.col = self.current.col + length
+			return
 			# I may have broken something here. I changed the first line above to <= from < and took out the below 5/20/00
-			# prog = len(self.current.linearray[self.current.row]) - self.current.col
+			prog = len(self.current.linearray[self.current.row]) - self.current.col
 			# if prog == length:  #I'm gonna have off by 1 errs, try to handle it
 			#    self.advanceLine()
 			# return
-			while prog < length:
-				self.advanceLine()
-				if prog + len(self.current.linearray[self.current.row]) > length :
-					self.current.col = length - prog
-					self.current.cursor = self.current.cursor + length - prog
-					return
-				prog = prog + len(self.current.linearray[self.current.row])
+		while prog < length:
+			self.advanceLine()
+			if prog + len(self.current.linearray[self.current.row]) > length :
+				self.current.col = length - prog
+				self.current.cursor = self.current.cursor + length - prog
+				return
+			prog = prog + len(self.current.linearray[self.current.row])
 
     def nextChar(self):
 		if self.hasMoreInput() == 0: return -1
