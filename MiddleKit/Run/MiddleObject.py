@@ -182,7 +182,7 @@ class MiddleObject(NamedValueAccess):
 		Used by referencingObjectsAndAttrs() to reduce the load on the persistent store.
 		Specific object stores replace this as appropriate.
 		"""
-		return {}
+		return {'refreshAttrs': 1}
 
 
 	## Debugging ##

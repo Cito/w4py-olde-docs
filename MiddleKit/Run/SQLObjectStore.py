@@ -247,7 +247,7 @@ class SQLObjectStore(ObjectStore):
 			assert count==1
 			return objects[0]
 
-	def fetchObjectsOfClass(self, aClass, clauses='', isDeep=1, serialNum=None):
+	def fetchObjectsOfClass(self, aClass, clauses='', isDeep=1, refreshAttrs=1, serialNum=None):
 		'''
 		Fetches a list of objects of a specific class. The list may be empty if no objects are found.
 		aClass can be a Klass object (from the MiddleKit object model), the name of the class (e.g., a string) or a Python class.
@@ -264,7 +264,7 @@ class SQLObjectStore(ObjectStore):
 		deepObjs = []
 		if isDeep:
 			for subklass in klass.subklasses():
-				deepObjs.extend(self.fetchObjectsOfClass(subklass, clauses, isDeep, serialNum))
+				deepObjs.extend(self.fetchObjectsOfClass(subklass, clauses, isDeep, refreshAttrs, serialNum))
 
 		# Now get objects of this exact class
 		objs = []
@@ -292,7 +292,8 @@ class SQLObjectStore(ObjectStore):
 					self._objects[key] = obj
 				else:
 					# Existing object
-					obj.initFromRow(row)
+					if refreshAttrs:
+						obj.initFromRow(row)
 				objs.append(obj)
 		objs.extend(deepObjs)
 		return objs
@@ -535,7 +536,7 @@ class MiddleObjectMixIn:
 			return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
 
 	def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
-		return {'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(), self.sqlObjRef())}
+		return {'refreshAttrs': 1, 'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(), self.sqlObjRef())}
 
 MixIn(MiddleObject, MiddleObjectMixIn)
 	# Normally we don't have to invoke MixIn()--it's done automatically.
