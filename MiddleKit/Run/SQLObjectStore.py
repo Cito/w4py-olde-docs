@@ -467,6 +467,26 @@ class SQLObjectStore(ObjectStore):
 			else:
 				return self.objRefDangles(objRef)
 
+	def objRefInMem(self, objRef):
+		""" Return the object corresponding to the given objref if and only 
+		if it has been loaded into memory.  If the object has never been 
+		fetched from the database, None is returned. """
+		assert type(objRef) is LongType, 'type=%r, objRef=%r' % (type(objRef), objRef)
+		if objRef==0:
+			return 0
+		else:
+			klassId, serialNum = objRefSplit(objRef)
+			if klassId==0 or serialNum==0:
+				# invalid! we don't use 0 serial numbers
+				return self.objRefZeroSerialNum(objRef)
+
+			klass = self.klassForId(klassId)
+
+			# return whether we have this object in memory
+			key = ObjectKey()
+			key.initFromClassNameAndSerialNum(klass.name(), serialNum)
+			return self._objects.get(key, None)
+
 	def objRefZeroSerialNum(self, objRef):
 		""" Invoked by fetchObjRef() if either the class or object serial number is 0. """
 		raise ObjRefZeroSerialNumError, objRefSplit(objRef)
