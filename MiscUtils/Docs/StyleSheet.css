@@ -1,22 +1,22 @@
 <style type="text/css">
 <!--
-	h1	{	font-family: Tahoma, Arial, Helvetica;
+	h1	{	font-family: Tahoma, Arial, Helvetica, sans-serif;
 			font-size: 18pt;
 			padding-top: 0;
 			padding-bottom: 0;
 		}
-	h2	{	font-family: Arial, Helvetica;
+	h2	{	font-family: Arial, Helvetica, sans-serif;
 			font-size: 12pt;
 			color: darkblue;
 			padding-top: 1em;
 			padding-bottom: 0;
 		}
-	h3	{	font-family: Arial, Helvetica;
+	h3	{	font-family: Arial, Helvetica, sans-serif;
 			font-size: 11pt;
 			padding-top: 1em;
 			padding-bottom: 0;
 		}
-	h4	{	font-family: Arial, Helvetica;
+	h4	{	font-family: Arial, Helvetica, sans-serif;
 			font-size: 10pt;
 			padding-top: 1em;
 			padding-bottom: 0;
@@ -46,16 +46,29 @@
 		color: white;
 		background-color: darkblue;
 	}
-
 	.Footer {
 		font-family: Arial, Helvetica, sans-serif;
 		font-size: smaller;
 	}
-
 	.ToC {
 		font-family: Arial, Verdana, Tahoma, Helvetica, sans-serif;
 		font-size: smaller;
 	}
+    span.name {
+        font-weight: bold;
+    }
+    span.filename {
+        font-family: Verdana, Tahoma, Arial, Helvetica, sans-serif;
+        font-size: smaller;
+    }
+    pre.py {
+        color: darkblue;
+        background-color: #EEE;
+        padding-left: 2.5em;
+    }
+    span.typed {
+        font-weight: bold;
+    }
 
 -->
 </style>
