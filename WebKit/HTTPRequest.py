@@ -169,6 +169,10 @@ class HTTPRequest(Request):
 
 	def urlPath(self):
 		''' Returns the URL path of the servlet sans host, adaptor and query string. For example, http://host/WebKit.cgi/Context/Servlet?x=1 yields '/Context/Servlet'. '''
+		if self._environ.has_key('WK_ABSOLUTE'): #set by the adaptor
+			self._absolutepath = 1
+			return self.fsPath()
+		self._absolutepath = 0
 		return self._environ['PATH_INFO']
 
 	def setURLPath(self, path):

@@ -796,6 +796,9 @@ class Application(Configurable,CanContainer):
 		urlPath = request.urlPath()
 		if debug: print '>> urlPath =', repr(urlPath)
 
+		if request._absolutepath:
+			return urlPath
+		
 		# try the cache first
 		ssPath = self._serverSidePathCacheByPath.get(urlPath, None)
 		if ssPath is not None:
