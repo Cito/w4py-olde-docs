@@ -39,6 +39,7 @@ class PlugIn(Object):
 		self._path = path
 		self._dir, self._name = os.path.split(path)
 		self._ver = '(unknown)'
+		self._examplePages = None
 
 	def load(self):
 		''' Loads the plug-in into memory, but does not yet install it. Will return None on success, otherwise a message (string) that says why the plug-in could not be loaded. '''
