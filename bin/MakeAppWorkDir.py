@@ -269,11 +269,15 @@ appWorkPath = '%(WORKDIR)s'
 
 def main(args):
 	global webwarePath, appWorkPath
+	newArgs = []
 	for arg in args:
 		if arg.startswith('--webware-path='):
 			webwarePath = arg[15:]
-		if arg.startswith('--working-path='):
+		elif arg.startswith('--working-path='):
 			appWorkPath = arg[15:]
+		else:
+			newArgs.append(arg)
+	args = newArgs
 	# ensure Webware is on sys.path
 	sys.path.insert(0, webwarePath)
 
