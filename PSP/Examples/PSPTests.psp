@@ -93,15 +93,15 @@ self.write(i)%>&nbsp;
 <p>serverURLDir = <%= req.serverURLDir() %>
 
 <hr>
-<p><b>Environment Variables</b>
+<p><b>Request Variables</b>
 
 <p><table>
 <%
-for i in os.environ.keys():
-	if len(os.environ[i]) > 100:
-		res.write("<tr><td><font color='red'>"+str(i)+'</font></td><td><font color="blue">'+os.environ[i][:100]+'</font></td></tr>')
+for i in self.request()._environ.keys():
+	if len(self.request()._environ[i]) > 100:
+		res.write("<tr><td><font color='red'>"+str(i)+'</font></td><td><font color="blue">'+self.request()._environ[i][:100]+'</font></td></tr>')
 	else:
-		res.write("<tr><td><font color='red'>"+str(i)+'</font></td><td><font color="blue">'+os.environ[i]+'</font></td></tr>')
+		res.write("<tr><td><font color='red'>"+str(i)+'</font></td><td><font color="blue">'+self.request()._environ[i]+'</font></td></tr>')
 %>
 </table>
 
