@@ -57,8 +57,9 @@ class ParseEventHandler:
 		self._parser = parser
 
 		self._imports=[]
+		self._importedSymbols = []
 		self._baseMethod = self.defaults['BASE_METHOD']
-		self._baseClass = self.defaults['BASE_CLASS']
+		self._baseClasses = [self.defaults['BASE_CLASS']]
 		self._threadSafe = self.defaults['threadSafe']
 		self._instanceSafe = self.defaults['instanceSafe']
 		self._indent=self.defaults['indent']
@@ -99,16 +100,18 @@ class ParseEventHandler:
 		importlist = string.split(imports,',')
 		for i in importlist:
 			if string.find(i,':') != -1:
-				implist = "from "+string.split(i,':')[0]+" import "+string.split(i,":")[1]
+				module, symbol = string.split(i, ':')[:2]
+				self._importedSymbols.append(string.strip(symbol))
+				implist = "from " + module + " import " + symbol
 				self._imports.append(implist)
 			else:
 				self._imports.append('import '+string.strip(i))
 
 	def extendsHandler(self,bc,start,stop):
-		"""extends is a page directive.  It sets the base class for the class that this class
-		will generate.  The choice of a base class affects the choice of a method to override with
+		"""extends is a page directive.  It sets the base class (or multiple base classes) for the class that this class
+		will generate.  The choice of base class affects the choice of a method to override with
 		the BaseMethod page directive.  The default base class is PSPPage.  PSPPage inherits from Page.py."""
-		self._baseClass = bc
+		self._baseClasses = map(string.strip, string.split(bc, ','))
 
 	def mainMethodHandler(self, method, start, stop):
 		'''BaseMethod is a page directive.  It sets the class method that the main body
@@ -237,7 +240,9 @@ class ParseEventHandler:
 ##		self._writer.println('try:\n')
 ##		self._writer.pushIndent()
 		#self._writer.println('from ' +self._baseClass+ ' import ' +self._baseClass +'\n')
-		self._writer.println('import '+self._baseClass + '\n')
+		for baseClass in self._baseClasses:
+			if string.find(baseClass,'.')<0 and baseClass not in self._importedSymbols:
+				self._writer.println('import ' + baseClass)
 ##		self._writer.popIndent()
 ##		self._writer.println('except:\n')
 ##		self._writer.pushIndent()
@@ -248,7 +253,15 @@ class ParseEventHandler:
 		self._writer.println()
 		self._writer.printChars('class ')
 		self._writer.printChars(self._ctxt.getServletClassName())
-		self._writer.printChars('('+self._baseClass+'.'+self._baseClass+'):')
+		self._writer.printChars('(')
+		baselist = []
+		for baseClass in self._baseClasses:
+			if string.find(baseClass,'.')<0 and baseClass not in self._importedSymbols:
+				baselist.append(baseClass + '.' + baseClass)
+			else:
+				baselist.append(baseClass)
+		self._writer.printChars(string.join(baselist, ','))
+		self._writer.printChars('):')
 		#self._writer.printChars('('+self._baseClass+'):')
 		self._writer.printChars('\n')
 		self._writer.pushIndent()

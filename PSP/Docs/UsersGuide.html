@@ -85,9 +85,13 @@ sytax of Python.
 Servlets that have common functionality for a series of pages, and then use PSP and the extends
 attribute to change only the pieces of that base servlet that are specific to a certain page.
 In conjunction with the <i>BaseMethod</i> page attribute, described below, and/or the &lt;psp:method
- tag, entire sites can be based on a few custom PSP base classes.
-<br>The default base class is <i>PSPPage.py</i>, which is inherited from the standard WebKit
+tag, entire sites can be based on a few custom PSP base classes.
+The default base class is <i>PSPPage.py</i>, which is inherited from the standard WebKit
 Page.py servlet.
+<p>You can also use multiple base classes by separating the base classes by commas.  If you use
+a base class in &lt;%@ page extends="..."%&gt; that is not specifically imported in a
+&lt;%@ page imports="..."%&gt; directive, the base class will be assumed to follow the
+servlet convention of being in a file of the same name as the base class plus the ".py" extension.
 <p>
 <p><li><b><i><font color="blue">method</font></i></b> - The <i>method</i> attribute of the <i>page</i> directive tells the
  PSP parser which method of the base class the HTML of this PSP page should be placed in and
