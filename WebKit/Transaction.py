@@ -101,12 +101,15 @@ class Transaction(Object):
 
 	## Debugging ##
 
-	def dump(self, f=sys.stdout):
+	def dump(self, file=None):
 		''' Dumps debugging info to stdout. '''
-		f.write('>> Transaction: %s\n' % self)
+		if file is None:
+			file = sys.stdout
+		wr = file.write
+		wr('>> Transaction: %s\n' % self)
 		for attr in dir(self):
-			f.write('%s: %s\n' % (attr, getattr(self, attr)))
-		f.write('\n')
+			wr('%s: %s\n' % (attr, getattr(self, attr)))
+		wr('\n')
 
 
 	## Die ##
