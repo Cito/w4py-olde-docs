@@ -1,9 +1,5 @@
-# -*- Mode: Python; tab-width: 4 -*-
 """
 Used by the AsyncThreadedAppServer module.
-
-
-
 
 This file implements an object that can force a call to select in the main asyncore.poll loop to return.
 This dispathcher is added to the asyncore polling group.  It is polled for reads.  We make this object available to everyone.  When we need the asyncore select loop to return, ie, we have some data ready to go, we call the release() method, which does a quick write to it's own socket/file-descriptor.  This causes select to return.
@@ -16,8 +12,6 @@ import os
 import socket
 import string
 import thread
-
-
 
 
 if os.name == 'posix':
@@ -115,5 +109,3 @@ else:
 
 		def log(self, message):
 			pass
-
-
