@@ -27,7 +27,7 @@ output their source code.
 """
 
 
-from Generators import *
+from Generators import * #this gets the ResponseObject
 import string
 
 
@@ -130,7 +130,7 @@ class ParseEventHandler:
 		"""Use tabs to indent source code?"""
 		type = string.lower(type)
 		
-		if type !="tabs" and type !="spaces":
+		if type !="tabs" and type !="spaces" and type !="braces":
 			raise "Invalid Indentation Type"
 		self._writer.setIndentType(type)
 
@@ -162,7 +162,6 @@ class ParseEventHandler:
 			for i in e:
 				if self.directiveHandlers.has_key(i):
 					self.directiveHandlers[i](self,attrs[i],start,stop)
-					break
 				else:
 					print i
 					raise 'No Page Directive Handler'
@@ -221,6 +220,7 @@ class ParseEventHandler:
 		self.generateAll('Declarations')
 		self._writer.println('\n')
 		self.generateMainMethod()
+		self.optimizeCharData()
 		self.generateAll('Service')
 		self._writer.println()
 		self.generateFooter()
@@ -300,7 +300,7 @@ class ParseEventHandler:
 		self._writer.println('trans = self._transaction')
 		self._writer.println(ResponseObject+ '= trans.response()')
 		self._writer.println('req = trans.request()')
-	#self._writer.println('session = trans.session()') # if Chuck changes the Session stuff, leave this out, as it would get the session every time.
+
 	#self._writer.println('app = trans.application()')
 
 	def generateFooter(self):
@@ -312,8 +312,20 @@ class ParseEventHandler:
 		for i in self._gens:
 			if i.phase == phase:
 				i.generate(self._writer)
-	
-    
+
+	def optimizeCharData(self):
+		""" Too many char data generators make the Servlet Slow.  If the current Generator and the next are both CharData type, merge their data."""
+		gens=self._gens
+		count=0
+		gencount = len(gens)
+
+		while count < gencount-1:
+			if isinstance(gens[count],CharDataGenerator) and isinstance(gens[count+1],CharDataGenerator):
+				gens[count].mergeData(gens[count+1])
+				gens.remove(gens[count+1])
+				gencount = gencount-1
+			else:
+				count = count+1
 	
 
     

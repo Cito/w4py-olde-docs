@@ -33,6 +33,7 @@
 
 
 import PSPUtils
+import BraceConverter
 try:
     import string
 except:
@@ -71,14 +72,14 @@ class ExpressionGenerator(GenericGenerator):
 
 
 class CharDataGenerator(GenericGenerator):
-    """This class handles standard character output, mostly HTML.  It just dumps it out.
-    Need to handle all the escaping of characters.  It's just skipped for now."""
+	"""This class handles standard character output, mostly HTML.  It just dumps it out.
+	Need to handle all the escaping of characters.  It's just skipped for now."""
 
-    def __init__(self, chars):
+	def __init__(self, chars):
 		GenericGenerator.__init__(self)
 		self.chars = chars
 
-    def generate(self, writer, phase=None):
+	def generate(self, writer, phase=None):
 		current=0
 		limit = len(self.chars)
 		#try this without any escaping
@@ -87,16 +88,17 @@ class CharDataGenerator(GenericGenerator):
 		#self.chars = string.replace(self.chars,'\t','\\\\t')
 		#self.chars = string.replace(self.chars, "'", "\\'")
 		self.chars = string.replace(self.chars,'"',r'\"')
-		
 		self.generateChunk(writer)
 
-
-    def generateChunk(self, writer, start=0, stop=None):
+	def generateChunk(self, writer, start=0, stop=None):
 		writer.printIndent()#gives a tab
 		writer.printChars(ResponseObject+'.write("""')
 		writer.printChars(self.chars)
 		writer.printChars('""")')
 		writer.printChars('\n')
+
+	def mergeData(self, cdGen):
+		self.chars = self.chars + cdGen.chars
 
 class ScriptGenerator(GenericGenerator):
     """generates scripts"""
@@ -105,6 +107,15 @@ class ScriptGenerator(GenericGenerator):
 		self.chars = chars
 
     def generate(self, writer, phase=None):
+
+		if writer._useBraces:
+			# send lines to be output by the braces generator
+			bc = BraceConverter.BraceConverter()
+			for line in string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'):
+				bc.parseLine(line,writer)
+			return
+
+
 		#check for whitespace at the beginning and if less than 2 spaces, remove
 		if self.chars[:1]==' ' and self.chars[:2]!= '  ':
 			self.chars=string.lstrip(self.chars)

@@ -46,6 +46,7 @@ class ServletWriter:
 		self._blockcount = 0 # a hack to handle nested blocks of python code
 		self._indentSpaces = self.SPACES
 		self._useTabs=1
+		self._useBraces=0
 		self._indent='\t'
 		self._userIndent = self.EMPTY_STRING
 
@@ -66,7 +67,10 @@ class ServletWriter:
 		elif type=="spaces":
 			self._useTabs=0
 			self.setIndention()
-			
+		elif type=="braces":
+			self._useTabs=0
+			self._useBraces=1
+			self.setIndention()
 	
 	def close(self):
 		self._filehandle.close()
