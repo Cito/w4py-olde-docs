@@ -8,7 +8,6 @@ Generate.py
 
 import os, string, sys, types
 from getopt import getopt
-from MiddleKit import StringTypes
 
 
 def FixPathForMiddleKit(verbose=0):
@@ -56,6 +55,7 @@ def FixPathForMiddleKit(verbose=0):
 
 FixPathForMiddleKit()
 import MiddleKit
+from MiddleKit import StringTypes
 
 
 class Generate:
