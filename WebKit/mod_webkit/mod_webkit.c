@@ -8,10 +8,6 @@ author: Jay Love (jsliv@jslove.org)
 
 
 
-
-
-
-
 #include "mod_webkit.h"
 
 
