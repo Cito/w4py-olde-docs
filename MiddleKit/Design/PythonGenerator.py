@@ -169,7 +169,7 @@ del sys.path[0]
 class Attr:
 
 	def defaultValue(self):
-		''' Returns the default value as a string of legal Python text. '''
+		''' Returns the default value as a legal Pythonic value. '''
 		if self.has_key('Default'):
 			default = self['Default']
 			if type(default) is type(''):
