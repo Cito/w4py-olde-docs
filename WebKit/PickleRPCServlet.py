@@ -9,8 +9,8 @@ class PickleRPCServlet(RPCServlet):
 	"""
 	PickleRPCServlet is a base class for Dict-RPC servlets.
 
-	The "Pickle" refers to Python's pickle module. This class is similar to
-	XMLRPCServlet. By using Python pickles you get their
+	The "Pickle" refers to Python's pickle module. This class is
+	similar to XMLRPCServlet. By using Python pickles you get their
 	convenience (assuming the client is Pythonic), but lose
 	language independence. Some of us don't mind that last one.  ;-)
 
@@ -22,6 +22,9 @@ class PickleRPCServlet(RPCServlet):
 	  * Keyword arguments
 
 	Pickles should also be faster than XML.
+
+	One possible drawback is security. See MiscUtils.PickleRPC for more
+	details.
 
 	To make your own PickleRPCServlet, create a subclass and implement a
 	method which is then named in exposedMethods():

@@ -12,6 +12,103 @@ for the purpose of making requests and receiving the responses.
 
 See also: Server, Webkit.PickleRPCServlet, WebKit.Examples.PickleRPCExample
 
+
+UNDER THE HOOD
+
+Requests look like this:
+	{
+		'version':    1,  # default
+		'action':     'call',  # default
+		'methodName': 'NAME',
+		'args':       (A, B, ...), # default = (,)
+		'keywords':   {'A': A, 'B': B, ...}  # default = {}
+	}
+
+Only 'methodName' is required since that is the only key without a
+default value.
+
+Responses look like this:
+	{
+		'timeReceived': N,
+		'timeReponded': M,
+		'value': V,
+		'exception': E,
+		'requestError': E,
+	}
+
+TimeReceived is the time the initial request was received.
+TimeResponded is the time at which the response was finished, as
+close to transmission as possible. The times are expressed as
+number of seconds since the Epoch, e.g., time.time().
+
+Value is whatever the method happened to return.
+
+Exception may be 'occurred' to indicate that an exception
+occurred, the specific exception, such as "KeyError: foo" or the
+entire traceback (as a string), at the discretion of the server.
+It will always be a non-empty string if it is present.
+
+RequestError is an exception such as "Missing method
+in request." (with no traceback) that indicates a problem with the
+actual request received by the Pickle-RPC server.
+
+Value, exception and requestError are all exclusive to each other.
+
+
+SECURITY
+
+There are no security precautions taken by Pickle RPC at this time.
+You should run your Pickle RPC clients and servers on a trusted
+network behind a firewall, or tackle the issues:
+
+Per Geoff T:
+
+http://www.python.org/doc/current/lib/pickle-sec.html talks about security
+issues with unpickling untrusted strings.  It seems from my quick reading
+that you ought to be able to tell it never to unpickle class instances, and
+then it would be secure.  Perhaps then you could add in hooks for the
+servlets to register particular classes that are known to be safe.
+
+I think a discussion about this happened on comp.lang.python a while ago --
+you could probably find it with Google.
+
+http://www.zope.org/Members/htrd/howto/MiniPickle is another article about
+safe unpickling.
+
+Attempt at safe unpickling:
+
+import cPickle
+
+class SafeUnpickler:
+
+	def __init__(self, file, allowedGlobals=[]):
+        '''
+        Pass in a list of (moduleName, klassName) tuples for all classes that
+        you want to allow to be unpickled.
+
+        Example: allowedGlobals=[('mx.DateTime', '_DT')]
+        '''
+        self._file = file
+        self._allowedGlobals = allowedGlobals
+
+    def _findGlobal(self, module, klass):
+        if (module, klass) not in self._allowedGlobals:
+            raise cPickle.UnpicklingError, "For security reasons, you can't unpickle a %s . %s" % (module, klass)
+        globals = {}
+        exec 'from %s import %s as theClass' % (module, klass) in globals
+        return globals['theClass']
+
+    def load(self):
+        safeUnpickler = cPickle.Unpickler(self._file)
+        safeUnpickler.find_global = self._findGlobal
+        return safeUnpickler.load()
+
+
+Chuck: I wonder if Pyro deals with secure pickling?
+
+
+CREDIT
+
 The implementation of this module was taken directly from Python 2.2's
 xmlrpclib and then transformed from XML-orientation to Pickle-orientation.
 """
@@ -87,50 +184,7 @@ class Server:
 	If the target part and the slash preceding it are both omitted,
 	"/PickleRPC" is assumed.
 
-	While this is the class used to make requests to PickleRPC servers
-	the docs that explain this are bundled with WebKit.XMLRPCServlet.
-
-
-	UNDER THE HOOD
-
-	Requests look like this:
-		{
-			'version':    1,  # default
-			'action':     'call',  # default
-			'methodName': 'NAME',
-			'args':       (A, B, ...), # default = (,)
-			'keywords':   {'A': A, 'B': B, ...}  # default = {}
-		}
-
-	Only 'methodName' is required since that is the only key without a
-	default value.
-
-	Responses look like this:
-		{
-			'timeReceived': N,
-			'timeReponded': M,
-			'value': V,
-			'exception': E,
-			'requestError': E,
-		}
-
-	TimeReceived is the time the initial request was received.
-	TimeResponded is the time at which the response was finished, as
-	close to transmission as possible. The times are expressed as
-	number of seconds since the Epoch, e.g., time.time().
-
-	Value is whatever the method happened to return.
-
-	Exception may be 'occurred' to indicate that an exception
-	occurred, the specific exception, such as "KeyError: foo" or the
-	entire traceback (as a string), at the discretion of the server.
-	It will always be a non-empty string if it is present.
-
-	RequestError is an exception such as "Missing method
-	in request." (with no traceback) that indicates a problem with the
-	actual request received by the Pickle-RPC server.
-
-	Value, exception and requestError are all exclusive to each other.
+	See the module doc string for more information.
 	"""
 
 	def __init__(self, uri, transport=None, verbose=0):
