@@ -36,6 +36,7 @@ Version 0.2
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_IteratingAttrs">Iterating over attributes</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_DeletingObjects">Deleting objects</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_DerivedAttributes">Derived attributes</a>
+<br> <a href="#ModelInheritance"><font size=+1>Model Inheritance</font></a>
 <br> <a href="#RelatedLinks"><font size=+1>Related Links</font></a>
 <br> <a href="#Credit"><font size=+1>Credit</font></a>
 <br> <a href="#ImpGuide"><font size=+1>Implementor's Guide</font></a>
@@ -391,6 +392,47 @@ Yet you still want to be able to iterate over the attribute using the allAttrs()
 
 <p> To do this, simply set the property <b>isDerived</b> on the attribute in the model file.
 You will have to write your own setter and getter methods for the attribute.
+
+
+<a name=ModelInheritance><h2>Model Inheritance</h2></a>
+
+<p> Model inheritance is an advanced feature for developers who wish to reuse models in other projects that are also model based. In Settings.config, you can specify other models to inhert class definitions from, which are termed <i>parent models</i>:
+
+<pre>{
+    'Inherits': ['/usr/lib/mkmodels/News', 'Users'],
+}</pre>
+
+<p> Note that the <b>.mkmodel</b> extension is assumed. Also, relative filenames are relative to the path of the model inheriting them.
+
+<p> The essential effect is that the classes found in parent models are available to instantiate, subclass and create sample data from, and are termed <i>inherited classes</i>. You can also redefine an inherited class before using it in other class declarations. Classes are identified strictly by name.
+
+<p> The resolution order for finding a class in a model that has parent classes is the same as the <a href=http://www.python.org/2.2/descrintro.html#mro>basic method resolution order in Python 2.2</a>, although don't take that mean that MiddleKit requires Python 2.2 (it requires 2.0 or greater).
+
+<p> Model inheritance does <b>not</b> affect the files found in the parent model directories. Also, settings and sample data are not inherited from parents; only class definitions.
+
+<p> In MiddleKit.Core.Model, the methods of interest that relate to model inheritance are klass(), which will traverse the parent model hierarchy if necessary, and allKlassesInOrder() and allKlassesByName(). See the doc strings for more info.
+
+<p> Caveats:
+
+<ul>
+	<li> Suppose model B inherits model A and that A has a class Base. If B wants to redefine Base and classes that inherit from it, the redefinition should come first:
+<pre>	Class Attr Type
+	Base
+	      b    int
+	Sub(Base)
+	      c    int
+</pre>
+
+	<p> If instead, B declares Sub first, then it will erroneously pick up the Base from A.
+
+	<li> A model cannot define a class such as "Foo(Foo)" where a given class is overridden, but inherited by the override. This could be useful for adding additional attribute definitions to an existing class.
+
+	<li> Although the "diamond of inheritance" situation has been accounted for, using ideas from Python 2.2, it is not yet covered by the test suite.
+
+	<li> "Infinite inheritance", where there is a cycle in inheritance, is not specifically caught.
+
+</ul>
+
 
 <a name=RelatedLinks><h2>Related Links</h2></a>
 
