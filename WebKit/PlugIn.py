@@ -57,7 +57,9 @@ class PlugIn(Object):
 			raise PlugInError, "Plug-in '%s' in '%s' has no InstallInWebKit() function." % (self._name, self._dir)
 
 		# Make a directory for it in Cache/
-		os.mkdir(os.path.join('Cache', self._name))
+		cacheDir = os.path.join('Cache', self._name)
+		if not os.path.exists(cacheDir):
+			os.mkdir(cacheDir)
 
 
 	def install(self):
