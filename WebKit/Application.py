@@ -1434,7 +1434,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			else:
 				filename = self.findDirectoryIndex(currentPath)
 				if filename:
-					return (filename, '/' + string.join(parts[1:], '/'))
+					return (filename, '/' + string.join(parts, '/'))
 
 				return None, None
 
