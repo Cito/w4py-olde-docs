@@ -9,7 +9,7 @@ class Model:
 	It also provides access to the Python classes that implement these structures for use by other MiddleKit entities including code generators and object stores.
 	'''
 
-	def __init__(self, filename=None, customCoreClasses= {}):
+	def __init__(self, filename=None, customCoreClasses={}):
 		self._filename = None
 		self._coreClasses = customCoreClasses
 		self._klasses = None
@@ -23,6 +23,9 @@ class Model:
 			else:
 				self._name = 'unnamed-mk-model'
 		return self._name
+
+	def setName(self, name):
+		self._name = name
 
 	def read(self, filename):
 		assert self._filename is None, 'Cannot read twice.'

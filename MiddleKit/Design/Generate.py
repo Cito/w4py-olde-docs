@@ -6,8 +6,7 @@ Generate.py
 '''
 
 
-import os, string, sys
-from string import split, upper
+import os, string, sys, types
 from getopt import getopt
 
 
@@ -74,8 +73,16 @@ class Generate:
 			print 'Error: Output target, %s, is not a directory.' % outdir
 
 		# Generate
-		self.generate('SQL', opt, 'sql', 'SQLGenerator', os.path.join(outdir, 'GeneratedSQL'))
-		self.generate('Python', opt, 'py', 'PythonGenerator', outdir)
+		if opt.has_key('sql'):
+			self.generate(
+				pyClass=opt['db']+'SQLGenerator',
+				model=opt['model'],
+				outdir=os.path.join(outdir, 'GeneratedSQL'))
+		if opt.has_key('py'):
+			self.generate(
+				pyClass=opt['db']+'PythonGenerator',
+				model=opt['model'],
+				outdir=outdir)
 
 	def usage(self, errorMsg=None):
 		progName = os.path.basename(sys.argv[0])
@@ -124,15 +131,17 @@ class Generate:
 
 		return opt
 
-	def generate(self, name, opt, cmdLineOption, className, outdir):
-		if opt.has_key(cmdLineOption):
-			print 'Generating %s...' % name
-			name = opt['db'] + className
-			module = __import__(name, globals())
-			klass = getattr(module, name)
-			generator = klass()
-			generator.readModelFileNamed(opt['model'])
-			generator.generate(outdir)
+	def generate(self, pyClass, model, outdir):
+		''' Generates code using the given class, model and output directory. The pyClass may be a string, in which case a module of the same name is imported and the class extracted from that. The model may be a string, in which case it is considered a filename of a model. '''
+		if type(pyClass) is types.StringType:
+			module = __import__(pyClass, globals())
+			pyClass = getattr(module, pyClass)
+		generator = pyClass()
+		if type(model) is types.StringType:
+			generator.readModelFileNamed(model)
+		else:
+			generator.setModel(model)
+		generator.generate(outdir)
 
 
 if __name__=='__main__':

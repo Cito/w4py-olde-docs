@@ -90,13 +90,14 @@ class Model:
 		return self.name()
 
 	def writeInsertSamplesSQL(self, generator, dirname):
-		file = open(os.path.join(dirname, 'InsertSamples.sql'), 'w')
-		file.write('use %s;\n\n' % self.dbName())
-		filenames = glob(os.path.join(self._filename, 'Sample*.csv'))
-		for filename in filenames:
-			lines = open(filename).readlines()
-			self.writeInsertSamplesSQLForLines(lines, generator, file)
-		file.close()
+		if self._filename is not None:
+			file = open(os.path.join(dirname, 'InsertSamples.sql'), 'w')
+			file.write('use %s;\n\n' % self.dbName())
+			filenames = glob(os.path.join(self._filename, 'Sample*.csv'))
+			for filename in filenames:
+				lines = open(filename).readlines()
+				self.writeInsertSamplesSQLForLines(lines, generator, file)
+			file.close()
 
 	def writeInsertSamplesSQLForLines(self, lines, generator, file):
 		# @@ 2001-02-04 ce: this method is too long

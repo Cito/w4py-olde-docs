@@ -34,14 +34,14 @@ class StringAttr:
 
 	def sqlType(self):
 		# @@ 2000-11-11 ce: cache this
-		if not self['Max']:
+		if not self.get('Max', None):
 			return 'varchar(100) /* WARNING: NO LENGTH SPECIFIED */'
 		max = int(self['Max']) # @@ 2000-11-12 ce: won't need int() after using types
 		if max>65535:
 			return 'longtext'
 		if max>255:
 			return 'text'
-		if self['Min']==max:
+		if self.has_key('Min') and self['Min']==max:
 			return 'char(%s)' % max
 		else:
 			return 'varchar(%s)' % max

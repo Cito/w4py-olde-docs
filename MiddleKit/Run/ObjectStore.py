@@ -162,6 +162,7 @@ class ObjectStore(ModelUser):
 			- a class name (e.g., string)
 		Users of this method include the various fetchObjectEtc() methods which take a "class" parameter.
 		'''
+		assert aClass is not None
 		if not isinstance(aClass, BaseKlass):
 			if type(aClass) is ClassType:
 				aClass = self._model.klass(aClass.__name__)

@@ -13,13 +13,14 @@ class Klass(ModelObject):
 
 	## Init ##
 
-	def __init__(self, dict):
+	def __init__(self, dict=None):
 		''' Initializes a Klass definition with a raw dictionary, typically read from a file. The 'Class' field contains the name and can also contain the name of the superclass (like "Name : SuperName"). Multiple inheritance is not yet supported. '''
 		self._attrsList = []
 		self._attrsByName = {}
 		self._superklass = None
 		self._subklasses = []
-		self.readDict(dict)
+		if dict is not None:
+			self.readDict(dict)
 
 
 	## Reading ##

@@ -111,6 +111,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] MK should add back pointers as necessary (like for lists). Right now the modeler has to make sure they are there. This also ties into the "distinct lists" problem, so you might wish tackle these simultaneously.
 
+	[ ] Investigate dbinfo.py: http://www.lemburg.com/files/python/dbinfo.py
+
 	[ ] Prior to inserting or updating an object in the store, validate the requirements on it's attributes.
 
 	[ ] support "not null" in SQL
@@ -172,6 +174,8 @@ If you have general comments or questions or contributions, please contact webwa
 	[ ] The object model doesn't allow specification as to whether or not accessor methods, such as the getter and setter, should be provided.
 
 	[ ] Allow the object model to specify an index for a particular attribute
+
+	[ ] Should the __init__ methods in generated code allow for dictionaries and/or keyword arguments to initialize attributes with?
 
 </refinements/improvements>
 
@@ -236,6 +240,8 @@ If you have general comments or questions or contributions, please contact webwa
 
 <very minor/clean up>
 
+	[ ] Convert all uses of _NoDefault to MiscUtils.NoDefault
+
 	[ ] rename initFromRow() to readRow() or something
 
 	[ ] Renames:
@@ -256,6 +262,10 @@ If you have general comments or questions or contributions, please contact webwa
 
 
 <testing>
+
+	[ ] Add a test where certain columns in the object model are not required: Min, Max
+
+	[ ] Add a test where a model can be constructed in memory and then used to generate and use SQL and Python (like UserKit's test suite does)
 
 	[ ] Update all the tests to use _get() and _set() (instead of directly using the accessor methods).
 
