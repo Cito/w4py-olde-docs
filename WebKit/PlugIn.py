@@ -12,6 +12,7 @@ class PlugIn(Object):
 	The most infamous plug-in is PSP (Python Server Pages) which ships with Webware.
 	Plug-ins often provide additional servlet factories, servlet subclasses, examples and documentation. Ultimately, it is the plug-in author's choice as to what to provide and in what manner.
 	Instances of this class represent plug-ins which are ultimately Python packages (see the Python Tutorial, 6.4: "Packages" at http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000).
+	A plug-in must also be a Webware component which at means that it will have a Properties.py file advertising its name, version, requirements, etc. You can ask a plug-in for its properties().
 	The plug-in/package must have an __init__.py while must contain a function:
 		def InstallInWebKit(appServer):
 	This function is invoked to take whatever actions are needed to plug the new component into WebKit. See PSP for an example.
@@ -21,9 +22,12 @@ class PlugIn(Object):
 
 	Instructions for invoking:
 		p = PlugIn(self, '../Foo')   # 'self' is typically AppServer. It gets passed to InstallInWebKit()
-		p.load()
+		willNotLoadReason = plugIn.load()
+		if willNotLoadReason:
+			print '    Plug-in %s cannot be loaded because:\n    %s' % (path, willNotLoadReason)
+			return None
 		p.install()
-		# Note that load() and install() could easily raise exceptions. You should expect this.
+		# Note that load() and install() could raise exceptions. You should expect this.
 	'''
 
 
