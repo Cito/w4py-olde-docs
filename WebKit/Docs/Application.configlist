@@ -43,6 +43,10 @@
 
 ('ShowDebugInfoOnErrors', '1', "If true, then uncaught exceptions will not only display a message for the user, but debugging information for the developer as well. This includes the traceback, HTTP headers, form fields, environment and process ids. You will most likely want to turn this off when deploying the site for users."),
 
+('IncludeFancyTraceback', '0', "If true, then use the cgitb.py module to display a fancy, detailed traceback at the end of the error page.  To use this option, you'll need to first install the cgitb.py module, downloadable from http://web.lfw.org/python/ , and if you are not using Python 2.1, you will also need to install inspect.py and pydoc.py, also available from the same site."),
+
+('FancyTracebackContext', '5', "The number of lines of source code context to show if IncludeFancyTraceback is turned on."),
+
 ('UserErrorMessage',
 	"'The site is having technical difficulties with this page. An error has been logged, and the problem will be fixed as soon as possible. Sorry!'",
 	"This is the error message that is displayed to the user when an uncaught exception escapes a servlet."),

@@ -330,6 +330,22 @@ If true, then uncaught exceptions will not only display a message for the user, 
 </dl></p>
 
 <p><dl class=config>
+<dt class=config><span class=setting>IncludeFancyTraceback</span>
+&nbsp; <code> = 0</code></dt>
+<dd class=config>
+If true, then use the cgitb.py module to display a fancy, detailed traceback at the end of the error page.  To use this option, you'll need to first install the cgitb.py module, downloadable from http://web.lfw.org/python/ , and if you are not using Python 2.1, you will also need to install inspect.py and pydoc.py, also available from the same site.
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>FancyTracebackContext</span>
+&nbsp; <code> = 5</code></dt>
+<dd class=config>
+The number of lines of source code context to show if IncludeFancyTraceback is turned on.
+</dd>
+</dl></p>
+
+<p><dl class=config>
 <dt class=config><span class=setting>UserErrorMessage</span>
 &nbsp; <code> = </code></dt>
 <dd class=config>
