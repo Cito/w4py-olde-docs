@@ -112,6 +112,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 		"""
 		Try to get a RequestHandler instance off the requestQueue and process it.
 		"""
+
 		self.initThread()
 		try:
 			while self.running:
@@ -132,7 +133,6 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 	def delThread(self):
 		''' Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. '''
 		pass
-
 
 
 	def shutDown(self):
@@ -306,11 +306,11 @@ def main(monitor = 0):
 		server = AsyncThreadedAppServer()
 		if monitor:
 			monitor = Monitor(server)
-		asyncore.loop()
+		asyncore.loop(0.5)
 	except Exception, e: #Need to kill the Sweeper thread somehow
 		print e
 		print "Exiting AppServer"
-		if 1: #See the traceback from an exception
+		if 0: #See the traceback from an exception
 			tb = sys.exc_info()
 			print tb[0]
 			print tb[1]
@@ -319,6 +319,7 @@ def main(monitor = 0):
 		if server:
 			server.running=0
 			server.shutDown()
+		#return
 		sys.exit()
 		raise Exception()
 
@@ -329,4 +330,8 @@ if __name__=='__main__':
 		print "Using Monitor"
 		main(1)
 	else:
-		main(0)
+		if 0:
+			import profile
+			profile.run("main()","profile.txt")
+		else:
+			main(0)

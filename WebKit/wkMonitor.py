@@ -5,8 +5,6 @@ Quick and dirty fault tolerance system for WebKit
 
 author: Jay Love
 
-(Or maybe I don't want to put my name on this one? ;0 )
-
 
 Future:
 Add ability to limit number of requests served.  When some count is reached, send
@@ -19,18 +17,25 @@ It should be possible on both Unix and Windows to monitor the AppServer process 
 
 Combining these with a timer lends itself to load balancing of some kind.
 
+The default AppServers are:
+Windows:  ThreadedAppServer
+*nix: AsyncThreadedAppServer
+
+On unix, to start the appserver, we fork and execute main() in the AppServer's module.
+On Win, we have to start the process through a command line like syntax.
 
 """
 
 #These need to be filled in correctly on Windows
 pythonexec = "C:\progra~1\python\python"
-appserver = "e:\Linux\python\webware\webkit\AsyncThreadedAppServer.py"
+appserver = "ThreadedAppServer.py"
+
 
 
 import AppServer
 import socket
 import time
-import AsyncThreadedAppServer
+import AsyncThreadedAppServer, ThreadedAppServer
 import os
 import asyncore
 import sys
@@ -41,7 +46,15 @@ import string
 #Windows Specific Section
 if os.name == 'nt':
 	import win32process
+	appcwd = os.getcwd()
+	appserver = os.path.join(appcwd,appserver)
+else:
+	appserverclass = AsyncThreadedAppServer
 
+
+
+##DEBUG
+##appserverclass =  ThreadedAppServer
 
 srvpid = 0
 checkInterval = 10  #add to config if this implementation is adopted, seconds between checks
@@ -51,13 +64,13 @@ cfg = open("Configs/AppServer.config")
 cfg = eval(cfg.read())
 addr = ((cfg['Host'],cfg['Port']-1))
 
-debug = 0
+debug = 1
 
 
 def createServer():
 	"""Unix only, after forking"""
 	print "Starting Server"
-	AsyncThreadedAppServer.main(1)
+	appserverclass.main(1)
 
 
 def startupCheck():
@@ -70,8 +83,8 @@ def startupCheck():
 		if checkServer(0):
 			break
 		print "Waiting for start"
-		time.sleep(interval)
-		count = count + interval
+		time.sleep(checkInterval)
+		count = count + checkInterval
 		if count > maxStartTime:
 			print "Couldn't start AppServer"
 			if os.name == 'posix':
@@ -139,25 +152,37 @@ def checkServer(restart = 1):
 
 def main():
 	global debug
+	file = open("monitorpid.txt","w")
+	file.write(str(os.getpid()))
+	file.flush()
+	file.close()
 	startServer(0)
-	startupCheck()
-	
-	while 1:
-		try: 
-			time.sleep(interval)
-			checkServer()
-			if debug:
-				print "Checking Server"
-		except:
+	try:
+		startupCheck()
+		while 1:
+			try: 
+				time.sleep(checkInterval)
+				checkServer()
+				if debug:
+					print "Checking Server"
+			except Exception, e:
+				if debug:
+					print "Exception %s" % e
+				print "Exiting Monitor"
+				if os.name == 'posix':
+					os.kill(srvpid,signal.SIGTERM)
+				else:
+					win32process.TerminateProcess(srvpid,0)
+				sys.exit()
+	except Exception, e:
+		if debug:
+			print "Exception %s" % e
 			print "Exiting Monitor"
-			if os.name == 'posix':
-				print "Killing AppServer"
-				os.kill(srvpid,signal.SIGQUIT)
-			else:
-				print "Killing AppServer"
-				win32process.TerminateProcess(srvpid,0)
-			sys.exit()
-		
+		if os.name == 'posix':
+			os.kill(srvpid,signal.SIGTERM)
+		else:
+			win32process.TerminateProcess(srvpid,0)
+		sys.exit()		
 
 
 

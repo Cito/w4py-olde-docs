@@ -11,7 +11,7 @@ from types import FloatType
 from glob import glob
 import Queue
 import imp
-from threading import Lock, Thread
+from threading import Lock, Thread, Event
 from time import *
 from CanContainer import *
 
@@ -140,15 +140,18 @@ class Application(Configurable,CanContainer):
 		self._canFactory = CanFactory.CanFactory(self)
 
 	def startSessionSweeper(self):
-		self._sessSweepThread = Thread(None, self.sweepSessionsContinuously, 'SessionSweeper')
+		self._closeEvent = Event()
+		self._sessSweepThread = Thread(None, self.sweepSessionsContinuously, 'SessionSweeper',(self._closeEvent,))
 		self._sessSweepThread.start()
 
-	def sweepSessionsContinuously(self):
-		''' Invoked by __init__ via a new thread to clean out stale sessions in the background. This method doesn't exit until self.running is 0. '''
+	def sweepSessionsContinuously(self,close):
+		"""Invoked by __init__ via a new thread to clean out stale sessions in the background. This method doesn't exit until self.running is 0.
+		"""
 		while self.running:
 			self.sweepSessions()
 			try:
-				sleep(self.setting('SessionTimeout')*60/10.0)
+				close.wait(self.setting('SessionTimeout')*60/10.0)
+				#sleep(self.setting('SessionTimeout')*60/10.0)
 				# @@ 2000-08-04 ce: make sleep interval or div factor a setting
 			except IOError:
 				pass
@@ -168,11 +171,13 @@ class Application(Configurable,CanContainer):
 		"""
 	Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references.
 		"""
+		print "Application is Shutting Down"
+		self.running = 0
+		self._closeEvent.set()
 		self._sessions.storeAllSessions()
 		del self._canFactory
 		del self._sessions
 		self._delCans()
-		self.running = 0
 		del self._factoryByExt
 		del self._factoryList
 		del self._server
