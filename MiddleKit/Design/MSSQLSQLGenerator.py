@@ -158,13 +158,6 @@ class Attr:
 	def sqlNullSpec(self):
 		return ' null'
 
-	def _writeSQL(self, generator, out):
-		if self.hasSQLColumn():
-			name = ljust(self.sqlName(), self.maxNameWidth())
-			out.write('\t[%s] %s null,\n' % (name, self.sqlType()))
-		else:
-			out.write('\t/* %(Name)s %(Type)s - not a SQL column */\n' % self)
-
 	def maxNameWidth(self):
 		return 30  # @@ 2000-09-14 ce: should compute that from names rather than hard code
 

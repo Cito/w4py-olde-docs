@@ -477,7 +477,7 @@ class Attr:
 				defaultSQL = ' ' + defaultSQL
 		else:
 			defaultSQL = ''
-		out.write('\t%s %s%s%s' % (name, self.sqlType(), notNullSQL, defaultSQL))
+		out.write('\t%s %s%s%s' % (name, self.sqlTypeOrOverride(), notNullSQL, defaultSQL))
 
 	def writeAuxiliaryCreateTable(self, generator, out):
 		# most attribute types have no such beast
@@ -502,6 +502,15 @@ class Attr:
 
 	def maxNameWidth(self):
 		return 30  # @@ 2000-09-14 ce: should compute that from names rather than hard code
+
+	def sqlTypeOrOverride(self):
+		"""
+		Returns the SQL type as specified by the attribute class, or
+		the SQLType that the user can specify in the model to override that.
+		For example, SQLType='image' for a string attribute.
+		Subclasses should not override this method, but sqlType() instead.
+		"""
+		return self.get('SQLType') or self.sqlType()
 
 	def sqlType(self):
 		raise AbstractError, self.__class__
@@ -656,7 +665,7 @@ class ObjRefAttr:
 				notNull = ' not null'
 			else:
 				notNull = self.sqlNullSpec()
-			out.write('\t%s %s%s%s' % (name, self.sqlType(), refs, notNull))
+			out.write('\t%s %s%s%s' % (name, self.sqlTypeOrOverride(), refs, notNull))
 		else:
 			# the new technique uses one column for each part of the obj ref: class id and obj id
 			classIdName = self.name()+self.setting('ObjRefSuffixes')[0]
@@ -673,8 +682,8 @@ class ObjRefAttr:
 				objIdRef = ' references %(Type)s(%(Type)sId) ' % self
 			else:
 				objIdRef = ''
-			out.write('\t%s %s%s%s references _MKClassIds, /* %s */ \n' % (classIdName, self.sqlType(), notNull, classIdDefault, self.targetClassName()))
-			out.write('\t%s %s%s%s' % (objIdName, self.sqlType(), notNull, objIdRef))
+			out.write('\t%s %s%s%s references _MKClassIds, /* %s */ \n' % (classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault, self.targetClassName()))
+			out.write('\t%s %s%s%s' % (objIdName, self.sqlTypeOrOverride(), notNull, objIdRef))
 
 	def sqlForNone(self):
 		if self.setting('UseBigIntObjRefColumns', False):
