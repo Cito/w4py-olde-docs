@@ -1,5 +1,4 @@
 # Webware for Python
-# See README
+# See _README
 
-__all__ = ['MiscUtils', 'WebUtils', 'CGIWrapper', 'WebKit', # 'PSP', 'MiddleKit'
-	]
+__all__ = ['MiscUtils', 'WebUtils', 'CGIWrapper', 'WebKit', 'PSP', 'MiddleKit']
