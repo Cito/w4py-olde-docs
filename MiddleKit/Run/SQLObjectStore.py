@@ -25,6 +25,13 @@ class UnknownSerialNumberError(SQLObjectStoreError):
 	def __init__(self, info):
 		self.info = info
 
+	def __repr__(self):
+		return '%s: %s' % (self.__class__.__name__, self.info)
+
+	def __str__(self):
+		return str(self.info)
+
+
 class UnknownSerialNumInfo:
 
 	def updateStmt(self):
@@ -32,6 +39,13 @@ class UnknownSerialNumInfo:
 		assert self.targetObject.serialNum()!=0
 		return 'update %s set %s=%s where %s=%s;' % (
 			self.tableName, self.fieldName, self.targetObject.sqlObjRef(), self.sqlIdName, self.sourceObject.serialNum())
+
+	def __repr__(self):
+		s = []
+		for item in self.__dict__.items():
+			s.append('%s=%r' % item)
+		s = ' '.join(s)
+		return '<%s %s>' % (self.__class__.__name__, s)
 
 
 class SQLObjectStore(ObjectStore):
