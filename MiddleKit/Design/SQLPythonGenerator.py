@@ -33,7 +33,7 @@ class ListAttr:
 		out.write('''
 	def %(pyGetName)s(self):
 		if self._%(name)s is None:
-			from %(targetClassName)s import %(targetClassName)s
+			from %(package)s%(targetClassName)s import %(targetClassName)s
 			self._%(name)s = self._mk_store.fetchObjectsOfClass(%(targetClassName)s, clauses='where %(lowerSourceClassName)sId=%%i' %% self.sqlObjRef())
 		return self._%(name)s
 ''' % names)

@@ -266,6 +266,9 @@ class ObjRefAttr:
 		name = self.name()
 		pySetName = self.pySetName()
 		targetClassName = self.className()
+		package = self.setting('Package', '')
+		if package:
+			package += '.'
 		if self.isRequired():
 			reqAssert = 'assert value is not None'
 		else:
@@ -275,7 +278,7 @@ class ObjRefAttr:
 		%(reqAssert)s
 		if value is not None and type(value) is not LongType:
 			assert type(value) is InstanceType
-			from %(targetClassName)s import %(targetClassName)s
+			from %(package)s%(targetClassName)s import %(targetClassName)s
 			assert isinstance(value, %(targetClassName)s)
 		self._%(name)s = value
 ''' % locals())
@@ -292,6 +295,9 @@ class ListAttr:
 		sourceClassName = self.klass().name()
 		targetClassName = self.className()
 		lowerSourceClassName = sourceClassName[0].lower() + sourceClassName[1:]
+		package = self.setting('Package', '')
+		if package:
+			package += '.'
 		names = locals()
 
 		# Invoke various code gen methods with the names
@@ -310,7 +316,7 @@ class ListAttr:
 		out.write('''
 	def addTo%(capName)s(self, value):
 		assert value is not None
-		from %(targetClassName)s import %(targetClassName)s
+		from %(package)s%(targetClassName)s import %(targetClassName)s
 		assert isinstance(value, %(targetClassName)s)
 		assert value.%(lowerSourceClassName)s()==None
 		self.%(pyGetName)s().append(value)

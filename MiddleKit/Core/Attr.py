@@ -1,6 +1,7 @@
 from ModelObject import ModelObject
 from UserDict import UserDict
 import types
+from MiscUtils import NoDefault
 
 
 class Attr(UserDict, ModelObject):
@@ -54,6 +55,15 @@ class Attr(UserDict, ModelObject):
 		''' Returns the name that should be used for the Python "set" accessor method for this attribute. This implementation returns setName, as in obj.setFoo(). '''
 		name = self.name()
 		return 'set'+name[0].upper()+name[1:]
+
+	def setting(self, name, default=NoDefault):
+		'''
+		Returns the value of a particular configuration setting taken
+		from the model. Perhaps a future version should ask the klass
+		and so on up the chain.
+		'''
+		model = self.klass().klasses()._model
+		return model.setting(name, default)
 
 	def __setitem__(self, key, value):
 		if key=='Name':
