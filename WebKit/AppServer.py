@@ -8,14 +8,12 @@ FUTURE
 	* Implement the additional settings that are commented out below.
 """
 
-import os, sys
-
 from Common import *
 from Object import Object
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 from Application import Application
 from PlugIn import PlugIn
-import sys, os
+import Profiler
 
 from threading import Thread, Event
 
@@ -81,6 +79,17 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			print
 			sys.exit(0)
 
+	def readyForRequests(self):
+		"""
+		Should be invoked by subclasses when they are finally ready to
+		accept requests. Records some stats and prints a message.
+		"""
+		Profiler.readyTime = time.time()
+		Profiler.readyDuration = Profiler.readyTime - Profiler.startTime
+		print "Ready  (%.2f seconds after launch)\n" % Profiler.readyDuration
+		sys.stdout.flush()
+		sys.stderr.flush()
+
 	def closeThread(self):
 		self._closeEvent.wait()
 		self.shutDown()
@@ -119,6 +128,13 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self._app.shutDown()
 		del self._plugIns
 		del self._app
+		if Profiler.profiler:
+			print 'Writing profile stats to %s...' % Profiler.statsFilename
+			Profiler.dumpStats()  # you might also considering having a page/servlet that lets you dump the stats on demand
+			print
+			print 'WARNING: Applications run much slower when profiled, so turn off profiling in Launch.py when you are finished.'
+			print
+			print 'AppServer ran for %0.2f seconds.' % (time.time()-Profiler.startTime)
 		print "AppServer has been shutdown"
 
 

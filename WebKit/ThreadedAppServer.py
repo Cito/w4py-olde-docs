@@ -111,7 +111,7 @@ class ThreadedAppServer(AppServer):
 		self.mainsocket.listen(1024)
 		self.recordPID()
 
-		print "Ready\n"
+		self.readyForRequests()
 
 	def isPersistent(self):
 		return 1
@@ -695,15 +695,11 @@ def main(args):
 		else:
 			print usage
 
-	if 0:
-		import profile
-		profile.run("main()", "profile.txt")
-	else:
-		if daemon:
-			if os.name == "posix":
-				pid=os.fork()
-				if pid:
-					sys.exit()
-			else:
-				print "daemon mode not available on your OS"
-		function(monitor, workDir)
+	if daemon:
+		if os.name == "posix":
+			pid=os.fork()
+			if pid:
+				sys.exit()
+		else:
+			print "daemon mode not available on your OS"
+	function(monitor, workDir)

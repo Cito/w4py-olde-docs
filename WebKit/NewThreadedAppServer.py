@@ -87,7 +87,7 @@ class ThreadedAppServer(AppServer):
 
 		self.addSocketHandler(self.address(), AdapterHandler)
 
-		print "Ready\n"
+		self.readyForRequests()
 
 	def addSocketHandler(self, serverAddress, handlerClass):
 		self._socketHandlers[serverAddress] = handlerClass
@@ -598,11 +598,6 @@ def main(args):
 			http = 1
 		else:
 			print usage
-
-	if 0:
-		import profile
-		profile.run("main()", "profile.txt")
-		return
 
 	if daemon:
 		if os.name == "posix":

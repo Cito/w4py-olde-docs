@@ -1,7 +1,13 @@
 #!/usr/bin/env python
 
+import time; startTime = time.time()
+
+runProfile = 0   # as in Python's profile module. See doc string of Profiler.py
+
 import ImportSpy
 import os, sys, string
+
+profiler = None  # Forget this and read the doc string of Profiler.py
 
 
 def usage():
@@ -31,13 +37,20 @@ def launchWebKit(server, appWorkPath, args):
 	exec code in dict
 	main = dict['main']
 
+	# Set up a reference to our profiler so applications can import and use it
+	from WebKit import Profiler
+	Profiler.startTime = startTime
+	if runProfile:
+		Profiler.profiler = profiler
+
 	# Run!
 	args = args + ['workdir=' + appWorkPath]
 	main(args)
 
 
-
-def main(args):
+def main(args=None):
+	if args is None:
+		args = sys.argv
 	if len(args)<2:
 		usage()
 
@@ -57,4 +70,12 @@ def main(args):
 
 
 if __name__=='__main__':
-	main(sys.argv)
+	if runProfile:
+		print 'Profiling is on. See doc string in Profiler.py for more info.'
+		from profile import Profile
+		profiler = Profile()
+		profiler.runcall(main)
+		from WebKit import Profiler
+		Profiler.dumpStats()
+	else:
+		main()

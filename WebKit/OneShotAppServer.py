@@ -17,6 +17,10 @@ from Application import Application
 
 class OneShotAppServer(AppServer):
 
+	def __init__(self, path=None):
+		AppServer.__init__(self, path)
+		self.readyForRequests()
+
 	def isPersistent(self):
 		return 0
 
