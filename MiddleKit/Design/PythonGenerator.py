@@ -456,6 +456,17 @@ class TimeAttr:
 	def mxDateTimeTypeName(self):
 		return 'DateTimeDeltaType'
 
+	def writePySetChecks(self, out):
+		# additional check to also allow DateTime instances.  This is what 
+		# comes back from the database for 'time' columns using PostgresSQL
+		# and the psycopg adapter.
+		if DateTime:
+			out.write('''\
+		if type(value) is DateTime.DateTimeType:
+			value = DateTime.DateTimeDeltaFrom(value.time)
+''')
+		TimeAttr.mixInSuperWritePySetChecks(self, out)
+
 
 class DateTimeAttr:
 
