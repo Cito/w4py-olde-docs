@@ -1025,14 +1025,16 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._exceptionHandlerClass(self, transaction, excInfo)
 
 	def filenamesForBaseName(self, baseName):
-		
+
 		"""Returns a list of all filenames with extensions existing for
 		baseName, but not including extension found in the setting
 		ExtensionsToIgnore. This utility method is used by
 		serverSideInfoForRequest().  Example: '/a/b/c' could yield
 		['/a/b/c.py', '/a/b/c.html'], but will never yield a
 		'/a/b/c.pyc' filename since .pyc files are ignored."""
-		
+
+		if string.find(baseName, '*') >= 0:
+			return []
 		filenames = []
 		ignoreExts = self.setting('ExtensionsToIgnore')
 		for filename in glob(baseName+'.*'):
@@ -1047,7 +1049,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				if os.path.splitext(filename)[1] in extensionsToServe:
 					filteredFilenames.append(filename)
 			filenames = filteredFilenames
-		
+
 		if debug:
 			print '>> filenamesForBaseName(%s) returning %s' % (
 				repr(baseName), repr(filenames))
@@ -1215,8 +1217,6 @@ class Application(ConfigurableForServerSidePath, Object):
 					      (urlPath, filenames)
 					return None, None, None
 			else:
-				print 'WARNING: For %s, did not get precisely 1 filename: %s' % \
-				      (urlPath, filenames)
 				return None, None, None
 
 		elif not os.path.isfile(ssPath):
