@@ -647,7 +647,6 @@ class Application(ConfigurableForServerSidePath, Object):
 			return '/%s%s' % (context, url)
 			
 	def returnServlet(self, servlet, trans):
-		print "Closing: %s" % servlet
 		servlet.close(trans)
 
 	def handleExceptionInTransaction(self, excInfo, transaction):

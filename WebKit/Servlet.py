@@ -105,7 +105,7 @@ class Servlet(Object):
 
 	def close(self, trans):
 		if self._factory:
-			self._factory.returnServlet(self, trans)
+			self._factory.returnServlet(trans, self)
 
 	def setFactory(self, factory):
 		self._factory = factory
