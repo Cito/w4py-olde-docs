@@ -4,8 +4,6 @@
 
 __all__ = ['Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error', 'Funcs', 'NamedValueAccess', 'Properties.py']
 
-__version__ = '0.5pre'
-
 
 def InstallInWebKit(appServer):
 	pass

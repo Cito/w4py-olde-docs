@@ -11,8 +11,6 @@
 
 __all__ = []
 
-__version__ = '0.2'
-
 
 # This function gets called by the app server during initialization
 def InstallInWebKit(appServer):
