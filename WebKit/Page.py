@@ -99,6 +99,9 @@ class Page(HTTPServlet):
 					self.handleAction(action)
 					return
 
+		self.defaultAction()
+
+	def defaultAction(self):
 		self.writeHTML()
 
 	def sleep(self, transaction):
@@ -481,17 +484,13 @@ class Page(HTTPServlet):
 
 	def endResponse(self):
 		"""
-		If this is called during `sleep` or `awake` then the
-		rest of `awake`, `response`, and `sleep` are skipped
-		and the accumulated response is sent immediately with
-		no further processing.  If this is called during
-		`respond` then the rest of `respond` is skipped but
-		`sleep` is called, then the accumulated response is
-		sent.
+		When this method is called during `awake` or
+		`respond`, servlet processing will end immediately,  
+		and the accumulated response will be sent.
+
+		Note that `sleep` will still be called, providing a 
+		chance to clean up or free any resources.  		
 		"""
-		## 2003-03 ib @@: I don't think this is a correct
-		## description of the current semantics, but it probably
-		## should be.
 		raise EndResponse
 
 	def sendRedirectAndEnd(self, url):

@@ -117,7 +117,9 @@ This would be placed in ``MyServlet.py``.  Webware will create a pool of ``MySer
   and it's sent to the browser.  This is all done for you.
 * ``sleep(transaction)`` is called.  This is where you should clean up anything
   you might have set up earlier -- open files, open database connections, etc.
-  Often it's empty.
+  Often it's empty.  Note that ``sleep()`` is called even if an exception was 
+  raised at any point in the servlet processing, so it should (if necessary)
+  check that each resource was in fact acquired before trying to release it.
 * The servlet is placed back into the pool, to be used again.  This only happens
   after the transaction is complete -- the servlet won't get reused any earlier.
   

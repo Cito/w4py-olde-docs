@@ -23,10 +23,9 @@ class EndResponse(Exception):
 	"""
 	Used to prematurely break out of the awake()/respond()/sleep()
 	cycle without reporting a traceback.  During servlet
-	processing, if this exception is caught during respond() then
-	sleep() is called and the response is sent.  If caught during
-	awake() then both respond() and sleep() are skipped and the
-	response is sent.
+	processing, if this exception is caught during awake() or respond() 
+	then sleep() is called and the response is sent.  If caught during
+	sleep(), processing ends and the response is sent.
 	"""
 	pass
 
@@ -478,6 +477,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		except HTTPExceptions.HTTPException, err:
 			err.setTransaction(trans)
 			trans.response().displayError(err)
+		except EndResponse:
+			pass
 		if servlet:
 			# Return the servlet to its pool
 			# 3-03 ib @@: what's this really supposed to do?
@@ -503,9 +504,11 @@ class Application(ConfigurableForServerSidePath, Object):
 			# implements this same sequence of calls, but
 			# by keeping it in the servlet it's easier to
 			# for the servlet to catch exceptions.
-			servlet.awake(trans)
-			servlet.respond(trans)
-			servlet.sleep(trans)
+			try:
+				servlet.awake(trans)
+				servlet.respond(trans)
+			finally:
+				servlet.sleep(trans)
 	
 	def forward(self, trans, url, context=None):
 		"""

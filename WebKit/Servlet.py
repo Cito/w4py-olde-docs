@@ -36,9 +36,11 @@ class Servlet(Object):
 	## Request-response cycles ##
 
 	def runTransaction(self, trans):
-		self.awake(trans)
-		self.respond(trans)
-		self.sleep(trans)
+		try:
+			self.awake(trans)
+			self.respond(trans)
+		finally:
+			self.sleep(trans)
 
 	def runMethodForTransaction(self, trans, method, *args, **kw):
 		self.awake(trans)
