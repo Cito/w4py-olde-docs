@@ -507,7 +507,7 @@ static int content_handler(request_rec *r)
     
     if (env_dict == NULL || whole_dict == NULL) {
 	log_message("Couldn't allocate python data structures", r);
-	return 0;
+	return HTTP_INTERNAL_SERVER_ERROR;
     }
     
     
@@ -570,13 +570,14 @@ static int content_handler(request_rec *r)
 	    return OK;
 	} else if( result == 2 ) {
 	    log_message("error transacting with app server -- giving up.", r);
-	    return -1;
+	    return HTTP_INTERNAL_SERVER_ERROR;
 	}
 	sprintf(msgbuf, "Couldn't connect to AppServer, attempt %i of %i", conn_attempt, cfg->retryattempts);
 	log_message(msgbuf, r);
 	sleep(cfg->retrydelay);
     }
     log_message("error transacting with app server -- giving up.", r);
+    return HTTP_INTERNAL_SERVER_ERROR;
 }
 
 
