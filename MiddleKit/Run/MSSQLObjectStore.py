@@ -92,21 +92,31 @@ class Klass:
 		"""
 		return '[%s]' % self.name()
 
+
 class Attr:
 
 	def sqlColumnName(self):
 		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
 		if not self._sqlColumnName:
-			self._sqlColumnName = self.name() + self.sqlTypeSuffix()
-		return '[' + self._sqlColumnName + ']'
+			self._sqlColumnName = '[' + self.name() + ']'
+		return self._sqlColumnName
+
+
+class ObjRefAttr:
+
+	def sqlColumnName(self):
+		if not self._sqlColumnName:
+			if self.setting('UseBigIntObjRefColumns', False):
+				self._sqlColumnName = '[' + self.name() + 'Id' + ']'  # old way: one 64 bit column
+			else:
+				# new way: 2 int columns for class id and obj id
+				self._sqlColumnName = '[%s],[%s]' % self.sqlColumnNames()
+		return self._sqlColumnName
 
 
 class StringAttr:
 
-	def sqlValue(self, value):
-		if value is None:
-			return 'NULL'
-		else:
-			# do the right thing
-			value = value.replace("'","''")
-			return "'" + value + "'"
+	def sqlForNonNone(self, value):
+		# do the right thing
+		value = value.replace("'","''")
+		return "'" + value + "'"

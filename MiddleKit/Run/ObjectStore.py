@@ -96,15 +96,6 @@ class ObjectStore(ModelUser):
 			self._deletedObjects = NonThreadedList()
 			self._changedObjects = NonThreadedDict()
 
-	## Settings ##
-
-	def setting(self, name, default=NoDefault):
-		"""
-		Returns the given setting for the store, which is actually
-		just taken from the model.
-		"""
-		return self._model.setting(name, default)
-
 
 	## Manipulating the objects in the store ##
 

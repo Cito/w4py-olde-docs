@@ -41,6 +41,12 @@ class UnknownSerialNumberError(SQLObjectStoreError):
 
 
 class UnknownSerialNumInfo:
+	"""
+	Attrs assigned externally are:
+		sourceObject
+		sourceAttr
+		targetObject
+	"""
 
 	def updateStmt(self):
 		assert self.sourceObject.serialNum!=0
@@ -49,8 +55,8 @@ class UnknownSerialNumInfo:
 		assert sourceKlass
 		sourceTableName = sourceKlass.sqlTableName()
 		sourceSqlIdName = sourceKlass.sqlIdName()
-		return 'update %s set %s=%s where %s=%s;' % (
-			sourceTableName, self.fieldName, self.targetObject.sqlObjRef(), sourceSqlIdName, self.sourceObject.serialNum())
+		return 'update %s set %s where %s=%s;' % (
+			sourceTableName, self.sourceAttr.sqlUpdateExpr(self.targetObject), sourceSqlIdName, self.sourceObject.serialNum())
 
 	def __repr__(self):
 		s = []
@@ -108,6 +114,7 @@ class SQLObjectStore(ObjectStore):
 			klass._setMethods = {}
 			for attr in klass.allDataAttrs():
 				attr._sqlColumnName = None
+				attr._sqlColumnNames = None
 
 		# Connect
 		self.connect()
@@ -551,6 +558,10 @@ class Model:
 class MiddleObjectMixIn:
 
 	def sqlObjRef(self):
+		"""
+		Returns the 64-bit integer value that refers to self in a SQL database.
+		This only makes sense if the UseBigIntObjRefColumns setting is True.
+		"""
 		return objRefJoin(self.klass().id(), self.serialNum())
 
 	def sqlInsertStmt(self, unknowns):
@@ -565,14 +576,21 @@ class MiddleObjectMixIn:
 		insertSQLStart, sqlAttrs = klass.insertSQLStart()
 		values = []
 		append = values.append
+		extend = values.extend
 		for attr in sqlAttrs:
 			try:
 				value = attr.sqlValue(self.valueForAttr(attr))
 			except UnknownSerialNumberError, exc:
 				exc.info.sourceObject = self
 				unknowns.append(exc.info)
-				value = 'NULL'
-			append(value)
+				if self.store().model().setting('UseBigIntObjRefColumns', False):
+					value = 'NULL'
+				else:
+					value = ('NULL', 'NULL')
+			if isinstance(value, str):
+				append(value)
+			else:
+				extend(value)  # value could be sequence for attrs that require multiple SQL columns
 		if len(values)==0:
 			values = ['0']
 		values = ','.join(values)
@@ -580,7 +598,7 @@ class MiddleObjectMixIn:
 
 	def sqlUpdateStmt(self):
 		"""
-		Returns the SQL update statement for MySQL of the form:
+		Returns the SQL update statement of the form:
 			update table set name=value, ... where idName=idValue;
 		Installed as a method of MiddleObject.
 		"""
@@ -588,8 +606,7 @@ class MiddleObjectMixIn:
 		klass = self.klass()
 		res = []
 		for attr in self._mk_changedAttrs.values():
-			colName = attr.sqlColumnName()
-			res.append(colName+'='+attr.sqlValue(self.valueForAttr(attr)))
+			res.append(attr.sqlUpdateExpr(self.valueForAttr(attr)))
 		res = ','.join(res)
 		res = ('update ', klass.sqlTableName(), ' set ', res, ' where ', klass.sqlIdName(), '=', str(self.serialNum()))
 		return ''.join(res)
@@ -610,7 +627,17 @@ class MiddleObjectMixIn:
 			return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
 
 	def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
-		return {'refreshAttrs': 1, 'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(), self.sqlObjRef())}
+		if self.store().setting('UseBigIntObjRefColumns'):
+			return {
+				'refreshAttrs': 1,
+				'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(), self.sqlObjRef())
+			}
+		else:
+			classIdName, objIdName = backObjRefAttr.sqlColumnNames()
+			return {
+				'refreshAttrs': 1,
+				'clauses': 'WHERE (%s=%s AND %s=%s)' % (classIdName, self.klass().id(), objIdName, self.serialNum())
+			}
 
 MixIn(MiddleObject, MiddleObjectMixIn)
 	# Normally we don't have to invoke MixIn()--it's done automatically.
@@ -662,6 +689,7 @@ class Klass:
 			self._sqlAttrs = attrs
 		return self._insertSQLStart, self._sqlAttrs
 
+
 class Attr:
 
 	def shouldRegisterChanges(self):
@@ -675,61 +703,138 @@ class Attr:
 	def sqlColumnName(self):
 		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
 		if not self._sqlColumnName:
-			self._sqlColumnName = self.name() + self.sqlTypeSuffix()
+			self._sqlColumnName = self.name()
 		return self._sqlColumnName
 
-	def sqlTypeSuffix(self):
-		""" Returns a string to be used as a suffix for sqlColumnName(). Returns an empty string. Occasionally, a subclass will override this to help clarify SQL column names of their type. """
-		return ''
-
 	def sqlValue(self, value):
-		""" For a given Python value, this returns the correct string for use in a SQL INSERT statement. Subclasses should override if this implementation, which returns repr(value), doesn't work for them. This method is responsible for returning 'NULL' if the value is None. """
+		"""
+		For a given Python value, this returns the correct string for
+		use in a SQL statement. Subclasses will typically *not*
+		override this method, but instead, sqlForNonNone() and on
+		rare occasions, sqlForNone().
+		"""
 		if value is None:
-			return 'NULL'
+			return self.sqlForNone()
 		else:
-			return repr(value)
+			return self.sqlForNonNone(value)
+
+	def sqlForNone(self):
+		return 'NULL'
+
+	def sqlForNonNone(self, value):
+		return repr(value)
+
+	def sqlUpdateExpr(self, value):
+		"""
+		Returns the assignment portion of an UPDATE statement such as:
+			"foo='bar'"
+		Using sqlColumnName() and sqlValue(). Subclasses only need to
+		override this if they have a special need (such as multiple
+		columns, see ObjRefAttr).
+		"""
+		colName = self.sqlColumnName()
+		return colName+'='+self.sqlValue(value)
+
+	def readStoreDataRow(self, obj, row, i):
+		"""
+		By default, an attr reads one data value out of the row.
+		"""
+		value = row[i]
+		obj.setValueForAttr(self, value)
+		return i+1
+
+
+class BasicTypeAttr:
+
+	pass
 
 
 class IntAttr:
 
-	def sqlValue(self, value):
-		if value is None:
-			return 'NULL'
-		else:
-			return str(value)
-			# it's important to use str() since an int might
-			# point to a long (whose repr() would be suffixed
-			# with an 'L')
+	def sqlForNonNone(self, value):
+		return str(value)
+		# it's important to use str() since an int might
+		# point to a long (whose repr() would be suffixed
+		# with an 'L')
 
 
 class LongAttr:
 
-	def sqlValue(self, value):
-		if value is None:
-			return 'NULL'
-		else:
-			return str(value)
+	def sqlForNonNone(self, value):
+		return str(value)
 
 
 class ObjRefAttr:
 
-	def sqlTypeSuffix(self):
-		return 'Id'
+	def sqlColumnName(self):
+		if not self._sqlColumnName:
+			if self.setting('UseBigIntObjRefColumns', False):
+				self._sqlColumnName = self.name() + 'Id'  # old way: one 64 bit column
+			else:
+				# new way: 2 int columns for class id and obj id
+				self._sqlColumnName = '%s,%s' % self.sqlColumnNames()
+		return self._sqlColumnName
 
-	def sqlValue(self, value):
-		if value is None:
+	def sqlColumnNames(self):
+		if not self._sqlColumnNames:
+			assert not self.setting('UseBigIntObjRefColumns', False)
+			name = self.name()
+			classIdName, objIdName = self.setting('ObjRefSuffixes')
+			classIdName = name + classIdName
+			objIdName = name + objIdName
+			self._sqlColumnNames = (classIdName, objIdName)
+		return self._sqlColumnNames
+
+	def sqlForNone(self):
+		if self.setting('UseBigIntObjRefColumns', False):
 			return 'NULL'
 		else:
-			assert type(value) is InstanceType
-			assert isinstance(value, MiddleObject)
-			if value.serialNum()==0:
-				info = UnknownSerialNumInfo()
-				info.fieldName = self.sqlColumnName()
-				info.targetObject = value
-				raise UnknownSerialNumberError(info)
+			return 'NULL,NULL'
+
+	def sqlForNonNone(self, value):
+		assert type(value) is InstanceType
+		assert isinstance(value, MiddleObject)
+		if value.serialNum()==0:
+			info = UnknownSerialNumInfo()
+			info.sourceAttr = self
+			info.targetObject = value
+			raise UnknownSerialNumberError(info)
+		else:
+			if self.setting('UseBigIntObjRefColumns', False):
+				return str(value.sqlObjRef())
 			else:
-				value = value.sqlObjRef()
-				return str(value)
+				return (str(value.klass().id()), str(value.serialNum()))
+
+	def sqlUpdateExpr(self, value):
+		"""
+		Returns the assignment portion of an UPDATE statement such as:
+			"foo='bar'"
+		Using sqlColumnName() and sqlValue(). Subclasses only need to
+		override this if they have a special need (such as multiple
+		columns, see ObjRefAttr).
+		"""
+		if self.setting('UseBigIntObjRefColumns', False):
+			colName = self.sqlColumnName()
+			return colName+'='+self.sqlValue(value)
+		else:
+			classIdName, objIdName = self.sqlColumnNames()
+			if value is None:
+				classId = objId = 'NULL'
+			else:
+				classId = value.klass().id()
+				objId = value.serialNum()
+			return '%s=%s,%s=%s' % (classIdName, classId, objIdName, objId)
+
+	def readStoreDataRow(self, obj, row, i):
+		# this does *not* get called under the old approach of single obj ref columns. see MiddleObject.readStoreData
+		classId, objId = row[i], row[i+1]
+		if classId is None:
+			value = None
+		else:
+			value = objRefJoin(classId, objId)
+			# @@ 2004-20-02 ce ^ that's wasteful to join them just so they can be split later, but it works well with the legacy code
+		obj.setValueForAttr(self, value)
+		return i+2
 
 
 class ListAttr:
@@ -737,31 +842,28 @@ class ListAttr:
 	def hasSQLColumn(self):
 		return 0
 
+	def readStoreDataRow(self, obj, row, i):
+		return i
+
 
 class AnyDateTimeAttr:
 
-	def sqlValue(self, value):
-		if value is None:
-			return 'NULL'
-		else:
-			# Chop off the milliseconds -- SQL databases seem to dislike that.
-			return "'%s'" % str(value).split('.')[0]
+	def sqlForNonNone(self, value):
+		# Chop off the milliseconds -- SQL databases seem to dislike that.
+		return "'%s'" % str(value).split('.')[0]
 
 
 class DateAttr:
 
-	def sqlValue(self, value):
-		if value is None:
-			return 'NULL'
-		else:
-			# We often get "YYYY-MM-DD HH:MM:SS" from mx's DateTime
-			# so we split on space and take the first value to
-			# work around that.
-			if 0:
-				print
-				print '>> type of value =', type(value)
-				print '>> value = %r' % value
-				print
-			if not isinstance(value, StringTypes):
-				value = str(value).split()[0]
-			return "'%s'" % value
+	def sqlForNonNone(self, value):
+		# We often get "YYYY-MM-DD HH:MM:SS" from mx's DateTime
+		# so we split on space and take the first value to
+		# work around that.
+		if 0:
+			print
+			print '>> type of value =', type(value)
+			print '>> value = %r' % value
+			print
+		if not isinstance(value, StringTypes):
+			value = str(value).split()[0]
+		return "'%s'" % value

@@ -35,10 +35,21 @@ class ObjRefAttr:
 class ListAttr:
 
 	def writePyGet(self, out, names):
-		out.write('''
+		if self.setting('UseBigIntObjRefColumns', False):
+			out.write('''
 	def %(pyGetName)s(self):
 		if self._%(name)s is None:
 			from %(package)s%(targetClassName)s import %(targetClassName)s
 			self._%(name)s = self._mk_store.fetchObjectsOfClass(%(targetClassName)s, clauses='where %(lowerSourceClassName)sId=%%i' %% self.sqlObjRef())
+		return self._%(name)s
+''' % names)
+		else:
+			classIdSuffix, objIdSuffix = self.setting('ObjRefSuffixes')
+			names.update(locals())
+			out.write('''
+	def %(pyGetName)s(self):
+		if self._%(name)s is None:
+			from %(package)s%(targetClassName)s import %(targetClassName)s
+			self._%(name)s = self._mk_store.fetchObjectsOfClass(%(targetClassName)s, clauses='where %(lowerSourceClassName)s%(classIdSuffix)s=%%i and %(lowerSourceClassName)s%(objIdSuffix)s=%%i' %% (self.klass().id(), self.serialNum()))
 		return self._%(name)s
 ''' % names)

@@ -17,7 +17,7 @@
 		Note however that comment tags within a title block seem to
 		not be interpreted as comments in Mozilla 1.2.1
 	-->
-	<title>CGIWrapper Release Notes</title>
+	<title>MiddleKit Release Notes</title>
 </head>
 
 <body>
@@ -28,15 +28,30 @@ Webware for Python  <!-- version --> X.Y <!-- /version -->
 Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 
-<a name=Introduction<h2>Introduction</h2></a>
+<a name=Incompatible><h2>Incompatible Changes</h2></a>
 <ul>
-	<li> *
+	<li> <font color=red>There are some MiddleKit improvements that break compatibility with previous versions of MiddleKit, although all are easy to address. Read below.</font>
 </ul>
 
-<h2>Major Changes</h2>
-<ul>
-	<li> *
-</ul>
+<h3>Obj Ref Columns</h3>
+
+<p> A long standing flaw in MiddleKit was the use of 64-bit integer SQL columns to store references/pointers to objects. The first 32-bits were for the class id and the second 32-bits were for the object id. These are difficult to work with from SQL. For example, an object reference to (classId=1, objId=1) showed as 4294967297 in SQL and couldn't not be readily joined with other tables.
+
+<p> The new approach is to break these values into two SQL columns. If the attribute name is "foo" then the SQL columns will be named "fooClassId" and "fooObjId". If, for some reason, you don't like those suffixes, you can customize them through the setting <a href=UsersGuide.html#Configuration_ObjRefSuffixes >ObjRefSuffixes</a>. As always, the class ids are stored in the _MKClassIds table that MiddleKit automatically generates.
+
+<p> <font color=red>If you are upgrading Webware then your database schema will no longer be compatible with MiddleKit.</font> The easy way to fix this is to set UseBigIntObjRefColumns to True in Settings.config (see <a href=UsersGuide.html#Configuration_UseBigIntObjRefColumns>User's Guide - Configuration</a> for more information). This will give you the old behavior. The hard way is to fix up your schema and migrate the data from the old columns to the new.
+
+
+<h3>SQLGenerator.config</h3>
+
+<p> There used to be another config file, besides Settings.config, named SQLGenerator.config, with a single setting, DropStatements. That file is no longer used and the setting has been moved to Settings.config. If you have a SQLGenerator.config in your model directories, move the setting over.
+
+
+<h3>MS SQL Support</h3>
+
+<p> The <span class=name>float</span> type now yields a SQL type of <span class=name>float</span> rather than <span class=name>decimal</span>, because that matches the semantics of Python's float type more closely (perhaps identically). If you want decimal, use decimal; it is a valid MiddleKit datatype.
+
+<p> The serial primary key field is now typed as int instead of bigint. This matches the MiddleKit approach for other databases and also allows object id columns to be foreign keys to this primary key (MS SQL will give an error if an int column tries to reference a bigint column).
 
 
 <h2>New Features</h2>
@@ -47,8 +62,8 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 <h2>Improvements and Refinements</h2>
 <ul>
-	<li>Improved error message when there are errors in the model (instead of 
-		cryptic tracebacks).  In many cases the filename of the model and the 
+	<li>Improved error message when there are errors in the model (instead of
+		cryptic tracebacks).  In many cases the filename of the model and the
 	line number are printed, along with the error message.
 </ul>
 

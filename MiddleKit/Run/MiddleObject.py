@@ -59,37 +59,44 @@ class MiddleObject(NamedValueAccess):
 			assert self._mk_store is store, 'Cannot refresh data from a different store.'
 		else:
 			self.setStore(store)
-		fullClassName = self.__class__.__module__ + '.' + self.__class__.__name__
-		cache = self._mk_setCache.setdefault(fullClassName, [])
-		if not cache:
-			allAttrs = self.klass().allDataAttrs()
-			# @@ 2000-10-29 ce: next line is major hack: hasSQLColumn()
-			attrs = [attr for attr in allAttrs if attr.hasSQLColumn()]
-			attrNames = [attr.name() for attr in attrs]
-			assert len(attrNames)+1==len(row)  # +1 because row has serialNumber
-			for name in attrNames:
-				setMethodName = 'set' + name[0].upper() + name[1:]
-				setMethod = getattr(self.__class__, setMethodName, '_'+name)
-				cache.append(setMethod)
+		if store.setting('UseBigIntObjRefColumns', False):
+			fullClassName = self.__class__.__module__ + '.' + self.__class__.__name__
+			cache = self._mk_setCache.setdefault(fullClassName, [])
+			if not cache:
+				allAttrs = self.klass().allDataAttrs()
+				# @@ 2000-10-29 ce: next line is major hack: hasSQLColumn()
+				attrs = [attr for attr in allAttrs if attr.hasSQLColumn()]
+				attrNames = [attr.name() for attr in attrs]
+				assert len(attrNames)+1==len(row)  # +1 because row has serialNumber
+				for name in attrNames:
+					setMethodName = 'set' + name[0].upper() + name[1:]
+					setMethod = getattr(self.__class__, setMethodName, '_'+name)
+					cache.append(setMethod)
 
-		assert len(cache)+1==len(row)
-		dict = self.__dict__ # we use this to bypass our own __setattr__
-		dict['_mk_initing'] = 1
-		if self._mk_serialNum==0:
-			self.setSerialNum(row[0])
-		else:
-			assert self._mk_serialNum==row[0]
-		# Set all of our attributes with setFoo() or by assigning to _foo
-		for i in xrange(len(cache)):
-			value = row[i+1]
-			setter = cache[i]
-			if isinstance(setter, StringTypes):
-				dict['_'+setter] = value
+			assert len(cache)+1==len(row)
+			self._mk_initing = 1
+			if self._mk_serialNum==0:
+				self.setSerialNum(row[0])
 			else:
-				# a method
+				assert self._mk_serialNum==row[0]
+			# Set all of our attributes with setFoo() or by assigning to _foo
+			for i in xrange(len(cache)):
+				value = row[i+1]
+				setter = cache[i]
 				setter(self, value)
-		dict['_mk_initing'] = 0
-		dict['_mk_inStore'] = 1
+		else:
+			self._mk_initing = 1
+			if self._mk_serialNum==0:
+				self.setSerialNum(row[0])
+			else:
+				assert self._mk_serialNum==row[0]
+			allAttrs = self.klass().allDataAttrs()
+			i = 1
+			for attr in allAttrs:
+				i = attr.readStoreDataRow(self, row, i)
+
+		self._mk_initing = 0
+		self._mk_inStore = 1
 		return self
 
 

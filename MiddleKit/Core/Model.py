@@ -321,4 +321,12 @@ class Model(Configurable):
 	def defaultConfig(self):
 		return {
 			'Threaded': 1,
+			'ObjRefSuffixes': ('ClassId', 'ObjId'),
+			'UseBigIntObjRefColumns': False,
+#			'SQLLog': { 'File': 'stdout', },
+			'PreSQL': '',
+			'PostSQL': '',
+			'DropStatements': 'database',  # database, tables
+			'ExternalEnumsTableName': None, # '%(ClassName)s%(AttrName)sEnum'
+			'ExternalEnumsColumnName': 'name',  # could use %(ClassName)s and %(AttrName)s
 		}

@@ -257,7 +257,7 @@ Version <!-- version --> X.Y <!-- /version -->
 
 <p> <span class=filename>Settings.config</span> is the primary configuration file.
 
-<p> The <span class=name>Package</span> setting can be used to declare the package that your set of middle objects are contained by. This is useful for keeping your middle objects packaged away from other parts of your programs, thereby reducing the chances of a name conflict. This is the recommended way of using MK.
+<p> <a name=Configuration_Package></a>The <span class=name>Package</span> setting can be used to declare the package that your set of middle objects are contained by. This is useful for keeping your middle objects packaged away from other parts of your programs, thereby reducing the chances of a name conflict. This is the recommended way of using MK.
 
 <p> An example <a name=filename>Settings.config</a>:
 
@@ -273,7 +273,7 @@ Version <!-- version --> X.Y <!-- /version -->
 <p> Don't forget to put an <span class=filename>__init__.py</span> in the directory so that Python recognizes it as a package.
 
 
-<p> The <span class=name>SQLLog</span> setting can be used to get MiddleKit to echo all SQL statements to 'stdout', 'stderr' or a filename. For filenames, an optional 'Mode' setting inside SQLLog can be used to write over or append to an existing file. The default is write. Here are some examples:
+<p> <a name=Configuration_SQLLog></a> The <span class=name>SQLLog</span> setting can be used to get MiddleKit to echo all SQL statements to 'stdout', 'stderr' or a filename. For filenames, an optional 'Mode' setting inside SQLLog can be used to write over or append to an existing file. The default is write. Here are some examples:
 
 <pre>{
     'SQLLog': { 'File': 'stdout' },
@@ -288,14 +288,14 @@ Version <!-- version --> X.Y <!-- /version -->
 }</pre>
 
 
-<p> The <span class=name>Database</span> setting overrides the database name, which is otherwise assumed to be same name as the model. This is particularly useful if you are running two instances of the same application on one host.
+<p> <a name=Configuration_Database></a> The <span class=name>Database</span> setting overrides the database name, which is otherwise assumed to be same name as the model. This is particularly useful if you are running two instances of the same application on one host.
 
 <pre>{
     'Database': 'foobar',
 }</pre>
 
 
-<p> The <span class=name>DeleteBehavior</span> setting can be used to change what MiddleKit does when you delete objects.
+<p> <a name=Configuration_DeleteBehavior></a> The <span class=name>DeleteBehavior</span> setting can be used to change what MiddleKit does when you delete objects.
 The default behavior is "delete" which means that objects are deleted from the SQL database when they are deleted from the MiddleKit object store.
 But setting DeleteBehavior to "mark" causes an extra SQL datetime column called "deleted" to be added to each SQL table, and records that are deleted from the object store in MiddleKit are kept in SQL tables with the deleted field set to the date/time when the object was deleted.
 This setting has no effect on the visible behavior of MiddleKit; it only changes what happens behind the scenes in the SQL store.
@@ -304,22 +304,36 @@ This setting has no effect on the visible behavior of MiddleKit; it only changes
     'DeleteBehavior': 'mark',
 }</pre>
 
-<p> The <span class=name>SQLConnectionPoolSize</span> setting is used to create a <a href=../../MiscUtils/Docs/index.html>MiscUtils</a>.DBPool instance for use by the store. For DB API modules with a threadsafety of only 1 (such as MySQLdb), this is particularly useful (in one benchmark, the speed up was 15 - 20%). Simply set the size of the pool in order to have one created and used:
+<p> <a name=Configuration_SQLConnectionPoolSize></a> The <span class=name>SQLConnectionPoolSize</span> setting is used to create a <a href=../../MiscUtils/Docs/index.html>MiscUtils</a>.DBPool instance for use by the store. For DB API modules with a threadsafety of only 1 (such as MySQLdb), this is particularly useful (in one benchmark, the speed up was 15 - 20%). Simply set the size of the pool in order to have one created and used:
 
 <pre>{
 	'SQLConnectionPoolSize': 20,
 }</pre>
 
-<p> The <span class=name>UsePickledClassesCache</span> setting defaults to 1 and causes MiddleKit to cache the <span class=filename>Classes.csv</span> text file as a binary pickle file named <span class=filename>Classes.pickle.cache</span>. This reduces subsequent load times by about 40%. The cache will be ignored if it can't be read, is older than the CSV file, has a different Python version, etc. You don't normally even need to think about this, but if for some reason you would like to turn off the use of the cache, you can do so through this setting.
 
-<p> <span class=filename>SQLGenerator.config</span> has one setting: <span class=name>DropStatements</span> whose potential values are:
+<p> <a name=Configuration_ObjRefSuffixes></a> The <span class=name>ObjRefSuffixes</span> controls the suffixes that are appended for the names of the two SQL column that are created for each obj ref attribute. The suffixes must be different from each other.
+
+<pre>{
+    'ObjRefSuffixes': ('ClassId', 'ObjId'),  # the default
+}</pre>
+
+
+<p> <a name=Configuration_UseBigIntObjRefColumns></a> The <span class=name>UseBigIntObjRefColumns</span> causes MiddleKit to store object references in 64-bit fields, instead of in two fields (one for the class id and one for the obj id). You would only do this for a legacy MiddleKit application. Turning this on obsoletes the ObjRefSuffixes setting.
+
+<pre>{
+    'UseBigIntObjRefColumns': True,  # use single 64-bit obj ref fields
+}</pre>
+
+
+
+<p> <a name=Configuration_UsePickledClassesCache></a> The <span class=name>UsePickledClassesCache</span> setting defaults to 1 and causes MiddleKit to cache the <span class=filename>Classes.csv</span> text file as a binary pickle file named <span class=filename>Classes.pickle.cache</span>. This reduces subsequent load times by about 40%. The cache will be ignored if it can't be read, is older than the CSV file, has a different Python version, etc. You don't normally even need to think about this, but if for some reason you would like to turn off the use of the cache, you can do so through this setting.
+
+<p> <a name=Configuration_DropStatements></a> The <span class=name>DropStatements</span> setting has these potential values:
 
 <ul>
 	<li> database - This causes a DROP DATABASE to be used in <span class=filename>Create.sql</span>. This is the cleanest way to handle models and also the default.
 	<li> tables - This assumes the database already exists and does a DROP TABLE for each table in the model. There is a small danger here that if you remove a class from a model, then its old SQL table will remain in the database. The main use for this setting is for database servers that are slow creating new databases. One user reported a 1 minute lag for Microsoft SQL Server 2000, which is too much of a lag when running the test suite.
 </ul>
-
-<p> An example <a name=filename>SQLGenerator.config</a>:
 
 <pre>{
     'DropStatements': 'database',  # database, tables

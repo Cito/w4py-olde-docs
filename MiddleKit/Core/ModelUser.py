@@ -1,25 +1,25 @@
-from MiscUtils.Configurable import Configurable
 from MiscUtils.MixIn import MixIn
+from MiscUtils import NoDefault
 import sys
 from types import *
 
 
-class ModelUser(Configurable):
+class ModelUser:
 
 	## Init ##
 
 	def __init__(self):
-		Configurable.__init__(self)
 		self._model = None
 
 
-	## Configuration ##
+	## Settings ##
 
-	def configFilename(self):
-		return self.name() + '.config'
-
-	def defaultConfig(self):
-		return {}
+	def setting(self, name, default=NoDefault):
+		"""
+		Returns the given setting which is actually just taken from
+		the model.
+		"""
+		return self._model.setting(name, default)
 
 
 	## Models ##
@@ -95,7 +95,7 @@ class ModelUser(Configurable):
 		occurs. This allows subclasses to override that method
 		and potentially customize the behavior, including
 		providing more debugging information.
-		
+
 		This implementation writes the msg to stdout.
 		"""
 		print 'WARNING:', msg

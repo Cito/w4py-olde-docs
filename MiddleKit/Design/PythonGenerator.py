@@ -15,11 +15,6 @@ except ImportError:
 
 class PythonGenerator(CodeGenerator):
 
-	def defaultConfig(self):
-		return {
-			'DestDir': 'GeneratedPy',
-		}
-
 	def generate(self, dirname):
 		self.requireDir(dirname)
 		# @@ 2000-10-17 ce: ACK! Get rid of all these hard coded 'GeneratedPy' strings

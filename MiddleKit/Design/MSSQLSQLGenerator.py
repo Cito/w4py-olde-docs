@@ -84,14 +84,14 @@ drop table [dbo].[_MKClassIds]
 go
 
 create table _MKClassIds (
-	id bigint not null primary key,
+	id int not null primary key,
 	name varchar(100)
 )\ngo
 ''')
 		wr('delete from _MKClassIds\n\n')
 		for klass in self._klasses:
-			wr('insert into _MKClassIds (id, name) values\n')
-			wr("\t(%s, '%s');\n" % (klass.id(), klass.name()))
+			wr('insert into _MKClassIds (id, name) values ')
+			wr("(%s, '%s');\n" % (klass.id(), klass.name()))
 		wr('\ngo\n\n')
 
 
@@ -142,7 +142,7 @@ class Klass:
 # Create table.
 #			wr("print 'Creating table %s'\n" % name)
 #			wr('create table [%s] (\n' % name)
-#			wr('	%s bigint primary key not null IDENTITY (1, 1),\n' % ljust(sqlIdName, self.maxNameWidth()))
+#			wr('	%s int primary key not null IDENTITY (1, 1),\n' % ljust(sqlIdName, self.maxNameWidth()))
 
 #			for attr in self.allAttrs():
 #				attr.writeSQL(generator, out)
@@ -166,7 +166,7 @@ class Klass:
 
 #		print("print 'Creating table %s'\n" % name)
 #		print('create table [%s] (\n' % name)
-		z = '	%s bigint primary key not null IDENTITY (1, 1),\n' % self.sqlIdName().ljust(self.maxNameWidth())
+		z = '	%s int primary key not null IDENTITY (1, 1),\n' % self.sqlIdName().ljust(self.maxNameWidth())
 #		print(z)
 		return z
 
@@ -267,11 +267,13 @@ class StringAttr:
 class ObjRefAttr:
 
 	def sqlType(self):
-		if self.get('Ref',None):
-			return 'bigint foreign key references %(Type)s(%(Type)sID) ' % self
+		if self.setting('UseBigIntObjRefColumns', False):
+			if self.get('Ref', None):
+				return 'bigint foreign key references %(Type)s(%(Type)sId) ' % self
+			else:
+				return 'bigint /* relates to %s */ ' % self['Type']
 		else:
-			return 'bigint /* relates to %s */ ' % self['Type']
-
+			return 'int'
 
 
 class ListAttr:
@@ -283,13 +285,10 @@ class ListAttr:
 class FloatAttr:
 
 	def sqlType(self):
-		return 'decimal(16,8)'
-		# @@ 2001-04-26 dr: this (16,8) should be doable through your model
-		# you should use the decimal attribute and max/numDecimalPlaces
-		# float is supported for mySQL test compatibility
+		return 'float'
+		# return 'decimal(16,8)'
+		# ^ use the decimal type instead
 
 	def sampleValue(self, value):
 		float(value) # raises exception if value is invalid
 		return value
-
-

@@ -70,5 +70,7 @@ class StringAttr:
 class ObjRefAttr:
 
 	def sqlType(self):
-		# @@ 2001-02-04 ce: Is this standard SQL? If so, it can be moved up.
-		return 'bigint unsigned /* %s */' % self['Type']
+		if self.setting('UseBigIntObjRefColumns', False):
+			return 'bigint unsigned /* %s */' % self['Type']
+		else:
+			return 'int unsigned'

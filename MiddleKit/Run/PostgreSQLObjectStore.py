@@ -23,7 +23,7 @@ class PostgreSQLObjectStore(SQLObjectStore):
 		args = self._dbArgs.copy()
 		args['database'] = self._model.sqlDatabaseName()
 		return self.dbapiModule().connect(**args)
-	
+
 	def _insertObject(self, object, unknownSerialNums):
 		# basically the same as the SQLObjectStore-
 		# version but modified to retrieve the
@@ -57,7 +57,7 @@ class PostgreSQLObjectStore(SQLObjectStore):
 	def saveChanges(self):
 		conn, cur = self.connectionAndCursor()
 		try:
-			
+
 			SQLObjectStore.saveChanges(self)
 		except DatabaseError:
 			conn.rollback()
@@ -73,9 +73,7 @@ class PostgreSQLObjectStore(SQLObjectStore):
 # Mixins
 
 class StringAttr:
-	def sqlValue(self, value):
+
+	def sqlForNonNone(self, value):
 		# Postgres provides a quoting function for string -- use it.
-		if value is None:
-			return 'NULL'
-		else:
-			return str(dbi._quote(value))
+		return str(dbi._quote(value))

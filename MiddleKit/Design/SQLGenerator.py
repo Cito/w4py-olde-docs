@@ -50,23 +50,6 @@ class SQLGenerator(CodeGenerator):
 		"""
 		return self.model().sqlDatabaseName()
 
-	def configFilename(self):
-		filename = self.model().filename()
-		if filename is not None:
-			filename = os.path.join(filename, 'SQLGenerator.config')
-		return filename
-
-	def defaultConfig(self):
-		config = CodeGenerator.defaultConfig(self)
-		config.update({
-			'PreSQL': '',
-			'PostSQL': '',
-			'DropStatements': 'database',  # database, tables
-			'ExternalEnumsTableName': None, # '%(ClassName)s%(AttrName)sEnum'
-			'ExternalEnumsColumnName': 'name',  # could use %(ClassName)s and %(AttrName)s
-		})
-		return config
-
 	def generate(self, dirname):
 		self.requireDir(dirname)
 		self.writeInfoFile(os.path.join(dirname, 'Info.text'))
@@ -179,28 +162,8 @@ class Model:
 						value = values[i]
 					except IndexError:
 						raise SampleError( linenum, "Couldn't find value for attribute '%s'" % attr.name() )
-					value = value.strip()
-					#print '>> (%s, %s)' % (value, attr)
-					if value=='':
-						value = attr.get('Default', None)
-						if value is None:
-							value = 'NULL'
-						else:
-							value = attr.sampleValue(value)
-					elif value.lower()=='none':
-						value = 'NULL'
-					else:
-						value = attr.sampleValue(value)
-#						print 'Attr: %s, Value: %s' % (attr,value)
-					value = str(value)
-					if 0:
-						if not isinstance(value, StringTypes):
-							print 'attr:', attr
-							print 'value:', value
-							print 'type of value:', type(value)
-							assert isinstance(value, StringTypes), value
-					assert value  # value cannot be blank
-					values[i] = value
+					values[i] = attr.sqlForSampleInput(value)
+					assert len(values[i])>0, repr(values[i])  # SQL value cannot be blank
 					i += 1
 				#print
 				#values = [self.valueFilter(value) for value in values]
@@ -325,9 +288,9 @@ class Klasses:
 	def _writeCreateSQL(self, generator, out):
 		# assign the class ids up-front, so that we can resolve forward object references
 		self.assignClassIds(generator)
+		self.writeClassIdsSQL(generator, out)
 		for klass in self._model._allKlassesInOrder:
 			klass.writeCreateSQL(self._sqlGenerator, out)
-		self.writeClassIdsSQL(generator, out)
 
 	def writeClassIdsSQL(self, generator, out):
 		wr = out.write
@@ -464,31 +427,25 @@ class Attr:
 		""" Returns true if the attribute has a direct correlating SQL column in it's class' SQL table definition. Most attributes do. Those of type list do not. """
 		return not self.get('isDerived', 0)
 
-	def sampleValue(self, value):
-		""" Returns a string suitable for a SQL insert statement including any necessary SQL syntax. Subclasses should override to perform type checking and handle any special capabilities.
-		The invoker of this method already strips preceding and trailing whitespace, as well detects blanks as NULLs.
-		"""
-		# @@ 2001-02-20 ce: restructure this
-			# sqlValue() instead of sampleValue()
-			# w.s. stripping, blanks as default value, none as NULL
-			# make _sqlValue()
-		return value
+	def sqlForSampleInput(self, input):
+		input = input.strip()
+		if input=='':
+			input = self.get('Default', '')
+		if input in (None, 'None', 'none'):
+			return self.sqlForNone()
+		else:
+			return str(self.sqlForNonNoneSampleInput(input))
+
+	def sqlForNone(self):
+		return 'NULL'
+
+	def sqlForNonNoneSampleInput(self, input):
+		return input
 
 	def writeCreateSQL(self, generator, out):
 		try:
 			if self.hasSQLColumn():
-				name = self.sqlName().ljust(self.maxNameWidth())
-				if self.isRequired():
-					notNullSQL = ' not null'
-				else:
-					notNullSQL = self.sqlNullSpec()
-				if generator.sqlSupportsDefaultValues():
-					defaultSQL = self.createDefaultSQL()
-					if defaultSQL:
-						defaultSQL = ' ' + defaultSQL
-				else:
-					defaultSQL = ''
-				out.write('\t%s %s%s%s' % (name, self.sqlType(), notNullSQL, defaultSQL))
+				self.writeRealCreateSQLColumn(generator, out)
 			else:
 				out.write('\t/* %(Name)s %(Type)s - not a SQL column */' % self)
 		except:
@@ -503,6 +460,20 @@ class Attr:
 			print
 			raise
 
+	def writeRealCreateSQLColumn(self, generator, out):
+		name = self.sqlName().ljust(self.maxNameWidth())
+		if self.isRequired():
+			notNullSQL = ' not null'
+		else:
+			notNullSQL = self.sqlNullSpec()
+		if generator.sqlSupportsDefaultValues():
+			defaultSQL = self.createDefaultSQL()
+			if defaultSQL:
+				defaultSQL = ' ' + defaultSQL
+		else:
+			defaultSQL = ''
+		out.write('\t%s %s%s%s' % (name, self.sqlType(), notNullSQL, defaultSQL))
+
 	def writeAuxiliaryCreateTable(self, generator, out):
 		# most attribute types have no such beast
 		pass
@@ -516,7 +487,7 @@ class Attr:
 			default = str(default).strip()
 			if default.lower()=='none':  # kind of redundant
 				default = None
-			return 'default ' + str(self.sampleValue(default))
+			return 'default ' + str(self.sqlForSampleInput(default))
 		else:
 			return ''
 
@@ -527,9 +498,13 @@ class Attr:
 		raise AbstractError, self.__class__
 
 	def sqlColumnName(self):
-		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
+		"""
+		Returns the SQL column name corresponding to this attribute
+		which simply defaults to the attribute's name. Subclasses may
+		override to customize.
+		"""
 		if not self._sqlColumnName:
-			self._sqlColumnName = self.name() # + self.sqlTypeSuffix()
+			self._sqlColumnName = self.name()
 		return self._sqlColumnName
 
 
@@ -539,9 +514,9 @@ class BoolAttr:
 		# @@ 2001-02-04 ce: is this ANSI SQL? or at least common SQL?
 		return 'bool'
 
-	def sampleValue(self, value):
+	def sqlForNonNoneSampleInput(self, input):
 		try:
-			value = value.upper()
+			value = input.upper()
 		except:
 			pass
 		if value in ('FALSE', 'NO', '0', '0.0', 0, 0.0):
@@ -557,9 +532,9 @@ class IntAttr:
 	def sqlType(self):
 		return 'int'
 
-	def sampleValue(self, value):
-		if not isinstance(value, int):
-			value = str(value)
+	def sqlForNonNoneSampleInput(self, input):
+		if not isinstance(input, int):
+			value = str(input)
 			if value.endswith('.0'):
 				# numeric values from Excel-based models are always float
 				value = value[:-2]
@@ -573,21 +548,19 @@ class LongAttr:
 		# @@ 2000-10-18 ce: is this ANSI SQL?
 		return 'bigint'
 
-	def sampleValue(self, value):
-		long(value) # raises exception if value is invalid
-		return value
+	def sqlForNonNoneSampleInput(self, input):
+		long(input) # raises exception if value is invalid
+		return input
 
 
 class FloatAttr:
 
 	def sqlType(self):
 		return 'double precision'
-		# @@ 2001-02-04 ce: this (8,8) stuff is bad,]
-		# but haven't come up with solution yet
 
-	def sampleValue(self, value):
-		float(value) # raises exception if value is invalid
-		return value
+	def sqlForNonNoneSampleInput(self, input):
+		float(input) # raises exception if value is invalid
+		return input
 
 
 class DecimalAttr:
@@ -608,8 +581,8 @@ class DecimalAttr:
 			scale = self.get('numDecimalPlaces', 3)
 		return 'decimal(%s,%s)' % (precision, scale)
 
-	def sampleValue(self, value):
-		return value
+	def sqlForNonNoneSampleInput(self, input):
+		return input
 
 
 class StringAttr:
@@ -622,7 +595,8 @@ class StringAttr:
 		"""
 		raise AbstractError, self.__class__
 
-	def sampleValue(self, value):
+	def sqlForNonNoneSampleInput(self, input):
+		value = input
 		if value=="''":
 			value = ''
 		elif value.find('\\')!=-1:
@@ -644,33 +618,79 @@ class AnyDateTimeAttr:
 	def sqlType(self):
 		return self['Type']  # e.g., date, time and datetime
 
-	def sampleValue(self, value):
-		return repr(value)
+	def sqlForNonNoneSampleInput(self, input):
+		return repr(input)
 
 
 class ObjRefAttr:
 
 	def sqlName(self):
-		return self.name() + 'Id'
+		if self.setting('UseBigIntObjRefColumns', False):
+			return self.name() + 'Id'  # old way: one 64 bit column
+		else:
+			# new way: 2 int columns for class id and obj id
+			name = self.name()
+			classIdName, objIdName = self.setting('ObjRefSuffixes')
+			classIdName = name + classIdName
+			objIdName = name + objIdName
+			return '%s,%s' % (classIdName, objIdName)
 
-	# @@ 2001-02-04 ce: Is this standard SQL?
-	#def sqlType(self):
-	#	return 'bigint unsigned /* %s */' % self['Type']
+	def writeRealCreateSQLColumn(self, generator, out):
+		if self.setting('UseBigIntObjRefColumns', False):
+			# the old technique of having both the class id and the obj id in one 64 bit reference
+			name = self.sqlName().ljust(self.maxNameWidth())
+			if self.get('Ref', None):
+				refs = ' references %(Type)s(%(Type)sId)' % self
+			else:
+				refs = ''
+			if self.isRequired():
+				notNull = ' not null'
+			else:
+				notNull = self.sqlNullSpec()
+			out.write('\t%s %s%s%s' % (name, self.sqlType(), refs, notNull))
+		else:
+			# the new technique uses one column for each part of the obj ref: class id and obj id
+			classIdName = self.name()+self.setting('ObjRefSuffixes')[0]
+			classIdName = classIdName.ljust(self.maxNameWidth())
+			objIdName = self.name()+self.setting('ObjRefSuffixes')[1]
+			objIdName = objIdName.ljust(self.maxNameWidth())
+			if self.isRequired():
+				notNull = ' not null'
+			else:
+				notNull = self.sqlNullSpec()
+			if self.get('Ref', None):
+				objIdRef = ' references %(Type)s(%(Type)sId) ' % self
+			else:
+				objIdRef = ''
+			out.write('\t%s %s%s references _MKClassIds,\n' % (classIdName, self.sqlType(), notNull))
+			out.write('\t%s %s%s%s' % (objIdName, self.sqlType(), notNull, objIdRef))
 
-	def sampleValue(self, value):
-		""" Obj ref sample data format is "Class.serialNum", such as "Thing.3". If the Class and period are missing, then the obj ref's type is assumed. """
-		parts = value.split('.')
+	def sqlForNone(self):
+		if self.setting('UseBigIntObjRefColumns', False):
+			return 'NULL'
+		else:
+			return 'NULL,NULL'
+
+	def sqlForNonNoneSampleInput(self, input):
+		"""
+		Obj ref sample data format is "Class.serialNum", such as
+		"Thing.3". If the Class and period are missing, then the obj
+		ref's type is assumed.
+		"""
+		parts = input.split('.')
 		if len(parts)==2:
 			className = parts[0]
 			objSerialNum = parts[1]
 		else:
 			className = self.className()
-			objSerialNum = value
-		# @@ 2000-11-24 ce: check that we're pointing to a legal class
+			objSerialNum = input
 		klass = self.klass().klasses()._model.klass(className)
 		klassId = klass.id()
-		objRef = objRefJoin(klassId, objSerialNum)
-		return str(objRef)
+		if self.setting('UseBigIntObjRefColumns', False):
+			objRef = objRefJoin(klassId, objSerialNum)
+			return str(objRef)
+		else:
+			return '%s,%s' % (klassId, objSerialNum)
 
 
 class ListAttr:
@@ -681,9 +701,7 @@ class ListAttr:
 	def hasSQLColumn(self):
 		return 0
 
-	def sampleValue(self, value):
-		# @@ 2000-11-24 ce: need specific extension?
-		# @@ 2001-02-04 ce: ^^^ what does that mean???
+	def sqlForSampleInput(self, input):
 		raise Exception, 'Lists are implicit. They cannot have sample values.'
 
 
@@ -700,12 +718,12 @@ class EnumAttr:
 		maxLen = max([len(e) for e in self.enums()])
 		return 'varchar(%s)' % maxLen
 
-	def sampleValue(self, value):
+	def sqlForNonNoneSampleInput(self, input):
 		if self.setting('ExternalEnumsTableName', None):
-			return self.intValueForString(value)
+			return self.intValueForString(input)
 		else:
-			assert value in self._enums, 'value = %r, enums = %r' % (value, self._enums)
-			return repr(value)
+			assert input in self._enums, 'input=%r, enums=%r' % (input, self._enums)
+			return repr(input)
 
 	def externalEnumsTableAndColumnName(self):
 		values = {
@@ -754,5 +772,5 @@ class PrimaryKey:
 	def get(self,key,default=0):
 		return self._props.get(key,default)
 
-	def sampleValue(self,value):
-		return value
+	def sqlForNonNoneSampleInput(self, input):
+		return input

@@ -51,9 +51,6 @@ class MySQLObjectStore(SQLObjectStore):
 # Mixins
 
 class StringAttr:
-	def sqlValue(self, value):
-		""" MySQL provides a quoting function for string -- use it. """
-		if value is None:
-			return 'NULL'
-		else:
-			return "'" + MySQLdb.escape_string(value) + "'"
+	def sqlForNonNone(self, value):
+		""" MySQL provides a quoting function for string -- this method uses it. """
+		return "'" + MySQLdb.escape_string(value) + "'"
