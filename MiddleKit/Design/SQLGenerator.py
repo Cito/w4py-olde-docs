@@ -398,7 +398,8 @@ class Klass:
 		wr('create table %s (\n' % self.sqlTableName())
 		wr(self.primaryKeySQLDef(generator))
 		if generator.model().setting('DeleteBehavior', 'delete') == 'mark':
-			wr(self.deletedSQLDef(generator))
+			self.writeDeletedSQLDef(generator, out)
+			wr(',\n')
 		first = 1
 		sqlAttrs = []
 		nonSQLAttrs = []
@@ -436,13 +437,18 @@ class Klass:
 		"""
 		return '    %s int not null primary key,\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
 
-	def deletedSQLDef(self, generator):
+	def writeDeletedSQLDef(self, generator, out):
 		"""
-		Returns a one liner that becomes part of the CREATE statement
-		for creating the deleted timestamp field of the table.
+		Returns a the column definition that becomes part of the CREATE statement
+		for the deleted timestamp field of the table.
 		This is used if DeleteBehavior is set to "mark".
 		"""
-		return '    %s datetime null,\n' % ('deleted'.ljust(self.maxNameWidth()))
+		row = {'Attribute': 'deleted', 'Type': 'DateTime'}
+		# create a "DateTimeAttr", so that the correct database type is used
+		# depending on the backend database.
+		datetime = generator.model().coreClass('DateTimeAttr')(row)
+		datetime.setKlass(self)
+		datetime.writeCreateSQL(generator, out)
 
 	def maxNameWidth(self):
 		return 30   # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
