@@ -1,32 +1,34 @@
 <html>
 
+<!--
+Word wrap to this:
+123456789 123456789 123456789 123456789 123456789 123456789 123456789X
+-->
+
 <head><title>Release Procedures (Webware for Python)</title></head>
 
 <body>
 
 <pre>
+<h1>Release Procedures</h1>Webware for Python
 
-<h1>Webware for Python</h1>
-Release Procedures
-
-
-TO DO
------
+<h2>To Do</h2>
 * cvs tagging didn't work last time
-* format these docs
 * details on updating web page
 * maybe procedures on cutting "release candidates"
+* move (and expand) testing instructions to a different document,
+  probably one for Webware and then for each component.
 
 
-Final tweaking
---------------
+<h2>Final tweaking</h2>
 * Search for @@ in both source docs
+* Make sure _VERSION is updated.
+* Make sure all files are check in and workspace is up to date.
 * Skim through docs one final time
-    * Make sure all the version numbers and dates are correct.
+    * Make sure all the version numbers and release dates are correct.
 
 
-Final testing
--------------
+<h2>Final testing</h2>
 * Close all source files (to reduce the chances of making changes that
   go untested)
 * Check out a _new_ copy of the repository.
@@ -34,15 +36,15 @@ Final testing
 * Restart web client
 * Test CGI Wrapper by trying all examples
 * Test WebKit
-	* Test _admin first. Check that viewing empty logs is handled gracefully.
-	* Test the examples.
-    * When testing examples, be sure to test links at bottom of page for
-      things like viewing the source
+    * Test _admin first. Check that viewing empty logs is handled
+      gracefully.
+    * Test the examples.
+    * When testing examples, be sure to test links at bottom of page
+      for things like viewing the source
     * Run Testing/stress.py
 
 
-Pack up
--------
+<h2>Pack up</h2>
 # Must be done on UNIX (or permissions are lost)
 # For CVS tagging only:  Use _ instead of .  No .:, or other symbols
 # For example,
@@ -51,12 +53,17 @@ Pack up
 > cvs -q tag Release-CVS_VER
 > cvs co -r Release-CVS_VER Webware
 > # remove CVS/ and .cvsignore files
+> find . -name .cvsignore -exec rm {} \;
+> find . -name CVS -exec rm -rf {} \;
 > tar czvf Webware-VER.tar.gz
 
 
-Release on SourceForge
-----------------------
+<h2>Release on SourceForge</h2>
 FTP to SourceForge.net:
+
+> ncftpput -V download.sourceforge.net /incoming Webware-VER.tar.gz
+
+or the long way:
 
 > ftp download.sourceforge.net
   > user: ftp
@@ -66,53 +73,52 @@ FTP to SourceForge.net:
   > hash
   > put Webware-VER.tar.gz
 
-or:
 
-> ncftpput -V download.sourceforge.net /incoming Webware-VER.tar.gz
+Log into <a href=http://sourceforge.net>sourceforge.net</a>.
+Go to the <a href=https://sourceforge.net/project/?group_id=4866>Webware Project Page</a> @ SourceForge.
+Choose 'File Release' and proceed.
 
-
-Log into www.sourceforge.net
-Go to project page:
-    https://sourceforge.net/project/?group_id=4866
-Choose 'File Release' and proceed
-
-Reference: "Making File Releases",
-    http://sfdocs.sourceforge.net/sfdocs/display_topic.php?topicid=22
+Reference: <a href=http://sfdocs.sourceforge.net/sfdocs/display_topic.php?topicid=22>"Making File Releases"</a>
 
 
-Notify
-------
-Update the web page at http://webware.sourceforge.net
+<h2>Notify</h2>
+Update the <a href=http://webware.sourceforge.net>Webware Home Page</a>:
+    * Update version number, including links
+    * Update file size
+    * Update project status
+    * Update testimonials, if appropriate
+    * Review all text
 
-Review http://webware.sourceforge.net and make appropriate changes including
-version number, project status, etc.
-
-Add a news item to the SourceForge project page
-    https://sourceforge.net/project/?group_id=4866
+Add a news item to the <a href=https://sourceforge.net/project/?group_id=4866>Webware Project Page</a> @ SourceForge
 
 Announce on comp.lang.python
 
 Announce on mailing lists:
-	webware-announce@lists.sourceforge.net
-	python-web-modules@egroups.com
-	pywx@idyll.org
+    * webware-announce@lists.sourceforge.net
+    * python-web-modules@egroups.com
+    * pywx@idyll.org
 
-Update on http://www.vex.net/parnassus
-
-http://www.crosswinds.net/~pboddie/Python/web_modules.html
+Update:
+    * <a href=http://www.vex.net/parnassus>Vaults of Parnassus</a>
+    * <a href=http://www.crosswinds.net/~pboddie/Python/web_modules.html>Python Web Modules</a>
+    * <a href=http://freshmeat.net>freshmeat.net</a>
 
 Review/search for other places where the announcement can be made.
 
 
-Post
-----
-Check that Parnassus and Web Modules were updated.
+<h2>Post-release</h2>
+Check that the following were updated:
+    * <a href=http://www.vex.net/parnassus>Vaults of Parnassus</a>
+    * <a href=http://www.crosswinds.net/~pboddie/Python/web_modules.html>Python Web Modules</a>
+    * <a href=http://freshmeat.net>freshmeat.net</a>
 
 Look for follow up messages on comp.lang.python
 
 Test drive the home page, project page and download.
 
-Check the download counter on SourceForge.
+Check the <a href=https://sourceforge.net/project/showfiles.php?group_id=4866>download counter</a> on SourceForge here.
+
+Update these Release Procedures.
 
 </pre>
 
