@@ -50,6 +50,7 @@ class ExamplePage(SidebarPage):
 			'View source of %s' % self.title(),
 			self.request().uriWebKitRoot() + 'Examples/View?filename=%s' % self.request().serverSidePath())
 
-		filename = 'Documentation/WebKit.html'
-		if os.path.exists(filename):
-			self.menuItem('Local WebKit docs', filename)
+		if self.application().hasContext('Documentation'):
+			filename = 'Documentation/WebKit.html'
+			if os.path.exists(filename):
+				self.menuItem('Local WebKit docs', self.request().adapterName() + '/' + filename)
