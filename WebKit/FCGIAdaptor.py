@@ -42,7 +42,7 @@ And then using, in your URLs, 'WebKit.fcgi' which is a link to this file. e.g.,:
 
 	http://localhost/Webware/WebKit/WebKit.fcgi/Introspect
 
-	
+
 
 FUTURE
 
@@ -85,12 +85,26 @@ WebKitDir = ''
 _AddressFile='address.text'
 
 
+HTMLCodes = [
+	['&', '&amp;'],
+	['<', '&lt;'],
+	['>', '&gt;'],
+	['"', '&quot;'],
+]
+
+def HTMLEncode(s, codes=HTMLCodes):
+	''' Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdaptor independent of everything but standard Python.) '''
+	for code in codes:
+		s = string.replace(s, code[0], code[1])
+	return s
+
+
 def FCGICallback(fcg,env,form):
 	"""This function is called whenever a request comes in"""
 	import os, string, sys
 
 	try:
-				
+
 		dict = {
 			'format':  'CGI',
 			'time':    timestamp,
@@ -103,35 +117,43 @@ def FCGICallback(fcg,env,form):
 		port = int(port)
 
 		bufsize = 32*1024
-		
+
 		s = socket(AF_INET, SOCK_STREAM)
 		s.connect(host, port)
 		s.send(dumps(dict))
 		s.shutdown(1)
-		stdout = fcg.req.out
+
+		# read the raw reponse (which is a marshalled dictionary)
+		response = ''
 		while 1:
-			data = s.recv(bufsize)
-			if not data:
+			chunk = s.recv(bufsize)
+			if not chunk:
 				break
-			stdout.write(data)
-		stdout.flush()
+			response = response + chunk
+		response = loads(response)  # decode it
+
+		# deliver it!
+		write = fcg.req.write
+		for pair in response['headers']:
+			write('%s: %s\n' % pair)
+		write('\n')
+		write(response['contents'])
+		fcg.req.flush()
 
 	except:
 		import traceback
-		
+
 		# Log the problem to stderr
 		stderr = fcg.req.err
 		stderr.write('[%s] [error] WebKitFCGIAdaptor: Error while responding to request (unknown)\n' % (
 			time.asctime(time.localtime(time.time()))))
 		stderr.write('Python exception:\n')
 		traceback.print_exc(file=stderr)
-		
+
 		# Report the problem to the browser
 		output = apply(traceback.format_exception, sys.exc_info())
 		output = string.join(output, '')
-		output = string.replace(output, '&', '&amp;')
-		output = string.replace(output, '<', '&lt;')
-		output = string.replace(output, '>', '&gt;')
+		output = HTMLEncode(output)
 		fcg.pr('''Content-type: text/html
 
 <html><body>
