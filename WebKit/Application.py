@@ -441,7 +441,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		else:
 			res.write('''<html> <head> <title>Session expired</title> </head>
 				<body> <h1>Session Expired</h1>
-				<p> Your session has expired and all information related to your previous working session with this site has been cleared. <p> You may try this URL again by choosing Refresh/Reload, or revisit the front page. ''')
+				<p> Your session has expired and all information related to your previous working session with this site has been cleared. <p> You may try this URL again by choosing Refresh/Reload, or revisit the front page.
+				</body>
+				</html>
+				''')
 			# @@ 2000-08-10 ce: This is a little cheesy. We could load a template...
 
 	def handleGoodURL(self, transaction):
