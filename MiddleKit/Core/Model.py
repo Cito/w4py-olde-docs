@@ -78,6 +78,8 @@ class Model(Configurable):
 			self.readKlasses()
 			self.awakeFromRead()
 		except ModelError, e:
+			print
+			print 'Error while reading model:'
 			e.printError(filename)
 			sys.exit(1)
 
