@@ -52,7 +52,7 @@ class ApplicationError(Exception):
 
 
 class Application(Configurable,CanContainer):
-	'''
+	"""
 	FUTURE
 		* 2000-04-09 ce: Actions: URLs that are bound to specific methods of a servlet
 			  - These could be powerful, because they could send the request back to the
@@ -77,7 +77,7 @@ class Application(Configurable,CanContainer):
 		* 2000-04-09 ce: Does request handling need to be embodied in a separate object?
 			  - Probably, as we may want request handlers for various file types.
 		* 2000-04-09 ce: Concurrent request handling (probably through multi-threading)
-	'''
+	"""
 
 	## Init ##
 
@@ -125,7 +125,7 @@ class Application(Configurable,CanContainer):
 		self._serverSidePathCacheByPath = {}
 		self._serverDir = os.getcwd()
 		self._cacheDictLock = Lock()
-		self._instanceCacheSize=self.setting('InstanceCacheSize')
+		self._instanceCacheSize=self._server.setting('ServerThreads') #CHANGED 6/21/00
 
 		if Contexts: #Try to get this from the Config file
 			self._Contexts = Contexts
@@ -150,35 +150,51 @@ class Application(Configurable,CanContainer):
 		#JSL
 
 		#JSL
+		self.running = 1
 		if useSessionSweeper:
 			self._startSessionSweeper()
+
 
 	def _startSessionSweeper(self):
 		self._sessSweepThread=Thread(None, self.Sweeper, 'SessionSweeper', (self._sessions,self.setting('SessionTimeout')))
 		self._sessSweepThread.start()
 
 	def Sweeper(self,sessions,timeout): #JSL, moved this here so I can control it better, later
-		"""This function runs in a separate thread and clenas out stale sessions periodically.
-		It probably doesn't belong in this file.  Also, should I lock the sessions dictionary before
-		deleting from it? Or is the session() function atomic enough?"""
+		"""
+		This function runs in a separate thread and cleans out stale sessions periodically.
+		"""
 		import sys
+		count = 0
+		frequency = 30 #how often to run *2
+		
 		while 1:
-
-			currtime=time.time()
-			keys=sessions.keys()
-			#print ">> Cleaning up to",len(keys)," stale sessions"
-			for i in keys:
-				if (currtime - sessions[i].lastAccessTime()) > timeout:
-					del sessions[i]
-			time.sleep(30)#sleep for 30 seconds, should probably be 60 in production use
+			if not self.running:
+				break #time to quit
+			count = count+1
+			if count > frequency:
+				currtime=time.time()
+				keys=sessions.keys()
+				for i in keys:
+					if (currtime - sessions[i].lastAccessTime()) > timeout:
+						del sessions[i]
+				count = 0
+			try:
+				time.sleep(2)#sleep for 2 secs, then check to see if its time to quit or run
+			except IOError, e:
+				pass
+				
 
 	def shutDown(self):
-		""" Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due
-		to circular references."""
+		""" Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references."""
 		del self._canFactory
 		del self._sessions
 		self._delCans()
+		self.running = 0
+		#self._sessSweepThread.join()
 		print "Exiting Application"
+
+##	def __del__(self):
+##		print "Application deleted"
 
 
 
@@ -211,7 +227,6 @@ class Application(Configurable,CanContainer):
 							            'Examples': 'Examples',
 			                          },
 			'SessionTimeout':         60*60, # seconds
-			'InstanceCacheSize':      10,
 		}
 
 	def configFilename(self):
@@ -224,7 +239,9 @@ class Application(Configurable,CanContainer):
 		return '0.3'
 
 	def version(self):
-		''' Returns the version of the application. This implementation returns '0.1'. Subclasses should override to return the correct version number. '''
+		"""
+		Returns the version of the application. This implementation returns '0.1'. Subclasses should override to return the correct version number.
+		"""
 		## @@ 2000-05-01 ce: Maybe this could be a setting 'AppVersion'
 		return '0.1'
 
@@ -236,7 +253,9 @@ class Application(Configurable,CanContainer):
 
 
 	def dispatchRequest(self, newRequest):
-		''' Creates the transaction, session, response and servlet for the new request which is then dispatched. The transaction is returned. '''
+		"""
+		Creates the transaction, session, response and servlet for the new request which is then dispatched. The transaction is returned.
+		"""
 		transaction = None
 		try:
 			request     = newRequest
@@ -256,15 +275,13 @@ class Application(Configurable,CanContainer):
 				transaction.setErrorOccurred(1)
 			self.handleExceptionInTransaction(sys.exc_info(), transaction)
  			transaction.response().deliver(transaction) # I hope this doesn't throw an exception. :-)   @@ 2000-05-09 ce: provide a secondary exception handling mechanism
+			pass
 
 		if self.setting('LogActivity'):
 			self.writeActivityLog(transaction)
 
-		#JSL
 		path = transaction._request.serverSidePath()
-
 		self.returnInstance(transaction,path)
-		#JSL
 
 		#possible circular reference, so delete it
 		transaction._request._transaction=None
@@ -369,7 +386,9 @@ class Application(Configurable,CanContainer):
 	## Activity Log ##
 
 	def writeActivityLog(self, transaction):
-		''' Writes an entry to the script log file. Uses settings ActivityLogFilename and ActivityLogColumns. '''
+		"""
+		Writes an entry to the script log file. Uses settings ActivityLogFilename and ActivityLogColumns.
+		"""
 		filename = os.path.join(self._serverDir, self.setting('ActivityLogFilename'))
 		if os.path.exists(filename):
 			file = open(filename, 'a')
@@ -407,7 +426,9 @@ class Application(Configurable,CanContainer):
 	## Utilities/Hooks ##
 
 	def serverDir(self):
-		''' Returns the directory where the application server is located. '''
+		"""
+		Returns the directory where the application server is located.
+		"""
 		return self._serverDir
 
 	def createRequestForDict(self, newRequestDict):
@@ -499,8 +520,6 @@ class Application(Configurable,CanContainer):
 		if not dir in sys.path:
 			sys.path.insert(0, dir)
 		inst = factory.servletForTransaction(transaction)
-		#print ">> servlet refcnt after creation=", sys.getrefcount(inst)
-		#print ">> trans refcnt after creation=", sys.getrefcount(transaction)
 		assert inst is not None, 'Factory (%s) failed to create a servlet upon request.' % factory.name()
 
 		if cache:
@@ -513,11 +532,13 @@ class Application(Configurable,CanContainer):
 		cache = self._servletCacheByPath.get(path, None)
 		if cache['reuseable'] and not cache['threadsafe']:
 			try:
-				cache['instances'].put_nowait(transaction.servlet())
+				cache['instances'].put(transaction.servlet())
+				#cache['instances'].put_nowait(transaction.servlet())
+				#print "returned Instance"
 				return
-			except Queue.Full:
+			except Queue.Full: #full or blocked
 				pass
-				#print '>> queue full' #do nothing, don't want to block queue for this
+				print '>> queue full for:',cache['path'] #do nothing, don't want to block queue for this
 
 ##		print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
 
@@ -526,9 +547,9 @@ class Application(Configurable,CanContainer):
 	def newServletCacheItem(self,key,item):
 		""" Safely add new item to the main cache.  Not woried about the retrieval for now.
 		I'm not even sure this is necessary, as it's a one bytecode op, but it doesn't cost much of anything speed wise."""
-		self._cacheDictLock.acquire()
+		#self._cacheDictLock.acquire()
 		self._servletCacheByPath[key]=item
-		self._cacheDictLock.release()
+		#self._cacheDictLock.release()
 
 
 	def createServletInTransaction(self, transaction):
@@ -543,15 +564,22 @@ class Application(Configurable,CanContainer):
 
 		# File is not newer?
 		if cache and self._servletCacheByPath[path]['timestamp']<os.path.getmtime(path):
-			cache = None
+			try:
+				while cache['instances'].qsize > 0: #don't leave instances out there, right?
+					cache['instances'].get_nowait()
+				cache = None
+			except Queue.Empty:
+				pass
 
 		if not cache:
 			cache = {
-				'instances':  Queue.Queue(self._instanceCacheSize),
+				'instances':  Queue.Queue(self._instanceCacheSize+1), # +1 is for safety
 				'path':       path,
 				'timestamp':  os.path.getmtime(path),
 				'threadsafe': 0,
 				'reuseable':  0,
+				'created':1,
+				'lock': Lock(),#used for the created count
 				}
 
 			self.newServletCacheItem(path,cache)
@@ -572,12 +600,15 @@ class Application(Configurable,CanContainer):
 ##			print '>> Queue size:', cache['instances'].qsize()
 			try:
 				inst = cache['instances'].get_nowait()
-			except Queue.Empty:
-##				print ">> Instance cache queue is empty"
-				if not cache['instances'].empty:
-					inst = cache['instances'].get() # block, it's really there
-				else:
+			except Queue.Empty: #happens if empty or blocked
+				cache['lock'].acquire()
+				if cache['created'] < self._instanceCacheSize:
 					inst = self.getServlet(transaction, path) # really need to create a new one
+					cache['created'] = cache['created']+1
+				else:
+					inst = cache['instances'].get() # block, it's really there
+				cache['lock'].release()
+
 
 		# Must be reuseable and threadsafe, get it and put it right back, I'm assuming this will be a rare case
 		else:
@@ -604,7 +635,7 @@ class Application(Configurable,CanContainer):
 			while strippedPath != '' and ssPath == None:
 				strippedPath,extra=os.path.split(strippedPath)
 				ssPath = self._serverSidePathCacheByPath.get(strippedPath, None)
-				if extraPathInfo != '': #avoid a trailing os.sep
+				if extraPathInfo != '': #avoid a trailing /
 					extraPathInfo=os.path.join(extra,extraPathInfo)
 				else: extraPathInfo=extra
 				
@@ -618,9 +649,10 @@ class Application(Configurable,CanContainer):
 			if urlPath[0]=='_':  # special administration scripts are denoted by a preceding underscore and are located with the app server. @@ 2000-05-19 ce: redesign this
 				ssPath = os.path.join(self.serverDir(), urlPath)
 			else:
+				restOfPath=''
 				#handle case of no /
-				if string.find(urlPath,os.sep) > -1: 
-					contextName,restOfPath = string.split(urlPath,os.sep,1) #is this OS specific????
+				if string.find(urlPath,'/') > -1: 
+					contextName,restOfPath = string.split(urlPath,'/',1)
 				else:
 					contextName = urlPath
 
@@ -675,13 +707,17 @@ class Application(Configurable,CanContainer):
 
 
 def main(requestDict):
-	''' Returns a raw reponse. This method is mostly used by OneShotAdaptor.py. '''
+	"""
+	Returns a raw reponse. This method is mostly used by OneShotAdaptor.py.
+	"""
 	from WebUtils.HTMLForException import HTMLForException
 	try:
+		fauxserver = Configurable()
+		fauxserver.settings['ServerThreads']=1
 		assert type(requestDict) is type({})
 		from HTTPRequest import HTTPRequest
 		request = HTTPRequest(requestDict)
-		app = Application(useSessionSweeper=0)
+		app = Application(useSessionSweeper=0,server=fauxserver)
 		return app.dispatchRequest(request).response().rawResponse()
 	except:
 		return {

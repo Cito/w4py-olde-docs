@@ -25,5 +25,4 @@
 							   'Documentation':'Documentation',
 							  },
 	'SessionTimeout':         60*60, # seconds
-	'InstanceCacheSize':      10,
 }

@@ -2,6 +2,6 @@
 	'PrintConfigAtStartUp': 1,
 	'Verbose':              1,
 	'Port':                 8086,
-	'Multitasking':         'threading', # threading, forking, sequencing
 	'PlugIns':              ['../PSP'],
+    'ServerThreads':        10,
 }
