@@ -18,6 +18,8 @@ from WebKit.Cookie import Cookie
 
 from WebUtils.HTMLForException import HTMLForException
 
+from ExceptionHandler import ExceptionHandler  
+
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 
 from TaskKit.Scheduler import Scheduler
@@ -1053,7 +1055,6 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	def handleExceptionInTransaction(self, excInfo, transaction):
 		if self._exceptionHandlerClass is None:
-			from ExceptionHandler import ExceptionHandler  # import ExceptionHandler only when we need to
 			self._exceptionHandlerClass = ExceptionHandler
 		self._exceptionHandlerClass(self, transaction, excInfo)
 
@@ -1066,7 +1067,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		if excInfo is None:
 			excInfo = sys.exc_info()
 		if self._exceptionHandlerClass is None:
-			from ExceptionHandler import ExceptionHandler  # import ExceptionHandler only when we need to
 			self._exceptionHandlerClass = ExceptionHandler
 		self._exceptionHandlerClass(self, None, excInfo)
 
