@@ -29,8 +29,16 @@ def InstallInWebKit(appServer):
 				# This must be called at the beginning of any thread that uses COM
 				import pythoncom
 				pythoncom.CoInitializeEx(pythoncom.COINIT_MULTITHREADED)
+				
+				# Invoke superclass's initThread.  This enables multiple plug-ins
+				# to each have their own initThread get called.
+				self.__class__.__bases__[0].initThread(self)
 
 			def delThread(self):
+				# Invoke superclass's delThread.  This enables multiple plug-ins
+				# to each have their own delThread get called.
+				self.__class__.__bases__[0].delThread(self)
+
 				# This must be called at the end of any thread that uses COM
 				import pythoncom
 				pythoncom.CoUninitialize()
