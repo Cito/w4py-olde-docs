@@ -44,7 +44,7 @@ class FileUpload(ExamplePage):
 		""" % (Funcs.htmlEncode(self.__doc__)))
 
 
-	def fileupload(self):
+	def fileupload(self, trans):
 
 		f = self.request().field('filename')
 
@@ -68,5 +68,5 @@ class FileUpload(ExamplePage):
 
 	def title(self):
 		return "File Upload Example"
-				   
+
 
