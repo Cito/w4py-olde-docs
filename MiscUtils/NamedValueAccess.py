@@ -482,25 +482,30 @@ def valueForKey(obj, key, default=NoDefault):
 		else:
 			return obj.get(key, default)
 	else:
+
 		try:
-			klass    = obj.__class__
+			klass = obj.__class__
 		except AttributeError:
-			raise AttributeError, '__class__ obj type=%r, obj=%r' % (type(obj), obj)
-		method   = getattr(klass, key, None)
+			# happens for classes themselves
+			klass = None
+			method = None
+		else:
+			method   = getattr(klass, key, None)
 		if not method:
 			underKey = '_' + key
-			method = getattr(klass, underKey, None)
+			method = klass and getattr(klass, underKey, None) or None
 			if not method:
 				attr = getattr(obj, key, NoDefault)
 				if attr is NoDefault:
 					attr = getattr(obj, underKey, NoDefault)
 					if attr is NoDefault:
-						getitem = getattr(obj.__class__, '__getitem__', None)
-						if getitem:
-							try:
-								value = getitem(obj, key)
-							except KeyError:
-								unknown = 1
+						if klass is not None:
+							getitem = getattr(klass, '__getitem__', None)
+							if getitem:
+								try:
+									value = getitem(obj, key)
+								except KeyError:
+									unknown = 1
 
 #	if value is not NoDefault:
 #		return value
@@ -531,7 +536,6 @@ def valueForName(obj, name, default=NoDefault):
 
 	Example: valueForName(obj, 'department.manager.salary')
 	"""
-
 	names = string.split(name, '.')
 	for name in names:
 		obj = valueForKey(obj, name, default)
