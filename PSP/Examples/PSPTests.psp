@@ -6,15 +6,18 @@
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="tabs" %>
 
-
-
 <HTML>
 <BODY bgcolor='white'>
+
+
+<BASE HREF="http://<%= req.serverURLDir()%>">
+
+
 <p align = center><img src="psplogo.png"><%-- This image is served by WebKit --%>
 <h1 align=center><font color='blue'  face='helvetica'>Hello from PSP!</font></h1><br><br>
 
 
-<table><tr><td></td><td width="90%">
+<table width="100%"><tr width="90%"><td></td><td width="90%">
 <center><h2>This is the sample/test page for an implementation of Python Server Pages.</h2></center>
 
 
@@ -68,15 +71,27 @@ self.write(i)%>&nbsp;
 %>
 </table>
 <hr>
-<p><b>Path Info: <%=req.pathInfo()%></b>
+<p>Path Info: <%=req.pathInfo()%>
+<p>extraPathInfo: <%=req.extraPathInfo()%>
+<p>Fields: <%= req.fields() %>
+<p>servletURI = <%= req.servletURI()%>
+<p>uriWebKitRoot = <%= req.uriWebKitRoot() %>
+<p>serverURL = <%= req.serverURL() %>
+<p>serverURLDir = <%= req.serverURLDir() %>
+
 <hr>
 <p><b>Environment Variables</b>
+
 <p><table>
 <%
 for i in os.environ.keys():
-	res.write("<tr><td><font color='red'>"+str(i)+'</font></td><td><font color="blue">'+os.environ[i]+'</font></td></tr>')
+	if len(os.environ[i]) > 100:
+		res.write("<tr><td><font color='red'>"+str(i)+'</font></td><td><font color="blue">'+os.environ[i][:100]+'</font></td></tr>')
+	else:
+		res.write("<tr><td><font color='red'>"+str(i)+'</font></td><td><font color="blue">'+os.environ[i]+'</font></td></tr>')
 %>
 </table>
+
 <hr>
 
 
