@@ -1,0 +1,44 @@
+<html>
+
+<head>
+	<title>Chuck's PSP Test</title>
+</head>
+
+
+<body text=black bgcolor=white>
+
+<p> Hi, there!
+
+<%
+from time import localtime, asctime, time
+%>
+
+<p> <%= asctime(localtime(time())) %>
+
+<p> <%= locals().keys() %>
+
+<%for i in range(5):
+	self.write('<br>', i, '\n')
+	for j in range(5):
+		self.write(j, ' ') %>
+<%pass%>
+
+<p><hr>
+
+<%for i in range(5):
+	self.write('<br>', i, '\n')
+	for j in range(5):
+		self.write(j, ' ') %>
+		-
+	<%pass%>
+	X
+<%pass%>
+
+<p> <b>Notes</b>
+	<ul>
+	<li> Locals have req, res and trans. I'd also like to have sess.
+	</ul>
+
+</body>
+
+</html>

@@ -1,0 +1,171 @@
+<html>
+
+<head>
+	<link rel=STYLESHEET href="../../Documentation/StyleSheet.css" type="text/css">
+	<title>WebKit (Webware for Python)</title>
+</head>
+
+<body>
+
+<h1>WebKit</h1>
+
+<a name=Done><h3>Done</h3></a>
+
+<ul>
+	<li> Version 0.3 ALPHA
+		<ul>
+		<li> 2000-05-21 ce
+			<ul>
+			<li> Incorporated JSL's UnknownFileTypeServletFactory. Not working, may be due to invalid changes on my part.
+			<li> Implemented plug-ins. Made PSP a plug-in.
+			<li> Improved stress.py including an improv from JSL.
+			<li> Copied and tested JSL's concurrency and instance pooling code.
+			</ul>
+		<li> 2000-05-20 ce
+			<ul>
+			<li> Partially fixed memory leaks. Transaction.died(), also invoke KeyValueAccess.resetKeyBindings()
+			<li> Wrote a stress test program.
+			<li> The extension for a URL is picked up automatically now.
+			<li> Application.createServletForTransaction(): Move cache logic in to top of method per JSL's suggestion.
+			<li> Rename target feature to 'action'.
+			</ul>
+		<li> 2000-05-19 ce
+			<ul>
+			<li> HTTPRequest: serverSideDir(): extension of file is picked up automatically (Yay!)
+			<li> Application.createServletForTransaction(): moved factory retrieval down so that it's only done when needed (Jay Love caught this.)
+			<li> Page: renamed 'target' feature to 'action'
+			<hr>
+			<li> Added HTTPResponse hasHeader() and hasCookie().
+			<li> Removed all use of crappy 'self.super' technique which doesn't work when you have subclasses.
+			<li> Fixed a bug in HTTPRequest where it could handle multiple form fields of the same name (e.g., "x=1&x=2&x=3" should result in x=[1, 2, 3])
+			<li> Page: Finished the 'target' feature. Made a ListBox example that uses it.
+			<li> Added Session.hasValue().
+			</ul>
+		<li> 2000-05-18 ce
+			<ul>
+			<li> Started on targets for servlets (via form submissions).
+			<li> Added str() call to response.write() so that strings can be written with ease. Maybe it should also take multiple args.
+			</ul>
+		</ul>
+	<li> Version 0.2
+		<ul>
+		<li> 2000-05-11 ce
+			<ul>
+			<li> Changed Hello example to more informative Welcome example. Changed ExamplePage to fix the list and order of examples.
+			<li> Removed 'transaction' parameter of Page.writeBody(). Not needed since awake() sets self._transaction.
+			<li> Docs: All kinds of stuff for 0.2.
+			<li> Fixed bug in HTTPRequest.sessionId() reported by Jay Love.
+			</ul>
+		<li> 2000-05-10 ce
+			<ul>
+			<li> Started playing with py2html.py for documentation purposes.
+			<li> API changes: Servlet.__init__() and ServletFactory.servletForTransaction() no longer take a path. Added HTTPRequest serverSidePath(), serverSideDir(), relativePath().
+			<li> Wrote a session example.
+			<li> Fixed more bugs with cookies.
+			<li> Revamped all the methods with "default=None" to be "default=Tombstone" (such as value(), cookie(), header(), etc.). You now get an exception if you ask for a value and don't provide a default value, as was the original intent.
+			</ul>
+		<li> 2000-05-09 ce
+			<ul>
+			<li> Fixed some bugs in Cookie.py that came out during Session work. Still needs shakeout.
+			<li> Worked on Sessions. Needs shakeout.
+			<li> Made ExceptionHandler a little more robust.
+			<li> Simplified Application.dispatchRequest().
+			<li> Added Session hasValue().
+			<li> Fixed ExamplePage and View in light of the recent chdir() removal.
+			<li> Added Servlet dir() and relativePath().
+			</ul>
+		<li> 2000-05-08 ce
+			<ul>
+			<li> Started on Application's chdir() removal. Renamed homeDir() to serverDir().
+			<li> Switched from a repr()/eval() scheme for communicating raw requests to the app server to a marshal scheme which is much faster. See WebKit/Research/TestTransports.py.
+			<li> Incorporated Jay Love's FastCGIAdaptor. Made a few tweaks described in file.
+			<li> Added ServletsDir setting to replace basePath() function.
+			<li> Worked on a default servlet to redirect files through the web server. Still working on it.
+			</ul>
+		<li> 2000-05-07 ce
+			<ul>
+			<li> Servlet __init__() now takes the path from whence it came. ServletFactory.createServletForTransaction() consequently requires this.
+			<li> Activity logging. The columns now hit a dictionary of objects instead of the application. Added HTTPResponse.size(). Got all the columns I wanted working.
+			<li> Changed Object to inherit KeyValueAccess instead of just Application.
+			</ul>
+		<li> 2000-05-03 ce
+			<ul>
+			<li> Commented out some of AppServer's unimplemented settings in its default config.
+			<li> Incorporated CSV in _dumpCSV but have a question about how to append to a file. It doesn't look like CSV will escape quotes. See CSVQuestions.text
+			<li> Fixed a bug in HTTPRequest.__init__() when initializing cookies.
+			<li> Changed all respond() methods to no longer include 'response' as an argument. Everything can be gotten from the transaction.
+			<li> Renamed Context to Transaction, which is a more accurate name.
+			<li> Created classes ServletFactory, PythonServletFactory and PSPServletFactory and reworked Application.createServletInContext() accordingly.
+			<li> Picked up Tim O'Malley's Cookie.py 2.25 with the new Python license.
+			</ul>
+		<li> 2000-05-02 ce
+			<ul>
+			<li> Created an exception handler in WebKit.cgi so that when the adaptor has problems, the exception information goes to stderr and as simple HTML to stdout.
+			<li> Created a Cookie class for use in HTTPResponse. Cleaned up cookie code and methods in HTTPResponse.
+			<li> HTTPRequest: Cookies are now simple string values just like fields. Also, the 'default' parameter for field() and cookie() now works.
+			<li> Moves the logs into Logs/ and the configs into Configs/. This makes for less directory clutter.
+			</ul>
+		<li> 2000-05-01 ce
+			<ul>
+			<li> Got my hands on CSV and created MiscUtils/ and Distributions/. Have not incorprated this yet. (It's for the error logs).
+			<li> Responses are no longer delivered through stdout, but through a string returned by contents(). That means that print statements show up in the console and can be used for debugging.
+			<li> Implemented _dumpErrors.
+			<li> Implemented _dumpCSV which provides the "View Activity Page".
+			<li> Created Config page.
+			<li> Created Admin page (_admin). Servlets that start with _ are considered to reside with the app server.
+			<li> Got rid of .value requirement for fields. fields() now returns a dictionary.
+			<li> Basically finished exception handling. This includes logging the error, displaying a public error message, saving a private error message and possibly e-mailing that private error message.
+			</ul>
+		<li> 2000-04-30 ce
+			<ul>
+			<li> Worked on exception handling.
+			</ul>
+		<li> 2000-04-27 ce
+			<ul>
+			<li> HTTPReponse: Killed the context, session and environ args for __init__. Init self._cookies to Cookie() instead of {}. deliver() now prints the cookies. reset() implemented.
+			<li> HTTPRequest: Killed "Headers" section of methods; requests don't have headers. Killed input() and append(); not currently needed/appropriate.
+			<li> Implemented writeActivityLog(). Haven't worked out what accessors are needed to useful configure the columns that get written.
+			<li> Made Application inherit KeyValueAccess.
+			<li> Created Configurable class which is base for AppServer and Application. Added config stuff for Application for the first time.
+			<li> Session ids.
+			</ul>
+		<li> 2000-04-26 ce
+			<ul>
+			<li> Created View example and added link for viewing code at the bottom of example pages.
+			<li> Spruced up ExamplePage.
+			<li> Bug: There is a funky, sporadic newline bug as exhibited by the Colors example. Fix: The CGI Adaptor was "print"ing the chunks of output it received rather than "write"ing them. Hence, the extra newline.
+			<li> Some documentation cleanup.
+			<li> Cache servlet instances rather than just their classes. Can be overridden by implementing canBeReused() to return 0.
+			<li> The app server now writes its host name and port to <i>address.text</i> which is automatically picked up by the CGI adaptor.
+			<li> Removed WebKitCGIAdaptor.py which was a "non-resident" kind of scheme. New version is CGIAdapator.py which passes the request to a stay-resident application server.
+			<li> Implemented the "Port" setting.
+			<li> Created class Page. A convenient subclass of HTTPServlet.
+			<li> Added field(), hasField() and fields() to HTTPRequest.
+			<li> Created Colors example.
+			<li> If a Servlet's file is updated, the Servlet gets reloaded by the Application. This substantially reduces the need to restart the server. However, this does not handle changes to the Application or changes to the Servlet's ancestor classes.
+			</ul>
+		</ul>
+
+		<ul>
+		<li> 2000-04-25 ce
+			<ul>
+			<li> The directory is now changed to the directory of the servlet the first time it's script is executed and whenever the class is used.
+			<li> Worked on examples.
+			<li> Some class re-organzation. Component and HTTPComponent became Servlet and HTTPServlet. New class Component was created.
+			<li> Added support for config setting 'Multitasking' which can be threading, forking, or sequencing. Forking is slower than the other two. Threading servers multiple users better. Threading is the default.
+			<li> AppServer: Add support for config files. Created configuration methods such as config(), setting(), printConfig().
+			<li> Spruced up the start up message.
+			<li> Created root class Object for the entire kit.
+			</ul>
+		</ul>
+	<li> Version 0.1  4/19/2000
+		<ul>
+		<li> The first version.
+		</ul>
+</ul>
+
+
+<p><hr>
+
+</body>
+</html>

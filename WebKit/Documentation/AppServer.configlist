@@ -1,0 +1,9 @@
+[
+('PrintConfigAtStartUp', '1', "Does pretty much what it says. It's generally a good idea to leave this on."),
+
+('Verbose', '1', "If true, then additional messages are printed while the AppServer runs, most notably information about each request such as size and response time."),
+
+('Port', '8086', "The port that the application server runs on. Change this if there is a conflict with another application on your server."),
+
+('Multitasking', 'threading', "Determines if and how the application server will multitask requests. Must be one of: threading, forking, sequencing."),
+]
