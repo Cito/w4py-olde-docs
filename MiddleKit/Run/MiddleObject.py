@@ -139,6 +139,13 @@ class MiddleObject(object, NamedValueAccess):
 	def isInStore(self):
 		return self._mk_inStore
 
+	def isNew(self):
+		"""
+		Returns true if the object was newly created (whether added to the store or not). Objects
+		fetched from the database will return false.
+		"""
+		return self._mk_serialNum<1
+
 
 	## Keys ##
 
@@ -316,13 +323,21 @@ class MiddleObject(object, NamedValueAccess):
 		the test suites use this instead of directly invoking the "get"
 		methods.
 
-		If the attribute is not found, the default argument is returned
+		If the attribute is not found, this method will look for any
+		Python attribute or method that matches.
+
+		If a value is still not found, the default argument is returned
 		if specified, otherwise LookupError is raised with the attrName.
 		"""
 		attr = self.klass().lookupAttr(attrName, None)
 		if attr:
 			return self.valueForAttr(attr, default)
 		else:
+			value = getattr(self, attrName, NoDefault)
+			if value is not NoDefault:
+				if callable(value):
+					value = value()
+				return value
 			if default is NoDefault:
 				raise LookupError, attrName
 			else:
