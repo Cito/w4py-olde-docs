@@ -33,6 +33,7 @@ TO DO
 	[ ] Consider making roles case insensitive.
 
 	[ ] For that matter, should user names be case insensitive?
+		- If so, provide for an option to be case sensitive. Some users want that, especially if they are porting an existing app.
 
 	[ ] UserManagerToFile
 		[ ] Iterating through all users means pulling them all into memory (until the inactive user timeout pushes them out)
