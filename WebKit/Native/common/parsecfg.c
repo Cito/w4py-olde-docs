@@ -20,7 +20,7 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* $Id: parsecfg.c,v 1.1 2001/06/03 23:11:34 jslove Exp $ */
+/* $Id: parsecfg.c,v 1.2 2001/10/11 21:10:38 gtalvola Exp $ */
 
 #ifdef HAVE_CONFIG_H
 #  include "config.h"
@@ -329,7 +329,7 @@ static void cfgFatalFunc(cfgErrorCode error_code, const char *file, int line, co
 {
 	switch (error_code) {
 	case CFG_OPEN_FAIL:
-		fprintf(stderr, _("Cannot open configuration file `%s'.\n"), file);
+		/* fprintf(stderr, _("Cannot open configuration file `%s'.\n"), file); */
 		break;
 	case CFG_CREATE_FAIL:
 		fprintf(stderr, _("Cannot create configuration file `%s'.\n"), file);

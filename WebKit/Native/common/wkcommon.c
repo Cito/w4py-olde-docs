@@ -258,10 +258,10 @@ Configuration* GetConfiguration(Configuration* config, char* configFile) {
 
    	rv = cfgParse(configFile, cfg, CFG_SIMPLE);
 
-	log_message(stderr,"Got config");
+	log_message("Got config");
 
 	if(rv == -1) {
-	  fprintf(stderr,"Whoops, Couldn't get config info");
+	  log_message("Whoops, Couldn't get config info");
 	}
 
 //	fprintf(stderr, "Host: %s\n",config->host);
