@@ -143,18 +143,26 @@ class ObjectStore(ModelUser):
 		"""
 		# First check if the delete is possible.  Then do the actual delete.  This avoids partially deleting
 		# objects only to have an exception halt the process in the middle.
+
 		objectsToDel = {}
 		detaches = []
-		self._deleteObject(object, objectsToDel, detaches)
+		self._deleteObject(object, objectsToDel, detaches)  # compute objectsToDel and detaches
 		self.willChange()
+
+		# detaches
+		for obj, attr in detaches:
+			if not objectsToDel.has_key(id(obj)):
+				setattr(obj, '_'+attr.name(), None)
+				# Can't use setValueForAttr() because that invokes the setter method which will raise an exception if the attribute is required.
+				#obj.setValueForAttr(attr, None)
+
+		# deleted objects
 		objectsToDel = objectsToDel.values()
 		self._deletedObjects.extend(objectsToDel)
+
+		# remove deleted objects from main list of objects
 		for obj in objectsToDel:
 			del self._objects[obj.key()]
-		for obj, attr in detaches:
-			setattr(obj, '_'+attr.name(), None)
-			# Can't use setValueForAttr() because that invokes the setter method which will raise an exception if the attribute is required.
-			#obj.setValueForAttr(attr, None)
 
 	def _deleteObject(self, object, objectsToDel, detaches, superobject=None):
 		"""
