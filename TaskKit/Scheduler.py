@@ -206,21 +206,34 @@ class Scheduler(Thread):
 		currHour = current[3]
 		currMin = current[4]
 
-		#minute difference
-		if minute > currMin:
-			minuteDifference = minute - currMin
-		elif minute < currMin:
-			minuteDifference = 60 - currMin + minute
-		else: #equal
-			minuteDifference = 0
-
-		#hourDifference
 		if hour > currHour:
 			hourDifference = hour - currHour
+			if minute > currMin:
+				minuteDifference = minute - currMin
+			elif minute < currMin:
+				minuteDifference = 60 - currMin + minute
+				hourDifference -= 1
+			else:
+				minuteDifference = 0
 		elif hour < currHour:
 			hourDifference = 24 - currHour + hour
-		else: #equal
-			hourDifference = 0
+			if minute > currMin:
+				minuteDifference = minute - currMin
+			elif minute < currMin:
+				minuteDifference = 60 - currMin + minute
+				hourDifference -= 1
+			else:
+				minuteDifference = 0
+		else:
+			if minute > currMin:
+				hourDifference = 0
+				minuteDifference = minute - currMin
+			elif minute < currMin:
+				minuteDifference = 60 - currMin + minute
+				hourDifference = 23
+			else:
+				hourDifference = 0
+				minuteDifference = 0
 
 		delay = (minuteDifference + (hourDifference * 60)) * 60
 		self.addPeriodicAction(time.time()+delay, 24*60*60, task, name)
