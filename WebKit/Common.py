@@ -2,15 +2,15 @@
 The Common module provides some commmon globals to all modules/classes in
 WebKit. It's intended for internal use, not for modules outside the WebKit.
 
-Typically usage is:
+Typically usage is::
 
 	from Common import *
 
 The globals provided are:
-	* the modules, os, string, sys and time
-	* the root class, Object
-	* the package WebUtils
-	* the class AbstractError, an exception that methods in abstract classes often raise.
+* the modules: `os`, `string`, `sys`, and `time`
+* the root class `Object`
+* the package `WebUtils`
+* the class `AbstractError`, an exception that methods in abstract classes often raise.
 """
 
 
