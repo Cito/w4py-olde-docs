@@ -12,6 +12,14 @@
 <li> All adapters have been moved to Webware/WebKit/Adapters
 <li> LRWPAdapter added, for use with the 
      <a href="http://xitami.com">Xitami web server</a>
+<li> New <code>setCookie</code> method in <code>HTTPResponse</code>.
+     New method supports setting the expire time, path (which 
+     defaults to "/") and security flag.  The expire time can
+     be set with constants "ONCLOSE", "NOW", or "NEVER"; or 
+     you can give an integer timestamp, tuple of integers (as
+     used in the time module), DateTime object, DateTimeDelta
+     object, or string identifier (like "+1w" for 1 week in the 
+     future).
 </ul>
 
 
