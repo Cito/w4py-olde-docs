@@ -65,13 +65,13 @@ or sets some optional output options for this page.  Directives set in <i>page</
 to the elements in the current PSP source file and to any included files.
 <p>Supported Page parameters:
 <ul>
-<p><li><b><i><font color="blue">import</font></i></b> - The import attribute of the page directive tells the PSP parser
+<p><li><b><i><font color="blue">imports</font></i></b> - The imports attribute of the page directive tells the PSP parser
 to import certain pyton modules into the PSP Class source file.
 <p>The format of this directive is as follows:
-<p><b>Example</b><i>&lt;%@ page import="sys,os"%&gt;</i>
-<p>The value of the import parameter may have multiple, comma separated items.
+<p><b>Example</b><i>&lt;%@ page imports="sys,os"%&gt;</i>
+<p>The value of the imports parameter may have multiple, comma separated items.
 <p> <i>from X import Y</i> is supported by separating the source package from the object to be imported with a colon (:), like this:<br>
-<p><b>Example</b><i> &lt;%@ page import="os:path" %&gt;</i> &nbsp; This will import the path object from the os module.<br>
+<p><b>Example</b><i> &lt;%@ page imports="os:path" %&gt;</i> &nbsp; This will import the path object from the os module.<br>
 Please note the <b>=</b> sign used in this directive.  Those who are used to python might try to skip it.
 
 
