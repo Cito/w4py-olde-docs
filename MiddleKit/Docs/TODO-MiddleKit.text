@@ -78,6 +78,8 @@ I'll be happy to support anyone's efforts by answering questions, discussing ide
 
 	[ ] mysqldb 0.9.2 causes errors with MiddleKit while all previous versions do not. The problem seems to be that MK creates a lot of connections *and* they hang around in memory for a long time, probably due to a new circular reference in mysqldb. I'm not able to resolve the problem with Andy Dustman, the author, so I will probably have to revamp MiddleKit. yuk. Current workaround is to use mysql 0.9.1.
 
+	[ ] When reading a model, no error is generated if an attr is declared more than once (with the same name). Classes might suffer from a similar problem.
+
 	[ ] Generator.py could detect when required columns are missing from sample data. Right now, you don't find out until you insert the samples into the database.
 
 	[ ] Generator.py should report all the string attributes that are missing a Max attribute as a warning.
