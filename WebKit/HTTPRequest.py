@@ -352,10 +352,14 @@ class HTTPRequest(Request):
 		sspath=self.serverSidePath() #ensure that extraURLPath has been stripped
 		pinfo=self.pathInfo()
 		if not self._extraURLPath:
-			if pinfo[-1]=="/": pinfo = pinfo[:-1]
+			if pinfo and pinfo[-1]=="/": pinfo = pinfo[:-1]
 			return pinfo
-		URI=pinfo[:string.rfind(pinfo,self._extraURLPath)]
-		if URI[-1]=="/": URI=URI[:-1]
+		pos = string.rfind(pinfo, self._extraURLPath)
+		if pos==-1:
+			URI=pinfo
+		else:
+			URI=pinfo[:pos]
+		if URI and URI[-1]=="/": URI=URI[:-1]
 		return URI
 
 	def uriWebKitRoot(self):
