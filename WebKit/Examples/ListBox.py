@@ -4,10 +4,12 @@ import string
 from types import ListType
 
 
-class Object:
+class Item:
+	''' Items are the objects that are added, deleted and edited by the
+		user in this example. '''
 	def __init__(self, name):
 		self._name = name
-	
+
 	def name(self):
 		return self._name
 
@@ -16,9 +18,9 @@ class ListBox(ExamplePage):
 	'''
 	This page provides a list box interface with controls for changing
 	it's size and adding and removing items.
-	
+
 	The source is a good example of how to use awake() and actions.
-	'''	
+	'''
 
 	def awake(self, transaction):
 		ExamplePage.awake(self, transaction)
@@ -31,7 +33,7 @@ class ListBox(ExamplePage):
 				'newCount':    1,
 			} )
 		self._error = None
-	
+
 	def writeBody(self):
 		sess = self._transaction.session()
 
@@ -41,7 +43,7 @@ class ListBox(ExamplePage):
 			self.writeln('<br>vars = ', HTMLEncode(str(self.vars())))
 			self.writeln('<p> <br>')
 
-		# Intro text is provided by our class' doc string		
+		# Intro text is provided by our class' doc string
 		self.writeln('<center>', string.replace(self.__class__.__doc__, '\n', '<br>'), '</center>')
 
 		if not self._error:
@@ -79,6 +81,7 @@ class ListBox(ExamplePage):
 
 <input name=_action_ type=submit value=Wider>
 <input name=_action_ type=submit value=Narrower>
+<br><i><b>Wider</b> and <b>Narrower</b> work on Netscape, but not on IE.</i>
 
 </form>
 </center>
@@ -90,26 +93,27 @@ class ListBox(ExamplePage):
 	def widthChange(self):
 		return 30
 
-		
+
 	## Commands ##
-	
+
 	def vars(self):
 		''' Returns a dictionary of values, stored in the session, for this page only. '''
 		return self._transaction.session().value('form')
 
 	def new(self, trans):
 		vars = self.vars()
-		vars['list'].append(Object('New item %d'%vars['newCount']))
+		vars['list'].append(Item('New item %d'%vars['newCount']))
 		vars['newCount'] = vars['newCount'] + 1
 		self.writeBody()
-		
+
 	def edit(self, trans):
-		self.writeBody()
+		self.writeBody() # @@ 2000-06-01 ce: not implemented
 
 	def view(self, trans):
-		self.writeBody()
+		self.writeBody() # @@ 2000-06-01 ce: not implemented
 
 	def delete(self, trans):
+		''' Delete the selected items in the list, whose indices are passed in through the form. '''
 		vars = self.vars()
 		req = trans.request()
 		if req.hasField('list'):
@@ -125,7 +129,7 @@ class ListBox(ExamplePage):
 		else:
 			self._error = 'You must select a row to delete.'
 		self.writeBody()
-			
+
 	def taller(self, trans):
 		vars = self.vars()
 		vars['height'] = vars['height'] + self.heightChange()
@@ -141,19 +145,19 @@ class ListBox(ExamplePage):
 		vars = self.vars()
 		vars['width'] = vars['width'] + self.widthChange()
 		self.writeBody()
-		
+
 	def narrower(self, trans):
 		vars = self.vars()
 		if vars['width']>=60:
-			vars['width'] = vars[	'width'] - self.widthChange()
+			vars['width'] = vars['width'] - self.widthChange()
 		self.writeBody()
-	
-		
+
+
 	## Actions ##
 
 	def methodNameForAction(self, name):
 		''' Our button titles are captialized like 'New', but our methods are lower case like 'new'. So we implement this method to convert action names to lowercase. '''
 		return string.lower(name)
-	
+
 	def actions(self):
 		return ExamplePage.actions(self) + ['new', 'edit', 'view', 'delete', 'taller', 'shorter', 'wider', 'narrower']
