@@ -278,7 +278,7 @@ class Scheduler(Thread):
 			return 0
 		self.runTask(handle)
 		return 1
-
+	
 	def demandTask(self, name):
 		"""
 		This method is provided to allow the server to request that a task listed as being 
@@ -401,7 +401,7 @@ class Scheduler(Thread):
 		This method terminates the scheduler and its associated tasks.
 		"""
 		self._isRunning = 0
-		#self.notify()  #this isn't necessary with the below is it?
+##		self.notify()  #this isn't necessary with the below is it?
 		self._closeEvent.set()
 
 
@@ -428,6 +428,7 @@ class Scheduler(Thread):
 				if currentTime < nextTime:
 					sleepTime = nextTime - currentTime
 					self.wait(sleepTime)
+				if not self._isRunning: return
 				currentTime = time()
 				if currentTime >= nextTime:
 					toRun = []
