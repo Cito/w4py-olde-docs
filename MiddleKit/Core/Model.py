@@ -7,8 +7,6 @@ try:
 except ImportError:
 	from pickle import load, dump
 
-havePython22OrGreater = sys.version_info[0]>2 or (sys.version_info[0]==2 and sys.version_info[1]>=2)
-
 
 class Model(Configurable):
 	"""
@@ -76,9 +74,7 @@ class Model(Configurable):
 
 		# read the pickled version of Classes if possible
 		data = None
-		shouldUseCache = self.setting('UsePickledClassesCache', 1) and havePython22OrGreater
-			# ^ require Python 2.2 or greater.
-			# otherwise we get cPickle.UnpickleableError: Cannot pickle <type 'type'> objects
+		shouldUseCache = self.setting('UsePickledClassesCache', 1)
 		if shouldUseCache:
 			from MiscUtils.PickleCache import readPickleCache, writePickleCache
 			data = readPickleCache(csvPath, pickleVersion=1, source='MiddleKit')

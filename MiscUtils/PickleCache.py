@@ -39,6 +39,11 @@ This would only be a problem in programmatic situations where the source
 file was rapidly being written and read. I think that's fairly rare.
 
 
+PYTHON VERSION
+
+These operations do nothing if you don't have Python 2.2 or greater.
+
+
 SEE ALSO
 	http://www.python.org/doc/current/lib/module-pickle.html
 
@@ -55,6 +60,8 @@ try:
 	from cPickle import load, dump
 except ImportError:
 	from pickle import load, dump
+
+havePython22OrGreater = sys.version_info[0]>2 or (sys.version_info[0]==2 and sys.version_info[1]>=2)
 
 
 s ="""
@@ -93,6 +100,10 @@ class PickleCacheReader(PickleCache):
 		if not os.path.exists(filename):
 			#if v: print 'cannot find %r' % filename
 			open(filename) # to get a properly constructed IOError
+
+		if not havePython22OrGreater:
+			#if v: print 'Python version is too old for this. Returning None.'
+			return None
 
 		didReadPickle = 0
 		shouldDeletePickle = 0
@@ -167,6 +178,11 @@ class PickleCacheWriter(PickleCache):
 		if v: print '>> PickleCacheWriter.write() - verbose is on'
 		assert filename
 		sourceTimestamp = os.path.getmtime(filename)
+
+		if not havePython22OrGreater:
+			#if v: print 'Python version is too old for this. Returning None.'
+			return None
+
 		picklePath = self.picklePath(filename)
 		dict = {
 			'source': source,
