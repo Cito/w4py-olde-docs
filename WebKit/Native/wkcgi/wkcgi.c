@@ -49,7 +49,7 @@ int sendCgiRequest(int sock, DictHolder* alldicts) {
 	  log_message("There is post data");
 	  buffer = (char*) calloc(8092,1);
 	  while (read < content_length) {
-		read = read + fread(buffer, 1, 8092, stdin);
+		read = read + fread(buffer, 1, content_length-read, stdin);
 		sent = sent + send(sock, buffer, read-sent, 0);
 	  }
 	}
@@ -111,14 +111,35 @@ int main(char* argc, char* argv[]) {
 	//	int retrydelay = 1;
 	int retrycount = 30;
 	Configuration* config;
+#ifdef WIN32
+	char configFile[500];
+	char* p;
+#endif
 
 #ifdef WIN32
 	winStartup();
 #endif
 
 	config = malloc(sizeof(Configuration));
-	
-	GetConfiguration(config);
+
+#ifdef WIN32
+	/* IIS runs CGI's in a different directory than they live in.  So */
+	/* we need to construct the full path to the config file by */
+	/* doing some string manipulation. */
+	strcpy(configFile, argv[0]);
+	p = strrchr(configFile, '\\');
+	if( !p ) {
+		p = strrchr(configFile, '/');
+	}
+	if( p ) {
+		strcpy(p+1, ConfigFilename);
+	} else {
+		strcpy(configFile, ConfigFilename);
+	}
+	GetConfiguration(config, configFile);
+#else
+	GetConfiguration(config, ConfigFilename);
+#endif
 	
 	//	retryattempts = config->retry_attempts;
 	//	retrydelay = config->retry_delay;

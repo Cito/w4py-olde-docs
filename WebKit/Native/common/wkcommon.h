@@ -43,5 +43,5 @@ int wksock_open(unsigned long address, int port);
 unsigned long resolve_host(char *value);
 struct WFILE*  setup_WFILE();
 int freeWFILE(struct WFILE* wf); 
-Configuration* GetConfiguration(Configuration*);
+Configuration* GetConfiguration(Configuration*, char*);
 

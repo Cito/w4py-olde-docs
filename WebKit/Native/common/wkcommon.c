@@ -221,7 +221,7 @@ int freeWFILE(struct WFILE* wf) {
 
 
 
-Configuration* GetConfiguration(Configuration* config) {
+Configuration* GetConfiguration(Configuration* config, char* configFile) {
 
 	FILE* cfgfile;
 	struct stat statbuf;
@@ -256,7 +256,7 @@ Configuration* GetConfiguration(Configuration* config) {
 
 	log_message("Trying to parse config file");
 
-   	rv = cfgParse(ConfigFilename, cfg, CFG_SIMPLE);
+   	rv = cfgParse(configFile, cfg, CFG_SIMPLE);
 
 	log_message(stderr,"Got config");
 
@@ -275,13 +275,13 @@ Configuration* GetConfiguration(Configuration* config) {
 	return config;
 
 	/*
-	result = stat(ConfigFilename, &statbuf);
+	result = stat(configFile, &statbuf);
 	size = statbuf.st_size;
 	if (size > 500) return NULL;
 
 	host = malloc(size+1);
 	portstr = malloc(size+1);
-	cfgfile = open(ConfigFilename, "r");
+	cfgfile = open(configFile, "r");
 	
 	c = fgetc(cfgfile);
 	while (c != ":") {
