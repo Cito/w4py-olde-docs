@@ -352,7 +352,7 @@ class Attr:
 		if self.hasSQLColumn():
 			name = self.sqlName().ljust(self.maxNameWidth())
 			if self.isRequired():
-				notNullSQL = ' NOT NULL'
+				notNullSQL = ' not null'
 			else:
 				notNullSQL = ''
 			if generator.sqlSupportsDefaultValues():
