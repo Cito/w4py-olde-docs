@@ -26,7 +26,9 @@ def launchWebKit(server, appWorkPath, args):
 	# Import the server's main()
 	import WebKit
 	code = 'from WebKit.%s import main' % server
-	exec code
+	dict = {}
+	exec code in dict
+	main = dict['main']
 
 	# Run!
 	args = args + ['workdir=' + appWorkPath]
