@@ -309,6 +309,22 @@ class ObjectStore(ModelUser):
 		self._objects        = {}
 		self._newSerialNum   = -1
 
+	def discardEverything(self):
+		"""
+		Discards all cached objects, including any modification
+		tracking. However, objects in memory will not change state as
+		a result of this call.
+
+		This method is a severe form of clear() and is typically used
+		only for debugging or production emergencies.
+		"""
+		self._hasChanges     = 0
+		self._objects        = {}
+		self._newObjects     = []
+		self._deletedObjects = []
+		self._changedObjects = {}
+		self._newSerialNum   = -1
+
 
 	## Notifications ##
 
