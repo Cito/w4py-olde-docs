@@ -1,4 +1,4 @@
-<psp:include file ="../Docs/UsersGuide.html">
+<psp:include path="../Docs/UsersGuide.html">
 
 
 

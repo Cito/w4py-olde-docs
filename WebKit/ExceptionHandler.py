@@ -1,5 +1,5 @@
 from Common import *
-import traceback, whrandom
+import string, time, traceback, types, whrandom
 from time import asctime, localtime
 from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict
@@ -182,9 +182,11 @@ class ExceptionHandler(Object):
 		# Construct the message
 		headers = self.setting('ErrorEmailHeaders')
 		msg = []
-		for key in headers.keys():
-			if key!='From' and key!='To':
-				msg.append('%s: %s\n' % (key, headers[key]))
+		for key, value in headers.items():
+			if isinstance(value, types.ListType):
+				value = string.join(value, ', ')
+			msg.append('%s: %s\n' % (key, value))
+		msg.append('Date: %s\n' % dateForEmail())
 		msg.append('\n')
 		msg.append(html)
 		msg = string.join(msg, '')
@@ -246,3 +248,17 @@ def htTable(listOfDicts, keys=None):
 
 	s = s + '</table>'
 	return s
+
+def dateForEmail():
+    """ Returns a properly formatted date/time string for email messages """
+    # @@ gat: this should be moved to MiscUtils
+    now = time.localtime(time.time())
+    if now[8] == 1:
+        offset = -time.altzone / 60
+    else:
+        offset = -time.timezone / 60
+    if offset<0:
+        plusminus = '-'
+    else:
+        plusminus = '+'
+    return time.strftime('%a, %d %b %Y %H:%M:%S ', now) + plusminus + '%02d%02d' % (abs(offset/60), abs(offset%60))
