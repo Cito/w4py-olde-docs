@@ -257,6 +257,26 @@ class ServletFactory(Object):
 					if servlet.__class__ is theClass:
 						return servlet
 		
+		# Use a lock to prevent multiple simultaneous imports
+		# of the same module @@ ib 2004-06: Aren't imports
+		# threadsafe already?  Or maybe not, because we are
+		# using tricky import techniques (e.g., __import__)
+		self._importLock.acquire()
+		try:
+			mtime = os.path.getmtime(path)
+			if not self._classCache.has_key(path):
+				self._classCache[path] = {
+					'mtime': mtime,
+					'class': self.loadClass(transaction, path)}
+			elif mtime > self._classCache[path]['mtime']:
+				self._classCache[path]['mtime'] = mtime
+				self._classCache[path]['class'] = self.loadClass(transaction, path)
+			theClass = self._classCache[path]['class']
+			if not self._cacheClasses:
+				del self._classCache[path]
+		finally:
+			self._importLock.release()
+
 		# No adequate cached servlet exists, so create a new servlet instance
 		servlet = theClass()
 		servlet.setFactory(self)
