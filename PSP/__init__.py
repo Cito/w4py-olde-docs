@@ -1,6 +1,9 @@
 # PSP
 # Webware for Python
 
+__version__ = 0.1
+
+
 import os
 from PSPServletFactory import PSPServletFactory
 
