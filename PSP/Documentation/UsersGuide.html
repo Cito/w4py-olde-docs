@@ -69,9 +69,11 @@ to the elements in the current PSP source file and to any included files.
 to import certain pyton modules into the PSP Class source file.
 <p>The format of this directive is as follows:
 <p><b>Example</b><i>&lt;%@ page import="sys,os"%&gt;</i>
-<p>The value of the import parameter may have multiple, comma separated items.  At this time,
- the <i>from X import X</i> syntax is not supported for imports to minimize namespace
-pollution. (Maybe I should permit this with a semicolon separating the from:import inj the list above)
+<p>The value of the import parameter may have multiple, comma separated items.
+<p> <i>from X import Y</i> is supported by separating the source package from the object to be imported with a colon (:), like this:<br>
+<p><b>Example</b><i> &lt;%@ page import="os:path" %&gt;</i> &nbsp; This will import the path object from the os module.<br>
+Please note the <b>=</b> sign used in this directive.  Those who are used to python might try to skip it.
+
 
 <p><li><b><i><font color="blue">extends</font></i></b> - The extends attribute of the page tells the PSP parser what base class this
  Servlet should be derived from.  The PSP servlet produced by parsing the PSP file will
@@ -109,7 +111,7 @@ override.
 <p><b>Example</b> - <i> &lt;%@ page isInstanceSafe="yes"%&gt;</i>
 <p>Valid values are "yes" and "no".  The default is "yes".
 <p>
-<p><li><b><i><font color="blue">indentType</font></i></b> - The <i>indentType </i> attribute of the page directive tells the parser how to handle block indention in the python sourcefile it creates.  The <i> indentType</i> attribute sets whether the sourcefile will be indented with tabs or spaces.  Valid values are "tabs" or "spaces". If this is set to "spaces", see <i>indentSpaces</i> for setting the number of spaces to be used. (also, see blocks, below).  The default is "tabs"
+<p><li><b><i><font color="blue">indentType</font></i></b> - The <i>indentType </i> attribute of the page directive tells the parser how to handle block indention in the python sourcefile it creates.  The <i> indentType</i> attribute sets whether the sourcefile will be indented with tabs or spaces, or braces.  Valid values are "tabs", "spaces" or "braces". If this is set to "spaces", see <i>indentSpaces</i> for setting the number of spaces to be used. (also, see blocks, below).  The default is "tabs"
 <p><b>Example</b> - <i>&lt;%@ page indentType="tabs"%&gt;</i>
 <p>This is a bit of a tricky item, because many editors will automatically replace tabs with spaces in their output, without the user realizing it.  If you are having trouble with complex blocks, look at that first.
 <p>
@@ -182,6 +184,30 @@ indenting described above wouldn't notice the block, because the last line in th
 &lt;% pass %&gt;</i>  ##Any new script statement resets the HTML indentation level<br>
 You could also start a new script block that just continues at the same indentation level that the HTML and the previous scipt block were at.
 <p>
+<p><b>Braces</b>
+<p>PSP also supports using braces to handle indentation.  This goes against the grain of python, we know, but is useful for this specific application.  To use this feature, specify it as you indentation style in a page directive, like so: <i>&lt;%@page indentType="braces" %&gt;</i><br>
+Now use braces to signify the start and end of blocks.  The braces can span multiple script tags. No automatic indentation will occur. <b>(???? Verify)</b>
+<p><b>Example</b><br>
+This is &lt;i&gt;Straight HTML&lt;/i&gt;&lt;br&gt;<br>
+&lt;% <br>
+for i in range(5): { %&gt;# Now I'm starting a block for this loop<br>
+z = i*i<br>
+%&gt;<br>
+&lt;!-- Now I've ending the scripting tag that started the block,<br> 
+but the following lines are still in the block --&gt;<br>
+More straight HTML.  But this is inside the loop started above.&lt;br&gt;<br>
+My i value is now <%= i %>&lt;br&gt;<br>
+Now I will process it again.&lt;br&gt;<br>
+&lt;%<br> 
+v = z*z <br>
+%&gt;<br>
+Now it is &lt;%=v &gt;<br>
+&lt;% }% &gt; # End the block<br>
+
+
+
+
+
 
 <h2>Method Tag - "&lt;psp:method&gt;&lt;/psp:method&gt;"</h2>
 <p>

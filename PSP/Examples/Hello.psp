@@ -2,7 +2,7 @@
 
 
 <%@ page imports = "sys,os,time,Examples:ExamplePage"%> <%-- Here's the modules that I need in this file --%>
-<%@ page method="writeBody" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
+<%@ page method="writeContent" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
 <%@ page extends="ExamplePage"%> <%--This is the base class for this page.  Page is the default --%>
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="tabs" %> <%-- use tabs to indent the sourcefile that this template will produce --%>
@@ -44,7 +44,7 @@ for i in files:
 
 <p>
 <p><i>Note: The above files were generated using a loop that utilized the "userIndent" feature that's new for WebKit 0.4.</i>
-<p><b>Document New Syntax Jay!</b>
+
 <p>
 <p>So anyway, read through the docs, and look at PSPTests.psp for examples.  Let us know what we can do better or more effectively.
 
