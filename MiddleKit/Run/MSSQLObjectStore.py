@@ -64,7 +64,9 @@ class MSSQLObjectStore(SQLObjectStore):
 			conn = self.dbapiModule().connect(**args)
 			cur = conn.cursor()
 			try:
-				cur.execute('use '+self._model.sqlDatabaseName()+';')
+				sql = 'use '+self._model.sqlDatabaseName()+';'
+				#print '>> use string=%r' % sql
+				cur.execute(sql)
 			except Exception, e:
 				if e.args[0]!='01000': # ('01000', 5701, "[Microsoft][ODBC SQL Server Driver][SQL Server]Changed database context to 'MKList'.", 4612)
 					raise
