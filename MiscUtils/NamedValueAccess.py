@@ -7,6 +7,11 @@ from time import time
 # @@ 2000-05-31 ce: after additional testing we can probably scorge the technique=0 allowance
 technique = 1
 
+
+class _NoDefault:
+	pass
+
+
 class NamedValueAccess:
 	'''	This class is intended to be ancestor class such that you can say:
 			from NamedValueAccess import *
@@ -61,7 +66,7 @@ class NamedValueAccess:
 		return self._bindingForGetKey(key)!=None
 
 
-	def valueForKey(self, key, default=None):
+	def valueForKey(self, key, default=_NoDefault):
 		''' Suppose key is 'foo'. This method returns the value with the following precedence:
 				1. Methods before non-methods
 				2. Public attributes before private attributes
@@ -72,8 +77,9 @@ class NamedValueAccess:
 				* self.foo
 				* self._foo
 
-			...or default, if it is not None,
+			...or default, if it was specified,
 			otherwise invokes and returns result of handleUnknownGetKey().
+			Note that handleUnknownGetKey(), normally returns an exception.
 
 			See valueForName() which is a more advanced version of this method that allows
 			multiple, qualified keys.
@@ -82,7 +88,7 @@ class NamedValueAccess:
 		binding = self._bindingForGetKey(key)
 
 		if not binding:
-			if default is None:
+			if default is _NoDefault:
 				return self.handleUnknownGetKey(key)
 			else:
 				return default
