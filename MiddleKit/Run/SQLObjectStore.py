@@ -15,6 +15,25 @@ class SQLObjectStoreError(Exception): pass
 class SQLObjectStoreThreadingError(SQLObjectStoreError): pass
 
 
+class UnknownSerialNumberError(SQLObjectStoreError):
+	'''
+	For internal use when archiving objects.
+
+	Sometimes an obj ref cannot be immediately resolved on INSERT because
+	the target has not yet been inserted and therefore, given a serial number.
+	'''
+	def __init__(self, info):
+		self.info = info
+
+class UnknownSerialNumInfo:
+
+	def updateStmt(self):
+		assert self.sourceObject.serialNum!=0
+		assert self.targetObject.serialNum()!=0
+		return 'update %s set %s=%s where %s=%s;' % (
+			self.tableName, self.fieldName, self.targetObject.sqlObjRef(), self.sqlIdName, self.sourceObject.serialNum())
+
+
 class SQLObjectStore(ObjectStore):
 	'''
 	TO DO:
@@ -114,6 +133,7 @@ class SQLObjectStore(ObjectStore):
 	def readKlassIds(self):
 		'''
 		Reads the klass ids from the SQL database. Invoked by connect().
+		'
 		'''
 		conn, cur = self.executeSQL('select id, name from _MKClassIds;')
 		klassesById = {}
@@ -128,12 +148,13 @@ class SQLObjectStore(ObjectStore):
 	## Changes ##
 
 	def commitInserts(self):
+		unknownSerialNums = []
 		for object in self._newObjects:
-			# New objects not in the persistent store have negative serial numbers
+			# New objects not in the persistent store have serial numbers less than 1
 			assert object.serialNum()<1
 
 			# SQL insert
-			sql = object.sqlInsertStmt()
+			sql = object.sqlInsertStmt(unknownSerialNums)
 			conn, cur = self.executeSQL(sql)
 
 			# Get new id/serial num
@@ -147,6 +168,9 @@ class SQLObjectStore(ObjectStore):
 			# Update our object pool
 			self._objects[object.key()] = object
 
+		for unknownInfo in unknownSerialNums:
+			stmt = unknownInfo.updateStmt()
+			self.executeSQL(stmt)
 		self._newObjects = []
 
 	def retrieveLastInsertId(self, conn, cur):
@@ -244,6 +268,7 @@ class SQLObjectStore(ObjectStore):
 					obj.initFromRow(row)
 				objs.append(obj)
 		return objs + deepObjs
+
 
 	## Klasses ##
 
@@ -407,10 +432,13 @@ class MiddleObjectMixIn:
 	def sqlObjRef(self):
 		return objRefJoin(self.klass().id(), self.serialNum())
 
-	def sqlInsertStmt(self):
+	def sqlInsertStmt(self, unknowns):
 		'''
 		Returns the SQL insert statements for MySQL (as a tuple) in the form:
 			insert into table (name, ...) values (value, ...);
+
+		May add an info object to the unknowns list for obj references that
+		are not yet resolved.
 		'''
 		klass = self.klass()
 		res = ['insert into %s (' % klass.sqlTableName()]
@@ -421,7 +449,15 @@ class MiddleObjectMixIn:
 			fieldNames = [klass.sqlIdName()]
 		res.append(','.join(fieldNames))
 		res.append(') values (')
-		values = [self.sqlValueForName(attr.name()) for attr in attrs]
+		values = []
+		for attr in attrs:
+			try:
+				value = self.sqlValueForName(attr.name())
+			except UnknownSerialNumberError, exc:
+				exc.info.sourceObject = self
+				unknowns.append(exc.info)
+				value = 'NULL'
+			values.append(value)
 		if len(values)==0:
 			values = ['0']
 		values = ','.join(values)
@@ -549,8 +585,16 @@ class ObjRefAttr:
 		else:
 			assert type(value) is InstanceType
 			assert isinstance(value, MiddleObject)
-			value = value.sqlObjRef()
-			return str(value)
+			if value.serialNum()==0:
+				info = UnknownSerialNumInfo()
+				info.tableName = self.klass().sqlTableName()
+				info.fieldName = self.sqlColumnName()
+				info.targetObject = value
+				info.sqlIdName = self.klass().sqlIdName()
+				raise UnknownSerialNumberError(info)
+			else:
+				value = value.sqlObjRef()
+				return str(value)
 
 
 class ListAttr:
