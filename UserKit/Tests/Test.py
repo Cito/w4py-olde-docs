@@ -1,7 +1,8 @@
 import os, sys
 sys.path.insert(1, os.path.abspath('../..'))
 import UserKit
-from MiscUtils import unittest
+import unittest
+#from MiscUtils import unittest
 
 import shutil
 

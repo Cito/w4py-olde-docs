@@ -31,7 +31,7 @@
 
 
 
-
+import re
 import PSPUtils
 import BraceConverter
 try:
@@ -106,10 +106,13 @@ class ScriptGenerator(GenericGenerator):
 
 	def generate(self, writer, phase=None):
 
+		self.chars = PSPUtils.normalizeIndentation( self.chars )
+		
 		if writer._useBraces:
 			# send lines to be output by the braces generator
 			bc = BraceConverter.BraceConverter()
-			for line in string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'):
+			lines = PSPUtils.splitLines( PSPUtils.removeQuotes(self.chars) )
+			for line in lines:
 				bc.parseLine(line,writer)
 			return
 
@@ -117,8 +120,7 @@ class ScriptGenerator(GenericGenerator):
 		#check for whitespace at the beginning and if less than 2 spaces, remove
 		if self.chars[:1]==' ' and self.chars[:2]!= '  ':
 			self.chars=string.lstrip(self.chars)
-		lines = string.splitfields(PSPUtils.removeQuotes(self.chars),'\n')
-		#writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
+		lines = PSPUtils.splitLines( PSPUtils.removeQuotes(self.chars) )
 		
 
 		#userIndent check
@@ -167,7 +169,40 @@ class EndBlockGenerator(GenericGenerator):
 			writer._blockcount = writer._blockcount-1
 		writer._userIndent = writer.EMPTY_STRING
 		
-		
+
+class ScriptFileGenerator(GenericGenerator):
+	""" 
+	Add Python code at the file/module level.  
+	"""
+	def __init__(self, chars, attrs):
+		GenericGenerator.__init__(self)
+		self.phase='psp:file'
+		self.attrs=attrs
+		self.chars=chars
+
+	def generate(self, writer, phase=None):
+		writer.println('\n# File level user code')
+		pySrc = PSPUtils.normalizeIndentation( self.chars )
+		pySrc = PSPUtils.splitLines( PSPUtils.removeQuotes(pySrc) )
+		writer.printList(pySrc)
+
+
+class ScriptClassGenerator(GenericGenerator):
+	""" 
+	Add Python code at the class level.  
+	"""
+	def __init__(self, chars, attrs):
+		GenericGenerator.__init__(self)
+		self.phase='psp:class'
+		self.attrs=attrs
+		self.chars=chars
+
+	def generate(self, writer, phase=None):
+		writer.println('# Class level user code\n')
+		pySrc = PSPUtils.normalizeIndentation( self.chars )
+		pySrc = PSPUtils.splitLines( PSPUtils.removeQuotes(pySrc) )
+		writer.printList(pySrc)
+
 
 class MethodGenerator(GenericGenerator):
 	""" generates class methods defined in the PSP page.  There are two parts to method generation.  This
@@ -198,7 +233,7 @@ class MethodGenerator(GenericGenerator):
 
 class MethodEndGenerator(GenericGenerator):
 	""" Part of class method generation.  After MethodGenerator, MethodEndGenerator actually generates
-	the code for th method body."""
+	the code for the method body."""
 	def __init__(self, chars, attrs):
 		GenericGenerator.__init__(self)
 		self.phase='Declarations'
@@ -207,7 +242,7 @@ class MethodEndGenerator(GenericGenerator):
 
 	def generate(self, writer, phase=None):
 		writer.pushIndent()
-		writer.printList(string.splitfields(PSPUtils.removeQuotes(self.chars),'\n'))
+		writer.printList( PSPUtils.splitLines( PSPUtils.removeQuotes(self.chars) ) )
 		writer.printChars('\n')
 		writer.popIndent()
 

@@ -27,8 +27,8 @@ output their source code.
 """
 
 
-from Generators import *
-import string
+from Generators import *	# ResponseObject, plus all the *Generator functions.
+import string, time
 
 
 
@@ -217,6 +217,18 @@ class ParseEventHandler:
 		gen = ScriptGenerator(self._reader.getChars(start, stop),attrs)
 		self.addGenerator(gen)
 
+	def handleScriptFile(self, start, stop, attrs):
+		"""Python script that goes at the file/module level"""
+		self._parser.flushCharData(self.tmplStart, self.tmplStop)
+		gen = ScriptFileGenerator(self._reader.getChars(start, stop),attrs)
+		self.addGenerator(gen)
+
+	def handleScriptClass(self, start, stop, attrs):
+		"""Python script that goes at the class level"""
+		self._parser.flushCharData(self.tmplStart, self.tmplStop)
+		gen = ScriptClassGenerator(self._reader.getChars(start, stop),attrs)
+		self.addGenerator(gen)
+
 	def handleEndBlock(self):
 	    self._parser.flushCharData(self.tmplStart, self.tmplStop)
 	    gen = EndBlockGenerator()
@@ -232,6 +244,8 @@ class ParseEventHandler:
 		gen = MethodEndGenerator(self._reader.getChars(start, stop),attrs)
 		self.addGenerator(gen)
 
+
+
     #####################################################################
     ##The generation of the page begins here
     ####################################################################3
@@ -240,9 +254,12 @@ class ParseEventHandler:
    		pass
 
 	def endProcessing(self):
+		self._writer.println('# Generated automatically by PSP compiler on %s\n' % time.asctime() )
 		self.generateHeader()
+		self.generateAll('psp:file')
 		self.generateDeclarations() #I'll overwrite this later when I can handle extends
 		self.generateInitPSP()
+		self.generateAll('psp:class')
 		self.generateAll('Declarations')
 		self._writer.println('\n')
 		self.generateMainMethod()
@@ -339,11 +356,6 @@ class ParseEventHandler:
 			self._writer.popIndent() # end if statement
 			self._writer.popIndent() # end for statement
 
-##commented out for new awake version per conversation w/ chuck
-##	    self._writer.println('if "init" in dir(self) and type(self.init) == type(self.__init__):\n')
-##	    self._writer.pushIndent()
-##	    self._writer.println('self.init()\n')
-##	    self._writer.popIndent()
 			self._writer.println('self.initPSP()\n')
 			self._writer.println()
 			self._writer.popIndent()
@@ -365,14 +377,22 @@ class ParseEventHandler:
 		self._writer.println()
 
 	def generateMainMethod(self):
+	
+		# write the output method that the user requested in with <%@ page method="WriteHTML"%>
 		self._writer.printIndent()
-		self._writer.printChars('def ')
-		self._writer.printChars(self._baseMethod) #method we're creating
-		self._writer.printChars('(self, transaction=None):\n')
+		self._writer.printChars('def %s(self, transaction=None):\n' % self._baseMethod )
 		self._writer.pushIndent()
+		self._writer.println('"""I take a WebKit.Transaction object."""')
 		self._writer.println('trans = self._transaction')
-		self._writer.println(ResponseObject+ '= trans.response()')
+		self._writer.println(ResponseObject+ ' = trans.response()')
 		self._writer.println('req = trans.request()')
+		self._writer.println('self._%s( %s )\n' % (self._baseMethod, ResponseObject) )
+		
+		# Put the real output code in a function that is doesn't need a 'transaction' for unit tests.
+		self._writer.popIndent()
+		self._writer.println('def _%s( self, %s ):' % (self._baseMethod, ResponseObject))
+		self._writer.pushIndent()
+		self._writer.println('"""I take a file-like object.  I am useful for unit testing."""')
 		self._writer.println('_formatter = %s' % self._formatter)
 
 	#self._writer.println('app = trans.application()')

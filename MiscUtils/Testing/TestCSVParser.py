@@ -2,10 +2,10 @@ import FixPath
 
 
 import unittest
-from CSVParser import CSVParser, ParseError
+from MiscUtils.CSVParser import CSVParser, ParseError
 
 
-class CSVParserTests(unittest.TestCase):
+class CSVParserTests( unittest.TestCase ):
 	"""
 	TO DO
 

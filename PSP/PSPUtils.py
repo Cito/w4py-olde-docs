@@ -26,6 +26,7 @@ A bunch of utility functions for the PSP generator.
 
 import string
 import copy
+import re
 
 """various utility functions"""
 
@@ -60,4 +61,56 @@ def checkAttributes(tagtype, attrs, validAttrs):
 
 	pass
 	
+	
 
+RE_LINES = re.compile("[\n\r]*")
+def splitLines( text ):
+	'''
+	Split text into lines, but works for Unix, or Windows format, 
+	i.e. with \n or \r for line endings.
+	'''
+	return RE_LINES.split( text )
+
+
+
+def normalizeIndentation( pySource ):
+	'''
+	Takes a block of code that may be too indented, and moved it all the the left.
+	
+	See PSPUtilsTest for examples.
+	
+	- Winston Wolff
+	'''
+	
+	# split into lines, but keep \n and \r chars.
+	lines = re.findall( "[^\n\r]*[\n\r]*", pySource)
+	
+	# find the line with the least indentation
+	indent = 999	# This should be big enough
+	for line in lines:
+
+		lstripped = line.lstrip()
+		
+		# if line is empty or comment, don't measure the indentation
+		if len(lstripped) == 0 or lstripped[0] == '#':
+			continue
+		indent = min( indent, len(line) - len(lstripped) )
+		
+	# Strip off the first 'indent' characters from each line
+	strippedLines = []
+	for line in lines:
+	
+		# Remove the first 'indent' whitespace chars, but not \n or \r
+		charsToStrip = 0
+		for i in range(0,min( indent, len(line)) ):
+			if line[i] in ' \t':
+				charsToStrip = charsToStrip+1
+			else:
+				break # don't check any more characters
+			
+		strippedLines.append( line[charsToStrip:] )
+		
+	# write lines back out
+	result = ''.join(strippedLines)
+	
+	return result

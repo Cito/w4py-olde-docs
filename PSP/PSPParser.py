@@ -25,13 +25,13 @@ with the characters it found.
 
 """
 
-
 from Generators import *
 
 try:
 	from cStringIO import StringIO
 except:
 	from StringIO import StringIO
+
 
 
 class PSPParser:
@@ -90,8 +90,8 @@ class PSPParser:
 	def checkExpression(self, handler, reader):
 		""" Look for "expressions" and handle them"""
 	
-		OPEN_EXPR = '<%='
-		CLOSE_EXPR = '%>'
+ 		OPEN_EXPR = '<%='
+ 		CLOSE_EXPR = '%>'
 		end_open = None
 		attrs=None
 	
@@ -212,8 +212,8 @@ class PSPParser:
 
 	def checkScript(self, handler, reader):
 		""" The main thing we're after.  Check for embedded scripts"""
-		OPEN_SCRIPT = '<%'
-		CLOSE_SCRIPT = '%>'
+ 		OPEN_SCRIPT = '<%'
+ 		CLOSE_SCRIPT = '%>'
 		attrs=None
 
 		end_open = None
@@ -248,6 +248,73 @@ class PSPParser:
 		return 1
 
 	checklist.append(checkScript)
+
+
+	def checkScriptFile(self, handler, reader):
+		"""
+		Check for python code that should go in the beginning of the generated module.
+		<psp:file>
+			import xyz
+			print 'hi Mome!'
+			def foo(): return 'foo'
+		</psp:file> 
+		"""
+		OPEN_SCRIPT='<psp:file>'
+		CLOSE_SCRIPT='</psp:file>'
+		attrs=None
+
+
+		if reader.Matches(OPEN_SCRIPT):
+			reader.Advance(len(OPEN_SCRIPT))
+			start = reader.Mark()
+
+			try:
+				stop = reader.skipUntil(CLOSE_SCRIPT)
+				if stop == None:
+					raise 'Unterminated Script is %s block' % OPEN_SCRIPT
+			except EOFError:
+				raise EOFError("Reached EOF while looking for ending script tag (%s)" % CLOSE_SCRIPT)
+
+			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+			handler.handleScriptFile(start, stop, attrs)
+
+			return 1
+		return 0
+
+	checklist.append(checkScriptFile)
+
+
+	def checkScriptClass(self, handler, reader):
+		"""
+		Check for python code that should go in the class definition.
+		<psp:class>
+			def foo(self): 
+				return self.dosomething()
+		</psp:class> 
+		"""
+		OPEN_SCRIPT='<psp:class>'
+		CLOSE_SCRIPT='</psp:class>'
+		attrs=None
+
+
+		if reader.Matches(OPEN_SCRIPT):
+			reader.Advance(len(OPEN_SCRIPT))
+			start = reader.Mark()
+
+			try:
+				stop = reader.skipUntil(CLOSE_SCRIPT)
+				if stop == None:
+					raise 'Unterminated Script is %s block' % OPEN_SCRIPT
+			except EOFError:
+				raise EOFError("Reached EOF while looking for ending script tag (%s)" % CLOSE_SCRIPT)
+
+			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+			handler.handleScriptClass(start, stop, attrs)
+
+			return 1
+		return 0
+
+	checklist.append(checkScriptClass)
 
 
 

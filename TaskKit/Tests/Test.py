@@ -1,7 +1,8 @@
 import os, sys
 sys.path.insert(1, os.path.abspath('../..'))
 import TaskKit
-from MiscUtils import unittest
+#from MiscUtils import unittest
+import unittest
 
 
 class TaskKitTest(unittest.TestCase):

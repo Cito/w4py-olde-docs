@@ -5,7 +5,10 @@ if newPath not in sys.path:
 
 from MiscUtils.NamedValueAccess import \
 	NamedValueAccessError, valueForKey, valueForName, NamedValueAccess
-from MiscUtils import AbstractError, NoDefault, unittest
+
+from MiscUtils import AbstractError, NoDefault
+import unittest
+#from MiscUtils import AbstractError, NoDefault, unittest
 from UserDict import UserDict
 import types
 
