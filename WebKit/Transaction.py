@@ -115,7 +115,7 @@ class Transaction(Object):
 	## Die ##
 
 	def die(self):
-		''' This method should be invoked when the entire transaction is finished with. Currently, this is invoked by AppServer. This method removes references to the different objects in the transaction, breaking cyclic reference chains and allowing Python to collect garbage. '''
+		''' This method should be invoked when the entire transaction is finished with. Currently, this is invoked by AppServer. This method removes references to the different objects in the transaction, breaking cyclic reference chains and allowing either older versions of Python to collect garbage, or newer versions to collect it faster. '''
 		from types import InstanceType
 		for attrName in dir(self):
 			# @@ 2000-05-21 ce: there's got to be a better way!
