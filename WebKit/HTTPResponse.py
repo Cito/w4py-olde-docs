@@ -13,6 +13,8 @@ except ImportError:
 		DateTime = None
 from MiscUtils.DateInterval import timeDecode
 
+True, False = 1==1, 0==1
+
 debug = 0
 
 class HTTPResponse(Response):
