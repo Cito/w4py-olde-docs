@@ -314,9 +314,9 @@ class HTTPRequest(Request):
 	def serverSidePath(self, path=None):
 		"""	Returns the absolute server-side path of the request. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the object.
 		"""
-		if not hasattr(self, '_serverSidePath'):
-			app = self._transaction.application()
-			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
+##		if not hasattr(self, '_serverSidePath'):
+##			app = self._transaction.application()
+##			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
 		if path:
 			return os.path.normpath(os.path.join(os.path.dirname(self._serverSidePath), path))
 		else:
@@ -329,9 +329,9 @@ class HTTPRequest(Request):
 
 		This directory could be different from the result of serverSidePath() if the request
 		is in a subdirectory of the main context directory."""
-		if not hasattr(self, '_serverSideContextPath'):
-			app = self._transaction.application()
-			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
+##		if not hasattr(self, '_serverSideContextPath'):
+##			app = self._transaction.application()
+##			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
 		if path:
 			return os.path.normpath(os.path.join(self._serverSideContextPath, path))  # The contextPath is already the dirname, no need to dirname it again
 		else:
@@ -339,9 +339,9 @@ class HTTPRequest(Request):
 
 	def contextName(self):
 		""" Returns the name of the context of this request.  This isn't necessarily the same as the name of the directory containing the context. """
-		if not hasattr(self, '_contextName'):
-			app = self._transaction.application()
-			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
+##		if not hasattr(self, '_contextName'):
+##			app = self._transaction.application()
+##			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
 		return self._contextName
 
 	def servletURI(self):
