@@ -25,9 +25,9 @@ A simple little module.  It organizes the actual page generation.
 """
 
 
-from PSPReader import PSPReader
+from StreamReader import PSPReader
 from ServletWriter import ServletWriter
-from Parser import PSPParser
+from PSPParser import PSPParser
 from ParseEventHandler import ParseEventHandler
 
 
