@@ -76,3 +76,8 @@ class Model(Configurable):
 			return None
 		else:
 			return os.path.join(self._filename, 'Settings.config')
+
+	def defaultConfig(self):
+		return {
+			'Threaded': 1,
+		}

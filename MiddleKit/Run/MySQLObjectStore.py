@@ -26,12 +26,16 @@ class MySQLObjectStore(SQLObjectStore):
 	  http://www.python.org/topics/database/DatabaseAPI-2.0.html
 	'''
 
-	def dbapiConnect(self):
-		return MySQLdb.connect(**self._dbArgs)
+	def newConnection(self):
+		return self.dbapiModule().connect(**self._dbArgs)
 
 	def retrieveLastInsertId(self):
-		self.executeSQL('select last_insert_id();')
-		return self._cursor.fetchone()[0]
+		conn, cur = self.executeSQL('select last_insert_id();')
+		# @@ 2001-05-23 ce: there is a specific Python call for this in MySQLdb that we should try
+		return cur.fetchone()[0]
+
+	def dbapiModule(self):
+		return MySQLdb
 
 
 # Mixins

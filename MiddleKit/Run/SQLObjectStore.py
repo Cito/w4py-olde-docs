@@ -11,11 +11,18 @@ from MiscUtils.MixIn import MixIn
 from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
 
 
+class SQLObjectStoreError(Exception): pass
+class SQLObjectStoreThreadingError(SQLObjectStoreError): pass
+
+
 class SQLObjectStore(ObjectStore):
 	'''
 	TO DO:
 
 		* _sqlEcho should be accessible via a config file setting as stdout, stderr or a filename.
+
+	For details on DB API 2.0, including the thread safety levels see:
+		http://www.python.org/topics/database/DatabaseAPI-2.0.html
 	'''
 
 	## Init ##
@@ -34,9 +41,29 @@ class SQLObjectStore(ObjectStore):
 		self._sqlEcho = sys.stdout
 
 	def modelWasSet(self):
-		''' Invokes self.connect(). '''
+		'''
+		Performs additional set up of the store after the model is set,
+		normally via setModel() or readModelFileNamed(). This includes
+		checking that threading conditions are valid, and connecting to
+		the database.
+		'''
 		ObjectStore.modelWasSet(self)
+
+		# Check thread safety
+		self._threaded = self.setting('Threaded')
+		self._threadSafety = self.threadSafety()
+		if self._threaded and self._threadSafety==0:
+			raise SQLObjectStoreThreadingError, 'Threaded is 1, but the DB API threadsafety is 0.'
+
+		# Connect
 		self.connect()
+
+
+	## Settings ##
+
+	def setting(self, name, default=NoDefault):
+		''' Returns the given setting for the store, which is actually just taken from the model. '''
+		return self._model.setting(name, default)
 
 
 	## Connecting to the db ##
@@ -45,19 +72,28 @@ class SQLObjectStore(ObjectStore):
 		return self._connected
 
 	def connect(self):
-		''' Connects to the database only if the store has not already and provided that the story has a valid model.
-		The default implementation of connect() is usually sufficient provided that subclasses have implemented createDBAPIConnection() and useDatabase(). '''
+		'''
+		Connects to the database only if the store has not already and
+		provided that the store has a valid model.
+
+		The default implementation of connect() is usually sufficient
+		provided that subclasses have implemented
+		createDBAPIConnection() and useDatabase().
+		'''
 		assert self._model, 'Cannot connect: No model has been attached to this store yet.'
 		if not self._connected:
-			self._db = self.dbapiConnect()
-#			self._cursor = self._db.cursor()
+			self._connection = self.newConnection()
 			self._connected = 1
 			self.useDB()
 			self.readKlassIds()
 
-	def dbapiConnect(self):
+	def newConnection(self):
 		'''
-		Returns a DB API 2.0 connection. This is a utility method invoked by connect(). Subclasses should implement this, making use of self._dbArgs (a dictionary specifying host, username, etc.).
+		Returns a DB API 2.0 connection. This is a utility method
+		invoked by connect(). Subclasses should implement this, making
+		use of self._dbArgs (a dictionary specifying host, username,
+		etc.).
+
 		Subclass responsibility.
 		Example implementation:
 			return MySQLdb.connect(**self._dbArgs)
@@ -66,28 +102,26 @@ class SQLObjectStore(ObjectStore):
 
 	def useDB(self):
 		'''
-		Takes whatever action necessary to use the appropriate database associated with the object store, usually named after self._model.name().
-		This implementation performs a SQL "use MODELNAME;" so subclasses only need override if that doesn't work.
+		Takes whatever action necessary to use the appropriate database
+		associated with the object store, usually named after
+		self._model.name().
+
+		This implementation performs a SQL "use MODELNAME;" so
+		subclasses only need override if that doesn't work.
 		'''
 		self.executeSQL('use %s;' % self._model.name())
-		self.closeCursor()
-
 
 	def readKlassIds(self):
-		''' Reads the klass ids from the SQL database. Should be invoked by connect(). '''
-		self.executeSQL('select id, name from _MKClassIds;')
+		'''
+		Reads the klass ids from the SQL database. Invoked by connect().
+		'''
+		conn, cur = self.executeSQL('select id, name from _MKClassIds;')
 		klassesById = {}
-		for (id, name) in self._cursor.fetchall():
+		for (id, name) in cur.fetchall():
 			klass = self._model.klass(name)
 			klassesById[id] = klass
 			klass.setId(id)
 		self._klassesById = klassesById
-		self.closeCursor()
-
-	def closeCursor(self):
-		if self._cursor != None:
-			self._cursor.close()
-			self._cursor = None
 
 
 	## Changes ##
@@ -111,7 +145,6 @@ class SQLObjectStore(ObjectStore):
 
 			# Update our object pool
 			self._objects[object.key()] = object
-			self.closeCursor()
 
 		self._newObjects = []
 
@@ -124,7 +157,6 @@ class SQLObjectStore(ObjectStore):
 		for object in self._changedObjects.values():
 			sql = object.sqlUpdateStmt()
 			self.executeSQL(sql)
-			self.closeCursor()
 		self._changedObjects.clear()
 
 	def commitDeletions(self):
@@ -182,9 +214,9 @@ class SQLObjectStore(ObjectStore):
 			className = klass.name()
 			if serialNum is not None:
 				clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
-			count = self.executeSQL('select %s from %s %s;' % (
+			conn, cur = self.executeSQL('select %s from %s %s;' % (
 				','.join(colNames), klass.sqlTableName(), clauses))
-			for row in self._cursor.fetchall():
+			for row in cur.fetchall():
 				serialNum = row[0]
 				key = ObjectKey().initFromClassNameAndSerialNum(className, serialNum)
 				obj = self._objects.get(key, None)
@@ -208,7 +240,6 @@ class SQLObjectStore(ObjectStore):
 					# Existing object
 					obj.initFromRow(row)
 				objs.append(obj)
-			self.closeCursor()
 		return objs + deepObjs
 
 
@@ -218,26 +249,65 @@ class SQLObjectStore(ObjectStore):
 		return self._klassesById[id]
 
 
-	## Self utility ##
+	## Self utility for SQL, connections, cursors, etc. ##
 
-	def executeSQL(self, sql):
-		''' Executes the given SQL, connecting to the database for the first time if necessary. This method will also log the SQL to self._sqlEcho, if it is not None. Returns whatever the DB API's cursor execute() method returns, which is undefined in DB API and varies from database to database (think hard before deciding to use it). '''
-		if not self._connected:
-			self.connect()
+	def executeSQL(self, sql, connection=None):
+		'''
+		Executes the given SQL, connecting to the database for the first
+		time if necessary. This method will also log the SQL to
+		self._sqlEcho, if it is not None. Returns the connection and
+		cursor used and relies on connectionAndCursor() to obtain these.
+		Note that you can pass in a connection to force a particular one
+		to be used.
+		'''
 		self._sqlCount += 1
 		if self._sqlEcho:
 			timestamp = funcs.timestamp()['pretty']
-			self._sqlEcho.write('SQL %03i. %s %s\n' % (self._sqlCount, timestamp, sql))
+			self._sqlEcho.write('SQL %04i. %s %s\n' % (self._sqlCount, timestamp, sql))
 			self._sqlEcho.flush()
-			self._cursor = None # explicitly break cursor
-			self._cursor = self._db.cursor()
-		# get new cursor - use that.
-		return self._cursor.execute(sql.strip())
-
+		conn, cur = self.connectionAndCursor(connection)
+		cur.execute(sql.strip())
+		return conn, cur
 
 	def setSQLEcho(self, file):
 		''' Sets a file to echo sql statements to, as sent through executeSQL(). None can be passed to turn echo off. '''
 		self._sqlEcho = file
+
+
+	def connectionAndCursor(self, connection=None):
+		'''
+		Returns the connection and cursor needed for executing SQL,
+		taking into account factors such as setting('Threaded') and the
+		threadsafety level of the DB API module. You can pass in a
+		connection to force a particular one to be used. Uses
+		newConnection() and connect().
+		'''
+		if connection:
+			conn = connection
+		elif self._threaded:
+			if self._threadSafety is 1:
+				conn = self.newConnection()
+			else: # safety = 2, 3
+				if not self._connected:
+					self.connect()
+				conn = self._connection
+		else:
+			# Non-threaded
+			if not self._connected:
+				self.connect()
+			conn = self._connection
+		cursor = conn.cursor()
+		return conn, cursor
+
+	def newConnection(self):
+		'''
+		Subclasses must override to return the DB API module
+		used by the subclass.
+		'''
+		raise SubclassResponsibilityError
+
+	def threadSafety(self):
+		return self.dbapiModule().threadsafety
 
 
 	## Obj refs ##
@@ -294,7 +364,6 @@ class SQLObjectStore(ObjectStore):
 			out.write(klass.name()+'\n')
 			self.executeSQL('select * from %s;' % klass.name())
 			out.write(str(self._cursor.fetchall()))
-			self.closeCursor()
 			out.write('\n')
 		out.write('END\n')
 
