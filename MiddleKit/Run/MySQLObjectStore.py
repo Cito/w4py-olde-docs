@@ -32,3 +32,15 @@ class MySQLObjectStore(SQLObjectStore):
 	def retrieveLastInsertId(self):
 		self.executeSQL('select last_insert_id();')
 		return self._cursor.fetchone()[0]
+
+
+# Mixins
+
+class StringAttr:
+	def sqlValue(self, value):
+		""" MySQL provides a quoting function for string -- use it. """
+		if value is None:
+			return 'NULL'
+		else:
+			return "'" + MySQLdb.escape_string(value) + "'"
+
