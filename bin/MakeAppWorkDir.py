@@ -38,7 +38,7 @@ OPTIONS:
 
 #----------------------------------------------------------------------
 
-import sys, os, string
+import sys, os, string, stat
 import glob, shutil
 
 #----------------------------------------------------------------------
@@ -137,6 +137,10 @@ class MakeAppWorkDir:
 		for name in configs:
 			newname = os.path.join(self._workDir, "Configs", os.path.basename(name))
 			shutil.copyfile(name, newname)
+			mode = os.stat(newname)[stat.ST_MODE] 
+
+			# remove public read/write/exec perms
+			os.chmod(newname, mode & 0770)
 
 
 	def copyOtherFiles(self):
