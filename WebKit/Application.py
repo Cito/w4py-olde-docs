@@ -173,7 +173,11 @@ class Application(Configurable,CanContainer):
 		"""
 		print "Application is Shutting Down"
 		self.running = 0
-		self._closeEvent.set()
+		if hasattr(self, '_sessSweepThread'):
+			# We don't always have this, hence the 'if' above
+			self._closeEvent.set()
+			self._sessSweepThread.join()
+			del self._sessSweepThread
 		self._sessions.storeAllSessions()
 		del self._canFactory
 		del self._sessions
@@ -181,10 +185,6 @@ class Application(Configurable,CanContainer):
 		del self._factoryByExt
 		del self._factoryList
 		del self._server
-		if hasattr(self, '_sessSweepThread'):
-			# We don't always have this, hence the 'if' above
-			self._sessSweepThread.join()
-			del self._sessSweepThread
 		print "Exiting Application"
 
 
