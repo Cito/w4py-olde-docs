@@ -121,6 +121,10 @@ If you have general comments or questions or contributions, please contact webwa
 
 	[ ] Improve Resources/Template.mkmodel.
 
+	[ ] In Classes.csv, provide an option for an attribute not to be archived. Accessors and type checking would still be provided.
+
+	[ ] Should MK also cover methods (it already does attributes)?
+
 	[ ] put types in for headings of classes.csv. Create "defaultTypes" feature for DataTable
 
 	[ ] standardize the DB API connection args?
