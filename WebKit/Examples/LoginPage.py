@@ -1,8 +1,14 @@
 from ExamplePage import ExamplePage
-import string, types, whrandom
-from time import time, localtime
+from MiscUtils.Funcs import uniqueId
+import string, types
 
 class LoginPage(ExamplePage):
+	def title(self):
+		return 'Log In'
+
+	def htBodyArgs(self):
+		return ExamplePage.htBodyArgs(self) + ' onload="document.loginform.username.focus();"' % locals()
+
 	def writeContent(self):
 		self.write('''
 <center>
@@ -10,8 +16,19 @@ class LoginPage(ExamplePage):
 ''')
 
 		extra = self.request().field('extra', None)
+		if not extra and self.request().isSessionExpired() and not self.request().hasField('logout'):
+			extra = 'You have been automatically logged out due to inactivity.'
 		if extra:
 			self.write('<tr><td align="left">%s</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>' % self.htmlEncode(extra))
+		
+		# Create a "unique" login id and put it in the form as well as in the session.
+		# Login will only be allowed if they match.
+		loginid = uniqueId(self)
+		self.session().setValue('loginid', loginid)
+
+		action = self.request().field('action', '')
+		if action:
+			action = 'action="%s"' % action
 
 		self.write('''
 		<tr>
@@ -19,7 +36,7 @@ class LoginPage(ExamplePage):
 		</tr>
 		<tr>
 			<td>
-				<form method="post">
+				<form method="post" name="loginform" %s>
 					<table border="0" width="100%%" cellpadding="3" cellspacing="0" bgcolor="#cecece" align="left">
 						<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 						<tr>
@@ -36,24 +53,10 @@ class LoginPage(ExamplePage):
 						</tr>
 						<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 					</table>
-''')
-		for (key, value) in self.request().fields().items():
-			if string.lower(key) not in ('username','password','login','logout','loginid'):
-				if isinstance(value, types.ListType):
-					for v in value:
-						self.writeln('<input type="hidden" name="%s" value="%s">' % (key, v))
-				else:
-					self.writeln('<input type="hidden" name="%s" value="%s">' % (key, value))
-		# Create a "unique" login id and put it in the form as well as in the session.
-		# Login will only be allowed if they match.
-		loginid = string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + str(whrandom.whrandom().randint(10000, 99999))
-		self.writeln('<input type="hidden" name="loginid" value="%s">' % loginid)
-		self.session().setValue('loginid', loginid)
-		self.write('''
+					<input type="hidden" name="loginid" value="%s">
 				</form>
 			</td>
 		</tr>
 	</table>
 </center>
-''')
-
+''' % (action, loginid))

@@ -20,7 +20,7 @@ class SecurePage(ExamplePage, Configurable):
 		}
 
 	To-Do: Integrate this functionality with the upcoming UserKit.
-	       Make more of the functionality configurable in the config file.
+		   Make more of the functionality configurable in the config file.
 
 	'''
 
@@ -28,44 +28,52 @@ class SecurePage(ExamplePage, Configurable):
 		ExamplePage.__init__(self)
 		Configurable.__init__(self)
 
-	def writeHTML(self):
-		# Check the configuration file to see if login is required.
+	def awake(self, trans):
+		# Awaken our superclass
+		ExamplePage.awake(self, trans)
+
 		if self.setting('RequireLogin'):
-			session = self.session()
-			request = self.request()
-			trans = self.transaction()
-			app = self.application()
-			# Get login id and clear it from the session
+			# Handle four cases: logout, login attempt, already logged in, and not already logged in.
+			session = trans.session()
+			request = trans.request()
+			app = trans.application()
+			# Get login id and immediately clear it from the session
 			loginid = session.value('loginid', None)
-			if loginid: session.delValue('loginid')
+			if loginid:
+				session.delValue('loginid')
 			# Are they logging out?
 			if request.hasField('logout'):
-				# They are logging out.  Clear all session variables.
+				# They are logging out.  Clear all session variables and take them to the
+				# Login page with a "logged out" message.
 				session.values().clear()
-				request.fields()['extra'] = 'You have been logged out.'
-				app.includeURL(trans, 'LoginPage')
+				request.setField('extra', 'You have been logged out.')
+				request.setField('action', request.urlPath().split('/')[-1])
+				app.forward(trans, 'LoginPage')
 			elif request.hasField('login') and request.hasField('username') and request.hasField('password'):
 				# They are logging in.  Clear session
 				session.values().clear()
-				# Check if this is a valid user/password
+				# Get request fields
 				username = request.field('username')
 				password = request.field('password')
-				if self.isValidUserAndPassword(username, password) and request.field('loginid', 'nologin')==loginid:
-					# Success; log them in and send the page
-					self.loginUser(username)
-					ExamplePage.writeHTML(self)
+				# Check if they can successfully log in.  The loginid must match what was previously
+				# sent.
+				if request.field('loginid', 'nologin')==loginid and self.loginUser(username, password):
+					# Successful login.
+					# Clear out the login parameters
+					request.delField('username')
+					request.delField('password')
+					request.delField('login')
+					request.delField('loginid')
 				else:
-					# Failed login attempt; have them try again
-					request.fields()['extra'] = 'Login failed.  Please try again. (And make sure cookies are enabled.)'
-					app.includeURL(trans, 'LoginPage')
+					# Failed login attempt; have them try again.
+					request.setField('extra', 'Login failed.  Please try again.')
+					app.forward(trans, 'LoginPage')
 			# They aren't logging in; are they already logged in?
-			elif self.getLoggedInUser():
-				# They are already logged in; write the HTML for this page.
-				ExamplePage.writeHTML(self)
-			else:
+			elif not self.getLoggedInUser():
 				# They need to log in.
 				session.values().clear()
-				app.includeURL(trans, 'LoginPage')
+				# Send them to the login page
+				app.forward(trans, 'LoginPage')
 		else:
 			# No login is required
 			session = self.session()
@@ -77,20 +85,34 @@ class SecurePage(ExamplePage, Configurable):
 			# write the page
 			ExamplePage.writeHTML(self)
 
+
+	def respond(self, trans):
+		"""
+		If the user is already logged in, then process this request normally.  Otherwise, do nothing.
+		All of the login logic has already happened in awake().
+		"""
+		if self.getLoggedInUser():
+			ExamplePage.respond(self, trans)
+  
 	def isValidUserAndPassword(self, username, password):
 		# Replace this with a database lookup, or whatever you're using for
 		# authentication...
 		users = [('Alice', 'Alice'), ('Bob', 'Bob')]
 		return (username, password) in users
 
-	def loginUser(self, username):
+	def loginUser(self, username, password):
 		# We mark a user as logged-in by setting a session variable called
 		# authenticated_user to the logged-in username.
 		#
 		# Here, you could also pull in additional information about this user
 		# (such as a user ID or user preferences) and store that information
 		# in session variables.
-		self.session().setValue('authenticated_user', username)
+		if self.isValidUserAndPassword(username, password):
+			self.session().setValue('authenticated_user', username)
+			return 1
+		else:
+			self.session().setValue('authenticated_user', None)
+			return 0
 
 	def getLoggedInUser(self):
 		# Gets the name of the logged-in user, or returns None if there is
