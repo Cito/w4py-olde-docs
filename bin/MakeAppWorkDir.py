@@ -268,6 +268,12 @@ appWorkPath = '%(WORKDIR)s'
 
 
 def main(args):
+	global webwarePath, appWorkPath
+	for arg in args:
+		if arg.startswith('--webware-path='):
+			webwarePath = arg[15:]
+		if arg.startswith('--working-path='):
+			appWorkPath = arg[15:]
 	# ensure Webware is on sys.path
 	sys.path.insert(0, webwarePath)
 
@@ -379,7 +385,7 @@ if __name__ == "__main__":
 			contextName = args[1]
 			args = args[2:]
 			continue
-		if targetDir:
+		if not args:
 			print __doc__
 			sys.exit(1)
 		targetDir = args[0]
@@ -389,7 +395,7 @@ if __name__ == "__main__":
 	p = os.path
 	webWareDir = p.abspath(p.join(p.dirname(sys.argv[0]), ".."))
 
-	mawd = MakeAppWorkDir(webWareDir, sys.argv[1],
+	mawd = MakeAppWorkDir(webWareDir, targetDir,
 	                      sampleContext=contextName,
 			      addCVSIgnore=addCVSIgnore)
 	mawd.buildWorkDir()
