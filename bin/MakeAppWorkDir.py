@@ -24,10 +24,13 @@ updated without disturbing your applications.
 
 COMMAND LINE USAGE
 
-	python MakeAppWorkDir.py [-c SampleContextName] SomeDir
+	python MakeAppWorkDir.py [-c SampleContextName] [--cvsignore] SomeDir
 
 If SampleContextName is given that name will be used for the
 installed context.  Otherwise a context "MyContext" will be created.
+
+If --cvsignore is used, .cvsignore files will be added to the working
+dir.
 
 """
 
@@ -48,7 +51,8 @@ class MakeAppWorkDir:
 	"""
 
 	def __init__(self, webWareDir, workDir, verbose=1,
-		     sampleContext="MyContext", osType=None):
+		     sampleContext="MyContext", osType=None,
+		     addCVSIgnore=0):
 		"""Initializer for MakeAppWorkDir.  Pass in at least the
 		Webware directory and the target working directory.  If you
 		pass None for sampleContext then the default context will the
@@ -70,6 +74,7 @@ class MakeAppWorkDir:
 		if osType is None:
 			osType = os.name
 		self._osType = osType
+		self._addCVSIgnore = addCVSIgnore
 
 	def buildWorkDir(self):
 		"""These are all the (overridable) steps needed to make a new runtime direcotry."""
@@ -79,8 +84,8 @@ class MakeAppWorkDir:
 		self.makeLauncherScripts()
 		self.makeDefaultContext()
 		self.printCompleted()
-
-
+		if self._addCVSIgnore:
+			self.addCVSIgnore()
 
 	def makeDirectories(self):
 		"""Creates all the needed directories if they don't already exist."""
@@ -201,6 +206,19 @@ class MakeAppWorkDir:
 				output.write(line)
 		self.msg("\n")
 
+	def addCVSIgnore(self):
+		print "Creating .cvsignore files."
+		files = {'.': '*.pyc\naddress.*\nhttpd.*\nappserverpid.*',
+			 'Cache': '*',
+			 'ErrorMsgs': '*',
+			 'Logs': '*',
+			 'Sessions': '*',
+			 }
+		for dir, contents in files.items():
+			filename = os.path.join(self._workDir, dir, '.cvsignore')
+			f = open(filename, 'w')
+			f.write(contents)
+			f.close()
 
 
 	def printCompleted(self):
@@ -346,9 +364,14 @@ class Main(Page):
 if __name__ == "__main__":
 	targetDir = None
 	contextName = 'MyContext'
+	addCVSIgnore = 0
 	args = sys.argv[1:]
 	# lame little command-line handler
 	while args:
+		if args[0] == '--cvsignore':
+			addCVSIgnore = 1
+			args = args[1:]
+			continue
 		if args[0] == '-c':
 			if len(args) < 2:
 				print __doc__
@@ -367,6 +390,7 @@ if __name__ == "__main__":
 	webWareDir = p.abspath(p.join(p.dirname(sys.argv[0]), ".."))
 
 	mawd = MakeAppWorkDir(webWareDir, sys.argv[1],
-	                      sampleContext=contextName)
+	                      sampleContext=contextName,
+			      addCVSIgnore=addCVSIgnore)
 	mawd.buildWorkDir()
 
