@@ -130,6 +130,7 @@ class AppServer(Configurable, Object):
 				if os.path.isdir(filename) and \
 				   os.path.exists(os.path.join(filename, '__init__.py')) and \
 				   not os.path.exists(os.path.join(filename, 'dontload')) and \
+				   os.path.basename(filename)!='WebKit' and \
 				   filename not in plugIns:
 					plugIns.append(filename)
 
