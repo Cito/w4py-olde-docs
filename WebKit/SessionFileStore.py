@@ -49,11 +49,15 @@ class SessionFileStore(SessionStore):
 			except IOError:
 				raise KeyError, key
 			try:
-				item = self.decoder()(file)
-			except:
-				# Corrupt data; pretend it doesn't exist
+				try:
+					item = self.decoder()(file)
+				finally:
+					file.close()
+			except:					# session can't be unpickled
+				os.remove(filename) # remove session file
+				print "Error loading session from disk:", key
+				self.application().handleException()
 				raise KeyError, key
-			file.close()
 		finally:
 			self._lock.release()
 		return item

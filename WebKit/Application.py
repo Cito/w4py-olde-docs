@@ -491,12 +491,16 @@ class Application(ConfigurableForServerSidePath, Object):
 		sid = request.sessionId()
 		if sid:
 			if self._sessions.has_key(sid):
-				if (time()-request.session().lastAccessTime()) >= request.session().timeout():
-					if debug: print prefix, 'session expired: %s' % repr(sid)
-					del self._sessions[sid]
+				try:
+					session = request.session()
+					if (time()-session.lastAccessTime()) >= session.timeout():
+						if debug: print prefix, 'session expired: %s' % repr(sid)
+						del self._sessions[sid]
+						problematic = 1
+					else:
+						problematic = 0
+				except KeyError:
 					problematic = 1
-				else:
-					problematic = 0
 			else:
 				if debug: print prefix, 'session does not exist: %s' % repr(sid)
 				problematic = 1
