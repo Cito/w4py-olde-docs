@@ -45,18 +45,19 @@ class OneShotAdapter(Adapter):
 	def run(self):
 
 		try:
-			myInput = ''
-			if os.environ.has_key('CONTENT_LENGTH'):
-				length = int(os.environ['CONTENT_LENGTH'])
-				if length:
-					myInput = sys.stdin.read(length)
+#			myInput = ''
+#			if os.environ.has_key('CONTENT_LENGTH'):
+#				length = int(os.environ['CONTENT_LENGTH'])
+#				if length:
+#					myInput = sys.stdin.read(length)
 			#myInput = sys.stdin.read()
 
 			dict = {
 				'format':  'CGI',
 				'time':    _timestamp,
 				'environ': os.environ.data, # ce: a little tricky. We use marshal which only works on built-in types, so we need environ's dictionary
-				'input':   myInput
+#				'input':   myInput,
+				'input':   sys.stdin,
 			}
 
 			print 'ONE SHOT MODE\n'
