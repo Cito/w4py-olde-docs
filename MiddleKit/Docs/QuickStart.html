@@ -311,10 +311,15 @@ sys.path.insert(1, os.path.abspath(os.pardir))
 
 from mx.DateTime import DateFrom
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
+# For MSSQL:
+# from MiddleKit.Run.MSSQLObjectStore import MSSQLObjectStore
+
 
 def main():
     # Set up the store
     store = MySQLObjectStore(user='user', passwd='password')
+    # For MSSQL:
+    # store = MSSQLObjectStore(dsn='dsn',user='user',password='password',clear_auto_commit=0)
     store.readModelFileNamed('../Middle/Videos')
 
 if __name__=='__main__':
