@@ -585,7 +585,10 @@ def run(useMonitor = 0, workDir=None):
 def shutDown(arg1,arg2):
 	global server
 	print "Shutdown Called"
-	server.initiateShutdown()
+	if server:
+		server.initiateShutdown()
+	else:
+		print 'WARNING: No server reference to shutdown.'
 
 import signal
 signal.signal(signal.SIGINT, shutDown)
