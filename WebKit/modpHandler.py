@@ -82,7 +82,10 @@ def handler(req):
 		# get the apache module to do the grunt work of
 		#   building the environment
 		env=apache.build_cgi_env(req)
-
+		WK_URI = env['REQUEST_URI'][len(env['SCRIPT_NAME']):]
+		env['PATH_INFO'] = WK_URI  #Hack to accomodate the current cgi-centric approach WK uses to find the path
+##		env['WK_URI'] = WK_URI
+##		if env["WK_URI"] == "": env["WK_URI"]="/"
 
 		dict = {
 				'format': 'CGI',
