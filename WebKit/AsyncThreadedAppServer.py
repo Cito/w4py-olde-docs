@@ -8,7 +8,7 @@ from AppServer import AppServer
 from Application import Application
 from marshal import dumps, loads
 import os, sys
-from threading import Lock, Thread, Event
+from threading import Lock, Thread, Event, RLock
 import Queue
 import select
 import socket
@@ -184,10 +184,51 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 
 
 
+from WebKit.ASStreamOut import ASStreamOut
+class ASTASStreamOut(ASStreamOut):
+	"""
+	This class handles a response stream for AsyncThreadedAppServer.
+	"""
+	def __init__(self, trigger):
+		ASStreamOut.__init__(self)
+		self._lock = RLock() #we need an reentrant lock because the write method uses the lock, but it can also call flush, which also uses the lock
+		self._trigger = trigger
+
+	def close(self):
+		ASStreamOut.close(self)
+		self._trigger.release()
+
+	def writable(self):
+		"""
+		Called by asyncore to ask if we want to write data
+		"""
+		if debug: print "writeable called with self._comm=%s and len(buffer)=%s"%(self._committed, len(self._buffer))
+		if self._closed: return 1
+		return self._committed and len(self._buffer)
+
+	def flush(self):
+		if debug: print "ASTASStreanOut Flushing"
+		self._lock.acquire()
+		ASStreamOut.flush(self)
+		self._lock.release()
+		if self._committed:
+			self._trigger.release()
+		
+	def write(self, charstr):
+		self._lock.acquire()
+		ASStreamOut.write(self, charstr)
+		self._lock.release()
+
+	def pop(self, count):
+		self._lock.acquire()
+		ASStreamOut.pop(self, count)
+		self._lock.release()
+
+
 class RequestHandler(asyncore.dispatcher):
 	"""
 	Has the methods that process the request.
-	An instance of this class is activated by AppServer.  When activated, it is listening for the request to come in.  asyncore will call handle_read when there is data to be read.  ONce all the request has been read, it will put itself in the requestQueue to be picked up by a thread and processed by calling handleRequest. Once the processing is complete, the thread drops the instance and tries to find another one.  This instance notifies asyncore that it is ready to send.
+	An instance of this class is activated by AppServer.  When activated, it is listening for the request to come in.  asyncore will call handle_read when there is data to be read.  Once all the request has been read, it will put itself in the requestQueue to be picked up by a thread and processed by calling handleRequest. Once the processing is complete, the thread drops the instance and tries to find another one.  This instance notifies asyncore that it is ready to send.
 	"""
 
 
@@ -196,18 +237,18 @@ class RequestHandler(asyncore.dispatcher):
 		self.have_request = 0
 		self.have_response = 0
 		self.reqdata=[]
-		self._buffer = ''
-
+		self._strmOut = None
+		
 	def handleRequest(self):
 		#check for status message
 		if self.reqdata == "STATUS":
-			self._buffer = str(self.server._reqCount)
-			self.have_response = 1
+			self._strmOut.write( str(self.server._reqCount))
+			self._strmOut.close()
 			return
 
 		if self.reqdata == 'QUIT':
-			self._buffer = 'OK'
-			self.have_response = 1
+			self._strmOut.write('OK')
+			self._strmOut.close()
 			self.server.initiateShutdown()
 			return
 
@@ -241,36 +282,28 @@ class RequestHandler(asyncore.dispatcher):
 				print 'request uri =', requestURI
 
 
-		transaction = self.server._app.dispatchRawRequest(dict)
+		transaction = self.server._app.dispatchRawRequest(dict, self._strmOut)
+		self._strmOut.close()
 
-
-		rawResponse = transaction.response().rawResponse()
-
-		for item in rawResponse['headers']:
-			if string.lower(item[0]) == string.lower("Status"):
-				self._buffer = item[0] + ": " + str(item[1]) + "\n" + self._buffer
-			else: self._buffer = self._buffer + item[0] + ": " + str(item[1]) + "\n"
-
-		self._buffer = self._buffer + "\n" + rawResponse['contents']
-
-		self.have_response = 1
 
 		transaction._application=None
 		transaction.die()
 		del transaction
 		MainRelease.release()
 
+
+
 	def activate(self, socket, addr):
 		self.set_socket(socket)
-		self._buffer=''
 		self.active = 1
+		self._strmOut = ASTASStreamOut(MainRelease)
+
 
 	def readable(self):
 		return self.active and not self.have_request
 
 	def writable(self):
-		return self._buffer
-		#return self.have_response and self._buffer
+		return self.active and self._strmOut.writable()
 
 	def handle_connect(self):
 		pass
@@ -290,27 +323,28 @@ class RequestHandler(asyncore.dispatcher):
 
 
 	def handle_write(self):
-		if not self._buffer and not self.have_response:
-			print ">> Handle write called before response is ready\n"
-			return
 		try:
-			sent = self.send(self._buffer[:8192])
+			sent = self.send(self._strmOut._buffer)
 		except socket.error, e:
 			if e[0] == 32: #bad file descriptor
 				self.close()
 				return
-		self._buffer = self._buffer[sent:]
-		if self.have_response and not self._buffer:  #if the servlet has returned and there is no more data in the buffer
-			self.socket.shutdown(1)
+		self._strmOut.pop(sent)
+		
+		 #if the servlet has returned and there is no more data in the buffer
+		if self._strmOut.closed() and len(self._strmOut._buffer)==0: 
+##			self.socket.shutdown(1)
 			self.close()
 			#For testing
-		else:
+		elif len(self._strmOut._buffer) > 0:
 			MainRelease.release() #let's send the rest
 		if debug:
 			sys.stdout.write(".")
 			sys.stdout.flush()
 
 	def close(self):
+		if debug: print "Socket closing"
+		self.socket.shutdown(1)
 		self.recycle()
 
 	def handle_close(self):
@@ -319,12 +353,11 @@ class RequestHandler(asyncore.dispatcher):
 		#self.recycle()
 
 	def recycle(self):
-		#print "Recycling\n"
 		self.active = 0
 		self.have_request = 0
-		self.have_response = 0
 		self.reqdata=[]
 		asyncore.dispatcher.close(self)
+		self._strmOut = None
 		self.server.rhQueue.put(self)
 
 	def log(self, message):

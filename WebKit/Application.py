@@ -23,6 +23,9 @@ from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 
 from TaskKit.Scheduler import Scheduler
 
+
+debug = 0
+
 class ApplicationError(Exception):
 	pass
 
@@ -174,6 +177,13 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		self._cacheServletInstances = self.setting("CacheServletInstances",1)
 		print
 
+		try:
+			self._404Page = open(os.path.join(self._serverSidePath,"404Text.txt"),"r").read()
+		except:
+			self._404Page = """404 Error<p>File Not Found: %s"""
+
+### End __init__
+
 
 ## Task access
 	def taskManager(self):
@@ -261,7 +271,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			'ErrorEmailHeaders':     { 'From':         '-@-.com',
 			                           'To':           ['-@-.com'],
 			                           'Reply-to':     '-@-.com',
-			                           'Content-type': 'text/html',
+			                           'content-type': 'text/html',
 			                           'Subject':      'Error'
 			                         },
 			'Contexts':              { 'default':       'Examples',
@@ -302,10 +312,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 	## Dispatching Requests ##
 
-	def dispatchRawRequest(self, newRequestDict):
-		return self.dispatchRequest(self.createRequestForDict(newRequestDict))
+	def dispatchRawRequest(self, newRequestDict, strmOut):
+		return self.dispatchRequest(self.createRequestForDict(newRequestDict), strmOut)
 
-	def dispatchRequest(self, request):
+	def dispatchRequest(self, request, strmOut):
 		""" Creates the transaction, session, response and servlet for the new request which is then dispatched. The transaction is returned. """
 
 		assert request is not None
@@ -315,7 +325,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			sys.stdout = StringIO()
 
 		transaction = self.createTransactionForRequest(request)
-		response	= self.createResponseInTransaction(transaction)
+		response	= self.createResponseInTransaction(transaction, strmOut)
 
 		try:
 			ssPath = request.serverSidePath()
@@ -333,7 +343,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 					<pre>%s</pre></td></tr></table>''' % sys.stdout.getvalue())
 				sys.stdout = real_stdout
 
-			response.deliver(transaction)
+			response.deliver()
 
 			# (*) We have to use pathInfo() instead of uri() when looking for the trailing slash, because some webservers, notably Apache, append a trailing / to REQUEST_URI in some circumstances even though the user did not specify that (for example: http://localhost/WebKit.cgi).
 
@@ -341,8 +351,9 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			if transaction:
 				transaction.setErrorOccurred(1)
 			self.handleExceptionInTransaction(sys.exc_info(), transaction)
-			transaction.response().deliver(transaction) # I hope this doesn't throw an exception. :-)   @@ 2000-05-09 ce: provide a secondary exception handling mechanism
+			transaction.response().deliver() # I hope this doesn't throw an exception. :-)   @@ 2000-05-09 ce: provide a secondary exception handling mechanism
 			pass
+
 
 		if self.setting('LogActivity'):
 			self.writeActivityLog(transaction)
@@ -352,14 +363,16 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 		# possible circular reference, so delete it
 		# @@ 2000-06-26 ce: we should have a more general solution for this
-		request._transaction = None
-
+		request.clearTransaction()
+		response.clearTransaction()
+		
 		return transaction
 
 	def handleBadURL(self, transaction):
 		res = transaction.response()
 		res.setHeader('Status', '404 Error')
-		res.write('<p> 404 Not found: %s' % transaction.request().uri())
+##		res.write('<p> 404 Not found: %s' % transaction.request().uri())
+		res.write(self._404Page % (transaction.request().uri()))
 		# @@ 2000-06-26 ce: This error page is pretty primitive
 		# @@ 2000-06-26 ce: We should probably load a separate template file and display that
 
@@ -443,7 +456,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		New Request, Response and Transaction objects are created.
 		Currently the URL is always relative to the existing URL.
 		"""
-
+		if debug: print "forwardRequest called"
 		req = trans.request()
 
 		# URL is relative to the original
@@ -458,17 +471,31 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 		newRequest = self.createRequestForDict(req.rawRequest())
 		newRequest.setURLPath(urlPath)
-		newTrans = self.dispatchRequest(newRequest)
-		trans.response().appendRawResponse(newTrans.response().rawResponse())
+		import ASStreamOut
+		strmOut = ASStreamOut.ASStreamOut()
+		newTrans = self.dispatchRequest(newRequest, strmOut)
+		textHeaders1 = string.find(strmOut._buffer,"\r\n\r\n")
+		textHeaders2 = string.find(strmOut._buffer,"\n\n")
+		if textHeaders1 and textHeaders2:
+			if textHeaders1 < textHeaders2:
+				textHeaders = textHeaders1
+			else:
+				textHeaders = textHeaders2
+		else: textHeaders = textHeaders1 or textHeaders2
+		trans.response().mergeTextHeaders(strmOut._buffer[:textHeaders])
+		trans.response().write(strmOut._buffer[textHeaders+1:])
+##		trans.response().appendRawResponse(newTrans.response().rawResponse())
 
 
 	def forwardRequestFast(self, trans, URL):
-		"""Enable a servlet to pass a request to another servlet.  This implementation handles chaining and
-		requestDispatch in Java.
+		"""
+		Enable a servlet to pass a request to another servlet.  This implementation
+		handles chaining and requestDispatch in Java.
 
-		The Request, REsponse and Session objects are all kept the same, so the Servlet that is called may
-		receive information through those objects.  The catch is that the function WILL return to the calling
-		servlet, so the calling servlet should either take advantage of that or return immediately.
+		The Request, Rssponse and Session objects are all kept the same, so the Servlet
+		that is called may receive information through those objects.  The catch is that
+		the function WILL return to the calling servlet, so the calling servlet should either
+		take advantage of that or return immediately.
 		"""
 
 
@@ -669,8 +696,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		request.setTransaction(trans)
 		return trans
 
-	def createResponseInTransaction(self, transaction):
-		response = self._responseClass()
+	def createResponseInTransaction(self, transaction, strmOut):
+		response = self._responseClass(transaction, strmOut)
 		transaction.setResponse(response)
 		return response
 
@@ -815,7 +842,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 	def handleExceptionInTransaction(self, excInfo, transaction):
 		self._exceptionHandlerClass(self, transaction, excInfo)
 
-	def filenamesForBaseName(self, baseName, debug=0):
+	def filenamesForBaseName(self, baseName):
 		'''
 		Returns a list of all filenames with extensions existing for baseName, but not including extension found in the setting ExtensionsToIgnore. This utility method is used by serverSideInfoForRequest().
 		Example: '/a/b/c' could yield ['/a/b/c.py', '/a/b/c.html'], but will never yield a '/a/b/c.pyc' filename since .pyc files are ignored.
@@ -847,7 +874,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				self._defaultContextName = 'default'
 		return self._defaultContextName, self.context(self._defaultContextName)
 
-	def serverSideInfoForRequest(self, request, debug=0):
+
+	def serverSideInfoForRequest(self, request):
 		"""
 		Returns a tuple (requestPath, contextPath, contextName) where requestPath is
 		the server-side path of this request, contextPath is the
@@ -1014,7 +1042,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			# Handle directories
 			if debug: print '>> directory = %s' % repr(ssPath)
 			for dirFilename in self.setting('DirectoryFile'):
-				filenames = self.filenamesForBaseName(os.path.join(ssPath, dirFilename), debug)
+				filenames = self.filenamesForBaseName(os.path.join(ssPath, dirFilename))
 				num = len(filenames)
 				if num==1:
 					break  # we found a file to handle the directory
@@ -1028,7 +1056,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			if debug: print '>> discovered directory file = %s' % repr(ssPath)
 		elif os.path.splitext(ssPath)[1]=='':
 			# At this point we have a file (or a bad path)
-			filenames = self.filenamesForBaseName(ssPath, debug)
+			filenames = self.filenamesForBaseName(ssPath)
 			if len(filenames)==1:
 				ssPath = filenames[0]
 				if debug: print '>> discovered extension, file = %s' % repr(ssPath)

@@ -23,5 +23,5 @@ class OneShotAppServer(AppServer):
 	def createApplication(self):
 		return Application(server=self, useSessionSweeper=0)
 
-	def dispatchRawRequest(self, newRequestDict):
-		return self._app.dispatchRawRequest(newRequestDict)
+	def dispatchRawRequest(self, newRequestDict, strmOut):
+		return self._app.dispatchRawRequest(newRequestDict, strmOut)

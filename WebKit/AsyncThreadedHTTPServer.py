@@ -27,15 +27,6 @@ try this out.  You can also modify the 8086 to 80 in AppServer.config
 if you want this to serve on the default port for web servers.
 
 To-Do:
-    - The HTTPRequestHandler class inherits from the standard Python library's
-      BaseHTTPRequestHandler class but uses it in a different way from how
-      it was intended to be used.  It might be less confusing, and more
-      maintainable if we copied the code we're using from
-      BaseHTTPRequestHandler into RequestHandler itself.  (Usually
-      cut-and-paste isn't the best way to reuse code, but in this case it's
-      probably preferable because of the unusual way we're using
-      BaseHTTPRequestHandler.)
-
     - Comment the code in HTTPRequestHandler.
 """
 
@@ -50,22 +41,23 @@ from AsyncThreadedAppServer import Monitor, MainRelease
 import AsyncThreadedAppServer
 
 from cStringIO import StringIO
-from BaseHTTPServer import BaseHTTPRequestHandler
 import urllib, string, time, asyncore, socket
 import sys, os
+from threading import RLock
+import mimetools
 
 global monitor
 monitor=0
 
 debug=0
 
-class AsyncThreadedHTTPServer(AsyncThreadedAppServer.AsyncThreadedAppServer):
-	'''
+class AsyncThreadedHTTPServer2(AsyncThreadedAppServer.AsyncThreadedAppServer):
+	"""
 	This derived class customizes AsyncThreadedAppServer so that it
 	can serve HTTP requests directly, using a different implementation
 	of RequestHandler from the one defined in AsyncThreadedAppServer.py.
 	See below for the modified version of RequestHandler.
-	'''
+	"""
 	def __init__(self):
 		AsyncThreadedAppServer.AsyncThreadedAppServer.__init__(self)
 		# Use a custom request handler class that is designed to respond
@@ -74,26 +66,21 @@ class AsyncThreadedHTTPServer(AsyncThreadedAppServer.AsyncThreadedAppServer):
 		self._serverName = None
 
 	def serverName(self):
-		'''
-		Returns the server name.
-		'''
-		# I didn't write this code myself, but I can't remember where I got it
-		# from.  In any case, it seems to do what we need.
-		return 'localhost'
-		if self._serverName is None:
-			host, port = self.address()
-			print "Using hostname %s" % host
-			if not host or host == '0.0.0.0':
-				host = socket.gethostname()
+		host, port = self.socket.getsockname()
+		if not host or host == '0.0.0.0':
+			host = socket.gethostname()
+		hostname, hostnames, hostaddrs = socket.gethostbyaddr(host)
+		if '.' not in hostname:
+			for host in hostnames:
+				if '.' in host:
+					hostname = host
+					break
+		self.server_name = hostname
+		self.server_port = port
+		self._serverName = hostname
+		return hostname
 
-			hostname, hostnames, hostaddrs = socket.gethostbyaddr(host)
-			if '.' not in hostname:
-				for host in hostnames:
-					if '.' in host:
-						hostname = host
-						break
-			self._serverName = hostname
-		return self._serverName
+
 
 	def serverPort(self):
 		'''
@@ -102,14 +89,52 @@ class AsyncThreadedHTTPServer(AsyncThreadedAppServer.AsyncThreadedAppServer):
 		return self.address()[1]
 
 
-
-class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
+from WebKit.ASStreamOut import ASStreamOut
+class ASTHSStreamOut(ASStreamOut):
 	"""
-	Has the methods that process the request.  This class inherits from
-	BaseHTTPRequestHandler but uses it in a somewhat strange way.  It would
-	probably be better to eliminate BaseHTTPRequestHandler as a base class
-	and instead simply move the necessary code into this class.
+	This class handles a response stream for AsyncThreadedAppServer.
+	"""
+	def __init__(self, trigger):
+		ASStreamOut.__init__(self)
+		self._lock = RLock() #we need an reentrant lock because the write method uses the lock, but it can also call flush, which also uses the lock
+		self._trigger = trigger
 
+	def close(self):
+		ASStreamOut.close(self)
+		self._trigger.release()
+
+	def writeable(self):
+		"""
+		Called by asyncore to ask if we want to write data
+		"""
+		if debug: print "writeable called with self._comm=%s and len(buffer)=%s"%(self._committed, len(self._buffer))
+		if self._closed: return 1
+		return self._committed and len(self._buffer)
+
+	def flush(self):
+		if debug: print "ASTASStreamOut Flushing"
+		self._lock.acquire()
+		ASStreamOut.flush(self)
+		self._lock.release()
+		if self._committed:
+			self._trigger.release()
+		
+	def write(self, charstr):
+		self._lock.acquire()
+		ASStreamOut.write(self, charstr)
+		self._lock.release()
+
+	def pop(self, count):
+		self._lock.acquire()
+		ASStreamOut.pop(self, count)
+		self._lock.release()
+
+
+
+class HTTPRequestHandler(asyncore.dispatcher):
+	"""
+	Has the methods that process the request.
+	
 	An instance of this class is activated by AsyncThreadedHTTPServer.
 	When activated, it is listening for the request to come in.  asyncore will
 	call handle_read when there is data to be read.  ONce all the request has
@@ -153,11 +178,10 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 
 		if verbose:
 			print 'received %d bytes' % len(self.reqdata)
-		self.rfile = StringIO(self.reqdata)
-		self.wfile = StringIO()
-		self.handle()
+		self.rfile = StringIO(self.reqdata[string.find(self.reqdata,"\n")+1:])
+		self.headers = mimetools.Message(self.rfile)
+		self.handleHTTPRequest()
 
-		self._buffer = self.wfile.getvalue()
 		self.have_response = 1
 
 		if verbose:
@@ -175,9 +199,10 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 	def activate(self, sock, addr):
 		self.set_socket(sock)
 		self.clientf = sock.makefile("r+",0)
-		self._buffer=''
 		self.active = 1
 		self.client_address = addr
+		self._strmOut = ASTHSStreamOut(MainRelease)
+		self.statusSent=0
 
 	def readable(self):
 		return self.active and not self.have_request
@@ -186,7 +211,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		"""
 		Always ready to write, otherwise we might have to wait for a timeout to be asked again
 		"""
-		return self.have_response
+		return self.active and self._strmOut.writeable()
 
 	def handle_connect(self):
 		pass
@@ -206,35 +231,52 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			if string.lower(self.reqtype) == "get":
 				self.reqdata = string.join(self.request_data,"")
 				self.have_request = 1
+				self.path = string.split(self.request_data[0])[1]
 				self.server.requestQueue.put(self)
 			elif string.lower(self.reqtype) == "post":
 				for i in self.request_data:
 					if string.lower(string.split(i,":")[0]) =="content-length":
 						self.datalength = int(string.split(i)[1]) + 2
+				self.path = string.split(self.request_data[0])[1]
+				self.reqdata=string.join(self.request_data,"")
+				self.request_data = []
 		else:
 			data = self.recv(self.datalength)
 			self.request_data.append(data)
 			self.datalength = self.datalength - len(data)
 			if self.datalength > 0:
 				return
-			self.reqdata = string.join(self.request_data,"")
+			self.inputdata = string.join(self.request_data,"")
 			self.have_request = 1
 			self.server.requestQueue.put(self)
 
 
-
-
 	def handle_write(self):
-		if not self.have_response: return
-		sent = self.send(self._buffer)
-		self._buffer = self._buffer[sent:]
-		if len(self._buffer) == 0:
+		if not self.statusSent:
+			if string.lower(self._strmOut._buffer[:7]) == "status:" :
+				self._strmOut._buffer = "HTTP/1.0" + self._strmOut._buffer[8:]
+			else:
+				self._strmOut._buffer = "HTTP/1.0 200 OK\r\n" + self._strmOut._buffer
+			self.statusSent=1
+		try:
+			sent = self.send(self._strmOut._buffer)
+		except socket.error, e:
+			if e[0] == 32: #bad file descriptor
+				self.close()
+				return
+		self._strmOut.pop(sent)
+		
+		 #if the servlet has returned and there is no more data in the buffer
+		if self._strmOut.closed() and len(self._strmOut._buffer)==0: 
+			self.socket.shutdown(1)
 			self.close()
-		else:
-			MainRelease.release()
+			#For testing
+		elif len(self._strmOut._buffer) > 0:
+			MainRelease.release() #let's send the rest
 		if debug:
 			sys.stdout.write(".")
 			sys.stdout.flush()
+
 
 
 	def close(self):
@@ -249,13 +291,13 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			pass
 		self.active = 0
 		self.have_request = 0
-		self.have_response = 0
 		self.have_header = 0
 		self.reqtype=''
 		self.reqdata=''
 		self.request_data=[]
 		self.haveheader=0
 		self.datalength=0
+		self._strmOut = None
 		self.server.rhQueue.put(self)
 
 	def log(self, message):
@@ -276,13 +318,13 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			query = ''
 
 		env = {}
-		env['SERVER_SOFTWARE'] = self.version_string()
+		env['SERVER_SOFTWARE'] = "WebKit.HTTPServer" ##self.version_string()
 		env['GATEWAY_INTERFACE'] = 'CGI/1.1'
-		env['SERVER_PROTOCOL'] = self.protocol_version
+		env['SERVER_PROTOCOL'] = "HTTP/1.0" ##self.protocol_version
 		env['SERVER_NAME'] = self.server.serverName()
 		env['HTTP_HOST'] = self.server.serverName()
 		env['SERVER_PORT'] = str(self.server.serverPort())
-		env['REQUEST_METHOD'] = self.command
+		env['REQUEST_METHOD'] = self.reqtype
 		uqrest = urllib.unquote(path)
 		env['PATH_INFO'] = uqrest
 		#env['PATH_TRANSLATED'] = self.translate_path(uqrest)
@@ -302,12 +344,11 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 			env['CONTENT_TYPE'] = self.headers.type
 		else:
 			env['CONTENT_TYPE'] = self.headers.typeheader
-		length = self.headers.getheader('content-length')
+		length = self.headers.getheader('Content-Length')
 		if length:
+			print "*******Length=",length
 			env['CONTENT_LENGTH'] = length
-#			print 'reading %d chars of input' % int(length)
-			input = self.rfile.read(int(length))
-#			print 'done reading; input is %d chars long' % int(len(input))
+			input = self.inputdata
 		else:
 			input = ''
 		for name, value in self.headers.items():
@@ -320,15 +361,10 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 				'input':   input
 				}
 
-		self.transaction = self.server._app.dispatchRawRequest(dict)
+		self.transaction = self.server._app.dispatchRawRequest(dict, self._strmOut)
+		self._strmOut.close()
 
-		response = self.transaction.response()
-		self.send_response(response.header('Status', 200))
-		rawResponse = response.rawResponse()
-		for keyword, value in rawResponse['headers']:
-			self.send_header(keyword, value)
-		self.end_headers()
-		self.wfile.write(rawResponse['contents'])
+		
 
 	def log_message(self, format, *args):
 		if debug:
@@ -347,7 +383,7 @@ def run(useMonitor=0):
 	try:
 		server = None
 		try:
-			server = AsyncThreadedHTTPServer()
+			server = AsyncThreadedHTTPServer2()
 			print __doc__
 		except Exception, e:
 			print "Error starting the AppServer"

@@ -18,11 +18,10 @@ class Response(Message):
 
 	## Init ##
 	
-	def __init__(self):
+	def __init__(self, trans, strmOut):
 		Message.__init__(self)
-		# @@ 2000-04-30 ce: Does a response need to know it's transaction?
-		#self._transaction = transaction
-
+		self._strmOut = strmOut
+		self._transaction = trans
 
 	## End time ##
 
@@ -47,3 +46,10 @@ class Response(Message):
 
 	def reset(self):
 		raise SubclassResponsibilityError
+
+	def streamOut(self):
+		return self._strmOut
+
+	## Cleanup ##
+	def clearTransaction(self):
+		del self._transaction

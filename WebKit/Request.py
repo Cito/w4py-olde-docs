@@ -79,3 +79,7 @@ class Request(Message):
 	def isSecure(self):
 		''' Returns true if request was made using a secure channel, such as HTTPS. This currently always returns false, since secure channels are not yet supported. '''
 		return 0
+
+	## Cleanup ##
+	def clearTransaction(self):
+		del self._transaction
