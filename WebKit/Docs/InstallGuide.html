@@ -350,7 +350,7 @@ WebKit 0.5.1
 
 <p> The top of ModPythonAdapter.py contains a doc sting explaining the setup.
 
-<p> This has been tested on both UNIX and Windows.
+<p> This has been tested on both UNIX and Windows.  On Windows, you should use mod_python 2.7.4 or later because there is a bug in earlier versions of mod_python for Windows that can cause Apache to crash or return incorrect responses under heavy load.
 
 <p> More information about mod_python can be found at <a href=http://www.modpython.org>http://www.modpython.org</a>.
 
@@ -365,7 +365,7 @@ WebKit 0.5.1
 
 <a name=Adapters_mod_webkit><h3>ModWebkit Adapter</h3></a>
 
-<p> This is a native apache module designed solely to communicate with WebKit.  It is written in C, and has only been tested on Linux.
+<p> This is a native apache module designed solely to communicate with WebKit.  It is written in C, and has been tested on Linux and Windows.
 
 <p> This adapter is the fastest of the adapters available for WebKit.
 
