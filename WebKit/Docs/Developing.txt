@@ -1,0 +1,15 @@
+Developing Webware, WebKit, and Components
+++++++++++++++++++++++++++++++++++++++++++
+
+Creating Plugins
+================
+
+Each plugin is a directory.  WebKit finds plugins using the
+``PlugIns`` and ``PluginDirs`` -- see Configuration_.
+
+.. _Configuration: Configuration.html#appserverconfig
+
+A plug-in must have ``__init__.py`` and ``Properties.py`` files. You
+can disable a specific plug-in by placing a ``dontload`` file in it.
+
+@@ ib: document __init__.py, Properties.py
