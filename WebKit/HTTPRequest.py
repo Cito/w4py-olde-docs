@@ -128,6 +128,8 @@ class HTTPRequest(Request):
 			self._environ['PATH_TRANSLATED'] = self._environ['PATH_TRANSLATED'].replace(sidstring,'')
 			assert(not self._environ.has_key('WK_URI')) # obsolete?
 
+		self._expiredSession = 0
+
 		if debug: print "Done setting up request, found keys %s" % repr(self._fields.keys())
 
 	## Transactions ##
@@ -209,6 +211,17 @@ class HTTPRequest(Request):
 	def session(self):
 		''' Returns the session associated with this request, either as specified by sessionId() or newly created. This is a convenience for transaction.session() '''
 		return self._transaction.session()
+
+	def expiredSession(self):
+		'''
+		Returns bool: whether or not this request originally contained an expired session ID.  Only works if
+		the Application.config setting "IgnoreInvalidSession" is set to 1; otherwise you get a canned error page
+		on an invalid session, so your servlet never gets processed.
+		'''
+		return self._expiredSession
+	
+	def setExpiredSession(self, expiredSession):
+		self._expiredSession = expiredSession
 
 
 	## Authentication ##
