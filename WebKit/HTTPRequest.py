@@ -79,6 +79,7 @@ class HTTPRequest(Request):
 		self._cookies = dict
 
 		self._transaction    = None
+		self._serverRootPath = None
 
 
 	## Transactions ##
@@ -203,6 +204,19 @@ class HTTPRequest(Request):
 		URI=pinfo[:string.rfind(pinfo,self.value("extraPathInfo",''))]
 		if URI[-1]=="/": URI=URI[:-1]
 		return URI
+
+	def uriWebKitRoot(self):
+		if not self._serverRootPath:
+			self._serverRootPath = ''
+			loc = self.urlPath() #self.servletURI()
+			loc,curr = os.path.split(loc)
+			while 1:
+				loc,curr = os.path.split(loc)
+				if curr:
+					self._serverRootPath = self._serverRootPath + "../"
+				else: break
+		return self._serverRootPath
+
 
 
 	## Special ##
