@@ -110,7 +110,7 @@ class ThreadedAppServer(AppServer):
 
 		The `handlerClass` is a subclass of `Handler`, and is used
 		to handle the actual request -- usually returning control
-		back to ThreadedAppServer in some fashion.  See Handler_
+		back to ThreadedAppServer in some fashion.  See `Handler`
 		for more.
 		"""
 		
@@ -688,7 +688,7 @@ def run(useMonitor = 0, http=0, workDir=None):
 	`workDir` is the server-side path for the server, which may
 	not be the ``Webware/WebKit`` directory (though by default
 	it is).  The monitor and HTTP handlers are started based
-	on `useMonitor` and `http`.  For monitor see `MonitorHandler`_,
+	on `useMonitor` and `http`.  For monitor see `MonitorHandler`,
 	and for HTTP see `HTTPServer.HTTPAppServerHandler`.
 
 	After setting up the ThreadedAppServer we call
