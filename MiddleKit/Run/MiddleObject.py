@@ -301,7 +301,7 @@ class MiddleObject(NamedValueAccess):
 		the test suites use this instead of directly invoking the "set"
 		methods.
 
-		If the required set method is not found, a NameError is raised
+		If the required set method is not found, a LookupError is raised
 		with the attrName.
 		'''
 		try:
@@ -312,7 +312,7 @@ class MiddleObject(NamedValueAccess):
 			pySetName = attr.pySetName()
 			method = getattr(self, pySetName, None)
 		if method is None:
-			raise NameError, attrName
+			raise LookupError, attrName
 		return method(value)
 
 	def valueForAttr(self, attr, default=NoDefault):
