@@ -92,6 +92,31 @@ def requestURI(dict):
 			uri = uri + '?' + query
 	return uri
 
+def normURL(path):
+        """Normalizes a URL path, like os.path.normpath, but acts on
+        a URL independant of operating system environmant.
+        """
+        if not path:
+                return
+        
+        initialslash = path[0] == '/'
+        lastslash = path[-1] == '/'
+        comps = string.split(path, '/')
+        
+        newcomps = []
+        for comp in comps:
+                if comp in ('','.'):
+                        continue
+                if comp != '..':
+                        newcomps.append(comp)
+                elif newcomps:
+                        newcomps.pop()
+        path = string.join(newcomps, '/')
+        if path and lastslash:
+                path = path + '/'
+        if initialslash:
+                path = '/' + path
+        return path
 
 ### Deprecated
 
