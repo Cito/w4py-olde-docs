@@ -29,7 +29,7 @@ class Scheduler(Thread):
 
 	## Init ##
 
-	def __init__(self):
+	def __init__(self, daemon=1):
 		Thread.__init__(self)
 		self._closeEvent = Event()
 		self._notifyEvent = Event()
@@ -38,6 +38,7 @@ class Scheduler(Thread):
 		self._running = {}
 		self._onDemand = {}
 		self._isRunning = 0
+		if daemon: self.setDaemon(1)
 
 
 	## Event Methods ##
