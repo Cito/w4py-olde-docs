@@ -96,6 +96,8 @@ class Application(ConfigurableForServerSidePath, Object):
 
                 self.startSessionSweeper()
 
+		self._exceptionHandlerClass = ExceptionHandler
+
 	def initVersions(self):
 		"""
 		Initialize attributes that store the Webware and
@@ -621,7 +623,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		req = transaction.request()
 		editlink = req.adapterName() + "/Admin/EditFile"
-		ExceptionHandler(self, transaction, excInfo,
+		self._exceptionHandler(self, transaction, excInfo,
 						 {"editlink": editlink})
 
 	def rootURLParser(self):
