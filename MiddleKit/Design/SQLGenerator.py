@@ -482,12 +482,16 @@ class Attr:
 		return ''
 
 	def createDefaultSQL(self):
-		default = self.get('Default', None)
-		if default is not None:
+		default = self.get('SQLDefault', None)
+		if default is None:
+			default = self.get('Default', None)
+			if default is not None:
+				default = self.sqlForSampleInput(str(default))
+		if default:
 			default = str(default).strip()
 			if default.lower()=='none':  # kind of redundant
 				default = None
-			return 'default ' + str(self.sqlForSampleInput(default))
+			return 'default ' + default
 		else:
 			return ''
 

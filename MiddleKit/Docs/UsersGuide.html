@@ -37,6 +37,7 @@ Version <!-- version --> X.Y <!-- /version -->
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_IteratingAttrs">Iterating over attributes</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_DeletingObjects">Deleting objects</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_DerivedAttributes">Derived attributes</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#MT_SQLDefault">SQLDefault</a>
 <br> <a href="#ModelInheritance"><font size=+1>Model Inheritance</font></a>
 <br> <a href="#RelatedLinks"><font size=+1>Related Links</font></a>
 <br> <a href="#Credit"><font size=+1>Credit</font></a>
@@ -434,6 +435,11 @@ Yet you still want to be able to iterate over the attribute using the allAttrs()
 
 <p> To do this, simply set the property <b>isDerived</b> on the attribute in the model file.
 You will have to write your own setter and getter methods for the attribute.
+
+
+<a name=MT_SQLDefault><h3>SQLDefault</h3></a>
+
+<p> MiddleKit will use the <b>Default</b> of attributes to generate a <b>DEFAULT <i>sqlValue</i></b> in the attribute's portion of the SQL CREATE statement, taking care to quote strings properly. This default value is also used in the Python class. But on occasion you may have a need to specify an alternative SQL default (such as <b>GetDate()</b>). When that happens, specify a <b>SQLDefault</b> for the attribute. If you do this in the <b>Extras</b> column, quote the SQL; for example, SQLDefault='GetDate()'. MiddleKit will pass this Python string down to the CREATE statement.
 
 
 <a name=ModelInheritance><h2>Model Inheritance</h2></a>
