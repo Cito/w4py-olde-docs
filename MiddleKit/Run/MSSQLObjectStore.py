@@ -44,7 +44,9 @@ class MSSQLObjectStore(SQLObjectStore):
 
 	def retrieveLastInsertId(self, conn, cur):
 		conn, cur = self.executeSQL('select @@IDENTITY', conn)
-		return int(cur.fetchone()[0])
+		value = int(cur.fetchone()[0])
+		self.doneWithConnection(conn)
+		return value
 
 	def newConnection(self):
 		args = self._dbArgs.copy()
@@ -98,7 +100,6 @@ class Klass:
 class Attr:
 
 	def sqlColumnName(self):
-		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
 		if not self._sqlColumnName:
 			self._sqlColumnName = '[' + self.name() + ']'
 		return self._sqlColumnName

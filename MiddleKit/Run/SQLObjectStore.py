@@ -203,8 +203,7 @@ class SQLObjectStore(ObjectStore):
 				klassesById[id] = klass
 				klass.setId(id)
 		finally:
-			if conn is not None:
-				conn.close()
+			self.doneWithConnection(conn)
 		self._klassesById = klassesById
 
 
@@ -221,8 +220,7 @@ class SQLObjectStore(ObjectStore):
 				stmt = unknownInfo.updateStmt()
 				conn, cur = self.executeSQL(stmt, conn)
 		finally:
-			if conn is not None:
-				conn.close()
+			self.doneWithConnection(conn)
 		self._newObjects.clear(allThreads)
 
 	def _insertObject(self, object, unknownSerialNums):
@@ -253,8 +251,7 @@ class SQLObjectStore(ObjectStore):
 			# Update our object pool
 			self._objects[object.key()] = object
 		finally:
-			if conn is not None:
-				conn.close()
+			self.doneWithConnection(conn)
 
 	def retrieveNextInsertId(self, klass):
 		""" Returns the id for the next new object of this class.  Databases which cannot determine
@@ -275,8 +272,7 @@ class SQLObjectStore(ObjectStore):
 				conn, cur = self.executeSQL(sql, conn)
 				object.setChanged(0)
 		finally:
-			if conn is not None:
-				conn.close()
+			self.doneWithConnection(conn)
 		self._changedObjects.clear(allThreads)
 
 	def commitDeletions(self,allThreads=0):
@@ -286,8 +282,7 @@ class SQLObjectStore(ObjectStore):
 				sql = object.sqlDeleteStmt()
 				conn, cur = self.executeSQL(sql, conn)
 		finally:
-			if conn is not None:
-				conn.close()
+			self.doneWithConnection(conn)
 		self._deletedObjects.clear(allThreads)
 
 
@@ -356,8 +351,7 @@ class SQLObjectStore(ObjectStore):
 							obj.readStoreData(self, row)
 					objs.append(obj)
 			finally:
-				if conn is not None:
-					conn.close()
+				self.doneWithConnection(conn)
 		objs.extend(deepObjs)
 		return objs
 
@@ -549,6 +543,17 @@ class SQLObjectStore(ObjectStore):
 		return 'Now()'
 
 
+	## Self util ##
+
+	def doneWithConnection(self, conn):
+		"""
+		Invoked by self when a connection is no longer needed.
+		The default behavior is to close the connection.
+		"""
+		if conn is not None:
+			conn.close()
+
+
 	## Debugging ##
 
 	def dumpTables(self, out=None):
@@ -564,8 +569,7 @@ class SQLObjectStore(ObjectStore):
 				out.write(str(self._cursor.fetchall()))
 				out.write('\n')
 		finally:
-			if conn is not None:
-				conn.close()
+			self.doneWithConnection(conn)
 		out.write('END\n')
 
 	def dumpKlassIds(self, out=None):

@@ -36,13 +36,17 @@ class PostgreSQLObjectStore(SQLObjectStore):
 		self.augmentDatabaseArgs(args)
 		return self.dbapiModule().connect(**args)
 
+	def doneWithConnection(self, conn):
+		# psycopg doesn't like connections to be closed presumably because of pooling
+		pass
+
 	def augmentDatabaseArgs(self, args, pool=0):
 		if not args.get('database'):
 			args['database'] = self._model.sqlDatabaseName()
 
 	def newCursorForConnection(self, conn, dictMode=0):
 		return conn.cursor()
-	
+
 	def retrieveNextInsertId(self, klass):
 		seqname = "%s_%s_seq" % (klass.name(), klass.sqlSerialColumnName())
 		conn, curs = self.executeSQL("select nextval('%s')" % seqname)
