@@ -39,6 +39,7 @@ Version <!-- version --> X.Y <!-- /version -->
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_DeletingObjects">Deleting objects</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_DerivedAttributes">Derived attributes</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#MT_SQLDefault">SQLDefault</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#MT_Cloning">Cloning Objects</a>
 <br> <a href="#ModelInheritance"><font size=+1>Model Inheritance</font></a>
 <br> <a href="#RelatedLinks"><font size=+1>Related Links</font></a>
 <br> <a href="#Credit"><font size=+1>Credit</font></a>
@@ -635,6 +636,49 @@ You will have to write your own setter and getter methods for the attribute.
 
 <p> MiddleKit will use the <b>Default</b> of attributes to generate a <b>DEFAULT <i>sqlValue</i></b> in the attribute's portion of the SQL CREATE statement, taking care to quote strings properly. This default value is also used in the Python class. But on occasion you may have a need to specify an alternative SQL default (such as <b>GetDate()</b>). When that happens, specify a <b>SQLDefault</b> for the attribute. If you do this in the <b>Extras</b> column, quote the SQL; for example, SQLDefault='GetDate()'. MiddleKit will pass this Python string down to the CREATE statement.
 
+<a name=MT_Cloning><h3>Cloning Objects</h3></a>
+
+<p> In many situations it is useful to clone a MiddleKit object.  One example is to allow a user to create a copy of some record (and all of its values) without having to enter a new record from scratch.  Every MiddleKit object has a <b>clone()</b> method which can be used to create a clone of the object.  All attribute values of the clone will be set to the same values as the original object.</p>
+
+<p>Depending on your model, you may or may not want sub-objects referenced by the original object to be cloned in 
+addition to the object itself.  You can control this by adding a "Copy" column in your Classes.csv file, and set the value for each object reference (single reference or list reference).  The possible values are:</p>
+
+<ul>
+<li>'deep': the referenced object(s) will be cloned</li>
+<li>'shallow': the cloned object will reference the same object as the original</li>
+<li>'none': the attribute in the cloned object is set to 'None'</li>
+</ul>
+
+<p>If there is no Copy value set for an object reference, 'shallow' is assumed.</p>
+
+<p>The following example should help illustrate how this can be used.  In this example we want to be able to clone Book objects.  We want a cloned book to have the same author(s), shelf and publisher as the original, but the new book should have a clean loan history (we don't want to clone the loans).</p>
+
+<p> <table border align=center style="border-collapse: collapse" cellpadding=2>
+<tr> <th> Class </th> <th> Attribute </th> <th> Type </th> <th> Copy </th> <th>Comment</th> </tr>
+<tr> <td>Book</td> <td></td> <td></td> <td></td> <td> </td> </tr>
+<tr> <td></td> <td>title</td> <td>string</td> <td></td> <td> </td> </tr>
+<tr> <td></td> <td>authors</td> <td>list of Wrote</td> <td>deep</td> <td style="font-size: 8px">Wrote objects should be cloned, too.</td> </tr>
+<tr> <td></td> <td>loans</td> <td>list of Loan</td> <td>none</td> <td style="font-size: 8px">We want cloned books to have a clean loan history..</td> </tr>
+<tr> <td></td> <td>shelf</td> <td>Shelf</td> <td>shallow</td> <td style="font-size: 8px">Cloned book should reference the <em>same</em> Shelf object as the original.</td> </tr>
+<tr> <td></td> <td>publisher</td> <td>string</td> <td></td> <td> </td> </tr>
+<tr> <td>&nbsp;</td> <td></td> <td></td> <td></td> <td> </td> </tr>
+<tr> <td>Wrote</td> <td></td> <td></td> <td></td> <td> </td> </tr>
+<tr> <td></td> <td>book</td> <td>Book</td> <td>deep</td> <td style="font-size: 8px">This is a back reference for Book; it needs to be set to 'deep' <br>so that it will be set to the new (cloned) Book object.</td> </tr>
+<tr> <td></td> <td>author</td> <td>Author</td> <td>shallow</td> <td style="font-size: 8px">Don't clone the actual author object.</td> </tr>
+<tr> <td>&nbsp;</td> <td></td> <td></td> <td></td> <td> </td> </tr>
+<tr> <td>Author</td> <td></td> <td></td> <td></td> <td> </td> </tr>
+<tr> <td></td> <td>name</td> <td>string</td> <td></td> <td> </td> </tr>
+<tr> <td></td> <td>wrote</td> <td>list of Wrote</td> <td></td> <td style="font-size: 8px">Cloning a book won't propagate this far,<br> since Wrote.author is set to 'shallow'.</td> </tr>
+<tr> <td>&nbsp;</td> <td></td> <td></td> <td></td> <td> </td> </tr>
+<tr> <td>Loan</td> <td></td> <td></td> <td></td> <td> </td> </tr>
+<tr> <td></td> <td>book</td> <td>Book</td> <td></td> <td> </td> </tr>
+<tr> <td></td> <td>borrower</td> <td>string</td> <td></td> <td> </td> </tr>
+<tr> <td>&nbsp;</td> <td></td> <td></td> <td></td> <td> </td> </tr>
+<tr> <td>Shelf</td> <td></td> <td></td> <td></td> <td> </td> </tr>
+<tr> <td></td> <td>name</td> <td>string</td> <td></td> <td> </td> </tr>
+</table>
+
+<p>When you create a cloned object(s), it is possible to generate a mapping from old to new objects.  It is also possible to specify a column which, if there is a value set in it for an object reference attribute, should override the value in the Copy column.  See the doc string in MiddleKit.Run.MiddleObject for more details.</p>
 
 <a name=ModelInheritance><h2>Model Inheritance</h2></a>
 

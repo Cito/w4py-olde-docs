@@ -400,3 +400,103 @@ class MiddleObject(NamedValueAccess):
 	# or after 4 months, whichever comes later.
 	_get = valueForKey
 	_set = setValueForKey
+
+	def clone(self,memo=None,depthAttr=None):
+		''' 
+		Clone middle object(s) generically.
+
+		You may or may not want objects referenced by ObjRefAttr or ListAttr attributes 
+		to be cloned in addition to the object itself.  You can control this by adding a 
+		"Copy" column in your Classes.csv file, and set the value for each attribute which may
+		reference another object.  The possible values are:
+			Copy = 'deep': referenced objects will be cloned and references to them will be set
+			Copy = 'shallow': the cloned object references the same object as the original
+			Copy = 'none': the attribute in the cloned object is set to 'None' 
+
+		Clone will call itself recursively to copy references deeply, and gracefully handles 
+		recursive references (where a referenced object may have already been cloned).  In this case
+		only one clone is created, not two cloned instances of the same original.  
+
+		If you want a mapping from original to cloned objects, pass in an empty dict for the 
+		memo argument.  It will be filled in during the clone operation, such that the keys are 
+		the original object instances and the values are the corresponding clones.
+
+		The parameter depthAttr may be set to a column name which, if set,
+		will take precedence over the value in the 'Copy' column for that attribute.
+
+		'''
+		def copyAttrValue(source,dest,attr,memo,depthAttr):
+			copymode = attr['Copy']
+			if depthAttr and attr.has_key(depthAttr):
+				copymode = attr[depthAttr]
+
+			if copymode == 'deep' and isinstance( attr, ObjRefAttr ):
+				# clone the value of an attribute from the source object,
+				# and set it in the attribute of the dest object
+				value = apply( getattr(source,attr.pyGetName()), ())
+				if value:
+					clonedvalue = value.clone(memo,depthAttr)
+				else:
+					clonedvalue = None
+				retvalue = apply( getattr(dest,attr.pySetName()), (clonedvalue,))
+			elif copymode == 'none':
+				# Shouldn't set to attribute to None explicitly since attribute may have 
+				# isRequired=1
+				# besides, the object will initialize all attributes to None anyways
+				pass
+			else:
+				# copy the value of an attribute from the source object
+				# to the dest object
+				#print 'copying value of ' + attr.name()
+				value = apply( getattr(source,attr.pyGetName()), ()) 
+				retvalue = apply( getattr(dest,attr.pySetName()), (value,))
+				
+		if memo is None:
+			#print 'Initializing memo'
+			memo = {}
+
+		# if we've already cloned this object, return the clone
+		if memo.has_key( self ):
+			return memo[self]
+
+		# make an instance of ourselves
+		copy = self.__class__()
+		#print 'cloning %s %s as %s' % ( self.klass().name(), str(self), str(copy) )
+
+		memo[self] = copy
+
+		# iterate over our persistent attributes
+		for attr in self.klass().allAttrs():
+			if isinstance( attr, ListAttr ):
+				valuelist = apply( getattr(self,attr.pyGetName()), ())
+				setmethodname = "addTo" + attr.name()[0].upper() + attr.name()[1:]
+				setmethod = getattr(copy,setmethodname)
+
+				# if cloning to create an extension object, we might want to copy fewer subobjects
+				copymode = attr['Copy']
+				if depthAttr and attr.has_key(depthAttr):
+					copymode = attr[depthAttr]
+
+				if copymode == 'deep':
+					backrefname = attr.backRefAttrName()
+					setrefname = "set" + backrefname[0].upper() + backrefname[1:]
+					for value in valuelist:
+						# clone the value
+						valcopy = value.clone(memo,depthAttr)
+
+						# set the value's back ref to point to self
+						setrefmethod = getattr(valcopy,setrefname)
+						backrefattr = valcopy.klass().lookupAttr(backrefname)
+						apply( setrefmethod, (None,))
+
+						# add the value to the list
+						retval = apply(setmethod,(valcopy,))
+				elif attr['Copy'] == 'none':
+					# leave the list empty
+					pass
+				else:
+					pass
+			else:
+				copyAttrValue(self,copy,attr,memo,depthAttr)
+
+		return copy
