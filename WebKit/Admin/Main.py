@@ -22,6 +22,7 @@ class Main(AdminPage):
 			('Up Since',        asctime(localtime(app.server().startTime()))),
 			('Num Requests',    app.server().numRequests()),
 			('Working Dir',     os.getcwd()),
+			('Active Sessions', len(app.sessions())),
 		]
 
 		self.writeln('<table align=center cellspacing=0 cellpadding=0 border=0>')
