@@ -1,6 +1,3 @@
-print '>> globals =', globals().keys()
-
-
 from ExamplePage import ExamplePage
 
 
