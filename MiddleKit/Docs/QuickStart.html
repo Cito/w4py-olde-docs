@@ -291,6 +291,7 @@ def main():
     store.readModelFileNamed('Videos')
 <b>    movie = Movie()
     movie.setTitle('The Terminator')
+    movie.setRating('r')
     store.addObject(movie)
     store.saveChanges()</b>
 
@@ -308,6 +309,7 @@ if __name__=='__main__':
 <pre class=py>    movie = Movie()
     movie.setTitle('The Terminator')
     movie.setYear(1984)
+    movie.setRating('r')
     store.addObject(movie)
 
     james = Person()
@@ -335,23 +337,29 @@ if __name__=='__main__':
 
 <p> You can get a list of objects of a particular class returned to you as a list, like so:
 <pre class=py>
+    from Video import Video
     videos = store.fetchObjectsOfClass(Video)
 </pre>
 
-<p> This will pick up <i>all</i> Videos, including both Movies and TVSeries, which inherit from Video. An optional keyword argument, isDefault, allows you to turn this off so that the fetch is <i>shallow</i>. In our case, that wouldn't make any sense since Video is an abstract class.
+<p> This will pick up <i>all</i> Videos, including both Movies and TVSeries, which inherit from Video. An optional keyword argument, isDeep, allows you to turn this off so that the fetch is <i>shallow</i>. In our case, that wouldn't make any sense since Video is an abstract class.
+
+<p> You can also give the name of the class instead of the Python class:
+
+<pre class=py>
+    videos = store.fetchObjectsOfClass('Video')
+</pre>
 
 <p> You can then filter this list with a Python <i>list comprehension</i> like you normally would:
 
-<pre class=py>    videos = store.fetchObjectsOfClass(Video)
-    # Get all videos that start with 'A'
+<pre class=py>    videos = store.fetchObjectsOfClass('Video')
+    # Get all videos that start with 'A':
     videos = [video for video in videos if video.title().upper().startswith('A')]
 </pre>
 
-<p> If you have a lot of videos, it may be too inefficient to pull them all into memory, just to grab the ones that start with 'A'. You can use a server-side query to solve this problem:
+<p> If you have a lot of videos, it may be too inefficient to pull them all into memory, just to grab the ones that start with 'A'. You can solve this problem by using a server-side query, e.g., a SQL WHERE clause:
 
-<p> You can also put a SQL WHERE clause in there (so much for hiding you from the database):
 <pre class=py>
-    videos = store.fetchObjectsOfClass(Video, clauses="WHERE title LIKE 'A%'")
+    videos = store.fetchObjectsOfClass('Video', clauses="WHERE title LIKE 'A%'")
 </pre>
 
 <p> If your SQL clauses are fairly simple, then they should port well between SQL databases.

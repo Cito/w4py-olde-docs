@@ -13,6 +13,7 @@ def main():
 	movie = Movie()
 	movie.setTitle('The Terminator')
 	movie.setYear(1984)
+	movie.setRating('r')
 	store.addObject(movie)
 
 	james = Person()
