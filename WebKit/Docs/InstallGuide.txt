@@ -46,7 +46,7 @@ If you just want to get to a working configuration fast, and your
 setup is fairly conventional, here's a minimal set of instructions for
 Posix systems::
 
-    $ cd path/to/Webware/
+    $ cd /path/to/Webware/
     $ python install.py
     (enter password, etc)
     $ cd WebKit/Adapters/wkcgi
@@ -76,7 +76,35 @@ you probably forgot to start the AppServer.
 Windows
 -------
 
-@@ TODO
+(@@: someone *needs* to check this)
+
+Here's what to do on Windows::
+
+    > cd \path\to\Webware
+    > python install.py
+    (enter password)
+    > copy WebKit\Adapters\wkcgi\WebKit.exe \path\to\cgi-bin
+    > cd WebKit
+    > AppServer.bat
+
+``\path\to\cgi-bin`` should be wherever Apache looks for cgi-bin
+scripts. (@@: default location?)
+
+This copies the adapter that that Apache can find it, and starts
+the AppServer.  The AppServer is a program that must be running
+anytime you want to access your servlets or PSP files.
+
+You should now be able to go to your browser and open up
+http://localhost/cgi-bin/WebKit.exe -- the WebKit.exe program connects
+to the AppServer -- Webware isn't a CGI script, but a small CGI script
+can be used as a gateway to the AppServer (you can't normally connect
+to the AppServer itself).
+
+If you get an Internal Error, the most likely case is you can't run
+CGI scripts wherever you put WebKit.exe -- check your error logs.  If
+it takes a long time to get an error message, or you get a message
+about not being able to connect to the AppServer, then you probably
+forgot to start the AppServer.
 
 Prerequisites
 =============
@@ -125,7 +153,9 @@ Apache
 Apache is the best supported web server, both on Posix and Windows
 systems.  The mod_webkit_ is the fastest way to connect to
 Webware, and is only supported for Apache.  CGI is also available to
-Apache users.
+Apache users through wkcgi_.  For Windows users compiled versions of
+mod_webkit and wkcgi (named ``WebKit.exe``) are also available.
+There are also other adapter options, see Adapters_.
 
 Most of the Webware developers use Apache.
 
@@ -303,6 +333,8 @@ Mozilla. The web server will be something like Apache or IIS. And
 finally, the app server will be WebKit, i.e. a Python process running
 the WebKit modules and your custom servlets.
 
+.. image:: arch.gif
+
 The chronological order of events goes from top to bottom and then
 back up to top. In other words, the browser makes a request to the web
 server which in turn makes a request to the app server. The response
@@ -311,24 +343,6 @@ then goes from the app server to the web server to the browser.
 The key to installing WebKit is to get the web server and app server
 talking to each other. For this purpose, you must use a WebKit
 adapter_.
-
-Bad Marshal Data
-----------------
-
-The most common installation problem is a Python exception appearing
-in your browser that says "bad marshal data". This is always caused by
-pointing the web browser to the app server:
-
-  http://localhost:8086/WebKit.cgi/
-
-But the app server hides behind a web server so the correct URL
-would be:
-
-  http://localhost/WebKit.cgi/
-
-That requires that web server and app server are set up to talk to
-each other. And that's what the next section is all about...
-
 
 Permissions
 -----------
@@ -1053,3 +1067,22 @@ Other Notes
 See `Stopping the App Server`_ and `Reloading Servlets`_ above in
 Adapters_.
 
+Troubleshooting
+===============
+
+Bad Marshal Data
+----------------
+
+The most common installation problem is a Python exception appearing
+in your browser that says "bad marshal data". This is always caused by
+pointing the web browser to the app server:
+
+  http://localhost:8086/WebKit.cgi/
+
+But the app server hides behind a web server so the correct URL
+would be:
+
+  http://localhost/WebKit.cgi/
+
+That requires that web server and app server are set up to talk to
+each other. And that's what the next section is all about...
