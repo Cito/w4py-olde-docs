@@ -1,6 +1,6 @@
 name = 'Webware for Python'
 
-version = (0, 5, 0, 'pre')
+version = (0, 5, 0)
 
 status = 'beta'
 
