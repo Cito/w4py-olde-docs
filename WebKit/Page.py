@@ -131,15 +131,20 @@ class Page(HTTPServlet):
 
 	def writeDocType(self):
 		"""
-		Invoked by writeHTML() to write the <!DOCTYPE ...> tag. This
-		implementation specifies HTML 4.01 Transitional. Subclasses may
-		override to specify something else.
+		Invoked by writeHTML() to write the <!DOCTYPE ...> tag.
+
+		This implementation USED TO specify HTML 4.01 Transitional, but
+		some versions of Mozilla acted strangely with that. The current
+		implementation does nothing.
+
+		Subclasses may override to specify something else.
 
 		You can find out more about doc types by searching for DOCTYPE
 		on the web, or visiting:
 			http://www.htmlhelp.com/tools/validator/doctype.html
 		"""
-		self.writeln('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">')
+		#self.writeln('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">')
+		pass
 
 	def writeHead(self):
 		"""
