@@ -5,6 +5,7 @@ version = ('X', 'Y', 0)
 docs = [
 	{'name': 'Install Guide', 'file': 'InstallGuide.html'},
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
+	{'name': 'Configuration Guide', 'file': 'Configuration.html'},
 	{'name': 'Future Work', 'file': 'Future.html'},
 ]
 
