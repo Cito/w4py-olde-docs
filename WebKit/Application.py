@@ -477,7 +477,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		request = transaction.request()
 		url = request.adapterName() + '/_SID_='+ newSid + '/' + request.pathInfo()
 		if request.queryString():
-			url +=  '?' + request.queryString()
+			url = url + '?' + request.queryString()
 		if self.setting('Debug')['Sessions']:
 			print ">> [sessions] handling UseAutomaticPathSessions, redirecting to", url
 		transaction.response().sendRedirect(url)

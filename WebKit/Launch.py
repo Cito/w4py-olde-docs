@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, string
 
 
 def usage():
@@ -19,7 +19,7 @@ def launchWebKit(server, appWorkPath, args):
 
 	# clean up sys.path
 	def ok(directory):
-		return directory not in ['', '.'] and directory[-6:].lower()!='webkit'
+		return directory not in ['', '.'] and string.lower(directory[-6:])!='webkit'
 	sys.path = filter(ok, sys.path)
 	sys.path.insert(0, '')
 
