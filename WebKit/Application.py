@@ -1363,9 +1363,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		corresponding server side path for the URL.
 		"""
 
-		info = self.serverSideInfoForRequestOld(request)
-		extraPath = request._extraURLPath
-
 		fullPath = request.urlPath()
 		contextPath, contextName, rest = self.findContext(fullPath)
 		servletPath, extraPath = self.findServlet(contextPath, rest)
