@@ -90,22 +90,19 @@ class ServletFactory(Object):
 		Imports the given module from the given directory.  fullModuleName should be the full
 		dotted name if the module is in a package or subpackage.  Returns the module object.
 
-		If isPackageDir is true, then this function simulates importing an empty __init__.py
-		if that file doesn't actually exist.
+		If isPackageDir is true, then this function creates an empty __init__.py
+		if that file doesn't already exist.
 		"""
 		moduleName = string.split(fullModuleName,'.')[-1]
 		fp = None
 		try:
 			if isPackageDir:
-				# Check if __init__.py is in the directory -- if not, fake an empty one.
+				# Check if __init__.py is in the directory -- if not, make an empty one.
 				packageDir = os.path.join(directory, moduleName)
-				if not os.path.exists(os.path.join(packageDir, '__init__.py')):
-					# Here we are faking the presence of an empty __init__.py in the package directory
-					fp, pathname, stuff = None, '', ('', '', imp.PKG_DIRECTORY)
-				else:
-					fp, pathname, stuff = imp.find_module(moduleName, [directory])
-			else:
-				fp, pathname, stuff = imp.find_module(moduleName, [directory])
+				initPy = os.path.join(packageDir, '__init__.py')
+				if not os.path.exists(initPy):
+					open(initPy, 'w').close()
+			fp, pathname, stuff = imp.find_module(moduleName, [directory])
 			module = imp.load_module(fullModuleName, fp, pathname, stuff)
 		finally:
 			if fp is not None:
