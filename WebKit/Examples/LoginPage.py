@@ -53,10 +53,23 @@ class LoginPage(ExamplePage):
 						</tr>
 						<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
 					</table>
-					<input type="hidden" name="loginid" value="%s">
+					<input type="hidden" name="loginid" value="%s">''' % (action, loginid))
+
+		# Forward any passed in values to the user's intended page after successful login,
+		# except for the special values used by the login mechanism itself
+		for name, value in self.request().fields().items():
+			if name not in 'login loginid username password extra logout'.split():
+				if isinstance(value, types.ListType):
+					for valueStr in value:
+						self.write('''<input type="hidden" name="%s" value="%s">'''
+								   % (self.htmlEncode(name), self.htmlEncode(valueStr)))
+				else:
+					self.write('''<input type="hidden" name="%s" value="%s">'''
+							   % (self.htmlEncode(name), self.htmlEncode(value)))
+		self.write('''
 				</form>
 			</td>
 		</tr>
 	</table>
 </center>
-''' % (action, loginid))
+''')
