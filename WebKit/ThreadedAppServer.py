@@ -691,6 +691,7 @@ class AdapterHandler(Handler):
 			requestURI = None
 
 		dict['input'] = self.makeInput()
+		dict['requestID'] = self._requestID
 		streamOut = TASASStreamOut(self._sock)
 		transaction = self._server._app.dispatchRawRequest(dict, streamOut)
 		streamOut.close()

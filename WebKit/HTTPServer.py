@@ -125,6 +125,7 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 	"""
 
 	protocolName = 'http'
+	settingPrefix = 'HTTP'
 
 	def handleRequest(self):
 		HTTPHandler.__init__(self, self._sock, self._sock.getpeername(), None)
@@ -136,6 +137,7 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 			'time': time.time(),
 			'environ': env,
 			'input': StringIO(myInput),
+			'requestID': self._requestID,
 			}
 		self.dispatchRawRequest(requestDict, streamOut)
 		self.processResponse(streamOut._buffer)

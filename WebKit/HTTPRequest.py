@@ -31,6 +31,7 @@ class HTTPRequest(Request):
 			self._time    = dict['time']
 			self._environ = dict['environ']
 			self._input   = dict['input']
+			self._requestID = dict['requestID']
 			self._fields  = FieldStorage.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._fields.parse_qs()
 			self._cookies = Cookie()
@@ -516,6 +517,13 @@ class HTTPRequest(Request):
 		Returns the time that the request was received.
 		"""
 		return self._time
+
+	def requestID(self):
+		"""
+		Returns the request ID, a serial number unique to this
+		request (at least unique for one run of the AppServer).
+		"""
+		return self._requestID
 
 
 	## Information ##
