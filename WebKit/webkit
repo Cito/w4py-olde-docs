@@ -46,6 +46,9 @@ case "$1" in
 		pushd $WEBKIT_DIR > /dev/null
 		LAUNCH='python Launch.py ThreadedAppServer'
 
+		# log separator
+		echo "----------------------------------------------------------------------" >> $LOG
+
 		# run as root:
 		$LAUNCH >> $LOG 2>&1 &
 
