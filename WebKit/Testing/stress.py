@@ -18,7 +18,7 @@ unrealistic).
 To Run:
 	> stress.py  -OR-
 	> python stress.py
-	
+
 This will give you the usage (and examples) which is:
 	stress.py numRequests [minParallelRequests [maxParallelRequests [delay]]]
 
@@ -55,13 +55,13 @@ def usage():
 	print
 	sys.exit(1)
 
-		
+
 def request(name, dict, host, port, bufsize):
 	''' Performs a single AppServer request including sending the request and receiving the response. '''
-	
+
 	# Update the time stamp to now
 	dict['time'] = time()
-	
+
 	# Taken from CGIAdaptor:
 	s = socket(AF_INET, SOCK_STREAM)
 	s.connect(host, port)
@@ -80,6 +80,8 @@ def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0)
 
 	# Taken from CGIAdaptor:
 	(host, port) = string.split(open('../address.text').read(), ':')
+	if os.name=='nt' and host=='': # MS Windows doesn't like a blank host name
+		host = 'localhost'
 	port = int(port)
 	bufsize = 32*1024
 	# END
@@ -94,7 +96,7 @@ def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0)
 		maxParallelRequests = minParallelRequests
 	sequential = minParallelRequests==1 and maxParallelRequests==1
 
-	startTime = time()	
+	startTime = time()
 	count = 0
 	print 'STRESS TEST for Webware.WebKit.AppServer'
 	print
@@ -140,7 +142,7 @@ def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0)
 	print 'Done.'
 	print
 
-	
+
 if __name__=='__main__':
 	if len(sys.argv)==1:
 		usage()
