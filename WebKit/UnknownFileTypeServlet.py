@@ -21,40 +21,66 @@ class UnknownFileTypeServletFactory(ServletFactory):
 		pass
 
 
+fileCache = {}
+	# A cache of the files served up by UnknownFileTypeServlet cached by absolute, server side path.
+	# Each content is another dictionary with keys: content, mimeType, mimeEncoding.
+	# Previously, this content was stored directly in the attributes of the UnknownFileTypeServlets, but with that approach subclasses cannot dynamically serve content from different locations.
+
 from HTTPServlet import HTTPServlet
 from MiscUtils.Configurable import Configurable
 class UnknownFileTypeServlet(HTTPServlet, Configurable):
 	"""
 	Normally this class is just a "private" utility class for WebKit's
 	purposes. However, you may find it useful to subclass on occasion,
-	such when the server side file path is determined by something other
-	than a direct correlation to the URL. Here is such an example:
+	such as when the server side file path is determined by something
+	other than a direct correlation to the URL. Here is such an example:
 
 
 	from WebKit.AppServer import globalServer
 	from WebKit.UnknownFileTypeServlet import UnknownFileTypeServlet
-	from Core.Config.Picks import picksGraphDir
 	import os
 
-	class Graph(UnknownFileTypeServlet):
+	class Image(UnknownFileTypeServlet):
 
-		def __init__(self):
-			UnknownFileTypeServlet.__init__(self, globalServer.application())
+		imageDir = '/var/images'
 
 		def filename(self, trans):
-			filename = trans.request().field('g')
-			filename = os.path.join(picksGraphDir, filename)
+			filename = trans.request().field('i')
+			filename = os.path.join(self.imageDir, filename)
 			return filename
 	"""
 
-	def __init__(self, application):
+	## Candidates for subclass overrides ##
+
+	def filename(self, trans):
+		"""
+		Returns the filename to be served. A subclass could override
+		this in order to serve files from other disk locations based
+		on some logic.
+		"""
+		filename = getattr(self, '_serverSideFilename', None)
+		if filename is None:
+			filename = trans.request().serverSidePath()
+			self._serverSideFilename = filename  # cache it
+		return filename
+
+	def shouldCacheContent(self):
+		"""
+		Returns a boolean that controls whether or not the content served through this servlet is cached. The default behavior is to return the CacheContent setting. Subclasses may override to always True or False, or incorporate some other logic.
+		"""
+		return self.setting('CacheContent')
+
+
+	## Init et al ##
+
+	def __init__(self, application=None):
 		HTTPServlet.__init__(self)
 		Configurable.__init__(self)
+		if application is None:
+			from WebKit.AppServer import globalServer
+			application = globalServer.application()
+			assert application is not None
 		self._application = application
-		self._content = None
-		self._serverSideFilename = None
-		self._mimeType = None
-		self._mimeEncoding = None
 
 	def userConfig(self):
 		""" Get the user config from the 'UnknownFileTypes' section in the Application's configuration. """
@@ -93,35 +119,28 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		env = trans.request()._environ
 		# @@ 2001-01-25 ce: isn't there a func in WebUtils to get script name? because some servers are different?
 		newURL = os.path.split(env['SCRIPT_NAME'])[0] + env['PATH_INFO']
-		import string
-		newURL = string.replace(newURL, '//', '/')  # hacky
+		newURL = newURL.replace('//', '/')  # hacky
 		trans.response().sendRedirect(newURL)
 
 
-	def filename(self, trans):
-		"""
-		Returns the filename to be served. A subclass could override
-		this in order to serve files from other disk locations based
-		on some logic.
-		"""
-		return trans.request().serverSidePath()
-
 	def serveContent(self, trans):
-
 		response = trans.response()
 
-		# @@temp variable, move to config
-		MaxCacheContentSize = 1024*32 ##32k
+		# @@ temp variables, move to config
+		MaxCacheContentSize = 128*1024
+		ReadBufferSize = 32*1024
 
 		#start sending automatically
 		response.streamOut().autoCommit(1)
 
 		filename = self.filename(trans)
-		filesize = os.path.getsize(filename)
+		file = fileCache.get(filename, None)
+		if file is None:
+			fileSize = os.path.getsize(filename)
 
 		isHead = trans.request().method().upper()[0]=='H' # as in HEAD
 		if isHead:
-			response.setHeader('Content-Length', str(filesize))
+			response.setHeader('Content-Length', str(fileSize))
 			mtime = os.path.getmtime(filename)
 			response.setHeader('Last-Modified',
 				time.strftime('%a, %d %b %Y %H:%M:%S GMT',
@@ -130,55 +149,51 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		if debug:
 			print '>> UnknownFileType.serveContent()'
 			print '>> filename =', filename
-		if self._content != None:
-			# We already have content in memory:
-			assert self._serverSideFilename==filename
-			if self.setting('CheckDate'):
-				# check the date and re-read if necessary
-				actual_mtime = os.path.getmtime(filename)
-				if actual_mtime>self._mtime:
-					if debug: print '>> reading updated file'
-					self._content = open(filename, 'rb').read()
-					self._mtime = actual_mtime
-			data = self._content
-			response.setHeader('Content-type', self._mimeType)
-			if self._mimeEncoding:
-				response.setHeader('Content-encoding', self._mimeEncoding)
-			if isHead:
-				return
-			response.write(data)
-
-		else:
+		if file is None:
 			if debug: print '>> reading file'
-			filetype = mimetypes.guess_type(filename)
-			mimeType = filetype[0]
-			mimeEncoding = filetype[1]
+			fileType = mimetypes.guess_type(filename)
+			mimeType = fileType[0]
+			mimeEncoding = fileType[1]
 
-			if mimeType==None:
+			if mimeType is None:
 				mimeType = 'text/html'  # @@ 2000-01-27 ce: should this just be text?
 			response.setHeader('Content-type', mimeType)
-			if self._mimeEncoding:
-				response.setHeader('Content-encoding', self._mimeEncoding)
+			if mimeEncoding:
+				response.setHeader('Content-encoding', mimeEncoding)
 
-
-			if self.setting('ReuseServlets') and self.setting('CacheContent') and filesize < MaxCacheContentSize:
-				# set the:
-				#   content, mimeType, mtime and serverSideFilename
+			if self.setting('ReuseServlets') and self.shouldCacheContent() and fileSize<MaxCacheContentSize:
 				if debug: print '>> caching'
-				self._content = open(filename,"rb").read()
-				self._mimeType = mimeType
-				self._mimeEncoding = mimeEncoding
-				self._mtime = os.path.getmtime(filename)
-				self._serverSideFilename = filename
+				file = {
+					'content':      open(filename, "rb").read(),
+					'mimeType':     mimeType,
+					'mimeEncoding': mimeEncoding,
+					'mtime':        os.path.getmtime(filename),
+					'filename':     filename,
+				}
+				fileCache[filename] = file
 				if isHead:
 					return
-				response.write(self._content)
-			else:  ##too big
+				response.write(file['content'])
+			else:  # too big or not supposed to cache
 				if isHead:
 					return
 				f = open(filename, "rb")
-				sent = 0
-				while sent < filesize:
-					data = f.read(8192)
+				numBytesSent = 0
+				while numBytesSent<fileSize:
+					data = f.read(ReadBufferSize)
 					response.write(data)
-					sent = sent + len(data)
+					numBytesSent += len(data)
+		else:  # We already have the file cached in memory
+			if self.setting('CheckDate'):
+				# check the date and re-read if necessary
+				actual_mtime = os.path.getmtime(filename)
+				if actual_mtime>file['mtime']:
+					if debug: print '>> reading updated file'
+					file['content'] = open(filename, 'rb').read()
+					file['mtime']   = actual_mtime
+			response.setHeader('Content-type', file['mimeType'])
+			if file.get('mimeEncoding'):
+				response.setHeader('Content-encoding', file['mimeEncoding'])
+			if isHead:
+				return
+			response.write(file['content'])
