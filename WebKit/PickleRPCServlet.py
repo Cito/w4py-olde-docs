@@ -103,6 +103,8 @@ class PickleRPCServlet(RPCServlet):
 				response['requestError'] = str(e)
 			except Exception, e:
 				response['exception'] = self.resultForException(e, trans)
+			except:  # if it's a string exception, this gets triggered
+				response['exception'] = self.resultForException(sys.exc_info()[0], trans)
 			response['timeResponded'] = time()
 			response = dumps(response)
 		except:

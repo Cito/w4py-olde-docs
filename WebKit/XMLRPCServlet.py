@@ -43,6 +43,9 @@ class XMLRPCServlet(RPCServlet):
 			except Exception, e:
 				fault = self.resultForException(e, transaction)
 				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault))
+			except:  # if it's a string exception, this gets triggered
+				fault = self.resultForException(sys.exc_info()[0], transaction)
+				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault))
 			else:
 				response = xmlrpclib.dumps(response, methodresponse=1)
 		except:
