@@ -131,3 +131,29 @@ def DictForArgs(s):
 	if verbose:	print
 
 	return dict
+
+
+
+def ExpandDictWithExtras(dict, key='Extras', delKey=1):
+	'''
+	Returns a dictionary with the 'Extras' column expanded by DictForArgs(). For example, given:
+		{ 'Name': 'foo', 'Extras': 'x=1 y=2' }
+	The return value is:
+		{ 'Name': 'foo', 'x': '1', 'y': '2' }
+	The key argument controls what key in the dictionary is used to hold the extra arguments. The delKey argument controls whether that key and its corresponding value are retained.
+	The same dictionary may be returned if there is no extras key.
+	The most typical use of this function is to pass a row from a DataTable that was initialized from a CSV file (e.g., a spreadsheet or tabular file). FormKit and MiddleKit both use CSV files and allow for an Extras column to specify attributes that occur infrequently.
+	'''
+
+	if dict.has_key(key):
+		newDict = {}
+		# We use the following for loop rather than newDict.update()
+		# so that the dict arg can be dictionary-like.
+		for k, v in dict.items():
+			newDict[k] = v
+		if delKey:
+			del newDict[key]
+		newDict.update(DictForArgs(dict[key]))
+		return newDict
+	else:
+		return dict
