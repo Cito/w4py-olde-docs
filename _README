@@ -1,8 +1,14 @@
 Webware for Python
 README
 
+
+Be sure to run, in this directory:
+
+	> python install.py
+
+
 See the files:
-	
+
 	./_COPYRIGHT
 	./Documentation/Webware.html
 
@@ -11,8 +17,7 @@ You might also check out:
 
 	./_VERSION
 
-	
-And get the latest version at:
+
+And get more information and the latest version at:
 
 	http://webware.sourceforge.net
-
