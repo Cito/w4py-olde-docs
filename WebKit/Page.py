@@ -345,7 +345,7 @@ class Page(HTTPServlet):
 		If this is called during sleep() or awake() then the rest of awake(), response(), and
 		sleep() are skipped and the accumulated response is sent immediately with no further
 		processing.  If this is called during respond() then the rest of respond() is
-		skipped but awake() is called, then the accumulated response is sent.
+		skipped but sleep() is called, then the accumulated response is sent.
 		"""
 		raise EndResponse
 
