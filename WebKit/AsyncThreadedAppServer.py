@@ -442,7 +442,6 @@ def main(args):
 	monitor=0
 	function=run
 	daemon=0
-	print args
 	for i in args:
 		if i == "monitor":
 			print "Enabling Monitoring"
