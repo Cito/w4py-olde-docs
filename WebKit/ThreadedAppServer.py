@@ -443,10 +443,13 @@ class ThreadedAppServer(AppServer):
 		Here's where we do that, called `shutDown`.
 		"""
 
-		for addr in self._sockets.keys():
+		for host, port in self._sockets.keys():
+			if host == '0.0.0.0':
+				# Can't connect to 0.0.0.0; use 127.0.0.1 instead
+				host = '127.0.0.1'
 			sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			try:
-				sock.connect(addr)
+				sock.connect((host, port))
 				sock.close()
 			except:
 				pass
