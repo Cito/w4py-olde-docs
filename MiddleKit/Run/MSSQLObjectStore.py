@@ -2,20 +2,34 @@ from SQLObjectStore import SQLObjectStore
 from mx import ODBC # DR: 07-12-02 The ODBC.Windows module is flawed
 ODBC.Windows.threadsafety = ODBC.Windows.threadlevel # mx.ODBC.Windows has a threadlevel, not a threadsafety, even though DBABI2.0 says its threadsafety (http://www.python.org/topics/database/DatabaseAPI-2.0.html)
 
+
 class MSSQLObjectStore(SQLObjectStore):
 	_threadSafety = ODBC.Windows.threadsafety
 	"""
 	MSSQLObjectStore does the obvious: it implements an object store backed by a MSSQL database.
 
-	The connection arguments passed to __init__ are:
-		- host
-		- user
-		- passwd
-		- port
-		- unix_socket
-		- client_flag
+	mx.ODBC is required, which in turn requires mx BASE:
+	http://egenix.com/files/python/
 
-	You wouldn't use the 'db' argument, since that is determined by the model.
+	Example creation:
+		from MiddleKit.Run.MSSQLObjectStore import MSSQLObjectStore
+		store = MSSQLObjectStore(dsn='LocalServer', clear_auto_commit=0)
+
+	As usual, the keyword args are passed through to the DB API connect()
+	function.
+
+	Interesting notes from mx.ODBC docs:
+	- - -
+	If you have troubles with multiple cursors on connections to MS SQL
+	Server the MS Knowledge Base Article INF: Multiple Active Microsoft
+	SQL Server Statements has some valuable information for you. It
+	seems that you'll have to force the usage of server side cursors
+	to be able to execute multiple statements on a single connection to
+	MS SQL Server. According to the article this is done by setting the
+	connection option SQL.CURSOR_TYPE to e.g. SQL.CURSOR_DYNAMIC:
+
+		dbc.setconnectoption(SQL.CURSOR_TYPE, SQL.CURSOR_DYNAMIC)
+	- - -
 	"""
 
 	def dbapiConnect(self):
@@ -34,11 +48,37 @@ class MSSQLObjectStore(SQLObjectStore):
 
 	def newConnection(self):
 		args = self._dbArgs.copy()
-#		args['database'] = self._model.sqlDatabaseName()
-		return self.dbapiModule().connect(**args)
+		if args.get('DriverConnect'):
+			# @@ problem here is that clear_auto_commit can't be set to zero
+			# example: storeArgs = {'DriverConnect': 'DRIVER=SQL Server;UID=echuck;Trusted_Connection=Yes;WSID=ALIEN;SERVER=ALIEN'}
+			# ODBC driver connection keywords are documented here:
+			# http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbcsql/od_odbc_d_4x4k.asp
+			s = args['DriverConnect']
+			if s.find('DATABASE=')==-1:
+				if s[-1]!=';':
+					s += ';'
+				s += 'DATABASE=' + self._model.sqlDatabaseName()
+			#print '>> connection string=%r' % s
+			conn = self.dbapiModule().DriverConnect(s)
+		else:
+			conn = self.dbapiModule().connect(**args)
+			cur = conn.cursor()
+			try:
+				cur.execute('use '+self._model.sqlDatabaseName()+';')
+			except Exception, e:
+				if e.args[0]!='01000': # ('01000', 5701, "[Microsoft][ODBC SQL Server Driver][SQL Server]Changed database context to 'MKList'.", 4612)
+					raise
+		return conn
 
 	def dbapiModule(self):
 		return ODBC.Windows
+
+	def filterDateTimeDelta(self, dtd):
+		from mx import DateTime
+		if isinstance(dtd, DateTime.DateTimeDeltaType):
+			dtd = DateTime.DateTime(1900, 1, 1) + dtd
+		return dtd
+
 
 class Klass:
 

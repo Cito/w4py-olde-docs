@@ -461,6 +461,17 @@ class SQLObjectStore(ObjectStore):
 		raise ObjRefDanglesError, objRefSplit(objRef)
 
 
+	## Special Cases ##
+
+	def filterDateTimeDelta(self, dtd):
+		"""
+		Some databases have no TIME type and therefore will not return DateTimeDeltas.
+		This utility method is overridden by subclasses as appropriate and invoked by
+		the test suite.
+		"""
+		return dtd
+
+
 	## Debugging ##
 
 	def dumpTables(self, out=None):

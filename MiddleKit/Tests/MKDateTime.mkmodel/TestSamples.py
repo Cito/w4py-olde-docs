@@ -18,5 +18,5 @@ def test(store):
 	except ImportError:
 		print 'Testing with strings.'
 	assert f.d()==d, 'f.d()=%s, d=%s' % (f.d(), d)
-	assert f.t()==t, 'f.t()=%s, t=%s' % (f.t(), t)
+	assert f.t()==store.filterDateTimeDelta(t), 'f.t()=%s, t=%s' % (f.t(), t)
 	assert f.dt()==dt, 'f.dt()=%s, dt=%s' % (f.dt(), dt)

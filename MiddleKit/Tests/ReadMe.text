@@ -10,14 +10,15 @@ storeArgs = {'user': 'root', 'passwd': 'blarr'}
 sqlCommand = 'mysql -u root -pblarr'
 # end
 
-Then to run all tests:
-> python Test.py
-
-When developing a new adapter, it is useful to run one test at a time:
+It can be useful to run one test at a time, especially when developing a
+new adapter:
 > python MKBasic
 
-Or a few:
+Or you can run a few:
 > python MKBasic MKDateTime MKNone
+
+Run all tests like this:
+> python Test.py
 
 Here is another example config file for a fresh MySQL 3.x installation on
 Windows:
@@ -30,3 +31,11 @@ sqlCommand = 'C:\\mysql\\bin\\mysql -u root'
 
 You can see what databases are supported by looking in the MiddleKit/Run
 directory. At the time I write this they are MySQL, PostgreSQL and MSSQL.
+
+Here is a Microsoft SQL Server config using trusted authentication:
+
+# LocalConfig.py
+dbName = 'MSSQL'
+storeArgs = {'dsn': 'LocalServer', 'clear_auto_commit': 0}
+sqlCommand = r'"C:\Program Files\Microsoft SQL Server\80\Tools\Binn\isql" -E'
+# end
