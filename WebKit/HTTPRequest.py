@@ -229,7 +229,7 @@ class HTTPRequest(Request):
 			loc,curr = os.path.split(loc)
 			while 1:
 				loc,curr = os.path.split(loc)
-				if curr:
+				if curr: 
 					self._serverRootPath = self._serverRootPath + "../"
 				else: break
 		return self._serverRootPath
@@ -238,6 +238,9 @@ class HTTPRequest(Request):
 		""" The filesystem path of the request, using the webserver's docroot"""
 		docroot = self._environ['DOCUMENT_ROOT']
 		requri = self._environ['REQUEST_URI'][1:]#strip leading /
+		if self._environ['QUERY_STRING']:
+			qslength = len(self._environ['QUERY_STRING'])+1
+			requri = requri[:-qslength] ##pull off the query string and the ?-mark
 		fspath = os.path.join(docroot,requri)
 		return fspath
 
