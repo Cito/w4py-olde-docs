@@ -1,7 +1,7 @@
 from Common import *
 from Response import Response
 from Cookie import Cookie
-		
+
 
 class HTTPResponse(Response):
 	'''
@@ -10,7 +10,7 @@ class HTTPResponse(Response):
 	'''
 
 	## Init ##
-	
+
 	def __init__(self, headers=None):
 		''' Initializes the request. You should pass the arguments by name rather than position. '''
 
@@ -20,14 +20,14 @@ class HTTPResponse(Response):
 			self._headers = {'Content-type': 'text/html'}
 		else:
 			self._headers = headers
-		
+
 		self._cookies = {}
 		self._committed = 0
 		self._contents = []
 
 
 	## Headers ##
-	
+
 	def header(self, name, default=Tombstone):
 		''' Returns the value of the specified header. '''
 		if default is Tombstone:
@@ -41,22 +41,22 @@ class HTTPResponse(Response):
 	def setHeader(self, name, value):
 		''' Sets a specific header by name. '''
 		self._headers[name] = value
-	
+
 	def addHeader(self, name, value):
 		''' Adds a specific header by name. '''
 		raise NotImplementedError
-		
+
 	def headers(self, name=None):
 		''' Returns a dictionary-style object of all Header objects contained by this request. '''
 		return self._headers
 
 
 	## Cookies ##
-	
+
 	def cookie(self, name):
 		''' Returns the value of the specified cookie. '''
 		return self._cookies[name]
-	
+
 	def hasCookie(self, name):
 		return self._cookies.has_key(name)
 
@@ -75,13 +75,13 @@ class HTTPResponse(Response):
 
 
 	## Status ##
-	
+
 	def setStatus(self, code):
 		raise NotImplementedError
 
-		
+
 	## Special responses ##
-	
+
 	def sendError(self, code, msg=None):
 		raise NotImplementedError
 
@@ -90,12 +90,12 @@ class HTTPResponse(Response):
 		self._cookies = {}
 		self._contents = []
 
-		
+
 	## Output ##
-	
+
 	def write(self, string):
 		self._contents.append(str(string))
-	
+
 	def isCommitted(self):
 		return self._committed
 
@@ -122,7 +122,7 @@ class HTTPResponse(Response):
 		self._headers = {'Content-type': 'text/html'}
 		self._cookies = {}
 		self._contents = []
-	
+
 	def contents(self):
 		''' Returns the final contents of the response. Don't invoke this method until after deliver(). '''
 		assert self._contents is not None, 'Contents are not set. Perhaps deliver() has not been invoked.'
