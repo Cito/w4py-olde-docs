@@ -277,7 +277,7 @@ Determines the amount of time (expressed in minutes) that passes before a user's
 <dt class=config><span class=setting>IgnoreInvalidSession</span>
 &nbsp; <code> = 1</code></dt>
 <dd class=config>
-If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->. 
+If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->.
 </dd>
 </dl></p>
 
@@ -285,7 +285,7 @@ If false, then an error message will be returned to the user if the user's sessi
 <dt class=config><span class=setting>UseAutomaticPathSessions</span>
 &nbsp; <code> = 0</code></dt>
 <dd class=config>
-If true, then the app server will include the session ID in the URL by inserting a component of the form _SID_=8098302983 into the URL, and will parse the URL to determine the session ID.  This is useful for situations where you want to use sessions, but it has to work even if the users can't use cookies. 
+If true, then the app server will include the session ID in the URL by inserting a component of the form _SID_=8098302983 into the URL, and will parse the URL to determine the session ID.  This is useful for situations where you want to use sessions, but it has to work even if the users can't use cookies.
 </dd>
 </dl></p>
 
@@ -436,7 +436,7 @@ The SMTP server to use for sending e-mail error messages.
 
 	<br><br> If your site has a large amount of static files being served via WebKit, you should consider changing 'CacheContent' to 0. If you are confident that your static files do not get updated while the app server is live, then you might consider changing 'CheckDate' to 0 for better performance.
 
-	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems. 
+	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems.
 </dd>
 </dl></p>
 
@@ -470,6 +470,8 @@ If true, then the full traceback for uncaught exceptions in XML-RPC Servlets wil
 <p> The most common technique is the infamous <code>print</code> statement. The results of <code>print</code> statements go to the console where the WebKit application server was started (not to the HTML page as would happen with CGI). Prefixing the debugging output with a special tag (such as >>) is useful because it stands out on the console and you can search for the tag in source code to remove the print statements after they are no longer useful. For example:
 
 <p><code>print '<b>&gt;&gt;</b> fields =', self.request().fields()</code>
+
+<p> Note that if you are using <a href=InstallGuide.html#Adapters_OneShot>OneShot.cgi</a>, then you will need to set <span class=name>ShowConsole</span> to 1 in <span class=filename>WebKit/Configs/OneShotAdapter.config</span>.
 
 
 <a name=Debugging_Raising><h3>Raising Exceptions</h3></a>
