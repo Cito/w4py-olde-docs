@@ -67,6 +67,7 @@ class SQLObjectStore(ObjectStore):
 		self._connected = 0
 		self._sqlEcho   = None
 		self._sqlCount  = 0
+		self._pyClassForName = {}   # cache. see corresponding method
 
 	def modelWasSet(self):
 		'''
@@ -83,6 +84,10 @@ class SQLObjectStore(ObjectStore):
 		if self._threaded and self._threadSafety==0:
 			raise SQLObjectStoreThreadingError, 'Threaded is 1, but the DB API threadsafety is 0.'
 
+		# Cache some settings
+		self._markDeletes = self.setting('DeleteBehavior', 'delete')=='mark'
+
+		# Set up SQL echo
 		self.setUpSQLEcho()
 
 		# Connect
@@ -253,29 +258,19 @@ class SQLObjectStore(ObjectStore):
 		objs = []
 		if not klass.isAbstract():
 			# @@ 2000-10-29 ce: Optimize this. The results for columns & attribute names can be cached with the Klass
-			attrs = klass.allAttrs()
-			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
-			colNames = [klass.sqlIdName()]
-			colNames.extend([attr.sqlColumnName() for attr in attrs])
+			fetchSQLStart = klass.fetchSQLStart()
 			className = klass.name()
 			if serialNum is not None:
 				clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
-			if self.setting('DeleteBehavior', 'delete') == 'mark':
+			if self._markDeletes:
 				clauses = self.addDeletedToClauses(clauses)
-			conn, cur = self.executeSQL('select %s from %s %s;' % (
-				','.join(colNames), klass.sqlTableName(), clauses))
+			conn, cur = self.executeSQL(fetchSQLStart + clauses + ';')
 			for row in cur.fetchall():
 				serialNum = row[0]
 				key = ObjectKey().initFromClassNameAndSerialNum(className, serialNum)
 				obj = self._objects.get(key, None)
 				if obj is None:
-					# Brand new object
-					results = {}
-					pkg = self._model.setting('Package', '')
-					if pkg:
-						pkg += '.'
-					exec 'from %s%s import %s' % (pkg, className, className) in results
-					pyClass = results[className]
+					pyClass = self.pyClassForName(className)
 					obj = pyClass()
 					assert isinstance(obj, MiddleObject), 'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r' % (obj, type(obj), MiddleObject)
 					obj._mk_store = self
@@ -382,6 +377,18 @@ class SQLObjectStore(ObjectStore):
 			return 'where deleted is null and (%s) %s' % (where, orderBy)
 		else:
 			return 'where deleted is null %s' % clauses
+
+	def pyClassForName(self, name):
+		pyClass = self._pyClassForName.get(name, None)
+		if pyClass is None:
+			results = {}
+			pkg = self._model.setting('Package', '')
+			if pkg:
+				pkg += '.'
+			exec 'from %s%s import %s' % (pkg, name, name) in results
+			pyClass = results[name]
+			self._pyClassForName[name] = pyClass
+		return pyClass
 
 	## Obj refs ##
 
@@ -546,6 +553,8 @@ MixIn(MiddleObject, MiddleObjectMixIn)
 
 class Klass:
 
+	_fetchSQLStart = None  # help out the caching mechanism in fetchSQLStart()
+
 	def sqlTableName(self):
 		'''
 		Returns the name of the SQL table for this class.
@@ -558,6 +567,15 @@ class Klass:
 	def sqlIdName(self):
 		name = self.name()
 		return name[0].lower() + name[1:] + 'Id'
+
+	def fetchSQLStart(self):
+		if self._fetchSQLStart is None:
+			attrs = self.allAttrs()
+			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
+			colNames = [self.sqlIdName()]
+			colNames.extend([attr.sqlColumnName() for attr in attrs])
+			self._fetchSQLStart = 'select %s from %s ' % (','.join(colNames), self.sqlTableName())
+		return self._fetchSQLStart
 
 
 class Attr:
