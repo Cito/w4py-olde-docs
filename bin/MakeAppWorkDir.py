@@ -75,6 +75,7 @@ class MakeAppWorkDir:
 		self._sample = sampleContext
 		if sampleContext is not None:
 			self._substVals["DEFAULT"] = sampleContext
+		self._substVals['executable'] = sys.executable
 		if osType is None:
 			osType = os.name
 		self._osType = osType
@@ -142,7 +143,22 @@ class MakeAppWorkDir:
 			oldname = os.path.join(self._webKitDir, name)
 			newname = os.path.join(self._workDir, os.path.basename(name))
 			self.msg("\t%s" % newname)
-			shutil.copyfile(oldname, newname)
+			# Here we replace the #!
+			f = open(oldname)
+			firstLine = f.readline()
+			f.close()
+			if firstLine[:2] == '#!' \
+			   and firstLine.find('python') != -1:
+				f = open(oldname)
+				new = open(newname, 'w')
+				# throw away the first line
+				f.readline()
+				new.write('#!%s\n' % sys.executable)
+				new.write(f.read())
+				f.close()
+				new.close()
+			else:
+				shutil.copyfile(oldname, newname)
 			if doChmod:
 				os.chmod(newname, 0755)
 		self.msg("\n")
@@ -276,7 +292,7 @@ Have fun!
 # A template for the launcher script
 
 _Launch_py = """\
-#!/usr/bin/env python
+#!%(executable)s
 
 import os, sys
 
