@@ -304,9 +304,12 @@ class Application(ConfigurableForServerSidePath, Object):
 		if debug:
 			print prefix, 'sessId =', sessId
 		if sessId:
-			session = self.session(sessId)
-			if debug: print prefix, 'retrieved session =', session
-		else:
+			try:
+				session = self.session(sessId)
+				if debug: print prefix, 'retrieved session =', session
+			except KeyError:
+				sessId = None
+		if not sessId:
 			session = Session(transaction)
 			self._sessions[session.identifier()] = session
 			if debug: print prefix, 'created session =', session
