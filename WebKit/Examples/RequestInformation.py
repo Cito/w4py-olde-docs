@@ -10,8 +10,8 @@ class RequestInformation(ExamplePage):
 		self.dict('HTTPRequest._environ', self.transaction().request()._environ)
 		self.dict('Cookies', self.transaction().request().cookies())
 		self.writeln('</table>')
-		self.transaction().response().setCookie('Test','Test')
-
+		self.transaction().response().setCookie('TestCookieName','CookieValue')
+		self.transaction().response().setCookie('TestExpire1','Expires in 1 minutes', expires='+1m')
 
 	def pair(self, key, value):
 		valueType = type(value)
@@ -31,5 +31,3 @@ class RequestInformation(ExamplePage):
 		for name in keys:
 			self.writeln('<tr valign=top><td>%s</td><td>%s</td></tr>'
 				 % (name, string.replace(self.htmlEncode(str(dict[name])), '\n', '<br>')))
-
-		
