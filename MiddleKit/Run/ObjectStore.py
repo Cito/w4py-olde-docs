@@ -241,7 +241,9 @@ class ObjectStore(ModelUser):
 				onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
 				if onDeleteOther == 'detach':
 					print 'setting %s.%d.%s to None' % (referencingObject.klass().name(), referencingObject.serialNum(), referencingAttr.name())
-					referencingObject.setValueForAttr(referencingAttr, None)
+					setattr(referencingObject, '_'+referencingAttr.name(), None)
+					# Can't use setValueForAttr() because that invokes the setter method which will raise an exception if the attribute is required.
+					#referencingObject.setValueForAttr(referencingAttr, None)
 
 		# Detach objects with onDeleteSelf=detach
 		# This is actually a no-op.  There is nothing that needs to be set to zero.
@@ -260,9 +262,9 @@ class ObjectStore(ModelUser):
 
 	def saveChanges(self):
 		''' Commits object changes to the object store by invoking commitInserts(), commitUpdates() and commitDeletions() all of which must by implemented by a concrete subclass. '''
+		self.commitDeletions()
 		self.commitInserts()
 		self.commitUpdates()
-		self.commitDeletions()
 		self._hasChanges = 0
 
 	def commitInserts(self):
