@@ -43,7 +43,7 @@ class SecurePage(ExamplePage, Configurable):
 				# They are logging out.  Clear all session variables.
 				session.values().clear()
 				request.fields()['extra'] = 'You have been logged out.'
-				app.forwardRequestFast(trans, 'LoginPage')
+				app.includeURL(trans, 'LoginPage')
 			elif request.hasField('login') and request.hasField('username') and request.hasField('password'):
 				# They are logging in.  Clear session
 				session.values().clear()
@@ -57,7 +57,7 @@ class SecurePage(ExamplePage, Configurable):
 				else:
 					# Failed login attempt; have them try again
 					request.fields()['extra'] = 'Login failed.  Please try again. (And make sure cookies are enabled.)'
-					app.forwardRequestFast(trans, 'LoginPage')
+					app.includeURL(trans, 'LoginPage')
 			# They aren't logging in; are they already logged in?
 			elif self.getLoggedInUser():
 				# They are already logged in; write the HTML for this page.
@@ -65,7 +65,7 @@ class SecurePage(ExamplePage, Configurable):
 			else:
 				# They need to log in.
 				session.values().clear()
-				app.forwardRequestFast(trans, 'LoginPage')
+				app.includeURL(trans, 'LoginPage')
 		else:
 			# No login is required
 			session = self.session()

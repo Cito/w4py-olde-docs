@@ -19,5 +19,5 @@ class View(ExamplePage):
 				self.write("Cannot request a file outside of this directory %s" % fn)
 				return
 			fn = self.request().serverSidePath(fn)
-			self.request().fields()['filename'] = fn 
-			trans.application().forwardRequest(trans, "Colorize.py")
+			self.request().fields()['filename'] = fn
+			trans.application().forward(trans, "Colorize.py")
