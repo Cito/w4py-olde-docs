@@ -36,6 +36,25 @@ class ExceptionHandler(Object):
 		def writeAttrs(self, obj, attrNames):
 
 	See the WebKit.html documentation for other information.
+
+
+	HOW TO CREATE A CUSTOM EXCEPTION HANDLER
+
+	In the __init__.py of your context:
+
+		from WebKit.ExceptionHandler import ExceptionHandler as _ExceptionHandler
+
+		class ExceptionHandler(_ExceptionHandler):
+
+			hideValuesForFields = _ExceptionHandler.hideValuesForFields + ['foo', 'bar']
+
+			def work(self):
+				_ExceptionHandler.work(self)
+				# do whatever
+				# override other methods if you like
+
+		def contextInitialize(app, ctxPath):
+			app._exceptionHandlerClass = ExceptionHandler
 	'''
 
 	maxValueLen = 20
