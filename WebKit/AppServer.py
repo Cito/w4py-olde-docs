@@ -9,7 +9,6 @@ FUTURE
 """
 
 import os, sys
-sys.path.append(os.path.join(os.path.dirname(__file__),".."))
 
 from Common import *
 from Object import Object
@@ -61,15 +60,15 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			self._closeThread = Thread(target=self.closeThread)
 ##			self._closeThread.setDaemon(1)
 			self._closeThread.start()
-		
+
 
 	def closeThread(self):
 		self._closeEvent.wait()
 		self.shutDown()
-		
+
 	def initiateShutdown(self):
-		self._closeEvent.set()		
-		
+		self._closeEvent.set()
+
 
 
 	def recordPID(self):
