@@ -13,9 +13,7 @@
 <h1 align=center><font color='blue'  face='helvetica'>Hello from PSP!</font></h1><br><br>
 
 
-<p>If you're running WebKit on Windows with the cgi adaptor, the image above will be broken.  You'll need to serve binary files from the WebServer itself.  We're working on a fix.  Sorry!
-
-<p>PSP is a new addition to WebKit version 0.3.  It allows you to write a WebKit servlet using only html and interspersed python statements.
+<p>PSP allows you to write a WebKit servlet using only html and interspersed python statements.
 
 <p><h3>Read the documentation <a href="PSPDocs.psp">here</a>.</h3>
 
@@ -28,20 +26,25 @@
 <p>
 <p>Since examples get added and removed here periodically, I'll just list links to the other examples below.  The main one is PSPTests.psp, which pretty much shows the syntax for PSP.  A truly wimpy Can example is at the bottom of PSPTests.
 <p>
+
+
+
 <%
 import glob
-
 filesyspath=self._request.serverSideDir()
 files=glob.glob(os.path.join(filesyspath,"*.psp"))
+for i in files:
+	file=os.path.split(i)[1]$%>   <%-- AhHa! Here's where we need the complex block syntax. OKay.  --%>
 
-%>
-
-<% for i in files:
-	file=os.path.split(i)[1]$%> <%-- AhHa! Here's where we need the complex block syntax. OKay.  --%>
 <a href="<%=file%>"> <%= file %></a><br>
+
 <% end %>
+
+
+
 <p>
 <p><i>Note: The above files were generated using a loop that utilized the "userIndent" feature that's new for WebKit 0.4.</i>
+<p><b>Document New Syntax Jay!</b>
 <p>
 <p>So anyway, read through the docs, and look at PSPTests.psp for examples.  Let us know what we can do better or more effectively.
 
