@@ -24,10 +24,22 @@ Windows:  ThreadedAppServer
 On unix, to start the appserver, we fork and execute main() in the AppServer's module.
 On Win, we have to start the process through a command line like syntax.
 
+
+*******************************************************************************************
+USE:
+
+Just run it!
+
+On UNIX, you can have the whole process run as a daemon by specifying "-d" on the command line.
+
+On any platform, to stop the processes, run stopMonitor.py.
+
+You can select which type of AppServer to run by changing the variable below.
+
 """
 
-#These need to be filled in correctly on Windows
-#pythonexec = "C:\progra~1\python\python"  #I think i got around this
+
+#appserver should be either "AsyncThreadedAppServer.py", or "ThreadedAppServer.py".
 appserver = "ThreadedAppServer.py"
 
 
@@ -50,13 +62,16 @@ if os.name == 'nt':
 	appcwd = os.getcwd()
 	appserver = os.path.join(appcwd,appserver)
 	pythonexec = string.split(win32api.GetCommandLine())[0]
-else:
-	appserverclass = AsyncThreadedAppServer
-
+else:      # *nix
+	appservername = string.split(appserver,".")[0]
+	if len(sys.argv) > 1 and sys.argv[1] == "-d": #fork and become a daemon
+		daemon=os.fork()
+		if daemon:
+			sys.exit()
 
 
 ##DEBUG
-appserverclass =  ThreadedAppServer
+appserverclass =  sys.modules[appservername]
 
 srvpid = 0
 checkInterval = 10  #add to config if this implementation is adopted, seconds between checks
