@@ -231,6 +231,7 @@ class ContextParser(URLParser):
 		trans._fileParserInitSeen = {}
 		if not requestPath:
 			raise HTTPMovedPermanently(webkitLocation='/')
+		requestPath = re.sub(r'/+', '/', requestPath)
 		parts = requestPath[1:].split('/', 1)
 		if len(parts) == 1:
 			rest = ''
