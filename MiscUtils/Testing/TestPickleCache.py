@@ -6,21 +6,29 @@ def writePickleCache(data, filename, pickleVersion=1, source=None, verbose=None)
 	PickleCacheWriter().write(data, filename, pickleVersion, source, verbose)
 """
 
-from FixPath import progDir
+import unittest
 from os.path import join
-from PickleCache import *
+
+#from FixPath import progDir
+from MiscUtils.PickleCache import *
 
 
-class TestPickleCache:
+# the directory that this file is in.
+progDir = os.path.dirname( __file__ )
+assert progDir.endswith('Webware/MiscUtils/Testing')
 
-	def run(self, iters=1):
-		sys.setcheckinterval(10000)  # keep the code sequence tight for the 'source is newer' test
-		print 'Testing PickleCache...'
-		for iter in range(iters):
-			self.test()
-		print 'Success.'
+
+class TestPickleCache(unittest.TestCase):
 
 	def test(self):
+		sys.setcheckinterval(10000)  # keep the code sequence tight for the 'source is newer' test
+#		print 'Testing PickleCache...'
+		iters = 3
+		for iter in range(iters):
+			self.oneIterTest()
+#		print 'Success.'
+
+	def oneIterTest(self):
 		sourcePath = self.sourcePath = join(progDir, 'foo.dict')
 		picklePath = self.picklePath = PickleCache().picklePath(sourcePath)
 		self.remove(picklePath) # make sure we're clean
@@ -63,6 +71,7 @@ class TestPickleCache:
 			self.remove(sourcePath)
 			self.remove(picklePath)
 
+
 	def remove(self, filename):
 		try:
 			os.remove(filename)
@@ -78,5 +87,5 @@ class TestPickleCache:
 		assert os.path.exists(self.picklePath)
 
 
-if __name__=='__main__':
-	TestPickleCache().run(iters=3)
+#if __name__=='__main__':
+#	TestPickleCache().test()
