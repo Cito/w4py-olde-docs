@@ -33,6 +33,17 @@ class SessionFileStore(SessionStore):
 		self.setEncoderDecoder(dump, load)
 
 
+	## Explicit Calls from Application ##
+
+	def storeSession(self, session):
+		key = session.identifier()
+		self[key]=session
+
+	def storeAllSessions(self):
+		pass
+		
+
+
 	## Encode/decode ##
 
 	def encoder(self):

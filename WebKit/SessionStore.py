@@ -28,6 +28,12 @@ class SessionStore(Object):
 	def application(self):
 		return self._app
 
+	def storeAllSessions(self):
+		raise SubclassResponsibilityError
+
+	def storeSession(self, session):
+		raise SubclassResponsibilityError		
+
 
 	## Dictionary-style access ##
 

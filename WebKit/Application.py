@@ -101,11 +101,9 @@ class Application(Configurable,CanContainer):
 		self._serverDir = os.getcwd()
 		self._cacheDictLock = Lock()
 		self._instanceCacheSize=10 # self._server.setting('ServerThreads') #CHANGED 6/21/00
+		self._canDirs = []
 
-##		if contexts: #Try to get this from the Config file
-##			self._contexts = contexts
-##		else: #Get it from Configurable object, which gets it from defaults or the user config file
-##			self._contexts = self.setting('Contexts')
+
 		if contexts: #Try to get this from the Config file
 			defctxt = contexts
 		else: #Get it from Configurable object, which gets it from defaults or the user config file
@@ -138,7 +136,7 @@ class Application(Configurable,CanContainer):
 		@@ Overhaul by 0.4
 		"""
 		import CanFactory
-		self._canDirs = ["Cans",]
+		self._canDirs.append("Cans")
 		self._canFactory = CanFactory.CanFactory(self)
 
 	def startSessionSweeper(self):
@@ -165,11 +163,13 @@ class Application(Configurable,CanContainer):
 			if (curTime - sessions[key].lastAccessTime()) >= sessions[key].getTimeout():
 				sessions[key].expiring()
 				del sessions[key]
+		sessions.storeAllSessions()
 
 	def shutDown(self):
 		"""
 	Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references.
 		"""
+		self._sessions.storeAllSessions()
 		del self._canFactory
 		del self._sessions
 		self._delCans()
@@ -292,6 +292,10 @@ class Application(Configurable,CanContainer):
 		if self.setting('LogActivity'):
 			self.writeActivityLog(transaction)
 
+		##store session##
+		if transaction._session:
+			self._sessions.storeSession(transaction.session())
+
 		path = request.serverSidePath()
 		self.returnInstance(transaction, path)
 
@@ -403,7 +407,7 @@ class Application(Configurable,CanContainer):
 		# Force a store of the session because non-memory session stores need this.
 		if transaction.hasSession():
 			sess = transaction.session()
-			self._sessions[sess.identifier()] = sess
+##			self._sessions[sess.identifier()] = sess
 			sess.sleep(transaction) # @@ 2000-08-11 ce: should go in transaction
 		transaction.servlet().sleep(transaction)
 
@@ -475,7 +479,9 @@ class Application(Configurable,CanContainer):
 			localdir, pkgname = os.path.split(dir)
 			res = imp.find_module(pkgname, [localdir])
 			# @@ question, do we want the package name to be the dir name or the context name?
-			imp.load_module(name, res[0], res[1], res[2])
+			mod = imp.load_module(name, res[0], res[1], res[2])
+			if mod.__dict__.has_key('contextInitialize'):
+				mod.__dict__['contextInitialize'](self, os.path.normpath(os.path.join(os.getcwd(),dir)))
 		except ImportError:
 			print "%s is not a package" % name
 		self._contexts[name] = dir
@@ -607,8 +613,7 @@ class Application(Configurable,CanContainer):
 			except Queue.Full: #full or blocked
 				pass
 				print '>> queue full for:', cache['path'] #do nothing, don't want to block queue for this
-
-##			  print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
+##				print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
 
 	def newServletCacheItem(self,key,item):
 		""" Safely add new item to the main cache.  Not woried about the retrieval for now.

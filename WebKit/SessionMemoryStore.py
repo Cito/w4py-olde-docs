@@ -1,5 +1,10 @@
 from SessionStore import SessionStore
 
+try:
+	from cPickle import load, dump
+except:
+	from pickle  import load, dump
+import os
 
 class SessionMemoryStore(SessionStore):
 	'''
@@ -14,6 +19,9 @@ class SessionMemoryStore(SessionStore):
 	def __init__(self, app):
 		SessionStore.__init__(self, app)
 		self._store = {}
+		if os.path.exists("Sessions/AllSessions.ses"):
+			file = open("Sessions/AllSessions.ses","r")
+			self._store = load(file)
 
 
 	## Access ##
@@ -38,3 +46,11 @@ class SessionMemoryStore(SessionStore):
 
 	def clear(self):
 		self._store.clear()
+
+	def storeAllSessions(self):
+		file = open("Sessions/AllSessions.ses","w")
+		dump(self._store,file)
+
+	def storeSession(self):
+		pass
+		
