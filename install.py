@@ -285,7 +285,8 @@ class Installer:
 			ht = []
 			for doc in comp['docs']:
 				ht.append(link % (doc['file'], doc['name']))
-			ht = ''.join(ht)
+#			ht = ''.join(ht)
+			ht = string.join(ht, '')
 			comp['docs'] = ht
 
 			# Set up release notes
@@ -306,7 +307,8 @@ class Installer:
 					ht.append(link % (item['filename'], item['name']))
 			else:
 				ht.append('None\n')
-			ht = ''.join(ht)
+#			ht = ''.join(ht)
+			ht = string.join(ht, '')
 			comp['releaseNotes'] = ht
 
 			# Write file
