@@ -167,7 +167,7 @@ class MiddleObject(NamedValueAccess):
 				targetKlasses.append(super.name())
 				super = super.superklass()
 			# Look at all klasses in the model
-			for klass in self.store().model().klasses().values():
+			for klass in self.store().model().allKlassesInOrder():
 				# find all ObjRefAttrs of this klass that refer to one of our targetKlasses
 				for attr in klass.attrs():
 					if isinstance(attr, ObjRefAttr) and attr.className() in targetKlasses:
