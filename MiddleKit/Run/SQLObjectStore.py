@@ -15,6 +15,9 @@ class SQLObjectStoreError(Exception): pass
 class SQLObjectStoreThreadingError(SQLObjectStoreError): pass
 
 
+aggressiveGC = 0
+
+
 class UnknownSerialNumberError(SQLObjectStoreError):
 	"""
 	For internal use when archiving objects.
@@ -147,7 +150,8 @@ class SQLObjectStore(ObjectStore):
 			poolSize = self.setting('SQLConnectionPoolSize', 0)
 			if poolSize:
 				args = self._dbArgs.copy()
-				args['db'] = self._model.sqlDatabaseName()
+				if not args.get('db'):
+					args['db'] = self._model.sqlDatabaseName()
 				self._pool = DBPool(self.dbapiModule(), poolSize, **args)
 
 	def newConnection(self):
@@ -313,11 +317,18 @@ class SQLObjectStore(ObjectStore):
 		Note that you can pass in a connection to force a particular one
 		to be used.
 		"""
+		if aggressiveGC:
+			import gc
+			assert gc.isenabled()
+			gc.collect()
 		self._sqlCount += 1
 		if self._sqlEcho:
 			timestamp = funcs.timestamp()['pretty']
 			self._sqlEcho.write('SQL %04i. %s %s\n' % (self._sqlCount, timestamp, sql))
 			self._sqlEcho.flush()
+			if self._sqlCount in (2, 3, 4):
+				import traceback as tb
+				tb.print_stack()
 		conn, cur = self.connectionAndCursor(connection)
 		self._executeSQL(cur, sql.strip())
 		return conn, cur
@@ -344,6 +355,10 @@ class SQLObjectStore(ObjectStore):
 		connection to force a particular one to be used. Uses
 		newConnection() and connect().
 		"""
+		if aggressiveGC:
+			import gc
+			assert gc.isenabled()
+			gc.collect()
 		if connection:
 			conn = connection
 		elif self._threaded:
@@ -466,9 +481,10 @@ class SQLObjectStore(ObjectStore):
 class Model:
 
 	def sqlDatabaseName(self):
-		# @@ 2001-06-15 ce: someday we might allow this to be set
-		# or at least read from a config file
-		return self.name()
+		name = self.setting('Database', None)
+		if name is None:
+			name = self.name()
+		return name
 
 
 class MiddleObjectMixIn:
