@@ -53,6 +53,24 @@ def charWrap(s, width, hanging=0):
 	return string.join(lines, '\n')
 
 
+def wordWrap(s, width=78):
+	"""
+	Returns a version of the string word wrapped to the given width.
+	Respects existing newlines in the string.
+
+	Taken from:
+	http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/148061
+	"""
+	return reduce(
+		lambda line, word, width=width: "%s%s%s" % (
+			line,
+			' \n'[(len(line[line.rfind('\n')+1:]) + len(word) >= width)],
+			word
+		),
+		s.split(' ')
+	)
+
+
 def dateForEmail(now=None):
 	""" Returns a properly formatted date/time string for email messages """
 	if now is None:

@@ -44,6 +44,24 @@ def TestHostName():
 		'host type = %s, host = %s' % (type(host), repr(host))
 
 
+def TestWordWrap():
+	# an example with some spaces and newlines
+	msg = """Arthur:  "The Lady of the Lake, her arm clad in the purest \
+shimmering samite, held aloft Excalibur from the bosom of the water, \
+signifying by Divine Providence that I, Arthur, was to carry \
+Excalibur. That is why I am your king!"
+
+Dennis:  "Listen. Strange women lying in ponds distributing swords is \
+no basis for a system of government. Supreme executive power derives \
+from a mandate from the masses, not from some farcical aquatic \
+ceremony!\""""
+
+	for margin in range(20, 200, 20):
+		s = wordWrap(msg, margin)
+		for line in s.split('\n'):
+			assert len(line)<=margin, 'len=%i, margin=%i, line=%r' % (len(line), margin, line)
+
+
 def TestUniqueId():
 	lastResult = None
 	for x in range(5):
@@ -61,6 +79,7 @@ def TestUniqueId():
 def Test():
 	TestCommas()
 	TestHostName()
+	TestWordWrap()
 	TestUniqueId()
 
 
