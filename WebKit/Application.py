@@ -198,7 +198,6 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		# @@ ISB 09/02: make this default or get rid of it eventually
 		if self.setting('ExtraPathInfo', 0):
-			print 'ExtraPathInfo set: using new path algorithm'
 			self.serverSideInfoForRequestOld = self.serverSideInfoForRequest
 			self.serverSideInfoForRequest = self.serverSideInfoForRequestNewAlgorithm
 			self._serverSideInfoCacheByPathNew = {}
@@ -1365,13 +1364,11 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		info = self.serverSideInfoForRequestOld(request)
 		extraPath = request._extraURLPath
-		print 'serverSideInfo should be:', info, extraPath
 
 		fullPath = request.urlPath()
 		contextPath, contextName, rest = self.findContext(fullPath)
 		servletPath, extraPath = self.findServlet(contextPath, rest)
 		request._extraURLPath = extraPath
-		print 'serverSideInfo is      :', (servletPath, contextPath, contextName), extraPath
 		return (servletPath, contextPath, contextName)
 
 
