@@ -18,7 +18,7 @@ class Klasses:
 		names.reverse()
 		for tableName in names:
 			sql.append('drop table if exists %s;\n' % tableName)
-		klasses = self.klassesInOrder()[:]
+		klasses = self._model._allKlassesInOrder[:]
 		klasses.reverse()
 		for klass in klasses:
 			sql.append('drop table if exists %s;\n' % klass.name())

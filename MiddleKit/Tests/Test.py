@@ -42,7 +42,12 @@ class Test:
 		if len(args)>1:
 			self._modelNames = args[1:]
 		else:
-			self._modelNames = 'MKBasic MKNone MKString MKDateTime MKDefaultMinMax MKTypeValueChecking MKInheritance MKInheritanceAbstract MKList MKObjRef MKObjRefReuse MKDelete MKDeleteMark'.split()
+			self._modelNames = '''
+				MKBasic MKNone MKString MKDateTime MKDefaultMinMax
+				MKTypeValueChecking MKInheritance MKInheritanceAbstract
+				MKList MKObjRef MKObjRefReuse MKDelete MKDeleteMark
+				MKModelInh1 MKModelInh2 MKModelInh3
+			'''.split()
 
 	def testEmpty(self):
 		'''

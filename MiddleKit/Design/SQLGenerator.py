@@ -222,7 +222,7 @@ class Klasses:
 		kv(out, 'Cur dir', os.getcwd())
 		kv(out, 'Num classes', len(self._klasses))
 		wr('\nClasses:\n')
-		for klass in self._klasses:
+		for klass in self._model._allKlassesInOrder:
 			wr('\t%s\n' % klass.name())
 		wr('*/\n\n')
 
@@ -275,7 +275,7 @@ class Klasses:
 		raise SubclassResponsibilityError
 
 	def _writeCreateSQL(self, generator, out):
-		for klass in self._klasses:
+		for klass in self._model._allKlassesInOrder:
 			klass.writeCreateSQL(self._sqlGenerator, out)
 		self.writeClassIdsSQL(generator, out)
 
@@ -290,7 +290,7 @@ create table _MKClassIds (
 		wr('insert into _MKClassIds (id, name) values\n')
 		id = 1
 		values = []
-		for klass in self._klasses:
+		for klass in self._model._allKlassesInOrder:
 			values.append('\t(%s, %r)' % (id, klass.name()))
 			klass.setId(id)
 			id += 1
@@ -320,7 +320,7 @@ create table _MKClassIds (
 			names.reverse()
 			for tableName in names:
 				wr('delete from %s;\n' % tableName)
-		klasses = self.klassesInOrder()[:]
+		klasses = self._model._allKlassesInOrder[:]
 		klasses.reverse()
 		for klass in klasses:
 			if not klass.isAbstract():

@@ -33,7 +33,16 @@ class Model:
 			filename = os.path.join(dirname, '__init__.py')
 			if not os.path.exists(filename):
 				open(filename, 'w').write('#')
-		self._klasses.writePy(generator, dirname)
+
+		for klass in self._allKlassesInOrder:
+			filename = os.path.join(dirname, klass.name()+'.py')
+			klass.writePyStubIfNeeded(generator, filename)
+
+			filename = os.path.join(dirname, 'GeneratedPy', 'Gen'+klass.name()+'.py')
+			klass.writePy(generator, filename)
+
+		filename = os.path.join(dirname, 'GeneratedPy', '__init__.py')
+		open(filename, 'w').write('# __init__.py\n')
 
 
 class ModelObject:
@@ -48,26 +57,6 @@ class ModelObject:
 		self._writePy(generator, out)
 		if close:
 			out.close()
-
-
-class Klasses:
-
-	def writePy(self, generator, outdir):
-		self._pyOutDir = outdir
-		self._writePy(generator, outdir)
-
-	def _writePy(self, generator, outdir):
-		for klass in self._klasses:
-			filename = os.path.join(outdir, klass.name()+'.py')
-			klass.writePyStubIfNeeded(generator, filename)
-
-			filename = os.path.join(outdir, 'GeneratedPy', 'Gen'+klass.name()+'.py')
-			klass.writePy(generator, filename)
-
-		# Write GeneratedPy/__init__.py
-		# @@ 2000-10-19 ce: break out into self.writeInitPy()
-		filename = os.path.join(outdir, 'GeneratedPy', '__init__.py')
-		open(filename, 'w').write('# Hi\n')
 
 
 class Klass:

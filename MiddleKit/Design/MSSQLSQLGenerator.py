@@ -39,7 +39,7 @@ class Klasses:
 		strList = []
 		strList.append('use %s\ngo\n' % dbName)
 		self._klasses.reverse()		
-		for klass in self._klasses:
+		for klass in self._model._allKlasses:
 		# If table exists drop.
 			strList.append("print 'Dropping table %s'\n" % klass.name())
 			strList.append("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % klass.name() )
@@ -81,7 +81,7 @@ create table _MKClassIds (
 ''')
 		wr('delete from _MKClassIds\n\n')
 		id = 1
-		for klass in self._klasses:
+		for klass in self._model._allKlasses:
 			wr('insert into _MKClassIds (id, name) values\n')
 			wr ('\t(%s, %r)\n' % (id, klass.name()))
 			klass.setId(id)
@@ -105,7 +105,7 @@ create table _MKClassIds (
 		kv(out, 'Cur dir', os.getcwd())
 		kv(out, 'Num classes', len(self._klasses))
 		wr('\nClasses:\n')
-		for klass in self._klasses:
+		for klass in self._model._allKlasses:
 			wr('\t%s\n' % klass.name())
 		wr('*/\n\n')
 
@@ -118,7 +118,7 @@ create table _MKClassIds (
 		wr('Use %s\ngo\n\n' % dbName)\
 		
 
-		rList = self._klasses[:]
+		rList = self._model._allKlassesInOrder[:]
 		rList.reverse()
 #		print str(type(rList))
 #		for klass in rList:

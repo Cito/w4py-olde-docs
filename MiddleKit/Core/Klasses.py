@@ -110,7 +110,7 @@ class Klasses(ModelObject, UserDict):
 
 		supername = klass.supername()
 		if supername!='MiddleObject':
-			klass.setSuperklass(self[supername])
+			klass.setSuperklass(self._model.klass(supername))
 
 		klass.setKlasses(self)
 
