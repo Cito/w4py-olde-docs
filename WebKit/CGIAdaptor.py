@@ -64,6 +64,11 @@ def main():
 		s.connect(host, port)
 		s.send(dumps(dict))
 		s.shutdown(1)
+
+		if os.name=='nt': # MS Windows: no special translation of end-of-lines
+			import msvcrt
+			msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
+
 		while 1:
 			data = s.recv(bufsize)
 			if not data:
