@@ -522,6 +522,13 @@ Determines how much detail an RPC servlet will return when an exception occurs o
 </dd>
 </dl></p>
 
+<p><dl class=config>
+<dt class=config><span class=setting>ReportRPCExceptionsInWebKit</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+1 means report exceptions in RPC servlets in the same way as exceptions in other servlets, i.e. in the logfiles, the error log, and/or by email.  0 means don't report the exceptions on the server side at all; this is useful if your RPC servlets are raising exceptions by design and you don't want to be notified.
+</dd>
+</dl></p>
 
 <a name=Administration><h2>Administration</h2></a>
 

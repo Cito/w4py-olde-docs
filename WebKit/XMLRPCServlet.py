@@ -34,6 +34,9 @@ class XMLRPCServlet(RPCServlet):
 
 			# generate response
 			try:
+				# This first test helps us to support PythonWin, which uses
+				# repeated calls to __methods__.__getitem__ to determine the
+				# allowed methods of an object.
 				if method == '__methods__.__getitem__':
 					response = self.exposedMethods()[params[0]]
 				else:
@@ -43,15 +46,19 @@ class XMLRPCServlet(RPCServlet):
 			except Exception, e:
 				fault = self.resultForException(e, transaction)
 				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault))
+				self.sendOK('text/xml', response, transaction)
+				self.handleException(transaction)
 			except:  # if it's a string exception, this gets triggered
 				fault = self.resultForException(sys.exc_info()[0], transaction)
 				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault))
+				self.sendOK('text/xml', response, transaction)
+				self.handleException(transaction)
 			else:
 				response = xmlrpclib.dumps(response, methodresponse=1)
+				self.sendOK('text/xml', response, transaction)
 		except:
 			# internal error, report as HTTP server error
 			print 'XMLRPCServlet internal error'
 			print string.join(traceback.format_exception(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2]))
 			transaction.response().setStatus(500, 'Server Error')
-		else:
-			self.sendOK('text/html', response, transaction)
+			self.handleException(transaction)

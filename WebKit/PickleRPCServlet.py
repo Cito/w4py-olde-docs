@@ -101,16 +101,28 @@ class PickleRPCServlet(RPCServlet):
 					response['value'] = self.call(methodName, *args, **req.get('keywords', {}))
 			except RequestError, e:
 				response['requestError'] = str(e)
+				self.sendResponse(trans, response)
+				self.handleException(trans)
 			except Exception, e:
 				response['exception'] = self.resultForException(e, trans)
+				self.sendResponse(trans, response)
+				self.handleException(trans)
 			except:  # if it's a string exception, this gets triggered
 				response['exception'] = self.resultForException(sys.exc_info()[0], trans)
-			response['timeResponded'] = time()
-			response = dumps(response)
+				self.sendResponse(trans, response)
+				self.handleException(trans)
+			else:
+				self.sendResponse(trans, response)
 		except:
 			# internal error, report as HTTP server error
 			print 'PickleRPCServlet internal error'
 			print ''.join(traceback.format_exception(*sys.exc_info()))
 			trans.response().setStatus(500, 'Server Error')
-		else:
-			self.sendOK('text/python/pickle/dict', response, trans)
+			self.handleException(trans)
+
+	def sendResponse(self, trans, response):
+		"""
+		Timestamp the response dict and send it.
+		"""
+		response['timeResponded'] = time()
+		self.sendOK('text/python/pickle/dict', dumps(response), trans)

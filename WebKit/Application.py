@@ -296,6 +296,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			                           'Subject':      'Error'
 			                         },
 			'RPCExceptionReturn':    'traceback',
+			'ReportRPCExceptionsInWebKit':   1,
 			'Contexts':              { 'default':       'Examples',
 			                           'Admin':         'Admin',
 			                           'Examples':      'Examples',

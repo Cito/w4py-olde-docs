@@ -109,4 +109,6 @@
 
 ('RPCExceptionReturn', "'traceback'", "Determines how much detail an RPC servlet will return when an exception occurs on the server side. Can take the values, in order of increasing detail, 'occurred', 'exception' and 'traceback'. The first reports the string 'unhandled exception', which the second prints the actual exception and finally the third prints both the exception and accompanying traceback. All returns are always strings."),
 
+('ReportRPCExceptionsInWebKit', '1', "1 means report exceptions in RPC servlets in the same way as exceptions in other servlets, i.e. in the logfiles, the error log, and/or by email.  0 means don't report the exceptions on the server side at all; this is useful if your RPC servlets are raising exceptions by design and you don't want to be notified."),
+
 ]

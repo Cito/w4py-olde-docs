@@ -141,7 +141,14 @@ class ResponseError(Error):
 	pass
 
 
-from xmlrpclib import ProtocolError as _PE   # @@ 2002-01-31 ce: should this be caught somewhere for special handling? Perhaps in XMLRPCServlet?
+# Sometimes xmlrpclib is installed as a package, sometimes not.  So we'll
+# make sure it works either way.
+try:
+	from xmlrpclib.xmlrpclib import ProtocolError as _PE
+except ImportError:
+	from xmlrpclib import ProtocolError as _PE
+# @@ 2002-01-31 ce: should this be caught somewhere for special handling? Perhaps in XMLRPCServlet?
+
 class ProtocolError(ResponseError, _PE):
 	pass
 

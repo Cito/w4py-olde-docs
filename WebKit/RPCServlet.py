@@ -47,3 +47,17 @@ class RPCServlet(HTTPServlet):
 		response.setHeader('Content-type', contentType)
 		response.setHeader('Content-length', str(len(contents)))
 		response.write(contents)
+
+	def handleException(self, transaction):
+		"""
+		If ReportRPCExceptionsInWebKit is set to true, then
+		flush the response (because we don't want the standard HTML traceback
+		to be appended to the response) and then handle the exception in the
+		standard WebKit way.  This means logging it to the console, storing
+		it in the error log, sending error email, etc. depending on the
+		settings.
+		"""
+		setting = transaction.application().setting('ReportRPCExceptionsInWebKit')
+		if setting:
+			transaction.response().flush()
+			transaction.application().handleExceptionInTransaction(sys.exc_info(), transaction)
