@@ -29,7 +29,20 @@ class HTTPServlet(Servlet):
 
 	def respond(self, trans):
 		""" Invokes the appropriate respondToSomething() method depending on the type of request (e.g., GET, POST, PUT, ...). """
-		httpMethodName = trans.request().method()
+		request = trans.request()
+		httpMethodName = request.method()
+		# For GET and HEAD, handle the HTTP If-Modified-Since header:
+		# if the object's last modified time is the same
+		# as the IMS header, we're done.
+		if httpMethodName in ('GET','HEAD'):
+			lm = self.lastModified(trans)
+			if lm:
+			 	lm = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime(lm))
+				trans.response().setHeader('Last-Modified', lm)
+				if request.environ().get('If-Modified-Since', '') == lm:
+					trans.response().setStatus(304, 'Not Modified')
+					#print "304", request.serverSidePath()
+					return
 		method = self._methodForRequestType.get(httpMethodName, None)
 		if not method:
 			methName = 'respondTo' + string.capitalize(httpMethodName)
@@ -38,15 +51,22 @@ class HTTPServlet(Servlet):
 		method(trans)
 
 	def notImplemented(self, trans):
-		trans.response().setHeader('Status', '501 Not Implemented')
+		trans.response().setStatus(501, 'Not Implemented')
+
+	def lastModified(self, trans):
+		"""
+		Return this object's Last-Modified time (as a float),
+		or None (meaning don't know or not applicable).
+		"""
+		return None
 
 	def respondToHead(self, trans):
 		"""
 		A correct but inefficient implementation.
-		Should at least provide Last-Modified and Content-Length.
 		"""
 		res = trans.response()
 		w = res.write
 		res.write = lambda *args: None
 		self.respondToGet(trans)
 		res.write = w
+

@@ -542,6 +542,17 @@ static int content_handler(request_rec *r)
 	if (value !=NULL) write_string(value, strlen(value), env_dict);
 	else w_byte(TYPE_NONE, env_dict);
     }
+    // If the "If-Modified-Since" HTTP header is present,
+    // add it to the environment.  Servlets may inspect this
+    // value and, if the object has not changed,
+    // return "Status: 304" and no body.
+    key = "If-Modified-Since";
+    value = ap_table_get(r->headers_in, key);
+    if (value && *value) {
+        write_string(key, strlen(key), env_dict);
+        write_string(value, strlen(value), env_dict);
+    }
+
     w_byte(TYPE_NULL, env_dict);
     //end dictionary
     //	log_message("Built env dictionary", r);

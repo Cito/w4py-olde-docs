@@ -51,3 +51,4 @@
 /Testing/Forward2 --> Dir/Forward2Target
 /Testing/Dir/Forward3 --> Forward3Target
 /Testing/SetCookie --> Test HTTPResponse.setCookie
+/Testing/TestIMS --> IMS Test Pass

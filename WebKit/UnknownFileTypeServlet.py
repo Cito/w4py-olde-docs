@@ -123,6 +123,12 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		trans.response().sendRedirect(newURL)
 
 
+	def lastModified(self, trans):
+		try:
+			return os.path.getmtime(self.filename(trans))
+		except OSError:
+			return None
+
 	def serveContent(self, trans):
 		response = trans.response()
 
