@@ -1,6 +1,6 @@
 name = 'TaskKit'
 
-version = (0, 1, 1)
+version = (0, 7, 0, 'b2')
 
 docs = [
 	{'name': "Quick Start",  'file': 'QuickStart.html'},
@@ -10,6 +10,6 @@ docs = [
 
 status = 'beta'
 
-requiredPyVersion = (1, 5, 2)
+requiredPyVersion = (2, 0, 0)
 
 synopsis = '''TaskKit provides a framework for the scheduling and management of tasks which can be triggered periodically or at specific times.'''

@@ -1,6 +1,6 @@
 name = 'WebUtils'
 
-version = (0, 3, 0)
+version = (0, 7, 0, 'b2')
 
 docs = [
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
@@ -8,6 +8,6 @@ docs = [
 
 status = 'beta'
 
-requiredPyVersion = (1, 5, 2)
+requiredPyVersion = (2, 0, 0)
 
 synopsis = '''WebUtils contains functions for common web related programming tasks such as encoding/decoding HTML, etc.'''

@@ -1,6 +1,6 @@
 name = 'COMKit'
 
-version = (0, 1, 0)
+version = (0, 7, 0, 'b2')
 
 docs = [
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
@@ -10,7 +10,7 @@ status = 'alpha'
 
 synopsis = '''COMKit allows COM objects to be used in the multi-threaded versions of WebKit.  Especially useful for data access using ActiveX Data Objects. Requires Windows and Python win32 extensions.'''
 
-requiredPyVersion = (1, 5, 2)
+requiredPyVersion = (2, 0, 0)
 
 requiredOpSys = 'nt'
 
