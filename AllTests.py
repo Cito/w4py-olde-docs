@@ -15,11 +15,9 @@ import unittest
 import sys
 
 
-suites = [
+alltestnames = [
 	'WebUtils.Tests.TestHTMLTag.makeTestSuite',
 	
-	'TaskKit.Tests.Test.makeTestSuite',
-
 	'MiscUtils.Testing.TestCSVParser.CSVParserTests',
 	'MiscUtils.Testing.TestNamedValueAccess.makeTestSuite',
 	'MiscUtils.Testing.TestError.TestError',
@@ -27,6 +25,10 @@ suites = [
 	'MiscUtils.Testing.TestPickleCache.TestPickleCache',
 	'MiscUtils.Testing.TestDataTable.TestDataTable',
 	'MiscUtils.Testing.TestDictForArgs',
+
+	'WebKit.Tests.Basic.Test',
+	
+	'TaskKit.Tests.Test.makeTestSuite',
 	
 	'PSP.Tests.PSPUtilsTest',
 	'PSP.Tests.CompileTest',
@@ -38,11 +40,19 @@ suites = [
 
 # If no arguments are given, all of the test cases are run.
 if len(sys.argv) == 1:
-	testnames = suites
+	testnames = alltestnames
 else:
 	testnames = sys.argv[1:]
 	print '\n\nRunning tests: %s\n' % testnames
 
-tests = unittest.defaultTestLoader.loadTestsFromNames(testnames)
+tests = unittest.TestSuite()
 
-unittest.TextTestRunner(verbosity=2).run(tests)
+# 	I could just use defaultTestLoader.loadTestsFromNames(), but it doesn't give a good
+#	error message when it cannot load a test.
+for t in testnames:
+	try:
+		tests.addTest( unittest.defaultTestLoader.loadTestsFromName(t) )
+	except:
+		print 'ERROR: Skipping tests from "%s" due to: %s' % (t, sys.exc_info()[1] )  
+
+unittest.TextTestRunner(verbosity=1).run(tests)
