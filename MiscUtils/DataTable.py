@@ -538,13 +538,6 @@ class TableRecord:
 			key = self._nameToIndexMap[key]
 		return self._values[key]
 
-	def get(self, key, default=None):
-		index = self._nameToIndexMap.get(key, None)
-		if index is None:
-			return default
-		else:
-			return self._values[index]
-
 	def __setitem__(self, key, value):
 		if type(key) is StringType:
 			key = self._nameToIndexMap[key]
@@ -552,3 +545,22 @@ class TableRecord:
 
 	def __repr__(self):
 		return '%s' % self._values
+
+	def get(self, key, default=None):
+		index = self._nameToIndexMap.get(key, None)
+		if index is None:
+			return default
+		else:
+			return self._values[index]
+
+	def keys(self):
+		return self._nameToIndexMap.keys()
+
+	def values(self):
+		return self._values
+
+	def items(self):
+		items = []
+		for key in self.keys():
+			items.append((key, self[key]))
+		return items
