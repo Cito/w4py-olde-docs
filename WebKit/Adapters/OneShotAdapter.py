@@ -65,6 +65,9 @@ class OneShotAdapter(Adapter):
 				'input':   sys.stdin,
 			}
 
+			from WebKit import Profiler
+			Profiler.startTime = time.time()
+			
 			print 'ONE SHOT MODE\n'
 
 			from WebKit.OneShotAppServer import OneShotAppServer
@@ -82,6 +85,7 @@ class OneShotAdapter(Adapter):
 			appSvr.shutDown()
 			appSvr = None
 
+			print "AppServer Run Time %.2f seconds" % ( time.time() - Profiler.startTime )
 			sys.stdout = _real_stdout
 
 			# MS Windows: no special translation of end-of-lines
