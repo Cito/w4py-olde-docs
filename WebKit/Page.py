@@ -46,15 +46,11 @@ class Page(HTTPServlet):
 		"""
 		req = transaction.request()
 
-		# Check for actions
-		for action in self.actions():
-			if req.hasField('_action_%s' % action) or (req.hasField('_action_%s.x' % action) and req.hasField('_action_%s.y' % action)):
-				if self._actionSet().has_key(action):
-					self.handleAction(action)
-					return
-
 		# Support old style actions from 0.5.x and below.
-		if req.hasField('_action_'):
+		# Use setting OldStyleActions in Application.config
+		# to use this.
+		if self.transaction().application().setting('OldStyleActions', ) \
+		   and req.hasField('_action_'):
 			action = self.methodNameForAction(req.field('_action_'))
 			actions = self._actionSet()
 			if actions.has_key(action):
@@ -64,6 +60,16 @@ class Page(HTTPServlet):
 				return
 			else:
 				raise PageError, "Action '%s' is not in the public list of actions, %s, for %s." % (action, actions.keys(), self)
+
+		# Check for actions
+		for action in self.actions():
+			if req.hasField('_action_%s' % action) or \
+			   req.field('_action_', None) == action or \
+			   (req.hasField('_action_%s.x' % action) and \
+			    req.hasField('_action_%s.y' % action)):
+				if self._actionSet().has_key(action):
+					self.handleAction(action)
+					return
 
 		self.writeHTML()
 

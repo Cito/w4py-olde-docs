@@ -625,13 +625,13 @@ the page.
 <p><code>&lt;input name=_action_ type=submit value=New&gt;
 <br>&lt;input name=_action_ type=submit value=Delete&gt;</code>
 
-<p> <b>2.</b> Add an <code>actions()</code> method to your class to state which actions are valid. This is security requirement is important. Without it, hackers could invoke any servlet method they wanted! For example:
+<p> <b>2.</b> Alternately, name the submit button <code>_action_<i>methodName</i></code>.  For example:
+
+<p><code>&lt;input name=_action_New type=submit value="Create New Item"&gt;</code>
+
+<p> <b>3.</b> Add an <code>actions()</code> method to your class to state which actions are valid. This is security requirement is important. Without it, hackers could invoke any servlet method they wanted! For example:
 
 <p> <code>def actions(self): return <i>SuperClass</i>.actions(self) + ['New', 'Delete']</code>
-
-<p> <b>3.</b> Unfortunately, the HTML submit button does not separate its value from its title/label. If your button labels don't match your method names, you will need to implement <code>methodNameForAction()</code> to provide the mapping. You could simply use a dictionary to create the mapping, or if you know there is some relationship you could write the logic for it. For example,
-
-<p><code>def methodNameForAction(self, name): return string.lower(name)</code>
 
 <p> <b>4.</b> Now you implement your action methods.
 

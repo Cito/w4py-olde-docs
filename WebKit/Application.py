@@ -331,7 +331,8 @@ class Application(ConfigurableForServerSidePath, Object):
 			                         },
 			'Debug':	{
 				'Sessions': 0,
-			}
+			},
+			'OldStyleActions': 0,
 		}
 
 	def configFilename(self):
