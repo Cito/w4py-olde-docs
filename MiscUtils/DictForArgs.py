@@ -1,3 +1,13 @@
+'''
+DictForArgs.py
+
+
+See the doc string for the DictForArgs() function.
+
+Also, there is a test suite in Testing/TestDictForArgs.py
+'''
+
+
 import re, string
 
 
@@ -8,6 +18,25 @@ def _SyntaxError(s):
 	raise DictForArgsError, 'Syntax error: %s' % repr(s)
 
 def DictForArgs(s):
+	'''
+	Takes an input such as:
+			x=3
+			name="foo"
+			first='john' last='doe'
+			required border=3
+
+	And returns a dictionary representing the same. For keys that aren't given an explicit value (such as 'required' above), the value is '1'.
+
+	All values are interpreted as strings. If you want ints and floats, you'll have to convert them yourself.
+
+	Returns {} for an empty string.
+
+	The informal grammar is:
+		(NAME [=NAME|STRING])*
+
+	Will raise DictForArgsError if the string is invalid.
+	'''
+
 	s = string.strip(s)
 
 	# Tokenize
