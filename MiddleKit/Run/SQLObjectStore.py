@@ -225,7 +225,16 @@ class SQLObjectStore(ObjectStore):
 			if klassId==0 or serialNum==0:
 				# invalid! we don't use 0 serial numbers
 				return self.objRefZeroSerialNum(objRef)
+
 			klass = self.klassForId(klassId)
+
+			# Check if we already have this in memory first
+			key = ObjectKey()
+			key.initFromClassNameAndSerialNum(klass.name(), serialNum)
+			obj = self._objects.get(key, None)
+			if obj:
+				return obj
+
 			clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
 			objs = self.fetchObjectsOfClass(klass, clauses)
 			if len(objs)>1:

@@ -36,7 +36,7 @@ class Test:
 		if len(args)>1:
 			self._modelNames = args[1:]
 		else:
-			self._modelNames = 'MKBasic MKNone MKString MKDateTime MKDefaultMinMax MKInheritance MKInheritanceAbstract MKList MKObjRef'.split()
+			self._modelNames = 'MKBasic MKNone MKString MKDateTime MKDefaultMinMax MKInheritance MKInheritanceAbstract MKList MKObjRef MKObjRefReuse'.split()
 
 	def testEmpty(self):
 		self.testRun('TestEmpty.py', deleteData=0)
