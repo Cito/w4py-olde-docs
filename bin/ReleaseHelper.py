@@ -9,11 +9,10 @@ will end up with generated docs.
 
 To run:
 
-  > ReleaseHelper.py ver=0.6b1
+  > ReleaseHelper.py
 
-- The version can be any string, but typical values would be 0.6, 0.6b1,
-  0.6.1, etc.
-- If no version is provided, you will be prompted.
+- The version number is taken from Webware/Properties.py like you would
+  expect.
 - You don't have to be in the current directory:
     > bin/ReleaseHelper.py
     > Webware/bin/ReleaseHelper.py
@@ -23,8 +22,6 @@ To run:
 For more information, see the Release Procedures in the Webware docs.
 
 TO DO
-
-  - Check that Webware/_installed does NOT exist.
 
   - Using ProperitesObject, this program could suggest a version string
     from the Webware version.
@@ -44,21 +41,15 @@ class ReleaseHelper:
 		webwarePath = os.path.dirname(os.path.dirname(progPath))  # because we're in Webware/bin/
 		parentPath = os.path.dirname(webwarePath)  # where the tarball will land
 
-		properties = {}
-		propertiesSource = open(os.path.join(webwarePath, 'Properties.py')).read()
-		exec propertiesSource in properties
-		print 'Webware version is:', properties['version']
-
-		ver = self.args.get('ver', None)
-		if ver is None:
-			try:
-				ver = raw_input('Enter a version string (like 1.0.3b2 or 0.7): ')
-			except KeyboardInterrupt:
-				print
-				print 'user break'
-				self.error()
-
 		self.chdir(webwarePath)
+
+		if os.path.exists('_installed'):
+			self.error('This Webware has already been installed.')
+
+		from MiscUtils.PropertiesObject import PropertiesObject
+		props = PropertiesObject(os.path.join(webwarePath, 'Properties.py'))
+		ver = props['versionString']
+		print 'Webware version is:', ver
 
 		self.run('cvs update -dP')  # get new directories; prune empty ones
 
@@ -79,7 +70,7 @@ class ReleaseHelper:
 			self.run('cp %s %s' % (pkgName, parentPath))
 
 			assert os.path.exists(os.path.join(parentPath, pkgName))
-		
+
 		finally:
 			# Clean up
 			self.run('rm -rf %s' % tempName)
