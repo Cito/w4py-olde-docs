@@ -27,6 +27,7 @@ import threading
 import time
 from WebUtils import Funcs
 
+debug = 0
 
 DefaultConfig = {
 	'Port':                 8086,
@@ -201,6 +202,8 @@ class ThreadedAppServer(AppServer):
 		self.__class__.request_queue_size = value
 
 
+
+
 class Monitor:
 	def __init__(self, server):
 		self.server = server
@@ -246,16 +249,41 @@ class Monitor:
 
 
 
+from WebKit.ASStreamOut import ASStreamOut
+class TASASStreamOut(ASStreamOut):
+
+	def __init__(self, sock):
+		ASStreamOut.__init__(self)
+		self._socket = sock
+
+	def flush(self):
+		debug = 1
+		result = ASStreamOut.flush(self)
+		if result: ##a true return value means we can send
+			reslen = len(self._buffer)
+			if debug: print "TASASStreamout is sending %s bytes" % reslen
+			sent = 0
+			while sent < reslen:
+				try:
+					sent = sent + self._socket.send(self._buffer[sent:sent+8192])
+				except socket.error, e:
+					print e
+					break
+			self.pop(sent)
+
+
 class RequestHandler:
 
 	def __init__(self, server):
 		self.server = server
 
-	def activate(self, socket):
-		self.sock = socket
+	def activate(self, sock):
+		self.sock = sock
+#		self._strmOut = TASASStreamOut(sock)
 
 	def close(self):
 		self.sock = None
+#		self._strmOut = None
 		self.server.rhQueue.put(self)
 
 	def handleRequest(self):
@@ -266,17 +294,18 @@ class RequestHandler:
 		if verbose:
 			print 'BEGIN REQUEST'
 			print time.asctime(time.localtime(startTime))
+
 		conn = self.sock
 		if verbose:
 			print 'receiving request from', conn
-		recv = conn.recv
+
 		BUFSIZE = 8*1024
 
 		data = []
 
 		chunk = ''
 		while len(chunk) < int_length:
-			chunk = chunk + recv(int_length)
+			chunk = chunk + conn.recv(int_length)
 		dict_length = loads(chunk)
 		if type(dict_length) != type(1):
 			conn.close()
@@ -286,7 +315,7 @@ class RequestHandler:
 		chunk = ''
 		missing = dict_length
 		while missing > 0:
-			chunk = chunk + recv(missing)
+			chunk = chunk + conn.recv(missing)
 			missing = dict_length - len(chunk)
 
 		dict = loads(chunk)
@@ -294,7 +323,7 @@ class RequestHandler:
 			chucklen1 = len(chunk)
 
 		while 1:
-			chunk = recv(BUFSIZE)
+			chunk = conn.recv(BUFSIZE)
 			if not chunk:
 				break
 			data.append(chunk)
@@ -312,28 +341,10 @@ class RequestHandler:
 					requestURI = None
 				print 'request uri =', requestURI
 
-		transaction = self.server._app.dispatchRawRequest(dict)
-		rawResponse = transaction.response().rawResponse()
+		strmOut = TASASStreamOut(self.sock)
+		transaction = self.server._app.dispatchRawRequest(dict, strmOut)
+		strmOut.close()
 
-
-		sent = 0
-
-		self._buffer = ''
-		for item in rawResponse['headers']:
-			if string.lower(item[0]) == string.lower("Status"):
-				self._buffer = item[0] + ": " + str(item[1]) + "\n" + self._buffer
-			else: self._buffer = self._buffer + item[0] + ": " + str(item[1]) + "\n"
-
-		self._buffer = self._buffer + "\n" + rawResponse['contents']
-
-
-		reslen = len(self._buffer)
-		while sent < reslen:
-			try:
-				sent = sent + conn.send(self._buffer[sent:sent+8192])
-			except socket.error, e:
-				print e
-				break
 
 		try:
 			conn.shutdown(1)

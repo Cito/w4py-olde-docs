@@ -1,6 +1,8 @@
 from ServletFactory import ServletFactory
 import os, mimetypes
 
+debug = 0
+
 class UnknownFileTypeServletFactory(ServletFactory):
 	'''
 	This is the factory for files of an unknown type (e.g., not .py .psp, etc).
@@ -29,6 +31,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		self._application = application
 		self._content = None
 		self._serverSideFilename = None
+		self._mimeType = None
+		self._mimeEncoding = None
 
 	def userConfig(self):
 		''' Get the user config from the 'UnknownFileTypes' section in the Application's configuration. '''
@@ -66,12 +70,24 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		newURL = string.replace(newURL, '//', '/')  # hacky
 		trans.response().sendRedirect(newURL)
 
-	def serveContent(self, trans, debug=0):
+
+	def serveContent(self, trans):
+
+		response = trans.response()
+
+		# @@temp variable, move to config
+		MaxCacheContentSize = 1024*32 ##32k
+		
+		#start sending automatically
+		response.streamOut().autoCommit(1)
+		
 		filename = trans.request().serverSidePath()
+		filesize = os.path.getsize(filename)
+
 		if debug:
 			print '>> UnknownFileType.serveContent()'
 			print '>> filename =', filename
-		if self._content!=None:
+		if self._content != None:
 			# We already have content in memory:
 			assert self._serverSideFilename==filename
 			if self.setting('CheckDate'):
@@ -82,26 +98,38 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 					self._content = open(filename, 'rb').read()
 					self._mtime = actual_mtime
 			data = self._content
-			mimeType = self._mimeType
+			response.setHeader('Content-type', self._mimeType)
+			if self._mimeEncoding:
+				response.setHeader('Content-encoding', self._mimeEncoding)
+			response.write(data)
+
 		else:
 			if debug: print '>> reading file'
-			data = open(filename, 'rb').read()
-			mimeType = mimetypes.guess_type(filename)[0]
-			# @@ 2001-01-27 ce:
-			# Shouldn't we be using [1] of them guess_type() to set
-			# a content-encoding header? I got this idea from the
-			# mimetypes documentation
+			filetype = mimetypes.guess_type(filename)
+			mimeType = filetype[0]
+			mimeEncoding = filetype[1]
+
 			if mimeType==None:
 				mimeType = 'text/html'  # @@ 2000-01-27 ce: should this just be text?
-			if self.setting('ReuseServlets') and self.setting('CacheContent'):
+			response.setHeader('Content-type', mimeType)
+			if self._mimeEncoding:
+				response.setHeader('Content-encoding', self._mimeEncoding)
+			
+
+			if self.setting('ReuseServlets') and self.setting('CacheContent') and filesize < MaxCacheContentSize:
 				# set the:
 				#   content, mimeType, mtime and serverSideFilename
 				if debug: print '>> caching'
-				self._content = data
+				self._content = open(filename,"r").read()
 				self._mimeType = mimeType
+				self._mimeEncoding = mimeEncoding
 				self._mtime = os.path.getmtime(filename)
 				self._serverSideFilename = filename
-
-		response = trans.response()
-		response.setHeader('Content-type', mimeType)
-		response.write(data)
+				response.write(self._content)
+			else:  ##too big
+				f = open(filename, "r")
+				sent = 0
+				while sent < filesize:
+					data = f.read(8192)
+					response.write(data)
+					sent = sent + len(data)

@@ -76,7 +76,8 @@ class CGIAdapter(Adapter):
                 write(HTMLEncode(str(response)))
                 write('</body></html>')
             else:
-				write(response)
+##                string.replace(response,"status:","HTTP/1.0 ") #for nph
+                write(response)
 
         except:
             import traceback
