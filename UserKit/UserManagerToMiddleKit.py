@@ -120,9 +120,7 @@ class UserManagerToMiddleKit(UserManager):
 			users = self._store.fetchObjectsOfClass(self._userClass, clauses='where externalId=%r' % externalId)
 			if users:
 				assert len(users)==1
-				user = users[0]
-			else:
-				user = None
+				return users[0]
 		else:
 			for user in self.users():
 				if user.externalId()==externalId:
@@ -140,9 +138,7 @@ class UserManagerToMiddleKit(UserManager):
 			users = self._store.fetchObjectsOfClass(self._userClass, clauses='where name=%r' % name)
 			if users:
 				assert len(users)==1
-				user = users[0]
-			else:
-				user = None
+				return users[0]
 		else:
 			for user in self.users():
 				if user.name()==name:

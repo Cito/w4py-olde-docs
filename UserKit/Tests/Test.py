@@ -63,6 +63,7 @@ class UserManagerToSomewhereTest(UserManagerTest):
 		assert mgr.userForSerialNum(user.serialNum())==user
 		assert mgr.userForExternalId(user.externalId())==user
 		assert mgr.userForName(user.name())==user
+		externalId = user.externalId()  # for use later in testing
 
 		users = mgr.users()
 		assert len(users)==1
@@ -98,6 +99,25 @@ class UserManagerToSomewhereTest(UserManagerTest):
 		user.login('rab')
 		assert not user.isActive()
 		assert mgr.numActiveUsers()==0
+
+		# Check that we can access the user when he is not cached
+		mgr.clearCache()
+		user = mgr.userForSerialNum(1)
+		assert user
+		assert user.password()=='bar'
+
+		if 0:
+			# @@ 2001-04-15 ce: doesn't work yet
+			mgr.clearCache()
+			user = self.mgr.userForExternalId(externalId)
+			assert user
+			assert user.password()=='bar'
+
+		mgr.clearCache()
+		user = self.mgr.userForName('foo')
+		assert user
+		assert user.password()=='bar'
+
 
 	def checkUserAccess(self):
 		mgr = self.mgr
