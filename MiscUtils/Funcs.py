@@ -305,9 +305,9 @@ def valueForString(s):
 	t = s.lower()
 	if t=='none':
 		return None
-	if t=='true':
+	if t.lower()=='true':
 		return True
-	if t=='false':
+	if t.lower()=='false':
 		return False
 	if s[0] in '[({"\'':
 		return eval(s)
