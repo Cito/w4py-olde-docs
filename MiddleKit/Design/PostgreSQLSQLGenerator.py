@@ -99,16 +99,11 @@ class StringAttr:
 		else:
 			return 'varchar(%s)' % max
 
-	def sampleValue(self, value):
-		if value is None:
-			value = 'NULL'
-		else:
-			value = "%s" % dbi.QuotedString(value)
-		return value
+	def sqlForNonNoneSampleInput(self, value):
+		return "%s" % dbi.QuotedString(value)
 
 class BoolAttr:
-
-	def sampleValue(self, value):
+	def sqlForNonNoneSampleInput(self, value):
 		value = value.upper()
 		if value=='FALSE' or value=='NO':
 			value = 'TRUE'
