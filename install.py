@@ -15,7 +15,7 @@ FUTURE
 
 import os, string, sys
 from time import time, localtime, asctime
-from string import join, split, strip, replace
+from string import join, rfind, split, strip, replace
 from glob import glob
 
 try:
@@ -301,7 +301,8 @@ class Installer:
 
 				for item in releaseNotes:
 					filename = item['filename']
-					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
+#					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
+					item['name'] = filename[rfind(filename,'-')+1:rfind(filename,'.')]
 				releaseNotes.sort(self.sortReleaseNotes)
 				for item in releaseNotes:
 					ht.append(link % (item['filename'], item['name']))
