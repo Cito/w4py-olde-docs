@@ -16,7 +16,7 @@ Here's how I set up my Apache conf:
    PythonPath "sys.path+['/path/to/WebKit']"
    PythonHandler ModPythonAdapter
    PythonDebug
-</Location>
+   </Location>
 
 Make sure you set WEBWARE_ADDRESS_FILE below and now you can access
 your running AppServer with:
@@ -162,7 +162,7 @@ class ModPythonAdapter(Adapter):
 			header = string.split(i, ":")
 			req.headers_out[header[0]] = header[1]
 			if string.lower(header[0]) == 'content-type': req.content_type = header[1]
-			if string.lower(header[0]) == 'status': req.status = int(header[1])
+			if string.lower(header[0]) == 'status': req.status = int(string.split(string.lstrip(header[1]),' ')[0])
 		req.send_http_header()
 		req.write(respdict[headerend+2:])
 
