@@ -62,7 +62,7 @@ class Page(HTTPServlet):
 				self.postAction(action)
 				return
 			else:
-				raise PageError, "Action '%s' is not in the public list of actions, %s." % (action, actions.keys())
+				raise PageError, "Action '%s' is not in the public list of actions, %s, for %s." % (action, actions.keys(), self)
 
 		self.writeHTML()
 
