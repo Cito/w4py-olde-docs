@@ -274,7 +274,6 @@ class Application(Configurable,CanContainer):
 			if ssPath is None:
 				self.handleBadURL(transaction)
 			elif isdir(ssPath) and noslash(request.pathInfo()): # (*) see below
-				print ssPath
 				self.handleDeficientDirectoryURL(transaction)
 			elif self.isSessionIdProblematic(request):
 				self.handleInvalidSession(transaction)
@@ -402,7 +401,7 @@ class Application(Configurable,CanContainer):
 
 	def forwardRequestFast(self, trans, URL):
 		"""Enable a servlet to pass a request to another servlet.  This implementation handles chaining and requestDispatch in Java.
-		The Request, REsponse and Session objects are all kept the same, so the Servlet that is called may receive information through those objects.  
+		The Request, REsponse and Session objects are all kept the same, so the Servlet that is called may receive information through those objects.
 		The catch is that the function WILL return to the calling servlet, so the calling servlet should either take advantage
 		of that or return immediately."""
 
@@ -422,7 +421,7 @@ class Application(Configurable,CanContainer):
 			lastSlash = string.rfind(urlPath, '/')
 			urlPath = urlPath[:lastSlash+1] + URL
 		req.setURLPath(urlPath)
-	
+
 		#Get the servlet
 		self.createServletInTransaction(trans)
 
