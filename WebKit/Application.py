@@ -76,6 +76,12 @@ class Application(ConfigurableForServerSidePath, Object):
 			self._taskManager = Scheduler(1)
 			self._taskManager.start()
 
+		# define this before initializing URLParser, so that contexts
+		# have a chance to override this.  Also be sure
+		# to define it before loading the sessions, in case the
+		# loading of the sessions causes an exception.
+		self._exceptionHandlerClass = ExceptionHandler
+
 		# For session store:
 		from SessionMemoryStore import SessionMemoryStore
 		from SessionFileStore import SessionFileStore
@@ -87,10 +93,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._sessions = klass(self)
 
 		print 'Current directory:', os.getcwd()
-
-		# define this before initializing URLParser, so that contexts
-		# have a chance to override this.
-		self._exceptionHandlerClass = ExceptionHandler
 
 		URLParser.initApp(self)
 		self._rootURLParser = URLParser.ContextParser(self)
@@ -707,6 +709,14 @@ class Application(ConfigurableForServerSidePath, Object):
 			
 	def returnServlet(self, servlet, trans):
 		servlet.close(trans)
+
+	def handleException(self):
+		"""
+		This should only be used in cases where there is no transaction object,
+		for example if an exception occurs when attempting to save a session
+		to disk.
+		"""
+		self._exceptionHandlerClass(self, None, sys.exc_info())
 
 	def handleExceptionInTransaction(self, excInfo, transaction):
 		"""

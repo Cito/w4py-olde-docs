@@ -20,7 +20,10 @@ class SessionMemoryStore(SessionStore):
 			filestore = SessionFileStore(app)
 			keys = filestore.keys()
 			for i in keys:
-				self[i] = filestore[i]
+				try:
+					self[i] = filestore[i]
+				except:
+					app.handleException()
 			filestore.clear()
 
 
