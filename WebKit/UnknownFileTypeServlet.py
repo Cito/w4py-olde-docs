@@ -122,7 +122,6 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		newURL = newURL.replace('//', '/')  # hacky
 		trans.response().sendRedirect(newURL)
 
-
 	def lastModified(self, trans):
 		try:
 			return os.path.getmtime(self.filename(trans))
@@ -140,69 +139,62 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		response.streamOut().autoCommit(1)
 
 		filename = self.filename(trans)
-		file = fileCache.get(filename, None)
-		if file is None:
-			fileSize = os.path.getsize(filename)
-		else:
-			fileSize = file['size']
+		try:
+			f = open(filename, 'rb')
+		except IOError:
+			trans.application().handleBadURL(trans)
+			return
 
-		isHead = trans.request().method().upper()[0]=='H' # as in HEAD
-		if isHead:
-			response.setHeader('Content-Length', str(fileSize))
-			mtime = os.path.getmtime(filename)
-			response.setHeader('Last-Modified',
-				time.strftime('%a, %d %b %Y %H:%M:%S GMT',
-				time.gmtime(mtime)))
+		stat = os.fstat(f.fileno())
+		fileSize,mtime = stat[6],stat[8]
 
 		if debug:
 			print '>> UnknownFileType.serveContent()'
 			print '>> filename =', filename
+			print '>> size=', fileSize
+		file = fileCache.get(filename, None)
+		if file is not None and mtime != file['mtime']:
+			# Cache is out of date; clear it.
+			if debug: print '>> changed, clearing cache'
+			del fileCache['filename']
+			file = None
 		if file is None:
-			if debug: print '>> reading file'
+			if debug: print '>> not found in cache'
 			fileType = mimetypes.guess_type(filename)
 			mimeType = fileType[0]
 			mimeEncoding = fileType[1]
-
 			if mimeType is None:
 				mimeType = 'text/html'  # @@ 2000-01-27 ce: should this just be text?
-			response.setHeader('Content-type', mimeType)
-			if mimeEncoding:
-				response.setHeader('Content-encoding', mimeEncoding)
-
-			if self.setting('ReuseServlets') and self.shouldCacheContent() and fileSize<MaxCacheContentSize:
-				if debug: print '>> caching'
-				file = {
-					'content':      open(filename, "rb").read(),
-					'mimeType':     mimeType,
-					'mimeEncoding': mimeEncoding,
-					'mtime':        os.path.getmtime(filename),
-					'size':         os.path.getsize(filename),
-					'filename':     filename,
-				}
-				fileCache[filename] = file
-				if isHead:
-					return
-				response.write(file['content'])
-			else:  # too big or not supposed to cache
-				if isHead:
-					return
-				f = open(filename, "rb")
-				numBytesSent = 0
-				while numBytesSent<fileSize:
-					data = f.read(ReadBufferSize)
-					response.write(data)
-					numBytesSent += len(data)
-		else:  # We already have the file cached in memory
-			if self.setting('CheckDate'):
-				# check the date and re-read if necessary
-				actual_mtime = os.path.getmtime(filename)
-				if actual_mtime>file['mtime']:
-					if debug: print '>> reading updated file'
-					file['content'] = open(filename, 'rb').read()
-					file['mtime']   = actual_mtime
-			response.setHeader('Content-type', file['mimeType'])
-			if file.get('mimeEncoding'):
-				response.setHeader('Content-encoding', file['mimeEncoding'])
-			if isHead:
-				return
+		else:
+			mimeType, mimeEncoding = file['mimeType'], file['mimeEncoding']
+		response.setHeader('Content-type', mimeType)
+		response.setHeader('Content-Length', str(fileSize))
+		if mimeEncoding:
+			response.setHeader('Content-encoding', mimeEncoding)
+		if trans.request().method() == 'HEAD':
+			f.close()
+			return
+		if file is None and self.setting('ReuseServlets') and self.shouldCacheContent() and fileSize < MaxCacheContentSize:
+			if debug: print '>> caching'
+			file = {
+				'content':      f.read(),
+				'mimeType':     mimeType,
+				'mimeEncoding': mimeEncoding,
+				'mtime':        mtime,
+				'size':         fileSize,
+				'filename':     filename,
+			}
+			fileCache[filename] = file
+		if file is not None:
+			if debug: print '>> sending content from cache'
 			response.write(file['content'])
+		else: # too big or not supposed to cache
+			if debug: print '>> sending directly'
+			numBytesSent = 0
+			while numBytesSent<fileSize:
+				data = f.read(min(fileSize-numBytesSent,ReadBufferSize))
+				if data == '':
+					break	# unlikely, but safety first
+				response.write(data)
+				numBytesSent += len(data)
+		f.close()
