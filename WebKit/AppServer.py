@@ -159,6 +159,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 				filename = os.path.normpath(os.path.join(plugInDir, filename))
 				if os.path.isdir(filename) and \
 				   os.path.exists(os.path.join(filename, '__init__.py')) and \
+				   os.path.exists(os.path.join(filename, 'Properties.py')) and \
 				   not os.path.exists(os.path.join(filename, 'dontload')) and \
 				   os.path.basename(filename)!='WebKit' and \
 				   filename not in plugIns:
