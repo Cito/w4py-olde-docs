@@ -345,10 +345,10 @@ Installation is finished.'''
 		# compare the way we want them too (x.y.z is newer than x.y)
 		a = a['name']
 		if a.count('.')==1:
-			a += '.0'
+			a = a + '.0'
 		b = b['name']
 		if b.count('.')==1:
-			b += '.0'
+			b = b + '.0'
 		return -cmp(a, b)
 
 	def htFragment(self, name):
