@@ -1,34 +1,6 @@
 import os, string
 from AdminPage import AdminPage
-
-
-def LoadCSV(filename):
-	''' Loads a CSV (comma-separated value) file from disk and returns it as a list of rows where each row is a list of values (which are always strings). '''
-
-	from MiscUtils import CSV
-	file = CSV.CSV()
-	file.load(filename, 0, 0)
-		# first  0 - first row is titles. I make this false so row[0] contains the headings
-		# second 0 - convert numbers. I don't need this.
-	return file
-
-	# 2000-05-03 ce: Old code that doesn't handle quotes
-	f = open(filename)
-	rows = []
-	numFields = None
-	lineNum = 1
-	while 1:
-		line = f.readline()
-		if not line:
-			break
-		rows.append(string.split(line, ','))
-		if numFields is None:
-			numFields = len(rows[0])
-		else:
-			assert len(rows[-1])<=numFields, 'Row %d has %d fields which exceeds the heading row which has %d.' % (lineNum, len(rows[-1]), numFields)
-		lineNum = lineNum + 1
-	f.close()
-	return rows
+from MiscUtils.DataTable import DataTable
 
 
 class DumpCSV(AdminPage):
@@ -52,18 +24,18 @@ class DumpCSV(AdminPage):
 			self.writeln('<p> File does not exist.')
 			return
 
-		rows = LoadCSV(self._filename)
+		table = DataTable(self._filename)
 
-		if len(rows)==1:
+		if len(table)==1:
 			plural = ''
 		else:
 			plural = 's'
-		self.writeln('<p>%d row%s' % (len(rows), plural))
+		self.writeln('<p>%d row%s' % (len(table), plural))
 		self.writeln('<br><table align=center border=0 cellpadding=2 cellspacing=2>')
 
 
 		# Head row gets special formatting
-		self._headings = map(lambda name: string.strip(name), rows[0])
+		self._headings = map(lambda col: string.strip(col.name()), table.headings())
 		self._numCols = len(self._headings)
 		self.writeln('<tr bgcolor=black>')
 		for value in self._headings:
@@ -72,7 +44,7 @@ class DumpCSV(AdminPage):
 
 		# Data rows
 		rowIndex = 1
-		for row in rows[1:]:
+		for row in table:
 			self.writeln('<tr bgcolor=#EEEEEE>')
 			colIndex = 0
 			for value in row:
