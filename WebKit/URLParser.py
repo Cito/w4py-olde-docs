@@ -99,7 +99,10 @@ class ContextParser(URLParser):
 		given directory.  The directory doesn't have to
 		match the context name.
 		"""
-		
+
+		# @@ 2003-03 ib: maybe adding a default context should
+		# be possible
+		assert name != 'default', 'You cannot add a default context after the contexts have been set up (you must define a default in Application.config)'
 		try:
 			importAsName = name
 			localDir, packageName = os.path.split(dir)
