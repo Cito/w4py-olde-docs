@@ -46,6 +46,7 @@ improve. Also, update these notes immediately following a release.
 
 <h2>Cut release candidate</h2>
 # Must be done on UNIX (or permissions are lost)
+* Make sure Properties.py's version has an 'rcX' added to it.
 * Make a fresh workspace as an anon user:
   > cvs -d:pserver:anonymous@cvs.Webware.sourceforge.net:/cvsroot/webware login
   > cvs -z3 -d:pserver:anonymous@cvs.Webware.sourceforge.net:/cvsroot/webware co Webware
@@ -57,6 +58,7 @@ improve. Also, update these notes immediately following a release.
   > tar czf Webware-VERrcX.tar.gz Webware
   > scp Webware-VERrcX.tar.gz USER@shell1.sourceforge.net:/home/groups/ftp/pub/webware
 * Download the release candidate, install and test
+  * Check that the right version show up in the WebKit examples, including rcX.
 * Announce:
   * To:
     * <a href=webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>
@@ -64,7 +66,8 @@ improve. Also, update these notes immediately following a release.
   * ftp://webware.sourceforge.net/pub/webware/Webware-VERrcX.tar.gz
   * Please report all problems to webware-discuss@lists.sourceforge.net.
     Include Webware ver, Py ver, web server ver, op sys ver and
-    browser ver.
+    browser ver. If running the app server, please specify flavor
+    and adapter.
   * Expected release date for X.Y is MONTH, DAY.
   * Changes since last release date are:
     * ...
@@ -76,6 +79,8 @@ improve. Also, update these notes immediately following a release.
 # For example,
 #    CVS_VER = 0_4
 #    VER = 0.4
+
+* Make sure all Properties.py "rcX" version components are removed.
 
 # From a workspace:
 > cvs -q tag Release-CVS_VER
