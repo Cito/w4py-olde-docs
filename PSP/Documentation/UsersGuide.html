@@ -4,7 +4,7 @@
 </head>
 <body bgcolor='white'>
 <H1> Python Server Pages for Webware</h1>
-Release 0.1 June 6, 2000<br>
+Release 0.3 August 31, 2000<br>
 <a href="http://webware.sourceforge.net">http://webware.sourceforge.net</a>
 <h2> Summary</h2>
 <p> Python Server Pages (PSP) provides the capability for producing dynamic web pages
@@ -58,7 +58,7 @@ at least two elements, the type of directive, and one or more parameters in the 
 of param="value" pairs.
 
 <p>Supported Directives include:
-<h4><b>Page</b> - <i>"&lt;%@ page"</i></h4>
+<h3><b>Page Directive</b> - <i>"&lt;%@ page"</i></h4>
 <p>The page directive tells the PSP parser about special requirements of this page,
 or sets some optional output options for this page.  Directives set in <i>page</i> apply
 to the elements in the current PSP source file and to any included files.
@@ -116,7 +116,7 @@ override.
 <p><b>Example</b> - <i> &lt;%@ page indentSpaces="8" %$gt;</i>
 </ul>
 <p>
-<p><h4>Include - <i>&lt;%@ include</i></h4>
+<p><h3>Include Directive- <i>&lt;%@ include</i></h4>
 <p>The include directive tells the parser to insert another file at this point in the page and to parse it for psp content.
 It is generally no problem to include an html file this way.  However, if you do not want your include file to be parsed,
 you may use the <i>&lt;psp:include</i> tag described below.
@@ -130,6 +130,7 @@ be represented as a string inside the tag.
 <p>
 <p>When the PSP parsing engine encounters Expression tags, it wraps the contents in a call to the
 python <i>str()</i> function.  Multiple lines are not supported in a PSP expression tag.
+<p>
 <p>
 <h3>Script Tag - <i>&lt;% "script code" %&gt;</i></h3>
 <p>The script tag is used to enclose python code that should be run by the WebKit Servlet
@@ -152,6 +153,7 @@ provides access to the objects involved in servicing this client request.
 <li><B>Others?</b>
 </ul>
 <p>
+
 <b>Python Code Blocks that span PSP Script Tags</b><br>
 The Python code structure, which uses whitespace to siginify blocks of code, presents a
 special challenge in PSP pages.  In order to allow for readable HTML code that does not impose
@@ -167,6 +169,7 @@ to handle Python blocks that span script tags.
 These blocks can be nested, with no need for special indentation, and each script tag that only contains a solitary end
 statement will reduce the block indent by one.<br>
 <p>
+
 <h3>Method Tag - "&lt;psp:method&gt;&lt;/psp:method&gt;"</h3>
 <p>
 <p>The Method tag is used to declare new methods of the Servlet class this page is producing.
