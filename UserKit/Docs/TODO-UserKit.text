@@ -1,0 +1,58 @@
+
+<before upload to Webware>
+
+	[ ] run test suite
+
+	[ ] upload.
+
+</before upload to Webware>
+
+
+<major>
+
+	[ ] Roles: Implement and test. These might be done as mix-ins.
+
+	[ ] Timeouts: We have the settings, but not the implementation
+		[ ] modified users get persisted
+		[ ] inactive users get pushed out of memory
+		[ ] inactive users get logged out
+
+	[ ] MiddleKit integration:
+		[ ] Should the manager be stored as an MK object?
+		[ ] Is there a conflict regarding accessor methods between User and what MiddleKit does?
+
+	[ ] WebKit integration
+		[ ] Make a UserPage(Page) class for WebKit. Or perhaps a UserServletMixIn. Hmmmm.
+		[ ] Add a UserManager admin page.
+
+	[ ] Consider implementing Tom's suggestion for manager interface
+
+	[ ] Docs: User's Guide
+
+	[ ] Upload to CVS
+
+</major>
+
+
+<refinements/improvements>
+
+	[ ] Consider making roles case insensitive.
+
+	[ ] For that matter, should user names be case insensitive?
+
+	[ ] UserManagerToFile: Hideous linear searches in: userForExternalId() and userForName()
+
+</refinements/improvements>
+
+
+<testing>
+
+	[ ] Test the various "default" parameters of all the methods.
+
+	[ ] cover all methods
+
+	[ ] Add more subtle and complex tests.
+
+	[ ] test externalId
+
+</testing>
