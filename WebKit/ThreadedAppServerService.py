@@ -59,6 +59,13 @@ import win32serviceutil
 import win32service
 import os, sys, cStringIO
 
+# With win32all version 163, I found that calling signal.signal crashes a service.  So
+# we sneakily replace signal.signal with a no-op.
+import signal
+def dummy_signal(*args, **kwargs):
+	pass
+signal.signal = dummy_signal
+
 class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 
 	_svc_name_ = 'WebKit'
