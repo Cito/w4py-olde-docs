@@ -38,7 +38,10 @@ class SQLGenerator(CodeGenerator):
 		return self.model().dbName()
 
 	def configFilename(self):
-		return os.path.join(self.model().filename(), 'SQLGenerator.config')
+		filename = self.model().filename()
+		if filename is not None:
+			filename = os.path.join(filename, 'SQLGenerator.config')
+		return filename
 
 	def defaultConfig(self):
 		config = CodeGenerator.defaultConfig(self)
