@@ -1,4 +1,5 @@
 from ServletFactory import ServletFactory
+import HTTPExceptions
 import os, mimetypes, time
 
 debug = 0
@@ -142,7 +143,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		try:
 			f = open(filename, 'rb')
 		except IOError:
-			trans.application().handleBadURL(trans)
+			raise HTTPExceptions.HTTPNotFound
 			return
 
 		stat = os.fstat(f.fileno())
