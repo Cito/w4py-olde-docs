@@ -206,7 +206,7 @@ class TableColumn:
 			try:
 				self._type = _types[type]
 			except:
-				raise DataTableError, 'Unknown type %s' % repr(spec)
+				raise DataTableError, 'Unknown type %s' % repr(type)
 
 	def __repr__(self):
 		return '<TableColumn %s with %s at %x>' % (
