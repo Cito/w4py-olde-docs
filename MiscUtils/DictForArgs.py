@@ -166,7 +166,8 @@ def PyDictForArgs(s):
 
 	See also: DictForArgs() and ExpandDictWithExtras() in this module
 	"""
-	s = s.strip()
+	if s:
+		s = s.strip()
 	if not s:
 		return {}
 
