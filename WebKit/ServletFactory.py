@@ -48,9 +48,10 @@ class ServletFactory(Object):
 	def importAsPackage(self, transaction, serverSidePathToImport):
 		"""
 		Imports the module at the given path in the proper package/subpackage for the current request.  For example, if the
-		transaction has the URL 'http://localhost/WebKit.cgi/MyContext/MySubdirectory/MyPage' and
-		path = 'some/random/path/MyModule.py' then this function imports the module at that path as
-		MyContext.MySubdirectory.MyModule .
+		transaction has the URL 'http://localhost/WebKit.cgi/MyContextDirectory/MySubdirectory/MyPage' and
+		path = 'some/random/path/MyModule.py' and the context is configured to have the name "MyContext" then this function
+		imports the module at that path as MyContext.MySubdirectory.MyModule .  Note that the context name may differ
+		from the name of the directory containing the context, even though they are usually the same by convention.
 
 		Note that the module imported may have a different name from the servlet name specified in the URL.  This is used in PSP.
 		"""
@@ -58,22 +59,22 @@ class ServletFactory(Object):
 		request = transaction.request()
 		path = request.serverSidePath()
 		contextPath = request.serverSideContextPath()
+		fullname = request.contextName()
 		
 		# First, we'll import the context's package.
-		directory, context = os.path.split(contextPath)
-		self._importModuleFromDirectory(context, directory, isPackageDir=1)
-		directory = os.path.join(directory, context)
+		directory, contextDirName = os.path.split(contextPath)
+		self._importModuleFromDirectory(fullname, contextDirName, directory, isPackageDir=1)
+		directory = contextPath
 				
 		# Now we'll break up the rest of the path into components.
 		remainder = path[len(contextPath)+1:]
 		remainder = string.replace(remainder, '\\', '/')
 		remainder = string.split(remainder, '/')
-		fullname = context
 		
 		# Import all subpackages of the context package
 		for name in remainder[:-1]:
 			fullname = fullname + '.' + name
-			self._importModuleFromDirectory(fullname, directory, isPackageDir=1)
+			self._importModuleFromDirectory(fullname, name, directory, isPackageDir=1)
 			directory = os.path.join(directory, name)
 					
 		# Finally, import the module itself as though it was part of the package
@@ -82,18 +83,24 @@ class ServletFactory(Object):
 		moduleDir = os.path.dirname(serverSidePathToImport)
 		name, ext = os.path.splitext(moduleFileName)
 		fullname = fullname + '.' + name
-		module = self._importModuleFromDirectory(fullname, moduleDir)
+		module = self._importModuleFromDirectory(fullname, name, moduleDir)
 		return module		
 
-	def _importModuleFromDirectory(self, fullModuleName, directory, isPackageDir=0):
+	def _importModuleFromDirectory(self, fullModuleName, moduleName, directory, isPackageDir=0, forceReload=0):
 		"""
 		Imports the given module from the given directory.  fullModuleName should be the full
-		dotted name if the module is in a package or subpackage.  Returns the module object.
+		dotted name that will be given to the module within Python.  moduleName should be the
+		name of the module in the filesystem, which may be different from the name given in
+		fullModuleName.  Returns the module object.  If forceReload is true then this reloads the module
+		even if it has already been imported.
 
 		If isPackageDir is true, then this function creates an empty __init__.py
 		if that file doesn't already exist.
 		"""
-		moduleName = string.split(fullModuleName,'.')[-1]
+		if not forceReload:
+			module = sys.modules.get(fullModuleName, None)
+			if module is not None:
+				return module
 		fp = None
 		try:
 			if isPackageDir:

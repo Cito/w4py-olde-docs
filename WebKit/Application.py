@@ -94,7 +94,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 		# Init other attributes
 		self._servletCacheByPath = {}
-		self._serverSidePathCacheByPath = {}
+		self._serverSideInfoCacheByPath = {}
 		self._cacheDictLock = Lock()
 		self._instanceCacheSize = self._server.setting('ServerThreads')
 		self._canDirs = []
@@ -121,11 +121,34 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		else: #Get it from Configurable object, which gets it from defaults or the user config file
 			defctxt = self.setting('Contexts')
 		self._contexts={}
+		# First load all contexts except the default
+		contextDirToName = {}
 		for i in defctxt.keys():
-			if not os.path.isabs(defctxt[i]):
-				path = self.serverSidePath(defctxt[i])
-			else: path = defctxt[i]
-			self.addContext(i, path)
+			if i != 'default':
+				if not os.path.isabs(defctxt[i]):
+					path = self.serverSidePath(defctxt[i])
+				else:
+					path = defctxt[i]
+				self.addContext(i, path)
+				contextDirToName[path] = i
+		# @@ gat: this code would be much cleaner if we had a separate DefaultContext config variable.
+		# load in the default context, if any
+		self._defaultContextName = None
+		if defctxt.has_key('default'):
+			if not os.path.isabs(defctxt['default']):
+				path = self.serverSidePath(defctxt['default'])
+			else:
+				path = defctxt['default']
+
+			# see if the default context is the same as one of the other contexts
+			self._defaultContextName = contextDirToName.get(path, None)
+			if self._defaultContextName:
+				# the default context is shared with another context
+				self._setContext('default', self.context(self._defaultContextName))
+			else:
+				# the default context is separate from the other contexts, so add it like any other context
+				self._defaultContextName = 'default'
+				self.addContext('default', path)
 		print
 ## End Contexts
 
@@ -568,14 +591,15 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			print 'WARNING: Overwriting context %s (=%s) with %s' % (
 				repr(name), repr(self._contents[name]), repr(value))
 		try:
+			importAsName = name
 			localdir, pkgname = os.path.split(dir)
-			res = imp.find_module(pkgname, [localdir])
-			# @@ question, do we want the package name to be the dir name or the context name?
-			mod = imp.load_module(name, res[0], res[1], res[2])
-			if mod.__dict__.has_key('contextInitialize'):
-				result = mod.__dict__['contextInitialize'](self, os.path.normpath(os.path.join(os.getcwd(),dir)))
-				if result != None and result.has_key('ContentLocation'):
-					dir = result['ContentLocation']
+			if not sys.modules.has_key(importAsName):
+				res = imp.find_module(pkgname, [localdir])
+				mod = imp.load_module(name, res[0], res[1], res[2])
+				if mod.__dict__.has_key('contextInitialize'):
+					result = mod.__dict__['contextInitialize'](self, os.path.normpath(os.path.join(os.getcwd(),dir)))
+					if result != None and result.has_key('ContentLocation'):
+						dir = result['ContentLocation']
 		except ImportError:
 			pass
 		print 'Loading context: %s at %s' % (name, dir)
@@ -793,7 +817,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 	def filenamesForBaseName(self, baseName, debug=0):
 		'''
-		Returns a list of all filenames with extensions existing for baseName, but not including extension found in the setting ExtensionsToIgnore. This utility method is used by serverSidePathsForRequest().
+		Returns a list of all filenames with extensions existing for baseName, but not including extension found in the setting ExtensionsToIgnore. This utility method is used by serverSideInfoForRequest().
 		Example: '/a/b/c' could yield ['/a/b/c.py', '/a/b/c.html'], but will never yield a '/a/b/c.pyc' filename since .pyc files are ignored.
 		'''
 		filenames = glob(baseName+'.*')
@@ -807,16 +831,31 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				repr(baseName), repr(filenames))
 		return filenames
 
+	def defaultContextNameAndPath(self):
+		'''
+		Returns the default context name and path in a tuple.  If there's an explicitly named context with the same
+		path as the "default" context, then we'll use that name instead.  Otherwise, we'll just
+		use "default" as the name.
+		'''
+		if not self._defaultContextName:
+			defaultContextPath = self._contexts['default']
+			for contextName, contextPath in self._contexts.items():
+				if contextPath == defaultContextPath:
+					self._defaultContextName = contextName
+					break
+			else:
+				self._defaultContextName = 'default'
+		return self._defaultContextName, self.context(self._defaultContextName)
 
-
-
-	def serverSidePathsForRequest(self, request, debug=0):
+	def serverSideInfoForRequest(self, request, debug=0):
 		"""
-		Returns a tuple (requestPath, contextPath) where requestPath is
-		the server-side path of this request, and contextPath is the
-		server-side path of the context for this request.
+		Returns a tuple (requestPath, contextPath, contextName) where requestPath is
+		the server-side path of this request, contextPath is the
+		server-side path of the context for this request, and contextName is the
+		name of the context, which is not necessarily the same as the name
+		of the directory that houses the context.
 		This is a 'private' service method for use by HTTPRequest.
-		Returns (None, None) if there is no corresponding server side path for the URL.
+		Returns (None, None, None) if there is no corresponding server side path for the URL.
 
 		This method supports:
 			* Contexts
@@ -836,7 +875,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		"""
 
 		if debug:
-			print '>> serverSidePathsForRequest(request=%s)' % repr(request)
+			print '>> serverSideInfoForRequest(request=%s)' % repr(request)
 			import pprint
 			pprint.pprint(request._rawRequest)
 
@@ -844,21 +883,20 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		if debug: print '>> urlPath =', repr(urlPath)
 
 		if request._absolutepath:
-			return urlPath, None
+			return urlPath, None, None
 
 		# try the cache first
-		ssPath, contextPath = self._serverSidePathCacheByPath.get(urlPath, (None, None))
+		ssPath, contextPath, contextName = self._serverSideInfoCacheByPath.get(urlPath, (None, None, None))
 		if ssPath is not None:
 			if debug: print '>> returning path from cache: %s' % repr(ssPath)
-			return ssPath, contextPath
+			return ssPath, contextPath, contextName
 
 
 		# case: no URL then use the default context
 		if urlPath=='' or urlPath=='/':
-			ssPath = self._contexts['default']
-			contextName= 'default'
+			contextName, ssPath = self.defaultContextNameAndPath()
 			if debug:
-				print '>> no urlPath, so using default context path: %s' % repr(ssPath)
+				print '>> no urlPath, so using default context %s at path: %s' % (contextName, ssPath)
 		else:
 			# Check for and process context name:
 			assert urlPath[0]=='/', 'urlPath=%s' % repr(urlPath)
@@ -873,11 +911,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				prepath = self._contexts[contextName]
 			except KeyError:
 				restOfPath = urlPath[1:]  # put the old path back, there's no context here
-				prepath = self._contexts['default']
-				contextName = 'default'
+				contextName, prepath = self.defaultContextNameAndPath()
 				if debug:
 					print '>> context not found so assuming default:'
-			if debug: print '>> prepath=%s, restOfPath=%s' % (repr(prepath), repr(restOfPath))
+			if debug: print '>> ContextName=%s, prepath=%s, restOfPath=%s' % (contextName, repr(prepath), repr(restOfPath))
 			#ssPath = os.path.join(prepath, restOfPath)
 			if restOfPath != '':
 				ssPath = prepath + os.sep + restOfPath
@@ -957,10 +994,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 			##Finish extraURLPath checks
 			##Check cache again
-			cachePath, cacheContextPath = self._serverSidePathCacheByPath.get(urlPath, (None, None))
+			cachePath, cacheContextPath, cacheContextName = self._serverSideInfoCacheByPath.get(urlPath, (None, None, None))
 			if cachePath is not None:
 				if debug: print '>> returning path from cache: %s' % repr(ssPath)
-				return cachePath, cacheContextPath
+				return cachePath, cacheContextPath, cacheContextName
 
 
 		if isdir(ssPath):
@@ -972,7 +1009,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			if extraURLPath == '' and (urlPath=='' or urlPath[-1]!='/'):
 				if debug:
 					print '>> BAILING on directory url: %s' % repr(urlPath)
-				return ssPath, contextPath
+				return ssPath, contextPath, contextName
 
 			# Handle directories
 			if debug: print '>> directory = %s' % repr(ssPath)
@@ -983,10 +1020,10 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 					break  # we found a file to handle the directory
 				elif num>1:
 					print 'WARNING: For %s, the directory is %s which contains more than 1 directory file: %s' % (urlPath, ssPath, filenames)
-					return None, None
+					return None, None, None
 			if num==0:
 				print 'WARNING: For %s, the directory is %s which contains no directory file.' % (urlPath, ssPath)
-				return None, None
+				return None, None, None
 			ssPath = filenames[0] # our path now includes the filename within the directory
 			if debug: print '>> discovered directory file = %s' % repr(ssPath)
 		elif os.path.splitext(ssPath)[1]=='':
@@ -997,25 +1034,25 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				if debug: print '>> discovered extension, file = %s' % repr(ssPath)
 			else:
 				print 'WARNING: For %s, did not get precisely 1 filename: %s' % (urlPath, filenames)
-				return None, None
+				return None, None, None
 		elif not os.path.exists(ssPath):
-			return None, None
+			return None, None, None
 
-		self._serverSidePathCacheByPath[urlPath] = ssPath, contextPath
+		self._serverSideInfoCacheByPath[urlPath] = ssPath, contextPath, contextName
 
 		if debug:
-			print '>> returning %s\n' % repr(ssPath)
-		return ssPath, contextPath
+			print '>> returning %s, %s, %s\n' % (repr(ssPath), repr(contextPath), repr(contextName))
+		return ssPath, contextPath, contextName
 
 	## Deprecated ##
 
 	def serverSidePathForRequest(self, request, debug=0):
 		"""
 		This is maintained for backward compatibility; it just returns the first part of the tuple
-		returned by serverSidePathsForRequest.
+		returned by serverSideInfoForRequest.
 		"""
 		self.deprecated(self.serverSidePathForRequest)
-		return self.serverSidePathsForRequest(request, debug)[0]
+		return self.serverSideInfoForRequest(request, debug)[0]
 
 	def serverDir(self):
 		"""

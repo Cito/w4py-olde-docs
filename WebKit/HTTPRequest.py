@@ -212,7 +212,7 @@ class HTTPRequest(Request):
 		'''
 		if not hasattr(self, '_serverSidePath'):
 			app = self._transaction.application()
-			self._serverSidePath, self._serverSideContextPath = app.serverSidePathsForRequest(self)
+			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
 		if path:
 			return os.path.normpath(os.path.join(os.path.dirname(self._serverSidePath), path))
 		else:
@@ -227,11 +227,18 @@ class HTTPRequest(Request):
 		is in a subdirectory of the main context directory.'''
 		if not hasattr(self, '_serverSideContextPath'):
 			app = self._transaction.application()
-			self._serverSidePath, self._serverSideContextPath = app.serverSidePathsForRequest(self)
+			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
 		if path:
 			return os.path.normpath(os.path.join(os.path.dirname(self._serverSideContextPath), path))
 		else:
 			return self._serverSideContextPath
+
+	def contextName(self):
+		''' Returns the name of the context of this request.  This isn't necessarily the same as the name of the directory containing the context. '''
+		if not hasattr(self, '_contextName'):
+			app = self._transaction.application()
+			self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
+		return self._contextName
 
 	def servletURI(self):
 		"""This is the URI of the servlet, without any query strings or extra path info"""
