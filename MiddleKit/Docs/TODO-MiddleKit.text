@@ -60,27 +60,6 @@ If you have general comments or questions or contributions, please contact webwa
 
 <major functionality>
 
-	[ ] deleting objects
-		Suppose Foo points to Bar. Given that Foo gets deleted, what happens with relation to Bar?
-			- detach (Bar stays around and it's back reference to Foo is set to None)
-			- cascade (delete foo)
-			- deny
-			- dangle (very dangerous)
-		Use UML terminology if such a thing exists.
-
-	[ ] MK derived attributes
-		- can get by, by declaring a *real* attribute and then
-		  just overriding the get method. Cheesy, but it works.
-		- isDerived
-		- allAttrs(..., isDerived=None)
-			None - get all attrs, otherwise non-derived or derived
-		- fix SQL code gen in Design/
-		- fix SQL code gen in Run/
-		- test MK browser
-		- run test suites
-		- update applications and run app test suites
-		- document
-
 	[ ] Distinct lists: An object such as "Video" cannot have a directors and writers attribute that are both typed "list of Person". Might want to review UML relationships before calling the deal on this.
 
 	[ ] Support defaults in both Python code gen and SQL code gen
@@ -117,6 +96,24 @@ If you have general comments or questions or contributions, please contact webwa
 
 
 <refinements/improvements>
+
+	[ ] A subtle issue with deleting objects requires a saveChanges() repeated times. I inquired with Geoff T who wrote:
+
+		This is tricky.  I think what happens is that store.deleteObject() ends up
+		calling store.fetchObjectsOfClass() somewhere a few levels deep inside of its
+		reference-checking code.  That method always reloads the fields from SQL,
+		wiping out local changes (I think).
+
+		If there were a flag to fetchObjectsOfClass() that could say "but if the
+		objects are already in memory, don't reload their values from SQL" that would
+		help.  In fact, maybe that should be the standard behavior?  The problem is,
+		what do you do with SQL clauses passed in to fetchObjectsOfClass()?  You
+		can't exactly apply them to objects in memory without writing a SQL parser in
+		Python.
+
+		Also see the comment in MiddleObject.referencingObjectsAndAttrs().
+
+	[ ] fetchObject*() refreshes the attributes of the objects in question, even if they were modified. eg, you could lose your changes
 
 	[ ] "set" methods for strings don't raise an exception when the min or max length boundaries are violated.
 
