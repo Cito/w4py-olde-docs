@@ -107,7 +107,7 @@ class PropertiesObject(UserDict):
 			pyVer = string.split(sys.version)[0]
 			pyVer = string.split(pyVer, '.')
 			pyVer = map(lambda x: int(x), pyVer)
-		if pyVer<self['requiredPyVersion']:
+		if tuple(pyVer)<tuple(self['requiredPyVersion']):
 			raise WillNotRunError, 'Required python ver is %s, but actual ver is %s.' % (self['requiredPyVersion'], pyVer)
 
 	def checkRequiredOpSys(self):
