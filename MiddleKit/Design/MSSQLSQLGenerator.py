@@ -142,13 +142,6 @@ create table _MKClassIds (
 #			wr('drop table [dbo].[%s]\n' % klass.name() )
 #			wr('go\n\n')
 
-	def didWriteCreateSQL(self, generator, out):
-		sql = generator.setting('PostSQL', None)
-		if sql:
-			out.write('/* PostSQL start */\n' + sql + '\n/* PostSQL end */\n\n')
-#		out.write('sp_tables\n\n') # not real effective
-		out.write('/* end of generated SQL */\n')
-
 
 
 class Klass:

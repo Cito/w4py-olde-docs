@@ -330,11 +330,17 @@ create table _MKClassIds (
 			id += 1
 		wr('\n')
 
+
+	def listTablesSQL(self):
+		# return a SQL command to list all tables in the database
+		# this is database-specific, so by default we return nothing
+		return ''
+
 	def didWriteCreateSQL(self, generator, out):
 		sql = generator.setting('PostSQL', None)
 		if sql:
 			out.write('/* PostSQL start */\n' + sql + '\n/* PostSQL end */\n\n')
-		out.write('\d\n\n')
+		out.write(self.listTablesSQL())
 		out.write('/* end of generated SQL */\n')
 
 	def writeDeleteAllRecords(self, generator, file):

@@ -31,6 +31,9 @@ class Klasses:
 	def useDatabaseSQL(self, dbName):
 		return 'use %s;\n\n' % dbName
 
+	def listTablesSQL(self):
+		return 'show tables\n\n'
+
 
 class Klass:
 

@@ -32,6 +32,9 @@ class Klasses:
 	def useDatabaseSQL(self, dbName):
 		return '\c "%s"\n\n' % dbName
 
+	def listTablesSQL(self):
+		return '\d\n\n'
+
 
 class Klass:
 
