@@ -11,7 +11,7 @@
 					}
 	-->
 	</style>
-	<title>WebKit User's Guide</title>
+	<title>WebKit Install Guide</title>
 </head>
 
 
@@ -22,27 +22,74 @@ WebKit 0.4
 <br>Webware for Python 0.4
 
 
-<!--
 <a name=TOC><h2>Table of Contents</h2></a>
 
 <p><font face="Helvetica">
-<br>  <a href="#Instroduction"><font size=+1>Synopsis</font></a>
 <br>  <a href="#Introduction"><font size=+1>Introduction</font></a>
-<br>  <a href="#KnownBugs"><font size=+1>Known Bugs</font></a>
+<br>  <a href="#Python"><font size=+1>Python</font></a>
+<br>  <a href="#Source"><font size=+1>Source</font></a>
+<br>  <a href="#InstallingWebware"><font size=+1>Installing Webware</font></a>
+<br>  <a href="#OpSys"><font size=+1>Operating Systems</font></a>
+<br>  <a href="#WebServers"><font size=+1>Web Servers</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#WebServers_Apache"><font size=>Apache</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#WebServers_IIS"><font size=>IIS</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#WebServers_AOLserver"><font size=>AOLserver</font></a>
+<br>  <a href="#Architecture"><font size=+1>Architecture</font></a>
+<br>  <a href="#Adapters"><font size=+1>Adapters</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Permissions"><font size=>Permissions</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_WebKit"><font size=>WebKit</font></a>
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  <a href="#None"><font size=>1. Review and fix permissions</font></a>
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  <a href="#None"><font size=>2. Set up WebKit.cgi</font></a>
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  <a href="#None"><font size=>3. Launch the servers</font></a>
+<br> &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;  <a href="#None"><font size=>4. Try it out</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Stopping"><font size=>Stopping the App Server</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Reloading"><font size=>Reloading Servlets</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_OneShot"><font size=>OneShot.cgi</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_FastCGI"><font size=>FastCGI</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_mod_python"><font size=>mod_python</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_AOLserver"><font size=>AOLserver</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Adapters_Renaming"><font size=>Renaming Adapters</font></a>
+<br>  <a href="#Configuration"><font size=+1>Configuration</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Configuration_Sessions"><font size=>Sessions</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Configuration_ActivityLog"><font size=>Activity Log</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#Configuration_EmailErrors"><font size=>E-mail Errors</font></a>
+<br>  <a href="#Contexts"><font size=+1>Contexts</font></a>
+<br>  <a href="#Future"><font size=+1>Future</font></a>
 <br>  <a href="#Credit"><font size=+1>Credit</font></a>
 </font></p>
--->
 
 
 <a name=Introduction><h2>Introduction</h2></a>
 
 <p> WebKit provides an application server that runs on both UNIX and Windows in "CGI-" or "persistent-" mode, with several configuration options to change it's behavior.
 
-<p> This install guide takes you through the installation process while showing you what options are available and how you would use them. There are also specific notes for operating systems and web servers including UNIX (and it's relatives), Windows 95/98/Me and Windows NT.
+<p> This install guide takes you through the installation process while showing you what options are available and how you would use them. There are also specific notes for operating systems and web servers including UNIX (and it's relatives), Windows 9x and Windows NT.
 
-<p> WebKit is pretty easy to install, but there are specific notes and gotchas for various operating systems and web servers. Do yourself a favor and quickly step through this guide.
+<p> WebKit is pretty easy to install, but there are specific notes and gotchas for various operating systems and web servers. Do yourself a favor and read through this guide from top to bottom, skipping sections that don't apply to you.
 
-<p> You can e-mail <a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a> to give feedback, discuss features and get help using WebKit.
+<p> Do yourself another favor and get a very simple configuration working first. After that, if you still want to play with more advanced set ups, then go for it.
+
+<p> This guide is arranged by topic in a fairly chronological order. There are specific product notes found throughout preceded with tags such as: [UNIX], [WinNT], [IIS], etc.
+
+<p> The term <i>deploy</i> means to install you web application/site in a well known location for access by your users. You first <i>develop</i> your web application and then <i>deploy</i> it. You will see deployment specific notes throughout the guide since the issues for these two areas can be different.
+
+<p> You can always e-mail <a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a> to give feedback, discuss features and get help using WebKit.
+
+
+<a name=Python><h2>Python</h2></a>
+
+<p> WebKit 0.4 was developed and tested primarily with Python 1.5.2. Some light testing has been done with Python 1.6.
+
+<p> Your installation of Python must be multi-threaded, even if you are using the OneShot adapter (which logically doesn't require threads). It's not uncommon for third party web host providers to leave this disabled in Python because they don't expect that it's needed and/or because the default install of Python does not turn threads on. If your Python installation is not multi-threaded, you will have to reinstall it. If you're using a third party host provider in this situation, you may be able to install it yourself into your home directory. See <a href=http://www.python.org>Python</a> for instructions.
+
+<p> To determine if threading is enabled, start the Python interpreter from the command line and enter <code>import thread</code>. If you don't get an exception, all is well.
+
+
+<a name=Source><h2>Source</h2></a>
+
+<p> Unless you just downloaded Webware (and therefore WebKit), you should check to see if you have the latest version. This version you are looking at is 0.4 Release Candidate 2. You can check for the latest version at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>.
+
+<p> If you're feeling adventurous, you can get the latest in-development source code from the public source repository. Instructions are located at the <a href=https://sourceforge.net/cvs/?group_id=4866>Webware CVS page</a>. You can find more information about CVS in general at <a href=http://www.cvshome.org>http://www.cvshome.org</a>.
 
 
 <a name=InstallingWebware><h2>Installing Webware</h2></a>
@@ -51,125 +98,309 @@ WebKit 0.4
 
 <p> Note that the install program doesn't actually copy the files to any separate directory. It copies files within the Webware directory tree, modifies permissions, generates documentation, etc.
 
-<p> Also, you can run the install program as many times as you like with no ill effect, so if you're not sure whether or you it has been run, feel free to do so again.
+<p> Also, you can run the install program as many times as you like with no ill effect, so if you're not sure whether or not it has been run, feel free to do so again.
 
 
-<!--
+<a name=OpSys><h2>Operating Systems</h2>
 
-<a name=Introduction><h2>The Operating System Fork</h2></a>
+<p> WebKit actively supports UNIX and it's relatives, Windows NT and Windows 9x.
 
-<p> Pick your poision:
+<p> Note that you don't have to develop and deploy on the same platform. One of the WebKit developers develops everything on Windows 98 2nd edition and deploys his web sites on BSD (http://www.bsd.org/).
 
-<p><table align=center border=0 cellpadding=4 cellspacing=4 width=80%>
-	<tr>
-		<td align=center bgcolor=red width=50%>
-			<font face="Arial, Helvetica, sans-serif" size=+2 color=white>
-				&nbsp; <br>
-				<a href=UNIXInstallGuide.html class=OSLink>UNIX</a>
-				<br> &nbsp;
-			</font>
-		</td>
-		<td align=center bgcolor=blue width=50%>
-			<font face="Arial, Helvetica, sans-serif" size=+2 color=white>
-				&nbsp; <br>
-				<a href=WindowsInstallGuide.html class=OSLink>Windows</a>
-				<br> &nbsp;
-			</font>
-		</td>
-	</tr>
-</table>
--->
+<p> [UNIX] Nothing special to report. Both Linux and BSD have been used with WebKit.
 
-<a name=Sketch><h2>Sketch</h2></a>
+<p> [WinNT] If you are using IIS as your web server, please see the <a href=#WebServers_IIS>IIS notes</a> below.
 
-<pre>
-* Operating Systems
-	* WebKit actively supports UNIX and it's relatives, Windows NT and Windows 9x.
-	* To our knowledge as of (@@ release date) no one has used Webware on Windows Me or 2000.
-	* This guide is arranged by topic in a fairly chronological order. There are specific OS notes found throughout with the following tags:
-		* [UNIX], [Win9x] and [WinNT]
-* Which web server
-	- Doesn't really matter
-	- Have used Apache and IIS so most people reading this have had their server tested
-	- Some special notes for IIS
-	- At the very least, if the w.s. has CGI support, you should be set
-* Source
-	* Unless you just downloaded this, you should check if you have the latest version at: @@ url
-	* If you're feeling adventurous, you can get the latest in-development source code from the public source repository. CVS, cvshome.org, url for webware's CVS
-* WebKit architecture
-* Adapters
-	- CGI
-	- FastCGI
-	- OneShot
-	- mod_python
-		mod_python itself is still somewhat immature (@@ verify) and the adapter is new, so this approach should be considered somewhat experimental right now
-	- Let us know if you contribute your own
-* The classic set up is WebKit.cgi.
-	* app server sticks around
-	* modified servlets get reloaded, but...
-		* not their ancestor classes
-			* you can trick WebKit by entering the URL for the ancestor class
-		* not other kinds of classes
-	* How to
-		* note the first python line and WebKitDir
-		* changing permissions
-			* consideration of security
-	* Note...
-		* check examples
-		* check admin
-			* plug-ins
-		* note the contexts
-* Using OneShot
-	* CGI mode
-	* Reasons
-		* (@@ see if these are in OneShotAdapter.py)
-		* development of a site
-		* development of webware
-		* lack of faith in application server
-	* Disadvantage
-		* Performance
-	* How to
-		* OneShot.cgi
-		* Change session storage to file
-* Other adapters
-	* FastCGI
-		* Like CGI but, uh, much faster
-		* Upon deployment, probably worth the effort
-		* So far, only gotten working on UNIX
-		* how to
-	* mod_python
-		* see earlier notes
-* More configuration options
-	* Let's briefly touch on some of the configuration options for our purposes. A full reference to these options can be found in the User's Guide at @@
-	* Session storage
-		* memory
-			* periodic back ups
-			* auto load
-		* file
-			* one session per file
-	* LogActivity & ActivityLogFilename & ActivityLogColumns
-	* Contexts
-		* directory paritioning
-		* __init__.py
-		* default
-		* creating your own
-	* Session timeout
-	* E-mailing errors
-* an actual install on BSD
-* IIS Notes
-</pre>
+<p> [Win9x] Note that AsyncThreadedAppServer.py often doesn't function correctly on Win9x. Since it's not the default app server (AppServer.bat points to ThreadedAppServer.py), you don't have to think hard about this unless you go digging.
+
+<p> [Win9x] Although a lot of the development of both WebKit and web sites that use it has been done on Windows 9x, we don't recommend that you use this operating system to actually serve your users. UNIX and NT are generally more robust and secure and therefore, more appropriate for deployment.
+
+<p> [Win] Some Windows users are surprised that URLs passed to WebKit are case sensitive. While it's true that the various Windows file systems are case insensitive, the data structures that WebKit uses internally are not. This is on the to do list.
+
+<p> [Win] When editing path names in configuration files, keep in mind that you are editing a Python dictionary populated with Python strings. Therefore your paths must either use double backslashes (\\) (since the backslash is a special character), use forward slashes or use "r-strings". A bad example is <code>'C:\All\Web\'</code>. Good examples include:
+
+<ul>
+	<li> <code>'/All/Web'</code>
+	<li> <code>'C:/All/Web'</code>
+	<li> <code>'C:\\All\\Web'</code>
+	<li> <code>r'C:\All\Web'</code>
+</ul>
+
+<p> [WinMe] [Win2k] To our knowledge, as of this release, no one has used WebKit on Windows Me or 2000. If you do so, please report the results to <a href=webware-discuss@lists.sourceforge.net>webware-discuss</a>.
 
 
-<a name=KnownBugs><h2>Known Bugs</h2></a>
+<a name=WebServers><h2>Web Servers</h2>
 
-<p> Um, the guide isn't finished yet.  @@ 2000-08-27 ce
+<p> WebKit has been tested with both Apache and IIS, so chances are your web server has already been tested. For the most part, WebKit doesn't care what web server you use. The least common demoninator is standard CGI, so as long as your web server has that, you should be fine.
+
+<a name=WebServers_Apache><h3>Apache</h3></a>
+
+<p> Apache is the world's most popular web server, which means it's also well tested. The Apache home page is located at <a href=http://www.apache.org>http://www.apache.org</a>.
+
+<p> You can use CGI with Apache or you can try out the new <a href=#Adapters_mod_python>mod_python adapter</a> described below.
+
+
+<a name=WebServers_IIS><h3>IIS</h3></a>
+
+<p> Microsoft's Internet Information Server, or IIS, requires some special configuration due to it's default non-standard CGI behavior. You have to do two things:
+
+<p> 1) Configure IIS to handle PATH_INFO and PATH_TRANSLATED according to
+the CGI specification, by running the following command:
+
+<p> <code>cscript adsutil.vbs SET W3SVC/1/AllowPathInfoForScriptMappings 1</code>
+
+<p> This is lightly documented in
+<a href=http://support.microsoft.com/support/kb/articles/Q184/3/20.ASP>http://support.microsoft.com/support/kb/articles/Q184/3/20.ASP</a>.
+
+<p> 2) Use Gordon McMillan's Standalone utility, which is part of his Installer package, to convert WebKit.cgi into an executable program WebKit.exe.  IIS apparently will not handle requests with additional path components after the name of the script, like <code>http://localhost/WebKit.py/foo/bar</code> where WebKit.py is a script, but will handle requests like <code>http://localhost/WebKit.exe/foo/bar</code> where WebKit.exe is an executable. In any case, using the Standalone utility probably results in a speed increase, so it's not such a terrible thing to do this.
+
+<p> In order to convert WebKit.cgi into WebKit.exe using the Standalone utility, I had to rename it to WebKit.py, and add <code>import socket</code> to the top of the file (I could have used a configuration file instead, but this was easier).  Then I was able to successfully use Standalone to create the executable.
+
+
+<a name=WebServers_AOLserver><h3>AOLserver</h3></a>
+
+<p> The PyWX project aims to meld Python and AOLserver and as part of that, they created an AOLserver "stay resident" WebKit adapter for tighter integration. More information can be found at <a href=http://pywx.idyll.org>http://pywx.idyll.org</a>.
+
+
+<a name=Architecture><h2>Architecture</h2></a>
+
+<p> The WebKit architecture involves three main entities at the top level:
+
+<ol>
+	<li> The web browser
+	<li> The web server
+	<li> The app server
+</ol>
+
+<p> The browser will be something like Microsoft Internet Explorer or Netscape Communicator. The web server will be something like Apache or IIS. And finally, the app server will be WebKit, e.g. a Python process running the WebKit modules and your custom servlets.
+
+<p> The chronological order of events goes from top to bottom and then back up to top. In other words, the browser makes a request to the web server which in turn makes a request to the app server. The response then goes from the app server to the web server to the browser.
+
+<p> The key to installing WebKit is to get the web server and app server talking to each other. For this purpose, you must use a WebKit adapter. See below.
+
+
+<a name=Adapters><h2>Adapters</h2></a>
+
+<p> A WebKit adapter takes an HTTP request from a webserver and, as quickly as possible, packs it up and ships it to the app server which subsequently sends the response back to the adapter for delivery to the web server and ultimately the web client. More concisely, an adaptor is the go-between of the web server and the app server.
+
+<p> The current suite of adapters for WebKit are:
+
+<ol>
+	<li> CGI
+	<li> FastCGI
+	<li> OneShot
+	<li> mod_python
+	<li> AOLserver
+</ol>
+
+
+<a name=Adapters_Permissions><h3>Permissions</h3></a>
+
+<p> Note that on UNIX and NT, regardless of which adapter you use, you may need to set some permissions so that the app server can write files to the WebKit directories Cache, ErrorMsgs, Logs and Sessions.
+
+<p> The easiest way to do this is to make these directories writeable by all (on UNIX, that would be <code>cd WebKit/Webware; chmod -R a+rX Cache ErrorMsgs Logs Sessions</code>).
+
+<p> The most secure way to do this, is to make sure the app server and it's adapter are executed by a specific user and that the specific user has write permissions to these directories (but no one else). This requires some savviness with both your operating system and you web server. You may wish to take the easy approach first in order to bootstrap yourself and then come back to this.
+
+
+<a name=Adapters_WebKit><h3>WebKit</h3></a>
+
+<p> The classic set up uses the CGI adapter, known as WebKit.cgi. In this configuration, the app server stays resident (similar to the web server) and is tapped for responses by a small CGI program that forwards the request to it from the web server.
+
+
+<p> To set this up, do the following:
+
+
+<h4>1. Review and fix permissions</h4>
+<ul>
+	<li> This was described earlier in <a href=#Adapters_Permissions>Permissions</a>.
+</ul>
+
+<h4>2. Set up WebKit.cgi</h4>
+<ul>
+	<li> Copy WebKit/WebKit.cgi to a location where your web server has CGI execution permissions.
+	<li> [IIS] See the <a href=#WebServers_IIS>IIS configuration notes</a> above.
+	<li> [Windows and Apache] With a text editor, modify the first line of WebKit.cgi to read <code>#!python</code> rather than <code>#!/usr/bin/env python</code>. Make sure that python is in your search path as defined in AUTOEXEC.BAT. You can check this by typing <code>python</code> at the command prompt to see if Python launches.
+	<li> [UNIX] On most UNIX systems, the WebKit.cgi start up line, <code>#!/usr/bin/env python</code>, works just fine. You can check this by typing <code>/usr/bin/env python</code> at the command line to verify that Python launches. In the event that it does not, or if you wish to point to a different installation, you can change the line to something else, for example, <code>/usr/local/bin/python</code> or <code>/home/me/bin/python</code>.
+	<li> Using a text editor, change the line in WebKit.cgi that reads <code>WebKitDir = None</code> to point to WebKit. For example, <code>WebKitDir = '/home/me/Webware/WebKit'</code>.
+</ul>
+
+<h4>3. Launch the servers</h4>
+<ul>
+	<li> Verify that your web server is running and launch it if not.
+	<li> At the command line, change directories to the WebKit directory, for example, <code>cd ~/Webware/WebKit</code> on UNIX and <code>cd C:\Webware\WebKit</code> on Windows).
+	<li> Still at the command line, type <code>AppServer</code> and press return. You should see the start up messages for the app server. This works on both Windows and UNIX, via the <code>AppServer.bat</code> and <code>AppServer</code> start up scripts. You will see that they are very simple scripts and simply point to the recommended default app server.
+</ul>
+
+
+<h4>4. Try it out</h4>
+<ul>
+	<li> At this point, you should have fixed permissions, set up WebKit.cgi and launched the servers.
+	<li> You can now try a URL such as <code>http://localhost/WebKit.cgi/</code>. By default, the WebKit app server will display the Examples page. A sidebar provide navigation of the various examples which you can breeze through. Note that for any example, you can view it's source code with one of the sidebar links.
+	<li> Some diagnostic information will be printed in the terminal window of the server. You'll notice after the first page is served, that additional pages are served much faster. You can verify this in the console of the app server which reports the response time for each request. As the application warms up (e.g., caches classes, objects, files and settings) performance increases.
+	<li> You will also notice a list of "contexts" in the sidebar. Each context has it's own directory and to create your own web applications, you will create a new context, perhaps even setting it to be the default. See the <a href=#Contexts>Contexts</a> below.
+	<li> One context you should look at now is <b>Admin</b>. These pages let you view the WebKit logs, configurations, installed plug-ins, etc.
+</ul>
+
+
+<a name=Adapters_Stopping><h3>Stopping the App Server</h3></a>
+
+<p> Stopping the app server is accomplished by simply going to it's terminal/command window and hitting Control-C. The app server is designed to intercept this interruption and shut down gracefully. This includes saving session data to disk, if necessary.
+
+
+<a name=Adapters_Reloading><h3>Reloading Servlets</h3></a>
+
+<p> As you develop your web application, you will change the code of your various Python classes, including your servlets. The WebKit app server will detect a change in the timestamp of a servlet's source file and automatically reload it for you.
+
+<p> However, reloading fails in two areas. The first is that WebKit doesn't check ancestor classes of servlets for modificatons. So if you modify an abstract class (for example, SitePage, AccountPage, etc.), it won't be reloaded. The second is that WebKit can't check non-servlet classes. So if you modify a utility class (for example, ShoppingCart, Story, etc.), it won't be reloaded.
+
+<p> You can deal with reloading problems by stopping the app server (Control-C in it's terminal/command window) and restarting it. If this gets too bothersome during development, try the OneShot adapter.
+
+
+<a name=Adapters_OneShot><h3>OneShot.cgi</h3></a>
+
+<p> The OneShot adapter is another CGI based adapter, but unlike WebKit.cgi, the app server launches, serves a response and shuts down for every single request.
+
+<p> There are three major reasons to use the OneShot adapter:
+
+<ul>
+	<li> When developing a web site. OneShot avoids the reloading problems described in the previous section, because each the app server is loaded fresh for every request.
+	<li> When developing WebKit itself and/or plug-ins. Restarting the app server is required in these circumstances, so again, OneShot becomes a convenient way to do this.
+	<li> To ensure absolute stability. Stability problems and memory leaks are unlikely to occur with OneShot since the lifetime of the app server is so short. However, the persistent app server is fairly well tested so this particular purpose is a somewhat weak.
+</ul>
+
+<p> Of course, the cost of these benefits is performance. OneShot is at least an order of magnitude slower than a persistent app server. For development, that's not a problem. But for deployed site with multiple users it could be.
+
+<p> We generally recommend that you develop with OneShot and deploy with something else, like WebKit.cgi.
+
+<p> To set up OneShot, follow the same instructions as for WebKit.cgi with two exceptions and one addition:
+
+<ol>
+	<li> Work with OneShot.cgi (not WebKit.cgi).
+	<li> Do not launch the app server (OneShot will not use it even if it's loaded).
+	<li> Change WebKit/Configs/Application.config's <code>'SessionStore'</code> from <code>'Memory'</code> to <code>'File'</code>. See <a href=#Configuration_Sessions>Sessions</a> for more information.
+</ol>
+
+
+<a name=Adapters_FastCGI><h3>FastCGI</h3></a>
+
+<p> FastCGI is just the like the CGI adapter, but, umm...much faster.  <kbd>:-)</kbd>
+
+<p> The essence of the FastCGI protocol is to keep the CGI program resident. In our case, that program is a combination of the Python interpreter, several standard Python modules and WebKit adapter code. By eliminating the constant reloading of these components, a substantial speed up can be obtained (2 X in informal tests).
+
+<p> Your web server will have to be FastCGI enabled, which you may be able to accomplish by downloading software at <a href=http://www.FastCGI.com>http://www.FastCGI.com</a> where you can also learn more about FastCGI.
+
+<p> The top of FCGIAdapter.py contains a doc string explaining the set up.
+
+<p> Note that to date, we have only gotten this to work on UNIX.
+
+<p> For development purposes, the FastCGI adapter doesn't offer anything substantial. However, for deploying your site for real use, the extra configuration effort is usually worth it.
+
+<p> Another adapter that provides the same type of benefit is the <a href=#Adapters_mod_python>mod_python adapter</a>, described below.
+
+
+<a name=Adapters_mod_python><h3>mod_python</h3></a>
+
+<p> Mod_python is a module that embeds the Python interpreter into the Apache web server. This can make for a substantial speed up over WebKit.cgi which reloads the Python intepreter and various modules for each request.
+
+<p> mod_python itself is still somewhat new and the adapter is new, so this approach should be considered somewhat experimental right now.
+
+<p> The top of modpHandler.py contains a doc sting explaining the set up.
+
+<p> Note that to date, we have only tested this on UNIX.
+
+<p> More information about mod_python can be found at <a href=http://www.modpython.org>http://www.modpython.org</a>.
+
+<p> Another adapter that provides the same type of benefit is the <a href=#Adapters_FastCGI>FastCGI adapter</a> described above.
+
+
+<a name=Adapters_AOLserver><h3>AOLserver</h3></a>
+
+<p> This adapter comes with the Python-enhanced AOLserver created by the <a href=http://pywx.idyll.org>PyWX project</a> and is described there.
+
+
+<a name=Adapters_Renaming><h3>Renaming Adapters</h3></a>
+
+<p> Adapters like WebKit.cgi and OneShot.cgi do not rely on their name. Consequently, when you deploy your web site, you can rename the adapter to something like <code>serve.cgi</code>. This allows you to switch adapters later without affecting the URLs and therefore the bookmarks of your users.
+
+
+<a name=Configuration><h2>Configuration</h2></a>
+
+<p> In this section, we'll briefly touch on some of the configuration options related to installing and running WebKit. A full reference to these options can be found in the User's Guide under <a href=UsersGuide.html#Configuration>Configuration</a>.
+
+<p> The settings reference below are found in the configuration file, Configs/Application.config.
+
+
+<a name=Configuration_Sessions><h3>Sessions</h3></a>
+
+<p> WebKit provides a Session class for storing data on the server side related to an individual user's session with your site. The <code>SessionStore</code> setting determines where the data is stored and can currently be set to <code>Memory</code> or <code>File</code>.
+
+<p> Storing to memory is the fastest solution and works well with a persistent app server. Note that the session data will be saved to disk periodically and on app server shutdown. It will then be automatically reloaded upon app server startup.
+
+<p> Storing to disk is provided mainly in support of the OneShot adapter. It may also prove useful in the future in support of load balancing. In this scenario, each individual session is stored in it's own files.
+
+<p> All on-disk session information is located in WebKit/Sessions.
+
+<p> Also, the <code>SessionTimeout</code> setting lets you set the number of minutes of inactivity before a user's session becomes invalid. The default is 60.
+
+
+<a name=Configuration_ActivityLog><h3>Activity Log</h2></a>
+
+<p> Three options let you control:
+
+<ul>
+	<li> Whether or not to log activity (LogActivity)
+	<li> The name of the file to store the log (ActivityLogFilename)
+	<li> The fields to store in the log (ActivityLogColumns)
+</ul>
+
+<p> See <a href=UsersGuide.html#Configuration>Configuration</a> in the User's Guide for more information.
+
+
+<a name=Configuration_EmailErrors><h3>E-mail Errors</h3></a>
+
+<p> <code>EmailErrors</code>, <code>ErrorEmailServer</code> and <code>ErrorEmailHeaders</code> let you configure the app server so that uncaught exceptions land in your mailbox in real time. You should definitely set these options when deploying a web site.
+
+<p> See <a href=UsersGuide.html#Configuration>Configuration</a> in the User's Guide for more information.
+
+
+<a name=Contexts><h2>Contexts</h2></a>
+
+<p> WebKit divides the world into <i>contexts</i>, each of which is a directory with it's own files and servlets. WebKit will only serve files out of it's list of known contexts.
+
+<p> Some of the contexts you will find out of the box are Examples, Documentation and Admin. When viewing either an example or admin page, you will see a sidebar that lists all the contexts for your browsing.
+
+<p> Another way to look at contexts is a means for "directory partitioning". If you have two distinct web applications (for example, PythonTutor and DayTrader), you will likely put each of these in their own context.
+
+<p> To add a new context, simply add a new one to <code>Contexts</code> dictionary of Application.config. The key is the name of the context as it appears in the URL and the value is the path (absolute or relative to the WebKit directory). Often the name of the context and the name of the directory will be the same:
+
+<p> <code>'DayTrader': '/All/Web/Apps/DayTrader',</code>
+
+<p> The URL to access DayTrader would then be something like: <code>http://localhost/WebKit.cgi/DayTrader/</code>.
+
+<p> The special name <code>default</code> is reserved to specify what context is served when none is specified (as in <code>http://localhost/WebKit.cgi/</code>). By default, this is the Examples context, which is convenient during development since it provides links to all the other contexts.
+
+<p> Note that a context can contain an <code>__init__.py</code> which will be executed when the context is loaded at app server start up. You can put any kind of initialization code you deem appropriate here.
+
+
+<a name=Future><h2>Future</h2></a>
+
+<p> This section documents future items for this install guide. To learn about future developments for WebKit, see WebKit's <a href=Future.html>Future</a> document.
+
+<ul>
+	<li> A verbatim actual install on a box such as BSD.
+	<li> Notes on third party web host providers.
+	<li> Document AsyncAppServer.
+	<li> For stopping the app server, add the appropriate UNIX kill command (equivalent to Control-C).
+</ul>
+
 
 
 <a name=Credit><h2>Credit</h2></a>
 
-<p> Authors: Chuck Esterbrook
+<p> Chuck Esterbrook (primary author), Geoff Talvola (IIS notes).
 
-<p> Several people, mostly on the webware-discuss mailing list, have provided feedback and testing of this guide.
+<!-- Not true, yet.  :-)   <p> Several people, mostly on the webware-discuss mailing list, have provided feedback and testing of this guide. -->
 
 
 <p><hr>
