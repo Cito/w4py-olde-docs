@@ -31,6 +31,7 @@ Version 0.7
 <br> &nbsp; &nbsp; &nbsp; <a href="#Debugging_Raising">Raising Exceptions</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#Debugging_Restarting">Restarting the Server</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#Assertions">Assertions</a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Debugging_html_validate">Validating HTML</a>
 <br> <a href="#NamingConventions"><font size=+1>Naming Conventions</font></a>
 <br> <a href="#Actions"><font size=+1>Actions</font></a>
 <br> <a href="#PlugIns"><font size=+1>Plug-ins</font></a>
@@ -587,6 +588,26 @@ Determines how much detail an RPC servlet will return when an exception occurs o
 
 <p><code>assert shoppingCart.total()>=0.0, 'shopping cart total is %0.2f' % shoppingCart.total()</code>
 
+<a name="Debugging_html_validate"><h3>HTML Validation</h3></a>
+
+<p> You can validate the HTML in your pages using the
+<a href="http://www.htmlhelp.com/tools/validator/">Web Designer Groups
+HTML Validator</a>. 
+<a href="http://www.htmlhelp.com/tools/validator/packages/">RPM packages
+are available</a>, it is available in Debian as <tt>wdg-html-validator</tt>,
+and you can install it from 
+<a href="http://www.htmlhelp.com/tools/validator/source.html">source</a>.
+
+<p> To enable the validation, you have to override
+<code>.writeBodyParts()</code> in your <code>SitePage</code>, as:
+
+<p><code>def writeBodyParts(self):
+<br>&nbsp; &nbsp; Page.writeBodyParts()
+<br>&nbsp; &nbsp; self.validateHTML()
+</code>
+
+<p> If your pages contain invalid HTML, a message will be appended to
+the page.
 
 <a name=NamingConventions><h2>Naming Conventions</h2></a>
 

@@ -254,7 +254,7 @@ class HTTPResponse(Response):
 			headers.append(('Set-Cookie', cookie.headerValue()))
 		return {
 			'headers': headers,
-			'contents': self._strmOut._buffer
+			'contents': self._strmOut.buffer()
 		}
 
 	def size(self):

@@ -73,6 +73,20 @@ class ASStreamOut:
 			self._chunkLen = 0
 		return 1
 
+ 	def buffer(self):
+		"""
+		Return accumulated data which has not yet been
+		flushed.  We want to be able to get at this data
+		without having to call flush first, so that we can
+		(for example) integrate automatic HTML validation.
+		"""
+		# if flush has been called, return what was flushed
+		if self._buffer:
+			return self._buffer
+		# otherwise return the buffered chunks 
+		else:
+			return string.join(self._chunks,'')
+
 	def clear(self):
 		"""
 		Try to clear any accumulated response data.  Will fail if the response is already sommitted.

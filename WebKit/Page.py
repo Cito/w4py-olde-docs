@@ -374,6 +374,45 @@ class Page(HTTPServlet):
 		return self._actionDict
 
 
+	## Validate HTML output (developer debugging) ##
+
+	def validateHTML(self, closingTags='</body></html>'):
+		"""
+		Validate the current response data using Web Design
+		Group's HTML validator available at
+		http://www.htmlhelp.com/tools/validator/
+
+		Make sure you install the offline validator (called
+		"validate") which can be called from the command-line.
+		The "validate" script must be in your path.
+		
+		Add this method to your SitePage (the servlet from
+		which all your servlets inherit), override
+		Page.writeBodyParts() in your SitePage like so:
+		    def writeBodyParts(self):
+		        Page.writeBodyParts()
+		        self.validateHTML()
+
+		The "closingtags" param is a string which is appended
+		to the page before validation.  Typically, it would be
+		the string "</body></html>".  At the point this method
+		is called (e.g. from writeBodyParts() the page is not
+		yet 100% complete, so we have to fake it.
+		"""
+
+		# don't bother validating if the servlet has redirected
+		status = self.response().header('status', None)
+		if status and status.find('Redirect') != -1:
+			return
+
+		response = self.response().rawResponse()
+		contents = response['contents'] + closingTags
+		from WebUtils import WDGValidator
+		errorText = WDGValidator.validateHTML(contents)
+		if not errorText:
+			return
+		self.write(errorText)
+
 	## Exception reports ##
 
 	def writeExceptionReport(self, handler):
