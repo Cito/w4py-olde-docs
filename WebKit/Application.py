@@ -583,6 +583,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		currentServerSidePath = req._serverSidePath
 		currentServerSideContextPath = req._serverSideContextPath
 		currentContextName = req._contextName
+		currentServerRootPath = req._serverRootPath
+		currentPathInfo = req._pathInfo
+		currentExtraURLPath = req._extraURLPath
 		req.setURLPath(urlPath)
 		req.addParent(currentServlet)
 		
@@ -600,6 +603,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		req._serverSidePath = currentServerSidePath
 		req._serverSideContextPath = currentServerSideContextPath
 		req._contextName = currentContextName
+		req._serverRootPath = currentServerRootPath
+		req._pathInfo = currentPathInfo
+		req._extraURLPath = currentExtraURLPath
 		req.popParent()
 		trans._servlet = currentServlet
 
