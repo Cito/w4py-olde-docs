@@ -954,6 +954,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		return self._defaultContextName, self.context(self._defaultContextName)
 
 
+
 	def serverSideInfoForRequest(self, request):
 		"""
 		Returns a tuple (requestPath, contextPath, contextName) where requestPath is
@@ -981,16 +982,17 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		OR SUBMITTING YOUR CHANGES.
 		"""
 
-		if debug:
-			print '>> serverSideInfoForRequest(request=%s)' % repr(request)
-			import pprint
-			pprint.pprint(request._rawRequest)
+		debug=0
+		extraURLPath=''
 
 		urlPath = request.urlPath()
 		if debug: print '>> urlPath =', repr(urlPath)
 
+		##if the requested file is in the filesystem outside of any context...
 		if request._absolutepath:
-			return urlPath, None, None
+			if isdir(urlPath):
+				urlPath = self.findDirectoryIndex(urlPath, debug)
+			return urlPath, None, None  #no contextpath, no contextname
 
 		# try the cache first
 		ssPath, contextPath, contextName = self._serverSideInfoCacheByPath.get(urlPath, (None, None, None))
@@ -1046,64 +1048,19 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 		if debug: print '>> normalized ssPath =', repr(ssPath)
 
-		######### NEW-jsl-12/14/00 - ExtraURLPath routine #############
-		extraURLPath=''
-		if self.setting('ExtraPathInfo'):
-			#Search for extra path info style from left to right.
-			if debug: print "Checking for extra path info"
-			index=0 #start
-			workPath=ssPath
-			loopagain=1
-			while loopagain:
-				index = string.find(ssPath,os.sep,index+1)
-				if index == -1:
-					path = ssPath
-					loopagain=0
-					index=0
 
-				else:
-					path, extra = (ssPath[:index],ssPath[index:])
-					if debug: print ">> Checking path=%s, extra=%s" % (path,extra)
-
-
-				if not os.path.exists(path):
-					# At this point we have a file (or a bad path)
-					filenames = self.filenamesForBaseName(path)
-					if len(filenames)>0:
-						workPath=path
-						if path == ssPath:
-							extraURLPath=''
-						else:
-							extraURLPath = ssPath[len(workPath):]
-						break
-					else:
-						extraURLPath = ssPath[len(workPath):]
-						ssPath = workPath
-						break
-				else:
-					extraURLPath = ssPath[len(path):]
-
-				workPath = path
-
-			ssPath = workPath
-			if len(extraURLPath) != 0:
-				request._extraURLPath = urlPath[-len(extraURLPath):] #get extraPathInfo from urlPath so the slashes are going the right direction
-			else:
-				request._extraURLPath = None
-			if urlPath != '/' and extraURLPath != '':
-				urlPath = urlPath[:-len(extraURLPath)]
+		if self.setting('ExtraPathInfo'):  #check for extraURLPath
+			ssPath, urlPath, extraURLPath = self.processExtraURLPath(ssPath, urlPath, debug)
 			request.setURLPath(urlPath)
-
-
-			if debug:
-				print "*** After EPI Checks:\n\turlPath=%s\n\textraPathInfo=%s\n\tssPath=%s\n" % (urlPath,extraURLPath,ssPath)
-				print "request.getURL() says %s" % request.urlPath()
+			request._extraURLPath = extraURLPath
 
 			##Finish extraURLPath checks
 			##Check cache again
 			cachePath, cacheContextPath, cacheContextName = self._serverSideInfoCacheByPath.get(urlPath, (None, None, None))
 			if cachePath is not None:
-				if debug: print '>> returning path from cache: %s' % repr(ssPath)
+				if debug:
+					print 'checked cache for urlPath %s' % urlPath
+					print '>> returning path for %s from cache: %s' % (repr(ssPath), repr(cachePath))
 				return cachePath, cacheContextPath, cacheContextName
 
 
@@ -1113,26 +1070,16 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			# constructed correctly by the browser.
 			# So in the following if statement, we're bailing out for such URLs.
 			# dispatchRequest() will detect the situation and handle the redirect.
+
+			if debug: print ">> ssPath is a directory"
 			if extraURLPath == '' and (urlPath=='' or urlPath[-1]!='/'):
 				if debug:
 					print '>> BAILING on directory url: %s' % repr(urlPath)
 				return ssPath, contextPath, contextName
 
-			# Handle directories
-			if debug: print '>> directory = %s' % repr(ssPath)
-			for dirFilename in self.setting('DirectoryFile'):
-				filenames = self.filenamesForBaseName(os.path.join(ssPath, dirFilename))
-				num = len(filenames)
-				if num==1:
-					break  # we found a file to handle the directory
-				elif num>1:
-					print 'WARNING: For %s, the directory is %s which contains more than 1 directory file: %s' % (urlPath, ssPath, filenames)
-					return None, None, None
-			if num==0:
-				print 'WARNING: For %s, the directory is %s which contains no directory file.' % (urlPath, ssPath)
-				return None, None, None
-			ssPath = filenames[0] # our path now includes the filename within the directory
-			if debug: print '>> discovered directory file = %s' % repr(ssPath)
+
+			ssPath = self.findDirectoryIndex(ssPath, debug)
+
 		elif os.path.splitext(ssPath)[1]=='':
 			# At this point we have a file (or a bad path)
 			filenames = self.filenamesForBaseName(ssPath)
@@ -1150,6 +1097,95 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		if debug:
 			print '>> returning %s, %s, %s\n' % (repr(ssPath), repr(contextPath), repr(contextName))
 		return ssPath, contextPath, contextName
+
+
+	def findDirectoryIndex(self, ssPath, debug=0):
+		"""
+		Given a url that points to a directory, find an index file in that directory.
+		"""
+		# URLs that map to directories need to have a trailing slash.
+		# If they don't, then relative links in the web page will not be
+		# constructed correctly by the browser.
+		# So in the following if statement, we're bailing out for such URLs.
+		# dispatchRequest() will detect the situation and handle the redirect.
+
+		# Handle directories
+		if debug: print '>> directory = %s' % repr(ssPath)
+		for dirFilename in self.setting('DirectoryFile'):
+			filenames = self.filenamesForBaseName(os.path.join(ssPath, dirFilename))
+			num = len(filenames)
+			if num==1:
+				break  # we found a file to handle the directory
+			elif num>1:
+				print 'WARNING: For %s, the directory is %s which contains more than 1 directory file: %s' % (urlPath, ssPath, filenames)
+				return None
+		if num==0:
+			if debug: print 'WARNING: For %s, the directory contains no directory file.' % (ssPath)
+			return None
+		ssPath = filenames[0] # our path now includes the filename within the directory
+		if debug: print '>> discovered directory file = %s' % repr(ssPath)
+		return ssPath
+
+
+	def processExtraURLPath(self, ssPath, urlPath, debug=0):
+		"""
+		given a server side path (ssPath) and the original request URL (urlPath), determine which portion of the URL is a request path and which portion is extra request information.
+		Return a tuple of:
+		ssPath: the corrected (truncted) ssPath,
+		urlPath:  the corrected (trunctated) urlPath,
+		extraPathInfo: the extra path info
+		"""
+		extraURLPath = ''
+
+		if debug: print "*** processExtraURLPath starting for ssPath=", ssPath
+		if os.path.exists(ssPath):  ##bail now if the whole thing exists
+			if debug: print "*** entire ssPath exists"
+			return ssPath, urlPath, ''
+
+		if debug: print "starting ssPath=%s, urlPath=%s " % (ssPath, urlPath)
+		goodindex = 0  #this marks the last point where the path exists
+		
+		index = string.find(ssPath, os.sep)
+		if index == -1: return ssPath, urlPath, extraURLInfo  ##bail if no seps found
+		if not index: index=1  #start with at least one character
+
+		if debug: print "testing ", ssPath[:index]
+
+		while os.path.exists(ssPath[:index]) and index != -1:
+			goodindex = index
+			index = string.find(ssPath, os.sep, index+1)
+			if debug: print "testing ", ssPath[:index]
+		if debug: print "quitting loop with goodindex= ",ssPath[:goodindex]
+
+		if index != -1: ##there is another slash, but we already know its invalid 
+			if debug: print "last loop got an index of -1"
+			searchpath = ssPath[:index]
+		else:    #no more slashes, so the last element is either a file without an extension, or the real URL is a directory and the last piece is extraURLInfo 
+			searchpath = ssPath
+			
+
+		## Now test to see if the next element is a file without an extension
+		filenames = self.filenamesForBaseName(searchpath)
+		if debug: print "found %s valid files" % len(filenames)
+		if len(filenames)>0:
+			extralen=0
+
+		else:
+			extralen = len(ssPath) - goodindex
+			if isdir(ssPath[:goodindex]):
+				extralen = extralen-1  ##leave the last slash on the path
+
+			
+
+		if extralen > 0:
+			urlPath, extraURLPath = urlPath[:-extralen] , urlPath[-extralen:]
+			ssPath = ssPath[:-extralen]
+			
+		if debug: print "processExtraURLPath returning %s, %s, %s" % ( ssPath, urlPath, extraURLPath )
+		return ssPath, urlPath, extraURLPath
+
+
+
 
 	## Deprecated ##
 
