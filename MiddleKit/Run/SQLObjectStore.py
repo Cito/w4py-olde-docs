@@ -1,5 +1,5 @@
 import sys, time
-from types import InstanceType, LongType
+from types import InstanceType, LongType, StringType
 
 from MiscUtils import NoDefault
 from MiscUtils import Funcs as funcs
@@ -410,3 +410,22 @@ class AnyDateTimeAttr:
 			return 'NULL'
 		else:
 			return "'%s'" % str(value)
+
+
+class DateAttr:
+
+	def sqlValue(self, value):
+		if value is None:
+			return 'NULL'
+		else:
+			# We often get "YYYY-MM-DD HH:MM:SS" from mx's DateTime
+			# so we split on space and take the first value to
+			# work around that.
+			if 0:
+				print
+				print '>> type of value =', type(value)
+				print '>> value = %r' % value
+				print
+			if type(value) is not StringType:
+				value = str(value).split()[0]
+			return "'%s'" % value
