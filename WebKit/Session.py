@@ -1,8 +1,9 @@
 from Common import *
 from MiscUtils.Funcs import uniqueId
 from time import localtime, time
+import socket
 
-
+_hostname = socket.gethostname()
 
 class SessionError(Exception):
 	pass
@@ -48,10 +49,17 @@ class Session(Object):
 		self._numTrans        = 0
 		self._values          = {}
 		self._timeout = trans.application().setting('SessionTimeout')*60
+		sessionPrefix = trans.application().setting('SessionPrefix', None)
+		if sessionPrefix == 'hostname':
+			self._prefix = _hostname + '-'
+		elif sessionPrefix is None:
+			self._prefix = ''
+		else:
+			self._prefix = sessionPrefix + '-'
 
 		attempts = 0
 		while attempts<10000:
-			self._identifier = string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + '-' + uniqueId(self)
+			self._identifier = self._prefix + string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + '-' + uniqueId(self)
 			if not trans.application().hasSession(self._identifier):
 				break
 			attempts = attempts + 1

@@ -39,6 +39,8 @@ Version 0.7
 <ul>
 	<li> A new PickleRPCServlet serves as a more convenient and efficient alternative to XMLRPCServlet. Also, a new RPCServlet base class is used by both classes and provides a starting point for other RPC protocols. The old setting 'IncludeTracebackInXMLRPCFault' is now called 'RPCExceptionReturn' and takes different values.
 
+	<li> New Application.config setting SessionPrefix can be used to prefix the session ID's with a string.  Possible values are None (don't use a prefix), "hostname" (use the hostname as the prefix), or any other string (use that string as the prefix).  Why would you want to use this?  It can be used along with some mod_rewrite magic to do simple load balancing with session affinity.
+
 </ul>
 
 </ul>

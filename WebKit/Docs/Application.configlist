@@ -47,6 +47,8 @@
 
 ('DynamicSessionTimeout', '15', 'The number of minutes of inactivity after which a session is pushed out to disk. This setting can be used to help control memory requirements, especially for busy sites. This is used only if the SessionStore is set to Dynamic.'),
 
+('SessionPrefix', 'None', '''This setting can be used to prefix the session IDs with a string.  Possible values are None (don't use a prefix), "hostname" (use the hostname as the prefix), or any other string (use that string as the prefix).  Why would you want to use this?  It can be used along with some mod_rewrite magic to do simple load balancing with session affinity.'''),
+
 ('ExtraPathInfo', '0', '''When enabled, this setting allows a servlet to be followed by additional path components which are accessible via HTTPRequest's extraURLPath(). For subclassers of Page, this would be self.request().extraURLPath(). This may degrade performance when turned on.'''),
 
 ('CacheServletClasses', '1', 'When set to zero, the app server will not cache the classes that are loaded for servlets. This is for development and debugging.'),
