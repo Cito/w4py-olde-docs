@@ -436,7 +436,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 			# Delete the session ID cookie from the request, then handle the servlet
 			# as though there was no session
 			del transaction.request().cookies()['_SID_']
-			transaction.request().setExpiredSession(1)
+			transaction.request().setSessionExpired(1)
 			if self.setting('UseAutomaticPathSessions'):
 				self.handleMissingPathSession(transaction)
 			else:
