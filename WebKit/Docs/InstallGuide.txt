@@ -195,7 +195,7 @@ run in a separate process from Webware, or in the same process.
 
 To run the server in a separate process, run the script
 ``WebKit/Adapters/HTTPAdapter.py`` -- it takes the options
-``--port=N``, ``-host=IP`` and ``-daemon``.  This will start a small
+``--port=N``, ``--host=IP`` and ``--daemon``.  This will start a small
 Python-based web server, that will forward all requests to the Webware
 AppServer (so you must *also* start the AppServer!).
 
@@ -263,12 +263,14 @@ Windows:
   you are editing a Python dictionary populated with Python
   strings. Therefore your paths must either use double backslashes
   (\\) (since the backslash is a special character), use forward
-  slashes or use "r-strings". A example of a bad string is
+  slashes or use "r-strings". An example of a bad string is
   ``'C:\All\Web\'``. Good examples include:
+
   * ``'/All/Web'``
   * ``'C:/All/Web'``
   * ``'C:\\All\\Web'``
   * ``'C:\All\Web'``
+
   It's generally recommended to simply use forward slashes (/) for all
   your file paths.
 

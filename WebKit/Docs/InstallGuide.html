@@ -290,17 +290,19 @@ appropriate for deployment.</dd>
 sensitive. While it's true that the various Windows file systems are
 case insensitive, the data structures that WebKit uses internally
 are not.</p>
-<p class="last">When editing path names in configuration files, keep in mind that
+<p>When editing path names in configuration files, keep in mind that
 you are editing a Python dictionary populated with Python
 strings. Therefore your paths must either use double backslashes
 (\) (since the backslash is a special character), use forward
-slashes or use &quot;r-strings&quot;. A example of a bad string is
-<tt class="literal"><span class="pre">'C:\All\Web\'</span></tt>. Good examples include:
-* <tt class="literal"><span class="pre">'/All/Web'</span></tt>
-* <tt class="literal"><span class="pre">'C:/All/Web'</span></tt>
-* <tt class="literal"><span class="pre">'C:\\All\\Web'</span></tt>
-* <tt class="literal"><span class="pre">'C:\All\Web'</span></tt>
-It's generally recommended to simply use forward slashes (/) for all
+slashes or use &quot;r-strings&quot;. An example of a bad string is
+<tt class="literal"><span class="pre">'C:\All\Web\'</span></tt>. Good examples include:</p>
+<ul class="simple">
+<li><tt class="literal"><span class="pre">'/All/Web'</span></tt></li>
+<li><tt class="literal"><span class="pre">'C:/All/Web'</span></tt></li>
+<li><tt class="literal"><span class="pre">'C:\\All\\Web'</span></tt></li>
+<li><tt class="literal"><span class="pre">'C:\All\Web'</span></tt></li>
+</ul>
+<p class="last">It's generally recommended to simply use forward slashes (/) for all
 your file paths.</p>
 </dd>
 </dl>
