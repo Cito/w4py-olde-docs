@@ -121,6 +121,8 @@ set it to true to avoid ever getting an assertion failure.  </p>
 	<li>A new setting, <b>UseHashForClassIds</b>, can be set to true to cause internal class ids to be hashed from the class name, instead of numbered serially (1, 2, 3, ...). <a href=UsersGuide.html#Configuration_UseHashForClassIds>docs</a>
 
 	<li>There are good instructions on how to run the test suite in MiddleKit/Tests/ReadMe.text.
+
+	<li>MiddleObject.isDeleted() returns true for objects that have been marked for deletion. You cannot refresh such an object from the database.
 </ul>
 
 
