@@ -43,7 +43,7 @@ class SidebarPage(Page):
 		self.writeBanner()
 
 		# sidebar
-		wr('<tr> <td bgcolor=EEEEEF valign=top nowrap>')
+		wr('<tr> <td bgcolor="#EEEEEF" valign=top nowrap>')
 		self.writeSidebar()
 		wr('</td>')
 
@@ -68,8 +68,8 @@ class SidebarPage(Page):
 		cornerTitle = self.cornerTitle()
 		self.writeln('''
 			<tr>
-				<td align=center bgcolor=000000>%(startFont1)s%(cornerTitle)s%(endFont1)s</td>
-				<td align=center bgcolor=00008B colspan=2>&nbsp;<br>%(startFont2)s%(title)s%(endFont2)s<br>&nbsp;</td>
+				<td align=center bgcolor='#000000'>%(startFont1)s%(cornerTitle)s%(endFont1)s</td>
+				<td align=center bgcolor='#00008B' colspan=2>&nbsp;<br>%(startFont2)s%(title)s%(endFont2)s<br>&nbsp;</td>
 			</tr>''' % locals())
 
 	def writeSidebar(self):
