@@ -144,7 +144,7 @@ class ExceptionHandler(Object):
 
 	def saveErrorPage(self, html):
 		''' Saves the given HTML error page for later viewing by the developer, and returns the filename used. '''
-		filename = os.path.join(self._app.serverDir(), self.setting('ErrorMessagesDir'), self.errorPageFilename())
+		filename = self._app.serverSidePath(os.path.join(self.setting('ErrorMessagesDir'), self.errorPageFilename()))
 		f = open(filename, 'w')
 		f.write(html)
 		f.close()
@@ -167,7 +167,7 @@ class ExceptionHandler(Object):
 			str(self._exc[0]),
 			str(self._exc[1]),
 			errorMsgFilename)
-		filename = os.path.join(self._app.serverDir(), self.setting('ErrorLogFilename'))
+		filename = self._app.serverSidePath(self.setting('ErrorLogFilename'))
 		if os.path.exists(filename):
 			f = open(filename, 'a')
 		else:
