@@ -370,7 +370,11 @@ def main(cmdline):
     else:
 	# load Just's
 	try:
-	    import PyFontify
+            if sys.version[:3]=='1.5':
+                import PyFontify15
+                PyFontify = PyFontify15
+            else:
+	        import PyFontify
 	    if PyFontify.__version__ < '0.3': raise ImportError
 	    tagfct = PyFontify.fontify
 	except ImportError:
