@@ -173,7 +173,7 @@ class PSPServletFactory(ServletFactory):
 
 		clc = PSPCompiler.Compiler(context)
 
-		print 'creating python class: ' , classname
+		#print 'creating python class: ' , classname
 		clc.compile()
 
 		instance = self.createInstanceFromFile(trans,cachedfilename,classname,mtime,1)
