@@ -1,5 +1,5 @@
 from Common import *
-from Servlet import Servlet
+from WebKit.Servlet import Servlet
 import sys
 from types import ClassType
 import imp
@@ -56,25 +56,27 @@ class ServletFactory(Object):
 
 		Note that the module imported may have a different name from the servlet name specified in the URL.  This is used in PSP.
 		"""
+		debug=0
+
 		# Pull out the full server side path and the context path
 		request = transaction.request()
 		path = request.serverSidePath()
 		contextPath = request.serverSideContextPath()
 		fullname = request.contextName()
 
-		## There is no context, so create a package name that is the same as the filesystem path
+		## There is no context, so import the module standalone and give it a unique name
 		if fullname == None:
-			remainder = path
-			remainder = string.replace(remainder, '\\', '/')
-			remainder = string.split(remainder, '/')
-			moduleName = string.join(remainder,".")
-			if moduleName[0] == ".":
-				moduleName = moduleName[1:]
-			directory, contextDirName = os.path.split(serverSidePathToImport)
-			if debug: print moduleName, contextDirName, directory
-			filename = contextDirName[:string.rfind(contextDirName, '.')]
-			module = self._importModuleFromDirectory(moduleName, filename, directory) 
+			remainder = serverSidePathToImport
+			remainder = string.replace(remainder, '\\', '_')
+			remainder = string.replace(remainder, '/','_')
+			fullmodname = string.replace(remainder,'.','_')
+			if debug: print __file__, "fullmodname=",fullmodname
+			if len(fullmodname) > 100: fullmodname=fullmodname[:-50]
+			modname=os.path.splitext(os.path.basename(serverSidePathToImport))[0]
+			fp, pathname, stuff = imp.find_module(modname, [os.path.dirname(serverSidePathToImport)])
+			module = imp.load_module(fullmodname, fp, pathname, stuff)
 			return module
+
 
 		# First, we'll import the context's package.
 		directory, contextDirName = os.path.split(contextPath)
@@ -113,7 +115,7 @@ class ServletFactory(Object):
 		if that file doesn't already exist.
 		"""
 		debug = 0
-		if debug: print fullModuleName, moduleName, directory
+		if debug: print __file__, fullModuleName, moduleName, directory
 		if not forceReload:
 			module = sys.modules.get(fullModuleName, None)
 			if module is not None:
