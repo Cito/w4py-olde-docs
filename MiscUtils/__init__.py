@@ -2,9 +2,9 @@
 # Webware for Python
 # See Documentation/MiscUtils.py
 
-__all__ = ['DataTable', 'NamedValueAccess']
+__all__ = ['DataTable', 'DictForArgs', 'NamedValueAccess']
 
-__version__ = '0.4'
+__version__ = '0.5pre'
 
 
 def InstallInWebKit(appServer):
