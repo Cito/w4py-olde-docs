@@ -199,8 +199,8 @@ class Application(ConfigurableForServerSidePath, Object):
 				self._404Page = """404 Error<p>File Not Found: %s"""
 
 		# @@ ISB 09/02: make this default or get rid of it eventually
-		if self.setting('UseNewPathAlgorithm', 0):
-			print 'Using new path algorithm'
+		if self.setting('ExtraPathInfo', 0):
+			print 'ExtraPathInfo set: using new path algorithm'
 			self.serverSideInfoForRequestOld = self.serverSideInfoForRequest
 			self.serverSideInfoForRequest = self.serverSideInfoForRequestNewAlgorithm
 			self._serverSideInfoCacheByPathNew = {}
