@@ -70,8 +70,15 @@ class HTTPRequest(Request):
 		self._adapterName = self._environ.get('SCRIPT_NAME', '')
 
 		# We use the cgi module to get the fields, but then change them into an ordinary dictionary of values
+		try:
+			keys = self._fields.keys()
+		except TypeError:
+			# This can happen if, for example, the request is an XML-RPC request, not
+			# a regular POST from an HTML form.  In that case we just create an empty
+			# set of fields.
+			keys = []
 		dict = {}
-		for key in self._fields.keys():
+		for key in keys:
 			value = self._fields[key]
 			if type(value) is not ListType:
 				value = value.value # i.e., if we don't have a list, we have one of those cgi.MiniFieldStorage objects. Get it's value.
