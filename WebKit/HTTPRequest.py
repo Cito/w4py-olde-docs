@@ -548,7 +548,12 @@ class HTTPRequest(Request):
 		return self._environ.get('QUERY_STRING', '')
 
 	def uri(self):
-		""" Returns the request URI, which is the entire URL except for the query string. """
+		""" Returns the request URI, which is the entire URL except for
+		the query string.
+		
+		@@TR 2003-03-22: I think this docstring is wrong, as REQUEST_URI
+		does contain the query string with Apache.
+		"""
 		return self._environ['REQUEST_URI']
 
 	def method(self):
