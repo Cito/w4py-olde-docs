@@ -50,6 +50,7 @@ class ListAttr(Attr):
 			backRefName = self.klass().name()
 			attr = self._targetKlass.lookupAttr(backRefName, None)
 			if attr is None:
+				className = self.klass().name()
 				backRefName = className[0].lower() + className[1:]
 		self._backRefAttr = backRefName
 
