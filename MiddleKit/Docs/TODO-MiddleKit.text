@@ -277,6 +277,8 @@ specification."
 
 	[ ] Should __setattr__ invoke willChange() when changes really occur so that willChange() can be come a hook for subclasses (for example, to implement notifications which could then be used in a GUI environment)?
 
+	[ ] A potential optimization to help speed start up would be to pickle the Model inside the .mkmodel directory and use that pickle file in place of the .csv (provided the .csv mtime was older). We could do this silently similar to .pyc files. Note that the only speed up here is in start up time.
+
 </refinements/improvements>
 
 
