@@ -34,6 +34,13 @@ class HTTPRequest(Request):
 			self._fields  = cgi.FieldStorage(keep_blank_values=1)
 			self._cookies = Cookie()
 
+		# Fix up environ if it doesn't look right.
+		# This happens when there is no extra path info past the adapter.
+		# e.g., http://localhost/WebKit.cgi
+		if not self._environ.has_key('PATH_INFO'):
+			self._environ['PATH_INFO'] = '/'
+			self._environ['PATH_TRANSLATED'] = self._environ['DOCUMENT_ROOT']
+
 		# We use the cgi module to get the fields, but then change them into an ordinary dictionary of values
 		dict = {}
 		for key in self._fields.keys():
@@ -44,7 +51,7 @@ class HTTPRequest(Request):
 				value = map(lambda miniFieldStorage: miniFieldStorage.value, value) # extract those .value's
 			dict[key] = value
 		self._fields = dict
-		
+
 		self._pathInfo = None
 
 		# We use Tim O'Malley's Cookie class to get the cookies, but then change them into an ordinary dictionary of values
@@ -59,24 +66,24 @@ class HTTPRequest(Request):
 
 
 	## Transactions ##
-	
+
 	def transaction(self):
 		return self._transaction
-		
-		
+
+
 	def setTransaction(self, trans):
 		''' This method should be invoked after the transaction is created for this request. '''
 		self._transaction = trans
 
 
 	## Special ##
-	
+
 	def environ(self):
 		return self._environ  # @@ 2000-05-01 ce: To implement ExceptionHandler.py
 
 
 	## Values ##
-	
+
 	def value(self, name, default=Tombstone):
 		''' Returns the value with the given name. Values are fields or cookies. Use this method when you're field/cookie agnostic. '''
 		if self._fields.has_key(name):
@@ -87,9 +94,9 @@ class HTTPRequest(Request):
 	def hasValue(self, name):
 		return self._fields.has_key(name) or self._cookies.has_key(name)
 
-	
+
 	## Fields ##
-	
+
 	def field(self, name, default=Tombstone):
 		if default is Tombstone:
 			return self._fields[name]
@@ -104,7 +111,7 @@ class HTTPRequest(Request):
 
 
 	## Cookies ##
-	
+
 	def cookie(self, name, default=Tombstone):
 		''' Returns the value of the specified cookie. '''
 		if default is Tombstone:
@@ -114,21 +121,21 @@ class HTTPRequest(Request):
 
 	def hasCookie(self, name):
 		return self._cookies.has_key(name)
-	
+
 	def cookies(self):
 		''' Returns a dictionary-style object of all Cookie objects the client sent with this request. '''
 		return self._cookies
 
 
 	## Sessions ##
-	
+
 	def session(self):
 		''' Returns the session associated with this request, either as specified by sessionId() or newly created. @@ 2000-05-10 ce: Not Implemented. '''
 		raise NotImplementedError
 
 
 	## Authentication ##
-	
+
 	def remoteUser(self):
 		''' Always returns None since authentication is not yet supported. Take from CGI variable REMOTE_USER. '''
 		# @@ 2000-03-26 ce: maybe belongs in section below. clean up docs
@@ -144,32 +151,10 @@ class HTTPRequest(Request):
 	def remoteName(self):
 		''' Returns the fully qualified name of the client that sent the request, or the IP address of the client if the name cannot be determined. '''
 		raise self.remoteName()
-	
-	
+
+
 	## Path ##
 
-	def _original_serverSidePath(self):
-		''' Returns the complete, unambiguous server-side path for the request. '''
-		if self._serverSidePath is None:
-			path = self._environ['PATH_INFO'][1:]
-			# The [1:] above strips the preceding '/' that we get with Apache 1.3
-			app = self._transaction.application()
-			if path[0]=='_':
-				path = os.path.join(app.serverDir(), path)
-			else:
-				prepath = app.setting('ServletsDir')
-				if not os.path.isabs(path):
-					prepath = os.path.join(app.serverDir(), prepath)
-				path = os.path.join(prepath, path)
-		
-			# @@ 2000-05-03 ce: Kind of hacky: if there is no extension, we assume .py
-			#                   We should look at the extension on disk (and as always, use a cache)
-			if os.path.splitext(path)[1]=='':				
-				path = path + '.py'
-			self._serverSidePath = path
-		
-		return self._serverSidePath
-	
 	def serverSidePath(self):
 		''' Returns the complete, unambiguous server-side path for the request. '''
 		if self._serverSidePath is None:
@@ -177,43 +162,43 @@ class HTTPRequest(Request):
 			# The [1:] above strips the preceding '/' that we get with Apache 1.3
 			app = self._transaction.application()
 			self._serverSidePath = app.serverSidePathForRequest(self, path)
-		return self._serverSidePath		
-	
+		return self._serverSidePath
+
 	def serverSideDir(self):
 		''' Returns the directory of the Servlet (as given through __init__()'s path). '''
 		if self._serverSideDir is None:
 			self._serverSideDir = os.path.split(self.serverSidePath())[0]
 		return self._serverSideDir
-	
+
 	def relativePath(self, joinPath):
 		''' Returns a new path which includes the servlet's path appended by 'joinPath'. Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned. '''
 		return os.path.join(self.serverSideDir(), joinPath)
 
 	def servletURI(self):
 		"""This is the URI of the servlet, without any query strings or extra path info"""
-		
+
 		sspath=self.serverSidePath()#ensure that extraPathInfo has been stripped
 		pinfo=self.pathInfo()
 		URI=pinfo[:string.rfind(pinfo,self.value("extraPathInfo",''))]
 		if URI[-1]=="/": URI=URI[:-1]
 		return URI
-		
-		
+
+
 
 
 	## Information ##
-	
+
 	# @@ 2000-05-10: See FUTURE section of class doc string
 
 	def servletPath(self):
 		# @@ 2000-03-26 ce: document
 		return self._environ['SCRIPT_NAME']
-	
+
 	def contextPath(self):
 		''' Returns the portion of the request URI that is the context of the request. '''
 		# @@ 2000-03-26 ce: this comes straight from Java servlets. Do we want this?
 		raise NotImplementedError
-	
+
 	def pathInfo(self):
 		''' Returns any extra path information associated with the URL the client sent with this request. Equivalent to CGI variable PATH_INFO. '''
 		if self._pathInfo is None:
@@ -223,7 +208,9 @@ class HTTPRequest(Request):
 
 	def pathTranslated(self):
 		''' Returns any extra path information after the servlet name but before the query string, translated to a file system path. Equivalent to CGI variable PATH_TRANSLATED. '''
-		return self._environ['PATH_TRANSLATED']
+#		return self._environ['PATH_TRANSLATED']
+# @@ 2000-06-22 ce: resolve this
+		return self._environ.get('PATH_TRANSLATED', None)
 
 	def queryString(self):
 		''' Returns the query string portion of the URL for this request. Taken from the CGI variable QUERY_STRING. '''
@@ -236,14 +223,14 @@ class HTTPRequest(Request):
 	def method(self):
 		''' Returns the HTTP request method (in all uppercase), typically from the set GET, POST, PUT, DELETE, OPTIONS and TRACE. '''
 		return string.upper(self._environ['REQUEST_METHOD'])
-	
+
 	def sessionId(self):
 		''' Returns a string with the session id specified by the client, or None if there isn't one. '''
 		return self.value('_SID_', None)
 
-		
+
 	## Inspection ##
-	
+
 	def info(self):
 		''' Returns a list of tuples where each tuple has a key/label (a string) and a value (any kind of object). Values are typically atomic values such as numbers and strings or another list of tuples in the same fashion. This is for debugging only. '''
 		# @@ 2000-04-10 ce: implement and invoke super if appropriate
@@ -258,9 +245,9 @@ class HTTPRequest(Request):
 		# Information methods
 		for method in _infoMethods:
 			info.append((method.__name__, apply(method, (self,))))
-		
+
 		return info
-	
+
 	def htmlInfo(self):
 		''' Returns a single HTML string that represents info(). Useful for inspecting objects via web browsers. '''
 		return htmlInfo(self.info())
@@ -274,7 +261,7 @@ class HTTPRequest(Request):
 		res.append('</table>\n')
 		return string.join(res, '')
 
-		
+
 _infoMethods = (
 	HTTPRequest.servletPath,
 	HTTPRequest.contextPath,
