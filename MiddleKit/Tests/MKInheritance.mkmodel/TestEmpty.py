@@ -56,3 +56,28 @@ def test():
 		fetchedObj = store.fetchObject(obj.__class__, obj.serialNum())	
 		assert fetchedObj.__class__ == obj.__class__
 		assert fetchedObj.a() == obj.a()
+
+	# Using fetchObjectsOfClass when there are several objects of the base class and subclass
+	for i in range(19):        # To make a total of 20 One's
+		one = One()
+		one.setA('a' + str(i))
+		one.setB('b' + str(i))
+		store.addObject(one)
+	for i in range(14):        # To make a total of 15 Two's
+		two = Two()
+		two.setA('a' + str(i))
+		two.setB('b' + str(i))
+		two.setC('c' + str(i))
+		two.setD('d' + str(i))
+		store.addObject(two)
+	store.saveChanges()
+	objs = store.fetchObjectsOfClass(One)
+	assert len(objs)==35
+	objs = store.fetchObjectsOfClass(One, isDeep=0)
+	assert len(objs)==20
+	objs = store.fetchObjectsOfClass(Two)
+	assert len(objs)==15
+	objs = store.fetchObjectsOfClass(Two, isDeep=0)
+	assert len(objs)==15
+
+
