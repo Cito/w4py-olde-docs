@@ -112,7 +112,7 @@ class ThreadedAppServer(AppServer):
 			except select.error, v:
 				# if the error is EINTR/interrupt, then self.running should be set to 0 and
 				# we'll exit on the next loop
-				if v[0] == EINTR or v[0]==0 or v[0]==2: break
+				if v[0] == EINTR or v[0]==0: break
 				else: raise
 				
 			if not self.running:
@@ -157,6 +157,19 @@ class ThreadedAppServer(AppServer):
 	def delThread(self):
 		''' Invoked immediately by threadloop() as a hook for subclasses. This implementation does nothing and subclasses need not invoke super. '''
 		pass
+
+	def awakeSelect(self):
+		"""
+		Send a connect to ourself to pop the select() call out of it's loop safely
+		"""
+		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		addr = self.address()
+		try:
+			sock.connect(addr)
+			sock.close()
+		except:
+			pass
+		return
 
 
 	def shutDown(self):
