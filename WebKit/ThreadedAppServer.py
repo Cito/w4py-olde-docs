@@ -131,7 +131,7 @@ class ThreadedAppServer(AppServer):
 
 	def address(self):
 		if self._addr is None:
-			self._addr = ('127.0.0.1', self.setting('Port'))
+			self._addr = (self.setting('Host'), self.setting('Port'))
 		return self._addr
 
 
@@ -181,7 +181,11 @@ class RequestHandler:
 			dict = loads(data)
 			if verbose:
 				print 'request has keys:', string.join(dict.keys(), ', ')
-
+				if dict.has_key('environ'):
+					requestURI = dict['environ'].get('REQUEST_URI', None)
+				else:
+					requestURI = None
+				print 'request uri =', requestURI
 
 		transaction = self.server._app.dispatchRawRequest(dict)
 		rawResponse = dumps(transaction.response().rawResponse())
