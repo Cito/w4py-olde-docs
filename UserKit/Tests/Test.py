@@ -238,9 +238,10 @@ class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 		}))
 		model = Model()
 		model.setName(self.__class__.__name__)
+		model.readParents([])
 		klasses = model.klasses()
 		klasses.addKlass(klass)
-		klasses.awakeFromRead() # @@ 2001-02-17 ce: a little weird
+		model.awakeFromRead() # @@ 2001-02-17 ce: a little weird regarding name
 		return model
 
 	def userManagerClass(self):
