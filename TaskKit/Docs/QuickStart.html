@@ -282,7 +282,7 @@ kind of developments. You'll certainly read more about it in the future.
         wr(<FONT COLOR=#FF0000>'&lt;table width=50% border=1 cellspacing=0&gt;'</FONT>)
         wr(<FONT COLOR=#FF0000>'&lt;tr bgcolor=00008B&gt;&lt;th colspan=2&gt;&lt;font color=white&gt;Task List&lt;/font&gt;&lt;/th&gt;&lt;/tr&gt;'</FONT>)
         wr(<FONT COLOR=#FF0000>'&lt;tr bgcolor=#dddddd&gt;&lt;td&gt;&lt;b&gt;Task Name&lt;/b&gt;&lt;/td&gt;&lt;td&gt;&lt;b&gt;Period&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;'</FONT>)
-        <FONT COLOR=black><B>for</B></FONT> taskname, handler <FONT COLOR=black><B>in</B></FONT> self.application().taskManager().scheduled().items():
+        <FONT COLOR=black><B>for</B></FONT> taskname, handler <FONT COLOR=black><B>in</B></FONT> self.application().taskManager().scheduledTasks().items():
             wr(<FONT COLOR=#FF0000>'&lt;tr&gt;&lt;td&gt;%s&lt;/td&gt;&lt;td&gt;%s&lt;/td&gt;&lt;/tr&gt;'</FONT> % (taskname, handler.period()))
         wr(<FONT COLOR=#FF0000>'&lt;/table&gt;&lt;/center&gt;'</FONT>)
 
