@@ -9,10 +9,12 @@ class RoleUserManager(UserManager):
 	'''
 
 
+	baseOfRoleUserManager = UserManager
+
 	## Init ##
 
 	def __init__(self, userClass=None):
-		UserManager.__init__(self, userClass)
+		self.baseOfRoleUserManager.__init__(self, userClass)
 		self._roles = {}
 
 

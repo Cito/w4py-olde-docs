@@ -42,6 +42,16 @@ class UserManagerTest(unittest.TestCase):
 
 
 class UserManagerToSomewhereTest(UserManagerTest):
+	'''
+	This abstract class provides some tests that all user managers should pass. Subclasses are responsible for overriding setUp() and tearDown() for which they should invoke super.
+	'''
+
+	def setUp(self):
+		# Nothing for now
+		pass
+
+	def tearDown(self):
+		self.mgr = None
 
 	def checkBasics(self):
 		mgr = self.mgr
@@ -109,18 +119,23 @@ class UserManagerToSomewhereTest(UserManagerTest):
 class UserManagerToFileTest(UserManagerToSomewhereTest):
 
 	def setUp(self):
+		UserManagerToSomewhereTest.setUp(self)
 		from UserKit.UserManagerToFile import UserManagerToFile
 		self.mgr = UserManagerToFile()
+		self.setUpUserDir(self.mgr)
+
+	def setUpUserDir(self, mgr):
 		path = 'Users'
 		if os.path.exists(path):
 			shutil.rmtree(path, ignore_errors=1)
 		os.mkdir(path)
-		self.mgr.setUserDir(path)
+		mgr.setUserDir(path)
 
 	def tearDown(self):
 		path = 'Users'
 		if os.path.exists(path):
 			shutil.rmtree(path, ignore_errors=1)
+		UserManagerToSomewhereTest.tearDown(self)
 
 
 class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
@@ -160,6 +175,7 @@ class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 		return model
 
 	def setUp(self):
+		UserManagerToSomewhereTest.setUp(self)
 		model = self.makeModel()
 		from MiddleKit.Design.Generate import Generate
 		generate = Generate().generate
@@ -203,14 +219,26 @@ class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 		for filename in filenames:
 			if os.path.exists(filename):
 				os.remove(filename)
-		self.mgr = None
+		UserManagerToSomewhereTest.tearDown(self)
+
+
+class RoleUserManagerToFileTest(UserManagerToFileTest):
+
+	def setUp(self):
+		UserManagerToSomewhereTest.setUp(self)
+		from UserKit import combineUserManagers
+		umClass = combineUserManagers('UserManagerToFile', 'RoleUserManager')
+		self.mgr = umClass()
+		self.setUpUserDir(self.mgr)
+
 
 
 def makeTestSuite():
 	testClasses = [
 		UserManagerTest,
 		UserManagerToFileTest,
-		UserManagerToMiddleKitTest
+		UserManagerToMiddleKitTest,
+		RoleUserManagerToFileTest,
 	]
 	make = unittest.makeSuite
 	suites = [make(clazz, 'check') for clazz in testClasses]

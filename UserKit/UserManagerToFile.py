@@ -12,11 +12,13 @@ class UserManagerToFile(UserManager):
 	The default user directory is the current working directory, but relying on the current directory is often a bad practice.
 	'''
 
+	baseOfUserManagerToFile = UserManager
+
 
 	## Init ##
 
 	def __init__(self, userClass=None):
-		UserManager.__init__(self, userClass=None)
+		self.baseOfUserManagerToFile.__init__(self, userClass=None)
 		try:
 			from cPickle import load, dump
 		except ImportError:
@@ -39,7 +41,7 @@ class UserManagerToFile(UserManager):
 	## WebKit integration ##
 
 	def wasInstalled(self, owner):
-		UserManager.wasInstalled(self, owner)
+		self.baseOfUserManagerToFile.wasInstalled(self, owner)
 		self.setUserDir(owner.serverSidePath('Users'))
 		self.initNextSerialNum()
 
@@ -91,7 +93,7 @@ class UserManagerToFile(UserManager):
 		''' Overridden to mix in UserMixIn to the class that is passed in. '''
 		from MiscUtils.MixIn import MixIn
 		MixIn(userClass, UserMixIn)
-		UserManager.setUserClass(self, userClass)
+		self.baseOfUserManagerToFile.setUserClass(self, userClass)
 
 
 	## UserManager concrete methods ##
@@ -104,7 +106,7 @@ class UserManagerToFile(UserManager):
 	def addUser(self, user):
 		assert isinstance(user, User)
 		user._serialNum = self.nextSerialNum()
-		UserManager.addUser(self, user)
+		self.baseOfUserManagerToFile.addUser(self, user)
 		user.save()
 
 	def userForSerialNum(self, serialNum, default=NoDefault):
