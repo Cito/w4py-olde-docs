@@ -156,6 +156,11 @@ class HTTPRequest(Request):
 	def fields(self):
 		return self._fields
 
+	def setField(self, name, value):
+		self._fields[name] = value
+
+	def delField(self, name):
+		del self._fields[name]
 
 
 	## Cookies ##
