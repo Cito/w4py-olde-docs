@@ -1,17 +1,19 @@
-#!/usr/bin/env python
+#!python
 
-# If the WebKit installation is located somewhere else,
-# then set the WebKitDir variable to point to it.
-# For example, WebKitDir = '/Servers/Webware/WebKit'
-WebKitDir = None
+# If the Webware installation is located somewhere else,
+# then set the WebwareDir variable to point to it.
+# For example, WebwareDir = '/Servers/Webware'
+WebwareDir = None
 
 try:
-	if WebKitDir:
-		import os, sys
-		os.chdir(WebKitDir)
-		sys.path.insert(0, '.')
-	import OneShotAdapter
-	OneShotAdapter.main()
+	import os, sys
+	if WebwareDir:
+		sys.path.insert(1, WebwareDir)
+	else:
+		WebwareDir = os.path.dirname(os.getcwd())
+	webKitDir = os.path.join(WebwareDir, 'WebKit')
+	import WebKit.OneShotAdapter
+	WebKit.OneShotAdapter.main(webKitDir)
 except:
 	import string, sys, traceback
 	from time import asctime, localtime, time
@@ -32,4 +34,3 @@ except:
 <p>ERROR
 <p><pre>%s</pre>
 </body></html>\n''' % output)
-
