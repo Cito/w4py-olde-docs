@@ -56,7 +56,8 @@ The text below comes from another psp page which was inserted into this one with
 
 
 <font color="blue">
-<psp:include path = "APSPinclude.html">
+<psp:insert file="APSPinclude.html">
+</font>
 
 <br/>
 Time at which dynamic output was generated: <psp:include path = "APSPinclude.psp">
