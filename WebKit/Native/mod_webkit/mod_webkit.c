@@ -362,6 +362,13 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     
     sock = wksock_open(r, cfg->addr, cfg->port, cfg);
     if (sock <= 0) return 1;    
+
+    // Errors after this point mean that the
+    // whole request fails -- no retry is possible.
+    // That's because once we've sent the request, it's possible
+    // that the appserver has already started to work on the request,
+    // and we don't want to accidentally submit the same request
+    // twice.
     
     //	log_message("creating buffsocket",r);
     buffsocket=ap_bcreate(r->pool,B_SOCKET+B_RDWR);
@@ -369,15 +376,14 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     //	log_message("push socket into fd",r);
     ap_bpushfd(buffsocket,sock,sock); //sock);
     
-    /* Now we send the request to th AppServer */
+    /* Now we send the request to the AppServer */
     //	log_message("writing request to buff",r);
     bs = ap_bwrite(buffsocket, int_dict->str, int_dict->ptr - int_dict->str);
     bs = ap_bwrite(buffsocket,whole_dict->str,length);
     
-    
-    ///Now we pump through any client input
+    // Now we pump through any client input.
     if (( ret = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR)) != 0)
-	return ret;
+	return 2;
     if (ap_should_client_block(r)) {
 	char * buff = ap_pcalloc(r->pool, MAX_STRING_LEN);
 	int n; 
@@ -429,7 +435,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     if ((ret=ap_scan_script_header_err_buff(r, buffsocket, NULL))) {
 	if( ret>=500 || ret < 0) {
 	    log_message("cannot scan servlet headers ", r);
-	    return 1;
+	    return 2;
 	}
 	
 	r->status_line = NULL;

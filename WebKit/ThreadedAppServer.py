@@ -136,8 +136,10 @@ class ThreadedAppServer(AppServer):
 				if v[0] == EINTR or v[0]==0: break
 				else: raise
 
-			if not self.running:
-				return
+			# @@ gat 2002-03-20: I found through heavy testing of restart behavior that WebKit
+			# dropped fewer requests on restart by removing this test.
+##			if not self.running:
+##				return
 
 			for sock in input:
 				if sock.getsockname()[1] == self.monitorPort:
@@ -266,13 +268,26 @@ class ThreadedAppServer(AppServer):
 					if rh == None: #None means time to quit
 						if debug: print "Thread retrieved None, quitting"
 						break
-					if self.running:
-						t.processing=1
-						try:
-							rh.handleRequest()
-						except:
-							traceback.print_exc(file=sys.stderr)
-						t.processing=0
+					# @@ gat 2002-03-21: we don't want to drop a request that we've
+					# already received from the adapter; therefore, I removed the
+					# test of self.running.  Now, once a request gets put into the
+					# request queue, it WILL be processed, never dropped.  This
+					# might slow down shutdown a bit if many requests are currently
+					# being processed, but it makes restarting the appserver work
+					# better.
+##					if self.running:
+##						t.processing=1
+##						try:
+##							rh.handleRequest()
+##						except:
+##							traceback.print_exc(file=sys.stderr)
+##						t.processing=0
+					t.processing=1
+					try:
+						rh.handleRequest()
+					except:
+						traceback.print_exc(file=sys.stderr)
+					t.processing=0
 					rh.close()
 				except Queue.Empty:
 					pass
@@ -469,7 +484,12 @@ class RequestHandler:
 			block = conn.recv(missing)
 			if not block:
 				conn.close()
-				raise NotEnoughDataError, 'received only %d out of %d bytes when receiving dict_length' % (len(chunk), int_length)
+				if len(chunk) == 0:
+					# We probably awakened due to awakeSelect being called.
+					return 0
+				else:
+					# We got a partial request -- something went wrong.
+					raise NotEnoughDataError, 'received only %d out of %d bytes when receiving dict_length' % (len(chunk), int_length)
 			chunk = chunk + block
 			missing = int_length - len(chunk)
 		dict_length = loads(chunk)

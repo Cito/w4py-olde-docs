@@ -74,7 +74,7 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 		# have to wait until it does.
 		while self.server is None:
 			time.sleep(1.0)
-		self.server.running = 0
+		self.server.initiateShutdown()
 
 	def SvcDoRun(self):
 		try:
@@ -99,7 +99,7 @@ class ThreadedAppServerService(win32serviceutil.ServiceFramework):
 				sys.stdout = sys.stderr = open('nul', 'w')
 			del stdoutAndStderr
 			self.server.mainloop()
-			self.server.shutDown()
+			self.server._closeThread.join()
 		except Exception, e: #Need to kill the Sweeper thread somehow
 			print e
 			print "Exiting AppServer"
