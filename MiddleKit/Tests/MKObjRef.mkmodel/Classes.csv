@@ -5,3 +5,5 @@ Bar,,,
 ,foo,Foo,0
 BarReq,,,
 ,foo,Foo,1
+Qux(Foo),,,
+,y,int,0
