@@ -523,6 +523,7 @@ class ExceptionHandler(Object):
 		## Construct the message headers
 		headers = self.setting('ErrorEmailHeaders').copy()
 		headers['Date'] = dateForEmail()
+		headers['Mime-Version'] = '1.0'
 		headers['Subject'] = headers.get('Subject','[WebKit Error]') + ' ' \
 					 + str(sys.exc_info()[0]) + ': ' \
 					 + str(sys.exc_info()[1])
@@ -558,6 +559,7 @@ class ExceptionHandler(Object):
 			# finish off
 			writer.lastpart()
 		else:
+			writer.addheader('Content-Type', 'text/html; charset=us-ascii')
 			body = writer.startbody('text/html')
 			body.write(htmlErrMsg)
 			
