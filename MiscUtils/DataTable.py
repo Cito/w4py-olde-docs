@@ -528,7 +528,7 @@ class TableRecord:
 			1. A TableRecord
 			2. A list
 			3. A dictionary
-			4. Any object responding to hasValueForField() and valueForField().
+			4. Any object responding to hasValueForKey() and valueForKey().
 		'''
  		self._headings = table.headings()
 		self._nameToIndexMap = table.nameToIndexMap()
@@ -570,12 +570,12 @@ class TableRecord:
 				self._values.append(BlankValues[heading.type()])
 
 	def initFromObject(self, object):
-		''' The object is expected to response to hasValueForField(name) and valueForField(name) for each of the headings in the table. It's alright if the object returns 0 for hasValueForField(). In that case, a "blank" value is assumed (such as zero or an empty string). If hasValueForField() returns 1, then valueForField() must return a value. '''
+		''' The object is expected to response to hasValueForKey(name) and valueForKey(name) for each of the headings in the table. It's alright if the object returns 0 for hasValueForKey(). In that case, a "blank" value is assumed (such as zero or an empty string). If hasValueForKey() returns 1, then valueForKey() must return a value. '''
 		self._values = []
 		for heading in self._headings:
 			name = heading.name()
-			if object.hasValueForField(name):
-				self._values.append(heading.valueForRawValue(object.valueForField(name)))
+			if object.hasValueForKey(name):
+				self._values.append(heading.valueForRawValue(object.valueForKey(name)))
 			else:
 				self._values.append(BlankValues[heading.type()])
 

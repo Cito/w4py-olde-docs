@@ -3,6 +3,7 @@ sys.path.insert(0, '..')
 from DataTable import *
 import string
 
+# @@ 2000-12-04 ce: We don't test the feature where record like objects, that respond to hasValueForKey() and valueForKey(), can be added to a table (as opposed to a sequence, dictionary or TableRecord instance).
 
 def heading(title):
 	print
