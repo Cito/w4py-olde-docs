@@ -16,3 +16,17 @@ class Welcome(ExamplePage):
 
 		<p> The <b>Admin</b> context is particularly interesting because it takes you to the administrative pages for the WebKit AppServer where you can review logs, configuration, plug-ins, etc.
 ''')
+		req = self.request()
+		extraURLPath = req.extraURLPath()
+		if extraURLPath and extraURLPath != '/':
+			self.writeln('''
+			<p>extraURLPath information was found on the URL,
+			and a servlet was not found to process it.
+			Processing has been delegated to this servlet.</p>''')
+
+			self.writeln('<ul>')
+			self.writeln('serverSidePath of this servlet is: <tt>%s</tt><br>' % req.serverSidePath() )
+			self.writeln('extraURLPath data is: <tt>%s</tt><br>' % extraURLPath )
+			self.writeln('</ul>')
+				    
+			
