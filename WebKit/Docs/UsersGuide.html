@@ -15,10 +15,10 @@ Version 0.5
 <a name=TOC><h2>Table of Contents</h2></a>
 
 <p><span class=ToC>
-     <a href="#TOC"><font size=+1>Table of Contents</font></a>
-<br> <a href="#Synopsis"><font size=+1>Synopsis</font></a>
+     <a href="#Synopsis"><font size=+1>Synopsis</font></a>
 <br> <a href="#Feedback"><font size=+1>Feedback</font></a>
 <br> <a href="#Introduction"><font size=+1>Introduction</font></a>
+<br> &nbsp; &nbsp; &nbsp; <a href="#Overview">Python 9</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#Overview">Overview</a>
 <br> &nbsp; &nbsp; &nbsp; <a href="#CompareCGIs">Compared to CGI "apps"</a>
 <br> <a href="#Errors"><font size=+1>Errors / Uncaught Exceptions</font></a>
@@ -34,7 +34,6 @@ Version 0.5
 <br> <a href="#NamingConventions"><font size=+1>Naming Conventions</font></a>
 <br> <a href="#Actions"><font size=+1>Actions</font></a>
 <br> <a href="#PlugIns"><font size=+1>Plug-ins</font></a>
-<br> <a href="#Files"><font size=+1>Files</font></a>
 <br> <a href="#How"><font size=+1>How do I develop an app?</font></a>
 <br> <a href="#KnownBugs"><font size=+1>Known Bugs</font></a>
 <br> <a href="#Credit"><font size=+1>Credit</font></a>
@@ -53,6 +52,11 @@ Version 0.5
 
 <a name=Introduction><h2>Introduction</h2></a>
 
+<a name=Overview><h3>Python 9</h3></a>
+
+<p> A paper titled "Introduction to Webware" was accepted for <a href=http://www.python9.org/>Python 9</a>, which runs the week of March 4th, 2001. Eventually, the conference proceedings make their way to the web. Unfortunately, at the time of this writing, we don't know what the URL will be, but if you poke around on that site or on <a href=http://www.python.org/>python.org</a> you can probably find them.
+
+
 <a name=Overview><h3>Overview</h3></a>
 
 <p> The core concepts of the WebKit are the Application, Servlet, Request, Response and Transaction, for which there are one or more Python classes.
@@ -61,20 +65,20 @@ Version 0.5
 
 <p> Content is normally served in HTML or XML format over an HTTP connection. However, applications can provide other forms of content and the framework is designed to allow new classes for supporting protocols other than HTTP.
 
-<p> In order to connect the web server and the application server, there is a small CGI script, WebKit.cgi, that bundles a web browser request and sends it to the application server, which then processes it and sends the response back to WebKit.cgi which then outputs the results for use by the web server. See the <a href=InstallGuide.html>Install Guide</a> for more information.
+<p> In order to connect the web server and the application server a small program called an <i>adapter</i> is used. It bundles a web browser request and sends it to the application server, which then processes it and sends the response back to the adapter which then outputs the results for use by the web server. Adapters come in various flavors including CGI, FastCGI and Apache mod. See the <a href=InstallGuide.html>Install Guide</a> for more information.
 
 <p> At a more detailed level, the process looks like this:
 
 <ol>
-	<li>At some point, someone has configured and run both a web server (such as Apache) and the WebKit app server (WebKit/AppServer.py).
+	<li>At some point, someone has configured and run both a web server (such as Apache) and the WebKit app server (WebKit/AppServer).
 	<li>A user requests a web page by typing a URL or submitting a form.
 	<li>The user's browser sends the request to the remote web server.
-	<li>The web server detects a CGI script, WebKit.cgi, in the URL and invokes it.
-	<li>WebKit.cgi simply collects information about the request and sends it to the WebKit app server which is ready and waiting.
+	<li>The web server invokes the adapter.
+	<li>The adapter simply collects information about the request and sends it to the WebKit app server which is ready and waiting.
 	<li>The app server asks the Application object to dispatch the raw request.
 	<li>The application instantiates an HTTPRequest object and asks the appropriate Servlet (as determined by examining the URL) to process it.
-	<li>The servlet generates content into a given HTTPResponse object, whose content is then sent back by the app server to WebKit.cgi.
-	<li>WebKit.cgi prints the content which the web server then delivers to the user's web browser.
+	<li>The servlet generates content into a given HTTPResponse object, whose content is then sent back by the app server to the adapter.
+	<li>The adapter sends the content through the web server and ultimately to the user's web browser.
 </ol>
 
 
@@ -82,9 +86,9 @@ Version 0.5
 
 <p> The alternative to a server-side application is a set of CGI scripts. However, a CGI script must always be launched from scratch and many common tasks will be performed repeatedly for each request. For example, loading libraries, opening database connections, reading configuration files, etc.
 
-<p> With the server-side application, the majority of these tasks can be done once at launch time and important  results can be easily cached. This the application significantly more efficient.
+<p> With the server-side application, the majority of these tasks can be done once at launch time and important results can be easily cached. This makes the application significantly more efficient.
 
-<p> Of course, CGIs can still be appropriate for "one shot" deals or simple applications. <a href=../../Documentation/Webware.html>Webware</a> includes a <a href=../../CGIWrapper/Documentation/CGIWrapper.html>CGI Wrapper</a> if you'd like to encapsulate your CGI scripts with robust error handling, e-mail notifications, etc.
+<p> Of course, CGIs can still be appropriate for "one shot" deals or simple applications. <a href=../../Docs/index.html>Webware</a> includes a <a href=../../CGIWrapper/Docs/index.html>CGI Wrapper</a> if you'd like to encapsulate your CGI scripts with robust error handling, e-mail notifications, etc.
 
 
 <a name=Errors><h2>Errors / Uncaught Exceptions</h2></a>
@@ -415,17 +419,13 @@ The SMTP server to use for sending e-mail error messages.
 
 <a name=Administration><h2>Administration</h2></a>
 
-<p> WebKit has a built-in administration page that you can access by specifying <code>_admin</code> in the URL. This gives basic information and provides links to other administrative features like viewing the logs and configuration.
+<p> WebKit has a built-in administration page that you can access via the <span class=name>Admin</span> context. You can see a list of all contexts in the sidebar of any Example or Admin page.
 
-<p> The error log display also contains links to the archived error messages so that you can browse them.
+<p> The admin pages allows you to view WebKit's configuration, logs, and servlet cache, and perform actions such as clearing the cache, reloading selected modules and shutting down the app server.
 
-<p> The adminstration scripts provide further examples of writing pages with WebKit, so you may wish to examine their source.
+<p> More sensitive pages that give control over the app server require a user name and password, which defaults to admin/webware. You can change the password in <span class=filename>WebKit/Configs/Application.config</span> and should do so as soon as possible.
 
-<p> Here's an <a href=SampleAdmin.html>example</a> of the admin page.
-
-<p> The URL might look something like:
-
-<p><code>http://www.host.com/WebKit.cgi/_admin</code>
+<p> The adminstration scripts provide further examples of writing pages with WebKit, so you may wish to examine their source in <span class=filename>WebKit/Admin/</span>.
 
 
 <a name=Debugging><h2>Debugging</h2></a>
@@ -437,7 +437,7 @@ The SMTP server to use for sending e-mail error messages.
 
 <p> The most common technique is the infamous <code>print</code> statement. The results of <code>print</code> statements go to the console where the WebKit application server was started (not to the HTML page as would happen with CGI). Prefixing the debugging output with a special tag (such as >>) is useful because it stands out on the console and you can search for the tag in source code to remove the print statements after they are no longer useful. For example:
 
-<p><code>print '<b>&gt;&gt;</b> fields =', self._request.fields()</code>
+<p><code>print '<b>&gt;&gt;</b> fields =', self.request().fields()</code>
 
 
 <a name=Debugging_Raising><h3>Raising Exceptions</h3></a>
@@ -451,7 +451,11 @@ The SMTP server to use for sending e-mail error messages.
 
 <a name=Debugging_Restarting><h3>Restarting the Server</h3></a>
 
-<p> Servlet <i>super classes</i> don't get reloaded by the AppServer. Also, Webware can still be unstable due to its early age. If a problem becomes unsolvable, restart the server and see if it still occurs on the first attempt.
+<p> When a servlet's source code changes, it is reloaded. However, ancestor classes of servlets are not. That is why web sites are often developed with the <a href=InstallGuide.html#Adapters_OneShot>One Shot adapter</a> and deployed with a more advanced, high performance adapter.
+
+<p> In any case, when having problems, consider restarting the app server.
+
+<p> Another option is to use the AppControl page of the <a href=#Administration>Admin</a> context to clear the servlet instance and class cache.
 
 
 <a name=Assertions><h3>Assertions</h3></a>
@@ -498,30 +502,7 @@ The SMTP server to use for sending e-mail error messages.
 
 <p> Plug-ins often provide additional servlet factories, servlet subclasses, examples and documentation. Ultimately, it is the plug-in author's choice as to what to provide and in what manner.
 
-<p> Technically, plug-ins are Python packages that follow a few simple conventions in order to work with WebKit. More information can be found in PlugIn.py's doc strings. You can learn more about Python packages in the Python Tutorial, 6.4: "Packages" at http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000).
-
-
-<a name=Files><h2>Files</h2></a>
-
-<p> <b>*.py</b> - Mostly the implementation of the various classes of the framework, except as noted below.
-
-<p> <b>WebKit.cgi</b> - A simple script that imports and runs WebKitCGIAdaptor. This also results in a cached byte code version of WebKitCGIAdapator (e.g., a <code>.pyc</code>) (provided you have write permission, of course).
-
-<p> <b>CGIAdaptor.py</b> - A program that collects HTTP requests together in a dictionary and passes them to the app server for processing. This allows WebKit applications to work with any web server that supports CGI.
-
-<p> <b>FCGIAdaptor.py</b> - Like CGIAdaptor, but in accordance with the <a href=http://www.fastcgi.com>FastCGI</a> protocol for improved performance.
-
-<p> <b>address.text</b> - The hostname and port of the AppServer are written to this file when it starts up. The CGI and FastCGI adaptors read this in order to communicate with the AppServer.
-
-<p> <b>Config/AppServer.config</b> - configuration file for the AppServer
-
-<p> <b>Config/Application.config</b> - configuration file for the Application
-
-<p> <b>Logs/Access.csv</b> - The log of servlets/pages accessed through the server as described above.
-
-<p> <b>Logs/Errors.csv</b> - The log of uncaught exceptions including date & time, exception and link to debugging page if one was saved.
-
-<p> <b>ErrorMsgs/Error-<i>scriptname</i>-<i>YYYY</i>-<i>MM</i>-<i>DD</i>-<i>*</i>.py</b> - Archived error messages.
+<p> Technically, plug-ins are Python packages that follow a few simple conventions in order to work with WebKit. More information can be found in PlugIn.py's doc strings. You can learn more about Python packages in the Python Tutorial, <a href=http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000>6.4: "Packages"</a>.
 
 
 <a name=How><h2>How do I develop an app?</h2></a>
@@ -530,13 +511,16 @@ The SMTP server to use for sending e-mail error messages.
 
 <ol>
 	<li> Make sure you can run the WebKit AppServer. See the <a href=InstallGuide.html>Install Guide</a> for more information.
-	<li> Read the source to the examples (in WebKit/Examples), then modify one of them to get your toes wet.
+	<li> Read the source to the examples (in <span class=filename>WebKit/Examples</span>), then modify one of them to get your toes wet.
 	<li> Create your own new example from scratch. Ninety-nine percent of the time you will be subclassing the <b>Page</b> class.
 	<li> Familiarize yourself with the class docs in order to take advantage of classes like Page, HTTPRequest, HTTPResponse and Session. Unfortunately, I couldn't get generated class docs working for this release, so you'll have to resort to breezing through the source code which is coupled with documentation strings. Read the examples first.
 	<li> With this additional knowledge, create more sophisticated pages.
 	<li> If you need to secure your pages using a login screen, you'll want to look at the SecurePage, LoginPage, and SecureCountVisits examples in WebKit/Examples.  You'll need to modify them to suit your particular needs.
 	<li> Contribute enhancements and bug fixes back to the project. &nbsp; <kbd>:-)</kbd>
-	<li> Make sure you find out about new versions when they're released: Subscribe to the announcements list at <a href=http://lists.sourceforge.net/mailman/listinfo/webware-announce>http://lists.sourceforge.net/mailman/listinfo/webware-announce</a>.
+	<li> The Webware user community is quite supportive and friendly:
+		<br> <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>http://lists.sourceforge.net/mailman/listinfo/webware-discuss</a>
+	<li> Make sure you find out about new versions when they're released:
+		<br> <a href=http://lists.sourceforge.net/mailman/listinfo/webware-announce>http://lists.sourceforge.net/mailman/listinfo/webware-announce</a>
 
 </ol>
 
@@ -550,7 +534,7 @@ The SMTP server to use for sending e-mail error messages.
 
 <p> Authors: Chuck Esterbrook, Jay Love, Geoff Talvola
 
-<p> Several people, mostly on the webware-discuss mailing list, have provided feedback and testing.
+<p> Many people, mostly on the webware-discuss mailing list, have provided feedback and testing.
 
 <p> The design was inspired by both Apple's WebObjects and Java's Servlets.
 
