@@ -1,5 +1,5 @@
 from Common import *
-import whrandom
+from MiscUtils.Funcs import uniqueId
 from time import localtime, time
 
 
@@ -47,7 +47,7 @@ class Session(Object):
 
 		attempts = 0
 		while attempts<10000:
-			self._identifier = string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + str(whrandom.randint(10000, 99999))
+			self._identifier = string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + '-' + uniqueId(self)
 			if not trans.application().hasSession(self._identifier):
 				break
 			attempts = attempts + 1
