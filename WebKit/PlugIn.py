@@ -70,6 +70,30 @@ class PlugIn(Object):
 		if not os.path.exists(cacheDir):
 			os.mkdir(cacheDir)
 
+		self.setUpExamplePages()
+
+	def setUpExamplePages(self):
+		# Add a context for the examples
+		app = self._appServer.application()
+		if app.hasContext('Examples'):
+			config = self._properties.get('WebKitConfig', {})
+			self._examplePages = config.get('examplePages', None)
+			if self._examplePages is not None:
+				examplesPath = self.serverSidePath('Examples')
+				assert os.path.exists(examplesPath), 'Plug-in %s says it has example pages, but there is no Examples/ subdir.' % self._name
+				ctxName = self._name + 'Examples'
+				if not app.hasContext(ctxName):
+					app.addContext(ctxName, examplesPath)
+				self._examplePagesContext = ctxName
+
+	def hasExamplePages(self):
+		return self._examplePages is not None
+
+	def examplePagesContext(self):
+		return self._examplePagesContext
+
+	def examplePages(self):
+		return self._examplePages
 
 	def install(self):
 		''' Installs the plug-in by invoking it's required InstallInWebKit() function. '''
