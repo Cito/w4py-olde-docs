@@ -106,6 +106,9 @@ class Session(Object, CanContainer):
 	def setValue(self, name, value):
 		self._values[name] = value
 
+	def delValue(self, name):
+		del self._values[name]
+
 	def values(self):
 		return self._values
 
