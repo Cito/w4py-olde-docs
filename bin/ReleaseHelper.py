@@ -24,6 +24,8 @@ For more information, see the Release Procedures in the Webware docs.
 
 TO DO
 
+  - Check that Webware/_installed does NOT exist.
+
   - Using ProperitesObject, this program could suggest a version string
     from the Webware version.
 '''
@@ -67,7 +69,7 @@ class ReleaseHelper:
 
 			# Get rid of CVS files
 			self.run("find %s -name '.cvs*' -exec rm {} \;" % tempName)
-			self.run("find %s -name 'CVS' -exec rm -rf {} \;" % tempName)
+			self.run("rm -rf `find %s -name CVS -print`" % tempName)
 
 			self.chdir(tempName)
 			pkgName = 'Webware-%s.tar.gz' % ver
