@@ -115,8 +115,11 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		self.server=server
 		self.have_request = 0
 		self.have_response = 0
-		self.reqdata=[]
+		self.reqdata=''
+		self.request_data=[]
 		self._buffer = ''
+		self.haveheader=0
+		self.reqtype=''
 
 	def handleRequest(self):
 		#check for status message
@@ -162,6 +165,7 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 
 	def activate(self, sock, addr):
 		self.set_socket(sock)
+		self.clientf = sock.makefile("r+",0)
 		self._buffer=''
 		self.active = 1
 		self.client_address = addr
@@ -179,14 +183,56 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		pass
 
 	def handle_read(self):
-		data = self.recv(8192)
-		if len(data) == 8192:
-			self.reqdata.append(data)
+		if not self.haveheader:
+			data = string.strip(self.clientf.readline())
+			print "received: ", data
+			if data:
+				self.request_data.append(data+"\r\n")
+				return
+			print "have header"
+			self.haveheader = 1
+			self.reqtype = string.split(self.request_data[0])[0]
+			self.request_data.append("\r\n")
+			if string.lower(self.reqtype) == "get":
+				self.reqdata = string.join(self.request_data,"")
+				self.have_request = 1
+				print "have get request"
+				self.server.requestQueue.put(self)
+				self.shutdown(0)
+			elif string.lower(self.reqtype) == "post":
+				#find content length
+				for i in self.request_data:
+					if string.lower(string.split(i,":")[0]) =="content-length":
+						self.datalength = int(string.split(i)[1])
+						break
 		else:
-			self.reqdata.append(data)
-			self.reqdata = string.join(self.reqdata,'')
-			self.have_request=1
+			data = self.recv(self.datalength)
+			self.request_data.append(data)
+			self.datalength = self.datalength - len(data)
+			print "received: ", data
+			if self.datalength > 0:
+				return
+			self.reqdata = string.join(self.request_data,"")
+			print "have post request"
+			self.have_request = 1
 			self.server.requestQueue.put(self)
+
+			
+##		data = self.recv(8192)
+##		if data:			
+##			self.reqdata = self.reqdata + data
+##			marker = string.rfind(self.reqdata,"\r\n")
+##			if marker > 0:
+##				self.have_headers = 1
+##				methMark=string.find(self.reqdata, " ")
+##				method = self.reqdata[:methMark]
+##				if string.lower(method) == "get":
+##					self.have_request=1
+##				else:
+##					self.have_header = 1
+##		else:
+##				self.have_request=1
+##				self.server.requestQueue.put(self)
 
 	def handle_write(self):
 		if not self.have_response: return
@@ -204,7 +250,12 @@ class HTTPRequestHandler(asyncore.dispatcher, BaseHTTPRequestHandler):
 		self.active = 0
 		self.have_request = 0
 		self.have_response = 0
-		self.reqdata=[]
+		self.have_header = 0
+		self.reqtype=''
+		self.reqdata=''
+		self.request_data=[]
+		self.haveheader=0
+		self.datalength=0
 		asyncore.dispatcher.close(self)
 		self.server.rhQueue.put(self)
 
