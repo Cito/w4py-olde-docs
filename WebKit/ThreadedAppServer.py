@@ -347,8 +347,14 @@ class Monitor:
 
 
 		chunk = ''
-		while len(chunk) < int_length:
-			chunk = chunk + conn.recv(int_length)
+		missing = int_length
+		while missing > 0:
+			block = conn.recv(missing)
+			if not block:
+				conn.close()
+				raise NotEnoughDataError, 'received only %d out of %d bytes when receiving dict_length' % (len(chunk), int_length)
+			chunk = chunk + block
+			missing = int_length - len(chunk)
 		dict_length = loads(chunk)
 		if type(dict_length) != type(1):
 			conn.close()
@@ -358,20 +364,14 @@ class Monitor:
 		chunk = ''
 		missing = dict_length
 		while missing > 0:
-			chunk = chunk + conn.recv(missing)
+			block = conn.recv(missing)
+			if not block:
+				conn.close()
+				raise NotEnoughDataError, 'received only %d out of %d bytes when receiving dict' % (len(chunk), dict_length)
+			chunk = chunk + block
 			missing = dict_length - len(chunk)
 
 		dict = loads(chunk)
-
-##		data = []
-##		while 1:
-##			chunk = recv(BUFSIZE)
-##			if not chunk:
-##				break
-##			data.append(chunk)
-##		data = string.join(data, '')
-
-##		dict = loads(data)
 
 		if dict['format'] == "STATUS":
 			conn.send(str(self.server._reqCount))
@@ -446,8 +446,14 @@ class RequestHandler:
 		data = []
 
 		chunk = ''
-		while len(chunk) < int_length:
-			chunk = chunk + conn.recv(int_length)
+		missing = int_length
+		while missing > 0:
+			block = conn.recv(missing)
+			if not block:
+				conn.close()
+				raise NotEnoughDataError, 'received only %d out of %d bytes when receiving dict_length' % (len(chunk), int_length)
+			chunk = chunk + block
+			missing = int_length - len(chunk)
 		dict_length = loads(chunk)
 		if type(dict_length) != type(1):
 			conn.close()
@@ -458,21 +464,15 @@ class RequestHandler:
 		chunk = ''
 		missing = dict_length
 		while missing > 0:
-			chunk = chunk + conn.recv(missing)
+			block = conn.recv(missing)
+			if not block:
+				conn.close()
+				raise NotEnoughDataError, 'received only %d out of %d bytes when receiving dict' % (len(chunk), dict_length)
+			chunk = chunk + block
 			missing = dict_length - len(chunk)
 
 		dict = loads(chunk)
 		#if verbose: print "Comm Delay=%s" % (time.time() - dict['time'])
-
-##		while 1:
-##			chunk = conn.recv(BUFSIZE)
-##			if not chunk:
-##				break
-##			data.append(chunk)
-##		data = string.join(data, '')
-##		conn.shutdown(0)
-
-		dict['input'] = conn.makefile("rb",8012)
 
 		if dict:
 			if verbose:
@@ -481,6 +481,8 @@ class RequestHandler:
 				else:
 					requestURI = None
 				print requestURI
+			
+		dict['input'] = conn.makefile("rb",8012)
 
 		strmOut = TASASStreamOut(self.sock)
 		transaction = self.server._app.dispatchRawRequest(dict, strmOut)
@@ -532,6 +534,9 @@ class RequestHandler:
 				currApp=None
 			ReStartLock.release()
 
+# This will be thrown when less data arrived on the socket than we were expecting.
+class NotEnoughDataError(Exception):
+	pass
 
 
 def run(useMonitor = 0, workDir=None):
