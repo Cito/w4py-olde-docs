@@ -121,10 +121,10 @@ class Model:
 					attrs = [klass.lookupAttr(name) for name in names]
 				except KeyError:
 					print '>> KeyError'
-					print '>> name:', name
-					print '>> fields:', fields
-					print '>> names:', names
-					print '>> klass:', klass
+					print '>> name: ', name
+					print '>> names:', ', '.join(names)
+					print '>> klass:', klass.name(), '-', klass
+					print '>> attrs:', ', '.join([attr.name() for attr in klass.allAttrs()])
 					raise
 				# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
 				colNames = [attr.sqlName() for attr in attrs]
