@@ -292,7 +292,6 @@ class MiddleObjectMixIn:
 		'''
 		Returns the SQL insert statements for MySQL (as a tuple) in the form:
 			insert into table (name, ...) values (value, ...);
-			select last_insert_id()
 		'''
 		klass = self.klass()
 		res = ['insert into %s (' % klass.name()]
