@@ -54,7 +54,8 @@ Version 0.2
 <a name=ToC><h2>Table of Contents</h2></a>
 
 <p><span class=ToC>
-     <a href="#CreateObjModel"><font size=+1>Create an object model</font></a>
+     <a href="#WhatYouNeed"><font size=+1>What you need</font></a>
+<br> <a href="#CreateObjModel"><font size=+1>Create an object model</font></a>
 <br> <a href="#GenCode"><font size=+1>Generate code</font></a>
 <br> <a href="#CreateData"><font size=+1>Create sample data</font></a>
 <br> <a href="#CreateDB"><font size=+1>Create the database</font></a>
@@ -68,6 +69,17 @@ Version 0.2
 <br> <a href="#UseMKBrowser"><font size=+1>Use the MKBrowser</font></a>
 <br> <a href="#Next"><font size=+1>What's Next?</font></a>
 </span>
+
+
+<a name=WhatYouNeed><h2>What you need</h2></a>
+
+<p> To perform the steps in this Quick Start you need:
+
+<ul>
+	<li> Python 2.0 or greater, found at <a href=http://www.python.org/>python.org</a>
+	<li> mx.DateTime as found in <a href=http://www.lemburg.com/files/python/eGenix-mx-Extensions.html#Download-mxBASE>egenix-mx-base</a>
+	<li> and MiddleKit, of course.
+</ul>
 
 
 <a name=CreateObjModel><h2>Create an object model</h2></a>
@@ -293,13 +305,14 @@ mysql &lt; GeneratedSQL\InsertSamples.sql
 <p> We'll first create an object store, which (largely) hides you from the database while allowing you to work in a fully object-oriented, Python-centric frame of mind. Put this <span class=filename>main.py</span> file in the <span class=filename>Command/</span> directory:
 
 <pre class=py>
+# Gain access to the Middle package
+import os, sys
+sys.path.insert(1, os.path.abspath(os.pardir))
+
+from mx.DateTime import DateFrom
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
 
 def main():
-    # Gain access to our package
-    import os, sys
-    sys.path.insert(1, os.path.abspath(os.pardir))
-
     # Set up the store
     store = MySQLObjectStore(user='user', passwd='password')
     store.readModelFileNamed('../Middle/Videos')
@@ -325,17 +338,18 @@ if __name__=='__main__':
 
 <p> Now create a new object. Augment <span class=name>main()</span> with this:
 <pre class=py>
+# Gain access to the Middle package
+import os, sys
+sys.path.insert(1, os.path.abspath(os.pardir))
+
+from mx.DateTime import DateFrom
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
 <b>from Middle.Movie import Movie</b>
 
 def main():
-    # Gain access to our package
-    import os, sys
-    sys.path.insert(1, os.path.abspath(os.pardir))
-
     # Set up the store
     store = MySQLObjectStore(user='user', passwd='password')
-    store.readModelFileNamed('Videos')
+    store.readModelFileNamed('../Middle/Videos')
 
 <b>    movie = Movie()
     movie.setTitle('The Terminator')
@@ -352,7 +366,14 @@ if __name__=='__main__':
 
 <a name=CreateMoreObjs><h2>Create more objects</h2></a>
 
-<p> Let's add more objects to our store. In between readModelFileNamed() and saveChanges(), add these:
+<p> Let's add more objects to our store. Add these imports after the import of Movie:
+
+<pre class=py>from Middle.Person import Person
+from Middle.Role import Role
+</pre>
+
+
+<p> In between readModelFileNamed() and saveChanges(), add these:
 
 <pre class=py>    movie = Movie()
     movie.setTitle('The Terminator')
