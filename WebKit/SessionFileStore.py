@@ -74,8 +74,15 @@ class SessionFileStore(SessionStore):
 		self._lock.acquire()
 		try:
 			file = open(filename, 'w')
-			self.encoder()(item, file)
-			file.close()
+			try:
+				self.encoder()(item, file)
+			except: # error pickling the session.
+				print "Error saving session to disk:",key
+				file.close()
+				os.remove(filename) # remove file because it is corrupt.
+				self.application().handleException()
+			else:
+				file.close()
 		finally:
 			self._lock.release()
 

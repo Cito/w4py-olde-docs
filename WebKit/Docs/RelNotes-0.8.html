@@ -116,6 +116,7 @@ Version 0.8
 	
 	<li> The singleton <span class=name>Tombstone</span> has been deprecated in favor of <span class=name>MiscUtils.NoDefault</span>.
 
+	<li> Added general purpose Application.handleException() which does not take a transaction.  Note that if you provide an exception handler, it must work when transaction=None.
 </ul>
 
 
@@ -141,9 +142,12 @@ We don't track every change to the interface, but here are some notables:
 
 <ul>
 
+
 	<li> Fixed a race condition that caused problems when multiple simultaneous requests were made for a servlet that hadn't yet been imported.
 	
 	<li> Fixed another rare problem that could eventually cause a servlet to hang until another request for that servlet came in.  Like the above problem, it is provoked by multiple simultaneous requests for the same servlet, but only if it happens hundreds or thousands of times.
+	<li> Fixed SesssionFileStore to fail safely and call the applications exception handler on a pickling error.
+
 
 </ul>
 

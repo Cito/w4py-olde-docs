@@ -17,7 +17,8 @@ class ExceptionHandler(Object):
 	After handling an exception, it should be removed.
 
 	At some point, the exception handler sends "writeExceptionReport"
-	to the transaction, which in turn sends it to the other transactional objects (application, request, response, etc.)
+	to the transaction (if present), which in turn sends it to the other
+	transactional objects (application, request, response, etc.)
 	The handler is the single argument for this message.
 
 	Classes may find it useful to do things like this:
@@ -34,6 +35,10 @@ class ExceptionHandler(Object):
 		def writeDict(self, d):
 		def writeTable(self, listOfDicts, keys=None):
 		def writeAttrs(self, obj, attrNames):
+
+	Derived classes must not assume that the error occured in a
+	transaction.  self._tra may be None for exceptions outside
+	of transactions.
 
 	See the WebKit.html documentation for other information.
 
@@ -82,12 +87,18 @@ class ExceptionHandler(Object):
 
 		# Make some repairs, if needed. We use the transaction & response to get the error page back out
 		# @@ 2000-05-09 ce: Maybe a fresh transaction and response should always be made for that purpose
-		if self._res is None:
-			self._res = HTTPResponse()
-			self._tra.setResponse(self._res)
+		## @@ 2003-01-10 sd: This requires a transaction which we do not have.
+		## Making remaining code safe for no transaction.
+		##
+                ##if self._res is None:
+		##	self._res = HTTPResponse()
+		##	self._tra.setResponse(self._res)
 
 		# Cache MaxValueLengthInExceptionReport for speed
 		self._maxValueLength = self.setting('MaxValueLengthInExceptionReport')
+
+		# exception occurance time. (overridden by response.endTime())
+		self._time = time.time()
 
 		# Get to work
 		self.work()
@@ -102,6 +113,7 @@ class ExceptionHandler(Object):
 		try:
 			return self._tra.request().serverSidePath()
 		except:
+			
 			return None
 
 	def basicServletName(self):
@@ -117,10 +129,14 @@ class ExceptionHandler(Object):
 	def work(self):
 		''' Invoked by __init__ to do the main work. '''
 
-		self._res.recordEndTime()
+		if self._res:
+			self._res.recordEndTime()
+			self._time = self._res.endTime()
+			
 		self.logExceptionToConsole()
 
-		if not self._res.isCommitted() or self._res.header('Content-type', None)=='text/html':
+		# write the error page out to the response if available.
+		if self._res and (not self._res.isCommitted() or self._res.header('Content-type', None)=='text/html'):
 			if not self._res.isCommitted():
 				self._res.reset()
 			if self.setting('ShowDebugInfoOnErrors')==1:
@@ -148,7 +164,7 @@ class ExceptionHandler(Object):
 		if stderr is None:
 			stderr = sys.stderr
 		stderr.write('[%s] [error] WebKit: Error while executing script %s\n' % (
-			asctime(localtime(self._res.endTime())), self.servletPathname()))
+			asctime(localtime(self._time)), self.servletPathname()))
 		traceback.print_exc(file=stderr)
 
 	def publicErrorPage(self):
@@ -286,7 +302,7 @@ class ExceptionHandler(Object):
 	def writeMiscInfo(self):
 		self.writeTitle('MiscInfo')
 		info = {
-			'time':          asctime(localtime(self._res.endTime())),
+			'time':          asctime(localtime(self._time)),
 			'filename':      self.servletPathname(),
 			'os.getcwd()':   os.getcwd(),
 			'sys.path':      sys.path
@@ -294,7 +310,11 @@ class ExceptionHandler(Object):
 		self.writeDict(info)
 
 	def writeTransaction(self):
-		self._tra.writeExceptionReport(self)
+		if self._tra:
+			self._tra.writeExceptionReport(self)
+		else:
+			self.writeTitle("No current Transaction")
+			
 
 	def writeEnvironment(self):
 		self.writeTitle('Environment')
@@ -325,14 +345,14 @@ class ExceptionHandler(Object):
 		''' Construct a filename for an HTML error page, not including the 'ErrorMessagesDir' setting. '''
 		return 'Error-%s-%s-%d.html' % (
 			self.basicServletName(),
-			string.join(map(lambda x: '%02d' % x, localtime(self._res.endTime())[:6]), '-'),
+			string.join(map(lambda x: '%02d' % x, localtime(self._time)[:6]), '-'),
 			whrandom.whrandom().randint(10000, 99999))
 			# @@ 2000-04-21 ce: Using the timestamp & a random number is a poor technique for filename uniqueness, but this works for now
 
 	def logExceptionToDisk(self, errorMsgFilename=''):
 		''' Writes a tuple containing (date-time, filename, pathname, exception-name, exception-data,error report filename) to the errors file (typically 'Errors.csv') in CSV format. Invoked by handleException(). '''
 		logline = (
-			asctime(localtime(self._res.endTime())),
+			asctime(localtime(self._time)),
 			self.basicServletName(),
 			self.servletPathname(),
 			str(self._exc[0]),
@@ -383,7 +403,7 @@ class ExceptionHandler(Object):
 				'WebKit caught an exception while processing ' +
 				'a request for "%s" ' % self.servletPathname() +
 				'at %s (timestamp: %s).  ' %
-				(asctime(localtime(self._res.endTime())), self._res.endTime()) +
+				(asctime(localtime(self._time)), self._time) +
 				'The plain text traceback from Python is printed below and ' +
 				'the full HTML error report from WebKit is attached.\n\n'
 				)

@@ -1050,6 +1050,19 @@ class Application(ConfigurableForServerSidePath, Object):
 			self._exceptionHandlerClass = ExceptionHandler
 		self._exceptionHandlerClass(self, transaction, excInfo)
 
+	def handleException(self, excInfo=None):
+		"""Handle the exception by calling the configured ExceptinHandler.
+		Note that the exception handler must be capable of taking
+		a transaction of None for exceptions that occur outside of
+		a transaction.
+		"""
+		if excInfo is None:
+			excInfo = sys.exc_info()
+		if self._exceptionHandlerClass is None:
+			from ExceptionHandler import ExceptionHandler  # import ExceptionHandler only when we need to
+			self._exceptionHandlerClass = ExceptionHandler
+		self._exceptionHandlerClass(self, None, excInfo)
+
 	def filenamesForBaseName(self, baseName):
 
 		"""Returns a list of all filenames with extensions existing for
