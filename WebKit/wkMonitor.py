@@ -27,7 +27,7 @@ On Win, we have to start the process through a command line like syntax.
 """
 
 #These need to be filled in correctly on Windows
-pythonexec = "C:\progra~1\python\python"
+#pythonexec = "C:\progra~1\python\python"  #I think i got around this
 appserver = "ThreadedAppServer.py"
 
 
@@ -46,15 +46,17 @@ import string
 #Windows Specific Section
 if os.name == 'nt':
 	import win32process
+	import win32api
 	appcwd = os.getcwd()
 	appserver = os.path.join(appcwd,appserver)
+	pythonexec = string.split(win32api.GetCommandLine())[0]
 else:
 	appserverclass = AsyncThreadedAppServer
 
 
 
 ##DEBUG
-##appserverclass =  ThreadedAppServer
+appserverclass =  ThreadedAppServer
 
 srvpid = 0
 checkInterval = 10  #add to config if this implementation is adopted, seconds between checks
@@ -153,7 +155,10 @@ def checkServer(restart = 1):
 def main():
 	global debug
 	file = open("monitorpid.txt","w")
-	file.write(str(os.getpid()))
+	if os.name == 'posix':
+		file.write(str(os.getpid()))
+	else:
+		file.write(str(win32api.GetCurrentProcess()))
 	file.flush()
 	file.close()
 	startServer(0)

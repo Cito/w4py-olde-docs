@@ -18,6 +18,7 @@ pid = int(open("monitorpid.txt","r").read())
 if os.name == "posix":
 	os.kill(pid,signal.SIGINT)
 else:
-	win32process.TerminateProcess(srvpid,0)
+	##this isn't working
+	win32process.TerminateProcess(pid,0)
 
 

@@ -342,4 +342,13 @@ def main(monitor = 0):
 
 
 if __name__=='__main__':
-	main()
+	import sys
+	if len(sys.argv) > 1 and sys.argv[1] == "-monitor":
+		print "Using Monitor"
+		main(1)
+	else:
+		if 0:
+			import profile
+			profile.run("main()","profile.txt")
+		else:
+			main(0)
