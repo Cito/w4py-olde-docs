@@ -157,6 +157,7 @@ ObjectType = "<type 'Object'>"
 _types = {
 	'string':	StringType,
 	'int':		IntType,
+	'long':		LongType,
 	'float':	FloatType,
 	'datetime':	DateTimeType,
 	'object':	ObjectType,
@@ -228,6 +229,11 @@ class TableColumn:
 				value = 0
 			else:
 				value = int(rawValue)
+		elif self._type is LongType:
+			if rawValue=='':
+				value = 0
+			else:
+				value = long(rawValue)
 		elif self._type is FloatType:
 			if rawValue=='':
 				value = 0.0
