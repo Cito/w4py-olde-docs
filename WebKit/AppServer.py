@@ -149,6 +149,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		Save the pid of the AppServer to a file
 		"""
 		if self.setting('PidFile') is None:
+			self._pidFile = None
 			return
 			
 		pidpath = self.serverSidePath(self.setting('PidFile'))
@@ -171,7 +172,8 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self._app.shutDown()
 		del self._plugIns
 		del self._app
-		self._pidFile.remove()  # remove the pid file
+		if self._pidFile:
+			self._pidFile.remove()  # remove the pid file
 		if Profiler.profiler:
 			print 'Writing profile stats to %s...' % Profiler.statsFilename
 			Profiler.dumpStats()  # you might also considering having a page/servlet that lets you dump the stats on demand
