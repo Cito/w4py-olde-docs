@@ -181,7 +181,15 @@ class ExceptionHandler(Object):
 		else:
 			f = open(filename, 'w')
 			f.write('time,filename,pathname,exception name,exception data,error report filename\n')
-		logline = map(lambda element: str(element), logline)
+			
+		def fixElement(element):
+			element = str(element)
+			if string.find(element, ',') or string.find(element, '"'):
+				element = string.replace(str(element), '"', '""')
+				element = '"' + element + '"'
+			return element
+		logline = map(fixElement, logline)
+		
 		f.write(string.join(logline, ','))
 		f.write('\n')
 		f.close()

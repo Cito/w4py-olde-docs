@@ -331,6 +331,7 @@ class DataTable:
 								inside = 0
 							else:
 								inside = 1
+							newLine.append(c)
 						elif c==delimiter:
 							if inside:
 								newLine.append('\0')
@@ -351,7 +352,12 @@ class DataTable:
 					values = map(strip, values)
 
 				if fixLine:
-					values = map(lambda v, d=delimiter: replace(v, '\0', d), values)
+					def fixValue(value, delimiter=delimiter):
+						value = replace(value, '\0', delimiter)
+						if value[:1] == value[-1:] == '"':
+							value = replace(value[1:-1], '""', '"')
+						return value
+					values = map(fixValue, values)
 
 				if haveReadHeadings:
 					# Create a record using the headings and the current values
