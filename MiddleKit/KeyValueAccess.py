@@ -1,6 +1,11 @@
 from types import *
 import string, sys
+from time import time
 
+
+# if technique is zero, use bound methods in the _kvGetBindings cache, otherwise use unbound
+# @@ 2000-05-31 ce: after additional testing we can probably scorge the technique=0 allowance
+technique = 1
 
 class KeyValueAccess:
 	'''	This class is intended to be ancestor class such that you can say:
@@ -11,35 +16,39 @@ class KeyValueAccess:
 		This can be useful in setups where you wish to textually refer to the objects
 		in a program, such as an HTML template processed in the context of an
 		object-oriented framework.
-		
+
 		Keys can be matched to either methods or ivars and with or without underscores.
-		
+
 		valueForName() can also traverse bona fide dictionaries (DictType).
-		
-		You can safely import * from this module. Only the KeyValueAccess class is exported.
-		
+
+		You can safely import * from this module. Only the KeyValueAccess class is exported
+		(other than typical things like string and sys).
+
 		There is no __init__() method and never will be.
-		
+
 		You can run the test suite by running this module as a program.
-		
+
 		You'll see the terms 'key' and 'name' in the class and its documentation. A 'key'
 		is a single identifier such as 'foo'. A name could be key, or a qualified key,
 		such as 'foo.bar.boo'. Names are generally more convenient and powerful, while
 		key-oriented methods are more efficient and provide the atomic functionality that
-		name-oriented methods are built upon.
+		name-oriented methods are built upon. From a usage point of view, you normally
+		just use the 'name' methods and forget about the 'key'.
 
 		@@ 2000-05-21 ce: This class causes problems when used in WebKit for logging.
 			Perhaps circular references?
 			Involving self?
 			Having to do with methods bound to their objects?
-		
+
 		@@ 2000-03-03 ce: document ivars
-		
+
 		@@ 2000-04-24 ce: Some classes like UserDict need to use getitem()
 		instead of getattr() and don't need to deal with _bindingForGetKey().
 
+		@@ 2000-05-31 ce: Rename this class to NamedValues, NamedValueAccess, ValuesByName
+
 		@@ This class probably needs to be in MiscUtils, as it's being used in that way
-		   while MiddleKit was intended for "enterprise/business objects".		
+		   while MiddleKit was intended for "enterprise/business objects".
 	'''
 
 	#
@@ -56,22 +65,22 @@ class KeyValueAccess:
 		''' Suppose key is 'foo'. This method returns the value with the following precedence:
 				1. Methods before non-methods
 				2. Public attributes before private attributes
-			
+
 			More specifically, this method then returns one of the following:
 				* self.foo()
 				* self._foo()
 				* self.foo
 				* self._foo
-			
+
 			...or default, if it is not None,
 			otherwise invokes and returns result of handleUnknownGetKey().
-			
+
 			See valueForName() which is a more advanced version of this method that allows
 			multiple, qualified keys.
 		'''
 
 		binding = self._bindingForGetKey(key)
-		
+
 		if not binding:
 			if default is None:
 				return self.handleUnknownGetKey(key)
@@ -81,7 +90,10 @@ class KeyValueAccess:
 		if type(binding) is MethodType:
 # @@ 2000-05-07 ce: come to a decision on exception handling for key errors
 #			try:
-			result = binding()
+			if technique:
+				result = binding(self)
+			else:
+				result = binding()
 #			except:
 				# @@ 2000-02-18: Improve next line with exception info
 #				raise 'KeyValueAccess', 'Caught exception while accessing key (%s). Exception is %s' % (key, sys.exc_info())
@@ -132,7 +144,7 @@ class KeyValueAccess:
 		if len(keys) is 0:
 			return []
 		results = []
-		
+
 		if default is not None:
 			results = map(lambda key, myself=self, mydefault=default: myself.valueForName(key, mydefault), keys)
 		elif defaults is not None:
@@ -159,7 +171,7 @@ class KeyValueAccess:
 		''' Suppose key is 'foo'. This method sets the value with the following precedence:
 				1. Public attributes before private attributes
 				2. Methods before non-methods
-			
+
 			More specifically, this method then uses one of the following:
 				@@ 2000-03-04 ce: fill in
 
@@ -172,7 +184,7 @@ class KeyValueAccess:
 		if hasattr(self, '_kvGetBindings'):
 			self._kvGetBindings = {}
 
-		
+
 	#
 	# Errors
 	#
@@ -202,13 +214,15 @@ class KeyValueAccess:
 		# No binding, so we have to look for the key
 
 		found = None  # set to what we find
-		
+
 		# Try plain old key
 		if hasattr(self, key):
 			found = getattr(self, key)
 			#print '0: found = ', found, type(found)
 			if type(found) is not MethodType:
 				found = key
+			elif technique:
+				found = getattr(self.__class__, key)
 			self._kvGetBindings[key] = found
 		#print '1: found = ', found, type(found)
 
@@ -219,12 +233,17 @@ class KeyValueAccess:
 				underAttr = getattr(self, underKey)
 				if found==None:
 					if type(underAttr) is MethodType:
-						value = underAttr
+						if technique:
+							value = getattr(self.__class__, underKey)
+						else:
+							value = underAttr
 					else:
 						value = underKey
 					found = self._kvGetBindings[key] = value
 				else:
 					if type(underAttr) is MethodType:
+						if technique:
+							underAttr = getattr(self.__class__, underKey)
 						found = self._kvGetBindings[key] = underAttr
 
 		#print '2: found = ', found, type(found)
@@ -303,7 +322,7 @@ def _testHeader(header):
 	print header
 	print '-' * len(header)
 
-def _test():
+def _testUse():
 	# @@ 2000-03-03 ce: Instead of having to scan the output, these tests should all raise exceptions if they fail (e.g., use assert)
 	# @@ 2000-03-03 ce: Still need to test that exceptions are thrown as appropriate
 	print 'Begin Testing', __name__
@@ -352,17 +371,17 @@ def _test():
 	assert obj.valueForName('dict.notThere', 1)==1
 	obj.dict['obj'] = _t1()
 	assert obj.valueForName('dict.obj.notThere', 1)==1
-	
-	
+
+
 	_testHeader('valuesForNames(self, keys, default=None, defaults=None, forgive=0)')
-	
+
 	# set up structure: rect(attrs(origin(x, y), size(width, height)))
 	rect = _t1()
 	origin = _t1();  origin.x = 5;  origin.y = 6
 	size = _t1();  size.width = 43;  size.height = 87;
 	attrs = {'origin': origin, 'size': size}
 	rect.attrs = attrs
-	
+
 	# test integrity of structure and validity of valueForName()
 	assert rect.valueForName('attrs') is attrs
 	assert rect.valueForName('attrs.origin') is origin
@@ -374,10 +393,40 @@ def _test():
 	assert rect.valuesForNames(['attrs.dontFind', 'attrs', 'attrs.origin.dontFind'], default=notFound) == [notFound, attrs, notFound]
 	assert rect.valuesForNames(['attrs.dontFind', 'attrs', 'attrs.origin.dontFind'], defaults=[1, 2, 3]) == [1, attrs, 3]
 	assert rect.valuesForNames(['attrs.dontFind', 'attrs', 'attrs.origin.dontFind'], forgive=1) == [attrs]
-	
+
 	print 'End Testing', __name__
 
 
+def _testLeaks():
+	# As of 2000-05-30 we have a leak: The cached key-value bindings using bound method objects which refer to self, thereby creating a cyclic reference.
+	if len(sys.argv)>2:
+		count = int(sys.argv[2])
+	else:
+		usage()
+	start = time()
+	for i in xrange(count):
+		t = _t1()
+		t.valueForKey('foo')
+		#print t._kvGetBindings
+	print '%0.2f secs' % (time()-start)
+
+
+def usage():
+	sys.stdout = sys.stderr
+	print "KeyValueAccess.py can be used as a program to invoke it's test suite."
+	print 'usage:'
+	print '  KeyValueAccess.py use'
+	print '  KeyValueAccess.py leaks <iterations>'
+	print
+	sys.exit(1)
+
 
 if __name__=='__main__':
-	_test()
+	if len(sys.argv)<2:
+		usage()
+	elif sys.argv[1]=='use':
+		_testUse()
+	elif sys.argv[1]=='leaks':
+		_testLeaks()
+	else:
+		usage()
