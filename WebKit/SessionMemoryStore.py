@@ -13,10 +13,10 @@ class SessionMemoryStore(SessionStore):
 
 	## Init ##
 
-	def __init__(self, app):
+	def __init__(self, app, restoreFiles=1):
 		SessionStore.__init__(self, app)
 		self._store = {}
-		if self._app.server().isPersistent():
+		if self._app.server().isPersistent() and restoreFiles == 1:
 			filestore = SessionFileStore(app)
 			keys = filestore.keys()
 			for i in keys:

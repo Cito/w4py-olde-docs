@@ -28,7 +28,7 @@ class SessionDynamicStore(SessionStore):
 	def __init__(self, app):
 		SessionStore.__init__(self, app)
 		self._fileStore = SessionFileStore.SessionFileStore(app)
-		self._memoryStore = SessionMemoryStore.SessionMemoryStore(app)
+		self._memoryStore = SessionMemoryStore.SessionMemoryStore(app, restoreFiles=0)
 		self._memoryStore.clear()  #fileStore will have the files on disk
 
 		#moveToFileInterval specifies after what period of time a session is automatically moved to file
