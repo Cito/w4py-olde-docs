@@ -151,7 +151,7 @@ class MiddleObject(NamedValueAccess):
 		"""
 		Returns a list of tuples of (object, attr) for all objects that have
 		ObjRefAttrs that reference this object.
-		
+
 		@@ gat: This is implemented correctly, but inefficiently.  It does a full
 		query of all tables in the model.  I don't understand the caching
 		ramifications well enough to know if I can safely use a WHERE clause to
@@ -275,9 +275,13 @@ class MiddleObject(NamedValueAccess):
 		If the attribute is not found, the default argument is returned
 		if specified, otherwise LookupError is raised with the attrName.
 		'''
-		attr = self.klass().lookupAttr(attrName)
-		pyGetName = attr.pyGetName()
-		method = getattr(self, pyGetName, None)
+		try:
+			attr = self.klass().lookupAttr(attrName)
+		except KeyError:
+			method = None
+		else:
+			pyGetName = attr.pyGetName()
+			method = getattr(self, pyGetName, None)
 		if method is None:
 			if default is NoDefault:
 				raise LookupError, attrName
@@ -300,9 +304,13 @@ class MiddleObject(NamedValueAccess):
 		If the required set method is not found, a NameError is raised
 		with the attrName.
 		'''
-		attr = self.klass().lookupAttr(attrName)
-		pySetName = attr.pySetName()
-		method = getattr(self, pySetName, None)
+		try:
+			attr = self.klass().lookupAttr(attrName)
+		except KeyError:
+			method = None
+		else:
+			pySetName = attr.pySetName()
+			method = getattr(self, pySetName, None)
 		if method is None:
 			raise NameError, attrName
 		return method(value)
