@@ -63,6 +63,13 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 	     also accepts options to add multiple application library
 	     dirs to the Python path.
 
+	<li> Added 'EnterDebuggerOnException' option to Application.config.
+		 If true, and if the AppServer is running from an interactive 
+		 terminal, an uncaught exception will cause the AppServer to 
+		 enter the debugger, allowing the developer to call functions, 
+		 investigate variables, etc.  See python debugger (pdb) docs 
+		 for more information.  You will certainly want to turn this off 
+		 when deploying the site.  Defaults to 0 (off).
 
 </ul>
 

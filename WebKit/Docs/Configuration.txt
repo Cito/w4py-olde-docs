@@ -224,6 +224,13 @@ Errors
 
     .. _`original version`: http://web.lfw.org/python/
 
+``EnterDebuggerOnException``:
+    If true, and if the AppServer is running from an interactive
+    terminal, an uncaught exception will cause the AppServer to
+    enter the debugger, allowing the developer to call functions,
+    investigate variables, etc.  See python debugger (pdb) docs for
+    more information.  You will certainly want to turn this off when
+    deploying the site.  Default ``0`` (off).
 ``FancyTracebackContext``:
     The number of lines of source code context to show if
     IncludeFancyTraceback is turned on.  Default: ``5``.

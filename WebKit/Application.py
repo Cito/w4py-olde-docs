@@ -221,6 +221,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			'Debug':	{
 				'Sessions': 0,
 			},
+			'EnterDebuggerOnException': 0,
 			'OldStyleActions': 0,
 		}
 
@@ -437,6 +438,10 @@ class Application(ConfigurableForServerSidePath, Object):
 		except:
 			if trans:
 				trans.setErrorOccurred(1)
+			if self.setting('EnterDebuggerOnException') and sys.stdin.isatty():
+				import pdb
+				pdb.post_mortem(sys.exc_info()[2])
+
 			self.handleExceptionInTransaction(sys.exc_info(), trans)
 			trans.response().deliver()
 			

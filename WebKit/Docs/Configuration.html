@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.2.8: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.3.1: http://docutils.sourceforge.net/" />
 <title>Configuration Guide</title>
 <link rel="stylesheet" href="default.css" type="text/css" />
 </head>
@@ -241,6 +241,13 @@ the traceback.  This makes use of a modified version of
 <tt class="literal"><span class="pre">cgitb.py</span></tt> which is included with Webware.  The <a class="reference" href="http://web.lfw.org/python/">original
 version</a> was written by Ka-Ping Yee.  Default <tt class="literal"><span class="pre">0</span></tt> (off).</p>
 </dd>
+<dt><tt class="literal"><span class="pre">EnterDebuggerOnException</span></tt>:</dt>
+<dd>If true, and if the AppServer is running from an interactive
+terminal, an uncaught exception will cause the AppServer to
+enter the debugger, allowing the developer to call functions,
+investigate variables, etc.  See python debugger (pdb) docs for
+more information.  You will certainly want to turn this off when
+deploying the site.  Default <tt class="literal"><span class="pre">0</span></tt> (off).</dd>
 <dt><tt class="literal"><span class="pre">FancyTracebackContext</span></tt>:</dt>
 <dd>The number of lines of source code context to show if
 IncludeFancyTraceback is turned on.  Default: <tt class="literal"><span class="pre">5</span></tt>.</dd>
