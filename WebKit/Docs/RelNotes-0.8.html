@@ -108,6 +108,12 @@ Version 0.8
 
 	<li> Fixed handling of POST'ed variables in the LoginPage.py example servlet.  (Thanks to Steve Freitas for the fix.)
 
+	<li> Any Python module can now get a reference to the app server singleton via:
+	
+<pre class=py>from WebKit.AppServer import globalAppServer</pre>
+
+	<li> <a href=Source/Files/UnknownFileTypeServlet.py.html>UnknownFileTypeServlet</a> can now be usefully subclassed to serve files from arbitrary parts of the file system. See its doc string for an example.
+	
 	<li> The singleton <span class=name>Tombstone</span> has been deprecated in favor of <span class=name>MiscUtils.NoDefault</span>.
 
 </ul>
