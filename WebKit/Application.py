@@ -282,7 +282,6 @@ class Application(Configurable,CanContainer):
 
 		try:
 			ssPath = request.serverSidePath()
-
 			if ssPath is None:
 				self.handleBadURL(transaction)
 			elif isdir(ssPath) and noslash(request.pathInfo()): # (*) see below
@@ -657,10 +656,15 @@ class Application(Configurable,CanContainer):
 		cache = self._servletCacheByPath.get(path, None)
 		if cache and cache['reuseable'] and not cache['threadsafe']:
 			try:
-				cache['instances'].put(transaction.servlet())
-				#cache['instances'].put_nowait(transaction.servlet())
-				#print "returned Instance"
-				return
+				srv = transaction.servlet()
+				if srv:
+					cache['instances'].put(transaction.servlet())
+					#cache['instances'].put_nowait(transaction.servlet())
+					#print "returned Instance"
+					return
+				else:
+					#error in executing servlet, drop it?
+					cache['created'] = cache['created']-1
 			except Queue.Full: #full or blocked
 				pass
 				print '>> queue full for:',cache['path'] #do nothing, don't want to block queue for this
@@ -786,6 +790,8 @@ class Application(Configurable,CanContainer):
 
 		if debug:
 			print '>> serverSidePathForRequest(request=%s)' % repr(request)
+			import pprint
+			pprint.pprint(request._rawRequest)
 
 		urlPath = request.urlPath()
 		if debug: print '>> urlPath =', repr(urlPath)
@@ -821,7 +827,13 @@ class Application(Configurable,CanContainer):
 
 		# case: no URL then use the default context
 		if urlPath=='' or urlPath=='/':
+			fspath = request.fsPath()
+			if debug:
+				print "fsPath: %s"%fspath
+			if os.path.exists(fspath):
+				return fspath
 			ssPath = self._contexts['default']
+			if urlPath=='': urlPath='/'
 			if debug:
 				print '>> no urlPath, so using default context path: %s' % repr(ssPath)
 		else:
