@@ -48,7 +48,15 @@ class ExceptionHandler(Object):
 
 	def servletPathname(self):
 		return self._tra.request().pathTranslated()
-		# 2000-05-01 ce: What should this be?
+		# @@ 2000-05-01 ce: What should this be?
+		# @@ 2000-06-28 ce: probaby servletURL()
+
+	def basicServletName(self):
+		name = self.servletPathname()
+		if name is None:
+			return 'unknown'
+		else:
+			return os.path.basename(name)
 
 
 	## Exception handling ##
@@ -145,7 +153,7 @@ class ExceptionHandler(Object):
 	def errorPageFilename(self):
 		''' Construct a filename for an HTML error page, not including the 'ErrorMessagesDir' setting. '''
 		return 'Error-%s-%s-%d.html' % (
-			os.path.split(self.servletPathname())[1],
+			self.basicServletName(),
 			string.join(map(lambda x: '%02d' % x, localtime(self._res.endTime())[:6]), '-'),
 			whrandom.whrandom().randint(10000, 99999))
 			# @@ 2000-04-21 ce: Using the timestamp & a random number is a poor technique for filename uniqueness, but this works for now
@@ -154,7 +162,7 @@ class ExceptionHandler(Object):
 		''' Writes a tuple containing (date-time, filename, pathname, exception-name, exception-data,error report filename) to the errors file (typically 'Errors.csv') in CSV format. Invoked by handleException(). '''
 		logline = (
 			asctime(localtime(self._res.endTime())),
-			os.path.split(self.servletPathname())[1],
+			self.basicServletName(),
 			self.servletPathname(),
 			str(self._exc[0]),
 			str(self._exc[1]),
@@ -165,6 +173,7 @@ class ExceptionHandler(Object):
 		else:
 			f = open(filename, 'w')
 			f.write('time,filename,pathname,exception name,exception data,error report filename\n')
+		logline = map(lambda element: str(element), logline)
 		f.write(string.join(logline, ','))
 		f.write('\n')
 		f.close()
