@@ -7,7 +7,7 @@ class Transaction(Object):
 	'''
 
 	## Init ##
-	
+
 	def __init__(self, application, request=None):
 		Object.__init__(self)
 		self._application   = application
@@ -16,27 +16,32 @@ class Transaction(Object):
 		self._session       = None
 		self._servlet       = None
 		self._errorOccurred = 0
-	
+
 
 	## Access ##
-	
+
 	def application(self):
 		return self._application
 
 	def request(self):
 		return self._request
-	
+
 	def response(self):
 		return self._response
-		
+
 	def setResponse(self, response):
 		self._response = response
 
+	def hasSession(self):
+		''' Returns true if the transaction has a session. '''
+		return self._session is not None
+
 	def session(self):
+		''' Returns the session for the transaction, creating one if necessary. Therefore, this method never returns None. Use hasSession() if you want to find out if there one already exists. '''
 		if not self._session:
 			self._session = self._application.createSessionForTransaction(self)
 		return self._session
-	
+
 	def setSession(self, session):
 		self._session = session
 
@@ -60,9 +65,9 @@ class Transaction(Object):
 		self._errorOccurred = flag
 		self._servlet=None
 
-		
+
 	## Debugging ##
-	
+
 	def dump(self, f=sys.stdout):
 		''' Dumps debugging info to stdout. '''
 		f.write('>> Transaction: %s\n' % self)
@@ -70,13 +75,13 @@ class Transaction(Object):
 			f.write('%s: %s\n' % (attr, getattr(self, attr)))
 		f.write('\n')
 
-		
-	## Die ##
-	
-	def die(self):
-		''' This method should be invoked when the entire transaction is finished with. Currently, this is invoked by AppServer. This method removes references to the different objects in the transaction, breaking cyclic reference chains and allowing Python to collect garbage. '''		
 
-		
+	## Die ##
+
+	def die(self):
+		''' This method should be invoked when the entire transaction is finished with. Currently, this is invoked by AppServer. This method removes references to the different objects in the transaction, breaking cyclic reference chains and allowing Python to collect garbage. '''
+
+
 		from types import InstanceType
 		for attrName in dir(self):
 			# @@ 2000-05-21 ce: there's got to be a better way!

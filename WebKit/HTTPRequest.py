@@ -142,8 +142,8 @@ class HTTPRequest(Request):
 	## Sessions ##
 
 	def session(self):
-		''' Returns the session associated with this request, either as specified by sessionId() or newly created. @@ 2000-05-10 ce: Not Implemented. '''
-		raise NotImplementedError
+		''' Returns the session associated with this request, either as specified by sessionId() or newly created. This is a convenience for transaction.session() '''
+		return self._transaction.session()
 
 
 	## Authentication ##
@@ -225,7 +225,7 @@ class HTTPRequest(Request):
 	def fsPath(self):
 		""" The filesystem path of the request, using the webserver's docroot"""
 		docroot = self._environ['DOCUMENT_ROOT']
-		requri = self._environ['REQUEST_URI'][1:]#strip leading / 
+		requri = self._environ['REQUEST_URI'][1:]#strip leading /
 		fspath = os.path.join(docroot,requri)
 		return fspath
 

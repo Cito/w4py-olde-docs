@@ -12,6 +12,7 @@ from glob import glob
 import Queue
 import imp
 from threading import Lock, Thread
+from time import *
 from CanContainer import *
 
 from WebUtils.WebFuncs import HTMLEncode
@@ -105,8 +106,14 @@ class Application(Configurable,CanContainer):
 			from ExceptionHandler import ExceptionHandler
 			self._exceptionHandlerClass = ExceptionHandler
 
-		# Init those ivars
-		self._sessions = {}
+		# Create the session store
+		from SessionMemoryStore import SessionMemoryStore
+		from SessionFileStore import SessionFileStore
+		klass = locals()['Session'+self.setting('SessionStore')+'Store']
+		assert type(klass) is ClassType
+		self._sessions = klass(self)
+
+		# Init other attributes
 		self._servletCacheByPath = {}
 		self._serverSidePathCacheByPath = {}
 		self._serverDir = os.getcwd()
@@ -152,7 +159,7 @@ class Application(Configurable,CanContainer):
 		self._canFactory = CanFactory.CanFactory(self,os.path.join(os.getcwd(),'Cans'))
 
 	def startSessionSweeper(self):
-		self._sessSweepThread=Thread(None, self.sweepSessionsContinuously, 'SessionSweeper')
+		self._sessSweepThread = Thread(None, self.sweepSessionsContinuously, 'SessionSweeper')
 		self._sessSweepThread.start()
 
 	def sweepSessionsContinuously(self):
@@ -160,18 +167,19 @@ class Application(Configurable,CanContainer):
 		while self.running:
 			self.sweepSessions()
 			try:
-				time.sleep(timeout/10)
+				sleep(self.setting('SessionTimeout')*60/10.0)
 				# @@ 2000-08-04 ce: make sleep interval or div factor a setting
 			except IOError:
 				pass
 
 	def sweepSessions(self):
+		''' Removes stale sessions by checking their lastAccessTime(). Session life time is configured via the SessionTimeout setting. '''
 		sessions = self._sessions
 		timeout = self.setting('SessionTimeout') * 60  # in seconds
 		assert timeout>=0
-		curTime = time.time()
+		curTime = time()
 		for key in sessions.keys():
-			if (curTime - sessions[key].lastAccessTime()) > timeout:
+			if (curTime - sessions[key].lastAccessTime()) >= timeout:
 				del sessions[key]
 
 	# @@ 2000-08-04 ce: Once sessionSweeper() has matured, remove this method. No longer used.
@@ -189,14 +197,14 @@ class Application(Configurable,CanContainer):
 				break #time to quit
 			count = count+1
 			if count > frequency:
-				currtime=time.time()
+				currtime=time()
 				keys=sessions.keys()
 				for i in keys:
 					if (currtime - sessions[i].lastAccessTime()) > timeout:
 						del sessions[i]
 				count = 0
 			try:
-				time.sleep(2)#sleep for 2 secs, then check to see if its time to quit or run
+				sleep(2)#sleep for 2 secs, then check to see if its time to quit or run
 				# @@ 2000-08-03 ce: er, 2 secs? perhaps that and 'frequency' should be configurable
 			except IOError, e:
 				pass
@@ -360,13 +368,28 @@ class Application(Configurable,CanContainer):
 	</body>
 </html>''' % (newURL, newURL))
 
-	def isSessionIdProblematic(self, request):
-		''' Returns 1 if there is a session id and it's not valid. Having no session id is not considered problematic. '''
+	def isSessionIdProblematic(self, request, debug=0):
+		'''
+		Returns 1 if there is a session id and it's not valid (either because it doesn't exist or because it has expired due to inactivity). Having no session id is not considered problematic.
+		This method will also expire the session if it's too old.
+		This method is invoked by dispatchRequest() as one of the major steps in handling requests.
+		'''
 		sid = request.sessionId()
-		if sid is None:
-			return 0
+		if sid:
+			if self._sessions.has_key(sid):
+				if (time()-request.session().lastAccessTime()) >= self.setting('SessionTimeout')*60:
+					if debug: print '>> session expired:', sid
+					del sessions[sid]
+					problematic = 1
+				else:
+					problematic = 0
+			else:
+				if debug: print '>> session does not exist:', sid
+				problematic = 1
 		else:
-			return not self._sessions.has_key(sid)
+			problematic = 0
+		if debug: print '>> isSessionIdProblematic =', problematic, ',  id =', sid
+		return problematic
 
 	def handleInvalidSession(self, transaction):
 		res = transaction.response()
@@ -450,8 +473,11 @@ class Application(Configurable,CanContainer):
 		transaction.servlet().respond(transaction)
 
 	def sleep(self, transaction):
-		if transaction._session:
-			transaction.session().sleep(transaction)
+		# Force a store of the session because non-memory session stores need this.
+		if transaction.hasSession():
+			sess = transaction.session()
+			self._sessions[sess.identifier()] = sess
+			sess.sleep(transaction) # @@ 2000-08-11 ce: should go in transaction
 		transaction.servlet().sleep(transaction)
 
 
@@ -603,13 +629,11 @@ class Application(Configurable,CanContainer):
 		return response
 
 	def createSessionForTransaction(self, transaction):
-		#print "Creating Session"
 		sessId = transaction.request().sessionId()
-		session = None
+
 		if sessId:
-			session = self.session(sessId, None)
-		# @@ 2000-05-10 ce: So here we just make a new session if the existing session id is invalid. Is that really the behavior we want? At the very least, we should probably have a "hook" method that subclasses can customize
-		if session is None:
+			session = self.session(sessId)
+		else:
 			session = self._sessionClass(transaction)
 			self._sessions[session.identifier()] = session
 		transaction.setSession(session)
