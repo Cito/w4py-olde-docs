@@ -62,7 +62,8 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 	     keep your code completely separate from the workdir.  It
 	     also accepts options to add multiple application library
 	     dirs to the Python path.
-  
+
+
 </ul>
 
 
@@ -75,6 +76,14 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 	     server).
 	<li> XMLRPCServlet now allows xmlrpclib.Fault exceptions to be
 	     passed through unmolested.
+	<li> The AppServer now removes the appserverpid.txt file when it exits,
+		 and will refuse to start if this file is present.  Previously, 
+		 attempting to start an already-running AppServer would fail when it 
+		 couldn't grab the socket to listen on, but it would have already 
+		 overwritten the pid file.
+
+		 Note that if the AppServer crashes a stale pid file will be left 
+		 around, which must be removed before the AppServer can be restarted. 
 </ul>
 
 
