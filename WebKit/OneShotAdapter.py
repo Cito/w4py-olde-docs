@@ -62,7 +62,14 @@ class OneShotAdapter(Adapter):
 
 			from OneShotAppServer import OneShotAppServer
 			appSvr = OneShotAppServer(webKitDir)
-			response = appSvr.dispatchRawRequest(dict).response().rawResponse()
+
+			# It is important to call transaction.die() after using it, rather than just
+			# letting it fall out of scope, to avoid circular references
+			transaction = appSvr.dispatchRawRequest(dict)
+			response = transaction.response().rawResponse()
+			transaction.die()
+			del transaction
+
 			appSvr.shutDown()
 			appSvr = None
 
@@ -73,8 +80,10 @@ class OneShotAdapter(Adapter):
 				msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
 			write = sys.stdout.write
-
-			write(response)
+			for pair in response['headers']:
+				write('%s: %s\n' % pair)
+			write('\n')
+			write(response['contents'])
 
 			if self.setting('ShowConsole'):
 				# show the contents of the console, but only if we
