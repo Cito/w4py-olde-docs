@@ -72,7 +72,7 @@ class PropertiesObject(UserDict):
 		numbers = string.join(numbers, '.')
 		rest = string.join(rest, '-')
 		if rest:
-			return numbers + '-' + rest
+			return numbers + rest
 		else:
 			return numbers
 
