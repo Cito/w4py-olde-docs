@@ -37,7 +37,6 @@
 		# Technique choices:
 		# serveContent, redirectSansAdapter
 		'Technique': 'serveContent',
-		#'Technique': 'redirectSansAdapter',
 
 		# If serving content:
 		'CacheContent': 1,
