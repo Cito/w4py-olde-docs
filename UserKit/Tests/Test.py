@@ -316,7 +316,6 @@ class RoleUserManagerToFileTest(UserManagerToFileTest):
 	def setUp(self):
 		UserManagerToFileTest.setUp(self)
 		from UserKit.RoleUserManagerToFile import RoleUserManagerToFile as umClass
-#		umClass = UserKit.combineManagerClasses('UserManagerToFile', 'RoleUserManager')
 		self.mgr = umClass()
 		self.setUpUserDir(self.mgr)
 
@@ -326,7 +325,6 @@ class RoleUserManagerToMiddleKitTest(UserManagerToMiddleKitTest):
 	def userManagerClass(self):
 		from UserKit.RoleUserManagerToMiddleKit import RoleUserManagerToMiddleKit
 		return RoleUserManagerToMiddleKit
-		#return UserKit.combineManagerClasses('UserManagerToMiddleKit', 'RoleUserManager')
 
 
 def makeTestSuite():
