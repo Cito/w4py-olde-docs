@@ -14,6 +14,7 @@ import imp
 from threading import Lock, Thread, Event
 from time import *
 from CanContainer import *
+from Cookie import Cookie
 
 from WebUtils.WebFuncs import HTMLEncode
 from WebUtils.HTMLForException import HTMLForException
@@ -343,7 +344,7 @@ class Application(Configurable,CanContainer):
 			if self._sessions.has_key(sid):
 				if (time()-request.session().lastAccessTime()) >= self.setting('SessionTimeout')*60:
 					if debug: print prefix, 'session expired:', sid
-					del sessions[sid]
+					del self._sessions[sid]
 					problematic = 1
 				else:
 					problematic = 0
@@ -359,8 +360,10 @@ class Application(Configurable,CanContainer):
 		res = transaction.response()
 		debug = self.setting('Debug')['Sessions']
 		if debug: prefix = '>> handleInvalidSession:'
-		res.setCookie('_SID_', '')
-		if debug: print prefix, "set _SID to ''"
+		cookie = Cookie('_SID_', '')
+		cookie.setPath('/')
+		res.addCookie(cookie)
+		if debug: print prefix, "set _SID_ to ''"
 		res.write('''<html> <head> <title>Session expired</title> </head>
 			<body> <h1>Session Expired</h1>
 			<p> Your session has expired and all information related to your previous working session with this site has been cleared. <p> You may try this URL again by choosing Refresh/Reload, or revisit the front page. ''')
