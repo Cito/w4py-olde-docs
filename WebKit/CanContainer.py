@@ -30,5 +30,6 @@ class CanContainer:
 		self._Cans[ID]=item
 
 	def _delCans(self):
-		for i in self.cans():
-			self.delCan(i)
+		if self.cans():
+			for i in self.cans():
+				self.delCan(i)
