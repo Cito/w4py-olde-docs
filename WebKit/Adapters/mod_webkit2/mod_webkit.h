@@ -30,5 +30,9 @@ typedef struct {
   request_rec* r; //just for debugging
 } WFILE;
 
-
+void w_byte(int c, WFILE* p);
+void w_long(long x, WFILE *p);
+void write_string(const char* s, long len, WFILE* p);
+void insert_data(WFILE* dest, WFILE* src);
+void write_integer(int number, WFILE* wf);
 int log_message(char* msg, request_rec* r);

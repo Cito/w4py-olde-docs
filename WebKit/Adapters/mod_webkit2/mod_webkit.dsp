@@ -23,8 +23,8 @@ CFG=mod_webkit - Win32 Debug
 
 # Begin Project
 # PROP AllowPerConfigDependencies 0
-# PROP Scc_ProjName ""
-# PROP Scc_LocalPath ""
+# PROP Scc_ProjName "mod_webkit"
+# PROP Scc_LocalPath "."
 CPP=cl.exe
 MTL=midl.exe
 RSC=rc.exe
@@ -43,7 +43,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MOD_WEBKIT_EXPORTS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "C:\progra~1\apache~1\apache\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MOD_WEBKIT_EXPORTS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "C:\progra~1\apache~1\apache\include" /I "c:\apache2\include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MOD_WEBKIT_EXPORTS" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
@@ -53,7 +53,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib ApacheCore.lib ws2_32.lib /nologo /dll /machine:I386 /libpath:"c:\progra~1\apache~1\apache\libexec"
+# ADD LINK32 kernel32.lib ws2_32.lib c:\apache2\lib\libaprutil.lib c:\apache2\lib\libapr.lib c:\apache2\lib\libhttpd.lib /nologo /dll /machine:I386 /libpath:"c:\progra~1\apache~1\apache\libexec"
 
 !ELSEIF  "$(CFG)" == "mod_webkit - Win32 Debug"
 
@@ -69,7 +69,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "MOD_WEBKIT_EXPORTS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "c:\progra~1\apache~1\apache\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "SHARED_MODULE" /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /GX /ZI /Od /I "c:\progra~1\apache~1\apache\include" /I "c:\apache2\include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "SHARED_MODULE" /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32

@@ -18,6 +18,7 @@ This is the Apache 2.x version
 #include "util_script.h"
 #include "apr_buckets.h"
 #include "apr_lib.h"
+#include "apr_strings.h"
 
 
 
@@ -45,7 +46,7 @@ typedef struct wkcfg {
 #define CONFIG_MODE_SERVER 1
 #define CONFIG_MODE_DIRECTORY 2
 #define CONFIG_MODE_COMBO 3	/* Shouldn't ever happen. */
-  int port;			/* Which port is the Appserver listening on? */
+  apr_port_t port;			/* Which port is the Appserver listening on? */
   char *host; 		/* Which host is the AppServer running on? */
   unsigned long addr; 	/* resolved host address */
   apr_sockaddr_t* apraddr; /*apache2 sockaddr*/
@@ -92,7 +93,6 @@ static const char *handle_wkserver(cmd_parms *cmd, void *mconfig,
 				   const char *word1, const char *word2)
 {
     wkcfg* cfg;
-    int port;
     apr_sockaddr_t *apraddr;
     apr_status_t err;
 
@@ -100,7 +100,7 @@ static const char *handle_wkserver(cmd_parms *cmd, void *mconfig,
     
     if (word1 != NULL) cfg->host = (char*)word1;
     if (word2 != NULL) cfg->port = atoi(word2);
-    err = apr_sockaddr_info_get(&apraddr, (char*)apr_pstrdup(cmd->server->process->pool, cfg->host),APR_UNSPEC, cfg->port, 0, cmd->server->process->pool);
+    err = apr_sockaddr_info_get(&apraddr, (char*)apr_pstrdup(cmd->server->process->pool, cfg->host), APR_UNSPEC, cfg->port, 0, cmd->server->process->pool);
     cfg->apraddr = apraddr;
     if (err !=APR_SUCCESS) log_error("Couldn't resolve hostname for WebKit Server", cmd->server);
     return NULL;
@@ -116,7 +116,6 @@ static const char *handle_wkserver(cmd_parms *cmd, void *mconfig,
 static const char *handle_maxconnectattempts(cmd_parms *cmd, void *mconfig, const char *word1)
 {
     wkcfg* cfg;
-    int attempts;
     
     cfg = (wkcfg *) mconfig;
     
@@ -133,7 +132,6 @@ static const char *handle_maxconnectattempts(cmd_parms *cmd, void *mconfig, cons
 static const char *handle_connectretrydelay(cmd_parms *cmd, void *mconfig, const char *word1)
 {
     wkcfg* cfg;
-    int attempts;
     
     cfg = (wkcfg *) mconfig;
     
@@ -233,13 +231,8 @@ WFILE*	setup_WFILE(request_rec* r)
 /*
 /* ======================================================================== */
 static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port, wkcfg* cfg) {
-    struct sockaddr_in addr;
-    int sock;
-    int ret;
-    apr_sockaddr_t *apraddr;
     apr_status_t rv;
     apr_socket_t *aprsock;
-    char msg[30];
 
     log_message("In wksock_open",r);
 
@@ -272,12 +265,9 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
 	log_error("Can not connect to WebKit AppServer",r->server);
 	return NULL;
     }
-#ifdef TCP_NODELAY
-    {
-	int set = 1;
-	setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *)&set, 
-	    sizeof(set));
-    }
+
+#ifdef APR_TCP_NODELAY
+    apr_socket_opt_set(aprsock, APR_TCP_NODELAY, 1);
 #endif
 
 
@@ -320,13 +310,11 @@ codes:
 static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dict, WFILE* int_dict, long length)
 {
 
-    long bs;
     int ret;
     apr_socket_t* aprsock;
     apr_bucket_brigade *bb;
     apr_bucket *b;
     int seen_eos, appserver_stopped_reading;
-    apr_pool_t *p;
     apr_status_t rv;
     apr_size_t aprlen;
     conn_rec *c = r->connection;
@@ -401,15 +389,14 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
             apr_bucket_read(bucket, &data, &len, APR_BLOCK_READ);
             
 	    do {
-	    aprlen=len;
-	    rv = apr_send(aprsock, data, &aprlen);
-	    len = len-aprlen;
+		aprlen=len;
+		rv = apr_send(aprsock, data, &aprlen);
+		len = len-aprlen;
 	    } while (len >0 && rv==APR_SUCCESS);
 
 	    if (rv != APR_SUCCESS) {
                 /* silly server stopped reading, soak up remaining message */
                 appserver_stopped_reading = 1;
-		log_message("appserver stopped reading input",r);
             }
 	    
         }
@@ -417,20 +404,19 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     }
     while (!seen_eos);
 
-
     //end mod_cgi copy
 
-    apr_shutdown(aprsock, APR_SHUTDOWN_WRITE);
+    // @@ gtalvola 2002-12-03: I had to remove this call to shutdown
+    // in order to get this to work on Windows.  I don't know why.
+    //apr_shutdown(aprsock, APR_SHUTDOWN_WRITE);
 
     /* Handle script return... */
-
-
     b = apr_bucket_socket_create(aprsock, c->bucket_alloc);
     APR_BRIGADE_INSERT_TAIL(bb, b);
     b = apr_bucket_eos_create(c->bucket_alloc);
     APR_BRIGADE_INSERT_TAIL(bb, b);
     
-    if ((ret = ap_scan_script_header_err_brigade(r, bb, sbuf))) {
+    if ((ret = ap_scan_script_header_err_brigade(r, bb, sbuf)) != HTTP_OK) {
       //      return log_error("the Appserver provided an invalid response",r->server);
     }
     sprintf(sbuf,"Status: %i",r->status);
@@ -467,6 +453,8 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     
     ap_pass_brigade(r->output_filters, bb);
     
+    apr_socket_close(aprsock);
+
     return 0;
 }
 
@@ -480,13 +468,9 @@ static int webkit_handler(request_rec *r)
     
     long length;
     wkcfg *cfg;
-    char** env;
     WFILE* env_dict=NULL;
-    char* content;
     int i;
-    int con_length;
     char msgbuf[MAX_STRING_LEN];
-    int debugint;
     int conn_attempt = 0;
     int conn_attempt_delay = 1;
     int max_conn_attempt=10;
@@ -494,7 +478,6 @@ static int webkit_handler(request_rec *r)
     WFILE* int_dict = NULL;
     const char *value;
     const char *key;
-    apr_table_t *table;
     apr_table_entry_t *tentry;
     apr_array_header_t *array_header;
 
@@ -551,7 +534,7 @@ static int webkit_handler(request_rec *r)
 	    continue;
 	key = tentry[i].key;
 	value = tentry[i].val;
-	write_string(key, (int) strlen(key), env_dict);
+	write_string(key, (long)strlen(key), env_dict);
 	if (value !=NULL) write_string(value, strlen(value), env_dict);
 	else w_byte(TYPE_NONE, env_dict);
     }
@@ -597,7 +580,7 @@ static int webkit_handler(request_rec *r)
 	}
 	sprintf(msgbuf, "Couldn't connect to AppServer, attempt %i of %i", conn_attempt, cfg->retryattempts);
 	log_error(msgbuf, r->server);
-	sleep(cfg->retrydelay);
+	apr_sleep(cfg->retrydelay);
     }
     log_error("error transacting with app server -- giving up.", r->server);
     return HTTP_INTERNAL_SERVER_ERROR;

@@ -17,19 +17,11 @@
 */
 
 
-WFILE* new_item()
-{
-  WFILE* wf;
-}
-		
-
-
 char* expand_memory(WFILE* p, long add)
 {
   char* newptr;
   long currsize;
   long newsize = 0;
-  char log_msg[500];
   
   //log_message("Expanding Memory",p->r);
   
@@ -59,7 +51,6 @@ void
 insert_data(WFILE* dest, WFILE* src) {
 
   long src_len, dest_avail, len_need;
-  char logmsg[500];
   
   //log_message("inserting data", dest->r);
   
@@ -78,11 +69,8 @@ insert_data(WFILE* dest, WFILE* src) {
 
 
 void
-w_more(char c,WFILE *p)
+w_more(int c,WFILE *p)
 {
-  int size, newsize;
-  char* newptr;
-  
   //	log_message("In w_more", p->r);
   if (p->str == NULL)
     return; /* An error already occurred, we're screwed */
@@ -92,7 +80,7 @@ w_more(char c,WFILE *p)
 }
 
 
-void w_byte(char c, WFILE* p) {
+void w_byte(int c, WFILE* p) {
 if ((p)->ptr != (p)->end) 
 		*(p)->ptr++ = (c);
 else w_more(c, p);
@@ -146,7 +134,7 @@ w_long64(x, p)
 
 
 void
-write_string( char* s, long len, WFILE* p){
+write_string(const char* s, long len, WFILE* p){
 
 		w_byte(TYPE_STRING, p);
 		w_long(len, p);
@@ -157,7 +145,7 @@ write_string( char* s, long len, WFILE* p){
 
 void
 write_integer(int number, WFILE* wf) {
-		long x,y;
+		long x;
 		x = (long)number;
 #if SIZEOF_LONG > 4
 		long y = x>>31;
