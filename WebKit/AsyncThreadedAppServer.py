@@ -71,7 +71,7 @@ class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
 
 		self.setRequestHandlerClass(RequestHandler)
 
-		self.listen(self._poolsize*2) # @@ 2000-07-14 ce: hard coded constant should be a setting
+		self.listen(1024) # @@ 2000-07-14 ce: hard coded constant should be a setting
 
 		self.recordPID()
 

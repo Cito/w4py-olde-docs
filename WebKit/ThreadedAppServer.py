@@ -84,7 +84,7 @@ class ThreadedAppServer(AppServer):
 			out.flush()
 		out.write("\n")
 
-		self.mainsocket.listen(64) # @@ 2000-07-10 ce: hard coded constant should be a setting
+		self.mainsocket.listen(1024)
 		self.recordPID()
 
 
@@ -324,6 +324,8 @@ class RequestHandler:
 		dict = loads(chunk)
 		if verbose:
 			chucklen1 = len(chunk)
+			
+		if verbose: print "Comm Delay=%s" % (time.time() - dict['time'])
 
 		while 1:
 			chunk = conn.recv(BUFSIZE)
