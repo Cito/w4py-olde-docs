@@ -1,11 +1,11 @@
 name = 'Webware for Python'
 
-version = (0, 5, 1, 'rc2')
+version = (1, 0, 0, 'pre')
 
 status = 'beta'
 
-releaseDate = 'March @@, 2001'
+releaseDate = 'July @@, 2001'
 
 requiredPyVersion = (1, 5, 2)
 
-synopsis = '''Webware for Python is a suite of modular software components for developing web-based applications that are object-oriented, cached and multi-threaded. The suite uses well known design patterns such as servlets and server pages (as found in ASP, PHP and JSP).'''
+synopsis = '''Webware provides a suite of Python components for developing Web applications. Included are an app server, servlets, Python Server Pages (PSP), object-relational mapping and task scheduling. The architecture is very modular, and you can provide your own extensions.'''
