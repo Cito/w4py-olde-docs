@@ -49,6 +49,7 @@
 <br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_MethodCategories"><font size=>Method Categories</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_Abbreviations"><font size=>Abbreviations</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_CompoundNames"><font size=>Compound Names</font></a>
+<br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_ComponentNames"><font size=>Component Names</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#SynNaming_Rules"><font size=>Rules</font></a>
 <br>  <a href="#Structure"><font size=+1>Structure and Patterns</font></a>
 <br> &nbsp; &nbsp; &nbsp;  <a href="#Structure_Classes"><font size=>Classes</font></a>
@@ -164,6 +165,13 @@ numRequest
 <p> Python itself uses all three styles (<code>has_key</code>, <code>getattr</code>, <code>isSet</code>), but Webware uses only the first which is more readable than the second and easier to type that the third.
 
 <p> This rule also applies to class names such as <code>HTTPRequest</code> and <code>ServletFactory</code>.
+
+
+<a name=SynNaming_ComponentNames><h3>Component Names</h3></a>
+
+<p> Names of object-oriented Webware components are often suffixed with <b>Kit</b>, as in <i>WebKit</i> and <i>MiddleKit</i>.
+
+<p> The occasional component that serves as a collective library (rather than an OO framework) is suffixed with <b>Utils</b>, as in <i>MiscUtils</i> and <i>WebUtils</i>.
 
 
 <a name=SynNaming_Rules><h3>Rules</h3></a>
