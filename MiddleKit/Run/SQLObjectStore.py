@@ -214,6 +214,8 @@ class SQLObjectStore(ObjectStore):
 			className = klass.name()
 			if serialNum is not None:
 				clauses = 'where %s=%d' % (klass.sqlIdName(), serialNum)
+			if self.setting('DeleteBehavior', 'delete') == 'mark':
+				clauses = self.addDeletedToClauses(clauses)
 			conn, cur = self.executeSQL('select %s from %s %s;' % (
 				','.join(colNames), klass.sqlTableName(), clauses))
 			for row in cur.fetchall():
@@ -241,7 +243,6 @@ class SQLObjectStore(ObjectStore):
 					obj.initFromRow(row)
 				objs.append(obj)
 		return objs + deepObjs
-
 
 	## Klasses ##
 
@@ -309,7 +310,23 @@ class SQLObjectStore(ObjectStore):
 	def threadSafety(self):
 		return self.dbapiModule().threadsafety
 
-
+	def addDeletedToClauses(self, clauses):
+		'''
+		Modify the given set of clauses so that it filters out records with non-NULL deleted field
+		'''
+		clauses = clauses.strip()
+		if clauses.lower().startswith('where'):
+			orderByIndex = clauses.lower().find('order by')
+			if orderByIndex == -1:
+				where = clauses[5:]
+				orderBy = ''
+			else:
+				where = clauses[5:orderByIndex]
+				orderBy = clauses[orderByIndex:]
+			return 'where deleted is null and (%s) %s' % (where, orderBy)
+		else:
+			return 'where deleted is null %s' % clauses
+	
 	## Obj refs ##
 
 	def fetchObjRef(self, objRef):
@@ -435,11 +452,16 @@ class MiddleObjectMixIn:
 		'''
 		Returns the SQL delete statement for MySQL of the form:
 			delete from table where idName=idValue;
+		Or if deletion is being marked with a timestamp:
+			update table set deleted=Now();
 		Installed as a method of MiddleObject.
 		'''
 		klass = self.klass()
 		assert klass is not None
-		return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
+		if self.store().model().setting('DeleteBehavior', 'delete') == 'mark':
+			return 'update %s set deleted=Now() where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
+		else:
+			return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlIdName(), self.serialNum())
 
 	def sqlValueForName(self, name):
 		# Our valueForKey() comes courtesy of MiscUtils.NamedValueAccess
@@ -476,7 +498,7 @@ class Attr:
 
 	def hasSQLColumn(self):
 		''' Returns true if the attribute has a direct correlating SQL column in it's class' SQL table definition. Most attributes do. Those of type list do not. '''
-		return 1
+		return not self.get('isDerived', 0)
 
 	def sqlColumnName(self):
 		''' Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). '''

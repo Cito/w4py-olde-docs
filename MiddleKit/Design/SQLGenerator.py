@@ -338,6 +338,8 @@ class Klass:
 			sqlIdName = self.sqlIdName()
 			wr('create table %s (\n' % name)
 			wr(self.primaryKeySQLDef(generator))
+			if generator.model().setting('DeleteBehavior', 'delete') == 'mark':
+				wr(self.deletedSQLDef(generator))
 			allAttrs = self.allAttrs()
 			# We have to make sure we don't put an extra comma after the
 			# last SQL attribute definition. Some attributes don't have
@@ -364,6 +366,13 @@ class Klass:
 		'''
 		return '    %s int not null primary key,\n' % self.sqlIdName().ljust(self.maxNameWidth())
 
+	def deletedSQLDef(self, generator):
+		'''
+		Returns a one liner that becomes part of the CREATE statement for creating the deleted timestamp field of the table.
+		This is used if DeleteBehavior is set to "mark".
+		'''
+		return '    %s datetime,\n' % ('deleted'.ljust(self.maxNameWidth()))
+
 	def sqlIdName(self):
 		name = self.name()
 		if name:
@@ -381,7 +390,7 @@ class Attr:
 
 	def hasSQLColumn(self):
 		''' Returns true if the attribute has a direct correlating SQL column in it's class' SQL table definition. Most attributes do. Those of type list do not. '''
-		return 1
+		return not self.get('isDerived', 0)
 
 	def sampleValue(self, value):
 		''' Returns a string suitable for a SQL insert statement including any necessary SQL syntax. Subclasses should override to perform type checking and handle any special capabilities.
