@@ -120,14 +120,14 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 				# set the:
 				#   content, mimeType, mtime and serverSideFilename
 				if debug: print '>> caching'
-				self._content = open(filename,"r").read()
+				self._content = open(filename,"rb").read()
 				self._mimeType = mimeType
 				self._mimeEncoding = mimeEncoding
 				self._mtime = os.path.getmtime(filename)
 				self._serverSideFilename = filename
 				response.write(self._content)
 			else:  ##too big
-				f = open(filename, "r")
+				f = open(filename, "rb")
 				sent = 0
 				while sent < filesize:
 					data = f.read(8192)
