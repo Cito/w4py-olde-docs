@@ -231,7 +231,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 	def version(self):
 		# @@ 2000-07-10 ce: Resolve this with the version methods in Application
-		return '0.7b2' # @@ 2002-02-26 ce: should pull from Properties.py
+		return '0.7b3' # @@ 2002-02-26 ce: should pull from Properties.py
 
 	def application(self):
 		return self._app

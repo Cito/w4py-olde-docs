@@ -1,6 +1,6 @@
 name = 'TaskKit'
 
-version = (0, 7, 0, 'b2')
+version = (0, 7, 0, 'b3')
 
 docs = [
 	{'name': "Quick Start",  'file': 'QuickStart.html'},
