@@ -1,6 +1,6 @@
 <%-- This is a PSP comment. It won't show up in the HTML or even in the class that this file will generate --%>
 
-<%@ page imports = "sys,os,time,termios"%> <%-- Here's the modules that I need in this file --%>
+<%@ page imports = "sys,os,time"%> <%-- Here's the modules that I need in this file --%>
 <%@ page method="writeHTML" %> <%-- This is the method of the base class that I want to override, writeHTML is the default --%>
 <%@ page extends="Page"%> <%--This is the base class for this page.  Page is the default --%>
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
