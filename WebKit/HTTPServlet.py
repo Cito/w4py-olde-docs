@@ -39,7 +39,10 @@ class HTTPServlet(Servlet):
 			if lm:
 			 	lm = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime(lm))
 				trans.response().setHeader('Last-Modified', lm)
-				if request.environ().get('If-Modified-Since', '') == lm:
+				if_modified_since = request.environ().get('HTTP_IF_MODIFIED_SINCE', None)
+				if not if_modified_since:
+					if_modified_since = request.environ().get('If-Modified-Since', None)
+				if if_modified_since and if_modified_since.split(';')[0] == lm:
 					trans.response().setStatus(304, 'Not Modified')
 					#print "304", request.serverSidePath()
 					return
