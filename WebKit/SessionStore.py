@@ -113,5 +113,6 @@ class SessionStore(Object):
 
 	def __repr__(self):
 		d = {}
-		d.update(self)
+		for key, value in self.items():
+			d[key] = value
 		return repr(d)
