@@ -408,7 +408,6 @@ WebKit 0.4.1
 
 <p>WebKit uses a process called an AppServer to handle requests.  The AppServer is responsible for receiving a request from the adapter, and then running it through the Application, and then sending the response back to the adapter.  The default AppServer is called ThreadedAppServer.  This AppServer uses a set number of threads to process requests.  The number of threads used is configurable.  As each request comes in, a thread from the thread pool will be handed that request and will be responsible for receiving the request from the adapter, running the request through the Application, and then sending the response back to the adapter.
 
-
 <a name=AppServerNotes_Async><h3>AsyncThreadedAppServer</h3></a>
 
 <p>There is also a modified version of ThreadedAppServer, called AsyncThreadedAppServer. The modification is that the threads are only responsible for running a request through the Application and not for any network I/O which is handled by the Python asyncore module.  The reason for this alternate form is that heavy network traffic could theoretically tie up threads if they are responsible for sending the response, thus leaving the potential for the AppServer to run out of threads to process requests.
@@ -422,11 +421,53 @@ WebKit 0.4.1
 <p> You can change which AppServer is used by editing the file AppServer (on UNIX) or AppServer.bat (on Windows).
 
 
+<a name=AppServerNotes_AsyncHTTP><h3>AsyncThreadedHTTPServer</h3></a>
+
+<p>There is an experimental web server called AsyncThreadedHTTPServer which serves HTTP requests directly from the web browser without needing a separate web server and adapter.  We do not currently recommend AsyncThreadedHTTPServer for deployment because it is brand new and hasn't undergone rigorous testing.  But please feel free to experiment with it, and report any problems found to the Webware developers.
+
+<p>AsyncThreadedHTTPServer listens to requests directly from the web browser on the port specified in AppServer.config.  This defaults to port 8086, so you would connect to AsyncThreadedHTTPServer using a url such as <code>http://localhost:8086/</code>.  If you want it to listen to the standard web server port, you can edit AppServer.config to change the port from 8086 to 80.
+
+<p>AsyncThreadedHTTPServer can in theory be used with Apache acting as a proxy, but this has not yet been tested.
+
 <a name=AppServerNotes_Monitoring><h3>Monitoring</h3></a>
 
 <p> [UNIX] In order to provide additional stability and peace of mind, a monitor process has been developed.  The monitor is responsible for starting the AppServer and monitoring its health.  If it detects that the AppServer is not responding, it will start a new AppServer and clean up the old one.  In order to use the monitor, run the file wkMonitor.py.  The wkMonitor process will handle the starting of the main AppServer. In order to shut down WebKit when using the monitor process, run stopMonitor.py.
 
 <p> This process will be available on Windows systems in the near future.
+
+
+<a name=AppServerNotes_NTService><h3>Running ThreadedAppServer as a Windows NT/2000 Service</h3></a>
+
+<p>ThreadedAppServerService is a version of ThreadedAppServer that runs as
+a Windows NT Service.  This means it can be started and stopped from
+the Control Panel or from the command line using "net start" and
+"net stop", and it can be configured in the Control Panel to
+auto-start when the machine boots.  This is the preferred way to deploy WebKit on a Windows NT/2000 platform.
+
+<p>ThreadedAppServerService requires the Python win32all extensions to have been installed.
+
+<p>To see the options for installing, removing, starting, and stopping
+the service, just run ThreadedAppServerService.py with no arguments.  Typical usage is
+to install the service to run under a particular user account and startup
+automatically on reboot with
+
+<p><code>python ThreadedAppServerService.py --username mydomain\myusername --password mypassword --startup auto install</code>
+
+<p>Then, you can start the service from the Services applet in the Control Panel,
+where it will be listed as "WebKit Threaded Application Server".  Or, from
+the command line, it can be started with either of the following commands:
+
+<p><code>net start WebKit
+<br>python ThreadedAppServerService.py start</code>
+
+<p>The service can be stopped from the Control Panel or with:
+
+<p><code>net stop WebKit
+<br>python ThreadedAppServerService.py stop</code>
+
+<p>And finally, to uninstall the service, stop it and then run:
+
+<p><code>python ThreadedAppServerService.py remove</code>
 
 
 <a name=AppServerNotes_Other><h3>Other Notes</h3></a>
