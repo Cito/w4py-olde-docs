@@ -55,7 +55,7 @@ class TestFuncs( unittest.TestCase ):
 		ip = localIP()
 		assert localIP()==ip  # second invocation
 		assert localIP(useCache=None)==ip
-		assert localIP(remote=None, useCache=None)==ip
+		assert localIP(remote=None, useCache=None)==ip, 'See if this works: localIP(remote=None).  If this fails, dont worry.'
 		assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80), useCache=None)==ip
 	
 	
