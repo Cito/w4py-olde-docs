@@ -29,6 +29,7 @@ class AdminPage(SidebarPage):
 		self.menuItem('Config', 'Config')
 		self.menuItem('Plug-ins', 'PlugIns')
 		self.menuItem('Servlet cache by path', 'ServletCacheByPath')
+		self.menuItem('Application Control','AppControl')
 
 	def fileSize(self, filename):
 		''' Utility method for writeMenu() to get the size of a configuration file. Returns an HTML string. '''
