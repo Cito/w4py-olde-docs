@@ -125,7 +125,7 @@ class Application(Configurable,CanContainer):
 		self._serverSidePathCacheByPath = {}
 		self._serverDir = os.getcwd()
 		self._cacheDictLock = Lock()
-		self._instanceCacheSize=self._server.setting('ServerThreads') #CHANGED 6/21/00
+		self._instanceCacheSize=10 # self._server.setting('ServerThreads') #CHANGED 6/21/00
 
 		if Contexts: #Try to get this from the Config file
 			self._Contexts = Contexts
@@ -641,7 +641,7 @@ class Application(Configurable,CanContainer):
 				repr(baseName), repr(filenames))
 		return filenames
 
-	def serverSidePathForRequest(self, request, urlPath, debug=1):
+	def serverSidePathForRequest(self, request, urlPath, debug=0):
 		"""
 		Returns what it says. This is a 'private' service method for use by HTTPRequest.
 		Returns None if there is no corresponding server side path for the URL.
@@ -781,7 +781,8 @@ class Application(Configurable,CanContainer):
 			if extraPathInfo:
 				request._fields['extraPathInfo'] = extraPathInfo
 
-		print '>> returning %s\n' % repr(ssPath)
+		if debug:
+			print '>> returning %s\n' % repr(ssPath)
 		return ssPath
 
 
