@@ -269,7 +269,6 @@ class SQLObjectStore(ObjectStore):
 		# Now get objects of this exact class
 		objs = []
 		if not klass.isAbstract():
-			# @@ 2000-10-29 ce: Optimize this. The results for columns & attribute names can be cached with the Klass
 			fetchSQLStart = klass.fetchSQLStart()
 			className = klass.name()
 			if serialNum is not None:
