@@ -2,7 +2,7 @@
 # Webware for Python
 # See ../README
 
-__all__ = ['Cookie', 'HTMLForException', 'HTTPStatusCodes', 'Funcs']
+__all__ = ['Cookie', 'HTMLForException', 'HTTPStatusCodes', 'HTMLTag', 'Funcs']
 
 
 def InstallInWebKit(appServer):
