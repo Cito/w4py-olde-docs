@@ -28,23 +28,31 @@ class Attr(UserDict, ModelObject):
 	def name(self):
 		return self.data['Name']
 
-	def isRequired(self):
-		""" Returns true if a value is required for this attribute. In Python, that means the value cannot be None. In relational theory terms, that means the value cannot be NULL. """
-		if not self.has_key('isRequired'):
-			req = 0
+	def boolForKey(self, key):
+		"""
+		Returns True or False for the given key. Returns False if the
+		key does not even exist. Raises a value error if the key
+		exists, but cannot be parsed as a bool.
+		"""
+		original = self.get(key, '')
+		s = original
+		if isinstance(s, StringTypes):
+			s = s.lower().strip()
+		if s in (False, '', None, 0, 0.0, '0', 'false'):
+			return False
+		elif s in (True, 1, '1', 1.0, 'true'):
+			return True
 		else:
-			req = self['isRequired']
-			if isinstance(req, StringTypes):
-				req = req.lower()
-			if req in ['', None, 0, '0', 'false']:
-				req = 0
-			elif req in [1, '1', 'true']:
-				req = 1
-			else:
-				raise ValueError, 'isRequired should be 0 or 1, but == %r' % req
-		return int(req)
-		# @@ 2000-11-11 ce: we say int() above, but in the future we
-		# should provide specific types for the columns of the model
+			raise ValueError, '%r for attr %r should be a boolean value (1, 0, True, False) but is %r instead' % (
+				key, self.get('Name', '(UNNAMED)'), original)
+
+	def isRequired(self):
+		"""
+		Returns true if a value is required for this attribute. In Python, that means the
+		value cannot be None. In relational theory terms, that means the value cannot be
+		NULL.
+		"""
+		return self.boolForKey('isRequired')
 
 	def setKlass(self, klass):
 		""" Sets the klass that the attribute belongs to. """
