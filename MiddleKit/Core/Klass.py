@@ -132,7 +132,7 @@ class Klass(UserDict, ModelObject):
 		if self.name()==name:
 			return 1
 		else:
-			return self.lookupAncestorKlass(name) is not None
+			return self.lookupAncestorKlass(name, None) is not None
 
 
 	## Subklasses ##
