@@ -3,8 +3,9 @@ from Common import *
 
 class Transaction(Object):
 	'''
-	A transaction is a container for the transactionual information of a transaction. This includes the application, request, response and session. It also includes the initial servlet for which the request was made and the current servlet executing in the case of nested servlets.
+	A transaction serves as a container for all objects involved in a transaction, and a message dissemination point. The objects include application, request, response and session. The messages include awake(), respond() and sleep().
 	'''
+
 
 	## Init ##
 
@@ -47,7 +48,6 @@ class Transaction(Object):
 
 	def servlet(self):
 		''' Return the current servlet that is processing. Remember that servlets can be nested. '''
-		#print ">> Someone asked for the servlet"
 		return self._servlet
 
 	def setServlet(self, servlet):
@@ -66,6 +66,26 @@ class Transaction(Object):
 		self._servlet=None
 
 
+	## Transaction stages ##
+
+	def awake(self):
+		''' Sends awake() the to session (if there is one) and the servlet. Currently, the request and response do not partake in the awake()-respond()-sleep() cycle. This could definitely be added in the future if any use was demonstrated for it. '''
+		if self._session:
+			self._session.awake(self)
+		self._servlet.awake(self)
+
+	def respond(self):
+		if self._session:
+			self._session.respond(self)
+		self._servlet.respond(self)
+
+	def sleep(self):
+		''' Note that sleep() is sent in reverse order as awake() (which is typical for shutdown/cleanup methods). '''
+		self._servlet.sleep(self)
+		if self._session:
+			self._session.sleep(self)
+
+
 	## Debugging ##
 
 	def dump(self, f=sys.stdout):
@@ -80,8 +100,6 @@ class Transaction(Object):
 
 	def die(self):
 		''' This method should be invoked when the entire transaction is finished with. Currently, this is invoked by AppServer. This method removes references to the different objects in the transaction, breaking cyclic reference chains and allowing Python to collect garbage. '''
-
-
 		from types import InstanceType
 		for attrName in dir(self):
 			# @@ 2000-05-21 ce: there's got to be a better way!
