@@ -254,15 +254,18 @@ class Installer:
 		wr = ht.append
 		wr("Don't know where to start? Try <a href=../WebKit/Docs/index.html>WebKit</a>. <p>")
 		wr('<table align=center border=0 cellpadding=2 cellspacing=2 width=100%>')
-		wr('<tr class=ComponentHeadings> <td nowrap>Component</td> <td>Status</td> <td nowrap>Py ver</td> <td>Summary</td> </tr>')
+		wr('<tr class=ComponentHeadings> <td nowrap>Component</td> <td>Status</td> <td>Ver</td> <td nowrap>Py ver</td> <td>Summary</td> </tr>')
 		row = 0
 		for comp in self._comps:
 			comp['nameAsLink'] = '<a href=../%(filename)s/Docs/index.html>%(name)s</a>' % comp
 			comp['indexRow'] = row+1
 			wr('''\
 <tr valign=top class=ComponentRow%(indexRow)i>
-	<td class=NameVersionCell> <span class=Name>%(nameAsLink)s</span><br><span class=Version>%(versionString)s</span> </td>
+	<td class=NameVersionCell> <span class=Name>%(nameAsLink)s</span>
+	<!-- <br><span class=Version>%(versionString)s</span>-->
+	</td>
 	<td> %(status)s </td>
+	<td> <span class=Version>%(versionString)s</span> </td>
 	<td> %(requiredPyVersionString)s </td>
 	<td> %(synopsis)s </td>
 </tr>''' % comp)
