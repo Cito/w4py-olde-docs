@@ -80,6 +80,7 @@ from marshal import dumps, loads
 from socket import *
 import string
 import os
+import sys
 
 timestamp = time.time()
 
@@ -101,6 +102,9 @@ addrfile=os.path.join(WebKitDir, _AddressFile)
 (host, port) = string.split(open(addrfile).read(), ':')
 port = int(port)
 
+os.chdir(WebKitDir)
+sys.path.append(os.path.join(WebKitDir, ".."))
+
 def HTMLEncode(s, codes=HTMLCodes):
 	""" Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page. (We could get this from WebUtils, but we're keeping CGIAdapter independent of everything but standard Python.) """
 	for code in codes:
@@ -110,7 +114,7 @@ def HTMLEncode(s, codes=HTMLCodes):
 from Adapter import Adapter
 
 class FCGIAdapter(Adapter):
-	def FCGICallback(fcg,env,form):
+	def FCGICallback(self,fcg,env,form):
 		"""This function is called whenever a request comes in"""
 		import sys
 
