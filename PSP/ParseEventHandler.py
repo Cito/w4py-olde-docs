@@ -234,15 +234,15 @@ class ParseEventHandler:
 	def generateHeader(self):
 		for i in self._imports:
 			self._writer.println(i)
-		self._writer.println('try:\n')
-		self._writer.pushIndent()
+##		self._writer.println('try:\n')
+##		self._writer.pushIndent()
 		#self._writer.println('from ' +self._baseClass+ ' import ' +self._baseClass +'\n')
 		self._writer.println('import '+self._baseClass + '\n')
-		self._writer.popIndent()
-		self._writer.println('except:\n')
-		self._writer.pushIndent()
-		self._writer.println('pass\n')
-		self._writer.popIndent()
+##		self._writer.popIndent()
+##		self._writer.println('except:\n')
+##		self._writer.pushIndent()
+##		self._writer.println('pass\n')
+##		self._writer.popIndent()
 	
 	def generateDeclarations(self):
 		self._writer.println()
