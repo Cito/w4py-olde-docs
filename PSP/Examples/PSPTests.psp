@@ -7,6 +7,7 @@
 <%@ page extends="PSP.Examples.PSPExamplePage"%> <%--This is the base class for this page.  Page is the default --%>
 <%@ page isInstanceSafe="yes" %> <%-- each instance of this class can be used multiple times --%>
 <%@ page indentType="tabs" %>
+<%@ page gobbleWhitespace="YES" %> <%-- Default is Yes, so this line isn't needed --%>
 
 
 <%--  Method declaration Test --%>
@@ -140,6 +141,15 @@ self._response.write(val)
 
 <%-- "pass" can be used to end a block, so test that it can be used by itself too! --%>
 <% pass %>
+<p>
+If Test<br>
+<%if 1:%>
+<b>It's True</b>
+<%end%>
+<%else:%>
+It's false
+<%end%>
+
 
 
 </td><td></td></tr></table>

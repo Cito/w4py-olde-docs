@@ -43,6 +43,7 @@ class ParseEventHandler:
 				'threadSafe':'no',
 				'instanceSafe':'yes',
 				'indent':int(4),
+				'gobbleWhitespace':1,
 				}
 
 
@@ -63,7 +64,7 @@ class ParseEventHandler:
 		self._threadSafe = self.defaults['threadSafe']
 		self._instanceSafe = self.defaults['instanceSafe']
 		self._indent=self.defaults['indent']
-
+		self._gobbleWhitespace=self.defaults['gobbleWhitespace']
 
 	def addGenerator(self, gen):
 		self._gens.append(gen)
@@ -152,6 +153,11 @@ class ParseEventHandler:
 		self._indentSpaces=int(amount)#don't really need this
 		self._writer.setIndentSpaces(int(amount))
 
+	def gobbleWhitespaceHandler(self, value, start, stop):
+		"""  Should we gobble up whitespace between script tags"""
+		if string.upper(value) == "NO" or value=="0":
+			self._gobbleWhitespace=0
+
 
 	directiveHandlers = {'imports':importHandler,
 						'import':importHandler,
@@ -161,7 +167,8 @@ class ParseEventHandler:
 						 'isInstanceSafe':instanceSafeHandler,
 						 'BaseClass':extendsHandler,
 						 'indentSpaces':indentSpacesHandler,
-						 'indentType':indentTypeHandler}
+						 'indentType':indentTypeHandler,
+						 'gobbleWhitespace':gobbleWhitespaceHandler}
 
 
 	def handleDirective(self, directive, start, stop, attrs):
@@ -234,7 +241,8 @@ class ParseEventHandler:
 		self._writer.println('\n')
 		self.generateMainMethod()
 		self.optimizeCharData()
-		self.gobbleWhitespace()
+		if self._gobbleWhitespace:
+			self.gobbleWhitespace()
 		self.generateAll('Service')
 		self._writer.println()
 		self.generateFooter()
@@ -400,7 +408,7 @@ class ParseEventHandler:
 			count = count+1
 		
 
-def checkForTextHavingOnlyGivenChars(text,ws=(" ","\n","\r")):
+def checkForTextHavingOnlyGivenChars(text, ws=string.whitespace):
 	""" Does the given text contain anything other than the ws characters?
 	Return true if text is only ws characters
 	Should redo this as a regex.

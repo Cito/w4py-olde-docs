@@ -4,7 +4,7 @@
 </head>
 <body bgcolor='white'>
 <H1> Python Server Pages for Webware</h1>
-Release 0.4<br>
+Release 0.5<br>
 <a href="http://webware.sourceforge.net">http://webware.sourceforge.net</a>
 <h2> Summary</h2>
 <p> Python Server Pages (PSP) provides the capability for producing dynamic web pages
@@ -24,10 +24,9 @@ favorably to other server side web scripting languages, such as ASP, PHP and JSP
 	<li>Ability to add additional methods to the class produced by PSP
 </ul>
 <h2>Feedback</h2>
-<p>The PSP for Webware project is fully open source.  Help in all areas is encouraged
-and appreciated.  The primary author of PSP is Jay Love (jsliv@jslove.net).  Comments
-should be directed to the Webware Discussion mailing list. This is a relatively low volume list
-and you are encouraged to join the list if you wish to participate in the development
+<p>The PSP for Webware project is fully open source.  Help in all areas is encouraged and appreciated.  
+  Comments should be directed to the Webware Discussion mailing list. This is a relatively 
+low volume list and you are encouraged to join the list if you wish to participate in the development
 of PSP or Webware, or if you plan on developing an application using the framework.
 
 
@@ -122,6 +121,14 @@ override.
 <p>
 <p><li><b><i><font color="blue">indentSpaces</font></i></b> - Sets the number of spaces to be used for indentation when <i>indentType</i> is set to spaces.  The default is "4".
 <p><b>Example</b> - <i> &lt;%@ page indentSpaces="8" %&gt;</i>
+<p>
+<li><b><i><font color="blue">gobbleWhitespace</font></i></b> - The <i>gobblewhitespace</i> attribute of the <i>page</i> directive tells the PSP
+ parser whether it can safely assume that whitespace characters that it finds between two script tags can be safely ignored.  This is a special case directive.  It applies when there are two script tags of some kind, and there is only whitespace characters between the two tags.  If there is only whitespace, the parser will ignore the whitespace.  This is necessary for multipart blocks to function correctly.  For example, if you are writing an if/else block, you would have your first script block that starts the if, and then you would end that block and start a new script block that contains the else portion.  If there is any whitespace between these two script blocks, and gobbleWhitespace is turned off, then the parser will add a write statement between the two blocks to output the whitespace into the page.  The problem is that the write statement will have the indentation level of the start of the if block.  So when the else statement starts, it will not be properly associated with the preceding if, and you'll get an error.<br>
+If you do need whitespace between two script blocks, use the &amp;nbsp; code.
+<p><b>Example</b> - <i> &lt;%@ page gobbleWhitspace="No"%&gt;</i>
+<p>Valid values are "yes" and "no".  The default is "yes".
+<p>
+
 </ul>
 <p>
 
@@ -166,7 +173,7 @@ provides access to the objects involved in servicing this client request.</td></
 <p>
 <p>
 <b>Python Code Blocks that span PSP Script Tags</b><br>
-The Python code structure, which uses whitespace to siginify blocks of code, presents a
+The Python code structure, which uses whitespace to signify blocks of code, presents a
 special challenge in PSP pages.  In order to allow for readable HTML code that does not impose
  restrictions on straight HTML within PSP pages, PSP uses a special syntax
 to handle Python blocks that span script tags.
@@ -182,9 +189,7 @@ These blocks can be nested, with no need for special indentation, and each scrip
 statement will reduce the block indent by one.<br>
 <p>
 <p><b>Manual Blocks</b><br>
-It is also possible to force a block of HTML statements to be included in a block.  You might want to do this if your start a loop
- of some kind in a script tag, but need the first line of the loop to also be inside the script tag.  In this case, the automatic
-indenting described above wouldn't notice the block, because the last line in the script tag wouldn't be a ":".  In this case, you need to end the script tag with $%&gt;.  When a script tag ends with $%&gt;, the PSP Parser will indent the following HTML at the same level as the last line of the script tag.  To end this level of indentation, just start another script tag.  Easy.
+It is also possible to force a block of HTML statements to be included in a block.  You might want to do this if your start a loop of some kind in a script tag, but need the first line of the loop to also be inside the script tag.  In this case, the automatic indenting described above wouldn't notice the block, because the last line in the script tag wouldn't be a ":".  In this case, you need to end the script tag with $%&gt;.  When a script tag ends with $%&gt;, the PSP Parser will indent the following HTML at the same level as the last line of the script tag.  To end this level of indentation, just start another script tag.  Easy.
 <br><b> Example of Manual Indention Script/HTML block</b><br>
 <i>&lt% for i in range(5): </i><br>
 <i>&nbsp &nbsp &nbsp &nbsp &nbsp icubed = i*i $%&gt;</i> ##The following lines of straight HTML will be included in the same block this line is on<br>
@@ -270,14 +275,15 @@ assumed to be an absolute path.  If it doesn't start with a "/", the file path i
 <h2>JSP Tags not Supported</h2>
 <ul>
 <li>Declaration (&lt;%!)- No need for this tag.  Simply use script tags to declare local variables.
-<li>Beans - The 0.3 release of WebKit has some initial support for Bean style functionality through the "Can" functions.  PSP does
-not include any special tag based support for this, but it may be accessed through script tags.  If anyone finds the JSP useBean functionality
-to be particularly important, please let the authors know, and we'll add it.
 <li>Forwarding functionality is now available in WebKit, but no tag based support has been added to PSP yet.
 </ul>
 
+<h2>Developers</h2>
+The original author of PSP is Jay Love (jsliv@jslove.net) and the project is now maintained by Jay and 
+Geoff Talvola. The contributions of the entire Webware community have been invaluable in improving this software.
+
 <p><hr>
-<P><P>Copyright 2000 Jay Love
+<P><P>Copyright 2002 Webware Development Team
 <P>Some architectural aspects of PSP were inspired by the Jakarta Project.
 </body>
 </html>
