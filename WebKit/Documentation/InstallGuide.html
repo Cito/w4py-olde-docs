@@ -1,0 +1,178 @@
+<html>
+
+<head>
+	<link rel=STYLESHEET href="StyleSheet.css" type="text/css">
+	<style type="text/css">
+	<!--
+		.OSLink		{	font-family: Arial, Helvetica;
+						font-size: 18pt;
+						font-weight: bold;
+						color: white;
+					}
+	-->
+	</style>
+	<title>WebKit User's Guide</title>
+</head>
+
+
+<body>
+
+<h1>WebKit Install Guide</h1>
+WebKit 0.4
+<br>Webware for Python 0.4
+
+
+<!--
+<a name=TOC><h2>Table of Contents</h2></a>
+
+<p><font face="Helvetica">
+<br>  <a href="#Instroduction"><font size=+1>Synopsis</font></a>
+<br>  <a href="#Introduction"><font size=+1>Introduction</font></a>
+<br>  <a href="#KnownBugs"><font size=+1>Known Bugs</font></a>
+<br>  <a href="#Credit"><font size=+1>Credit</font></a>
+</font></p>
+-->
+
+
+<a name=Introduction><h2>Introduction</h2></a>
+
+<p> WebKit provides an application server that runs on both UNIX and Windows in "CGI-" or "persistent-" mode, with several configuration options to change it's behavior.
+
+<p> This install guide takes you through the installation process while showing you what options are available and how you would use them. There are also specific notes for operating systems and web servers including UNIX (and it's relatives), Windows 95/98/Me and Windows NT.
+
+<p> WebKit is pretty easy to install, but there are specific notes and gotchas for various operating systems and web servers. Do yourself a favor and quickly step through this guide.
+
+<p> You can e-mail <a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a> to give feedback, discuss features and get help using WebKit.
+
+
+<a name=InstallingWebware><h2>Installing Webware</h2></a>
+
+<p> Webware's main directory contains an <b>install.py</b> script that should always be run first.
+
+<p> Note that the install program doesn't actually copy the files to any separate directory. It copies files within the Webware directory tree, modifies permissions, generates documentation, etc.
+
+<p> Also, you can run the install program as many times as you like with no ill effect, so if you're not sure whether or you it has been run, feel free to do so again.
+
+
+<!--
+
+<a name=Introduction><h2>The Operating System Fork</h2></a>
+
+<p> Pick your poision:
+
+<p><table align=center border=0 cellpadding=4 cellspacing=4 width=80%>
+	<tr>
+		<td align=center bgcolor=red width=50%>
+			<font face="Arial, Helvetica, sans-serif" size=+2 color=white>
+				&nbsp; <br>
+				<a href=UNIXInstallGuide.html class=OSLink>UNIX</a>
+				<br> &nbsp;
+			</font>
+		</td>
+		<td align=center bgcolor=blue width=50%>
+			<font face="Arial, Helvetica, sans-serif" size=+2 color=white>
+				&nbsp; <br>
+				<a href=WindowsInstallGuide.html class=OSLink>Windows</a>
+				<br> &nbsp;
+			</font>
+		</td>
+	</tr>
+</table>
+-->
+
+<a name=Sketch><h2>Sketch</h2></a>
+
+<pre>
+* Operating Systems
+	* WebKit actively supports UNIX and it's relatives, Windows NT and Windows 9x.
+	* To our knowledge as of (@@ release date) no one has used Webware on Windows Me or 2000.
+	* This guide is arranged by topic in a fairly chronological order. There are specific OS notes found throughout with the following tags:
+		* [UNIX], [Win9x] and [WinNT]
+* Which web server
+	- Doesn't really matter
+	- Have used Apache and IIS so most people reading this have had their server tested
+	- Some special notes for IIS
+	- At the very least, if the w.s. has CGI support, you should be set
+* Source
+	* Unless you just downloaded this, you should check if you have the latest version at: @@ url
+	* If you're feeling adventurous, you can get the latest in-development source code from the public source repository. CVS, cvshome.org, url for webware's CVS
+* WebKit architecture
+* Adapters
+	- CGI
+	- FastCGI
+	- OneShot
+	- mod_python
+		mod_python itself is still somewhat immature (@@ verify) and the adapter is new, so this approach should be considered somewhat experimental right now
+	- Let us know if you contribute your own
+* The classic set up is WebKit.cgi.
+	* app server sticks around
+	* modified servlets get reloaded, but...
+		* not their ancestor classes
+			* you can trick WebKit by entering the URL for the ancestor class
+		* not other kinds of classes
+	* How to
+		* note the first python line and WebKitDir
+		* changing permissions
+			* consideration of security
+	* Note...
+		* check examples
+		* check admin
+			* plug-ins
+		* note the contexts
+* Using OneShot
+	* CGI mode
+	* Reasons
+		* (@@ see if these are in OneShotAdapter.py)
+		* development of a site
+		* development of webware
+		* lack of faith in application server
+	* Disadvantage
+		* Performance
+	* How to
+		* OneShot.cgi
+		* Change session storage to file
+* Other adapters
+	* FastCGI
+		* Like CGI but, uh, much faster
+		* Upon deployment, probably worth the effort
+		* So far, only gotten working on UNIX
+		* how to
+	* mod_python
+		* see earlier notes
+* More configuration options
+	* Let's briefly touch on some of the configuration options for our purposes. A full reference to these options can be found in the User's Guide at @@
+	* Session storage
+		* memory
+			* periodic back ups
+			* auto load
+		* file
+			* one session per file
+	* LogActivity & ActivityLogFilename & ActivityLogColumns
+	* Contexts
+		* directory paritioning
+		* __init__.py
+		* default
+		* creating your own
+	* Session timeout
+	* E-mailing errors
+* an actual install on BSD
+* IIS Notes
+</pre>
+
+
+<a name=KnownBugs><h2>Known Bugs</h2></a>
+
+<p> Um, the guide isn't finished yet.  @@ 2000-08-27 ce
+
+
+<a name=Credit><h2>Credit</h2></a>
+
+<p> Authors: Chuck Esterbrook
+
+<p> Several people, mostly on the webware-discuss mailing list, have provided feedback and testing of this guide.
+
+
+<p><hr>
+
+</body>
+</html>
