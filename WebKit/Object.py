@@ -1,11 +1,14 @@
-import sys
+import os, sys
 
 try:
-	import WebUtils
+	import MiscUtils
 except:
-	sys.path.append('..')
-	import WebUtils
+	# When the Webware tarball unravels,
+	# the components sit next to each other
+	sys.path.append(os.path.normpath('..'))
+	import MiscUtils
 from MiscUtils.NamedValueAccess import NamedValueAccess
+
 
 class Object(NamedValueAccess):
 	'''

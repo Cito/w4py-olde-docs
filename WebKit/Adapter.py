@@ -1,15 +1,9 @@
-# @@ 2000-07-10 ce fix this up
 import sys, time, socket
 from marshal import dumps, loads
-try:
-	import WebUtils
-except ImportError:
-	sys.path.append('..')
-	import WebUtils
-from WebUtils.WebFuncs import HTMLEncode
-
 from Object import Object
 from MiscUtils.Configurable import Configurable
+from WebUtils.WebFuncs import HTMLEncode
+
 
 class Adapter(Configurable, Object):
 

@@ -23,13 +23,7 @@ except ImportError:
 	from StringIO import StringIO
 
 from Object import Object
-
-
-try:
-	import WebUtils
-except:
-	sys.path.append('..')  # because that's how the Webware tarball unravels
-	import WebUtils
+import WebUtils
 
 
 # @@ 2000-05-10 ce: Consider if all the following should be located in MiscUtils

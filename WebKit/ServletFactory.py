@@ -121,6 +121,7 @@ class UnknownFileTypeServletFactory(ServletFactory):
 		newURL = os.path.split(env['SCRIPT_NAME'])[0] + env['PATH_INFO']
 
 		servlet.setLocation(newURL)
+		print '>> set location to: %r' % newURL
 		return servlet
 
 
@@ -130,8 +131,10 @@ class UnknownFileTypeServlet(HTTPServlet):
 		self._location = location
 
 	def respondToGet(self, trans):
+		print '>> location: %r' % self._location
 		trans.response().sendRedirect(self._location)
 
 	def respondToPost(self, trans):
+		print '>> location: %r' % self._location
 		# @@ 2000-05-08 ce: Does a redirect make sense for a POST?
 		trans.response().sendRedirect(self._location)
