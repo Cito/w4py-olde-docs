@@ -301,7 +301,16 @@ def mystr(s):
 	except UnicodeError:
 		s = s.replace(u'\u201c', '"')
 		s = s.replace(u'\u201d', '"')
-		return str(s)
+		try:
+			return str(s)
+		except UnicodeError:
+			parts = []
+			for c in s:
+				try:
+					parts.append(str(c))
+				except UnicodeError:
+					parts.append(repr(c))
+			return ''.join(parts)
 
 
 def htmlForType(self):
