@@ -175,7 +175,9 @@ Version <!-- version --> X.Y <!-- /version -->
 
 <a name=DT_ObjRef><h3>Object references</h3></a>
 
-<p> There are two types of object references: a single reference and a list of references. In relational terminology, that would be "1 to 1" and "1 to many" respectively.
+<p> There are two types of object references: a single reference and a list of references. In relational terminology, that would be "1-to-1" and "1-to-many" respectively.
+
+<h4>1-to-1 references</h4>
 
 <p> The type for a single reference in Python is indicated by simply naming the class of the object that can be referred to. That class must be defined in the object model and will therefore have it's own table in the database. User-defined classes are required to be capitalized (while other types are lower case). For example:
 
@@ -196,27 +198,183 @@ Version <!-- version --> X.Y <!-- /version -->
 	</tr>
 </table>
 
+<h4>1-to-many references</h4>
 
 <p> The type for a list of references is specified by <code>list of <i>ClassName</i></code> and represents the 1-to-many relationship. This will be an ordinary Python list, except that some invisible MiddleKit machinery in the background will perform various services (fetch objects on demand, insert new objects, etc.). For example:
 
 <p> <table border align=center style="border-collapse: collapse" cellpadding=2>
 	<tr>
+		<th> Class </th>
 		<th> Attribute </th>
 		<th> Type </th>
 	</tr>
 
 	<tr>
-		<td> contacts </td>
-		<td> list of Contact </td>
+		<td>Contact</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
 	</tr>
 
 	<tr>
-		<td> customers </td>
-		<td> list of Customer </td>
+		<td>&nbsp;</td>
+		<td> addresses </td>
+		<td> list of Address </td>
+	</tr>
+
+</table>
+
+<p>Note that the the Address class referred to will need a "back reference" attribute which, for each Address instance, refers to the corresponding Contact instance.  By default, MiddleKit assumes that this attribute is named the same as the class containing the list attribute ('Contact' in this example), but with the first letter converted to lowercase to match MiddleKit naming conventions (therefore, 'contact'):
+
+<p> <table border align=center style="border-collapse: collapse" cellpadding=2>
+	<tr>
+		<th> Class </th>
+		<th> Attribute </th>
+		<th> Type </th>
+	</tr>
+
+	<tr>
+		<td>Address</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td> contact </td>
+		<td> Contact</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td> name </td>
+		<td> string</td>
 	</tr>
 </table>
 
-<p> There are two additional properties that applies to attributes whose types are object references.
+<h4>Many-to-many references</h4>
+
+Using the example of 'Author' and 'Books' objects, we may have many
+books written a single author, and a book may have multiple authors
+(i.e. many-to-many).  To set up this relationship in
+MiddleKit, use an intermediate object to represent the relationship.
+In many cases it makes sense to name this object using a verb, such as
+"Wrote":
+
+<p> <table border align=center style="border-collapse: collapse" cellpadding=2>
+	<tr>
+		<th> Class </th>
+		<th> Attribute </th>
+		<th> Type </th>
+	</tr>
+
+	<tr>
+		<td>Author</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td> name </td>
+		<td> string</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td> books </td>
+		<td> list of Wrote</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td>Book</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td> title </td>
+		<td> string</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td> authors </td>
+		<td> list of Wrote</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td>Wrote</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td> author </td>
+		<td> Author</td>
+	</tr>
+	<tr>
+		<td>&nbsp;</td>
+		<td> book </td>
+		<td> Book</td>
+	</tr>
+</table>
+
+<a name="DT_Recursive"><h4>Recursive structures</h4></a>
+
+It was mentioned above that, when using a list attribute, MiddleKit requires a "back reference" and by default 
+assumes this attribute will be named according to the name of the referencing.  If you ever want to create recursive structures such as trees you may need to override the default using the "backRefAttr" attribute.  A tree node can be implemented by having a reference to its parent node, and a list of children nodes like so:
+
+<p> <table border align=center style="border-collapse: collapse" cellpadding=2>
+	<tr>
+		<th> Class </th>
+		<th> Attribute </th>
+		<th> Type </th>
+		<th> Extras </th>
+	</tr>
+
+	<tr>
+		<td>Node</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td> parent </td>
+		<td> Node</td>
+		<td>&nbsp;</td>
+	</tr>
+
+	<tr>
+		<td>&nbsp;</td>
+		<td> children </td>
+		<td> list of Node</td>
+		<td> backRefAttr='parent'</td>
+	</tr>
+</table>
+
+<p>By specifying the attribute to use a back reference, you've told MiddleKit that it can fetch children of a 
+specific node by fetching all children whose "parent" attribute matches that node.</p>
+
+
+<h4>Object references and deletion</h4>
+
+<p> There are two additional properties to control how object references are handled when an objects is 
+deleted.
 
 <p> For the purpose of discussion, the object containing the attribute is <i>self</i> while the objects being referred to are the <i>others</i>. Now then, the <b>onDeleteSelf</b> property specifies what happens to the other object(s) when the self object is deleted:
 

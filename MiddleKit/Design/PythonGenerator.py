@@ -522,7 +522,8 @@ class ListAttr:
 		capName = name[0].upper() + name[1:]
 		sourceClassName = self.klass().name()
 		targetClassName = self.className()
-		lowerSourceClassName = sourceClassName[0].lower() + sourceClassName[1:]
+		backRefAttrName = self.backRefAttrName()
+		upperBackRefAttrName = backRefAttrName[0].upper() + backRefAttrName[1:]
 		package = self.setting('Package', '')
 		if package:
 			package += '.'
@@ -546,9 +547,9 @@ class ListAttr:
 		assert value is not None
 		from %(package)s%(targetClassName)s import %(targetClassName)s
 		assert isinstance(value, %(targetClassName)s)
-		assert value.%(lowerSourceClassName)s() is None
+		assert value.%(backRefAttrName)s() is None
 		self.%(pyGetName)s().append(value)
-		value.set%(sourceClassName)s(self)
+		value.set%(upperBackRefAttrName)s(self)
 		store = self.store()
 		if value.serialNum()==0 and self.isInStore():
 			store.addObject(value)
