@@ -439,9 +439,17 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		res.addCookie(cookie)
 		if debug: print prefix, "set _SID_ to ''"
 		if self.setting('IgnoreInvalidSession'):
-			# Delete the session ID cookie from the request, then handle the servlet
+			# Delete the session ID cookie (and field since session IDs can also
+			# be encoded into fields) from the request, then handle the servlet
 			# as though there was no session
-			del transaction.request().cookies()['_SID_']
+			try:
+				del transaction.request().cookies()['_SID_']
+			except KeyError:
+				pass
+			try:
+				transaction.request().delField('_SID_')
+			except KeyError:
+				pass
 			transaction.request().setSessionExpired(1)
 			if self.setting('UseAutomaticPathSessions'):
 				self.handleMissingPathSession(transaction)
