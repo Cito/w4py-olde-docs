@@ -483,7 +483,7 @@ class LongAttr:
 class FloatAttr:
 
 	def sqlType(self):
-		return 'float(8,8)'
+		return 'double precision'
 		# @@ 2001-02-04 ce: this (8,8) stuff is bad,]
 		# but haven't come up with solution yet
 
