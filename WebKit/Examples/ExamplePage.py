@@ -20,7 +20,7 @@ class ExamplePage(Page):
 </head>
 <body %s>''' % (self.title(), self.htBodyArgs()))
 		self.writeBanner()
-		self.writeExamplesToolBar()
+		self.writeHeaderLinks()
 
 	def writeBanner(self):
 		self.writeln('''<table align=center bgcolor=darkblue cellpadding=5 cellspacing=0 width=100%%>
@@ -32,20 +32,32 @@ class ExamplePage(Page):
 			</td></tr>
 		</table><p>''' % self.htTitle())
 
-	def writeExamplesToolBar(self):
-		hidden = ['ExamplePage']
-		scripts = filter(lambda script, hidden=hidden: not script['name'] in hidden, self.scripts())
-		scripts = map(lambda scriptDict: '<a href="%s">%s</a>' % (scriptDict['name'], scriptDict['name']), scripts)
+	def writeHeaderLinks(self):
+		scripts = self.scripts()
+		scripts = map(lambda scriptDict: '<a href="%s">%s</a>' % (
+			scriptDict['name'], scriptDict['name']), scripts)
 		self.writeln('<p><center>', string.join(scripts, ' | '), '</center>')
-		#handle case of which directory the client thinks we're in
+
+		# handle case of which directory the client thinks we're in
 		self.write('<p><center> <a href="')
 		if string.find(self._request._environ['PATH_INFO'],'/Examples/')>0: self.write('../')
 		self.writeln('PSPExamples/Hello.psp">PSP</a></center>')
-		#end special case
+		# end special case
+
+		# Contexts
+		adapterName = self.request().adapterName()
+		ctxs = self.application().contexts().keys()
+		ctxs = filter(lambda ctx: ctx!='default', ctxs)
+		ctxs.sort()
+		ctxs = map(lambda ctx, an=adapterName: '<a href=%s/%s/>%s</a> ' % (an, ctx, ctx), ctxs)
+		self.writeln('<p><center>Contexts: ', string.join(ctxs, ' | '), '</center>')
+
 		if self.isDebugging():
 			self.writeln('<p><center>', self._session.identifier(), '</center>')
 			from WebUtils.WebFuncs import HTMLEncode
 			self.writeln('<p><center>', HTMLEncode(str(self._request.cookies())), '</center>')
+
+		self.writeln('<hr>')
 
 	def scripts(self):
 		# Create a list of dictionaries, where each dictionary stores information about
