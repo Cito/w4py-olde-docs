@@ -101,6 +101,13 @@ class KeyValueAccess:
 		else:
 			return getattr(self, binding)
 
+	def hasValueForName(self, keysString):
+		try:
+			value = self.valueForName(keysString)
+		except 'KeyValueAccess':
+			return 0
+		return 1
+
 	def valueForName(self, keysString, default=None):
 		''' Returns the value for the given keysString. This is the more advanced version of
 			valueForKey(), which can only handle single names. This method can handle
