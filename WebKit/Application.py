@@ -186,6 +186,7 @@ class Application(Configurable, CanContainer, Object):
 		del self._factoryByExt
 		del self._factoryList
 		del self._server
+		del self._servletCacheByPath
 		print "Exiting Application"
 
 
