@@ -297,6 +297,8 @@ class HTTPResponse(Response):
 
 	def recordSession(self):
 		""" Invoked by commit() to record the session id in the response (if a session exists). This implementation sets a cookie for that purpose. For people who don't like sweets, a future version could check a setting and instead of using cookies, could parse the HTML and update all the relevant URLs to include the session id (which implies a big performance hit). Or we could require site developers to always pass their URLs through a function which adds the session id (which implies pain). Personally, I'd rather just use cookies. You can experiment with different techniques by subclassing Session and overriding this method. Just make sure Application knows which "session" class to use. """
+		if not self._transaction.application().setting('UseCookieSessions', True):
+			return
 		sess = self._transaction._session
 		if debug: prefix = '>> recordSession:'
 		if sess:
