@@ -27,15 +27,10 @@ class SitePage(Page, Configurable):
 			print
 		Page.writeHTML(self)
 
-	def writeHeader(self):
-		self.writeln('''\
-<head>
-	<title>%s</title>
-	<link rel=stylesheet href=StyleSheet.css type=text/css>
-</head>
-<body>''' % self.title())
+	def writeStyleSheet(self):
+		self.writeln('\t<link rel=stylesheet href=StyleSheet.css type=text/css>')
 
-	def writeBody(self):
+	def writeBodyParts(self):
 		wr = self.writeln
 		wr('<table border=0 cellpadding=2 cellspacing=0 width=100%>')
 

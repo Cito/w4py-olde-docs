@@ -27,15 +27,7 @@ class SidebarPage(Page):
 
 	## Content methods ##
 
-	def writeHeader(self):
-		self.writeln('''
-			<head>
-				<title>%s</title>
-			</head>
-			<body %s>''' % (
-			self.title(), self.htBodyArgs()))
-
-	def writeBody(self):
+	def writeBodyParts(self):
 		# begin
 		wr = self.writeln
 		wr('<table border=0 cellpadding=0 cellspacing=0 width=100%>')

@@ -91,28 +91,113 @@ class Page(HTTPServlet):
 		return self.title()
 
 	def htBodyArgs(self):
-		''' The arguments used for the HTML <body> tag. Invoked by writeHeader(). '''
+		'''
+		Returns the arguments used for the HTML <body> tag. Invoked by
+		writeBody().
+
+		With the prevalence of stylesheets (CSS), you can probably skip
+		this particular HTML feature.
+		'''
 		return 'color=black bgcolor=white'
 
 	def writeHTML(self):
-		''' Subclasses may override this method (which is invoked by respondToGet() and respondToPost()) or it's constituent methods, writeHeader(), writeBody() and writeFooter(). '''
+		'''
+		Writes all the HTML for the page.
+
+		Subclasses may override this method (which is invoked by
+		respondToGet() and respondToPost()) or more commonly its
+		constituent methods, writeDocType(), writeHead() and
+		writeBody().
+		'''
+		self.writeDocType()
 		self.writeln('<html>')
-		self.writeHeader()
+		self.writeHead()
 		self.writeBody()
-		self.writeFooter()
 		self.writeln('</html>')
 
-	def writeHeader(self):
-		self.writeln('''<head>
-	<title>%s</title>
-</head>
-<body %s>''' % (self.title(), self.htBodyArgs()))
+	def writeDocType(self):
+		'''
+		Invoked by writeHTML() to write the <!DOCTYPE ...> tag. This
+		implementation specifies HTML 4.01 Transitional. Subclasses may
+		override to specify something else.
+
+		You can find out more about doc types by searching for DOCTYPE
+		on the web, or visiting:
+			http://www.htmlhelp.com/tools/validator/doctype.html
+		'''
+		self.writeln('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">')
+
+	def writeHead(self):
+		'''
+		Writes the <head> portion of the page by writing the
+		<head>...</head> tags and invoking writeHeadParts() in between.
+		'''
+		wr = self.writeln
+		wr('<head>')
+		self.writeHeadParts()
+		wr('</head>')
+
+	def writeHeadParts(self):
+		'''
+		Writes the parts inside the <head>...</head> tags. Invokes
+		writeTitle() and writeStyleSheet(). Subclasses can override this
+		to add additional items and should invoke super.
+		'''
+		self.writeTitle()
+		self.writeStyleSheet()
+
+	def writeTitle(self):
+		'''
+		Writes the <title> portion of the page. Uses title().
+		'''
+		self.writeln('\t<title>%s</title>' % self.title())
+
+	def writeStyleSheet(self):
+		'''
+		Writes the style sheet for the page, however, this default
+		implementation does nothing. Subclasses should override if
+		necessary. A typical implementation is:
+			self.writeln('\t<link rel=stylesheet href=StyleSheet.css type=text/css>')
+		'''
+		pass
 
 	def writeBody(self):
-		self.writeln("<p>This page has not yet customized it's body.")
+		'''
+		Writes the <body> portion of the page by writing the
+		<body>...</body> (making use of self.htBodyArgs()) and invoking
+		self.writeBodyParts() in between.
+		'''
+		wr = self.writeln
+		wr('<body %s>' % self.htBodyArgs())
+		self.writeBodyParts()
+		wr('</body>')
 
-	def writeFooter(self):
-		self.writeln('</body>')
+	def writeBodyParts(self):
+		'''
+		Invokes writeContent(). Subclasses should only override this
+		method to provide additional page parts such as a header,
+		sidebar and footer, that a subclass doesn't normally have to
+		worry about writing.
+
+		For writing page-specific content, subclasses should override
+		writeContent() instead.
+
+		See SidebarPage for an example override of this method.
+
+		Invoked by writeBody().
+		'''
+		self.writeContent()
+
+	def writeContent(self):
+		'''
+		Writes the unique, central content for the page.
+
+		Subclasses should override this method (not invoking super) to
+		write their unique page content.
+
+		Invoked by writeBodyParts().
+		'''
+		self.writeln('<p> This page has not yet customized its content. </p>')
 
 
 	## Writing ##
