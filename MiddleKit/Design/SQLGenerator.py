@@ -127,12 +127,13 @@ class Model:
 				if fields[0] and str(fields[0])[0]=='#':
 					continue
 				if fields[0].endswith(' objects'):
-					tableName = fields[0].split()[0]
+					klassName = fields[0].split()[0]
 					try:
-						klass = self.klass(tableName)
+						klass = self.klass(klassName)
 					except KeyError:
 						raise SampleError( linenum, "Class '%s' has not been defined" % ( tableName ) )
 					file.write('\n\n/* %s */\n\n' % fields[0])
+					tableName = klass.sqlTableName()
 					#print '>> table:', tableName
 					readColumns = 1
 					continue
