@@ -41,7 +41,7 @@ class OneShotAdapter(Adapter):
 		})
 		return config
 
-	def run(self):
+	def run(self, webKitDir):
 
 		try:
 			myInput = ''
@@ -61,7 +61,7 @@ class OneShotAdapter(Adapter):
 			print 'ONE SHOT MODE\n'
 
 			from OneShotAppServer import OneShotAppServer
-			appSvr = OneShotAppServer()
+			appSvr = OneShotAppServer(webKitDir)
 			response = appSvr.dispatchRawRequest(dict).response().rawResponse()
 			appSvr.shutDown()
 			appSvr = None
@@ -117,9 +117,12 @@ class OneShotAdapter(Adapter):
 		sys.stdout.write('<br><p><table><tr><td bgcolor=#EEEEEE><pre>%s</pre></td></tr></table>' % contents)
 
 
-def main():
+def main(webKitDir=None):
+	if webKitDir is None:
+		import os
+		webKitDir = os.getcwd()
 	try:
-		OneShotAdapter().run()
+		OneShotAdapter().run(webKitDir)
 	except:
 		import traceback
 

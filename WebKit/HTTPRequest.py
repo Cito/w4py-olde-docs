@@ -200,22 +200,16 @@ class HTTPRequest(Request):
 		self._environ['PATH_INFO'] = path
 		self._environ['REQUEST_URI'] = self.adapterName() + path
 
-	def serverSidePath(self):
-		''' Returns the complete, unambiguous server-side path for the request. '''
+	def serverSidePath(self, path=None):
+		'''	Returns the absolute server-side path of the request. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the object.
+		'''
 		if not hasattr(self, '_serverSidePath'):
 			app = self._transaction.application()
 			self._serverSidePath = app.serverSidePathForRequest(self)
-		return self._serverSidePath
-
-	def serverSideDir(self):
-		''' Returns the directory of the Servlet (as given through __init__()'s path). '''
-		if not hasattr(self, '_serverSideDir'):
-			self._serverSideDir = os.path.dirname(self.serverSidePath())
-		return self._serverSideDir
-
-	def relativePath(self, joinPath):
-		''' Returns a new path which includes the servlet's path appended by 'joinPath'. Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned. '''
-		return os.path.join(self.serverSideDir(), joinPath)
+		if path:
+			return os.path.normpath(os.path.join(os.path.dirname(self._serverSidePath), path))
+		else:
+			return self._serverSidePath
 
 	def servletURI(self):
 		"""This is the URI of the servlet, without any query strings or extra path info"""
@@ -367,6 +361,21 @@ class HTTPRequest(Request):
 			res.append('<tr valign=top> <td> %s </td>  <td> %s&nbsp;</td> </tr>\n' % (pair[0], value))
 		res.append('</table>\n')
 		return string.join(res, '')
+
+
+	## Deprecated ##
+
+	def serverSideDir(self):
+		''' deprecated: HTTPRequest.serverSideDir() on 01/24/01 in 0.5. use serverSidePath() instead. @ Returns the directory of the Servlet (as given through __init__()'s path). '''
+		self.deprecated(self.serverSideDir)
+		if not hasattr(self, '_serverSideDir'):
+			self._serverSideDir = os.path.dirname(self.serverSidePath())
+		return self._serverSideDir
+
+	def relativePath(self, joinPath):
+		''' deprecated: HTTPRequest.relativePath() on 01/24/01 in 0.5. use serverSidePath() instead. @ Returns a new path which includes the servlet's path appended by 'joinPath'. Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned. '''
+		self.deprecated(self.relativePath)
+		return os.path.join(self.serverSideDir(), joinPath)
 
 
 _infoMethods = (

@@ -85,6 +85,12 @@ class PlugIn(Object):
 		""" Returns the full path of the plug-in. Example: '../Foo' """
 		return self._path
 
+	def serverSidePath(self, path=None):
+		if path:
+			return os.path.normpath(os.path.join(self._path, path))
+		else:
+			return self._path
+
 	def module(self):
 		''' Returns the Python module object of the plug-in. '''
 		return self._module

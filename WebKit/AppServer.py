@@ -11,7 +11,7 @@ FUTURE
 
 from Common import *
 from Object import Object
-from MiscUtils.Configurable import Configurable
+from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 from Application import Application
 from PlugIn import PlugIn
 import os, sys
@@ -31,14 +31,17 @@ class AppServerError(Exception):
 	pass
 
 
-class AppServer(Configurable, Object):
+class AppServer(ConfigurableForServerSidePath, Object):
 
 	## Init ##
 
-	def __init__(self):
+	def __init__(self, path=None):
 		self._startTime = time.time()
-		Configurable.__init__(self)
+		ConfigurableForServerSidePath.__init__(self)
 		Object.__init__(self)
+		if path is None:
+			path = os.getcwd()
+		self._serverSidePath = os.path.abspath(path)
 		self._verbose = self.setting('Verbose')
 		self._plugIns = []
 		self._reqCount = 0
@@ -72,7 +75,7 @@ class AppServer(Configurable, Object):
 		return DefaultConfig
 
 	def configFilename(self):
-		return 'Configs/AppServer.config'
+		return self.serverSidePath('Configs/AppServer.config')
 
 
 	## Network Server ##
@@ -104,6 +107,7 @@ class AppServer(Configurable, Object):
 	def loadPlugIn(self, path):
 		''' Loads the given plug-in. Used by loadPlugIns(). '''
 		try:
+			path = self.serverSidePath(path)
 			plugIn = PlugIn(self, path)
 			self._plugIns.append(plugIn)
 			plugIn.load()
@@ -162,6 +166,14 @@ class AppServer(Configurable, Object):
 
 	def isPersistent(self):
 		raise SubclassResponsibilityError
+
+	def serverSidePath(self, path=None):
+		'''	Returns the absolute server-side path of the WebKit app server. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the app server.
+		'''
+		if path:
+			return os.path.normpath(os.path.join(self._serverSidePath, path))
+		else:
+			return self._serverSidePath
 
 
 	## Warnings and Errors ##

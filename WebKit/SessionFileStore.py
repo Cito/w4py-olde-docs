@@ -26,7 +26,7 @@ class SessionFileStore(SessionStore):
 
 	def __init__(self, app):
 		SessionStore.__init__(self, app)
-		self._sessionDir = os.path.join(app._serverDir,"Sessions")
+		self._sessionDir = app.serverSidePath('Sessions')
 
 
 	## Access ##

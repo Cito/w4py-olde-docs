@@ -11,6 +11,7 @@ from types import FloatType
 from glob import glob
 import Queue
 import imp
+import string
 from threading import Lock, Thread, Event
 from time import *
 from CanContainer import *
@@ -19,14 +20,14 @@ from WebKit.Cookie import Cookie
 from WebUtils.WebFuncs import HTMLEncode
 from WebUtils.HTMLForException import HTMLForException
 
-from MiscUtils.Configurable import Configurable
+from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 
 
 class ApplicationError(Exception):
 	pass
 
 
-class Application(Configurable, CanContainer, Object):
+class Application(ConfigurableForServerSidePath, CanContainer, Object):
 	"""
 	FUTURE
 		* 2000-04-09 ce: Automatically open in browser.
@@ -52,13 +53,14 @@ class Application(Configurable, CanContainer, Object):
 
 	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None, contexts=None, useSessionSweeper=1):
 
-		Configurable.__init__(self)
+		self._server = server
+		self._serverSidePath = server.serverSidePath()
+
+		ConfigurableForServerSidePath.__init__(self)
 		Object.__init__(self)
 
 		if self.setting('PrintConfigAtStartUp'):
 			self.printConfig()
-
-		self._server = server
 
 		if transactionClass:
 			self._transactionClass = transactionClass
@@ -93,7 +95,6 @@ class Application(Configurable, CanContainer, Object):
 		# Init other attributes
 		self._servletCacheByPath = {}
 		self._serverSidePathCacheByPath = {}
-		self._serverDir = os.getcwd()
 		self._cacheDictLock = Lock()
 		self._instanceCacheSize=10 # self._server.setting('ServerThreads') #CHANGED 6/21/00
 		self._canDirs = []
@@ -114,7 +115,8 @@ class Application(Configurable, CanContainer, Object):
 		# New context loading routine
 		self._contexts={}
 		for i in defctxt.keys():
-			self.addContext(i,defctxt[i])
+			path = self.serverSidePath(defctxt[i])
+			self.addContext(i, path)
 		print
 
 		# Create the session store
@@ -182,7 +184,7 @@ class Application(Configurable, CanContainer, Object):
 	def sweepSessions(self):
 		''' Removes stale sessions by checking their lastAccessTime(). Session life time is configured via the SessionTimeout setting. '''
 		self._sessions.cleanStaleSessions()
-		
+
 
 
 	def shutDown(self):
@@ -247,7 +249,7 @@ class Application(Configurable, CanContainer, Object):
 		}
 
 	def configFilename(self):
-		return 'Configs/Application.config'
+		return self.serverSidePath('Configs/Application.config')
 
 
 	## Versions ##
@@ -507,6 +509,14 @@ class Application(Configurable, CanContainer, Object):
 	def server(self):
 		return self._server
 
+	def serverSidePath(self, path=None):
+		'''	Returns the absolute server-side path of the WebKit application. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the app server.
+		'''
+		if path:
+			return os.path.normpath(os.path.join(self._serverSidePath, path))
+		else:
+			return self._serverSidePath
+
 	def name(self):
 		return sys.argv[0]
 
@@ -584,7 +594,7 @@ class Application(Configurable, CanContainer, Object):
 		"""
 		Writes an entry to the script log file. Uses settings ActivityLogFilename and ActivityLogColumns.
 		"""
-		filename = os.path.join(self._serverDir, self.setting('ActivityLogFilename'))
+		filename = self.serverSidePath(self.setting('ActivityLogFilename'))
 		if os.path.exists(filename):
 			file = open(filename, 'a')
 		else:
@@ -620,12 +630,6 @@ class Application(Configurable, CanContainer, Object):
 
 	## Utilities/Hooks ##
 
-	def serverDir(self):
-		"""
-		Returns the directory where the application server is located.
-		"""
-		return self._serverDir
-
 	def createRequestForDict(self, newRequestDict):
 		return self._requestClass(dict=newRequestDict)
 
@@ -657,7 +661,7 @@ class Application(Configurable, CanContainer, Object):
 	def getServlet(self, transaction, path, cache=None): #send the cache if you want the cache info set
 		ext = os.path.splitext(path)[1]
 		# Add the path to sys.path. @@ 2000-05-09 ce: not the most ideal solution, but works for now
-		dir = os.path.split(path)[0]
+		dir = os.path.dirname(path)
 
 		factory = self._factoryByExt.get(ext, None)
 		if not factory:
@@ -983,6 +987,16 @@ class Application(Configurable, CanContainer, Object):
 			print '>> returning %s\n' % repr(ssPath)
 		return ssPath
 
+
+	## Deprecated ##
+
+	def serverDir(self):
+		"""
+		deprecated: Application.serverDir() on 1/24 in ver 0.5, use serverSidePath() instead @
+		Returns the directory where the application server is located.
+		"""
+		self.deprecated(self.serverDir)
+		return self.serverSidePath()
 
 
 

@@ -24,7 +24,6 @@ class Servlet(Object):
 		''' Subclasses must invoke super. '''
 		Object.__init__(self)
 		self._serverSidePath = None
-		self._serverSideDir = None
 
 
 	## Access ##
@@ -89,14 +88,22 @@ class Servlet(Object):
 
 	## Server side filesystem ##
 
-	def serverSideDir(self):
-		''' Returns the filesytem directory of the page on the server. '''
-		if self._serverSideDir is None:
-			self._serverSideDir = os.path.dirname(self._request.serverSidePath())
-		return self._serverSideDir
-
-	def serverSidePath(self):
+	def serverSidePath(self, path):
 		''' Returns the filesystem path of the page on the server. '''
 		if self._serverSidePath is None:
 			self._serverSidePath = self._request.serverSidePath()
-		return self._serverSidePath
+		if path:
+			return os.path.normpath(os.path.join(os.path.dirname(self._serverSidePath), path))
+		else:
+			return self._serverSidePath
+
+
+	## Deprecated ##
+
+	def serverSideDir(self):
+		'''
+		deprecated: Servlet.serverSideDir() on 1/24 in ver 0.5, use serverSidePath() instead @
+		Returns the filesytem directory of the page on the server.
+		'''
+		self.deprecated(self.serverSideDir)
+		return os.path.dirname(self.serverSidePath())
