@@ -88,6 +88,7 @@ We don't track every change to the interface, but here are some notables:
 <ul>
 	<li> WebUtils.WebFuncs: HTMLEncode/Decode() now handle quote characters.
 	<li> The CGI adapter would sometimes cut responses short on Windows.
+	<li> The CGI adapter now makes use of the CONTENT_LENGTH environment variable, which is necessary when using IIS and doesn't hurt when using other servers.
 	<li> URLs that map to directories and don't end in a slash are redirected in order to do so. e.g., http://host/a/b gets redirected to http://host/a/b<b>/</b> if "b" is a directory. This is absolutely essential because without it, relative web page links, such as "c.html", will get interpreted as residing in "a/" instead of "b/".
 	<li> The host name in address.text is never blank since some platforms, like Windows and FreeBSD, didn't work with that.
 </ul>
