@@ -373,3 +373,20 @@ class HTTPResponse(Response):
 	## Exception reporting ##
 
 	exceptionReportAttrNames = Response.exceptionReportAttrNames + ['committed', 'headers', 'cookies']
+
+	def displayError(self, err):
+		"""
+		Displays HTTPException errors, with status codes
+		"""
+		
+		assert not self._committed, "Already committed"
+		for header, value in err.headers().items():
+			self.setHeader(header, value)
+		self.setHeader('Status',
+			       '%s %s' % (err.code(),
+					  err.codeMessage()))
+		self._strmOut.clear()
+		self.setHeader('Content-type', 'text/html')
+		self._strmOut.write(err.html())
+		print 'ERROR:', err.codeMessage()
+		self.commit()
