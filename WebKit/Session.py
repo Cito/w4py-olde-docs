@@ -142,7 +142,7 @@ class Session(Object):
 		self.setValue(name, value)
 
 	def __delitem__(self, name):
-		self.delValue(self, name)
+		self.delValue(name)
 
 
 	## Transactions ##
