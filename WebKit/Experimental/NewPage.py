@@ -1,8 +1,6 @@
-#from NewHTTPServlet import NewHTTPServlet
 from WebKit.Servlet import Servlet
 from WebKit.Common import *
 import HTTPExceptions
-#from WebUtils.Funcs import htmlEncode
 from WebUtils import Funcs
 import base64
 from WebKit.Cookie import Cookie
@@ -586,59 +584,6 @@ See WebKit/ExceptionHandler.py for more information.
         self._request = None
         self._session = None
         self._exception = None
-
-    ############################################################
-    ## Cookies (really belongs in HTTPResponse)
-    ############################################################
-
-    def setCookie(self, name, value, path='/', expires='ONCLOSE',
-                  secure=False):
-        """
-        Set a cookie.  You can also set the path (which defaults to /),
-        You can also set when it expires.  It can expire:
-            'NOW': this is the same as trying to delete it, but it
-                doesn't really seem to work in IE
-            'ONCLOSE': the default behavior for cookies (expires when
-                the browser closes)
-            'NEVER': some time in the far, far future.
-            integer: a timestamp value
-            tuple: a tuple, as created by the time module
-            DateTime: an mxDateTime object for the time
-            DeltaDateTime: a interval from the present, e.g.,
-                DateTime.DeltaDateTime(month=1) (1 month in the future)
-            '+...': a time in the future, '...' should be something like
-                1w (1 week), 3h46m (3:45), etc.  You can use y (year),
-                b (month), w (week), d (day), h (hour), m (minute),
-                s (second).  This is done by the DateInterval module.
-        """
-        cookie = Cookie(name, value)
-        if expires == 'ONCLOSE' or not expires:
-            pass # this is already default behavior
-        elif expires == 'NOW' or expires == 'NEVER':
-            t = time.gmtime(time.time())
-            if expires == 'NEVER':
-                t = (t[0] + 10,) + t[1:]
-            t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
-            cookie.setExpires(t)
-        else:
-            if type(t) is StringType and t and t[0] == '+':
-                interval = timeDecode(t[1:])
-                t = time.time() + interval
-            if type(t) in (IntType, LongType):
-                t = time.gmtime(t)
-            if type(t) is TupleType:
-                t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
-            if DateTime and type(t) in \
-               (DateTime.DeltaDateTimeType, DateTime.RelativeDateTimeType):
-                t = DateTime.now() + t
-            if DateTime and type(t) is DateTime.DateTimeType:
-                t = t.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
-            cookie.setExpires(t)
-        if path:
-            cookie.setPath(path)
-        if secure:
-            cookie.setSecure(secure)
-        self.response().addCookie(cookie)
 
     def pathArgs(self):
         args = self.request().extraURLPath()
