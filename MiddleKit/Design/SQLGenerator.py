@@ -146,7 +146,7 @@ class Model:
 							try:
 								attrs.append(klass.lookupAttr(name))
 							except KeyError:
-								raise SampleError( linenum, "Class '%s' has no attribute '%s'" % ( klass.name(), name ) )
+								raise SampleError(linenum, "Class '%s' has no attribute '%s'" % (klass.name(), name))
 					# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
 					for attr in attrs:
 						assert not attr.get('isDerived', 0)
@@ -696,7 +696,15 @@ class ObjRefAttr:
 		Obj ref sample data format is "Class.serialNum", such as
 		"Thing.3". If the Class and period are missing, then the obj
 		ref's type is assumed.
+
+		Also, a comment can follow the value after a space:
+		"User.3 Joe Schmoe" or
+		"User.3 - Joe Schmoe"
+		This is useful so that you can look at the sample later and
+		know what the obj ref value is referring to without having
+		to look it up. MiddleKit only looks at the first part ("User.3").
 		"""
+		input = input.split()[0]  # this gets rid of the sample value comment described above
 		parts = input.split('.')
 		if len(parts)==2:
 			className = parts[0]

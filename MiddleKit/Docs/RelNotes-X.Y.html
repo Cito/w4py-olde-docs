@@ -77,6 +77,7 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 	<li> For list references, you can specify the name of the "back reference" attribute explicitly.  This allows creation of recursive structures, such as trees. <a href=UsersGuide.html#DT_Recursive>docs</a>
 	<li> A setting called "DatabaseArgs" was added in which you can pass necessary arguments for establishing the database connection. <a href=UsersGuide.html#Configuration_DatabaseArgs>docs</a>
 	<li> You can clone Middle objects (recursively, if you want). <a href=UsersGuide.html#MT_Cloning>docs</a>
+	<li> In sample data files, you can put a comment after an obj ref value to remind you of what it points to; you do so in the same cell. For example, instead of just "User.17", you can say "User.17 - John Smith". One space is required after the number and the rest is ignored.
 </ul>
 
 
@@ -85,8 +86,8 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 	<li><b>Generate.py</b> does a better job of detecting errors in the class definitions and sample values than before. You are more likely to see a useful error message than a cryptic traceback. However, in those cases where an exception does occur, you can see that just before the exception, Generate.py prints the last attribute that it was processing before the error. You can then search for that attribute in your model and troubleshoot it.
 
 	<li><b>Dump.py</b> is documented.
-	
-	<li>When you delete an object, it is automatically removed from any list 
+
+	<li>When you delete an object, it is automatically removed from any list
 	attributes in other objects.
 </ul>
 
