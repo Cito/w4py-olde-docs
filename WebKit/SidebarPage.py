@@ -44,7 +44,7 @@ class SidebarPage(Page):
 		self.writeBanner()
 
 		# sidebar
-		wr('<tr> <td bgcolor=EEEEEF valign=top>')
+		wr('<tr> <td bgcolor=EEEEEF valign=top nowrap>')
 		self.writeSidebar()
 		wr('</td>')
 
@@ -78,11 +78,6 @@ class SidebarPage(Page):
 		self.writeln('Woops. Someone forgot to override writeSidebar().')
 		self.endMenu()
 
-	def writeMenuBarMinWidthImage(self):
-		# To ensure a minimum width of the sidebar
-		# Technique learned from www.python.org in 6/2000
-		self.writeln('<img width=175 height=1 src=MenuBar.gif>')
-
 	def cornerTitle(self):
 		return ''
 
@@ -90,7 +85,7 @@ class SidebarPage(Page):
 	## Menu ##
 
 	def startMenu(self):
-		self.writeln('<table border=0 cellpadding=0 cellspacing=4><tr><td><font face=Arial size=-1>')
+		self.writeln('<table border=0 cellpadding=0 cellspacing=4><tr><td nowrap><font face=Arial size=-1>')
 		self._wroteHeading = 0
 
 	def menuHeading(self, title):
@@ -151,3 +146,13 @@ class SidebarPage(Page):
 
 	def writeContent(self):
 		self.writeln('Woops, someone forgot to override writeContent().')
+
+
+	## Deprecated ##
+
+	def writeMenuBarMinWidthImage(self):
+		''' DEPRECATED: SidebarPage.writeMenuBarMinWidthImage() deprecated on 1/26/01 in ver 0.5. HTML's nowrap is used instead. '''
+		# To ensure a minimum width of the sidebar
+		# Technique learned from www.python.org in 6/2000
+		self.deprecated(self.writeMenuBarMinWidthImage)
+		self.writeln('<img width=175 height=1 src=MenuBar.gif>')
