@@ -563,13 +563,15 @@ class BoolAttr:
 
 	def sqlForNonNoneSampleInput(self, input):
 		try:
-			value = input.upper()
+			input = input.upper()
 		except:
 			pass
-		if value in ('FALSE', 'NO', '0', '0.0', 0, 0.0):
+		if input in (False, 'FALSE', 'NO', '0', '0.0', 0, 0.0):
 			value = 0
-		elif value in ('TRUE', 'YES', '1', '1.0', 1, 1.0):
+		elif input in (True, 'TRUE', 'YES', '1', '1.0', 1, 1.0):
 			value = 1
+		else:
+			raise ValueError, "invalid bool input: %r" % input
 		assert value==0 or value==1, value
 		return str(value)
 
