@@ -80,7 +80,13 @@ class Installer:
 	def readProperties(self, filename):
 		''' Returns a dictionary of values from executing the given Python properties file. '''
 		results = {}
-		exec open(filename).read() in results
+		contents = open(filename).read()
+		if os.name=='posix':
+			# get rid of CRs on posix, cuz Python's exec statement
+			# will barf on them (even though a straight out script
+			# works fine)
+			contents = string.replace(contents, '\015', '')
+		exec contents in results
 		# get rid of stuff like '__builtins__'
 		for key in results.keys():
 			if key.startswith('__'):
