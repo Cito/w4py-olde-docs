@@ -5,6 +5,8 @@ from MiscUtils import unittest
 
 import shutil
 
+# @@ 2001-02-25 ce: We might consider breaking this file up pretty soon
+
 
 class UserManagerTest(unittest.TestCase):
 
@@ -47,6 +49,7 @@ class UserManagerToSomewhereTest(UserManagerTest):
 		assert user.manager()==mgr
 		assert user.name()=='foo'
 		assert user.password()=='bar'
+		assert not user.isActive()
 		assert mgr.userForSerialNum(user.serialNum())==user
 		assert mgr.userForExternalId(user.externalId())==user
 		assert mgr.userForName(user.name())==user
@@ -70,7 +73,8 @@ class UserManagerToSomewhereTest(UserManagerTest):
 		assert mgr.numActiveUsers()==0
 
 		# login via user
-		user.login('bar')
+		result = user.login('bar')
+		assert result==user
 		assert user.isActive()
 		assert mgr.numActiveUsers()==1
 
