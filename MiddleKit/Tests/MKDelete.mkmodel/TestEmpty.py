@@ -30,6 +30,8 @@ def test(store):
 
 	print '*** passed testListUpdate'
 
+	testCascadeWithRequiredBackRef(store)
+
 # These are possible values for expectedResult
 DELETE_FOO = 1
 DELETE_OBJECT = 2
@@ -90,7 +92,7 @@ def testListUpdate(store, klass, expectedResult):
 		assert len(foo.listOfI()) == 0
 	finally:
 		cleanupTest(store, klass)
-    
+
 
 def setupTest(store, klass):
 	"""
@@ -173,3 +175,26 @@ def cleanupTest(store, klass):
 	store.executeSQL('delete from Bar;')
 	store.executeSQL('delete from %s;' % klass.__name__)
 	print
+
+
+def testCascadeWithRequiredBackRef(store):
+	"""
+	See also: Classes.csv Engine & Engine Part
+	The deal is that deleting an Engine should delete all its EngineParts via the cascade set on
+	the parts list attribute. Previously, there was a bug with this if the back ref attr
+	(EnginePart.engine in this case) was required (isRequired=True).
+	"""
+	from Engine import Engine
+	from EnginePart import EnginePart
+	e = Engine()
+	store.addObject(e)
+	store.saveChanges()
+	e.addToParts(EnginePart())
+	e.addToParts(EnginePart())
+	e.addToParts(EnginePart())
+	store.saveChanges()
+	assert e.parts()
+
+	store._verboseDelete = True
+	store.deleteObject(e)
+	store.saveChanges()

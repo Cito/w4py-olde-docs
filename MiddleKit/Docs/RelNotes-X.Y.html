@@ -128,6 +128,7 @@ set it to true to avoid ever getting an assertion failure.  </p>
 <ul>
 	<li> The default for the <b>UsePickledClassesCache<b> setting is now false. It occasionally created problems for multiple developers.
 
+	<li> MiddleKit no longer erroneously complains about certain deletion situations. (Specifically, objects that still point to a deleted object should not cause an error if those objects are going to be deleted as well (via cascading deletes).)
 </ul>
 
 

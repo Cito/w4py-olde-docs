@@ -35,3 +35,11 @@ K,,,,,,
 ,foo,Foo,,,,onDeleteOther='detach'
 L,,,,,,
 ,foo,Foo,,,,onDeleteOther='detach'
+
+Engine,,,,,,
+,parts,list of EnginePart,,,,onDeleteSelf='cascade'
+,name,string,,,20,
+
+EnginePart,,,,,,
+,engine,Engine,,,,isRequired=1
+,name,string,,,20,

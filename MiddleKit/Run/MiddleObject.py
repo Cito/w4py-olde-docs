@@ -221,12 +221,27 @@ class MiddleObject(object, NamedValueAccess):
 			if isinstance( attr, ObjRefAttr ):
 				value = getattr( self, '_' + attr.name() )
 				if value is not None:
-					if isinstance(value, (types.InstanceType, types.ObjectType)):
+					if isinstance(value, (types.InstanceType, MiddleObject)):
 						value.removeObjectFromListAttrs(self)
 					elif type(value) is types.LongType:
 						obj = self.store().objRefInMem(value)
 						if obj:
 							obj.removeObjectFromListAttrs(self)
+
+	def referencedAttrsAndObjects(self):
+		"""
+		Returns a list of tuples of (attr, object) for all objects that this object references.
+		"""
+		t = []
+		for attr in self.klass().allDataAttrs():
+			if isinstance(attr, ObjRefAttr):
+				obj = self.valueForAttr(attr)
+				if obj:
+					t.append((attr, obj))
+			elif isinstance(attr, ListAttr):
+				for obj in self.valueForAttr(attr):
+					t.append((attr, obj))
+		return t
 
 	def referencingObjectsAndAttrs(self):
 		"""

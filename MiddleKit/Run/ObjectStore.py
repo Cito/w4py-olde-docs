@@ -200,6 +200,24 @@ class ObjectStore(ModelUser):
 
 		objectsToDel[id(object)] = object
 
+		# Get the objects/attrs that reference this object
+		referencingObjectsAndAttrs = object.referencingObjectsAndAttrs()
+
+		# cascade-delete objects with onDeleteOther=cascade
+		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
+			onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
+			if onDeleteOther == 'cascade':
+				self._deleteObject(referencingObject, objectsToDel, detaches, object)
+
+		# Determine all referenced objects, constructing a list of (attr, referencedObject) tuples.
+		referencedAttrsAndObjects = object.referencedAttrsAndObjects()
+
+		# Check if it's possible to cascade-delete objects with onDeleteSelf=cascade
+		for referencedAttr, referencedObject in referencedAttrsAndObjects:
+			onDeleteSelf = referencedAttr.get('onDeleteSelf', 'detach')
+			if onDeleteSelf == 'cascade':
+				self._deleteObject(referencedObject, objectsToDel, detaches, object)
+
 		# Deal with all other objects that reference or are referenced by this object.  By default, you are not allowed
 		# to delete an object that has an ObjRef pointing to it.  But if the ObjRef has
 		# onDeleteOther=detach, then that ObjRef attr will be set to None and the delete will be allowed;
@@ -210,21 +228,9 @@ class ObjectStore(ModelUser):
 		# but if onDeleteSelf=deny it will be disallowed, or if onDeleteSelf=cascade the pointed-to
 		# objects will themselves be deleted.
 
-		# Get the objects/attrs that reference this object
-		referencingObjectsAndAttrs = object.referencingObjectsAndAttrs()
 		# Remove from that list anything in the cascaded list
 		referencingObjectsAndAttrs = [(o,a) for o,a in referencingObjectsAndAttrs if not objectsToDel.has_key(id(o))]
 
-		# Determine all referenced objects, constructing a list of (attr, referencedObject) tuples.
-		referencedAttrsAndObjects = []
-		for attr in object.klass().allDataAttrs():
-			if isinstance(attr, ObjRefAttr):
-				obj = object.valueForAttr(attr)
-				if obj:
-					referencedAttrsAndObjects.append((attr, obj))
-			elif isinstance(attr, ListAttr):
-				for obj in object.valueForAttr(attr):
-					referencedAttrsAndObjects.append((attr, obj))
 		# Remove from that list anything in the cascaded list
 		referencedAttrsAndObjects = [(a,o) for a,o in referencedAttrsAndObjects if not objectsToDel.has_key(id(o))]
 
@@ -255,18 +261,6 @@ class ObjectStore(ModelUser):
 				% (object.klass().name(), object.serialNum()),
 				object,
 				badAttrs)
-
-		# cascade-delete objects with onDeleteOther=cascade
-		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
-			onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
-			if onDeleteOther == 'cascade':
-				self._deleteObject(referencingObject, objectsToDel, detaches, object)
-
-		# Check if it's possible to cascade-delete objects with onDeleteSelf=cascade
-		for referencedAttr, referencedObject in referencedAttrsAndObjects:
-			onDeleteSelf = referencedAttr.get('onDeleteSelf', 'detach')
-			if onDeleteSelf == 'cascade':
-				self._deleteObject(referencedObject, objectsToDel, detaches, object)
 
 		# Detach objects with onDeleteOther=detach
 		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
