@@ -309,7 +309,11 @@ class Model(Configurable):
 			if not klass.dependents:
 				#print '>>', klass.name()
 				klass.recordDependencyOrder(allKlasses, visited)
-		assert len(allKlasses)==len(self._allKlassesInOrder)
+		# The above loop fails to capture classes that are in cycles,
+		# but in that case there really is no dependency order.
+		if len(allKlasses)<len(self._allKlassesInOrder):
+			raise ModelError('Cannot determine a dependency order among the classes due to a cycle. Try setting Ref=0 for one of the attributes to break the cycle.')
+		assert len(allKlasses)==len(self._allKlassesInOrder), '%r, %r, %r' % (len(allKlasses), len(self._allKlassesInOrder), allKlasses)
 		#print '>> allKlassesInDependencyOrder() =', ' '.join([klass.name() for klass in allKlasses])
 		return allKlasses
 
