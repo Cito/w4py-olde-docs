@@ -3,6 +3,7 @@ from MiscUtils import NoDefault
 import ObjectStore
 import sys, types
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
+from types import StringType
 
 
 class MiddleObject(NamedValueAccess):
@@ -41,21 +42,32 @@ class MiddleObject(NamedValueAccess):
 			self._mk_store = ObjectStore.Store
 		else:
 			self._mk_store = store
-		self._mk_klass        = None  # Our class model
-		self._mk_changedAttrs = None
-		self._mk_serialNum    = 0
-		self._mk_key          = None
-		self._mk_changed      = 0
-		self._mk_initing      = 0
-		self._mk_inStore      = 0
+		self._mk_klass           = None  # Our class model
+		self._mk_changedAttrs    = None
+		self._mk_serialNum       = 0
+		self._mk_key             = None
+		self._mk_changed         = 0
+		self._mk_initing         = 0
+		self._mk_inStore         = 0
 		self._mk_backObjRefAttrs = None
 
+	_mk_setCache = {}    # cache the various setFoo methods first by qualified class name
+
 	def initFromRow(self, row):
-		allAttrs = self.klass().allAttrs()
-		# @@ 2000-10-29 ce: next line is major hack: hasSQLColumn()
-		attrs = [attr for attr in allAttrs if attr.hasSQLColumn()]
-		attrNames = [attr.name() for attr in attrs]
-		assert len(attrNames)+1==len(row)  # +1 because row has serialNumber
+		fullClassName = self.__class__.__module__ + '.' + self.__class__.__name__
+		cache = self._mk_setCache.setdefault(fullClassName, [])
+		if not cache:
+			allAttrs = self.klass().allAttrs()
+			# @@ 2000-10-29 ce: next line is major hack: hasSQLColumn()
+			attrs = [attr for attr in allAttrs if attr.hasSQLColumn()]
+			attrNames = [attr.name() for attr in attrs]
+			assert len(attrNames)+1==len(row)  # +1 because row has serialNumber
+			for name in attrNames:
+				setMethodName = 'set' + name[0].upper() + name[1:]
+				setMethod = getattr(self.__class__, setMethodName, '_'+name)
+				cache.append(setMethod)
+
+		assert len(cache)+1==len(row)
 		dict = self.__dict__ # we use this to bypass our own __setattr__
 		dict['_mk_initing'] = 1
 		if self._mk_serialNum==0:
@@ -63,15 +75,14 @@ class MiddleObject(NamedValueAccess):
 		else:
 			assert self._mk_serialNum==row[0]
 		# Set all of our attributes with setFoo() or by assigning to _foo
-		for i in range(len(attrNames)):
-			attrName = attrNames[i]
+		for i in xrange(len(cache)):
 			value = row[i+1]
-			setMethodName = 'set' + attrName[0].upper() + attrName[1:]
-			setMethod = getattr(self, setMethodName, None)
-			if setMethod is None:
-				dict['_'+attrName] = value
+			setter = cache[i]
+			if isinstance(setter, StringType):
+				dict['_'+setter] = value
 			else:
-				apply(setMethod, (value,))
+				# a method
+				setter(self, value)
 		dict['_mk_initing'] = 0
 		dict['_mk_inStore'] = 1
 		return self
@@ -86,7 +97,7 @@ class MiddleObject(NamedValueAccess):
 		''' Sets the serial number of the object and invalidates the object's key.
 		There are some restrictions: Once the serial number is a positive value, indicating a legitimate value from the object store, it cannot be set to anything else. Also, if the serial number is negative, indicating a temporary serial number for new objects that haven't been committed to the database, it can only be set to a positive value.
 		'''
-		assert type(value) in [type(0), type(0L)], "Type is: %r, value is: %r" % (type(value), value)
+		assert type(value) in (type(0), type(0L)), "Type is: %r, value is: %r" % (type(value), value)
 		if self._mk_serialNum<0:
 			assert value>0
 		else:

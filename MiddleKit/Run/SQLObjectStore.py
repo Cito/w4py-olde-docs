@@ -283,7 +283,8 @@ class SQLObjectStore(ObjectStore):
 					# Existing object
 					obj.initFromRow(row)
 				objs.append(obj)
-		return objs + deepObjs
+		objs.extend(deepObjs)
+		return objs
 
 
 	## Klasses ##
