@@ -15,7 +15,7 @@ FUTURE
 
 import os, string, sys
 from time import time, localtime, asctime
-from string import join, rfind, split, strip, replace
+from string import count, join, rfind, split, strip, replace
 from glob import glob
 
 try:
@@ -355,10 +355,12 @@ Installation is finished.'''
 		# We append '.0' below so that values like 'x.y' and 'x.y.z'
 		# compare the way we want them too (x.y.z is newer than x.y)
 		a = a['name']
-		if a.count('.')==1:
+#		if a.count('.')==1:
+		if count(a, '.')==1:
 			a = a + '.0'
 		b = b['name']
-		if b.count('.')==1:
+#		if b.count('.')==1:
+		if count(b, '.')==1:
 			b = b + '.0'
 		return -cmp(a, b)
 
