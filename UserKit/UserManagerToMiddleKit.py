@@ -26,7 +26,7 @@ class UserManagerToMiddleKit(UserManager):
 
 		class User(GenUser, User):
 
-			def __init__(self, manager, name, password):
+			def __init__(self, manager=None, name=None, password=None):
 				GenUser.__init__(self)
 				User.__init__(self, manager, name, password)
 

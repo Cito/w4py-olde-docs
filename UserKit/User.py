@@ -10,19 +10,32 @@ class User:
 
 	## Init ##
 
-	def __init__(self, manager, name, password):
+	def __init__(self, manager=None, name=None, password=None):
 		self._creationTime = time.time()
-		self._manager = manager
-		self.setName(name)
-		self.setPassword(password)
+
+		self._manager = None
+		self._name = None
+		self._password = None
 		self._isActive = 0
 		self._externalId = None
+
+		if manager is not None:
+			self.setManager(manager)
+		if name is not None:
+			self.setName(name)
+		if password is not None:
+			self.setPassword(password)
 
 
 	## Attributes ##
 
 	def manager(self):
 		return self._manager
+
+	def setManager(self, manager):
+		''' Sets the manager, which can only be done once. '''
+		assert self._manager is None
+		self._manager = manager
 
 	def serialNum(self):
 		return self._serialNum
@@ -47,6 +60,8 @@ class User:
 		return self._name
 
 	def setName(self, name):
+		''' Sets the name, which can only be done once. '''
+		assert self._name is None
 		self._name = name
 		# @@ 2001-02-15 ce: do we need to notify the manager
 		# which may have us keyed by name?

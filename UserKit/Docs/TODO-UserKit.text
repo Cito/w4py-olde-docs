@@ -43,6 +43,8 @@ TO DO
 
 <testing>
 
+	[ ] case: retrieve users from the middlekit store, totally fresh.
+
 	[ ] Test the various "default" parameters of all the methods.
 
 	[ ] cover all methods
