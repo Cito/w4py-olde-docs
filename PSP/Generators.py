@@ -222,7 +222,7 @@ class IncludeGenerator(GenericGenerator):
 
 	_theFunction = """
 __pspincludepath = self.transaction().request().urlPathDir() + "%s"
-self.transaction().application().includeServlet(self.transaction(), __pspincludepath)
+self.transaction().application().includeURL(self.transaction(), __pspincludepath)
 """
 
 	def __init__(self, attrs, param, ctxt):
