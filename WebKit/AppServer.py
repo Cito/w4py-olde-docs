@@ -16,6 +16,7 @@ from Object import Object
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 from Application import Application
 from PlugIn import PlugIn
+import sys, os
 
 
 DefaultConfig = {
@@ -60,14 +61,17 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		"""
 		Save the pid of the AppServer to a file name appserverpid.txt.
 		"""
-		import os
 		pidfile = open(os.path.join(self._serverSidePath, "appserverpid.txt"),"w")
 
 		if os.name == 'posix':
 			pidfile.write(str(os.getpid()))
 		else:
-			import win32api
-			pidfile.write(str(win32api.GetCurrentProcess()))
+			try:
+				import win32api
+			except:
+				print "win32 extensions not present.  Webkit Will not be able to detatch from the controlling terminal."
+			if sys.modules.has_key('win32api'):
+				pidfile.write(str(win32api.GetCurrentProcess()))
 
 	def shutDown(self):
 		"""
@@ -239,9 +243,12 @@ def stop():
 		import signal
 		os.kill(pid,signal.SIGINT)
 	else:
-		import win32process
-		win32process.TerminateProcess(pid,0)
-
+		try:
+			import win32process
+		except:
+			print "Win32 extensions not present.  Webkit cannot terminate the running process."
+		if sys.modules.has_key('win32process'):
+			win32process.TerminateProcess(pid,0)
 
 
 if __name__=='__main__':
