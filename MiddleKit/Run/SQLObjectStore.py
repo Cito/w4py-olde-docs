@@ -481,6 +481,10 @@ class SQLObjectStore(ObjectStore):
 class Model:
 
 	def sqlDatabaseName(self):
+		"""
+		Returns the name of the database (which is either the 'Database'
+		setting or self.name()).
+		"""
 		name = self.setting('Database', None)
 		if name is None:
 			name = self.name()
