@@ -156,7 +156,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		if file is not None and mtime != file['mtime']:
 			# Cache is out of date; clear it.
 			if debug: print '>> changed, clearing cache'
-			del fileCache['filename']
+			del fileCache[filename]
 			file = None
 		if file is None:
 			if debug: print '>> not found in cache'
