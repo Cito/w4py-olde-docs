@@ -147,6 +147,17 @@ class MiddleObject(NamedValueAccess):
 
 	## Misc utility ##
 
+	def refetch(self):
+		"""
+		Refetches the object's attributes from the store.
+		Only works for non-changed objects from a store.
+		@@ not covered by test suite yet
+		"""
+		assert self.isInStore()
+		assert not self.isChanged()
+		result = self.store().fetchObject(self.__class__, self.serialNum())
+		assert result is self, 'expecting result to be self. self=%r, result=%r' % (self, result)
+
 	def allAttrs(self, includeUnderscoresInKeys=1):
 		"""
 		Returns a dictionary mapping the names of attributes to their
