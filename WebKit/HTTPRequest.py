@@ -189,6 +189,17 @@ class HTTPRequest(Request):
 		''' Returns a new path which includes the servlet's path appended by 'joinPath'. Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned. '''
 		return os.path.join(self.serverSideDir(), joinPath)
 
+	def servletURI(self):
+		"""This is the URI of the servlet, without any query strings or extra path info"""
+		
+		sspath=self.serverSidePath()#ensure that extraPathInfo has been stripped
+		pinfo=self.pathInfo()
+		URI=pinfo[:string.rfind(pinfo,self.value("extraPathInfo",''))]
+		if URI[-1]=="/": URI=URI[:-1]
+		return URI
+		
+		
+
 
 	## Information ##
 	
