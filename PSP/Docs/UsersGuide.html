@@ -88,8 +88,9 @@ In conjunction with the <i>BaseMethod</i> page attribute, described below, and/o
 tag, entire sites can be based on a few custom PSP base classes.
 The default base class is <i>PSPPage.py</i>, which is inherited from the standard WebKit
 Page.py servlet.
-<p>You can also use multiple base classes by separating the base classes by commas.  If you use
-a base class in &lt;%@ page extends="..."%&gt; that is not specifically imported in a
+<p>You can also have your PSP inherit from multiple base classes.  To do this, separate the base classes using commas, for example
+&lt;%@ page extends="BaseClass1,BaseClass2"%&gt;.
+If you use a base class in &lt;%@ page extends="..."%&gt; that is not specifically imported in a
 &lt;%@ page imports="..."%&gt; directive, the base class will be assumed to follow the
 servlet convention of being in a file of the same name as the base class plus the ".py" extension.
 <p>
@@ -120,7 +121,7 @@ override.
 <p>This is a bit of a tricky item, because many editors will automatically replace tabs with spaces in their output, without the user realizing it.  If you are having trouble with complex blocks, look at that first.
 <p>
 <p><li><b><i><font color="blue">indentSpaces</font></i></b> - Sets the number of spaces to be used for indentation when <i>indentType</i> is set to spaces.  The default is "4".
-<p><b>Example</b> - <i> &lt;%@ page indentSpaces="8" %$gt;</i>
+<p><b>Example</b> - <i> &lt;%@ page indentSpaces="8" %&gt;</i>
 </ul>
 <p>
 <p><li><h3><b>Include Directive</b>- <i>&lt;%@ include</i></h3>
