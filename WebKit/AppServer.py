@@ -122,7 +122,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		''' Invoked by __init__. '''
 		print 'WebKit AppServer', self.version()
 		print 'part of Webware for Python'
-		print 'Copyright 1999-2000 by Chuck Esterbrook. All Rights Reserved.'
+		print 'Copyright 1999-2001 by Chuck Esterbrook. All Rights Reserved.'
 		print 'WebKit and Webware are open source.'
 		print 'Please visit:  http://webware.sourceforge.net'
 		print
@@ -193,7 +193,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 	def version(self):
 		# @@ 2000-07-10 ce: Resolve this with the version methods in Application
-		return '0.5.1' # @@ 2002-02-26 ce: should pull from Properties.py
+		return '1.0-pre' # @@ 2002-02-26 ce: should pull from Properties.py
 
 
 	def application(self):
