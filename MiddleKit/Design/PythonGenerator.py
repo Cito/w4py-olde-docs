@@ -301,6 +301,8 @@ class IntAttr:
 		if value is not None:
 			if type(value) is types.LongType:
 				value = int(value)
+				if type(value) is types.LongType: # happens in Python 2.3
+					raise OverflowError, value
 			elif type(value) is not types.IntType:
 				raise TypeError, 'expecting int type, but got value %r of type %r instead' % (value, type(value))
 ''')
