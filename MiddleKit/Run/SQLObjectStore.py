@@ -164,14 +164,14 @@ class SQLObjectStore(ObjectStore):
 		Raises an exception if aClass parameter is invalid.
 		'''
 		klass = self._klassForClass(aClass)
-		
+
 		# Fetch objects of subclasses first, because the code below will be modifying clauses and serialNum
 		deepObjs = []
 		if isDeep:
 			for subklass in klass.subklasses():
 				deepObjs.extend(self.fetchObjectsOfClass(subklass, clauses, isDeep, serialNum))
 
-		# Now get objects of this exact class						
+		# Now get objects of this exact class
 		objs = []
 		if not klass.isAbstract():
 			# @@ 2000-10-29 ce: Optimize this. The results for columns & attribute names can be cached with the Klass
@@ -191,7 +191,10 @@ class SQLObjectStore(ObjectStore):
 				if obj is None:
 					# Brand new object
 					results = {}
-					exec 'from %s import %s' % (className, className) in results
+					pkg = self._model.setting('Package', '')
+					if pkg:
+						pkg += '.'
+					exec 'from %s%s import %s' % (pkg, className, className) in results
 					pyClass = results[className]
 					obj = pyClass()
 					assert isinstance(obj, MiddleObject), 'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r' % (obj, type(obj), MiddleObject)

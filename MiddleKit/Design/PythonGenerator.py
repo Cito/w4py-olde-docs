@@ -111,13 +111,17 @@ class Klass:
 		if supername=='MiddleObject':
 			wr('\n\nfrom MiddleKit.Run.MiddleObject import MiddleObject\n')
 		else:
+			pkg = self.setting('Package', '')
+			if pkg:
+				pkg += '.'
+			backPath = '../' * (pkg.count('.')+1)
 			wr('''\
 import sys
-sys.path.insert(0, '..')
-from %s import %s
+sys.path.insert(0, %(backpath)s)
+from %(pkg)s%(supername)s import %(supername)s
 del sys.path[0]
 
-''' % (supername, supername))
+''' % locals())
 
 	def writePyClassDef(self):
 		wr = self._pyOut.write
