@@ -66,6 +66,8 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		if self.setting('PrintConfigAtStartUp'):
 			self.printConfig()
 
+		self.initVersions()
+
 		if transactionClass:
 			self._transactionClass = transactionClass
 		else:
@@ -189,7 +191,21 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 				# Fall back on a simple string
 				self._404Page = """404 Error<p>File Not Found: %s"""
 
-### End __init__
+
+	def initVersions(self):
+		'''
+		Initialize attributes that store the Webware and WebKit versions
+		as both tuples and strings. These are stored in the Properties.py
+		files.
+		'''
+		from MiscUtils.PropertiesObject import PropertiesObject
+		props = PropertiesObject(os.path.join(self.webwarePath(), 'Properties.py'))
+		self._webwareVersion = props['version']
+		self._webwareVersionString = props['versionString']
+
+		props = PropertiesObject(os.path.join(self.webKitPath(), 'Properties.py'))
+		self._webKitVersion = props['version']
+		self._webKitVersionString = props['versionString']
 
 
 ## Task access
@@ -291,23 +307,30 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 
 	## Versions ##
 
-	def webwareVersion(self):
-		''' Returns the version of Webware as a string. '''
-		if not hasattr(self, '_webwareVersion'):
-			from MiscUtils.PropertiesObject import PropertiesObject
-			props = PropertiesObject(os.path.join(self.webwarePath(), 'Properties.py'))
-			self._webwareVersion = props['versionString']
-		return self._webwareVersion
-
-	def webKitVersion(self):
-		return '0.6a1'  # @@ 2002-02-26 ce: should pull from Properties.py
-
 	def version(self):
 		"""
-		Returns the version of the application. This implementation returns '0.1'. Subclasses should override to return the correct version number.
+		Returns the version of the application. This implementation
+		returns '0.1'. Subclasses should override to return the correct
+		version number.
 		"""
 		## @@ 2000-05-01 ce: Maybe this could be a setting 'AppVersion'
 		return '0.1'
+
+	def webwareVersion(self):
+		''' Returns the Webware version as a tuple. '''
+		return self._webwareVersion
+
+	def webwareVersionString(self):
+		''' Returns the Webware version as a printable string. '''
+		return self._webwareVersionString
+
+	def webKitVersion(self):
+		''' Returns the WebKit version as a tuple. '''
+		return self._webKitVersion
+
+	def webKitVersionString(self):
+		''' Returns the WebKit version as a printable string. '''
+		return self._webKitVersionString
 
 
 	## Dispatching Requests ##

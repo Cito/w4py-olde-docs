@@ -3,7 +3,7 @@ from ExamplePage import ExamplePage
 class Welcome(ExamplePage):
 
 	def writeContent(self):
-		self.writeln('<p> Welcome to WebKit %s!' % self.application().webKitVersion())
+		self.writeln('<p> Welcome to WebKit %s!' % self.application().webKitVersionString())
 		self.writeln('''<p> Along the side of this page you will see various links that will take you to:
 
 		<ul>

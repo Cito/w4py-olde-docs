@@ -139,8 +139,8 @@ class SidebarPage(Page):
 	def writeVersions(self):
 		app = self.application()
 		self.menuHeading('Versions')
-		self.menuItem('WebKit ' + app.webKitVersion())
-		self.menuItem('Webware ' + app.webwareVersion())
+		self.menuItem('WebKit ' + app.webKitVersionString())
+		self.menuItem('Webware ' + app.webwareVersionString())
 		import string, sys
 		self.menuItem('Python ' + string.split(sys.version)[0])
 
