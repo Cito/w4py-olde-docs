@@ -485,9 +485,9 @@ class Application(Configurable):
 		return inst
 
 	def returnInstance(self, transaction, path):
-		""" The only case I care about now is threadsafe=0"""
+		""" The only case I care about now is threadsafe=0 and reuseable=1"""
 		cache = self._servletCacheByPath.get(path, None)
-		if not cache['threadsafe']:
+		if cache['reuseable'] and not cache['threadsafe']:
 			try:
 				cache['instances'].put_nowait(transaction.servlet())
 				return
