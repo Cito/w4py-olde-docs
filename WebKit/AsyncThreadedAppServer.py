@@ -208,7 +208,7 @@ class RequestHandler(asyncore.dispatcher):
 		if self.reqdata == 'QUIT':
 			self._buffer = 'OK'
 			self.have_response = 1
-			self.server.shutDown()
+			self.server.initiateShutdown()
 			return
 
 
@@ -344,6 +344,7 @@ class Monitor(asyncore.dispatcher):
 		self.bind(addr)
 		self.listen(5)
 		self.server = server
+		print "Monitor socket connected"
 
 	def handle_accept(self):
 		rh = None
@@ -438,12 +439,11 @@ If AppServer is called with no arguments, it will start the AppServer and record
 
 
 def main(args):
-##	if len(args)>1:
 	monitor=0
 	function=run
 	daemon=0
-	
-	for i in args[1:]:
+	print args
+	for i in args:
 		if i == "monitor":
 			print "Enabling Monitoring"
 			monitor=1
