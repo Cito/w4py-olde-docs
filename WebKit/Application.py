@@ -484,8 +484,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			pass
 		if servlet:
 			# Return the servlet to its pool
-			# 3-03 ib @@: what's this really supposed to do?
-			self.returnServlet(servlet)
+			self.returnServlet(servlet, trans)
 
 	def runServlet(self, servlet, trans):
 		"""
@@ -617,6 +616,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		servlet = self._rootURLParser.findServletForTransaction(trans)
 		trans._servlet = servlet
 		servlet.runTransaction(trans)
+		self.returnServlet(servlet, trans)
 		req.setURLPath(currentPath)
 		req._serverSidePath = currentServerSidePath
 		req._serverSideContextPath = currentServerSideContextPath
@@ -646,9 +646,9 @@ class Application(ConfigurableForServerSidePath, Object):
 				context = req._contextName
 			return '/%s%s' % (context, url)
 			
-	def returnServlet(self, servlet):
-		# @@: this should return the servlet to its factory
-		pass
+	def returnServlet(self, servlet, trans):
+		print "Closing: %s" % servlet
+		servlet.close(trans)
 
 	def handleExceptionInTransaction(self, excInfo, transaction):
 		"""

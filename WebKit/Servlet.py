@@ -24,6 +24,7 @@ class Servlet(Object):
 		""" Subclasses must invoke super. """
 		Object.__init__(self)
 		self._serverSidePath = None
+		self._factory = None
 
 
 	## Access ##
@@ -101,3 +102,10 @@ class Servlet(Object):
 		"""
 		self.deprecated(self.serverSideDir)
 		return os.path.dirname(self.serverSidePath())
+
+	def close(self, trans):
+		if self._factory:
+			self._factory.returnServlet(self, trans)
+
+	def setFactory(self, factory):
+		self._factory = factory

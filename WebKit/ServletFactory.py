@@ -22,6 +22,7 @@ class ServletFactory(Object):
 		Object.__init__(self)
 		self._app = application
 		self._cacheClasses = self._app.setting("CacheServletClasses",1)
+		self._cacheInstances = self._app.setting("CacheServletInstances",1)
 
 	def name(self):
 		""" Returns the name of the factory. This is a convenience for the class name. """
@@ -138,6 +139,11 @@ class ServletFactory(Object):
 				fp.close()
 		return module
 
+	def returnServlet(self, servlet):
+		## @@ ib 07-2003: Should this be an explicit subclass
+		## responsibility?
+		pass
+
 class PythonServletFactory(ServletFactory):
 	"""
 	This is the factory for ordinary, Python servlets whose extensions are empty or .py. The servlets are unique per file since the file itself defines the servlet.
@@ -145,8 +151,17 @@ class PythonServletFactory(ServletFactory):
 
 	def __init__(self,app):
 		ServletFactory.__init__(self,app)
-		self._cache = {}
-		self._lock = threading.RLock()
+		# All caches are keyed on the path.
+		# _classCache caches the servlet classes, in dictionaries
+		# with keys 'mtime' and 'class'.  'mtime' is the
+		# modification time of the enclosing module.
+		self._classCache = {}
+		# _servletPool has lists of free reusable servlets
+		self._servletPool = {}
+		# _threadsafeServletCache has threadsafe servlets
+		# (which are not pooled, so only one is kept at a time)
+		self._threadsafeServletCache = {}
+		self._importLock = threading.RLock()
 
 	def uniqueness(self):
 		return 'file'
@@ -157,66 +172,76 @@ class PythonServletFactory(ServletFactory):
 	def flushCache(self):
 		self._cache = {}
 
-#	def old_servletForTransaction(self, transaction):
-#		path = transaction.request().serverSidePath()
-#		globals = {}
-#		execfile(path, globals)
-#		from types import ClassType
-#		name = os.path.splitext(os.path.split(path)[1])[0]
-#		assert globals.has_key(name), 'Cannot find expected servlet class named "%s".' % name
-#		theClass = globals[name]
-#		assert type(theClass) is ClassType
-#		assert issubclass(theClass, Servlet)
-#		return theClass()
+	def returnServlet(self, servlet, trans):
+		if servlet.canBeReused() \
+		       and not servlet.canBeThreaded() \
+		       and self._cacheInstances:
+			path = trans.request().serverSidePath()
+			self._servletPool[path].append(servlet)
 
 	def servletForTransaction(self, transaction):
 		request = transaction.request()
 		path = request.serverSidePath()
-		name = os.path.splitext(os.path.split(path)[1])[0]
-		# Use a lock to prevent multiple simultaneous imports of the same module
-		self._lock.acquire()
-		try:
-			if not self._cache.has_key(path):
-				self._cache[path] = {}
-			if os.path.getmtime(path) > self._cache[path].get('mtime', 0):
-				# Import the module as part of the context's package
-				module = self.importAsPackage(transaction, path)
-				assert module.__dict__.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
-				# Pull the servlet class out of the module
-				theClass = getattr(module, name)
-				# new-style classes aren't ClassType, but they
-				# are okay to use.  They are subclasses of
-				# type.  But type isn't a class in older
-				# Python versions, it's a builtin function.
-				# So we test what type is first, then use
-				# isinstance only for the newer Python
-				# versions
-				if type(type) is BuiltinFunctionType:
-					assert type(theClass) is ClassType
-				else:
-					assert type(theClass) is ClassType \
-					       or isinstance(theClass, type)
-				assert issubclass(theClass, Servlet)
-				self._cache[path]['mtime'] = os.path.getmtime(path)
-				self._cache[path]['class'] = theClass
-			else:
-				theClass = self._cache[path]['class']
-				if not self._cacheClasses:
-					del self._cache[path]
-			return theClass()
-		finally:
-			self._lock.release()
 
-#	def import_servletForTransaction(self, transaction):
-#		path = transaction.request().serverSidePath()
-#		name = os.path.splitext(os.path.split(path)[1])[0]
-#		if not self.cache.has_key(name): self.cache[name]={}
-#		if os.path.getmtime(path) > self.cache[name].get('mtime',0):
-#			if not os.path.split(path)[0] in sys.path: sys.path.append(os.path.split(path[0]))
-#			module_obj=__import__(name)
-#			reload(module_obj)#force reload
-#			inst =  module_obj.__dict__[name]()
-#			self.cache[name]['mtime']=os.path.getmtime(path)
-#		else:
-#			inst = sys.modules[name].__dict__[name]()
-#		return inst
+		if self._threadsafeServletCache.has_key(path):
+			return self._threadsafeServletCache[path]
+		try:
+			servlet = self._servletPool[path].pop()
+		except (KeyError, IndexError):
+			pass
+		else:
+			return servlet
+		
+		# Use a lock to prevent multiple simultaneous imports of the same module
+		self._importLock.acquire()
+		try:
+			if not self._classCache.has_key(path):
+				self._classCache[path] = self.loadClass(path, transaction)
+			if os.path.getmtime(path) > self._classCache[path]['mtime']:
+				self._classCache[path] = self.loadClass(path, transaction)
+			theClass = self._classCache[path]['class']
+			if not self._cacheClasses:
+				del self._classCache[path]
+		finally:
+			self._importLock.release()
+
+		servlet = theClass()
+		servlet.setFactory(self)
+		if servlet.canBeReused():
+			if servlet.canBeThreaded():
+				self._threadsafeServletCache[path] = servlet
+			else:
+				self._servletPool[path] = []
+		return servlet
+			
+	def loadClass(self, path, transaction):
+		name = os.path.splitext(os.path.split(path)[1])[0]
+		# Import the module as part of the context's package
+		module = self.importAsPackage(transaction, path)
+		assert module.__dict__.has_key(name), 'Cannot find expected servlet class named %s in %s.' % (repr(name), repr(path))
+		# Pull the servlet class out of the module
+		theClass = getattr(module, name)
+		# new-style classes aren't ClassType, but they
+		# are okay to use.  They are subclasses of
+		# type.  But type isn't a class in older
+		# Python versions, it's a builtin function.
+		# So we test what type is first, then use
+		# isinstance only for the newer Python
+		# versions
+		if type(type) is BuiltinFunctionType:
+			assert type(theClass) is ClassType
+		else:
+			assert type(theClass) is ClassType \
+			       or isinstance(theClass, type)
+		assert issubclass(theClass, Servlet)
+		return {'mtime': os.path.getmtime(path),
+			'class': theClass}
+
+	def findInCache(self, path):
+		"""
+		If it can find an up-to-date cached servlet, then
+		return that (removing it from the pool, if necessary).
+		If not and force is true, then create a new servlet
+		instance, caching everything.
+		"""
+		
