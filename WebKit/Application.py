@@ -14,7 +14,6 @@ import imp
 import string
 from threading import Lock, Thread, Event
 from time import *
-from CanContainer import *
 from WebKit.Cookie import Cookie
 
 from WebUtils.HTMLForException import HTMLForException
@@ -31,7 +30,7 @@ class ApplicationError(Exception):
 	pass
 
 
-class Application(ConfigurableForServerSidePath, CanContainer, Object):
+class Application(ConfigurableForServerSidePath, Object):
 	"""
 	FUTURE
 		* 2000-04-09 ce: Automatically open in browser.
@@ -103,9 +102,6 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		self._serverSideInfoCacheByPath = {}
 		self._cacheDictLock = Lock()
 		self._instanceCacheSize = self._server.setting('MaxServerThreads')
-		self._canDirs = []
-
-		self.initializeCans()
 
 		# Set up servlet factories
 		self._factoryList = []  # the list of factories
@@ -222,16 +218,6 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		tm.addPeriodicAction(time.time()+sweepinterval, sweepinterval, task, "SessionSweeper")
 		print "Session Sweeper started"
 
-
-##Can Stuff
-	def initializeCans(self):
-		"""
-		@@ Overhaul by 0.4
-		"""
-		import CanFactory
-		self._canFactory = CanFactory.CanFactory(self)
-
-
 	def shutDown(self):
 		"""
 		Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references.
@@ -246,9 +232,7 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		self._sessions.storeAllSessions()
 		if self._server.isPersistent():
 			self.taskManager().stop()
-		del self._canFactory
 		del self._sessions
-		self._delCans()
 		del self._factoryByExt
 		del self._factoryList
 		del self._server

@@ -316,26 +316,6 @@ class Page(HTTPServlet):
 
 	## Self utility ##
 
-	def getCan(self, ID, klass, storage='request',*args, **kargs):
-		"""Gets a Can"""
-		storage = string.lower(storage)
-		if storage=="session":
-			container=self.session()
-		elif storage=="request":
-			container=self._transaction.request()
-		elif storage=="application":
-			container=self._transaction.application()
-		else:
-			print storage
-			raise "Invalid Storage Parameter",storage
-
-		instance = container.getCan(ID)
-		if instance == None:
-			instance = apply(self._transaction.application()._canFactory.createCan,(klass,)+args,kargs)
-			container.setCan(ID,instance)
-		return instance
-
-
 	def sessionEncode(self, url=None):
 		"""
 		Utility function to access session.sessionEncode.

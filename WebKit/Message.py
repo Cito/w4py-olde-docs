@@ -1,8 +1,7 @@
 from Common import *
-from CanContainer import *
 
 
-class Message(Object,CanContainer):
+class Message(Object):
 	'''
 	Message is the abstract, parent class for both Request and Response, and implements the behavior that is generic to both.
 
@@ -11,12 +10,12 @@ class Message(Object,CanContainer):
 		* A set of arguments.
 		* A protocol.
 		* A content type and length.
-	
+
 	FUTURE
 		* Support for different types of encodings
 	'''
 
-	
+
 	## Init ##
 
 	def __init__(self):
@@ -25,7 +24,7 @@ class Message(Object,CanContainer):
 
 
 	## Content ##
-	
+
 	def contentLength(self):
 		''' Returns the length of the message body or -1 if not known. '''
 		return -1
@@ -34,25 +33,25 @@ class Message(Object,CanContainer):
 		''' Returns the MIME type of the message body or None if not known. '''
 		return None
 
-		
+
 	## Protocol ##
-	
+
 	def protocol(self):
 		''' Returns the name and version of the protocol the message uses in the form protocol/majorVersion.minorVersion, for example, HTTP/1.1. '''
 		# @@ 2000-04-09 ce: Move this down into HTTPSomething subclasses
 		return 'HTTP/1.0'
 
-		
+
 	## Arguments ##
 
 	# @@ 2000-05-10 ce: Are arguments really used for anything?
-		
+
 	def arg(self, name, default=Tombstone):
 		if default is Tombstone:
 			return self._args[name]
 		else:
 			return self._args.get(name, default)
-	
+
 	def setArg(self, name, value):
 		self._args[name] = value
 

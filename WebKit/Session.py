@@ -1,7 +1,6 @@
 from Common import *
 import whrandom
 from time import localtime, time
-from CanContainer import *
 
 
 
@@ -9,7 +8,7 @@ class SessionError(Exception):
 	pass
 
 
-class Session(Object, CanContainer):
+class Session(Object):
 	'''
 	All methods that deal with time stamps, such as creationTime(),
 	treat time as the number of seconds since January 1, 1970.
@@ -123,7 +122,7 @@ class Session(Object, CanContainer):
 
 	def __delitem__(self, name):
 		self.delValue(self, name)
-		
+
 
 	## Transactions ##
 

@@ -64,28 +64,6 @@ class Servlet(Object):
 		return 1
 
 
-	## Cans ##
-
-	def getCan(self, ID, klass, storage,trans,*args, **kargs):
-		""" Gets a Can, but requires that the transaction be passed in."""
-		storage = string.lower(storage)
-		if storage=="session":
-			container=trans.session()
-		elif storage=="request":
-			container=trans.request()
-		elif storage=="application":
-			container=trans.application()
-		else:
-			print storage
-			raise "Invalid Storage Parameter",storage
-
-		instance = container.getCan(ID)
-		if instance == None:
-			instance = apply(trans.application()._canFactory.createCan,(klass,)+args,kargs)
-			container.setCan(ID,instance)
-		return instance
-
-
 	## Server side filesystem ##
 
 	def serverSidePath(self, path=None):
