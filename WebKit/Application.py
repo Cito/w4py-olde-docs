@@ -135,7 +135,7 @@ class Application(Configurable,CanContainer):
 
 	def initializeCans(self):
 		"""
-		Overhaul by 0.4
+		@@ Overhaul by 0.4
 		"""
 		import CanFactory
 		self._canFactory = CanFactory.CanFactory(self,os.path.join(os.getcwd(),'Cans'))
@@ -164,33 +164,6 @@ class Application(Configurable,CanContainer):
 			if (curTime - sessions[key].lastAccessTime()) >= timeout:
 				del sessions[key]
 
-	# @@ 2000-08-04 ce: Once sessionSweeper() has matured, remove this method. No longer used.
-	def sweeperThreadFunc(self,sessions,timeout): #JSL, moved this here so I can control it better, later
-		"""
-		This function runs in a separate thread and cleans out stale sessions periodically.
-		"""
-		import sys
-		timeout = timeout * 60  # convert minutes to seconds
-		count = 0
-		frequency = 30 #how often to run *2
-
-		while 1:
-			if not self.running:
-				break #time to quit
-			count = count+1
-			if count > frequency:
-				currtime=time()
-				keys=sessions.keys()
-				for i in keys:
-					if (currtime - sessions[i].lastAccessTime()) > timeout:
-						del sessions[i]
-				count = 0
-			try:
-				sleep(2)#sleep for 2 secs, then check to see if its time to quit or run
-				# @@ 2000-08-03 ce: er, 2 secs? perhaps that and 'frequency' should be configurable
-			except IOError, e:
-				pass
-
 	def shutDown(self):
 		"""
 	Called by AppServer when it is shuting down.  The __del__ function of Application probably won't be called due to circular references.
@@ -208,10 +181,6 @@ class Application(Configurable,CanContainer):
 			del self._sessSweepThread
 		print "Exiting Application"
 
-##	  def __del__(self):
-##			  print "Application deleted"
-
-
 
 	## Config ##
 
@@ -223,6 +192,8 @@ class Application(Configurable,CanContainer):
 			'LogActivity':          1,
 			'ActivityLogFilename':  'Logs/Activity.csv',
 			'ActivityLogColumns':   ['request.remoteAddress', 'request.method', 'request.uri', 'response.size', 'servlet.name', 'request.timeStamp', 'transaction.duration', 'transaction.errorOccurred'],
+			'SessionStore':         'Memory',  # can be File or Memory
+			'SessionTimeout':        60,  # minutes
 
 			# Error handling
 			'ShowDebugInfoOnErrors': 1,
@@ -244,7 +215,6 @@ class Application(Configurable,CanContainer):
 			                           'Documentation': 'Documentation',
 			                           'Testing':       'Testing',
 			                         },
-			'SessionTimeout':        60,  # minutes
 		}
 
 	def configFilename(self):
@@ -382,7 +352,6 @@ class Application(Configurable,CanContainer):
 		# @@ 2000-08-10 ce: This is a little cheesy. We could load a template...
 
 	def handleGoodURL(self, transaction):
-		#session	 = self.createSessionForTransaction(transaction)
 		self.createServletInTransaction(transaction)
 		self.awake(transaction)
 		self.respond(transaction)
@@ -411,33 +380,6 @@ class Application(Configurable,CanContainer):
 		newRequest.setURLPath(urlPath)
 		newTrans = self.dispatchRequest(newRequest)
 		trans.response().appendRawResponse(newTrans.response().rawResponse())
-		return
-
-		# Save the things we're gonna change.
-		currentPath = req.serverSidePath()
-		currentServlet = trans.servlet()
-
-		# Get the path to the next servlet.
-		req.setURLPath(urlPath)
-#			   req._serverSidePath = self.serverSidePathForRequest(req)
-
-		# Get the servlet
-		self.dispatchRequest(req)
-
-		if 0:
-			# the old way
-			self.createServletInTransaction(trans)
-
-			# Call the servlet, but not session, it's already alive
-			trans.servlet().awake(trans)
-			trans.servlet().respond(trans)
-			trans.servlet().sleep(trans)
-
-			self.returnInstance(trans, req.serverSidePath())
-
-		# Replace things like they were
-		req.setURLPath(currentPath)
-		trans.setServlet(currentServlet)
 
 
 	## Transactions ##
@@ -621,53 +563,6 @@ class Application(Configurable,CanContainer):
 		transaction.setSession(session)
 		return session
 
-	def _original_createServletInTransaction(self, transaction):
-		# Get the path and extension
-		path = transaction.request().serverSidePath()
-
-		# Cached?
-		cache = self._servletCacheByPath.get(path, None)
-
-		# File is not newer?
-		if cache and self._servletCacheByPath[path]['timestamp']<os.path.getmtime(path):
-			cache = None
-
-		# Instance can be reused?
-		if cache and not cache['instance'].canBeReused():
-			cache = None
-
-		# Create the cache?
-		if not cache:
-			# Add the path to sys.path. @@ 2000-05-09 ce: not the most ideal solution, but works for now
-			dir = os.path.split(path)[0]
-
-			if not dir in sys.path:
-				sys.path.insert(0, dir)
-
-			# Get the factory responsible for making this servlet
-			ext = os.path.splitext(path)[1]
-			factory = self._factoryByExt.get(ext, None)
-			if not factory:
-				factory = self._factoryByExt.get('.*', None) # special case: .* is the catch-all
-				if not factory:
-					raise ApplicationError, 'Unknown extension (%s). No factory found.' % ext
-					# ^ @@ 2000-05-03 ce: Maybe the web browser doesn't want an exception for bad extensions. We probably need a nicer message to the user...
-					#					 On the other hand, that can always be done by providing a factory for '.*'
-			assert factory.uniqueness()=='file', '%s uniqueness is not supported.' % factory.uniqueness()
-
-			# Get the servlet and create the cache
-			cache = {
-				'instance':  factory.servletForTransaction(transaction),
-				'path':	  path,
-				'timestamp': os.path.getmtime(path)
-			}
-			assert cache['instance'] is not None, 'Factory (%s) failed to create a servlet upon request.' % factory.name()
-			self._servletCacheByPath[path] = cache
-
-		# Set the transaction's servlet
-		transaction.setServlet(cache['instance'])
-
-	##JSL
 	def getServlet(self, transaction, path, cache=None): #send the cache if you want the cache info set
 		ext = os.path.splitext(path)[1]
 		# Add the path to sys.path. @@ 2000-05-09 ce: not the most ideal solution, but works for now
@@ -712,15 +607,12 @@ class Application(Configurable,CanContainer):
 
 ##			  print ">> Deleting Servlet: ",sys.getrefcount(transaction._servlet)
 
-
-
 	def newServletCacheItem(self,key,item):
 		""" Safely add new item to the main cache.  Not woried about the retrieval for now.
 		I'm not even sure this is necessary, as it's a one bytecode op, but it doesn't cost much of anything speed wise."""
 		#self._cacheDictLock.acquire()
 		self._servletCacheByPath[key] = item
 		#self._cacheDictLock.release()
-
 
 	def createServletInTransaction(self, transaction):
 		# Get the path
@@ -744,12 +636,12 @@ class Application(Configurable,CanContainer):
 		if not cache:
 			cache = {
 				'instances':  Queue.Queue(self._instanceCacheSize+1), # +1 is for safety
-				'path':	   path,
+				'path':	      path,
 				'timestamp':  os.path.getmtime(path),
 				'threadsafe': 0,
 				'reuseable':  0,
-				'created':	1,
-				'lock':	   Lock(), # used for the created count
+				'created':    1,
+				'lock':       Lock(), # used for the created count
 				}
 
 			self.newServletCacheItem(path,cache)
@@ -787,8 +679,6 @@ class Application(Configurable,CanContainer):
 
 		# Set the transaction's servlet
 		transaction.setServlet(inst)
-
-	##END JSL threadpool
 
 	def handleExceptionInTransaction(self, excInfo, transaction):
 		self._exceptionHandlerClass(self, transaction, excInfo)
