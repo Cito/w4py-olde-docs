@@ -111,6 +111,7 @@ class Transaction(Object):
 		self._servlet.sleep(self)
 		if self._session:
 			self._session.sleep(self)
+			self._application.sessions().storeSession(self._session)
 
 
 	## Debugging ##
