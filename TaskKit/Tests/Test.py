@@ -15,8 +15,8 @@ class TaskKitTest(unittest.TestCase):
 		sched.start()
 
 	def tearDown(self):
-		 self.scheduler.stop()
-		 self.scheduler = None
+		self.scheduler.stop()
+		self.scheduler = None
 
 
 def makeTestSuite():
