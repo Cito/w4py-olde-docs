@@ -1,12 +1,12 @@
 from RoleUserManagerMixIn import RoleUserManagerMixIn
-from UserManager import UserManager
+from UserManagerToFile import UserManagerToFile
 
 
-class RoleUserManager(UserManager, RoleUserManagerMixIn):
+class RoleUserManagerToFile(UserManagerToFile, RoleUserManagerMixIn):
 	'''
 	See the base classes for more information.
 	'''
 
 	def __init__(self, userClass=None):
-		UserManager.__init__(self, userClass)
+		UserManagerToFile.__init__(self, userClass)
 		RoleUserManagerMixIn.__init__(self)

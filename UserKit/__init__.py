@@ -6,8 +6,13 @@ def InstallInWebKit(appServer):
 	pass
 
 
-def combineManagerClasses(*classesOrNamesThereof):
+def dont_use_combineManagerClasses(*classesOrNamesThereof):
 	'''
+	----
+	While this was a nice idea that nearly worked, it broke on keyword arguments to __init__ methods. Fixing it seemed nastier than the next solution: Split RoleUserManager's methods out into RoleUserManagerMixIn, which inherits nothing. Then use the mix-in for the various manager classes, taking care of problems manually in the classes.
+	@@ 2002-04-10 ce
+	----
+
 	Given a list of "orthogonal" classes (or their names), that all inherit from UserManager, this function returns a new class that combines all of them. By "orthogonal" we mean that the features of the user manager are separate concerns and not dependent on each other.
 	Out of the box, UserKit provides custom user managers for:
 		* persistence

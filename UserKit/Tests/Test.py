@@ -140,40 +140,6 @@ class UserManagerToFileTest(UserManagerToSomewhereTest):
 
 class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 
-	def checkUserClass(self):
-		pass
-
-	def makeModel(self):
-		''' Constructs and returns a MiddleKit model for use with UserKit. '''
-
-		from MiddleKit.Core.Model import Model
-		from MiddleKit.Core.Klasses import Klasses
-		from MiddleKit.Core.Klass import Klass
-		from MiddleKit.Core.StringAttr import StringAttr
-		klass = Klass()
-		klass.readDict({'Class': 'UserForMKTest'})
-		klass.addAttr(StringAttr({
-			'Name': 'name',
-			'Type': 'string',
-			'isRequired': 1,
-		}))
-		klass.addAttr(StringAttr({
-			'Name': 'password',
-			'Type': 'string',
-			'isRequired': 1,
-		}))
-		klass.addAttr(StringAttr({
-			'Name': 'externalId',
-			'Type': 'string',
-			'isRequired': 0,
-		}))
-		model = Model()
-		model.setName(self.__class__.__name__)
-		klasses = model.klasses()
-		klasses.addKlass(klass)
-		klasses.awakeFromRead() # @@ 2001-02-17 ce: a little weird
-		return model
-
 	def setUp(self):
 		UserManagerToSomewhereTest.setUp(self)
 		model = self.makeModel()
@@ -211,7 +177,45 @@ class UserManagerToMiddleKitTest(UserManagerToSomewhereTest):
 			base2.__init__(self, manager=manager, name=name, password=password)
 
 		UserForMKTest.__init__ = __init__
-		self.mgr = UserManagerToMiddleKit(userClass=UserForMKTest, store=store)
+		self.mgr = self.userManagerClass()(userClass=UserForMKTest, store=store)
+
+	def checkUserClass(self):
+		pass
+
+	def makeModel(self):
+		''' Constructs and returns a MiddleKit model for use with UserKit. '''
+
+		from MiddleKit.Core.Model import Model
+		from MiddleKit.Core.Klasses import Klasses
+		from MiddleKit.Core.Klass import Klass
+		from MiddleKit.Core.StringAttr import StringAttr
+		klass = Klass()
+		klass.readDict({'Class': 'UserForMKTest'})
+		klass.addAttr(StringAttr({
+			'Name': 'name',
+			'Type': 'string',
+			'isRequired': 1,
+		}))
+		klass.addAttr(StringAttr({
+			'Name': 'password',
+			'Type': 'string',
+			'isRequired': 1,
+		}))
+		klass.addAttr(StringAttr({
+			'Name': 'externalId',
+			'Type': 'string',
+			'isRequired': 0,
+		}))
+		model = Model()
+		model.setName(self.__class__.__name__)
+		klasses = model.klasses()
+		klasses.addKlass(klass)
+		klasses.awakeFromRead() # @@ 2001-02-17 ce: a little weird
+		return model
+
+	def userManagerClass(self):
+		from UserKit.UserManagerToMiddleKit import UserManagerToMiddleKit
+		return UserManagerToMiddleKit
 
 	def tearDown(self):
 		# clean out generated files
@@ -310,11 +314,19 @@ class HierRoleTest(unittest.TestCase):
 class RoleUserManagerToFileTest(UserManagerToFileTest):
 
 	def setUp(self):
-		UserManagerToSomewhereTest.setUp(self)
-		umClass = UserKit.combineManagerClasses('UserManagerToFile', 'RoleUserManager')
+		UserManagerToFileTest.setUp(self)
+		from UserKit.RoleUserManagerToFile import RoleUserManagerToFile as umClass
+#		umClass = UserKit.combineManagerClasses('UserManagerToFile', 'RoleUserManager')
 		self.mgr = umClass()
 		self.setUpUserDir(self.mgr)
 
+
+class RoleUserManagerToMiddleKitTest(UserManagerToMiddleKitTest):
+
+	def userManagerClass(self):
+		from UserKit.RoleUserManagerToMiddleKit import RoleUserManagerToMiddleKit
+		return RoleUserManagerToMiddleKit
+		#return UserKit.combineManagerClasses('UserManagerToMiddleKit', 'RoleUserManager')
 
 
 def makeTestSuite():
@@ -324,6 +336,7 @@ def makeTestSuite():
 		UserManagerToMiddleKitTest,
 		BasicRoleTest,
 		RoleUserManagerToFileTest,
+		RoleUserManagerToMiddleKitTest,
 	]
 	make = unittest.makeSuite
 	suites = [make(clazz, 'check') for clazz in testClasses]
