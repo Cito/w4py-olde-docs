@@ -355,6 +355,14 @@ class Page(HTTPServlet):
 		"""
 		raise EndResponse
 
+	def sendRedirectAndEnd(self, url):
+		"""
+		Sends a redirect back to the client and ends the response. This
+		is a very popular pattern.
+		"""
+		self.response().sendRedirect(self)
+		self.endResponse()
+
 
 	## Self utility ##
 
