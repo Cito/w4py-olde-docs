@@ -305,8 +305,9 @@ class Klass(MiddleDict, ModelObject):
 			for klass in self._klassContainer._model.allKlassesInOrder():
 				# find all ObjRefAttrs of klass that refer to one of our targetKlasses
 				for attr in klass.attrs():
-					if isinstance(attr, ObjRefAttr) and targetKlasses.has_key(attr.targetClassName()):
-						backObjRefAttrs.append(attr)
+					if not attr.get('isDerived', 0):
+						if isinstance(attr, ObjRefAttr) and targetKlasses.has_key(attr.targetClassName()):
+							backObjRefAttrs.append(attr)
 			self._backObjRefAttrs = backObjRefAttrs
 		return self._backObjRefAttrs
 
