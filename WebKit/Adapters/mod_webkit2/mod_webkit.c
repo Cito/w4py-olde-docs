@@ -234,7 +234,7 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
     apr_status_t rv;
     apr_socket_t *aprsock;
 
-    log_message("In wksock_open",r);
+    //    log_message("In wksock_open",r);
 
     if (cfg->apraddr==NULL) {
       log_error("No Valid Host Configured",r->server);
@@ -244,7 +244,7 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
                                     SOCK_STREAM, r->pool)) != APR_SUCCESS)
 
        {
-	 log_message("Failure creating socket",r);
+	 log_error("Failure creating socket for appserver connection",r->server);
 	return NULL;
        }
 
@@ -262,7 +262,7 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
 
     /* Check if we connected */
     if (rv!=APR_SUCCESS){  //(ret==-1) {
-	log_error("Can not connect to WebKit AppServer",r->server);
+	log_message("Can not open socket connection to WebKit AppServer",r);
 	return NULL;
     }
 
@@ -323,7 +323,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
 
 
 
-    log_message("In transact_with_appserver",r);
+    //    log_message("In transact_with_appserver",r);
 
 
     aprsock = wksock_open(r, cfg->addr, cfg->port, cfg);
@@ -575,14 +575,14 @@ static int webkit_handler(request_rec *r)
 	if( result == 0 ) {
 	    return OK;
 	} else if( result == 2 ) {
-	    log_message("error transacting with app server -- giving up.", r);
+	    log_error("error transacting with app server -- giving up.", r->server);
 	    return HTTP_INTERNAL_SERVER_ERROR;
 	}
-	sprintf(msgbuf, "Couldn't connect to AppServer, attempt %i of %i", conn_attempt, cfg->retryattempts);
-	log_error(msgbuf, r->server);
-	apr_sleep(cfg->retrydelay);
+	sprintf(msgbuf, "Couldn't connect to AppServer, attempt %i of %i, sleeping %i second(s)", conn_attempt, cfg->retryattempts, cfg->retrydelay);
+	log_message(msgbuf, r);
+	apr_sleep(cfg->retrydelay * APR_USEC_PER_SEC);
     }
-    log_error("error transacting with app server -- giving up.", r->server);
+    log_error("timed out trying to connect to appserver-- giving up.", r->server);
     return HTTP_INTERNAL_SERVER_ERROR;
 }
 
