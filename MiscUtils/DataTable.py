@@ -295,7 +295,7 @@ class TableColumn:
 			try:
 				self._type = _types[type.lower()]
 			except:
-				raise DataTableError, 'Unknown type %s' % repr(type)
+				raise DataTableError, 'Unknown type %s. types=%r' % (repr(type), _types.keys())
 
 	def __repr__(self):
 		return '<%s %s with %s at %x>' % (
