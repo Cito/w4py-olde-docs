@@ -327,6 +327,19 @@ class Model(Configurable):
 			'PreSQL': '',
 			'PostSQL': '',
 			'DropStatements': 'database',  # database, tables
-			'ExternalEnumsTableName': None, # '%(ClassName)s%(AttrName)sEnum'
-			'ExternalEnumsColumnName': 'name',  # could use %(ClassName)s and %(AttrName)s
+			'ExternalEnumsSQLNames': {
+				'Enable': False,
+				'TableName': '%(ClassName)s%(AttrName)sEnum',
+				'ValueColName': 'value',
+				'NameColName': 'name',
+			},
+				# can use: [cC]lassName, _ClassName, [aA]ttrName, _AttrName.
+				# "_" prefix means "as is", the others control the case of the first character.
 		}
+
+	def usesExternalSQLEnums(self):
+		flag = getattr(self, '_usesExternalSQLEnums', None)
+		if flag is None:
+			flag = self.setting('ExternalEnumsSQLNames')['Enable']
+			self._usesExternalSQLEnums = flag
+		return flag

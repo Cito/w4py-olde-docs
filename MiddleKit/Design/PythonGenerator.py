@@ -355,7 +355,7 @@ class StringAttr:
 class EnumAttr:
 
 	def stringToValue(self, string):
-		if self.setting('ExternalEnumsTableName', None):
+		if self.usesExternalSQLEnums():
 			return self.intValueForString(string)
 		else:
 			return string
@@ -367,7 +367,7 @@ class EnumAttr:
 		if _%(name)sAttr is None:
 			_%(name)sAttr = self.klass().lookupAttr('%(name)s')
 ''' % {'name': self.name()})
-		if self.setting('ExternalEnumsTableName', None):
+		if self.usesExternalSQLEnums():
 			out.write('''
 		if value is not None:
 			if isinstance(value, types.StringType):
@@ -407,6 +407,17 @@ class EnumAttr:
 			# Tell ObjectStore it happened
 			self._mk_store.objectChanged(self)
 ''' % {'name': name})
+
+
+	## Settings ##
+
+	def usesExternalSQLEnums(self):
+		# @@ 2004-02-25 ce: seems like this method and its use should be pushed down to SQLPythonGenerator.py
+		flag = getattr(self, '_usesExternalSQLEnums', None)
+		if flag is None:
+			flag = self.model().usesExternalSQLEnums()
+			self._usesExternalSQLEnums = flag
+		return flag
 
 
 class AnyDateTimeAttr:

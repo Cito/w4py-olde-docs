@@ -708,9 +708,9 @@ class ListAttr:
 class EnumAttr:
 
 	def sqlType(self):
-		if self.setting('ExternalEnumsTableName', None):
-			tableName, columnName = self.externalEnumsTableAndColumnName()
-			return 'int references %s(%sId)' % (tableName, tableName)
+		if self.usesExternalSQLEnums():
+			tableName, valueColName, nameColName = self.externalEnumsSQLNames()
+			return 'int references %s(%s)' % (tableName, valueColName)
 		else:
 			return self.nativeEnumSQLType()
 
@@ -719,36 +719,57 @@ class EnumAttr:
 		return 'varchar(%s)' % maxLen
 
 	def sqlForNonNoneSampleInput(self, input):
-		if self.setting('ExternalEnumsTableName', None):
+		if self.usesExternalSQLEnums():
 			return self.intValueForString(input)
 		else:
 			assert input in self._enums, 'input=%r, enums=%r' % (input, self._enums)
 			return repr(input)
 
-	def externalEnumsTableAndColumnName(self):
-		values = {
-			'ClassName': self.klass().name(),
-			'AttrName':  self.name()[0].upper() + self.name()[1:],
-			'attrName':  self.name(),
-		}
-		tableName  = self.setting('ExternalEnumsTableName')  % values  # typical setting value is '%(ClassName)s%(AttrName)sEnum'. can use also use %(attrName)s for non-capped attr name
-		columnName = self.setting('ExternalEnumsColumnName') % values  # typical setting value is simply 'name'
-		return tableName, columnName
-
 	def writeAuxiliaryCreateTable(self, generator, out):
-		if self.setting('ExternalEnumsTableName', None):
-			tableName, columnName = self.externalEnumsTableAndColumnName()
+		if self.usesExternalSQLEnums():
+			tableName, valueColName, nameColName = self.externalEnumsSQLNames()
 			out.write('create table %s (\n' % tableName)
-			out.write('\t%sId int not null primary key,\n' % tableName)
-			out.write('\t%s varchar(255)\n' % columnName)
+			out.write('\t%s int not null primary key,\n' % valueColName)
+			out.write('\t%s varchar(255)\n' % nameColName)
 			out.write(');\n')
 
 			i = 0
 			sep = ''
 			for enum in self.enums():
-				out.write("insert into %(tableName)s (%(tableName)sId, %(columnName)s) values (%(i)i, '%(enum)s');\n" % locals())
+				out.write("insert into %(tableName)s values (%(i)i, '%(enum)s');\n" % locals())
 				i += 1
 			out.write('\n')
+
+
+	## Settings ##
+
+	def usesExternalSQLEnums(self):
+		flag = getattr(self, '_usesExternalSQLEnums', None)
+		if flag is None:
+			flag = self.model().usesExternalSQLEnums()
+			self._usesExternalSQLEnums = flag
+		return flag
+
+	def externalEnumsSQLNames(self):
+		"""
+		Returns the tuple (tableName, valueColName, nameColName)
+		derived from the model setting ExternalEnumsSQLNames.
+		"""
+		names = getattr(self, '_externalEnumsSQLNames', None)
+		if names is None:
+			_ClassName = self.klass().name()
+			ClassName  = _ClassName[0].upper() + _ClassName[1:]
+			className  = _ClassName[0].lower() + _ClassName[1:]
+			_AttrName  = self.name()
+			AttrName   = _AttrName[0].upper()  + _AttrName[1:]
+			attrName   = _AttrName[0].lower()  + _AttrName[1:]
+			values = locals()
+			names = self.setting('ExternalEnumsSQLNames')
+			names = [names['TableName'], names['ValueColName'], names['NameColName']]
+			for i in range(len(names)):
+				names[i] %= values
+			self._externalEnumsSQLNames = names
+		return names
 
 
 class PrimaryKey:
