@@ -104,6 +104,8 @@ class Application(Configurable,CanContainer):
 		self._instanceCacheSize=10 # self._server.setting('ServerThreads') #CHANGED 6/21/00
 		self._canDirs = []
 
+		self.initializeCans()
+
 
 		if contexts: #Try to get this from the Config file
 			defctxt = contexts
@@ -123,8 +125,6 @@ class Application(Configurable,CanContainer):
 		# ^ @@ 2000-05-03 ce: make this customizable at least through a method (that can be overridden) if not a config file (or both)
 
 		print 'Current directory:', os.getcwd()
-
-		self.initializeCans()
 
 		self.running = 1
 		if useSessionSweeper:
@@ -377,8 +377,8 @@ class Application(Configurable,CanContainer):
 
 	def forwardRequest(self, trans, URL):
 		"""
-		Enable a servlet to pass a request to another servlet.  This implementation handles chaining and requestDispatch in Java.
-		The catch is that the function WILL return to the calling servlet, so the calling servlet should either take advantage of that or return immediately.
+		Enable a servlet to pass a request to another servlet.  No information is passed from one servlet to the next.
+		New Request, Response and Transaction objects are created.
 		Currently the URL is always relative to the existing URL.
 		"""
 
@@ -398,6 +398,45 @@ class Application(Configurable,CanContainer):
 		newRequest.setURLPath(urlPath)
 		newTrans = self.dispatchRequest(newRequest)
 		trans.response().appendRawResponse(newTrans.response().rawResponse())
+
+
+	def forwardRequestFast(self, trans, URL):
+		"""Enable a servlet to pass a request to another servlet.  This implementation handles chaining and requestDispatch in Java.
+		The Request, REsponse and Session objects are all kept the same, so the Servlet that is called may receive information through those objects.  
+		The catch is that the function WILL return to the calling servlet, so the calling servlet should either take advantage
+		of that or return immediately."""
+
+
+		req = trans.request()
+		#Save the things we're gonna change.
+		currentPath=req.urlPath()
+		currentServlet=trans._servlet
+
+
+		urlPath = req.urlPath()
+		if urlPath=='':
+			urlPath = '/' + URL
+		elif urlPath[-1]=='/':
+			urlPath = urlPath + URL
+		else:
+			lastSlash = string.rfind(urlPath, '/')
+			urlPath = urlPath[:lastSlash+1] + URL
+		req.setURLPath(urlPath)
+	
+		#Get the servlet
+		self.createServletInTransaction(trans)
+
+		#call the servlet, but not session, it's already alive
+		trans.servlet().awake(trans)
+		trans.servlet().respond(trans)
+		trans.servlet().sleep(trans)
+
+		self.returnInstance(trans,trans.request().serverSidePath())
+
+		#replace things like they were
+		#trans.request()._serverSidePath=currentPath
+		req.setURLPath(currentPath)
+		trans._servlet=currentServlet
 
 
 	## Transactions ##
