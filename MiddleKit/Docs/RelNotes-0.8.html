@@ -60,6 +60,8 @@ Trade.initialStop dangles with value Stop.97
 <b>FULL ATTR NAME</b> dangles with value <b>CLASS.SERIAL_NUM VALUE</b>
 </pre>
 
+	<li> The <span class=filename>Classes.csv</span> text file is now cached as a binary pickle file named <span class=filename>Classes.pickle.cache</span>. This reduces subsequent load times by about 40%. The cache will be ignored if it can't be read, is older than the CSV file, has a different Python version, etc. You don't normally even need to think about this, but if for some reason you would like to turn off the use of the cache, you can do so via the <span class=name>UsePickledClassesCache</span> <a href=UsersGuide.html#Configuration>setting</a>.
+
 </ul>
 
 

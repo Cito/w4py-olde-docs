@@ -1,7 +1,11 @@
-import os
-from types import ClassType
+import os, sys
+from types import ClassType, DictType
 from MiscUtils.Configurable import Configurable
 from MiscUtils import NoDefault
+try:
+	from cPickle import load, dump
+except ImportError:
+	from pickle import load, dump
 
 
 class Model(Configurable):
@@ -10,6 +14,10 @@ class Model(Configurable):
 
 	It also provides access to the Python classes that implement these structures for use by other MiddleKit entities including code generators and object stores.
 	"""
+
+	pickleVersion = 1
+		# increment this if a non-compatible change is made in Klasses,
+		# Klass or Attr
 
 	def __init__(self, filename=None, customCoreClasses={}, rootModel=None, havePythonClasses=1):
 		Configurable.__init__(self)
@@ -52,8 +60,87 @@ class Model(Configurable):
 		self._filename = os.path.abspath(filename)
 		self._name = None
 		self.readParents()
-		self.klasses().read(os.path.join(filename, 'Classes.csv'))
+		self.readKlasses()
 		self.awakeFromRead()
+
+	def readKlasses(self):
+		"""
+		Reads the Classes.csv file, or the Classes.pickle.cache file as
+		appropriate.
+		"""
+		csvPath = os.path.join(self._filename, 'Classes.csv')
+		if not os.path.exists(csvPath):
+			open(csvPath) # to get a properly constructed IOError
+
+		# read the pickled version of Classes if possible
+		didReadPickle = 0
+		shouldDeletePickle = 0
+		shouldUseCache = self.setting('UsePickledClassesCache', 1)
+		if shouldUseCache:
+			picklePath = os.path.join(self._filename, 'Classes.pickle.cache')
+			if os.path.exists(picklePath):
+				if os.path.getmtime(picklePath)<os.path.getmtime(csvPath):
+					shouldDeletePickle = 1
+				else:
+					try:
+						file = open(picklePath)
+					except IOError:
+						pass
+					else:
+						try:
+							#print '>> reading', picklePath
+							dict = load(file)
+						except EOFError:
+							shouldDeletePickle = 1
+						else:
+							file.close()
+							assert isinstance(dict, DictType), 'type=%r dict=%r' % (type(dict), dict)
+							for key in ('source', 'klasses', 'pickle version', 'python version'):
+								assert dict.has_key(key)
+							if dict['source']!='MiddleKit':
+								shouldDeletePickle = 1
+							elif dict['pickle version']!=self.pickleVersion:
+								shouldDeletePickle = 1
+							elif dict['python version']!=sys.version_info:
+								shouldDeletePickle = 1
+							else:
+								self._klasses = dict['klasses']
+								self._klasses._model = self
+								didReadPickle = 1
+
+			# delete the pickle file if suggested by previous conditions
+			if shouldDeletePickle:
+				try:
+					os.remove(picklePath)
+				except OSError:
+					pass
+
+		# read the regular file if necessary
+		if not didReadPickle:
+			#print '>> reading', csvPath
+			self.klasses().read(csvPath)
+
+		# write the pickle file when needed
+		if shouldUseCache and (shouldDeletePickle or not didReadPickle):
+			# write pickled version of klasses which loads much faster than CSV files
+			#print '>> writing', picklePath
+			dict = {
+				'source': 'MiddleKit',
+				'python version': sys.version_info,
+				'pickle version': self.pickleVersion,
+				'klasses': self._klasses,
+			}
+			try:
+				file = open(picklePath, 'w')
+			except IOError:
+				#print '>> woops. not writing due to IOError.'
+				pass
+			else:
+				dump(dict, file, 1)   # 1 = binary format
+				file.close()
+
+	def __getstate__(self):
+		raise Exception, 'Model instances were not designed to be pickled.'
 
 	def awakeFromRead(self):
 		# create containers for all klasses, uniqued by name

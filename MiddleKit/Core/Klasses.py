@@ -100,6 +100,15 @@ class Klasses(ModelObject, UserDict):
 		for klass in self._klasses:
 			klass.awakeFromRead()
 
+	def __getstate__(self):
+		"""
+		For pickling purposes, the back reference to the model that owns self is removed.
+		"""
+		assert self._model
+		attrs = self.__dict__.copy()
+		del attrs['_model']
+		return attrs
+
 
 	## Adding classes ##
 

@@ -310,6 +310,8 @@ This setting has no effect on the visible behavior of MiddleKit; it only changes
 	'SQLConnectionPoolSize': 20,
 }</pre>
 
+<p> The <span class=name>UsePickledClassesCache</span> setting defaults to 1 and causes MiddleKit to cache the <span class=filename>Classes.csv</span> text file as a binary pickle file named <span class=filename>Classes.pickle.cache</span>. This reduces subsequent load times by about 40%. The cache will be ignored if it can't be read, is older than the CSV file, has a different Python version, etc. You don't normally even need to think about this, but if for some reason you would like to turn off the use of the cache, you can do so through this setting.
+
 <p> <span class=filename>SQLGenerator.config</span> has one setting: <span class=name>DropStatements</span> whose potential values are:
 
 <ul>
