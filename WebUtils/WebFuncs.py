@@ -79,3 +79,14 @@ def HTMLForDictionary(dict, addSpace=None):
 		html.append('<tr bgcolor=#F0F0F0> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (key, value))
 	html.append('</table>')
 	return string.join(html, '')
+
+
+def RequestURI(dict):
+	''' Returns the request URI for a given CGI-style dictionary. Uses REQUEST_URI if available, otherwise constructs and returns it from SCRIPT_NAME, PATH_INFO and QUERY_STRING. '''
+	uri = dict.get('REQUEST_URI', None)
+	if uri==None:
+		uri = dict.get('SCRIPT_NAME', '') + dict.get('PATH_INFO', '')
+		query = dict.get('QUERY_STRING', None)
+		if query!=None:
+			uri = uri + '?' + query
+	return uri
