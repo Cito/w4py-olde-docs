@@ -62,6 +62,8 @@ class PSPServletFactory(ServletFactory):
 			head, tail = os.path.split(head)
 			className = tail + '_'+ className
 			className=string.replace(className,'.','_')
+		className = string.replace(className,'-','_')
+		className = string.replace(className,' ','_')
 		return className
 
 	def createInstanceFromFile(self,filename,classname,mtime):
