@@ -151,7 +151,7 @@ class HTTPResponse(Response):
 		Write charstr to the response stream.
 		"""
 		if charstr: self._strmOut.write(charstr)
-		if not self._committed and self._strmOut.needCommit():
+		if not self._committed and self._strmOut._needCommit:
 			self.commit()
 
 	def flush(self, autoFlush=1):
