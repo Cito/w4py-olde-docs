@@ -480,6 +480,16 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		Called by `dispatchRawRequest`.
 		"""
+		# @@ gtalvola: I'm guessing this is not the ideal place to put this code.  But, it works. 
+		if self.setting('UseAutomaticPathSessions'):
+			request_has_cookies = trans.request().environ().has_key('HTTP_COOKIE')
+			request_has_path_session = trans.request().hasPathSession() 
+			if request_has_cookies and request_has_path_session:
+				self.handleUnnecessaryPathSession(trans)
+				return
+			elif not request_has_cookies and not request_has_path_session:
+				self.handleMissingPathSession(trans)
+				return
 
 		servlet = None
 		try:
@@ -734,14 +744,46 @@ class Application(ConfigurableForServerSidePath, Object):
 		# @@ 2003-02 ib: does anyone care?
 		pass
 
+	def handleMissingPathSession(self,transaction):
+		"""
+		if UseAutomaticPathSessions is enabled in Application.config
+		we redirect the browser to a url with SID in path
+		http://gandalf/a/_SID_=2001080221301877755/Examples/
+		_SID_ is extracted and removed from path in HTTPRequest.py
 
+		this is for convinient building of webapps that must not
+		depend on cookie support
+		"""
+		newSid = transaction.session().identifier()
+		request = transaction.request()
+		url = request.adapterName() + '/_SID_='+ newSid + '/' + request.pathInfo() + (request.extraURLPath() or '')
 
+		if request.queryString():
+			url = url + '?' + request.queryString()
+		if self.setting('Debug')['Sessions']:
+			print ">> [sessions] handling UseAutomaticPathSessions, redirecting to", url
+		transaction.response().sendRedirect(url)
+		
+	def handleUnnecessaryPathSession(self, transaction):
+		"""
+		This is called if it has been determined that the request has a path
+		session, but also cookies.  In that case we redirect 
+		to eliminate the unnecessary path session.
+		"""
+		request = transaction.request()
+		url = request.adapterName() + '/' + request.pathInfo() + (request.extraURLPath() or '')
 
-
-
-
-
-
+		if request.queryString():
+			url = url + '?' + request.queryString()
+		if self.setting('Debug')['Sessions']:
+			print ">> [sessions] handling unnecessary path session, redirecting to", url
+		transaction.response().sendRedirect(url)
+		
+		
+		
+		
+		
+		
 def main(requestDict):
 	"""
 	Returns a raw reponse. This method is mostly used by
