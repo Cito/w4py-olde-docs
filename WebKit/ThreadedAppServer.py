@@ -57,19 +57,20 @@ class ThreadedAppServer(AppServer):
 		self.rhQueue = Queue.Queue(self._poolsize) # same size as threadQueue
 
 		self.mainsocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.mainsocket.bind(('localhost',self.setting('Port')))
-		print "Listening on", self.address()
-
-		addr=self.address()
+		addr = self.address()
+		self.mainsocket.bind(addr)
+		print "Listening on", addr
 		open('address.text', 'w').write('%s:%d' % (addr[0], addr[1]))
 
-		print "Creating %d threads" % self._poolsize
+		out = sys.stdout
+		out.write('Creating %d threads' % self._poolsize)
 		for i in range(self._poolsize): #change to threadcount
 			t = Thread(target=self.threadloop)
 			t.start()
 			self.threadPool.append(t)
-			sys.stdout.write(".")
-		sys.stdout.write("\n")
+			out.write(".")
+			out.flush()
+		out.write("\n")
 
 		self.mainsocket.listen(20) # @@ 2000-07-10 ce: hard coded constant should be a setting
 
@@ -130,7 +131,7 @@ class ThreadedAppServer(AppServer):
 
 	def address(self):
 		if self._addr is None:
-			self._addr = ('', self.setting('Port'))
+			self._addr = ('127.0.0.1', self.setting('Port'))
 		return self._addr
 
 

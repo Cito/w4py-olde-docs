@@ -15,9 +15,7 @@ import socket
 import asyncore
 
 
-
-
-class AsyncThreadedAppServer(asyncore.dispatcher,AppServer):
+class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
     """
 
     """
@@ -25,9 +23,10 @@ class AsyncThreadedAppServer(asyncore.dispatcher,AppServer):
     ## Init ##
 
     def __init__(self):
-        
+
         AppServer.__init__(self)
 
+        self._addr = None
         self._poolsize=self.setting('ServerThreads')
 
         self.threadPool=[]
@@ -36,33 +35,29 @@ class AsyncThreadedAppServer(asyncore.dispatcher,AppServer):
         self._maxRHCount = self._poolsize * 10
         self.rhCreateCount = 0
 
-        print "Port",self.setting("Port")
-        self.create_socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.bind(('localhost',self.setting('Port')))
-        print "Listening On",self.address()
-
-        addr=self.address()
+        self.create_socket(socket.AF_INET, socket.SOCK_STREAM)
+        addr = self.address()
+        self.bind(addr)
+        print "Listening on", addr
         open('address.text', 'w').write('%s:%d' % (addr[0], addr[1]))
 
-
-        print 'OK'
-        print
         self.running=1
 
-        print "spawning threads "
+        out = sys.stdout
+        out.write('Creating %d threads' % self._poolsize)
         for i in range(self._poolsize): #change to threadcount
-            t=Thread(target=self.threadloop)
+            t = Thread(target=self.threadloop)
             t.start()
             self.threadPool.append(t)
-            sys.stdout.write(".")
-        sys.stdout.write("\n")
-
+            out.write(".")
+            out.flush()
+        out.write("\n")
 
         #self.asyn_thread = Thread(target=self.asynloop)
         #self.asyn_thread.start()
 
-        self.listen(1024)
-        print "Ready"
+        self.listen(1024) # @@ 2000-07-14 ce: hard coded constant should be a setting
+        print "Ready\n"
 
 
     def handle_accept(self):
@@ -105,9 +100,9 @@ class AsyncThreadedAppServer(asyncore.dispatcher,AppServer):
             asyncore.loop()
 
     def address(self):
-                if self._addr is None:
-                        self._addr = ('', self.setting('Port'))
-                return self._addr
+        if self._addr is None:
+            self._addr = ('127.0.0.1', self.setting('Port'))
+        return self._addr
 
 
 
@@ -120,8 +115,8 @@ class AsyncThreadedAppServer(asyncore.dispatcher,AppServer):
             try:
                 rh=self.requestQueue.get()
                 if rh == None: #None means time to quit
-                    break                                                               
-                rh.handleRequest()      #this is all there is to it             
+                    break
+                rh.handleRequest()      #this is all there is to it
             except Queue.Empty:
                 pass
 
@@ -234,8 +229,8 @@ class RequestHandler(asyncore.dispatcher):
         if len(self._buffer) == 0:
             self.close()
             #For testing
-            sys.stdout.write(".")
-            sys.stdout.flush()
+            #sys.stdout.write(".")
+            #sys.stdout.flush()
 
     def close(self):
         self.active = 0
@@ -245,11 +240,8 @@ class RequestHandler(asyncore.dispatcher):
         asyncore.dispatcher.close(self)
         self.server.rhQueue.put(self)
 
-
     def log(self, message):
         pass
-
-
 
 
 

@@ -42,7 +42,6 @@ class AppServer(Configurable):
         self._verbose = self.setting('Verbose')
         self._plugIns = []
         self._reqCount = 0
-        self._addr = None
 
         self.config() # cache the config
         self.printStartUpMessage()
