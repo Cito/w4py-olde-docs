@@ -4,7 +4,7 @@ from HTTPServlet import HTTPServlet
 
 class PageError(Exception):
 	pass
-	
+
 
 class Page(HTTPServlet):
 	'''
@@ -17,7 +17,7 @@ class Page(HTTPServlet):
 	'''
 
 	## Transactions ##
-	
+
 	def awake(self, transaction):
 		HTTPServlet.awake(self, transaction)
 		# @@ 2000-05-08 ce: move these up to Servlet?
@@ -30,11 +30,10 @@ class Page(HTTPServlet):
 		assert self._request  is not None
 		# @@ 2000-05-08 ce: yes/no: assert self._session is not None
 
-
 	def respondToGet(self, transaction):
 		''' Invokes _respond() to handle the transaction. '''
 		self._respond(transaction)
-	
+
 	def respondToPost(self, transaction):
 		''' Invokes _respond() to handle the transaction. '''
 		self._respond(transaction)
@@ -53,7 +52,7 @@ class Page(HTTPServlet):
 				raise PageError, "Action '%s' is not in the public list of actions, %s." % (action, actions.keys())
 		else:
 			self.writeHTML()
-	
+
 	def sleep(self, transaction):
 		self._session = None
 		self._request  = None
@@ -63,22 +62,25 @@ class Page(HTTPServlet):
 
 
 	## Access ##
-	
+
 	def application(self):
 		return self._transaction.application()
 
 	def transaction(self):
 		return self._transaction
-		
+
 	def request(self):
 		return self._request
-		
+
 	def response(self):
 		return self._response
 
-				
+	def session(self):
+		return self._session
+
+
 	## Generating results ##
-	
+
 	def title(self):
 		''' Subclasses often override this method to provide a custom title. This title should be absent of HTML tags. This implementation returns the name of the class, which is sometimes appropriate and at least informative. '''
 		return self.__class__.__name__
@@ -107,12 +109,12 @@ class Page(HTTPServlet):
 
 	def writeBody(self):
 		self.writeln("<p>This page has not yet customized it's body.")
-		
+
 	def writeFooter(self):
 		self.writeln('</body>')
-	
 
-	## Utility methods ##
+
+	## Writing ##
 
 	def write(self, *args):
 		for arg in args:
@@ -123,14 +125,14 @@ class Page(HTTPServlet):
 			self._response.write(str(arg))
 		self._response.write('\n')
 
-		
+
 	## Threading ##
-	
+
 	def canBeThreaded(self):
 		''' Returns 0 because of the ivars we set up in awake(). '''
 		return 0
 
-		
+
 	## Actions ##
 
 	def methodNameForAction(self, name):
@@ -140,27 +142,19 @@ class Page(HTTPServlet):
 	def actions(self):
 		''' Returns an array of method names that are allowable actions from HTML forms. The default implementation returns []. '''
 		return []
-	
+
 	def preAction(self, actionName):
 		''' Invoked by self prior to invoking a action method. This implementation basically invokes writeHeader(). Subclasses may override to customize and may or may not invoke super as they see fit. The actionName is passed to this method, although it seems a generally bad idea to rely on this. However, it's still provided just in case you need that hook. '''
 		self.writeln('<html>')
 		self.writeHeader()
-		
+
 	def postAction(self, actionName):
 		''' Invoked by self after invoking a action method. This implementation basically invokes writeFooter(). Subclasses may override to customize and may or may not invoke super as they see fit. The actionName is passed to this method, although it seems a generally bad idea to rely on this. However, it's still provided just in case you need that hook. '''
 		self.writeFooter()
 		self.writeln('</html>')
 
-		
+
 	## Self utility ##
-	
-	def _actionSet(self):
-		''' Returns a dictionary whose keys are the names returned by actions(). The dictionary is used for a quick set-membership-test in self._respond. Subclasses don't generally override this method or invoke it. '''
-		if not hasattr(self, '_actionDict'):	
-			self._actionDict = {}
-			for action in self.actions():
-				self._actionDict[action] = 1
-		return self._actionDict
 
 	def getCan(self, ID, klass, storage,*args, **kargs):
 		"""Gets a Can"""
@@ -180,4 +174,15 @@ class Page(HTTPServlet):
 			instance = apply(self._transaction.application()._canFactory.createCan,(klass,)+args,kargs)
 			container.setCan(ID,instance)
 		return instance
+
+
+	## Private utility ##
+
+	def _actionSet(self):
+		''' Returns a dictionary whose keys are the names returned by actions(). The dictionary is used for a quick set-membership-test in self._respond. Subclasses don't generally override this method or invoke it. '''
+		if not hasattr(self, '_actionDict'):
+			self._actionDict = {}
+			for action in self.actions():
+				self._actionDict[action] = 1
+		return self._actionDict
 
