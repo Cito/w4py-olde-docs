@@ -3,18 +3,6 @@ def test(store):
 
 	f = store.fetchObjectsOfClass(Foo)[0]
 
-	d  = '2000-01-01'
-	t  = '13:01'
-	dt = '2000-01-01 13:01'
-	try:
-		from mx.DateTime import DateTimeFrom, DateTimeDeltaFrom
-		print 'Testing with DateTime module.'
-		d  = DateTimeFrom(d)
-		t  = DateTimeDeltaFrom(t)
-		dt = DateTimeFrom(dt)
-	except ImportError:
-		print 'Testing with strings.'
-
 	from MiddleKit.Design.PythonGenerator import nativeDateTime, mxDateTime
 
 	value = f.d()
@@ -29,9 +17,11 @@ def test(store):
 	match = False
 	if nativeDateTime:
 		match = value==store.filterDateTimeDelta(nativeDateTime.time(13, 01))
+		if not match:
+			match = value==nativeDateTime.timedelta(hours=13, minutes=01)
 	if not match and mxDateTime:
 		match = value==mxDateTime.DateTimeDeltaFrom('13:01')
-	assert match, value
+	assert match, '%s, %s' % (value, type(value))
 
 	value = f.dt()
 	match = False
