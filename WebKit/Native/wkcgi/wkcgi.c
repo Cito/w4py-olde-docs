@@ -47,21 +47,42 @@ int sendCgiRequest(int sock, DictHolder* alldicts) {
 
 	len_str = getenv("CONTENT_LENGTH");
 	if (len_str !=NULL) {
-	  int read=0;
-	  int sent=0;
-	  int sent_this_time=0;
-	  content_length = atoi(getenv("CONTENT_LENGTH"));
-	  log_message("There is post data");
-	  buffer = (char*) calloc(8092,1);
-	  while (read < content_length) {
-		read = read + fread(buffer, 1, content_length-read, stdin);
-		sent_this_time = send(sock, buffer, read-sent, 0);
-		if( sent_this_time<0 ) {
-			log_message("send() returned error code");
-			return -1;
+		int read=0;
+		int sent=0;
+		int read_this_time=0;
+		int sent_this_time=0;
+		int amount_to_read=0;
+		int amount_to_send=0;
+		content_length = atoi(getenv("CONTENT_LENGTH"));
+		log_message("There is post data");
+		buffer = (char*) calloc(8092,1);
+		while (read < content_length) {
+			amount_to_read = content_length-read;
+			if( amount_to_read > 8092 ) {
+				amount_to_read = 8092;
+			}
+			read_this_time = fread(buffer, 1, amount_to_read, stdin);
+			if( read_this_time <= 0 ) {
+				if( ferror(stdin) ) {
+					log_message("error during fread(stdin)");
+					return -1;
+				} else {
+					log_message("premature end of input on stdin");
+					return -1;
+				}
+			}
+			read = read + read_this_time;
+			amount_to_send = read_this_time;
+			while( amount_to_send > 0 ) {
+				sent_this_time = send(sock, buffer+(read_this_time-amount_to_send), amount_to_send, 0);
+				if( sent_this_time<=0 ) {
+					log_message("send() returned error code");
+					return -1;
+				}
+				sent += sent_this_time;
+				amount_to_send -= sent_this_time;
+			}
 		}
-		sent += sent_this_time;
-	  }
 	}
 
 	log_message("Sent Request to server");
