@@ -18,8 +18,8 @@ import os, sys
 
 DefaultConfig = {
 	'PrintConfigAtStartUp': 1,
-	'Verbose':              1,
-	'PlugIns':              ['../PSP']
+	'Verbose':			  1,
+	'PlugIns':			  ['../PSP']
 
 	# @@ 2000-04-27 ce: None of the following settings are implemented
 #	'ApplicationClassName': 'Application',
@@ -31,27 +31,27 @@ class AppServerError(Exception):
 
 
 class AppServer(Configurable):
-    """
-    """
+	"""
+	"""
 
 	## Init ##
 
-    def __init__(self):
-        self._startTime = time.time()
-        Configurable.__init__(self)
-        self._verbose = self.setting('Verbose')
-        self._plugIns = []
-        self._reqCount = 0
+	def __init__(self):
+		self._startTime = time.time()
+		Configurable.__init__(self)
+		self._verbose = self.setting('Verbose')
+		self._plugIns = []
+		self._reqCount = 0
 
-        self.config() # cache the config
-        self.printStartUpMessage()
-        self._app = self.createApplication()
-        self.loadPlugIns()
+		self.config() # cache the config
+		self.printStartUpMessage()
+		self._app = self.createApplication()
+		self.loadPlugIns()
 
-        self.running = 1
+		self.running = 1
 
 
-    def shutDown(self):
+	def shutDown(self):
 		"""
 		Subclasses may override and normally follow this sequence:
 			1. set self._shuttingDown to 1
@@ -66,95 +66,113 @@ class AppServer(Configurable):
 		del self._app
 
 
-    ## Configuration ##
+	## Configuration ##
 
-    def defaultConfig(self):
-        return DefaultConfig
+	def defaultConfig(self):
+		return DefaultConfig
 
-    def configFilename(self):
-        return 'Configs/AppServer.config'
-
-
-    ## Network Server ##
-
-    def createApplication(self):
-        ''' Creates and returns an application object. Invoked by __init__. '''
-        return Application(server=self)
-
-    def printStartUpMessage(self):
-        ''' Invoked by __init__. '''
-        print 'WebKit AppServer', self.version()
-        print 'part of Webware for Python'
-        print 'Copyright 1999-2000 by Chuck Esterbrook. All Rights Reserved.'
-        print 'WebKit and Webware are open source.'
-        print 'Please visit:  http://webware.sourceforge.net'
-        print
-        print 'Process id is', os.getpid()
-        print
-        if self.setting('PrintConfigAtStartUp'):
-            self.printConfig()
+	def configFilename(self):
+		return 'Configs/AppServer.config'
 
 
-    ## Plug-ins ##
+	## Network Server ##
 
-    def plugIns(self):
-        ''' Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. '''
-        return self._plugIns
+	def createApplication(self):
+		''' Creates and returns an application object. Invoked by __init__. '''
+		return Application(server=self)
 
-    def loadPlugIn(self, path):
-        ''' Loads the given plug-in. Used by loadPlugIns(). '''
-        try:
-            plugIn = PlugIn(self, path)
-            self._plugIns.append(plugIn)
-            plugIn.load()
-            plugIn.install()
-        except:
-            import traceback
-            traceback.print_exc(file=sys.stderr)
-            self.error('Plug-in %s raised exception.' % path)
-
-    def loadPlugIns(self):
-        """
-        A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source. Plug-ins are loaded by AppServer at startup time, just before listening for requests. See the docs for PlugIn.py for more info.
-        """
-        # @@ 2000-05-21 ce: We should really have an AddPlugIns and RemovePlugIns setting
-        for plugInPath in self.setting('PlugIns'):
-            self.loadPlugIn(plugInPath)
+	def printStartUpMessage(self):
+		''' Invoked by __init__. '''
+		print 'WebKit AppServer', self.version()
+		print 'part of Webware for Python'
+		print 'Copyright 1999-2000 by Chuck Esterbrook. All Rights Reserved.'
+		print 'WebKit and Webware are open source.'
+		print 'Please visit:  http://webware.sourceforge.net'
+		print
+		print 'Process id is', os.getpid()
+		print
+		if self.setting('PrintConfigAtStartUp'):
+			self.printConfig()
 
 
-    ## Misc ##
+	## Plug-ins ##
 
-    def version(self):
-        # @@ 2000-07-10 ce: Resolve this with the fooVersion() methods in Application
-        return '0.4 PRERELEASE'
+	def plugIns(self):
+		''' Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. '''
+		return self._plugIns
 
-    def application(self):
-        return self._app
+	def loadPlugIn(self, path):
+		''' Loads the given plug-in. Used by loadPlugIns(). '''
+		try:
+			plugIn = PlugIn(self, path)
+			self._plugIns.append(plugIn)
+			plugIn.load()
+			plugIn.install()
+		except:
+			import traceback
+			traceback.print_exc(file=sys.stderr)
+			self.error('Plug-in %s raised exception.' % path)
 
-    def startTime(self):
-        ''' Returns the time the app server was started (as seconds, like time()). '''
-        return self._startTime
+	def loadPlugIns(self):
+		"""
+		A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source. Plug-ins are loaded by AppServer at startup time, just before listening for requests. See the docs for PlugIn.py for more info.
+		"""
+		plugIns = self.setting('PlugIns')[:]
+		plugIns = map(lambda path: os.path.normpath(path), plugIns)
 
-    def numRequests(self):
-        ''' Return the number of requests received by this server since it was launched. '''
-        return self._reqCount
+		# Scan each directory named in the PlugInDirs list.
+		# If those directories contain Python packages (that
+		# don't have a "dontload" file) then add them to the
+		# plugs in list.
+		for plugInDir in self.setting('PlugInDirs'):
+			for filename in os.listdir(plugInDir):
+				filename = os.path.normpath(os.path.join(plugInDir, filename))
+				if os.path.isdir(filename) and \
+				   os.path.exists(os.path.join(filename, '__init__.py')) and \
+				   not os.path.exists(os.path.join(filename, 'dontload')) and \
+				   filename not in plugIns:
+					plugIns.append(filename)
+
+		print 'Plug-ins list:', string.join(plugIns, ', ')
+
+		# Now that we have our plug-in list, load them...
+		for plugInPath in plugIns:
+			self.loadPlugIn(plugInPath)
 
 
-    ## Warnings and Errors ##
+	## Misc ##
 
-    def warning(self, msg):
-        # @@ 2000-04-25 ce: would this be useful?
-        raise NotImplementedError
+	def version(self):
+		# @@ 2000-07-10 ce: Resolve this with the fooVersion() methods in Application
+		return '0.4 PRERELEASE'
 
-    def error(self, msg):
-        """
-        Flushes stdout and stderr, prints the message to stderr and exits with code 1.
-        """
-        sys.stdout.flush()
-        sys.stderr.flush()
-        sys.stderr.write('ERROR: %s\n' % msg)
-        sys.stderr.flush()
-        sys.exit(1)  # @@ 2000-05-29 ce: Doesn't work. Perhaps because of threads
+	def application(self):
+		return self._app
+
+	def startTime(self):
+		''' Returns the time the app server was started (as seconds, like time()). '''
+		return self._startTime
+
+	def numRequests(self):
+		''' Return the number of requests received by this server since it was launched. '''
+		return self._reqCount
+
+
+	## Warnings and Errors ##
+
+	def warning(self, msg):
+		# @@ 2000-04-25 ce: would this be useful?
+		raise NotImplementedError
+
+	def error(self, msg):
+		"""
+		Flushes stdout and stderr, prints the message to stderr and exits with code 1.
+		"""
+		sys.stdout.flush()
+		sys.stderr.flush()
+		sys.stderr.write('ERROR: %s\n' % msg)
+		sys.stderr.flush()
+		sys.exit(1)  # @@ 2000-05-29 ce: Doesn't work. Perhaps because of threads
 
 
 
