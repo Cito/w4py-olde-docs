@@ -1,11 +1,5 @@
-
-<before upload to Webware>
-
-	[ ] run test suite
-
-	[ ] upload.
-
-</before upload to Webware>
+UserKit
+TO DO
 
 
 <major>
@@ -40,7 +34,9 @@
 
 	[ ] For that matter, should user names be case insensitive?
 
-	[ ] UserManagerToFile: Hideous linear searches in: userForExternalId() and userForName()
+	[ ] UserManagerToFile
+		[ ] Iterating through all users means pulling them all into memory (until the inactive user timeout pushes them out)
+		[ ] No indexes on externalId or name. So a linear search is required (after checking memory). On the other hand, what do you expect with simple file based storage?
 
 </refinements/improvements>
 
