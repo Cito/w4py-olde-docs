@@ -9,7 +9,7 @@ class ExamplePage(Page):
 
 	def htTitle(self):
 		return Page.title(self)
-	
+
 	def isDebugging(self):
 		return 0
 
@@ -64,20 +64,20 @@ class ExamplePage(Page):
 		# View the source of the current servlet
 		self.write('<br><a href=View?filename=%s>source</a>' % self.__class__.__name__)
 
-		# WebKit docs		
+		# WebKit docs
 		filename = '../Documentation/WebKit.html'
 		if os.path.exists(filename):
 			self.write(' | <a href=%s>%s</a>' % (filename, 'WebKit'))
-		
+
 		# Webware docs
 		filename = '../../Documentation/Webware.html'
 		if os.path.exists(filename):
 			self.write(' | <a href=%s>%s</a>' % (filename, 'Webware'))
-		
+
 		# Project page
 		self.write(' | <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>')
-		
+
 		# Kit and versions
-		self.write('<br>WebKit 0.2, part of Webware for Python 0.2')
-		
+		self.write('<br>WebKit 0.3, part of Webware for Python 0.3') # @@ 2000-06-02 ce: should pick these up dynamically
+
 		self.writeln('</center>')
