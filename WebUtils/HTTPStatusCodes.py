@@ -38,9 +38,9 @@ HTTPStatusCodeList = [
 	(403, 'FORBIDDEN',                       'The server understood the request but refused to fulfill it.'),
 	(404, 'NOT_FOUND',                       'The requested resource is not available.'),
 	(405, 'METHOD_NOT_ALLOWED',              'The method specified in the <code><em>Request-Line</em></code> is not allowed for the resource identified by the <code><em>Request-URI</em></code>.'),
-	(406, 'NOT_ACCEPTABLE',                  'The resource identified by the request is only capable of generating response entities which have content characteristics not acceptable according to the accept headerssent in the request.'),
+	(406, 'NOT_ACCEPTABLE',                  'The resource identified by the request is only capable of generating response entities which have content characteristics not acceptable according to the accept headers sent in the request.'),
 	(407, 'PROXY_AUTHENTICATION_REQUIRED',   'The client <em>MUST</em> first authenticate itself with the proxy.'),
-	(408, 'REQUEST_TIMEOUT',                 'The client did not produce a requestwithin the time that the server was prepared to wait.'),
+	(408, 'REQUEST_TIMEOUT',                 'The client did not produce a request within the time that the server was prepared to wait.'),
 	(409, 'CONFLICT',                        'The request could not be completed due to a conflict with the current state of the resource.'),
 	(410, 'GONE',                            'The resource is no longer available at the server and no forwarding address is known.'),
 	(411, 'LENGTH_REQUIRED',                 'The request cannot be handled without a defined <code><em>Content-Length</em></code>.'),
@@ -74,7 +74,7 @@ for record in HTTPStatusCodeList:
 		'htmlMsg':		htmlMsg
 	}
 	dict['asciiMsg'] = re.sub('<.*?>', '', htmlMsg)
-	
+
 	HTTPStatusCodes[code] = dict
 	HTTPStatusCodes[identifier] = dict
 
