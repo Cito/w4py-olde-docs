@@ -215,7 +215,7 @@ Version 0.4.1
 
 <a name=Debugging><h2>Debugging</h2></a>
 
-<p> As will all software development, you will need to debug your web application. The most popular techniques are detailed below.
+<p> As with all software development, you will need to debug your web application. The most popular techniques are detailed below.
 
 
 <a name=Debugging_print><h3>print</h3></a>
@@ -236,7 +236,7 @@ Version 0.4.1
 
 <a name=Debugging_Restarting><h3>Restarting the Server</h3></a>
 
-<p> Servlet <i>super classes</i> don't get reloaded by the AppServer. Also, Webware can still be unstable due to it's early age. If a problem becomes unsolvable, restart the server and see if it still occurs on the first attempt.
+<p> Servlet <i>super classes</i> don't get reloaded by the AppServer. Also, Webware can still be unstable due to its early age. If a problem becomes unsolvable, restart the server and see if it still occurs on the first attempt.
 
 
 <a name=Assertions><h3>Assertions</h3></a>
@@ -248,7 +248,7 @@ Version 0.4.1
 
 <a name=NamingConventions><h2>Naming Conventions</h2></a>
 
-<p>Cookies and form values that are named with surrounding underscores (such as <code>_sid_</code> and <code>_action_</code>) are reserved by WebKit for it's own internal purposes. If you refrain from using surrounding underscores in your own names, then [a] you won't accidentally clobber an already existing internal name and [b] when new names are introduced by future versions of WebKit, they won't break your application.
+<p>Cookies and form values that are named with surrounding underscores (such as <code>_sid_</code> and <code>_action_</code>) are reserved by WebKit for its own internal purposes. If you refrain from using surrounding underscores in your own names, then [a] you won't accidentally clobber an already existing internal name and [b] when new names are introduced by future versions of WebKit, they won't break your application.
 
 
 <a name=Actions><h2>Actions</h2></a>
@@ -266,7 +266,7 @@ Version 0.4.1
 
 <p> <code>def actions(self): return <i>SuperClass</i>.actions(self) + ['New', 'Delete']</code>
 
-<p> <b>3.</b> Unfortunately, the HTML submit button does not separate it's value from it's title/label. If your button labels don't match your method names, you will need to implement <code>methodNameForAction()</code> to provide the mapping. You could simply use a dictionary to create the mapping, or if you know there is some relationship you could write the logic for it. For example,
+<p> <b>3.</b> Unfortunately, the HTML submit button does not separate its value from its title/label. If your button labels don't match your method names, you will need to implement <code>methodNameForAction()</code> to provide the mapping. You could simply use a dictionary to create the mapping, or if you know there is some relationship you could write the logic for it. For example,
 
 <p><code>def methodNameForAction(self, name): return string.lower(name)</code>
 

@@ -69,13 +69,13 @@ WebKit 0.4.1
 
 <a name=Introduction><h2>Introduction</h2></a>
 
-<p> WebKit provides an application server that runs on both UNIX and Windows in "CGI-" or "persistent-" mode, with several configuration options to change it's behavior.
+<p> WebKit provides an application server that runs on both UNIX and Windows in "CGI-" or "persistent-" mode, with several configuration options to change its behavior.
 
 <p> This install guide takes you through the installation process while showing you what options are available and how you would use them. There are notes for specific operating systems and web servers preceded with tags such as [UNIX], [WinNT], [IIS], etc.
 
 <p> WebKit is pretty easy to install, but there are some important things to know. You will be doing yourself a favor by reading through this guide from top to bottom (skipping sections that don't apply to you).
 
-<p> We recommend that you get a very simple configuration working first, focusing most on a convenient environment for your development. After that, if you still want to play with more advanced set-ups, then go for it.
+<p> We recommend that you get a very simple configuration working first, focusing most on a convenient environment for your development. After that, if you still want to play with more advanced setups, then go for it.
 
 <p> The term <i>deploy</i> means to install your web application/site in a well known location for access by your users. You first <i>develop</i> your web application and then <i>deploy</i> it. You will see deployment specific notes throughout the guide since the issues for these two situations can be different. In a nutshell, you want convenience during development, and security and performance during deployment.
 
@@ -150,7 +150,7 @@ WebKit 0.4.1
 
 <a name=WebServers_IIS><h3>IIS</h3></a>
 
-<p> Microsoft's Internet Information Server, or IIS, requires some special configuration due to it's default non-standard CGI behavior. You have to do two things:
+<p> Microsoft's Internet Information Server, or IIS, requires some special configuration due to its default non-standard CGI behavior. You have to do two things:
 
 <p> 1) Configure IIS to handle PATH_INFO and PATH_TRANSLATED according to
 the CGI specification, by running the following command:
@@ -208,12 +208,12 @@ the CGI specification, by running the following command:
 
 <p> The easiest way to do this is to make these directories writeable by all (on UNIX, that would be <code>cd Webware/WebKit; chmod -R a+rwX Cache ErrorMsgs Logs Sessions</code>).
 
-<p> The most secure way to do this, is to make sure the app server and it's adapter are executed by a specific user and that the specific user has write permissions to these directories (but no one else). This requires some savvy with both your operating system and your web server. You may wish to take the easy approach first in order to bootstrap yourself and then come back to this.
+<p> The most secure way to do this, is to make sure the app server and its adapter are executed by a specific user and that the specific user has write permissions to these directories (but no one else). This requires some savvy with both your operating system and your web server. You may wish to take the easy approach first in order to bootstrap yourself and then come back to this.
 
 
 <a name=Adapters_CGI><h3>CGI Adapter</h3></a>
 
-<p> The "classic" WebKit set up uses the CGI adapter, known as WebKit.cgi. Almost all web servers support CGI so it was obvious that WebKit should, too.
+<p> The "classic" WebKit setup uses the CGI adapter, known as WebKit.cgi. Almost all web servers support CGI so it was obvious that WebKit should, too.
 
 <p> In this configuration, the app server stays resident (similar to the web server) and is tapped for responses by a small CGI program that forwards the request to the app server.
 
@@ -232,7 +232,7 @@ the CGI specification, by running the following command:
 	<li> Copy WebKit/WebKit.cgi to a location where your web server has CGI execute permissions.
 	<li> [IIS] See the <a href=#WebServers_IIS>IIS configuration notes</a> above.
 	<li> [Windows and Apache] With a text editor, modify the first line of WebKit.cgi to read <code>#!python</code> rather than <code>#!/usr/bin/env python</code>. Make sure that python is in your search path as defined in AUTOEXEC.BAT. You can check this by typing <code>python</code> at the command prompt to see if Python launches.
-	<li> [UNIX] On most UNIX systems, the WebKit.cgi start up line, <code>#!/usr/bin/env python</code>, works just fine. You can check this by typing <code>/usr/bin/env python</code> at the command line to verify that Python launches. In the event that it does not, or if you wish to point to a different installation, you can change the line to something else, for example, <code>/usr/local/bin/python</code> or <code>/home/me/bin/python</code>.
+	<li> [UNIX] On most UNIX systems, the WebKit.cgi startup line, <code>#!/usr/bin/env python</code>, works just fine. You can check this by typing <code>/usr/bin/env python</code> at the command line to verify that Python launches. In the event that it does not, or if you wish to point to a different installation, you can change the line to something else, for example, <code>/usr/local/bin/python</code> or <code>/home/me/bin/python</code>.
 	<li> Using a text editor, change the line in WebKit.cgi that reads <code>WebKitDir = None</code> to point to WebKit. For example, <code>WebKitDir = '/home/me/Webware/WebKit'</code>.
 </ul>
 
@@ -240,23 +240,23 @@ the CGI specification, by running the following command:
 <ul>
 	<li> Verify that your web server is running and launch it if not.
 	<li> At the command line, change directories to the WebKit directory, for example, <code>cd ~/Webware/WebKit</code> on UNIX and <code>cd \Webware\WebKit</code> on Windows).
-	<li> Still at the command line, type <code>AppServer</code> and press return. You should see the start up messages for the app server. This works on both Windows and UNIX, via the <code>AppServer.bat</code> and <code>AppServer</code> start up scripts. You will see that they are very simple scripts and simply point to the recommended default app server.
+	<li> Still at the command line, type <code>AppServer</code> and press return. You should see the startup messages for the app server. This works on both Windows and UNIX, via the <code>AppServer.bat</code> and <code>AppServer</code> startup scripts. You will see that they are very simple scripts and simply point to the recommended default app server.
 </ul>
 
 
 <h4>4. Try it out</h4>
 <ul>
 	<li> At this point, you should have fixed permissions, set up WebKit.cgi and launched the servers.
-	<li> You can now try a URL such as <code>http://localhost/WebKit.cgi/</code>. By default, the WebKit app server will display the Examples page. A sidebar provides navigation of the various examples which you can look through. Note that for any example, you can view it's source code by clicking the <b>View source of...</b> link in the sidebar.
+	<li> You can now try a URL such as <code>http://localhost/WebKit.cgi/</code>. By default, the WebKit app server will display the Examples page. A sidebar provides navigation of the various examples which you can look through. Note that for any example, you can view its source code by clicking the <b>View source of...</b> link in the sidebar.
 	<li> Some diagnostic information will be printed in the terminal window of the server. You'll notice after the first page is served, that additional pages are served much faster. You can verify this in the console of the app server which reports the response time for each request. As the application warms up (e.g., caches classes, objects, files and settings) performance increases.
-	<li> You will also notice a list of "contexts" in the sidebar. Each context has it's own directory and to create your own web applications, you will create a new context, perhaps even setting it to be the default. See <a href=#Contexts>Contexts</a> below.
+	<li> You will also notice a list of "contexts" in the sidebar. Each context has its own directory and to create your own web applications, you will create a new context, perhaps even setting it to be the default. See <a href=#Contexts>Contexts</a> below.
 	<li> One context you should look at now is <b>Admin</b>. These pages let you view the WebKit logs, configuration, installed plug-ins, etc.
 </ul>
 
 
 <a name=Adapters_Stopping><h3>Stopping the App Server</h3></a>
 
-<p> Stopping the app server is accomplished by simply going to it's terminal/command window and hitting Control-C. The app server is designed to intercept this interruption and shut down gracefully. This includes saving session data to disk, if necessary.
+<p> Stopping the app server is accomplished by simply going to its terminal/command window and hitting Control-C. The app server is designed to intercept this interruption and shut down gracefully. This includes saving session data to disk, if necessary.
 
 <p> [Windows] Control-C normally shuts the app server down <i>gracefully</i>, where as Control-Break does not. Keep that in mind and use Control-C, unless the server is unresponsive to it.
 
@@ -269,7 +269,7 @@ the CGI specification, by running the following command:
 
 <p> However, reloading fails in two areas. The first is that WebKit doesn't check ancestor classes of servlets for modifications. So if you modify an abstract class (for example, SitePage, AccountPage, etc.), it won't be reloaded. The second is that WebKit can't check non-servlet classes. So if you modify a utility class (for example, ShoppingCart, Story, etc.), it won't be reloaded.
 
-<p> You can deal with reloading problems by stopping the app server (Control-C in it's terminal/command window) and restarting it. If this gets too bothersome during development (and it probably will), use the OneShot adapter.
+<p> You can deal with reloading problems by stopping the app server (Control-C in its terminal/command window) and restarting it. If this gets too bothersome during development (and it probably will), use the OneShot adapter.
 
 
 <a name=Adapters_OneShot><h3>OneShot Adapter</h3></a>
@@ -304,11 +304,11 @@ the CGI specification, by running the following command:
 
 <a name=Adapters_FastCGI><h3>FastCGI Adapter</h3></a>
 
-<p> The essence of the FastCGI protocol is to keep the CGI program resident. In our case, that program is a combination of the Python interpreter, several standard Python modules and the WebKit adapter code. By eliminating the constant reloading of these components, a substantial speed up can be obtained (2 X in informal tests).
+<p> The essence of the FastCGI protocol is to keep the CGI program resident. In our case, that program is a combination of the Python interpreter, several standard Python modules and the WebKit adapter code. By eliminating the constant reloading of these components, a substantial speedup can be obtained (2 X in informal tests).
 
 <p> Your web server will have to be FastCGI enabled, which you may be able to accomplish by downloading software at <a href=http://www.FastCGI.com>http://www.FastCGI.com</a> where you can also learn more about FastCGI.
 
-<p> The top of FCGIAdapter.py contains a doc string explaining it's set up.
+<p> The top of FCGIAdapter.py contains a doc string explaining its setup.
 
 <p> Note that to date, we have only gotten this to work on UNIX.
 
@@ -319,11 +319,11 @@ the CGI specification, by running the following command:
 
 <a name=Adapters_mod_python><h3>Mod_python Adapter</h3></a>
 
-<p> Mod_python is a module that embeds the Python interpreter into the Apache web server. This can make for a substantial speed up over WebKit.cgi which reloads the Python interpreter and various modules for each request.
+<p> Mod_python is a module that embeds the Python interpreter into the Apache web server. This can make for a substantial speedup over WebKit.cgi which reloads the Python interpreter and various modules for each request.
 
 <p> mod_python itself and the adapter are both somewhat new, which makes this approach the least tested among the bunch.
 
-<p> The top of modpHandler.py contains a doc sting explaining the set up.
+<p> The top of modpHandler.py contains a doc sting explaining the setup.
 
 <p> This has been tested on both UNIX and Windows.
 
@@ -355,7 +355,7 @@ the CGI specification, by running the following command:
 
 <p> Storing to memory is the fastest solution and works well with a persistent app server. Note that the session data will be saved to disk periodically (as a backup measure) and upon app server shutdown. It will then be automatically reloaded upon app server startup.
 
-<p> Storing to files is provided mainly in support of the OneShot adapter. It may also prove useful in the future in support of load balancing. In this scenario, each individual session is stored in it's own file, loaded for every request and saved when delivering the corresponding response.
+<p> Storing to files is provided mainly in support of the OneShot adapter. It may also prove useful in the future in support of load balancing. In this scenario, each individual session is stored in its own file, loaded for every request and saved when delivering the corresponding response.
 
 <p> All on-disk session information is located in WebKit/Sessions.
 
@@ -384,7 +384,7 @@ the CGI specification, by running the following command:
 
 <a name=Contexts><h2>Contexts</h2></a>
 
-<p> WebKit divides the world into <i>contexts</i>, each of which is a directory with it's own files and servlets. WebKit will only serve files out of it's list of known contexts.
+<p> WebKit divides the world into <i>contexts</i>, each of which is a directory with its own files and servlets. WebKit will only serve files out of its list of known contexts.
 
 <p> Some of the contexts you will find out of the box are Examples, Documentation and Admin. When viewing either an example or admin page, you will see a sidebar that links to all the contexts.
 
@@ -400,7 +400,7 @@ the CGI specification, by running the following command:
 
 <p> The special name <code>default</code> is reserved to specify what context is served when none is specified (as in <code>http://localhost/WebKit.cgi/</code>). Upon installation, this is the Examples context, which is convenient during development since it provides links to all the other contexts.
 
-<p> Note that a context can contain an <code>__init__.py</code> which will be executed when the context is loaded at app server start up. You can put any kind of initialization code you deem appropriate there.
+<p> Note that a context can contain an <code>__init__.py</code> which will be executed when the context is loaded at app server startup. You can put any kind of initialization code you deem appropriate there.
 
 
 <a name=AppServerNotes><h2>AppServer Notes</h2></a>
@@ -425,7 +425,7 @@ the CGI specification, by running the following command:
 
 <a name=AppServerNotes_Monitoring><h3>Monitoring</h3></a>
 
-<p> [UNIX] In order to provide additional stability and peace of mind, a monitor process has been developed.  The monitor is responsible for starting the AppServer and monitoring it's health.  If it detects that the AppServer is not responding, it will start a new AppServer and clean up the old one.  In order to use the monitor, run the file wkMonitor.py.  The wkMonitor process will handle the starting of the main AppServer. In order to shut down WebKit when using the monitor process, run stopMonitor.py.
+<p> [UNIX] In order to provide additional stability and peace of mind, a monitor process has been developed.  The monitor is responsible for starting the AppServer and monitoring its health.  If it detects that the AppServer is not responding, it will start a new AppServer and clean up the old one.  In order to use the monitor, run the file wkMonitor.py.  The wkMonitor process will handle the starting of the main AppServer. In order to shut down WebKit when using the monitor process, run stopMonitor.py.
 
 <p> This process will be available on Windows systems in the near future.
 
@@ -442,7 +442,7 @@ the CGI specification, by running the following command:
 <ul>
 	<li> A verbatim actual install on a box such as BSD.
 	<li> Notes on third party web host providers.
-	<li> Some example web pages of the start up screen, examples page, admin page, etc.
+	<li> Some example web pages of the startup screen, examples page, admin page, etc.
 </ul>
 
 
