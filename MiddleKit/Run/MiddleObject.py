@@ -5,16 +5,31 @@ import sys, types
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 
 class MiddleObject(NamedValueAccess):
-	'''
-	MiddleObject is the abstract superclass of objects that are manipulated at runtime by MiddleKit. For any objects that you expect to pull out of a database via MiddleKit, their classes must inherit MiddleObject.
+	"""
+	MiddleObject is the abstract superclass of objects that are
+	manipulated at runtime by MiddleKit. For any objects that you
+	expect to pull out of a database via MiddleKit, their classes must
+	inherit MiddleObject.
 
-	MiddleObjects have a serial number which persists in the database and is unique for the object across all timelines. In other words, serial numbers do not get reused.
+	MiddleObjects have a serial number which persists in the database
+	and is unique for the object across all timelines. In other words,
+	serial numbers do not get reused.
 
-	A serial number of 0 is not valid for persistence, so if an MiddleObject has such a serial number, you will know that it was not created from the database and it has not yet been committed to the database (upon which time it will receive a valid serial number).
+	A serial number of 0 is not valid for persistence, so if a
+	MiddleObject has such a serial number, you will know that it was
+	not created from the database and it has not yet been committed to
+	the database (upon which time it will receive a valid serial
+	number).
 
-	Normally we simply prefix data attributes with '_', but here we prefix them with '_mk_'. Part of the reason is to provide an extra degree of protection for subclasses from current and future attribute names used for MiddleKit's own internal book keeping purposes. Although uses of MiddleKit subclass MiddleObject, they only need to have a limited understanding of it.
-	Also, in __setattr__ we skip the change-detection bookkeeping on '_mk_*' attributes.
-	'''
+	Normally we simply prefix data attributes with '_', but here we
+	prefix them with '_mk_'. Part of the reason is to provide an extra
+	degree of protection for subclasses from current and future
+	attribute names used for MiddleKit's own internal book keeping
+	purposes. Although users of MiddleKit subclass MiddleObject, they
+	only need to have a limited understanding of it. Also, in
+	__setattr__ we skip the change-detection bookkeeping on	'_mk_*'
+	attributes.
+	"""
 
 
 	## Init ##
@@ -99,11 +114,17 @@ class MiddleObject(NamedValueAccess):
 	## Keys ##
 
 	def key(self):
-		''' Returns the object's key as needed and used by the ObjectStore. Will return None if setKey() was never invoked, or not invoked after a setSerialNum(). '''
+		"""
+		Returns the object's key as needed and used by the ObjectStore.
+		Will return None if setKey() was never invoked, or not invoked
+		after a setSerialNum().
+		"""
 		return self._mk_key
 
 	def setKey(self, key):
-		''' Restrictions: Cannot set the key twice. '''
+		"""
+		Restrictions: Cannot set the key twice.
+		"""
 		assert self._mk_serialNum>=1, "Cannot make keys for objects that haven't been persisted yet."
 		assert self._mk_key is None
 		self._mk_key = key
@@ -112,7 +133,14 @@ class MiddleObject(NamedValueAccess):
 	## Misc utility ##
 
 	def allAttrs(self, includeUnderscoresInKeys=1):
-		''' Returns a dictionary mapping the names of attributes to their values. Only attributes defined in the MiddleKit object model are included. An example return value might be { '_x': 1, '_y': 1 }, or if includeUnderscoresInKeys==0, { 'x': 1, 'y': 1 }. '''
+		"""
+		Returns a dictionary mapping the names of attributes to their
+		values. Only attributes defined in the MiddleKit object model
+		are included. An example return value might be
+			{ '_x': 1, '_y': 1 },
+		or if includeUnderscoresInKeys==0,
+			{ 'x': 1, 'y': 1 }.
+		"""
 		allAttrs = {}
 		allAttrDefs = self.klass().allAttrs()
 		for attrDef in allAttrDefs:
@@ -165,10 +193,15 @@ class MiddleObject(NamedValueAccess):
 					referencingObjectsAndAttrs.append((object, backObjRefAttr))
 		return referencingObjectsAndAttrs
 
+
 	## Debugging ##
 
 	def dumpAttrs(self, out=None, verbose=0):
-		''' Prints the attributes of the object. If verbose is 0 (the default), then the only MiddleKit specific attribute that gets printed is _mk_serialNum. '''
+		"""
+		Prints the attributes of the object. If verbose is 0 (the
+		default), then the only MiddleKit specific attribute that gets
+		printed is _mk_serialNum.
+		"""
 		if out is None:
 			out = sys.stdout
 		out.write('%s %x\n' % (self.__class__.__name__, id(self)))

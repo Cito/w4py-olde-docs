@@ -148,11 +148,11 @@ class ObjectStore(ModelUser):
 			self.doDeleteObject(object, 0)
 		
 	def doDeleteObject(self, object, checkOnly, cascaded=[]):
-		'''
+		"""
 		Do the work of deleting the object.  If checkOnly is true then only do the checks, don't actually delete anything.
 		If checkOnly is false then go ahead and delete, assuming all checks have already been done.
 		cascaded is a list of objects that have already been deleted higher up in a cascade-delete.
-		'''
+		"""
 		# Some basic assertions
 		assert self.hasObject(object)
 		assert object.key() is not None
@@ -199,7 +199,7 @@ class ObjectStore(ModelUser):
 		badObjectsAndAttrs = []
 		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
 			onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
-			assert onDeleteOther in ['deny', 'detach', 'cascade']
+			assert onDeleteOther in ('deny', 'detach', 'cascade')
 			if onDeleteOther == 'deny':
 				badObjectsAndAttrs.append((referencingObject, referencingAttr))
 		if badObjectsAndAttrs:
