@@ -75,14 +75,18 @@ CHANGES
 
 import fcgi, time
 from marshal import dumps
-
+from socket import *
 
 timestamp = time.time()
 
-from socket import *
+"""Set WebKitDir to the directory where WebKit is located"""
+WebKitDir = ''
+
+_AddressFile='address.text'
+
 
 def FCGICallback(fcg,env,form):
-	'''This function is called whenever a request comes in'''
+	"""This function is called whenever a request comes in"""
 	import os, string, sys
 
 	try:
@@ -94,7 +98,8 @@ def FCGICallback(fcg,env,form):
 			'input':   form
 		}
 
-		(host, port) = string.split(open('address.text').read(), ':')
+		addrfile=os.path.join(WebKitDir, _AddresFile)
+		(host, port) = string.split(open(addrfile).read(), ':')
 		port = int(port)
 
 		bufsize = 32*1024
@@ -139,12 +144,12 @@ def FCGICallback(fcg,env,form):
 
 
 class WKFCGI:
-	'''This class handles calls from the web server'''
+	"""This class handles calls from the web server"""
 	def __init__(self,func):
 		self.func=func
 
 	def run(self):
-		'''Block waiting for new request'''
+		"""Block waiting for new request"""
 		while fcgi.isFCGI():
 			req=fcgi.FCGI()
 			self.req=req
@@ -152,7 +157,7 @@ class WKFCGI:
 
 	#easy print function
 	def pr(self,*args):
-		'''just a quick and easy print function'''
+		"""just a quick and easy print function"""
 		try:
 			req=self.req
 			s=''
@@ -164,7 +169,7 @@ class WKFCGI:
 
 
 	def finish(self):
-	    '''Finish and send all data back to the FCGI parent'''
+	    """Finish and send all data back to the FCGI parent"""
 	    self.req.Finish()
 
 
