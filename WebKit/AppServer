@@ -1,2 +1,4 @@
-python ThreadedAppServer.py
+#!/bin/sh
+
+python ThreadedAppServer.py $1 &
 
