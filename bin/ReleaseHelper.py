@@ -110,7 +110,9 @@ class ReleaseHelper:
 		webwarePath = os.path.dirname(os.path.dirname(progPath))  # because we're in Webware/bin/
 		parentPath = os.path.dirname(webwarePath)  # where the tarball will land
 		if webwarePath not in sys.path:
-			sys.path.append(webwarePath)
+			# insert in the path but ahead of anything that PYTHONPATH might
+			# have created.
+			sys.path.insert(1,webwarePath)
 
 		self.chdir(webwarePath)
 		from MiscUtils.PropertiesObject import PropertiesObject
@@ -144,6 +146,10 @@ class ReleaseHelper:
 		
 		try:
 			self.run('cvs -z3 export %s -d %s Webware' % (dtag, tempName))
+			if not os.path.exists( tempName ):
+				print "** Unable to find the exported package.  Perhaps the tag %s does not exist." % \
+				      self.args['tag']
+				return 1
 			props = PropertiesObject(os.path.join(webwarePath, tempName, 'Properties.py'))
 			ver = props['versionString']
 
