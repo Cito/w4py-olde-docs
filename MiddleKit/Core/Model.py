@@ -73,71 +73,20 @@ class Model(Configurable):
 			open(csvPath) # to get a properly constructed IOError
 
 		# read the pickled version of Classes if possible
-		didReadPickle = 0
-		shouldDeletePickle = 0
+		data = None
 		shouldUseCache = self.setting('UsePickledClassesCache', 1)
 		if shouldUseCache:
-			picklePath = csvPath + '.pickle.cache'
-			if os.path.exists(picklePath):
-				if os.path.getmtime(picklePath)<os.path.getmtime(csvPath):
-					shouldDeletePickle = 1
-				else:
-					try:
-						file = open(picklePath)
-					except IOError:
-						pass
-					else:
-						try:
-							#print '>> reading', picklePath
-							dict = load(file)
-						except EOFError:
-							shouldDeletePickle = 1
-						else:
-							file.close()
-							assert isinstance(dict, DictType), 'type=%r dict=%r' % (type(dict), dict)
-							for key in ('source', 'data', 'pickle version', 'python version'):
-								assert dict.has_key(key)
-							if dict['source']!='MiddleKit':
-								shouldDeletePickle = 1
-							elif dict['pickle version']!=self.pickleVersion:
-								shouldDeletePickle = 1
-							elif dict['python version']!=sys.version_info:
-								shouldDeletePickle = 1
-							else:
-								self._klasses = dict['data']
-								self._klasses._model = self
-								didReadPickle = 1
-
-			# delete the pickle file if suggested by previous conditions
-			if shouldDeletePickle:
-				try:
-					os.remove(picklePath)
-				except OSError:
-					pass
+			from MiscUtils.PickleCache import readPickleCache, writePickleCache
+			data = readPickleCache(csvPath, pickleVersion=1, source='MiddleKit')
 
 		# read the regular file if necessary
-		if not didReadPickle:
-			#print '>> reading', csvPath
+		if data is None:
 			self.klasses().read(csvPath)
-
-		# write the pickle file when needed
-		if shouldUseCache and (shouldDeletePickle or not didReadPickle):
-			# write pickled version of klasses which loads much faster than CSV files
-			#print '>> writing', picklePath
-			dict = {
-				'source': 'MiddleKit',
-				'python version': sys.version_info,
-				'pickle version': self.pickleVersion,
-				'data': self._klasses,
-			}
-			try:
-				file = open(picklePath, 'w')
-			except IOError:
-				#print '>> woops. not writing due to IOError.'
-				pass
-			else:
-				dump(dict, file, 1)   # 1 = binary format
-				file.close()
+			if shouldUseCache:
+				writePickleCache(self._klasses, csvPath, pickleVersion=1, source='MiddleKit')
+		else:
+			self._klasses = data
+			self._klasses._model = self
 
 	def __getstate__(self):
 		raise Exception, 'Model instances were not designed to be pickled.'

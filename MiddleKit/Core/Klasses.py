@@ -68,7 +68,7 @@ class Klasses(ModelObject, UserDict):
 	def read(self, filename):
 		# @@ 2000-11-24 ce: split into readTable()
 		self._filename = filename
-		table = DataTable(filename)
+		table = DataTable(filename, usePickleCache=0)  # because PickleCache is used at the Model level
 		# in case we want to look at these later:
 		self._tableHeadings = table.headings()
 
