@@ -17,7 +17,7 @@ class PythonGenerator(CodeGenerator):
 		# @@ 2000-10-17 ce: ACK! Get rid of all these hard coded 'GeneratedPy' strings
 		# @@ 2000-10-16 ce: should delete GeneratedPy/
 		self.requireDir(os.path.join(dirname, 'GeneratedPy'))
-		self.writeInfoFile(os.path.join(dirname, 'GeneratedPy', '_Info.text'))
+		self.writeInfoFile(os.path.join(dirname, 'GeneratedPy', 'Info.text'))
 		self._model.writePy(self, dirname)
 
 

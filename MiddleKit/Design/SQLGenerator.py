@@ -11,7 +11,7 @@ class SQLGenerator(CodeGenerator):
 	This class and its associated mix-ins are responsible for generating:
 		- Create.sql
 		- InsertSample.sql
-		- _Info.text
+		- Info.text
 
 	A subclass and further mix-ins are required for specific databases (since SQL varies from product to product).
 
@@ -51,7 +51,7 @@ class SQLGenerator(CodeGenerator):
 
 	def generate(self, dirname):
 		self.requireDir(dirname)
-		self.writeInfoFile(os.path.join(dirname, '_Info.text'))
+		self.writeInfoFile(os.path.join(dirname, 'Info.text'))
 		self._model.writeCreateSQL(self, dirname)
 		self._model.writeInsertSamplesSQL(self, dirname)
 

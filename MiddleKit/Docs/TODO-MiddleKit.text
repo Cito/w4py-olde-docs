@@ -3,18 +3,6 @@ TO DO
 
 Update
 ------
-Create.sql now includes NOT NULL as appropriate.
-
-Create.sql now uses a PRIMARY KEY instead of just a generic index on the object serial number.
-
-
-For providers of SQL adapters:
-
-Added SQLGenerator.sqlSupportsDefaultValues(self) so that concrete subclasses can advertise whether or not their CREATE statement supports DEFAULT <value>. (MySQL & PostgreSQL do; MSSQL does not.)
-
-I factored out the SQL for the primary key since this often needs to be customized for each database. Check out primaryKeySQLDef() in Design/[MySQL]SQLGenerator.py.
-
-
 [ ] Implement all ***
 
 [ ] Make sure all changes are documented.
@@ -28,7 +16,7 @@ I factored out the SQL for the primary key since this often needs to be customiz
 <subtle>
 <misc>
 <bugs/flaws>
-<very minor/clean up>
+<clean up/very minor>
 <testing>
 <docs>
 
@@ -79,7 +67,17 @@ If you have general comments or questions or contributions, please contact webwa
 <major functionality>
 
 	[ ] deleting objects
+		Suppose Foo points to Bar. Given that Foo gets deleted, what happens with relation to Bar?
+			- detach (Bar stays around and it's back reference to Foo is set to None)
+			- cascade (delete foo)
+			- deny
+			- dangle (very dangerous)
+		Use UML terminology if such a thing exists.
 
+EODeleteRuleNullify
+EODeleteRuleCascade
+EODeleteRuleDeny
+EODeleteRuleNoAction
 	[ ] Distinct lists: An object such as "Video" cannot have a directors and writers attribute that are both typed "list of Person". Might want to review UML relationships before calling the deal on this.
 
 	[ ] Support defaults in both Python code gen and SQL code gen
@@ -106,6 +104,10 @@ If you have general comments or questions or contributions, please contact webwa
 	[ ] Support multiple inheritance.
 
 	[ ] Experiment with the idea of a MiddleKit that does not generate any Python code (other than the stubs). All operations are handled entirely at run time.
+
+	[ ] Support locking and unlocking of objects.
+
+	[ ] When we support object proxies, e.g., objects that exist, but haven't fetched their attribute values from the persistent store yet, then we should also support invalidating those objects.
 
 </major functionality>
 
@@ -140,7 +142,30 @@ If you have general comments or questions or contributions, please contact webwa
 
 	*** [ ] Prior to inserting or updating an object in the store, validate the requirements on it's attributes.
 		- review EOF's validation policies
+			- EOValidation protocol
+			"For more discussion of this subject, see the chapter “Designing Enterprise Objects” in the
+Enterprise Objects Framework Developer’s Guide, and the EOEnterpriseObject informal protocol
+specification."
+
 		- should the accessor assertions be inside a different method? That way you could validate a value for an attribute without necessarily having to set it. The default implementation could invoke self.klass().attr('name').validate(value). Subclasses could override, invoke super, and perform additional checks.
+		- Generated code:
+			def validateNAME(self, value):
+				self.klass().attr('NAME').validate(value)
+		- MiddleObject
+			def validateNamedValue(self, name, value):
+				# ?? really need this?
+				return validateNAME(value)
+			def validateForSave(self):
+				# is this for loop necessary?
+				for attr in self.klass().allAttrs():
+					self.validateNamedValue(attr.name(), self._get(attr.name()))
+			def validateForDelete(self):
+				pass
+			def validateForUpdate(self):
+				self.validateForSave(self)
+			def validateForInsert(self):
+				self.validateForSave(self)
+
 
 	[x] support "not null" in SQL. e.g. if isRequired: then add NOT NULL.
 
@@ -173,7 +198,7 @@ If you have general comments or questions or contributions, please contact webwa
 		If so, consider that MySQL takes some extra args:
 			port, unix_socket, client_flag
 
-	*** [ ] In sample code generation, do all deletes first, one time for each table. That way you can have multiple groups of objects
+	[x] In sample code generation, do all deletes first, one time for each table. That way you can have multiple groups of objects
 
 	[ ] Add a parameter to the config for the database name, which right now is assumed to be the same name as the CSV file.
 
@@ -209,6 +234,10 @@ If you have general comments or questions or contributions, please contact webwa
 	[ ] Should the __init__ methods in generated code allow for dictionaries and/or keyword arguments to initialize attributes with?
 
 	[ ] (per Dave R) fault tolerance: If the database connection goes down, re-establish it.
+
+	[ ] error checking: validate that class names and attribute names are valid
+
+	[ ] Should __setattr__ invoke willChange() when changes really occur so that willChange() can be come a hook for subclasses (for example, to implement notifications which could then be used in a GUI environment)?
 
 </refinements/improvements>
 
@@ -271,26 +300,30 @@ If you have general comments or questions or contributions, please contact webwa
 
 
 
-<very minor/clean up>
+<clean up/very minor>
 
-	[ ] Convert all uses of _NoDefault to MiscUtils.NoDefault
+	*** [ ]  Rename store.clear() to store.clearCachedObjects()
+		- Also, assert that there are no outstanding changes. Maybe:
+			assert not self.isChanged()
 
-	[ ] rename initFromRow() to readRow() or something
+	*** [ ] Convert all uses of _NoDefault to MiscUtils.NoDefault
+
+	*** [ ] rename initFromRow() to readRow() or something
 
 	[ ] Renames:
 		- klassId to klassSerialNum
 		- change MKClassIds table to KlassSerialNums
 		- id() to serialNum()
 
-	[ ] What's up with _Info.text filename? from SQLGenerator
+	[x] What's up with _Info.text filename? from SQLGenerator
 
 	[ ] Attr's init dict takes a 'Name'. So should Klass.
 
 	[ ] Consider use "id" instead of "someClassId" for the identity column.
 
-	[ ] Do we still use Core/NULL.py?
+	[x] Do we still use Core/NULL.py?
 
-</very minor/clean up>
+</clean up/very minor>
 
 
 
