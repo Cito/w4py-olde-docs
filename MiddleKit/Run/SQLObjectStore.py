@@ -13,6 +13,9 @@ from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
 
 class SQLObjectStoreError(Exception): pass
 class SQLObjectStoreThreadingError(SQLObjectStoreError): pass
+class ObjRefError(SQLObjectStoreError): pass
+class ObjRefZeroSerialNumError(ObjRefError): pass
+class ObjRefDanglesError(ObjRefError): pass
 
 
 aggressiveGC = 0
@@ -449,14 +452,11 @@ class SQLObjectStore(ObjectStore):
 
 	def objRefZeroSerialNum(self, objRef):
 		""" Invoked by fetchObjRef() if either the class or object serial number is 0. """
-		self.warning('Zero serial number. Obj ref = %x.' % objRef)
-		return None
+		raise ObjRefZeroSerialNumError, objRefSplit(objRef)
 
 	def objRefDangles(self, objRef):
 		""" Invoked by fetchObjRef() if there is no possible target object for the given objRef, e.g., a dangling reference. This method invokes self.warning() and includes the objRef as decimal, hexadecimal and class:obj numbers. """
-		klassId, objSerialNum = objRefSplit(objRef)
-		self.warning('Obj ref dangles. dec=%i  hex=%x  class.obj=%s.%i.' % (objRef, objRef, self.klassForId(klassId).name(), objSerialNum))
-		return None
+		raise ObjRefDanglesError, objRefSplit(objRef)
 
 
 	## Debugging ##

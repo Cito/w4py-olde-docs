@@ -318,6 +318,32 @@ class MiddleObject(NamedValueAccess):
 	def setValueForAttr(self, attr, value):
 		return self.setValueForKey(attr['Name'], value)
 
+
+	## Problems ##
+
+	def objRefErrorWasRaised(self, error, sourceKlassName, sourceAttrName):
+		"""
+		Invoked by getter methods when ObjRefErrors are raised.
+		Prints very useful information to stdout.
+		Override if you wish other actions to be taken.
+		The value returned is used for the obj ref (defaults to None).
+		"""
+		klassId, objSerialNum = error.args
+		try:
+			rep = repr(self)
+		except Exception, e:
+			rep = '(exception during repr: %s: %s)' % (e.__class__.__name__, e)
+		try:
+			klassName = self.store().klassForId(klassId).name()
+		except Exception, e:
+			klassName = '%i (exception during klassName fetch: %s: %s)' % (klassId, e.__class__.__name__, e)
+		sys.stdout.flush()
+		sys.stderr.flush()
+		print 'WARNING: MiddleKit: In object %(rep)s, attribute %(sourceKlassName)s.%(sourceAttrName)s dangles with value %(klassName)s.%(objSerialNum)s' % locals()
+		sys.stdout.flush()
+		return None
+
+
 	# @@ 2001-07-10 ce: the old names
 	#attr = valueForKey
 	#setAttr = setValueForKey
