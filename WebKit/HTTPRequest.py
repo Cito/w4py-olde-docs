@@ -4,6 +4,7 @@ from WebUtils.Cookie import Cookie
 import cgi
 from types import ListType
 import os
+from WebUtils.WebFuncs import RequestURI
 
 
 class HTTPRequest(Request):
@@ -53,10 +54,18 @@ class HTTPRequest(Request):
 			f.close()
 
 		# Fix up environ if it doesn't look right.
+
+		# Fix #1: No PATH_INFO
 		# This can happen when there is no extra path info past the adapter.
 		# e.g., http://localhost/WebKit.cgi
 		if not self._environ.has_key('PATH_INFO'):
 			self._environ['PATH_INFO'] = ''
+
+		# Fix #2: No REQUEST_URI
+		# REQUEST_URI isn't actually part of the CGI standard and some
+		# web servers like IIS don't set it (as of 8/22/2000).
+		if not self._environ.has_key('REQUEST_URI'):
+			self._environ['REQUEST_URI'] = RequestURI(self._environ)
 
 		self._adapterName = self._environ.get('SCRIPT_NAME', '')
 

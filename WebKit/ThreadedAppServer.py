@@ -23,6 +23,7 @@ from threading import Lock, Thread
 import Queue
 import select
 import socket
+from WebUtils.WebFuncs import RequestURI
 
 
 DefaultConfig = {
@@ -193,7 +194,7 @@ class RequestHandler:
 			if verbose:
 				print 'request has keys:', string.join(dict.keys(), ', ')
 				if dict.has_key('environ'):
-					requestURI = dict['environ'].get('REQUEST_URI', None)
+					requestURI = RequestURI(dict['environ'])
 				else:
 					requestURI = None
 				print 'request uri =', requestURI
