@@ -17,6 +17,7 @@ FUTURE
 
 from Common import *
 from AppServer import AppServer
+from MiscUtils.Funcs import timestamp
 from marshal import dumps, loads
 import os, sys
 from threading import Lock, Thread, Event
@@ -84,13 +85,11 @@ class ThreadedAppServer(AppServer):
 			out.flush()
 		out.write("\n")
 
+		# @@ 2001-05-30 ce: another hard coded number:
 		self.mainsocket.listen(1024)
 		self.recordPID()
 
-
 		print "Ready\n"
-
-
 
 	def isPersistent(self):
 		return 1
@@ -114,7 +113,7 @@ class ThreadedAppServer(AppServer):
 				# we'll exit on the next loop
 				if v[0] == EINTR or v[0]==0: break
 				else: raise
-				
+
 			if not self.running:
 				return
 
@@ -128,10 +127,10 @@ class ThreadedAppServer(AppServer):
 					rh = None
 					client,addr = sock.accept()
 					try:
-						rh=self.rhQueue.get_nowait()
+						rh = self.rhQueue.get_nowait()
 					except Queue.Empty:
 						rh = RequestHandler(self)
-					rh.activate(client)
+					rh.activate(client, self._reqCount)
 					self.requestQueue.put(rh)
 
 	def threadloop(self):
@@ -232,10 +231,10 @@ class Monitor:
 		conn = self.sock
 		if verbose:
 			print 'receiving request from', conn
-			
+
 		BUFSIZE = 8*1024
 
-		
+
 		chunk = ''
 		while len(chunk) < int_length:
 			chunk = chunk + conn.recv(int_length)
@@ -300,9 +299,16 @@ class RequestHandler:
 	def __init__(self, server):
 		self.server = server
 
-	def activate(self, sock):
+	def activate(self, sock, number):
+		'''
+		Activates the handler for processing the request.
+		Number is the number of the request, mostly used to identify
+		verbose output. Each request should be given a unique,
+		incremental number.
+		'''
 		self.sock = sock
 #		self._strmOut = TASASStreamOut(sock)
+		self._number = number
 
 	def close(self):
 		self.sock = None
@@ -315,13 +321,11 @@ class RequestHandler:
 
 		startTime = time.time()
 		if verbose:
-			print 'BEGIN REQUEST'
-			print time.asctime(time.localtime(startTime))
+			print '%5i  %s ' % (self._number, timestamp()['pretty']),
 
 		conn = self.sock
-		if verbose:
-			print 'receiving request from', conn
 
+		# @@ 2001-05-30 ce: Ack! Look at this hard coding.
 		BUFSIZE = 8*1024
 
 		data = []
@@ -332,6 +336,7 @@ class RequestHandler:
 		dict_length = loads(chunk)
 		if type(dict_length) != type(1):
 			conn.close()
+			print
 			print "Error: Invalid AppServer protocol"
 			return 0
 
@@ -342,10 +347,7 @@ class RequestHandler:
 			missing = dict_length - len(chunk)
 
 		dict = loads(chunk)
-		if verbose:
-			chucklen1 = len(chunk)
-			
-		if verbose: print "Comm Delay=%s" % (time.time() - dict['time'])
+		#if verbose: print "Comm Delay=%s" % (time.time() - dict['time'])
 
 ##		while 1:
 ##			chunk = conn.recv(BUFSIZE)
@@ -359,12 +361,11 @@ class RequestHandler:
 
 		if dict:
 			if verbose:
-				print 'request has keys:', string.join(dict.keys(), ', ')
 				if dict.has_key('environ'):
 					requestURI = Funcs.requestURI(dict['environ'])
 				else:
 					requestURI = None
-				print 'request uri =', requestURI
+				print requestURI
 
 		strmOut = TASASStreamOut(self.sock)
 		transaction = self.server._app.dispatchRawRequest(dict, strmOut)
@@ -378,9 +379,9 @@ class RequestHandler:
 			pass
 
 		if verbose:
-			print 'connection closed.'
-			print '%0.2f secs' % (time.time() - startTime)
-			print 'END REQUEST'
+			duration = '%0.2f secs' % (time.time() - startTime)
+			duration = string.ljust(duration, 19)
+			print '%5i  %s  %s' % (self._number, duration, requestURI)
 			print
 
 		transaction._application=None
