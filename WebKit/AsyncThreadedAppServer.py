@@ -16,10 +16,10 @@ import asyncore
 from WebUtils.WebFuncs import RequestURI
 
 try:
-	from select_trigger import trigger
-	MainTrigger=trigger()
+	from selectRelease import Release
+	MainRelease=Release()
 except:
-	MainTrigger = lambda:()
+	MainRelease = lambda:()
 
 
 class AsyncThreadedAppServer(asyncore.dispatcher, AppServer):
@@ -222,8 +222,7 @@ class RequestHandler(asyncore.dispatcher):
 		transaction._application=None
 		transaction.die()
 		del transaction
-		#trigger().pull_trigger()
-		MainTrigger.pull_trigger()
+		MainRelease.release()
 
 	def activate(self, socket):
 		self.set_socket(socket)
