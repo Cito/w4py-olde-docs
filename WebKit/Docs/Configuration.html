@@ -352,12 +352,24 @@ qualified arbitrarily deep.  Default: <tt class="literal"><span class="pre">['re
 this unless you have a machine with multiple network interfaces,
 and you don't want Webware to listen on all interfaces.  
 Default <tt class="literal"><span class="pre">127.0.0.1</span></tt>.</dd>
-<dt><tt class="literal"><span class="pre">Port</span></tt>:</dt>
+<dt><tt class="literal"><span class="pre">EnableAdapter</span></tt>:</dt>
+<dd>Whether the application server should listen for requests from
+the adapter.  You'll want this on unless you decide to use the 
+built-in HTTP server.  Default: <tt class="literal"><span class="pre">1</span></tt> (true)</dd>
+<dt><tt class="literal"><span class="pre">AdapterPort</span></tt>:</dt>
 <dd>The port the application server listens to for requests from the
 adapter.  You cannot point a browser to this port.  You may wish
 to change this if you have another application running at this
 port, or if you are running more than one AppServer they must each
 be listening at a different port.  Default: <tt class="literal"><span class="pre">8086</span></tt>.</dd>
+<dt><tt class="literal"><span class="pre">EnableHTTP</span></tt>:</dt>
+<dd>Activate the built-in HTTP server.  The HTTP server will listen 
+on the port specified by the <tt class="literal"><span class="pre">HTTPPort</span></tt> setting.  Note that 
+at this point, the built-in HTTP server is considered to be 
+experimental.  Default: <tt class="literal"><span class="pre">0</span></tt> (false)</dd>
+<dt><tt class="literal"><span class="pre">HTTPPort</span></tt>:</dt>
+<dd>The port the built-in HTTP server listens on.  You can point a
+browser to this port.  Default: <tt class="literal"><span class="pre">8080</span></tt>.</dd>
 <dt><tt class="literal"><span class="pre">PluginDirs</span></tt>:</dt>
 <dd><p class="first">When the application server starts up, it looks in these locations
 for plugins.  Each plugin is a subdirectory of its own.  By

@@ -234,14 +234,9 @@ To run the server in a separate process, run the script
 Python-based web server, that will forward all requests to the Webware
 AppServer (so you must *also* start the AppServer!).
 
-The run the server in the same process, edit the ``AppServer`` or
-``AppServer.bat`` script, replacing ``ThreadedAppServer`` with
-``NewThreadedAppServer``.  Then start the AppServer like::
-
-  # Posix:
-  $ ./AppServer http
-  # Windows:
-  > AppServer.bat http
+The run the server in the same process, set the ``EnableHTTP`` setting 
+to 1 (true) in your ``AppServer.config``.  You may also wish to set the
+port using the ``HTTPPort`` setting.
 
 There isn't much in the way of configuration for these servers --
 they're still experimental.
@@ -475,7 +470,7 @@ case, you must put a file ``webkit.cfg`` in the same directory as the
 wkcgi executable.  This file looks like::
 
     Host = localhost
-    Port = 8086
+    AdapterPort = 8086
     MaxConnectAttempts = 10
     ConnectRetryDelay = 1
 

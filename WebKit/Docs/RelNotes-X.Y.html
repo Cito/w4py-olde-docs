@@ -71,6 +71,9 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 		 for more information.  You will certainly want to turn this off 
 		 when deploying the site.  Defaults to 0 (off).
 
+	<li> The AppServer now includes an experimental built-in web server.
+		 See the InstallGuide for more details.
+
 </ul>
 
 
@@ -108,7 +111,10 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 <h2>Minor API Changes</h2>
 <ul>
-	<li> *
+	<li> The 'Port' setting in AppServer.config has been deprecated in favor
+	     of the new 'AdapterPort' setting.  The 'Port' setting in your config 
+		 file will still be honored, but you are encouraged to update your 
+		 AppServer.config as the 'Port' setting will be removed in the future.
 </ul>
 
 

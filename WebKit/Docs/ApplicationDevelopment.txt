@@ -133,7 +133,7 @@ Some options that you may be particularly interested in:
 ``--AppServer.AutoReload``:
     Setting this to ``1`` will make the AppServer restart if there have been
     changes to any loaded files.  This is very nice during development.
-``--AppServer.Port``:
+``--AppServer.AdapterPort``:
     If you want multiple applications running on the same machine (e.g., one
     for development, one for production), you have to use different ports.
 ``--Application.ShowDebugInfoOnErrors``:

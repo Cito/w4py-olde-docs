@@ -27,13 +27,16 @@ from WebUtils import Funcs
 debug = 0
 
 DefaultConfig = {
-	'Port':                 8086,
 	'Host':                 '127.0.0.1',
+	'EnableAdapter':        1,
+	'AdapterPort':          8086,
+	'EnableMonitor':		0,
 	'MonitorPort':          8085,
+	'EnableHTTP':           0,
 	'HTTPPort':             8080,
-	'MaxServerThreads':        20,
-	'MinServerThreads':        5,
-	'StartServerThreads':      10,
+	'MaxServerThreads':     20,
+	'MinServerThreads':     5,
+	'StartServerThreads':   10,
 
 	# @@ 2000-04-27 ce: None of the following settings are implemented
 #	'RequestQueueSize':     16,#	'RequestBufferSize':    64*1024,
@@ -71,8 +74,7 @@ class ThreadedAppServer(AppServer):
 		"""
 		Setup the AppServer, create an initial thread pool
 		(threads created with `spawnThread`), record the PID
-		in a file, and add the Adapter handler (which always runs,
-		unlike monitor or http).
+		in a file, and add any enabled handlers (Adapter, HTTP, Monitor).
 		"""
 		
 		self._defaultConfig = None
@@ -101,7 +103,15 @@ class ThreadedAppServer(AppServer):
 		self._handlerCache = {}
 		self._sockets = {}
 
-		self.addSocketHandler(AdapterHandler)
+		if self.setting('EnableAdapter'):
+			self.addSocketHandler(AdapterHandler)
+
+		if self.setting('EnableMonitor'):
+			self.addSocketHandler(MonitorHandler)
+
+		if self.setting('EnableHTTP'):
+			from WebKit.HTTPServer import HTTPAppServerHandler
+			self.addSocketHandler(HTTPAppServerHandler)
 
 		self.readyForRequests()
 
@@ -134,7 +144,7 @@ class ThreadedAppServer(AppServer):
 				self.initiateShutdown()
 			self._closeThread.join()
 			raise
-		print "Listening on", serverAddress
+		print "Listening for %s on %s" % (handlerClass.settingPrefix, serverAddress)
 		f = open(self.serverSidePath(
 			'%s.text' % handlerClass.protocolName), 'w')
 		f.write('%s:%d' % (serverAddress[0], serverAddress[1]))
@@ -445,17 +455,31 @@ class ThreadedAppServer(AppServer):
 	def address(self, settingPrefix):
 		"""
 		The address for the Adapter (Host/interface, and port),
-		taken from ``Configs/Application.config``, setting
-		``Host`` and ``Port``.
+		taken from ``Configs/AppServer.config``, setting
+		``Host`` and ``AdapterPort``.
 		"""
 		try:
 			return self._addr[settingPrefix]
 		except KeyError:
 			host = self.setting(settingPrefix + 'Host',
 					    self.setting('Host'))
+			if settingPrefix == 'Adapter':
+				# jdh 2004-12-01: 
+				# 'Port' has been renamed to 'AdapterPort'.  However, we don't
+				# want the the default AdapterPort in DefaultConfig above to 
+				# be used if a user still has 'Port' in their config file.
+				# So for now, we prefer the 'Port' setting if it exists.
+				# After a few releases we can remove this special case.
+				port = self.setting('Port', None)
+				if port is None:
+					port = self.setting(settingPrefix + 'Port')
+				else:
+					print "WARNING: The 'Port' setting has been renamed to 'AdapterPort'.\n         Please update your AppServer.config file"
+			else:
+				port = self.setting(settingPrefix + 'Port')
 			self._addr[settingPrefix] = (
 				host,
-				self.setting(settingPrefix + 'Port'))
+				port)
 			return self._addr[settingPrefix]
 
 class Handler:
@@ -663,7 +687,7 @@ class AdapterHandler(Handler):
 	"""
 
 	protocolName = 'address'
-	settingPrefix = ''
+	settingPrefix = 'Adapter'
 
 	def handleRequest(self):
 		"""
@@ -717,15 +741,13 @@ class AdapterHandler(Handler):
 		return self._sock.makefile("rb",8012)
 
 
-def run(useMonitor = 0, http=0, workDir=None):
+def run(workDir=None):
 	"""
 	Starts the server (`ThreadedAppServer`).
 
 	`workDir` is the server-side path for the server, which may
 	not be the ``Webware/WebKit`` directory (though by default
-	it is).  The monitor and HTTP handlers are started based
-	on `useMonitor` and `http`.  For monitor see `MonitorHandler`,
-	and for HTTP see `HTTPServer.HTTPAppServerHandler`.
+	it is).  
 
 	After setting up the ThreadedAppServer we call
 	`ThreadedAppServer.mainloop` to start the server main loop.
@@ -733,17 +755,9 @@ def run(useMonitor = 0, http=0, workDir=None):
 	"""
 	
 	global server
-	global monitor
-	monitor = useMonitor
 	try:
 		server = None
 		server = ThreadedAppServer(workDir)
-		if useMonitor:
-			addr = server.address('Monitor')
-			server.addSocketHandler(MonitorHandler)
-		if http:
-			from WebKit.HTTPServer import HTTPAppServerHandler
-			server.addSocketHandler(HTTPAppServerHandler)
 
 		# On NT, run mainloop in a different thread because
 		# it's not safe for Ctrl-C to be caught while
@@ -844,7 +858,6 @@ def main(args):
 	interface for AppServer.
 	"""
 	
-	monitor = 0
 	http = 0
 	function = run
 	daemon = 0
@@ -856,9 +869,6 @@ def main(args):
 			name = match.group(1)
 			value = i[match.end():]
 			Configurable.addCommandLineSetting(name, value)
-		elif i == "monitor":
-			print "Enabling Monitoring"
-			monitor=1
 		elif i == "stop":
 			import AppServer
 			function=AppServer.stop
@@ -868,8 +878,6 @@ def main(args):
 			pass
 		elif i[:8] == "workdir=":
 			workDir = i[8:]
-		elif i == "http":
-			http = 1
 		else:
 			print usage
 
@@ -880,6 +888,6 @@ def main(args):
 				sys.exit()
 		else:
 			print "daemon mode not available on your OS"
-	function(useMonitor=monitor, http=http, workDir=workDir)
+	function(workDir=workDir)
 
 
