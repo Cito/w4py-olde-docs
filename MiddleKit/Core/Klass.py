@@ -69,6 +69,8 @@ class Klass(UserDict, ModelObject):
 		# order for MiddleKit.Run.MiddleObject methods to work.
 		# Invoking pyClass() makes that happen.
 		self.pyClass()
+		for attr in self.attrs():
+			attr.awakeFromRead()
 
 	def _makeAllAttrs(self):
 		"""
@@ -282,7 +284,7 @@ class Klass(UserDict, ModelObject):
 			for klass in self._klassContainer._model.allKlassesInOrder():
 				# find all ObjRefAttrs of klass that refer to one of our targetKlasses
 				for attr in klass.attrs():
-					if isinstance(attr, ObjRefAttr) and targetKlasses.has_key(attr.className()):
+					if isinstance(attr, ObjRefAttr) and targetKlasses.has_key(attr.targetClassName()):
 						backObjRefAttrs.append(attr)
 			self._backObjRefAttrs = backObjRefAttrs
 		return self._backObjRefAttrs

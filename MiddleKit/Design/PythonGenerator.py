@@ -471,7 +471,7 @@ class ObjRefAttr:
 			className = parts[0]
 			objSerialNum = parts[1]
 		else:
-			className = self.className()
+			className = self.targetClassName()
 			objSerialNum = string
 		klass = self.klass().klasses()._model.klass(className)
 		klassId = klass.id()
@@ -481,7 +481,7 @@ class ObjRefAttr:
 	def writePySet(self, out):
 		name = self.name()
 		pySetName = self.pySetName()
-		targetClassName = self.className()
+		targetClassName = self.targetClassName()
 		package = self.setting('Package', '')
 		if package:
 			package += '.'

@@ -449,14 +449,18 @@ class Attr:
 			else:
 				out.write('\t/* %(Name)s %(Type)s - not a SQL column */' % self)
 		except:
+			bar = '*'*78
 			print
+			print bar
 			print 'exception for attribute:'
 			print '%s.%s' % (self.klass().name(), self.name())
 			print
 			try:
-				print self
+				from pprint import pprint
+				pprint(self.data)
 			except:
 				pass
+			print bar
 			print
 			raise
 
@@ -662,11 +666,13 @@ class ObjRefAttr:
 				notNull = ' not null'
 			else:
 				notNull = self.sqlNullSpec()
+			classIdDefault = ' default %s' % self.targetKlass().id()
+			#   ^ this makes the table a little to easier to work with in some cases (you can often just insert the obj id)
 			if self.get('Ref', None):
 				objIdRef = ' references %(Type)s(%(Type)sId) ' % self
 			else:
 				objIdRef = ''
-			out.write('\t%s %s%s references _MKClassIds,\n' % (classIdName, self.sqlType(), notNull))
+			out.write('\t%s %s%s%s references _MKClassIds,\n' % (classIdName, self.sqlType(), notNull, classIdDefault))
 			out.write('\t%s %s%s%s' % (objIdName, self.sqlType(), notNull, objIdRef))
 
 	def sqlForNone(self):
@@ -686,7 +692,7 @@ class ObjRefAttr:
 			className = parts[0]
 			objSerialNum = parts[1]
 		else:
-			className = self.className()
+			className = self.targetClassName()
 			objSerialNum = input
 		klass = self.klass().klasses()._model.klass(className)
 		klassId = klass.id()

@@ -828,7 +828,7 @@ class ObjRefAttr:
 	def readStoreDataRow(self, obj, row, i):
 		# this does *not* get called under the old approach of single obj ref columns. see MiddleObject.readStoreData
 		classId, objId = row[i], row[i+1]
-		if classId is None:
+		if objId is None:
 			value = None
 		else:
 			value = objRefJoin(classId, objId)

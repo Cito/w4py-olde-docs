@@ -77,3 +77,6 @@ class Attr(UserDict, ModelObject):
 
 	def model(self):
 		return self._klass.klasses()._model
+
+	def awakeFromRead(self):
+		pass
