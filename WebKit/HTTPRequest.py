@@ -281,7 +281,7 @@ class HTTPRequest(Request):
 		"""
 		path = self.urlPath()
 		if not path[:-1] == "/":
-			path = path[:string.rfind("/", path)+1]
+			path = path[:string.rfind(path, "/")+1]
 		return path
 
 
