@@ -17,12 +17,11 @@ class AdminPage(Page):
 	## Content methods ##
 
 	def writeHeader(self):
-		self.writeln('''<html>
+		self.writeln('''
 			<head>
 				<title>%s</title>
 			</head>
-			<body %s>
-				<table align=left border=0 cellpadding=0 cellspacing=0 width=100%%><tr><td>''' % (
+			<body %s>''' % (
 			self.title(), self.htBodyArgs()))
 
 	def writeBody(self):
