@@ -277,7 +277,7 @@ class Page(HTTPServlet):
 		return instance
 
 
-	def sessionEncode(url=None):
+	def sessionEncode(self, url=None):
 		"""
 		Utility function to access session.sessionEncode.
 		Takes a url and adds the session ID as a parameter.  This is for cases where
