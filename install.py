@@ -86,13 +86,15 @@ class Installer:
 			version_info = sys.version_info
 		except:
 			version_info=None
-		if not version_info or version_info[0]<minver[0] or (version_info[0]==minver and version_info[1]<min[1]):
+		if not version_info or version_info[0]<minver[0] or (version_info[0]==minver[0] and version_info[1]<minver[1]):
 			minVersionString=str(minver[0])+"."+str(minver[1])
 			response=raw_input( MinimumVersionErrorMsg % (minVersionString,sys.version))
 			if response and string.upper(response)[0] == "Y":
 				rtncode=1
 			else:
 				rtncode=0
+		else:
+			rtncode = 1
 		return rtncode
 
 	def detectComponents(self):
