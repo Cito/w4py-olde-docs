@@ -24,6 +24,23 @@ Version 0.8
 	<li> Also, the database name can be passed via the constructor. See the <a href=UsersGuide.html#MT_DatabaseName>User's Guide</a> for more info.
 </ul>
 
+<p> "Dangling obj refs" now print much more useful information. The old message:
+
+<pre class=py>WARNING: Obj ref dangles. dec=266287972390  hex=3e00000026  class.obj=Stop.97.
+</pre>
+
+<p> The new message:
+<pre class=py>WARNING: MiddleKit: In object &lt;PendingTrade 'TIVO long 4.25' 129&gt;, attribute
+Trade.initialStop dangles with value Stop.97
+</pre>
+
+<p> In other words:
+<pre class=py>WARNING: MiddleKit: In object <b>&lt;REPR()&gt;</b>, attribute
+<b>FULL ATTR NAME</b> dangles with value <b>CLASS.SERIAL_NUM VALUE</b>
+</pre>
+
+</ul>
+
 
 <p><hr>
 
