@@ -81,7 +81,7 @@ class Application(Configurable,CanContainer):
 
 	## Init ##
 
-	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None, Contexts=None):
+	def __init__(self, server=None, transactionClass=None, sessionClass=None, requestClass=None, responseClass=None, exceptionHandlerClass=None, Contexts=None, useSessionSweeper=1):
 
 
 		Configurable.__init__(self)
@@ -150,7 +150,8 @@ class Application(Configurable,CanContainer):
 		#JSL
 
 		#JSL
-		self._startSessionSweeper()
+		if useSessionSweeper:
+			self._startSessionSweeper()
 
 	def _startSessionSweeper(self):
 		self._sessSweepThread=Thread(None, self.Sweeper, 'SessionSweeper', (self._sessions,self.setting('SessionTimeout')))
@@ -650,11 +651,11 @@ def main(requestDict):
 		if 0:
 			# For debugging in bad circumstances
 			print '<html><body>'
-			print '<p><b>Application %s</b>' % sys.argv[1]
+			print '<p><b>Application</b>'
 			print request.htmlInfo()
 			print '</body></html>'
-		app = Application()
-		app.dispatchRequest(request)
+		app = Application(useSessionSweeper=0)
+		return app.dispatchRequest(request)
 	except:
 		print 'Content-type: text/html\n'
 		print '<html>'
