@@ -75,6 +75,8 @@
 
 ('EmailErrors', '0', "If true, error messages are e-mailed out according to the ErrorEmailServer and ErrorEmailHeaders settings. This setting defaults to false because <span class=name>ErrorEmailServer</span> and <span>ErrorEmailHeaders</span> must be configured first."),
 
+('EmailErrorReportAsAttachment', '0', "1 to make html error reports be emailed as text with an html attachment, or 0 to make the html the body of the message."),
+
 ('ErrorEmailServer', "'mail.-.com'", "The SMTP server to use for sending e-mail error messages."),
 
 ('ErrorEmailHeaders',

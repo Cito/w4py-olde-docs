@@ -461,6 +461,14 @@ If true, error messages are e-mailed out according to the ErrorEmailServer and E
 </dl></p>
 
 <p><dl class=config>
+<dt class=config><span class=setting>EmailErrorReportAsAttachment</span>
+&nbsp; <code> = 0</code></dt>
+<dd class=config>
+1 to make html error reports be emailed as text with an html attachment, or 0 to make the html the body of the message.
+</dd>
+</dl></p>
+
+<p><dl class=config>
 <dt class=config><span class=setting>ErrorEmailServer</span>
 &nbsp; <code> = 'mail.-.com'</code></dt>
 <dd class=config>
@@ -513,6 +521,7 @@ The SMTP server to use for sending e-mail error messages.
 Determines how much detail an RPC servlet will return when an exception occurs on the server side. Can take the values, in order of increasing detail, 'occurred', 'exception' and 'traceback'. The first reports the string 'unhandled exception', which the second prints the actual exception and finally the third prints both the exception and accompanying traceback. All returns are always strings.
 </dd>
 </dl></p>
+
 
 <a name=Administration><h2>Administration</h2></a>
 

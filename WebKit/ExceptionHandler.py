@@ -6,7 +6,10 @@ from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict, htmlEncode
 from HTTPResponse import HTTPResponse
 from types import DictType
-
+import traceback
+import MimeWriter
+import smtplib
+import StringIO
 
 class singleton: pass
 
@@ -321,27 +324,55 @@ class ExceptionHandler(Object):
 		f.write('\n')
 		f.close()
 
-	def emailException(self, html):
-		# Construct the message
-		headers = self.setting('ErrorEmailHeaders')
-		msg = []
-		for key, value in headers.items():
-			if isinstance(value, types.ListType):
-				value = string.join(value, ', ')
-			msg.append('%s: %s\n' % (key, value))
-		msg.append('Date: %s\n' % dateForEmail())
-		msg.append('\n')
-		msg.append(html)
-		msg = string.join(msg, '')
+	def emailException(self, htmlErrMsg):
+		message = StringIO.StringIO()
+ 		writer = MimeWriter.MimeWriter(message)
 
-		# dbg code, in case you're having problems with your e-mail
-		# open('error-email-msg.text', 'w').write(msg)
+ 		## Construct the message headers
+ 		headers = self.setting('ErrorEmailHeaders')
+ 		headers['Date'] = dateForEmail()
+ 		headers['Subject'] = headers.get('Subject','[WebKit Error]') + ' ' \
+ 				     + str(sys.exc_info()[0]) + ': ' \
+				     + str(sys.exc_info()[1])
+ 		for h,v in headers.items():
+			if isinstance(v, types.ListType):
+                                v = ','.join(v)
+ 			writer.addheader(h, v)
 
+ 		## Construct the message body
+
+ 		if self.setting('EmailErrorReportAsAttachment'):
+ 			writer.startmultipartbody('mixed')
+ 			# start off with a text/plain part
+ 			part = writer.nextpart()
+ 			body = part.startbody('text/plain')
+ 			body.write(
+ 				'WebKit caught an exception while processing ' +
+ 				'a request for "%s" ' % self.servletPathname() +
+ 				'at %s (timestamp: %s).  ' %
+ 				(asctime(localtime(self._res.endTime())), self._res.endTime()) +
+ 				'The plain text traceback from Python is printed below and ' +
+ 				'the full HTML error report from WebKit is attached.\n\n'
+ 				)
+ 			traceback.print_exc(file=body)
+			
+ 			# now add htmlErrMsg
+ 			part = writer.nextpart()
+ 			part.addheader('Content-Transfer-Encoding', '7bit')
+ 			part.addheader('Content-Description', 'HTML version of WebKit error message')
+ 			body = part.startbody('text/html; name=WebKitErrorMsg.html')
+ 			body.write(htmlErrMsg)
+			
+ 			# finish off
+ 			writer.lastpart()
+     		else:
+ 			body = writer.startbody('text/html')
+ 			body.write(htmlErrMsg)
+			
 		# Send the message
-		import smtplib
 		server = smtplib.SMTP(self.setting('ErrorEmailServer'))
 		server.set_debuglevel(0)
-		server.sendmail(headers['From'], headers['To'], msg)
+		server.sendmail(headers['From'], headers['To'], message.getvalue())
 		server.quit()
 
 

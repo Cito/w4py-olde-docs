@@ -41,6 +41,8 @@ Version 0.7 beta 2
 
 	<li> New Application.config setting SessionPrefix can be used to prefix the session ID's with a string.  Possible values are None (don't use a prefix), "hostname" (use the hostname as the prefix), or any other string (use that string as the prefix).  Why would you want to use this?  It can be used along with some mod_rewrite magic to do simple load balancing with session affinity.
 
+	<li> New Application.config setting EmailErrorReportAsAttachment can be used to make error emails be sent at a text body with an HTML attachment, instead of the default of an HTML-only message.
+
 </ul>
 
 </ul>
