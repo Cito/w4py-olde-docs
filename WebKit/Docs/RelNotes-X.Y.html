@@ -106,6 +106,11 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 		 setting in AppServer.config.  By default, the pid is written to the 
 		 "appserverpid.txt" in the working directory (or webkit path if you're 
 		 not using a working dir)
+         <li>You can disable the use of the pid file by setting it to None in
+         AppServer.config.  This seems to be a good idea on Windows because
+         Windows often reuses the same pid right away, so if the appserver
+         crashes, and it tries to restart and it happens to reuse the same
+         pid, the restart will fail.
 		 </ul>
 
 	<li> Page has been refactored into HTTPContent and Page.  HTTPContent
@@ -152,6 +157,10 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 	make the action list dependent on the permissions of the logged-in user).  
 	Note that _actionSet() is still used for "old-style" actions to maintain 
 	backwards compatibility.
+    <li>Fixed a bug in mod_webkit for Apache 2.X that might have been
+    causing mod_webkit to retry connections to the appserver unnecessarily
+    in some cases.  (This does not apply to the Apache 1.3 version of
+    mod_webkit.)
 </ul>
 
 
