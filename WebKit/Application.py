@@ -620,16 +620,16 @@ class Application(ConfigurableForServerSidePath, Object):
 		Absolute paths are returned unchanged.
 		"""
 		req = trans.request()
-		if context is None:
-			context = req._contextName
-		origPath = req.urlPath()
-		if origPath.endswith('/'):
-			origDir = origPath
-		else:
-			origDir = os.path.dirname(origPath)
 		if not url.startswith('/'):
-			return os.path.join(origDir, url)
+			origPath = req.urlPath()
+			if origPath.endswith('/'):
+				origDir = origPath
+			else:
+				origDir = os.path.dirname(origPath) + '/'
+			return origDir + url
 		else:
+			if context is None:
+				context = req._contextName
 			return '/%s%s' % (context, url)
 			
 	def returnServlet(self, servlet):
