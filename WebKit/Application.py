@@ -208,19 +208,6 @@ class Application(ConfigurableForServerSidePath, CanContainer, Object):
 		"""
 		import CanFactory
 		self._canFactory = CanFactory.CanFactory(self)
-		self._canFactory.addCanDir("Cans")
-
-	def addCanDir(self, newDir):
-		"""
-		Interface for adding directories to the Can search path
-		See CanFactory for the ugly hack required by the session pickling process
-		"""
-		print "Adding Can directory: %s" % newDir
-		self._canFactory.addCanDir(newDir)
-
-	def addCan(self, ID, klass, *args, **kwargs):
-		instance = apply(self._canFactory.createCan,(klass,)+args,kwargs)
-		self.setCan(ID, instance)
 
 
 	def shutDown(self):
