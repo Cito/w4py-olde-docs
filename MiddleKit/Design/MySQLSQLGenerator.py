@@ -37,6 +37,11 @@ class Klasses:
 
 class Klass:
 
+	def writePostCreateTable(self, generator, out):
+		start = self.setting('StartingSerialNum', None)
+		if start:
+			out.write('alter table %s auto_increment=%s;\n' % (self.sqlTableName(), start))
+
 	def primaryKeySQLDef(self, generator):
 		return '    %s int not null primary key auto_increment,\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
 

@@ -446,6 +446,7 @@ class Klass:
 			attr.writeAuxiliaryCreateTable(generator, out)
 		if not self.isAbstract():
 			self.writeCreateTable(generator, out)
+			self.writePostCreateTable(generator, out)
 
 	def writeCreateTable(self, generator, out):
 		name = self.name()
@@ -480,6 +481,9 @@ class Klass:
 		# cleanup
 		for attr in self.allAttrs():
 			attr.containingKlass = None
+
+	def writePostCreateTable(self, generator, out):
+		pass
 
 	def primaryKeySQLDef(self, generator):
 		"""
