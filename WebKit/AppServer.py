@@ -1,11 +1,6 @@
 #!/usr/bin/env python
 """
-AppServer
-
-
-FUTURE
-
-	* Implement the additional settings that are commented out below.
+.. include:: AppServer
 """
 
 from Common import *
@@ -17,10 +12,14 @@ import Profiler
 
 from threading import Thread, Event
 
+"""
+There is only one instance of AppServer, `globalAppServer` contains
+that instance.  Use it like::
+
+    from WebKit.AppServer import globalAppServer
+"""
+# This actually gets set inside AppServer.__init__
 globalAppServer = None
-	# Concrete app servers have to set this variable which then allows
-	# any Python code to access the app server singleton like so:
-	#     from WebKit.AppServer import globalAppServer
 
 DefaultConfig = {
 	'PrintConfigAtStartUp': 1,
@@ -33,15 +32,39 @@ DefaultConfig = {
 }
 
 
+# @@ ib 03-3: this isn't used
 class AppServerError(Exception):
 	pass
 
 
 class AppServer(ConfigurableForServerSidePath, Object):
 
-	## Init ##
+	"""
+	The `AppServer` is a singleton, and the controlling
+	object/process/thread.  `AppServer` receives requests and dispatches
+	them to `Application` (via `Application.dispatchRawRequest`).
+
+	`ThreadedAppServer` completes the implementation, dispatching
+	these requests to separate threads.  `AppServer`, at least in the
+	abstract, could support different execution models and environments,
+	but that support is not yet realized.  (Will it ever be realized?)
+
+	The distinction between `AppServer` and `Application` is somewhat
+	vague -- both are global singletons and both handle dispatching
+	requests.
+	"""
 
 	def __init__(self, path=None):
+		"""
+		Sets up and starts the `AppServer`.
+
+		`path` is the working directory for the AppServer
+		(directory in which AppServer is contained, by default)
+
+		This method loads plugins, creates the Application
+		object, and starts the request handling loop.
+		"""
+		
 		self._startTime = time.time()
 		
 		global globalAppServer
@@ -69,6 +92,8 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 		self.running = 1
 
+		# @@ 2003-03 ib: shouldn't this just be in a subclass's
+		# __init__?
 		if self.isPersistent():
 			self._closeEvent = Event()
 			self._closeThread = Thread(target=self.closeThread)
@@ -78,6 +103,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	def checkForInstall(self):
 		"""
 		Exits with an error message if Webware was not installed.
+		Called from `__init__`.
 		"""
 		if not os.path.exists(os.path.join(self._webwarePath, '_installed')):
 			sys.stdout = sys.stderr
@@ -101,18 +127,26 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		sys.stderr.flush()
 
 	def closeThread(self):
+		"""
+		This method is called when the shutdown sequence is
+		initiated.
+		"""
+		
 		self._closeEvent.wait()
 		self.shutDown()
 
 	def initiateShutdown(self):
+		"""
+		Ask the master thread to begin the shutdown.
+		"""
+		
 		self._closeEvent.set()
-
-
 
 	def recordPID(self):
 		"""
 		Save the pid of the AppServer to a file name appserverpid.txt.
 		"""
+		
 		pidfile = open(os.path.join(self._serverSidePath, "appserverpid.txt"),"w")
 
 		if os.name == 'posix':
@@ -130,8 +164,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		Subclasses may override and normally follow this sequence:
 			1. set self._shuttingDown to 1
 			2. class specific statements for shutting down
-			3. Invoke super's shutDown() e.g., AppServer.shutDown(self)
+			3. Invoke super's shutDown() e.g., ``AppServer.shutDown(self)``
 		"""
+		
 		print "Shutting down the AppServer"
 		self._shuttingDown = 1
 		self.running = 0
@@ -151,13 +186,18 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	## Configuration ##
 
 	def defaultConfig(self):
+		":ignore:"
 		return DefaultConfig
 
 	def configFilename(self):
+		":ignore:"
 		return self.serverSidePath('Configs/AppServer.config')
 
 	def configReplacementValues(self):
-		return {      # Since these strings will be eval'ed we need to double escape any backslashes
+		":ignore:"
+		# Since these strings will be eval'ed we need to double
+		# escape any backslashes
+		return {      
 			'WebwarePath' : string.replace(self._webwarePath, '\\', '\\\\'),
 			'WebKitPath'  : string.replace(self._webKitPath, '\\', '\\\\'),
 			'serverSidePath' : string.replace(self._serverSidePath, '\\', '\\\\'),
@@ -167,11 +207,15 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	## Network Server ##
 
 	def createApplication(self):
-		""" Creates and returns an application object. Invoked by __init__. """
+		"""
+		Creates and returns an application object. Invoked by __init__.
+		"""
 		return Application(server=self)
 
 	def printStartUpMessage(self):
-		""" Invoked by __init__. """
+		"""
+		Invoked by __init__, prints a little intro.
+		"""
 		print 'WebKit AppServer', self.version()
 		print 'part of Webware for Python'
 		print 'Copyright 1999-2001 by Chuck Esterbrook. All Rights Reserved.'
@@ -185,10 +229,13 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			self.printConfig()
 
 
-	## Plug-ins ##
+	"""
+	Plug-in loading
+	"""
 
 	def plugIns(self):
-		""" Returns a list of the plug-ins loaded by the app server. Each plug-in is a python package. """
+		"""Returns a list of the plug-ins loaded by the app server.
+		Each plug-in is a python package. """
 		return self._plugIns
 
 	def plugIn(self, name, default=NoDefault):
@@ -203,7 +250,13 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			return default
 
 	def loadPlugIn(self, path):
-		""" Loads and returns the given plug-in. May return None if loading was unsuccessful (in which case this method prints a message saying so). Used by loadPlugIns(). """
+		"""
+		Loads and returns the given plug-in. May return None
+		if loading was unsuccessful (in which case this method
+		prints a message saying so). Used by
+		`loadPlugIns` (note the **s**).
+		"""
+
 		plugIn = None
 		path = self.serverSidePath(path)
 		try:
@@ -221,11 +274,15 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 	def loadPlugIns(self):
 		"""
-		A plug-in allows you to extend the functionality of WebKit without necessarily having to modify it's source. Plug-ins are loaded by AppServer at startup time, just before listening for requests. See the docs for PlugIn.py for more info.
+		A plug-in allows you to extend the functionality of
+		WebKit without necessarily having to modify it's
+		source. Plug-ins are loaded by AppServer at startup
+		time, just before listening for requests. See the docs
+		in `WebKit.PlugIn` for more info.
 		"""
+		
 		plugIns = self.setting('PlugIns')
 		plugIns = map(lambda path, ssp=self.serverSidePath: ssp(path), plugIns)
-
 
 		# Scan each directory named in the PlugInDirs list.
 		# If those directories contain Python packages (that
@@ -253,7 +310,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		print
 
 
-	## Access ##
+	"""
+	Accessors
+	"""
 
 	def version(self):
 		if not hasattr(self,'_webKitVersionString'):
@@ -266,19 +325,31 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		return self._app
 
 	def startTime(self):
-		""" Returns the time the app server was started (as seconds, like time()). """
+		""" Returns the time the app server was started (as
+		seconds, like time()). """
 		return self._startTime
 
 	def numRequests(self):
-		""" Return the number of requests received by this server since it was launched. """
+		""" Return the number of requests received by this
+		server since it was launched. """
 		return self._reqCount
 
 	def isPersistent(self):
+		"""
+		When using ``OneShot``, the AppServer will exist only
+		for a single request, otherwise it will stay around
+		indefinitely.
+		"""
 		raise AbstractError, self.__class__
 
 	def serverSidePath(self, path=None):
-		"""	Returns the absolute server-side path of the WebKit app server. If the optional path is passed in, then it is joined with the server side directory to form a path relative to the app server.
 		"""
+		Returns the absolute server-side path of the WebKit
+		app server. If the optional path is passed in, then it
+		is joined with the server side directory to form a
+		path relative to the app server.
+		"""
+		
 		if path:
 			return os.path.normpath(os.path.join(self._serverSidePath, path))
 		else:
@@ -291,7 +362,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		return self._webKitPath
 
 
-	## Warnings and Errors ##
+	"""
+	Warnings and Errors
+	"""
 
 	def warning(self, msg):
 		# @@ 2000-04-25 ce: would this be useful?
@@ -310,6 +383,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 
 def main():
+	"""
+	Start the Appserver
+	"""
 	try:
 		server = AppServer()
 		return
@@ -326,6 +402,10 @@ def main():
 
 
 def stop(*args, **kw):
+	"""
+	Stop the AppServer (which may be in a different process).
+	"""
+	
 	pidfile = os.path.join(os.path.dirname(__file__),"appserverpid.txt")
 	pid = int(open(pidfile,"r").read())
 	#now what for windows?
