@@ -28,6 +28,7 @@ sys.stdout = _console = StringIO()  # to capture the console output of the appli
 import os, string
 from Adapter import *
 from MiscUtils.Funcs import charWrap
+from WebUtils.Funcs import htmlEncode
 
 
 class OneShotAdapter(Adapter):
@@ -120,7 +121,7 @@ class OneShotAdapter(Adapter):
 		width = self.setting('ConsoleWidth')
 		if width:
 			contents = charWrap(contents, self.setting('ConsoleWidth'), self.setting('ConsoleHangingIndent'))
-		contents = HTMLEncode(contents)
+		contents = htmlEncode(contents)
 		sys.stdout.write('<br><p><table><tr><td bgcolor=#EEEEEE><pre>%s</pre></td></tr></table>' % contents)
 
 
