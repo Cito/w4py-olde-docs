@@ -40,6 +40,13 @@ class Klass:
 	def primaryKeySQLDef(self, generator):
 		return '    %s int not null primary key auto_increment,\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
 
+	def writeIndexSQLDefsInTable(self, wr):
+		for attr in self.allAttrs():
+			if attr.boolForKey('isIndexed') and attr.hasSQLColumn():
+				wr(',\n')
+				wr('\tindex (%s)' % attr.sqlName())
+		wr('\n')
+
 
 class EnumAttr:
 

@@ -405,11 +405,13 @@ class Klass:
 			else:
 				wr(',\n')
 			attr.writeCreateSQL(generator, out)
-		self.writeIndexSQLDefs(wr)
+		self.writeIndexSQLDefsInTable(wr)
 		for attr in nonSQLAttrs:
 			attr.writeCreateSQL(generator, out)
 			wr('\n')
-		wr(');\n\n\n')
+		wr(');\n')
+		self.writeIndexSQLDefsAfterTable(wr)
+		wr('\n\n')
 
 	def primaryKeySQLDef(self, generator):
 		"""
@@ -433,12 +435,17 @@ class Klass:
 	def maxNameWidth(self):
 		return 30   # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
 
-	def writeIndexSQLDefs(self, wr):
-		for attr in self.allAttrs():
-			if attr.get('isIndexed', 0) and attr.hasSQLColumn():
-				wr(',\n')
-				wr('\tindex (%s)' % attr.sqlName())
-		wr('\n')
+	def writeIndexSQLDefsInTable(self, wr):
+		"""
+		Subclasses should override this or writeIndexSQLDefsAfterTable, or no indexes will be created.
+		"""
+		pass
+
+	def writeIndexSQLDefsAfterTable(self, wr):
+		"""
+		Subclasses should override this or writeIndexSQLDefsInTable, or no indexes will be created.
+		"""
+		pass
 
 	def sqlTableName(self):
 		"""

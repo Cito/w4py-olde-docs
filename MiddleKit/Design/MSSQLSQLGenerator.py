@@ -151,6 +151,15 @@ class Klass:
 		"""
 		return '[%s]' % self.name()
 
+	def writeIndexSQLDefsAfterTable(self, wr):
+		for attr in self.allAttrs():
+			if attr.boolForKey('isIndexed') and attr.hasSQLColumn():
+				unique = self.boolForKey('isUnique') and ' unique' or ''
+				indexName = '%s_%s_index' % (self.name(), attr.name())
+				wr('create%s index %s on %s(%s);\n' % (
+					unique, indexName, self.sqlTableName(), attr.sqlColumnName()))
+		wr('\n')
+
 
 
 class Attr:
@@ -171,7 +180,7 @@ class Attr:
 
 	def sqlColumnName(self):
 		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
-		if not self._sqlColumnName:
+		if not hasattr(self, '_sqlColumnName'):
 			self._sqlColumnName = self.name() # + self.sqlTypeSuffix()
 		return '[' + self._sqlColumnName + ']'
 
