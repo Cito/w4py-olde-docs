@@ -65,8 +65,23 @@ class Adapter(Configurable, Object):
 					except socket.error, e:
 						if e[0] == errno.EAGAIN: #timed out
 							pass
+						# @@ gat 2001-05-30: On Windows, if the server gets shut down after the client has already
+						# written to the socket but before the server dispatched that request, the recv
+						# causes a WSAECONNRESET (which is a Windows Sockets specific error code).
+						# If we get this error, we want to retry because it
+						# means the server shut down without ever starting to handle our request.
+						# Something similar needs to be done for Unix, but I don't have a Unix box to
+						# do any testing on.  Note that we're using a little extra paranoia and
+						# checking that self._respData is still empty -- this will prevent us from
+						# retrying a request that has already begun to be handled by the app server.
+						# Strictly, this paranoia is unnecessary, but it doesn't hurt anything so I put
+						# it in.
+						#
+						# And similar retry code should be put into mod_webkit.c also.
+						elif os.name=='nt' and e[0] == errno.WSAECONNRESET and not self._respData:
+							raise
 						else:
-							raise "error receiving response"
+							raise "error receiving response (errno = %d)" % e[0]
 				break
 			except socket.error:
 				# retry
