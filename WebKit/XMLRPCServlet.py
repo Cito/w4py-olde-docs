@@ -4,7 +4,7 @@
 # See Examples/XMLRPCExample.py for sample usage.
 #
 
-import sys, xmlrpclib
+import sys, xmlrpclib, string, traceback
 from HTTPServlet import HTTPServlet
 
 class XMLRPCServlet(HTTPServlet):
@@ -20,7 +20,7 @@ class XMLRPCServlet(HTTPServlet):
 		'''
 		try:
 			# get arguments
-			data = transaction.request().rawRequest()['input']
+			data = transaction.request().xmlInput().read()
 			params, method = xmlrpclib.loads(data)
 
 			# generate response
@@ -30,20 +30,19 @@ class XMLRPCServlet(HTTPServlet):
 					response = (response,)
 			except:
 				# report exception back to server
-				response = xmlrpclib.dumps(
-					xmlrpclib.Fault(1, "%s:%s" % (sys.exc_type, sys.exc_value))
-					)
+				if transaction.application().setting('IncludeTracebackInXMLRPCFault', 0):
+					fault = string.join(traceback.format_exception(sys.exc_info()[0],sys.exc_info()[1],sys.exc_info()[2]))
+				else:
+					fault = 'unhandled exception'
+				response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault))
 			else:
-				response = xmlrpclib.dumps(
-					response,
-					methodresponse=1
-					)
+				response = xmlrpclib.dumps(response, methodresponse=1)
 		except:
 			# internal error, report as HTTP server error
-			transaction.response().setHeader('Status', 500)
+			transaction.response().setStatus(500, 'Server Error')
 		else:
 			# got a valid XML RPC response
-			transaction.response().setHeader('Status', 200)
+			transaction.response().setStatus(200, 'OK')
 			transaction.response().setHeader("Content-type", "text/xml")
 			transaction.response().setHeader("Content-length", str(len(response)))
 			transaction.response().write(response)

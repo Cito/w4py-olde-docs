@@ -1,5 +1,4 @@
 from WebKit.XMLRPCServlet import XMLRPCServlet
-import operator
 
 class XMLRPCExample(XMLRPCServlet):
 	'''
@@ -7,10 +6,10 @@ class XMLRPCExample(XMLRPCServlet):
 
 	>>> import xmlrpclib
 	>>> server = xmlrpclib.Server('http://localhost/cgi-bin/WebKit.cgi/Examples/XMLRPCExample')
-	>>> server.multiply(10,20,30)
-	6000
-	>>> server.add(10,20,30)
-	60
+	>>> server.multiply(10,20)
+	200
+	>>> server.add(10,20)
+	30
 
 	You'll get an exception if you try to call divide, because that
 	method is not listed in exposedMethods.
@@ -19,11 +18,11 @@ class XMLRPCExample(XMLRPCServlet):
 	def exposedMethods(self):
 		return ['multiply', 'add']
 
-	def multiply(self, *args):
-		return reduce(operator.mul, args)
+	def multiply(self, x, y):
+		return x * y
 
-	def add(self, *args):
-		return reduce(operator.add, args)
+	def add(self, x, y):
+		return x + y
 
 	def divide(self, *args):
 		return reduce(operator.div, args)

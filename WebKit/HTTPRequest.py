@@ -26,6 +26,13 @@ class HTTPRequest(Request):
 			self._time    = dict['time']
 			self._environ = dict['environ']
 			self._input   = dict['input']
+			# If the content type is text/xml, don't run self._input through cgi.FieldStorage; instead, save it in
+			# self._xmlInput to be processed by a servlet.  This is needed for XML-RPC.
+			if self._environ.get('CONTENT_TYPE', None) == 'text/xml':
+				self._xmlInput = self._input
+				self._input = StringIO('')
+			else:
+				self._xmlInput = None
 ##			self._fields  = cgi.FieldStorage(fp=StringIO(self._input), environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._fields  = cgi.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._cookies = Cookie()
@@ -36,7 +43,8 @@ class HTTPRequest(Request):
 			import time
 			self._time    = time.time()
 			self._environ = os.environ.copy()
-			self._input   = ''
+			self._input   = None
+			self._xmlInput = None
 			self._fields  = cgi.FieldStorage(keep_blank_values=1)
 			self._cookies = Cookie()
 
@@ -329,6 +337,12 @@ class HTTPRequest(Request):
 	def environ(self):
 		return self._environ  # @@ 2000-05-01 ce: To implement ExceptionHandler.py
 
+	def xmlInput(self):
+		"""
+		If content-type "text/xml" was POST'ed, this will return a file-like object
+		ready to read the XML.  Otherwise, it returns None.
+		"""
+		return self._xmlInput
 
 	## Information ##
 
@@ -385,6 +399,7 @@ class HTTPRequest(Request):
 			('time',    self._time),
 			('environ', self._environ),
 			('input',   self._input),
+			('xmlInput',self._xmlInput),
 			('fields',  self._fields),
 			('cookies', self._cookies)
 		]

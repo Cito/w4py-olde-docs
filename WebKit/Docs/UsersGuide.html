@@ -277,7 +277,7 @@ Determines the amount of time (expressed in minutes) that passes before a user's
 <dt class=config><span class=setting>IgnoreInvalidSession</span>
 &nbsp; <code> = 0</code></dt>
 <dd class=config>
-If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->.
+If false, then an error message will be returned to the user if the user's session has timed out or doesn't exist.  If true, then servlets will be processed with no session data <!-- and can take action if session.isNew(). -->. 
 </dd>
 </dl></p>
 
@@ -412,7 +412,15 @@ The SMTP server to use for sending e-mail error messages.
 
 	<br><br> If your site has a large amount of static files being served via WebKit, you should consider changing 'CacheContent' to 0. If you are confident that your static files do not get updated while the app server is live, then you might consider changing 'CheckDate' to 0 for better performance.
 
-	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems.
+	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems. 
+</dd>
+</dl></p>
+
+<p><dl class=config>
+<dt class=config><span class=setting>IncludeTracebackInXMLRPCFault</span>
+&nbsp; <code> = 1</code></dt>
+<dd class=config>
+If true, then the full traceback for uncaught exceptions in XML-RPC Servlets will be returned to the client in an XML-RPC Fault.  If false, then a generic 'unhandled exception' message will be returned in the Fault.
 </dd>
 </dl></p>
 
