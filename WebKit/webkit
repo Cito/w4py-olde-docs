@@ -15,7 +15,6 @@ WEBKIT_DIR=/opt/Webware/WebKit
 PID_FILE=/var/run/webkit.pid
 LOG=/var/log/webkit
 PYTHONPATH=
-PYTHONPATH_ADDONS=
 
 
 [ -f $WEBKIT_DIR/AppServer ] || exit 0
@@ -24,7 +23,14 @@ case "$1" in
 	start)
 		echo -n  "Starting WebKit: "
 		pushd $WEBKIT_DIR > /dev/null
-		PYTHONPATH="$PYTHONPATH $PYTHONPATH_ADDONS" ./AppServer >> $LOG 2>&1 &
+		LAUNCH='./AppServer'
+
+		# run as root:
+		$LAUNCH >> $LOG 2>&1 &
+
+		# run as a user named 'webware':
+		#su -c "$LAUNCH" webware >> $LOG 2>&1 &
+
 		echo $! > $PID_FILE
 		popd > /dev/null
 		success "Starting WebKit"
