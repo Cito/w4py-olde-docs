@@ -116,12 +116,22 @@ class ContextParser(URLParser):
 			# Examples is a last-case default context, otherwise
 			# use a context that isn't built into Webware as
 			# the default
-			self._defaultContext = 'Examples'
+			defaultContext = 'Examples'
 			for name in contexts.keys():
 				if name not in ('Admin', 'Examples', 'Docs', 'Testing'):
+					defaultContext = name
+					break
+
+		if self._contexts.has_key(defaultContext):
+			self._defaultContext = defaultContext
+		else:
+			for name, dir in self._contexts.items():
+				if defaultContext == dir:
 					self._defaultContext = name
 					break
-		self.addContext('default', defaultContext)
+			else:
+				self.addContext('default', defaultContext)
+				self._defaultContext = 'default'
 
 	def resolveDefaultContext(self, name, dest):
 		""" 
