@@ -13,6 +13,8 @@
 <p align = center><img src="psplogo.png"><%-- This image is served by WebKit --%>
 <h1 align=center><font color='blue'  face='helvetica'>Hello from PSP!</font></h1><br><br>
 
+<p>If you're running WebKit on Windows with the cgi adaptor, the image above will be broken.  You'll need to serve binary files from the WebServer itself.  We're working on a fix.  Sorry!
+
 <center><h2>This is the sample/test page for an implmentation of Python Server Pages.</h2></center>
 <p>What happens if I put a triple quote here? """
 <% self.test=5 %>

@@ -12,6 +12,8 @@
 <p align = center><img src="psplogo.png"><%-- This image is served by WebKit --%>
 <h1 align=center><font color='blue'  face='helvetica'>Hello from PSP!</font></h1><br><br>
 
+<p>If you're running WebKit on Windows with the cgi adaptor, the image above will be broken.  You'll need to serve binary files from the WebServer itself.  We're working on a fix.  Sorry!
+
 <p>PSP is a new addition to WebKit version 0.3.  It allows you to write a WebKit servlet using only html and interspersed python statements.
 
 <p><h3>Read the documentation <a href="PSPDocs.psp">here</a>.</h3>
