@@ -46,7 +46,7 @@ class Test:
 				MKBasic MKNone MKString MKDateTime MKDefaultMinMax
 				MKTypeValueChecking MKInheritance MKInheritanceAbstract
 				MKList MKObjRef MKObjRefReuse MKDelete MKDeleteMark
-				MKMultipleStores
+				MKMultipleStores MKMultipleThreads
 				MKModelInh1 MKModelInh2 MKModelInh3
 			'''.split()
 
