@@ -1,7 +1,7 @@
 from threading import Thread, Event
 from SchedulerHandler import SchedulerHandler
 from time import time, sleep
-
+from exceptions import IOError
 
 class Scheduler(Thread):
 
@@ -22,10 +22,22 @@ class Scheduler(Thread):
 	## Event Methods ##
 
 	def closeEvent(self):
+		"""
+		The close event is a scheduling mechanism
+		This function returns the close event.
+		"""
 		return self._closeEvent
 
 	def wait(self, seconds=None):
-		self._notifyEvent.wait(seconds)
+		"""
+		Our own version of wait.
+		When called, it waits for the specified number of seconds, or until it is
+		notified that it needs to wake up, through the notify event.
+		"""
+		try:
+			self._notifyEvent.wait(seconds)
+		except IOError, e:
+			pass
 		self._notifyEvent.clear()
 
 
