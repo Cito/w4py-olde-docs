@@ -510,6 +510,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		return problematic
 
 	def handleInvalidSession(self, transaction):
+		transaction.setSession(None)
 		res = transaction.response()
 		debug = self.setting('Debug')['Sessions']
 		if debug: prefix = '>> handleInvalidSession:'

@@ -65,7 +65,10 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 
 <h2>Bugfixes</h2>
 <ul>
-	<li> *
+	<li> Fixed handling of expired sessions.  Previously, if you tried to access an expired session
+		before the session sweeper thread had cleaned it out, you'd get that expired session for
+		one request, but on the second request you'd get a new session.  Now it correctly returns
+		a new empty session with a new session ID on the first request after expiration.
 </ul>
 
 
