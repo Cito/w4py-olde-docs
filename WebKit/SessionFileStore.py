@@ -26,6 +26,7 @@ class SessionFileStore(SessionStore):
 
 	def __init__(self, app):
 		SessionStore.__init__(self, app)
+		self._sessionDir = os.path.join(app._serverDir,"Sessions")
 
 
 	## Access ##
@@ -64,16 +65,16 @@ class SessionFileStore(SessionStore):
 		return os.path.exists(self.filenameForKey(key))
 
 	def keys(self):
-		start = len('Sessions/')
+		start = len(self._sessionDir)
 		end = -len('.ses')
-		keys = glob('Sessions/*.ses')
+		keys = glob(os.path.join(self._sessionDir,'*.ses'))
 		keys = map(lambda key, start=start, end=end: key[start:end], keys)
 		if debug:
 			print '>> keys =', keys
 		return keys
 
 	def clear(self):
-		for filename in glob('Sessions/*.ses'):
+		for filename in glob(os.path.join(self._sessionDir,'*.ses')):
 			os.remove(filename)
 
 
@@ -90,4 +91,4 @@ class SessionFileStore(SessionStore):
 	## Self utility ##
 
 	def filenameForKey(self, key):
-		return 'Sessions/%s.ses' % key
+		return self._sessionDir + '/%s.ses' % key
