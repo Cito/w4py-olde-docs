@@ -1,6 +1,3 @@
-from Configurable import Configurable
-
-
 # @@ 2000-07-10 ce fix this up
 import sys
 try:
