@@ -56,6 +56,10 @@ class PlugIn(Object):
 		if not hasattr(self._module, 'InstallInWebKit'):
 			raise PlugInError, "Plug-in '%s' in '%s' has no InstallInWebKit() function." % (self._name, self._dir)
 
+		# Make a directory for it in Cache/
+		os.mkdir(os.path.join('Cache', self._name))
+
+
 	def install(self):
 		''' Installs the plug-in by invoking it's required InstallInWebKit() function. '''
 		self._module.InstallInWebKit(self._appServer)
