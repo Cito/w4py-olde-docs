@@ -127,7 +127,7 @@ Release 0.3 on 6/5/2000
 </table>
 
 
-<h2>Ground Rules</h2>
+<h2>Design Points</h2>
 
 <ul>
 	<li> Misc
@@ -151,9 +151,17 @@ Release 0.3 on 6/5/2000
 			<li> The suffix <em>Kit</em>, indicates an object-oriented framework.
 			<li> The suffix <em>Utils</em>, indicates a miscellaneous collection of functions, data and classes.
 			<li> The convention for naming methods is <code>name()</code> and <code>setName()</code> (as opposed to <code>getName()</code>, <code>setname()</code> or <code>set_name()</code>). Note that Python is inconsistent in this regard (<code>hasattr()</code>, <code>has_key()</code>), but it is ideal to pick a convention for a project and stick with it. The chosen convention for Webware is taken from Smalltalk and Objective-C and is fairly close to the Java convention.
-			<li> The convention for naming attributes, which are treated privately by default, is <code>_name</code>. The non-underscored name is reserved for the accessor method, as in <code>name()</code>.
+			<li> The convention for naming attributes, which are treated privately by other classes (but not necessarily by subclasses), is <code>_name</code>. The non-underscored name is reserved for the accessor method, as in <code>name()</code>.
 			</ul>
 		</ul>
+</ul>
+
+
+<h2>Release Notes</h2>
+
+<ul>
+	<li> <a href=RelNotes-0.3.html>Version 0.3</a>
+	<li> <a href=RelNotes-0.2.html>Version 0.2</a>
 </ul>
 
 
