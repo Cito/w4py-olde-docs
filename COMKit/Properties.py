@@ -10,4 +10,4 @@ status = 'alpha'
 
 requiredPyVersion = (1, 5, 2)
 
-synopsis = '''COMKit allows COM objects such as ADO to be used in free-threading mode in a threaded app server.  See Appendix D of the fine book Python Programming on Win32 by Mark Hammond and Andy Robinson for details.'''
+synopsis = '''COMKit allows COM objects to be used in the multi-threaded versions of WebKit.  Especially useful for data access using ActiveX Data Objects. Requires Windows and Python win32 extensions. '''
