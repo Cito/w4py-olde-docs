@@ -54,7 +54,7 @@ debug=0
 _adapter = None
 bufsize = 32*1024
 
-WEBWARE_ADDRESS_FILE='/path/to/Webware/WebKit/address.text'
+WEBWARE_ADDRESS_FILE='/data/Linux/python/Webware/WebKit/address.text'
 
 
 class ModPythonAdapter(Adapter):
@@ -161,7 +161,7 @@ class ModPythonAdapter(Adapter):
 			header = string.split(i, ":")
 			req.headers_out[header[0]] = header[1]
 			if string.lower(header[0]) == 'content-type': req.content_type = header[1]
-			if header[0] == 'status': req.status = int(header[1])
+			if string.lower(header[0]) == 'status': req.status = int(header[1])
 		req.send_http_header()
 		req.write(respdict[headerend+2:])
 
