@@ -9,24 +9,22 @@
 <body>
 
 <h1>Webware for Python</h1>
-Release 0.3 on 6/5/2000
+Release 0.4 on 8/@@/2000
 <br><a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>
 
 
 <h2>Synopsis</h2>
 
 
-<p> Webware for Python is a suite of software components for developing web-based applications that are multi-threaded, object-oriented and cached. The suite uses well known design patterns such as servlets and server pages (as found in ASP, PHP and JSP).
+<p> Webware for Python is a suite of software components for developing web-based applications that are object-oriented, cached and multi-threaded. The suite uses well known design patterns such as servlets and server pages (as found in ASP, PHP and JSP).
 
 <p> Key goals of the project include:
 
 <ul>
-	<li> Python-oriented.
-	<li> Object-oriented.
-	<li> An expansive suite of components and features.
-	<li> Components that can be used together or independently.
-	<li> Excellent documentation.
-	<li> Numerous examples.
+	<li> Python- and object-oriented.
+	<li> An expansive suite of components and features to cover common needs of web developers.
+	<li> Modular architecture where components can be used together or independently.
+	<li> Excellent documentation and numerous examples.
 	<li> Open source development and community.
 </ul>
 
@@ -36,6 +34,11 @@ Release 0.3 on 6/5/2000
 <p> You can e-mail <a href=mailto:webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a> to give feedback, discuss features and get help using Webware.
 
 
+<h2>Installation</h2>
+
+<p> Be sure to run <b>install.py</b> in the Webware directory before proceeding. Some portions of the documentation will not be accessible until this is done.
+
+
 <h2>Description</h2>
 
 <p>Each component has a focused purpose and can often be used on it's own. At the same time, the components are designed to work together where appropriate. As a user of Webware, you can bite off as much or as little as you want to chew.
@@ -43,35 +46,35 @@ Release 0.3 on 6/5/2000
 <p> Webware for Python contains the following components:
 
 <p>
-<table align=center border=1 cellpadding=2 width=80%>
+<table align=center border=1 cellpadding=4 width=80%>
 <tr> <th>Package</th> <th>Ver</th> <th>Docs</th> <th>Synopsis</th> </tr>
 
 <tr valign=top>
 	<td align=center> <b>WebKit</b> </td>
-	<td align=center> 0.3 </td>
+	<td align=center> 0.4 </td>
 	<td> <a href="../WebKit/Documentation/WebKit.html">Docs</a> </td>
-	<td> WebKit provides Python classes for generating dynamic content from a web-based, server-side application. It is a significantly more powerful alternative to CGI scripts for application-oriented development. WebKit is analogous to NeXT/Apple's WebObjects and Sun's Servlets. </td>
+	<td> WebKit provides Python classes for generating dynamic content from a web-based, server-side application. It is a significantly more powerful alternative to CGI scripts for application-oriented development, while still being nearly as easy to use as CGI. WebKit is analogous to NeXT/Apple's WebObjects and Sun's Servlets. </td>
 </tr>
 
 <tr valign=top>
 	<td align=center> <b>Python Server Pages (PSP)</b> </td>
-	<td align=center> 0.1 </td>
+	<td align=center> 0.3 </td>
 	<td> <a href="../PSP/Documentation/PSP.html">Docs</a> </td>
-	<td> A Python Server Page (or PSP) is an HTML document with interspersed Python instructions that are interpreted to generate dynamic content. PSP is analgous to PHP, Microsoft's ASP and Sun's JSP. </td>
+	<td> A Python Server Page (or PSP) is an HTML document with interspersed Python instructions that are interpreted to generate dynamic content. PSP is analgous to PHP, Microsoft's ASP and Sun's JSP. PSP sits on top of WebKit and therefore benefits from it's features. </td>
 </tr>
 
 <tr valign=top>
 	<td align=center> <b>CGI Wrapper</b> </th>
 	<td align=center> 0.2 </td>
 	<td> <a href="../CGIWrapper/Documentation/CGIWrapper.html">Docs</a> </td>
-	<td> The CGI Wrapper is a CGI script used to execute other Python CGI scripts. The wrapper provides convenient access to form fields and headers, exception catching, and usage and performance logging. Hooks are provided for cookies and class-based CGI scripts. </td>
+	<td> The CGI Wrapper is a CGI script used to execute other Python CGI scripts. The wrapper provides convenient access to form fields and headers, exception catching, and usage and performance logging. Hooks are provided for cookies and class-based CGI scripts. This is useful if you have legacy CGI scripts. Otherwise, you're best off doing new development with WebKit. </td>
 </tr>
 
 <tr valign=top>
 	<td align=center> <b>WebUtils</b> </td>
 	<td align=center> 0.2 </td>
 	<td> <a href="../WebUtils/Documentation/WebUtils.html">Docs</a> </td>
-	<td> WebUtils are a basic set of functions for common web related programming tasks such encoding/decoding HTML, etc.</td>
+	<td> WebUtils contains functions for common web related programming tasks such as encoding/decoding HTML, etc. </td>
 </tr>
 
 <tr valign=top bgcolor=#CCCCCC>
@@ -86,11 +89,28 @@ Release 0.3 on 6/5/2000
 
 <h2>Status</h2>
 
-<p> Webware is somewhat new, but you should be able to begin using it to develop a site. Two warnings:
+<p> Webware is currently being used in at least three known commercial endeavors, two of which are by people outside the main Webware project. This recent use has lead to a host of improvements in the API, stability, test suites and documentation, that have contributed to this latest release.
+
+<p> With support from the <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>webware-discuss</a> mailing list, you should feel comfortable developing with Webware.
+
+<p> However, there are a few warnings:
 
 <ul>
-	<li> We're still not striving for backwards compatibility in new releases (designing the best API is the first priority).
-	<li> There is no set timeline for when Webware will be production quality (although you have access to the source and could always fix what you need for your site).
+	<li> The servlet and PSP APIs are fairly stable, but we're not guaranteeing backwards compatibility in new releases (designing the best API is the first priority).
+	<li> You will still find some features lacking as with any work-in-progress.
+	<li> There is no set timeline for when Webware will be final, production quality (although you have access to the source and could always fix what you need for your site, usually with the help of the team). Some goals for 1.0 include:
+	<ul>
+		<li> Larger regression test suite.
+		<li> Even better documentation.
+		<li> Tutorial.
+		<li> Even more real-life applications.
+		<li> WebKit AppServer:
+		<ul>
+			<li> Better handling of its own uncaught exceptions (it already deals well with servlet-generated exceptions).
+			<li> Fault tolerance
+			<li> Load balancing
+		</ul>
+	</ul>
 </ul>
 
 <p> You can keep up on new releases through the <i>very low traffic</i> <a href=http://lists.sourceforge.net/mailman/listinfo/webware-announce>announcement list</a> and the home page at <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a>.
@@ -104,7 +124,7 @@ Release 0.3 on 6/5/2000
 	<li> Write custom WebKit adapters for your favorite web server for enhanced performance. (fairly lightweight)
 	<li> Write an article about using Webware. (middleweight)
 	<li> Write a tutorial. (middleweight)
-	<li> Build up regression test suites to ensure help with testing and ensure future stability. (middleweight)
+	<li> Build up regression test suites to help with testing and ensure future stability. (middleweight)
 	<li> Contribute to the implementation of components such as WebKit and PSP. (heavyweight)
 	<li> Contribute something else you might think of that we haven't.
 </ul>
@@ -116,13 +136,13 @@ Release 0.3 on 6/5/2000
 
 <table style="padding-left: 2em">
 <tr> <td valign=top> Home: </td> <td> <a href=http://webware.sourceforge.net>http://webware.sourceforge.net</a> </td> </tr>
-<tr> <td valign=top> Version: </td> <td> 0.3 </td> </tr>
-<tr> <td valign=top> Requirements: </td> <td> Python 1.5.2. Tested on UNIX and Windows. </td> </tr>
+<tr> <td valign=top> Version: </td> <td> 0.4 </td> </tr>
+<tr> <td valign=top> Requirements: </td> <td> Python 1.5.2. Tested on UNIX (FreeBSD, Linux, et al) and Windows (98, NT). </td> </tr>
 <tr> <td valign=top> Announcements: </td> <td> join: <a href=http://lists.sourceforge.net/mailman/listinfo/webware-announce>http://lists.sourceforge.net/mailman/listinfo/webware-announce</a> (very low traffic) </td> </tr>
 <tr> <td valign=top> Discussion: </td> <td> e-mail: <a href="mailto:webware-discuss@lists.sourceforge.net">webware-discuss@lists.sourceforge.net</a>
 										<br> join: <a href=http://lists.sourceforge.net/mailman/listinfo/webware-discuss>http://lists.sourceforge.net/mailman/listinfo/webware-discuss</a> </td> </tr>
 <tr> <td valign=top> Copyright: </td> <td> See the <a href="#Copyright">Copyright, License and Disclaimer</a> below. </td> </tr>
-<tr> <td valign=top> Authors: </td> <td> Chuck Esterbrook, <a href="mailto:echuck@mindspring.com">echuck@mindspring.com</a>
+<tr> <td valign=top> Primary Authors: </td> <td> Chuck Esterbrook, <a href="mailto:echuck@mindspring.com">echuck@mindspring.com</a>
 						<br> Jay Love, <a href="mailto:jsliv@jslove.net">jsliv@jslove.net</a> </td> </tr>
 </table>
 
@@ -132,19 +152,21 @@ Release 0.3 on 6/5/2000
 <ul>
 	<li> Misc
 		<ul>
-		<li> Webware is pro-Python. These software components are not about Java, C++ or any programming languages.
+		<li> Webware is pro-Python. These software components are not about Java, C++ or any other programming languages.
 		<li> The various software components are meant to be accessible in a stand alone fashion except in those cases where one component builds on another. That doesn't preclude the idea that the components can provide hooks for integration or even automatically integrate other components when their presence is detected.
 		<li> A clean, object-oriented style of development is used as much as possible.
 		<li> However, Webware components don't provide a special class for each type of HTML tag. It's generally easier and more efficient to use strings like '&lt;br&gt;&lt;hr&gt;' than to say something like 'BreakLine() + HorizontalRule()'.
 		<li> Documentation is meant to be of the highest caliber so that users can more quickly get up and running with Webware.
-		<li> All components are accompanied by examples that also serve as tests.
-		<li> Although Webware includes more than one independent component, it's not intended to be a hodge-podge repository of any kind of web component written in Python. New components should fit into the 'feel' of what's there already and provide integration with other components whereever possible. The emphasis is on high-quality object-oriented components (with the mild exception of WebUtils).
+		<li> All components are accompanied by examples (that also serve as tests).
+		<li> Over time, regression tests are created and expanded upon for each component.
+		<li> Although Webware includes more than one independent component, it's not intended to be a hodge-podge repository of any kind of web component written in Python. New components should fit into the 'feel' of what's there already and provide integration with other components whereever possible. The emphasis is on high-quality, object-oriented components (with the mild exception of the utility collections, MiscUtils and WebUtils).
 		</ul>
 	<li> Source Code Conventions
 		<ul>
 		<li>Misc
 			<ul>
 			<li> Tabs are used for source indentation and set to 4 spaces in width.
+			<li> Groups of methods are denoted by a preceding and trailing double pound sign. For example, <code><font color=darkblue>## Transactions ##</font></code>.
 			</ul>
 		<li> Naming Conventions
 			<ul>
@@ -160,6 +182,7 @@ Release 0.3 on 6/5/2000
 <h2>Release Notes</h2>
 
 <ul>
+	<li> <a href=RelNotes-0.4.html>Version 0.4</a>
 	<li> <a href=RelNotes-0.3.html>Version 0.3</a>
 	<li> <a href=RelNotes-0.2.html>Version 0.2</a>
 </ul>
@@ -175,6 +198,7 @@ Release 0.3 on 6/5/2000
 	<li> Write an article for <a href=www.oreillynet.com/topics/python/internet>www.oreillynet.com/topics/python/internet</a>.
 	<li> <b>Investigate</b>
 	<ul>
+		<li> <a href=http://aquarium.sourceforge.net>Aquarium</a> and it's inspirations: <a href=http://java.apache.org/>Turbine</a> and <a href=http://www.working-dogs.com/>FreeTrade</a>.
 		<li> <a href=http://www.xs4all.nl/~irmen/pyro.html>Pyro</a> - distributed objects
 		<li> <a href=http://www.fusebox.org>Fusebox</a>
 		<li> <a href=http://starship.python.net/crew/lemburg/>Lemburg's page</a> which contains something called mxCGIPython.
@@ -192,7 +216,7 @@ Release 0.3 on 6/5/2000
 	<li> <a href=http://webware.sourceforge.net>Webware for Python</a> home page hosted by <a href=http://www.sourceforge.net>SourceForge</a>.
 	<li> <a href=http://www.python.org>Python</a>
 	<li> <a href=http://www.vex.net/parnassus/>Vaults of Parnassus</a> where you can search for the latest version of <b>Webware for Python</b>.
-	<li> <a href="http://www.corrt.com/info/pyisp-list.html">Python-Friendly ISPs</a>
+	<li> <a href=http://www.corrt.com/info/pyisp-list.html>Python-Friendly ISPs</a>
 </ul>
 
 
