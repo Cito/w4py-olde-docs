@@ -487,7 +487,7 @@ class MiddleObjectMixIn:
 		'''
 		klass = self.klass()
 		res = ['insert into %s (' % klass.sqlTableName()]
-		attrs = klass.allAttrs()
+		attrs = klass.allDataAttrs()
 		attrs = [attr for attr in attrs if attr.hasSQLColumn()]
 		fieldNames = [attr.sqlColumnName() for attr in attrs]
 		if len(fieldNames)==0:
@@ -516,18 +516,14 @@ class MiddleObjectMixIn:
 			update table set name=value, ... where idName=idValue;
 		Installed as a method of MiddleObject.
 		'''
-		assert self._mk_changedAttrs is not None
-		assert len(self._mk_changedAttrs)>0
+		assert self._mk_changedAttrs
 		klass = self.klass()
-		assert klass is not None
-
-		res = ['update %s set ' % klass.sqlTableName()]
+		res = []
 		for attr in self._mk_changedAttrs.values():
 			colName = attr.sqlColumnName()
-			res.append('%s=%s, ' % (colName, self.sqlValueForName(attr.name())))
-		res[-1] = res[-1][:-2] + ' ' # e.g., shave off the trailing comma
-		idValue = self.serialNum()
-		res.append('where %s=%d;' % (klass.sqlIdName(), idValue))
+			res.append(colName+'='+attr.sqlValue(self.valueForAttr(attr)))
+		res = ','.join(res)
+		res = ('update ', klass.sqlTableName(), ' set ', res, ' where ', klass.sqlIdName(), '=', str(self.serialNum()))
 		return ''.join(res)
 
 	def sqlDeleteStmt(self):
@@ -578,7 +574,7 @@ class Klass:
 
 	def fetchSQLStart(self):
 		if self._fetchSQLStart is None:
-			attrs = self.allAttrs()
+			attrs = self.allDataAttrs()
 			attrs = [attr for attr in attrs if attr.hasSQLColumn()]
 			colNames = [self.sqlIdName()]
 			colNames.extend([attr.sqlColumnName() for attr in attrs])

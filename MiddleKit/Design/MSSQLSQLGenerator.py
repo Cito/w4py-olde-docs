@@ -145,7 +145,7 @@ class Klass:
 #			wr('create table [%s] (\n' % name)
 #			wr('	%s bigint primary key not null IDENTITY (1, 1),\n' % ljust(sqlIdName, self.maxNameWidth()))
 
-#			for attr in self.allAttrs():
+#			for attr in self.allDataAttrs():
 #				attr.writeSQL(generator, out)
 				
 #			wr('	unique (%s)\n' % sqlIdName)

@@ -57,7 +57,7 @@ class MiddleObject(NamedValueAccess):
 		fullClassName = self.__class__.__module__ + '.' + self.__class__.__name__
 		cache = self._mk_setCache.setdefault(fullClassName, [])
 		if not cache:
-			allAttrs = self.klass().allAttrs()
+			allAttrs = self.klass().allDataAttrs()
 			# @@ 2000-10-29 ce: next line is major hack: hasSQLColumn()
 			attrs = [attr for attr in allAttrs if attr.hasSQLColumn()]
 			attrNames = [attr.name() for attr in attrs]
@@ -249,7 +249,8 @@ class MiddleObject(NamedValueAccess):
 
 	def addReferencedObjectsToStore(self, store):
 		""" Adds all MK objects referenced by this object to the store """
-		for value in self.allAttrs().values():
+		values = [self.valueForAttr(attr) for attr in self.klass().allDataAttrs()]
+		for value in values:
 			if isinstance(value, MiddleObject):
 				store.addObject(value)
 			elif isinstance(value, types.ListType):

@@ -58,7 +58,13 @@ class Klass(UserDict, ModelObject):
 		self._makeAllAttrs()
 
 	def _makeAllAttrs(self):
-		''' Makes the all attributes list which is accessible via allAttrs(). Invoked by awakeFromRead(). '''
+		"""
+		Makes two list attributes accessible via methods:
+			allAttrs - every attr of the klass including inherited and derived attributes
+			allDataAttrs - every attr of the klass including inherited, but NOT derived
+
+		...and a dictionary attribute used by lookupAttr().
+		"""
 		klass = self
 		klasses = []
 		while 1:
@@ -68,11 +74,22 @@ class Klass(UserDict, ModelObject):
 				break
 		klasses.reverse()
 
-		attrs = []
+		allAttrs = []
+		allDataAttrs = []
 		for klass in klasses:
-			attrs.extend(klass.attrs())
+			attrs = klass.attrs()
+			allAttrs.extend(attrs)
+			for attr in attrs:
+				if not attr.get('isDerived', 0):
+					allDataAttrs.append(attr)
 
-		self._allAttrs = attrs
+		self._allAttrs = allAttrs
+		self._allDataAttrs = allDataAttrs
+
+		# set up _allAttrsByName which is used by lookupAttr()
+		self._allAttrsByName = {}
+		for attr in allAttrs:
+			self._allAttrsByName[attr.name()] = attr
 
 
 	## Names ##
@@ -166,28 +183,28 @@ class Klass(UserDict, ModelObject):
 			return self._attrsByName.get(name, default)
 
 	def lookupAttr(self, name, default=NoDefault):
-		if self._attrsByName.has_key(name):
-			return self._attrsByName[name]
-		if self._superklass:
-			return self._superklass.lookupAttr(name, default)
+		if default is NoDefault:
+			return self._allAttrsByName[name]
 		else:
-			if default is NoDefault:
-				raise KeyError, name
-			else:
-				return default
+			return self._allAttrsByName.get(name, default)
 
-	def allAttrs(self, isDerived=None):
-		'''
-		Returns a list of all attributes, including those inherited. The order is top down; that is, ancestor attributes come first.
-		If isDerived=0, return only non-derived attrs; if isDerived=1, return only derived attrs.
-		If this method fails, because of an unknown attribute, then awakeFromRead() has not yet been invoked.
-		'''
-		if isDerived is None:
-			return self._allAttrs
-		elif not isDerived:
-			return [attr for attr in self._allAttrs if not attr.get('isDerived', 0)]
-		else:
-			return [attr for attr in self._allAttrs if attr.get('isDerived', 0)]
+	def allAttrs(self):
+		"""
+		Returns a list of all attributes, including those that are
+		inherited and derived. The order is top down; that is,
+		ancestor attributes come first.
+		"""
+		return self._allAttrs
+
+	def allDataAttrs(self):
+		"""
+		Returns a list of all data attributes, including those that
+		are inherited. The order is top down; that is, ancestor
+		attributes come first. Derived attributes are not included
+		in the list.
+		"""
+		return self._allDataAttrs
+
 
 	## Klasses access ##
 

@@ -205,7 +205,7 @@ class ObjectStore(ModelUser):
 
 		# Determine all referenced objects, constructing a list of (attr, referencedObject) tuples.
 		referencedAttrsAndObjects = []
-		for attr in object.klass().allAttrs():
+		for attr in object.klass().allDataAttrs():
 			if isinstance(attr, ObjRefAttr):
 				obj = object.valueForAttr(attr)
 				if obj:

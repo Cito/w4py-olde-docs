@@ -131,6 +131,8 @@ class Model:
 					print '>> attrs:', ', '.join([attr.name() for attr in klass.allAttrs()])
 					raise
 				# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
+				for attr in attrs:
+					assert not attr.get('isDerived', 0)
 				colNames = [attr.sqlName() for attr in attrs]
 				#print '>> cols:', columns
 				colSql = ','.join(colNames)
