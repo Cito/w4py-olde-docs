@@ -215,9 +215,40 @@ class MethodEndGenerator(GenericGenerator):
 
 
 class IncludeGenerator(GenericGenerator):
-    """ Include files designated by the psp:include syntax.
+	"""
+	Handles psp:include directives.  This is a new version of this directive that actually
+	forwards the request to the specified page.
+	"""
+
+	_theFunction = """
+__pspincludepath = self.transaction().request().urlPathDir() + "%s"
+self.transaction().application().includeServlet(self.transaction(), __pspincludepath)
+"""
+
+	def __init__(self, attrs, param, ctxt):
+		GenericGenerator.__init__(self,ctxt)
+		self.attrs = attrs
+		self.param = param
+		self.scriptgen = None
+
+		self.url = attrs.get('path')
+		if self.url == None:
+			raise "No path attribute in Include"
+    
+		self.scriptgen = ScriptGenerator(self._theFunction % self.url, None)
+	
+
+	def generate(self, writer, phase=None):
+		"""
+		Just insert theFunction
+		"""
+		self.scriptgen.generate(writer, phase)
+
+
+class InsertGenerator(GenericGenerator):
+    """ Include files designated by the psp:insert syntax.
 	If the attribute static is set to true or 1, we include the file now, at compile time.
-	Otherwise, we use a function added to every PSP page name __includeFile, which reads the file at run time.
+	Otherwise, we use a function added to every PSP page named __includeFile, which reads the file at run time.
 	"""
     def __init__(self, attrs, param, ctxt):
 		GenericGenerator.__init__(self,ctxt)
