@@ -68,6 +68,19 @@ If you have general comments or questions or contributions, please contact webwa
 			- dangle (very dangerous)
 		Use UML terminology if such a thing exists.
 
+	[ ] MK derived attributes
+		- can get by, by declaring a *real* attribute and then
+		  just overriding the get method. Cheesy, but it works.
+		- isDerived
+		- allAttrs(..., isDerived=None)
+			None - get all attrs, otherwise non-derived or derived
+		- fix SQL code gen in Design/
+		- fix SQL code gen in Run/
+		- test MK browser
+		- run test suites
+		- update applications and run app test suites
+		- document
+
 	[ ] Distinct lists: An object such as "Video" cannot have a directors and writers attribute that are both typed "list of Person". Might want to review UML relationships before calling the deal on this.
 
 	[ ] Support defaults in both Python code gen and SQL code gen
