@@ -211,6 +211,7 @@ class SQLObjectStore(ObjectStore):
 
 	def commitInserts(self,allThreads=0):
 		unknownSerialNums = []
+		# @@ ... sort here for dependency order
 		for object in self._newObjects.items(allThreads):
 			self._insertObject(object, unknownSerialNums)
 
@@ -838,6 +839,12 @@ class LongAttr:
 
 	def sqlForNonNone(self, value):
 		return str(value)
+
+
+class DecimalAttr:
+
+	def sqlForNonNone(self, value):
+		return str(value)  # repr() can give Decimal("3.4") in Python 2.4
 
 
 class BoolAttr:

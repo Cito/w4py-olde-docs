@@ -123,12 +123,14 @@ set it to true to avoid ever getting an assertion failure.  </p>
 	<li>There are good instructions on how to run the test suite in MiddleKit/Tests/ReadMe.text.
 
 	<li>MiddleObject.isDeleted() returns true for objects that have been marked for deletion. You cannot refresh such an object from the database.
+
+	<li>MiddleKit is now compatible with the new Decimal type in Python 2.4 which can be returned, for example, by MySQLdb. By "compatible", I mean that the MK test suit passes. MK does not yet go out of its way to create Decimals.
 </ul>
 
 
 <h2>Bugfixes</h2>
 <ul>
-	<li> The default for the <b>UsePickledClassesCache<b> setting is now false. It occasionally created problems for multiple developers.
+	<li> The default for the <b>UsePickledClassesCache</b> setting is now false. It occasionally created problems for multiple developers.
 
 	<li> MiddleKit no longer erroneously complains about certain deletion situations. (Specifically, objects that still point to a deleted object should not cause an error if those objects are going to be deleted as well (via cascading deletes).)
 </ul>
