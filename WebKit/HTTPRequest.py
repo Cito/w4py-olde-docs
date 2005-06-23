@@ -1,8 +1,9 @@
 from Common import *
 from Request import Request
+from Session import Session, SessionError
 from WebKit.Cookie import CookieEngine
 Cookie = CookieEngine.SimpleCookie
-import os, cgi, sys, traceback
+import os, cgi, sys, traceback 
 from types import ListType
 from WebUtils.Funcs import requestURI
 from WebUtils import FieldStorage
@@ -583,6 +584,32 @@ class HTTPRequest(Request):
 			print '>> sessionId: returning sid =', sid
 		return sid
 
+	def setSessionId(self, sessionID, force=False):
+		"""
+		Allows you to set the session id.  This needs to be called _before_
+		attempting to use the session.  This would be useful if the session
+		ID is being passed in through unusual means, for example via a field
+		in an XML-RPC request.
+		
+		Pass in force=True if you want to force this
+		session ID to be used even if the session doesn't exist.  This
+		would be useful in unusual circumstances where the client is
+		responsible for creating the unique session ID rather than the server.
+		Be sure to use only legal filename characters in the session ID --
+		0-9, a-z, A-Z, _, -, and . are OK but everything else will be rejected,
+		as will identifiers longer than 80 characters.
+		(Without passing in force=True, a random session ID will be generated
+		if that session ID isn't already present in the session store.)
+		"""
+		# Modify the request so that it looks like a hashed version of the
+		# given session ID was passed in
+		self.setField('_SID_', sessionID)
+		
+		if force:
+			# Force this session ID to exist, so that a random session ID
+			# won't be created in case it's a new session.
+			self._transaction.application().createSessionWithID(self._transaction, sessionID)
+	
 	def hasPathSession(self):
 		return self._pathSession is not None
 	

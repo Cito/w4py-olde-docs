@@ -1,6 +1,7 @@
 from Common import *
 from MiscUtils.Funcs import uniqueId, hostName
 from time import localtime, time
+import re
 
 # Only compute this once, for improved speed.
 _hostname = hostName()
@@ -42,7 +43,7 @@ class Session(Object):
 
 	## Init ##
 
-	def __init__(self, trans):
+	def __init__(self, trans, identifier=None):
 		Object.__init__(self)
 		self._lastAccessTime  = self._creationTime = time()
 		self._isExpired       = 0
@@ -57,14 +58,22 @@ class Session(Object):
 		else:
 			self._prefix = sessionPrefix + '-'
 
-		attempts = 0
-		while attempts<10000:
-			self._identifier = self._prefix + string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + '-' + uniqueId(self)
-			if not trans.application().hasSession(self._identifier):
-				break
-			attempts = attempts + 1
+		if identifier:
+			if re.search(r'[^\w\.\-]', identifier) is not None:
+				raise SessionError, "Illegal characters in session identifier"
+			if len(identifier) > 80:
+				raise SessionError, "Session identifier too long"
+			self._identifier = identifier
 		else:
-			raise SessionError, "Can't create valid session id after %d attempts." % attempts
+			attempts = 0
+			while attempts<10000:
+				self._identifier = self._prefix + string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + '-' + uniqueId(self)
+				if not trans.application().hasSession(self._identifier):
+					break
+				attempts = attempts + 1
+			else:
+				raise SessionError, "Can't create valid session id after %d attempts." % attempts
+            
 		if trans.application().setting('Debug')['Sessions']:
 			print '>> [session] Created session, timeout=%s, id=%s, self=%s' % (
 				self._timeout, self._identifier, self)

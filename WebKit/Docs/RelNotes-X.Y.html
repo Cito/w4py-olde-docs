@@ -79,6 +79,11 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 		 never be sent in the response.  Use this along with
 		 UseAutomaticPathSessions to ONLY use path sessions and never
 		 use cookie sessions.
+
+	<li> Added HTTPRequest.setSessionId() method which allows the use
+		 of session IDs that are sent via means other than cookies or 
+		 URL parameters.  (An example would be via an XML-RPC parameter.)
+		 See the docstring for more details.
 </ul>
 
 
@@ -127,6 +132,12 @@ Released on <!-- relDate --> @@/@@/@@ <!-- /relDate -->
 		 "allow_none = False" to your XMLRPCServlet-derived servlets at class
 		 level (adding "self.allow_none = False" in the __init__ should
 		 also work).
+	 
+	<li> Fixed problem where SessionDynamicStore would unpickle the same object
+		 twice.
+		 
+	<li> Added transaction() method to RPCServlet so that there's a way for
+		 a method to get the transaction object if needed.
 </ul>
 
 

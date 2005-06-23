@@ -336,6 +336,17 @@ class Application(ConfigurableForServerSidePath, Object):
 		transaction.setSession(session)
 		return session
 
+	def createSessionWithID(self, transaction, sessionID):
+		# Create a session object with our session ID
+		sess = Session(transaction, sessionID)
+		
+		# Replace the session if it didn't already exist,
+		# otherwise we just throw it away.  setdefault is an atomic
+		# operation so this guarantees that 2 different
+		# copies of the session with the same ID never get placed into
+		# the session store, even if multiple threads are calling
+		# this method simultaneously.
+		transaction.application()._sessions.setdefault(sessionID, sess)
 
 	## Misc Access ##
 

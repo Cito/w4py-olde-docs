@@ -63,3 +63,19 @@ class RPCServlet(HTTPServlet):
 		if setting:
 			transaction.response().flush()
 			transaction.application().handleExceptionInTransaction(sys.exc_info(), transaction)
+
+	# Most uses of RPC will not need this, but if you need the transaction
+	# object, you can get it through self.transaction().
+	# @@ GAT: should we also add request, response, session, and application?
+	def transaction(self):
+		return self._transaction
+		
+	def awake(self, transaction):
+		HTTPServlet.awake(self, transaction)
+		self._transaction = transaction
+	
+	def sleep(self, transaction):
+		self._transaction = None
+		HTTPServlet.sleep(self, transaction)
+
+

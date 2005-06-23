@@ -127,13 +127,24 @@ class SessionDynamicStore(SessionStore):
 		finally:
 			self._lock.release()
 
+	def setdefault(self, key, default):
+		self._lock.acquire()
+		try:
+			try:
+				return self[key]
+			except KeyError:
+				self[key] = default
+				return default
+		finally:
+			self._lock.release()
+		
 	def MovetoMemory(self, key):
 		self._lock.acquire()
 		try:
 			global debug
 			if debug: print ">> Moving %s to Memory" % key
 			self._memoryStore[key] = self._fileStore[key]
-			del self._fileStore[key]
+			self._fileStore.removeKey(key)
 		finally:
 			self._lock.release()
 

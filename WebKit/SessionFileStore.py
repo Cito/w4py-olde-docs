@@ -28,7 +28,7 @@ class SessionFileStore(SessionStore):
 	def __init__(self, app):
 		SessionStore.__init__(self, app)
 		self._sessionDir = app.serverSidePath('Sessions')
-		self._lock = threading.Lock()
+		self._lock = threading.RLock()
 
 
 	## Access ##
@@ -45,7 +45,7 @@ class SessionFileStore(SessionStore):
 		self._lock.acquire()
 		try:
 			try:
-				file = open(filename)
+				file = open(filename, 'rb')
 			except IOError:
 				raise KeyError, key
 			try:
@@ -77,7 +77,7 @@ class SessionFileStore(SessionStore):
 		filename = self.filenameForKey(key)
 		self._lock.acquire()
 		try:
-			file = open(filename, 'w')
+			file = open(filename, 'wb')
 			try:
 				self.encoder()(item, file)
 			except: # error pickling the session.
@@ -99,6 +99,13 @@ class SessionFileStore(SessionStore):
 			sess.expiring()
 		os.remove(filename)
 
+	def removeKey(self, key):
+		filename = self.filenameForKey(key)
+		try:
+			os.remove(filename)
+		except:
+			pass
+
 	def has_key(self, key):
 		return os.path.exists(self.filenameForKey(key))
 
@@ -114,6 +121,19 @@ class SessionFileStore(SessionStore):
 	def clear(self):
 		for filename in glob(os.path.join(self._sessionDir,'*.ses')):
 			os.remove(filename)
+
+	def setdefault(self, key, default):
+		if debug:
+			print '>> setdefault (%s, %s)' % (key, default)
+		self._lock.acquire()
+		try:
+			try:
+				return self[key]
+			except KeyError:
+				self[key] = default
+				return default
+		finally:
+			self._lock.release()
 
 
 	## Application support ##

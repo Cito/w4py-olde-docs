@@ -44,11 +44,17 @@ class SessionStore(Object):
 		self._app = app
 
 		try:
-			from cPickle import load, dump
+			import cPickle
+			pickle = cPickle
 		except ImportError:
-			from pickle import load, dump
-		self._encoder = dump
-		self._decoder = load
+			import pickle
+		if hasattr(pickle, 'HIGHEST_PROTOCOL'):
+			def dump_with_highest_protocol(obj, f, proto=pickle.HIGHEST_PROTOCOL, dump=pickle.dump):
+				return dump(obj, f, proto)
+			self._encoder = dump_with_highest_protocol
+		else:
+			self._encoder = pickle.dump
+		self._decoder = pickle.load
 
 
 	## Access ##
@@ -87,6 +93,8 @@ class SessionStore(Object):
 	def clear(self):
 		raise AbstractError, self.__class__
 
+	def setdefault(self, key, default):
+		raise AbstractError, self.__class__
 
 	## Application support ##
 

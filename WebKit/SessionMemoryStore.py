@@ -53,6 +53,9 @@ class SessionMemoryStore(SessionStore):
 	def clear(self):
 		self._store.clear()
 
+	def setdefault(self, key, default):
+		# Note, setdefault is atomic so no locking is needed.
+		return self._store.setdefault(key, default)
 
 	## Application support ##
 
