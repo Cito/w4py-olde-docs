@@ -10,7 +10,7 @@ except:
 from MiscUtils.NamedValueAccess import NamedValueAccess
 
 
-class Object(NamedValueAccess):
+class Object(object, NamedValueAccess):
 	"""
 	Object is the root class for all classes in the WebKit.  This
 	is a placeholder for any future functionality that might be

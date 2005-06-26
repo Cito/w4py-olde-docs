@@ -5,7 +5,7 @@ from UserDict import UserDict
 from Object import Object
 from types import FloatType, ClassType
 
-from ExceptionHandler import ExceptionHandler  
+from ExceptionHandler import ExceptionHandler
 
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 
@@ -23,7 +23,7 @@ class EndResponse(Exception):
 	"""
 	Used to prematurely break out of the awake()/respond()/sleep()
 	cycle without reporting a traceback.  During servlet
-	processing, if this exception is caught during awake() or respond() 
+	processing, if this exception is caught during awake() or respond()
 	then sleep() is called and the response is sent.  If caught during
 	sleep(), processing ends and the response is sent.
 	"""
@@ -86,7 +86,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		sessionStore = 'Session%sStore' % self.setting('SessionStore')
 		exec 'from %s import %s' % (sessionStore, sessionStore)
 		klass = locals()[sessionStore]
-		assert type(klass) is ClassType
+		assert isinstance(klass, ClassType) or issubclass(klass, Object)
 		self._sessions = klass(self)
 
 		print 'Current directory:', os.getcwd()
@@ -316,7 +316,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		Finding the session ID is done in `Transaction.sessionId`.
 		"""
-		
+
 		debug = self.setting('Debug').get('Sessions')
 		if debug:
 			prefix = '>> [session] createSessionForTransaction:'
@@ -424,7 +424,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				# probably need more flexibility in
 				# the future
 				value = '%0.2f' % value
-				
+
 			else:
 				value = str(value)
 			values.append(value)
@@ -439,7 +439,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	These are the entry points from `AppServer`, which take
 	a raw request, turn it into a transaction, run the transaction,
-	and clean up.  
+	and clean up.
 
 	"""
 
@@ -452,7 +452,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		catches any exceptions, which are then passed on to
 		`handleExceptionInTransaction`.
 		"""
-		
+
 		trans = None
 		try:
 			request = self.createRequestForDict(requestDict)
@@ -471,7 +471,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 			self.handleExceptionInTransaction(sys.exc_info(), trans)
 			trans.response().deliver()
-			
+
 		if self.setting('LogActivity'):
 			self.writeActivityLog(trans)
 		request.clearTransaction()
@@ -490,7 +490,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		Called by `dispatchRawRequest`.
 		"""
-		
+
 		format = requestDict['format']
 		# Maybe an EmailAdapter would make a request with a
 		# format of Email, and an EmailRequest would be
@@ -507,11 +507,11 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		Called by `dispatchRawRequest`.
 		"""
-		# @@ gtalvola: I'm guessing this is not the ideal place to put this code.  But, it works. 
+		# @@ gtalvola: I'm guessing this is not the ideal place to put this code.  But, it works.
 		if self.setting('UseAutomaticPathSessions'):
 			request = trans.request()
 			request_has_cookie_session = request.hasCookieSession()
-			request_has_path_session = request.hasPathSession() 
+			request_has_path_session = request.hasPathSession()
 			if request_has_cookie_session and request_has_path_session:
 				self.handleUnnecessaryPathSession(trans)
 				return
@@ -544,7 +544,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		Called by `runTransaction`.
 		"""
-		
+
 		trans.setServlet(servlet)
 		if hasattr(servlet, 'runTransaction'):
 			servlet.runTransaction(trans)
@@ -558,7 +558,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				trans.respond()
 			finally:
 				trans.sleep()
-	
+
 	def forward(self, trans, url, context=None):
 		"""
 		Forward the request to a different (internal) url.
@@ -576,13 +576,13 @@ class Application(ConfigurableForServerSidePath, Object):
 		@@ 2003-03 ib: how does the forwarded servlet knows
 		that it's not the original servlet?
 		"""
-		
+
 		# Reset the response to a "blank slate"
 		trans.response().reset()
-		
+
 		# Include the other servlet
 		self.includeURL(trans, url, context)
-		
+
 		# Raise an exception to end processing of this request
 		raise EndResponse
 
@@ -604,16 +604,16 @@ class Application(ConfigurableForServerSidePath, Object):
 		is also allowed, though it isn't present in the
 		method signature.
 		"""
-		
+
 		# 3-03 ib@@: Does anyone actually use this method?
 		# 2003-04-08 jdh: I use callMethodOfServlet, but I don't use
-		# this little context trick.  Not sure what you were referring to.  
+		# this little context trick.  Not sure what you were referring to.
 		if kw.has_key('context'):
 			context = kw['context']
 			del kw['context']
 		else:
 			context = None
-			
+
 		urlPath = self.resolveInternalRelativePath(trans, url, context)
 		req = trans.request()
 		currentPath = req.urlPath()
@@ -626,7 +626,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		currentExtraURLPath = req._extraURLPath
 		req.setURLPath(urlPath)
 		req.addParent(currentServlet)
-		
+
 		servlet = self._rootURLParser.findServletForTransaction(trans)
 		trans._servlet = servlet
 		if hasattr(servlet, 'runMethodForTransaction'):
@@ -655,7 +655,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		context (or current context).  Like `forward`, except
 		control is ultimately returned to the servlet.
 		"""
-		
+
 		urlPath = self.resolveInternalRelativePath(trans, url, context)
 		req = trans.request()
 		currentPath = req.urlPath()
@@ -670,7 +670,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		try:
 			servlet = self._rootURLParser.findServletForTransaction(trans)
 			trans._servlet = servlet
-			# We will interpret an EndResponse in an included page to mean that 
+			# We will interpret an EndResponse in an included page to mean that
 			# the current page may continue processing.
 			try:
 				servlet.runTransaction(trans)
@@ -714,7 +714,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			else:
 				parts.append(part)
 		return '/'.join(parts)
-			
+
 	def returnServlet(self, servlet, trans):
 		servlet.close(trans)
 
@@ -799,11 +799,11 @@ class Application(ConfigurableForServerSidePath, Object):
 		if self.setting('Debug')['Sessions']:
 			print ">> [sessions] handling UseAutomaticPathSessions, redirecting to", url
 		transaction.response().sendRedirect(url)
-		
+
 	def handleUnnecessaryPathSession(self, transaction):
 		"""
 		This is called if it has been determined that the request has a path
-		session, but also cookies.  In that case we redirect 
+		session, but also cookies.  In that case we redirect
 		to eliminate the unnecessary path session.
 		"""
 		request = transaction.request()
@@ -814,12 +814,12 @@ class Application(ConfigurableForServerSidePath, Object):
 		if self.setting('Debug')['Sessions']:
 			print ">> [sessions] handling unnecessary path session, redirecting to", url
 		transaction.response().sendRedirect(url)
-		
-		
-		
-		
-		
-		
+
+
+
+
+
+
 def main(requestDict):
 	"""
 	Returns a raw reponse. This method is mostly used by
