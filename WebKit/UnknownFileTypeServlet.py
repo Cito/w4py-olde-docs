@@ -165,7 +165,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 			mimeType = fileType[0]
 			mimeEncoding = fileType[1]
 			if mimeType is None:
-				mimeType = 'text/html'  # @@ 2000-01-27 ce: should this just be text?
+				mimeType = 'application/octet-stream'
 		else:
 			mimeType, mimeEncoding = file['mimeType'], file['mimeEncoding']
 		response.setHeader('Content-type', mimeType)
