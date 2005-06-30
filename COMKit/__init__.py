@@ -21,36 +21,36 @@ def InstallInWebKit(appServer):
 		import sys
 		sys.coinit_flags = 0
 
-		# See if the win32 extensions are available
+		# Get the win32 extensions
 		import pythoncom
-		# Create a base class for a COM-enabled app server.
-		class COMEnabledAppServer:
-			def initThread(self):
-				# This must be called at the beginning of any thread that uses COM
-				import pythoncom
-				pythoncom.CoInitializeEx(pythoncom.COINIT_MULTITHREADED)
-				
-				# Invoke superclass's initThread.  This enables multiple plug-ins
-				# to each have their own initThread get called.
-				self.__class__.__bases__[0].initThread(self)
+        
+		# Grab references to the original initThread and delThread bound
+		# methods, which we will replace
+		original_initThread = appServer.initThread
+		original_delThread = appServer.delThread
+		
+		# Create new versions of initThread and delThread which will call the
+		# old versions
+		def new_initThread(self):
+			# This must be called at the beginning of any thread that uses COM
+			pythoncom.CoInitializeEx(pythoncom.COINIT_MULTITHREADED)
 
-			def delThread(self):
-				# Invoke superclass's delThread.  This enables multiple plug-ins
-				# to each have their own delThread get called.
-				self.__class__.__bases__[0].delThread(self)
+			# Call the original initThread
+			original_initThread()
+		
+		def new_delThread(self):
+			# Call the original delThread
+			original_delThread()
+			
+			# Uninitialize COM
+			pythoncom.CoUninitialize()
 
-				# This must be called at the end of any thread that uses COM
-				import pythoncom
-				pythoncom.CoUninitialize()
-
-		# We mix-in the COMEnabledAppServer, but it's a reverse mix-in:
-
-		# Make COMEnabledAppServer inherit the current app server's class
-		COMEnabledAppServer.__bases__ = (appServer.__class__,)
-
-		# Make the current app server point to COMEnabledAppServer
-		appServer.__class__ = COMEnabledAppServer
-
+		# Replace the initThread and delThread with our new versions, for
+		# this instance of the appserver only
+		import new
+		appServer.initThread = new.instancemethod(new_initThread, appServer, appServer.__class__)
+		appServer.delThread = new.instancemethod(new_delThread, appServer, appServer.__class__)
+		
 		print 'COM has been enabled.'
 
-		# Note: Python makes "plugging in" possible.
+
