@@ -760,6 +760,15 @@ class AdapterHandler(Handler):
 		"""
 		return self._sock.makefile("rb",8012)
 
+# Determines whether the main look should run in another thread.
+# On NT, we run the mainloop in a different thread because
+# it's not safe for Ctrl-C to be caught while
+# manipulating the queues.  It's not safe on Linux
+# either, but there, it appears that Ctrl-C will
+# trigger an exception in ANY thread, so this fix
+# doesn't help.
+def runMainLoopInThread():
+    return os.name == 'nt'
 
 def run(workDir=None):
 	"""
@@ -779,14 +788,7 @@ def run(workDir=None):
 		server = None
 		server = ThreadedAppServer(workDir)
 
-		# On NT, run mainloop in a different thread because
-		# it's not safe for Ctrl-C to be caught while
-		# manipulating the queues.  It's not safe on Linux
-		# either, but there, it appears that Ctrl-C will
-		# trigger an exception in ANY thread, so this fix
-		# doesn't help.
-
-		if os.name == 'nt':
+		if runMainLoopInThread():
 			# catch the exception raised by sys.exit so
 			# that we can re-call it in the main thread.
 			global exitStatus

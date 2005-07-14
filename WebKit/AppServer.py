@@ -97,7 +97,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		# __init__?
 		if self.isPersistent():
 			self._closeEvent = Event()
-			self._closeThread = Thread(target=self.closeThread)
+			self._closeThread = Thread(target=self.closeThread, name="CloseThread")
 ##			self._closeThread.setDaemon(1)
 			self._closeThread.start()
 
