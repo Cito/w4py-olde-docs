@@ -76,7 +76,7 @@ class ThreadedAppServer(AppServer):
 		(threads created with `spawnThread`), record the PID
 		in a file, and add any enabled handlers (Adapter, HTTP, Monitor).
 		"""
-		
+
 		self._defaultConfig = None
 		AppServer.__init__(self, path)
 		threadCount = self.setting('StartServerThreads')
@@ -185,7 +185,7 @@ class ThreadedAppServer(AppServer):
 		threads (killing or spawning new ones, in
 		`manageThreadCount`).
 		"""
-		
+
 		from errno import EINTR
 
 		threadCheckInterval = self._maxServerThreads*2
@@ -303,7 +303,7 @@ class ThreadedAppServer(AppServer):
 		elif average < self._threadCount - margin and \
 		     self._threadCount > self._minServerThreads:
 			n=min(self._threadCount - self._minServerThreads,
-			      self._threadCount - max) 
+			      self._threadCount - max)
 			self.absorbThread(n)
 		else:
 			#cleanup any stale threads that we killed but haven't joined
@@ -368,7 +368,7 @@ class ThreadedAppServer(AppServer):
 		aren't being used for anything (future use as a
 		hook).
 		"""
-		
+
 		self.initThread()
 
 		t=threading.currentThread()
@@ -420,7 +420,7 @@ class ThreadedAppServer(AppServer):
 		but first closes all sockets and tells all the threads
 		to die.
 		"""
-		
+
 		self.running=0
 		self.awakeSelect()
 		self._shuttingdown=1  #jsl-is this used anywhere?
@@ -470,9 +470,9 @@ class ThreadedAppServer(AppServer):
 			host = self.setting(settingPrefix + 'Host',
 					    self.setting('Host'))
 			if settingPrefix == 'Adapter':
-				# jdh 2004-12-01: 
+				# jdh 2004-12-01:
 				# 'Port' has been renamed to 'AdapterPort'.  However, we don't
-				# want the the default AdapterPort in DefaultConfig above to 
+				# want the the default AdapterPort in DefaultConfig above to
 				# be used if a user still has 'Port' in their config file.
 				# So for now, we prefer the 'Port' setting if it exists.
 				# After a few releases we can remove this special case.
@@ -510,7 +510,7 @@ class Handler:
 		Each handler is attached to a specific host and port,
 		and of course to the AppServer.
 		"""
-		
+
 		self._server = server
 		self._serverAddress = serverAddress
 
@@ -525,7 +525,7 @@ class Handler:
 		queued after this, and work is done when
 		`handleRequest` is called.
 		"""
-		
+
 		self._requestID = requestID
 		self._sock = sock
 
@@ -540,7 +540,7 @@ class Handler:
 	def handleRequest(self):
 		"""
 		Subclasses should override this -- this is where
-		work gets done.  
+		work gets done.
 		"""
 		pass
 
@@ -595,7 +595,7 @@ See the Troubleshooting section of the WebKit Install Guide.\r
 			chunk += block
 			missing = dictLength - len(chunk)
 		return loads(chunk)
-	
+
 
 class MonitorHandler(Handler):
 
@@ -641,6 +641,10 @@ class MonitorHandler(Handler):
 			self.server.shutDown()
 
 
+
+
+
+
 from WebKit.ASStreamOut import ASStreamOut
 class TASASStreamOut(ASStreamOut):
 
@@ -660,7 +664,7 @@ class TASASStreamOut(ASStreamOut):
 		We get an extra `sock` argument, which is the socket
 		which we'll stream output to (if we're streaming).
 		"""
-		
+
 		ASStreamOut.__init__(self)
 		self._socket = sock
 
@@ -670,7 +674,7 @@ class TASASStreamOut(ASStreamOut):
 		returns true (indicating the buffer is full enough)
 		then we send data from the buffer out on the socket.
 		"""
-		
+
 		debug=0
 		result = ASStreamOut.flush(self)
 		if result: ##a true return value means we can send
@@ -716,7 +720,7 @@ class AdapterHandler(Handler):
 		`Application.dispatchRawRequest`, which does the
 		rest of the work (here we just clean up after).
 		"""
-		
+
 		verbose = self._server._verbose
 		self._startTime = time.time()
 		if verbose:
@@ -770,19 +774,21 @@ class AdapterHandler(Handler):
 def runMainLoopInThread():
     return os.name == 'nt'
 
+doesRunHandleExceptions = True  # Set to False in DebugAppServer so Python debuggers can trap exceptions
+
 def run(workDir=None):
 	"""
 	Starts the server (`ThreadedAppServer`).
 
 	`workDir` is the server-side path for the server, which may
 	not be the ``Webware/WebKit`` directory (though by default
-	it is).  
+	it is).
 
 	After setting up the ThreadedAppServer we call
 	`ThreadedAppServer.mainloop` to start the server main loop.
 	It also catches exceptions as a last resort.
 	"""
-	
+
 	global server
 	try:
 		server = None
@@ -819,20 +825,22 @@ def run(workDir=None):
 				server.mainloop()
 			except KeyboardInterrupt, e:
 				server.shutDown()
-
 	except Exception, e:
+		if not doesRunHandleExceptions:
+			raise
 		if not isinstance(e, SystemExit):
 			import traceback
 			traceback.print_exc(file=sys.stderr)
-		print
-		print "Exiting AppServer"
+			print "\nExiting AppServer due to above exception"
+		else:
+			print "\nExiting AppServer due to sys.exit()"
 		if server:
 			if server.running:
 				server.initiateShutdown()
 			server._closeThread.join()
 		# if we're here as a result of exit() being called,
 		# exit with that return code.
-		if isinstance(e,SystemExit):
+		if isinstance(e, SystemExit):
 			sys.exit(e)
 
 	sys.exit()
@@ -879,7 +887,7 @@ def main(args):
 	Run by `Launch`, this is the main entrance and command-line
 	interface for AppServer.
 	"""
-	
+
 	http = 0
 	function = run
 	daemon = 0
