@@ -108,6 +108,30 @@ class MiddleObject(object, NamedValueAccess):
 		return self
 
 
+	## Debug Info ##
+
+	def __repr__(self):
+		return self.debugStr()
+
+	debugKeys = 'serialNum'.split()
+
+	def debugStr(self):
+		out = [self.__class__.__name__, '(', '0x%x'%id(self)]
+		sep = ', '
+		for key in self.debugKeys:
+			out.append(sep)
+			out.append(key)
+			out.append('=')
+			try:
+				out.append(repr(self.valueForName(key)))
+			except Exception, exc:
+				from MiscUtils.Funcs import excstr
+				out.append('('+excstr(exc)+')')
+		out.append(')')
+		out = ''.join(out)
+		return out
+
+
 	## Serial numbers ##
 
 	def serialNum(self):
@@ -453,7 +477,7 @@ class MiddleObject(object, NamedValueAccess):
 		"Copy" column in your Classes.csv file, and set the value for each attribute which may
 		reference another object.  The possible values are:
 			Copy = 'deep': referenced objects will be cloned and references to them will be set
-			Copy = 'shallow': the cloned object references the same object as the original
+			Copy = 'shallow': the cloned object references the same object as the original. The default.
 			Copy = 'none': the attribute in the cloned object is set to 'None'
 
 		Clone will call itself recursively to copy references deeply, and gracefully handles
@@ -469,9 +493,10 @@ class MiddleObject(object, NamedValueAccess):
 
 		'''
 		def copyAttrValue(source,dest,attr,memo,depthAttr):
-			copymode = attr['Copy']
 			if depthAttr and attr.has_key(depthAttr):
 				copymode = attr[depthAttr]
+			else:
+				copymode = attr.get('Copy', 'shallow')
 
 			if copymode == 'deep' and isinstance( attr, ObjRefAttr ):
 				# clone the value of an attribute from the source object,
@@ -509,8 +534,8 @@ class MiddleObject(object, NamedValueAccess):
 		memo[self] = copy
 
 		# iterate over our persistent attributes
-		for attr in self.klass().allAttrs():
-			if isinstance( attr, ListAttr ):
+		for attr in self.klass().allDataAttrs():
+			if isinstance(attr, ListAttr):
 				valuelist = apply( getattr(self,attr.pyGetName()), ())
 				setmethodname = "addTo" + attr.name()[0].upper() + attr.name()[1:]
 				setmethod = getattr(copy,setmethodname)
@@ -540,6 +565,6 @@ class MiddleObject(object, NamedValueAccess):
 				else:
 					pass
 			else:
-				copyAttrValue(self,copy,attr,memo,depthAttr)
+				copyAttrValue(self, copy, attr, memo, depthAttr)
 
 		return copy
