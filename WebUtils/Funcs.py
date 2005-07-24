@@ -13,6 +13,8 @@ TO DO
 import string
 
 
+htmlForNone = '-'  # used by htmlEncode.
+
 htmlCodes = [
 	['&', '&amp;'],
 	['<', '&lt;'],
@@ -25,7 +27,19 @@ htmlCodesReversed = htmlCodes[:]
 htmlCodesReversed.reverse()
 
 
-def htmlEncode(s, codes=htmlCodes):
+def htmlEncode(what, codes=htmlCodes):
+	if what is None:
+		return htmlForNone
+	if hasattr(what, 'html'):
+		# allow objects to specify their own translation to html via a method, property or attribute
+		ht = what.html
+		if callable(ht):
+			ht = ht()
+		return ht
+	what = str(what)
+	return htmlEncodeStr(what, codes)
+
+def htmlEncodeStr(s, codes=htmlCodes):
 	""" Returns the HTML encoded version of the given string. This is useful to display a plain ASCII text string on a web page."""
 	for code in codes:
 		s = string.replace(s, code[0], code[1])
@@ -98,11 +112,11 @@ def normURL(path):
         """
         if not path:
                 return
-        
+
         initialslash = path[0] == '/'
         lastslash = path[-1] == '/'
         comps = string.split(path, '/')
-        
+
         newcomps = []
         for comp in comps:
                 if comp in ('','.'):
