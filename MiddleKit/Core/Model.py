@@ -297,6 +297,11 @@ class Model(Configurable):
 		(via obj ref attributes).
 		The typical use for such an order is to avoid SQL errors
 		about foreign keys referring to tables that do not exist.
+
+		A ModelError is raised if there is a dependency cycle
+		since there can be no definitive order when a cycle exists.
+		You can break cycles by setting Ref=False for some
+		attribute in the cycle.
 		"""
 		for klass in self._allKlassesInOrder:
 			klass.willBuildDependencies()
