@@ -70,12 +70,16 @@ class Cookie(Object):
 		Create a cookie -- properties other than `name` and
 		`value` are set with methods.
 		"""
-		
+
 		self._cookies = CookieEngine.SimpleCookie()
 		self._name = name
 		self._value = value
 		self._cookies[name] = value
 		self._cookie = self._cookies[name]
+
+	def __repr__(self):
+		return '%s(id=0x%x, name=%r, domain=%r, path=%r, value=%r, expires=%r, maxAge=%r)' % (
+			self.__class__.__name__, id(self), self.name(), self.domain(), self.path(), self.value(), self.expires(), self.maxAge())
 
 	"""
 	**Accessors**
@@ -151,7 +155,7 @@ class Cookie(Object):
 		the cookie for any browser (which one actually works
 		depends on the browser).
 		"""
-		
+
 		self._value = ''
 		self._cookie['expires'] = "Mon, 01-Jan-1900 00:00:00 GMT"
 		self._cookie['max-age'] = 0
@@ -162,7 +166,7 @@ class Cookie(Object):
 		"""
 		Returns a string with the value that should be
 		used in the HTTP headers. """
-		
+
 		items = self._cookies.items()
 		assert(len(items)==1)
 		return items[0][1].OutputString()
