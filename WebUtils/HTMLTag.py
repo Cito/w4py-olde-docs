@@ -18,7 +18,7 @@ You can discard the reader immediately if you like:
 
     tag = HTMLReader().readFileNamed('foo.html')
 
-The point of reading HTML into tab objects is so that you have a concrete,
+The point of reading HTML into tag objects is so that you have a concrete,
 Pythonic data structure to work with. The original motiviation for such a beast
 was in building automated regression test suites that wanted granular,
 structured access to the HTML output by the web application.
@@ -145,12 +145,14 @@ class HTMLTag:
 
 	## Init and reading ##
 
-	def __init__(self, name):
+	def __init__(self, name, lineNumber=None):
 		assert '\n' not in name
 		self._name = name
 		self._attrs = {}
 		self._children = []
 		self._subtags = []
+		self._lineNumber = lineNumber
+		self._isClosed = False  # used by closedBy() and __repr__. helps with HTMLReader error messages
 
 	def readAttr(self, name, value):
 		"""
@@ -234,9 +236,24 @@ class HTMLTag:
 		# certain tags like <p> are closed immediately.
 
 	def __repr__(self):
-		#return '<%s, %i attrs, %i children>' % (self._name, len(self._attrs),
-		#len(self._children))
-		return '<%s>' % self._name
+		r = ['<', self._name]
+		if self._attrs:
+			keys = self._attrs.keys()
+			keys.sort()
+			for key in keys:
+				r.extend([' ', key, '="', self._attrs[key], '"'])
+		r.append('>')
+		if self._lineNumber or self._isClosed:
+			r.append(' (')
+			if self._lineNumber:
+				r.append('%s' % self._lineNumber)
+			if self._isClosed:
+				if self._lineNumber:
+					r.append('; ')
+				r.append('closed by %s at %s' % (self._closedBy, self._closedAt))
+			r.append(')')
+		r = ''.join(r)
+		return r
 
 
 	## Searching ##
@@ -271,6 +288,13 @@ class HTMLTag:
 		"""
 		return self.tagWithMatchingAttr('id', id, default)
 
+
+	## Parsing (HTMLReader) ##
+
+	def closedBy(self, name, lineNumber):
+		self._isClosed = True
+		self._closedBy = name
+		self._closedAt = lineNumber
 
 	## Self utility ##
 
@@ -318,7 +342,7 @@ class HTMLReader(SGMLParser):
 	names.
 
 	If an HTML file doesn't conform to the reader's expectation, you will get an
-	except (see more below for details).
+	exception (see more below for details).
 
 	If your HTML file doesn't contain root <html> ... </html> tags wrapping
 	everything, a fake root tag will be constructed for you, unless you pass
@@ -522,7 +546,11 @@ class HTMLReader(SGMLParser):
 			data = data.strip()
 			if not data:
 				return
-		self._tagStack[-1].addChild(data)
+		if self._tagStack:
+			self._tagStack[-1].addChild(data)
+		else:
+			print '<> data=%r' % repr(data)
+
 
 	def handle_pi(self, data):
 		raise HTMLTagProcessingInstructionError, 'Was not expecting a processing instruction: %r' % data
@@ -530,7 +558,7 @@ class HTMLReader(SGMLParser):
 	def unknown_starttag(self, name, attrs):
 		if self._finished:
 			return
-		tag = HTMLTag(name)
+		tag = HTMLTag(name, lineNumber=self._lineNumber)
 		for attrName, value in attrs:
 			tag.readAttr(attrName, value)
 		if self._emptyTagDict.has_key(name):
@@ -573,8 +601,10 @@ class HTMLReader(SGMLParser):
 		if self._printsStack:
 			print 'END   %s: %r' % (name.ljust(6), self._tagStack)
 		if openingTag.name()!=name:
-			raise HTMLTagUnbalancedError('line %i: opening is %r, but closing is %r' % \
-				(self._lineNumber, openingTag.name(), name), line=self._lineNumber, opening=openingTag.name(), closing=name)
+			raise HTMLTagUnbalancedError('line %i: opening is %r, but closing is <%s>.' % \
+				(self._lineNumber, openingTag, name), line=self._lineNumber, opening=openingTag.name(), closing=name, tagStack=self._tagStack)
+		else:
+			openingTag.closedBy(name, self._lineNumber)
 
 	def close(self):
 		if len(self._tagStack)>0 and not (len(self._tagStack)==1 and self._usedFakeRootTag):
