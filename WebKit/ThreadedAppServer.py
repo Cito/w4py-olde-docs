@@ -9,6 +9,7 @@ is thus largely historical.
 
 
 from Common import *
+import AppServer as AppServerModule
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 from MiscUtils.Funcs import timestamp
 from marshal import dumps, loads
@@ -293,7 +294,7 @@ class ThreadedAppServer(AppServer):
 		if debug: print "margin=", margin
 
 		if average > self._threadCount - margin and \
-		   self._threadCount < self._maxServerThreads:
+			self._threadCount < self._maxServerThreads:
 			# Running low: double thread count
 			n = min(self._threadCount,
 				self._maxServerThreads - self._threadCount)
@@ -301,9 +302,9 @@ class ThreadedAppServer(AppServer):
 			for i in range(n):
 				self.spawnThread()
 		elif average < self._threadCount - margin and \
-		     self._threadCount > self._minServerThreads:
+			self._threadCount > self._minServerThreads:
 			n=min(self._threadCount - self._minServerThreads,
-			      self._threadCount - max)
+				self._threadCount - max)
 			self.absorbThread(n)
 		else:
 			#cleanup any stale threads that we killed but haven't joined
@@ -468,7 +469,7 @@ class ThreadedAppServer(AppServer):
 			return self._addr[settingPrefix]
 		except KeyError:
 			host = self.setting(settingPrefix + 'Host',
-					    self.setting('Host'))
+						self.setting('Host'))
 			if settingPrefix == 'Adapter':
 				# jdh 2004-12-01:
 				# 'Port' has been renamed to 'AdapterPort'.  However, we don't
@@ -772,9 +773,16 @@ class AdapterHandler(Handler):
 # trigger an exception in ANY thread, so this fix
 # doesn't help.
 def runMainLoopInThread():
-    return os.name == 'nt'
+	return os.name == 'nt'
 
 doesRunHandleExceptions = True  # Set to False in DebugAppServer so Python debuggers can trap exceptions
+
+class RestartAppServerError(Exception):
+	"""
+	Raised by DebugAppServer when needed.
+	"""
+	pass
+
 
 def run(workDir=None):
 	"""
@@ -790,58 +798,69 @@ def run(workDir=None):
 	"""
 
 	global server
-	try:
-		server = None
-		server = ThreadedAppServer(workDir)
-
-		if runMainLoopInThread():
-			# catch the exception raised by sys.exit so
-			# that we can re-call it in the main thread.
-			global exitStatus
-			exitStatus = None
-			def windowsmainloop(server):
-				global exitStatus
-				try:
-					server.mainloop()
-				except SystemExit, e:
-					exitStatus = e.code
-
-			# Run the server thread
-			t = threading.Thread(target=windowsmainloop, args=(server,))
-			t.start()
+	runAgain = True
+	while runAgain:  # looping in support of RestartAppServerError
+		try:
 			try:
-				while server.running:
-					time.sleep(1.0)
-			except KeyboardInterrupt:
-				pass
-			server.running = 0
-			t.join()
-
-			# re-call sys.exit if necessary
-			if exitStatus:
-				sys.exit(exitStatus)
-		else:
-			try:
-				server.mainloop()
-			except KeyboardInterrupt, e:
-				server.shutDown()
-	except Exception, e:
-		if not doesRunHandleExceptions:
-			raise
-		if not isinstance(e, SystemExit):
-			import traceback
-			traceback.print_exc(file=sys.stderr)
-			print "\nExiting AppServer due to above exception"
-		else:
-			print "\nExiting AppServer due to sys.exit()"
-		if server:
-			if server.running:
-				server.initiateShutdown()
-			server._closeThread.join()
-		# if we're here as a result of exit() being called,
-		# exit with that return code.
-		if isinstance(e, SystemExit):
-			sys.exit(e)
+				runAgain = False
+				server = None
+				server = ThreadedAppServer(workDir)
+	
+				if runMainLoopInThread():
+					# catch the exception raised by sys.exit so
+					# that we can re-call it in the main thread.
+					global exitStatus
+					exitStatus = None
+					def windowsmainloop(server):
+						global exitStatus
+						try:
+							server.mainloop()
+						except SystemExit, e:
+							exitStatus = e.code
+	
+					# Run the server thread
+					t = threading.Thread(target=windowsmainloop, args=(server,))
+					t.start()
+					try:
+						while server.running:
+							time.sleep(1.0)
+					except KeyboardInterrupt:
+						pass
+					server.running = 0
+					t.join()
+	
+					# re-call sys.exit if necessary
+					if exitStatus:
+						sys.exit(exitStatus)
+				else:
+					try:
+						server.mainloop()
+					except KeyboardInterrupt, e:
+						server.shutDown()
+			except RestartAppServerError:
+				print
+				print "Restarting app server:"
+				sys.stdout.flush()
+				runAgain = True
+			except Exception, e:
+				if not doesRunHandleExceptions:
+					raise
+				if not isinstance(e, SystemExit):
+					import traceback
+					traceback.print_exc(file=sys.stderr)
+					print "\nExiting AppServer due to above exception"
+				else:
+					print "\nExiting AppServer due to sys.exit()"
+				if server:
+					if server.running:
+						server.initiateShutdown()
+					server._closeThread.join()
+				# if we're here as a result of exit() being called,
+				# exit with that return code.
+				if isinstance(e, SystemExit):
+					sys.exit(e)
+		finally:
+			AppServerModule.globalAppServer = None
 
 	sys.exit()
 

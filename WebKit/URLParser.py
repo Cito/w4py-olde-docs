@@ -715,6 +715,9 @@ class ServletFactoryManagerClass:
 	"""
 
 	def __init__(self):
+		self.reset()
+
+	def reset(self):
 		self._factories = []
 		self._factoryExtensions = {}
 
@@ -779,6 +782,7 @@ def initApp(app):
 
 	from UnknownFileTypeServlet import UnknownFileTypeServletFactory
 	from ServletFactory import PythonServletFactory
+	ServletFactoryManager.reset()
 	for factory in [UnknownFileTypeServletFactory, PythonServletFactory]:
 		ServletFactoryManager.addServletFactory(factory(app))
 

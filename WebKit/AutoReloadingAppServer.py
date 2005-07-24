@@ -27,7 +27,7 @@ try:
 except:
 	haveFam = 0
 
-from ImportSpy import modloader
+import ImportSpy
 standardLibraryPrefix = '%s/lib/python%i.%i' % \
 			(sys.prefix, sys.version_info[0], sys.version_info[1])
 
@@ -85,7 +85,7 @@ class AutoReloadingAppServer(AppServer):
 
 	def activateAutoReload(self):
 		"""Start the monitor thread"""
-		modloader.activate()
+		ImportSpy.modloader.activate()
 		if not self._autoReload:
 			if haveFam:
 				print 'AutoReload Monitor started, using FAM'
@@ -177,7 +177,7 @@ class AutoReloadingAppServer(AppServer):
 		pollInterval = self.setting('AutoReloadPollInterval')
 		while self._autoReload:
 			time.sleep(pollInterval)
-			for f, mtime in modloader.fileList().items():
+			for f, mtime in ImportSpy.modloader.fileList().items():
 				if self.fileUpdated(f, mtime):
 					print '*** The file', f, 'has changed.  The server is restarting now.'
 					self._autoReload = 0
@@ -199,7 +199,7 @@ class AutoReloadingAppServer(AppServer):
 					# It's not a module, we must reload
 					return 1
 				if getattr(mod, '__donotreload__', None):
-					modloader.fileList()[filename] = getmtime(filename)
+					ImportSpy.modloader.fileList()[filename] = getmtime(filename)
 					return 0
 				return 1
 			else:
@@ -212,12 +212,12 @@ class AutoReloadingAppServer(AppServer):
 		Monitoring thread loop, but using the FAM library.
 		"""
 		
-		modloader.notifyOfNewFiles(self.monitorNewModule)
+		ImportSpy.modloader.notifyOfNewFiles(self.monitorNewModule)
 		self._fc = fc = _fam.open()
 
 		# for all of the modules which have _already_ been loaded, we check
 		# to see if they've already been modified or deleted
-		for f, mtime in modloader.fileList().items():
+		for f, mtime in ImportSpy.modloader.fileList().items():
 			if self.fileUpdated(f, mtime):
 				print '*** The file', f, 'has changed.  The server is restarting now.'
 				self._autoReload = 0
@@ -247,7 +247,7 @@ class AutoReloadingAppServer(AppServer):
 			while fc.pending():
 				fe = fc.nextEvent()
 				if (fe.code2str() in ['changed','deleted','created']
-				    and self.fileUpdated(fe.userData, modloader.fileList()[fe.userData])):
+				    and self.fileUpdated(fe.userData, ImportSpy.modloader.fileList()[fe.userData])):
 					print '*** The file %s has changed.  The server is restarting now.' % fe.userData
 					self._autoReload = 0
 					return self.shouldRestart()

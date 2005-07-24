@@ -11,13 +11,14 @@ trap them so you can inspect the program.
 To use, simply run "python Launch.py DebugAppServer" using whatever debugging
 environment you prefer.
 
-
 Caveats:
 
-Due to the nature of debugging, using this app server cannot work well
-with the "autoreload feature". When a non-servlet Python file changes,
-you will need to stop and restart the app server yourself (unless your
-development environment does it for you).
+This app server supports the AutoReload feature but not for Python's standard
+modules or WebKit or WebKit's dependencies (MiscUtils, WebUtils and TaskKit).
+Even with that limitation, auto-reload is still useful because if you modify
+any module in your site, the auto-reload will happen. Note that the app server
+*will* restart when the aformentioned modules are modified, but the modules
+won't actually be reloaded.
 
 Currently the session sweeper is still run within a separate thread, and
 a "close thread" is started up by the AppServer base class, but neither
@@ -30,8 +31,8 @@ Tested on:
 	- JEdit with the JPyDbg plugin, on Windows
 """
 
-import ThreadedAppServer
-import sys, traceback
+import ThreadedAppServer, ImportSpy, Profiler
+import sys
 
 # We are going to replace ThreadedAppServer with our own class,
 # so we need to save a reference to the original class.
@@ -48,6 +49,9 @@ class DebugAppServer(OriginalThreadedAppServer):
 	that executes requests immediately instead of pushing them onto
 	a queue to be handled by other threads.
 	"""
+
+	excludePrefixes = 'WebKit MiscUtils WebUtils TaskKit'.split()
+
 	def __init__(self, path=None):
 		# Initialize the base class
 		OriginalThreadedAppServer.__init__(self, path)
@@ -81,6 +85,17 @@ class DebugAppServer(OriginalThreadedAppServer):
 		Creates and returns an application object. Invoked by __init__.
 		"""
 		return DebugApplication(server=self)
+
+	def restart(self):
+		# The normal restart technique is to exit the application with a special exit code and let an exta-process script start the app server up again. That works poorly for a debugging environment which is attached to a particular process.
+		Profiler.reset()
+		self.initiateShutdown()
+		self._closeThread.join()
+		sys.stdout.flush()
+		sys.stderr.flush()
+		ImportSpy.modloader.delModules(includePythonModules=False, excludePrefixes=self.excludePrefixes)
+		ImportSpy.reset()
+		raise ThreadedAppServer.RestartAppServerError
 
 
 from Application import Application

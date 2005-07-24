@@ -38,6 +38,12 @@ for instance).
 
 True, False = 1==1, 0==1
 
+try:
+	set
+except NameError:
+	from sets import Set as set
+
+
 class ImportLock:
 	"""
 	Provides a lock for protecting against concurrent imports.
@@ -81,6 +87,7 @@ class ModuleLoader(ihooks.ModuleLoader):
 		self._notifyHook = None
 		self._installed = False
 		self._lock = ImportLock()
+		self._modulesSet = set()
 
 	def load_module(self,name,stuff):
 		try:
@@ -127,6 +134,9 @@ class ModuleLoader(ihooks.ModuleLoader):
 
 		fileList = self._fileList
 		if mod:
+			assert sys.modules.has_key(mod.__name__)
+			self._modulesSet.add(mod)
+			
 			# __orig_file__ is used for cheetah and psp mods; we want 
 			# to record the source filenames, not the auto-generated modules
 			f2 = getattr(mod, '__orig_file__', 0) 
@@ -164,10 +174,36 @@ class ModuleLoader(ihooks.ModuleLoader):
 		self.recordModules(sys.modules.keys())
 		self._installed = True
 
+	def delModules(self, includePythonModules=False, excludePrefixes=[]):
+		"""
+		Deletes all the modules that the ImportSpy has ever imported unless they
+		are part of WebKit. This in support of DebugAppServer's useful (yet
+		imperfect) support for AutoReload.
+		"""
+		for mod in self._modulesSet:
+			name = mod.__name__
+			if not includePythonModules and (not hasattr(mod, '__file__') or mod.__file__.startswith(sys.prefix)):
+				continue
+			exclude = False
+			for prefix in excludePrefixes:
+				if mod.__name__.startswith(prefix):
+					exclude = True
+					break
+			if exclude:
+				continue
+			del sys.modules[mod.__name__]
+		self._modulesSet = set()
+
+
 # We do this little double-assignment trick to make sure ModuleLoader
 # is only instantiated once.
 modloader = None
 modloader = ModuleLoader()
+
+def reset():
+	global modloader
+	modloader = None
+	modloader = ModuleLoader()
 
 
 def load_module(name, file, filename, description):

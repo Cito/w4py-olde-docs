@@ -56,3 +56,11 @@ statsFilename = 'profile.pstats'
 
 def dumpStats():
 	profiler.dump_stats(statsFilename)
+
+def reset():
+	"""
+	Invoked by DebugAppServer in support of AutoReload.
+	"""
+	global startTime
+	import time
+	startTime = time.time()
