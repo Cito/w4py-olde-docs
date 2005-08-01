@@ -3,7 +3,7 @@ Version %(versionString)s<br>
 %(releaseDate)s
 </b></p>
 
-<table align="center" cellspacing="4" cellpadding="4" border="0">
+<table align="center" cellspacing="4" cellpadding="4" border="0" style="border: 2px solid #002352">
 <tr style="background-color:#E8E8FF">
 <td valign="top" nowrap>
 	<ul>
