@@ -50,7 +50,7 @@ class UserManagerToMiddleKit(UserManager):
 		# If no userClass was specified, try to pull 'User'
 		# out of the object model.
 		if userClass is None:
-			userClass = store.model().klasses('User', None)
+			userClass = store.model().klass('User', None)
 
 		UserManager.__init__(self, userClass)
 
