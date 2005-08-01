@@ -1,80 +1,114 @@
-	body {
-			background-color: #FFFFFF;
-			font-family: Verdana, Arial, Helvetica, sans-serif;
-			font-size: 10pt;
-			padding: 15px;
-	}
-	td {
-			background-color: #FFFFFF;
-			font-family: Verdana, Arial, Helvetica, sans-serif;
-			font-size: 10pt;
-	}
-	p {
-		margin: 8px 0 8px 0;
-	}
-	h1, h2 {
+body {
+		background-color: #FFFFFF;
 		font-family: Verdana, Arial, Helvetica, sans-serif;
-		color: #002352;
-	}
-	h3, h4 {
+		font-size: 10pt;
+		padding: 12pt;
+}
+td {
 		font-family: Verdana, Arial, Helvetica, sans-serif;
-		color: #002352;
-		margin: 8px 0 0 0;
-	}
-
-	.TitleBar {
-		font-family: Tahoma, Arial, Helvetica, sans-serif;
-		font-size: 18pt;
-		color: white;
-		background-color: #002352;
-	}
-	.Footer {
-		font-family: Tahoma, Arial, Helvetica, sans-serif;
-		font-size: smaller;
-	}
-	.ToC {
-		font-family: Tahoma, Arial, Helvetica, sans-serif;
-		font-size: smaller;
-	}
-    span.name {
-        font-weight: bold;
-    }
-    span.filename {
-        font-family: Tahoma, Arial, Helvetica, sans-serif;
-        font-size: smaller;
-    }
-    pre.py {
-        color: darkblue;
-        background-color: #EEE;
-        padding-left: 2.5em;
 		font-size: 10pt;
-		margin: 0;
-    }
-	.pyInline {
-        color: darkblue;
-		font-family: Monaco, "Courier New", Courier, mono;
-		font-size: 10pt;
-        background-color: #EEE;
-    }
-    span.typed {
-        font-weight: bold;
-    }
-    .error {
-    	color: red;
-    }
+}
+p {
+	margin-top: 6pt;
+	margin-bottom: 6pt;
+	text-align: justify;
+}
+li {
+	margin-bottom: 6pt;
+}
+h1, h2 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	color: #002352;
+}
+h3, h4 {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	color: #002352;
+}
+.center {
+	text-align: center;
+}
+.TitleBar {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 18pt;
+	text-align: center;
+	padding: 2pt;
+	margin-bottom: 12pt;
+	color: white;
+	background-color: #002352;
+}
+.Footer {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-size: small;
+	text-align: center;
+	padding: 2pt;
+	margin-top: 12pt;
+	border-top: 1pt solid #002352;
+}
+.ToC {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+}
+.ToC ul {
+	list-style: none;
+	padding-left: 0em;
+	margin-left: 2em;
+}
+.ToC ul li {
+	font-size: medium;
+	margin-bottom: 3pt;
+}
+.ToC ul ul {
+	list-style-type: none;
+	margin-top: 2pt;
+	padding-left: 0em;
+	margin-left: 1.5em;
+}
+.ToC ul ul li {
+	font-size: small;
+	margin-bottom: 1pt;
+}
+span.name {
+	font-weight: bold;
+}
+span.filename {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-size: small;
+}
+code {
+	font-family: "Andale Mono", "Lucida Console", Monaco, "Courier New", Courier, monospace;
+	color: #005422;
+}
+pre.py {
+	font-family: "Andale Mono", "Lucida Console", Monaco, "Courier New", Courier, monospace;
+	color: #005422;
+	background-color: #EEE;
+	padding-left: 2.5em;
+	font-size: 10pt;
+	margin: 0;
+}
+.pyInline {
+	font-family: "Andale Mono", "Lucida Console", Monaco, "Courier New", Courier, monospace;
+	color: #005422;
+	font-size: 10pt;
+	background-color: #EEE;
+}
+span.typed {
+	font-weight: bold;
+}
+error {
+	color: red;
+}
 
+/*** Configuration documentation ***/
 
-	/*** Configuration documentation ***/
-
-	dl.config {
-	}
-	dt.config {
-	}
-	dd.config {
-	}
-	span.setting {
-		font-family: Tahoma, Arial, Helvetica, sans-serif;
-		font-size: smaller;
-		font-weight: bolder;
-	}
+dl.config {
+}
+dt.config {
+}
+dd.config {
+}
+span.setting {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-size: small;
+	font-weight: bold;
+}
 

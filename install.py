@@ -328,9 +328,9 @@ class Installer:
 		filenames = map(lambda filename: os.path.basename(filename), fullnames)
 		filenames.sort()
 		ht = []
-		ht.append('<table cellpadding=2 cellspacing=0 style="font-family: Arial, Helvetica, sans-serif; font-size: 14;">\n')
+		ht.append('<table cellpadding="2" cellspacing="0" style="font-size: 14pt;">\n')
 		for filename in filenames:
-			ht.append('<tr> <td> summary </td> <td> source </td> <td> %s </td> </tr>' % filename)
+			ht.append('<tr><td>summary</td><td>source</td><td>%s</td></tr>' % filename)
 		ht.append('</table>')
 		ht = string.join(ht, '')
 		open(docsDir+'/FileList.html', 'w').write(ht)
@@ -388,33 +388,33 @@ class Installer:
 		print 'Creating ComponentIndex.html...'
 		ht = []
 		wr = ht.append
-		wr("Don't know where to start? Try <a href=../WebKit/Docs/index.html>WebKit</a>. <p>")
-		wr('<table align=center border=0 cellpadding=2 cellspacing=2 width=100%>')
-		wr('<tr class=ComponentHeadings> <td nowrap>Component</td> <td>Status</td> <td>Ver</td> <td nowrap>Py ver</td> <td>Summary</td> </tr>')
+		wr('<p>Don\'t know where to start? Try <a href="../WebKit/Docs/index.html">WebKit</a>.</p>')
+		wr('<table align="center" border="0" cellpadding="2" cellspacing="2" width="100%">')
+		wr('<tr class="ComponentHeadings"><td nowrap>Component</td><td>Status</td><td>Ver</td><td nowrap>Py ver</td><td>Summary</td></tr>')
 		row = 0
 		for comp in self._comps:
-			comp['nameAsLink'] = '<a href=../%(filename)s/Docs/index.html>%(name)s</a>' % comp
+			comp['nameAsLink'] = '<a href="../%(filename)s/Docs/index.html">%(name)s</a>' % comp
 			comp['indexRow'] = row+1
 			wr('''\
-<tr valign=top class=ComponentRow%(indexRow)i>
-	<td class=NameVersionCell> <span class=Name>%(nameAsLink)s</span>
-	<!-- <br><span class=Version>%(versionString)s</span>-->
+<tr valign="top" class="ComponentRow%(indexRow)i">
+	<td class="NameVersionCell"><span class="Name">%(nameAsLink)s</span>
+	<!-- <br><span class="Version">%(versionString)s</span> -->
 	</td>
-	<td> %(status)s </td>
-	<td> <span class=Version>%(versionString)s</span> </td>
-	<td> %(requiredPyVersionString)s </td>
-	<td> %(synopsis)s </td>
+	<td>%(status)s</td>
+	<td><span class="Version">%(versionString)s</span></td>
+	<td>%(requiredPyVersionString)s</td>
+	<td>%(synopsis)s</td>
 </tr>''' % comp)
 			row = (row+1)%2  # e.g., 1, 2, 1, 2, ...
 		wr('</table>')
 		ht = string.join(ht, '\n')
-		self.writeDocFile('Webware Component Index', 'Docs/ComponentIndex.html', ht, extraHead='<link rel=stylesheet href=ComponentIndex.css type=text/css>')
+		self.writeDocFile('Webware Component Index', 'Docs/ComponentIndex.html', ht, extraHead='<link rel="stylesheet" href="ComponentIndex.css" type="text/css">')
 
 	def createIndex(self):
 		print 'Creating index.html...'
 		ht = self.htFragment('index')
 		ht = ht % self._props
-		self.writeDocFile('Webware Documentation', 'Docs/index.html', ht, extraHead='<link rel=stylesheet href=GenIndex.css type=text/css>')
+		self.writeDocFile('Webware Documentation', 'Docs/index.html', ht, extraHead='<link rel="stylesheet" href="GenIndex.css" type="text/css">')
 
 		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until
 		# we have a more general mechanism for adding the header
@@ -430,7 +430,7 @@ class Installer:
 	def createComponentIndexes(self):
 		print "Creating components' index.html..."
 		indexFrag = self.htFragment('indexOfComponent')
-		link = '<a href=%s>%s</a> <br>\n'
+		link = '<a href="%s">%s</a><br>\n'
 		for comp in self._comps:
 			comp['webwareVersion'] = self._props['version']
 			comp['webwareVersionString'] = self._props['versionString']
@@ -467,7 +467,7 @@ class Installer:
 			title = comp['name'] + ' Documentation'
 			filename = os.path.join(comp['filename'], 'Docs', 'index.html')
 			contents = indexFrag % comp
-			cssLink = '<link rel=stylesheet href=GenIndex.css type=text/css>'
+			cssLink = '<link rel="stylesheet" href="GenIndex.css" type="text/css">'
 			self.writeDocFile(title, filename, contents, extraHead=cssLink)
 
 	def finished(self):
@@ -485,7 +485,7 @@ Welcome to Webware!
 
 You can find more information at:
   * Docs/index.html  (e.g., local docs)
-  * http://webware.sourceforge.net
+  * http://www.webwareforpython.org
 
 Installation is finished.'''
 
