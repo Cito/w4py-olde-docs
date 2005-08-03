@@ -107,7 +107,6 @@ class UserManager:
 
 	def setUserClass(self, userClass):
 		""" Sets the userClass, which cannot be None and must inherit from User. See also: userClass(). """
-		assert type(userClass) is types.ClassType
 		from User import User
 		assert issubclass(userClass, User)
 		self._userClass = userClass
