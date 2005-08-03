@@ -184,9 +184,9 @@ class ExceptionHandler(Object):
 				publicErrorPage = self.publicErrorPage()
 			self._res.write(publicErrorPage)
 		
-		# Add a large block comment; this prevents IE from overriding the
-		# page with its own generic error 500 page
-		self._res.write('<!-- --------------------------------- -->\n' * 100)
+			# Add a large block comment; this prevents IE from overriding the
+			# page with its own generic error 500 page
+			self._res.write('<!-- --------------------------------- -->\n' * 100)
 
 		privateErrorPage = None
 		if self.setting('SaveErrorMessages'):
