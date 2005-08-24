@@ -724,18 +724,14 @@ class AdapterHandler(Handler):
 
 		verbose = self._server._verbose
 		self._startTime = time.time()
-		if verbose:
-			print '%5i  %s ' % (self._requestID, timestamp()['pretty']),
 
 		data = []
 		dict = self.receiveDict()
 		if not dict:
 			return
-		if verbose and dict.has_key('environ'):
-			requestURI = Funcs.requestURI(dict['environ'])
-			print requestURI
-		else:
-			requestURI = None
+		if verbose:
+			requestURI = dict.has_key('environ') and Funcs.requestURI(dict['environ']) or None
+			sys.stdout.write('%5i  %s  %s\n' % (self._requestID, timestamp()['pretty'], requestURI))
 
 		dict['input'] = self.makeInput()
 		dict['requestID'] = self._requestID
@@ -749,11 +745,10 @@ class AdapterHandler(Handler):
 		except:
 			pass
 
-		if self._server._verbose:
+		if verbose:
 			duration = '%0.2f secs' % (time.time() - self._startTime)
 			duration = string.ljust(duration, 19)
-			print '%5i  %s  %s' % (self._requestID, duration, requestURI)
-			print
+			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID, duration, requestURI))
 
 		transaction._application=None
 		transaction.die()
@@ -805,7 +800,7 @@ def run(workDir=None):
 				runAgain = False
 				server = None
 				server = ThreadedAppServer(workDir)
-	
+
 				if runMainLoopInThread():
 					# catch the exception raised by sys.exit so
 					# that we can re-call it in the main thread.
@@ -817,7 +812,7 @@ def run(workDir=None):
 							server.mainloop()
 						except SystemExit, e:
 							exitStatus = e.code
-	
+
 					# Run the server thread
 					t = threading.Thread(target=windowsmainloop, args=(server,))
 					t.start()
@@ -828,7 +823,7 @@ def run(workDir=None):
 						pass
 					server.running = 0
 					t.join()
-	
+
 					# re-call sys.exit if necessary
 					if exitStatus:
 						sys.exit(exitStatus)
