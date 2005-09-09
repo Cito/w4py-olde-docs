@@ -235,11 +235,11 @@ class Installer:
 		print
 
 	def processRawFiles(self):
-		print 'Processing raw doc files...'
+		print 'Processing raw html doc files...'
 		self.requirePath('DocSupport')
 		from RawToHTML import RawToHTML
 		processor = RawToHTML()
-		processor.main(['install.RawToHTML', 'Docs/*.raw'])
+		processor.main(['install.RawToHTML', 'Docs/*.rawhtml'])
 		print
 
 	def createBrowsableSource(self):

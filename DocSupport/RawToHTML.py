@@ -1,9 +1,9 @@
 """
 RawToHTML.py
 
-This script inputs a .raw file and outputs a .html file of the same base name.
+This script inputs a .rawhtml file and outputs a .html file of the same base name.
 
-The .raw files are basically HTML files that can contain Python dictionaries, which get processed by this script to produce HTML in their place. That HTML could be a table, a series of bullet points, etc. and is based on the content of the dictionary.
+The .rawhtml files are basically HTML files that can contain Python dictionaries, which get processed by this script to produce HTML in their place. That HTML could be a table, a series of bullet points, etc. and is based on the content of the dictionary.
 
 This technique comes in handy when style sheets won't go far enought. For example, you may have several blurbs in your document that have all the same content components. Until you actually write these blurbs and experiment with their look and feel, you might not know whether you want to use <table> et al, <dd> et al or something else.
 
@@ -12,7 +12,7 @@ A special AutoToC dictionary can be used to automatically create a table of cont
 
 EXAMPLES
 
-For an example, see ../Docs/StyleGuidelines.raw.
+For an example, see ../Docs/StyleGuidelines.rawhtml.
 
 
 RULES
@@ -44,7 +44,7 @@ from types import *
 
 class Convention:
 	"""
-	"Raw to HTML" class specifically for ../Docs/StyleGuidelines.raw.
+	"Raw to HTML" class specifically for ../Docs/StyleGuidelines.rawhtml.
 	"""
 
 	def __init__(self, processor):
