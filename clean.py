@@ -1,11 +1,13 @@
 #!/usr/bin/env python
-#
-# Clean up Webware installation directory
-# (remove all derived and temporary files).
-# This will work with all operating systems.
-#
 
-# Files that shall be removed:
+"""
+clean.py - Clean up Webware installation directory.
+
+Removes all derived and temporary files.
+This will work on all operating systems.
+"""
+
+# The files that shall be removed:
 
 files = '''
 *~
@@ -20,10 +22,11 @@ WebKit/Logs/*.csv
 WebKit/ErrorMsgs/*.html
 '''
 
-import os, glob
+import os
+from glob import glob
 
 def remove(pattern):
-	for name in glob.glob(pattern):
+	for name in glob(pattern):
 		os.remove(name)
 
 def walk_remove(pattern, dirname, names):
