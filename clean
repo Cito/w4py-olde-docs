@@ -1,9 +1,0 @@
-#!/bin/sh
-find . -name '*.pyc' -print -exec rm {} \;
-find . -name '*~' -print -exec rm {} \;
-rm -f CGIWrapper/Errors.csv
-rm -f CGIWrapper/Scripts.csv
-rm -f CGIWrapper/ErrorMsgs/*.html
-rm -f WebKit/address.text
-rm -f WebKit/Logs/*.csv
-rm -f WebKit/ErrorMsgs/*.html
