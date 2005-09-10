@@ -28,8 +28,8 @@ class Colorize(Page):
 ##			res.write(filename+" does not exist.")
 			return
 
-		from WebKit.DocSupport import py2html
-		from WebKit.DocSupport import PyFontify
+		from DocSupport import py2html
+		from DocSupport import PyFontify
 
 		myout=StringIO()
 		realout=sys.stdout

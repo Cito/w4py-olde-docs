@@ -248,6 +248,7 @@ class Installer:
 				self.createHighlightedSource(pyFilename, filesDir)
 				self.createSummary(pyFilename, summariesDir)
 				self.createDocs(pyFilename, docsDir)
+			self.createDocs(dir, docsDir)
 			self.createClassList(dir, sourceDir)
 			#self.createBrowsableFileList(filename, sourceDir)
 		print
@@ -261,8 +262,8 @@ class Installer:
 		sys.stdout = StringIO()
 		py2html.main((None, '-stdout', '-files', filename))
 		result = sys.stdout.getvalue()
-		open(targetName, 'w').write(result)
 		sys.stdout = stdout
+		open(targetName, 'w').write(result)
 
 	def createSummary(self, filename, dir):
 		from DocSupport.PySummary import PySummary
@@ -279,27 +280,28 @@ class Installer:
 		try:
 			import pydoc
 		except ImportError:
+			print "BOESER ERROR!!!"
 			from MiscUtils import pydoc
-		pkgPath, modName = os.path.split(filename)
-		pkgName = os.path.basename(pkgPath)
-		modName = os.path.splitext(modName)[0]
-		targetName = '%s/%s.html' % (dir, modName)
+		package, module = os.path.split(filename)
+		module = os.path.splitext(module)[0]
+		if package:
+			module = package + '.' + module
+		targetName = '%s/%s.html' % (dir, module)
 		self.printMsg('    Creating %s...' % targetName)
 		saveDir = os.getcwd()
-		os.chdir(pkgPath)
-		targetName = '../' + targetName
 		try:
+			os.chdir(dir)
+			targetName = '../' + targetName
+			stdout = sys.stdout
+			sys.stdout = StringIO()
 			try:
-				module = pydoc.locate(modName)
-			except pydoc.ErrorDuringImport, detail:
-				self.printMsg(detail)
-			else:
-				if module:
-					html = pydoc.html.page(pydoc.describe(object),
-						pydoc.html.document(module, module.__name__))
-					open(targetName, 'w').write(html)
-				else:
-					self.printMsg('No Python doc found for %s' % modName)
+				pydoc.writedoc(module)
+			except:
+				pass
+			msg = sys.stdout.getvalue()
+			sys.stdout = stdout
+			if msg:
+				self.printMsg(msg)
 		finally:
 			os.chdir(saveDir)
 
@@ -309,8 +311,6 @@ class Installer:
 		pkgName = os.path.basename(filesDir)
 		self.printMsg('    Creating class list of %s...' % pkgName)
 		classlist = ClassList()
-		# @@ 2000-08-17 ce:  whoa! look at that hard-coding!
-		classlist.addFilesToIgnore(['zCookieEngine.py', 'WebKitSocketServer.py', '_on_hold_HierarchicalPage.py', 'fcgi.py'])
 		saveDir = os.getcwd()
 		os.chdir(filesDir)
 		try:
