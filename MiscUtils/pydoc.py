@@ -33,7 +33,7 @@ Tommy Burnette, the original creator of manpy.
 Paul Prescod, for all his work on onlinehelp.
 Richard Chamberlain, for the first implementation of textdoc.
 
-Mynd you, møøse bites Kan be pretty nasti..."""
+Mynd you, m00se bites Kan be pretty nasti..."""
 
 # Note: this module is designed to deploy instantly and run under any
 # version of Python from 1.5 and up.  That's why it's a single file and
