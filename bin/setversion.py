@@ -1,17 +1,17 @@
 #!/usr/bin/env python
 
 """
-This script updates the version number information 
-in the Properties.py files, as well as *.html and *.txt. 
+This script updates the version number information
+in the Properties.py files, as well as *.html and *.txt.
 
 	*.html files version information is updated by searching for a
 	comment tag surrounding both version and release date and replacing
 	the version and release date information respectively.
 
-	*.txt files are updated matching 
+	*.txt files are updated matching
 		:Version:
 		:Released:
-	tags at the beginning of the line.  This is designed for the 
+	tags at the beginning of the line.  This is designed for the
 	reStructured text documents.  Note that reStructured text
 	HTML files will need to be re-generated after processing.
 
@@ -41,7 +41,7 @@ from MiscUtils.PropertiesObject import PropertiesObject
 #   (0, 8, 1, 'b1')
 #   (0, 8, 2)
 
-# update this to change the version  and release Date 
+# update this to change the version  and release Date
 version = ('X', 'Y', 0)
 releaseDate = '@@/@@/@@'
 
@@ -115,12 +115,12 @@ propReplace.replaceGlob( "Properties.py" )
 
 
 # get the X.Y.Z style version information and create
-# a pattern for the RelNotes-X.Y.Z.html. 
+# a pattern for the RelNotes-X.Y.Z.html.
 
 vstr = getXYZ( version )
 relnotes = "RelNotes-%s.html" % vstr
 
-# Do not replace version information in release notes other 
+# Do not replace version information in release notes other
 # than this version.
 docReplace.replaceGlob( "Docs/%s" % relnotes )
 docReplace.replaceGlob( "*/Docs/%s" % relnotes )
@@ -128,6 +128,10 @@ docReplace.replaceGlob( "*/Docs/%s" % relnotes )
 # replace in existing HTML
 docReplace.replaceGlob( "Docs/*.html", skip="RelNotes" )
 docReplace.replaceGlob( "*/Docs/*.html", skip="RelNotes" )
+
+# replace in existing raw HTML
+docReplace.replaceGlob( "Docs/*.rawhtml", skip="RelNotes" )
+docReplace.replaceGlob( "*/Docs/*.rawhtml", skip="RelNotes" )
 
 # replace in reStructuredText files.
 rstReplace.replaceGlob( "Docs/*.txt", skip="RelNotes" )

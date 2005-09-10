@@ -73,10 +73,6 @@ class AutoToC:
 	"Raw to HTML" class for automatic table of contents.
 	"""
 
-	toc = 0
-	title = None
-	headings = []
-
 	def __init__(self, processor):
 		pass
 
@@ -133,6 +129,9 @@ class RawToHTML:
 		numLines = len(lines)
 		i = 0
 		results = []
+		AutoToC.toc = 0
+		AutoToC.title = None
+		AutoToC.headings = []
 		pattern_heading = re.compile('<h[1-6]>.*</h[1-6]>', re.IGNORECASE)
 		while i<numLines:
 			line = lines[i]

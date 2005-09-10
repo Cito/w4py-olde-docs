@@ -7,15 +7,14 @@ Webware for Python
 FUTURE
 	* Look for an install.py in each component directory and run it
 	  (there's not a strong need right now).
-	* Upon successful install, create "installed" file with info such
-	  as date, time, py ver, etc. Maybe just put the output of this
-	  in there.
+	* Upon successful install, put meaningful info in the "_installed"
+	  file, such as date, time, py ver, etc. Maybe just put the output
+	  of this installation script in there.
 """
 
 
-import os, string, sys, compileall
+import os, sys, compileall
 from time import time, localtime, asctime
-from string import count, join, rfind, split, strip, replace
 from glob import glob
 from MiscUtils.PropertiesObject import PropertiesObject
 
@@ -24,27 +23,12 @@ try:
 except ImportError:
 	from StringIO import StringIO
 
-MinimumVersionErrorMsg="""
-!!! This Release of Webware requires Python %s.  Your current version
-of Python is:
-  %s.
-Please go to http://www.python.org for the latest version of Python.
-You may continue to install, but Webware may not perform as expected.
-Do you wish to continue with the installation?  [yes/no]
-"""
-
-ThreadingEnabled = """
-!!! Webware requires that Python be compiled with threading support.
-This version of Python does not appear to support threading.  You may
-continue, but you will have to run the AppServer with a Python
-interpreter that has threading enabled.
-
-Do you wish to continue with the installation? [yes/NO]
-"""
 
 class Installer:
-	"""
-	The _comps attribute is a list of components, each of which is an instance of MiscUtils.PropertiesObject.
+	"""Install Webware.
+
+	The _comps attribute is a list of components,
+	each of which is an instance of MiscUtils.PropertiesObject.
 	"""
 
 	## Init ##
@@ -64,12 +48,11 @@ class Installer:
 
 	def run(self, verbose=0, passprompt=1, defaultpass=''):
 		self._verbose = verbose
-		if self._verbose: self.printMsg = self._printMsg
-		else: self.printMsg = self._nop
+		self.printMsg = verbose and self._printMsg or self._nop
 		self.clearInstalledFile()
 		self.printHello()
-		if not self.checkPyVersion(): return
-		if not self.checkThreading(): return
+		if not self.checkPyVersion() or not self.checkThreading():
+			return
 		self.detectComponents()
 		self.installDocs()
 		self.backupConfigs()
@@ -99,120 +82,124 @@ class Installer:
 		self.printKeyValue('Cur dir', os.getcwd())
 		print
 
-	def checkPyVersion(self,minver=[2,0]):
+	def checkPyVersion(self, minver=(2,0)):
+		"""Check for minimum required Python version."""
 		try:
-			version_info = sys.version_info
-		except:
-			version_info=None
-		if not version_info or version_info[0]<minver[0] or (version_info[0]==minver[0] and version_info[1]<minver[1]):
-			minVersionString=str(minver[0])+"."+str(minver[1])
-			response=raw_input( MinimumVersionErrorMsg % (minVersionString,sys.version))
-			if response and string.upper(response)[0] == "Y":
-				rtncode=1
-			else:
-				rtncode=0
-		else:
-			rtncode = 1
-		return rtncode
+			ver = sys.version_info[:len(minver)]
+			version = '.'.join(map(str, ver))
+			minversion = '.'.join(map(str, minver))
+		except AttributeError: # Python < 2.0
+			from string import split, join
+			ver = tuple(map(int, split(split(sys.version, ' ', 1)[0], '.')[:len(minver)]))
+			version = join(map(str, ver), '.')
+			minversion = join(map(str, minver), '.')
+		if ver < minver:
+			print 'This Release of Webware requires Python %s.' % minversion
+			print 'Your currently used version is Python %s.' % version
+			print 'Please go to http://www.python.org for the latest version of Python.'
+			if ver[0] <= 1: # require at least Python 2.0 for installation
+				return 0 # otherwise stop here
+			response = raw_input('\nYou may continue to install, '
+				'but Webware may not perform as expected.\n'
+				'Do you wish to continue with the installation?  [yes/no] ')
+			return response[:1].upper() == "Y"
+		return 1
 
 	def checkThreading(self):
 		try:
 			import threading
 		except ImportError:
-			response=raw_input(ThreadingEnabled)
-			if response and string.upper(response)[0] == "Y":
-				return 1
-			else:
-				return 0
+			print '!!! Webware requires that Python be compiled with threading support.'
+			print 'This version of Python does not appear to support threading.'
+			response = raw_input('\nYou may continue, '
+				'but you will have to run the AppServer with a Python\n'
+				'interpreter that has threading enabled.'
+				'Do you wish to continue with the installation? [yes/no] ')
+			return response[:1].upper() == "Y"
 		return 1
 
 	def detectComponents(self):
 		print 'Scanning for components...'
-		filenames = os.listdir('.')
-		maxLen = max(filter(None, map(lambda name: os.path.isdir(name) and len(name), filenames)))
-		count = 0
-		needPrint = 0
-		for filename in os.listdir('.'):
-			if os.path.isdir(filename):
-				propName = os.path.join(filename, 'Properties.py')
-				displayName = string.ljust(filename, maxLen)
-				if os.path.exists(propName):
-					comp = PropertiesObject(propName)
-					comp['filename'] = filename
-					self._comps.append(comp)
-					print '  yes', displayName,
-				else:
-					print '   no', displayName,
-				if count%2==1:
-					print
-					needPrint = 0
-				else:
-					needPrint = 1
-				count = count + 1
-		if needPrint:
+		dirnames = filter(os.path.isdir, os.listdir('.'))
+		maxLen = max(map(len, dirnames))
+		column = 0
+		for dirname in dirnames:
+			propName = os.path.join(dirname, 'Properties.py')
+			print dirname.ljust(maxLen, '.'),
+			if os.path.exists(propName):
+				comp = PropertiesObject(propName)
+				comp['dirname'] = dirname
+				self._comps.append(comp)
+				print 'yes',
+			else:
+				print 'no ',
+			if column < 2:
+				print '   ',
+				column = column + 1
+			else:
+				print
+				column = 0
+		if column:
 			print
 		print
 		self._comps.sort(lambda a, b: cmp(a['name'], b['name']))
 
-
 	def setupWebKitPassword(self, prompt, defpass):
-		""" Setup a password for WebKit Application server. """
-		print 'Setting passwords...'
+		"""Setup a password for WebKit Application server."""
+		print 'Setting the WebKit password...'
 		print
-
-		password = ''
 		if prompt:
-			print 'Choose a Password for WebKit Application Server.'
+			print 'Choose a password for the WebKit Application Server.'
 			print 'If you will just press enter without entering anything,'
-			print 'the password specified on the command-line will be used;'
-			print 'you can check the password after installation at:'
-			print 'WebKit/Configs/Application.config'
+			if defpass is None:
+				print 'a password will be automatically generated.'
+			else:
+				print 'the password specified on the command-line will be used.'
 			import getpass
 			password = getpass.getpass()
 		else:
-			print 'A password was specified on the command-line; check'
-			print 'the file: WebKit/Configs/Application.config'
-			print 'after installation for the password'
-
-		if not password:
-			if defpass:
-				password = defpass
+			if defpass is None:
+				print 'A password will be automatically generated.'
 			else:
-				# Generate 7 digits worth of a password.
-				# The random function gives back a real number.
-				characters = string.letters + string.digits
-
-				import random
-				for i in range(8):
-					password = password + random.choice(characters)
-
-		try:
+				print 'A password was specified on the command-line.'
+			password = None
+		print 'You can check the password after installation at:'
+		print 'WebKit/Configs/Application.config'
+		if not password:
+			if defpass is None:
+				from string import letters, digits
+				from random import choice
+				password = ''.join(map(choice, [letters + digits]*8))
+			else:
+				password = defpass
+		try: # read config file
 			data = open('WebKit/Configs/Application.config', 'r').read()
 		except IOError:
 			print 'Error reading config file, possibly a permission problem,'
 			print 'password not replaced, make sure to edit it by hand.'
 			return
-
-		# This will search for the construct:
-		# 'AdminPassword': 'password'
-		# and replace whatever password is written there with what is
-		# given in the 'password' variable.
-		if data.startswith('{'):
+		# This will search for the construct "'AdminPassword': '...'"
+		# and replace '...' with the content of the 'password' variable:
+		if data.lstrip().startswith('{'):
 			pattern = "('AdminPassword'\s*:)\s*'.*?'"
-		else:
+		else: # keyword arguments style
 			pattern = "(AdminPassword\\s*=)\\s*['\"].*?['\"]"
-		repl    = "\g<1> '%s'" % (password,)
-		import re
-		# Still need to verify that we actually found a match!
-		data = re.sub(pattern, repl, data)
-
-		try:
+		repl = "\g<1> '%s'" % (password,)
+		from re import subn
+		data, count = subn(pattern, repl, data)
+		if count != 1:
+			print "Warning:",
+			if count > 1:
+				print "More than one 'AdminPassword' in config file."
+			else:
+				print "'AdminPassword' not found in config file."
+			return
+		try: # write back config file
 			open('WebKit/Configs/Application.config', 'w').write(data)
 		except IOError:
 			print 'Error writing config file, possibly a permission problem,'
 			print 'password not replaced, make sure to edit it by hand.'
 			return
-
 		print 'Password replaced successfully.'
 
 	def installDocs(self):
@@ -224,70 +211,60 @@ class Installer:
 		self.createComponentIndexes()
 
 	def propagateStyleSheet(self):
-		""" Copy Docs/StyleSheet.css and GenIndex.css into other Docs dirs. """
+		"""Copy stylesheets in / into the other Docs dirs."""
 		print 'Propagating stylesheets...'
 		for name in ['StyleSheet.css', 'GenIndex.css']:
 			stylesheet = open('Docs/%s' % name, 'rb').read()
 			for comp in self._comps:
-				#print '  %s...' % comp['filename']
-				target = os.path.join(comp['filename'], 'Docs', name)
+				#print '  %s...' % comp['dirname']
+				target = os.path.join(comp['dirname'], 'Docs', name)
 				open(target, 'wb').write(stylesheet)
 		print
 
 	def processRawFiles(self):
 		print 'Processing raw html doc files...'
-		self.requirePath('DocSupport')
-		from RawToHTML import RawToHTML
+		from DocSupport.RawToHTML import RawToHTML
 		processor = RawToHTML()
-		processor.main(['install.RawToHTML', 'Docs/*.rawhtml'])
+		dirs = ['.'] + [comp['dirname'] for comp in self._comps]
+		for dir in dirs:
+			processor.main((None, dir + '/Docs/*.rawhtml'))
 		print
 
 	def createBrowsableSource(self):
-		""" Create HTML documents for class hierarchies, summaries, source files, etc. """
-
+		"""Create HTML documents for class hierarchies, summaries, source files, etc."""
 		print 'Creating browsable source and summaries...'
-		self.requirePath('DocSupport')
-
-		for comp in self._comps:
-			filename = comp['filename']
-			print '  %s...' % filename
-
-			sourceDir = '%s/Docs/Source' % filename
+		dirs = [comp['dirname'] for comp in self._comps]
+		for dir in dirs:
+			print '  %s...' % dir
+			sourceDir = '%s/Docs/Source' % dir
 			self.makeDir(sourceDir)
-
 			filesDir = sourceDir + '/Files'
 			self.makeDir(filesDir)
-
 			summariesDir = sourceDir + '/Summaries'
 			self.makeDir(summariesDir)
-
-			docsDir = sourceDir + '/Docs'  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
+			#docsDir = sourceDir + '/Docs'  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
 			#self.makeDir(docsDir)
-
-			for pyFilename in glob('%s/*.py' % filename):
+			for pyFilename in glob('%s/*.py' % dir):
 				self.createHighlightedSource(pyFilename, filesDir)
 				self.createSummary(pyFilename, summariesDir)
 				#self.createDocs(pyFilename, docsDir)  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
-
-			self.createBrowsableClassHier(filename, sourceDir)
+			self.createBrowsableClassHier(dir, sourceDir)
 			#self.createBrowsableFileList(filename, sourceDir)
 		print
 
 	def createHighlightedSource(self, filename, dir):
-		import py2html
+		from DocSupport import py2html
 		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
 		self.printMsg('    Creating %s...' % targetName)
-		realout = sys.stdout
+		stdout = sys.stdout
 		sys.stdout = StringIO()
-#		py2html.main([None, '-stdout', '-format:rawhtml', '-files', filename])
-		py2html.main([None, '-stdout', '-files', filename])
+		py2html.main((None, '-stdout', '-files', filename))
 		result = sys.stdout.getvalue()
-		result = replace(result, '\t', '    ')  # 4 spaces per tab
 		open(targetName, 'w').write(result)
-		sys.stdout = realout
+		sys.stdout = stdout
 
 	def createSummary(self, filename, dir):
-		from PySummary import PySummary
+		from DocSupport.PySummary import PySummary
 		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
 		self.printMsg('    Creating %s...' % targetName)
 		sum = PySummary()
@@ -297,15 +274,15 @@ class Installer:
 		open(targetName, 'w').write(html)
 
 	def createDocs(self, filename, dir):
-		from PySummary import PySummary
+		from DocSupport.PySummary import PySummary
 		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
 		self.printMsg('    Creating %s...' % targetName)
 		# @@ 2000-08-17 ce: use something like pydoc or gendoc here
 		raise NotImplementedError
 
 	def createBrowsableClassHier(self, filesDir, docsDir):
-		""" Create HTML class hierarchy listings of the source files. """
-		from classhier import ClassHier
+		"""Create HTML class hierarchy listings of the source files."""
+		from DocSupport.classhier import ClassHier
 
 		classHierName = os.path.join(os.getcwd(), docsDir, 'ClassHier.html')
 		listName = os.path.join(os.getcwd(), docsDir, 'ClassList.html')
@@ -322,7 +299,7 @@ class Installer:
 			os.chdir(saveDir)
 
 	def createBrowsableFileList(self, filesDir, docsDir):
-		""" Create HTML list of the source files. """
+		"""Create HTML list of the source files."""
 		# @@ 2000-08-18 ce: not yet
 		fullnames = glob('%s/*.py' % filesDir)
 		filenames = map(lambda filename: os.path.basename(filename), fullnames)
@@ -332,11 +309,15 @@ class Installer:
 		for filename in filenames:
 			ht.append('<tr><td>summary</td><td>source</td><td>%s</td></tr>' % filename)
 		ht.append('</table>')
-		ht = string.join(ht, '')
+		ht = ''.join(ht)
 		open(docsDir+'/FileList.html', 'w').write(ht)
 
 	def backupConfigs(self):
-		""" Copies *.config to *.config.default, if the .default files don't already exist. This allows the user to always go back to the default config file if needed (for troubleshooting for example). """
+		"""Copy *.config to *.config.default, if the .default files don't already exist.
+
+		This allows the user to always go back to the default config file if needed
+		(for troubleshooting for example).
+		"""
 		print 'Backing up original config files...'
 		print '   ',
 		self._backupConfigs(os.curdir)
@@ -349,7 +330,7 @@ class Installer:
 			if os.path.isdir(fullPath):
 				self._backupConfigs(fullPath)
 			elif (filename[0]!='.' and \
-			      os.path.splitext(filename)[1] == '.config'):
+				os.path.splitext(filename)[1] == '.config'):
 				backupName = fullPath + '.default'
 				if not os.path.exists(backupName):
 					contents = open(fullPath, 'rb').read()
@@ -377,7 +358,7 @@ class Installer:
 			print 'Setting permissions on CGI scripts...'
 			for comp in self._comps:
 				#print '  %s...' % comp['name']
-				for filename in glob('%s/*.cgi' % comp['filename']):
+				for filename in glob('%s/*.cgi' % comp['dirname']):
 					#self.printMsg('    %s...' % os.path.basename(filename))
 					cmd = 'chmod a+rx %s' % filename
 					print '  %s' % cmd
@@ -405,9 +386,9 @@ class Installer:
 	<td>%(requiredPyVersionString)s</td>
 	<td>%(synopsis)s</td>
 </tr>''' % comp)
-			row = (row+1)%2  # e.g., 1, 2, 1, 2, ...
+			row = (row+1) % 2  # e.g., 1, 2, 1, 2, ...
 		wr('</table>')
-		ht = string.join(ht, '\n')
+		ht = '\n'.join(ht)
 		self.writeDocFile('Webware Component Index', 'Docs/ComponentIndex.html', ht, extraHead='<link rel="stylesheet" href="ComponentIndex.css" type="text/css">')
 
 	def createIndex(self):
@@ -426,7 +407,6 @@ class Installer:
 		ht = self.htFragment('RelNotes')
 		self.writeDocFile('Webware Release Notes', 'Docs/RelNotes.html', ht)
 
-
 	def createComponentIndexes(self):
 		print "Creating components' index.html..."
 		indexFrag = self.htFragment('indexOfComponent')
@@ -439,43 +419,45 @@ class Installer:
 			ht = []
 			for doc in comp['docs']:
 				ht.append(link % (doc['file'], doc['name']))
-			ht = string.join(ht, '')
+			ht = ''.join(ht)
 			comp['htDocs'] = ht
 
 			# Set up release notes
 			ht = []
-			releaseNotes = glob(os.path.join(comp['filename'], 'Docs', 'RelNotes-*.html'))
+			releaseNotes = glob(os.path.join(comp['dirname'], 'Docs', 'RelNotes-*.html'))
 			if releaseNotes:
-#				releaseNotes = [{'filename': os.path.basename(filename)} for filename in releaseNotes]
+#				releaseNotes = [{'dirname': os.path.basename(filename)} for filename in releaseNotes]
 				results = []
 				for filename in releaseNotes:
-					results.append({'filename': os.path.basename(filename)})
+					results.append({'dirname': os.path.basename(filename)})
 				releaseNotes = results
 
 				for item in releaseNotes:
-					filename = item['filename']
-					item['name'] = filename[string.rfind(filename,'-')+1:string.rfind(filename,'.')]
+					filename = item['dirname']
+					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
 				releaseNotes.sort(self.sortReleaseNotes)
 				for item in releaseNotes:
-					ht.append(link % (item['filename'], item['name']))
+					ht.append(link % (item['dirname'], item['name']))
 			else:
 				ht.append('None\n')
-			ht = string.join(ht, '')
+			ht = ''.join(ht)
 			comp['htReleaseNotes'] = ht
 
 			# Write file
 			title = comp['name'] + ' Documentation'
-			filename = os.path.join(comp['filename'], 'Docs', 'index.html')
+			filename = os.path.join(comp['dirname'], 'Docs', 'index.html')
 			contents = indexFrag % comp
 			cssLink = '<link rel="stylesheet" href="GenIndex.css" type="text/css">'
 			self.writeDocFile(title, filename, contents, extraHead=cssLink)
 
 	def finished(self):
-		"""
+		"""Finish the installation.
+
 		This method is invoked just before printGoodbye().
 		It writes the _installed file to disk.
 		"""
-		open('_installed', 'w').write('This file is written upon successful installation.\nLeave this file in place.\n')
+		open('_installed', 'w').write('This file is written upon successful installation.\n'
+			'Leave this file in place.\n')
 
 	def printGoodbye(self):
 		print '''
@@ -493,10 +475,6 @@ Installation is finished.'''
 	## Self utility ##
 
 	def printKeyValue(self, key, value):
-		# Handle values with line breaks by indenting extra lines
-		value = str(value)
-		value = string.replace(value, '\n', '\n'+' '*14)
-
 		print '%12s: %s' % (key, value)
 
 	def makeDir(self, dirName):
@@ -504,24 +482,20 @@ Installation is finished.'''
 			self.printMsg('    Making %s...' % dirName)
 			os.mkdir(dirName)
 
-	def requirePath(self, path):
-		if path not in sys.path:
-			sys.path.insert(1, path)
-
 	def sortReleaseNotes(self, a, b):
-		""" Used by createComponentIndexes(). You pass this to list.sort(). """
-		# We append '.0' below so that values like 'x.y' and 'x.y.z'
-		# compare the way we want them too (x.y.z is newer than x.y)
-		a = a['name']
-		if string.count(a, '.')==1:
-			a = a + '.0'
-		b = b['name']
-		if string.count(b, '.')==1:
-			b = b + '.0'
-		return -cmp(a, b)
+		"""Used by createComponentIndexes(). You pass this to list.sort()."""
+		try:
+			a = map(int, a['name'].split('.'))
+		except ValueError:
+			a = 0
+		try:
+			b = map(int, b['name'].split('.'))
+		except ValueError:
+			b = 0
+		return cmp(b, a)
 
 	def htFragment(self, name):
-		""" Returns an HTML fragment with the given name. """
+		"""Return HTML fragment with the given name."""
 		return open(os.path.join('Docs', name+'.htmlf')).read()
 
 	def writeDocFile(self, title, filename, contents, extraHead=''):
@@ -537,18 +511,15 @@ def printHelp():
 	print 'Usage: install.py [options]'
 	print 'Install WebWare in the local directory.'
 	print
-	print '  -h, --help                  This help screen'
-	print '  -v, --verbose               Print extra information messages during install'
-	print '  --password-prompt=yes/no    Do not prompt for password during install'
-	print '                              Will autogenerate a random password'
-	print '  --set-password=password     Set the password, if you follow it with'
-	print '                              --password-prompt=yes it will be used as a default'
+	print '  -h, --help                 Print this help screen.'
+	print '  -v, --verbose              Print extra information messages during install.'
+	print '  --password-prompt=no       Do not prompt for the WebKit password during install.'
+	print '  --set-password=...         Set the WebKit password to the given value.'
 
 if __name__=='__main__':
 	import getopt
-	verbose=0
-	passprompt=1
-	defaultpass=''
+	verbose = 0
+	passprompt = defaultpass = None
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "hv", ["help", "verbose", "password-prompt=", "set-password="])
 	except getopt.GetoptError:
@@ -558,14 +529,15 @@ if __name__=='__main__':
 			if o in ("-v", "--verbose"): verbose=1
 			if o in ("--password-prompt",):
 				if a in ("1", "yes", "true"):
-					passprompt=1
+					passprompt = 1
 				elif a in ("0", "no", "false"):
-					passprompt=0
+					passprompt = 0
 			if o in ("--set-password",):
-				defaultpass=a
-				passprompt=0
+				defaultpass = a
 			if o in ("-h", "--help", "h", "help"):
 				printHelp()
 				sys.exit(0)
+		if passprompt is None and defaultpass is None:
+			passprompt = 1
 
 		Installer().run(verbose=verbose, passprompt=passprompt, defaultpass=defaultpass)
