@@ -76,10 +76,10 @@ class Installer:
 		print 'Installer'
 		print
 		self.printKeyValue('Date', asctime(localtime(time())))
-		self.printKeyValue('Python ver', sys.version)
+		self.printKeyValue('Python Ver', sys.version)
 		self.printKeyValue('Op Sys', os.name)
 		self.printKeyValue('Platform', sys.platform)
-		self.printKeyValue('Cur dir', os.getcwd())
+		self.printKeyValue('Cur Dir', os.getcwd())
 		print
 
 	def checkPyVersion(self, minver=(2,0)):
@@ -246,14 +246,15 @@ class Installer:
 			self.makeDir(docsDir)
 			for pyFilename in glob('%s/*.py' % dir):
 				self.createHighlightedSource(pyFilename, filesDir)
-				self.createSummary(pyFilename, summariesDir)
-				self.createDocs(pyFilename, docsDir)
-			self.createDocs(dir, docsDir)
+				self.createPySummary(pyFilename, summariesDir)
+				self.createPyDocs(pyFilename, docsDir)
+			self.createPyDocs(dir, docsDir)
 			self.createFileList(dir, sourceDir)
 			self.createClassList(dir, sourceDir)
 		print
 
 	def createHighlightedSource(self, filename, dir):
+		"""Create highlighted HTML source code using py2html."""
 		from DocSupport import py2html
 		module = os.path.splitext(os.path.basename(filename))[0]
 		targetName = '%s/%s.html' % (dir, module)
@@ -265,7 +266,8 @@ class Installer:
 		sys.stdout = stdout
 		open(targetName, 'w').write(result)
 
-	def createSummary(self, filename, dir):
+	def createPySummary(self, filename, dir):
+		"""Create a HTML module summary."""
 		from DocSupport.PySummary import PySummary
 		module = os.path.splitext(os.path.basename(filename))[0]
 		targetName = '%s/%s.html' % (dir, module)
@@ -276,7 +278,8 @@ class Installer:
 		html = sum.html()
 		open(targetName, 'w').write(html)
 
-	def createDocs(self, filename, dir):
+	def createPyDocs(self, filename, dir):
+		"""Create a HTML module documentation using pydoc."""
 		try:
 			import pydoc
 		except ImportError:
@@ -305,7 +308,7 @@ class Installer:
 			os.chdir(saveDir)
 
 	def createFileList(self, filesDir, docsDir):
-		"""Create HTML list of the source files."""
+		"""Create a HTML list of the source files."""
 		from DocSupport.FileList import FileList
 		name = os.path.basename(filesDir)
 		self.printMsg('    Creating file list of %s...' % name)
@@ -321,7 +324,7 @@ class Installer:
 			os.chdir(saveDir)
 
 	def createClassList(self, filesDir, docsDir):
-		"""Create HTML class hierarchy listings of the source files."""
+		"""Create a HTML class hierarchy listing of the source files."""
 		from DocSupport.ClassList import ClassList
 		name = os.path.basename(filesDir)
 		self.printMsg('    Creating class list of %s...' % name)
@@ -338,6 +341,100 @@ class Installer:
 			classlist.printForWeb(1, targetName)
 		finally:
 			os.chdir(saveDir)
+
+	def createComponentIndex(self):
+		"""Create a HTML component index of Webware itself."""
+		print 'Creating ComponentIndex.html...'
+		ht = []
+		wr = ht.append
+		wr('<p>Don\'t know where to start? '
+			'Try <a href="../WebKit/Docs/index.html">WebKit</a>.</p>')
+		wr('<table align="center" border="0" '
+			'cellpadding="2" cellspacing="2" width="100%">')
+		wr('<tr class="ComponentHeadings">'
+			'<th>Component</th><th>Status</th><th>Ver</th>'
+			'<th>Py</th><th>Summary</th></tr>')
+		row = 0
+		for comp in self._comps:
+			comp['nameAsLink'] = ('<a href='
+				'"../%(dirname)s/Docs/index.html">%(name)s</a>' % comp)
+			comp['indexRow'] = row + 1
+			wr('<tr valign="top" class="ComponentRow%(indexRow)i">'
+				'<td class="NameVersionCell">'
+				'<span class="Name">%(nameAsLink)s</span></td>'
+				'<td>%(status)s</td>'
+				'<td><span class="Version">%(versionString)s</span></td>'
+				'<td>%(requiredPyVersionString)s</td>'
+				'<td>%(synopsis)s</td></tr>' % comp)
+			row = 1 - row
+		wr('</table>')
+		ht = '\n'.join(ht)
+		self.writeDocFile('Webware Component Index',
+			'Docs/ComponentIndex.html', ht,
+			extraHead='<link rel="stylesheet" '
+			'href="ComponentIndex.css" type="text/css">')
+
+	def createIndex(self):
+		"""Create start page for Webware docs from fragment."""
+		print 'Creating index.html...'
+		ht = self.htFragment('index')
+		ht = ht % self._props
+		self.writeDocFile('Webware Documentation',
+			'Docs/index.html', ht,
+			extraHead='<link rel="stylesheet" '
+			'href="GenIndex.css" type="text/css">')
+		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until we have a
+		# more general mechanism for adding header/footer to various documents
+		ht = self.htFragment('Copyright')
+		self.writeDocFile('Webware Copyright et al',
+			'Docs/Copyright.html', ht)
+		# @@ 2001-03-11 ce: Uh, we sneak in RelNotes.html here, as well
+		ht = self.htFragment('RelNotes')
+		self.writeDocFile('Webware Release Notes',
+			'Docs/RelNotes.html', ht)
+
+	def createComponentIndexes(self):
+		"""Create start page for all components."""
+		print "Creating index.html for all components..."
+		indexFrag = self.htFragment('indexOfComponent')
+		link = '<p><a href="%s">%s</a></p>'
+		for comp in self._comps:
+			comp['webwareVersion'] = self._props['version']
+			comp['webwareVersionString'] = self._props['versionString']
+			# Create 'htDocs' as a HTML fragment corresponding to comp['docs']
+			ht = []
+			for doc in comp['docs']:
+				ht.append(link % (doc['file'], doc['name']))
+			ht = ''.join(ht)
+			comp['htDocs'] = ht
+			# Set up release notes
+			ht = []
+			releaseNotes = glob(os.path.join(comp['dirname'],
+				'Docs', 'RelNotes-*.html'))
+			if releaseNotes:
+				releaseNotes = [{'dirname': os.path.basename(filename)}
+					for filename in releaseNotes]
+				for item in releaseNotes:
+					filename = item['dirname']
+					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
+					try:
+						item['ver'] = map(int, item['name'].split('.'))
+					except ValueError:
+						item['ver'] = None
+				releaseNotes.sort(lambda a, b: cmp(a['ver'], b['ver']))
+				for item in releaseNotes:
+					ht.append(link % (item['dirname'], item['name']))
+			else:
+				ht.append('<p>None</p>')
+			ht = '\n'.join(ht)
+			comp['htReleaseNotes'] = ht
+			# Write file
+			title = comp['name'] + ' Documentation'
+			filename = os.path.join(comp['dirname'], 'Docs', 'index.html')
+			ht = indexFrag % comp
+			self.writeDocFile(title, filename, ht,
+				extraHead='<link rel="stylesheet" '
+				'href="GenIndex.css" type="text/css">')
 
 	def backupConfigs(self):
 		"""Copy *.config to *.config.default, if the .default files don't already exist.
@@ -392,91 +489,6 @@ class Installer:
 					os.system(cmd)
 			print
 
-	def createComponentIndex(self):
-		print 'Creating ComponentIndex.html...'
-		ht = []
-		wr = ht.append
-		wr('<p>Don\'t know where to start? Try <a href="../WebKit/Docs/index.html">WebKit</a>.</p>')
-		wr('<table align="center" border="0" cellpadding="2" cellspacing="2" width="100%">')
-		wr('<tr class="ComponentHeadings"><td nowrap>Component</td><td>Status</td><td>Ver</td><td nowrap>Py ver</td><td>Summary</td></tr>')
-		row = 0
-		for comp in self._comps:
-			comp['nameAsLink'] = '<a href="../%(filename)s/Docs/index.html">%(name)s</a>' % comp
-			comp['indexRow'] = row+1
-			wr('''\
-<tr valign="top" class="ComponentRow%(indexRow)i">
-	<td class="NameVersionCell"><span class="Name">%(nameAsLink)s</span>
-	<!-- <br><span class="Version">%(versionString)s</span> -->
-	</td>
-	<td>%(status)s</td>
-	<td><span class="Version">%(versionString)s</span></td>
-	<td>%(requiredPyVersionString)s</td>
-	<td>%(synopsis)s</td>
-</tr>''' % comp)
-			row = (row+1) % 2  # e.g., 1, 2, 1, 2, ...
-		wr('</table>')
-		ht = '\n'.join(ht)
-		self.writeDocFile('Webware Component Index', 'Docs/ComponentIndex.html', ht, extraHead='<link rel="stylesheet" href="ComponentIndex.css" type="text/css">')
-
-	def createIndex(self):
-		print 'Creating index.html...'
-		ht = self.htFragment('index')
-		ht = ht % self._props
-		self.writeDocFile('Webware Documentation', 'Docs/index.html', ht, extraHead='<link rel="stylesheet" href="GenIndex.css" type="text/css">')
-
-		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until
-		# we have a more general mechanism for adding the header
-		# and footer to various documents
-		ht = self.htFragment('Copyright')
-		self.writeDocFile('Webware Copyright et al', 'Docs/Copyright.html', ht)
-
-		# @@ 2001-03-11 ce: Uh, we sneak in RelNotes.html here, as well
-		ht = self.htFragment('RelNotes')
-		self.writeDocFile('Webware Release Notes', 'Docs/RelNotes.html', ht)
-
-	def createComponentIndexes(self):
-		print "Creating components' index.html..."
-		indexFrag = self.htFragment('indexOfComponent')
-		link = '<a href="%s">%s</a><br>\n'
-		for comp in self._comps:
-			comp['webwareVersion'] = self._props['version']
-			comp['webwareVersionString'] = self._props['versionString']
-
-			# Create 'htDocs' as a readable HTML version comp['docs']
-			ht = []
-			for doc in comp['docs']:
-				ht.append(link % (doc['file'], doc['name']))
-			ht = ''.join(ht)
-			comp['htDocs'] = ht
-
-			# Set up release notes
-			ht = []
-			releaseNotes = glob(os.path.join(comp['dirname'], 'Docs', 'RelNotes-*.html'))
-			if releaseNotes:
-#				releaseNotes = [{'dirname': os.path.basename(filename)} for filename in releaseNotes]
-				results = []
-				for filename in releaseNotes:
-					results.append({'dirname': os.path.basename(filename)})
-				releaseNotes = results
-
-				for item in releaseNotes:
-					filename = item['dirname']
-					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
-				releaseNotes.sort(self.sortReleaseNotes)
-				for item in releaseNotes:
-					ht.append(link % (item['dirname'], item['name']))
-			else:
-				ht.append('None\n')
-			ht = ''.join(ht)
-			comp['htReleaseNotes'] = ht
-
-			# Write file
-			title = comp['name'] + ' Documentation'
-			filename = os.path.join(comp['dirname'], 'Docs', 'index.html')
-			contents = indexFrag % comp
-			cssLink = '<link rel="stylesheet" href="GenIndex.css" type="text/css">'
-			self.writeDocFile(title, filename, contents, extraHead=cssLink)
-
 	def finished(self):
 		"""Finish the installation.
 
@@ -508,18 +520,6 @@ Installation is finished.'''
 		if not os.path.exists(dirName):
 			self.printMsg('    Making %s...' % dirName)
 			os.mkdir(dirName)
-
-	def sortReleaseNotes(self, a, b):
-		"""Used by createComponentIndexes(). You pass this to list.sort()."""
-		try:
-			a = map(int, a['name'].split('.'))
-		except ValueError:
-			a = 0
-		try:
-			b = map(int, b['name'].split('.'))
-		except ValueError:
-			b = 0
-		return cmp(b, a)
 
 	def htFragment(self, name):
 		"""Return HTML fragment with the given name."""

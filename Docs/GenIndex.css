@@ -1,6 +1,15 @@
-/*	This style sheet is linked to by both Webware's index.html
-as well as each component's index.html. */
+/*
+	This style sheet is linked to by both Webware's index.html
+	as well as each component's index.html files.
+	We assume that "StyleSheet.css" is linked to before we are.
+*/
 
+body {
+	font-size: 11pt;
+}
+td, th {
+	font-size: 11pt;
+}
 p {
 	padding-left: 0;
 }

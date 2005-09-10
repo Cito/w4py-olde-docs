@@ -1,10 +1,14 @@
+/*
+	This is the common style sheet for Webware's documentation.
+*/
+
 body {
 		background-color: #FFFFFF;
 		font-family: Verdana, Arial, Helvetica, sans-serif;
 		font-size: 10pt;
 		padding: 12pt;
 }
-td {
+td, th {
 		font-family: Verdana, Arial, Helvetica, sans-serif;
 		font-size: 10pt;
 }
@@ -98,7 +102,7 @@ error {
 	color: red;
 }
 
-/*** Configuration documentation ***/
+/* Configuration documentation */
 
 dl.config {
 }

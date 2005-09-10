@@ -1,23 +1,20 @@
 /*
-	This is the style sheet is for:
-	  Webware/Documentations/ComponentIndex.html.
-
+	This is the style sheet for Webware's ComponentIndex.html.
 	It is not for the index.html files of varous components.
-
-	Note that we assume that "StyleSheet.css" is linked to
-	before we are.
+	We assume that "StyleSheet.css" is linked to before we are.
 */
 
 body {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: smaller;
+	font-size: 11pt;
+}
+td, th {
+	font-size: 10pt;
+}
+td.InfoSummary {
+	font-size: 10pt;
 }
 p {
 	padding-left: 0;
-}
-td {
-	font-family: Arial, Helvetica, sans-serif;
-	font-size: small;
 }
 .ComponentHeadings {
 	font-weight: bold;
