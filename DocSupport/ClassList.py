@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 """
-A quick, hacky script to contruct a class hierarchy list from a set of python files.
+ClassHierarchy.py
+
+A quick, hacky script to contruct a class hierarchy list from a set of Python files.
 """
 
 
-import os, re, string, string, sys, time
+import os, re, sys, time
 from glob import glob
 from types import *
 
@@ -14,7 +16,8 @@ def EmptyString(klass):
 
 
 class Klass:
-	""" Represents a Python class for our purposes. """
+	"""Represents a Python class for our purposes."""
+
 	def __init__(self, name, filename=''):
 		self._name = name
 		self._bases = []
@@ -41,7 +44,10 @@ class Klass:
 	def setFilename(self, filename):
 		self._filename = filename
 
-	def printHier(self, file=sys.stdout, indent=0, indentString='    ', prefix='', func=EmptyString, filenamePrefix=' (', filenamePostfix=')', multipleBasesMarker='*'):
+	def printList(self, file=sys.stdout,
+		indent=0, indentString='    ',
+		prefix='', func=EmptyString, postfix='',
+		multipleBasesMarker='*'):
 		filename = self._filename
 		if os.path.splitext(filename)[0]==self._name:
 			filename = ''
@@ -49,16 +55,19 @@ class Klass:
 			star = ''
 		else:
 			star = multipleBasesMarker
-		file.write('%s%s%s%s%s%s%s%s\n' % (prefix, func(self), indentString*indent, self._name, star, filenamePrefix, filename, filenamePostfix))
+		file.write(''.join((prefix, indentString*indent,
+			self._name, star, func(self), postfix)))
 		indent = indent + 1
 		for klass in self._derived:
-			klass.printHier(file, indent, indentString, prefix, func, filenamePrefix, filenamePostfix)
+			klass.printList(file, indent, indentString, prefix, func, postfix)
 
 	def __repr__(self):
 		return '<%s, %s>' % (self.__class__.__name__, self._name)
 
 
-class ClassHier:
+class ClassList:
+	"""Builds a class list for a package of Python modules."""
+
 	def __init__(self):
 		self._splitter = re.compile(r"[(,):]")
 		self._klasses = {}
@@ -84,9 +93,9 @@ class ClassHier:
 		lineNum = 1
 		for line in lines:
 			if len(line)>8 and \
-			   line[:5]=='class' and \
-			   line[5] in ' \t' and \
-			   string.find(line, ':')!=-1:
+				line[:5]=='class' and \
+				line[5] in ' \t' and \
+				line.find(':')!=-1:
 				self.readLine(line, name, lineNum)
 			lineNum = lineNum + 1
 		if self._verbose:
@@ -94,23 +103,18 @@ class ClassHier:
 
 	def readLine(self, line, filename=None, lineNum=None):
 		# strip comments
-		comment = string.find(line, '#')
+		comment = line.find('#')
 		if comment!=-1:
 			line = line[:comment]
-
 		# split into words
 		names = self._splitter.split(line[5:])
-
 		# strip white space
-		names = map(lambda part: string.strip(part), names)
-
+		names = map(lambda part: part.strip(), names)
 		# get rid of empty strings
 		names = filter(None, names)
-
 		# special case:  class foo(fi): pass
 		if names[-1]=='pass':
 			del names[-1]
-
 		# check for weirdos
 		for name in names:
 			if ' ' in name  or  '\t' in name:
@@ -121,17 +125,14 @@ class ClassHier:
 						print '%s:' % (filename),
 				print 'strange result:', names
 				if not self._verbose:
-					print 'Maybe you should set self._verbose to 1 and try again.'
+					print 'Maybe you should set self._verbose and try again.'
 				sys.exit(1)
-
 		if self._verbose:
 			print names
-
 		# create the klasses as needed
 		for name in names:
 			if not self._klasses.has_key(name):
 				self._klasses[name] = Klass(name)
-
 		# connect them
 		klass = self._klasses[names[0]]
 		klass.setFilename(filename)
@@ -145,74 +146,98 @@ class ClassHier:
 				roots.append(klass)
 		return roots
 
-	def printHier(self, file=sys.stdout):
+	def printList(self, file=sys.stdout):
 		roots = self.roots()
 		roots.sort(lambda a, b: cmp(a._name, b._name))
 		for klass in roots:
-			klass.printHier(file=file)
+			klass.printList(file=file)
 
-	def printHierForWeb(self, file=sys.stdout):
+	def printForWeb(self, name='Package', hierarchic=0, file=sys.stdout):
 		if type(file) is StringType:
 			file = open(file, 'w')
 			close = 1
 		else:
 			close = 0
-		file.write('<table cellpadding=2 cellspacing=0 style="font-family: Arial, Helvetica, sans-serif; font-size: 14;">\n')
-		file.write('<tr> <td><b>Summary</b></td> <td><b>Source</b></td> <td><b>Class</b></td> <td><b>File</b></td> </tr>\n')
-		roots = self.roots()
-		roots.sort(lambda a, b: cmp(a._name, b._name))
-		for klass in roots:
-			klass.printHier(file=file, prefix='<tr>', func=self.links, indentString = '&nbsp;'*6, filenamePrefix='</td><td>', filenamePostfix='</td></tr>\n')
-		file.write('</table>')
-		if close:
-			file.close()
-
-	def printListForWeb(self, file=sys.stdout):
-		if type(file) is StringType:
-			file = open(file, 'w')
-			close = 1
+		title = 'Class %s of %s' % (
+			hierarchic and 'Hierarchy' or 'List', name)
+		other = ('<a href="Class%s.html">%s class list of %s<a>'
+			% (hierarchic and 'List' or 'Hierarchy',
+				hierarchic and 'Alphabetical' or 'Hierarchical', name))
+		file.write('''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<head>
+<title>%s</title>
+<style type="text/css">
+body { background: #FFF;
+ font-family: Verdana, Arial, Helvetica, sans-serif;
+ font-size: 10pt;
+ padding: 6pt; }
+th { background-color: #CCF; text-align: left; }
+td { background-color: #EEF; }
+.center { text-align: center; }
+</style>
+</head>
+<body>
+<h1>%s</h1>
+<p>%s</p>
+<table cellpadding="2" cellspacing="2">
+''' % (title, title, other))
+		file.write('<tr><th>Class Name</th><th>Source File</th>'
+			'<th>Source</th><th>Doc</th><th>Summary</th></tr>\n')
+		if hierarchic:
+			classes = self.roots()
 		else:
-			close = 0
-		file.write('<table cellpadding=2 cellspacing=0 style="font-family: Arial, Helvetica, sans-serif; font-size: 14;">\n')
-		file.write('<tr> <td><b>Summary</b></td> <td><b>Source</b></td> <td><b>Class</b></td> <td><b>File</b></td> </tr>\n')
-		classes = self._klasses.values()
+			classes = self._klasses.values()
 		classes.sort(lambda a, b: cmp(a._name, b._name))
 		for klass in classes:
-			file.write('<tr> %s %s </td>  <td>%s</td> </tr>\n' % (self.links(klass), klass.name(), klass.filename()))
-		file.write('</table>')
+			if hierarchic:
+				klass.printList(file=file, prefix='<tr><td>',
+					indentString='&nbsp;'*6,
+					func=self.links, postfix='</tr>\n')
+			else:
+				file.write('<tr><td>%s%s</tr>\n'
+					% (klass.name(), self.links(klass)))
+		file.write('''</table>
+</body>
+</html>''')
 		if close:
 			file.close()
 
 	def links(self, klass):
-		""" In support of printForWeb(). """
+		"""In support of printForWeb()"""
 		filename = klass.filename()
+		module = os.path.splitext(filename)[0]
 		links = []
-
+		# souce file
+		if os.path.exists(filename):
+			links.append('<a href="../../%s">%s</a>' % (filename, filename))
+		else:
+			links.append('&nbsp;')
+		# highlighted source file
+		if os.path.exists('Docs/Source/Files/%s.html' % module):
+			links.append('<a href="Files/%s.html">source</a>' % module)
+		else:
+			links.append('&nbsp;')
+		# doc file
+		if os.path.exists('Docs/Source/Docs/%s.html' % module):
+			links.append('<a href="Docs/%s.html">doc</a>' % module)
+		else:
+			links.append('&nbsp;')
 		# summary file
-		if os.path.exists('Docs/Source/Summaries/%s.html' % filename):
-			links.append('<td> <a href="Summaries/%s.html">summary</a> </td>' % filename)
+		if os.path.exists('Docs/Source/Summaries/%s.html' % module):
+			links.append('<a href="Summaries/%s.html">summary</a>' % module)
 		else:
-			links.append('<td> &nbsp; </td>')
-
-		# source file
-		docFilename = 'Docs/Source/Files/%s.html' % filename
-		if os.path.exists(docFilename):
-			links.append('<td> <a href="Files/%s.html">source</a> </td>' % filename)
-		else:
-			links.append('<td> &nbsp; </td>')
-
+			links.append('&nbsp;')
 		# finish up
-		links.append('<td>')
-		return string.join(links, '')
+		links = '</td><td class="center">'.join(links)
+		return '</td><td>%s</td>' % links
 
 
 def main(args):
-	ch = ClassHier()
-	ch.addFilesToIgnore(['zCookieEngine.py', 'WebKitSocketServer.py', '_on_hold_HierarchicalPage.py', 'fcgi.py']) # whoa! look at that hard-coding!
+	classlist = ClassList()
+	classlist.addFilesToIgnore(['zCookieEngine.py', 'WebKitSocketServer.py', '_on_hold_HierarchicalPage.py', 'fcgi.py']) # whoa! look at that hard-coding!
 	for filename in args:
-		ch.readFiles(filename)
-#	ch.printHier()
-	ch.printForWeb()
+		classlist.readFiles(filename)
+	classlist.printList()
 
 
 if __name__=='__main__':

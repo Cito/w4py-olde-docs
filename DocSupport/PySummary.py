@@ -68,6 +68,9 @@ class PySummary:
 
 	def render(self, format):
 		filename = self._filename
+		path, basename = os.path.split(filename)
+		module = os.path.splitext(basename)[0]
+		package = '%s.%s' % (path, module)
 		span = format=='html'
 		settings = self._settings[format]
 		res = []
@@ -82,6 +85,7 @@ class PySummary:
 				res.append('</span>')
 			res.append('\n')
 			res.append(settings[type][1])
+		res.append('\n')
 		res.append(settings['file'][1] % locals())
 		res = ''.join(res)
 		res = res.replace('\t', settings['tabSubstitute'])

@@ -232,7 +232,7 @@ class Installer:
 
 	def createBrowsableSource(self):
 		"""Create HTML documents for class hierarchies, summaries, source files, etc."""
-		print 'Creating browsable source and summaries...'
+		print 'Creating html source, summaries and doc files...'
 		dirs = [comp['dirname'] for comp in self._comps]
 		for dir in dirs:
 			print '  %s...' % dir
@@ -242,19 +242,20 @@ class Installer:
 			self.makeDir(filesDir)
 			summariesDir = sourceDir + '/Summaries'
 			self.makeDir(summariesDir)
-			#docsDir = sourceDir + '/Docs'  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
-			#self.makeDir(docsDir)
+			docsDir = sourceDir + '/Docs'
+			self.makeDir(docsDir)
 			for pyFilename in glob('%s/*.py' % dir):
 				self.createHighlightedSource(pyFilename, filesDir)
 				self.createSummary(pyFilename, summariesDir)
-				#self.createDocs(pyFilename, docsDir)  # @@ 2000-08-17 ce: Eventually for pydoc/gendoc
-			self.createBrowsableClassHier(dir, sourceDir)
+				self.createDocs(pyFilename, docsDir)
+			self.createClassList(dir, sourceDir)
 			#self.createBrowsableFileList(filename, sourceDir)
 		print
 
 	def createHighlightedSource(self, filename, dir):
 		from DocSupport import py2html
-		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
+		module = os.path.splitext(os.path.basename(filename))[0]
+		targetName = '%s/%s.html' % (dir, module)
 		self.printMsg('    Creating %s...' % targetName)
 		stdout = sys.stdout
 		sys.stdout = StringIO()
@@ -265,7 +266,8 @@ class Installer:
 
 	def createSummary(self, filename, dir):
 		from DocSupport.PySummary import PySummary
-		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
+		module = os.path.splitext(os.path.basename(filename))[0]
+		targetName = '%s/%s.html' % (dir, module)
 		self.printMsg('    Creating %s...' % targetName)
 		sum = PySummary()
 		sum.readConfig('DocSupport/PySummary.config')
@@ -274,27 +276,51 @@ class Installer:
 		open(targetName, 'w').write(html)
 
 	def createDocs(self, filename, dir):
-		from DocSupport.PySummary import PySummary
-		targetName = '%s/%s.html' % (dir, os.path.basename(filename))
+		try:
+			import pydoc
+		except ImportError:
+			from MiscUtils import pydoc
+		pkgPath, modName = os.path.split(filename)
+		pkgName = os.path.basename(pkgPath)
+		modName = os.path.splitext(modName)[0]
+		targetName = '%s/%s.html' % (dir, modName)
 		self.printMsg('    Creating %s...' % targetName)
-		# @@ 2000-08-17 ce: use something like pydoc or gendoc here
-		raise NotImplementedError
+		saveDir = os.getcwd()
+		os.chdir(pkgPath)
+		targetName = '../' + targetName
+		try:
+			try:
+				module = pydoc.locate(modName)
+			except pydoc.ErrorDuringImport, detail:
+				self.printMsg(detail)
+			else:
+				if module:
+					html = pydoc.html.page(pydoc.describe(object),
+						pydoc.html.document(module, module.__name__))
+					open(targetName, 'w').write(html)
+				else:
+					self.printMsg('No Python doc found for %s' % modName)
+		finally:
+			os.chdir(saveDir)
 
-	def createBrowsableClassHier(self, filesDir, docsDir):
+	def createClassList(self, filesDir, docsDir):
 		"""Create HTML class hierarchy listings of the source files."""
-		from DocSupport.classhier import ClassHier
-
-		classHierName = os.path.join(os.getcwd(), docsDir, 'ClassHier.html')
-		listName = os.path.join(os.getcwd(), docsDir, 'ClassList.html')
+		from DocSupport.ClassList import ClassList
+		pkgName = os.path.basename(filesDir)
+		self.printMsg('    Creating class list of %s...' % pkgName)
+		classlist = ClassList()
+		# @@ 2000-08-17 ce:  whoa! look at that hard-coding!
+		classlist.addFilesToIgnore(['zCookieEngine.py', 'WebKitSocketServer.py', '_on_hold_HierarchicalPage.py', 'fcgi.py'])
 		saveDir = os.getcwd()
 		os.chdir(filesDir)
 		try:
-			ch = ClassHier()
-			# @@ 2000-08-17 ce:  whoa! look at that hard-coding!
-			ch.addFilesToIgnore(['zCookieEngine.py', 'WebKitSocketServer.py', '_on_hold_HierarchicalPage.py', 'fcgi.py'])
-			ch.readFiles('*.py')
-			ch.printHierForWeb(classHierName)
-			ch.printListForWeb(listName)
+			classlist.readFiles('*.py')
+			targetName = '../' + docsDir + '/ClassList.html'
+			self.printMsg('    Creating %s...' % targetName)
+			classlist.printForWeb(pkgName, 0, targetName)
+			targetName = '../' + docsDir + '/ClassHierarchy.html'
+			self.printMsg('    Creating %s...' % targetName)
+			classlist.printForWeb(pkgName, 1, targetName)
 		finally:
 			os.chdir(saveDir)
 

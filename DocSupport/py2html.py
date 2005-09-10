@@ -143,7 +143,7 @@ class PrettyPrint:
 
 	# misc settings
 	title = ''
-	bgcolor = '#FFF'
+	bgcolor = '#EEF'
 	css = ''
 	header = ''
 	footer = ''
@@ -182,7 +182,10 @@ class PrettyPrint:
 		self.css = """
 <style type="text/css">
 <!--
-body{ background: %s; }
+body{ background: %s;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
 .PY_KEYWORD{ color: #00C; font-weight: bold; }
 .PY_COMMENT{ color: #008; }
 .PY_PARAMETER{ color: #C00; }
@@ -209,7 +212,10 @@ body{ background: %s; }
 		self.css = """
 <style type="text/css">
 <!--
-body{ background-color: %s }
+body{ background-color: %s;
+font-family: Verdana, Arial, Helvetica, sans-serif;
+font-size: 10pt;
+padding: 3pt; }
 .PY_KEYWORD{ text-decoration: underline }
 .PY_COMMENT{ }
 .PY_PARAMETER{ }
@@ -272,7 +278,8 @@ body{ background-color: %s }
 		if self.replace_URLs:
 			output = re.sub('URL:([ \t]+)([^ \n\r<]+)',
 							'URL:\\1<a href="\\2">\\2</a>',output)
-		html = """%s<html%s>
+		html = """%s
+<html%s>
 <head>
 <title>%s</title>
 <!--css-->
@@ -285,7 +292,8 @@ body{ background-color: %s }
 %s
 <!--footer-->
 %s
-</body></html>\n""" %(HTML_DOCTYPE, HTML_XMLNS,
+</body>
+</html>\n""" %(HTML_DOCTYPE, HTML_XMLNS,
 			self.title, self.css,
 			self.header, output, self.footer)
 		return html
