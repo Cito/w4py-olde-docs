@@ -2,14 +2,12 @@
 PySummary
 
 
-A PySummary instance reads a python file and creates a summary of the file which you can access by using it as a string (e.g., %s or str()).
+A PySummary instance reads a python file and creates a summary of the file which you can access by using it as a     (e.g., %s or str()).
 
 The notion of a "category" is recognized. A category is simply a group of methods with a given name. The default prefix for denoting a category is ##.
 
 """
 
-import string
-from string import find, join, replace, strip
 from types import *
 import os
 
@@ -43,15 +41,16 @@ class PySummary:
 	def readFile(self, file):
 		self.invalidateCache()
 		for line in file.readlines():
-			if line and line[-1]=='\n':
-				line = line[:-1]
-			sline = strip(line)
+			line = line.rstrip()
+			sline = line.lstrip()
 			if not sline:
 				continue
 			try:
-				if sline[:6]=='class ' and sline[6]!='_':
+				if sline[:6]=='class ' and sline[6]!='_' and (
+					sline.find('(', 7)>=0 or sline.find(':', 7)>=0):
 					self._lines.append(Line('class', line))
-				elif sline[:4]=='def ' and (sline[4]!='_' or sline[5]=='_'):
+				elif sline[:4]=='def ' and (sline[4]!='_'
+					or sline[5]=='_') and sline.find('(', 5)>=0:
 					self._lines.append(Line('def', line))
 				elif sline[:3]=='## ':
 					self._lines.append(Line('category', line))
@@ -77,15 +76,15 @@ class PySummary:
 			type = line.type()
 			res.append(settings[type][0])
 			if span:
-				res.append('<span class=Line_%s>' % type)
-			res.append(apply(getattr(line, format)))  # e.g., line.format()
+				res.append('<span class="line_%s">' % type)
+			res.append(apply(getattr(line, format))) # e.g., line.format()
 			if span:
 				res.append('</span>')
 			res.append('\n')
 			res.append(settings[type][1])
 		res.append(settings['file'][1] % locals())
-		res = join(res, '')
-		res = replace(res, '\t', settings['tabSubstitute'])
+		res = ''.join(res)
+		res = res.replace('\t', settings['tabSubstitute'])
 		return res
 
 
@@ -121,13 +120,19 @@ class Line:
 	def html(self):
 		if self._html is None:
 			if self._type=='class' or self._type=='def':
-				delimiters = {'class': ':', 'def': '('}
-				delimiter = delimiters[self._type]
 				ht = self._text
-				start = find(ht, self._type) + len(self._type) + 1
-				end = find(ht, delimiter, start)
-				ht = '%s<span class=Name_class>%s</span>%s' % (
-					ht[:start], ht[start:end], ht[end:])
+				start = ht.find(self._type) + len(self._type) + 1
+				end = ht.find('(', start)
+				if end < 0:
+					end = ht.find(':', start)
+					if end < 0:
+						end = start
+				if self._type=='def':
+					end2 = ht.find(')', end + 1)
+					if end2 >= 0:
+						ht = ht[:end2+1]
+				ht = '%s<span class="name_%s">%s</span>%s' % (
+					ht[:start], self._type, ht[start:end], ht[end:])
 			else:
 				ht = self._text
 			self._html = ht
