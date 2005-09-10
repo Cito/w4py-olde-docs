@@ -68,7 +68,8 @@ class Klass:
 class ClassList:
 	"""Builds a class list for a package of Python modules."""
 
-	def __init__(self):
+	def __init__(self, name):
+		self._name = name
 		self._splitter = re.compile(r"[(,):]")
 		self._klasses = {}
 		self._verbose = 0
@@ -152,17 +153,19 @@ class ClassList:
 		for klass in roots:
 			klass.printList(file=file)
 
-	def printForWeb(self, name='Package', hierarchic=0, file=sys.stdout):
+	def printForWeb(self, hierarchic=0, file=sys.stdout):
 		if type(file) is StringType:
 			file = open(file, 'w')
 			close = 1
 		else:
 			close = 0
+		name = self._name
 		title = 'Class %s of %s' % (
 			hierarchic and 'Hierarchy' or 'List', name)
-		other = ('<a href="Class%s.html">%s class list of %s<a>'
+		other = ('<a href="Class%s.html">%s class list<a>'
+			' and the <a href="FileList.html">list of files<a> of %s'
 			% (hierarchic and 'List' or 'Hierarchy',
-				hierarchic and 'Alphabetical' or 'Hierarchical', name))
+				hierarchic and 'alphabetical' or 'hierarchical', name))
 		file.write('''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <head>
 <title>%s</title>
@@ -174,11 +177,12 @@ body { background: #FFF;
 th { background-color: #CCF; text-align: left; }
 td { background-color: #EEF; }
 .center { text-align: center; }
+.center table { margin-left: auto; margin-right: auto; text-align: left; }
 </style>
 </head>
-<body>
+<body><div class="center">
 <h1>%s</h1>
-<p>%s</p>
+<p>See also the %s.</p>
 <table cellpadding="2" cellspacing="2">
 ''' % (title, title, other))
 		file.write('<tr><th>Class Name</th><th>Source File</th>'
@@ -197,7 +201,7 @@ td { background-color: #EEF; }
 				file.write('<tr><td>%s%s</tr>\n'
 					% (klass.name(), self.links(klass)))
 		file.write('''</table>
-</body>
+</div></body>
 </html>''')
 		if close:
 			file.close()
@@ -234,7 +238,6 @@ td { background-color: #EEF; }
 
 def main(args):
 	classlist = ClassList()
-	classlist.addFilesToIgnore(['zCookieEngine.py', 'WebKitSocketServer.py', '_on_hold_HierarchicalPage.py', 'fcgi.py']) # whoa! look at that hard-coding!
 	for filename in args:
 		classlist.readFiles(filename)
 	classlist.printList()

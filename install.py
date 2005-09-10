@@ -249,8 +249,8 @@ class Installer:
 				self.createSummary(pyFilename, summariesDir)
 				self.createDocs(pyFilename, docsDir)
 			self.createDocs(dir, docsDir)
+			self.createFileList(dir, sourceDir)
 			self.createClassList(dir, sourceDir)
-			#self.createBrowsableFileList(filename, sourceDir)
 		print
 
 	def createHighlightedSource(self, filename, dir):
@@ -280,7 +280,6 @@ class Installer:
 		try:
 			import pydoc
 		except ImportError:
-			print "BOESER ERROR!!!"
 			from MiscUtils import pydoc
 		package, module = os.path.split(filename)
 		module = os.path.splitext(module)[0]
@@ -305,38 +304,40 @@ class Installer:
 		finally:
 			os.chdir(saveDir)
 
+	def createFileList(self, filesDir, docsDir):
+		"""Create HTML list of the source files."""
+		from DocSupport.FileList import FileList
+		name = os.path.basename(filesDir)
+		self.printMsg('    Creating file list of %s...' % name)
+		filelist = FileList(name)
+		saveDir = os.getcwd()
+		os.chdir(filesDir)
+		try:
+			filelist.readFiles('*.py')
+			targetName = '../' + docsDir + '/FileList.html'
+			self.printMsg('    Creating %s...' % targetName)
+			filelist.printForWeb(targetName)
+		finally:
+			os.chdir(saveDir)
+
 	def createClassList(self, filesDir, docsDir):
 		"""Create HTML class hierarchy listings of the source files."""
 		from DocSupport.ClassList import ClassList
-		pkgName = os.path.basename(filesDir)
-		self.printMsg('    Creating class list of %s...' % pkgName)
-		classlist = ClassList()
+		name = os.path.basename(filesDir)
+		self.printMsg('    Creating class list of %s...' % name)
+		classlist = ClassList(name)
 		saveDir = os.getcwd()
 		os.chdir(filesDir)
 		try:
 			classlist.readFiles('*.py')
 			targetName = '../' + docsDir + '/ClassList.html'
 			self.printMsg('    Creating %s...' % targetName)
-			classlist.printForWeb(pkgName, 0, targetName)
+			classlist.printForWeb(0, targetName)
 			targetName = '../' + docsDir + '/ClassHierarchy.html'
 			self.printMsg('    Creating %s...' % targetName)
-			classlist.printForWeb(pkgName, 1, targetName)
+			classlist.printForWeb(1, targetName)
 		finally:
 			os.chdir(saveDir)
-
-	def createBrowsableFileList(self, filesDir, docsDir):
-		"""Create HTML list of the source files."""
-		# @@ 2000-08-18 ce: not yet
-		fullnames = glob('%s/*.py' % filesDir)
-		filenames = map(lambda filename: os.path.basename(filename), fullnames)
-		filenames.sort()
-		ht = []
-		ht.append('<table cellpadding="2" cellspacing="0" style="font-size: 14pt;">\n')
-		for filename in filenames:
-			ht.append('<tr><td>summary</td><td>source</td><td>%s</td></tr>' % filename)
-		ht.append('</table>')
-		ht = ''.join(ht)
-		open(docsDir+'/FileList.html', 'w').write(ht)
 
 	def backupConfigs(self):
 		"""Copy *.config to *.config.default, if the .default files don't already exist.
