@@ -41,7 +41,7 @@ class Installer:
 
 	## debug printing facility
 	def _nop (self, msg): pass
-	def _printMsg (self, msg): print msg
+	def _printMsg (self, msg): print '  ' + msg
 
 
 	## Running the installation ##
@@ -133,7 +133,7 @@ class Installer:
 				print 'yes',
 			else:
 				print 'no ',
-			if column < 2:
+			if column < 2 and not self._verbose:
 				print '   ',
 				column = column + 1
 			else:
@@ -227,7 +227,10 @@ class Installer:
 		column = 0
 		for comp in self._comps:
 			dir = comp['dirname']
-			print dir.ljust(maxLen, '.'),
+			if self._verbose:
+				print dir, '...'
+			else:
+				print dir.ljust(maxLen, '.'),
 			sourceDir = '%s/Docs/Source' % dir
 			self.makeDir(sourceDir)
 			filesDir = sourceDir + '/Files'
@@ -243,13 +246,14 @@ class Installer:
 			self.createPyDocs(dir, docsDir)
 			self.createFileList(dir, sourceDir)
 			self.createClassList(dir, sourceDir)
-			print "ok",
-			if column < 2:
-				print '   ',
-				column = column + 1
-			else:
-				print
-				column = 0
+			if not self._verbose:
+				print "ok",
+				if column < 2:
+					print '   ',
+					column = column + 1
+				else:
+					print
+					column = 0
 		if column:
 			print
 		print
@@ -259,7 +263,7 @@ class Installer:
 		from DocSupport import py2html
 		module = os.path.splitext(os.path.basename(filename))[0]
 		targetName = '%s/%s.html' % (dir, module)
-		self.printMsg('    Creating %s...' % targetName)
+		self.printMsg('Creating %s...' % targetName)
 		stdout = sys.stdout
 		sys.stdout = StringIO()
 		py2html.main((None, '-stdout', '-files', filename))
@@ -272,7 +276,7 @@ class Installer:
 		from DocSupport.PySummary import PySummary
 		module = os.path.splitext(os.path.basename(filename))[0]
 		targetName = '%s/%s.html' % (dir, module)
-		self.printMsg('    Creating %s...' % targetName)
+		self.printMsg('Creating %s...' % targetName)
 		sum = PySummary()
 		sum.readConfig('DocSupport/PySummary.config')
 		sum.readFileNamed(filename)
@@ -290,7 +294,7 @@ class Installer:
 		if package:
 			module = package + '.' + module
 		targetName = '%s/%s.html' % (dir, module)
-		self.printMsg('    Creating %s...' % targetName)
+		self.printMsg('Creating %s...' % targetName)
 		saveDir = os.getcwd()
 		try:
 			os.chdir(dir)
@@ -312,14 +316,14 @@ class Installer:
 		"""Create a HTML list of the source files."""
 		from DocSupport.FileList import FileList
 		name = os.path.basename(filesDir)
-		self.printMsg('    Creating file list of %s...' % name)
+		self.printMsg('Creating file list of %s...' % name)
 		filelist = FileList(name)
 		saveDir = os.getcwd()
 		os.chdir(filesDir)
 		try:
 			filelist.readFiles('*.py')
 			targetName = '../' + docsDir + '/FileList.html'
-			self.printMsg('    Creating %s...' % targetName)
+			self.printMsg('Creating %s...' % targetName)
 			filelist.printForWeb(targetName)
 		finally:
 			os.chdir(saveDir)
@@ -328,17 +332,17 @@ class Installer:
 		"""Create a HTML class hierarchy listing of the source files."""
 		from DocSupport.ClassList import ClassList
 		name = os.path.basename(filesDir)
-		self.printMsg('    Creating class list of %s...' % name)
+		self.printMsg('Creating class list of %s...' % name)
 		classlist = ClassList(name)
 		saveDir = os.getcwd()
 		os.chdir(filesDir)
 		try:
 			classlist.readFiles('*.py')
 			targetName = '../' + docsDir + '/ClassList.html'
-			self.printMsg('    Creating %s...' % targetName)
+			self.printMsg('Creating %s...' % targetName)
 			classlist.printForWeb(0, targetName)
 			targetName = '../' + docsDir + '/ClassHierarchy.html'
-			self.printMsg('    Creating %s...' % targetName)
+			self.printMsg('Creating %s...' % targetName)
 			classlist.printForWeb(1, targetName)
 		finally:
 			os.chdir(saveDir)
@@ -479,7 +483,7 @@ class Installer:
 			for comp in self._comps:
 				#print '  %s...' % comp['name']
 				for filename in glob('%s/*.cgi' % comp['dirname']):
-					#self.printMsg('    %s...' % os.path.basename(filename))
+					#self.printMsg('%s...' % os.path.basename(filename))
 					cmd = 'chmod a+rx %s' % filename
 					print '  %s' % cmd
 					os.system(cmd)
@@ -516,7 +520,7 @@ Installation is finished.'''
 	def makeDir(self, dirName):
 		"""Create a directory."""
 		if not os.path.exists(dirName):
-			self.printMsg('    Making %s...' % dirName)
+			self.printMsg('Making %s...' % dirName)
 			os.mkdir(dirName)
 
 	def htFragment(self, name):
@@ -563,7 +567,8 @@ if __name__=='__main__':
 		printHelp()
 	else:
 		for o, a in opts:
-			if o in ("-v", "--verbose"): verbose=1
+			if o in ("-v", "--verbose"):
+				verbose=1
 			if o in ("--password-prompt",):
 				if a in ("1", "yes", "true"):
 					passprompt = 1
