@@ -1,31 +1,49 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
+<head>
+<title>Webware for Python - Release Procedures</title>
+<link rel="stylesheet" href="StyleSheet.css" type="text/css">
+</head>
+
+
+<body>
+
+<h1>Release Procedures</h1>
+
+<h3>Webware for Python</h3>
 
 <!--
 Word wrap to this:
 123456789 123456789 123456789 123456789 123456789 123456789 123456789X
 -->
 
-<head><title>Release Procedures (Webware for Python)</title></head>
-
-<body>
-
-<pre><h1>Release Procedures</h1>Webware for Python
-
 <h2>Preface</h2>
-These notes have expanded and changed upon every release. Carefully,
-consider each step as you make it. Look for opportunities to
-improve. Also, update these notes immediately following a release.
+
+<p>
+These notes have expanded and changed upon every release.
+Carefully, consider each step as you make it.
+Look for opportunities to improve.
+Also, update these notes immediately following a release.
+</p>
 
 <h2>To Do</h2>
+
+<pre>
 * Document tests to run.
 * Add notes on download mirror
   scp Webware-VER.tar.gz esterbro@ebad.pair.com:public_html/python/webware/
-  @@ sgd 2003-02-13 Is the mirror really used? 
+  @@ sgd 2003-02-13 Is the mirror really used?
+</pre>
 
 <h2>Changes encountered in the 0.8 Release</h2>
-* Download mirror requires updating by Chuck, the instructuions for 
+
+<pre>
+* Download mirror requires updating by Chuck, the instructuions for
+</pre>
 
 <h2>Last minute tweaks</h2>
+
+<pre>
 * Run all regression test suites
   > cd SomeKit/Tests
   > python Test.py
@@ -40,8 +58,10 @@ improve. Also, update these notes immediately following a release.
 
   * Copy */Docs/RelNotes-X.Y.html to RelNotes-#.#.html where #.# matches the
     major and minor version numbers on the release.    bin/setversion.py will
-    only update RelNotes* files that are named according to the version 
+    only update RelNotes* files that are named according to the version
     number so that it will not update old RelNotes files.
+
+  * Update Docs/RelNotes.htmlf
 
   * run bin/setversion.py  this will change the version in the following files
     according to defined rules.  See setversion.py for more information.
@@ -60,9 +80,11 @@ improve. Also, update these notes immediately following a release.
 
 * Skim through docs one final time
   * Make sure all the version numbers and release dates are correct.
-
+</pre>
 
 <h2>Prep release</h2>
+
+<pre>
 Releases often go alpha 1, alpha 2, beta 1, beta 2, ... with
 suffixes a1, a2, b1, b2 as in 0.6.1b1.
 
@@ -72,11 +94,11 @@ For CVS tagging only:  Use _ instead of .  No .:, or other symbols
 For example,
    VER = 0.4
    CVS_VER = 0_4
-Look at the existing tags to make sure your new tag is of a 
+Look at the existing tags to make sure your new tag is of a
 suitable style.  For example Release-0_8 is the tag for the
 0.8 release.
 
-* Make sure Properties.py's version has an a1, a2, b1, or b2, etc. 
+* Make sure Properties.py's version has an a1, a2, b1, or b2, etc.
   (see bin/setversion.py)
 
 * Make sure verything is committed and current in CVS.
@@ -84,13 +106,13 @@ suitable style.  For example Release-0_8 is the tag for the
 * Tag the release
   > cvs -q tag Release-CVS_VER
 
-* Use ReleaseHelper to create the release. This performs a a CVS 
-  EXPORT of the repository to create a directory without the CVS 
+* Use ReleaseHelper to create the release. This performs a a CVS
+  EXPORT of the repository to create a directory without the CVS
   control files, and then build a tarball from that directory.
 
   > Webware/bin/ReleaseHelper.py [tag=CVS_TAG]
 
-  If you specify the tag=TAG, the tarball is built using the revision 
+  If you specify the tag=TAG, the tarball is built using the revision
   informationfound in the release.  Otherwise the tarball is built
   and named with the current date indicating a snapshot build.
 
@@ -108,30 +130,35 @@ suitable style.  For example Release-0_8 is the tag for the
   This forces the tag to move rather than giving an error that the
   tag already exists.
 
-* Following these procedures assures that the CVS tagged version 
+* Following these procedures assures that the CVS tagged version
   is what is actually in the released tarball.
+</pre>
 
 <h2>Release on SourceForge</h2>
+
+<pre>
 FTP to SourceForge.net:
 
 > ncftpput -V upload.sourceforge.net /incoming Webware-VER.tar.gz
 
-* Log into <a href=http://sourceforge.net>sourceforge.net</a>.
-* Go to the <a href=https://sourceforge.net/project/?group_id=4866>Webware Project Page</a> @ SourceForge.
+* Log into <a href="http://sourceforge.net">sourceforge.net</a>.
+* Go to the <a href="https://sourceforge.net/project/?group_id=4866">Webware Project Page</a> @ SourceForge.
 * Click 'Admin' in the top menu bar.
 * Click 'Edit/Release Files' in the second menu bar.
 * Proceed to completion, but don't send users notification of
   release until final test is performed and the web site is updated.
-* Reference for the above: <a href=http://sfdocs.sourceforge.net/sfdocs/display_topic.php?topicid=22>"Making File Releases"</a>
+* Reference for the above: <a href="http://sfdocs.sourceforge.net/sfdocs/display_topic.php?topicid=22">"Making File Releases"</a>
 
 * Download the release and test.
 * Review the trove categorization and update if necessary
   * Go to Admin
   * Read down and see the link for trove categorization
-
+</pre>
 
 <h2>Update Home Page</h2>
-<a href=http://webware.sourceforge.net>Webware Home Page</a>:
+
+<pre>
+<a href="http://webware.sourceforge.net">Webware Home Page</a>:
 
 * Updates to the home page should go through CVS. In general
   you should not be editing files directly on the HomePage site
@@ -147,7 +174,7 @@ FTP to SourceForge.net:
       * Testimonials
     * Review all text and links
     * commit the changes to CVS
-    
+
 * You have to copy and install Webware in the web page directory so
   the documentation can be browsed online:  Make sure you install
   this from the tarball.
@@ -175,14 +202,18 @@ FTP to SourceForge.net:
     <a href="http://webware.sf.net">Webware.sourceforge.net</a> and double-checking
     all of the updated links, including the download link.
 
-* Add a news item to the <a href=https://sourceforge.net/project/?group_id=4866>Webware Project Page</a> @ SourceForge
+* Add a news item to the <a href="https://sourceforge.net/project/?group_id=4866">Webware Project Page</a> @ SourceForge
+</pre>
+
 <h2>Notify</h2>
+
+<pre>
 Create a new announcement text file containing the text for the
 general announcement, SourceForge news and freshmeat.net update. Use
 the previous releases as examples.
 
 For pre-releases, just the following:
-  * To: <a href=webware-discuss@lists.sourceforge.net>webware-discuss@lists.sourceforge.net</a>
+  * To: <a href="webware-discuss@lists.sourceforge.net">webware-discuss@lists.sourceforge.net</a>
   * http://prdownloads.sourceforge.net/webware/Webware-VER.tar.gz
   * Report all problems to webware-discuss@lists.sourceforge.net.
     Please include all appropriate version numbers including Webware,
@@ -194,36 +225,37 @@ For pre-releases, just the following:
     * ...
 
 Announce on mailing lists:
-    [ ] <a href=mailto:python-list@python.org>python-list@python.org</a>
-    [ ] <a href=mailto:python-announce@python.org>python-announce@python.org</a>
-    [ ] <a href=mailto:webware-announce@lists.sourceforge.net>webware-announce@lists.sourceforge.net</a>
-    [ ] <a href=mailto:pywx@idyll.org>pywx@idyll.org</a>
-    [ ] <a href=mailto:db-sig@python.org>db-sig@python.org</a>
+    [ ] <a href="mailto:python-list@python.org">python-list@python.org</a>
+    [ ] <a href="mailto:python-announce@python.org">python-announce@python.org</a>
+    [ ] <a href="mailto:webware-announce@lists.sourceforge.net">webware-announce@lists.sourceforge.net</a>
+    [ ] <a href="mailto:pywx@idyll.org">pywx@idyll.org</a>
+    [ ] <a href="mailto:db-sig@python.org">db-sig@python.org</a>
         - Only if MiddleKit was updated
         - Make custom message focused on MiddleKit
-    [ ] <a href=http://www.crosswinds.net/~pboddie/Python/web_modules.html>Python Web Modules</a> (the pboddie page, not the mailing list)
+    [ ] <a href="http://www.crosswinds.net/~pboddie/Python/web_modules.html">Python Web Modules</a> (the pboddie page, not the mailing list)
 
 Update:
-    [ ] <a href=http://www.vex.net/parnassus>Vaults of Parnassus</a>
-    [ ] <a href=http://freshmeat.net>freshmeat.net</a>
+    [ ] <a href="http://www.vex.net/parnassus">Vaults of Parnassus</a>
+    [ ] <a href="http://freshmeat.net">freshmeat.net</a>
 
 [ ] Review/search for other places where the announcement can be made.
-
+</pre>
 
 <h2>Post-release</h2>
+
+<pre>
 [ ] Update these Release Procedures.
 
 [ ] Check that the following were updated:
-    [ ] <a href=http://www.vex.net/parnassus>Vaults of Parnassus</a>
-    [ ] <a href=http://freshmeat.net>freshmeat.net</a>
+    [ ] <a href="http://www.vex.net/parnassus">Vaults of Parnassus</a>
+    [ ] <a href="http://freshmeat.net">freshmeat.net</a>
 
-[ ] Look for follow up messages on <a href=news:comp.lang.python>comp.lang.python</a>
+[ ] Look for follow up messages on <a href="news:comp.lang.python">comp.lang.python</a>
 
-[ ] Test drive the <a href=http://webware.sourceforge.net/>home page</a>, <a href=https://sourceforge.net/project/admin/?group_id=4866>project page</a> and <a href=https://sourceforge.net/project/showfiles.php?group_id=4866>download</a>.
+[ ] Test drive the <a href="http://webware.sourceforge.net">home page</a>, <a href="https://sourceforge.net/project/admin/?group_id=4866">project page</a> and <a href="https://sourceforge.net/project/showfiles.php?group_id=4866">download</a>.
 
-[ ] Check the <a href=https://sourceforge.net/project/showfiles.php?group_id=4866>download counter</a> and <a href=https://sourceforge.net/project/stats/?group_id=4866>activity statistics</a> on SourceForge.
-
+[ ] Check the <a href="https://sourceforge.net/project/showfiles.php?group_id=4866">download counter</a> and <a href="https://sourceforge.net/project/stats/?group_id=4866">activity statistics</a> on SourceForge.
 </pre>
 
-<hr>
 </body>
+</html>

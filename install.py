@@ -203,39 +203,31 @@ class Installer:
 		print 'Password replaced successfully.'
 
 	def installDocs(self):
-		self.propagateStyleSheet()
 		self.processRawFiles()
 		self.createBrowsableSource()
 		self.createComponentIndex()
 		self.createIndex()
 		self.createComponentIndexes()
-
-	def propagateStyleSheet(self):
-		"""Copy stylesheets in / into the other Docs dirs."""
-		print 'Propagating stylesheets...'
-		for name in ['StyleSheet.css', 'GenIndex.css']:
-			stylesheet = open('Docs/%s' % name, 'rb').read()
-			for comp in self._comps:
-				#print '  %s...' % comp['dirname']
-				target = os.path.join(comp['dirname'], 'Docs', name)
-				open(target, 'wb').write(stylesheet)
 		print
 
 	def processRawFiles(self):
 		print 'Processing raw html doc files...'
 		from DocSupport.RawToHTML import RawToHTML
 		processor = RawToHTML()
-		dirs = ['.'] + [comp['dirname'] for comp in self._comps]
-		for dir in dirs:
-			processor.main((None, dir + '/Docs/*.rawhtml'))
+		processor.main((None, '-r', 'Docs/*.rawhtml'))
+		for comp in self._comps:
+			dir = comp['dirname']
+			processor.main((None, '-r', dir + '/Docs/*.rawhtml'))
 		print
 
 	def createBrowsableSource(self):
 		"""Create HTML documents for class hierarchies, summaries, source files, etc."""
 		print 'Creating html source, summaries and doc files...'
-		dirs = [comp['dirname'] for comp in self._comps]
-		for dir in dirs:
-			print '  %s...' % dir
+		maxLen = max(map(lambda comp: len(comp['dirname']), self._comps))
+		column = 0
+		for comp in self._comps:
+			dir = comp['dirname']
+			print dir.ljust(maxLen, '.'),
 			sourceDir = '%s/Docs/Source' % dir
 			self.makeDir(sourceDir)
 			filesDir = sourceDir + '/Files'
@@ -251,6 +243,15 @@ class Installer:
 			self.createPyDocs(dir, docsDir)
 			self.createFileList(dir, sourceDir)
 			self.createClassList(dir, sourceDir)
+			print "ok",
+			if column < 2:
+				print '   ',
+				column = column + 1
+			else:
+				print
+				column = 0
+		if column:
+			print
 		print
 
 	def createHighlightedSource(self, filename, dir):
@@ -370,9 +371,7 @@ class Installer:
 		wr('</table>')
 		ht = '\n'.join(ht)
 		self.writeDocFile('Webware Component Index',
-			'Docs/ComponentIndex.html', ht,
-			extraHead='<link rel="stylesheet" '
-			'href="ComponentIndex.css" type="text/css">')
+			'Docs/ComponentIndex.html', ht, 'ComponentIndex.css')
 
 	def createIndex(self):
 		"""Create start page for Webware docs from fragment."""
@@ -380,9 +379,7 @@ class Installer:
 		ht = self.htFragment('index')
 		ht = ht % self._props
 		self.writeDocFile('Webware Documentation',
-			'Docs/index.html', ht,
-			extraHead='<link rel="stylesheet" '
-			'href="GenIndex.css" type="text/css">')
+			'Docs/index.html', ht, 'GenIndex.css')
 		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until we have a
 		# more general mechanism for adding header/footer to various documents
 		ht = self.htFragment('Copyright')
@@ -409,18 +406,19 @@ class Installer:
 			comp['htDocs'] = ht
 			# Set up release notes
 			ht = []
-			releaseNotes = glob(os.path.join(comp['dirname'],
+			files = glob(os.path.join(comp['dirname'],
 				'Docs', 'RelNotes-*.html'))
-			if releaseNotes:
-				releaseNotes = [{'dirname': os.path.basename(filename)}
-					for filename in releaseNotes]
-				for item in releaseNotes:
+			if files:
+				releaseNotes = []
+				for filename in files:
+					item = {'dirname': os.path.basename(filename)}
 					filename = item['dirname']
 					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
 					try:
 						item['ver'] = map(int, item['name'].split('.'))
 					except ValueError:
 						item['ver'] = None
+					releaseNotes.append(item)
 				releaseNotes.sort(lambda a, b: cmp(a['ver'], b['ver']))
 				for item in releaseNotes:
 					ht.append(link % (item['dirname'], item['name']))
@@ -432,9 +430,7 @@ class Installer:
 			title = comp['name'] + ' Documentation'
 			filename = os.path.join(comp['dirname'], 'Docs', 'index.html')
 			ht = indexFrag % comp
-			self.writeDocFile(title, filename, ht,
-				extraHead='<link rel="stylesheet" '
-				'href="GenIndex.css" type="text/css">')
+			self.writeDocFile(title, filename, ht, 'GenIndex.css')
 
 	def backupConfigs(self):
 		"""Copy *.config to *.config.default, if the .default files don't already exist.
@@ -514,9 +510,11 @@ Installation is finished.'''
 	## Self utility ##
 
 	def printKeyValue(self, key, value):
+		"""Print a key/value pair."""
 		print '%12s: %s' % (key, value)
 
 	def makeDir(self, dirName):
+		"""Create a directory."""
 		if not os.path.exists(dirName):
 			self.printMsg('    Making %s...' % dirName)
 			os.mkdir(dirName)
@@ -525,7 +523,19 @@ Installation is finished.'''
 		"""Return HTML fragment with the given name."""
 		return open(os.path.join('Docs', name+'.htmlf')).read()
 
-	def writeDocFile(self, title, filename, contents, extraHead=''):
+	def writeDocFile(self, title, filename, contents, style=None):
+		"""Write HTML page with header/footer and optional extra style."""
+		link = '<link rel="stylesheet" href="%s" type="text/css">'
+		stylesheets = ['StyleSheet.css']
+		if style:
+			stylesheets.append(style)
+		css = []
+		for s in stylesheets:
+			if not filename.startswith('Docs'):
+				s = '../../Docs/' + s
+			s = link % s
+			css.append(s)
+		css = '\n'.join(css)
 		values = locals()
 		file = open(filename, 'w')
 		file.write(self._htHeader % values)

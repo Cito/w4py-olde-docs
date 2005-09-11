@@ -52,6 +52,7 @@ class FileList:
 <head>
 <title>%s</title>
 <style type="text/css">
+<!--
 body { background: #FFF;
  font-family: Verdana, Arial, Helvetica, sans-serif;
  font-size: 10pt;
@@ -60,6 +61,7 @@ th { background-color: #CCF; text-align: left; }
 td { background-color: #EEF; }
 .center { text-align: center; }
 .center table { margin-left: auto; margin-right: auto; text-align: left; }
+-->
 </style>
 </head>
 <body><div class="center">

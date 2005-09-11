@@ -6,7 +6,7 @@ docs = [
 	{'name': 'Introduction', 'file': 'Intro.html'},
 	{'name': 'Quick Start',  'file': 'QuickStart.html'},
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
-	{'name': 'To Do',        'file': 'TODO-MiddleKit.text'},
+	{'name': 'To Do',        'file': 'TODO.text'},
 ]
 
 status = 'alpha'

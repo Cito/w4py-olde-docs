@@ -102,7 +102,7 @@
 
 <p>Webware classes divide their methods into logical groups called categories purely for organizational purposes. This often helps in understanding the interface of a class, especially when looking at its summary.</p>
 
-<p>Upon installation, Webware generates HTML summaries for each Python source file. See the summary of <a href="../WebKit/Docs/Source/Summaries/HTTPResponse.py.html">WebKit.HTTPResponse</a> for an example.</p>
+<p>Upon installation, Webware generates HTML summaries for each Python source file. See the summary of <a href="../WebKit/Docs/Source/Summaries/HTTPResponse.html">WebKit.HTTPResponse</a> for an example.</p>
 
 <p>By convention, a category is named with a comment beginning and ending with two pound signs, <code>##</code>, with two blanks lines before and one blank line after.</p>
 

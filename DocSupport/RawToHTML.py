@@ -20,7 +20,7 @@ RULES
 There are some rules to help this script recognize the Python dictionaries without confusing them with ordinary HTML content.
 
 * The dictionary starts with a single curly brace on a line by itself in column 1 (e.g., no preceding white space).
-* The immediate line after words starts with a single or double quote optionally preceded by white space.
+* The immediate line after it starts with a single or double quote optionally preceded by white space.
 * The dictionary ends with a single curly brace on a line by itself in column 1.
 
 * htForDict() can return an string containing HTML, or a list of strings.
@@ -81,7 +81,11 @@ class AutoToC:
 			AutoToC.title = dict['title']
 		else:
 			AutoToC.title= 'Table of Contents'
-		AutoToC. toc += 1
+		if dict.has_key('maxlevel'):
+			AutoToC.maxlevel = dict['maxlevel']
+		else:
+			AutoToC.maxlevel = 4
+		AutoToC.toc += 1
 		return '%(AutoToC.toc)s'
 
 
@@ -89,9 +93,13 @@ class RawToHTML:
 
 	def __init__(self):
 		self._translators = {}
+		self._remove = 0
 
 	def main(self, args):
 		for filename in args[1:]:
+			if filename == '-r': # remove option
+				self._remove = 1
+				continue
 			if '*' in filename:
 				# Help out Windows command line users
 				filenames = glob(filename)
@@ -132,6 +140,8 @@ class RawToHTML:
 		contents = open(filename).read()
 		results = self.processString(contents)
 		open(targetName, 'w').write(results)
+		if self._remove:
+			os.remove(filename)
 
 	def processString(self, contents):
 		lines = contents.splitlines()
@@ -157,9 +167,10 @@ class RawToHTML:
 				dictString = '\n'.join(lines[start:end+1])
 				try:
 					dict = eval(dictString)
+					if type(dict) == DictType or dict.has_key('class'):
+						translator = self.translator(dict['class'])
 				except:
 					self.error('Could not evaluate dictionary starting at line %d.' % (start+1))
-				translator = self.translator(dict['class'])
 				ht = translator.htForDict(dict)
 				if type(ht)==ListType:
 					results.extend(ht)
@@ -176,7 +187,7 @@ class RawToHTML:
 		pattern_label = re.compile('<a name="(.*)">', re.IGNORECASE)
 		headings = [(int(g[0]), g[1])
 			for g in [pattern_heading.search(heading).groups()
-			for heading in AutoToC.headings]]
+			for heading in AutoToC.headings] if int(g[0]) <= AutoToC.maxlevel]
 		minLevel = None
 		for level in range(1,7):
 			if len([headings[0] for heading in headings if heading[0]==level])>1:

@@ -4,7 +4,7 @@ version = ('X', 'Y', 0)
 
 docs = [
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
-	{'name': 'To Do',        'file': 'TODO-UserKit.text'},
+	{'name': 'To Do',        'file': 'TODO.text'},
 ]
 
 status = 'alpha'
