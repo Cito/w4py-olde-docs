@@ -383,7 +383,7 @@ class Installer:
 		ht = self.htFragment('index')
 		ht = ht % self._props
 		self.writeDocFile('Webware Documentation',
-			'Docs/index.html', ht, 'GenIndex.css')
+			'Docs/index.html', ht, 'DocIndex.css')
 		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until we have a
 		# more general mechanism for adding header/footer to various documents
 		ht = self.htFragment('Copyright')
@@ -434,7 +434,7 @@ class Installer:
 			title = comp['name'] + ' Documentation'
 			filename = os.path.join(comp['dirname'], 'Docs', 'index.html')
 			ht = indexFrag % comp
-			self.writeDocFile(title, filename, ht, 'GenIndex.css')
+			self.writeDocFile(title, filename, ht, 'DocIndex.css')
 
 	def backupConfigs(self):
 		"""Copy *.config to *.config.default, if the .default files don't already exist.
@@ -530,7 +530,7 @@ Installation is finished.'''
 	def writeDocFile(self, title, filename, contents, style=None):
 		"""Write HTML page with header/footer and optional extra style."""
 		link = '<link rel="stylesheet" href="%s" type="text/css">'
-		stylesheets = ['StyleSheet.css']
+		stylesheets = ['Doc.css']
 		if style:
 			stylesheets.append(style)
 		css = []

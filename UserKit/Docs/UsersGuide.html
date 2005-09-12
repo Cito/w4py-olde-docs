@@ -2,7 +2,7 @@
 <html>
 
 <head>
-<link rel="stylesheet" href="../../Docs/StyleSheet.css" type="text/css">
+<link rel="stylesheet" href="../../Docs/Doc.css" type="text/css">
 <title>UserKit (Webware for Python)</title>
 </head>
 
@@ -32,7 +32,7 @@ to give feedback, discuss features and get help using UserKit.</p>
 It does use a few functions in MiscUtils. The objects of interest in UserKit are Users, UserMangers, and Roles.</p>
 
 <p><strong>User</strong> &ndash; This represents a particular user and has a name, password,
-and various flags like <span class="pyInline">isActive()</span>.</p>
+and various flags like <span class="py">isActive()</span>.</p>
 
 <p><strong>UserManager</strong> &ndash; Your application will create one instance of a UserManager
 and use to create and retrieve Users by name. The UserManager comes in several flavors depending on support for Roles,
@@ -42,7 +42,7 @@ choose the UserManagerToFile which saves it's data to a file. If you want hierar
 choose RoleUserManagerToMiddleKit.</p>
 
 <p><strong>Roles</strong> &ndash; A role represents a permission that users may be granted.
-A user may belong to several roles, and this is queried using the method <span class="pyInline">user.playsRole( theRole )</span>.
+A user may belong to several roles, and this is queried using the method <span class="py">user.playsRole( theRole )</span>.
 Roles can be hierarchical. For example a customers role may indicate permissions that customers have.
 A staff role may include the customers role, meaning that members of staff may also do anything that customers can do.</p>
 

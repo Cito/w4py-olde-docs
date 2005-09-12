@@ -1,6 +1,14 @@
 /*
-	This is the common style sheet for Webware's documentation.
+	Webware for Python (http://www.webwareforpython.org)
+
+	Common style sheet for Webware's documentation pages
 */
+
+/* First import default style for pages created with Docutils: */
+
+@import url(default.css);
+
+/* Customization for Webware goes here: */
 
 body {
 		background-color: #FFFFFF;
@@ -34,44 +42,47 @@ h3, h4 {
 .center {
 	text-align: center;
 }
-.TitleBar {
+.titlebar {
 	font-family: Tahoma, Arial, Helvetica, sans-serif;
 	font-size: 18pt;
 	text-align: center;
 	padding: 2pt;
 	margin-bottom: 12pt;
 	color: white;
-	background-color: #002352;
+	background-color: #025;
 }
-.Footer {
+.footer {
 	font-family: Tahoma, Arial, Helvetica, sans-serif;
 	font-size: small;
 	text-align: center;
 	padding: 2pt;
 	margin-top: 12pt;
-	border-top: 1pt solid #002352;
+	border-top: 1pt solid #025;
 }
-.ToC {
+.contents {
 	font-family: Tahoma, Arial, Helvetica, sans-serif;
 }
-.ToC ul {
+.contents ul {
 	list-style: none;
 	padding-left: 0em;
 	margin-left: 2em;
 }
-.ToC ul li {
+.contents ul li {
 	font-size: medium;
 	margin-bottom: 3pt;
 }
-.ToC ul ul {
+.contents ul ul {
 	list-style-type: none;
 	margin-top: 2pt;
 	padding-left: 0em;
 	margin-left: 1.5em;
 }
-.ToC ul ul li {
+.contents ul ul li {
 	font-size: small;
 	margin-bottom: 1pt;
+}
+.contents .topic-title {
+	font-size: 16pt;
 }
 span.name {
 	font-weight: bold;
@@ -80,25 +91,20 @@ span.filename {
 	font-family: Tahoma, Arial, Helvetica, sans-serif;
 	font-size: small;
 }
-code {
+code, .literal, .literal-block, .pre, .py {
 	font-family: "Andale Mono", "Lucida Console", Monaco, "Courier New", Courier, monospace;
-	color: #005422;
-}
-pre.py {
-	font-family: "Andale Mono", "Lucida Console", Monaco, "Courier New", Courier, monospace;
-	color: #005422;
-	background-color: #EEE;
-	padding-left: 2.5em;
 	font-size: 10pt;
+	color: #052;
+}
+tt.literal, span.pre {
+	background-color: #FFFFFF;
+}
+pre.py, pre.literal-block {
 	margin: 0;
+	padding: 2pt 1pt 1pt 2pt;
+	background-color: #F0F0F8;
 }
-.pyInline {
-	font-family: "Andale Mono", "Lucida Console", Monaco, "Courier New", Courier, monospace;
-	color: #005422;
-	font-size: 10pt;
-	background-color: #EEE;
-}
-span.typed {
+.typed {
 	font-weight: bold;
 }
 .error {
@@ -108,7 +114,7 @@ span.typed {
 	color: brown;
 }
 
-/* Configuration documentation */
+/* Configuration documentation: */
 
 dl.config {
 }

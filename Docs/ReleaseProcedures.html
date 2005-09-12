@@ -2,7 +2,7 @@
 <html>
 <head>
 <title>Webware for Python - Release Procedures</title>
-<link rel="stylesheet" href="StyleSheet.css" type="text/css">
+<link rel="stylesheet" href="Doc.css" type="text/css">
 </head>
 
 
@@ -33,6 +33,7 @@ Also, update these notes immediately following a release.
 * Add notes on download mirror
   scp Webware-VER.tar.gz esterbro@ebad.pair.com:public_html/python/webware/
   @@ sgd 2003-02-13 Is the mirror really used?
+* Go through WebKit/Docs/Future.html
 </pre>
 
 <h2>Changes encountered in the 0.8 Release</h2>
@@ -47,6 +48,16 @@ Also, update these notes immediately following a release.
 * Run all regression test suites
   > cd SomeKit/Tests
   > python Test.py
+
+* Update the HTML pages that are created from reStructuredText.
+  Currently these exist only in the folder WebKit/Docs
+  - Docutils (0.3.9) must be installed
+    (that's why it is not done in the Webware installer)
+  - Copy buildhtml.py from the Docutils tools directory
+    somewhere to the PATH
+  - cd WebKit/Docs
+  - buildhtml.py --stylesheet=../../Docs/Doc.css
+  - check the produced HTML pages
 
 * Release notes
   * Search webware-discuss and webware-devel archives for "update"
@@ -101,7 +112,7 @@ suitable style.  For example Release-0_8 is the tag for the
 * Make sure Properties.py's version has an a1, a2, b1, or b2, etc.
   (see bin/setversion.py)
 
-* Make sure verything is committed and current in CVS.
+* Make sure everything is committed and current in CVS.
 
 * Tag the release
   > cvs -q tag Release-CVS_VER

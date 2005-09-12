@@ -80,7 +80,7 @@ class AutoToC:
 		if dict.has_key('title'):
 			AutoToC.title = dict['title']
 		else:
-			AutoToC.title= 'Table of Contents'
+			AutoToC.title= 'Contents'
 		if dict.has_key('maxlevel'):
 			AutoToC.maxlevel = dict['maxlevel']
 		else:
@@ -196,7 +196,7 @@ class RawToHTML:
 		else:
 			minLevel = None
 		if minLevel:
-			toc = ['<div class="ToC">']
+			toc = ['<div class="contents">']
 			if AutoToC.title:
 				toc.append('\n<h%d>%s</h%d>' % (minLevel, AutoToC.title, minLevel))
 			level = minLevel-1

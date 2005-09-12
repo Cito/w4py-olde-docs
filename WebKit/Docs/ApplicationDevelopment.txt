@@ -6,7 +6,7 @@ Webware for Python
 :Version: X.Y
 :Released: @@/@@/@@
 
-.. contents::
+.. contents:: Contents
 
 Synopsis
 ========
@@ -26,7 +26,7 @@ Creating a Working Directory
 Instead you should use the script ``bin/MakeAppWorkDir.py``.  You should run it like::
 
     $ python Webware/bin/MakeAppWorkDir -l --cvsignore -c context DIRECTORYNAME
-    
+
 This will create a directory DIRECTORYNAME that will contain a directory structure for your application.  The options are:
 
 ``-l``:
@@ -35,13 +35,13 @@ This will create a directory DIRECTORYNAME that will contain a directory structu
     Create ``.cvsignore`` files.
 ``-c CONTEXTNAME``:
     Use CONTEXTNAME for the application context instead of ``MyContext`` (there
-    will be a directory CONTEXTNAME/ in the work dir).  I like the name 
+    will be a directory CONTEXTNAME/ in the work dir).  I like the name
     ``context`` for all my applications.
 ``DIRECTORYNAME``:
     The files will be put here.  Name if after your application, place it where
     it is convenient for you -- it doesn't need to be located close to the
     Webware installation.
-    
+
 When you do this, you'll see this directory structure::
 
     404Text.txt  Cache/       ErrorMsgs/   Logs/        WebKit.cgi   lib/
@@ -50,7 +50,7 @@ When you do this, you'll see this directory structure::
 Here's what the files and directories are for:
 
 ``404Text.txt``:
-    The text when a page is not found (actually the HTML from <body> to     
+    The text when a page is not found (actually the HTML from <body> to
     </body>).
 ``AppServer``:
     The script to start up the AppServer for this application.  Each application
@@ -62,14 +62,14 @@ Here's what the files and directories are for:
     ``WebKit/Configs``, but are specific to this application/AppServer.
 ``ErrorMsgs``:
     HTML pages for any errors that occur.  These can pile up and take up
-    considerable size (even just during development), so you'll want to purge 
+    considerable size (even just during development), so you'll want to purge
     these every so often.
 ``Launch.py``:
     Called by the ``AppServer`` script to launch the AppServer.
 ``Logs``:
     Logs of accesses.
 ``Sessions``:
-    Users sessions.  These should be cleaned out automatically, you won't 
+    Users sessions.  These should be cleaned out automatically, you won't
     have to look in this directory.
 ``WebKit.cgi``:
     A CGI script/adapter for accessing the AppServer here.  You can still use
@@ -79,7 +79,7 @@ Here's what the files and directories are for:
     The directory (given with the ``-c`` switch) for your default context.  This
     is where you put your servlets.
 ``lib``:
-    An application-specific library package, created if you give the ``-l`` 
+    An application-specific library package, created if you give the ``-l``
     switch.  Import from this like ``from lib.SitePage import SitePage``
 
 Using CVS for your application
@@ -103,29 +103,29 @@ If you are using CVS or otherwise distributing your application code, you may fi
 To solve these problems I recommend creating a shell script to handle startup.  I generally call this script ``start``, and it looks something like this::
 
     #!/bin/sh
-    
+
     # lothlorien.colorstudy.com is my development machine
     if [ `hostname` = lothlorien.colorstudy.com ] ; then
         WORKING=$HOME/prog/webware/WorkingDir
         WEBWARE=$HOME/prog/webware/Webware
         OPS="--AppServer.AutoReload=1"
     fi
-    
+
     # this is my production environment
     if [ `hostname` = color.colorstudy.com && `whoami` = webware ] ; then
         WORKING=/www/WorkingDir
         WEBWARE=/www/Webware
         OPS=""
     fi
-    
+
     if [ "$WORKING" = "" ] ; then
         echo I do not recognize this environment
         exit 1
     fi
-    
+
     cd $WORKING
     ./AppServer --working-path=$WORKING --webware-path=$WEBWARE $OPS $*
-    
+
 You can add this to CVS, and the script should automatically detect what environment it is being used in.  You can use options to change configuration parameters, like setting some parameters depending on whether the environment is a development or production environment.  (@@ ib: add link to command line options)
 
 Some options that you may be particularly interested in:
@@ -143,10 +143,10 @@ Some options that you may be particularly interested in:
     During development you probably want this off.
 ``--Application.EmailErrors``:
     Turn on for production.
-        
-For more settings, see the Configuration_ document.
 
-.. _Configuration: Configuration.html
+For more settings, see the Configuration__ document.
+
+__ Configuration.html
 
 Structuring your Code
 =====================
@@ -170,15 +170,15 @@ I also typically add other functions to the SitePage module, and then do ``from 
 A basic framework for your SitePage might be::
 
     from WebKit.Page import Page
-    
+
     class SitePage(Page):
-    
+
         def respond(self, trans):
             if self.securePage():
                 if not self.session().value('username', False):
                     self.respondLogIn()
                     return
-                    
+
         def securePage(self):
             """Override this method in your servlets to return True if the
             page should only be accessible to logged-in users -- by default
@@ -188,6 +188,6 @@ A basic framework for your SitePage might be::
         def respondLogin(self):
             # Here we should deal with logging in...
             pass
-            
+
 Obviously there are a lot of details to add in on your own which are specific to your application and the security and user model you are using.
 

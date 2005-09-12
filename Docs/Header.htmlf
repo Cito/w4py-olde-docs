@@ -5,4 +5,4 @@
 %(css)s
 </head>
 <body>
-<h1 class="TitleBar">%(title)s</h1>
+<h1 class="titlebar">%(title)s</h1>

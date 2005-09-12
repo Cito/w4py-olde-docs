@@ -6,6 +6,9 @@ docs = [
 	{'name': 'Install Guide', 'file': 'InstallGuide.html'},
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
 	{'name': 'Configuration Guide', 'file': 'Configuration.html'},
+	{'name': 'Beginner Tutorial', 'file': 'Tutorial.html'},
+	{'name': 'Application Development', 'file': 'ApplicationDevelopment.html'},
+	{'name': 'Developing Webware', 'file': 'Developing.html'},
 	{'name': 'Future Work', 'file': 'Future.html'},
 ]
 

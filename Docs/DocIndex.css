@@ -1,7 +1,7 @@
 /*
 	This style sheet is linked to by both Webware's index.html
 	as well as each component's index.html files.
-	We assume that "StyleSheet.css" is linked to before we are.
+	We assume that "Doc.css" is linked to before we are.
 */
 
 body {
