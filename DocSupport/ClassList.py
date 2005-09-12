@@ -210,6 +210,7 @@ td { background-color: #EEF; }
 
 	def links(self, klass):
 		"""In support of printForWeb()"""
+		name = self._name
 		filename = klass.filename()
 		module = os.path.splitext(filename)[0]
 		links = []
@@ -224,8 +225,8 @@ td { background-color: #EEF; }
 		else:
 			links.append('&nbsp;')
 		# doc file
-		if os.path.exists('Docs/Source/Docs/%s.html' % module):
-			links.append('<a href="Docs/%s.html">doc</a>' % module)
+		if os.path.exists('Docs/Source/Docs/%s.%s.html' % (name, module)):
+			links.append('<a href="Docs/%s.%s.html">doc</a>' % (name, module))
 		else:
 			links.append('&nbsp;')
 		# summary file
