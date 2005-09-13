@@ -10,7 +10,7 @@ class DB(ExamplePage):
                            MySQLdb, 5, host='localhost',
                            user='test', passwd='test',
                            db='test')
-        con = pool.getConnection()
+        con = pool.connection()
         cursor = con.cursor()
         cursor.execute("select name from test")
         for name in cursor.fetchall():

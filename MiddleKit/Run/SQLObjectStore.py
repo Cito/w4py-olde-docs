@@ -421,7 +421,7 @@ class SQLObjectStore(ObjectStore):
 			conn = connection
 		elif self._threaded:
 			if self._pool:
-				conn = self._pool.getConnection()
+				conn = self._pool.connection()
 			elif self._threadSafety is 1:
 				conn = self.newConnection()
 			else: # safety = 2, 3
