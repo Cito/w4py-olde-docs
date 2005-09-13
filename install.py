@@ -7,14 +7,10 @@ Webware for Python
 FUTURE
 	* Look for an install.py in each component directory and run it
 	  (there's not a strong need right now).
-	* Upon successful install, put meaningful info in the "_installed"
-	  file, such as date, time, py ver, etc. Maybe just put the output
-	  of this installation script in there.
 """
 
 
-import os, sys, compileall
-from time import time, localtime, asctime
+import os, sys
 from glob import glob
 from MiscUtils.PropertiesObject import PropertiesObject
 
@@ -22,6 +18,15 @@ try:
 	from cStringIO import StringIO
 except ImportError:
 	from StringIO import StringIO
+
+class OutputCatcher:
+	"""Auxiliary class for logging output."""
+	def __init__(self, output, log):
+		self.output = output
+		self.log = log
+	def write(self, stuff):
+		self.output.write(stuff)
+		self.log.append(stuff)
 
 
 class Installer:
@@ -49,29 +54,39 @@ class Installer:
 	def run(self, verbose=0, passprompt=1, defaultpass=''):
 		self._verbose = verbose
 		self.printMsg = verbose and self._printMsg or self._nop
-		self.clearInstalledFile()
-		self.printHello()
-		if not self.checkPyVersion() or not self.checkThreading():
-			return
-		self.detectComponents()
-		self.installDocs()
-		self.backupConfigs()
-		self.compileModules()
-		self.fixPermissions()
-		self.setupWebKitPassword(passprompt, defaultpass)
-		self.finished()
-		self.printGoodbye()
-		return self
+		log = []
+		stdout, stderr = sys.stdout, sys.stderr
+		try:
+			sys.stdout = OutputCatcher(sys.stdout, log)
+			sys.stderr = OutputCatcher(sys.stderr, log)
+			self.printHello()
+			self.clearLogFile()
+			if not self.checkPyVersion() or not self.checkThreading():
+				return
+			self.detectComponents()
+			self.installDocs()
+			self.backupConfigs()
+			self.compileModules()
+			self.fixPermissions()
+			self.setupWebKitPassword(passprompt, defaultpass)
+			self.printGoodbye()
+			self.writeLogFile(log)
+		finally:
+			sys.stdout, sys.stderr = stdout, stderr
 
-	def clearInstalledFile(self):
+	def clearLogFile(self):
+		"""Remove the install.log file.
+
+		This file with the logged output will get created at the
+		very end of the installation, provided there are no errors.
 		"""
-		Removes the _installed file which will get created at the very
-		end of installation, provided there are no errors.
-		"""
-		if os.path.exists('_installed'):
-			os.remove('_installed')
+		if os.path.exists('install.log'):
+			print 'Removing log from last installation...'
+			os.remove('install.log')
+			print
 
 	def printHello(self):
+		from time import time, localtime, asctime
 		print '%(name)s %(versionString)s' % self._props
 		print 'Installer'
 		print
@@ -120,7 +135,7 @@ class Installer:
 
 	def detectComponents(self):
 		print 'Scanning for components...'
-		dirnames = filter(os.path.isdir, os.listdir('.'))
+		dirnames = filter(os.path.isdir, os.listdir(os.curdir))
 		maxLen = max(map(len, dirnames))
 		column = 0
 		for dirname in dirnames:
@@ -141,8 +156,8 @@ class Installer:
 				column = 0
 		if column:
 			print
-		print
 		self._comps.sort(lambda a, b: cmp(a['name'], b['name']))
+		print
 
 	def setupWebKitPassword(self, prompt, defpass):
 		"""Setup a password for WebKit Application server."""
@@ -265,10 +280,12 @@ class Installer:
 		targetName = '%s/%s.html' % (dir, module)
 		self.printMsg('Creating %s...' % targetName)
 		stdout = sys.stdout
-		sys.stdout = StringIO()
-		py2html.main((None, '-stdout', '-files', filename))
-		result = sys.stdout.getvalue()
-		sys.stdout = stdout
+		try:
+			sys.stdout = StringIO()
+			py2html.main((None, '-stdout', '-files', filename))
+			result = sys.stdout.getvalue()
+		finally:
+			sys.stdout = stdout
 		open(targetName, 'w').write(result)
 
 	def createPySummary(self, filename, dir):
@@ -443,60 +460,36 @@ class Installer:
 		(for troubleshooting for example).
 		"""
 		print 'Backing up original config files...'
-		print '   ',
 		self._backupConfigs(os.curdir)
 		print
 
 	def _backupConfigs(self, dir):
-		wr = sys.stdout.write
 		for filename in os.listdir(dir):
 			fullPath = os.path.join(dir, filename)
 			if os.path.isdir(fullPath):
 				self._backupConfigs(fullPath)
-			elif (filename[0]!='.' and \
+			elif (not filename.startswith('.') and
 				os.path.splitext(filename)[1] == '.config'):
-				backupName = fullPath + '.default'
-				if not os.path.exists(backupName):
-					contents = open(fullPath, 'rb').read()
-					open(backupName, 'wb').write(contents)
-					del contents
-					wr('.')
-				else:
-					wr('-')
-				sys.stdout.flush()
+				self.printMsg(fullPath)
+				backupPath = fullPath + '.default'
+				if not os.path.exists(backupPath):
+					open(backupPath, 'wb').write(open(fullPath, 'rb').read())
 
 	def compileModules(self):
-		import StringIO
-		print """Byte compiling all modules\n------------------------------------------\n"""
-		stdout = sys.stdout
-		stderr = sys.stderr
-		sys.stdout = StringIO.StringIO() #the compileall is a little verbose
-		sys.stderr = StringIO.StringIO()
-		compileall.compile_dir(".", 10, '', 1)
-		sys.stdout = stdout
-		sys.stderr = stderr
-		print "\n\n"
+		import compileall
+		print 'Byte compiling all modules...'
+		compileall.compile_dir(os.curdir, 10, None, 1, None, 1)
+		print
 
 	def fixPermissions(self):
-		if os.name=='posix':
+		if os.name == 'posix':
 			print 'Setting permissions on CGI scripts...'
 			for comp in self._comps:
-				#print '  %s...' % comp['name']
 				for filename in glob('%s/*.cgi' % comp['dirname']):
-					#self.printMsg('%s...' % os.path.basename(filename))
 					cmd = 'chmod a+rx %s' % filename
-					print '  %s' % cmd
+					self.printMsg(cmd)
 					os.system(cmd)
 			print
-
-	def finished(self):
-		"""Finish the installation.
-
-		This method is invoked just before printGoodbye().
-		It writes the _installed file to disk.
-		"""
-		open('_installed', 'w').write('This file is written upon successful installation.\n'
-			'Leave this file in place.\n')
 
 	def printGoodbye(self):
 		print '''
@@ -509,6 +502,10 @@ You can find more information at:
   * http://www.webwareforpython.org
 
 Installation is finished.'''
+
+	def writeLogFile(self, log):
+		"""Write the logged output to the install.log file."""
+		open('install.log', 'w').write(''.join(log))
 
 
 	## Self utility ##
@@ -557,7 +554,7 @@ def printHelp():
 	print '  --password-prompt=no       Do not prompt for the WebKit password during install.'
 	print '  --set-password=...         Set the WebKit password to the given value.'
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	import getopt
 	verbose = 0
 	passprompt = defaultpass = None
