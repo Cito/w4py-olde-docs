@@ -524,7 +524,7 @@ Installation is finished.'''
 		"""Create a directory."""
 		if not os.path.exists(dirName):
 			self.printMsg('Making %s...' % dirName)
-			os.mkdir(dirName)
+			os.makedirs(dirName)
 
 	def htFragment(self, name):
 		"""Return HTML fragment with the given name."""
