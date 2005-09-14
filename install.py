@@ -459,7 +459,7 @@ class Installer:
 		This allows the user to always go back to the default config file if needed
 		(for troubleshooting for example).
 		"""
-		print 'Backing up original config files...'
+		print 'Creating backups of original config files...'
 		self._backupConfigs(os.curdir)
 		print
 
