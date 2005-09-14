@@ -478,7 +478,13 @@ class Installer:
 	def compileModules(self):
 		import compileall
 		print 'Byte compiling all modules...'
-		compileall.compile_dir(os.curdir, 10, None, 1, None, 1)
+		try:
+			compileall.compile_dir(os.curdir, 10, None, 1, None, 1)
+		except TypeError: # workaround for Python < 2.3
+			stdout = sys.stdout
+			sys.stdout = StringIO()
+			compileall.compile_dir(os.curdir, 10, None, 1)
+			sys.stdout = stdout
 		print
 
 	def fixPermissions(self):
