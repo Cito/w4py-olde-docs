@@ -140,7 +140,7 @@ class Installer:
 		column = 0
 		for dirname in dirnames:
 			propName = os.path.join(dirname, 'Properties.py')
-			print dirname.ljust(maxLen, '.'),
+			print dirname.ljust(maxLen),
 			if os.path.exists(propName):
 				comp = PropertiesObject(propName)
 				comp['dirname'] = dirname
@@ -245,7 +245,7 @@ class Installer:
 			if self._verbose:
 				print dir, '...'
 			else:
-				print dir.ljust(maxLen, '.'),
+				print dir.ljust(maxLen),
 			sourceDir = '%s/Docs/Source' % dir
 			self.makeDir(sourceDir)
 			filesDir = sourceDir + '/Files'
