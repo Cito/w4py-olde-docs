@@ -63,13 +63,13 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		This method loads plugins, creates the Application
 		object, and starts the request handling loop.
 		"""
-		
+
 		self._startTime = time.time()
-		
+
 		global globalAppServer
 		assert globalAppServer is None, 'more than one app server; or __init__() invoked more than once'
 		globalAppServer = self
-		
+
 		ConfigurableForServerSidePath.__init__(self)
 		Object.__init__(self)
 		if path is None:
@@ -106,7 +106,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		Exits with an error message if Webware was not installed.
 		Called from `__init__`.
 		"""
-		if not os.path.exists(os.path.join(self._webwarePath, '_installed')):
+		if not os.path.exists(os.path.join(self._webwarePath, 'install.log')):
 			sys.stdout = sys.stderr
 			print 'ERROR: You have not installed Webware.'
 			print 'Please run install.py from inside the Webware directory.'
@@ -132,7 +132,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		This method is called when the shutdown sequence is
 		initiated.
 		"""
-		
+
 		self._closeEvent.wait()
 		self.shutDown()
 
@@ -140,7 +140,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		"""
 		Ask the master thread to begin the shutdown.
 		"""
-		
+
 		self._closeEvent.set()
 
 
@@ -151,7 +151,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		if self.setting('PidFile') is None:
 			self._pidFile = None
 			return
-			
+
 		pidpath = self.serverSidePath(self.setting('PidFile'))
 		try:
 			self._pidFile = PidFile.PidFile(pidpath)
@@ -165,7 +165,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			2. class specific statements for shutting down
 			3. Invoke super's shutDown() e.g., ``AppServer.shutDown(self)``
 		"""
-		
+
 		print "Shutting down the AppServer"
 		self._shuttingDown = 1
 		self.running = 0
@@ -198,7 +198,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		":ignore:"
 		# Since these strings will be eval'ed we need to double
 		# escape any backslashes
-		return {      
+		return {
 			'WebwarePath' : string.replace(self._webwarePath, '\\', '\\\\'),
 			'WebKitPath'  : string.replace(self._webKitPath, '\\', '\\\\'),
 			'serverSidePath' : string.replace(self._serverSidePath, '\\', '\\\\'),
@@ -281,7 +281,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		time, just before listening for requests. See the docs
 		in `WebKit.PlugIn` for more info.
 		"""
-		
+
 		plugIns = self.setting('PlugIns')
 		plugIns = map(lambda path, ssp=self.serverSidePath: ssp(path), plugIns)
 
@@ -350,7 +350,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		is joined with the server side directory to form a
 		path relative to the app server.
 		"""
-		
+
 		if path:
 			return os.path.normpath(os.path.join(self._serverSidePath, path))
 		else:
@@ -406,7 +406,7 @@ def stop(*args, **kw):
 	"""
 	Stop the AppServer (which may be in a different process).
 	"""
-	
+
 	if kw.has_key('workDir'):
 		# app directory
 		pidfile = os.path.join(kw['workDir'], "appserverpid.txt")

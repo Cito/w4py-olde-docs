@@ -41,7 +41,7 @@ class ReleaseHelper:
 
 		if self.args.get("method",None) == "export":
 			return self.release_export()
-		
+
 		self.release_current()
 
 	def release_current(self):
@@ -52,7 +52,7 @@ class ReleaseHelper:
 
 		self.chdir(webwarePath)
 
-		if os.path.exists('_installed'):
+		if os.path.exists('install.log'):
 			self.error('This Webware has already been installed.')
 
 		from MiscUtils.PropertiesObject import PropertiesObject
@@ -101,7 +101,7 @@ class ReleaseHelper:
 	        So specifying a CVS tag such as Release-0_7 will export the CVS files tagged
 		with Release-0_7 and build Webware-0.7.tar.gz
 		"""
-		
+
 		self.writeHello()
 		self.checkPlatform()
 		self.readArgs()
@@ -123,27 +123,27 @@ class ReleaseHelper:
 		else:
 			# timestamp for tomorrow to insure we get latest data off
 			# of the trunk.  Is this needed?
-			year,month,day = time.gmtime(time.time()+3600*24)[:3]  
+			year,month,day = time.gmtime(time.time()+3600*24)[:3]
 			dtag = '-D %04d-%02d-%02d' % (year,month,day)
 
 			# timestamp for time of release used to in versioning the file.
-			year,month,day = time.localtime(time.time())[:3]  
+			year,month,day = time.localtime(time.time())[:3]
 			datestamp = "%04d%02d%02d" % (year,month,day)
 
 			# drop leading 2 digits from year. (Ok, itn's not Y2K but it is short
 			# and unique in a narrow time range of 100 years.)
 			datestamp = datestamp[2:]
-			
+
 			print "No cvs tag specified, assuming snapshot of CVS."
-			
+
 		tempName = "ReleaseHelper-Export"
 		if os.path.exists( tempName ):
 			print "There is incomplete ReleaseHelper data in:", tempName
 			print "Please remove this directory."
 			return 1
-		
+
 		cleanup = [ tempName ]
-		
+
 		try:
 			self.run('cvs -z3 export %s -d %s Webware' % (dtag, tempName))
 			if not os.path.exists( tempName ):
@@ -159,7 +159,7 @@ class ReleaseHelper:
 				print "Packaged release will be:", ver
 
 			pkgDir = "Webware-%s" % ver
-			
+
 			if os.path.exists(pkgDir):
 				print "** %s is in the way, please remove it." % pkgDir
 				return
@@ -167,9 +167,9 @@ class ReleaseHelper:
 			# rename the tempName to the pkgDir so the extracted parent
 			# directory from the tarball will be unique to this package.
 			self.run("mv %s %s" % (tempName, pkgDir))
-			
+
 			cleanup.append( pkgDir )
-			
+
 			pkgName = os.path.join(parentPath, pkgDir + ".tar.gz")
 
 			# cleanup .cvs files
@@ -178,7 +178,7 @@ class ReleaseHelper:
 			# cleanup any other files not part of this release. (ie: documentation?)
 
 			# build any internal documentation for release.
-			
+
 			self.run('tar czf %s %s' % (pkgName, pkgDir))
 
 			assert os.path.exists(os.path.join(parentPath, pkgName))
@@ -188,7 +188,7 @@ class ReleaseHelper:
 			for path in cleanup:
 				if os.path.exists(path):
 					self.run('rm -rf %s' % os.path.join(webwarePath, path))
-			 
+
 		self.writeGoodBye(locals())
 
 	def writeHello(self):
