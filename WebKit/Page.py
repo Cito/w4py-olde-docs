@@ -65,7 +65,7 @@ class Page(HTTPContent):
 		on white.
 		"""
 
-		return 'color="black" bgcolor="white"'
+		return 'text="black" bgcolor="white"'
 
 	def writeHTML(self):
 		"""
@@ -83,9 +83,9 @@ class Page(HTTPContent):
 		  page
 		* if you want to send non-HTML content (be sure to
 		  call ``self.response().setHeader('Content-type',
-		  'mime/type')`` in this case).		
+		  'mime/type')`` in this case).
 		"""
-		
+
 		self.writeDocType()
 		self.writeln('<html>')
 		self.writeHead()
@@ -111,7 +111,7 @@ class Page(HTTPContent):
 		"""
 		## @@ sgd-2003-01-29 - restored the 4.01 transitional as
 		## per discussions on the mailing list for the 0.8
-		## release.  
+		## release.
 		self.writeln('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">')
 
 	def writeHead(self):
@@ -120,7 +120,7 @@ class Page(HTTPContent):
 		``<head>...</head>`` tags and invoking `writeHeadParts`
 		in between.
 		"""
-		
+
 		wr = self.writeln
 		wr('<head>')
 		self.writeHeadParts()
@@ -170,7 +170,7 @@ class Page(HTTPContent):
 
 	def writeBodyParts(self):
 		"""
-		
+
 		Invokes `writeContent`. Subclasses should only
 		override this method to provide additional page parts
 		such as a header, sidebar and footer, that a subclass
@@ -259,7 +259,7 @@ class Page(HTTPContent):
 		is called (e.g. from `writeBodyParts`) the page is not
 		yet 100% complete, so we have to fake it.
 		"""
-	
+
 		# don't bother validating if the servlet has redirected
 		status = self.response().header('status', None)
 		if status and status.find('Redirect') != -1:
