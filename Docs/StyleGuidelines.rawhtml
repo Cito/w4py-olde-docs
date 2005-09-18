@@ -242,6 +242,16 @@ def hasValue(self, name):
 
 {
 'class': 'Convention',
+'what': 'Use docstrings and the <a href=http://www.python.org/peps/pep-0257.html">PEP 257</a> conventions.',
+'why': 'This allows for creating appropriate code documentation automatically. Please note that in the past, this has not been heeded very well. But as the project matures and grows, the docstrings should be improved.',
+'examples': '''def function(a, b):
+	"""Do X and return a list."""''',
+'negatives': '''def function(a, b):
+	"""function(a, b) -> list"""'''
+}
+
+{
+'class': 'Convention',
 'what': '"To do" marks should be marked as <code>@@ yyyy-mm-dd initials: comment</code>.',
 'why': 'These things are easier to track if they are dated and marked in a consistent way.',
 'examples': '# @@ 2000-05-03 ce: This is bogus. Disregard for now.',
