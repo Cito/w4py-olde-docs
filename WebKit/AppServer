@@ -1,22 +1,27 @@
 #!/bin/sh
 
-# You may give the following Python parameters in advance
-# followed by the parameters passed on to ThreadedAppServer
-# -O with optimization (.pyo instead of .pyc)
-# -u unbuffered output (useful for debugging)
+# WebKit application server launch script for Unix.
+
+# You may give the following Python parameters in advance,
+# followed by the parameters passed on to ThreadedAppServer:
+#   -O with optimization (.pyo instead of .pyc)
+#   -u unbuffered output (useful for debugging)
 unset OPTIONS
 NUM_PY_OPTS=0
-while getopts ":Ou" OPT; do    
+while getopts ":Ou" OPT; do
 	case $OPT in O | u) OPTIONS="$OPTIONS -$OPT"
-					    NUM_PY_OPTS=$(( $NUM_PY_OPTS + 1 ))
-						;; 
+		NUM_PY_OPTS=$(( $NUM_PY_OPTS + 1 ))
+		;;
 	esac
 done
 shift $NUM_PY_OPTS
 
-# as long as the appserver returns a 3, it wants to be restarted
-retcode=3
-while test $retcode -eq 3; do
-    /usr/bin/env python $OPTIONS Launch.py ThreadedAppServer $*
-    retcode=$?
+# Make the directory where this script lives the current directory:
+cd $(dirname $0)
+
+# As long as the app server returns a 3, it wants to be restarted:
+errorlevel=3
+while [ $errorlevel -eq 3 ]; do
+	/usr/bin/env python $OPTIONS Launch.py ThreadedAppServer $*
+	errorlevel=$?
 done
