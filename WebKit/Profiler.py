@@ -1,31 +1,27 @@
-"""
-Stores some values related to performance. These are usually set by
-Launch.py or AppServer.py.
+"""Profiler.py
 
-To get profiling going, locate the "runProfile = 0" line towards the
-top of WebKit/Launch.py and change the "0" to a "1". When the app
-server shuts down it will write Webware/profile.pstats which can be
-quickly examined from the command line:
+Stores some values related to performance.
+These are usually set by Launch.py or AppServer.py.
+
+To get profiling going, locate the "runProfile = 0" line towards the top
+of WebKit/Launch.py and change the "0" to a "1", or start the Launch.py
+script with the --run-profile option. When the app server shuts down it
+will write a profiling report "profile.pstats" in the directory containing
+the Launch.py script which can be quickly examined from the command line:
 
 	$ cd Webware
-	$ bin/printprof.py profile.pstats
+	$ bin/printprof.py WebKit/profile.pstats
 
 You might also wish to dump the profiling stats on demand (as in, by
-clicking or reloading a URL for that purpose). Read further for
-details.
-
+clicking or reloading a URL for that purpose). Read further for details.
 
 The variables in this module are:
 
 profiler
 	An instance of Python's profile.Profiler, but only if Launch.py is
-	modified to say "runProfile = 1". Otherwise, this is None. You
-	could access this from a servlet in order to dump stats:
+	started with profiling enabled. Otherwise, this is None.
+	You could access this from a servlet in order to dump stats:
 
-		from WebKit.Profiler import profiler
-		profiler.dump_stats('profile.pstats')
-
-	Or more conveniently:
 		from WebKit.Profiler import dumpStats
 		dumpStats()
 
@@ -44,18 +40,17 @@ readyDuration
 	developing with AutoReload on.
 """
 
-profiler      = None
-startTime     = None
-readyTime     = None
-readyDuration = None
-
+profiler = startTime = readyTime = readyDuration = None
 
 # Convenience
 
 statsFilename = 'profile.pstats'
 
-def dumpStats():
-	profiler.dump_stats(statsFilename)
+def runCall(func, *args, **kwargs):
+	profiler.runcall(func, *args, **kwargs)
+
+def dumpStats(file=statsFilename):
+	profiler.dump_stats(file)
 
 def reset():
 	"""
