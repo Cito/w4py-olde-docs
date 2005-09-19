@@ -22,5 +22,5 @@ if exist $~dpn0 cd /d %~dp0
 
 rem As long as the app server returns a 3, it wants to be restarted:
 :restart
-python Launch.py %OPTIONS% ThreadedAppServer %1 %2 %3 %4 %5
+python %OPTIONS% Launch.py ThreadedAppServer %1 %2 %3 %4 %5
 if errorlevel 3 goto restart
