@@ -6,15 +6,11 @@
 # followed by the parameters passed on to ThreadedAppServer:
 #   -O with optimization (.pyo instead of .pyc)
 #   -u unbuffered output (useful for debugging)
-unset OPTIONS
-NUM_PY_OPTS=0
-while getopts ":Ou" OPT; do
-	case $OPT in O | u) OPTIONS="$OPTIONS -$OPT"
-		NUM_PY_OPTS=$(( $NUM_PY_OPTS + 1 ))
-		;;
-	esac
+unset PY_OPTS
+while [ "$1" = "-O" -o "$1" = "-u" ]; do
+	PY_OPTS="$PY_OPTS $1"
+	shift
 done
-shift $NUM_PY_OPTS
 
 # Make the directory where this script lives the current directory:
 cd $(dirname $0)
@@ -22,6 +18,6 @@ cd $(dirname $0)
 # As long as the app server returns a 3, it wants to be restarted:
 errorlevel=3
 while [ $errorlevel -eq 3 ]; do
-	/usr/bin/env python $OPTIONS Launch.py ThreadedAppServer $*
+	/usr/bin/env python$PY_OPTS Launch.py ThreadedAppServer $*
 	errorlevel=$?
 done
