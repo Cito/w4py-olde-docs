@@ -943,11 +943,11 @@ the service, just run <tt class="docutils literal"><span class="pre">AppServerSe
 Typical usage is to install the service to run under a particular
 user account and startup automatically on reboot with:</p>
 <pre class="literal-block">
-&gt; python AppServerService.py \
-  --username mydomain\myusername \
+&gt; python AppServerService.py ^
+  --username mydomain\myusername ^
   --password mypassword --startup auto install
 </pre>
-<p>(&#64;&#64;: can you use a to continue a line in Windows?)</p>
+<p>(Note: The caret (^) is the line continuation character under Windows.)</p>
 <p>Then, you can start the service from the Services applet in the
 Control Panel, where it will be listed as &quot;WebKit Application Server&quot;.
 Or, from the command line, it can be started with either of

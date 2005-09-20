@@ -1026,11 +1026,11 @@ the service, just run ``AppServerService.py`` with no arguments.
 Typical usage is to install the service to run under a particular
 user account and startup automatically on reboot with::
 
-    > python AppServerService.py \
-      --username mydomain\myusername \
+    > python AppServerService.py ^
+      --username mydomain\myusername ^
       --password mypassword --startup auto install
 
-(@@: can you use a \ to continue a line in Windows?)
+(Note: The caret (^) is the line continuation character under Windows.)
 
 Then, you can start the service from the Services applet in the
 Control Panel, where it will be listed as "WebKit Application Server".
