@@ -18,7 +18,7 @@ goto getopt
 :continue
 
 rem Make the directory where this script lives the current directory:
-if exist $~dpn0 cd /d %~dp0
+if exist %~dpn0 cd /d %~dp0
 
 rem As long as the app server returns a 3, it wants to be restarted:
 :restart
