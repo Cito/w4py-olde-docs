@@ -1,42 +1,50 @@
 #!/usr/bin/env python
-#----------------------------------------------------------------------
-#
-# A script to build a WebKit work directory outside of the WebWare tree
-#
-# By Robin Dunn
-#
-#----------------------------------------------------------------------
 
-"""\
-MakeAppWorkDir.py
+"""MakeAppWorkDir.py
 
 INTRODUCTION
 
 This utility builds a directory tree that can be used as the current
-working directory of an instance of the WebKit application server.  By
-using a separate directory tree like this your application can run
-without needing write access, etc. to the WebWare directory tree, and
+working directory of an instance of the WebKit application server.
+By using a separate directory tree like this your application can run
+without needing write access etc. to the Webware directory tree, and
 you can also run more than one application server at once using the
-same WebWare code.  This makes it easy to reuse and keep WebWare
+same Webware code. This makes it easy to reuse and keep Webware
 updated without disturbing your applications.
 
+USAGE
 
-COMMAND LINE USAGE
+MakeAppWorkDir.py [Options] WorkDir
 
-python MakeAppWorkDir.py [OPTIONS] SomeDir
+Options:
+  -c, --context-name=...  The name for the preinstalled context.
+                          By default, it will be "MyContext".
+  -d, --context-dir=...   The directory where the context will be located,
+                          so you can place it outside of the WorkDir.
+  -l, --library=...       Other dirs to be included in the search path.
+                          You may specify this option multiple times.
+  -i, --cvsignore         This will add .cvsignore files to the WorkDir.
+  -u, --user=...          The name or uid of the user to own the WorkDir.
+                          This option is supported under Unix only.
+  -g, --group=...         The name or gid of the group to own the WorkDir.
+                          This option is supported under Unix only.
 
-OPTIONS:
--c SampleContextName  "SampleContextName" will be used for the pre-
-                      installed context.  (Default "MyContext")
--d SampleContextDir   The directory where the context will be located
-                      (so you can place the context outside of the workdir).
---cvsignore           .cvsignore files will be added
--l Dir                You may specify this option multiple times; all
-   or --library Dir   directories you give will be added to sys.path.
+WorkDir:
+  The target working directory to be created.
 """
 
-import sys, os, stat
-import glob, shutil
+# FUTURE
+# * Add options to immediately import the new directory tree into a
+#   CVS or SVN repository. In the case of a CVS repository, the
+#   .cvsignore files should be created automatically, and in case
+#   of SVN, the corresponding svn propset commands should be issued.
+# * Do not copy the complete  Launch.py and AppServerService.py scripts,
+#   but use slim versions utilizing the scripts at the standard location.
+# CREDITS
+# * Contributed to Webware for Python by Robin Dunn
+# * Improved by Christoph Zwerschke
+
+import sys, os, stat, re, glob, shutil
 
 
 class MakeAppWorkDir:
@@ -48,46 +56,54 @@ class MakeAppWorkDir:
 	Each step can be overridden in a derived class if needed.
 	"""
 
-	def __init__(self, webwareDir, workDir, verbose=1,
-			sampleContext="MyContext",
-			contextDir='',
-			osType=None,
-			addCVSIgnore=0,
-			libraryDirs=None):
-		"""Initializer for MakeAppWorkDir.  Pass in at least the
-		Webware directory and the target working directory.  If you
-		pass None for sampleContext then the default context will the
-		the WebKit/Examples directory as usual.
+	def __init__(self, webwareDir, workDir, verbose=1, osType=None,
+			contextName='MyContext', contextDir='', libraryDirs=None,
+			cvsIgnore=0, uid=None, gid=None):
+		"""Initializer for MakeAppWorkDir.
+
+		Pass in at least the Webware directory and the target working
+		directory. If you pass None for contextName then the default
+		context will be the the WebKit/Examples directory as usual.
+
 		"""
-		self._webwareDir = webWareDir
-		self._webKitDir = os.path.join(webwareDir, "WebKit")
+		self._webwareDir = webwareDir
+		self._webKitDir = os.path.join(webwareDir, 'WebKit')
 		self._workDir = os.path.abspath(workDir)
 		self._verbose = verbose
-		self._sampleContext = sampleContext
-		self.contextDir = contextDir
 		if osType is None:
 			osType = os.name
-		self._osType = osType
-		self._addCVSIgnore = addCVSIgnore
+		self._contextName = contextName
+		self._contextDir = contextDir
+		if libraryDirs is None:
+			libraryDirs = []
 		self._libraryDirs = libraryDirs
+		self._osType = osType
+		self._cvsIgnore = cvsIgnore
+		self._uid = uid
+		self._gid = gid
 
 	def buildWorkDir(self):
-		"""These are all the (overridable) steps needed to make a new runtime directory."""
-		self.msg("Making a new runtime directory...")
+		"""These are all the steps needed to make a new runtime directory.
+
+		You can override the steps taken here with your own methods.
+
+		"""
+		self.msg("Making a new WebKit runtime directory...")
 		self.msg()
 		self.makeDirectories()
 		self.copyConfigFiles()
 		self.copyOtherFiles()
 		self.adjustLauncherScripts()
-		if self._sampleContext is not None:
+		if self._contextName is not None:
 			self.makeDefaultContext()
-		if self._addCVSIgnore:
-			self.addCVSIgnore()
+		if self._cvsIgnore:
+			self.addCvsIgnore()
+		self.changeOwner()
 		self.printCompleted()
 
 	def makeDirectories(self):
 		"""Create all the needed directories if they don't already exist."""
-		self.msg("Creating directory tree at %s" % self._workDir)
+		self.msg("Creating the directory tree...")
 		standardDirs = (
 			'', 'Cache', 'Configs', 'ErrorMsgs', 'Logs', 'Sessions')
 		for dir in standardDirs:
@@ -96,7 +112,7 @@ class MakeAppWorkDir:
 				self.msg("\t%s already exists." % dir)
 			else:
 				os.mkdir(dir)
-				self.msg("\t%s created." % dir)
+				self.msg("\t%s" % dir)
 		for dir in self._libraryDirs:
 			dir = os.path.join(self._workDir, dir)
 			if not os.path.exists(dir):
@@ -108,9 +124,11 @@ class MakeAppWorkDir:
 	def copyConfigFiles(self):
 		"""Make a copy of the config files in the Configs directory."""
 		self.msg("Copying config files...")
-		configs = glob.glob(os.path.join(self._webKitDir, "Configs", "*.config"))
+		configs = glob.glob(os.path.join(self._webKitDir,
+			"Configs", "*.config"))
 		for name in configs:
-			newname = os.path.join(self._workDir, "Configs", os.path.basename(name))
+			newname = os.path.join(self._workDir, "Configs",
+				os.path.basename(name))
 			self.msg("\t%s" % newname)
 			shutil.copyfile(name, newname)
 			mode = os.stat(newname)[stat.ST_MODE]
@@ -154,33 +172,30 @@ class MakeAppWorkDir:
 
 	def adjustLauncherScripts(self):
 		"""Adjust the launcher scripts and the CGI adapter script."""
-		self.msg("Adjusting the launcher scripts...")
+		self.msg("Relocating the launcher scripts...")
 		launchScripts = ('Launch.py', 'AppServerService.py', 'WebKit.cgi')
-		substitutions = (
-			('workDir', None, self._workDir),
-			('webwareDir', None, self._webwareDir),
-			('libraryDirs', [], self._libraryDirs))
+		settings = (
+			('workDir', self._workDir),
+			('webwareDir', self._webwareDir),
+			('libraryDirs', self._libraryDirs))
 		for name in launchScripts:
 			filename = os.path.join(self._workDir, os.path.basename(name))
 			if not os.path.exists(filename):
 				continue
 			self.msg("\t%s" % filename)
 			script = open(filename, 'r').read()
-			for s in substitutions:
+			for s in settings:
 				if name == 'WebKit.cgi':
 					if s[0] == 'libraryDirs':
 						continue
 				else:
 					if s[0] == 'workDir':
 						continue
-				pattern = '\n%s = %r\n' % s[:2]
-				try:
-					i = script.index(pattern)
-				except:
-					self.msg("\t%s cannot be set in %s." % (s[0], name))
-				else:
-					repl = '\n%s = %r\n' % (s[0], s[2])
-					script = script[:i] + repl + script[i + len(pattern):]
+				pattern, repl = '\n%s = .*\n' % s[0], '\n%s = %r\n' %s
+				script, n = re.subn(pattern, repl, script, 1)
+				if n != 1:
+					self.msg("\tWarning: %s cannot be set in %s."
+						% (s[0], name))
 			open(filename, 'w').write(script)
 		self.msg()
 
@@ -189,7 +204,7 @@ class MakeAppWorkDir:
 		self.msg("Creating default context...")
 		contextDir = os.path.join(
 			self._workDir,
-			self.contextDir or self._sampleContext)
+			self._contextDir or self._contextName)
 		if contextDir.startswith(self._workDir):
 			configDir = contextDir[len(self._workDir):]
 			configDir = configDir.lstrip(os.sep)
@@ -205,32 +220,63 @@ class MakeAppWorkDir:
 				self.msg("\t%s" % filename)
 				open(filename, "w").write(exampleContext[name])
 		self.msg("Updating config for default context...")
-		filename = os.path.join(self._workDir, "Configs", 'Application.config')
+		filename = os.path.join(self._workDir, "Configs",
+			'Application.config')
 		self.msg("\t%s" % filename)
 		content = open(filename).readlines()
 		output  = open(filename, 'w')
+		foundContext = 0
 		for line in content:
 			if line.startswith("Contexts['default'] = "):
-				output.write("Contexts[%r] = %r\n" % (self._sampleContext, configDir))
-				output.write("Contexts['default'] = %r\n" % self._sampleContext)
+				output.write("Contexts[%r] = %r\n"
+					% (self._contextName, configDir))
+				output.write("Contexts['default'] = %r\n"
+					% self._contextName)
+				foundContext += 1
 			else:
 				output.write(line)
+		if not foundContext:
+			self.msg("\tWarning: Default context could not be set.")
 		self.msg()
 
-	def addCVSIgnore(self):
+	def addCvsIgnore(self):
 		self.msg("Creating .cvsignore files...")
-		files = {'.': '*.pyc\naddress.*\nhttpd.*\nappserverpid.*',
-			 'Cache': '[a-zA-Z0-9]*',
-			 'ErrorMsgs': '[a-zA-Z0-9]*',
-			 'Logs': '[a-zA-Z0-9]*',
-			 'Sessions': '[a-zA-Z0-9]*',
-			 self._sampleContext: '*.pyc\n*.pyo',
-			 }
+		files = {
+			'.': '*.pyc\n*.pyo\n'
+					'address.*\nhttpd.*\nappserverpid.*\nprofile.pstats',
+			'Cache': '[a-zA-Z0-9]*',
+			'ErrorMsgs': '[a-zA-Z0-9]*',
+			'Logs': '[a-zA-Z0-9]*',
+			'Sessions': '[a-zA-Z0-9]*',
+			self._contextName: '*.pyc\n*.pyo' }
 		for dir, contents in files.items():
-			filename = os.path.join(self._workDir, dir, '.cvsignore')
+			filename = os.path.join(self._workDir,
+				dir, '.cvsignore')
 			f = open(filename, 'w')
 			f.write(contents)
 			f.close()
+		self.msg()
+
+	def changeOwner(self):
+		if self._uid is None and self._gid is None:
+			return
+		self.msg("Changing the ownership...")
+		uid = self._uid
+		if uid is None:
+			uid =os.getuid()
+		gid = self._gid
+		if gid is None:
+			gid = os.getgid()
+		try:
+			os.chown(self._workDir, uid, gid)
+		except:
+			self.msg("\tWarning: The ownership could not be changed.")
+		else:
+			for (dir, dirs, files) in os.walk(self._workDir):
+				for file in dirs + files:
+					path = os.path.join(dir, file)
+					os.chown(path, uid, gid)
+		self.msg()
 
 	def printCompleted(self):
 		run = os.path.abspath(os.path.join(self._workDir, 'AppServer'))
@@ -271,8 +317,8 @@ exampleContext = { # files copied to example context
 
 '__init__.py': """
 def contextInitialize(appServer, path):
-	# You could put initialization code here to be executed when
-	# the context is loaded into WebKit.
+	# You could put initialization code here to be executed
+	# when the context is loaded into WebKit.
 	pass
 """,
 
@@ -285,94 +331,120 @@ class Main(Page):
 		return 'My Sample Context'
 
 	def writeContent(self):
-		self.writeln('<h1>Welcome to Webware!</h1>')
+		self.writeln('<h1>Welcome to Webware for Python!</h1>')
 		self.writeln('''
-		This is a sample context generated for you and has purposly been kept very simple
-		to give you something to play with to get yourself started.  The code that implements
-		this page is located in <b>%s</b>.
+		<p>This is a sample context generated for you and has purposly been kept
+		very simple to give you something to play with to get yourself started.
+		The code that implements this page is located in <b>%s</b>.</p>
 		''' % self.request().serverSidePath())
-
 		self.writeln('''
-		<p>
-		There are more examples and documentaion in the Webware distribution, which you
-		can get to from here:<p><ul>
+		<p>There are more examples and documentaion in the Webware distribution,
+		which you can get to from here:<p>
+		<ul>
 		''')
-
 		adapterName = self.request().adapterName()
 		ctxs = self.application().contexts().keys()
 		ctxs = filter(lambda ctx: ctx!='default', ctxs)
 		ctxs.sort()
 		for ctx in ctxs:
-			self.writeln('<li><a href="%s/%s/">%s</a>' % (adapterName, ctx, ctx))
-
+			self.writeln('<li><a href="%s/%s/">%s</a></li>'
+				% (adapterName, ctx, ctx))
 		self.writeln('</ul>')
 """
 
 } # end of example context files
 
-if __name__ == "__main__":
-	targetDir = None
-	contextName = None
-	contextDir = ''
-	addCVSIgnore = 0
+def usage():
+	"""Print the docstring and exit with error."""
+	print __doc__
+	sys.exit(2)
+
+def main(args=None):
+	"""Evaluate the command line arguments and call MakeAppWorkDir."""
+	if args is None:
+		args = sys.argv[1:]
+	contextName = contextDir = cvsIgnore = user = group = None
 	libraryDirs = []
-	args = sys.argv[1:]
-	# lame little command-line handler
-	while args:
-		if args[0] == '--cvsignore':
-			addCVSIgnore = 1
-			args = args[1:]
-			continue
-		if args[0] == '-c':
-			if len(args) < 2 or args[1].startswith('-'):
-				print "Bad option: %s" % args[0]
-				print __doc__
-				sys.exit(2)
-			contextName = args[1]
-			args = args[2:]
-			continue
-		if args[0] == '-d':
-			if len(args) < 2 or args[1].startswith('-'):
-				print "Bad option: %s" % args[0]
-				print __doc__
-				sys.exit(2)
-			contextDir = args[1]
-			args = args[2:]
-			continue
-		if args[0] in ['-l', '--library']:
-			if len(args) < 2 or args[1].startswith('-'):
-				print "Bad option: %s" % args[0]
-				print __doc__
-				sys.exit(2)
-			libraryDirs.append(args[1])
-			args = args[2:]
-			continue
-		if not targetDir and not args[0].startswith('-'):
-			targetDir = args[0]
-			args = args[1:]
-			continue
-		# Must be an error:
-		print "Unknown option: %s" % args[0]
-		print __doc__
+	# Get all options:
+	from getopt import getopt, GetoptError
+	try:
+		opts, args = getopt(args, 'c:d:l:iu:g:', [
+			'context-name=', 'context-dir=', 'library=',
+			'cvsignore', 'user=', 'group='])
+	except GetoptError, error:
+		print str(error)
+		usage()
+	for opt, arg in opts:
+		if opt in ('-c', '--context-name'):
+			contextName = arg
+		elif opt in ('-d', '--context-dir'):
+			contextDir = arg
+		elif opt in ('-l', '--library'):
+			libraryDirs.append(arg)
+		elif opt in ('-i', '--cvsignore'):
+			cvsIgnore = 1
+		elif opt in ('-u', '--user'):
+			user = arg
+		elif opt in ('-g', '--group'):
+			group = arg
+	# Get the name of the target directory:
+	try:
+		workDir = args.pop(0)
+	except IndexError:
+		usage()
+	if args:# too many parameters
+		usage()
+	if os.path.exists(workDir):
+		print "The target directory already exists!"
 		sys.exit(1)
-	if not targetDir:
-		print "Give a target directory"
-		print __doc__
-		sys.exit(1)
+	if not contextName:
+		if contextDir:
+			contextName = os.path.basename(contextDir)
+		else:
+			contextName = 'MyContext'
+	# Figure out the group id:
+	gid = group
+	if gid is not None:
+		try:
+			gid = int(gid)
+		except ValueError:
+			try:
+				import grp
+				entry = grp.getgrnam(gid)
+			except KeyError:
+				print 'Error: Group %r does not exist.' % gid
+				sys.exit(2)
+			except ImportError:
+				print 'Error: Group names are not supported.'
+				sys.exit(2)
+			gid = entry[2]
+	# Figure out the user id:
+	uid = user
+	if uid is not None:
+		try:
+			uid = int(uid)
+		except ValueError:
+			try:
+				import pwd
+				entry = pwd.getpwnam(uid)
+			except KeyError:
+				print 'Error: User %r does not exist.' % uid
+				sys.exit(2)
+			except ImportError:
+				print 'Error: User names are not supported.'
+				sys.exit(2)
+			if not gid:
+				gid = entry[3]
+			uid = entry[2]
+	# This assumes that this script is still located in Webware/bin:
+	scriptName = sys.argv and sys.argv[0]
+	if not scriptName or scriptName == '-c':
+		scriptName = 'MakeAppWorkDir.py'
+	binDir = os.path.dirname(os.path.abspath(scriptName))
+	webwareDir = os.path.abspath(os.path.join(binDir, os.pardir))
+	mawd = MakeAppWorkDir(webwareDir, workDir, 1, None,
+		contextName, contextDir, libraryDirs, cvsIgnore, uid, gid)
+	mawd.buildWorkDir() # go!
 
-	if contextDir and contextName is None:
-		contextName = os.path.basename(contextDir)
-	elif contextName is None:
-		contextName = 'MyContext'
-
-	# this assumes that this script is still located in Webware/bin
-	p = os.path
-	webWareDir = p.abspath(p.join(p.dirname(sys.argv[0]), ".."))
-
-	mawd = MakeAppWorkDir(webWareDir, targetDir,
-		sampleContext=contextName,
-		contextDir=contextDir,
-		addCVSIgnore=addCVSIgnore,
-		libraryDirs=libraryDirs)
-	mawd.buildWorkDir()
-
+if __name__ == '__main__':
+	main()

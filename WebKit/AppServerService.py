@@ -39,15 +39,19 @@ And finally, to uninstall the service, stop it and then run::
     python AppServerService.py remove
 
 Currently only one AppServer per system can be set up this way.
-
-FUTURE
-* This shares a lot of code with ThreadedAppServer.py and Launch.py.
-  Try to consolidate these things.
-* Optional NT event log messages on start, stop, and errors.
-* Allow the option of installing multiple copies of WebKit with different
-  configurations and different service names.
-* Allow it to work with wkMonitor, or some other fault tolerance mechanism.
 """
+
+# FUTURE
+# * This shares a lot of code with ThreadedAppServer.py and Launch.py.
+#   Try to consolidate these things. The default settings below in the
+#   global variables could go completely into AppServer.config.
+# * Optional NT event log messages on start, stop, and errors.
+# * Allow the option of installing multiple copies of WebKit with different
+#   configurations and different service names.
+# * Allow it to work with wkMonitor, or some other fault tolerance mechanism.
+# CREDITS
+# * Contributed to Webware for Python by Geoff Talvola
+# * Changes by Christoph Zwerschke
 
 
 # You can change the following default values:
@@ -175,7 +179,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
 			self.server._closeThread.join()
 		except Exception, error: # need to kill the sweeper thread somehow
 			print error
-			print "Exiting AppServer"
+			print 'Exiting AppServer...'
 			if debug: # see the traceback from an exception
 				tb = sys.exc_info()
 				print tb[0]

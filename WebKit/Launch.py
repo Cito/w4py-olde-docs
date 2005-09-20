@@ -2,14 +2,12 @@
 
 """Launch.py
 
-
 DESCRIPTION
 
 Python launch script for the WebKit application server.
 
 This launch script will run in its standard location in the Webware/WebKit
 directory as well as in a WebKit work directory outside of the Webware tree.
-
 
 USAGE
 
@@ -21,6 +19,7 @@ StartOptions:
   -w, --webware-dir=...  Set the path to the Webware root directory.
                          By default this is the parent directory.
   -l, --library=...      Other directories to be included in the search path.
+                         You may specify this option multiple times.
   -p, --run-profile      Set this to get profiling going (see Profiler.py).
   -o, --log-file=...     Redirect standard output and error to this file.
   -i, --pid-file=...     Set the file path to hold the app server process id.
@@ -40,15 +39,16 @@ AppServerOptions:
 
 Please note that the default values for the StartOptions and the AppServer
 can be easily changed at the top of the Launch.py script.
-
-
-CREDITS
-
-* Contributed to Webware for Python by Chuck Esterbrook
-* Improved by Ian Bicking
-* Improved by Christoph Zwerschke
-
 """
+
+# FUTURE
+# * This shares a lot of code with ThreadedAppServer.py and Launch.py.
+#   Try to consolidate these things. The default settings below in the
+#   global variables could go completely into AppServer.config.
+# CREDITS
+# * Contributed to Webware for Python by Chuck Esterbrook
+# * Improved by Ian Bicking
+# * Improved by Christoph Zwerschke
 
 
 # You can change the following default values:
@@ -158,7 +158,7 @@ def main(args=None):
 			group = arg
 	# Figure out the group id:
 	gid = group
-	if gid:
+	if gid is not None:
 		try:
 			gid = int(gid)
 		except ValueError:
@@ -166,15 +166,15 @@ def main(args=None):
 				import grp
 				entry = grp.getgrnam(gid)
 			except KeyError:
-				print "Error: Group %r does not exist" % gid
+				print 'Error: Group %r does not exist.' % gid
 				sys.exit(2)
 			except ImportError:
-				print "Error: Group names are not supported."
+				print 'Error: Group names are not supported.'
 				sys.exit(2)
 			gid = entry[2]
 	# Figure out the user id:
 	uid = user
-	if uid:
+	if uid is not None:
 		try:
 			uid = int(uid)
 		except ValueError:
@@ -182,10 +182,10 @@ def main(args=None):
 				import pwd
 				entry = pwd.getpwnam(uid)
 			except KeyError:
-				print "Error: User %r does not exist" % uid
+				print 'Error: User %r does not exist.' % uid
 				sys.exit(2)
 			except ImportError:
-				"Error: User names are not supported."
+				print 'Error: User names are not supported.'
 				sys.exit(2)
 			if not gid:
 				gid = entry[3]
@@ -307,7 +307,7 @@ def main(args=None):
 	olduid = oldgid = stdout = stderr = log = None
 	try:
 		# Change server process group:
-		if gid:
+		if gid is not None:
 			try:
 				oldgid = os.getgid()
 				if gid != oldgid:
@@ -323,7 +323,7 @@ def main(args=None):
 					oldgid = None
 					sys.exit(1)
 		# Change server process user:
-		if uid:
+		if uid is not None:
 			try:
 				olduid = os.getuid()
 				if uid != olduid:
@@ -372,13 +372,13 @@ def main(args=None):
 			sys.stdout, sys.stderr = stdout, stderr
 			log.close()
 		# Restore server process group:
-		if oldgid:
+		if oldgid is not None:
 			try:
 				os.setgid(oldgid)
 			except:
 				pass
 		# Restore server process user:
-		if olduid:
+		if olduid is not None:
 			try:
 				os.setuid(olduid)
 			except:
