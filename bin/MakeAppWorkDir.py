@@ -269,7 +269,7 @@ exampleContext = { # files copied to example context
 # This is used to create a very simple sample context for the new
 # work dir to give the newbie something easy to play with.
 
-'__init.py__': """
+'__init__.py': """
 def contextInitialize(appServer, path):
 	# You could put initialization code here to be executed when
 	# the context is loaded into WebKit.
