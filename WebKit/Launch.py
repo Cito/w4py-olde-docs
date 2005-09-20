@@ -16,19 +16,19 @@ USAGE
 Launch.py [StartOptions] [AppServer [AppServerOptions]]
 
 StartOptions:
-  --work-dir=...     Set the path to the app server working directory.
-                     By default this is the directory containing Lauch.py.
-  --webware-dir=...  Set the path to the Webware root directory.
-                     By default this is the parent directory.
-  --library=...      Other directories to be included in the search path.
-  --run-profile      Set this to get profiling going (see Profiler.py).
-  --log-file=...     Redirect standard output and error to this file.
-  --pid-file=...     Set the file path to hold the app server process id.
-                     This option is fully supported under Unix only.
-  --user=...         The name or uid of the user to run the app server.
-                     This option is supported under Unix only.
-  --group=...        The name or gid of the group to run the app server.
-                     This option is supported under Unix only.
+  -d, --work-dir=...     Set the path to the app server working directory.
+                         By default this is the directory containing Lauch.py.
+  -w, --webware-dir=...  Set the path to the Webware root directory.
+                         By default this is the parent directory.
+  -l, --library=...      Other directories to be included in the search path.
+  -p, --run-profile      Set this to get profiling going (see Profiler.py).
+  -o, --log-file=...     Redirect standard output and error to this file.
+  -i, --pid-file=...     Set the file path to hold the app server process id.
+                         This option is fully supported under Unix only.
+  -u, --user=...         The name or uid of the user to run the app server.
+                         This option is supported under Unix only.
+  -g, --group=...        The name or gid of the group to run the app server.
+                         This option is supported under Unix only.
 
 AppServer:
   The name of the application server module.
@@ -57,9 +57,9 @@ CREDITS
 # want to use the directory containing this script:
 workDir = None
 
-# The path to the Webware root directory; change this if you
-# you want to start this script from outside that directory:
-webwareDir = '..'
+# The path to the Webware root directory; by default this will
+# be the parent directory of the directory containing this script:
+webwareDir = None
 
 # A list of additional directories (usually some libraries)
 # that you want to include into the search path for modules:
@@ -117,50 +117,44 @@ def launchWebKit(appServer=appServer, workDir=None, args=None):
 		appServerMain = __import__('WebKit.' + appServer, None, None, 'main').main
 	except ImportError:
 		print 'Error: Cannot import the app server module.'
-		raise
 		sys.exit(1)
 	# Run the app server:
 	appServerMain(args) # go!
 
 def main(args=None):
-	"""Evaluate the command line arguments and run launchWebKit."""
-	global workDir, webwareDir, libraryDirs, \
-		runProfile, logFile, pidFile, user, group, appServer
+	"""Evaluate the command line arguments and call launchWebKit."""
+	global workDir, webwareDir, libraryDirs, runProfile, \
+		logFile, pidFile, user, group, appServer
 	if args is None:
-		args = sys.argv
-	# Get the name of this script:
-	try:
-		scriptName = args.pop(0)
-	except IndexError:
-		scriptName = None
+		args = sys.argv[1:]
 	# Get the name of the app server even if placed in front
 	if args and not args[0].startswith('-'):
 		appServer = args.pop(0)
 	# Get all options:
 	from getopt import getopt, GetoptError
 	try:
-		opts, args = getopt(args, '', [
-			'webware-dir=', 'work-dir=', 'library=', 'run-profile',
+		opts, args = getopt(args, 'd:w:l:po:i:u:g:', [
+			'work-dir=', 'webware-dir=', 'library=', 'run-profile',
 			'log-file=', 'pid-file=', 'user=', 'group='])
 	except GetoptError, error:
 		print str(error)
 		usage()
 	for opt, arg in opts:
-		if opt == '--webware-dir':
-			webwareDir = arg
-		elif opt == '--work-dir':
+		if opt in ('-d', '--work-dir'):
 			workDir = arg
-		elif opt == '--library':
+		elif opt in ('-w', '--webware-dir'):
+			webwareDir = arg
+		elif opt in ('-l', '--library'):
 			libraryDirs.append(arg)
-		elif opt == '--run-profile':
+		elif opt in ('-p', '--run-profile'):
 			runProfile = 1
-		elif opt == '--log-file':
+		elif opt in ('-o', '--log-file'):
 			logFile = arg
-		elif opt == '--pid-file':
+		elif opt in ('-i', '--pid-file'):
 			pidFile = arg
-		elif opt == '--user':
+		elif opt in ('-u', '--user'):
 			user = arg
-		elif opt == '--group':
+		elif opt in ('-g', '--group'):
 			group = arg
 	# Figure out the group id:
 	gid = group
@@ -200,6 +194,7 @@ def main(args=None):
 	if workDir:
 		workDir = os.path.expanduser(workDir)
 	else:
+		scriptName = sys.argv and sys.argv[0]
 		if not scriptName or scriptName == '-c':
 			scriptName = 'Launch.py'
 		workDir = os.path.dirname(os.path.abspath(scriptName))
@@ -216,28 +211,29 @@ def main(args=None):
 	if webwareDir:
 		webwareDir = os.path.expanduser(webwareDir)
 	else:
-		webwareDir = workDir
+		webwareDir = os.pardir
 	if libraryDirs:
 		libraryDirs = map(os.path.expanduser, libraryDirs)
-	# Get the absolute location of the Webware/WebKit directory:
-	webKitDir = os.path.abspath(os.path.join(webwareDir, 'WebKit'))
+	# Check the validity of the Webware directory:
 	sysPath = sys.path # memorize the standard Python search path
-	sys.path = [webKitDir] # now include only the Webware/WebKit directory
-	try: # check whether WebKit is really located here
-		from Properties import name
+	sys.path = [webwareDir] # now include only the Webware directory
+	try: # check whether Webware is really located here
+		from Properties import name as webwareName
+		from WebKit.Properties import name as webKitName
 	except ImportError:
-		name = None
-	if name != 'WebKit':
-		print 'Error: Cannot find the Webware/WebKit directory.'
-		print 'The path %r seems to be wrong.' % webKitDir
+		webwareName = None
+	if webwareName != 'Webware for Python' or webKitName != 'WebKit':
+		print 'Error: Cannot find the Webware directory.'
+		print 'The path %r seems to be wrong.' % webwareDir
 		print 'Check the --webware-dir option.'
 		sys.exit(1)
 	# Now assemble a new clean Python search path:
 	path = [] # the new search path will be collected here
 	absPath = [] # the absolute pathes
+	absWebKitDir = os.path.abspath(os.path.join(webwareDir, 'WebKit'))
 	for p in ['', webwareDir] + libraryDirs + sysPath:
 		ap = os.path.abspath(p)
-		if ap == webKitDir: # do not include the webKitDir
+		if ap == absWebKitDir: # do not include the WebKit directory
 			continue
 		if ap not in absPath: # include every path only once
 			path.append(p)

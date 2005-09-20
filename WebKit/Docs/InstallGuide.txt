@@ -1009,42 +1009,45 @@ not you inherited the path).
 Running ThreadedAppServer as a Windows NT/2000 Service
 ------------------------------------------------------
 
-``ThreadedAppServerService`` is a version of ``ThreadedAppServer``
-that runs as a Windows NT Service.  This means it can be started and
-stopped from the Control Panel or from the command line using ``net
-start`` and ``net stop``, and it can be configured in the Control
-Panel to auto-start when the machine boots.  This is the preferred way
+``AppServerService`` is a script that runs the ``ThreadedAppServer``
+as a Windows NT Service.  This means it can be started and stopped
+from the Control Panel or from the command line using ``net start``
+and ``net stop``, and it can be configured in the Control Panel
+to auto-start when the machine boots.  This is the preferred way
 to deploy WebKit on a Windows NT/2000 platform.
 
-``ThreadedAppServerService`` requires the Python ``win32all``
-extensions to have been installed.
+``AppServerService`` requires the Python win32all__ extensions to
+have been installed.
+
+__ http://www.python.org/windows/win32all/
 
 To see the options for installing, removing, starting, and stopping
-the service, just run ``ThreadedAppServerService.py`` with no
-arguments.  Typical usage is to install the service to run under a
-particular user account and startup automatically on reboot with::
+the service, just run ``AppServerService.py`` with no arguments.
+Typical usage is to install the service to run under a particular
+user account and startup automatically on reboot with::
 
-    > python ThreadedAppServerService.py --username mydomain\myusername \
+    > python AppServerService.py \
+      --username mydomain\myusername \
       --password mypassword --startup auto install
 
 (@@: can you use a \ to continue a line in Windows?)
 
 Then, you can start the service from the Services applet in the
-Control Panel, where it will be listed as "WebKit Threaded Application
-Server".  Or, from the command line, it can be started with either of
+Control Panel, where it will be listed as "WebKit Application Server".
+Or, from the command line, it can be started with either of
 the following commands::
 
     > net start WebKit
-    > python ThreadedAppServerService.py start
+    > python AppServerService.py start
 
 The service can be stopped from the Control Panel or with::
 
     > net stop WebKit
-    > python ThreadedAppServerService.py stop
+    > python AppServerService.py stop
 
 And finally, to uninstall the service, stop it and then run::
 
-    > python ThreadedAppServerService.py remove
+    > python AppServerService.py remove
 
 Other Notes
 -----------

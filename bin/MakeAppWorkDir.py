@@ -26,22 +26,18 @@ COMMAND LINE USAGE
 python MakeAppWorkDir.py [OPTIONS] SomeDir
 
 OPTIONS:
--c SampleContextName    "SampleContextName" will be used for the pre-
-                        installed context.  (Default "MyContext")
--d SampleContextDir     The directory where the context will be located
-                        (so you can place the context outside of the
-			workdir).
---cvsignore             .cvsignore files will be added
--l Dir                  You may specify this option multiple times; all
-   or --library Dir     directories you give will be added to sys.path.
+-c SampleContextName  "SampleContextName" will be used for the pre-
+                      installed context.  (Default "MyContext")
+-d SampleContextDir   The directory where the context will be located
+                      (so you can place the context outside of the workdir).
+--cvsignore           .cvsignore files will be added
+-l Dir                You may specify this option multiple times; all
+   or --library Dir   directories you give will be added to sys.path.
 """
 
-#----------------------------------------------------------------------
-
-import sys, os, string, stat
+import sys, os, stat
 import glob, shutil
 
-#----------------------------------------------------------------------
 
 class MakeAppWorkDir:
 	"""Make a new application runtime directory for Webware.
@@ -52,225 +48,183 @@ class MakeAppWorkDir:
 	Each step can be overridden in a derived class if needed.
 	"""
 
-	def __init__(self, webWareDir, workDir, verbose=1,
-		     sampleContext="MyContext",
-		     contextDir='',
-		     osType=None,
-		     addCVSIgnore=0,
-		     libraryDirs=None):
+	def __init__(self, webwareDir, workDir, verbose=1,
+			sampleContext="MyContext",
+			contextDir='',
+			osType=None,
+			addCVSIgnore=0,
+			libraryDirs=None):
 		"""Initializer for MakeAppWorkDir.  Pass in at least the
 		Webware directory and the target working directory.  If you
 		pass None for sampleContext then the default context will the
 		the WebKit/Examples directory as usual.
 		"""
-		self._webWareDir = webWareDir
-		self._webKitDir = os.path.join(webWareDir, "WebKit")
+		self._webwareDir = webWareDir
+		self._webKitDir = os.path.join(webwareDir, "WebKit")
 		self._workDir = os.path.abspath(workDir)
 		self._verbose = verbose
-		self._substVals = {
-		    "WEBWARE": string.replace(self._webWareDir, '\\', '/'),
-		    "WEBKIT":  string.replace(self._webKitDir,	'\\', '/'),
-		    "WORKDIR": string.replace(self._workDir,	'\\', '/'),
-		    "DEFAULT": "%s/Examples" % string.replace(self._webKitDir,	'\\', '/'),
-		    }
-		if libraryDirs:
-			expandedLibraryDirs = []
-			for dir in libraryDirs:
-				dir = os.path.join(self._substVals['WORKDIR'], dir)
-				expandedLibraryDirs.append(dir)
-				if not os.path.exists(dir):
-					os.makedirs(dir)
-					open(os.path.join(dir, '__init__.py'), 'w').write('#\n')
-
-			self._substVals['libraryPath'] = 'sys.path.extend(%r)\n' % expandedLibraryDirs
-		else:
-			self._substVals['libraryPath'] = ''
-		self._sample = sampleContext
-		self._contextDir = contextDir
-		if sampleContext is not None:
-			self._substVals["DEFAULT"] = sampleContext
-		self._substVals['executable'] = sys.executable
+		self._sampleContext = sampleContext
+		self.contextDir = contextDir
 		if osType is None:
 			osType = os.name
 		self._osType = osType
 		self._addCVSIgnore = addCVSIgnore
+		self._libraryDirs = libraryDirs
 
 	def buildWorkDir(self):
-		"""These are all the (overridable) steps needed to make a new runtime direcotry."""
+		"""These are all the (overridable) steps needed to make a new runtime directory."""
+		self.msg("Making a new runtime directory...")
+		self.msg()
 		self.makeDirectories()
 		self.copyConfigFiles()
 		self.copyOtherFiles()
-		self.makeLauncherScripts()
-		if self._sample is not None:
+		self.adjustLauncherScripts()
+		if self._sampleContext is not None:
 			self.makeDefaultContext()
 		if self._addCVSIgnore:
 			self.addCVSIgnore()
 		self.printCompleted()
 
 	def makeDirectories(self):
-		"""Creates all the needed directories if they don't already exist."""
+		"""Create all the needed directories if they don't already exist."""
 		self.msg("Creating directory tree at %s" % self._workDir)
-
-		theDirs = [ self._workDir,
-			    os.path.join(self._workDir, "Cache"),
-			    os.path.join(self._workDir, "Configs"),
-			    os.path.join(self._workDir, "ErrorMsgs"),
-			    os.path.join(self._workDir, "Logs"),
-			    os.path.join(self._workDir, "Sessions"),
-			    ]
-
-		for aDir in theDirs:
-			if os.path.exists(aDir):
-				self.msg("\t%s already exists." % aDir)
+		standardDirs = (
+			'', 'Cache', 'Configs', 'ErrorMsgs', 'Logs', 'Sessions')
+		for dir in standardDirs:
+			dir = os.path.join(self._workDir, dir)
+			if os.path.exists(dir):
+				self.msg("\t%s already exists." % dir)
 			else:
-				os.mkdir(aDir)
-				self.msg("\t%s created." % aDir)
-
-		self.msg("\n")
-
+				os.mkdir(dir)
+				self.msg("\t%s created." % dir)
+		for dir in self._libraryDirs:
+			dir = os.path.join(self._workDir, dir)
+			if not os.path.exists(dir):
+				os.makedirs(dir)
+				open(os.path.join(dir, '__init__.py'), 'w').write('#\n')
+				self.msg("\t%s created." % dir)
+		self.msg()
 
 	def copyConfigFiles(self):
-		"""
-		Make a copy of the config files in the Configs directory.
-		"""
+		"""Make a copy of the config files in the Configs directory."""
+		self.msg("Copying config files...")
 		configs = glob.glob(os.path.join(self._webKitDir, "Configs", "*.config"))
 		for name in configs:
 			newname = os.path.join(self._workDir, "Configs", os.path.basename(name))
+			self.msg("\t%s" % newname)
 			shutil.copyfile(name, newname)
 			mode = os.stat(newname)[stat.ST_MODE]
-
 			# remove public read/write/exec perms
 			os.chmod(newname, mode & 0770)
-
+		self.msg()
 
 	def copyOtherFiles(self):
-		"""
-		Make a copy of any other necessary files in the new work dir.
-		"""
-		self.msg("Copying files.")
-		otherFiles = [("404Text.txt",   0, None),
-					  ("AppServer",     1, 'posix'),
-					  ("AppServer.bat", 1, 'nt'),
-					  ("Adapters/WebKit.cgi",    0, None),
-					  ]
-		for name, doChmod, osType in otherFiles:
+		"""Make a copy of any other necessary files in the new work dir."""
+		self.msg("Copying other files...")
+		otherFiles = (
+			# (file, executable, platform, relocate)
+			('404Text.txt', None, 0),
+			('AppServer', 'posix', 1),
+			('AppServer.bat', 'nt', 1),
+			('Launch.py', None, 1),
+			('AppServerService.py', 'nt', 1),
+			('Adapters/WebKit.cgi', None, 1))
+		for name, osType, doChmod in otherFiles:
 			if osType and osType != self._osType:
 				continue
 			oldname = os.path.join(self._webKitDir, name)
 			newname = os.path.join(self._workDir, os.path.basename(name))
 			self.msg("\t%s" % newname)
-			# Here we replace the #!
-			f = open(oldname)
-			firstLine = f.readline()
-			f.close()
-			if firstLine[:2] == '#!' \
-			   and firstLine.find('python') != -1:
+			# Copy the file, adjusting the shebang magic
+			firstLine = open(oldname).readline()
+			if doChmod and firstLine.startswith('#!') \
+					and firstLine.rstrip().endswith('python'):
 				f = open(oldname)
+				f.readline() # throw away the first line
 				new = open(newname, 'w')
-				# throw away the first line
-				f.readline()
 				new.write('#!%s\n' % sys.executable)
 				new.write(f.read())
-				f.close()
 				new.close()
+				f.close()
 			else:
 				shutil.copyfile(oldname, newname)
 			if doChmod:
 				os.chmod(newname, 0755)
-		self.msg("\n")
+		self.msg()
 
-
-	def makeLauncherScripts(self):
-		"""
-		Using templates loacted below, make the Launcher script for
-		launching the AppServer in various ways.  Also makes writes
-		the Webware and the runtime directories into the CGI adapter
-		scripts.
-		"""
-		self.msg("Creating launcher scripts.")
-		scripts = [ ("Launch.py", _Launch_py, None),
-			        ("NTService.py", _NTService_py, 'nt'),
-			    ]
-		for name, template, osType in scripts:
-			if osType and osType != self._osType:
+	def adjustLauncherScripts(self):
+		"""Adjust the launcher scripts and the CGI adapter script."""
+		self.msg("Adjusting the launcher scripts...")
+		launchScripts = ('Launch.py', 'AppServerService.py', 'WebKit.cgi')
+		substitutions = (
+			('workDir', None, self._workDir),
+			('webwareDir', None, self._webwareDir),
+			('libraryDirs', [], self._libraryDirs))
+		for name in launchScripts:
+			filename = os.path.join(self._workDir, os.path.basename(name))
+			if not os.path.exists(filename):
 				continue
-			filename = os.path.join(self._workDir, name)
-			open(filename, "w").write(template % self._substVals)
-			os.chmod(filename, 0755)
-			self.msg("\t%s created." % filename)
-
-		for name in ["WebKit.cgi"]:
-			filename = os.path.join(self._workDir, name)
-			content = open(filename).readlines()
-			output  = open(filename, "wt")
-			for line in content:
-				s = string.split(line)
-				if s and s[0] == 'WebwareDir' and s[2] == 'None':
-					line = "WebwareDir = '%(WEBWARE)s'\n" % self._substVals
-				elif s and s[0] == 'AppWorkDir' and s[2] == 'None':
-					line = "AppWorkDir = '%(WORKDIR)s'\n" % self._substVals
-				output.write(line)
-			output.close()
-			os.chmod(filename, 0755)
-			self.msg("\t%s updated." % filename)
-
-		self.msg("\n")
-
+			self.msg("\t%s" % filename)
+			script = open(filename, 'r').read()
+			for s in substitutions:
+				if name == 'WebKit.cgi':
+					if s[0] == 'libraryDirs':
+						continue
+				else:
+					if s[0] == 'workDir':
+						continue
+				pattern = '\n%s = %r\n' % s[:2]
+				try:
+					i = script.index(pattern)
+				except:
+					self.msg("\t%s cannot be set in %s." % (s[0], name))
+				else:
+					repl = '\n%s = %r\n' % (s[0], s[2])
+					script = script[:i] + repl + script[i + len(pattern):]
+			open(filename, 'w').write(script)
+		self.msg()
 
 	def makeDefaultContext(self):
-		"""
-		Make a very simple context for the newbie user to play with.
-		"""
-		self.msg("Creating default context.")
+		"""Make a very simple context for the newbie user to play with."""
+		self.msg("Creating default context...")
 		contextDir = os.path.join(
 			self._workDir,
-			self._contextDir or self._sample)
+			self.contextDir or self._sampleContext)
 		if contextDir.startswith(self._workDir):
 			configDir = contextDir[len(self._workDir):]
-			while configDir.startswith('/'):
-				configDir = configDir[1:]
+			configDir = configDir.lstrip(os.sep)
+			if os.altsep:
+				configDir =  configDir.lstrip(os.altsep)
 		else:
 			configDir = contextDir
 		if not os.path.exists(contextDir):
 			os.makedirs(contextDir)
-		name2 = os.path.join(contextDir, 'Main.py')
-		if not os.path.exists(name2):
-			open(name2, "w").write(_Main_py % self._substVals)
-		name2 = os.path.join(contextDir, '__init__.py')
-		if not os.path.exists(name2):
-			open(name2, "w").write(_init_py)
-
-		self.msg("Updating config for default context.")
+		for name in exampleContext:
+			filename = os.path.join(contextDir, name)
+			if not os.path.exists(filename):
+				self.msg("\t%s" % filename)
+				open(filename, "w").write(exampleContext[name])
+		self.msg("Updating config for default context...")
 		filename = os.path.join(self._workDir, "Configs", 'Application.config')
+		self.msg("\t%s" % filename)
 		content = open(filename).readlines()
-		if content and content[0].strip().startswith('{'):
-			isDict = 1
-		else:
-			isDict = 0
-		output  = open(filename, "wt")
+		output  = open(filename, 'w')
 		for line in content:
-			pos = string.find(line, "##MAWD")
-			if pos == -1:
-				output.write(line)
-				continue
-			if isDict:
-				output.write("\t\t\t\t\t\t\t '%(CTX)s':     '%(CTXDir)s',\n"\
-					     "\t\t\t\t\t\t\t 'default':       '%(CTX)s',\n"\
-					     % {'CTX' : self._sample,
-						'CTXDir': configDir})
+			if line.startswith("Contexts['default'] = "):
+				output.write("Contexts[%r] = %r\n" % (self._sampleContext, configDir))
+				output.write("Contexts['default'] = %r\n" % self._sampleContext)
 			else:
-				output.write("Contexts[%r] = %r\n" % (self._sample, configDir))
-				output.write("Contexts['default'] = %r\n" % self._sample)
-		self.msg("\n")
+				output.write(line)
+		self.msg()
 
 	def addCVSIgnore(self):
-		print "Creating .cvsignore files."
+		self.msg("Creating .cvsignore files...")
 		files = {'.': '*.pyc\naddress.*\nhttpd.*\nappserverpid.*',
 			 'Cache': '[a-zA-Z0-9]*',
 			 'ErrorMsgs': '[a-zA-Z0-9]*',
 			 'Logs': '[a-zA-Z0-9]*',
 			 'Sessions': '[a-zA-Z0-9]*',
-			 self._sample: '*.pyc',
+			 self._sampleContext: '*.pyc\n*.pyo',
 			 }
 		for dir, contents in files.items():
 			filename = os.path.join(self._workDir, dir, '.cvsignore')
@@ -278,125 +232,51 @@ class MakeAppWorkDir:
 			f.write(contents)
 			f.close()
 
-
 	def printCompleted(self):
-		default = os.path.normpath(self._substVals['DEFAULT'])
-		workDir = os.path.normpath(self._substVals['WORKDIR'])
-		runName = os.name=='nt' and 'AppServer' or './AppServer'
-		print """\n\n
-Congratulations, you've just created a runtime working directory for
-Webware.  To start the app server you can run these commands:
+		run = os.path.abspath(os.path.join(self._workDir, 'AppServer'))
+		print """
+Congratulations, you've just created a runtime working directory for Webware.
 
-	cd %(workDir)s
-	%(runName)s
+To start the app server you can run this command:
 
-Copy WebKit.cgi to your web server's cgi-bin directory, or
-anywhere else that it will execute CGIs from.  Then point your browser
-to http://localhost/cgi-bin/WebKit.cgi/ .  The page you
-see is generated from the code in the %(default)s directory and is
-there for you to play with and to build upon.
+    %s
 
-If you see import errors, then you may need to modify the permissions
-on your Webware directory so that the WebKit.cgi script can
-access it.
+By default the built-in HTTP server is activated. So you can immediately see
+an example that has been generated for you to play with and to build upon by
+pointing your browser to:
 
-There are also several adapters in the Webware/WebKit directory that
-allow you to connect from the web server to the WebKit AppServer
-without using CGI.
+    http://localhost:8080
+
+In a productive environment, you will probably want to use Apache or another
+web server instead of the built-in HTTP server. The most somple (but least
+performant) solution to do this is by using the Python WebKit.cgi CGI script.
+Copy it to your web server's cgi-bin directory or anywhere else that it will
+execute CGIs from. If you see import errors, you may need to modify the file
+permissions on your Webware directory so that the CGI script can access it.
 
 Have fun!
-""" % locals()
+""" % run
 
-
-	def msg(self, text):
+	def msg(self, text=None):
 		if self._verbose:
-			print text
+			if text:
+				print text
+			else:
+				print
 
+exampleContext = { # files copied to example context
 
-
-
-
-#----------------------------------------------------------------------
-# A template for the launcher script
-
-_Launch_py = """\
-#!%(executable)s
-
-import os, sys
-
-webwarePath = '%(WEBWARE)s'
-appWorkPath = '%(WORKDIR)s'
-%(libraryPath)s
-
-def main(args):
-	global webwarePath, appWorkPath
-	newArgs = []
-	for arg in args:
-		if arg.startswith('--webware-path='):
-			webwarePath = arg[15:]
-		elif arg.startswith('--working-path='):
-			appWorkPath = arg[15:]
-		else:
-			newArgs.append(arg)
-	args = newArgs
-	# ensure Webware is on sys.path
-	sys.path.insert(0, webwarePath)
-
-	# import the master launcher
-	import WebKit.Launch
-
-	if len(args) < 2:
-		WebKit.Launch.usage()
-
-	# Go!
-	WebKit.Launch.launchWebKit(args[1], appWorkPath, args[2:])
-
-
-if __name__=='__main__':
-	main(sys.argv)
-"""
-
-#----------------------------------------------------------------------
-# A template for the NTService script
-
-_NTService_py = """\
-import os, re, sys, win32serviceutil
-
-# settings
-appWorkPath = '%(WORKDIR)s'
-webwarePath = '%(WEBWARE)s'
-serviceName = 'WebKit'
-serviceDisplayName = 'WebKit App Server'
-
-# ensure Webware is on sys.path
-sys.path.insert(0, webwarePath)
-
-# Construct customized version of ThreadedAppServerService that uses our
-# specified service name, service display name, and working dir
-from WebKit.ThreadedAppServerService import ThreadedAppServerService
-class NTService(ThreadedAppServerService):
-	_svc_name_ = serviceName
-	_svc_display_name_ = serviceDisplayName
-	def workDir(self):
-		return appWorkPath
-
-# Handle the command-line args
-if __name__=='__main__':
-	win32serviceutil.HandleCommandLine(NTService)
-"""
-
-#----------------------------------------------------------------------
 # This is used to create a very simple sample context for the new
 # work dir to give the newbie something easy to play with.
 
-_init_py = """
+'__init.py__': """
 def contextInitialize(appServer, path):
 	# You could put initialization code here to be executed when
 	# the context is loaded into WebKit.
 	pass
-"""
+""",
 
-_Main_py = """
+'Main.py': """
 from WebKit.Page import Page
 
 class Main(Page):
@@ -409,8 +289,8 @@ class Main(Page):
 		self.writeln('''
 		This is a sample context generated for you and has purposly been kept very simple
 		to give you something to play with to get yourself started.  The code that implements
-		this page is located in <b>%%s</b>.
-		''' %% self.request().serverSidePath())
+		this page is located in <b>%s</b>.
+		''' % self.request().serverSidePath())
 
 		self.writeln('''
 		<p>
@@ -423,14 +303,12 @@ class Main(Page):
 		ctxs = filter(lambda ctx: ctx!='default', ctxs)
 		ctxs.sort()
 		for ctx in ctxs:
-			self.writeln('<li><a href="%%s/%%s/">%%s</a>' %% (adapterName, ctx, ctx))
+			self.writeln('<li><a href="%s/%s/">%s</a>' % (adapterName, ctx, ctx))
 
 		self.writeln('</ul>')
-
 """
 
-#----------------------------------------------------------------------
-
+} # end of example context files
 
 if __name__ == "__main__":
 	targetDir = None
@@ -492,9 +370,9 @@ if __name__ == "__main__":
 	webWareDir = p.abspath(p.join(p.dirname(sys.argv[0]), ".."))
 
 	mawd = MakeAppWorkDir(webWareDir, targetDir,
-	                      sampleContext=contextName,
-			      contextDir=contextDir,
-			      addCVSIgnore=addCVSIgnore,
-			      libraryDirs=libraryDirs)
+		sampleContext=contextName,
+		contextDir=contextDir,
+		addCVSIgnore=addCVSIgnore,
+		libraryDirs=libraryDirs)
 	mawd.buildWorkDir()
 
