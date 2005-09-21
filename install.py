@@ -549,11 +549,13 @@ Installation looks successful.
 
 Welcome to Webware!
 
-You can find more information at:
-  * Docs/index.html  (e.g., local docs)
-  * http://www.webwareforpython.org
+You can already try out the WebKit application server. Start it with
+"WebKit%sAppServer" and point your browser to "http://localhost:8080".
 
-Installation is finished.'''
+Browsable documentation is available in the Docs folders.
+You can use "Docs%sindex.html" as the main entry point.
+
+Installation is finished.''' % ((os.sep,)*2)
 
 	def writeLogFile(self, log):
 		"""Write the logged output to the install.log file."""
