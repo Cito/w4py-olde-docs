@@ -211,11 +211,11 @@ class Application(ConfigurableForServerSidePath, Object):
 			'MaxValueLengthInExceptionReport': 500,
 			'RPCExceptionReturn':    'traceback',
 			'ReportRPCExceptionsInWebKit':   1,
-			'Contexts':              { 'default':       'Examples',
-			                           'Admin':         'Admin',
-			                           'Examples':      'Examples',
-			                           'Documentation': 'Documentation',
-			                           'Testing':       'Testing',
+			'Contexts':              { 'default':  'Examples',
+			                           'Admin':    'Admin',
+			                           'Examples': 'Examples',
+			                           'Testing':  'Testing',
+			                           'Docs':     'Docs',
 			                         },
 			'Debug':	{
 				'Sessions': 0,
@@ -339,7 +339,7 @@ class Application(ConfigurableForServerSidePath, Object):
 	def createSessionWithID(self, transaction, sessionID):
 		# Create a session object with our session ID
 		sess = Session(transaction, sessionID)
-		
+
 		# Replace the session if it didn't already exist,
 		# otherwise we just throw it away.  setdefault is an atomic
 		# operation so this guarantees that 2 different

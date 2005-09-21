@@ -193,8 +193,9 @@ class Installer:
 		try: # read config file
 			data = open('WebKit/Configs/Application.config', 'r').read()
 		except IOError:
-			print 'Error reading config file, possibly a permission problem,'
-			print 'password not replaced, make sure to edit it by hand.'
+			print 'Error reading Application.config file.'
+			print 'Password not replaced, make sure to edit it by hand.'
+			print
 			return
 		# This will search for the construct "'AdminPassword': '...'"
 		# and replace '...' with the content of the 'password' variable:
@@ -215,10 +216,12 @@ class Installer:
 		try: # write back config file
 			open('WebKit/Configs/Application.config', 'w').write(data)
 		except IOError:
-			print 'Error writing config file, possibly a permission problem,'
-			print 'password not replaced, make sure to edit it by hand.'
+			print 'Error writing Application.config (probably no permission).'
+			print 'Password not replaced, make sure to edit it by hand.'
+			print
 			return
 		print 'Password replaced successfully.'
+		print
 
 	def installDocs(self):
 		self.processRawFiles()
@@ -226,7 +229,7 @@ class Installer:
 		self.createComponentIndex()
 		self.createIndex()
 		self.createComponentIndexes()
-		print
+		self.createContexts()
 
 	def processRawFiles(self):
 		print 'Processing raw html doc files...'
@@ -458,6 +461,43 @@ class Installer:
 			filename = os.path.join(comp['dirname'], 'Docs', 'index.html')
 			ht = indexFrag % comp
 			self.writeDocFile(title, filename, ht, 'DocIndex.css')
+		print
+
+	def createContexts(self):
+		"""Create a WebKit context for every Docs directory."""
+		print 'Making all Docs directories browsable via WebKit...'
+		docsDirs = ['Docs']
+		for comp in self._comps:
+			docsDirs.append(comp['dirname'] + '/Docs')
+		config = []
+		for docsDir in docsDirs:
+			if os.path.exists(docsDir):
+				open(docsDir + '/__init__.py', 'w').write(
+					'# Allows this directory to be used as a WebKit context.\n')
+			config.append("Contexts['%s'] = WebwarePath + '/%s'" % ((docsDir,)*2))
+		config = '\n'.join(config)
+		try: # read config file
+			data = open('WebKit/Configs/Application.config', 'r').read()
+		except IOError:
+			print 'Error reading Application.config file.'
+			print 'Docs cannot be made browsable via WebKit.'
+			data = ''
+		if data.find(config) < 0:
+			insertMark = "# Installer will insert Contexts['Docs'] here."
+			insertPos = data.find(insertMark)
+			if insertPos < 0:
+				print 'Configuration has already been changed.'
+				print 'Docs directories will not be added as context.'
+			else:
+				data = data[:insertPos] + config + data[insertPos+len(insertMark):]
+			try: # write back config file
+				open('WebKit/Configs/Application.config', 'w').write(data)
+			except IOError:
+				print 'Error writing Application.config (probably no permission).'
+				print 'Docs cannot be made browsable via WebKit.'
+		else:
+			print 'Docs directories are already registered with WebKit.'
+		print
 
 	def backupConfigs(self):
 		"""Copy *.config to *.config.default, if the .default files don't already exist.

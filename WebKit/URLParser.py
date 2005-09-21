@@ -110,6 +110,7 @@ class ContextParser(URLParser):
 			if name == 'default':
 				defaultContext = dir
 			else:
+				name = '/'.join(filter(lambda x: x, name.split('/')))
 				self.addContext(name, dir)
 
 		if not defaultContext:
@@ -235,21 +236,31 @@ class ContextParser(URLParser):
 		trans._fileParserInitSeen = {}
 		if not requestPath:
 			raise HTTPMovedPermanently(webkitLocation='/')
-		requestPath = re.sub(r'/+', '/', requestPath)
-		parts = requestPath[1:].split('/', 1)
-		if len(parts) == 1:
-			rest = ''
+		context = filter(lambda x: x, requestPath.split('/'))
+		if requestPath.endswith('/'):
+			context.append('')
+		request = []
+		while context:
+			contextName = '/'.join(context)
+			if self._contexts.has_key(contextName):
+				break
+			request.insert(0, context.pop())
+		if context:
+			if request:
+				request.insert(0, '')
+				if not request[-1]:
+					request[-1] = '/'
+				requestPath = '/'.join(request)
+			else:
+				requestPath = ''
 		else:
-			rest = '/' + parts[1]
-		contextName = parts[0]
-
-		if not self._contexts.has_key(contextName):
 			contextName = self._defaultContext
-			rest = requestPath
-		trans.request()._serverSideContextPath = self._contexts[contextName]
+		context = self._contexts[contextName]
+		trans.request()._serverSideContextPath = context
 		trans.request()._contextName = contextName
-		fpp = FileParser(self._contexts[contextName])
-		return fpp.parse(trans, rest)
+		fpp = FileParser(context)
+		return fpp.parse(trans, requestPath)
+
 
 class _FileParser(URLParser):
 	"""

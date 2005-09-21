@@ -16,14 +16,16 @@ class Welcome(ExamplePage):
 		</ul>
 		<p>The <a href="../Admin/">Admin</a> context is particularly interesting because
 		it takes you to the administrative pages for the WebKit application server where
-		you can review logs, configuration, plug-ins, etc.</p>''')
+		you can review logs, configuration, plug-ins, etc.</p>
+		<p>The <a href="../Docs/">Docs</a> contexts allow you to browse
+		the documentation of <a href="../WebKit/Docs/">WebKit</a>
+		and <a href="../Docs/ComponentIndex.html">all other components</a>
+		of <a href="../Docs/">Webware for Python</a>.</p>''')
 		from os.path import join
-		self.writeln('<p>The browsable WebKit documentation is available here on the server:</p>')
-		self.writeln('<blockquote>%s</blockquote>'
-			% join(self.application().webKitPath(), 'Docs', 'index.html'))
-		self.writeln('<p>The complete documentation for Webware for Python is here:</p>')
-		self.writeln('<blockquote>%s</blockquote>'
-			% join(self.application().webwarePath(), 'Docs', 'index.html'))
+		self.writeln('<p>The location of the WebKit documentation on the server is:</p>')
+		self.writeln('<blockquote>%s</blockquote>' % join(self.application().webKitPath(), 'Docs'))
+		self.writeln('<p>The documentation for Webware for Python is located here:</p>')
+		self.writeln('<blockquote>%s</blockquote>' % join(self.application().webwarePath(), 'Docs'))
 		req = self.request()
 		extraURLPath = req.extraURLPath()
 		if extraURLPath and extraURLPath != '/':

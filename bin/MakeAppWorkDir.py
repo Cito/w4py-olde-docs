@@ -338,13 +338,13 @@ class Main(Page):
 		The code that implements this page is located in <b>%s</b>.</p>
 		''' % self.request().serverSidePath())
 		self.writeln('''
-		<p>There are more examples and documentaion in the Webware distribution,
+		<p>There are more examples and documentation in the Webware distribution,
 		which you can get to from here:<p>
 		<ul>
 		''')
 		adapterName = self.request().adapterName()
 		ctxs = self.application().contexts().keys()
-		ctxs = filter(lambda ctx: ctx!='default', ctxs)
+		ctxs = filter(lambda ctx: ctx!='default' and ctx.find('/')<0, ctxs)
 		ctxs.sort()
 		for ctx in ctxs:
 			self.writeln('<li><a href="%s/%s/">%s</a></li>'

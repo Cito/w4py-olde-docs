@@ -126,7 +126,7 @@ class SidebarPage(Page):
 		self.menuHeading('Contexts')
 		adapterName = self.request().adapterName()
 		ctxs = self.application().contexts().keys()
-		ctxs = filter(lambda ctx: ctx!='default', ctxs)
+		ctxs = filter(lambda ctx: ctx!='default' and ctx.find('/')<0, ctxs)
 		ctxs.sort()
 		for ctx in ctxs:
 			self.menuItem(ctx, '%s/%s/' % (adapterName, ctx))
