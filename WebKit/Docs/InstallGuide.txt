@@ -203,7 +203,7 @@ Operating Systems
 -----------------
 
 WebKit actively supports Posix (Linux, BSD, Mac OS X, Solaris, etc)
-and Windows (95/98/NT/2000), and their various flavors.
+and Windows (95/98/NT/2K/XP), and their various flavors.
 
 Note that you don't have to develop and deploy on the same
 platform. One of the WebKit developers develops everything on Windows
@@ -999,15 +999,15 @@ if you prefer to inherit the Python path. The second allows you
 specify additional Python path components (regardless of whether or
 not you inherited the path).
 
-Running ThreadedAppServer as a Windows NT/2000 Service
-------------------------------------------------------
+Running ThreadedAppServer as a Windows NT/2K/XP Service
+-------------------------------------------------------
 
 ``AppServerService`` is a script that runs the ``ThreadedAppServer``
 as a Windows NT Service.  This means it can be started and stopped
 from the Control Panel or from the command line using ``net start``
 and ``net stop``, and it can be configured in the Control Panel
 to auto-start when the machine boots.  This is the preferred way
-to deploy WebKit on a Windows NT/2000 platform.
+to deploy WebKit on a Windows NT/2K/XP platform.
 
 ``AppServerService`` requires the Python win32all__ extensions to
 have been installed.

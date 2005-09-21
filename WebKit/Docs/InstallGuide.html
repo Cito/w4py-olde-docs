@@ -71,7 +71,7 @@
 <li><a class="reference" href="#additional-notes" id="id58" name="id58">Additional Notes</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#running-threadedappserver-as-a-windows-nt-2000-service" id="id59" name="id59">Running ThreadedAppServer as a Windows NT/2000 Service</a></li>
+<li><a class="reference" href="#running-threadedappserver-as-a-windows-nt-2k-xp-service" id="id59" name="id59">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></li>
 <li><a class="reference" href="#other-notes" id="id60" name="id60">Other Notes</a></li>
 </ul>
 </li>
@@ -248,7 +248,7 @@ generally fairly stable.</p>
 <div class="section" id="operating-systems">
 <h2><a class="toc-backref" href="#id26" name="operating-systems">Operating Systems</a></h2>
 <p>WebKit actively supports Posix (Linux, BSD, Mac OS X, Solaris, etc)
-and Windows (95/98/NT/2000), and their various flavors.</p>
+and Windows (95/98/NT/2K/XP), and their various flavors.</p>
 <p>Note that you don't have to develop and deploy on the same
 platform. One of the WebKit developers develops everything on Windows
 98 2nd edition and deploys his web sites on BSD.  Some of the web
@@ -920,14 +920,14 @@ specify additional Python path components (regardless of whether or
 not you inherited the path).</p>
 </div>
 </div>
-<div class="section" id="running-threadedappserver-as-a-windows-nt-2000-service">
-<h2><a class="toc-backref" href="#id59" name="running-threadedappserver-as-a-windows-nt-2000-service">Running ThreadedAppServer as a Windows NT/2000 Service</a></h2>
+<div class="section" id="running-threadedappserver-as-a-windows-nt-2k-xp-service">
+<h2><a class="toc-backref" href="#id59" name="running-threadedappserver-as-a-windows-nt-2k-xp-service">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></h2>
 <p><tt class="docutils literal"><span class="pre">AppServerService</span></tt> is a script that runs the <tt class="docutils literal"><span class="pre">ThreadedAppServer</span></tt>
 as a Windows NT Service.  This means it can be started and stopped
 from the Control Panel or from the command line using <tt class="docutils literal"><span class="pre">net</span> <span class="pre">start</span></tt>
 and <tt class="docutils literal"><span class="pre">net</span> <span class="pre">stop</span></tt>, and it can be configured in the Control Panel
 to auto-start when the machine boots.  This is the preferred way
-to deploy WebKit on a Windows NT/2000 platform.</p>
+to deploy WebKit on a Windows NT/2K/XP platform.</p>
 <p><tt class="docutils literal"><span class="pre">AppServerService</span></tt> requires the Python <a class="reference" href="http://www.python.org/windows/win32all/">win32all</a> extensions to
 have been installed.</p>
 <p>To see the options for installing, removing, starting, and stopping
