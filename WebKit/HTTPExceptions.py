@@ -130,7 +130,7 @@ class HTTPNotImplemented(HTTPException):
 	When methods (like GET, POST, PUT, PROPFIND, etc) are not
 	implemented for this resource.
 	"""
-	
+
 	_code = 501, "Not Implemented"
 	_description = "The method given is not yet implemented by this application"
 
@@ -145,7 +145,7 @@ class HTTPForbidden(HTTPException):
 	access, or no one is allowed to view this, then HTTPForbidden would
 	be the proper response.
 	"""
-	
+
 	_code = 403, 'Forbidden'
 	_description = "You are not authorized to access this resource"
 
@@ -164,7 +164,7 @@ class HTTPAuthenticationRequired(HTTPException):
 	authentication every request will usually be doubled, once
 	without authentication, once with.
 	"""
-	
+
 	_code = 401, 'Authentication Required'
 	_description = "You must log in to access this resource"
 	def __init__(self, realm=None, *args):
@@ -191,7 +191,7 @@ class HTTPMethodNotAllowed(HTTPException):
 	on this resource (usually because it does not make sense, not
 	because it is not permitted).  Mostly for WebDAV.
 	"""
-	
+
 	_code = 405, 'Method Not Allowed'
 	_description = 'The method is not supported on this resource'
 
@@ -201,14 +201,14 @@ class HTTPConflict(HTTPException):
 	to something like a PUT, not for most other conflicts).
 	Mostly for WebDAV.
 	"""
-	
+
 	_code = 409, 'Conflict'
 
 class HTTPUnsupportedMediaType(HTTPException):
 	"""
 	Uhh....
 	"""
-	
+
 	_code = 415, 'Unsupported Media Type'
 
 class HTTPInsufficientStorage(HTTPException):
@@ -216,7 +216,7 @@ class HTTPInsufficientStorage(HTTPException):
 	When there is not sufficient storage, usually in response
 	to a PUT when there isn't enough disk space.  Mostly for WebDAV.
 	"""
-	
+
 	_code = 507, 'Insufficient Storage'
 	_description = 'There was not enough storage space on the server to complete your request'
 
@@ -226,7 +226,7 @@ class HTTPPreconditionFailed(HTTPException):
 	an early operation fail, then later operations in will fail
 	with this code.  Mostly for WebDAV.
 	"""
-	
+
 	_code = 412, 'Precondition Failed'
 
 class HTTPMovedPermanently(HTTPException):
@@ -235,9 +235,9 @@ class HTTPMovedPermanently(HTTPException):
 	this relocation, and later requests may skip requesting the
 	original resource altogether.
 	"""
-	
+
 	_code = 301, 'Moved Permanently'
-	
+
 	def __init__(self, location=None, webkitLocation=None, *args):
 		"""
 		HTTPMovedPermanently needs a destination that you
@@ -246,7 +246,7 @@ class HTTPMovedPermanently(HTTPException):
 		it will be relative to the WebKit base (the portion
 		through the adapter).
 		"""
-		
+
 		self._location = location
 		self._webkitLocation = webkitLocation
 		HTTPException.__init__(self, 301, 'Moved Permanently', *args)
@@ -259,10 +259,9 @@ class HTTPMovedPermanently(HTTPException):
 			environ = self._transaction.request().environ()
 			if not self._webkitLocation.startswith('/'):
 				self._webkitLocation = '/' + self._webkitLocation
-			location = 'http://%s%s%s' % (
-				environ.get('HTTP_HOST', environ['SERVER_NAME']),
-				environ['SCRIPT_NAME'],
-				self._webkitLocation)
+			location = 'http://%s%s%s' % (environ.get('HTTP_HOST',
+					environ.get('SERVER_NAME', 'localhost')),
+				environ.get('SCRIPT_NAME', ''), self._webkitLocation)
 		else:
 			location = self._location
 		return location
@@ -274,7 +273,8 @@ class HTTPMovedPermanently(HTTPException):
 		return {'Location': self.location()}
 
 	def description(self):
-		return 'The resource you are accessing has been moved to <a href="%s">%s</a>' % (htmlEncode(self.location()), htmlEncode(self.location()))
+		return 'The resource you are accessing has been moved to' \
+			' <a href="%s">%s</a>' % ((htmlEncode(self.location()),)*2)
 
 class HTTPTemporaryRedirect(HTTPMovedPermanently):
 
@@ -294,7 +294,7 @@ class HTTPBadRequest(HTTPException):
 	"""
 	When the browser sends an invalid request.
 	"""
-	
+
 	_code = 400, 'Bad Request'
 
 class HTTPNotFound(HTTPException):
@@ -304,6 +304,6 @@ class HTTPNotFound(HTTPException):
 	permitted (you are not required to use HTTPForbidden, though it
 	makes it more clear why access was disallowed).
 	"""
-	
+
 	_code = 404, 'Not Found'
 	_description = 'The resource you were trying to access was not found'
