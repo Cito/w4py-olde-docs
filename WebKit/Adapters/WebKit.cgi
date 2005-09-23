@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
 # If you used the MakeAppWorkDir.py script to make a separate
-# application working directory, specify it here.
+# application working directory, specify it here:
 workDir = None
 
 # If the Webware installation is located somewhere else,
-# then set the webwareDir variable to point to it.
-# For example, webwareDir = '/Servers/Webware'
+# then set the webwareDir variable to point to it here:
 webwareDir = None
 
 try:

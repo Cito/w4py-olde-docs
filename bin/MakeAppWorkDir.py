@@ -38,8 +38,6 @@ WorkDir:
 #   CVS or SVN repository. In the case of a CVS repository, the
 #   .cvsignore files should be created automatically, and in case
 #   of SVN, the corresponding svn propset commands should be issued.
-# * Do not copy the complete  Launch.py and AppServerService.py scripts,
-#   but use slim versions utilizing the scripts at the standard location.
 # CREDITS
 # * Contributed to Webware for Python by Robin Dunn
 # * Improved by Christoph Zwerschke
@@ -93,7 +91,7 @@ class MakeAppWorkDir:
 		self.makeDirectories()
 		self.copyConfigFiles()
 		self.copyOtherFiles()
-		self.adjustLauncherScripts()
+		self.makeLauncherScripts()
 		if self._contextName is not None:
 			self.makeDefaultContext()
 		if self._cvsIgnore:
@@ -109,7 +107,7 @@ class MakeAppWorkDir:
 		for dir in standardDirs:
 			dir = os.path.join(self._workDir, dir)
 			if os.path.exists(dir):
-				self.msg("\t%s already exists." % dir)
+				self.msg("\tWarning: %s already exists." % dir)
 			else:
 				os.mkdir(dir)
 				self.msg("\t%s" % dir)
@@ -139,64 +137,65 @@ class MakeAppWorkDir:
 	def copyOtherFiles(self):
 		"""Make a copy of any other necessary files in the new work dir."""
 		self.msg("Copying other files...")
-		otherFiles = (
-			# (file, executable, platform, relocate)
-			('404Text.txt', None, 0),
-			('AppServer', 'posix', 1),
-			('AppServer.bat', 'nt', 1),
-			('Launch.py', None, 1),
-			('AppServerService.py', 'nt', 1),
-			('Adapters/WebKit.cgi', None, 1))
-		for name, osType, doChmod in otherFiles:
-			if osType and osType != self._osType:
-				continue
-			oldname = os.path.join(self._webKitDir, name)
-			newname = os.path.join(self._workDir, os.path.basename(name))
-			self.msg("\t%s" % newname)
-			# Copy the file, adjusting the shebang magic
-			firstLine = open(oldname).readline()
-			if doChmod and firstLine.startswith('#!') \
-					and firstLine.rstrip().endswith('python'):
-				f = open(oldname)
-				f.readline() # throw away the first line
-				new = open(newname, 'w')
-				new.write('#!%s\n' % sys.executable)
-				new.write(f.read())
-				new.close()
-				f.close()
+		otherFiles = ('AppServer', '404Text.txt')
+		for name in otherFiles:
+			if name == 'AppServer' and self._osType == 'nt':
+				name += '.bat'
+				chmod = 1
 			else:
-				shutil.copyfile(oldname, newname)
-			if doChmod:
-				os.chmod(newname, 0755)
+				chmod = 0
+			newname = os.path.join(self._workDir, os.path.basename(name))
+			if not os.path.exists(newname):
+				oldname = os.path.join(self._webKitDir, name)
+				if os.path.exists(oldname):
+					self.msg("\t%s" % newname)
+					shutil.copyfile(oldname, newname)
+					if chmod:
+						os.chmod(newname, 0755)
+				else:
+					self.msg("\tWarning: Cannot find %r." % oldname)
 		self.msg()
 
-	def adjustLauncherScripts(self):
-		"""Adjust the launcher scripts and the CGI adapter script."""
-		self.msg("Relocating the launcher scripts...")
-		launchScripts = ('Launch.py', 'AppServerService.py', 'WebKit.cgi')
-		settings = (
-			('workDir', self._workDir),
-			('webwareDir', self._webwareDir),
-			('libraryDirs', self._libraryDirs))
-		for name in launchScripts:
-			filename = os.path.join(self._workDir, os.path.basename(name))
-			if not os.path.exists(filename):
+	def makeLauncherScripts(self):
+		"""Create the launcher scripts and copy the CGI adapter script."""
+		self.msg("Creating the launcher scripts...")
+		workDir = self._workDir
+		webwareDir = self._webwareDir
+		webKitDir = self._webKitDir
+		executable = sys.executable
+		for name in launcherScripts:
+			if name.endswith('Service') and self._osType != 'nt':
 				continue
-			self.msg("\t%s" % filename)
-			script = open(filename, 'r').read()
-			for s in settings:
-				if name == 'WebKit.cgi':
-					if s[0] == 'libraryDirs':
-						continue
+			newname = os.path.join(workDir, name)
+			if not os.path.exists(newname):
+				oldname = os.path.join(webKitDir, name)
+				if os.path.exists(oldname):
+					self.msg("\t%s" % newname)
+					script = launcherScripts[name] % locals()
+					open(newname, "w").write(script)
+					os.chmod(newname, 0755)
 				else:
-					if s[0] == 'workDir':
-						continue
-				pattern, repl = '\n%s = .*\n' % s[0], '\n%s = %r\n' %s
-				script, n = re.subn(pattern, repl, script, 1)
-				if n != 1:
-					self.msg("\tWarning: %s cannot be set in %s."
-						% (s[0], name))
-			open(filename, 'w').write(script)
+					self.msg("\tWarning: Cannot find %r." % oldname)
+		name = 'WebKit.cgi'
+		newname = os.path.join(workDir, os.path.basename(name))
+		if not os.path.exists(newname):
+			oldname = os.path.join(webKitDir, os.path.join('Adapters', name))
+			if os.path.exists(oldname):
+				self.msg("\t%s" % newname)
+				script = open(oldname, 'r').read()
+				script = re.sub('^#!/usr/bin/env python\n',
+					'#!%s\n' % executable, script, 1)
+				parameter = (('workDir', workDir), ('webwareDir', webwareDir))
+				for p in parameter:
+					pattern, repl = '\n%s = .*\n' % p[0], '\n%s = %r\n' % p
+					script, n = re.subn(pattern, repl, script, 1)
+					if n != 1:
+						self.msg("\tWarning: %s cannot be set in %s."
+							% (p[0], name))
+				open(newname, 'w').write(script)
+				os.chmod(newname, 0755)
+			else:
+				self.msg("\tWarning: Cannot find %r." % oldname)
 		self.msg()
 
 	def makeDefaultContext(self):
@@ -310,6 +309,46 @@ Have fun!
 			else:
 				print
 
+launcherScripts = { # launcher scripts with adjusted parameters
+
+'Launch.py': """#!%(executable)s
+
+# Adjust Launcher default parameters:
+webwareDir = '%(webwareDir)s'
+
+import sys
+sys.path.insert(0, webwareDir)
+
+from WebKit import Launch
+
+Launch.webwareDir = webwareDir
+
+if __name__ == '__main__':
+	Launch.main()
+""",
+
+'AppServerService.py': """#!%(executable)s
+
+# Adjust AppServerService default parameters:
+webwareDir = '%(webwareDir)s'
+
+import sys
+sys.path.insert(0, webwareDir)
+
+from WebKit import AppServerService as appServerService
+
+class AppServerService(appServerService.AppServerService):
+	pass # service class must be defined in __main__ module
+
+appServerService.AppServerService = AppServerService
+appServerService.webwareDir = webwareDir
+
+if __name__ == '__main__':
+	appServerService.main()
+"""
+
+} # end of launcer scripts
+
 exampleContext = { # files copied to example context
 
 # This is used to create a very simple sample context for the new
@@ -343,10 +382,12 @@ class Main(Page):
 		<ul>
 		''')
 		adapterName = self.request().adapterName()
+		contextName = self.request().contextName()
 		ctxs = self.application().contexts().keys()
-		ctxs = filter(lambda ctx: ctx!='default' and ctx.find('/')<0, ctxs)
 		ctxs.sort()
 		for ctx in ctxs:
+			if ctx in ('default', contextName) or ctx.find('/') >= 0:
+				continue
 			self.writeln('<li><a href="%s/%s/">%s</a></li>'
 				% (adapterName, ctx, ctx))
 		self.writeln('</ul>')

@@ -214,6 +214,10 @@ def main(args=None):
 		webwareDir = os.pardir
 	if libraryDirs:
 		libraryDirs = map(os.path.expanduser, libraryDirs)
+	# Remove the package component in the name of this module,
+	# because otherwise the package path would be used for imports, too:
+	global __name__
+	__name__ = __name__.split('.')[-1]
 	# Check the validity of the Webware directory:
 	sysPath = sys.path # memorize the standard Python search path
 	sys.path = [webwareDir] # now include only the Webware directory
@@ -226,6 +230,12 @@ def main(args=None):
 		print 'Error: Cannot find the Webware directory.'
 		print 'The path %r seems to be wrong.' % webwareDir
 		print 'Check the --webware-dir option.'
+		sys.exit(1)
+	if not os.path.exists(os.path.join(webwareDir, 'install.log')):
+		print 'Error: Webware has not been installed.'
+		print 'Please run install.py in the Webware directory:'
+		print '> cd', os.path.abspath(webwareDir)
+		print '> python install.py'
 		sys.exit(1)
 	# Now assemble a new clean Python search path:
 	path = [] # the new search path will be collected here
