@@ -40,7 +40,6 @@ def getExpr(st):
 	"""Get the content of a PSP expression."""
 	OPEN_EXPR = '<%='
 	CLOSE_EXPR = '%>'
-	print "GETEXPR", st
 	if st.startswith(OPEN_EXPR) and st.endswith(CLOSE_EXPR):
 		return st[len(OPEN_EXPR):-len(CLOSE_EXPR)]
 	else:
@@ -86,10 +85,6 @@ def normalizeIndentation(pySource, tab='\t'):
 	Improved version by Christoph Zwerschke.
 
 	"""
-	print
-	print "------- in ---------------"
-	print pySource
-	print "---------------------------"
 	lines = splitLines(pySource, 1)
 	# Find out which kind of line feeds are used:
 	crlf = ''
@@ -126,7 +121,4 @@ def normalizeIndentation(pySource, tab='\t'):
 	# Write lines back out:
 	strippedLines.insert(0, line0)
 	pySource = crlf.join(strippedLines)
-	print "----------------out ------------"
-	print pySource
-	print "--------------------------------"
 	return pySource
