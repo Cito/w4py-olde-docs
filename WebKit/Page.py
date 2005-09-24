@@ -109,10 +109,11 @@ class Page(HTTPContent):
 		DOCTYPE on the web, or visiting:
 		http://www.htmlhelp.com/tools/validator/doctype.html
 		"""
-		## @@ sgd-2003-01-29 - restored the 4.01 transitional as
-		## per discussions on the mailing list for the 0.8
-		## release.
-		self.writeln('<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">')
+		# @@ sgd-2003-01-29 - restored the 4.01 transitional as
+		# per discussions on the mailing list for the 0.8 release.
+		self.writeln('<!DOCTYPE HTML PUBLIC'
+			' "-//W3C//DTD HTML 4.01 Transitional//EN"'
+			' "http://www.w3.org/TR/html4/loose.dtd">')
 
 	def writeHead(self):
 		"""

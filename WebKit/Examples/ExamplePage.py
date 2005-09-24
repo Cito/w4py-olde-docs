@@ -3,7 +3,8 @@ import string, os
 
 
 class ExamplePage(SidebarPage):
-	"""
+	"""WebKit page template class for displaying examples.
+
 	The convention for picking up examples from WebKit plug-ins is:
 		* Properties.py must have at least this:
 			WebKitConfig = {
@@ -32,6 +33,7 @@ class ExamplePage(SidebarPage):
 
 	If the WebKit Examples context is not present in the first place,
 	then there is no access to the plug-in examples.
+
 	"""
 
 	def cornerTitle(self):
@@ -41,29 +43,29 @@ class ExamplePage(SidebarPage):
 		return 0
 
 	def examplePages(self):
-		"""
+		"""Get a list of all example pages.
+
 		Returns a list of all the example pages for our particular plug-in.
 		These can be used in the sidebar or in the main content area to
 		give easy access to the other example pages.
+
 		"""
 		ctxName = self.request().contextName()
-		if ctxName=='Examples':
-			# Special case: We're in WebKit Examples
+		if ctxName == 'Examples':
+			# Special case: We're in WebKit examples
 			from WebKit.Properties import WebKitConfig
 			return WebKitConfig['examplePages']
 		else:
-			# Any plug-in
-			assert ctxName[-8:]=='Examples'
+			# Any other plug-in:
+			assert ctxName[-8:] == 'Examples'
 			plugInName = ctxName[:-8]
 			plugIn = self.application().server().plugIn(plugInName)
 			return plugIn.examplePages()
 
 	def writeSidebar(self):
-		self.startMenu()
 		self.writeExamplesMenu()
 		self.writeOtherMenu()
 		self.writeWebKitSidebarSections()
-		self.endMenu()
 
 	def writeExamplesMenu(self):
 		adapterName = self.request().adapterName()
@@ -89,24 +91,24 @@ class ExamplePage(SidebarPage):
 
 	def writeOtherMenu(self):
 		self.menuHeading('Other')
-
 		viewPath = self.request().uriWebKitRoot() + "Examples/View"
 		self.menuItem(
-			'View source of %s' % self.title(),
-			self.request().uriWebKitRoot() + 'Examples/View?filename=%s' % os.path.basename(self.request().serverSidePath()))  #string.replace(self.request().serverSidePath(), '\\', '/'))
-
+			'View source of<br>%s' % self.title(),
+			self.request().uriWebKitRoot() + 'Examples/View?filename=%s' \
+				% os.path.basename(self.request().serverSidePath()))
 		if self.application().hasContext('Documentation'):
 			filename = 'Documentation/WebKit.html'
 			if os.path.exists(filename):
-				self.menuItem('Local WebKit docs', self.request().adapterName() + '/' + filename)
+				self.menuItem('Local WebKit docs',
+					self.request().adapterName() + '/' + filename)
 
 	def title(self):
 		return self.request().contextName()
 
 	def writeContent(self):
 		wr = self.writeln
-		wr('<p style="padding-left: 2em;"> <table>')
+		wr('<div style="padding-left:2em"><table>')
 		for page in self.examplePages():
-			wr('<tr> <td bgcolor=#EEEEEE> <a href=%s>%s</a> </td> </tr>' % (
-				page, page))
-		wr('</table> </p>')
+			wr('<tr><td bgcolor="#E8E8F0"><a href=%s>%s</a>'
+				'</td></tr>' % (page, page))
+		wr('</table></div>')

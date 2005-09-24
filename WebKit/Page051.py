@@ -23,7 +23,7 @@ class Page051(Page):
 <body %s>''' % (self.title(), self.htBodyArgs()))
 
 	def writeBody(self):
-		self.writeln("<p>This page has not yet customized it's body.")
+		self.writeln("<p>This page has not yet customized it's body.</p>")
 
 	def writeFooter(self):
 		self.writeln('</body>')

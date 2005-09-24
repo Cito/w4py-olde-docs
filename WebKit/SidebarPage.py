@@ -2,38 +2,61 @@ from Page import Page
 
 
 class SidebarPage(Page):
-	"""
-	SidebarPage is an abstract superclass for pages that have a sidebar (as well as a header and "content well"). Sidebars are normally used for navigation (e.g., a menu or list of links), showing small bits of info and occasionally a simple form (such as login or search).
+	"""WebKit page template class for pages with a sidebar.
 
-	Subclasses should override cornerTitle(), writeSidebar() and writeContent() (and title() if necessary; see Page).
+	SidebarPage is an abstract superclass for pages that have a sidebar
+	(as well as a header and "content well"). Sidebars are normally used
+	for navigation (e.g., a menu or list of links), showing small bits
+	of info and occasionally a simple form (such as login or search).
 
-	The utility methods menuHeading() and menuItem() can be used by subclasses, typically in their implementation of writeSidebar().
+	Subclasses should override cornerTitle(), writeSidebar() and
+	writeContent() (and title() if necessary; see Page).
 
-	WebKit itself uses this class: Examples/ExamplePage and Admin/AdminPage both inherit from it.
+	The utility methods menuHeading() and menuItem() can be used by
+	subclasses, typically in their implementation of writeSidebar().
+
+	WebKit itself uses this class: Examples/ExamplePage and Admin/AdminPage
+	both inherit from it.
 
 	TO DO
-	-----
-	* Consider using a DIV tag to set the min width of the menu bar.
-	* Use style sheets.
-	* After style sheets, consider removal of startMenu() and endMenu().
-	* It's not easy to customize, via subclasses:
-		* what's between <head> and </head>
-		* the corner
-		* the colors
-		* the spacer
+	* More consequent use style sheets; get rid of tables completely.
+	* The header, corner and colors are not easy to customize via subclasses.
+
 	"""
 
 
-	## Init ##
+	## StyleSheet ##
 
-	def __init__(self):
-		Page.__init__(self)
-		self._indentBase = '&nbsp; ' # used in menuItem()
+	def writeStyleSheet(self):
+		"""We're using a simply internal style sheet.
+
+		This way we avoid having to care about where an external style
+		sheet should be located when this class is used in another context.
+
+		"""
+		self.writeln('''<style type="text/css">
+<!--
+body {
+	color: #080810;
+	background-color: white;
+	font-size: 11pt;
+	font-family: Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	margin: 0pt;
+	padding: 0pt;
+}
+h1 { font-size: 20pt; }
+h2 { font-size: 18pt; }
+h3 { font-size: 16pt; }
+h4 { font-size: 14pt; }
+h5 { font-size: 12pt; }
+-->
+</style>''')
 
 
 	## Content methods ##
 
 	def writeBodyParts(self):
+
 		# begin
 		wr = self.writeln
 		wr('<table border="0" cellpadding="0" cellspacing="0" width="100%">')
@@ -42,15 +65,14 @@ class SidebarPage(Page):
 		self.writeBanner()
 
 		# sidebar
-		wr('<tr><td bgcolor="#EEEEEF" valign="top" nowrap>')
+		wr('<tr><td style="background-color:#E8E8F0;'
+			'padding:4pt;font-size:10pt;'
+			'vertical-align:top;white-space:nowrap;height:100%">')
 		self.writeSidebar()
 		wr('</td>')
 
-		# spacer
-		wr('<td> &nbsp;&nbsp;&nbsp; </td>')
-
 		# content
-		wr('<td valign="top" width="90%"><p>&nbsp;</p>')
+		wr('<td style="padding:8pt;vertical-align:top">')
 		self.writeContent()
 		wr('</td>')
 
@@ -59,20 +81,19 @@ class SidebarPage(Page):
 
 	def writeBanner(self):
 		# header
-		title = self.title()
-		startFont1 = '<font face="Tahoma, Arial, Helvetica, sans-serif" color=white size="+1">'
-		endFont1 = '</font>'
-		startFont2 = '<font face="Tahoma, Arial, Helvetica, sans-serif" color=white size="+2"><b>'
-		endFont2 = '</b></font>'
-		cornerTitle = self.cornerTitle()
-		self.writeln('<tr><td align="center" bgcolor="#000000">'
-			'%(startFont1)s%(cornerTitle)s%(endFont1)s</td>'
-			'<td align="center" bgcolor="#00008B" colspan=2>&nbsp;<br>'
-			'%(startFont2)s%(title)s%(endFont2)s<br>&nbsp;</td></tr>' % locals())
+		title, cornerTitle = self.title(), self.cornerTitle()
+		self.writeln('<tr><td style="background-color:#101040;color:white;'
+			'padding:6pt 6pt;font-size:14pt;'
+			'text-align:center;vertical-align:middle">'
+			'%s</td><td style="background-color:#202080;color:white;'
+			'padding:8pt 6pt;font-size:16pt;font-weight:bold;'
+			'text-align:center;vertical-align:middle">'
+			'%s</td></tr>' % (self.cornerTitle(), self.title()))
 
 	def writeSidebar(self):
 		self.startMenu()
-		self.writeln('Woops. Someone forgot to override writeSidebar().')
+		self.writeln('<p style="color:red">Woops.'
+			' Someone forgot to override writeSidebar().</p>')
 		self.endMenu()
 
 	def cornerTitle(self):
@@ -81,31 +102,20 @@ class SidebarPage(Page):
 
 	## Menu ##
 
-	def startMenu(self):
-		self.writeln('<table border="0" cellpadding="0" cellspacing="4">'
-			'<tr><td nowrap><font face="Arial" size="-1">')
-		self._wroteHeading = 0
-
 	def menuHeading(self, title):
-		if self._wroteHeading:
-			self.write('<br>')
-		self.writeln('<b>%s</b><br>' % title)
+		self.writeln('<div style="font-weight:bold;'
+			'margin-top:6pt;margin-bottom:3pt;width:12em">%s</div>' % title)
 		self._wroteHeading = 1
 
 	def menuItem(self, title, url=None, suffix=None, indentLevel=1):
 		if suffix:
-			suffix = suffix + ' '
+			suffix = ' ' + suffix
 		else:
 			suffix = ''
-		indent = self._indentBase*indentLevel
-		if url is not None:
-			self.writeln(' %s<a href="%s">%s</a> %s<br>' % (
-				indent, url, title, suffix))
-		else:
-			self.writeln(' %s%s %s<br>' % (indent, title, suffix))
-
-	def endMenu(self):
-		self.writeln('</font></td></tr></table>')
+		if url:
+			title = '<a href="%s">%s</a>' % (url, title)
+		self.writeln('<div style="margin-left:%dpt">%s%s</div>'
+			% (4*indentLevel, title, suffix))
 
 
 	## WebKit sidebar sections ##
@@ -113,8 +123,9 @@ class SidebarPage(Page):
 	def writeWebKitSidebarSections(self):
 		"""Write sidebar sections.
 
-		This method (and consequently the methods it invokes) are provided for WebKit's example
-		and admin pages. It writes sections such as contexts, e-mails, exits and versions.
+		This method (and consequently the methods it invokes)
+		are provided for WebKit's example and admin pages.
+		It writes sections such as contexts, e-mails, exits and versions.
 
 		"""
 		self.writeContextsMenu()
@@ -137,7 +148,7 @@ class SidebarPage(Page):
 
 	def writeWebwareExitsMenu(self):
 		self.menuHeading('Exits')
-		self.menuItem('Webware', 'http://webware.sourceforge.net')
+		self.menuItem('Webware', 'http://www.webwareforpython.org')
 		self.menuItem('Python', 'http://www.python.org')
 
 	def writeVersions(self):

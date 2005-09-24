@@ -16,10 +16,8 @@ class AdminPage(SidebarPage):
 
 	def writeSidebar(self):
 		app = self.application()
-		self.startMenu()
 		self.writeAdminMenu()
 		self.writeWebKitSidebarSections()
-		self.endMenu()
 
 	def writeAdminMenu(self):
 		self.menuHeading('Admin')
