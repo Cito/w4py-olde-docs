@@ -1,9 +1,7 @@
 
-"""
-A bunch of utility functions for the PSP generator.
+"""A bunch of utility functions for the PSP generator.
 
---------------------------------------------------------------------------
-   (c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.net)
+	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.net)
 
 	Permission to use, copy, modify, and distribute this software and its
 	documentation for any purpose and without fee or royalty is hereby granted,
@@ -20,97 +18,115 @@ A bunch of utility functions for the PSP generator.
 	NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
 	WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
 
-		This software is based in part on work done by the Jakarta group.
+	This software is based in part on work done by the Jakarta group.
 
 """
 
-import string
-import copy
-import re
 
-"""various utility functions"""
-
-
+"""Various utility functions"""
 
 def removeQuotes(st):
-	return string.replace(st,"%\\\\>","%>")
+	return st.replace("%\\\\>", "%>")
 
 def isExpression(st):
+	"""Check whether this is a PSP expression."""
 	OPEN_EXPR = '<%='
 	CLOSE_EXPR = '%>'
-	
-	if ((st[:len(OPEN_EXPR)] == OPEN_EXPR) and (st[-len(CLOSE_EXPR):] == CLOSE_EXPR)):
+	if st.startswith(OPEN_EXPR) and st.endswith(CLOSE_EXPR):
 		return 1
 	return 1
 
 def getExpr(st):
+	"""Get the content of a PSP expression."""
 	OPEN_EXPR = '<%='
 	CLOSE_EXPR = '%>'
-	length = len(st)
-	if ((st[:len(OPEN_EXPR)] == OPEN_EXPR) and (st[-len(CLOSE_EXPR):] == CLOSE_EXPR)):
-		retst = st[len(OPEN_EXPR):-(len(CLOSE_EXPR))]
+	print "GETEXPR", st
+	if st.startswith(OPEN_EXPR) and st.endswith(CLOSE_EXPR):
+		return st[len(OPEN_EXPR):-len(CLOSE_EXPR)]
 	else:
-		retst=''
-	return retst
-
+		return ''
 
 def checkAttributes(tagtype, attrs, validAttrs):
+	"""Missing check for mandatory atributes."""
+	pass #see line 186 in JSPUtils.java
 
-	#missing check for mandatory atributes
-	#see line 186 in JSPUtils.java
+def splitLines(text, keepends=0):
+	"""Split text into lines."""
+	return text.splitlines(keepends)
 
-	pass
-	
-	
+def startsNewBlock(line):
+	"""Determine whether line starts a new block.
 
-RE_LINES = re.compile("[\n\r]*")
-def splitLines( text ):
-	'''
-	Split text into lines, but works for Unix, or Windows format, 
-	i.e. with \n or \r for line endings.
-	'''
-	return RE_LINES.split( text )
+	Utility function for normalizeIndentation
 
+	Added by Christoph Zwerschke.
 
+	"""
+	if line.startswith('#'):
+		return 0
+	try:
+		compile(line, '<string>', 'exec')
+		return 0
+	except SyntaxError:
+		try:
+			compile(line + '\n\tpass', '<string>', 'exec')
+			return 1
+		except:
+			pass
+	else:
+		pass
+	return line.endswith(':')
 
-def normalizeIndentation( pySource ):
-	'''
-	Takes a block of code that may be too indented, and moved it all the the left.
-	
+def normalizeIndentation(pySource, tab='\t'):
+	"""Take a block of code that may be too indented, and move it all to the left.
+
 	See PSPUtilsTest for examples.
-	
-	- Winston Wolff
-	'''
-	
-	# split into lines, but keep \n and \r chars.
-	lines = re.findall( "[^\n\r]*[\n\r]*", pySource)
-	
-	# find the line with the least indentation
-	indent = 999	# This should be big enough
-	for line in lines:
 
-		lstripped = line.lstrip()
-		
-		# if line is empty or comment, don't measure the indentation
-		if len(lstripped) == 0 or lstripped[0] == '#':
-			continue
-		indent = min( indent, len(line) - len(lstripped) )
-		
-	# Strip off the first 'indent' characters from each line
+	First written by Winston Wolff.
+	Improved version by Christoph Zwerschke.
+
+	"""
+	print
+	print "------- in ---------------"
+	print pySource
+	print "---------------------------"
+	lines = splitLines(pySource, 1)
+	# Find out which kind of line feeds are used:
+	crlf = ''
+	line0 = lines.pop(0)
+	while line0 and line0[-1] in '\r\n':
+		crlf = crlf + line0[-1]
+		line0 = line0[:-1]
+	# The first line may be stripped completely:
 	strippedLines = []
+	charsToStrip = None
+	# Find the least indentation of the remaining lines:
 	for line in lines:
-	
-		# Remove the first 'indent' whitespace chars, but not \n or \r
-		charsToStrip = 0
-		for i in range(0,min( indent, len(line)) ):
-			if line[i] in ' \t':
-				charsToStrip = charsToStrip+1
-			else:
-				break # don't check any more characters
-			
-		strippedLines.append( line[charsToStrip:] )
-		
-	# write lines back out
-	result = ''.join(strippedLines)
-	
-	return result
+		line = line.rstrip()
+		strippedLines.append(line)
+		if charsToStrip == 0:
+			continue
+		if line != '':
+			s = line.lstrip()
+			if s[0] != '#':
+				i = len(line) - len(s)
+				if charsToStrip is None or i < charsToStrip:
+					charsToStrip = i
+	if charsToStrip is not None:
+		# If there is code on the first line, strip one column less:
+		if line0 and line0[0] != '#' and charsToStrip != 0:
+			charsToStrip = charsToStrip - 1
+		# Strip off the first indent characters from each line:
+		if charsToStrip != 0:
+			lines = []
+			for line in strippedLines:
+				line = line[:charsToStrip].lstrip() + line[charsToStrip:]
+				lines.append(line)
+			strippedLines = lines
+	# Write lines back out:
+	strippedLines.insert(0, line0)
+	pySource = crlf.join(strippedLines)
+	print "----------------out ------------"
+	print pySource
+	print "--------------------------------"
+	return pySource

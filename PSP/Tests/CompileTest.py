@@ -1,7 +1,6 @@
 """
 	Automated tests for PSP Kit
 
-	--------------------------------------------------------------------------------
 	(c) Copyright by Winston Wolff, 2004 http://www.stratolab.com
 
 	Permission to use, copy, modify, and distribute this software and its
@@ -18,7 +17,9 @@
 	FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
 	NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
 	WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
+
 """
+
 import os, sys
 import imp
 import logging
@@ -30,7 +31,6 @@ from StringIO import StringIO
 # There is a circular dependency between AppServer and Application in imports
 # so I have to import both AppServer before Page imports Application.
 import WebKit.AppServer
-
 
 _log = logging.getLogger( __name__ )
 
@@ -44,35 +44,29 @@ if DEBUG:
 class CompileTest(unittest.TestCase):
 
 	def compileString(self, pspSource, classname ):
-		'''
-		Takes a string, compiles it, imports the python file, and returns you
+		'''Compile a string to an object.
+
+		Takes a string, compiles it, imports the Python file, and returns you
 		the Python class object.
 
 		classname = some string so that each file is unique per test case.
 		'''
-
 		# write string to temporary file
 		moduleName = "tmp_CompileTest_"+classname
 		tmpInName = moduleName+".psp"
 		tmpOutName = moduleName+".py"
-
 		_log.debug('Writing PSP source to: "%s"', tmpInName)
 		fp = open( tmpInName, 'w' )
 		fp.write( pspSource )
 		fp.close()
-
 		# Compile PSP into .py file
 		context = Context.PSPCLContext( tmpInName )
 		context.setClassName( classname )
 		context.setPythonFileName( tmpOutName )
-
 		clc = PSPCompiler.Compiler( context )
 		clc.compile()
-
-
 		# Have Python import the .py file.
 		fp = open( tmpOutName )
-
 		try:
 			description = ('.py', 'r', imp.PY_SOURCE)
 			theModule = imp.load_module(moduleName, fp, tmpOutName, description)
@@ -80,81 +74,64 @@ class CompileTest(unittest.TestCase):
 			# Since we may exit via an exception, close fp explicitly.
 			if fp:
 				fp.close()
-
 		if not DEBUG:
 			os.remove( tmpInName )
 			os.remove( tmpOutName )
 			os.remove( moduleName+".pyc" )
-
 		# want to return the class inside the module.
 		theClass = getattr( theModule, classname)
-
 		return theClass
 
-
 	def compileAndRun( self, pspSource, classname ):
-
 		pspClass = self.compileString( pspSource, classname )
 		pspInstance = pspClass()
 		outStream = StringIO()
 		pspInstance._writeHTML( outStream )
 		output = outStream.getvalue()
-
 		return output
 
-
 	def testExpression(self):
-
 		output = self.compileAndRun( 'two plus three is: <%= 2+3 %>', 'testExpression' )
 		self.assertEquals( "two plus three is: 5", output )
 
-
 	def testScript(self):
-
 		output = self.compileAndRun( 'one plus two is: <% res.write( 1+2) %>', 'testScript' )
 		self.assertEquals( "one plus two is: 3", output )
 
 	def testScript_NewLines(self):
-
-		psp    = '''\nthree plus two is: \n<%\nres.write( 3+2) \n%>'''
+		psp = '''\nthree plus two is: \n<%\nres.write( 3+2) \n%>'''
 		expect = '''\nthree plus two is: \n5'''
 		output = self.compileAndRun( psp, 'testScript_NewLines' )
 		self.assertEquals( output, expect )
-
-
-		psp    = '''\nthree plus two is: \n<%\n  res.write( 3+2) \n%>'''
+		psp = '''\nthree plus two is: \n<%\n  res.write( 3+2) \n%>'''
 		expect = '''\nthree plus two is: \n5'''
 		output = self.compileAndRun( psp, 'testScript_NewLines' )
 		self.assertEquals( output, expect )
-
 
 	def testScript_Returns(self):
-		psp    = '''\rthree plus two is: \r<%\rres.write( 3+2) \r%>'''
+		psp = '''\rthree plus two is: \r<%\rres.write( 3+2) \r%>'''
 		expect = '''\nthree plus two is: \n5'''
 		output = self.compileAndRun( psp, 'testScript_Returns' )
 		self.assertEquals( output, expect )
-
-		psp    = '''\rthree plus two is: \r<%\r     res.write( 3+2) \r%>'''
+		psp = '''\rthree plus two is: \r<%\r     res.write( 3+2) \r%>'''
 		expect = '''\nthree plus two is: \n5'''
 		output = self.compileAndRun( psp, 'testScript_Returns' )
 		self.assertEquals( output, expect )
 
 	def testScript_If(self):
-		psp    = '''PSP is <% if True: %>Good<% end %>'''
+		psp = '''PSP is <% if True: %>Good<% end %>'''
 		expect = '''PSP is Good'''
 		output = self.compileAndRun( psp, 'testScript_IfElse' )
 		self.assertEquals( output, expect )
 
-
 	def testScript_IfElse(self):
-		psp    = '''JSP is <% if False: %>Good<% end %><% else: %>Bad<% end %>'''
+		psp = '''JSP is <% if False: %>Good<% end %><% else: %>Bad<% end %>'''
 		expect = '''JSP is Bad'''
 		output = self.compileAndRun( psp, 'testScript_IfElse' )
 		self.assertEquals( output, expect )
 
-
 	def testScript_Blocks(self):
-		psp    = '''
+		psp = '''
 <% for i in range(3): %>
 	<%= i %><br/>
 <% end %>'''
@@ -169,9 +146,8 @@ class CompileTest(unittest.TestCase):
 		output = self.compileAndRun( psp, 'testScript_Blocks' )
 		self.assertEquals( output, expect )
 
-
 	def testScript_Braces(self):
-		psp    = '''
+		psp = '''
 <%@page indentType="braces" %>
 <% for i in range(3): { %>
 	<%= i %><br/>
@@ -187,7 +163,6 @@ class CompileTest(unittest.TestCase):
 		output = self.compileAndRun( psp, 'testScript_Braces' )
 		self.assertEquals( output, expect )
 
-
 	def testPspMethod(self):
 		psp = '''
 		<psp:method name="add" params="a,b">
@@ -197,7 +172,6 @@ class CompileTest(unittest.TestCase):
 		'''
 		output = self.compileAndRun( psp, 'testPspMethod' ).strip()
 		self.assertEquals( "7 plus 8 = 15", output )
-
 
 	def testPspFile(self):
 		psp = '''
@@ -220,5 +194,3 @@ class CompileTest(unittest.TestCase):
 		'''
 		output = self.compileAndRun( psp, 'testPspClass' ).strip()
 		self.assertEquals( "4^2 = 16", output )
-
-
