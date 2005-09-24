@@ -1,30 +1,34 @@
-import string
-#from WebKit.Page import Page
 from PSP.Examples.PSPExamplePage import PSPExamplePage
 import os
 
 class View(PSPExamplePage):
-	"""
+	"""View the source of a PSP page.
+
+	For each PSP example, you will see a sidebar with various menu items,
+	one of which is "View source of <i>example</i>". This link points to the View
+	servlet and passes the filename of the current servlet. The View servlet
+	then loads that PSP file's source code and displays it in the browser for
+	your viewing pleasure.
+
+	Note that if the View servlet isn't passed a PSP filename, it prints the
+	View's docstring which you are reading right now.
 
 	"""
 
 	def writeContent(self):
 		req = self.request()
 		if req.hasField('filename'):
-			self.writeln('<p>', self.__class__.__doc__)
-
 			filename = req.field('filename')
 			basename = os.path.basename(filename)
 			filename = self.request().serverSidePath(basename)
 			if not os.path.exists(filename):
-				self.write("No such file %s exists" % basename)
+				self.write('<p style="color:red">'
+					'No such file %r exists</p>' % basename)
 				return
-
 			text = open(filename).read()
-
-			text = string.replace(text,"<","&lt;")
-			text = string.replace(text,">","&gt;")
-			text = string.replace(text,'\n',"<br>")
-
+			text = text.replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br>')
 			self.write(text)
-			
+		else:
+			doc = self.__class__.__doc__.split('\n', 1)
+			doc[1] = '</p>\n<p>'.join(doc[1].split('\n\n'))
+			self.writeln('<h2>%s</h2>\n<p>%s</p>' % tuple(doc))

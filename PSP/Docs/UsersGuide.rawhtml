@@ -79,7 +79,7 @@ instance of this class will be instantiated to serve requests for that page.</p>
 into the HTML response.  You may include anything that will evaluate to a value that can
 be represented as a string inside the tag.</p>
 
-<a name="4.1.1.1"></a><h5>Example</h5>
+<h5>Example</h5>
 
 <pre class="py">The current time is &lt;%= time.time() %&gt;</pre>
 
@@ -94,7 +94,7 @@ code can be used in Script tags.  Inside a script tag, indentation is up to the 
 just like in regular Python. (More info on blocks below)  The PSP Engine actually just outputs the strings in a Script tag
 into the method body that is being produced by this PSP page.</p>
 
-<a name="4.2.1.1"></a><h5>Example</h5>
+<h5>Example</h5>
 
 <pre class="py">&lt;% for i in range(5):
      &nbsp;&nbsp;&nbsp; res.write("&lt;b&gt;This is number" + str(i) + "&lt;/b&gt;&lt;br&gt;") %&gt;</i> </pre>
@@ -126,7 +126,7 @@ PSP uses a special syntax to handle Python blocks that span script tags.</p>
 comment tag may follow the colon. After this tag, any following HTML is considered to be part
 of the block begun within the previous script tag. To end the block, insert a new script tag with the word "end" as the only statement.</p>
 
-<a name="4.2.3.1"></a><h5>Example of Script/HTML block</h5>
+<h5>Example of Script/HTML block</h5>
 
 <pre class="py">
 &lt;% for i in range(5): %&gt;  #the blocks starts here, no need for indenting the following HTML
@@ -145,7 +145,7 @@ In this case, you need to end the script tag with $%&gt;.
 When a script tag ends with $%&gt;, the PSP Parser will indent the following HTML at the same level as the last line of the script tag.
 To end this level of indentation, just start another script tag. Easy.</p>
 
-<a name="4.2.4.1"></a><h5>Example of Manual Indention Script/HTML block</h5>
+<h5>Example of Manual Indention Script/HTML block</h5>
 
 <pre class="py">
 &lt;% for i in range(5):
@@ -167,7 +167,7 @@ The braces can span multiple script tags. No automatic indentation will occur.
 However, you must use braces for all blocks!
 Tabs and spaces at the start of lines will be ignored and removed!</p>
 
-<a name="4.2.5.1"></a><h5>Example</h5>
+<h5>Example</h5>
 
 <pre class="py">
 This is &lt;i&gt;Straight HTML&lt;/i&gt;&lt;br&gt;
@@ -194,7 +194,7 @@ For example, at the file level, you might do imports statements,
 and some initialization that occurs only when the PSP file is loaded the first time.
 You can even define other classes that are used in your PSP file.</p>
 
-<a name="5.1.1.1"></a><h5>Example</h5>
+<h5>Example</h5>
 
 <pre class="py">
 &lt;psp:file&gt;
@@ -208,7 +208,7 @@ You can even define other classes that are used in your PSP file.</p>
 &lt;/html&gt;
 </pre>
 
-<a name="5.1.1.2"></a><h5>Example</h5>
+<h5>Example</h5>
 
 <p>At the class level you can define methods using ordinary Python syntax instead of the &lt;psp:method &gt; syntax below.</p>
 
@@ -245,7 +245,7 @@ not necessary to start the method definition with indentation, the first level o
 
 <p>To end the method definition block, the close tag <i>&lt;/psp:method&gt;</i> is used.</p>
 
-<a name="5.2.1.1"></a><h5>Example</h5>
+<h5>Example</h5>
 
 <pre class="py">&lt;psp:method name="MyClassMethod" params="var1, var2"&gt;
   import string
@@ -405,7 +405,7 @@ for <b>&lt;%= ... %&gt;</b> expression blocks. The default value is <b>str</b>.
 You might want to use this if certain types need to be formatted in a certain way across an entire page;
 for example, if you want all integers to be formatted with commas like "1,234,567" you could make that happen by specifying a custom formatter.</p>
 
-<a name="6.1.1.1"></a><h5>Example</h5>
+<h5>Example</h5>
 
 <pre class="py">&lt;%@ page imports="MyUtils" %&gt;
 &lt;%@ page formatter="MyUtils.myFormatter" %&gt;</pre></li>
@@ -418,7 +418,7 @@ for example, if you want all integers to be formatted with commas like "1,234,56
 It is generally no problem to include an html file this way. However, if you do not want your include file to be parsed,
 you may use the <i>&lt;psp:include</i> tag described below.</p>
 
-<a name="6.2.1.1"></a><h5>Example</h5>
+<h5>Example</h5>
 
 <pre class="py">&lt;%@ include file="myfile.txt"%&gt; </pre>
 

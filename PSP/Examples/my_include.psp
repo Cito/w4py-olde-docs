@@ -1,4 +1,4 @@
 
-Hello from included file!<br>
+<p>Hello from included file!<p>
 <%@page imports="time" %>
-<%= time.ctime(time.time()) %>
+<p><%= time.ctime(time.time()) %></p>
