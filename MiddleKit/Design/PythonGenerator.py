@@ -493,6 +493,26 @@ class AnyDateTimeAttr:
 				raise TypeError, 'expecting %s type (e.g., %s), but got value %%r of type %%r instead' %% (value, type(value))
 ''' % (dateTimeTypes, self['Type'], dateTimeTypes))
 
+	def writePyGetAsMXDateTime(self, out):
+		if nativeDateTime and mxDateTime and self.setting('ReturnMXDateTimes', False):
+			dateTimeTypes = []
+			typeNames = self.nativeDateTimeTypeName()
+			if not isinstance(typeNames, tuple):
+				typeNames = (typeNames,)
+			for typeName in typeNames:
+				dateTimeTypes.append('datetime.'+typeName)
+			dateTimeTypes = '(' + ', '.join(dateTimeTypes) + ')'
+			out.write('''
+	def %s(self):
+		if isinstance(self._%s, %s):
+		    self._%s = mxDateTime.mktime(self._%s.timetuple())
+		return self._%s
+	''' % (self.pyGetName(), self.name(), dateTimeTypes, self.name(), self.name(), self.name()))
+		else:
+			out.write('''
+	def %s(self):
+		return self._%s
+	''' % (self.pyGetName(), self.name()))
 
 class DateAttr:
 
@@ -502,6 +522,8 @@ class DateAttr:
 	def mxDateTimeTypeName(self):
 		return 'DateTimeType'
 
+	def writePyGet(self, out):
+		self.writePyGetAsMXDateTime(out)
 
 class TimeAttr:
 
@@ -531,6 +553,8 @@ class DateTimeAttr:
 	def mxDateTimeTypeName(self):
 		return 'DateTimeType'
 
+	def writePyGet(self, out):
+		self.writePyGetAsMXDateTime(out)
 
 class ObjRefAttr:
 
