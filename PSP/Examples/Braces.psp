@@ -35,3 +35,5 @@ return "Braces Test"
 <% } %></ul>
 
 <p>Click on &quot;View source&quot; over on the left to see the source for this page.</p>
+
+<p>See also the <a href="PSPDocs.psp#Braces">PSP documentation on braces</a>.</p>

@@ -21,7 +21,7 @@ for an implementation of<br>
 <span style="color:navy">Python Server Pages</span>.</h4>
 
 <p align="center"><span style="color:navy;background-color:yellow;padding:1pt 6pt">This version
-of the test page uses <a href="PSPDocs.psp#Braces"><b>braces</b></a> as the indent type.</span></p>
+of the test page uses <a href="Braces"><b>braces</b></a> as the indent type.</span></p>
 
 <p align="center">Read the <a href="PSPDocs.psp"><strong>PSP documentation</strong></a></strong>.
 See the <a href="View.py?filename=<%=os.path.basename(self.request().serverSidePath())%>"><strong>source for this page</strong></a>.</p>
