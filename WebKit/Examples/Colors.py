@@ -2,7 +2,7 @@ import os
 from ExamplePage import ExamplePage
 
 class Colors(ExamplePage):
-	"""Colors example.
+	"""Colors demo.
 
 	This class is a good example of caching. The color table that
 	this servlet creates never changes, so the servlet caches this in
@@ -33,8 +33,9 @@ class Colors(ExamplePage):
 	def writeContent(self):
 		self.writeln('<div style="text-align:center">')
 		self.write('''
+			<h3>Color Table Demo</h3>
 			<form>
-				bgcolor: <input type="next" name="bgcolor" value="%s">
+				Background color: <input type="next" name="bgcolor" value="%s">
 				<input type="submit" value="Go">
 			</form>
 		''' % (self._bgcolor))

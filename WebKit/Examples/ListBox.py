@@ -1,14 +1,15 @@
 from ExamplePage import ExamplePage
-import string
 from types import ListType
 
 
 class ListBox(ExamplePage):
-	"""
-	This page provides a list box interface with controls for changing
-	it's size and adding and removing items.
+	"""List box example.
+
+	This page provides a list box interface with controls
+	for changing its size and adding and removing items.
 
 	The source is a good example of how to use awake() and actions.
+
 	"""
 
 	def awake(self, transaction):
@@ -16,64 +17,51 @@ class ListBox(ExamplePage):
 		sess = transaction.session()
 		if not sess.hasValue('form'):
 			sess.setValue('form', {
-				'list':       [],
-				'height':     10,
-				'width':     250,
-				'newCount':    1,
-			} )
+				'list':      [],
+				'height':    10,
+				'width':    250,
+				'newCount':   1,
+			})
 		self._error = None
 
 	def writeContent(self):
 		sess = self.session()
-
-		# Debugging
-		if 0:
-			self.writeln('<br>fields = ', self.htmlEncode(str(self.request().fields())))
-			self.writeln('<br>vars = ', self.htmlEncode(str(self.vars())))
-			self.writeln('<p> <br>')
-
-		# Intro text is provided by our class' doc string
-		self.writeln('<center>', string.replace(self.__class__.__doc__, '\n', '<br>'), '</center>')
-
+		self.writeln('<div style="text-align:center">')
+		if 0: # Debugging
+			self.writeln('<p>fields = %s</p>' % self.htmlEncode(str(self.request().fields())))
+			self.writeln('<p>vars = %s</p>' % self.htmlEncode(str(self.vars())))
+		# Intro text is provided by our class' doc string:
+		intro = self.__class__.__doc__.split('\n\n')
+		self.writeln('<h2>%s</h2>' % intro.pop(0))
+		for s in intro:
+			self.writeln('<p>%s</p>' % s.replace('\n', '<br>'))
 		if not self._error:
 			self._error = '&nbsp;'
-		self.writeln('<p><center><font color=red>%s</font></center>' % self._error)
+		self.writeln('<p style="color:red">%s</p>' % self._error)
 		self.writeln('''
-<center>
-<form method=post>
-<select multiple name=list size=%(height)d width=%(width)d>
+<form method="post">
+<select multiple="yes" name="list" size="%(height)d"
+style="width:%(width)dpt;text-align:center">
 ''' % sess.value('form'))
 		index = 0
 		vars = self.vars()
 		for item in vars['list']:
-			self.writeln('<option value=%d>%s</option>' % (index, self.htmlEncode(item['name'])))
+			self.writeln('<option value="%d">%s</option>' % (index, self.htmlEncode(item['name'])))
 			index = index + 1
-
 		self.writeln('''
 </select>
-
-<br>
-
-<input name=_action_new type=submit value=New>
-<!--
-<input name=_action_edit type=submit value=Edit>
-<input name=_action_view type=submit value=View>
--->
-<input name=_action_delete type=submit value=Delete>
-
-<br>
-
-<input name=_action_taller type=submit value=Taller>
-<input name=_action_shorter type=submit value=Shorter>
-
-<br>
-
-<input name=_action_wider type=submit value=Wider>
-<input name=_action_narrower type=submit value=Narrower>
-<br><i><b>Wider</b> and <b>Narrower</b> work on Netscape, but not on IE.</i>
-
+<p>
+<input name="_action_new" type="submit" value="New">
+<input name=_action_delete type="submit" value=Delete>
+&nbsp; &nbsp; &nbsp;
+<input name="_action_taller" type="submit" value=Taller>
+<input name="_action_shorter" type="submit" value=Shorter>
+&nbsp; &nbsp; &nbsp;
+<input name="_action_wider" type="submit" value=Wider>
+<input name="_action_narrower" type="submit" value=Narrower>
+</p>
 </form>
-</center>
+</div>
 ''')
 
 	def heightChange(self):
@@ -86,7 +74,7 @@ class ListBox(ExamplePage):
 	## Commands ##
 
 	def vars(self):
-		""" Returns a dictionary of values, stored in the session, for this page only. """
+		"""Returns a dictionary of values, stored in the session, for this page only."""
 		return self.session().value('form')
 
 	def new(self):
@@ -95,24 +83,18 @@ class ListBox(ExamplePage):
 		vars['newCount'] = vars['newCount'] + 1
 		self.writeBody()
 
-	def edit(self):
-		self.writeBody() # @@ 2000-06-01 ce: not implemented
-
-	def view(self):
-		self.writeBody() # @@ 2000-06-01 ce: not implemented
-
 	def delete(self):
-		""" Delete the selected items in the list, whose indices are passed in through the form. """
+		"""Delete the selected items in the list whose indices are passed in through the form."""
 		vars = self.vars()
 		req = self.request()
 		if req.hasField('list'):
 			indices = req.field('list')
 			if type(indices) is not ListType:
 				indices = [indices]
-			indices = map(lambda x: int(x), indices) # convert strings to ints
+			indices = map(int, indices) # convert strings to ints
 			indices.sort() # sort...
 			indices.reverse() # in reverse order
-			# remove the objects
+			# remove the objects:
 			for index in indices:
 				del vars['list'][index]
 		else:
@@ -126,7 +108,7 @@ class ListBox(ExamplePage):
 
 	def shorter(self):
 		vars = self.vars()
-		if vars['height']>2:
+		if vars['height'] > 2:
 			vars['height'] = vars['height'] - self.heightChange()
 		self.writeBody()
 
@@ -137,7 +119,7 @@ class ListBox(ExamplePage):
 
 	def narrower(self):
 		vars = self.vars()
-		if vars['width']>=60:
+		if vars['width'] >= 60:
 			vars['width'] = vars['width'] - self.widthChange()
 		self.writeBody()
 
@@ -145,4 +127,5 @@ class ListBox(ExamplePage):
 	## Actions ##
 
 	def actions(self):
-		return ExamplePage.actions(self) + ['new', 'edit', 'view', 'delete', 'taller', 'shorter', 'wider', 'narrower']
+		return ExamplePage.actions(self) + \
+			['new', 'delete', 'taller', 'shorter', 'wider', 'narrower']

@@ -21,7 +21,7 @@ class View(ExamplePage):
 			trans = self.transaction()
 			fn = req.field('filename')
 			if os.sep in fn:
-				self.write('<p style="color:red">'
+				self.write('<h3 style="color:red">Error</h3><p>'
 					'Cannot request a file outside of this directory %r</p>' % fn)
 				return
 			fn = self.request().serverSidePath(fn)
