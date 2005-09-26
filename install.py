@@ -55,7 +55,7 @@ class Installer:
 
 	## Running the installation ##
 
-	def run(self, verbose=0, passprompt=1, defaultpass=''):
+	def run(self, verbose=0, passprompt=1, defaultpass='', keepdocs=0):
 		self._verbose = verbose
 		self.printMsg = verbose and self._printMsg or self._nop
 		log = []
@@ -68,7 +68,7 @@ class Installer:
 			if not self.checkPyVersion() or not self.checkThreading():
 				return
 			self.detectComponents()
-			self.installDocs()
+			self.installDocs(keepdocs)
 			self.backupConfigs()
 			self.compileModules()
 			self.fixPermissions()
@@ -230,12 +230,12 @@ class Installer:
 		print 'Password replaced successfully.'
 		print
 
-	def installDocs(self):
+	def installDocs(self, keep):
 		self.processHtmlDocFiles()
-		self.processPyTemplateFiles()
+		self.processPyTemplateFiles(keep)
 		self.createBrowsableSource()
 		self.createComponentIndex()
-		self.createComponentIndexes()
+		self.createComponentIndexes(keep)
 		self.createContexts()
 
 	def processHtmlDocFiles(self):
@@ -248,15 +248,19 @@ class Installer:
 				self.processHtmlDocFile(htmlFile)
 		print
 
-	def processPyTemplateFiles(self):
+	def processPyTemplateFiles(self, keep):
 		print 'Processing phtml doc files...'
+		if keep:
+			print 'The templates will not be removed.'
+		else:
+			print 'The templates will be removed afterwards.'
 		for inFile in glob('Docs/*.phtml'):
 			if not os.path.splitext(inFile)[0].endswith('OfComponent'):
-				self.processPyTemplateFile(inFile, self._props)
+				self.processPyTemplateFile(inFile, self._props, keep)
 		for comp in self._comps:
 			dir = comp['dirname']
 			for inFile in glob(dir + '/Docs/*.phtml'):
-				self.processPyTemplateFile(inFile, comp)
+				self.processPyTemplateFile(inFile, comp, keep)
 		print
 
 	def createBrowsableSource(self):
@@ -423,10 +427,13 @@ class Installer:
 		ht = self.processPyTemplate(ht, self._props)
 		open('Docs/ComponentIndex.html', 'w').write(ht)
 
-	def createComponentIndexes(self):
+	def createComponentIndexes(self, keep):
 		"""Create start page for all components."""
+		indexfile = 'Docs/indexOfComponent.phtml'
+		if not os.path.exists(indexfile):
+			return
 		print "Creating index.html for all components..."
-		index = open('Docs/indexOfComponent.phtml').read()
+		index = open(indexfile).read()
 		link = '<p><a href="%s">%s</a></p>'
 		for comp in self._comps:
 			comp['webwareVersion'] = self._props['version']
@@ -463,6 +470,8 @@ class Installer:
 			filename = os.path.join(comp['dirname'], 'Docs', 'index.html')
 			ht = self.processPyTemplate(index, comp)
 			open(filename, 'w').write(ht)
+		if not keep:
+			os.remove(indexfile)
 		print
 
 	def createContexts(self):
@@ -595,13 +604,15 @@ Installation is finished.''' % ((os.sep,)*2)
 				self.printMsg('Modifying %s...' % htmlFile)
 				open(htmlFile, 'w').write(page)
 
-	def processPyTemplateFile(self, inFile, props):
+	def processPyTemplateFile(self, inFile, props, keep):
 		"""Process a Python template file."""
 		page = open(inFile).read()
 		page = self.processPyTemplate(page, props)
 		outFile = os.path.splitext(inFile)[0] + '.html'
 		self.printMsg('Creating %s...' % outFile)
 		open(outFile, 'w').write(page)
+		if not keep:
+			os.remove(inFile) # remove template
 
 	def processPyTemplate(self, input, props):
 		"""Process a Python template."""
@@ -646,34 +657,36 @@ def printHelp():
 	print 'Usage: install.py [options]'
 	print 'Install WebWare in the local directory.'
 	print
-	print '  -h, --help                 Print this help screen.'
-	print '  -v, --verbose              Print extra information messages during install.'
-	print '  --password-prompt=no       Do not prompt for the WebKit password during install.'
-	print '  --set-password=...         Set the WebKit password to the given value.'
+	print '  -h, --help            Print this help screen.'
+	print '  -v, --verbose         Print extra information messages during install.'
+	print '  --no-password-prompt  Do not prompt for the WebKit password during install.'
+	print '  --set-password=...    Set the WebKit password to the given value.'
+	print '  --keep-templates      Keep the templates for creating the docs.'
 
 if __name__ == '__main__':
 	import getopt
 	verbose = 0
-	passprompt = defaultpass = None
+	passprompt = defaultpass = keepdocs = None
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], "hv", ["help", "verbose", "password-prompt=", "set-password="])
+		opts, args = getopt.getopt(sys.argv[1:], "hv", ["help", "verbose",
+			"no-password-prompt", "set-password=", "keep-templates"])
 	except getopt.GetoptError:
 		printHelp()
 	else:
 		for o, a in opts:
 			if o in ("-v", "--verbose"):
 				verbose=1
-			if o in ("--password-prompt",):
-				if a in ("1", "yes", "true"):
-					passprompt = 1
-				elif a in ("0", "no", "false"):
-					passprompt = 0
-			if o in ("--set-password",):
+			elif o == "--no-password-prompt":
+				passprompt = 0
+			elif o == "--set-password":
 				defaultpass = a
-			if o in ("-h", "--help", "h", "help"):
+			elif o == '--keep-templates':
+				keepdocs = 1
+			elif o in ("-h", "--help", "h", "help"):
 				printHelp()
 				sys.exit(0)
 		if passprompt is None and defaultpass is None:
 			passprompt = 1
 
-		Installer().run(verbose=verbose, passprompt=passprompt, defaultpass=defaultpass)
+		Installer().run(verbose=verbose, passprompt=passprompt,
+			defaultpass=defaultpass, keepdocs=keepdocs)
