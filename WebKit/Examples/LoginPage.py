@@ -1,75 +1,49 @@
 from ExamplePage import ExamplePage
 from MiscUtils.Funcs import uniqueId
-import string, types
 
 class LoginPage(ExamplePage):
+	"""A log-in screen for the example pages."""
+
 	def title(self):
 		return 'Log In'
 
 	def htBodyArgs(self):
-		return ExamplePage.htBodyArgs(self) + ' onload="document.loginform.username.focus();"' % locals()
+		return ExamplePage.htBodyArgs(self) + \
+			' onload="document.loginform.username.focus();"' % locals()
 
 	def writeContent(self):
-		self.write('''
-<center>
-	<table border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" width="300">
-''')
-
-		extra = self.request().field('extra', None)
-		if not extra and self.request().isSessionExpired() and not self.request().hasField('logout'):
+		self.writeln('<div style="margin-left:auto;margin-right:auto;width:20em">'
+			'<p>&nbsp;</p>')
+		request = self.request()
+		extra = request.field('extra', None)
+		if not extra and request.isSessionExpired() and not request.hasField('logout'):
 			extra = 'You have been automatically logged out due to inactivity.'
 		if extra:
-			self.write('<tr><td align="left">%s</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>' % self.htmlEncode(extra))
-		
+			self.writeln('<p style="color:#333399">%s</p>' % self.htmlEncode(extra))
 		# Create a "unique" login id and put it in the form as well as in the session.
 		# Login will only be allowed if they match.
 		loginid = uniqueId(self)
 		self.session().setValue('loginid', loginid)
-
-		action = self.request().field('action', '')
+		action = request.field('action', '')
 		if action:
-			action = 'action="%s"' % action
-
-		self.write('''
-		<tr>
-			<td align="left">Please log in (use Alice or Bob as the username and password):</td>
-		</tr>
-		<tr>
-			<td>
-				<form method="post" name="loginform" %s>
-					<table border="0" width="100%%" cellpadding="3" cellspacing="0" bgcolor="#cecece" align="left">
-						<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-						<tr>
-							<td align="right">Username</td>
-							<td><input type="TEXT" name="username"></td>
-						</tr>
-						<tr>
-							<td align="right">Password</td>
-							<td><input type="PASSWORD" name="password"></td>
-						</tr>
-						<tr>
-							<td>&nbsp;</td>
-							<td><input type="submit" name="login" value="Login"></td>
-						</tr>
-						<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-					</table>
-					<input type="hidden" name="loginid" value="%s">''' % (action, loginid))
-
+			action = ' action="%s"' % action
+		self.writeln('''<p>Please log in to view the example.
+The username and password is <tt>alice</tt> or <tt>bob</tt>.</p>
+<form method="post" name="loginform"%s>
+<table cellpadding="4" cellspacing="4"
+style="background-color:#CCCCEE;border:1px solid #3333CC;width:20em">
+<tr><td align="right"><label for="username">Username:</label></td>
+<td><input type="text" name="username" value="admin"></td></tr>
+<tr><td align="right"><label for="password">Password:</label></td>
+<td><input type="password" name="password" value=""></td></tr>
+<tr><td colspan="2" align="right"><input type="submit" name="login" value="Login"></td></tr>
+</table>
+<input type="hidden" name="loginid" value="%s">''' % (action, loginid))
 		# Forward any passed in values to the user's intended page after successful login,
 		# except for the special values used by the login mechanism itself
-		for name, value in self.request().fields().items():
-			if name not in 'login loginid username password extra logout'.split():
-				if isinstance(value, types.ListType):
-					for valueStr in value:
-						self.write('''<input type="hidden" name="%s" value="%s">'''
-								   % (self.htmlEncode(name), self.htmlEncode(valueStr)))
-				else:
-					self.write('''<input type="hidden" name="%s" value="%s">'''
-							   % (self.htmlEncode(name), self.htmlEncode(value)))
-		self.write('''
-				</form>
-			</td>
-		</tr>
-	</table>
-</center>
-''')
+		for name, value in request.fields().items():
+			if name not in ('login', 'loginid', 'username', 'password', 'extra', 'logout'):
+				for v in list(value):
+					self.writeln('''<input type="hidden" name="%s" value="%s">'''
+							   % (self.htmlEncode(name), self.htmlEncode(v)))
+		self.writeln('</form>\n<p>&nbsp;</p></div>')

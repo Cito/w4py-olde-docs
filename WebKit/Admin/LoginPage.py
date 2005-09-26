@@ -1,61 +1,38 @@
 from AdminPage import AdminPage
-import string, types, random
+from random import randint
 from time import time, localtime
 
 class LoginPage(AdminPage):
+	"""The log-in screen for the admin pages."""
+
 	def writeContent(self):
 		if self.loginDisabled():
 			self.write(self.loginDisabled())
 			return
-		self.write('''
-<center>
-	<table border="0" cellpadding="0" cellspacing="0" bgcolor="#ffffff" width="300">
-''')
-
+		self.writeln('<div style="margin-left:auto;margin-right:auto;width:20em">'
+			'<p>&nbsp;</p>')
 		extra = self.request().field('extra', None)
 		if extra:
-			self.write('<tr><td align="left">%s</td></tr><tr><td>&nbsp;</td><td>&nbsp;</td></tr>' % self.htmlEncode(extra))
-
-		self.write('''
-		<tr>
-			<td align="left">Please log in to view Administration Pages.  The username is admin.  The password is set in the WebKit/Configs/Application.config file.</td>
-		</tr>
-		<tr>
-			<td>
-				<form method="post">
-					<table border="0" width="100%%" cellpadding="3" cellspacing="0" bgcolor="#cecece" align="left">
-						<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-						<tr>
-							<td align="right">Username</td>
-							<td><input type="TEXT" name="username"></td>
-						</tr>
-						<tr>
-							<td align="right">Password</td>
-							<td><input type="PASSWORD" name="password"></td>
-						</tr>
-						<tr>
-							<td>&nbsp;</td>
-							<td><input type="submit" name="login" value="Login"></td>
-						</tr>
-						<tr><td>&nbsp;</td><td>&nbsp;</td></tr>
-					</table>
-''')
-		for (key, value) in self.request().fields().items():
-			if string.lower(key) not in ('username','password','login','logout','loginid'):
-				if isinstance(value, types.ListType):
-					for v in value:
-						self.writeln('<input type="hidden" name="%s" value="%s">' % (key, v))
-				else:
-					self.writeln('<input type="hidden" name="%s" value="%s">' % (key, value))
+			self.writeln('<p style="color:#333399">%s</p>' % self.htmlEncode(extra))
+		self.writeln('''<p>Please log in to view Administration Pages.
+The username is <tt>admin</tt>. The password has been set during installation and is
+stored in the <tt>Application.config</tt> file in the <tt>WebKit/Configs</tt> directory.</p>
+<form method="post">
+<table cellpadding="4" cellspacing="4" style="background-color:#CCCCEE;border:1px solid #3333CC;width:20em">
+<tr><td align="right"><label for="username">Username:</label></td>
+<td><input type="text" name="username" value="admin"></td></tr>
+<tr><td align="right"><label for="password">Password:</label></td>
+<td><input type="password" name="password" value=""></td></tr>
+<tr><td colspan="2" align="right"><input type="submit" name="login" value="Login"></td></tr>
+</table>''')
+		for name, value in self.request().fields().items():
+			if name.lower() not in ('username', 'password', 'login', 'logout', 'loginid'):
+				for v in list(value):
+					self.writeln('<input type="hidden" name="%s" value="%s">' % (name, v))
 		# Create a "unique" login id and put it in the form as well as in the session.
 		# Login will only be allowed if they match.
-		loginid = string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + str(random.randint(10000, 99999))
+		loginid = ''.join(map(lambda x: '%02d' % x,
+				localtime(time())[:6])) + str(randint(10000, 99999))
 		self.writeln('<input type="hidden" name="loginid" value="%s">' % loginid)
 		self.session().setValue('loginid', loginid)
-		self.write('''
-				</form>
-			</td>
-		</tr>
-	</table>
-</center>
-''')
+		self.writeln('</form>\n<p>&nbsp;</p></div>')

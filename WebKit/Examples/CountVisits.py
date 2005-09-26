@@ -2,6 +2,7 @@ from ExamplePage import ExamplePage
 
 
 class CountVisits(ExamplePage):
+    """Counting visits example."""
 
 	def writeContent(self):
 		count = self.session().value('count', 0) + 1
@@ -14,8 +15,8 @@ class CountVisits(ExamplePage):
 			' <strong style="background-color:yellow">&nbsp;%d&nbsp;</strong>'
 			' time%s.</p>' % (count, plural))
 		self.writeln('<p>This page records your visits using a session object.'
-			' Every time you <a href="javascript:location.reload()">reload</a>'
-			' or revisit this page, the counter will increase.'
+			' Every time you <a href="javascript:location.reload()">reload</a> or'
+			' <a href="CountVisits">revisit</a> this page, the counter will increase.'
 			' If you close your browser, then your session will end and you'
 			' will see the counter go back to 1 on your next visit.</p>')
 		self.writeln('<p>Try hitting <a href="javascript:location.reload()">'

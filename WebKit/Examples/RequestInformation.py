@@ -1,11 +1,14 @@
 from ExamplePage import ExamplePage
-import string
+
 
 class RequestInformation(ExamplePage):
+	"""Request information demo."""
 
 	def writeContent(self):
-		self.writeln("<p>The following table shows the values for various request variables.")
-		self.writeln('<table align=center bgcolor=#EEEEFF border=0 cellpadding=2 cellspacing=2 width=100%>')
+		self.writeln('<h3>Request Variables</h3>')
+		self.writeln('<p>The following table shows the values for various request variables.</p>')
+		self.writeln('<table style="background-color:#EEEEFF;width:100%"'
+			' border="0" cellpadding="2" cellspacing="4" width="100%">')
 		self.dict('HTTPRequest.fields()', self.transaction().request().fields())
 		self.dict('HTTPRequest._environ', self.transaction().request()._environ)
 		self.dict('Cookies', self.transaction().request().cookies())
@@ -15,9 +18,10 @@ class RequestInformation(ExamplePage):
 
 	def pair(self, key, value):
 		valueType = type(value)
-		if valueType is type([])  or  valueType is type(()):
-			value = string.join(map(lambda x: str(x), value), ', ')
-		self.writeln('<tr valign=top><td>%s</td><td>%s</td></tr>' % (key, self.htmlEncode(str(value))))
+		if valueType is type([]) or valueType is type(()):
+			value = ', '.join(map(str, value))
+		self.writeln('<tr valign="top"><td>%s</td><td>%s</td></tr>'
+			% (key, self.htmlEncode(str(value))))
 
 	def list(self, codeString):
 		list = eval(codeString)
@@ -25,9 +29,11 @@ class RequestInformation(ExamplePage):
 		self.pair(codeString, list)
 
 	def dict(self, name, dict):
-		self.writeln('<tr valign=top><td bgcolor=#9999FF colspan=2>%s</td></tr>' % (name))
+		self.writeln('<tr valign="top">'
+			'<td style="background-color:#CCCCFF" colspan="2">%s</td>'
+			'</tr>' % (name))
 		keys = dict.keys()
 		keys.sort()
 		for name in keys:
-			self.writeln('<tr valign=top><td>%s</td><td>%s</td></tr>'
-				 % (name, string.replace(self.htmlEncode(str(dict[name])), '\n', '<br>')))
+			self.writeln('<tr valign="top"><td>%s</td><td>%s</td></tr>' % (name,
+				self.htmlEncode(str(dict[name])).replace('\n', '<br>').replace(',', ', ')))
