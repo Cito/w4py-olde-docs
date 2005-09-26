@@ -72,7 +72,7 @@ h5 { font-size: 12pt; }
 		wr('</td>')
 
 		# content
-		wr('<td style="padding:8pt;vertical-align:top">')
+		wr('<td style="padding:8pt;vertical-align:top;width:100%">')
 		self.writeContent()
 		wr('</td>')
 
