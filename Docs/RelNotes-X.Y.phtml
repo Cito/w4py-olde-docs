@@ -1,0 +1,68 @@
+<% header(name + ' ' + versionString + ' Release Notes') %>
+
+<p><% name %> version <% versionString %> released on <% releaseDate %></p>
+
+<a name="Introduction"></a><h2>Introduction</h2>
+<ul>
+	<li>...</li>
+</ul>
+
+<a name="MajorChanges"></a><h2>Major Changes</h2>
+<ul>
+	<li>...</li>
+</ul>
+
+
+<a name="NewFeatures"></a><h2>New Features</h2>
+<ul>
+	<li>...</li>
+</ul>
+
+
+<a name="Improvements"></a><h2>Improvements and Refinements</h2>
+<ul>
+	<li>...</li>
+</ul>
+
+
+<a name="Security"></a><h2>Security</h2>
+<ul>
+	<li>...</li>
+</ul>
+
+<a name="MinorChanges"></a><h2>Minor API Changes</h2>
+<ul>
+
+<li><p>the semantics for the awake-respond-sleep cycle have changed so
+that Servlet.sleep() is <em>always</em> called, even when an
+unhandled exception occurs in Servlet.awake() or Servlet.respond().
+Servlet.sleep() is called even when Page.endResponse() or
+Page.sendRedirectAndEnd() have been called to end servlet
+processing prematurely.  This behaviour differs from previous
+versions, in which sleep() was called only if awake() succeeded.</p>
+<p>The intent of this change is to guarantee servlets the chance to free
+resources, without having to be prepared to catch all possible exceptions
+within awake() to do so.</p>
+<p>The programmer should ensure that sleep does not attempt to free
+resources which were never allocated, as sleep() may be called even when
+awake() did not succeed.</p>
+<pre class="py">
+	def awake(...):
+		initialize resource A
+		initialize resource B
+
+	def sleep(...):
+		if resource B was initialized:
+			finalize resource B
+		if resource A was initialized:
+			finalize resource A
+</pre></li>
+
+</ul>
+
+<a name="Bugfixes"></a><h2>Bugfixes</h2>
+<ul>
+	<li>...</li>
+</ul>
+
+<% footer() %>

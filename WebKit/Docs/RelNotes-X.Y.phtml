@@ -1,0 +1,143 @@
+<% header(name + ' ' + versionString + ' Release Notes') %>
+
+<p><% name %> version <% versionString %> released on <% releaseDate %></p>
+
+<a name="Introduction"></a><h2>Introduction</h2>
+<ul>
+	<li>...</li>
+</ul>
+
+<a name="MajorChanges"></a><h2>Major Changes</h2>
+<ul>
+	<li>...</li>
+</ul>
+
+<a name="NewFeatures"></a><h2>New Features</h2>
+<ul>
+	<li>Added If-Modified-Since support to HTTPServlet. A Servlet can provide a
+	lastModified() method which returns the modification time of the data.
+	This has been integrated into the UnknownFileType servlet for handling
+	static files.</li>
+	<li>AppServer script detects -u (unbuffered output) and -O (optimize)
+	parameters and passes them to python.  These parameters must precede
+	any other parameters.  Other parameters will be passed to
+	ThreadedAppServer normally.</li>
+	<li>Configuration files can be written as Python modules
+	instead of as python dictionaries.  Any global variables
+	in the module are equivalent to top-level keys in the
+	configuration dictionary.</li>
+	<li>MakeAppWorkDir.py accepts options to point the default
+	context to a location not inside the workdir, so you can
+	keep your code completely separate from the workdir.  It
+	also accepts options to add multiple application library
+	dirs to the Python path.</li>
+	<li>Added 'EnterDebuggerOnException' option to Application.config.
+	If true, and if the AppServer is running from an interactive
+	terminal, an uncaught exception will cause the AppServer to
+	enter the debugger, allowing the developer to call functions,
+	investigate variables, etc.  See python debugger (pdb) docs
+	for more information.  You will certainly want to turn this off
+	when deploying the site.  Defaults to 0 (off).</li>
+	<li>The AppServer now includes an experimental built-in web server.
+	See the InstallGuide for more details.</li>
+	<li>Added new Application.config option "UseCookieSessions" that
+	defaults to True.  If set to False, then a session cookie will
+	never be sent in the response.  Use this along with
+	UseAutomaticPathSessions to ONLY use path sessions and never
+	use cookie sessions.</li>
+	<li>Added HTTPRequest.setSessionId() method which allows the use
+	of session IDs that are sent via means other than cookies or
+	URL parameters.  (An example would be via an XML-RPC parameter.)
+	See the docstring for more details.</li>
+ 	<li>Added DebugAppServer, a single-threaded app server
+	that makes it possible to debug servlets using a standard Python
+	debugger.  I've tested it on Windows only, using both PythonWin
+	and JEdit with the JPyDbg plugin.  See WebKit/DebugAppServer.py for
+	details.</li>
+</ul>
+
+<a name="Improvements"></a><h2>Improvements and Refinements</h2>
+<ul>
+	<li>WebKit.Object now inherits Python's object. This affects all other classes
+	for which Super() should now work.</li>
+	<li>Unknown file types (those for whom mimetypes.guess_type() cannot return
+	something meaningful) are now served up with a mime type of
+	'application/octet-stream' instead of 'text/html'.</li>
+	<li>Fixed incompatibility between the NT Service code and
+  win32all 163.</li>
+	<li>AutoReload no longer catches servlet updates (since
+	servlets can be reloaded without restarting the entire server).</li>
+	<li>XMLRPCServlet now allows xmlrpclib.Fault exceptions to be
+	passed through unmolested.</li>
+	<li><p>Previously, attempting to start an already-running AppServer
+	would fail when it couldn't grab the socket to listen on, but it
+	would have already overwritten the pid file.</p>
+	<p>Now pid file handling is much improved:</p>
+	<ul>
+		<li>The AppServer will refuse to start if it detects that the pid file
+		exists and the process is still running.</li>
+		<li>A stale pid file left over from a crash or forcible termination
+		will be detected and removed.</li>
+		<li>You can override the path of the pid file using the "PidFile"
+		setting in AppServer.config.  By default, the pid is written to the
+		"appserverpid.txt" in the working directory (or webkit path if you're
+		not using a working dir)</li>
+		<li>You can disable the use of the pid file by setting it to None in
+		AppServer.config.  This seems to be a good idea on Windows because
+		Windows often reuses the same pid right away, so if the appserver
+		crashes, and it tries to restart and it happens to reuse the same
+		pid, the restart will fail.</li>
+	</ul></li>
+	<li>Page has been refactored into HTTPContent and Page.  HTTPContent
+	can be used as a base class for servlets which generate non-HTML
+	content.  As Page inherits from HTTPContent (which inherits from
+	HTTPServlet), Page still contains all the methods it previously did,
+	and this change should not require any changes to end-user code.</li>
+	<li>XMLRPCServlets are now allowed to return None as part of their
+	marshalled response.  This improves usability in an all-Python
+	environment at the possible cost of compatibility problems
+	with non-Python clients.  To revert to the old behavior, where an
+	attempt to respond with None caused an exception, add
+	"allow_none = False" to your XMLRPCServlet-derived servlets at class
+	level (adding "self.allow_none = False" in the __init__ should
+	also work).</li>
+	<li>Fixed problem where SessionDynamicStore would unpickle the same object
+	twice.</li>
+	<li>Added transaction() method to RPCServlet so that there's a way for
+	a method to get the transaction object if needed.</li>
+</ul>
+
+<a name="MinorChanges"></a><h2>Minor API Changes</h2>
+<ul>
+	<li>The 'Port' setting in AppServer.config has been deprecated in favor
+	of the new 'AdapterPort' setting.  The 'Port' setting in your config
+	file will still be honored, but you are encouraged to update your
+	AppServer.config as the 'Port' setting will be removed in the future.</li>
+</ul>
+
+<a name="Bugfixes"></a><h2>Bugfixes</h2>
+<ul>
+	<li>Fixed handling of expired sessions.  Previously, if you tried to access an expired session
+	before the session sweeper thread had cleaned it out, you'd get that expired session for
+	one request, but on the second request you'd get a new session.  Now it correctly returns
+	a new empty session with a new session ID on the first request after expiration.</li>
+	<li>New debugging feature: by turning on the configuration
+	variable IncludeErrorLink in Application.config, an [edit] link
+	will be put next to each line in tracebacks.  That link will
+	point to a file of type application/x-webkit-edit-file, which
+	you should configure your browser to run with
+	Webware/bin/editfile.py (and edit editfile.py so that it opens
+	your editor).</li>
+	<li>In WebKit.Page, removed use of the internal method _actionSet()
+	which cached the list of actions for the servlet.  This was redundant
+	code, and its removal allows a servlet to use dynamic actions (i.e. to
+	make the action list dependent on the permissions of the logged-in user).
+	Note that _actionSet() is still used for "old-style" actions to maintain
+	backwards compatibility.</li>
+	<li>Fixed a bug in mod_webkit for Apache 2.X that might have been
+	causing mod_webkit to retry connections to the appserver unnecessarily
+	in some cases.  (This does not apply to the Apache 1.3 version of
+	mod_webkit.)</li>
+</ul>
+
+<% footer() %>

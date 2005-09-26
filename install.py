@@ -40,9 +40,13 @@ class Installer:
 
 	def __init__(self):
 		self._props = PropertiesObject('Properties.py')
-		self._htHeader = self.htFragment('Header')
-		self._htFooter = self.htFragment('Footer')
+		self._props['dirname'] = '.'
 		self._comps = []
+		self._htHeader, self._htFooter = self.htHeaderAndFooter()
+		from DocSupport.pytp import PyTP
+		self._pytp = PyTP()
+		from DocSupport.autotoc import AutoToC
+		self._autotoc = AutoToC()
 
 	## debug printing facility
 	def _nop (self, msg): pass
@@ -135,7 +139,8 @@ class Installer:
 
 	def detectComponents(self):
 		print 'Scanning for components...'
-		dirnames = filter(os.path.isdir, os.listdir(os.curdir))
+		dirnames = filter(lambda dir: not dir.startswith('.')
+				and os.path.isdir(dir), os.listdir(os.curdir))
 		maxLen = max(map(len, dirnames))
 		column = 0
 		for dirname in dirnames:
@@ -147,6 +152,8 @@ class Installer:
 			if os.path.exists(propName):
 				comp = PropertiesObject(propName)
 				comp['dirname'] = dirname
+				if not comp.has_key('releaseDate'):
+					comp['releaseDate'] = self._props['releaseDate']
 				self._comps.append(comp)
 				print 'yes',
 			else:
@@ -191,7 +198,7 @@ class Installer:
 			else:
 				password = defpass
 		try: # read config file
-			data = open('WebKit/Configs/Application.config', 'r').read()
+			data = open('WebKit/Configs/Application.config').read()
 		except IOError:
 			print 'Error reading Application.config file.'
 			print 'Password not replaced, make sure to edit it by hand.'
@@ -224,21 +231,32 @@ class Installer:
 		print
 
 	def installDocs(self):
-		self.processRawFiles()
+		self.processHtmlDocFiles()
+		self.processPyTemplateFiles()
 		self.createBrowsableSource()
 		self.createComponentIndex()
-		self.createIndex()
 		self.createComponentIndexes()
 		self.createContexts()
 
-	def processRawFiles(self):
-		print 'Processing raw html doc files...'
-		from DocSupport.RawToHTML import RawToHTML
-		processor = RawToHTML()
-		processor.main((None, '-r', 'Docs/*.rawhtml'))
+	def processHtmlDocFiles(self):
+		print 'Processing html doc files...'
+		for htmlFile in glob('Docs/*.html'):
+			self.processHtmlDocFile(htmlFile)
 		for comp in self._comps:
 			dir = comp['dirname']
-			processor.main((None, '-r', dir + '/Docs/*.rawhtml'))
+			for htmlFile in glob(dir + '/Docs/*.html'):
+				self.processHtmlDocFile(htmlFile)
+		print
+
+	def processPyTemplateFiles(self):
+		print 'Processing phtml doc files...'
+		for inFile in glob('Docs/*.phtml'):
+			if not os.path.splitext(inFile)[0].endswith('OfComponent'):
+				self.processPyTemplateFile(inFile, self._props)
+		for comp in self._comps:
+			dir = comp['dirname']
+			for inFile in glob(dir + '/Docs/*.phtml'):
+				self.processPyTemplateFile(inFile, comp)
 		print
 
 	def createBrowsableSource(self):
@@ -376,7 +394,8 @@ class Installer:
 	def createComponentIndex(self):
 		"""Create a HTML component index of Webware itself."""
 		print 'Creating ComponentIndex.html...'
-		ht = []
+		ht = ["<% header('Webware Documentation', 'titlebar',"
+			" 'ComponentIndex.css') %>"]
 		wr = ht.append
 		wr('<p>Don\'t know where to start? '
 			'Try <a href="../WebKit/Docs/index.html">WebKit</a>.</p>')
@@ -399,31 +418,15 @@ class Installer:
 				'<td>%(synopsis)s</td></tr>' % comp)
 			row = 1 - row
 		wr('</table>')
+		wr("<% footer() %>")
 		ht = '\n'.join(ht)
-		self.writeDocFile('Webware Component Index',
-			'Docs/ComponentIndex.html', ht, 'ComponentIndex.css')
-
-	def createIndex(self):
-		"""Create start page for Webware docs from fragment."""
-		print 'Creating index.html...'
-		ht = self.htFragment('index')
-		ht = ht % self._props
-		self.writeDocFile('Webware Documentation',
-			'Docs/index.html', ht, 'DocIndex.css')
-		# @@ 2000-12-23 Uh, we sneak in Copyright.html here until we have a
-		# more general mechanism for adding header/footer to various documents
-		ht = self.htFragment('Copyright')
-		self.writeDocFile('Webware Copyright et al',
-			'Docs/Copyright.html', ht)
-		# @@ 2001-03-11 ce: Uh, we sneak in RelNotes.html here, as well
-		ht = self.htFragment('RelNotes')
-		self.writeDocFile('Webware Release Notes',
-			'Docs/RelNotes.html', ht)
+		ht = self.processPyTemplate(ht, self._props)
+		open('Docs/ComponentIndex.html', 'w').write(ht)
 
 	def createComponentIndexes(self):
 		"""Create start page for all components."""
 		print "Creating index.html for all components..."
-		indexFrag = self.htFragment('indexOfComponent')
+		index = open('Docs/indexOfComponent.phtml').read()
 		link = '<p><a href="%s">%s</a></p>'
 		for comp in self._comps:
 			comp['webwareVersion'] = self._props['version']
@@ -457,10 +460,9 @@ class Installer:
 			ht = '\n'.join(ht)
 			comp['htReleaseNotes'] = ht
 			# Write file
-			title = comp['name'] + ' Documentation'
 			filename = os.path.join(comp['dirname'], 'Docs', 'index.html')
-			ht = indexFrag % comp
-			self.writeDocFile(title, filename, ht, 'DocIndex.css')
+			ht = self.processPyTemplate(index, comp)
+			open(filename, 'w').write(ht)
 		print
 
 	def createContexts(self):
@@ -477,7 +479,7 @@ class Installer:
 			config.append("Contexts['%s'] = WebwarePath + '/%s'" % ((docsDir,)*2))
 		config = '\n'.join(config)
 		try: # read config file
-			data = open('WebKit/Configs/Application.config', 'r').read()
+			data = open('WebKit/Configs/Application.config').read()
 		except IOError:
 			print 'Error reading Application.config file.'
 			print 'Docs cannot be made browsable via WebKit.'
@@ -574,29 +576,70 @@ Installation is finished.''' % ((os.sep,)*2)
 			self.printMsg('Making %s...' % dirName)
 			os.makedirs(dirName)
 
-	def htFragment(self, name):
-		"""Return HTML fragment with the given name."""
-		return open(os.path.join('Docs', name+'.htmlf')).read()
+	def htHeaderAndFooter(self):
+		"""Return header and footer from HTML template."""
+		template = open('Docs/Template.html').read()
+		return template.split('\n<!-- page content -->\n', 1)
 
-	def writeDocFile(self, title, filename, contents, style=None):
-		"""Write HTML page with header/footer and optional extra style."""
-		link = '<link rel="stylesheet" href="%s" type="text/css">'
-		stylesheets = ['Doc.css']
-		if style:
-			stylesheets.append(style)
-		css = []
-		for s in stylesheets:
-			if not filename.startswith('Docs'):
-				s = '../../Docs/' + s
-			s = link % s
-			css.append(s)
-		css = '\n'.join(css)
-		values = locals()
-		file = open(filename, 'w')
-		file.write(self._htHeader % values)
-		file.write(contents)
-		file.write(self._htFooter % values)
-		file.close()
+	def processHtmlDocFile(self, htmlFile):
+		"""Process a HTML file."""
+		txtFile = os.path.splitext(htmlFile)[0] + '.txt'
+		if os.path.exists(txtFile):
+			# this has been probably created with docutils
+			page = open(htmlFile).read()
+			if page.find('<meta name="generator" content="Docutils') > 0 \
+				and page.find('<h1 class="title">') > 0:
+				page = page.replace('<h1 class="title">',
+					'<h1 class="header">')
+				page = page.replace('</body>\n</html>', self._htFooter)
+				self.printMsg('Modifying %s...' % htmlFile)
+				open(htmlFile, 'w').write(page)
+
+	def processPyTemplateFile(self, inFile, props):
+		"""Process a Python template file."""
+		page = open(inFile).read()
+		page = self.processPyTemplate(page, props)
+		outFile = os.path.splitext(inFile)[0] + '.html'
+		self.printMsg('Creating %s...' % outFile)
+		open(outFile, 'w').write(page)
+
+	def processPyTemplate(self, input, props):
+		"""Process a Python template."""
+		global scope
+		def header(title, titleclass=None, style=None):
+			"""Get the header of a document."""
+			if not titleclass:
+				titleclass = 'header'
+			titleclass = ' class="%s"' % titleclass
+			link = '<link rel="stylesheet" href="%s" type="text/css">'
+			stylesheets = ['Doc.css']
+			if style and style.endswith('.css'):
+				stylesheets.append(style)
+				style = None
+			css = []
+			for s in stylesheets:
+				if not scope['dirname'].startswith('.'):
+					s = '../../Docs/' + s
+				s = link % s
+				css.append(s)
+			if style:
+				css.extend(('<style type="text/css">',
+					'<!--', style, '-->', '</style>'))
+			css = '\n'.join(css)
+			return scope['htHeader'] % locals()
+		def footer():
+			"""Get the footer of a document."""
+			return scope['htFooter']
+		scope = props.copy()
+		try:
+			scope = dict(props)
+		except NameError: # workaround for Python < 2.2
+			scope = {}
+			for k in props.keys():
+				scope[k] = props[k]
+		scope.update({'header': header, 'htHeader': self._htHeader,
+				'footer': footer, 'htFooter': self._htFooter})
+		return self._autotoc.process(self._pytp.process(input, scope))
 
 
 def printHelp():
