@@ -1,11 +1,5 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-
-<head>
-<link rel="stylesheet" href="../../Docs/Doc.css" type="text/css">
-<style type="text/css">
-<!--
-td.methodName {
+<% header('Introduction to MiddleKit', None,
+'''td.methodName {
 	font-size: 90%;
 	vertical-align: top;
 }
@@ -20,22 +14,12 @@ td.description {
 span.bigPoint {
 	font-size: 90%;
 	font-weight: bolder;
-}
--->
-</style>
-<title>MiddleKit Documentation (Webware for Python)</title>
-</head>
+}''')
+%>
 
-<body>
+<p class="right"><% name %> version <% versionString %></p>
 
-<h1>Introduction to MiddleKit</h1>
-
-<p>Version <!-- version --> X.Y <!-- /version -->
-Webware for Python <!-- version --> X.Y <!-- /version --></p>
-
-{
-'class': 'AutoToC',
-}
+<!-- contents -->
 
 
 <a name="AboutMidTier"></a><h2>About the Middle Tier</h2>
@@ -224,5 +208,4 @@ Webware for Python <!-- version --> X.Y <!-- /version --></p>
 
 <p>Your next step is to read the <a href="QuickStart.html">Quick Start Guide</a> which shows step-by-step how to create and use an object model. You could even start building your custom application by following the guide as you read.</p>
 
-</body>
-</html>
+<% footer() %>

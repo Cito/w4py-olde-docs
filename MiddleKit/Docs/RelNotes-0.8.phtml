@@ -1,13 +1,4 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-<head>
-<link rel="stylesheet" href="../../Docs/Doc.css" type="text/css">
-<title>MiddleKit 0.8 Release Notes</title>
-</head>
-
-<body>
-
-<h1>MiddleKit 0.7 Release Notes</h1>
+<% header(name + ' 0.8 Release Notes') %>
 
 <p>Webware for Python 0.8</p>
 
@@ -44,5 +35,4 @@ Trade.initialStop dangles with value Stop.97</pre>
 	<li>The <span class="filename">Classes.csv</span> text file is now cached as a binary pickle file named <span class="filename">Classes.pickle.cache</span>. This reduces subsequent load times by about 40%. The cache will be ignored if it can't be read, is older than the CSV file, has a different Python version, etc. You don't normally even need to think about this, but if for some reason you would like to turn off the use of the cache, you can do so via the <span class="name">UsePickledClassesCache</span> <a href="UsersGuide.html#Configuration">setting</a>.</li>
 </ul>
 
-</body>
-</html>
+<% footer() %>

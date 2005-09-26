@@ -1,11 +1,5 @@
-<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
-<html>
-
-<head>
-<link rel="stylesheet" href="../../Docs/Doc.css" type="text/css">
-<style type="text/css">
-<!--
-span.menuCmd {
+<% header('MiddleKit Quick Start', None,
+'''span.menuCmd {
 	font-size: smaller;
 	font-weight: bolder;
 }
@@ -37,22 +31,12 @@ td.dataTable1 {
 td.dataTable2 {
 	background-color: #EEE;
 	white-space: nowrap;
-}
--->
-</style>
-<title>MiddleKit Quick Start (Webware for Python)</title>
-</head>
+}''')
+%>
 
-<body>
+<p class="right"><% name %> version <% versionString %></p>
 
-<h1>MiddleKit Quick Start</h1>
-
-<p>Version <!-- version --> X.Y <!-- /version --><br>
-Webware for Python <!-- version --> X.Y <!-- /version --></p>
-
-{
-'class': 'AutoToC',
-}
+<!-- contents -->
 
 
 <a name="WhatYouNeed"></a><h2>What you need</h2>
@@ -66,7 +50,7 @@ Webware for Python <!-- version --> X.Y <!-- /version --></p>
 </ul>
 
 
-<a name=CreateObjModel></a><h2>Create an object model</h2>
+<a name="CreateObjModel"></a><h2>Create an object model</h2>
 
 <p>Our example will be an application for tracking "videos", such as movies and TV series. Feel free to create your own application as you step through this guide to learn how to use MiddleKit (MK).</p>
 
@@ -477,5 +461,4 @@ from Middle.Role import Role
 
 <p>Your next steps are to read the <a href="UsersGuide.html">User's Guide</a> which contains more information about using MiddleKit, and build your own MiddleKit application.</p>
 
-</body>
-</html>
+<% footer() %>
