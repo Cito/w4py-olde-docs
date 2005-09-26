@@ -168,11 +168,11 @@ class PSPParser:
 	checklist.append(checkDirective)
 
 	def checkEndBlock(self, handler, reader):
-		OPEN_SCRIPT='<%'
-		CLOSE_SCRIPT='%>'
-		CLOSE_SCRIPT2='$%>'
-		CENTER_SCRIPT='end'
-		start=reader.Mark()
+		OPEN_SCRIPT = '<%'
+		CLOSE_SCRIPT = '%>'
+		CLOSE_SCRIPT2 = '$%>'
+		CENTER_SCRIPT = 'end'
+		start = reader.Mark()
 		if reader.Matches(OPEN_SCRIPT):
 			reader.Advance(len(OPEN_SCRIPT))
 			reader.skipSpaces()
@@ -200,7 +200,7 @@ class PSPParser:
 		"""The main thing we're after. Check for embedded scripts."""
 		OPEN_SCRIPT = '<%'
 		CLOSE_SCRIPT = '%>'
-		attrs=None
+		attrs = None
 		end_open = None
 		if reader.Matches(OPEN_SCRIPT):
 			open = OPEN_SCRIPT
@@ -308,7 +308,7 @@ class PSPParser:
 		if reader.Matches(OPEN_METHOD):
 			start = reader.Mark()
 			reader.Advance(len(OPEN_METHOD))
-			attrs=reader.parseTagAttributes()
+			attrs = reader.parseTagAttributes()
 			# PSPUtils.checkAttributes('method',attrs,validAttributes)
 			reader.skipSpaces()
 			if not reader.Matches(CLOSE_METHOD_3):

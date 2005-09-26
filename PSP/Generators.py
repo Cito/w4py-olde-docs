@@ -138,7 +138,7 @@ class ScriptGenerator(GenericGenerator):
 		writer.printChars('\n')
 		# Check for a block:
 		# lastline = string.splitfields(PSPUtils.removeQuotes(self.chars),'\n')[-1]
-		commentstart = string.find(lastline,'#')
+		commentstart = string.find(lastline,'#') # @@ this fails if '#' part of string
 		if commentstart > 0:
 			lastline = lastline[:commentstart]
 		blockcheck=string.rstrip(lastline)
