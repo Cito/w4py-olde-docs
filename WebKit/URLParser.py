@@ -18,6 +18,7 @@ import re, os, sys
 from MiscUtils.ParamFactory import ParamFactory
 import warnings
 from WebKit.HTTPExceptions import *
+from WebUtils.Funcs import urlDecode
 import AppServer
 
 # Legal characters for use in a module name -- used when turning
@@ -308,6 +309,9 @@ class _FileParser(URLParser):
 		for more information.
 		"""
 
+		# First decode the URL, since we are dealing with filenames here:
+		requestPath = urlDecode(requestPath)
+
 		# print "FP(%r) parses %r" % (self._path, requestPath)
 
 		result = self.parseInit(trans, requestPath)
@@ -474,8 +478,7 @@ class _FileParser(URLParser):
 		a Python servlet, etc.
 		"""
 
-
-		# if requestPath is empty, then we're missing the trailing /
+		# If requestPath is empty, then we're missing the trailing slash:
 		if not requestPath:
 			raise HTTPMovedPermanently(webkitLocation=trans.request().urlPath() + "/")
 		if requestPath == '/':
