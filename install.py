@@ -594,10 +594,15 @@ Installation is finished.''' % ((os.sep,)*2)
 		"""Process a HTML file."""
 		txtFile = os.path.splitext(htmlFile)[0] + '.txt'
 		if os.path.exists(txtFile):
-			# this has been probably created with docutils
+			# A text file with the same name exists:
 			page = open(htmlFile).read()
 			if page.find('<meta name="generator" content="Docutils') > 0 \
 				and page.find('<h1 class="title">') > 0:
+				# This has obvisouly been created with docutils; modify it
+				# to match style, header and footer of other the other docs.
+				page = page.replace(
+					'<link rel="stylesheet" href="default.css"',
+					'<link rel="stylesheet" href="../../Docs/Doc.css"')
 				page = page.replace('<h1 class="title">',
 					'<h1 class="header">')
 				page = page.replace('</body>\n</html>', self._htFooter)
