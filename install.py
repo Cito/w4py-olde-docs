@@ -599,7 +599,7 @@ Installation is finished.''' % ((os.sep,)*2)
 			if page.find('<meta name="generator" content="Docutils') > 0 \
 				and page.find('<h1 class="title">') > 0:
 				# This has obvisouly been created with docutils; modify it
-				# to match style, header and footer of other the other docs.
+				# to match style, header and footer of all the other docs.
 				page = page.replace(
 					'<link rel="stylesheet" href="default.css"',
 					'<link rel="stylesheet" href="../../Docs/Doc.css"')
