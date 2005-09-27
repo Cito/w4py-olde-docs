@@ -1,4 +1,5 @@
 Source
+__init__.*
 index.html
-StyleSheet.css
-GenIndex.css
+RelNotes*.html
+UsersGuide.html

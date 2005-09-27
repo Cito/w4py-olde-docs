@@ -1,2 +1,4 @@
-*.pyc *.pyo *.pyd
-
+*.pyc
+*.pyo
+*.pyd
+install.log
