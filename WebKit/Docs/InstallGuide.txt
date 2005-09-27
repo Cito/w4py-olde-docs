@@ -825,7 +825,7 @@ Here's what the files and directories are for:
 ``WebKit.cgi``:
     A CGI script/adapter for accessing the AppServer here. You can still use
     the other adapters, but most of them don't need to be configured for the
-    individual applications. I still recommend mod_webkit or wkcgi.
+    individual applications. I still recommend ``mod_webkit`` or ``wkcgi``.
 ``MyContext``:
     The directory for your default context. This is where you put your servlets.
     you can change its name and location with the ```-c`` and ``-d`` options.
@@ -836,7 +836,7 @@ Here's what the files and directories are for:
 ``Lib``:
     An example for an application-specific library package that can be created
     ``-l`` option (in this case, ``-l Lib``. Import modules from this directory
-    like ``from lib.SitePage import SitePage``.
+    like ``from Lib.SitePage import SitePage``.
 
 
 AppServer Notes
