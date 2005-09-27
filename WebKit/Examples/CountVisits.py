@@ -2,7 +2,7 @@ from ExamplePage import ExamplePage
 
 
 class CountVisits(ExamplePage):
-    """Counting visits example."""
+	"""Counting visits example."""
 
 	def writeContent(self):
 		count = self.session().value('count', 0) + 1
