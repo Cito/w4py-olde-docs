@@ -217,7 +217,10 @@ def main(args=None):
 	# Remove the package component in the name of this module,
 	# because otherwise the package path would be used for imports, too:
 	global __name__
-	__name__ = __name__.split('.')[-1]
+	name = __name__.split('.')[-1]
+	sys.modules[name] = sys.modules[__name__]
+	del sys.modules[__name__]
+	__name__ = name
 	# Check the validity of the Webware directory:
 	sysPath = sys.path # memorize the standard Python search path
 	sys.path = [webwareDir] # now include only the Webware directory
