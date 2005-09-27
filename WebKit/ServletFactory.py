@@ -2,7 +2,8 @@ from Common import *
 from WebKit.Servlet import Servlet
 import sys
 from types import ClassType, BuiltinFunctionType
-import ImportSpy as imp   # ImportSpy provides find_module and load_module
+from keyword import iskeyword
+import ImportSpy as imp # provides find_module and load_module
 import threading
 
 
@@ -79,7 +80,6 @@ class ServletFactory(Object):
 		Clear any caches and start fesh.
 		"""
 		raise AbstractError, self.__class__
-
 
 	def importAsPackage(self, transaction, serverSidePathToImport):
 		"""
@@ -300,7 +300,7 @@ class ServletFactory(Object):
 
 class PythonServletFactory(ServletFactory):
 	"""
-	This is the factory for ordinary, Python servlets whose
+	This is the factory for ordinary Python servlets whose
 	extensions are empty or .py. The servlets are unique per file
 	since the file itself defines the servlet.
 	"""
@@ -315,23 +315,24 @@ class PythonServletFactory(ServletFactory):
 		# Import the module as part of the context's package
 		module = self.importAsPackage(transaction, path)
 
-		# Compute the potential names for the servlet
+		# The class name is expected to be the same as the servlet name:
 		name = os.path.splitext(os.path.split(path)[1])[0]
-		potentialNames = [name]
-		# So you can have a url with a dash. url "foo-bar" maps to Python identifier "foo_bar":
-		potentialNames.append(name.replace('-', '_'))
-		# So you can have a url that ends in a Python reserved word. url "in" maps to Python identifier "in_":
-		potentialNames.append(name+'_')
-
-		# Extract the class
-		theClass = None
-		for name in potentialNames:
-			theClass = getattr(module, name, None)  # Pull the servlet class out of the module
-			if theClass is not None:
-				break
-		if theClass is None:
-			raise ValueError, 'Cannot find expected servlet class in %r. Looking for one of these: %s' % (
-				path, ', '.join([repr(n) for n in potentialNames]))
+		# Check whether such a class exists in the servlet module:
+		if not hasattr(module, name):
+			# If it does not exist, maybe the name has to be mangled.
+			# Servlet names may have dashes or blanks in them, but classes not.
+			# So we automatically translate dashes blanks to underscores:
+			name = name.replace('-', '_').replace(' ', '_')
+			# You may also have a servlet name that is a Python reserved word.
+			# Automatically append an underscore in these cases:
+			if iskeyword(name):
+				name = name + '_'
+			# If the mangled name does not exist either, report an error:
+			if not hasattr(module, name) is None:
+				raise ValueError, \
+					'Cannot find expected servlet class %r in %r.' % (name, path)
+		# Pull the servlet class out of the module:
+		theClass = getattr(module, name)
 
 		# new-style classes aren't ClassType, but they
 		# are okay to use.  They are subclasses of
@@ -347,4 +348,3 @@ class PythonServletFactory(ServletFactory):
 			       or isinstance(theClass, type)
 		assert issubclass(theClass, Servlet)
 		return theClass
-
