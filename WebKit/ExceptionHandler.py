@@ -1,5 +1,5 @@
 from Common import *
-import string, time, traceback, types, random, sys, MimeWriter, smtplib, StringIO
+import time, traceback, types, random, sys, MimeWriter, smtplib, StringIO
 from time import asctime, localtime
 from MiscUtils.Funcs import dateForEmail
 from WebUtils.HTMLForException import HTMLForException
@@ -11,7 +11,8 @@ class singleton: pass
 
 
 class ExceptionHandler(Object):
-	"""
+	"""Exception handling.
+
 	ExceptionHandler is a utility class for Application that is created
 	to handle a particular exception. The object is a one-shot deal.
 	After handling an exception, it should be removed.
@@ -35,7 +36,7 @@ class ExceptionHandler(Object):
 	.. inline:: writeTitle
 	.. inline:: writeDict
 	.. inline:: writeTable
-	.. inline: writeAttrs
+	.. inline:: writeAttrs
 
 	Derived classes must not assume that the error occured in a
 	transaction.  self._tra may be None for exceptions outside
@@ -61,13 +62,13 @@ class ExceptionHandler(Object):
 
 	You can also control the errors with settings in
 	``Application.config``
-	"""
 
-	hideValuesForFields = ['creditcard', 'credit card', 'cc', 'password', 'passwd']
-		# ^ keep all lower case to support case insensitivity
+	"""
+	# keep these lower case to support case insensitivity:
+	hideValuesForFields = ['password', 'passwd', 'pwd',
+		'creditcard', 'credit card', 'cc']
 	if 0: # for testing
 		hideValuesForFields.extend('application uri http_accept userid'.split())
-
 	hiddenString = '*** hidden ***'
 
 
@@ -75,13 +76,13 @@ class ExceptionHandler(Object):
 
 	def __init__(self, application, transaction, excInfo,
 				 formatOptions=None):
-		"""
-		ExceptionHandler instances are created anew for
-		each exception.  Instantiating ExceptionHandler
-		completes the process -- the caller need not
-		do anything else.
-		"""
+		"""Create an exception handler instance.
 
+		ExceptionHandler instances are created anew for each exception.
+		Instantiating ExceptionHandler completes the process --
+		the caller need not	do anything else.
+
+		"""
 		Object.__init__(self)
 
 		# Keep references to the objects
@@ -102,14 +103,14 @@ class ExceptionHandler(Object):
 		# @@ 2000-05-09 ce: Maybe a fresh transaction and
 		# response should always be made for that purpose
 
-		## @@ 2003-01-10 sd: This requires a transaction which
-		## we do not have.
+		# @@ 2003-01-10 sd: This requires a transaction which
+		# we do not have.
 
-		## Making remaining code safe for no transaction.
-		##
-                ##if self._res is None:
-		##	self._res = HTTPResponse()
-		##	self._tra.setResponse(self._res)
+		# Making remaining code safe for no transaction.
+		#
+		# if self._res is None:
+		# 	self._res = HTTPResponse()
+		# 	self._tra.setResponse(self._res)
 
 		# Cache MaxValueLengthInExceptionReport for speed
 		self._maxValueLength = self.setting('MaxValueLengthInExceptionReport')
@@ -120,70 +121,60 @@ class ExceptionHandler(Object):
 		# Get to work
 		self.work()
 
-	"""
-	**Accessors**
-	"""
+
+	## Accessors ##
 
 	def setting(self, name):
-		"""
-		Settings are inherited from Application.
-		"""
+		"""Settings are inherited from Application."""
 		return self._app.setting(name)
 
 	def servletPathname(self):
-		"""
-		The full filesystem path for the servlet.
-		"""
-
+		"""The full filesystem path for the servlet."""
 		try:
 			return self._tra.request().serverSidePath()
 		except:
-
 			return None
 
 	def basicServletName(self):
-		"""
-		The base name for the servlet (sans directory).
-		"""
+		"""The base name for the servlet (sans directory)."""
 		name = self.servletPathname()
 		if name is None:
 			return 'unknown'
 		else:
 			return os.path.basename(name)
 
-	"""
-	**Exception Handling**
-	"""
+
+	## Exception Handling ##
 
 	def work(self):
-		"""
-		Invoked by `__init__` to do the main work.
-		This calls `logExceptionToConsole`, then checks
-		settings to see if it should call `saveErrorPage`
-		(to save the error to disk) and `emailException`.
+		"""Main error handling method.
 
-		It also sends gives a page from `privateErrorPage`
-		or `publicErrorPage` (which one based on
-		``ShowDebugInfoOnErrors``).
-		"""
+		Invoked by `__init__` to do the main work. This calls
+		`logExceptionToConsole`, then checks settings to see if it should
+		call `saveErrorPage` (to save the error to disk) and `emailException`.
 
+		It also sends gives a page from `privateErrorPage` or
+		`publicErrorPage` (which one based on ``ShowDebugInfoOnErrors``).
+
+		"""
 		if self._res:
 			self._res.recordEndTime()
 			self._time = self._res.endTime()
 
 		self.logExceptionToConsole()
 
-		# write the error page out to the response if available.
-		if self._res and (not self._res.isCommitted() or self._res.header('Content-type', None)=='text/html'):
+		# Write the error page out to the response if available:
+		if self._res and (not self._res.isCommitted()
+			or self._res.header('Content-type', None)=='text/html'):
 			if not self._res.isCommitted():
 				self._res.reset()
 				self._res.setStatus(500, "Servlet Error")
-			if self.setting('ShowDebugInfoOnErrors')==1:
+			if self.setting('ShowDebugInfoOnErrors') ==1:
 				publicErrorPage = self.privateErrorPage()
 			else:
 				publicErrorPage = self.publicErrorPage()
 			self._res.write(publicErrorPage)
-		
+
 			# Add a large block comment; this prevents IE from overriding the
 			# page with its own generic error 500 page
 			self._res.write('<!-- --------------------------------- -->\n' * 100)
@@ -203,66 +194,55 @@ class ExceptionHandler(Object):
 			self.emailException(privateErrorPage)
 
 	def logExceptionToConsole(self, stderr=None):
-		"""
-		Logs the time, servlet name and traceback to the
-		console (typically stderr). This usually results in
-		the information appearing in console/terminal from
-		which AppServer was launched.
-		"""
+		"""Log an exception.
 
+		Logs the time, servlet name and traceback to the console
+		(typically stderr). This usually results in the information
+		appearing in console/terminal from which AppServer was launched.
+
+		"""
 		if stderr is None:
 			stderr = sys.stderr
-		stderr.write('[%s] [error] WebKit: Error while executing script %s\n' % (
-			asctime(localtime(self._time)), self.servletPathname()))
+		stderr.write('[%s] [error] WebKit: Error while executing script %s\n'
+			% (asctime(localtime(self._time)), self.servletPathname()))
 		traceback.print_exc(file=stderr)
 
 	def publicErrorPage(self):
-		"""
-		Returns a brief error page telling the user that an
-		error has occurred.  Body of the message comes from
-		``UserErrorMessage`` setting.
-		"""
+		"""Return a public error page.
 
-		return '''<html>
-	<head>
-		<title>Error</title>
-	</head>
-	<body fgcolor=black bgcolor=white>
-		%s
-		<p> %s
-	</body>
-</html>
-''' % (htTitle('Error'), self.setting('UserErrorMessage'))
+		Returns a brief error page telling the user that an error has occurred.
+		Body of the message comes from ``UserErrorMessage`` setting.
+
+		"""
+		return '\n'.join(('<html>', '<head>', '<title>Error</title>',
+			htStyle(), '</head>', '<body text="black" bgcolor="white">',
+			htTitle('Error'), '<p>%s</p>' % self.setting('UserErrorMessage'),
+			'</body>', '</html>\n'))
 
 	def privateErrorPage(self):
-		"""
+		"""Return a private error page.
+
 		Returns an HTML page intended for the developer with
-		useful information such as the traceback. '''
+		useful information such as the traceback.
 
 		Most of the contents are generated in `htmlDebugInfo`.
+
 		"""
-
-		html = ['''
-<html>
-	<head>
-		<title>Error</title>
-	</head>
-	<body fgcolor=black bgcolor=white>
-%s
-<p> %s''' % (htTitle('Error'), self.setting('UserErrorMessage'))]
-
+		html = ['<html>', '<head>', '<title>Error</title>',
+			htStyle(), '</head>', '<body text="black" bgcolor="white">',
+			htTitle('Error'), '<p>%s</p>' % self.setting('UserErrorMessage')]
 		html.append(self.htmlDebugInfo())
+		html.extend(['</body>', '</html>\n'])
+		return '\n'.join(html)
 
-		html.append('</body></html>')
-		return string.join(html, '')
 
 	def htmlDebugInfo(self):
-		"""
-		Return HTML-formatted debugging information about the
-		current exception.  Calls `writeHTML`, which uses
-		``self.write(...)`` to add content.
-		"""
+		"""Return the debug info.
 
+		Return HTML-formatted debugging information about the current exception.
+		Calls `writeHTML`, which uses ``self.write(...)`` to add content.
+
+		"""
 		self.html = []
 		self.writeHTML()
 		html = ''.join(self.html)
@@ -270,7 +250,8 @@ class ExceptionHandler(Object):
 		return html
 
 	def writeHTML(self):
-		"""
+		"""Write the traceback.
+
 		Writes all the parts of the traceback, invoking:
 		* `writeTraceback`
 		* `writeMiscInfo`
@@ -278,6 +259,7 @@ class ExceptionHandler(Object):
 		* `writeEnvironment`
 		* `writeIds`
 		* `writeFancyTraceback`
+
 		"""
 		self.writeTraceback()
 		self.writeMiscInfo()
@@ -286,44 +268,34 @@ class ExceptionHandler(Object):
 		self.writeIds()
 		self.writeFancyTraceback()
 
-	"""
-	**Write Methods**
-	"""
+
+	## Write Methods ##
 
 	def write(self, s):
-		"""
-		Write `s` to the body
-		"""
+		"""Output `s` to the body."""
 		self.html.append(str(s))
 
 	def writeln(self, s):
-		"""
-		Write `s` plus a newline
-		"""
+		"""Output `s` plus a newline."""
 		self.html.append(str(s))
 		self.html.append('\n')
 
 	def writeTitle(self, s):
-		"""
-		Write a title line (a sub-heading, really, to define
-		a section)
-		"""
+		"""Output the sub-heading to define a section."""
 		self.writeln(htTitle(s))
 
 	def writeDict(self, d):
-		"""
-		Write a table-formated dictionary
-		"""
-		self.writeln(htmlForDict(d, filterValueCallBack=self.filterDictValue, maxValueLength=self._maxValueLength))
+		"""Output a table-formated dictionary."""
+		self.writeln(htmlForDict(d, filterValueCallBack=self.filterDictValue,
+			maxValueLength=self._maxValueLength))
 
 	def writeTable(self, listOfDicts, keys=None):
-		"""
-		Writes a table whose contents are given by
-		`listOfDicts`. The keys of each dictionary are
-		expected to be the same. If the `keys` arg is None,
-		the headings are taken in alphabetical order from the
-		first dictionary. If listOfDicts is false, nothing
-		happens.
+		"""Output a table from dictionaries.
+
+		Writes a table whose contents are given by `listOfDicts`.
+		The keys of each dictionary are expected to be the same.
+		If the `keys` arg is None, the headings are taken in alphabetical order
+		from the first dictionary. If listOfDicts is false, nothing	happens.
 
 		The keys and values are already considered to be HTML,
 		and no quoting is applied.
@@ -331,35 +303,38 @@ class ExceptionHandler(Object):
 		Caveat: There's no way to influence the formatting or to use
 		column titles that are different than the keys.
 
-		Used by `writeAttrs`
+		Used by `writeAttrs`.
+
 		"""
 		if not listOfDicts:
 			return
-
 		if keys is None:
 			keys = listOfDicts[0].keys()
 			keys.sort()
-
 		wr = self.writeln
-		wr('<table>\n<tr>')
+		wr('<table border="0" cellpadding="2" cellspacing="2"'
+			' style="background-color:#FFFFFF;font-size:10pt">')
+		wr('<tr>')
 		for key in keys:
-			wr('<td bgcolor=#F0F0F0><b>%s</b></td>' % key)
-		wr('</tr>\n')
-
+			wr('<td style="background-color:#F0F0F0;'
+				'font-weight:bold">%s</td>' % key)
+		wr('</tr>')
 		for row in listOfDicts:
 			wr('<tr>')
 			for key in keys:
-				wr('<td bgcolor=#F0F0F0>%s</td>' % self.filterTableValue(row[key], key, row, listOfDicts))
-			wr('</tr>\n')
-
+				wr('<td style="background-color:#F0F0F0">%s</td>'
+					% self.filterTableValue(row[key], key, row, listOfDicts))
+			wr('</tr>')
 		wr('</table>')
 
 	def writeAttrs(self, obj, attrNames):
-		"""
+		"""Output object attributes.
+
 		Writes the attributes of the object as given by attrNames.
 		Tries ``obj._name` first, followed by ``obj.name()``.
 		Is resilient regarding exceptions so as not to spoil the
 		exception report.
+
 		"""
 		rows = []
 		for name in attrNames:
@@ -374,123 +349,136 @@ class ExceptionHandler(Object):
 							if callable(value):
 								value = value()
 						except Exception, e:
-							value = '(exception during method call: %s: %s)' % (e.__class__.__name__, e)
+							value = '(exception during method call: %s: %s)' \
+								% (e.__class__.__name__, e)
 						value = self.repr(value)
 				else:
 					value = self.repr(value)
 			except Exception, e:
-				value = '(exception during value processing: %s: %s)' % (e.__class__.__name__, e)
+				value = '(exception during value processing: %s: %s)' \
+					% (e.__class__.__name__, e)
 			rows.append({'attr': name, 'value': value})
 		self.writeTable(rows, ('attr', 'value'))
 
-	"""
-	**Traceback sections**
-	"""
+
+	## Traceback sections ##
 
 	def writeTraceback(self):
-		"""
-		Writes the traceback, with most of the work done
-		by `WebUtils.HTMLForException.HTMLForException`
-		"""
+		"""Output the traceback.
 
+		Writes the traceback, with most of the work done
+		by `WebUtils.HTMLForException.HTMLForException`.
+
+		"""
 		self.writeTitle('Traceback')
-		self.write('<p> <i>%s</i>' % self.servletPathname())
+		self.write('<p><i>%s</i></p>' % self.servletPathname())
 		self.write(HTMLForException(self._exc, self._formatOptions))
 
 	def writeMiscInfo(self):
-		"""
+		"""Output misc info.
+
 		Write a couple little pieces of information about
 		the environment.
-		"""
 
+		"""
 		self.writeTitle('MiscInfo')
 		info = {
-			'time':          asctime(localtime(self._time)),
-			'filename':      self.servletPathname(),
-			'os.getcwd()':   os.getcwd(),
-			'sys.path':      sys.path,
-			'sys.version':   sys.version,
+			'time':        asctime(localtime(self._time)),
+			'filename':    self.servletPathname(),
+			'os.getcwd()': os.getcwd(),
+			'sys.path':    sys.path,
+			'sys.version': sys.version,
 		}
 		self.writeDict(info)
 
 	def writeTransaction(self):
-		"""
+		"""Output transaction.
+
 		Lets the transaction talk about itself, using
-		`Transaction.writeExceptionReport`
+		`Transaction.writeExceptionReport`.
+
 		"""
 		if self._tra:
 			self._tra.writeExceptionReport(self)
 		else:
-			self.writeTitle("No current Transaction")
-
+			self.writeTitle("No current Transaction.")
 
 	def writeEnvironment(self):
-		"""
-		Writes the environment this is being run in.  This
-		is *not* the environment that was passed in with
-		the request (holding the CGI information) -- it's
-		just the information from the environment that the
-		AppServer is being executed in.
+		"""Output environment.
+
+		Writes the environment this is being run in. This is *not* the
+		environment that was passed in with the request (holding the CGI
+		information) -- it's just the information from the environment
+		that the AppServer is being executed in.
+
 		"""
 		self.writeTitle('Environment')
 		self.writeDict(os.environ)
 
 	def writeIds(self):
-		"""
-		Prints some values from the OS (like processor ID)
+		"""Output OS identification.
+
+		Prints some values from the OS (like processor ID).
+
 		"""
 		self.writeTitle('Ids')
 		self.writeTable(osIdTable(), ['name', 'value'])
 
 	def writeFancyTraceback(self):
-		"""
-		Writes a fancy traceback, using cgitb
-		"""
-
+		"""Output a fancy traceback, using cgitb."""
 		if self.setting('IncludeFancyTraceback'):
 			self.writeTitle('Fancy Traceback')
 			try:
-				from WebUtils.ExpansiveHTMLForException import ExpansiveHTMLForException
-				self.write(ExpansiveHTMLForException(context=self.setting('FancyTracebackContext')))
+				from WebUtils.ExpansiveHTMLForException \
+					import ExpansiveHTMLForException
+				self.write(ExpansiveHTMLForException(
+					context=self.setting('FancyTracebackContext')))
 			except:
-				self.write('Unable to generate a fancy traceback! (uncaught exception)')
+				self.write('<p>Unable to generate a fancy traceback!'
+					' (uncaught exception)</p>')
 				try:
 					self.write(HTMLForException(sys.exc_info()))
 				except:
-					self.write('<br>Unable to even generate a normal traceback of the exception in fancy traceback!')
+					self.write('<p>Unable to even generate a normal traceback'
+						' of the exception in fancy traceback!</p>')
 
 	def saveErrorPage(self, html):
-		"""
-		Saves the given HTML error page for later viewing by
-		the developer, and returns the filename used.  """
+		"""Save the error page.
 
-		filename = self._app.serverSidePath(os.path.join(self.setting('ErrorMessagesDir'), self.errorPageFilename()))
+		Saves the given HTML error page for later viewing by
+		the developer, and returns the filename used.
+
+		"""
+		filename = self._app.serverSidePath(os.path.join(
+			self.setting('ErrorMessagesDir'), self.errorPageFilename()))
 		f = open(filename, 'w')
 		f.write(html)
 		f.close()
 		return filename
 
 	def errorPageFilename(self):
-		"""
-		Construct a filename for an HTML error page, not
-		including the ``ErrorMessagesDir`` setting
-		(which `saveError` adds on)"""
+		"""Create filename for error page.
 
-		return 'Error-%s-%s-%d.html' % (
-			self.basicServletName(),
-			string.join(map(lambda x: '%02d' % x, localtime(self._time)[:6]), '-'),
-			random.randint(10000, 99999))
+		Construct a filename for an HTML error page, not including the
+		``ErrorMessagesDir`` setting (which `saveError` adds on)
+
+		"""
+		return 'Error-%s-%s-%d.html' % (self.basicServletName(),
+			'-'.join(map(lambda x: '%02d' % x, localtime(self._time)[:6])),
+				random.randint(10000, 99999))
 			# @@ 2000-04-21 ce: Using the timestamp & a
 			# random number is a poor technique for
 			# filename uniqueness, but this works for now
 
 	def logExceptionToDisk(self, errorMsgFilename=''):
-		"""
+		"""Log the exception to disk.
+
 		Writes a tuple containing (date-time, filename,
 		pathname, exception-name, exception-data,error report
 		filename) to the errors file (typically 'Errors.csv')
-		in CSV format. Invoked by `handleException`. """
+		in CSV format. Invoked by `handleException`.
 
+		"""
 		logline = (
 			asctime(localtime(self._time)),
 			self.basicServletName(),
@@ -503,30 +491,30 @@ class ExceptionHandler(Object):
 			f = open(filename, 'a')
 		else:
 			f = open(filename, 'w')
-			f.write('time,filename,pathname,exception name,exception data,error report filename\n')
-
+			f.write('time,filename,pathname,exception name,'
+				'exception data,error report filename\n')
 		def fixElement(element):
 			element = str(element)
-			if string.find(element, ',') or string.find(element, '"'):
-				element = string.replace(str(element), '"', '""')
-				element = '"' + element + '"'
+			if element.find(',') >= 0 or element.find('"') >= 0:
+				element = element.replace('"', '""')
+				element = '"%s"' % element
 			return element
 		logline = map(fixElement, logline)
-
-		f.write(string.join(logline, ','))
+		f.write(','.join(logline))
 		f.write('\n')
 		f.close()
 
 	def emailException(self, htmlErrMsg):
-		"""
-		Emails the exception, either as an attachment, or in the
-		body of the mail.
-		"""
+		"""Email the exception.
 
+		Emails the exception, either as an attachment,
+		or in the body of the mail.
+
+		"""
 		message = StringIO.StringIO()
 		writer = MimeWriter.MimeWriter(message)
 
-		## Construct the message headers
+		# Construct the message headers
 		headers = self.setting('ErrorEmailHeaders').copy()
 		headers['Date'] = dateForEmail()
 		headers['Mime-Version'] = '1.0'
@@ -538,8 +526,7 @@ class ExceptionHandler(Object):
 				v = ','.join(v)
 			writer.addheader(h, v)
 
-		## Construct the message body
-
+		# Construct the message body
 		if self.setting('EmailErrorReportAsAttachment'):
 			writer.startmultipartbody('mixed')
 			# start off with a text/plain part
@@ -558,7 +545,8 @@ class ExceptionHandler(Object):
 			# now add htmlErrMsg
 			part = writer.nextpart()
 			part.addheader('Content-Transfer-Encoding', '7bit')
-			part.addheader('Content-Description', 'HTML version of WebKit error message')
+			part.addheader('Content-Description',
+				'HTML version of WebKit error message')
 			body = part.startbody('text/html; name=WebKitErrorMsg.html')
 			body.write(htmlErrMsg)
 
@@ -576,24 +564,24 @@ class ExceptionHandler(Object):
 		server.quit()
 
 
-	"""
-	**Filtering**
-	"""
+	## Filtering ##
 
 	def filterDictValue(self, value, key, dict):
-		"""
+		"""Filter dictionary values.
+
 		Filters keys from a dict.  Currently ignores the
 		dictionary, and just filters based on the key.
-		"""
 
+		"""
 		return self.filterValue(value, key)
 
 	def filterTableValue(self, value, key, row, table):
-		"""
-		Invoked by writeTable() to afford the opportunity to filter
-		the values written in tables. These values are already HTML
-		when they arrive here. Use the extra key, row and table
-		args as necessary.
+		"""Filter table values.
+
+		Invoked by writeTable() to afford the opportunity to filter the values
+		written in tables. These values are already HTML when they arrive here.
+		Use the extra key, row and table args as necessary.
+
 		"""
 		if row.has_key('attr') and key!='attr':
 			return self.filterValue(value, row['attr'])
@@ -601,11 +589,13 @@ class ExceptionHandler(Object):
 			return self.filterValue(value, key)
 
 	def filterValue(self, value, key):
-		"""
+		"""Filter values.
+
 		This is the core filter method that is used in all filtering.
 		By default, it simply returns self.hiddenString if the key is
 		in self.hideValuesForField (case insensitive). Subclasses
 		could override for more elaborate filtering techniques.
+
 		"""
 		try:
 			key = key.lower()
@@ -617,20 +607,20 @@ class ExceptionHandler(Object):
 			return value
 
 
-	"""
-	**Utility**
-	"""
+	## Utility ##
 
 	def repr(self, x):
-		"""
-		Returns the repr() of x already html encoded. As a
-		special case, dictionaries are nicely formatted in
-		table.
+		"""Get HTML encoded representation.
+
+		Returns the repr() of x already HTML encoded. As a special case,
+		dictionaries are nicely formatted in table.
 
 		This is a utility method for `writeAttrs`.
+
 		"""
 		if type(x) is DictType:
-			return htmlForDict(x, filterValueCallBack=self.filterDictValue, maxValueLength=self._maxValueLength)
+			return htmlForDict(x, filterValueCallBack=self.filterDictValue,
+				maxValueLength=self._maxValueLength)
 		else:
 			rep = repr(x)
 			if self._maxValueLength and len(rep) > self._maxValueLength:
@@ -638,23 +628,38 @@ class ExceptionHandler(Object):
 			return htmlEncode(rep)
 
 
-# Some misc functions
+## Misc functions ##
+
+def htStyle():
+	"""Defines the page style."""
+	return ('''<style type="text/css">
+<!--
+body {
+	color: #080810;
+	background-color: white;
+	font-size: 11pt;
+	font-family: Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	margin: 0pt;
+	padding: 8pt;
+}
+h2 { font-size: 14pt; }
+-->
+</style>''')
+
+
 def htTitle(name):
-	"""
-	Formats a `name` as a section title
-	"""
-
-	return '''
-<p> <br> <table border=0 cellpadding=4 cellspacing=0 bgcolor=#A00000 width=100%%> <tr> <td align=center>
-	<font face="Tahoma, Arial, Helvetica" color=white> <b> %s </b> </font>
-</td> </tr> </table>''' % name
-
+	"""Formats a `name` as a section title."""
+	return ('<h2 style="text-align:center;'
+		'color:white;background-color:#993333">%s</h2>' % name)
 
 def osIdTable():
+	"""Get all OS id information.
+
+	Returns a list of dictionaries contained id information such as
+	uid, gid, etc., all obtained from the os module.
+	Dictionary keys are ``"name"`` and ``"value"``.
+
 	"""
-	Returns a list of dictionaries contained id information such
-	as uid, gid, etc., all obtained from the os module. Dictionary
-	keys are ``"name"`` and ``"value"``. """
 
 	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp', 'getpid',
 		 'getppid', 'getuid']

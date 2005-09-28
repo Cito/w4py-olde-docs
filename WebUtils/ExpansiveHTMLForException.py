@@ -2,13 +2,14 @@ import string, sys, traceback
 from Funcs import htmlEncode
 
 
-# @@ 2000-04-10 ce: change these so they're general args to the tags rather than just the colors
 HTMLForExceptionOptions = {
-	'table.bgcolor':        '#F0F0F0',
-	'default.fgcolor':      '#000000',
-	'row.location.fgcolor': '#0000AA',
-	'row.code.fgcolor':     '#FF0000'
+	'table': 'background-color:#F0F0F0;font-size:10pt',
+	'default': 'color:#000000',
+	'row.location': 'color:#000099',
+	'row.code': 'color:#990000',
+	'editlink': None,
 }
+
 
 def ExpansiveHTMLForException(context=5, options=None):
 	from WebUtils import cgitb
