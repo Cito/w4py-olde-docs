@@ -1,10 +1,11 @@
 """
 PySummary
 
+A PySummary instance reads a Python file and creates a summary of the file
+which you can access by using it as a (e.g., %s or str()).
 
-A PySummary instance reads a python file and creates a summary of the file which you can access by using it as a     (e.g., %s or str()).
-
-The notion of a "category" is recognized. A category is simply a group of methods with a given name. The default prefix for denoting a category is ##.
+The notion of a "category" is recognized. A category is simply a group of
+methods with a given name. The default prefix for denoting a category is ##.
 
 """
 
@@ -40,19 +41,31 @@ class PySummary:
 
 	def readFile(self, file):
 		self.invalidateCache()
-		for line in file.readlines():
-			line = line.rstrip()
+		lines = file.readlines()
+		while lines:
+			line = lines.pop(0).rstrip()
 			sline = line.lstrip()
 			if not sline:
 				continue
 			try:
-				if sline[:6]=='class ' and sline[6]!='_' and (
-					sline.find('(', 7)>=0 or sline.find(':', 7)>=0):
-					self._lines.append(Line('class', line))
-				elif sline[:4]=='def ' and (sline[4]!='_'
-					or sline[5]=='_') and sline.find('(', 5)>=0:
-					self._lines.append(Line('def', line))
-				elif sline[:3]=='## ':
+				if sline[:6] == 'class ' and sline[6] != '_' and (
+					sline.find('(', 7) >= 0 or sline.find(':', 7) >= 0):
+					self._lines.append(Line('class', line)) # a class
+					line = lines.pop(0).lstrip()
+					if line[:3] == '"""': # skip docstring
+						while lines and line.rstrip()[-3:] != '"""':
+							line = lines.pop(0)
+					while lines and line.lstrip(): # skip body
+						line = lines.pop(0)
+				elif sline[:4] == 'def ' and (sline[4] != '_'
+					or sline[5] == '_') and sline.find('(', 5) >= 0:
+					self._lines.append(Line('def', line)) # a method
+					if line[:3] == '"""': # skip docstring
+						while lines and line.rstrip()[-3:] != '"""':
+							line = lines.pop(0)
+					while lines and line.lstrip(): # skip body
+						line = lines.pop(0)
+				elif sline[:3] == '## ': # a category
 					self._lines.append(Line('category', line))
 			except IndexError:
 				pass
@@ -71,12 +84,15 @@ class PySummary:
 		path, basename = os.path.split(filename)
 		module = os.path.splitext(basename)[0]
 		package = '%s.%s' % (path, module)
-		span = format=='html'
+		span = format == 'html'
 		settings = self._settings[format]
 		res = []
 		res.append(settings['file'][0] % locals())
 		for line in self._lines:
 			type = line.type()
+			if line.text()[:1].lstrip() \
+				and settings[type][0][:1] == '\n':
+				res.append('\n')
 			res.append(settings[type][0])
 			if span:
 				res.append('<span class="line_%s">' % type)
@@ -123,7 +139,7 @@ class Line:
 
 	def html(self):
 		if self._html is None:
-			if self._type=='class' or self._type=='def':
+			if self._type == 'class' or self._type == 'def':
 				ht = self._text
 				start = ht.find(self._type) + len(self._type) + 1
 				end = ht.find('(', start)
@@ -131,7 +147,7 @@ class Line:
 					end = ht.find(':', start)
 					if end < 0:
 						end = start
-				if self._type=='def':
+				if self._type == 'def':
 					end2 = ht.find(')', end + 1)
 					if end2 >= 0:
 						ht = ht[:end2+1]
@@ -144,6 +160,9 @@ class Line:
 
 	def __str__(self):
 		return self.contents()
+
+
+## Auxiliary functions ##
 
 
 def test():
