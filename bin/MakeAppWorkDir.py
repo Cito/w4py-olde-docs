@@ -139,8 +139,9 @@ class MakeAppWorkDir:
 		self.msg("Copying other files...")
 		otherFiles = ('AppServer', '404Text.txt')
 		for name in otherFiles:
-			if name == 'AppServer' and self._osType == 'nt':
-				name += '.bat'
+			if name == 'AppServer':
+				if self._osType == 'nt':
+					name += '.bat'
 				chmod = 1
 			else:
 				chmod = 0
@@ -164,7 +165,7 @@ class MakeAppWorkDir:
 		webKitDir = self._webKitDir
 		executable = sys.executable
 		for name in launcherScripts:
-			if name.endswith('Service') and self._osType != 'nt':
+			if name.endswith('Service.py') and self._osType != 'nt':
 				continue
 			newname = os.path.join(workDir, name)
 			if not os.path.exists(newname):
