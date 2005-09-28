@@ -162,6 +162,7 @@ class MakeAppWorkDir:
 		self.msg("Creating the launcher scripts...")
 		workDir = self._workDir
 		webwareDir = self._webwareDir
+		libraryDirs = self._libraryDirs
 		webKitDir = self._webKitDir
 		executable = sys.executable
 		for name in launcherScripts:
@@ -316,6 +317,7 @@ launcherScripts = { # launcher scripts with adjusted parameters
 
 # Adjust Launcher default parameters:
 webwareDir = '%(webwareDir)s'
+libraryDirs = %(libraryDirs)s
 
 import sys
 sys.path.insert(0, webwareDir)
@@ -323,6 +325,7 @@ sys.path.insert(0, webwareDir)
 from WebKit import Launch
 
 Launch.webwareDir = webwareDir
+Launch.libraryDirs = libraryDirs
 
 if __name__ == '__main__':
 	Launch.main()
@@ -332,6 +335,7 @@ if __name__ == '__main__':
 
 # Adjust AppServerService default parameters:
 webwareDir = '%(webwareDir)s'
+libraryDirs = %(libraryDirs)s
 
 import sys
 sys.path.insert(0, webwareDir)
@@ -343,6 +347,7 @@ class AppServerService(appServerService.AppServerService):
 
 appServerService.AppServerService = AppServerService
 appServerService.webwareDir = webwareDir
+appServerService.libraryDirs = libraryDirs
 
 if __name__ == '__main__':
 	appServerService.main()
