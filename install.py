@@ -577,7 +577,11 @@ Installation is finished.''' % ((os.sep,)*2)
 
 	def printKeyValue(self, key, value):
 		"""Print a key/value pair."""
-		print '%12s: %s' % (key, value)
+		value = value.split('\n')
+		v = value.pop(0)
+		print '%12s: %s' % (key, v)
+		for v in value:
+			print '%14s%s' % ('', v)
 
 	def makeDir(self, dirName):
 		"""Create a directory."""
