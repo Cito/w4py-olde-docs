@@ -162,8 +162,19 @@ class MakeAppWorkDir:
 		self.msg("Creating the launcher scripts...")
 		workDir = self._workDir
 		webwareDir = self._webwareDir
-		libraryDirs = self._libraryDirs
 		webKitDir = self._webKitDir
+		libraryDirs = self._libraryDirs
+		uid, gid = self._uid, self._gid
+		if uid is None:
+			user = None
+		else:
+			import pwd
+			user = pwd.getpwuid(uid)[0]
+		if gid is None:
+			group = None
+		else:
+			import grp
+			group = grp.getgrgid(gid)[0]
 		executable = sys.executable
 		for name in launcherScripts:
 			if name.endswith('Service.py') and self._osType != 'nt':
@@ -316,8 +327,13 @@ launcherScripts = { # launcher scripts with adjusted parameters
 'Launch.py': """#!%(executable)s
 
 # Adjust Launcher default parameters:
-webwareDir = '%(webwareDir)s'
-libraryDirs = %(libraryDirs)s
+webwareDir = %(webwareDir)r
+libraryDirs = %(libraryDirs)r
+runProfile = 0
+logFile = None
+pidFile = None
+user = %(user)r
+group = %(group)r
 
 import sys
 sys.path.insert(0, webwareDir)
@@ -326,6 +342,11 @@ from WebKit import Launch
 
 Launch.webwareDir = webwareDir
 Launch.libraryDirs = libraryDirs
+Launch.runProfile = runProfile
+Launch.logFile = logFile
+Launch.pidFile = pidFile
+Launch.user = user
+Launch.group = group
 
 if __name__ == '__main__':
 	Launch.main()
@@ -334,8 +355,10 @@ if __name__ == '__main__':
 'AppServerService.py': """#!%(executable)s
 
 # Adjust AppServerService default parameters:
-webwareDir = '%(webwareDir)s'
-libraryDirs = %(libraryDirs)s
+webwareDir = %(webwareDir)r
+libraryDirs = %(libraryDirs)r
+runProfile = 0
+logFile = None
 
 import sys
 sys.path.insert(0, webwareDir)
@@ -348,6 +371,8 @@ class AppServerService(appServerService.AppServerService):
 appServerService.AppServerService = AppServerService
 appServerService.webwareDir = webwareDir
 appServerService.libraryDirs = libraryDirs
+appServerService.runProfile = runProfile
+appServerService.logFile = logFile
 
 if __name__ == '__main__':
 	appServerService.main()
