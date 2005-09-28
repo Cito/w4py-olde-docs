@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="document" id="webkit-install-guide">
-<h1 class="header">WebKit Install Guide</h1>
+<h1 class="title">WebKit Install Guide</h1>
 <div class="contents topic" id="contents">
 <p class="topic-title first"><a name="contents">Contents</a></p>
 <ul class="simple">
@@ -767,7 +767,7 @@ have to look in this directory.</dd>
 <dt><tt class="docutils literal"><span class="pre">WebKit.cgi</span></tt>:</dt>
 <dd>A CGI script/adapter for accessing the AppServer here. You can still use
 the other adapters, but most of them don't need to be configured for the
-individual applications. I still recommend mod_webkit or wkcgi.</dd>
+individual applications. I still recommend <tt class="docutils literal"><span class="pre">mod_webkit</span></tt> or <tt class="docutils literal"><span class="pre">wkcgi</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">MyContext</span></tt>:</dt>
 <dd>The directory for your default context. This is where you put your servlets.
 you can change its name and location with the <tt class="docutils literal"><span class="pre">`-c</span></tt> and <tt class="docutils literal"><span class="pre">-d</span></tt> options.
@@ -778,7 +778,7 @@ with Webware from the config file.</dd>
 <dt><tt class="docutils literal"><span class="pre">Lib</span></tt>:</dt>
 <dd>An example for an application-specific library package that can be created
 <tt class="docutils literal"><span class="pre">-l</span></tt> option (in this case, <tt class="docutils literal"><span class="pre">-l</span> <span class="pre">Lib</span></tt>. Import modules from this directory
-like <tt class="docutils literal"><span class="pre">from</span> <span class="pre">lib.SitePage</span> <span class="pre">import</span> <span class="pre">SitePage</span></tt>.</dd>
+like <tt class="docutils literal"><span class="pre">from</span> <span class="pre">Lib.SitePage</span> <span class="pre">import</span> <span class="pre">SitePage</span></tt>.</dd>
 </dl>
 </div>
 </div>
@@ -981,9 +981,6 @@ would be:</p>
 each other. And that's what the next section is all about...</p>
 </div>
 </div>
-</div>
-<div class="footer">
-Webware for Python (<a href="http://www.webwareforpython.org">www.webwareforpython.org</a>)
 </div>
 </body>
 </html>

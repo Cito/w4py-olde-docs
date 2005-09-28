@@ -127,7 +127,7 @@ get started by importing your project into the repository simply by running::
 
 Replace ``MyWebwareProject`` with the name of your project and ``username`` with
 your own user name. You should use the option ``--cvsignore`` when running
-``MakeAppWorkDir.py`` if you plan to do this. If you do then ``.cvsignore``
+``MakeAppWorkDir.py`` if you plan to do this. If you do, then ``.cvsignore``
 files will be added to each directory. These tell CVS to ignore files with
 certain extensions (such as ``.pyc`` files), and all the files in certain
 directories (``Cache``, ``ErrorMsgs``, ``Logs``, and ``Sessions``).
@@ -138,7 +138,13 @@ The command to import your project into a SVN repository is very similar::
     $ cd WorkDir
     $ svn import  -m 'initial import' https://myserver/myrepos/MyWebWareProject
 
-Replace ``https://myserver/myrepos/`` with the URL of your SVN repository.
+Replace ``https://myserver/myrepos/`` with the URL of your SVN repository. The
+``.cvsignore`` files will not be used in this case. Instead, you have to set the
+``svn:ignore`` property on the respective directory. You can still use the
+``.cvsignore`` files to generate the necessary ``svn propset`` commands::
+
+    $ find . -name .cvsignore | while read f; \
+    >   do echo svn propset svn:ignore -F $f $(dirname $f); done
 
 After importing ``WorkDir`` to the repository, note that it is not automatically
 under version control. To start working, you first need to explicitely check it

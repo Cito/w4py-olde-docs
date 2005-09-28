@@ -192,7 +192,7 @@ the files. In a production environment, you would place the ``Pics`` directory
 outside of the context and let the web server deliver the files directly.
 
 For the first iteration, we'll display files that you upload by hand to
-the ``Pics``directory.
+the ``Pics`` directory.
 
 We do this with two servlets -- one servlet ``Main.py`` to show the entire
 album, and another ``View.py`` for individual pictures. Place these two servlets
