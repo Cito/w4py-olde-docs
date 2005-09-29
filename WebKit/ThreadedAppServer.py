@@ -883,11 +883,12 @@ def run(workDir=None):
 	sys.exit()
 
 
-def shutDown():
-	"""Shut down the server."""
+def shutDown(signum, frame):
+	"""Signal handler for shutting down the server."""
 	global server
 	print
-	print "Shutdown Called", time.asctime(time.localtime(time.time()))
+	print "AppServer received signal", signum
+	print "Shutting down at", time.asctime(time.localtime(time.time()))
 	if server:
 		server.initiateShutdown()
 	else:
