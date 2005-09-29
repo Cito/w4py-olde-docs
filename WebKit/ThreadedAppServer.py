@@ -179,8 +179,9 @@ class ThreadedAppServer(AppServer):
 		This is the main thread loop that accepts and dispatches
 		socket requests.
 
-		It goes through an loop as long as ``self.running`` is True
-		(i.e., ``self.running = False`` asks the server to stop running).
+		It goes through an loop as long as ``self.running`` is ``True``.
+		Setting ``self.running = None`` asks the server to stop running.
+		When it has shut down, it sets ``self.running = False``.
 
 		The loop waits for connections, then based on the connecting
 		port it initiates the proper Handler (e.g.,
@@ -203,42 +204,48 @@ class ThreadedAppServer(AppServer):
 		threadUpdateDivisor = 5 # grab stat interval
 		threadCheck = 0
 
-		while 1:
-			if not self.running:
-				return
+		try:
+			while self.running:
 
-			#block for timeout seconds waiting for connections
-			try:
-				input, output, exc = select.select(
-					self._sockets.values(), [], [], timeout)
-			except select.error, v:
-				if not self.running:
-					return
-				input = []
-				if v[0] == EINTR or v[0] == 0: break
-				else: raise
-
-			for sock in input:
-				self._requestID += 1
-				client, addr = sock.accept()
-				serverAddress = sock.getsockname()
+				# block for timeout seconds waiting for connections
 				try:
-					handler = self._handlerCache[serverAddress].pop()
-				except IndexError:
-					handler = self._socketHandlers[serverAddress](self, serverAddress)
-				handler.activate(client, self._requestID)
-				self._requestQueue.put(handler)
+					input, output, exc = select.select(
+						self._sockets.values(), [], [], timeout)
+				except select.error, v:
+					if v[0] == EINTR or v[0] == 0:
+						break
+					else:
+						raise
 
-			if threadCheck % threadUpdateDivisor == 0:
-				self.updateThreadUsage()
+				for sock in input:
+					self._requestID += 1
+					client, addr = sock.accept()
+					serverAddress = sock.getsockname()
+					try:
+						handler = self._handlerCache[serverAddress].pop()
+					except IndexError:
+						handler = self._socketHandlers[serverAddress](self,
+							serverAddress)
+					handler.activate(client, self._requestID)
+					self._requestQueue.put(handler)
 
-			if threadCheck > threadCheckInterval:
-				threadCheck = 0
-				self.manageThreadCount()
-			else:
-				threadCheck = threadCheck + 1
+				if threadCheck % threadUpdateDivisor == 0:
+					self.updateThreadUsage()
 
-			self.restartIfNecessary()
+				if threadCheck > threadCheckInterval:
+					threadCheck = 0
+					self.manageThreadCount()
+				else:
+					threadCheck = threadCheck + 1
+
+				self.restartIfNecessary()
+
+			self.running = False
+		except:
+			running = self.running
+			self.running = False
+			if running: # was the exception while running?
+				raise # then raise it
 
 
 	## Thread Management ##
@@ -360,7 +367,7 @@ class ThreadedAppServer(AppServer):
 			# of the threads we want gone may not yet be gone.
 			# But we'll pick them up later -- they'll wait,.
 			if not i.isAlive():
-				rv = i.join() #Don't need a timeout, it isn't alive
+				rv = i.join() # Don't need a timeout, it isn't alive
 				self._threadPool.remove(i)
 				if debug: print "Thread Absorbed, Real Thread Count=", len(self.threadPool)
 
@@ -436,25 +443,32 @@ class ThreadedAppServer(AppServer):
 		and tells all the threads to die.
 
 		"""
-		self.running = False
-		self.awakeSelect()
-		self._shuttingdown = False # jsl-is this used anywhere?
+		self._shuttingdown = True # see AppServer.shutDown()
+		self.running = None # ask Appserver to shut dhow
 		print "ThreadedAppServer: Shutting Down"
+		self.awakeSelect() # unblock select call in mainloop()
+		for i in range(30): # wait at most 3 seconds for shutdown
+			if not self.running and self.running is not None:
+				break
+			time.sleep(0.1)
+		# Close all sockets now:
 		for sock in self._sockets.values():
 			sock.close()
+		# Tell all threads to end:
 		for i in range(self._threadCount):
-			self._requestQueue.put(None) # kill all threads
+			self._requestQueue.put(None)
 		for i in self._threadPool:
 			try:
 				i.join()
 			except:
 				pass
+		# Call super's shutdown:
 		AppServer.shutDown(self)
 
 	def awakeSelect(self):
 		"""Awake the select() call.
 
-		The ``select()`` in `mainloop` is blocking, so when
+		The ``select()`` in `mainloop()` is blocking, so when
 		we shut down we have to make a connect to unblock it.
 		Here's where we do that, called `shutDown`.
 
@@ -841,7 +855,7 @@ def run(workDir=None):
 					t.start()
 					try:
 						while server.running:
-							time.sleep(1)
+							time.sleep(1) # wait for interrupt
 					except KeyboardInterrupt:
 						pass
 					server.running = False
@@ -863,12 +877,13 @@ def run(workDir=None):
 			except Exception, e:
 				if not doesRunHandleExceptions:
 					raise
+				print
 				if not isinstance(e, SystemExit):
 					import traceback
 					traceback.print_exc(file=sys.stderr)
-					print "\nExiting AppServer due to above exception"
+					print "Exiting AppServer due to above exception"
 				else:
-					print "\nExiting AppServer due to sys.exit()"
+					print "Exiting AppServer due to sys.exit()"
 				if server:
 					if server.running:
 						server.initiateShutdown()
@@ -888,8 +903,8 @@ def shutDown(signum, frame):
 	global server
 	print
 	print "AppServer received signal", signum
-	print "Shutting down at", time.asctime(time.localtime(time.time()))
-	if server:
+	if server and server.running:
+		print "Shutting down at", time.asctime(time.localtime(time.time()))
 		server.initiateShutdown()
 	else:
 		print 'WARNING: No server reference to shutdown.'

@@ -1,9 +1,3 @@
-from AppServer import AppServer
-import os
-from threading import Thread
-import time
-import sys
-import select
 
 """
 This module defines `AutoReloadingAppServer`, a replacement for `AppServer`
@@ -18,14 +12,26 @@ Much of the actually polling and monitoring takes place in the
 .. inline:: AutoReloadingAppServer
 """
 
+from AppServer import AppServer
+import os
+from threading import Thread
+import time
+import sys
+import select
+
+try: # backward compatibility for Python < 2.3
+  True, False
+except NameError:
+  True, False = 1, 0
+
 # Attempt to use python-fam (fam = File Alteration Monitor) instead of polling
 # to see if files have changed.  If python-fam is not installed, we fall back
 # to polling.
 try:
 	import _fam
-	haveFam = 1
+	haveFam = True
 except:
-	haveFam = 0
+	haveFam = False
 
 import ImportSpy
 standardLibraryPrefix = '%s/lib/python%i.%i' % \
@@ -33,8 +39,8 @@ standardLibraryPrefix = '%s/lib/python%i.%i' % \
 
 
 DefaultConfig = {
-	'AutoReload':                 0,
-	'AutoReloadPollInterval':     1,  # in seconds
+	'AutoReload': False,
+	'AutoReloadPollInterval': 1,  # in seconds
 }
 
 
@@ -59,8 +65,8 @@ class AutoReloadingAppServer(AppServer):
 	def __init__(self,path=None):
 		"""Activate AutoReloading."""
 		AppServer.__init__(self,path)
-		self._autoReload = 0
-		self._shouldRestart = 0
+		self._autoReload = False
+		self._shouldRestart = False
 		self._requests = []
 		self._pipe = None
 
@@ -82,7 +88,7 @@ class AutoReloadingAppServer(AppServer):
 		"""
 		print 'Stopping AutoReload Monitor'
 		sys.stdout.flush()
-		self._shuttingDown = 1
+		self._shuttingDown = True
 		self.deactivateAutoReload()
 		AppServer.shutDown(self)
 
@@ -102,7 +108,7 @@ class AutoReloadingAppServer(AppServer):
 					self.setting('AutoReloadPollInterval'), 'seconds'
 				self._fileMonitorThread = t = Thread(
 					target=self.fileMonitorThreadLoop)
-			self._autoReload = 1
+			self._autoReload = True
 			t.setName('AutoReloadMonitor')
 			t.start()
 
@@ -112,7 +118,7 @@ class AutoReloadingAppServer(AppServer):
 		This should be considered as a request, not a demand.
 
 		"""
-		self._autoReload = 0
+		self._autoReload = False
 		if haveFam:
 			# Send a message down the pipe to wake up the monitor thread
 			# and tell him to quit.
@@ -180,7 +186,7 @@ class AutoReloadingAppServer(AppServer):
 
 	def shouldRestart(self):
 		"""Tell the main thread to restart the server."""
-		self._shouldRestart = 1
+		self._shouldRestart = True
 
 	def fileMonitorThreadLoop(self):
 		"""This the the main loop for the monitoring thread.
@@ -197,7 +203,7 @@ class AutoReloadingAppServer(AppServer):
 			for f, mtime in ImportSpy.modloader.fileList().items():
 				if self.fileUpdated(f, mtime):
 					print '*** The file', f, 'has changed.  The server is restarting now.'
-					self._autoReload = 0
+					self._autoReload = False
 					return self.shouldRestart()
 		print 'Autoreload Monitor stopped'
 		sys.stdout.flush()
@@ -237,7 +243,7 @@ class AutoReloadingAppServer(AppServer):
 			if self.fileUpdated(f, mtime):
 				print '*** The file', f, 'has changed.', \
 					'The server is restarting now.'
-				self._autoReload = 0
+				self._autoReload = False
 				return self.shouldRestart()
 			# request that this file be monitored for changes
 			self._requests.append( fc.monitorFile(f, f) )
@@ -268,7 +274,7 @@ class AutoReloadingAppServer(AppServer):
 							ImportSpy.modloader.fileList()[fe.userData])):
 					print '*** The file', fe.userData, 'has changed.', \
 						'The server is restarting now.'
-					self._autoReload = 0
+					self._autoReload = False
 					return self.shouldRestart()
 		for req in self._requests:
 			req.cancelMonitor()

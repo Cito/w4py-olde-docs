@@ -13,6 +13,11 @@ import PidFile
 
 from threading import Thread, Event
 
+try: # backward compatibility for Python < 2.3
+  True, False
+except NameError:
+  True, False = 1, 0
+
 """
 There is only one instance of AppServer, `globalAppServer` contains
 that instance.  Use it like::
@@ -93,7 +98,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self._app = self.createApplication()
 		self.loadPlugIns()
 
-		self.running = 1
+		self.running = True
 
 		# @@ 2003-03 ib: shouldn't this just be in a subclass's __init__?
 		if self.isPersistent():
@@ -162,14 +167,14 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		"""Shut down the AppServer.
 
 		Subclasses may override and normally follow this sequence:
-			1. set self._shuttingDown to 1
+			1. set self._shuttingDown to True
 			2. class specific statements for shutting down
 			3. Invoke super's shutDown() e.g., ``AppServer.shutDown(self)``
 
 		"""
 		print "Shutting down the AppServer"
-		self._shuttingDown = 1
-		self.running = 0
+		self._shuttingDown = True
+		self.running = False
 		self._app.shutDown()
 		del self._plugIns
 		del self._app
