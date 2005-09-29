@@ -47,7 +47,7 @@ profiler = startTime = readyTime = readyDuration = None
 statsFilename = 'profile.pstats'
 
 def runCall(func, *args, **kwargs):
-	profiler.runcall(func, *args, **kwargs)
+	return profiler.runcall(func, *args, **kwargs)
 
 def dumpStats(file=statsFilename):
 	profiler.dump_stats(file)
