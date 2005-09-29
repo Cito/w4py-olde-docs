@@ -4,19 +4,24 @@ import string
 
 
 class HTTPServlet(Servlet):
-	"""
-	HTTPServlet implements the respond() method to invoke methods such as respondToGet() and respondToPut() depending on the type of HTTP request.
+	"""A HTTP servlet.
+
+	HTTPServlet implements the respond() method to invoke methods such as
+	respondToGet() and respondToPut() depending on the type of HTTP request.
 	Example HTTP request methods are GET, POST, HEAD, etc.
 	Subclasses implement HTTP method FOO in the Python method respondToFoo.
 	Unsupported methods return a "501 Not Implemented" status.
 
-	Note that HTTPServlet inherits awake() and respond() methods from Servlet and that subclasses may make use of these.
+	Note that HTTPServlet inherits awake() and respond() methods from
+	Servlet and that subclasses may make use of these.
 
 	See also: Servlet
 
 	FUTURE
 		* Document methods (take hints from Java HTTPServlet documentation)
+
 	"""
+
 
 	## Init ##
 
@@ -28,7 +33,12 @@ class HTTPServlet(Servlet):
 	## Transactions ##
 
 	def respond(self, trans):
-		""" Invokes the appropriate respondToSomething() method depending on the type of request (e.g., GET, POST, PUT, ...). """
+		"""Respond to a request.
+
+		Invokes the appropriate respondToSomething() method depending on the
+		type of request (e.g., GET, POST, PUT, ...).
+
+		"""
 		request = trans.request()
 		httpMethodName = request.method()
 		# For GET and HEAD, handle the HTTP If-Modified-Since header:
@@ -37,11 +47,14 @@ class HTTPServlet(Servlet):
 		if httpMethodName in ('GET','HEAD'):
 			lm = self.lastModified(trans)
 			if lm:
-			 	lm = time.strftime('%a, %d %b %Y %H:%M:%S GMT', time.gmtime(lm))
+				lm = time.strftime('%a, %d %b %Y %H:%M:%S GMT',
+					time.gmtime(lm))
 				trans.response().setHeader('Last-Modified', lm)
-				if_modified_since = request.environ().get('HTTP_IF_MODIFIED_SINCE', None)
+				if_modified_since = request.environ().get(
+					'HTTP_IF_MODIFIED_SINCE', None)
 				if not if_modified_since:
-					if_modified_since = request.environ().get('If-Modified-Since', None)
+					if_modified_since = request.environ().get(
+						'If-Modified-Since', None)
 				if if_modified_since and if_modified_since.split(';')[0] == lm:
 					trans.response().setStatus(304, 'Not Modified')
 					#print "304", request.serverSidePath()
@@ -57,15 +70,19 @@ class HTTPServlet(Servlet):
 		trans.response().setStatus(501, 'Not Implemented')
 
 	def lastModified(self, trans):
-		"""
+		"""Get time of last modification.
+
 		Return this object's Last-Modified time (as a float),
 		or None (meaning don't know or not applicable).
+
 		"""
 		return None
 
 	def respondToHead(self, trans):
-		"""
+		"""Respond to a HEAD request.
+
 		A correct but inefficient implementation.
+
 		"""
 		res = trans.response()
 		w = res.write

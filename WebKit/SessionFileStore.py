@@ -7,9 +7,10 @@ debug = 0
 
 
 class SessionFileStore(SessionStore):
-	"""
-	Stores the sessions on disk in the Sessions/ directory, one file
-	per session.
+	"""A session file store.
+
+	Stores the sessions on disk in the Sessions/ directory,
+	one file per session.
 
 	This is useful for various situations:
 		1. Using the OneShot adapter
@@ -18,8 +19,8 @@ class SessionFileStore(SessionStore):
 		3. Fault tolerance
 		4. Clustering
 
-	Note that the last two are not yet supported by WebKit (as of 0.4,
-	8/2000).
+	Note that the last two are not yet supported by WebKit.
+
 	"""
 
 
@@ -53,7 +54,7 @@ class SessionFileStore(SessionStore):
 					item = self.decoder()(file)
 				finally:
 					file.close()
-			except:					# session can't be unpickled
+			except: # session can't be unpickled
 				os.remove(filename) # remove session file
 				print "Error loading session from disk:", key
 				self.application().handleException()
@@ -71,7 +72,6 @@ class SessionFileStore(SessionStore):
 		# have to lock the file for the entire time that the servlet is manipulating
 		# the session, which would block any other servlets from using that session.
 		# Doesn't seem like a great solution to me.
-
 		if debug:
 			print '>> setitem(%s,%s)' % (key, item)
 		filename = self.filenameForKey(key)
@@ -145,18 +145,21 @@ class SessionFileStore(SessionStore):
 	def storeAllSessions(self):
 		pass
 
-##	def cleanStaleSessions(self, task=None):
-##		"""
-##		Called by the Application to tell this store to clean out all sessions that
-##		have exceeded their lifetime.
-##		"""
-##	    we don't know the timeout without opening the session, so his can't work.
-##		curTime = time.time()
-##		for key in self.keys():
-##			mtime = os.path.getmtime(self.filenameForKey(key))
-##			if (curTime - mtime) >= sess.timeout()  or  sess.timeout()==0:
-##				sess.expiring()
-##				del self[key]
+	# We don't know the timeout without opening the session, so this can't work:
+	# def cleanStaleSessions(self, task=None):
+	#	"""Clean stale sessions.
+	#
+	#	Called by the Application to tell this store to clean out all
+	#	sessions that have exceeded their lifetime.
+	#	"""
+	#
+	#	curTime = time.time()
+	#	for key in self.keys():
+	#		mtime = os.path.getmtime(self.filenameForKey(key))
+	#		if (curTime - mtime) >= sess.timeout()  or  sess.timeout()==0:
+	#			sess.expiring()
+	#			del self[key]
+
 
 	## Self utility ##
 

@@ -3,16 +3,9 @@ import os
 import sys
 import imp
 
-"""
-NO DOCS - this can all be more easily implemented by looking at
-sys.modules, along with select files (like config files).  It's fast
-to poll sys.modules, then we don't need this fanciness.
+"""ImportSpy
 
-jdh: I'm not sure.  The original implementation from Tavis used sys.modules
-like you say.  I implemented this to avoid having any polling at all,
-but perhaps it's not worth it.  I'm not sure if there were other
-factors in the design which pointed to this solution.
-
+Keeps track of imported modules and protects against concurrent imports.
 
 This module helps save the filepath of every module which is imported.
 This is used by the `AutoReloadingAppServer` (see doc strings for more
@@ -31,57 +24,71 @@ in the `imp` module, and you may use the `watchFile(filename)` function
 to add more files to watch without importing them (configuration files,
 for instance).
 
-.. inline:: load_module
-.. inline:: find_module
-.. inline:: watchFile
+ianb: This can all be more easily implemented by looking at sys.modules,
+along with select files (like config files). It's fast to poll sys.modules,
+then we don't need this fanciness.
+
+jdh: I'm not sure.  The original implementation from Tavis used sys.modules
+like you say. I implemented this to avoid having any polling at all,
+but perhaps it's not worth it. I'm not sure if there were other factors
+in the design which pointed to this solution.
+
 """
 
-True, False = 1==1, 0==1
+try: # backward compatibility for Python < 2.3
+  True, False
+except NameError:
+  True, False = 1, 0
 
-try:
+try: # backward compatibility for Python < 2.4
 	set
 except NameError:
 	from sets import Set as set
 
 
 class ImportLock:
-	"""
-	Provides a lock for protecting against concurrent imports.
-	This is necessary because WebKit is multithreaded and uses its
-	own import hook.
-	
-	This class abstracts the difference between using the Python
-	interpreter's global import lock, and using our own RLock.
-	The global lock is the correct solution, but is only available
-	in recent Python versions (2.3 or 2.2.3).  If it's not
-	available, we fall back to using an RLock (which is not as
-	good, but better than nothing).
+	"""Lock for multi-threaded imports.
+
+	Provides a lock for protecting against concurrent imports. This is
+	necessary because WebKit is multithreaded and uses its own import hook.
+
+	This class abstracts the difference between using the Python interpreter's
+	global import lock, and using our own RLock. The global lock is the correct
+	solution, but is only available in Python since version 2.2.3. If it's not
+	available, we fall back to using an RLock (which is not as good, but better
+	than nothing).
+
 	"""
 
 	def __init__(self):
-		"""
+		"""Create the lock.
+
 		Aliases the `acquire` and `release` methods to
-		`imp.acquire_lock` and `imp.release_lock` (if
-		available), or to acquire and release our own RLock.
+		`imp.acquire_lock` and `imp.release_lock` (if available),
+		or to acquire and release our own RLock.
+
 		"""
 		if hasattr(imp,'acquire_lock'):
 			self.acquire = imp.acquire_lock
 			self.release = imp.release_lock
-		else:
+		else: # fallback for Python < 2.3
 			from threading import RLock
 			self._lock = RLock()
 			self.acquire = self._lock.acquire
 			self.release = self._lock.release
 
+
 class ModuleLoader(ihooks.ModuleLoader):
-	"""
-	Implements the ihook module loader that tracks imported
-	modules.  
+	"""The import hook.
+
+	Implements the ihook module loader that tracks imported modules.
+
 	"""
 
 	def __init__(self):
+		"""Create import hook."""
 		assert modloader is None, \
-		       "ModuleLoader can only be instantiated once"
+			"ModuleLoader can only be instantiated once"
 		ihooks.ModuleLoader.__init__(self)
 		self._fileList = {}
 		self._notifyHook = None
@@ -89,7 +96,8 @@ class ModuleLoader(ihooks.ModuleLoader):
 		self._lock = ImportLock()
 		self._modulesSet = set()
 
-	def load_module(self,name,stuff):
+	def load_module(self, name, stuff):
+		"""Replaces imp.load_module()."""
 		try:
 			try:
 				self._lock.acquire()
@@ -103,6 +111,7 @@ class ModuleLoader(ihooks.ModuleLoader):
 		return mod
 
 	def recordModules(self, moduleNames):
+		"""Record a list of modules."""
 		for name in moduleNames:
 			mod = sys.modules[name]
 			if not hasattr(mod, '__file__'):
@@ -112,34 +121,41 @@ class ModuleLoader(ihooks.ModuleLoader):
 			pathname = os.path.dirname(file)
 			desc = None
 			self.recordFileName((file, pathname, desc),
-					    sys.modules[name])
+				sys.modules[name])
 
 	def fileList(self):
+		"""Return the list of tracked files."""
 		return self._fileList
 
 	def notifyOfNewFiles(self, hook):
-		""" Called by someone else to register that they'd like to 
-		be know when a new file is imported """
+		"""Register notification hook.
+
+		Called by someone else to register that they'd like to be know
+		when a new file is imported.
+
+		"""
 		self._notifyHook = hook
 
 	def watchFile(self, filepath, getmtime=os.path.getmtime):
+		"""Add more files to watch without importing them."""
 		modtime = getmtime(filepath)
 		self._fileList[filepath] = modtime
-		# send notification that this file was imported 
+		# send notification that this file was imported
 		if self._notifyHook:
 			self._notifyHook(filepath,modtime)
 
 	def recordFileName(self, stuff, mod, isfile=os.path.isfile):
+		"""Record a file."""
 		file, pathname, desc = stuff
 
 		fileList = self._fileList
 		if mod:
 			assert sys.modules.has_key(mod.__name__)
 			self._modulesSet.add(mod)
-			
-			# __orig_file__ is used for cheetah and psp mods; we want 
-			# to record the source filenames, not the auto-generated modules
-			f2 = getattr(mod, '__orig_file__', 0) 
+
+			# __orig_file__ is used for cheetah and psp mods; we want to
+			# record the source filenames, not the auto-generated modules:
+			f2 = getattr(mod, '__orig_file__', 0)
 			f = getattr(mod, '__file__', 0)
 
 			if f2 and f2 not in fileList.keys():
@@ -160,29 +176,31 @@ class ModuleLoader(ihooks.ModuleLoader):
 				except OSError:
 					pass
 
-		# also record filepaths which weren't successfully
-		# loaded, which may happen due to a syntax error in a
-		# servlet, because we also want to know when such a
-		# file is modified
+		# Also record filepaths which weren't successfully loaded, which
+		# may happen due to a syntax error in a servlet, because we also
+		# want to know when such a file is modified:
 		elif pathname:
 			if isfile(pathname):
 				self.watchFile(pathname)
 
 	def activate(self):
+		"""Activate the ModuleLoader."""
 		imp = ihooks.ModuleImporter(loader=modloader)
 		ihooks.install(imp)
 		self.recordModules(sys.modules.keys())
 		self._installed = True
 
 	def delModules(self, includePythonModules=False, excludePrefixes=[]):
-		"""
-		Deletes all the modules that the ImportSpy has ever imported unless they
-		are part of WebKit. This in support of DebugAppServer's useful (yet
-		imperfect) support for AutoReload.
+		"""Delete imported modules.
+
+		Deletes all the modules that the ImportSpy has ever imported unless
+		they are part of WebKit. This in support of DebugAppServer's useful
+		(yet imperfect) support for AutoReload.
 		"""
 		for mod in self._modulesSet:
 			name = mod.__name__
-			if not includePythonModules and (not hasattr(mod, '__file__') or mod.__file__.startswith(sys.prefix)):
+			if not includePythonModules and (not hasattr(mod, '__file__')
+					or mod.__file__.startswith(sys.prefix)):
 				continue
 			exclude = False
 			for prefix in excludePrefixes:
@@ -194,6 +212,8 @@ class ModuleLoader(ihooks.ModuleLoader):
 			del sys.modules[mod.__name__]
 		self._modulesSet = set()
 
+
+## Global ##
 
 # We do this little double-assignment trick to make sure ModuleLoader
 # is only instantiated once.
@@ -207,20 +227,13 @@ def reset():
 
 
 def load_module(name, file, filename, description):
-	"""
-	.. inline:: ModuleLoader.load_module
-	"""
+	"""See ModuleLoader.load_module."""
 	return modloader.load_module(name,(file,filename,description))
 
 def find_module(name,path=None):
-	"""
-	.. inline:: ModuleLoader.find_module
-	"""
+	"""See ModuleLoader.find_module."""
 	return modloader.find_module(name,path)
 
 def watchFile(*args):
-	"""
-	.. inline:: ModuleLoader.watchFile
-	"""
+	"""See ModuleLoader.watchFile."""
 	return modloader.watchFile(*args)
-

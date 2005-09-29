@@ -2,7 +2,8 @@ from Common import *
 
 
 class SessionStore(Object):
-	"""
+	"""A general session store.
+
 	SessionStores are dictionary-like objects used by Application to
 	store session state. This class is abstract and it's up to the
 	concrete subclass to implement several key methods that determine
@@ -33,6 +34,7 @@ class SessionStore(Object):
 	  prevent concurrent requests on the same session? If so, that can
 	  probably be done at this level (as opposed to pushing the burden
 	  on various subclasses).
+
 	"""
 
 
@@ -49,7 +51,8 @@ class SessionStore(Object):
 		except ImportError:
 			import pickle
 		if hasattr(pickle, 'HIGHEST_PROTOCOL'):
-			def dump_with_highest_protocol(obj, f, proto=pickle.HIGHEST_PROTOCOL, dump=pickle.dump):
+			def dump_with_highest_protocol(obj, f,
+					proto=pickle.HIGHEST_PROTOCOL, dump=pickle.dump):
 				return dump(obj, f, proto)
 			self._encoder = dump_with_highest_protocol
 		else:
@@ -75,12 +78,14 @@ class SessionStore(Object):
 		raise AbstractError, self.__class__
 
 	def __delitem__(self, key):
-		"""
+		"""Delete an item.
+
 		Subclasses are responsible for expiring the session as well.
 		Something along the lines of:
 			sess = self[key]
 			if not sess.isExpired():
 				sess.expiring()
+
 		"""
 		raise AbstractError, self.__class__
 
@@ -96,6 +101,7 @@ class SessionStore(Object):
 	def setdefault(self, key, default):
 		raise AbstractError, self.__class__
 
+
 	## Application support ##
 
 	def storeSession(self, session):
@@ -105,9 +111,11 @@ class SessionStore(Object):
 		raise AbstractError, self.__class__
 
 	def cleanStaleSessions(self, task=None):
-		"""
-		Called by the Application to tell this store to clean out all sessions that
-		have exceeded their lifetime.
+		"""Clean stale sessions.
+
+		Called by the Application to tell this store to clean out all
+		sessions that have exceeded their lifetime.
+
 		"""
 		curTime = time.time()
 		for key, sess in self.items():

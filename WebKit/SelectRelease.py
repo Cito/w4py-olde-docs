@@ -1,8 +1,11 @@
-"""
-Used by the AsyncThreadedAppServer module.
+"""Used by the AsyncThreadedAppServer module.
 
-This file implements an object that can force a call to select in the main asyncore.poll loop to return.
-This dispathcher is added to the asyncore polling group.  It is polled for reads.  We make this object available to everyone.  When we need the asyncore select loop to return, ie, we have some data ready to go, we call the release() method, which does a quick write to it's own socket/file-descriptor.  This causes select to return.
+This file implements an object that can force a call to select in the main
+asyncore.poll loop to return. This dispatcher is added to the asyncore polling
+group. It is polled for reads. We make this object available to everyone.
+When we need the asyncore select loop to return, i.e., we have some data ready
+to go, we call the release() method, which does a quick write to it's own socket/file-descriptor. This causes select to return.
+
 """
 
 import asyncore
@@ -17,8 +20,10 @@ import thread
 if os.name == 'posix':
 
 	class SelectRelease (asyncore.file_dispatcher):
-		"""
-		In a posix environment, we can use a file descriptor as the object that we include in the polling loop that we force a read on.
+		"""Version for Posix.
+
+		In a Posix environment, we can use a file descriptor as the object
+		that we include in the polling loop that we force a read on.
 
 		"""
 
@@ -49,9 +54,12 @@ if os.name == 'posix':
 else:
 
 	class SelectRelease (asyncore.dispatcher):
-		"""
-		MSW can't hanlde file descriptors in a select poll, so a real socket has to be used.
-		This method was adapted from a similar module in the Zope Medusa server.
+		"""Version for MS Windows.
+
+		Windows can't handle file descriptors in a select poll, so a real
+		socket has to be used. This method was adapted from a similar module
+		in the Zope Medusa server.
+
 		"""
 
 		address = ('127.9.9.9', 19999)

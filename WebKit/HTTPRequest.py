@@ -37,12 +37,13 @@ class HTTPRequest(Request):
 			self._environ = dict['environ']
 			self._input   = dict['input']
 			self._requestID = dict['requestID']
-			self._fields  = FieldStorage.FieldStorage(self._input, environ=self._environ, keep_blank_values=1, strict_parsing=0)
+			self._fields  = FieldStorage.FieldStorage(self._input,
+				environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._fields.parse_qs()
 			self._cookies = Cookie()
 			if self._environ.has_key('HTTP_COOKIE'):
-				# Protect the loading of cookies with an exception handler, because some cookies
-				# from IE are known to break the cookie module.
+				# Protect the loading of cookies with an exception handler,
+				# because some cookies from MSIE are known to break the cookie module.
 				try:
 					self._cookies.load(self._environ['HTTP_COOKIE'])
 				except:
@@ -86,13 +87,14 @@ class HTTPRequest(Request):
 
 		self._adapterName = self._environ.get('SCRIPT_NAME', '')
 
-		# We use the cgi module to get the fields, but then change them into an ordinary dictionary of values
+		# We use the cgi module to get the fields,
+		# but then change them into an ordinary dictionary of values:
 		try:
 			keys = self._fields.keys()
 		except TypeError:
-			# This can happen if, for example, the request is an XML-RPC request, not
-			# a regular POST from an HTML form.  In that case we just create an empty
-			# set of fields.
+			# This can happen if, for example, the request is an XML-RPC request,
+			# not a regular POST from an HTML form.  In that case we just create
+			# an empty set of fields.
 			keys = []
 		dict = {}
 
@@ -101,10 +103,12 @@ class HTTPRequest(Request):
 			if type(value) is not ListType:
 				if value.filename:
 					if debug: print "Uploaded File Found"
-				else:  # i.e., if we don't have a list, we have one of those cgi.MiniFieldStorage objects.
+				else:  # i.e., if we don't have a list,
+					# we have one of those cgi.MiniFieldStorage objects.
 					value = value.value # Get it's value.
 			else:
-				value = map(lambda miniFieldStorage: miniFieldStorage.value, value) # extract those .value's
+				value = map(lambda miniFieldStorage: miniFieldStorage.value,
+					value) # extract those .value's
 
 			dict[key] = value
 		self._fieldStorage = self._fields
@@ -135,10 +139,13 @@ class HTTPRequest(Request):
 			self._pathSession = self._environ['PATH_INFO'][7:].split('/',1)[0]
 			self._cookies['_SID_'] = self._pathSession
 			sidstring = '_SID_=' +  self._pathSession +'/'
-			self._environ['REQUEST_URI'] = self._environ['REQUEST_URI'].replace(sidstring,'')
-			self._environ['PATH_INFO'] = self._environ['PATH_INFO'].replace(sidstring,'')
+			self._environ['REQUEST_URI'] = self._environ[
+				'REQUEST_URI'].replace(sidstring,'')
+			self._environ['PATH_INFO'] = self._environ[
+				'PATH_INFO'].replace(sidstring,'')
 			if self._environ.has_key('PATH_TRANSLATED'):
-				self._environ['PATH_TRANSLATED'] = self._environ['PATH_TRANSLATED'].replace(sidstring,'')
+				self._environ['PATH_TRANSLATED'] = self._environ[
+					'PATH_TRANSLATED'].replace(sidstring,'')
 			assert(not self._environ.has_key('WK_URI')) # obsolete?
 
 		self._sessionExpired = 0
@@ -146,7 +153,8 @@ class HTTPRequest(Request):
 		# Save the original urlPath.
 		self._originalURLPath = self.urlPath()
 
-		if debug: print "Done setting up request, found keys %s" % repr(self._fields.keys())
+		if debug:
+			print "Done setting up request, found keys %r" % self._fields.keys()
 
 
 	## Transactions ##
@@ -615,8 +623,8 @@ class HTTPRequest(Request):
 		Equivalent to CGI variable PATH_TRANSLATED.
 
 		"""
-#		return self._environ['PATH_TRANSLATED']
-# @@ 2000-06-22 ce: resolve this
+		# return self._environ['PATH_TRANSLATED']
+		# @@ 2000-06-22 ce: resolve this
 		return self._environ.get('PATH_TRANSLATED', None)
 
 	def queryString(self):
@@ -738,29 +746,7 @@ class HTTPRequest(Request):
 		' queryString method sessionId parents fields cookies environ'.split())
 
 
-	## Deprecated ##
-
-	def serverSideDir(self):
-		"""deprecated: HTTPRequest.serverSideDir() on 01/24/01 in 0.5. use serverSidePath() instead.
-
-		Returns the directory of the Servlet (as given through __init__()'s path).
-
-		"""
-		self.deprecated(self.serverSideDir)
-		if not hasattr(self, '_serverSideDir'):
-			self._serverSideDir = os.path.dirname(self.serverSidePath())
-		return self._serverSideDir
-
-	def relativePath(self, joinPath):
-		"""deprecated: HTTPRequest.relativePath() on 01/24/01 in 0.5. use serverSidePath() instead.
-
-		Returns a new path which includes the servlet's path appended by 'joinPath'.
-		Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned.
-
-		"""
-		self.deprecated(self.relativePath)
-		return os.path.join(self.serverSideDir(), joinPath)
-
+## Info Structure ##
 
 _infoMethods = (
 	HTTPRequest.servletPath,

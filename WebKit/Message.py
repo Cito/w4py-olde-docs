@@ -1,9 +1,17 @@
+"""Message
+
+A very general (dumb) message class.
+
+"""
+
+
 from Common import *
-# @@ 2003-03 ib: NO DOC - this class seems dumb.
 
 class Message(Object):
-	"""
-	Message is the abstract, parent class for both Request and Response, and implements the behavior that is generic to both.
+	"""A very general message class.
+
+	Message is the abstract, parent class for both Request and Response,
+	and implements the behavior that is generic to both.
 
 	Messages have:
 
@@ -37,7 +45,12 @@ class Message(Object):
 	## Protocol ##
 
 	def protocol(self):
-		""" Returns the name and version of the protocol the message uses in the form protocol/majorVersion.minorVersion, for example, HTTP/1.1. """
+		"""Return the protocol-
+
+		Returns the name and version of the protocol the message uses
+		in the form protocol/majorVersion.minorVersion, for example, HTTP/1.1.
+
+		"""
 		# @@ 2000-04-09 ce: Move this down into HTTPSomething subclasses
 		return 'HTTP/1.0'
 

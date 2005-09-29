@@ -6,7 +6,10 @@ import base64
 from WebKit.Cookie import Cookie
 from types import *
 
-True, False = 1==1, 0==1
+try: # backward compatibility for Python < 2.3
+  True, False
+except NameError:
+  True, False = 1, 0
 
 class NewPage(Servlet):
 
@@ -52,7 +55,7 @@ class NewPage(Servlet):
         to be initialized may not have been.
         """
         pass
-    
+
     def notImplemented(self):
         raise self.exc.NotImplemented
 
@@ -61,13 +64,13 @@ class NewPage(Servlet):
 
     def statusCreated(self):
         self.response().setStatus(201, 'Created')
-        
+
     def statusNoContent(self):
         self.response().setStatus(204, 'No Content')
-        
+
     def statusMultiStatus(self):
         self.response().setStatus(207, 'Multi-Status')
-	
+
     def host(self):
         """The hostname of the server, with port number if necessary
         (i.e., not 80)"""
@@ -180,11 +183,11 @@ class NewPage(Servlet):
     def respondToGet(self):
         """ Invokes _respond() to handle the transaction. """
         self._respond()
-        
+
     def respondToPost(self):
         """ Invokes _respond() to handle the transaction. """
         self._respond()
-        
+
     def respondToHead(self):
         """
         A correct but inefficient implementation.
@@ -215,7 +218,7 @@ class NewPage(Servlet):
         self.writeHTML()
 
     ## Access ##
-        
+
     def application(self):
         return self._transaction.application()
 
@@ -286,7 +289,7 @@ class NewPage(Servlet):
     def writeHTML(self):
         """
         Writes all the HTML for the page.
-        
+
         Subclasses may override this method (which is invoked by
         respondToGet() and respondToPost()) or more commonly its
         constituent methods, writeDocType(), writeHead() and
@@ -310,7 +313,7 @@ class NewPage(Servlet):
         Invoked by writeHTML() to write the <!DOCTYPE ...> tag. This
         implementation specifies HTML 4.01 Transitional. Subclasses may
         override to specify something else.
-        
+
         You can find out more about doc types by searching for DOCTYPE
         on the web, or visiting:
             http://www.htmlhelp.com/tools/validator/doctype.html
@@ -331,7 +334,7 @@ class NewPage(Servlet):
         Writes the parts inside the <head>...</head> tags.  It's best
         to override title(), styleSheet(), styleSheetHref(), and
         headJavaScript(), not the write* methods.
-        
+
         Subclasses can override this to add additional items and
         should invoke super.
         """
@@ -456,7 +459,7 @@ class NewPage(Servlet):
 
 
     ## Actions ##
-    
+
     def actions(self):
         """
         Returns a list of method names that are allowable actions from
@@ -469,13 +472,13 @@ class NewPage(Servlet):
 
     def htmlEncode(self, s):
         return Funcs.htmlEncode(s)
-    
+
     def htmlDecode(self, s):
         return Funcs.htmlDecode(s)
 
     def urlEncode(self, s):
         return Funcs.urlEncode(s)
-    
+
     def urlDecode(self, s):
         return Funcs.urlDecode(s)
 
@@ -509,7 +512,7 @@ class NewPage(Servlet):
         return apply(self.application().callMethodOfServlet, (self.transaction(), URL, method) + args, kwargs)
 
     ## Self utility ##
-    
+
     def sessionEncode(self, url=None):
         """
         Utility function to access session.sessionEncode.

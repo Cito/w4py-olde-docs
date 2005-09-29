@@ -11,7 +11,8 @@ class SessionError(Exception):
 
 
 class Session(Object):
-	"""
+	"""Implementation of client sessions.
+
 	All methods that deal with time stamps, such as creationTime(),
 	treat time as the number of seconds since January 1, 1970.
 
@@ -41,6 +42,7 @@ class Session(Object):
 		  abstract super class to codify that?
 	"""
 
+
 	## Init ##
 
 	def __init__(self, trans, identifier=None):
@@ -66,14 +68,17 @@ class Session(Object):
 			self._identifier = identifier
 		else:
 			attempts = 0
-			while attempts<10000:
-				self._identifier = self._prefix + string.join(map(lambda x: '%02d' % x, localtime(time())[:6]), '') + '-' + uniqueId(self)
+			while attempts < 10000:
+				self._identifier = self._prefix + ''.join(
+					map(lambda x: '%02d' % x,
+						localtime(time())[:6])) + '-' + uniqueId(self)
 				if not trans.application().hasSession(self._identifier):
 					break
 				attempts = attempts + 1
 			else:
-				raise SessionError, "Can't create valid session id after %d attempts." % attempts
-            
+				raise SessionError, \
+					"Can't create valid session id after %d attempts." % attempts
+
 		if trans.application().setting('Debug')['Sessions']:
 			print '>> [session] Created session, timeout=%s, id=%s, self=%s' % (
 				self._timeout, self._identifier, self)
@@ -82,42 +87,55 @@ class Session(Object):
 	## Access ##
 
 	def creationTime(self):
-		""" Returns the time when this session was created. """
+		"""Return the time when this session was created."""
 		return self._creationTime
 
 	def lastAccessTime(self):
-		""" Returns the last time the user accessed the session through interaction. This attribute is updated in awake(), which is invoked at the beginning of a transaction. """
+		"""Get last access time.
+
+		Returns the last time the user accessed the session through
+		interaction. This attribute is updated in awake(), which is
+		invoked at the beginning of a transaction.
+
+		"""
 		return self._lastAccessTime
 
 	def identifier(self):
-		""" Returns a string that uniquely identifies the session. This method will create the identifier if needed. """
+		"""Return a string that uniquely identifies the session.
+
+		This method will create the identifier if needed.
+
+		"""
 		return self._identifier
 
 	def isExpired(self):
-		"""
-		Returns true if the session has been previously expired.
+		"""Check whether the session has been previously expired.
+
 		See also: expiring()
+
 		"""
 		return getattr(self, '_isExpired', 0)
 
 	def isNew(self):
-		return self._numTrans<2
+		"""Check whether the session is new."""
+		return self._numTrans < 2
 
 	def timeout(self):
-		""" Returns the timeout for this session in seconds. """
+		"""Return the timeout for this session in seconds."""
 		return self._timeout
 
 	def setTimeout(self, timeout):
-		""" Set the timeout on this session in seconds. """
+		"""Set the timeout on this session in seconds."""
 		self._timeout = timeout
 
 
 	## Invalidate ##
 
 	def invalidate(self):
-		"""
-		Invalidates the session.
+		"""Invalidate the session.
+
 		It will be discarded the next time it is accessed.
+
 		"""
 		self._lastAccessTime = 0
 		self._values = {}
@@ -157,23 +175,43 @@ class Session(Object):
 	## Transactions ##
 
 	def awake(self, trans):
-		""" Invoked during the beginning of a transaction, giving a Session an opportunity to perform any required setup. The default implementation updates the 'lastAccessTime'. """
+		"""Let the session awake.
+
+		Invoked during the beginning of a transaction, giving a Session an
+		opportunity to perform any required setup. The default implementation
+		updates the 'lastAccessTime'.
+
+		"""
 		self._lastAccessTime = time()
 		self._numTrans += 1
 
 	def respond(self, trans):
-		""" The default implementation does nothing, but could do something in the future. Subclasses should invoke super. """
+		"""Let the session respond to a request.
+
+		The default implementation does nothing, but could do something
+		in the future. Subclasses should invoke super.
+
+		"""
 		pass
 
 	def sleep(self, trans):
-		""" Invoked during the ending of a transaction, giving a Session an opportunity to perform any required shutdown. The default implementation does nothing, but could do something in the future. Subclasses should invoke super. """
+		"""Let the session sleep again.
+
+		Invoked during the ending of a transaction, giving a Session an
+		opportunity to perform any required shutdown. The default
+		implementation does nothing, but could do something in the future.
+		Subclasses should invoke super.
+
+		"""
 		pass
 
 	def expiring(self):
-		"""
+		"""Let the session expire.
+
 		Called when session is expired by the application.
 		Subclasses should invoke super.
 		Session store __delitem__()s should invoke if not isExpired().
+
 		"""
 		self._isExpired = 1
 
@@ -181,9 +219,7 @@ class Session(Object):
 	## Utility ##
 
 	def sessionEncode(self, url):
-		"""
-		Encode the session ID as a parameter to a url.
-		"""
+		"""Encode the session ID as a parameter to a url."""
 		import urlparse
 		sid = '_SID_=' + self.identifier()
 		url=list(urlparse.urlparse(url)) #make a list

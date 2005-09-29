@@ -1,6 +1,9 @@
 from types import *
 
-True, False = 1==1, 0==1
+try: # backward compatibility for Python < 2.3
+  True, False
+except NameError:
+  True, False = 1, 0
 
 class HTTPError(Exception):
 
@@ -83,7 +86,7 @@ class AuthenticationRequiredError(HTTPError):
             return HTTPError.codeMessage(servlet)
         else:
             return servlet.loginBox(focus=True)
-        
+
     def headers(self, servlet=None):
         return {'WWW-Authenticate': 'Basic realm="%s"' % self._realm}
 

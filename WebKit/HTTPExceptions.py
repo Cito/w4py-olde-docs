@@ -1,4 +1,5 @@
-"""
+"""HTTPExceptions
+
 HTTPExceptions are for situations that are predicted by the
 HTTP spec.  Where the ``200 OK`` response is typical, a
 ``404 Not Found`` or ``301 Moved Temporarily`` response is not
@@ -14,13 +15,15 @@ turned into a normal login page.
 from types import *
 from WebUtils.Funcs import htmlEncode
 
-True, False = 1==1, 0==1
+try: # backward compatibility for Python < 2.3
+  True, False
+except NameError:
+  True, False = 1, 0
 
 class HTTPException(Exception):
+	"""HTTPException template class.
 
-	"""
-	Subclasses must define these variables (usually as class
-	variables):
+	Subclasses must define these variables (usually as class variables):
 
 	`_code`:
 	    a tuple of the integer error code, and the short
@@ -29,28 +32,28 @@ class HTTPException(Exception):
 	    the long-winded description, to be presented
 	    in the response page.  Or you can override description()
 	    if you want something more context-sensitive.
+
 	"""
+
+
+	## Error codes ##
 
 	_description = 'An error occurred'
 
 	def code(self):
-		"""
-		The integer code
-		"""
+		"""The integer code."""
 		return self._code[0]
 
 	def codeMessage(self):
-		"""
-		The message (like ``Not Found``) that goes with the code
-		"""
+		"""The message (like ``Not Found``) that goes with the code."""
 		return self._code[1]
 
-	"""
-	**HTML Description**
-	"""
+
+	## HTML Description ##
 
 	def html(self):
-		"""
+		"""The error page.
+
 		The HTML page that should be sent with the error,
 		usually a description of the problem.
 		"""
@@ -67,44 +70,40 @@ class HTTPException(Exception):
 			}
 
 	def title(self):
-		"""
-		The title used in the HTML page
-		"""
+		"""The title used in the HTML page."""
 		return self.codeMessage()
 
 	def htTitle(self):
-		"""
-		The title, but it may include HTML markup (like
-		italics)
-		"""
+		"""The title, but it may include HTML markup (like italics)."""
 		return self.title()
 
 	def htBody(self):
-		"""
-		The HTML body of the page.
-		"""
+		"""The HTML body of the page."""
 		body = self.htDescription()
 		if self.args:
 			body += ''.join(['<p>%s</p>\n' % str(l) for l in self.args])
 		return body
 
 	def description(self):
-		"""
+		"""Error description.
+
 		Possibly a plain text version of the error description,
 		though usually just identical to `htDescription`.
+
 		"""
 		return self._description
 
 	def htDescription(self):
-		"""
+		"""HTML error description.
+
 		The HTML description of the error, for presentation
 		to the browser user.
+
 		"""
 		return self.description()
 
-	"""
-	**Misc**
-	"""
+
+	## Misc ##
 
 	def headers(self):
 		"""
@@ -125,46 +124,44 @@ class HTTPException(Exception):
 
 
 class HTTPNotImplemented(HTTPException):
+	"""HTTPExcecption "not implemented" subclass.
 
-	"""
 	When methods (like GET, POST, PUT, PROPFIND, etc) are not
 	implemented for this resource.
-	"""
 
+	"""
 	_code = 501, "Not Implemented"
 	_description = "The method given is not yet implemented by this application"
 
 class HTTPForbidden(HTTPException):
+	"""HTTPExcecption "forbidden" subclass.
 
-	"""
-	When access is not allowed to this resource.  If the user is
-	anonymous, and must be authenticated, then
-	HTTPAuthenticationRequired is a preferable exception.  If the
-	user should not be able to get to this resource (at least through
-	the path they did), or is authenticated and still doesn't have
-	access, or no one is allowed to view this, then HTTPForbidden would
+	When access is not allowed to this resource. If the user is anonymous,
+	and must be authenticated, then HTTPAuthenticationRequired is a preferable
+	exception. If the user should not be able to get to this resource (at
+	least through the path they did), or is authenticated and still doesn't
+	have access, or no one is allowed to view this, then HTTPForbidden would
 	be the proper response.
-	"""
 
+	"""
 	_code = 403, 'Forbidden'
 	_description = "You are not authorized to access this resource"
 
 class HTTPAuthenticationRequired(HTTPException):
+	"""HTTPExcecption "authentication required" subclass.
+
+	HTTPAuthenticationRequired will usually cause the browser to open up an
+	HTTP login box, and after getting login information from the user, the
+	browser will resubmit the request. However, this should also trigger
+	login pages in properly set up environments (though much code will not
+	work this way).
+
+	Browsers will usually not send authentication information unless they
+	receive this response, even when other pages on the site have given 401
+	responses before. So when using this authentication every request will
+	usually be doubled, once without authentication, once with.
 
 	"""
-	HTTPAuthenticationRequired will usually cause the browser
-	to open up an HTTP login box, and after getting login information
-	from the user, the browser will resubmit the request.  However,
-	this should also trigger login pages in properly set up
-	environments (though much code will not work this way).
-
-	Browsers will usually not send authentication information unless
-	they receive this response, even when other pages on the site
-	have given 401 responses before.  So when using this
-	authentication every request will usually be doubled, once
-	without authentication, once with.
-	"""
-
 	_code = 401, 'Authentication Required'
 	_description = "You must log in to access this resource"
 	def __init__(self, realm=None, *args):
@@ -177,84 +174,82 @@ class HTTPAuthenticationRequired(HTTPException):
 	def headers(self):
 		return {'WWW-Authenticate': 'Basic realm="%s"' % self._realm}
 
+
+# This is for wording mistakes. I'm unsure about their benefit.
+HTTPAuthorizationRequired = HTTPAuthenticationRequired
 """
 There is also an alias `HTTPAuthorizationRequired`, as it is hard
 to distinguish between these two names.
 """
 
-## This is for wording mistakes.  I'm unsure about their benefit.
-HTTPAuthorizationRequired = HTTPAuthenticationRequired
-
 class HTTPMethodNotAllowed(HTTPException):
-	"""
+	"""HTTPExcecption "method not allowed" subclass.
+
 	When a method (like GET, PROPFIND, POST, etc) is not allowed
 	on this resource (usually because it does not make sense, not
-	because it is not permitted).  Mostly for WebDAV.
-	"""
+	because it is not permitted). Mostly for WebDAV.
 
+	"""
 	_code = 405, 'Method Not Allowed'
 	_description = 'The method is not supported on this resource'
 
 class HTTPConflict(HTTPException):
-	"""
-	When there's a locking conflict on this resource (in response
-	to something like a PUT, not for most other conflicts).
-	Mostly for WebDAV.
-	"""
+	"""HTTPExcecption "conflict" subclass.
 
+	When there's a locking conflict on this resource (in response to something
+	like a PUT, not for most other conflicts). Mostly for WebDAV.
+
+	"""
 	_code = 409, 'Conflict'
 
 class HTTPUnsupportedMediaType(HTTPException):
-	"""
-	Uhh....
-	"""
-
+	"""HTTPExcecption "unsupported media type" subclass."""
 	_code = 415, 'Unsupported Media Type'
 
 class HTTPInsufficientStorage(HTTPException):
-	"""
-	When there is not sufficient storage, usually in response
-	to a PUT when there isn't enough disk space.  Mostly for WebDAV.
-	"""
+	"""HTTPExcecption "insufficient storage" subclass.
 
+	When there is not sufficient storage, usually in response to a PUT when
+	there isn't enough disk space. Mostly for WebDAV.
+
+	"""
 	_code = 507, 'Insufficient Storage'
 	_description = 'There was not enough storage space on the server to complete your request'
 
 class HTTPPreconditionFailed(HTTPException):
-	"""
-	During compound, atomic operations, when a precondition for
-	an early operation fail, then later operations in will fail
-	with this code.  Mostly for WebDAV.
-	"""
+	"""HTTPExcecption "Precondition Failed" subclass.
 
+	During compound, atomic operations, when a precondition for an early
+	operation fail, then later operations in will fail with this code.
+	Mostly for WebDAV.
+
+	"""
 	_code = 412, 'Precondition Failed'
 
 class HTTPMovedPermanently(HTTPException):
-	"""
-	When a resource is permanently moved.  The browser may remember
-	this relocation, and later requests may skip requesting the
-	original resource altogether.
-	"""
+	"""HTTPExcecption "moved permanently" subclass.
 
+	When a resource is permanently moved. The browser may remember this
+	relocation, and later requests may skip requesting the original
+	resource altogether.
+
+	"""
 	_code = 301, 'Moved Permanently'
 
 	def __init__(self, location=None, webkitLocation=None, *args):
-		"""
-		HTTPMovedPermanently needs a destination that you
-		it should be directed to -- you can pass `location`
-		*or* `webkitLocation` -- if you pass `webkitLocation`
-		it will be relative to the WebKit base (the portion
-		through the adapter).
-		"""
+		"""Set destination.
 
+		HTTPMovedPermanently needs a destination that you it should be
+		directed to -- you can pass `location` *or* `webkitLocation` --
+		if you pass `webkitLocation` it will be relative to the WebKit base
+		(the portion through the adapter).
+		"""
 		self._location = location
 		self._webkitLocation = webkitLocation
 		HTTPException.__init__(self, 301, 'Moved Permanently', *args)
 
 	def location(self):
-		"""
-		The location that we will be redirecting to
-		"""
+		"""The location that we will be redirecting to."""
 		if self._webkitLocation:
 			environ = self._transaction.request().environ()
 			if not self._webkitLocation.startswith('/'):
@@ -267,9 +262,7 @@ class HTTPMovedPermanently(HTTPException):
 		return location
 
 	def headers(self):
-		"""
-		We include a Location header
-		"""
+		"""We include a Location header."""
 		return {'Location': self.location()}
 
 	def description(self):
@@ -277,33 +270,35 @@ class HTTPMovedPermanently(HTTPException):
 			' <a href="%s">%s</a>' % ((htmlEncode(self.location()),)*2)
 
 class HTTPTemporaryRedirect(HTTPMovedPermanently):
+	"""HTTPExcecption "temporary tedirect" subclass.
+
+	Like HTTPMovedPermanently, except the redirect is only valid for this
+	request.  Internally identical to HTTPMovedPermanently, except with a
+	different response code. Browsers will check the server for each request
+	to see where it's redirected to.
 
 	"""
-	Like HTTPMovedPermanently, except the redirect is only valid for
-	this request.  Internally identical to HTTPMovedPermanently,
-	except with a different response code.  Browsers will check the
-	server for each request to see where it's redirected to.
-	"""
-
 	_code = 307, 'Temporary Redirect'
 
 # This is what people mean most often:
 HTTPRedirect = HTTPTemporaryRedirect
 
 class HTTPBadRequest(HTTPException):
-	"""
-	When the browser sends an invalid request.
-	"""
+	"""HTTPExcecption "bad request" subclass.
 
+	When the browser sends an invalid request.
+
+	"""
 	_code = 400, 'Bad Request'
 
 class HTTPNotFound(HTTPException):
-	"""
-	When the requested resource does not exist.  To be more secretive,
-	it is okay to return a 404 if access to the resource is not
-	permitted (you are not required to use HTTPForbidden, though it
-	makes it more clear why access was disallowed).
-	"""
+	"""HTTPExcecption "not found" subclass.
 
+	When the requested resource does not exist. To be more secretive,
+	it is okay to return a 404 if access to the resource is not	permitted
+	(you are not required to use HTTPForbidden, though it makes it more
+	clear why access was disallowed).
+
+	"""
 	_code = 404, 'Not Found'
 	_description = 'The resource you were trying to access was not found'

@@ -11,10 +11,11 @@ from MiscUtils.NamedValueAccess import NamedValueAccess
 
 
 class Object(object, NamedValueAccess):
-	"""
-	Object is the root class for all classes in the WebKit.  This
-	is a placeholder for any future functionality that might be
+	"""Object is the root class for all classes in the WebKit.
+
+	This is a placeholder for any future functionality that might be
 	appropriate for all objects in the framework.
+
 	"""
 
 	def __init__(self):
@@ -23,21 +24,21 @@ class Object(object, NamedValueAccess):
 		pass
 
 	def deprecated(self, method):
-		"""
-		The implementation of WebKit sometimes invokes this
-		method which prints a warning that the method you are
-		using has been deprecated.  This method expects that
-		deprecated methods say so at the beginning of their
-		doc string and terminate that msg with @.  For
-		example:
+		"""Output a deprecation warning.
+
+		The implementation of WebKit sometimes invokes this method which prints
+		a warning that the method you are using has been deprecated.
+		This method expects that deprecated methods say so at the beginning of
+		their doc string and terminate that msg with @. For example:
 
 			DEPRECATED: Class.foo() on 01/24/01 in ver 0.5. Use Class.bar() instead. @
 
-		Putting this information in the doc string is
-		important for accuracy in the generated docs.
+		Putting this information in the doc string is important for accuracy
+		in the generated docs.
 
 		Example call:
 			self.deprecated(self.foo)
+
 		"""
 		import string
 		docString = method.__doc__
@@ -46,7 +47,6 @@ class Object(object, NamedValueAccess):
 		else:
 			msg = string.strip(string.split(method.__doc__, '@')[0])
 		print msg
-
 
 	# 2000-05-21 ce: Sometimes used for debugging:
 	#

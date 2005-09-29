@@ -32,11 +32,11 @@ class ExceptionHandler(Object):
 
 	The handler write methods that may be useful are:
 
-	.. inline:: write
-	.. inline:: writeTitle
-	.. inline:: writeDict
-	.. inline:: writeTable
-	.. inline:: writeAttrs
+        * write
+        * writeTitle
+        * writeDict
+        * writeTable
+        * writeAttrs
 
 	Derived classes must not assume that the error occured in a
 	transaction.  self._tra may be None for exceptions outside
@@ -68,7 +68,8 @@ class ExceptionHandler(Object):
 	hideValuesForFields = ['password', 'passwd', 'pwd',
 		'creditcard', 'credit card', 'cc']
 	if 0: # for testing
-		hideValuesForFields.extend('application uri http_accept userid'.split())
+		hideValuesForFields.extend(['application', 'uri',
+			'http_accept', 'userid'])
 	hiddenString = '*** hidden ***'
 
 

@@ -19,44 +19,48 @@ import HTTPExceptions
 
 debug = 0
 
+
 class EndResponse(Exception):
-	"""
+	"""End response exception.
+
 	Used to prematurely break out of the awake()/respond()/sleep()
-	cycle without reporting a traceback.  During servlet
-	processing, if this exception is caught during awake() or respond()
-	then sleep() is called and the response is sent.  If caught during
-	sleep(), processing ends and the response is sent.
+	cycle without reporting a traceback. During servlet processing,
+	if this exception is caught during awake() or respond() then sleep()
+	is called and the response is sent. If caught during sleep(),
+	processing ends and the response is sent.
+
 	"""
 	pass
 
-class Application(ConfigurableForServerSidePath, Object):
-	"""
-	`Application` and `AppServer` work together to setup up and
-	dispatch requests.  The distinction between the two is largely
-	historical, but AppServer communicates directly with Adapters
-	(or speaks protocols like HTTP), and Application receives the
-	(slightly) processed input from AppServer and turns it into
-	`Transaction`, `HTTPRequest`, `HTTPResponse`, and `Session`.
 
-	Application is a singleton, which belongs to the AppServer.
-	You can get access through the Transaction object
-	(``transaction.application()``), or you can do::
+class Application(ConfigurableForServerSidePath, Object):
+	"""The Application singleton.
+
+	`Application` and `AppServer` work together to setup up and dispatch
+	requests. The distinction between the two is largely historical, but
+	AppServer communicates directly with Adapters (or speaks protocols like
+	HTTP), and Application receives the (slightly) processed input from
+	AppServer and turns it into `Transaction`, `HTTPRequest`, `HTTPResponse`,
+	and `Session`.
+
+	Application is a singleton, which belongs to the AppServer. You can get
+	access through the Transaction object (``transaction.application()``),
+	or you can do::
 
 	    from AppServer import globalAppServer
 	    application = AppServer.application()
 
-	Settings for Application are taken from
-	``Configs/Application.config``, and it is used for many
-	global settings, even if they aren't closely tied to the
-	Application object itself.
+	Settings for Application are taken from ``Configs/Application.config``,
+	and it is used for many global settings, even if they aren't closely tied
+	to the Application object itself.
+
 	"""
+
 
 	## Init ##
 
 	def __init__(self, server):
-		"""
-		Called only by `AppServer`, sets up the Application.
-		"""
+		"""Called only by `AppServer`, sets up the Application."""
 
 		self._server = server
 		self._serverSidePath = server.serverSidePath()
@@ -71,15 +75,14 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		self._shutDownHandlers = []
 
-		## For TaskManager:
+		# For TaskManager:
 		if self._server.isPersistent():
 			self._taskManager = Scheduler(1)
 			self._taskManager.start()
 
-		# define this before initializing URLParser, so that contexts
-		# have a chance to override this.  Also be sure
-		# to define it before loading the sessions, in case the
-		# loading of the sessions causes an exception.
+		# Define this before initializing URLParser, so that contexts have a
+		# chance to override this. Also be sure to define it before loading the
+		# sessions, in case the loading of the sessions causes an exception.
 		self._exceptionHandlerClass = ExceptionHandler
 
 		# For session store:
@@ -100,10 +103,11 @@ class Application(ConfigurableForServerSidePath, Object):
 
 
 	def initVersions(self):
-		"""
-		Initialize attributes that store the Webware and
-		WebKit versions as both tuples and strings. These are
-		stored in the Properties.py files.
+		"""Get and store versions.
+
+		Initialize attributes that store the Webware and WebKit versions as
+		both tuples and strings. These are stored in the Properties.py files.
+
 		"""
 		from MiscUtils.PropertiesObject import PropertiesObject
 		props = PropertiesObject(os.path.join(self.webwarePath(),
@@ -118,16 +122,15 @@ class Application(ConfigurableForServerSidePath, Object):
 
 
 	def taskManager(self):
-		"""
-		Accessor: `TaskKit.Scheduler` instance
-		"""
+		"""Accessor: `TaskKit.Scheduler` instance."""
 		return self._taskManager
 
 	def startSessionSweeper(self):
-		"""
-		Starts the session sweeper, `WebKit.Tasks.SessionTask`,
-		which deletes session objects (and disk copies of those
-		objects) that have expired.
+		"""Start session sweeper.
+
+		Starts the session sweeper, `WebKit.Tasks.SessionTask`, which deletes
+		session objects (and disk copies of those objects) that have expired.
+
 		"""
 		from Tasks import SessionTask
 		import time
@@ -139,10 +142,11 @@ class Application(ConfigurableForServerSidePath, Object):
 		print "Session Sweeper started"
 
 	def shutDown(self):
-		"""
-		Called by AppServer when it is shuting down.  The
-		`__del__` function of Application probably won't be
-		called due to circular references.
+		"""Shut down the application.
+
+		Called by AppServer when it is shuting down.  The `__del__` function
+		of Application probably won't be called due to circular references.
+
 		"""
 		print "Application is Shutting Down"
 		self.running = 0
@@ -165,18 +169,20 @@ class Application(ConfigurableForServerSidePath, Object):
 		print "Application has been succesfully shutdown."
 
 	def addShutDownHandler(self, func):
-		"""
-		Functions added through `addShutDownHandler` will be
-		called when the AppServer is shutting down.  You can use
-		this hook to close database connections, clean up resources,
-		save data to disk, etc.
+		"""Add a shutdown handler.
+
+		Functions added through `addShutDownHandler` will be called when
+		the AppServer is shutting down. You can use this hook to close
+		database connections, clean up resources, save data to disk, etc.
+
 		"""
 		self._shutDownHandlers.append(func)
+
 
 	## Config ##
 
 	def defaultConfig(self):
-		":ignore:"
+		"""The default Application.config."""
 		return {
 			'PrintConfigAtStartUp': 1,
 			'LogActivity':          1,
@@ -253,29 +259,29 @@ class Application(ConfigurableForServerSidePath, Object):
 	## Versions ##
 
 	def version(self):
-		"""
-		Returns the version of the application. This
-		implementation returns '0.1'. Subclasses should
+		"""Returns the version of the application.
+
+		This implementation returns '0.1'. Subclasses should
 		override to return the correct version number.
+
 		"""
-		## @@ 2000-05-01 ce: Maybe this could be a setting 'AppVersion'
-		## @@ 2003-03 ib: Does anyone care about this?  What's this
-		## version even supposed to mean?
+		# @@ 2000-05-01 ce: Maybe this could be a setting 'AppVersion'
+		# @@ 2003-03 ib: Does anyone care about this?  What's this
+		# version even supposed to mean?
 		return '0.1'
 
 	def webwareVersion(self):
-		""" Returns the Webware version as a tuple. """
+		"""Returns the Webware version as a tuple."""
 		return self._webwareVersion
 
 	def webwareVersionString(self):
-		""" Returns the Webware version as a printable string. """
+		"""Returns the Webware version as a printable string."""
 		return self._webwareVersionString
 
 	def webKitVersion(self):
 		""" Returns the WebKit version as a tuple. """
-		## @@ 2003-03 ib: This is synced with Webware now,
-		## should be removed because redundant (and not that useful
-		## anyway)
+		# @@ 2003-03 ib: This is synced with Webware now, should be removed
+		# because redundant (and not that useful anyway)
 		return self._webKitVersion
 
 	def webKitVersionString(self):
@@ -286,10 +292,10 @@ class Application(ConfigurableForServerSidePath, Object):
 	## Sessions ##
 
 	def session(self, sessionId, default=NoDefault):
-		"""
-		The session object for `sessionId`.  Raises
-		``KeyError`` if session not found and no default
-		is given.
+		"""The session object for `sessionId`.
+
+		Raises ``KeyError`` if session not found and no default is given.
+
 		"""
 		if default is NoDefault:
 			return self._sessions[sessionId]
@@ -297,26 +303,22 @@ class Application(ConfigurableForServerSidePath, Object):
 			return self._sessions.get(sessionId, default)
 
 	def hasSession(self, sessionId):
-		"""
-		Does session `sessionId` exist.
-		"""
+		"""Check whether session `sessionId` exist."""
 		return self._sessions.has_key(sessionId)
 
 	def sessions(self):
-		"""
-		A dictionary of all the session objects.
-		"""
+		"""A dictionary of all the session objects."""
 		return self._sessions
 
 	def createSessionForTransaction(self, transaction):
-		"""
-		Gets the session object for the transaction -- if the
-		session already exists, returns that, otherwise creates
+		"""Get the session object for the transaction.
+
+		If the session already exists, returns that, otherwise creates
 		a new session.
 
 		Finding the session ID is done in `Transaction.sessionId`.
-		"""
 
+		"""
 		debug = self.setting('Debug').get('Sessions')
 		if debug:
 			prefix = '>> [session] createSessionForTransaction:'
@@ -339,7 +341,6 @@ class Application(ConfigurableForServerSidePath, Object):
 	def createSessionWithID(self, transaction, sessionID):
 		# Create a session object with our session ID
 		sess = Session(transaction, sessionID)
-
 		# Replace the session if it didn't already exist,
 		# otherwise we just throw it away.  setdefault is an atomic
 		# operation so this guarantees that 2 different
@@ -348,20 +349,19 @@ class Application(ConfigurableForServerSidePath, Object):
 		# this method simultaneously.
 		transaction.application()._sessions.setdefault(sessionID, sess)
 
+
 	## Misc Access ##
 
 	def server(self):
-		"""
-		Acessor: the AppServer
-		"""
+		"""Acessor: the AppServer"""
 		return self._server
 
 	def serverSidePath(self, path=None):
-		"""
-		Returns the absolute server-side path of the WebKit
-		application. If the optional path is passed in, then
-		it is joined with the server side directory to form a
-		path relative to the app server.
+		"""Get the serve-side-path.
+
+		Returns the absolute server-side path of the WebKit application.
+		If the optional path is passed in, then it is joined with the
+		server side directory to form a path relative to the app server.
 		"""
 		if path:
 			return os.path.normpath(
@@ -370,31 +370,28 @@ class Application(ConfigurableForServerSidePath, Object):
 			return self._serverSidePath
 
 	def webwarePath(self):
-		"""
-		Path of the ``Webware/`` directory
-		"""
+		"""The path of the ``Webware/`` directory."""
 		return self._server.webwarePath()
 
 	def webKitPath(self):
-		"""
-		Path of the ``Webware/WebKit/`` directory
-		"""
+		"""The Path of the ``Webware/WebKit/`` directory."""
 		return self._server.webKitPath()
 
 
 	def name(self):
-		"""
-		Name by which this was started.  Usually ``AppServer``
-		"""
-		## @@ 2003-03 ib: unconfirmed
+		"""The name by which this was started. Usually ``AppServer``."""
+		# @@ 2003-03 ib: unconfirmed
 		return sys.argv[0]
+
 
 	## Activity Log ##
 
 	def writeActivityLog(self, transaction):
-		"""
+		"""Write an entry to the activity log.
+
 		Writes an entry to the script log file. Uses settings
 		``ActivityLogFilename`` and ``ActivityLogColumns``.
+
 		"""
 		filename = self.serverSidePath(
 			self.setting('ActivityLogFilename'))
@@ -404,9 +401,8 @@ class Application(ConfigurableForServerSidePath, Object):
 			file = open(filename, 'w')
 			file.write(','.join(self.setting('ActivityLogColumns'))+'\n')
 		values = []
-		# We use UserDict on the next line because we know it
-		# inherits NamedValueAccess and reponds to
-		# valueForName()
+		# We use UserDict on the next line because we know it inherits
+		# NamedValueAccess and reponds to valueForName()
 		objects = UserDict({
 			'application': self,
 			'transaction': transaction,
@@ -421,10 +417,8 @@ class Application(ConfigurableForServerSidePath, Object):
 			except:
 				value = '(unknown)'
 			if type(value) is FloatType:
-				# probably need more flexibility in
-				# the future
+				# probably need more flexibility in the future
 				value = '%0.2f' % value
-
 			else:
 				value = str(value)
 			values.append(value)
@@ -434,25 +428,21 @@ class Application(ConfigurableForServerSidePath, Object):
 		for i in objects.keys():
 			objects[i] = None
 
-	"""
-	**Request Dispatching**
 
-	These are the entry points from `AppServer`, which take
-	a raw request, turn it into a transaction, run the transaction,
-	and clean up.
+	## Request Dispatching ##
 
-	"""
+	# These are the entry points from `AppServer`, which take a raw request,
+	# turn it into a transaction, run the transaction, and clean up.
 
 	def dispatchRawRequest(self, requestDict, strmOut):
-		"""
-		Dispatch a raw request, as passed from the Adapter
-		through the AppServer.  This method creates the
-		request, response, and transaction object, then runs
-		(via `runTransaction`) the transaction.  It also
-		catches any exceptions, which are then passed on to
-		`handleExceptionInTransaction`.
-		"""
+		"""Dispatch a raw request.
 
+		Dispatch a request as passed from the Adapter through the AppServer.
+		This method creates the request, response, and transaction object,
+		then runs (via `runTransaction`) the transaction. It also catches any
+		exceptions, which are then passed on to `handleExceptionInTransaction`.
+
+		"""
 		trans = None
 		try:
 			request = self.createRequestForDict(requestDict)
@@ -479,18 +469,18 @@ class Application(ConfigurableForServerSidePath, Object):
 		return trans
 
 	def createRequestForDict(self, requestDict):
-		"""
-		Create a request object (subclass of `Request`) given the
-		raw dictionary as passed by the adapter.
+		"""Create request object for a given dictionary.
 
-		The class of the request may be based on the contents
-		of the dictionary (though only `HTTPRequest` is
-		currently created), and the request will later
-		determine the class of the response.
+		Create a request object (subclass of `Request`) given the raw
+		dictionary as passed by the adapter.
+
+		The class of the request may be based on the contents of the
+		dictionary (though only `HTTPRequest` is currently created),
+		and the request will later determine the class of the response.
 
 		Called by `dispatchRawRequest`.
-		"""
 
+		"""
 		format = requestDict['format']
 		# Maybe an EmailAdapter would make a request with a
 		# format of Email, and an EmailRequest would be
@@ -499,15 +489,18 @@ class Application(ConfigurableForServerSidePath, Object):
 		return HTTPRequest(requestDict)
 
 	def runTransaction(self, trans):
-		"""
+		"""Run transation.
+
 		Executes the transaction, handling HTTPException errors.
 		Finds the servlet (using the root parser, probably
 		`URLParser.ContextParser`, to find the servlet for the
 		transaction, then calling `runTransactionViaServlet`.
 
 		Called by `dispatchRawRequest`.
+
 		"""
-		# @@ gtalvola: I'm guessing this is not the ideal place to put this code.  But, it works.
+		# @@ gtalvola: I'm guessing this is not the ideal place
+		# @@ to put this code. But, it works.
 		if self.setting('UseAutomaticPathSessions'):
 			request = trans.request()
 			request_has_cookie_session = request.hasCookieSession()
@@ -518,7 +511,6 @@ class Application(ConfigurableForServerSidePath, Object):
 			elif not request_has_cookie_session and not request_has_path_session:
 				self.handleMissingPathSession(trans)
 				return
-
 		servlet = None
 		try:
 			servlet = self._rootURLParser.findServletForTransaction(trans)
@@ -533,26 +525,25 @@ class Application(ConfigurableForServerSidePath, Object):
 			self.returnServlet(servlet, trans)
 
 	def runTransactionViaServlet(self, servlet, trans):
-		"""
-		Executes the transaction using the servlet.  This is
-		the `awake`/`respond`/`sleep` sequence of calls, or if the
-		servlet supports it, a single `runTransaction` call
-		(which is presumed to make the awake/respond/sleep calls
-		on its own).  Using `runTransaction` allows the servlet
-		to override the basic call sequence, or catch errors from
-		that sequence.
+		"""Execute the transaction using the servlet.
+
+		This is	the `awake`/`respond`/`sleep` sequence of calls, or if
+		the servlet supports it, a single `runTransaction` call (which is
+		presumed to make the awake/respond/sleep calls on its own). Using
+		`runTransaction` allows the servlet to override the basic call
+		sequence, or catch errors from that sequence.
 
 		Called by `runTransaction`.
+
 		"""
 
 		trans.setServlet(servlet)
 		if hasattr(servlet, 'runTransaction'):
 			servlet.runTransaction(trans)
 		else:
-			# For backward compatibility (Servlet.runTransaction
-			# implements this same sequence of calls, but
-			# by keeping it in the servlet it's easier to
-			# for the servlet to catch exceptions.
+			# For backward compatibility (Servlet.runTransaction implements
+			# this same sequence of calls, but by keeping it in the servlet
+			# it's easier for the servlet to catch exceptions.
 			try:
 				trans.awake()
 				trans.respond()
@@ -560,23 +551,21 @@ class Application(ConfigurableForServerSidePath, Object):
 				trans.sleep()
 
 	def forward(self, trans, url, context=None):
+		"""Forward the request to a different (internal) url.
+
+		The transaction's URL is changed to point to the new servlet,
+		and the transaction is simply run again.
+
+		Output is _not_ accumulated, so if the original servlet	had any output,
+		the new output will _replace_ the old output.
+
+		You can change the request in place to control the servlet you are
+		forwarding to -- using methods like `HTTPRequest.setField`.
+
+		@@ 2003-03 ib: how does the forwarded servlet knows that it's not
+		the original servlet?
+
 		"""
-		Forward the request to a different (internal) url.
-		The transaction's URL is changed to point to the new
-		servlet, and the transaction is simply run again.
-
-		Output is _not_ accumulated, so if the original servlet
-		had any output, the new output will _replace_ the old
-		output.
-
-		You can change the request in place to control the
-		servlet you are forwarding to -- using methods like
-		`HTTPRequest.setField`.
-
-		@@ 2003-03 ib: how does the forwarded servlet knows
-		that it's not the original servlet?
-		"""
-
 		# Reset the response to a "blank slate"
 		trans.response().reset()
 
@@ -587,24 +576,22 @@ class Application(ConfigurableForServerSidePath, Object):
 		raise EndResponse
 
 	def callMethodOfServlet(self, trans, url, method, *args, **kw):
-		"""
-		Call a method of the servlet referred to by the url,
-		potentially in a particular context (use the context
-		keyword argument).  Calls sleep and awake before and
-		after the method call.  Or, if the servlet defines it,
-		then `runMethodForTransaction` is used (analogous to the
+		"""Call method of another servlet.
+
+		Call a method of the servlet referred to by the url, potentially in
+		a particular context (use the context keyword argument). Calls sleep()
+		and awake() before and after the method call. Or, if the servlet
+		defines it, then `runMethodForTransaction` is used (analogous to the
 		use of `runTransaction` in `forward`).
 
-		The entire process is similar to `forward`, except that
-		instead of `respond`, `method` is called (`method` should
-		be a string, ``*args`` and ``**kw`` are passed as
-		arguments to that method).
+		The entire process is similar to `forward`, except that instead of
+		`respond`, `method` is called (`method` should be a string, ``*args``
+		and ``**kw`` are passed as arguments to that method).
 
-		A `context` keyword argument (as used in `forward`)
-		is also allowed, though it isn't present in the
-		method signature.
+		A `context` keyword argument (as used in `forward`) is also allowed,
+		though it isn't present in the method signature.
+
 		"""
-
 		# 3-03 ib@@: Does anyone actually use this method?
 		# 2003-04-08 jdh: I use callMethodOfServlet, but I don't use
 		# this little context trick.  Not sure what you were referring to.
@@ -650,12 +637,13 @@ class Application(ConfigurableForServerSidePath, Object):
 		return result
 
 	def includeURL(self, trans, url, context=None):
-		"""
-		Include the servlet given by the url, potentially in
-		context (or current context).  Like `forward`, except
-		control is ultimately returned to the servlet.
-		"""
+		"""Include another servlet.
 
+		Include the servlet given by the url, potentially in context (or
+		current context). Like `forward`, except control is ultimately
+		returned to the servlet.
+
+		"""
 		urlPath = self.resolveInternalRelativePath(trans, url, context)
 		req = trans.request()
 		currentPath = req.urlPath()
@@ -686,11 +674,13 @@ class Application(ConfigurableForServerSidePath, Object):
 			trans._servlet = currentServlet
 
 	def resolveInternalRelativePath(self, trans, url, context=None):
-		"""
+		"""Return the absolute internal path.
+
 		Given a URL and an optional context, return the absolute
-		internal URL.  URLs are assumed relative to the current URL.
+		internal URL. URLs are assumed relative to the current URL.
 
 		Absolute paths are returned unchanged.
+
 		"""
 		req = trans.request()
 		if not url.startswith('/'):
@@ -719,19 +709,23 @@ class Application(ConfigurableForServerSidePath, Object):
 		servlet.close(trans)
 
 	def handleException(self):
-		"""
+		"""Handle exceptions.
+
 		This should only be used in cases where there is no transaction object,
 		for example if an exception occurs when attempting to save a session
 		to disk.
+
 		"""
 		self._exceptionHandlerClass(self, None, sys.exc_info())
 
 	def handleExceptionInTransaction(self, excInfo, transaction):
-		"""
-		Handles exception `excInfo` (as returned by
-		``sys.exc_info()``) that was generated by `transaction`.
-		It may display the exception report, email the report,
-		etc., handled by `ExceptionHandler.ExceptionHandler`.
+		"""Handle exception with info.
+
+		Handles exception `excInfo` (as returned by ``sys.exc_info()``)
+		that was generated by `transaction`. It may display the exception
+		report, email the report, etc., handled by
+		`ExceptionHandler.ExceptionHandler`.
+
 		"""
 		req = transaction.request()
 		editlink = req.adapterName() + "/Admin/EditFile"
@@ -739,41 +733,40 @@ class Application(ConfigurableForServerSidePath, Object):
 						 {"editlink": editlink})
 
 	def rootURLParser(self):
-		"""
-		Accessor: the Rool URL parser -- URL parsing (as defined
-		by subclasses of `URLParser.URLParser`) starts here.
-		Other parsers are called in turn by this parser.
+		"""Accessor: the Rool URL parser.
+
+		URL parsing (as defined	by subclasses of `URLParser.URLParser`)
+		starts here. Other parsers are called in turn by this parser.
+
 		"""
 		return self._rootURLParser
 
 	def hasContext(self, name):
-		"""
-		Does context `name` exist?
-		"""
+		"""Checks whether context `name` exist."""
 		return self._rootURLParser._contexts.has_key(name)
 
 	def addContext(self, name, path):
-		"""
-		Add a context by named `name`, rooted at `path`.
+		"""Add a context by named `name`, rooted at `path`.
+
 		This gets imported as a package, and the last directory
 		of `path` does not have to match the context name.
 		(The package will be named `name`, regardless of `path`).
 
 		Delegated to `URLParser.ContextParser`.
+
 		"""
 		self._rootURLParser.addContext(name, path)
 
 	def addServletFactory(self, factory):
-		"""
-		Adds a ServletFactory, delegated to the
-		`URLParser.ServletFactoryManager` singleton.
+		"""Add a ServletFactory.
+
+		Delegated to the `URLParser.ServletFactoryManager` singleton.
+
 		"""
 		URLParser.ServletFactoryManager.addServletFactory(factory)
 
 	def contexts(self):
-		"""
-		Returns a dictionary of context-name: context-path.
-		"""
+		"""Return a dictionary of context-name: context-path."""
 		return self._rootURLParser._contexts
 
 	def writeExceptionReport(self, handler):
@@ -781,30 +774,35 @@ class Application(ConfigurableForServerSidePath, Object):
 		pass
 
 	def handleMissingPathSession(self,transaction):
-		"""
+		"""Redirect requests without session info in the path.
+
 		if UseAutomaticPathSessions is enabled in Application.config
 		we redirect the browser to a url with SID in path
 		http://gandalf/a/_SID_=2001080221301877755/Examples/
 		_SID_ is extracted and removed from path in HTTPRequest.py
 
-		this is for convinient building of webapps that must not
-		depend on cookie support
+		This is for convinient building of webapps that must not
+		depend on cookie support.
+
 		"""
 		newSid = transaction.session().identifier()
 		request = transaction.request()
-		url = request.adapterName() + '/_SID_='+ newSid + '/' + request.pathInfo() + (request.extraURLPath() or '')
-
+		url = request.adapterName() + '/_SID_='+ newSid + '/' \
+			+ request.pathInfo() + (request.extraURLPath() or '')
 		if request.queryString():
 			url = url + '?' + request.queryString()
 		if self.setting('Debug')['Sessions']:
-			print ">> [sessions] handling UseAutomaticPathSessions, redirecting to", url
+			print '>> [sessions] handling UseAutomaticPathSessions,' \
+				' redirecting to', url
 		transaction.response().sendRedirect(url)
 
 	def handleUnnecessaryPathSession(self, transaction):
-		"""
+		"""Redirect request with unnecessary session info in the path.
+
 		This is called if it has been determined that the request has a path
-		session, but also cookies.  In that case we redirect
-		to eliminate the unnecessary path session.
+		session, but also cookies. In that case we redirect	to eliminate the
+		unnecessary path session.
+
 		"""
 		request = transaction.request()
 		url = request.adapterName() + '/' + request.pathInfo() + (request.extraURLPath() or '')
@@ -816,14 +814,13 @@ class Application(ConfigurableForServerSidePath, Object):
 		transaction.response().sendRedirect(url)
 
 
-
-
-
+## Main ##
 
 def main(requestDict):
-	"""
-	Returns a raw reponse. This method is mostly used by
-	OneShotAdapter.py.
+	"""Return a raw reponse.
+
+	This method is mostly used by OneShotAdapter.py.
+
 	"""
 	from WebUtils.HTMLForException import HTMLForException
 	try:
@@ -846,6 +843,7 @@ could raise exceptions that aren't caught. See `CGIAdapter` and
 
 Largely historical.
 """
+
 if __name__=='__main__':
 	if len(sys.argv)!=2:
 		sys.stderr.write('WebKit: Application: Expecting one filename argument.\n')

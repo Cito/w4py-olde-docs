@@ -4,9 +4,12 @@ import os, mimetypes, time
 
 debug = 0
 
+
 class UnknownFileTypeServletFactory(ServletFactory):
-	"""
-	This is the factory for files of an unknown type (e.g., not .py .psp, etc).
+	"""The servlet factory for unknown file types.
+
+	I.e. all files other than .py, .psp and the other types we support.
+
 	"""
 
 	def uniqueness(self):
@@ -23,14 +26,18 @@ class UnknownFileTypeServletFactory(ServletFactory):
 
 
 fileCache = {}
-	# A cache of the files served up by UnknownFileTypeServlet cached by absolute, server side path.
-	# Each content is another dictionary with keys: content, mimeType, mimeEncoding.
-	# Previously, this content was stored directly in the attributes of the UnknownFileTypeServlets, but with that approach subclasses cannot dynamically serve content from different locations.
+	# A cache of the files served up by UnknownFileTypeServlet cached by
+	# absolute, server side path. Each content is another dictionary with keys:
+	# content, mimeType, mimeEncoding.
+	# Previously, this content was stored directly in the attributes of the
+	# UnknownFileTypeServlets, but with that approach subclasses cannot
+	# dynamically serve content from different locations.
 
 from HTTPServlet import HTTPServlet
 from MiscUtils.Configurable import Configurable
 class UnknownFileTypeServlet(HTTPServlet, Configurable):
-	"""
+	"""Servlet for unknown file types.
+
 	Normally this class is just a "private" utility class for WebKit's
 	purposes. However, you may find it useful to subclass on occasion,
 	such as when the server side file path is determined by something
@@ -49,15 +56,17 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 			filename = trans.request().field('i')
 			filename = os.path.join(self.imageDir, filename)
 			return filename
+
 	"""
 
 	## Candidates for subclass overrides ##
 
 	def filename(self, trans):
-		"""
-		Returns the filename to be served. A subclass could override
-		this in order to serve files from other disk locations based
-		on some logic.
+		"""Return the filename to be served.
+
+		A subclass could override this in order to serve files from other
+		disk locations based on some logic.
+
 		"""
 		filename = getattr(self, '_serverSideFilename', None)
 		if filename is None:
@@ -66,8 +75,13 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		return filename
 
 	def shouldCacheContent(self):
-		"""
-		Returns a boolean that controls whether or not the content served through this servlet is cached. The default behavior is to return the CacheContent setting. Subclasses may override to always True or False, or incorporate some other logic.
+		"""Return whether the content should be cached or not.
+
+		Returns a boolean that controls whether or not the content served
+		through this servlet is cached. The default behavior is to return
+		the CacheContent setting. Subclasses may override to always True
+		or False, or incorporate some other logic.
+
 		"""
 		return self.setting('CacheContent')
 
@@ -84,7 +98,12 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		self._application = application
 
 	def userConfig(self):
-		""" Get the user config from the 'UnknownFileTypes' section in the Application's configuration. """
+		"""Get the user config.
+
+		This is taken from the 'UnknownFileTypes' section
+		in the Application's configuration.
+
+		"""
 		return self._application.setting('UnknownFileTypes')
 
 	def configFilename(self):
@@ -97,7 +116,12 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		return ['serveContent', 'redirectSansAdapter']
 
 	def respondToGet(self, trans):
-		""" Responds to the transaction by invoking self.foo() for foo is specified by the 'Technique' setting. """
+		"""Respond to GET request.
+
+		Responds to the transaction by invoking self.foo() for foo is
+		specified by the 'Technique' setting.
+
+		"""
 		technique = self.setting('Technique')
 		assert technique in self.validTechniques(), 'technique = %s' % technique
 		method = getattr(self, technique)
@@ -106,19 +130,33 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 	respondToHead = respondToGet
 
 	def respondToPost(self, trans):
-		"""
-		Invokes self.respondToGet().
-		Since posts are usually accompanied by data, this might not be the best policy. However, a POST would most likely be for a CGI, which currently no one is mixing in with their WebKit-based web sites.
+		"""Respond to POST request.
+
+		Invoke self.respondToGet().
+
+		Since posts are usually accompanied by data, this might not be
+		the best policy. However, a POST would most likely be for a CGI,
+		which currently no one is mixing in with their WebKit-based web sites.
+
 		"""
 		# @@ 2001-01-25 ce: See doc string for why this might be a bad idea.
 		self.respondToGet(trans)
 
 	def redirectSansAdapter(self, trans):
-		""" Sends a redirect to a URL that doesn't contain the adapter name. Under the right configuration, this will cause the web server to then be responsible for the URL rather than the app server. This has only been test with "*.[f]cgi" adapters.
-		Keep in mind that links off the target page will NOT include the adapter in the URL. """
+		"""Redirect to web server.
+
+		Sends a redirect to a URL that doesn't contain the adapter name.
+		Under the right configuration, this will cause the web server to
+		then be responsible for the URL rather than the app server.
+		This has only been test with "*.[f]cgi" adapters.
+		Keep in mind that links off the target page will *not* include
+		the adapter in the URL.
+
+		"""
 		# @@ 2000-05-08 ce: the following is horribly CGI specific and hacky
 		env = trans.request()._environ
-		# @@ 2001-01-25 ce: isn't there a func in WebUtils to get script name? because some servers are different?
+		# @@ 2001-01-25 ce: isn't there a func in WebUtils to get script name?
+		# because some servers are different?
 		newURL = os.path.split(env['SCRIPT_NAME'])[0] + env['PATH_INFO']
 		newURL = newURL.replace('//', '/')  # hacky
 		trans.response().sendRedirect(newURL)
@@ -156,11 +194,13 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		file = fileCache.get(filename, None)
 		if file is not None and mtime != file['mtime']:
 			# Cache is out of date; clear it.
-			if debug: print '>> changed, clearing cache'
+			if debug:
+				print '>> changed, clearing cache'
 			del fileCache[filename]
 			file = None
 		if file is None:
-			if debug: print '>> not found in cache'
+			if debug:
+				print '>> not found in cache'
 			fileType = mimetypes.guess_type(filename)
 			mimeType = fileType[0]
 			mimeEncoding = fileType[1]
@@ -175,8 +215,11 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		if trans.request().method() == 'HEAD':
 			f.close()
 			return
-		if file is None and self.setting('ReuseServlets') and self.shouldCacheContent() and fileSize < MaxCacheContentSize:
-			if debug: print '>> caching'
+		if file is None and self.setting('ReuseServlets') \
+				and self.shouldCacheContent() \
+				and fileSize < MaxCacheContentSize:
+			if debug:
+				print '>> caching'
 			file = {
 				'content':      f.read(),
 				'mimeType':     mimeType,
@@ -187,15 +230,17 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 			}
 			fileCache[filename] = file
 		if file is not None:
-			if debug: print '>> sending content from cache'
+			if debug:
+				print '>> sending content from cache'
 			response.write(file['content'])
 		else: # too big or not supposed to cache
-			if debug: print '>> sending directly'
+			if debug:
+				print '>> sending directly'
 			numBytesSent = 0
 			while numBytesSent<fileSize:
 				data = f.read(min(fileSize-numBytesSent,ReadBufferSize))
 				if data == '':
-					break	# unlikely, but safety first
+					break # unlikely, but safety first
 				response.write(data)
 				numBytesSent += len(data)
 		f.close()

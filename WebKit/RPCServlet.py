@@ -5,9 +5,10 @@ import traceback, sys
 class RPCServlet(HTTPServlet):
 
 	def call(self, methodName, *args, **keywords):
-		"""
-		Subclasses may override this class for custom handling of
-		methods.
+		"""Call custom method.
+
+		Subclasses may override this class for custom handling of methods.
+
 		"""
 		if methodName in self.exposedMethods():
 			return getattr(self, methodName)( *args, **keywords)
@@ -15,33 +16,36 @@ class RPCServlet(HTTPServlet):
 			raise NotImplementedError, methodName
 
 	def exposedMethods(self):
-		"""
-		Subclasses should return a list of methods that will be
-		exposed through XML-RPC.
+		"""Get exposed methods.
+
+		Subclasses should return a list of methods that will be exposed
+		through XML-RPC.
+
 		"""
 		return ['exposedMethods']
 
 	def resultForException(self, e, trans):
-		"""
+		"""Get text for exception.
+
 		Given an unhandled exception, returns the string that should be
 		sent back in the RPC response as controlled by the
 		RPCExceptionReturn setting.
+
 		"""
 		# report exception back to server
 		setting = trans.application().setting('RPCExceptionReturn')
-		assert setting in ('occurred', 'exception', 'traceback'), 'setting=%r' % setting
-		if setting=='occurred':
+		assert setting in ('occurred', 'exception', 'traceback'), \
+			'setting=%r' % setting
+		if setting == 'occurred':
 			result = 'unhandled exception'
-		elif setting=='exception':
+		elif setting == 'exception':
 			result = str(e)
-		elif setting=='traceback':
+		elif setting == 'traceback':
 			result = ''.join(traceback.format_exception(*sys.exc_info()))
 		return result
 
 	def sendOK(self, contentType, contents, trans, contentEncoding=None):
-		"""
-		Sends a 200 OK response with the given contents.
-		"""
+		"""Send a 200 OK response with the given contents."""
 		response = trans.response()
 		response.setStatus(200, 'OK')
 		response.setHeader('Content-type', contentType)
@@ -51,13 +55,14 @@ class RPCServlet(HTTPServlet):
 		response.write(contents)
 
 	def handleException(self, transaction):
-		"""
-		If ReportRPCExceptionsInWebKit is set to true, then
-		flush the response (because we don't want the standard HTML traceback
-		to be appended to the response) and then handle the exception in the
-		standard WebKit way.  This means logging it to the console, storing
-		it in the error log, sending error email, etc. depending on the
-		settings.
+		"""Handle exception.
+
+		If ReportRPCExceptionsInWebKit is set to True, then flush the response
+		(because we don't want the standard HTML traceback to be appended to
+		the response) and then handle the exception in the standard WebKit way.
+		This means logging it to the console, storing it in the error log,
+		sending error email, etc. depending on the settings.
+
 		"""
 		setting = transaction.application().setting('ReportRPCExceptionsInWebKit')
 		if setting:
@@ -69,11 +74,11 @@ class RPCServlet(HTTPServlet):
 	# @@ GAT: should we also add request, response, session, and application?
 	def transaction(self):
 		return self._transaction
-		
+
 	def awake(self, transaction):
 		HTTPServlet.awake(self, transaction)
 		self._transaction = transaction
-	
+
 	def sleep(self, transaction):
 		self._transaction = None
 		HTTPServlet.sleep(self, transaction)

@@ -5,75 +5,73 @@ from Application import EndResponse
 
 
 class Page(HTTPContent):
-	"""
-	Page is a type of HTTPContent that is more convenient for
-	Servlets which represent HTML pages generated in response to
-	GET and POST requests. In fact, this is the most common type
-	of Servlet.
+	"""The standard web page template.
 
-	Subclasses typically override `writeHeader`, `writeBody` and
-	`writeFooter`.
+	Page is a type of HTTPContent that is more convenient for servlets
+	which represent HTML pages generated in response to GET and POST requests.
+	In fact, this is the most common type of Servlet.
+
+	Subclasses typically override `writeHeader`, `writeBody` and `writeFooter`.
 
 	They might also choose to override `writeHTML` entirely.
 
-	When developing a full-blown website, it's common to create a
-	subclass of `Page` called `SitePage` which defines the common look
-	and feel of the website and provides site-specific convenience
-	methods. Then all other pages in your application then inherit
-	from `SitePage`.
+	When developing a full-blown website, it's common to create a subclass of
+	`Page` called `SitePage` which defines the common look and feel of the
+	website and provides site-specific convenience methods. Then all other
+	pages in your application then inherit from `SitePage`.
+
 	"""
+
 
 	## Transactions ##
 
 	def defaultAction(self):
-		"""
-		The default action in a Page is to writeHTML().
-		"""
+		"""The default action in a Page is to writeHTML()."""
 		self.writeHTML()
 
 
 	## Generating results ##
 
 	def title(self):
-		"""
-		Subclasses often override this method to provide a
-		custom title. This title should be absent of HTML
-		tags. This implementation returns the name of the
-		class, which is sometimes appropriate and at least
-		informative. """
+		"""The page title.
 
+		Subclasses often override this method to provide a custom title.
+		This title should be absent of HTML tags. This implementation
+		returns the name of the class, which is sometimes appropriate
+		and at least informative.
+
+		"""
 		return self.__class__.__name__
 
 	def htTitle(self):
-		"""
-		Return self.title(). Subclasses sometimes override
-		this to provide an HTML enhanced version of the
-		title. This is the method that should be used when
-		including the page title in the actual page
-		contents. """
+		"""The page title as HTML.
 
+		Return self.title(). Subclasses sometimes override this to provide
+		an HTML enhanced version of the title. This is the method that should
+		be used when including the page title in the actual page contents.
+
+		"""
 		return self.title()
 
 	def htBodyArgs(self):
-		"""
-		Returns the arguments used for the HTML <body>
-		tag. Invoked by writeBody().
+		"""The atrributes for the <body> element.
 
-		With the prevalence of stylesheets (CSS), you can
-		probably skip this particular HTML feature, but for
-		historical reasons this sets the page to black text
-		on white.
-		"""
+		Returns the arguments used for the HTML <body> tag.
+		Invoked by writeBody().
 
+		With the prevalence of stylesheets (CSS), you can probably skip
+		this particular HTML feature, but for historical reasons this sets
+		the page to black text on white.
+
+		"""
 		return 'text="black" bgcolor="white"'
 
 	def writeHTML(self):
-		"""
-		Writes all the HTML for the page.
+		"""Write all the HTML for the page.
 
-		Subclasses may override this method (which is invoked
-		by `_respond`) or more commonly its constituent
-		methods, `writeDocType`, `writeHead` and `writeBody`
+		Subclasses may override this method (which is invoked by `_respond`)
+		or more commonly its constituent methods, `writeDocType`, `writeHead`
+		and `writeBody`.
 
 		You will want to override this method if:
 		* you want to format the entire HTML page yourself
@@ -84,8 +82,8 @@ class Page(HTTPContent):
 		* if you want to send non-HTML content (be sure to
 		  call ``self.response().setHeader('Content-type',
 		  'mime/type')`` in this case).
-		"""
 
+		"""
 		self.writeDocType()
 		self.writeln('<html>')
 		self.writeHead()
@@ -93,7 +91,7 @@ class Page(HTTPContent):
 		self.writeln('</html>')
 
 	def writeDocType(self):
-		"""
+		"""Write the DOCTYPE tag.
 
 		Invoked by `writeHTML` to write the ``<!DOCTYPE ...>`` tag.
 
@@ -108,6 +106,7 @@ class Page(HTTPContent):
 		You can find out more about doc types by searching for
 		DOCTYPE on the web, or visiting:
 		http://www.htmlhelp.com/tools/validator/doctype.html
+
 		"""
 		# @@ sgd-2003-01-29 - restored the 4.01 transitional as
 		# per discussions on the mailing list for the 0.8 release.
@@ -116,19 +115,20 @@ class Page(HTTPContent):
 			' "http://www.w3.org/TR/html4/loose.dtd">')
 
 	def writeHead(self):
-		"""
-		Writes the ``<head>`` portion of the page by writing the
-		``<head>...</head>`` tags and invoking `writeHeadParts`
-		in between.
-		"""
+		"""Write the <head> element of the page.
 
+		Writes the ``<head>`` portion of the page by writing the
+		``<head>...</head>`` tags and invoking `writeHeadParts` in between.
+
+		"""
 		wr = self.writeln
 		wr('<head>')
 		self.writeHeadParts()
 		wr('</head>')
 
 	def writeHeadParts(self):
-		"""
+		"""Write the parts included in the <head> element.
+
 		Writes the parts inside the ``<head>...</head>`` tags.
 		Invokes `writeTitle` and `writeStyleSheet`. Subclasses
 		can override this to add additional items and should
@@ -138,27 +138,34 @@ class Page(HTTPContent):
 		self.writeStyleSheet()
 
 	def writeTitle(self):
-		"""
-		Writes the ``<title>`` portion of the page. Uses `title`,
-		which is where you should override..
+		"""Write the <title> element of the page.
+
+		Writes the ``<title>`` portion of the page.
+		Uses `title`, which is where you should override..
+
 		"""
 		self.writeln('\t<title>%s</title>' % self.title())
 
 	def writeStyleSheet(self):
-		"""
-		Writes the style sheet for the page, however, this default
-		implementation does nothing. Subclasses should override if
-		necessary. A typical implementation is:
+		"""Write the style sheet for the page.
+
+		This default implementation does nothing.
+		Subclasses should override if necessary.
+
+		A typical implementation is:
 
 		    self.writeln('\t<link rel="stylesheet" href="StyleSheet.css" type="text/css">')
+
 		"""
 		pass
 
 	def writeBody(self):
-		"""
+		"""Write the <body> element of the page.
+
 		Writes the ``<body>`` portion of the page by writing the
 		``<body>...</body>`` (making use of `htBodyArgs`) and
 		invoking `writeBodyParts` in between.
+
 		"""
 		wr = self.writeln
 		bodyArgs = self.htBodyArgs()
@@ -170,16 +177,15 @@ class Page(HTTPContent):
 		wr('</body>')
 
 	def writeBodyParts(self):
-		"""
+		"""Write the parts included in the <body> element.
 
-		Invokes `writeContent`. Subclasses should only
-		override this method to provide additional page parts
-		such as a header, sidebar and footer, that a subclass
-		doesn't normally have to worry about writing.
+		Invokes `writeContent`. Subclasses should only override this method
+		to provide additional page parts such as a header, sidebar and footer,
+		that a subclass doesn't normally have to worry about writing.
 
-		For writing page-specific content, subclasses should
-		override `writeContent`() instead.  This method is
-		intended to be overridden by your SitePage.
+		For writing page-specific content, subclasses should override
+		`writeContent`() instead. This method is intended to be overridden
+		by your SitePage.
 
 		See `SidebarPage` for an example override of this method.
 
@@ -189,29 +195,32 @@ class Page(HTTPContent):
 		self.writeContent()
 
 	def writeContent(self):
-		"""
-		Writes the unique, central content for the page.
+		"""Write the unique, central content for the page.
 
-		Subclasses should override this method (not invoking
-		super) to write their unique page content.
+		Subclasses should override this method (not invoking super) to write
+		their unique page content.
 
 		Invoked by `writeBodyParts`.
+
 		"""
 		self.writeln('<p> This page has not yet customized its content. </p>')
 
 
 	def preAction(self, actionName):
-		"""
-		For a page, we first writeDocType(), <html>, and then
-		writeHead().
+		"""Things to do before actions.
+
+		For a page, we first writeDocType(), <html>, and then writeHead().
+
 		"""
 		self.writeDocType()
 		self.writeln('<html>')
 		self.writeHead()
 
 	def postAction(self, actionName):
-		"""
+		"""Things to do after actions.
+
 		Simply close the html tag (</html>).
+
 		"""
 		self.writeln('</html>')
 
@@ -219,27 +228,29 @@ class Page(HTTPContent):
 	## Convenience Methods ##
 
 	def htmlEncode(self, s):
-		"""
-		Alias for `WebUtils.Funcs.htmlEncode`, quotes
-		the special characters &, <, >, and \"
+		"""HTML encode special characters.
+		Alias for `WebUtils.Funcs.htmlEncode`, quotes the special characters
+		&, <, >, and \"
+
 		"""
 		return Funcs.htmlEncode(s)
 
 	def htmlDecode(self, s):
-		"""
-		Alias for `WebUtils.Funcs.htmlDecode`.  Decodes
-		HTML entities.
+		"""HTML decode special characters.
+
+		Alias for `WebUtils.Funcs.htmlDecode`. Decodes HTML entities.
+
 		"""
 		return Funcs.htmlDecode(s)
 
-	"""
-	**Validate HTML output** (developer debugging)
-	"""
+
+	## Validate HTML output (developer debugging) ##
 
 	def validateHTML(self, closingTags='</body></html>'):
-		"""
-		Validate the current response data using Web Design
-		Group's HTML validator available at
+		"""Validate the response.
+
+		Validate the current response data using Web Design Group's
+		HTML validator available at
 		http://www.htmlhelp.com/tools/validator/
 
 		Make sure you install the offline validator (called
@@ -259,13 +270,12 @@ class Page(HTTPContent):
 		the string ``</body></html>``.  At the point this method
 		is called (e.g. from `writeBodyParts`) the page is not
 		yet 100% complete, so we have to fake it.
-		"""
 
+		"""
 		# don't bother validating if the servlet has redirected
 		status = self.response().header('status', None)
 		if status and status.find('Redirect') != -1:
 			return
-
 		response = self.response().rawResponse()
 		contents = response['contents'] + closingTags
 		from WebUtils import WDGValidator
@@ -273,4 +283,3 @@ class Page(HTTPContent):
 		if not errorText:
 			return
 		self.write(errorText)
-

@@ -18,7 +18,10 @@ except ImportError:
 		DateTime = None
 from MiscUtils.DateInterval import timeDecode
 
-True, False = 1==1, 0==1
+try: # backward compatibility for Python < 2.3
+  True, False
+except NameError:
+  True, False = 1, 0
 
 debug = 0
 
@@ -56,22 +59,21 @@ class HTTPResponse(Response):
 		return self._headers.has_key(string.lower(name))
 
 	def setHeader(self, name, value):
+		"""Sets a specific header by name.
+
+		Parameters:
+			name: Header Name
+			value: Header Value
+
 		"""
-		Sets a specific header by name.
-		-  parameters:
-		name: Header Name
-		value: Header Value
-		"""
-		assert self._committed==0, "Headers have already been sent"
+		assert self._committed == 0, "Headers have already been sent"
 		self._headers[string.lower(name)] = value
 
 
 	def addHeader(self, name, value):
-		"""
-		Adds a specific header by name.
-		"""
-		print "addHeader is deprecated.  Use setHeader()."
-		assert self._committed==0
+		"""Adds a specific header by name."""
+		print "addHeader is deprecated. Use setHeader()."
+		assert self._committed == 0
 		self.setHeader(name, value)
 
 	def headers(self, name=None):
@@ -79,33 +81,37 @@ class HTTPResponse(Response):
 		return self._headers
 
 	def clearHeaders(self):
-		""" Clears all the headers. You might consider a setHeader('Content-type', 'text/html') or something similar after this. """
-		assert self._committed==0
+		"""Clears all the headers.
+
+		You might consider a setHeader('Content-type', 'text/html')
+		or something similar after this.
+
+		"""
+		assert self._committed == 0
 		self._headers = {}
 
 
 	## Cookies ##
 
 	def cookie(self, name):
-		""" Returns the value of the specified cookie. """
+		"""Returns the value of the specified cookie."""
 		return self._cookies[name]
 
 	def hasCookie(self, name):
-		"""
-		Returns true if the specified cookie is present.
-		"""
+		"""Returns True if the specified cookie is present."""
 		return self._cookies.has_key(name)
 
-	
+
 	def setCookie(self, name, value, path='/', expires='ONCLOSE',
 		      secure=False):
-		"""
-		Set a cookie.  You can also set the path (which defaults to /),
-		You can also set when it expires.  It can expire:
+		"""Set a cookie.
+
+		You can also set the path (which defaults to /).
+		You can also set when it expires. It can expire:
 		  'NOW': this is the same as trying to delete it, but it
 		    doesn't really seem to work in IE
 		  'ONCLOSE': the default behavior for cookies (expires when
-                    the browser closes)
+		             the browser closes)
 		  'NEVER': some time in the far, far future.
 		  integer: a timestamp value
 		  tuple: a tuple, as created by the time module
@@ -113,10 +119,11 @@ class HTTPResponse(Response):
 		    be *local*, not GMT time)
 		  DateTimeDelta: a interval from the present, e.g.,
 		    DateTime.DateTimeDelta(month=1) (1 month in the future)
-                  '+...': a time in the future, '...' should be something like
+		    '+...': a time in the future, '...' should be something like
 		    1w (1 week), 3h46m (3:45), etc.  You can use y (year),
-                    b (month), w (week), d (day), h (hour), m (minute),
-		    s (second).  This is done by the MiscUtils.DateInterval.
+		    b (month), w (week), d (day), h (hour), m (minute),
+		    s (second). This is done by the MiscUtils.DateInterval.
+
 		"""
 		cookie = Cookie(name, value)
 		if expires == 'ONCLOSE' or not expires:
@@ -140,7 +147,7 @@ class HTTPResponse(Response):
 			if type(t) in (TupleType, TimeTupleType):
 				t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
 			if DateTime and \
-			       (type(t) is DateTime.DateTimeDeltaType
+					(type(t) is DateTime.DateTimeDeltaType
 				or isinstance(t, DateTime.RelativeDateTime)):
 				t = DateTime.now() + t
 			if DateTime and type(t) is DateTime.DateTimeType:
@@ -153,92 +160,97 @@ class HTTPResponse(Response):
 		self.addCookie(cookie)
 
 	def addCookie(self, cookie):
+		"""Adds a cookie that will be sent with this response.
+
+		cookie is a Cookie object instance. See WebKit.Cookie.
+
 		"""
-		Adds a cookie that will be sent with this response.
-		cookie is a Cookie object instance.  See WebKit.Cookie.
-		"""
-		assert self._committed==0
+		assert self._committed == 0
 		assert isinstance(cookie, Cookie)
 		self._cookies[cookie.name()] = cookie
 
 	def delCookie(self, name):
- 		"""
-		Deletes a cookie at the browser. To do so, one has
- 		to create and send to the browser a cookie with
- 		parameters that will cause the browser to delete it.
- 		"""
- 		if self._cookies.has_key(name):
- 			self._cookies[name].delete()
- 		else:
- 			cookie = Cookie(name, None)
- 			cookie.delete()
- 			self.addCookie(cookie)
+		"""Deletes a cookie at the browser.
+
+		To do so, one has to create and send to the browser a cookie with
+		parameters that will cause the browser to delete it.
+
+		"""
+		if self._cookies.has_key(name):
+			self._cookies[name].delete()
+		else:
+			cookie = Cookie(name, None)
+			cookie.delete()
+			self.addCookie(cookie)
 
 	def cookies(self):
-		"""
-		Returns a dictionary-style object of all Cookie objects that will be sent
-		with this response.
+		"""Get all the cookies.
+
+		Returns a dictionary-style object of all Cookie objects that will
+		be sent with this response.
+
 		"""
 		return self._cookies
 
 	def clearCookies(self):
-		""" Clears all the cookies. """
-		assert self._committed==0
+		"""Clears all the cookies."""
+		assert self._committed == 0
 		self._cookies = {}
 
 
 	## Status ##
 
 	def setStatus(self, code, msg=''):
-		""" Set the status code of the response, such as 200, 'OK'. """
-		assert self._committed==0, "Headers already sent."
+		"""Set the status code of the response, such as 200, 'OK'."""
+		assert self._committed == 0, "Headers already sent."
 		self.setHeader('Status', str(code) + ' ' + msg)
 
 
 	## Special responses ##
 
 	def sendError(self, code, msg=''):
-		"""
-		Sets the status code to the specified code and message.
-		"""
-		assert self._committed==0, "Response already partially sent"
+		"""Sets the status code to the specified code and message."""
+		assert self._committed == 0, "Response already partially sent"
 		self.setStatus(code, msg)
 
 	def sendRedirect(self, url):
-		"""
+		"""Redirect to another url.
+
 		This method sets the headers and content for the redirect, but does
 		NOT change the cookies. Use clearCookies() as appropriate.
 
 		@@ 2002-03-21 ce: I thought cookies were ignored by user agents if a
 		redirect occurred. We should verify and update code or docs as appropriate.
+
 		"""
 		# ftp://ftp.isi.edu/in-notes/rfc2616.txt
 		# Sections: 10.3.3 and others
 
-		assert self._committed==0, "Headers already sent"
+		assert self._committed == 0, "Headers already sent"
 
 		self.setHeader('Status', '302 Redirect')
 		self.setHeader('Location', url)
 		self.setHeader('Content-type', 'text/html')
 
-		self.write('<html> <body> This page has been redirected to <a href="%s">%s</a>. </body> </html>' % (url, url))
+		self.write('<html><body>This page has been redirected'
+			' to <a href="%s">%s</a>.</body> </html>' % (url, url))
 
 
 	## Output ##
 
 	def write(self, charstr=None):
-		"""
-		Write charstr to the response stream.
-		"""
+		"""Write charstr to the response stream."""
 		if charstr: self._strmOut.write(charstr)
 		if not self._committed and self._strmOut._needCommit:
 			self.commit()
 
 	def flush(self, autoFlush=1):
-		"""
-		Send all accumulated response data now.
+		"""Send all accumulated response data now.
+
 		Commits the response headers and tells the underlying stream to flush.
-		if autoFlush is 1, the responseStream will flush itself automatically from now on.
+		if autoFlush is 1, the responseStream will flush itself automatically
+		from now on.
+
 		"""
 		if not self._committed:
 			self.commit()
@@ -247,36 +259,43 @@ class HTTPResponse(Response):
 
 
 	def isCommitted(self):
-		"""
-		Has the reponse already been partially or completely sent?
-		If this returns true, no new headers/cookies can be added to the response.
+		"""Checks whether response is already commited.
+
+		Checks whether the reponse has already been partially or completely sent.
+		If this returns true, no new headers/cookies can be added
+		to the response.
+
 		"""
 		return self._committed
 
 	def deliver(self):
-		"""
+		"""Deliver response.
+
 		The final step in the processing cycle.
 		Not used for much with responseStreams added.
+
 		"""
-		if debug: print "HTTPResponse deliver called"
+		if debug:
+			print "HTTPResponse deliver called"
 		self.recordEndTime()
 		if not self._committed: self.commit()
 
 	def commit(self):
-		"""
+		"""Commit response.
+
 		Write out all headers to the reponse stream, and tell the underlying
 		response stream it can start sending data.
+
 		"""
-		if debug: print "HTTPResponse commit"
+		if debug:
+			print "HTTPResponse commit"
 		self.recordSession()
 		self.writeHeaders()
 		self._committed = 1
 		self._strmOut.commit()
 
 	def writeHeaders(self):
-		"""
-		Write headers to the response stream.  Used internally.
-		"""
+		"""Write headers to the response stream. Used internally."""
 		if self._committed:
 			print "response.writeHeaders called when already committed"
 			return
@@ -296,7 +315,21 @@ class HTTPResponse(Response):
 		self._strmOut.prepend(headerstring)
 
 	def recordSession(self):
-		""" Invoked by commit() to record the session id in the response (if a session exists). This implementation sets a cookie for that purpose. For people who don't like sweets, a future version could check a setting and instead of using cookies, could parse the HTML and update all the relevant URLs to include the session id (which implies a big performance hit). Or we could require site developers to always pass their URLs through a function which adds the session id (which implies pain). Personally, I'd rather just use cookies. You can experiment with different techniques by subclassing Session and overriding this method. Just make sure Application knows which "session" class to use. """
+		"""Record session id.
+
+		Invoked by commit() to record the session id in the response
+		(if a session exists). This implementation sets a cookie for
+		that purpose. For people who don't like sweets, a future version
+		could check a setting and instead of using cookies, could parse
+		the HTML and update all the relevant URLs to include the session id
+		(which implies a big performance hit). Or we could require site
+		developers to always pass their URLs through a function which adds
+		the session id (which implies pain). Personally, I'd rather just
+		use cookies. You can experiment with different techniques by
+		subclassing Session and overriding this method. Just make sure
+		Application knows which "session" class to use.
+
+		"""
 		if not self._transaction.application().setting('UseCookieSessions', True):
 			return
 		sess = self._transaction._session
@@ -313,21 +346,27 @@ class HTTPResponse(Response):
 			if debug: print prefix, 'did not set sid'
 
 	def reset(self):
-		"""
-		Resets the response (such as headers, cookies and contents).
-		"""
-
+		"""Reset the response (such as headers, cookies and contents)."""
 		assert self._committed == 0, "Cannot reset the response; it has already been sent."
 		self._headers = {}
 		self.setHeader('Content-type','text/html')
 		self._cookies = {}
 		self._strmOut.clear()
 
-
 	def rawResponse(self):
-		""" Returns the final contents of the response. Don't invoke this method until after deliver().
-		Returns a dictionary representing the response containing only strings, numbers, lists, tuples, etc. with no backreferences. That means you don't need any special imports to examine the contents and you can marshal it. Currently there are two keys. 'headers' is list of tuples each of which contains two strings: the header and it's value. 'contents' is a string (that may be binary (for example, if an image were being returned)). """
+		"""Return the final contents of the response.
 
+		Don't invoke this method until after deliver().
+
+		Returns a dictionary representing the response containing only
+		strings, numbers, lists, tuples, etc. with no backreferences.
+		That means you don't need any special imports to examine the contents
+		and you can marshal it. Currently there are two keys. 'headers' is
+		list of tuples each of which contains two strings: the header and
+		it's value. 'contents' is a string (that may be binary, for example,
+		if an image were being returned).
+
+		"""
 		headers = []
 		for key, value in self._headers.items():
 			headers.append((key, value))
@@ -339,31 +378,37 @@ class HTTPResponse(Response):
 		}
 
 	def size(self):
-		"""
-		Returns the size of the final contents of the response. Don't invoke this
-		method until after deliver().
+		"""Return the size of the final contents of the response.
+
+		Don't invoke this method until after deliver().
+
 		"""
 		return self._strmOut.size()
 
-##	def appendRawResponse(self, rawRes):
-##		"""
-##		Appends the contents of the raw response (as returned by some transaction's rawResponse() method) to this response.
-##		The headers of the receiving response take precedence over the appended response.
-##		This method was built primarily to support Application.forwardRequest().
-##		"""
-##		assert self._committed==0
-##		headers = rawRes.get('headers', [])
-##		for key, value in headers:
-##			if not self._headers.has_key(key):
-##				self._headers[key] = value
-##		self.write(rawRes['contents'])
+	#def appendRawResponse(self, rawRes):
+	#	"""Appends the contents of the raw response.
+	#
+	#	The contents returned by some transaction's rawResponse() are added
+	#	to this response. The headers of the receiving response take precedence
+	#	over the appended response. This method was built primarily to support
+	#	Application.forwardRequest().
+	#
+	#	"""
+	#	assert self._committed == 0
+	#	headers = rawRes.get('headers', [])
+	#	for key, value in headers:
+	#		if not self._headers.has_key(key):
+	#			self._headers[key] = value
+	#	self.write(rawRes['contents'])
 
 	def mergeTextHeaders(self, headerstr):
-		"""
-		Given a string of headers (separated by newlines), merge them into our headers.
+		"""Merge text into our headers.
+
+		Given a string of headers (separated by newlines),
+		merge them into our headers.
+
 		"""
 		linesep = "\n"
-
 		lines = string.split(headerstr,"\n")
 		for i in lines:
 			sep = string.find(i, ":")
@@ -373,19 +418,17 @@ class HTTPResponse(Response):
 
 	## Exception reporting ##
 
-	exceptionReportAttrNames = Response.exceptionReportAttrNames + ['committed', 'headers', 'cookies']
+	exceptionReportAttrNames = Response.exceptionReportAttrNames + [
+		'committed', 'headers', 'cookies']
 
 	def displayError(self, err):
-		"""
-		Displays HTTPException errors, with status codes
-		"""
-		
+		"""Display HTTPException errors, with status codes."""
+
 		assert not self._committed, "Already committed"
 		for header, value in err.headers().items():
 			self.setHeader(header, value)
 		self.setHeader('Status',
-			       '%s %s' % (err.code(),
-					  err.codeMessage()))
+			'%s %s' % (err.code(), err.codeMessage()))
 		self._strmOut.clear()
 		self.setHeader('Content-type', 'text/html')
 		self._strmOut.write(err.html())

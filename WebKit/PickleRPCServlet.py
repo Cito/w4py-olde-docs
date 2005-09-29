@@ -2,18 +2,20 @@ from RPCServlet import RPCServlet
 import sys, traceback, types
 from time import time
 from MiscUtils.PickleRPC import RequestError, SafeUnpickler
+
 try:
 	from cPickle import dumps, PickleError
 except ImportError:
 	from pickle import dumps, PickleError
+
 try:
 	import zlib
 except ImportError:
 	zlib = None
 
+
 class PickleRPCServlet(RPCServlet, SafeUnpickler):
-	"""
-	PickleRPCServlet is a base class for Dict-RPC servlets.
+	"""PickleRPCServlet is a base class for Dict-RPC servlets.
 
 	The "Pickle" refers to Python's pickle module. This class is
 	similar to XMLRPCServlet. By using Python pickles you get their
@@ -65,6 +67,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 
 	For the dictionary formats and more information see the docs
 	for MiscUtils.PickleRPC.
+
 	"""
 
 	def respondToPost(self, trans):
@@ -83,21 +86,28 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 								rawstring = data.read()
 								req = self.loads(zlib.decompress(rawstring))
 							except zlib.error:
-								raise RequestError, 'Cannot uncompress compressed dict-rpc request'
+								raise RequestError, \
+									'Cannot uncompress compressed dict-rpc request'
 						else:
-							raise RequestError, 'Cannot handle compressed dict-rpc request'
+							raise RequestError, \
+								'Cannot handle compressed dict-rpc request'
 					elif encoding:
-						raise RequestError, 'Cannot handle Content-Encoding of %s' % encoding
+						raise RequestError, \
+							'Cannot handle Content-Encoding of %s' % encoding
 					else:
 						req = self.load(data)
 				except PickleError:
 					raise RequestError, 'Cannot unpickle dict-rpc request.'
 				if not isinstance(req, types.DictType):
-					raise RequestError, 'Expecting a dictionary for dict-rpc requests, but got %s instead.' % type(dict)
+					raise RequestError, \
+						'Expecting a dictionary for dict-rpc requests,' \
+						' but got %s instead.' % type(dict)
 				if req.get('version', 1)!=1:
-					raise RequestError, 'Cannot handle version %s requests.' % req['version']
+					raise RequestError, 'Cannot handle version %s requests.' \
+						% req['version']
 				if req.get('action', 'call')!='call':
-					raise RequestError, 'Cannot handle the request action, %r.' % req['action']
+					raise RequestError, \
+						'Cannot handle the request action, %r.' % req['action']
 				try:
 					methodName = req['methodName']
 				except KeyError:
@@ -107,7 +117,8 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 					# support PythonWin autoname completion
 					response['value'] = self.exposedMethods()[args[0]]
 				else:
-					response['value'] = self.call(methodName, *args, **req.get('keywords', {}))
+					response['value'] = self.call(methodName, *args,
+						**req.get('keywords', {}))
 			except RequestError, e:
 				response['requestError'] = str(e)
 				self.sendResponse(trans, response)
@@ -117,7 +128,8 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 				self.sendResponse(trans, response)
 				self.handleException(trans)
 			except:  # if it's a string exception, this gets triggered
-				response['exception'] = self.resultForException(sys.exc_info()[0], trans)
+				response['exception'] = self.resultForException(
+					sys.exc_info()[0], trans)
 				self.sendResponse(trans, response)
 				self.handleException(trans)
 			else:
@@ -130,9 +142,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 			self.handleException(trans)
 
 	def sendResponse(self, trans, response):
-		"""
-		Timestamp the response dict and send it.
-		"""
+		"""Timestamp the response dict and send it."""
 		# Generated a pickle string
 		response['timeResponded'] = time()
 		if self.useBinaryPickle():
@@ -141,20 +151,23 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 		else:
 			contentType = 'text/x-python-pickled-dict'
 			response = dumps(response)
-		
+
 		# Get list of accepted encodings
 		try:
 			accept_encoding = trans.request().environ()["HTTP_ACCEPT_ENCODING"]
 			if accept_encoding:
-				accept_encoding = [enc.strip() for enc in accept_encoding.split(',')]
+				accept_encoding = [enc.strip()
+					for enc in accept_encoding.split(',')]
 			else:
 				accept_encoding = []
 		except KeyError:
 			accept_encoding = []
 
-		# Compress the output if we are allowed to.  We'll avoid compressing short responses and
+		# Compress the output if we are allowed to.
+		# We'll avoid compressing short responses and
 		# we'll use the fastest possible compression -- level 1.
-		if zlib is not None and "gzip" in accept_encoding and len(response) > 1000:
+		if zlib is not None and "gzip" in accept_encoding \
+				and len(response) > 1000:
 			contentEncoding = 'x-gzip'
 			response = zlib.compress(response, 1)
 		else:
@@ -162,7 +175,5 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 		self.sendOK(contentType, response, trans, contentEncoding)
 
 	def useBinaryPickle(self):
-		"""
-		Override this to return 0 to use the less-efficient text pickling format
-		"""
+		"""Override this to return 0 to use the less-efficient text pickling format."""
 		return 1

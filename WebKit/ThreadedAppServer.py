@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-"""
-ThreadedAppServer uses a threaded model for handling multiple
-requests.  At one time there were other experimental execution
-models for AppServer, but none of these were successful and
-have been removed.  The ThreadedAppServer/AppServer distinction
-is thus largely historical.
-"""
+"""Threaded Application Server
 
+ThreadedAppServer uses a threaded model for handling multiple requests.
+At one time there were other experimental execution models for AppServer,
+but none of these were successful and have been removed.
+The ThreadedAppServer/AppServer distinction is thus largely historical.
+
+"""
 
 from Common import *
 import AppServer as AppServerModule
@@ -25,6 +25,11 @@ import errno
 import traceback
 from WebUtils import Funcs
 
+try: # backward compatibility for Python < 2.3
+  True, False
+except NameError:
+  True, False = 1, 0
+
 debug = 0
 
 DefaultConfig = {
@@ -40,34 +45,39 @@ DefaultConfig = {
 	'StartServerThreads':   10,
 
 	# @@ 2000-04-27 ce: None of the following settings are implemented
-#	'RequestQueueSize':     16,#	'RequestBufferSize':    64*1024,
-#	'SocketType':           'inet',      # inet, unix
+	# 'RequestQueueSize':     16,#	'RequestBufferSize':    64*1024,
+	# 'SocketType':           'inet',      # inet, unix
 }
 
-#Need to know this value for communications
-#Note that this limits the size of the dictionary we receive from the AppServer to 2,147,483,647 bytes
+# Need to know this value for communications
+# (note that this limits the size of the dictionary we receive
+# from the AppServer to 2,147,483,647 bytes):
 intLength = len(dumps(int(1)))
 
 server = None
+
 
 class NotEnoughDataError(Exception):
 	pass
 class ProtocolError(Exception):
 	pass
 
+
 class ThreadedAppServer(AppServer):
-	"""
+	"""Threaded Application Server.
+
 	`ThreadedAppServer` accepts incoming socket requests, spawns a
 	new thread or reuses an existing one, then dispatches the request
-	to the appropriate handler (e.g., an Adapter handler, HTTP
-	handler, etc, one for each protocol).
+	to the appropriate handler (e.g., an Adapter handler, HTTP handler,
+	etc., one for each protocol).
 
 	The transaction is connected directly to the socket, so that the
 	response is sent directly (if streaming is used, like if you call
-	``response.flush()``).  Thus the ThreadedAppServer packages
-	the socket/response, rather than value being returned up the
-	call chain.
+	``response.flush()``).  Thus the ThreadedAppServer packages the
+	socket/response, rather than value being returned up the call chain.
+
 	"""
+
 
 	## Init ##
 
@@ -117,7 +127,8 @@ class ThreadedAppServer(AppServer):
 		self.readyForRequests()
 
 	def addSocketHandler(self, handlerClass, serverAddress=None):
-		"""
+		"""Add socket handler.
+
 		Adds a socket handler for `serverAddress` -- `serverAddress`
 		is a tuple (*host*, *port*), where *host* is the interface
 		to connect to (for instance, the IP address on a machine
@@ -129,6 +140,7 @@ class ThreadedAppServer(AppServer):
 		to handle the actual request -- usually returning control
 		back to ThreadedAppServer in some fashion.  See `Handler`
 		for more.
+
 		"""
 
 		if serverAddress is None:
@@ -153,8 +165,7 @@ class ThreadedAppServer(AppServer):
 		self._sockets[serverAddress] = sock
 
 	def isPersistent(self):
-		":ignore:"
-		return 1
+		return True
 
 	def defaultConfig(self):
 		if self._defaultConfig is None:
@@ -163,18 +174,17 @@ class ThreadedAppServer(AppServer):
 		return self._defaultConfig
 
 	def mainloop(self, timeout=1):
-		"""
+		"""Main thread loop.
+
 		This is the main thread loop that accepts and dispatches
 		socket requests.
 
-		It goes through an loop as long as ``self.running``
-		is true (i.e., ``self.running = 0`` asks the server to
-		stop running).
+		It goes through an loop as long as ``self.running`` is True
+		(i.e., ``self.running = False`` asks the server to stop running).
 
 		The loop waits for connections, then based on the connecting
 		port it initiates the proper Handler (e.g.,
-		AdapterHandler, HTTPHandler).  Handlers are reused when
-		possible.
+		AdapterHandler, HTTPHandler). Handlers are reused when possible.
 
 		The initiated handlers are put into a queue, and
 		worker threads poll that queue to look for requests that
@@ -183,15 +193,15 @@ class ThreadedAppServer(AppServer):
 		Every so often (every 5 loops) it updates thread usage
 		information (`updateThreadUsage`), and every
 		``MaxServerThreads`` * 2 loops it it will manage
-		threads (killing or spawning new ones, in
-		`manageThreadCount`).
+		threads (killing or spawning new ones, in `manageThreadCount`).
+
 		"""
 
 		from errno import EINTR
 
 		threadCheckInterval = self._maxServerThreads*2
-		threadUpdateDivisor = 5 #grabstat interval
-		threadCheck=0
+		threadUpdateDivisor = 5 # grab stat interval
+		threadCheck = 0
 
 		while 1:
 			if not self.running:
@@ -205,7 +215,7 @@ class ThreadedAppServer(AppServer):
 				if not self.running:
 					return
 				input = []
-				if v[0] == EINTR or v[0]==0: break
+				if v[0] == EINTR or v[0] == 0: break
 				else: raise
 
 			for sock in input:
@@ -223,26 +233,26 @@ class ThreadedAppServer(AppServer):
 				self.updateThreadUsage()
 
 			if threadCheck > threadCheckInterval:
-				threadCheck=0
+				threadCheck = 0
 				self.manageThreadCount()
 			else:
 				threadCheck = threadCheck + 1
 
 			self.restartIfNecessary()
 
-	"""
-	**Thread Management**
 
-	These methods handle the thread pool.  The AppServer pre-allocates
-	threads, and reuses threads for requests.  So as more threads
-	are needed with varying load, new threads are spawned, and if there
-	are excess threads than threads are removed.
-	"""
+	## Thread Management ##
+
+	# These methods handle the thread pool. The AppServer pre-allocates
+	# threads, and reuses threads for requests. So as more threads
+	# are needed with varying load, new threads are spawned, and if there
+	# are excess threads than threads are removed.
 
 	def updateThreadUsage(self):
-		"""
-		Update the threadUseCounter list.  Called periodically
-		from `mainloop`.
+		"""Update the threadUseCounter list.
+
+		Called periodically	from `mainloop`.
+
 		"""
 		count = self.activeThreadCount()
 		if len(self._threadUseCounter) > self._maxServerThreads:
@@ -250,9 +260,10 @@ class ThreadedAppServer(AppServer):
 		self._threadUseCounter.append(count)
 
 	def activeThreadCount(self):
-		"""
-		Get a snapshot of the number of threads currently in use.
+		"""Get a snapshot of the number of threads currently in use.
+
 		Called from `updateThreadUsage`.
+
 		"""
 		count = 0
 		for i in self._threadPool:
@@ -261,17 +272,17 @@ class ThreadedAppServer(AppServer):
 		return count
 
 	def manageThreadCount(self):
-		"""
-		Adjust the number of threads in use.  From information
-		gleened from `updateThreadUsage`, we see about how
-		many threads are being used, to see if we have too
-		many threads or too few.  Based on this we create or
-		absorb threads.
+		"""Adjust the number of threads in use.
+
+		From information gleened from `updateThreadUsage`, we see about how
+		many threads are being used, to see if we have too many threads or
+		too few. Based on this we create or absorb threads.
+
 		"""
 
-		## @@: This algorithm needs work.  The edges (ie at
-		## the minserverthreads) are tricky.  When working
-		## with this, remember thread creation is CHEAP
+		# @@: This algorithm needs work. The edges (i.e. at
+		# the minserverthreads) are tricky. When working
+		# with this, remember thread creation is *cheap*.
 
 		average = 0
 		max = 0
@@ -307,32 +318,36 @@ class ThreadedAppServer(AppServer):
 				self._threadCount - max)
 			self.absorbThread(n)
 		else:
-			#cleanup any stale threads that we killed but haven't joined
+			# cleanup any stale threads that we killed but haven't joined
 			self.absorbThread(0)
 
 	def spawnThread(self):
+		"""Create a new worker thread.
+
+		Worker threads poll with the `threadloop` method.
+
 		"""
-		Create a new worker thread.  Worker threads poll
-		with the `threadloop` method.
-		"""
-		debug=0
+		debug = 0
 		if debug: print "Spawning new thread"
 		t = Thread(target=self.threadloop)
-		t._processing = 0
+		t._processing = False
 		t.start()
 		self._threadPool.append(t)
 		self._threadCount += 1
-		if debug: print "New Thread Spawned, threadCount=", self._threadCount
+		if debug:
+			print "New Thread Spawned, threadCount=", self._threadCount
 
 	def absorbThread(self, count=1):
-		"""
-		Absorb a thread.  We do this by putting a None on the
-		Queue.  When a thread gets it, that tells it to exit.
+		"""Absorb a thread.
+
+		We do this by putting a None on the Queue.
+		When a thread gets it, that tells it to exit.
 
 		We also keep track of the threads, so after killing
 		threads we go through all the threads and find the
 		thread(s) that have exited, so that we can take them
 		out of the thread pool.
+
 		"""
 		for i in range(count):
 			self._requestQueue.put(None)
@@ -349,31 +364,29 @@ class ThreadedAppServer(AppServer):
 				self._threadPool.remove(i)
 				if debug: print "Thread Absorbed, Real Thread Count=", len(self.threadPool)
 
-	"""
-	**Worker Threads**
-	"""
+
+	## Worker Threads ##
 
 	def threadloop(self):
-		"""
-		This is the main loop for worker threads.  Worker
-		threads poll the ``_requestQueue`` to find a request
-		handler waiting to run.  If they find a None in the
-		queue, this thread has been selected to die, which is
-		the way the loop ends.
+		"""The main loop for worker threads.
 
-		The handler object does all the work when its
-		`handleRequest` method is called.
+		Worker threads poll the ``_requestQueue`` to find a request handler
+		waiting to run.  If they find a None in the queue, this thread has
+		been selected to die, which is the way the loop ends.
 
-		`initThread` and `delThread` methods are called at
-		the beginning and end of the thread loop, but they
-		aren't being used for anything (future use as a
-		hook).
+		The handler object does all the work when its `handleRequest` method
+		is called.
+
+		`initThread` and `delThread` methods are called at the beginning and
+		end of the thread loop, but they aren't being used for anything
+		(future use as a hook).
+
 		"""
 
 		self.initThread()
 
-		t=threading.currentThread()
-		t.processing=0
+		t = threading.currentThread()
+		t.processing = False
 
 		try:
 			while 1:
@@ -382,12 +395,12 @@ class ThreadedAppServer(AppServer):
 					if handler is None: #None means time to quit
 						if debug: print "Thread retrieved None, quitting"
 						break
-					t.processing=1
+					t.processing = True
 					try:
 						handler.handleRequest()
 					except:
 						traceback.print_exc(file=sys.stderr)
-					t.processing=0
+					t.processing = False
 					handler.close()
 				except Queue.Empty:
 					pass
@@ -396,40 +409,41 @@ class ThreadedAppServer(AppServer):
 		if debug: print threading.currentThread(), "Quitting"
 
 	def initThread(self):
-		"""
-		Invoked immediately by threadloop() as a hook for
-		subclasses. This implementation does nothing and
-		subclasses need not invoke super.
+		"""Initialize thread.
+
+		Invoked immediately by threadloop() as a hook for subclasses.
+		This implementation does nothing and subclasses need not invoke super.
+
 		"""
 		pass
 
 	def delThread(self):
-		"""
-		Invoked immediately by threadloop() as a hook for
-		subclasses. This implementation does nothing and
-		subclasses need not invoke super.
+		"""Delete thread.
+
+		Invoked immediately by threadloop() as a hook for subclasses.
+		This implementation does nothing and subclasses need not invoke super.
+
 		"""
 		pass
 
-	"""
-	**Shutting Down**
-	"""
+
+	## Shutting Down ##
 
 	def shutDown(self):
-		"""
-		Called on shutdown.  Also calls `AppServer.shutDown`,
-		but first closes all sockets and tells all the threads
-		to die.
-		"""
+		"""Called on shutdown.
 
-		self.running=0
+		Also calls `AppServer.shutDown`, but first closes all sockets
+		and tells all the threads to die.
+
+		"""
+		self.running = False
 		self.awakeSelect()
-		self._shuttingdown=1  #jsl-is this used anywhere?
+		self._shuttingdown = False # jsl-is this used anywhere?
 		print "ThreadedAppServer: Shutting Down"
 		for sock in self._sockets.values():
 			sock.close()
 		for i in range(self._threadCount):
-			self._requestQueue.put(None)#kill all threads
+			self._requestQueue.put(None) # kill all threads
 		for i in self._threadPool:
 			try:
 				i.join()
@@ -438,10 +452,12 @@ class ThreadedAppServer(AppServer):
 		AppServer.shutDown(self)
 
 	def awakeSelect(self):
-		"""
+		"""Awake the select() call.
+
 		The ``select()`` in `mainloop` is blocking, so when
 		we shut down we have to make a connect to unblock it.
 		Here's where we do that, called `shutDown`.
+
 		"""
 
 		for host, port in self._sockets.keys():
@@ -455,15 +471,16 @@ class ThreadedAppServer(AppServer):
 			except:
 				pass
 
-	"""
-	**Misc**
-	"""
+
+	## Misc ##
 
 	def address(self, settingPrefix):
-		"""
+		"""Get host address.
+
 		The address for the Adapter (Host/interface, and port),
-		taken from ``Configs/AppServer.config``, setting
-		``Host`` and ``AdapterPort``.
+		as taken from ``Configs/AppServer.config``,
+		settings ``Host`` and ``AdapterPort``.
+
 		"""
 		try:
 			return self._addr[settingPrefix]
@@ -472,7 +489,7 @@ class ThreadedAppServer(AppServer):
 						self.setting('Host'))
 			if settingPrefix == 'Adapter':
 				# jdh 2004-12-01:
-				# 'Port' has been renamed to 'AdapterPort'.  However, we don't
+				# 'Port' has been renamed to 'AdapterPort'. However, we don't
 				# want the the default AdapterPort in DefaultConfig above to
 				# be used if a user still has 'Port' in their config file.
 				# So for now, we prefer the 'Port' setting if it exists.
@@ -481,7 +498,9 @@ class ThreadedAppServer(AppServer):
 				if port is None:
 					port = self.setting(settingPrefix + 'Port')
 				else:
-					print "WARNING: The 'Port' setting has been renamed to 'AdapterPort'.\n         Please update your AppServer.config file"
+					print "WARNING:", \
+						"The 'Port' setting has been renamed to 'AdapterPort'."
+					print "Please update your AppServer.config file."
 			else:
 				port = self.setting(settingPrefix + 'Port')
 			self._addr[settingPrefix] = (
@@ -490,50 +509,52 @@ class ThreadedAppServer(AppServer):
 			return self._addr[settingPrefix]
 
 class Handler:
+	"""A very general socket handler.
 
-	"""
-	Handler is an abstract superclass -- specific protocol
-	implementations will subclass this.  A Handler takes a socket
-	to interact with, and creates a raw request.
+	Handler is an abstract superclass -- specific protocol implementations
+	will subclass this. A Handler takes a socket to interact with, and
+	creates a raw request.
 
-	Handlers will be reused.  When a socket is received
-	`activate` will be called -- but the handler should not do
-	anything, as it is still running in the main thread.  The
-	handler is put into a queue, and a worker thread picks it
-	up and runs `handleRequest`, which subclasses should override.
+	Handlers will be reused.  When a socket is received `activate` will be
+	called -- but the handler should not do anything, as it is still running
+	in the main thread. The handler is put into a queue, and a worker thread
+	picks it up and runs `handleRequest`, which subclasses should override.
 
-	Several methods are provided which are typically used by
-	subclasses.
+	Several methods are provided which are typically used by subclasses.
+
 	"""
 
 	def __init__(self, server, serverAddress):
-		"""
+		"""Create a new socket handler.
+
 		Each handler is attached to a specific host and port,
 		and of course to the AppServer.
+
 		"""
 
 		self._server = server
 		self._serverAddress = serverAddress
 
 	def activate(self, sock, requestID):
-		"""
-		Activates the handler for processing the request.
-		`sock` is the incoming socket that this handler
-		will work with, and `requestID` is a serial number
-		unique for each request.
+		"""Activate the handler for processing the request.
 
-		This isn't where work gets done -- the handler is
-		queued after this, and work is done when
-		`handleRequest` is called.
+		`sock` is the incoming socket that this handler will work with,
+		and `requestID` is a serial number unique for each request.
+
+		This isn't where work gets done -- the handler is queued after this,
+		and work is done when `handleRequest` is called.
+
 		"""
 
 		self._requestID = requestID
 		self._sock = sock
 
 	def close(self):
-		"""
-		Called when the handler is finished.  Closes the socket
-		and returns the handler to the pool of inactive handlers.
+		"""Close the socket.
+
+		Called when the handler is finished. Closes the socket and
+		returns the handler to the pool of inactive handlers.
+
 		"""
 		self._sock = None
 		self._server._handlerCache[self._serverAddress].append(self)
@@ -546,9 +567,11 @@ class Handler:
 		pass
 
 	def receiveDict(self):
-		"""
+		"""Receive a dictionary from the socket.
+
 		Utility function to receive a marshalled dictionary from
-		the socket.  Returns None if the request was empty.
+		the socket. Returns None if the request was empty.
+
 		"""
 		chunk = ''
 		missing = intLength
@@ -561,7 +584,8 @@ class Handler:
 					return None
 				else:
 					# We got a partial request -- something went wrong.
-					raise NotEnoughDataError, 'received only %d of %d bytes when receiving dictLength' % (len(chunk), intLength)
+					raise NotEnoughDataError, 'received only %d of %d bytes' \
+						' when receiving dictLength' % (len(chunk), intLength)
 			chunk += block
 			missing = intLength - len(chunk)
 		try:
@@ -580,8 +604,9 @@ See the Troubleshooting section of the WebKit Install Guide.\r
 				self._sock.close()
 				return None
 			print 'ERROR:', msg
-			print 'ERROR: you can only connect to %s via an adapter, like mod_webkit or' % self._serverAddress[1]
-			print '       wkcgi, not with a browser)'
+			print 'ERROR: you can only connect to', self._serverAddress[1], \
+				'via an adapter,'
+			print '       like mod_webkit or wkcgi, not with a browser.'
 			raise
 		if type(dictLength) != type(1):
 			self._sock.close()
@@ -592,24 +617,25 @@ See the Troubleshooting section of the WebKit Install Guide.\r
 			block = self._sock.recv(missing)
 			if not block:
 				self._sock.close()
-				raise NotEnoughDataError, 'received only %d of %d bytes when receiving dict' % (len(chunk), dictLength)
+				raise NotEnoughDataError, 'received only %d of %d bytes' \
+					' when receiving dict' % (len(chunk), dictLength)
 			chunk += block
 			missing = dictLength - len(chunk)
 		return loads(chunk)
 
 
 class MonitorHandler(Handler):
+	"""Monitor server status.
 
-	"""
 	Monitor is a minimal service that accepts a simple protocol,
 	and returns a value indicating the status of the server.
 
 	The protocol passes a marshalled dict, much like the Adapter
 	interface, which looks like ``{'format': 'XXX'}``, where XXX
-	is a command (``STATUS`` or ``QUIT``).  Responds with a simple
+	is a command (``STATUS`` or ``QUIT``). Responds with a simple
 	string, either the number of requests we've received (for
-	``STATUS``) or ``OK`` for ``QUIT`` (which also stops the
-	server)
+	``STATUS``) or ``OK`` for ``QUIT`` (which also stops the server).
+
 	"""
 
 	# @@ 2003-03 ib: we should have a RESTART command, and
@@ -642,50 +668,49 @@ class MonitorHandler(Handler):
 			self.server.shutDown()
 
 
-
-
-
-
 from WebKit.ASStreamOut import ASStreamOut
 class TASASStreamOut(ASStreamOut):
+	"""Response stream for ThreadedAppServer.
 
-	"""
-	The `TASASStreamOut` class streams to a given socket, so that
-	when `flush` is called and the buffer is ready to be written,
-	it sends the data from the buffer out on the socket.  This is
-	the response stream used for requests generated by
-	ThreadedAppServer.
+	The `TASASStreamOut` class streams to a given socket, so that when `flush`
+	is called and the buffer is ready to be written, it sends the data from the
+	buffer out on the socket. This is the response stream used for requests
+	generated by ThreadedAppServer.
 
-	TAS stands for ThreadedAppServer (AS for AppServer... a little
-	redundant).
+	TAS stands for ThreadedAppServer (AS for AppServer... a little redundant).
+
 	"""
 
 	def __init__(self, sock):
-		"""
-		We get an extra `sock` argument, which is the socket
-		which we'll stream output to (if we're streaming).
+		"""Create stream.
+
+		We get an extra `sock` argument, which is the socket which we'll
+		stream output to (if we're streaming).
+
 		"""
 
 		ASStreamOut.__init__(self)
 		self._socket = sock
 
 	def flush(self):
-		"""
-		Calls `ASStreamOut.ASStreamOut.flush`, and if that
-		returns true (indicating the buffer is full enough)
-		then we send data from the buffer out on the socket.
+		"""Flush stream.
+
+		Calls `ASStreamOut.ASStreamOut.flush`, and if that returns True
+		(indicating the buffer is full enough) then we send data from
+		the buffer out on the socket.
+
 		"""
 
-		debug=0
+		debug = 0
 		result = ASStreamOut.flush(self)
-		if result: ##a true return value means we can send
+		if result: # a True return value means we can send
 			reslen = len(self._buffer)
 			sent = 0
 			while sent < reslen:
 				try:
 					sent = sent + self._socket.send(self._buffer[sent:sent+8192])
 				except socket.error, e:
-					if e[0]==errno.EPIPE: #broken pipe
+					if e[0] == errno.EPIPE: # broken pipe
 						pass
 					elif hasattr(errno, 'ECONNRESET') and e[0]==errno.ECONNRESET:
 						pass
@@ -696,8 +721,8 @@ class TASASStreamOut(ASStreamOut):
 
 
 class AdapterHandler(Handler):
+	"""Adapter handler.
 
-	"""
 	Handles the Adapter protocol (as used in mod_webkit, wkcgi,
 	WebKit.cgi, HTTPAdapter, etc).  This protocol passes a marshalled
 	dictionary which contains the keys ``format`` and ``environ``.
@@ -709,19 +734,20 @@ class AdapterHandler(Handler):
 	object based off the socket, which contains the body of the
 	request (the POST data, for instance).  It's left to Application
 	to handle that data.
+
 	"""
 
 	protocolName = 'address'
 	settingPrefix = 'Adapter'
 
 	def handleRequest(self):
-		"""
-		Creates the request dictionary, and creates a
-		`TASASStreamOut` object for the response, then calls
-		`Application.dispatchRawRequest`, which does the
-		rest of the work (here we just clean up after).
-		"""
+		"""Handle request.
 
+		Creates the request dictionary, and creates a `TASASStreamOut` object
+		for the response, then calls `Application.dispatchRawRequest`, which
+		does the rest of the work (here we just clean up after).
+
+		"""
 		verbose = self._server._verbose
 		self._startTime = time.time()
 
@@ -755,9 +781,7 @@ class AdapterHandler(Handler):
 		del transaction
 
 	def makeInput(self):
-		"""
-		Create a file-like object from the socket
-		"""
+		"""Create a file-like object from the socket."""
 		return self._sock.makefile("rb",8012)
 
 # Determines whether the main look should run in another thread.
@@ -770,31 +794,29 @@ class AdapterHandler(Handler):
 def runMainLoopInThread():
 	return os.name == 'nt'
 
-doesRunHandleExceptions = True  # Set to False in DebugAppServer so Python debuggers can trap exceptions
+# Set to False in DebugAppServer so Python debuggers can trap exceptions:
+doesRunHandleExceptions = True
 
 class RestartAppServerError(Exception):
-	"""
-	Raised by DebugAppServer when needed.
-	"""
+	"""Raised by DebugAppServer when needed."""
 	pass
 
 
+## Script usage ##
+
 def run(workDir=None):
+	"""Start the server (`ThreadedAppServer`).
+
+	`workDir` is the server-side path for the server, which may not be
+	the ``Webware/WebKit`` directory (though by default it is).
+
+	After setting up the ThreadedAppServer we call `ThreadedAppServer.mainloop`
+	to start the server main loop. It also catches exceptions as a last resort.
+
 	"""
-	Starts the server (`ThreadedAppServer`).
-
-	`workDir` is the server-side path for the server, which may
-	not be the ``Webware/WebKit`` directory (though by default
-	it is).
-
-	After setting up the ThreadedAppServer we call
-	`ThreadedAppServer.mainloop` to start the server main loop.
-	It also catches exceptions as a last resort.
-	"""
-
 	global server
 	runAgain = True
-	while runAgain:  # looping in support of RestartAppServerError
+	while runAgain: # looping in support of RestartAppServerError
 		try:
 			try:
 				runAgain = False
@@ -806,7 +828,7 @@ def run(workDir=None):
 					# that we can re-call it in the main thread.
 					global exitStatus
 					exitStatus = None
-					def windowsmainloop(server):
+					def _windowsmainloop(server):
 						global exitStatus
 						try:
 							server.mainloop()
@@ -814,14 +836,15 @@ def run(workDir=None):
 							exitStatus = e.code
 
 					# Run the server thread
-					t = threading.Thread(target=windowsmainloop, args=(server,))
+					t = threading.Thread(target=_windowsmainloop,
+						args=(server,))
 					t.start()
 					try:
 						while server.running:
-							time.sleep(1.0)
+							time.sleep(1)
 					except KeyboardInterrupt:
 						pass
-					server.running = 0
+					server.running = False
 					t.join()
 
 					# re-call sys.exit if necessary
@@ -860,14 +883,9 @@ def run(workDir=None):
 	sys.exit()
 
 
-# 2003-03 ib @@: is this right?  arg1, arg2?
-def shutDown(arg1,arg2):
-	"""
-	Shut down the server.
-	"""
-##	print "I AM HERE"
+def shutDown():
+	"""Shut down the server."""
 	global server
-##	print "S", server
 	print
 	print "Shutdown Called", time.asctime(time.localtime(time.time()))
 	if server:
@@ -879,32 +897,28 @@ import signal
 signal.signal(signal.SIGINT, shutDown)
 signal.signal(signal.SIGTERM, shutDown)
 
-
-
-
 usage = """
-The AppServer is the main process of WebKit.  It handles requests for
-servlets from webservers.  ThreadedAppServer takes the following
-command line arguments: stop: Stop the currently running Apperver.
-daemon: run as a daemon If AppServer is called with no arguments, it
-will start the AppServer and record the pid of the process in
-appserverpid.txt
+The AppServer is the main process of WebKit. It handles requests for servlets
+from webservers. ThreadedAppServer takes the following command line arguments:
+stop: Stop the currently running Apperver.
+daemon: run as a daemon If AppServer is called with no arguments, it will start
+the AppServer and record the pid of the process in appserverpid.txt
 """
-
 
 import re
 settingRE = re.compile(r'^--([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
 from MiscUtils import Configurable
 
 def main(args):
-	"""
-	Run by `Launch`, this is the main entrance and command-line
-	interface for AppServer.
+	"""Command line interface.
+
+	Run by `Launch`, this is the main entrance and command-line interface
+	for ThreadedAppServer.
+
 	"""
 
-	http = 0
 	function = run
-	daemon = 0
+	daemon = False
 	workDir = None
 
 	for i in args[:]:
@@ -917,7 +931,7 @@ def main(args):
 			import AppServer
 			function=AppServer.stop
 		elif i == "daemon":
-			daemon=1
+			daemon = True
 		elif i == "start":
 			pass
 		elif i[:8] == "workdir=":
@@ -927,11 +941,10 @@ def main(args):
 
 	if daemon:
 		if os.name == "posix":
-			pid=os.fork()
+			pid = os.fork()
 			if pid:
 				sys.exit()
 		else:
-			print "daemon mode not available on your OS"
+			print "Daemon mode not available on your OS."
+
 	function(workDir=workDir)
-
-

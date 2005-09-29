@@ -8,25 +8,33 @@ import threading
 
 
 class ServletFactory(Object):
-	"""
-	ServletFactory is an abstract class that defines the protocol
-	for all servlet factories.
+	"""Servlet factory template.
 
-	Servlet factories are used by the Application to create
-	servlets for transactions.
+	ServletFactory is an abstract class that defines the protocol for
+	all servlet factories.
 
-	A factory must inherit from this class and override
-	uniqueness(), extensions() and either loadClass() or
-	servletForTransaction().  Do not invoke the base class methods
-	as they all raise AbstractErrors.
+	Servlet factories are used by the Application to create servlets
+	for transactions.
+
+	A factory must inherit from this class and override uniqueness(),
+	extensions() and either loadClass() or servletForTransaction().
+	Do not invoke the base class methods as they all raise AbstractErrors.
 
 	Each method is documented below.
+
 	"""
 
+
+	## Init ##
+
 	def __init__(self, application):
-		""" Stores a reference to the application in
-		self._app, because subclasses may or may not need to
-		talk back to the application to do their work."""
+		"""Create servlet factory.
+
+		Stores a reference to the application in self._app, because
+		subclasses may or may not need to talk back to the application
+		to do their work.
+
+		"""
 		Object.__init__(self)
 		self._app = application
 		self._cacheClasses = self._app.setting("CacheServletClasses",1)
@@ -43,61 +51,59 @@ class ServletFactory(Object):
 		self._threadsafeServletCache = {}
 		self._importLock = threading.RLock()
 
+
+	## Info ##
+
 	def name(self):
-		""" Returns the name of the factory. This is a
-		convenience for the class name."""
+		"""Return the name of the factory.
+
+		This is a convenience for the class name.
+
+		"""
 		return self.__class__.__name__
 
 	def uniqueness(self):
-		""" Returns a string to indicate the uniqueness of the
-		ServletFactory's servlets. The Application needs to
-		know if the servlets are unique per file, per
-		extension or per application. Return values are
-		'file', 'extension' and 'application'.  *** NOTE:
-		Application only supports 'file' uniqueness at this
-		point in time."""
+		"""Return uniqueness type.
+
+		Returns a string to indicate the uniqueness of the ServletFactory's
+		servlets. The Application needs to know if the servlets are unique
+		per file, per extension or per application.
+
+		Return values are 'file', 'extension' and 'application'.
+
+		NOTE: Application only supports 'file' uniqueness at this point in time.
+
+		"""
 		raise AbstractError, self.__class__
 
 	def extensions(self):
-		""" Return a list of extensions that match this
-		handler. Extensions should include the dot. An empty
-		string indicates a file with no extension and is a
-		valid value. The extension '.*' is a special case that
-		is looked for a URL's extension doesn't match
-		anything."""
-		raise AbstractError, self.__class__
+		"""Return a list of extensions that match this handler.
 
-	def servletForTransaction(self, transaction):
-		""" Returns a new servlet that will handle the
-		transaction. This method should do no caching (e.g.,
-		it should really create the servlet upon each
-		invocation) since caching is already done at the
-		Application level."""
-		raise AbstractError, self.__class__
+		Extensions should include the dot. An empty string indicates a file
+		with no extension and is a valid value. The extension '.*' is a special
+		case that is looked for a URL's extension doesn't match anything.
 
-	def flushCache(self):
-		"""
-		Clear any caches and start fesh.
 		"""
 		raise AbstractError, self.__class__
+
+
+	## Import ##
 
 	def importAsPackage(self, transaction, serverSidePathToImport):
-		"""
-		Imports the module at the given path in the proper
-		package/subpackage for the current request.  For
-		example, if the transaction has the URL
-		http://localhost/WebKit.cgi/MyContextDirectory/MySubdirectory/MyPage
-		and path = 'some/random/path/MyModule.py' and the
-		context is configured to have the name 'MyContext'
-		then this function imports the module at that path as
-		MyContext.MySubdirectory.MyModule .  Note that the
-		context name may differ from the name of the directory
-		containing the context, even though they are usually
-		the same by convention.
+		"""Import requested module.
 
-		Note that the module imported may have a different
-		name from the servlet name specified in the URL.  This
-		is used in PSP.
+		Imports the module at the given path in the proper package/subpackage
+		for the current request. For example, if the transaction has the URL
+		http://localhost/WebKit.cgi/MyContextDirectory/MySubdirectory/MyPage
+		and path = 'some/random/path/MyModule.py' and the context is configured
+		to have the name 'MyContext' then this function imports the module at
+		that path as MyContext.MySubdirectory.MyModule . Note that the context
+		name may differ from the name of the directory containing the context,
+		even though they are usually the same by convention.
+
+		Note that the module imported may have a different name from the
+		servlet name specified in the URL. This is used in PSP.
+
 		"""
 		debug=0
 
@@ -107,7 +113,8 @@ class ServletFactory(Object):
 		contextPath = request.serverSideContextPath()
 		fullname = request.contextName()
 
-		## There is no context, so import the module standalone and give it a unique name
+		# There is no context, so import the module standalone
+		# and give it a unique name:
 		if fullname == None:
 			remainder = serverSidePathToImport
 			remainder = string.replace(remainder, '\\', '_')
@@ -115,8 +122,10 @@ class ServletFactory(Object):
 			fullmodname = string.replace(remainder,'.','_')
 			if debug: print __file__, "fullmodname=",fullmodname
 			if len(fullmodname) > 100: fullmodname=fullmodname[:-50]
-			modname=os.path.splitext(os.path.basename(serverSidePathToImport))[0]
-			fp, pathname, stuff = imp.find_module(modname, [os.path.dirname(serverSidePathToImport)])
+			modname=os.path.splitext(os.path.basename(
+				serverSidePathToImport))[0]
+			fp, pathname, stuff = imp.find_module(modname,
+				[os.path.dirname(serverSidePathToImport)])
 			module = imp.load_module(fullmodname, fp, pathname, stuff)
 			module.__donotreload__ = 1
 			return module
@@ -124,7 +133,8 @@ class ServletFactory(Object):
 
 		# First, we'll import the context's package.
 		directory, contextDirName = os.path.split(contextPath)
-		self._importModuleFromDirectory(fullname, contextDirName, directory, isPackageDir=1)
+		self._importModuleFromDirectory(fullname, contextDirName,
+			directory, isPackageDir=1)
 		directory = contextPath
 
 		# Now we'll break up the rest of the path into components.
@@ -134,8 +144,9 @@ class ServletFactory(Object):
 
 		# Import all subpackages of the context package
 		for name in remainder[:-1]:
-			fullname = fullname + '.' + name
-			self._importModuleFromDirectory(fullname, name, directory, isPackageDir=1)
+			fullname = '%s.%s' % (fullname, name)
+			self._importModuleFromDirectory(fullname, name,
+				directory, isPackageDir=1)
 			directory = os.path.join(directory, name)
 
 		# Finally, import the module itself as though it was part of the package
@@ -143,23 +154,23 @@ class ServletFactory(Object):
 		moduleFileName = os.path.basename(serverSidePathToImport)
 		moduleDir = os.path.dirname(serverSidePathToImport)
 		name, ext = os.path.splitext(moduleFileName)
-		fullname = fullname + '.' + name
-		module = self._importModuleFromDirectory(fullname, name, moduleDir, forceReload=1)
+		fullname = '%s.%s' % (fullname, name)
+		module = self._importModuleFromDirectory(fullname, name,
+			moduleDir, forceReload=1)
 		return module
 
 	def _importModuleFromDirectory(self, fullModuleName, moduleName, directory, isPackageDir=0, forceReload=0):
-		"""
-		Imports the given module from the given directory.
-		fullModuleName should be the full dotted name that
-		will be given to the module within Python.  moduleName
-		should be the name of the module in the filesystem,
-		which may be different from the name given in
-		fullModuleName.  Returns the module object.  If
-		forceReload is true then this reloads the module even
-		if it has already been imported.
+		"""Imports the given module from the given directory.
 
-		If isPackageDir is true, then this function creates an
-		empty __init__.py if that file doesn't already exist.
+		fullModuleName should be the full dotted name that will be given
+		to the module within Python. moduleName should be the name of the
+		module in the filesystem, which may be different from the name
+		given in fullModuleName. Returns the module object. If forceReload is
+		True then this reloads the module even if it has already been imported.
+
+		If isPackageDir is True, then this function creates an empty
+		__init__.py if that file doesn't already exist.
+
 		"""
 		debug = 0
 		if debug: print __file__, fullModuleName, moduleName, directory
@@ -185,54 +196,45 @@ class ServletFactory(Object):
 		module.__donotreload__ = 1
 		return module
 
-	def flushCache(self):
-		"""
-		Flush the cache.  Servlets that are currently in
-		the wild may find their way back into the cache
-		(this may be a problem).
-		"""
-		## @@ ib 07-2003: I'm unsure how well this works.
-		self._importLock.acquire()
-		self._classCache = {}
-		# We can't just delete all the lists, because returning
-		# servlets expect it to exist.
-		for key in self._servletPool.keys():
-			self._servletPool[key] = []
-		self._threadsafeServletCache = {}
-		self._importLock.release()
+	def loadClass(self, transaction, path):
+		"""Load the appropriate class.
 
-	def returnServlet(self, trans, servlet):
+		Given a transaction and a path, load the class for creating these
+		servlets. Caching, pooling, and threadsafeness are all handled by
+		servletForTransaction. This method is not expected to be threadsafe.
+
 		"""
-		Called by Servlet.close(), which returns the
-		servlet to the servlet pool if necessary.
-		"""
-		if servlet.canBeReused() \
-		       and not servlet.canBeThreaded() \
-		       and self._cacheInstances:
-			path = trans.request().serverSidePath()
-			self._servletPool[path].append(servlet)
+		raise AbstractError, self.__class__
+
+
+	## Servlet Pool ##
 
 	def servletForTransaction(self, transaction):
-		"""
-		Returns a servlet given a transaction.  This method
-		handles caching, and will call loadClass(trans, filepath)
-		if no cache is found.  Caching is generally controlled
-		by servlets with the canBeReused() and canBeThreaded()
-		methods.
+		"""Return a new servlet that will handle the transaction.
+
+		This method handles caching, and will call loadClass(trans, filepath)
+		if no cache is found. Caching is generally controlled by servlets
+		with the canBeReused() and canBeThreaded() methods.
+
 		"""
 		request = transaction.request()
 		path = request.serverSidePath()
 
-		# Do we need to import/reimport the class because the file changed on disk or isn't in cache?
+		# Do we need to import/reimport the class
+		# because the file changed on disk or isn't in cache?
 		mtime = os.path.getmtime(path)
-		if not self._classCache.has_key(path) or mtime != self._classCache[path]['mtime']:
-			# Use a lock to prevent multiple simultaneous imports of the same module
+		if not self._classCache.has_key(path) or \
+				mtime != self._classCache[path]['mtime']:
+			# Use a lock to prevent multiple simultaneous
+			# imports of the same module:
 			self._importLock.acquire()
 			try:
-				if not self._classCache.has_key(path) or mtime != self._classCache[path]['mtime']:
+				if not self._classCache.has_key(path) or \
+						mtime != self._classCache[path]['mtime']:
 					theClass = self.loadClass(transaction, path)
 					if self._cacheClasses:
-						self._classCache[path] = {'mtime': mtime, 'class': theClass}
+						self._classCache[path] = {
+							'mtime': mtime, 'class': theClass}
 				else:
 					theClass = self._classCache[path]['class']
 			finally:
@@ -240,9 +242,9 @@ class ServletFactory(Object):
 		else:
 			theClass = self._classCache[path]['class']
 
-		# Try to find a cached servlet of the correct class.  (Outdated servlets may
-		# have been returned to the pool after a new class was imported, but we don't want
-		# to use an outdated servlet.)
+		# Try to find a cached servlet of the correct class.
+		# (Outdated servlets may have been returned to the pool after a new
+		# class was imported, but we don't want to use an outdated servlet.)
 		if self._threadsafeServletCache.has_key(path):
 			servlet = self._threadsafeServletCache[path]
 			if servlet.__class__ is theClass:
@@ -257,10 +259,10 @@ class ServletFactory(Object):
 					if servlet.__class__ is theClass:
 						return servlet
 
-		# Use a lock to prevent multiple simultaneous imports
-		# of the same module @@ ib 2004-06: Aren't imports
-		# threadsafe already?  Or maybe not, because we are
-		# using tricky import techniques (e.g., __import__)
+		# Use a lock to prevent multiple simultaneous
+		# imports of the same module.
+		# @@ ib 2004-06: Aren't imports threadsafe already? Or maybe not,
+		# because we are using tricky import techniques (e.g., __import__)
 		self._importLock.acquire()
 		try:
 			mtime = os.path.getmtime(path)
@@ -287,29 +289,56 @@ class ServletFactory(Object):
 				self._servletPool[path] = []
 		return servlet
 
-	def loadClass(self, transaction, path):
+	def returnServlet(self, trans, servlet):
+		"""Return servlet to the pool.
+
+		Called by Servlet.close(), which returns the servlet
+		to the servlet pool if necessary.
+
 		"""
-		Given a transaction and a path, load the class for
-		creating these servlets.  Caching, pooling, and
-		threadsafeness are all handled by
-		servletForTransaction.  This method is not expected to
-		be threadsafe.
+		if servlet.canBeReused() and not servlet.canBeThreaded() \
+				and self._cacheInstances:
+			path = trans.request().serverSidePath()
+			self._servletPool[path].append(servlet)
+
+	def flushCache(self):
+		"""Flush the servlet cache and start fresh.
+
+		Servlets that are currently in the wild may find their way back
+		into the cache (this may be a problem).
+
 		"""
-		raise AbstractError, self.__class__
+		# @@ ib 07-2003: I'm unsure how well this works.
+		self._importLock.acquire()
+		self._classCache = {}
+		# We can't just delete all the lists, because returning
+		# servlets expect it to exist.
+		for key in self._servletPool.keys():
+			self._servletPool[key] = []
+		self._threadsafeServletCache = {}
+		self._importLock.release()
 
 
 class PythonServletFactory(ServletFactory):
+	"""The factory for Python servlets.
+
+	This is the factory for ordinary Python servlets whose extensions
+	are empty or .py. The servlets are unique per file since the file
+	itself defines the servlet.
+
 	"""
-	This is the factory for ordinary Python servlets whose
-	extensions are empty or .py. The servlets are unique per file
-	since the file itself defines the servlet.
-	"""
+
+
+	## Info ##
 
 	def uniqueness(self):
 		return 'file'
 
 	def extensions(self):
 		return ['.py']
+
+
+	## Import ##
 
 	def loadClass(self, transaction, path):
 		# Import the module as part of the context's package
@@ -330,17 +359,15 @@ class PythonServletFactory(ServletFactory):
 			# If the mangled name does not exist either, report an error:
 			if not hasattr(module, name) is None:
 				raise ValueError, \
-					'Cannot find expected servlet class %r in %r.' % (name, path)
+					'Cannot find expected servlet class %r in %r.' \
+						% (name, path)
 		# Pull the servlet class out of the module:
 		theClass = getattr(module, name)
 
-		# new-style classes aren't ClassType, but they
-		# are okay to use.  They are subclasses of
-		# type.  But type isn't a class in older
-		# Python versions, it's a builtin function.
-		# So we test what type is first, then use
-		# isinstance only for the newer Python
-		# versions
+		# New-style classes aren't ClassType, but they are okay to use.
+		# They are subclasses of type. But type isn't a class in older
+		# Python versions, it's a builtin function. So we test what type
+		# is first, then use isinstance only for the newer Python versions.
 		if type(type) is BuiltinFunctionType:
 			assert type(theClass) is ClassType
 		else:

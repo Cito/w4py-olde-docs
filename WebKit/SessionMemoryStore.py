@@ -4,10 +4,10 @@ import os
 
 
 class SessionMemoryStore(SessionStore):
-	"""
-	Stores the session in memory as a dictionary.
+	"""Stores the session in memory as a dictionary.
 
 	This is fast and secure when you have one, persistent app server.
+
 	"""
 
 

@@ -10,35 +10,38 @@ import time
 import errno
 
 class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
-	"""Handles incoming requests.  Recreated with every request.
-	Abstract base class.
+	"""Handles incoming requests.
+
+	Recreated with every request. Abstract base class.
+
 	"""
 
-	## This sends certain CGI variables.  These are some that
-	## should be sent, but aren't:
-	## SERVER_ADDR
-	## SERVER_PORT
-	## SERVER_SOFTWARE
-	## SERVER_NAME
-	## HTTP_CONNECTION
-	## SERVER_PROTOCOL
-	## HTTP_KEEP_ALIVE
+	# This sends certain CGI variables.  These are some that
+	# should be sent, but aren't:
+	# SERVER_ADDR
+	# SERVER_PORT
+	# SERVER_SOFTWARE
+	# SERVER_NAME
+	# HTTP_CONNECTION
+	# SERVER_PROTOCOL
+	# HTTP_KEEP_ALIVE
 
-	## These I don't think are needed:
-	## DOCUMENT_ROOT
-	## PATH_TRANSLATED
-	## GATEWAY_INTERFACE
-	## PATH
-	## SERVER_SIGNATURE
-	## SCRIPT_NAME (?)
-	## SCRIPT_FILENAME (?)
-	## SERVER_ADMIN (?)
+	# These I don't think are needed:
+	# DOCUMENT_ROOT
+	# PATH_TRANSLATED
+	# GATEWAY_INTERFACE
+	# PATH
+	# SERVER_SIGNATURE
+	# SCRIPT_NAME (?)
+	# SCRIPT_FILENAME (?)
+	# SERVER_ADMIN (?)
 
 	def handleRequest(self):
-		"""
-		Actually performs the request, creating the environment and
-		calling self.doTransaction(env, myInput) to perform the
-		response.
+		"""Handle a request.
+
+		Actually performs the request, creating the environment and calling
+		self.doTransaction(env, myInput) to perform the response.
+
 		"""
 		self.server_version = 'Webware/0.1'
 		env = {}
@@ -71,16 +74,22 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 	do_PROPFIND = handleRequest
 
 	def headersToEnviron(self, headers, env):
-		"""Use a simple heuristic to convert all the headers to
-		environmental variables..."""
+		"""Convert headers to environment variables.
+
+		Use a simple heuristic to convert all the headers to
+		environmental variables.
+
+		"""
 		for header, value in headers.items():
 			env['HTTP_%s' % (header.upper().replace('-', '_'))] = value
 		return env
 
 	def processResponse(self, data):
-		"""
+		"""Process response.
+
 		Takes a string (like what a CGI script would print) and
 		sends the actual HTTP response (response code, headers, body).
+
 		"""
 		s = StringIO(data)
 		headers = mimetools.Message(s)
@@ -90,14 +99,19 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		self.sendBody(s)
 
 	def doLocation(self, headers):
-		"""If there's a Location header and no Status header,
-		we need to add a Status header ourselves."""
+		"""Process location header.
+
+		If there's a Location header and no Status header,
+		we need to add a Status header ourselves.
+
+		"""
 		if headers.has_key('Location'):
 			if not headers.has_key('Status'):
-				## @@: is this the right status header?
+				# @@: is this the right status header?
 				headers['Status'] = '301 Moved Temporarily'
 
 	def sendStatus(self, headers):
+		"""Send status."""
 		if not headers.has_key('Status'):
 			status = "200 OK"
 		else:
@@ -113,33 +127,38 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		self.send_response(code, message)
 
 	def sendHeaders(self, headers):
+		"""Send headers."""
 		for header, value in headers.items():
 			self.send_header(header, value)
 		self.end_headers()
 
 	def sendBody(self, bodyFile):
+		"""Send body."""
 		self.wfile.write(bodyFile.read())
 		bodyFile.close()
 
 	def log_request(self, code='-', size='-'):
+		"""Log request."""
 		# Set LogActivity instead.
 		pass
 
 
 class HTTPAppServerHandler(Handler, HTTPHandler):
+	"""AppServer interface.
 
-	"""
 	Adapters HTTPHandler to fit with ThreadedAppServer's
-	model of an adapter
-	"""
+	model of an adapter.
 
+	"""
 	protocolName = 'http'
 	settingPrefix = 'HTTP'
 
 	def handleRequest(self):
+		"""Handle a request."""
 		HTTPHandler.__init__(self, self._sock, self._sock.getpeername(), None)
 
 	def doTransaction(self, env, myInput):
+		"""Process transaction."""
 		streamOut = ASStreamOut()
 		requestDict = {
 			'format': 'CGI',
@@ -158,9 +177,9 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 			print "HTTPServer: output error:", e	# lame
 
 	def dispatchRawRequest(self, requestDict, streamOut):
+		"""Dispatch the request."""
 		transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
 		streamOut.close()
 		transaction._application=None
 		transaction.die()
 		del transaction
-

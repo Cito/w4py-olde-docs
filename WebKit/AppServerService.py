@@ -90,10 +90,11 @@ import os, sys, time
 # The ThreadedAppServer calls signal.signal which is not possible
 # if it is installed as a service, since signal only works in main thread.
 # So we sneakily replace signal.signal with a no-op:
-def dummy_signal(*args, **kwargs):
+def _dummy_signal(*args, **kwargs):
 	pass
 import signal
-signal.signal = dummy_signal
+signal.signal = _dummy_signal
+
 
 class AppServerService(win32serviceutil.ServiceFramework):
 
@@ -194,6 +195,9 @@ class AppServerService(win32serviceutil.ServiceFramework):
 				self.server.running=0
 				self.server.shutDown()
 			raise
+
+
+## Main ##
 
 def main():
 	win32serviceutil.HandleCommandLine(AppServerService)

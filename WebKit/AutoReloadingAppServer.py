@@ -37,22 +37,27 @@ DefaultConfig = {
 	'AutoReloadPollInterval':     1,  # in seconds
 }
 
+
 class AutoReloadingAppServer(AppServer):
+	"""AppServer AutoReloading.
+
+	This class adds functionality to `AppServer`, to notice changes to
+	source files, including servlets, PSPs, templates or changes to the
+	Webware source file themselves, and reload the server as necessary
+	to pick up the changes.
+
+	The server will also be restarted if a file which Webware *tried*
+	to import is modified.  This is so that changes to a file containing
+	a syntax error (which would have prevented it from being imported)
+	will also cause the server to restart.
 
 	"""
-	This class adds functionality to `AppServer`, to notice
-	changes to source files, including servlets, PSPs, templates
-	or changes to the Webware source file themselves, and reload
-	the server as necessary to pick up the changes.
 
-	The server will also be restarted if a file which Webware
-	*tried* to import is modified.  This is so that changes to a
-	file containing a syntax error (which would have prevented it
-	from being imported) will also cause the server to restart.
-	"""
+
+	## Init ##
 
 	def __init__(self,path=None):
-		":ignore:"
+		"""Activate AutoReloading."""
 		AppServer.__init__(self,path)
 		self._autoReload = 0
 		self._shouldRestart = 0
@@ -64,15 +69,16 @@ class AutoReloadingAppServer(AppServer):
 				self.activateAutoReload()
 
 	def defaultConfig(self):
-		":ignore:"
+		"""Return the default configuration."""
 		conf = AppServer.defaultConfig(self)
 		conf.update(DefaultConfig)
 		return conf
 
 	def shutDown(self):
-		"""
-		Shuts down the monitoring thread (in addition to
-		normal shutdown procedure).
+		"""Shut down the monitoring thread.
+
+		This is done in addition to the normal shutdown procedure.
+
 		"""
 		print 'Stopping AutoReload Monitor'
 		sys.stdout.flush()
@@ -89,21 +95,27 @@ class AutoReloadingAppServer(AppServer):
 		if not self._autoReload:
 			if haveFam:
 				print 'AutoReload Monitor started, using FAM'
-				self._fileMonitorThread = t = Thread(target=self.fileMonitorThreadLoopFAM)
+				self._fileMonitorThread = t = Thread(
+					target=self.fileMonitorThreadLoopFAM)
 			else:
-				print 'AutoReload Monitor started, polling every %d seconds' % self.setting('AutoReloadPollInterval')
-				self._fileMonitorThread = t = Thread(target=self.fileMonitorThreadLoop)
+				print 'AutoReload Monitor started, polling every', \
+					self.setting('AutoReloadPollInterval'), 'seconds'
+				self._fileMonitorThread = t = Thread(
+					target=self.fileMonitorThreadLoop)
 			self._autoReload = 1
 			t.setName('AutoReloadMonitor')
 			t.start()
 
 	def deactivateAutoReload(self):
-		"""Tell the monitor thread to stop (it's a request,
-		not a demand)."""
+		"""Tell the monitor thread to stop.
+
+		This should be considered as a request, not a demand.
+
+		"""
 		self._autoReload = 0
 		if haveFam:
-			# send a message down the pipe to wake up the monitor
-			# thread and tell him to quit
+			# Send a message down the pipe to wake up the monitor thread
+			# and tell him to quit.
 			self._pipe[1].write('close')
 			self._pipe[1].flush()
 		try:
@@ -112,33 +124,36 @@ class AutoReloadingAppServer(AppServer):
 			pass
 
 
-	## Restart methods
+	## Restart methods ##
 
 	def restartIfNecessary(self):
-		"""
-		This should be called regularly to see if a restart is
-		required.  The server can only restart from the main
-		thread, it other threads can't do the restart.  So this
-		polls to see if `shouldRestart` has been called.
-		"""
+		"""Check if the app server should be restarted.
 
+		This should be called regularly to see if a restart is required.
+		The server can only restart from the main thread, other threads
+		can't do the restart. So this polls to see if `shouldRestart`
+		has been called.
+
+		"""
 		# Tavis Rudd claims: "this method can only be called by
 		# the main thread.  If a worker thread calls it, the
 		# process will freeze up."
 		#
 		# I've implemented it so that the ThreadedAppServer's
-		# control thread calls this.  That thread is _not_ the
+		# control thread calls this. That thread is _not_ the
 		# MainThread (the initial thread created by the Python
 		# interpreter), but I've never encountered any problems.
 		# Most likely Tavis meant a freeze would occur if a
 		# _worker_ called this.
-
 		if self._shouldRestart:
 			self.restart()
 
 	def restart(self):
-		"""Do the actual restart.  Call `shouldRestart` from
-		outside the class"""
+		"""Do the actual restart.
+
+		Call `shouldRestart` from outside the class.
+
+		"""
 		self.initiateShutdown()
 		self._closeThread.join()
 		sys.stdout.flush()
@@ -152,28 +167,30 @@ class AutoReloadingAppServer(AppServer):
 		sys.exit(3)
 
 	def monitorNewModule(self, filepath, mtime):
-		"""
-		This is a callback which ImportSpy invokes to notify
-		us of new files to monitor.  This is only used when we
-		are using FAM.
+		"""Add new file to be monitored.
+
+		This is a callback which ImportSpy invokes to notify us of new files
+		to monitor. This is only used when we are using FAM.
+
 		"""
 		self._requests.append(self._fc.monitorFile(filepath, filepath) )
 
-	## Internal methods
+
+	## Internal methods ##
 
 	def shouldRestart(self):
 		"""Tell the main thread to restart the server."""
 		self._shouldRestart = 1
 
 	def fileMonitorThreadLoop(self):
+		"""This the the main loop for the monitoring thread.
+
+		Runs in its own thread, polling the files for changes directly
+		(i.e., going through every file that's being used and checking
+		its last-modified time, seeing if it's been changed since it
+		was initially loaded).
+
 		"""
-		This the the main loop for the monitoring thread.
-		Runs in its own thread, polling the files for changes
-		directly (i.e., going through every file that's being
-		used and checking its last-modified time, seeing if
-		it's been changed since it was initially loaded)
-		"""
-		
 		pollInterval = self.setting('AutoReloadPollInterval')
 		while self._autoReload:
 			time.sleep(pollInterval)
@@ -186,9 +203,11 @@ class AutoReloadingAppServer(AppServer):
 		sys.stdout.flush()
 
 	def fileUpdated(self, filename, mtime, getmtime=os.path.getmtime):
-		"""
-		Checks if a file has been updated in such a way that
-		we should restart the server.
+		"""Check whether a file has been updated.
+
+		Checks if a file has been updated in such a way that we should
+		restart the server.
+
 		"""
 		try:
 			if mtime < getmtime(filename):
@@ -208,34 +227,32 @@ class AutoReloadingAppServer(AppServer):
 			return 1
 
 	def fileMonitorThreadLoopFAM(self, getmtime=os.path.getmtime):
-		"""
-		Monitoring thread loop, but using the FAM library.
-		"""
-		
+		"""Monitoring thread loop, but using the FAM library."""
 		ImportSpy.modloader.notifyOfNewFiles(self.monitorNewModule)
 		self._fc = fc = _fam.open()
 
-		# for all of the modules which have _already_ been loaded, we check
-		# to see if they've already been modified or deleted
+		# For all of the modules which have _already_ been loaded, we check
+		# to see if they've already been modified or deleted:
 		for f, mtime in ImportSpy.modloader.fileList().items():
 			if self.fileUpdated(f, mtime):
-				print '*** The file', f, 'has changed.  The server is restarting now.'
+				print '*** The file', f, 'has changed.', \
+					'The server is restarting now.'
 				self._autoReload = 0
 				return self.shouldRestart()
 			# request that this file be monitored for changes
 			self._requests.append( fc.monitorFile(f, f) )
 
-		# create a pipe so that this thread can be notified when the
-		# server is shutdown.  We use a pipe because it needs to be an object
-		# which will wake up the call to 'select'
+		# Create a pipe so that this thread can be notified when the
+		# server is shutdown. We use a pipe because it needs to be an object
+		# which will wake up the call to 'select':
 		r,w = os.pipe()
 		r = os.fdopen(r,'r')
 		w = os.fdopen(w,'w')
 		self._pipe = pipe = (r,w)
 		while self._autoReload:
 			try:
-				# we block here until a file has been changed, or until
-				# we receive word that we should shutdown (via the pipe)
+				# We block here until a file has been changed, or until
+				# we receive word that we should shutdown (via the pipe).
 				ri, ro, re = select.select([fc,pipe[0]], [], [])
 			except select.error, er:
 				errnumber, strerr = er
@@ -247,8 +264,10 @@ class AutoReloadingAppServer(AppServer):
 			while fc.pending():
 				fe = fc.nextEvent()
 				if (fe.code2str() in ['changed','deleted','created']
-				    and self.fileUpdated(fe.userData, ImportSpy.modloader.fileList()[fe.userData])):
-					print '*** The file %s has changed.  The server is restarting now.' % fe.userData
+						and self.fileUpdated(fe.userData,
+							ImportSpy.modloader.fileList()[fe.userData])):
+					print '*** The file', fe.userData, 'has changed.', \
+						'The server is restarting now.'
 					self._autoReload = 0
 					return self.shouldRestart()
 		for req in self._requests:
