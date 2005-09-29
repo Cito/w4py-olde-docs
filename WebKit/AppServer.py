@@ -126,6 +126,8 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		accept requests. Records some stats and prints a message.
 
 		"""
+		if Profiler.startTime is None:
+			Profiler.startTime = self._startTime
 		Profiler.readyTime = time.time()
 		Profiler.readyDuration = Profiler.readyTime - Profiler.startTime
 		print "Ready  (%.2f seconds after launch)\n" % Profiler.readyDuration

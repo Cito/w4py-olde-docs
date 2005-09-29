@@ -118,6 +118,11 @@ def launchWebKit(appServer=appServer, workDir=None, args=None):
 	except ImportError:
 		print 'Error: Cannot import the app server module.'
 		sys.exit(1)
+	# Set Profiler.startTime if this has not been done already:
+	from WebKit import Profiler
+	if Profiler.startTime is None:
+		from time import time
+		Profiler.startTime = time()
 	# Run the app server:
 	appServerMain(args) # go!
 
@@ -367,8 +372,9 @@ def main(args=None):
 			print
 		# Set up a reference to our profiler so apps can import and use it:
 		from WebKit import Profiler
-		from time import time
-		Profiler.startTime = time()
+		if Profiler.startTime is None:
+			from time import time
+			Profiler.startTime = time()
 		# Now start the app server:
 		if runProfile:
 			print 'Profiling is on. See docstring in Profiler.py for more info.'
