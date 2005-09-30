@@ -96,7 +96,7 @@ class AutoReloadingAppServer(AppServer):
 	## Activatation of AutoReload ##
 
 	def activateAutoReload(self):
-		"""Start the monitor thread"""
+		"""Start the monitor thread.W"""
 		ImportSpy.modloader.activate()
 		if not self._autoReload:
 			if haveFam:
@@ -222,15 +222,15 @@ class AutoReloadingAppServer(AppServer):
 						break
 				else:
 					# It's not a module, we must reload
-					return 1
+					return True
 				if getattr(mod, '__donotreload__', None):
 					ImportSpy.modloader.fileList()[filename] = getmtime(filename)
-					return 0
-				return 1
+					return False
+				return True
 			else:
-				return 0
+				return False
 		except OSError:
-			return 1
+			return True
 
 	def fileMonitorThreadLoopFAM(self, getmtime=os.path.getmtime):
 		"""Monitoring thread loop, but using the FAM library."""

@@ -459,7 +459,6 @@ class ThreadedAppServer(AppServer):
 			if self.running < 2:
 				break
 			time.sleep(0.1)
-			file(r'd:\temp\ixi.txt','w').write(str(i))
 		# Close all sockets now:
 		for sock in self._sockets.values():
 			sock.close()
