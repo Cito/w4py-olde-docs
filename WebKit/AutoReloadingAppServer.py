@@ -1,15 +1,14 @@
 
 """
 This module defines `AutoReloadingAppServer`, a replacement for `AppServer`
-that adds a file-monitoring and restarting to the AppServer.  It's
-used mostly like::
+that adds a file-monitoring and restarting to the AppServer.  It's used
+mostly like::
 
     from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 
 Much of the actually polling and monitoring takes place in the
 `WebKit.ImportSpy` module.
 
-.. inline:: AutoReloadingAppServer
 """
 
 from AppServer import AppServer
@@ -86,26 +85,27 @@ class AutoReloadingAppServer(AppServer):
 		This is done in addition to the normal shutdown procedure.
 
 		"""
-		print 'Stopping AutoReload Monitor'
+		print 'Stopping AutoReload Monitor...'
 		sys.stdout.flush()
-		self._shuttingDown = True
+		self.running = 1
 		self.deactivateAutoReload()
 		AppServer.shutDown(self)
+		self.running = 0
 
 
-	## Activatation of AutoReload
+	## Activatation of AutoReload ##
 
 	def activateAutoReload(self):
 		"""Start the monitor thread"""
 		ImportSpy.modloader.activate()
 		if not self._autoReload:
 			if haveFam:
-				print 'AutoReload Monitor started, using FAM'
+				print 'AutoReload Monitor started, using FAM.'
 				self._fileMonitorThread = t = Thread(
 					target=self.fileMonitorThreadLoopFAM)
 			else:
 				print 'AutoReload Monitor started, polling every', \
-					self.setting('AutoReloadPollInterval'), 'seconds'
+					self.setting('AutoReloadPollInterval'), 'seconds.'
 				self._fileMonitorThread = t = Thread(
 					target=self.fileMonitorThreadLoop)
 			self._autoReload = True

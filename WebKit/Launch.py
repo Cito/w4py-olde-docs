@@ -51,6 +51,8 @@ can be easily changed at the top of the Launch.py script.
 # * Improved by Christoph Zwerschke
 
 
+## Default options ##
+
 # You can change the following default values:
 
 # The path to the app server working directory, if you do not
@@ -89,6 +91,8 @@ group = None
 appServer = 'ThreadedAppServer'
 
 
+## Launch app server ##
+
 import os, sys
 
 def usage():
@@ -125,6 +129,9 @@ def launchWebKit(appServer=appServer, workDir=None, args=None):
 		Profiler.startTime = time()
 	# Run the app server:
 	appServerMain(args) # go!
+
+
+## Main ##
 
 def main(args=None):
 	"""Evaluate the command line arguments and call launchWebKit."""
@@ -163,8 +170,7 @@ def main(args=None):
 			user = arg
 		elif opt in ('-g', '--group'):
 			group = arg
-	# If app server name has been in front, add it again options
-	if arg0:
+	if arg0: # move app server name behind options
 		args.insert(0, arg0)
 	# Figure out the group id:
 	gid = group
@@ -253,15 +259,14 @@ def main(args=None):
 		sys.exit(1)
 	# Now assemble a new clean Python search path:
 	path = [] # the new search path will be collected here
-	absPath = [] # the absolute pathes
-	absWebKitDir = os.path.abspath(os.path.join(webwareDir, 'WebKit'))
-	for p in ['', webwareDir] + libraryDirs + sysPath:
-		ap = os.path.abspath(p)
-		if ap == absWebKitDir: # do not include the WebKit directory
-			continue
-		if ap not in absPath: # include every path only once
-			path.append(p)
-			absPath.append(ap)
+	webKitDir = os.path.abspath(os.path.join(webwareDir, 'WebKit'))
+	for p in [workDir, webwareDir] + libraryDirs + sysPath:
+		if not p:
+			continue # do not include the empty ("current") directory
+		p = os.path.abspath(p)
+		if p == webKitDir or p in path or not os.path.exists(p):
+			continue # do not include WebKit and duplicates
+		path.append(p)
 	sys.path = path # set the new search path
 	# Get the name of the app server module:
 	try:
@@ -387,7 +392,8 @@ def main(args=None):
 			Profiler.startTime = time()
 		# Now start the app server:
 		if runProfile:
-			print 'Profiling is on. See docstring in Profiler.py for more info.'
+			print 'Profiling is on.', \
+				'See docstring in Profiler.py for more info.'
 			print
 			from profile import Profile
 			profiler = Profile()

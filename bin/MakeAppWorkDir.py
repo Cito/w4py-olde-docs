@@ -324,9 +324,14 @@ Have fun!
 
 launcherScripts = { # launcher scripts with adjusted parameters
 
-'Launch.py': """#!%(executable)s
+'Launch.py': r"""#!%(executable)s
 
-# Adjust Launcher default parameters:
+# You can pass several parameters on the command line
+# (more info by running this with option --help)
+# or you can modify the default values here
+# (more info in WebKit.Launch):
+
+workDir = None
 webwareDir = %(webwareDir)r
 libraryDirs = %(libraryDirs)r
 runProfile = 0
@@ -340,6 +345,7 @@ sys.path.insert(0, webwareDir)
 
 from WebKit import Launch
 
+Launch.workDir = workDir
 Launch.webwareDir = webwareDir
 Launch.libraryDirs = libraryDirs
 Launch.runProfile = runProfile
@@ -352,47 +358,63 @@ if __name__ == '__main__':
 	Launch.main()
 """,
 
-'AppServerService.py': """#!%(executable)s
+'AppServerService.py': r"""#!%(executable)s
 
-# Adjust AppServerService default parameters:
+# You can adjust several parameters here
+# (more info in WebKit.AppServerService):
+
+workDir = None
 webwareDir = %(webwareDir)r
 libraryDirs = %(libraryDirs)r
 runProfile = 0
 logFile = None
+appServer = 'ThreadedAppServer'
+debug = 0
+serviceName = 'WebKit'
+serviceDisplayName = 'WebKit Application Server'
+serviceDescription = "This is the threaded application server" \
+	" of the Webware for Python web framework."
+serviceDeps = []
 
-import sys
+import sys, os
 sys.path.insert(0, webwareDir)
 
-from WebKit import AppServerService as appServerService
+from WebKit import AppServerService as service
 
-class AppServerService(appServerService.AppServerService):
-	pass # service class must be defined in __main__ module
-
-appServerService.AppServerService = AppServerService
-appServerService.webwareDir = webwareDir
-appServerService.libraryDirs = libraryDirs
-appServerService.runProfile = runProfile
-appServerService.logFile = logFile
+class AppServerService(service.AppServerService):
+	# this class must be defined here in __main__
+	_svc_name_ = serviceName
+	_svc_display_name_ = serviceDisplayName
+	_svc_description_ = serviceDescription
+	_svc_deps_ = serviceDeps
+	_workDir = workDir or os.path.dirname(__file__)
+	_webwareDir = webwareDir
+	_libraryDirs = libraryDirs
+	_runProfile = runProfile
+	_logFile = logFile
+	_appServer = appServer
+	_debug = debug
 
 if __name__ == '__main__':
-	appServerService.main()
+	service.AppServerService = AppServerService
+	service.main()
 """
 
-} # end of launcer scripts
+} # end of launcher scripts
 
 exampleContext = { # files copied to example context
 
 # This is used to create a very simple sample context for the new
 # work dir to give the newbie something easy to play with.
 
-'__init__.py': """
+'__init__.py': r"""
 def contextInitialize(appServer, path):
 	# You could put initialization code here to be executed
 	# when the context is loaded into WebKit.
 	pass
 """,
 
-'Main.py': """
+'Main.py': r"""
 from WebKit.Page import Page
 
 class Main(Page):

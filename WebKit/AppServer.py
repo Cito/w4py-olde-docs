@@ -98,7 +98,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self._app = self.createApplication()
 		self.loadPlugIns()
 
-		self.running = True
+		self.running = 2 # server is running
 
 		# @@ 2003-03 ib: shouldn't this just be in a subclass's __init__?
 		if self.isPersistent():
@@ -166,14 +166,15 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		"""Shut down the AppServer.
 
 		Subclasses may override and normally follow this sequence:
-			1. set self._shuttingDown to True
+			1. set self.running = 1 (request to shut down)
 			2. class specific statements for shutting down
 			3. Invoke super's shutDown() e.g., ``AppServer.shutDown(self)``
+			4. set self.running = 0 (server is completely down)
 
 		"""
-		print "Shutting down the AppServer"
-		self._shuttingDown = True
-		self.running = False
+		print "AppServer is shutting down..."
+		sys.stdout.flush()
+		self.running = 1
 		self._app.shutDown()
 		del self._plugIns
 		del self._app
@@ -190,7 +191,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			print
 			print 'AppServer ran for %0.2f seconds.' % (
 				time.time() - Profiler.startTime)
-		print "AppServer has been shutdown"
+		print "AppServer has been shutdown."
+		sys.stdout.flush()
+		self.running = 0
 
 
 	## Configuration ##
@@ -406,7 +409,7 @@ def main():
 	"""Start the Appserver."""
 	try:
 		server = AppServer()
-		print "Ready"
+		print "Ready."
 		print
 		print "WARNING: There is nothing to do here with the abstract AppServer."
 		print "Use one of the adapters such as WebKit.cgi (with ThreadedAppServer)"
@@ -414,7 +417,7 @@ def main():
 		server.shutDown()
 	except Exception, exc:  # Need to kill the Sweeper thread somehow
 		print "Caught exception:", exc
-		print "Exiting AppServer"
+		print "Exiting AppServer..."
 		server.shutDown()
 		del server
 		sys.exit()

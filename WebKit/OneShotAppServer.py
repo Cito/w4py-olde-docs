@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-"""
-OneShotAppServer
+
+"""OneShotAppServer
 
 This version of the app server is in support of the OneShot adapter.
 
@@ -8,6 +8,7 @@ This class creates an application that has no session sweeper thread,
 and it provides the convenience method dispatchRawRequest().
 
 See also: OneShot.cgi and OneShotAdapter.py.
+
 """
 
 

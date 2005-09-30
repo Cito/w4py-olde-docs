@@ -85,7 +85,7 @@ debug = 1
 
 def createServer(setupPath=0):
 	"""Unix only, executed after forking for daemonization."""
-	print "Starting Server"
+	print "Starting Server..."
 
 	import WebKit
 	code = 'from WebKit.%s import main' % serverName
@@ -96,18 +96,18 @@ def startupCheck():
 	"""Make sure the AppServer starts up correctly."""
 	global debug
 	count = 0
-	print "Waiting for start"
+	print "Waiting for start..."
 	time.sleep(checkInterval/2) #give the server a chance to start
 	while 1:
 		if checkServer(0):
 			break
 		count = count + checkInterval
 		if count > maxStartTime:
-			print "Couldn't start AppServer"
-			print "Killing AppServer"
+			print "Couldn't start AppServer."
+			print "Killing AppServer..."
 			os.kill(srvpid,signal.SIGKILL)
 			sys.exit(1)
-		print "Waiting for start"
+		print "Waiting for start..."
 		time.sleep(checkInterval)
 
 def startServer(killcurrent = 1):
@@ -151,11 +151,11 @@ def checkServer(restart = 1):
 		resp = s.recv(9)  #up to 1 billion requests!
 		monwait = time.time() - sts
 		if debug:
-			print "Processed %s Requests" % resp
-			print "Delay %s" % monwait
+			print "Processed %s Requests." % resp
+			print "Delay %s." % monwait
 		return 1
 	except:
-		print "No Response from AppServer"
+		print "No Response from AppServer."
 		if running and restart:
 			startServer()
 			startupCheck()
@@ -187,8 +187,8 @@ def main(args):
 
 	except Exception, e:
 		if debug:
-			print "Startup Check Exception %s" % e
-			print "Exiting Monitor"
+			print "Startup check exception:", e
+			print "Exiting monitor..."
 		try:	os.kill(srvpid,signal.SIGTERM)
 		except: pass
 		sys.exit()
@@ -196,15 +196,15 @@ def main(args):
 	while running:
 		try:
 			if debug:
-				print "Checking Server"
+				print "Checking server..."
 			checkServer()
 			time.sleep(checkInterval)
 		except Exception, e:
 			if debug:
-				print "Exception %s" % e
+				print "Exception:", e
 			if not running:
 				return
-			print "Exiting Monitor"
+			print "Exiting Monitor..."
 			try: os.kill(srvpid,signal.SIGTERM)
 			except: sys.exit(0)
 			try: os.waitpid(srvpid,0) #prevent zombies
@@ -218,7 +218,7 @@ def shutDown(arg1,arg2):
 
 	"""
 	global running
-	print "Monitor Shutdown Called"
+	print "Monitor Shutdown Called."
 	running = 0
 	global addr
 	try:
@@ -231,7 +231,7 @@ def shutDown(arg1,arg2):
 		print "AppServer response to shutdown request:", resp
 	except Exception, e:
 		print e
-		print "No Response to Shutdown Request, performing hard kill"
+		print "No Response to shutdown request, performing hard kill."
 		os.kill(srvpid, signal.SIGINT)
 		os.waitpid(srvpid,0)
 	return 0
@@ -285,7 +285,7 @@ if __name__=='__main__':
 	global addr
 
 	if os.name != 'posix':
-		print "This service can only be run on posix machines (UNIX)"
+		print "This service can only be run on Posix machines (UNIX)."
 		sys.exit()
 
 	if len(sys.argv) == 1:

@@ -148,7 +148,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		of Application probably won't be called due to circular references.
 
 		"""
-		print "Application is Shutting Down"
+		print "Application is shutting down..."
 		self.running = 0
 		if hasattr(self, '_sessSweepThread'):
 			# We don't always have this, hence the 'if' above

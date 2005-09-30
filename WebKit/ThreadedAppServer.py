@@ -153,7 +153,7 @@ class ThreadedAppServer(AppServer):
 			sock.bind(serverAddress)
 			sock.listen(1024)
 		except:
-			if self.running:
+			if self.running > 2:
 				self.initiateShutdown()
 			self._closeThread.join()
 			raise
@@ -179,9 +179,10 @@ class ThreadedAppServer(AppServer):
 		This is the main thread loop that accepts and dispatches
 		socket requests.
 
-		It goes through an loop as long as ``self.running`` is ``True``.
-		Setting ``self.running = None`` asks the server to stop running.
-		When it has shut down, it sets ``self.running = False``.
+		It goes through a loop as long as ``self.running > 2``.
+		Setting ``self.running = 2`` asks the the main loop to end.
+		When the main loop is finished, it sets ``self.running = 1``.
+		When the AppServer is completely down, it sets ``self.running = 0``.
 
 		The loop waits for connections, then based on the connecting
 		port it initiates the proper Handler (e.g.,
@@ -204,8 +205,10 @@ class ThreadedAppServer(AppServer):
 		threadUpdateDivisor = 5 # grab stat interval
 		threadCheck = 0
 
+		self.running = 3 # server is in the main loop now
+
 		try:
-			while self.running:
+			while self.running > 2:
 
 				# block for timeout seconds waiting for connections
 				try:
@@ -240,12 +243,11 @@ class ThreadedAppServer(AppServer):
 
 				self.restartIfNecessary()
 
-			self.running = False
 		except:
-			running = self.running
-			self.running = False
-			if running: # was the exception while running?
+			if self.running > 2: # was the exception while running?
+				self.running = 1
 				raise # then raise it
+		self.running = 1
 
 
 	## Thread Management ##
@@ -309,14 +311,16 @@ class ThreadedAppServer(AppServer):
 			return #not enough samples
 
 		margin = self._threadCount / 2 #smoothing factor
-		if debug: print "margin=", margin
+		if debug:
+			print "margin=", margin
 
 		if average > self._threadCount - margin and \
 			self._threadCount < self._maxServerThreads:
 			# Running low: double thread count
 			n = min(self._threadCount,
 				self._maxServerThreads - self._threadCount)
-			if debug: print "Adding %s threads" % n
+			if debug:
+				print "Adding %s threads" % n
 			for i in range(n):
 				self.spawnThread()
 		elif average < self._threadCount - margin and \
@@ -335,14 +339,15 @@ class ThreadedAppServer(AppServer):
 
 		"""
 		debug = 0
-		if debug: print "Spawning new thread"
+		if debug:
+			print "Spawning new thread"
 		t = Thread(target=self.threadloop)
 		t._processing = False
 		t.start()
 		self._threadPool.append(t)
 		self._threadCount += 1
 		if debug:
-			print "New Thread Spawned, threadCount=", self._threadCount
+			print "New thread spawned, threadCount =", self._threadCount
 
 	def absorbThread(self, count=1):
 		"""Absorb a thread.
@@ -369,7 +374,8 @@ class ThreadedAppServer(AppServer):
 			if not i.isAlive():
 				rv = i.join() # Don't need a timeout, it isn't alive
 				self._threadPool.remove(i)
-				if debug: print "Thread Absorbed, Real Thread Count=", len(self.threadPool)
+				if debug:
+					print "Thread absorbed, real threadCount =", len(self.threadPool)
 
 
 	## Worker Threads ##
@@ -400,7 +406,8 @@ class ThreadedAppServer(AppServer):
 				try:
 					handler = self._requestQueue.get()
 					if handler is None: #None means time to quit
-						if debug: print "Thread retrieved None, quitting"
+						if debug:
+							print "Thread retrieved None, quitting."
 						break
 					t.processing = True
 					try:
@@ -413,7 +420,8 @@ class ThreadedAppServer(AppServer):
 					pass
 		finally:
 			self.delThread()
-		if debug: print threading.currentThread(), "Quitting"
+		if debug:
+				print threading.currentThread(), "Quitting."
 
 	def initThread(self):
 		"""Initialize thread.
@@ -443,14 +451,15 @@ class ThreadedAppServer(AppServer):
 		and tells all the threads to die.
 
 		"""
-		self._shuttingdown = True # see AppServer.shutDown()
-		self.running = None # ask Appserver to shut dhow
-		print "ThreadedAppServer: Shutting Down"
+		self.running = 2 # ask main loop to finish
+		print "ThreadedAppServer is shutting down..."
+		sys.stdout.flush()
 		self.awakeSelect() # unblock select call in mainloop()
 		for i in range(30): # wait at most 3 seconds for shutdown
-			if not self.running and self.running is not None:
+			if self.running < 2:
 				break
 			time.sleep(0.1)
+			file(r'd:\temp\ixi.txt','w').write(str(i))
 		# Close all sockets now:
 		for sock in self._sockets.values():
 			sock.close()
@@ -464,6 +473,8 @@ class ThreadedAppServer(AppServer):
 				pass
 		# Call super's shutdown:
 		AppServer.shutDown(self)
+		sys.stdout.flush()
+		self.running = 0
 
 	def awakeSelect(self):
 		"""Awake the select() call.
@@ -799,12 +810,10 @@ class AdapterHandler(Handler):
 		return self._sock.makefile("rb",8012)
 
 # Determines whether the main look should run in another thread.
-# On NT, we run the mainloop in a different thread because
-# it's not safe for Ctrl-C to be caught while
-# manipulating the queues.  It's not safe on Linux
-# either, but there, it appears that Ctrl-C will
-# trigger an exception in ANY thread, so this fix
-# doesn't help.
+# On Win NT/2K/XP, we run the mainloop in a different thread because
+# it's not safe for Ctrl-C to be caught while manipulating the queues.
+# It's not safe on Linux either, but there, it appears that Ctrl-C will
+# trigger an exception in ANY thread, so this fix doesn't help.
 def runMainLoopInThread():
 	return os.name == 'nt'
 
@@ -836,7 +845,6 @@ def run(workDir=None):
 				runAgain = False
 				server = None
 				server = ThreadedAppServer(workDir)
-
 				if runMainLoopInThread():
 					# catch the exception raised by sys.exit so
 					# that we can re-call it in the main thread.
@@ -848,19 +856,17 @@ def run(workDir=None):
 							server.mainloop()
 						except SystemExit, e:
 							exitStatus = e.code
-
 					# Run the server thread
 					t = threading.Thread(target=_windowsmainloop,
 						args=(server,))
 					t.start()
 					try:
-						while server.running:
+						while server.running > 1:
 							time.sleep(1) # wait for interrupt
 					except KeyboardInterrupt:
 						pass
-					server.running = False
+					server.running = 1
 					t.join()
-
 					# re-call sys.exit if necessary
 					if exitStatus:
 						sys.exit(exitStatus)
@@ -871,7 +877,7 @@ def run(workDir=None):
 						server.shutDown()
 			except RestartAppServerError:
 				print
-				print "Restarting app server:"
+				print "Restarting AppServer:"
 				sys.stdout.flush()
 				runAgain = True
 			except Exception, e:
@@ -881,11 +887,11 @@ def run(workDir=None):
 				if not isinstance(e, SystemExit):
 					import traceback
 					traceback.print_exc(file=sys.stderr)
-					print "Exiting AppServer due to above exception"
+					print "Exiting AppServer due to above exception."
 				else:
-					print "Exiting AppServer due to sys.exit()"
+					print "Exiting AppServer due to sys.exit()."
 				if server:
-					if server.running:
+					if server.running > 2:
 						server.initiateShutdown()
 					server._closeThread.join()
 				# if we're here as a result of exit() being called,
@@ -894,7 +900,6 @@ def run(workDir=None):
 					sys.exit(e)
 		finally:
 			AppServerModule.globalAppServer = None
-
 	sys.exit()
 
 
@@ -903,7 +908,7 @@ def shutDown(signum, frame):
 	global server
 	print
 	print "AppServer received signal", signum
-	if server and server.running:
+	if server and server.running > 2:
 		print "Shutting down at", time.asctime(time.localtime(time.time()))
 		server.initiateShutdown()
 	else:

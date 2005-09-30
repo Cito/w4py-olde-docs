@@ -38,7 +38,14 @@ And finally, to uninstall the service, stop it and then run::
 
     python AppServerService.py remove
 
-Currently only one AppServer per system can be set up this way.
+You can change several parameters in the top section of this script.
+For instance, by changing the serviceName and serviceDisplayName, you
+can have several instances of this service running on the same system.
+Please note that the AppServer looks for the pid file in the working
+directory, so use different working directories for different services.
+And of course, you have to adapt the respective AppServer.config files
+so that there will be no conflicts in the used ports.
+
 """
 
 # FUTURE
@@ -54,7 +61,9 @@ Currently only one AppServer per system can be set up this way.
 # * Changes by Christoph Zwerschke
 
 
-# You can change the following default values:
+## Options ##
+
+# You can change the following parameters:
 
 # The path to the app server working directory, if you do not
 # want to use the directory containing this script:
@@ -82,10 +91,25 @@ appServer = 'ThreadedAppServer'
 # Set debug = 1 if you want to see debugging output:
 debug = 0
 
+# The service name:
+serviceName = 'WebKit'
 
-import win32serviceutil
-import win32service
-import os, sys, time
+# The service display name:
+serviceDisplayName = 'WebKit Application Server'
+
+# The service descrpition:
+serviceDescription = "This is the threaded application server" \
+	" that belongs to the WebKit package" \
+	" of the Webware for Python web framework."
+
+# Sequence of service names on which this depends:
+serviceDeps = []
+
+
+## Win32 Service ##
+
+import sys, os, time
+import win32service, win32serviceutil
 
 # The ThreadedAppServer calls signal.signal which is not possible
 # if it is installed as a service, since signal only works in main thread.
@@ -95,50 +119,63 @@ def _dummy_signal(*args, **kwargs):
 import signal
 signal.signal = _dummy_signal
 
-
 class AppServerService(win32serviceutil.ServiceFramework):
 
-	_svc_name_ = 'WebKit'
-	_svc_display_name_ = 'WebKit Application Server'
-	_svc_description_ = "This is the threaded application server" \
-		" that belongs to the WebKit package" \
-		" of the Webware for Python web framework."
+	_svc_name_ = serviceName
+	_svc_display_name_ = serviceDisplayName
+	_svc_description_ = serviceDescription
+	_svc_deps_ = serviceDeps
+
+	_workDir = workDir or os.path.dirname(__file__)
+	_webwareDir = webwareDir
+	_libraryDirs = libraryDirs
+	_runProfile = runProfile
+	_logFile = logFile
+	_appServer = appServer
+	_debug = debug
 
 	def __init__(self, args):
 		win32serviceutil.ServiceFramework.__init__(self, args)
-		self.server = None
-		# Fix the current working directory -- this gets initialized
-		# incorrectly for some reason when run as an NT service.
-		os.chdir(os.path.dirname(os.path.abspath(__file__)))
+		self._server = None
 
 	def SvcStop(self):
-		# Before we do anything, tell the SCM we are starting the stop process:
+		# Stop the service:
+		# Tell the SCM we are starting the stop process:
 		self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
-		# And set running to 0 in the server. If it hasn't started yet, we'll
-		# have to wait until it does.
-		while self.server is None:
-			time.sleep(1)
-		self.server.initiateShutdown()
+		if self._server:
+			if self._server.running > 2:
+				self._server.initiateShutdown()
+			for i in range(30): # wait at most 3 seconds for shutdown
+				if not self._server:
+					break
+				time.sleep(0.1)
 
 	def SvcDoRun(self):
+		# Start the service:
+		self._server = log = None
 		try:
-			global workDir, webwareDir, libraryDirs, \
-				runProfile, logFile, appServer, debug
 			# Figure out the work directory and make it the current directory:
+			workDir = self._workDir
 			if not workDir:
-				workDir = os.path.dirname(os.path.abspath(__file__))
+				workDir = os.path.dirname(__file__)
 			os.chdir(workDir)
 			workDir = os.path.curdir
-			# Switch the output to the logfile specified above:
-			if logFile:
-				log = open(logFile, 'a', 1) # append, line buffered mode
-			else:
-				# Make all output go nowhere. Otherwise, print statements cause
-				# the service to crash, believe it or not.
-				log = open('nul', 'w')
+			# Switch the output to the logFile specified above:
+			stdout, stderr = sys.stdout, sys.stderr
+			logFile = self._logFile
+			if logFile: # logFile has been specified
+				if os.path.exists(logFile):
+					log = open(logFile, 'a', 1) # append line buffered
+					log.write('\n' + '-' * 68 + '\n\n')
+				else:
+					log = open(logFile, 'w', 1) # write line buffered
+			else: # no logFile
+				# Make all output go nowhere. Otherwise, print statements
+				# cause the service to crash, believe it or not.
+				log = open('nul', 'w') # os.devnull on Windows
 			sys.stdout = sys.stderr = log
-			sys.stdout.write('\n' + '-' * 68 + '\n\n')
 			# By default, Webware is searched in the parent directory:
+			webwareDir = self._webwareDir
 			if not webwareDir:
 				webwareDir = os.pardir
 			# Remove the package component in the name of this module,
@@ -155,45 +192,63 @@ class AppServerService(win32serviceutil.ServiceFramework):
 				raise ImportError
 			# Now assemble a new clean Python search path:
 			path = [] # the new search path will be collected here
-			absPath = [] # the absolute pathes
-			absWebKitDir = os.path.abspath(os.path.join(webwareDir, 'WebKit'))
-			for p in ['', webwareDir] + libraryDirs + sysPath:
-				ap = os.path.abspath(p)
-				if ap == absWebKitDir: # do not include the WebKit directory
-					continue
-				if ap not in absPath: # include every path only once
-					path.append(p)
-					absPath.append(ap)
+			webKitDir = os.path.abspath(os.path.join(webwareDir, 'WebKit'))
+			for p in [workDir, webwareDir] + self._libraryDirs + sysPath:
+				if not p:
+					continue  # do not include the empty ("current") directory
+				p = os.path.abspath(p)
+				if p == webKitDir or p in path or not os.path.exists(p):
+					continue # do not include WebKit and duplicates
+				path.append(p)
 			sys.path = path # set the new search path
 			# Import the Profiler:
 			from WebKit import Profiler
 			Profiler.startTime = time.time()
 			# Import the AppServer:
-			appServerModule = __import__('WebKit.' + appServer, None, None, appServer)
-			self.server = getattr(appServerModule, appServer)(workDir)
-			if runProfile:
-				print 'Profiling is on. See docstring in Profiler.py for more info.'
+			appServer = self._appServer
+			appServerModule = __import__('WebKit.' + appServer,
+				None, None, appServer)
+			self._server = getattr(appServerModule, appServer)(workDir)
+			if self._runProfile:
+				print 'Profiling is on.', \
+					'See docstring in Profiler.py for more info.'
 				print
 				from profile import Profile
 				profiler = Profile()
 				Profiler.profiler = profiler
-				Profiler.runCall(self.server.mainloop)
+				sys.stdout.flush()
+				Profiler.runCall(self._server.mainloop)
 				Profiler.dumpStats()
 			else:
-				self.server.mainloop()
-			self.server._closeThread.join()
+				sys.stdout.flush()
+				self._server.mainloop()
+			if self._server.running > 2:
+				self._server.shutDown()
+			for i in range(30): # wait at most 3 seconds for shutdown
+				if not self._server.running:
+					break
+				time.sleep(0.1)
+			self._server = None
+			if log:
+				sys.stdout, sys.stderr = stdout, stderr
+				log.close()
 		except Exception, error: # need to kill the sweeper thread somehow
 			print error
-			print 'Exiting AppServer...'
-			if debug: # see the traceback from an exception
-				tb = sys.exc_info()
-				print tb[0]
-				print tb[1]
-				import traceback
-				traceback.print_tb(tb[2])
-			if self.server:
-				self.server.running=0
-				self.server.shutDown()
+			if self._debug: # see the traceback from an exception
+				try:
+					tb = sys.exc_info()
+					print tb[0]
+					print tb[1]
+					import traceback
+					traceback.print_tb(tb[2])
+				except:
+					print 'Cannot print traceback.'
+			if self._server and self._server.running > 2:
+				self._server.shutDown()
+			self._server = None
+			if log:
+				sys.stdout, sys.stderr = stdout, stderr
+				log.close()
 			raise
 
 

@@ -15,10 +15,9 @@ class PidFile:
 	def __init__(self, path):
 		self._path = path
 		self._createdPID = 0
-
 		if os.path.exists(path):
 			try:
-				f = open(path, 'r')
+				f = open(path)
 				pid = int(f.read())
 				f.close()
 			except (IOError, ValueError, TypeError):
@@ -39,7 +38,7 @@ class PidFile:
 						# Try continuing...
 						pass
 
-		pidfile = open(path, "w")
+		pidfile = open(path, 'w')
 		pidfile.write(str(self.getCurrentPID()))
 		pidfile.close()
 
@@ -66,10 +65,10 @@ class PidFile:
 				try:
 					h = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, 0, pid)
 				except pywintypes.error, e:
-					if e[0] == 87:   # returned when process does not exist
+					if e[0] == 87: # returned when process does not exist
 						return 0
 			except:
-				pass  # couldn't import win32 modules
+				pass # couldn't import win32 modules
 			return 1
 
 	def getCurrentPID(self):
