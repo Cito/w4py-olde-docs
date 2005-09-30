@@ -134,7 +134,9 @@ def main(args=None):
 		args = sys.argv[1:]
 	# Get the name of the app server even if placed in front
 	if args and not args[0].startswith('-'):
-		appServer = args.pop(0)
+		arg0 = args.pop(0)
+	else:
+		arg0 = None
 	# Get all options:
 	from getopt import getopt, GetoptError
 	try:
@@ -161,6 +163,9 @@ def main(args=None):
 			user = arg
 		elif opt in ('-g', '--group'):
 			group = arg
+	# If app server name has been in front, add it again options
+	if arg0:
+		args.insert(0, arg0)
 	# Figure out the group id:
 	gid = group
 	if gid is not None:
@@ -354,7 +359,12 @@ def main(args=None):
 				print 'Could not change server process user to %r.' % user
 				olduid = None
 				sys.exit(1)
-		print 'Starting WebKit.%s...' % appServer
+		msg = 'WebKit.' + appServer
+		if args[2]:
+			msg = '%s %s' % (msg, ' '.join(args[2]))
+		else:
+			msg = 'Starting %s...' % msg
+		print msg
 		# Handle the log file:
 		if logFile:
 			logFile = os.path.expanduser(logFile)
