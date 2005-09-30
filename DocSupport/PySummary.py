@@ -60,6 +60,7 @@ class PySummary:
 				elif sline[:4] == 'def ' and (sline[4] != '_'
 					or sline[5] == '_') and sline.find('(', 5) >= 0:
 					self._lines.append(Line('def', line)) # a method
+					line = lines.pop(0).lstrip()
 					if line[:3] == '"""': # skip docstring
 						while lines and line.rstrip()[-3:] != '"""':
 							line = lines.pop(0)
@@ -88,19 +89,22 @@ class PySummary:
 		settings = self._settings[format]
 		res = []
 		res.append(settings['file'][0] % locals())
-		for line in self._lines:
-			type = line.type()
-			if line.text()[:1].lstrip() \
-				and settings[type][0][:1] == '\n':
+		if self._lines:
+			for line in self._lines:
+				type = line.type()
+				if line.text()[:1].lstrip() \
+					and settings[type][0][:1] == '\n':
+					res.append('\n')
+				res.append(settings[type][0])
+				if span:
+					res.append('<span class="line_%s">' % type)
+				res.append(apply(getattr(line, format))) # e.g., line.format()
+				if span:
+					res.append('</span>')
 				res.append('\n')
-			res.append(settings[type][0])
-			if span:
-				res.append('<span class="line_%s">' % type)
-			res.append(apply(getattr(line, format))) # e.g., line.format()
-			if span:
-				res.append('</span>')
-			res.append('\n')
-			res.append(settings[type][1])
+				res.append(settings[type][1])
+		else:
+			res.append('# No classes or functions defined in this module.')
 		res.append('\n')
 		res.append(settings['file'][1] % locals())
 		res = ''.join(res)
