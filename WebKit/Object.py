@@ -5,7 +5,7 @@ try:
 except:
 	# When the Webware tarball unravels,
 	# the components sit next to each other
-	sys.path.append(os.path.abspath('..'))
+	sys.path.append(os.path.abspath(os.pardir))
 	import MiscUtils
 from MiscUtils.NamedValueAccess import NamedValueAccess
 
@@ -19,8 +19,7 @@ class Object(object, NamedValueAccess):
 	"""
 
 	def __init__(self):
-		""" Initializes the object. Subclasses should invoke
-		super. """
+		"""Initializes the object. Subclasses should invoke super."""
 		pass
 
 	def deprecated(self, method):
@@ -40,13 +39,18 @@ class Object(object, NamedValueAccess):
 			self.deprecated(self.foo)
 
 		"""
-		import string
 		docString = method.__doc__
-		if not docString:
-			msg = 'DEPRECATED: %s, (no doc string)' % method
+		if docString:
+			msg = docString.split('@')[0]
+			msg = '\n'.join(map(lambda s: s.strip(), msg.splitlines()))
 		else:
-			msg = string.strip(string.split(method.__doc__, '@')[0])
+			msg = 'DEPRECATED: %s (no doc string)' % method
 		print msg
+		try:
+			from traceback import format_stack
+			print format_stack(limit =3)[0]
+		except:
+			print 'Could not determine calling function.'
 
 	# 2000-05-21 ce: Sometimes used for debugging:
 	#
