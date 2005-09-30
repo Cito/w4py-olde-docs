@@ -153,7 +153,6 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		if self.setting('PidFile') is None:
 			self._pidFile = None
 			return
-
 		pidpath = self.serverSidePath(self.setting('PidFile'))
 		try:
 			self._pidFile = PidFile.PidFile(pidpath)
@@ -407,7 +406,6 @@ def main():
 	"""Start the Appserver."""
 	try:
 		server = AppServer()
-		return
 		print "Ready"
 		print
 		print "WARNING: There is nothing to do here with the abstract AppServer."
@@ -421,6 +419,24 @@ def main():
 		del server
 		sys.exit()
 
+def kill(pid):
+	"""Kill a process."""
+	try:
+		from signal import SIGINT
+		os.kill(pid, SIGINT)
+	except:
+		if os.name == 'nt':
+			try:
+				import win32api
+			except:
+				print "Win32 API extensions not present."
+			try:
+				handle = win32api.OpenProcess(1, 0, pid)
+				win32api.TerminateProcess(handle, 0)
+			except:
+				pass
+		print "WebKit cannot terminate the running process."
+
 def stop(*args, **kw):
 	"""Stop the AppServer (which may be in a different process)."""
 	if kw.has_key('workDir'):
@@ -429,20 +445,12 @@ def stop(*args, **kw):
 	else:
 		# pidfile is in WebKit directory
 		pidfile = os.path.join(os.path.dirname(__file__),"appserverpid.txt")
-	pid = int(open(pidfile,"r").read())
-	#now what for windows?
-	if os.name == 'posix':
-		import signal
-		os.kill(pid,signal.SIGINT)
+	try:
+		pid = int(open(pidfile).read())
+	except:
+		print "Cannot read process id from pidfile."
 	else:
-		try:
-			import win32process
-		except:
-			print "Win32 extensions not present."
-			print "Webkit cannot terminate the running process."
-		if sys.modules.has_key('win32process'):
-			win32process.TerminateProcess(pid,0)
-
+		kill(pid)
 
 if __name__=='__main__':
 	main()
