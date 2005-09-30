@@ -746,6 +746,34 @@ class HTTPRequest(Request):
 		' queryString method sessionId parents fields cookies environ'.split())
 
 
+	## Deprecated ##
+
+	def serverSideDir(self):
+		"""deprecated: HTTPRequest.serverSideDir() on 01/24/01 in 0.5.
+
+		use serverSidePath() instead.@
+
+		Return the directory of the Servlet (as given through __init__()'s path).
+
+		"""
+		self.deprecated(self.serverSideDir)
+		if not hasattr(self, '_serverSideDir'):
+			self._serverSideDir = os.path.dirname(self.serverSidePath())
+		return self._serverSideDir
+
+	def relativePath(self, joinPath):
+		"""deprecated: HTTPRequest.relativePath() on 01/24/01 in 0.5.
+
+		use serverSidePath() instead.@
+
+		Return a new path which includes the servlet's path appended by 'joinPath'.
+		Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned.
+
+		"""
+		self.deprecated(self.relativePath)
+		return os.path.join(self.serverSideDir(), joinPath)
+
+
 ## Info Structure ##
 
 _infoMethods = (
