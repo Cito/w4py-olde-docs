@@ -6,7 +6,7 @@ class TestBasicFunctionality(AppServerTest):
 
 	def workDir(self):
 		return os.path.dirname(os.path.join(os.getcwd(), __file__))
-	    
+
 	def testAppServerStarts(self):
 		pass
 

@@ -2,30 +2,13 @@
 
 import os, sys
 
+os.chdir(os.path.abspath(os.path.dirname(__file__)))
+webwareDir = os.path.join(os.pardir, os.pardir, os.pardir)
+sys.path.insert(0, webwareDir)
 
-def main(args):
-	global webwarePath, appWorkPath
-	newArgs = []
-	for arg in args:
-		if arg.startswith('--webware-path='):
-			webwarePath = arg[15:]
-		elif arg.startswith('--working-path='):
-			appWorkPath = arg[15:]
-		else:
-			newArgs.append(arg)
-	args = newArgs
-	# ensure Webware is on sys.path
-	sys.path.insert(0, webwarePath)
+from WebKit import Launch
 
-	# import the master launcher
-	import WebKit.Launch
+Launch.webwareDir = webwareDir
 
-	if len(args) < 2:
-		WebKit.Launch.usage()
-
-	# Go!
-	WebKit.Launch.launchWebKit(args[1], appWorkPath, args[2:])
-
-
-if __name__=='__main__':
-	main(sys.argv)
+if __name__ == '__main__':
+	Launch.main()
