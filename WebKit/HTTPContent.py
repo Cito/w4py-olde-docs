@@ -81,9 +81,14 @@ class HTTPContent(HTTPServlet):
 		"""
 		req = transaction.request()
 
-		# Support old style actions from 0.5.x and below.
-		# Use setting OldStyleActions in Application.config
-		# to use this.
+		# Support old style actions, i.e. mapping through methodNameForAction()
+		# This has been disabled by default from version 0.6 upwards, but you
+		# can enable it with the setting OldStyleActions in Application.config.
+		# @@cz: We should enable this additional mapping again; I see no
+		# performance or securits issues here, and since methodNameForAction()
+		# is by default the identity, everything stays compatible. Or, we
+		# should get rid of this and the OldStyleActions setting completely.
+		# Leaving this as an option makes things only more confusing.
 		if self.transaction().application().setting('OldStyleActions', ) \
 				and req.hasField('_action_'):
 			action = self.methodNameForAction(req.field('_action_'))
@@ -251,6 +256,21 @@ class HTTPContent(HTTPServlet):
 
 		"""
 		pass
+
+	def methodNameForAction(self, name):
+		"""
+		This method exists only to support "old style" actions
+		from WebKit 0.5.x and below.
+
+		Invoked by _respond() to determine the method name for a given action
+		name (which usually comes from an HTML submit button in a form).
+		This implementation simply returns the name. Subclasses could "mangle"
+		the names or look them up in a dictionary; they should override this
+		method when action names don't match their method names.
+
+		"""
+		# @@cz: see my comment above where this method is used
+		return name
 
 	def urlEncode(self, s):
 		"""Alias for `WebUtils.Funcs.urlEncode`.
