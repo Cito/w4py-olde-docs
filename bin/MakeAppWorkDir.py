@@ -429,7 +429,7 @@ class Main(Page):
 		''' % self.request().serverSidePath())
 		self.writeln('''
 		<p>There are more examples and documentation in the Webware distribution,
-		which you can get to from here:<p>
+		which you can get to from here:</p>
 		<ul>
 		''')
 		adapterName = self.request().adapterName()
