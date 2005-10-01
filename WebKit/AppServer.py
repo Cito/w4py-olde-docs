@@ -24,12 +24,13 @@ that instance.  Use it like::
 
     from WebKit.AppServer import globalAppServer
 """
+
 # This actually gets set inside AppServer.__init__
 globalAppServer = None
 
 DefaultConfig = {
-	'PrintConfigAtStartUp': 1,
-	'Verbose':              1,
+	'PrintConfigAtStartUp': True,
+	'Verbose':              True,
 	'PlugIns':              ['../PSP'],
 	'CheckInterval':        100,
 	'PlugInPackages':       [],
@@ -135,7 +136,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			Profiler.startTime = self._startTime
 		Profiler.readyTime = time.time()
 		Profiler.readyDuration = Profiler.readyTime - Profiler.startTime
-		print "Ready  (%.2f seconds after launch)\n" % Profiler.readyDuration
+		print "Ready (%.2f seconds after launch)." % Profiler.readyDuration
 		sys.stdout.flush()
 		sys.stderr.flush()
 
@@ -181,18 +182,14 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		if self._pidFile:
 			self._pidFile.remove() # remove the pid file
 		if Profiler.profiler:
-			print 'Writing profile stats to %s...' % Profiler.statsFilename
-			Profiler.dumpStats()
+			# The profile stats will be dumped by Launch.py.
 			# You might also considering having a page/servlet
 			# that lets you dump the stats on demand.
-			print
-			print 'WARNING: Applications run much slower when profiled,'
-			print 'so turn off profiling in Launch.py when you are finished.'
-			print
 			print 'AppServer ran for %0.2f seconds.' % (
 				time.time() - Profiler.startTime)
 		print "AppServer has been shutdown."
 		sys.stdout.flush()
+		sys.stderr.flush()
 		self.running = 0
 
 

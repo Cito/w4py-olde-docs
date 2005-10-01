@@ -88,9 +88,6 @@ logFile = None
 # The default app server to be used:
 appServer = 'ThreadedAppServer'
 
-# Set debug = 1 if you want to see debugging output:
-debug = 0
-
 # The service name:
 serviceName = 'WebKit'
 
@@ -132,7 +129,6 @@ class AppServerService(win32serviceutil.ServiceFramework):
 	_runProfile = runProfile
 	_logFile = logFile
 	_appServer = appServer
-	_debug = debug
 
 	def __init__(self, args):
 		win32serviceutil.ServiceFramework.__init__(self, args)
@@ -154,103 +150,120 @@ class AppServerService(win32serviceutil.ServiceFramework):
 		# Start the service:
 		self._server = log = None
 		try:
-			# Figure out the work directory and make it the current directory:
-			workDir = self._workDir
-			if not workDir:
-				workDir = os.path.dirname(__file__)
-			os.chdir(workDir)
-			workDir = os.path.curdir
-			# Switch the output to the logFile specified above:
-			stdout, stderr = sys.stdout, sys.stderr
-			logFile = self._logFile
-			if logFile: # logFile has been specified
-				if os.path.exists(logFile):
-					log = open(logFile, 'a', 1) # append line buffered
-					log.write('\n' + '-' * 68 + '\n\n')
-				else:
-					log = open(logFile, 'w', 1) # write line buffered
-			else: # no logFile
-				# Make all output go nowhere. Otherwise, print statements
-				# cause the service to crash, believe it or not.
-				log = open('nul', 'w') # os.devnull on Windows
-			sys.stdout = sys.stderr = log
-			# By default, Webware is searched in the parent directory:
-			webwareDir = self._webwareDir
-			if not webwareDir:
-				webwareDir = os.pardir
-			# Remove the package component in the name of this module,
-			# because otherwise the package path would be used for imports, too:
-			global __name__
-			__name__ = __name__.split('.')[-1]
-			# Check the validity of the Webware directory:
-			sysPath = sys.path # memorize the standard Python search path
-			sys.path = [webwareDir] # now include only the Webware directory
-			# Check whether Webware is really located here
-			from Properties import name as webwareName
-			from WebKit.Properties import name as webKitName
-			if webwareName != 'Webware for Python' or webKitName != 'WebKit':
-				raise ImportError
-			# Now assemble a new clean Python search path:
-			path = [] # the new search path will be collected here
-			webKitDir = os.path.abspath(os.path.join(webwareDir, 'WebKit'))
-			for p in [workDir, webwareDir] + self._libraryDirs + sysPath:
-				if not p:
-					continue  # do not include the empty ("current") directory
-				p = os.path.abspath(p)
-				if p == webKitDir or p in path or not os.path.exists(p):
-					continue # do not include WebKit and duplicates
-				path.append(p)
-			sys.path = path # set the new search path
-			# Import the Profiler:
-			from WebKit import Profiler
-			Profiler.startTime = time.time()
-			# Import the AppServer:
-			appServer = self._appServer
-			appServerModule = __import__('WebKit.' + appServer,
-				None, None, appServer)
-			self._server = getattr(appServerModule, appServer)(workDir)
-			if self._runProfile:
-				print 'Profiling is on.', \
-					'See docstring in Profiler.py for more info.'
+			try:
+				# Figure out the work directory and make it the current directory:
+				workDir = self._workDir
+				if not workDir:
+					workDir = os.path.dirname(__file__)
+				os.chdir(workDir)
+				workDir = os.path.curdir
+				# Switch the output to the logFile specified above:
+				stdout, stderr = sys.stdout, sys.stderr
+				logFile = self._logFile
+				if logFile: # logFile has been specified
+					if os.path.exists(logFile):
+						log = open(logFile, 'a', 1) # append line buffered
+						log.write('\n' + '-' * 68 + '\n\n')
+					else:
+						log = open(logFile, 'w', 1) # write line buffered
+				else: # no logFile
+					# Make all output go nowhere. Otherwise, print statements
+					# cause the service to crash, believe it or not.
+					log = open('nul', 'w') # os.devnull on Windows
+				sys.stdout = sys.stderr = log
+				# By default, Webware is searched in the parent directory:
+				webwareDir = self._webwareDir
+				if not webwareDir:
+					webwareDir = os.pardir
+				# Remove the package component in the name of this module,
+				# because otherwise the package path would be used for imports:
+				global __name__
+				__name__ = __name__.split('.')[-1]
+				# Check the validity of the Webware directory:
+				sysPath = sys.path # memorize the standard Python search path
+				sys.path = [webwareDir] # now include only the Webware directory
+				# Check whether Webware is really located here
+				from Properties import name as webwareName
+				from WebKit.Properties import name as webKitName
+				if webwareName != 'Webware for Python' or webKitName != 'WebKit':
+					raise ImportError
+				# Now assemble a new clean Python search path:
+				path = [] # the new search path will be collected here
+				webKitDir = os.path.abspath(os.path.join(webwareDir, 'WebKit'))
+				for p in [workDir, webwareDir] + self._libraryDirs + sysPath:
+					if not p:
+						continue  # do not include empty ("current") directory
+					p = os.path.abspath(p)
+					if p == webKitDir or p in path or not os.path.exists(p):
+						continue # do not include WebKit and duplicates
+					path.append(p)
+				sys.path = path # set the new search path
+				# Import the Profiler:
+				from WebKit import Profiler
+				Profiler.startTime = time.time()
+				# Import the AppServer:
+				appServer = self._appServer
+				appServerModule = __import__('WebKit.' + appServer,
+					None, None, appServer)
+				if self._runProfile:
+					print 'Profiling is on.', \
+						'See docstring in Profiler.py for more info.'
+					print
+				self._server = getattr(appServerModule, appServer)(workDir)
 				print
-				from profile import Profile
-				profiler = Profile()
-				Profiler.profiler = profiler
 				sys.stdout.flush()
-				Profiler.runCall(self._server.mainloop)
-				Profiler.dumpStats()
-			else:
+				if self._runProfile:
+					from profile import Profile
+					profiler = Profile()
+					Profiler.profiler = profiler
+					sys.stdout.flush()
+					Profiler.runCall(self._server.mainloop)
+				else:
+					self._server.mainloop()
+				print
 				sys.stdout.flush()
-				self._server.mainloop()
-			if self._server.running > 2:
-				self._server.shutDown()
-			for i in range(30): # wait at most 3 seconds for shutdown
-				if not self._server.running:
-					break
-				time.sleep(0.1)
+				if self._server.running:
+					self._server.initiateShutdown()
+					self._server._closeThread.join()
+				if self._runProfile:
+					print
+					print 'Writing profile stats to %s...' % Profiler.statsFilename
+					Profiler.dumpStats()
+					print 'WARNING: Applications run much slower when profiled,'
+					print 'so turn off profiling the service when you are done.'
+			except SystemExit, e:
+				if log and logFile:
+					print
+					errorlevel = e[0]
+					if errorlevel == 3:
+						print 'Please switch off AutoReloading in AppServer.Config.'
+						print 'It does currently not work with AppServerSercive.'
+						print 'You have to reload the service manually.'
+					else:
+						print 'The AppServer has been signaled to terminate.'
+					print
+			except Exception, e:
+				if log and logFile:
+					print
+					try:
+						import traceback
+						traceback.print_exc(file=sys.stderr)
+						print 'Service stopped due to above exception.'
+					except:
+						print 'ERROR:', e
+						print 'Cannot print traceback.'
+					print
+				raise
+			except:
+				raise
+		finally:
+			if self._server and self._server.running:
+				self._server.initiateShutdown()
+				self._server._closeThread.join()
 			self._server = None
 			if log:
 				sys.stdout, sys.stderr = stdout, stderr
 				log.close()
-		except Exception, error: # need to kill the sweeper thread somehow
-			print error
-			if self._debug: # see the traceback from an exception
-				try:
-					tb = sys.exc_info()
-					print tb[0]
-					print tb[1]
-					import traceback
-					traceback.print_tb(tb[2])
-				except:
-					print 'Cannot print traceback.'
-			if self._server and self._server.running > 2:
-				self._server.shutDown()
-			self._server = None
-			if log:
-				sys.stdout, sys.stderr = stdout, stderr
-				log.close()
-			raise
-
 
 ## Main ##
 

@@ -369,7 +369,6 @@ libraryDirs = %(libraryDirs)r
 runProfile = 0
 logFile = None
 appServer = 'ThreadedAppServer'
-debug = 0
 serviceName = 'WebKit'
 serviceDisplayName = 'WebKit Application Server'
 serviceDescription = "This is the threaded application server" \
@@ -393,7 +392,6 @@ class AppServerService(service.AppServerService):
 	_runProfile = runProfile
 	_logFile = logFile
 	_appServer = appServer
-	_debug = debug
 
 if __name__ == '__main__':
 	service.AppServerService = AppServerService

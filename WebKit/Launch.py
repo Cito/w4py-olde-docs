@@ -128,7 +128,7 @@ def launchWebKit(appServer=appServer, workDir=None, args=None):
 		from time import time
 		Profiler.startTime = time()
 	# Run the app server:
-	appServerMain(args) # go!
+	return appServerMain(args) # go!
 
 
 ## Main ##
@@ -334,6 +334,7 @@ def main(args=None):
 			print 'The pid file %r could not be written.' % pidFile
 			sys.exit(1)
 	olduid = oldgid = stdout = stderr = log = None
+	errorlevel = 1
 	try:
 		# Change server process group:
 		if gid is not None:
@@ -398,11 +399,16 @@ def main(args=None):
 			from profile import Profile
 			profiler = Profile()
 			Profiler.profiler = profiler
-			Profiler.runCall(launchWebKit, *args)
+			errorlevel = Profiler.runCall(launchWebKit, *args)
+			print
+			print 'Writing profile stats to %s...' % Profiler.statsFilename
 			Profiler.dumpStats()
+			print 'WARNING: Applications run much slower when profiled,'
+			print 'so turn off profiling in Launch.py when you are finished.'
 		else:
-			launchWebKit(*args)
+			errorlevel = launchWebKit(*args)
 	finally:
+		print
 		# Close the log file properly:
 		if log:
 			sys.stdout, sys.stderr = stdout, stderr
@@ -425,6 +431,8 @@ def main(args=None):
 				os.remove(pidFile)
 			except:
 				print 'The pid file could not be removed.'
+				print
+	sys.exit(errorlevel)
 
 if __name__ == '__main__':
 	main()

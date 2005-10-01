@@ -199,8 +199,6 @@ class ThreadedAppServer(AppServer):
 
 		"""
 
-		from errno import EINTR
-
 		threadCheckInterval = self._maxServerThreads*2
 		threadUpdateDivisor = 5 # grab stat interval
 		threadCheck = 0
@@ -211,14 +209,8 @@ class ThreadedAppServer(AppServer):
 			while self.running > 2:
 
 				# block for timeout seconds waiting for connections
-				try:
-					input, output, exc = select.select(
-						self._sockets.values(), [], [], timeout)
-				except select.error, v:
-					if v[0] == EINTR or v[0] == 0:
-						break
-					else:
-						raise
+				input, output, exc = select.select(
+					self._sockets.values(), [], [], timeout)
 
 				for sock in input:
 					self._requestID += 1
@@ -243,11 +235,8 @@ class ThreadedAppServer(AppServer):
 
 				self.restartIfNecessary()
 
-		except:
-			if self.running > 2: # was the exception while running?
-				self.running = 1
-				raise # then raise it
-		self.running = 1
+		finally:
+			self.running = 1
 
 
 	## Thread Management ##
@@ -451,7 +440,8 @@ class ThreadedAppServer(AppServer):
 		and tells all the threads to die.
 
 		"""
-		self.running = 2 # ask main loop to finish
+		if self.running > 2:
+			self.running = 2 # ask main loop to finish
 		print "ThreadedAppServer is shutting down..."
 		sys.stdout.flush()
 		self.awakeSelect() # unblock select call in mainloop()
@@ -473,6 +463,7 @@ class ThreadedAppServer(AppServer):
 		# Call super's shutdown:
 		AppServer.shutDown(self)
 		sys.stdout.flush()
+		sys.stderr.flush()
 		self.running = 0
 
 	def awakeSelect(self):
@@ -483,7 +474,6 @@ class ThreadedAppServer(AppServer):
 		Here's where we do that, called `shutDown`.
 
 		"""
-
 		for host, port in self._sockets.keys():
 			if host == '0.0.0.0':
 				# Can't connect to 0.0.0.0; use 127.0.0.1 instead
@@ -555,7 +545,6 @@ class Handler:
 		and of course to the AppServer.
 
 		"""
-
 		self._server = server
 		self._serverAddress = serverAddress
 
@@ -569,7 +558,6 @@ class Handler:
 		and work is done when `handleRequest` is called.
 
 		"""
-
 		self._requestID = requestID
 		self._sock = sock
 
@@ -661,7 +649,6 @@ class MonitorHandler(Handler):
 	``STATUS``) or ``OK`` for ``QUIT`` (which also stops the server).
 
 	"""
-
 	# @@ 2003-03 ib: we should have a RESTART command, and
 	# perhaps better status indicators (# of threads, etc).
 
@@ -669,7 +656,6 @@ class MonitorHandler(Handler):
 	settingPrefix = 'Monitor'
 
 	def handleRequest(self):
-
 		verbose = self.server._verbose
 		startTime = time.time()
 		if verbose:
@@ -678,15 +664,11 @@ class MonitorHandler(Handler):
 		conn = self._sock
 		if verbose:
 			print 'receiving request from', conn
-
 		BUFSIZE = 8*1024
-
 		dict = self.receiveDict()
-
 		if dict['format'] == "STATUS":
 			conn.send(str(self.server._reqCount))
-
-		if dict['format'] == 'QUIT':
+		elif dict['format'] == 'QUIT':
 			conn.send("OK")
 			conn.close()
 			self.server.shutDown()
@@ -712,7 +694,6 @@ class TASASStreamOut(ASStreamOut):
 		stream output to (if we're streaming).
 
 		"""
-
 		ASStreamOut.__init__(self)
 		self._socket = sock
 
@@ -724,7 +705,6 @@ class TASASStreamOut(ASStreamOut):
 		the buffer out on the socket.
 
 		"""
-
 		debug = 0
 		result = ASStreamOut.flush(self)
 		if result: # a True return value means we can send
@@ -732,11 +712,13 @@ class TASASStreamOut(ASStreamOut):
 			sent = 0
 			while sent < reslen:
 				try:
-					sent = sent + self._socket.send(self._buffer[sent:sent+8192])
+					sent = sent + self._socket.send(
+						self._buffer[sent:sent+8192])
 				except socket.error, e:
 					if e[0] == errno.EPIPE: # broken pipe
 						pass
-					elif hasattr(errno, 'ECONNRESET') and e[0]==errno.ECONNRESET:
+					elif hasattr(errno, 'ECONNRESET') \
+							and e[0] == errno.ECONNRESET:
 						pass
 					else:
 						print "StreamOut Error: ", e
@@ -760,7 +742,6 @@ class AdapterHandler(Handler):
 	to handle that data.
 
 	"""
-
 	protocolName = 'address'
 	settingPrefix = 'Adapter'
 
@@ -837,81 +818,85 @@ def run(workDir=None):
 
 	"""
 	global server
+	server = None
+	global exitstatus
+	exitstatus = 0
 	runAgain = True
 	while runAgain: # looping in support of RestartAppServerError
 		try:
 			try:
 				runAgain = False
-				server = None
 				server = ThreadedAppServer(workDir)
 				if runMainLoopInThread():
 					# catch the exception raised by sys.exit so
 					# that we can re-call it in the main thread.
-					global exitStatus
-					exitStatus = None
-					def _windowsmainloop(server):
+					def _windowsmainloop():
 						global exitStatus
 						try:
 							server.mainloop()
 						except SystemExit, e:
-							exitStatus = e.code
+							exitStatus = e[0]
 					# Run the server thread
-					t = threading.Thread(target=_windowsmainloop,
-						args=(server,))
+					t = threading.Thread(
+						target=_windowsmainloop)
 					t.start()
 					try:
 						while server.running > 1:
-							time.sleep(1) # wait for interrupt
-					except KeyboardInterrupt:
-						pass
-					server.running = 1
-					t.join()
-					# re-call sys.exit if necessary
-					if exitStatus:
-						sys.exit(exitStatus)
+							time.sleep(1) # wait for exception
+					finally:
+						t.join()
 				else:
-					try:
-						server.mainloop()
-					except KeyboardInterrupt, e:
-						server.shutDown()
+					server.mainloop()
+				sys.exit(exitStatus)
 			except RestartAppServerError:
 				print
 				print "Restarting AppServer:"
 				sys.stdout.flush()
+				sys.stderr.flush()
 				runAgain = True
 			except Exception, e:
 				if not doesRunHandleExceptions:
 					raise
 				print
-				if not isinstance(e, SystemExit):
+				if isinstance(e, SystemExit):
+					print "Exiting AppServer%s." % (
+						e[0] == 3 and ' for reload' or '')
+					exitstatus = e[0]
+				elif (isinstance(e, KeyboardInterrupt) or
+						(isinstance(e, IOError) and e[0] == errno.EINTR)):
+					print "Exiting AppServer due to keyboard interrupt."
+					exitstatus = 0
+				else:
 					import traceback
 					traceback.print_exc(file=sys.stderr)
 					print "Exiting AppServer due to above exception."
-				else:
-					print "Exiting AppServer due to sys.exit()."
-				if server:
-					if server.running > 2:
-						server.initiateShutdown()
+					exitstatus = 1
+				sys.stdout.flush()
+				sys.stderr.flush()
+				if server and server.running:
+					server.initiateShutdown()
 					server._closeThread.join()
-				# if we're here as a result of exit() being called,
-				# exit with that return code.
-				if isinstance(e, SystemExit):
-					sys.exit(e)
 		finally:
 			AppServerModule.globalAppServer = None
-	sys.exit()
-
+	sys.stdout.flush()
+	sys.stderr.flush()
+	return exitstatus
 
 def shutDown(signum, frame):
 	"""Signal handler for shutting down the server."""
 	global server
 	print
-	print "AppServer received signal", signum
+	print "App server has been signaled to shutdown."
 	if server and server.running > 2:
 		print "Shutting down at", time.asctime(time.localtime(time.time()))
-		server.initiateShutdown()
+		sys.stdout.flush()
+		server.running = 2
+		if signum == signal.SIGINT:
+			raise KeyboardInterrupt
+		else:
+			sys.exit(0)
 	else:
-		print 'WARNING: No server reference to shutdown.'
+		print 'No running app server was found.'
 
 import signal
 signal.signal(signal.SIGINT, shutDown)
@@ -967,4 +952,4 @@ def main(args):
 		else:
 			print "Daemon mode not available on your OS."
 
-	function(workDir=workDir)
+	return function(workDir=workDir)

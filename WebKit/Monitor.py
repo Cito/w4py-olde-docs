@@ -211,7 +211,7 @@ def main(args):
 			except: sys.exit(0)
 
 
-def shutDown(arg1,arg2):
+def shutDown(signum, frame):
 	"""Shutdown handler.
 
 	For when Ctrl-C has been hit, or this process is being cleanly killed.
@@ -219,6 +219,7 @@ def shutDown(arg1,arg2):
 	"""
 	global running
 	print "Monitor Shutdown Called."
+	sys.stdout.flush()
 	running = 0
 	global addr
 	try:
@@ -234,6 +235,8 @@ def shutDown(arg1,arg2):
 		print "No Response to shutdown request, performing hard kill."
 		os.kill(srvpid, signal.SIGINT)
 		os.waitpid(srvpid,0)
+	sys.stdout.flush()
+	sys.stderr.flush()
 	return 0
 
 import signal

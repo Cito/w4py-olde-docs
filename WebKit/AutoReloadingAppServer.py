@@ -90,6 +90,8 @@ class AutoReloadingAppServer(AppServer):
 		self.running = 1
 		self.deactivateAutoReload()
 		AppServer.shutDown(self)
+		sys.stdout.flush()
+		sys.stderr.flush()
 		self.running = 0
 
 
@@ -160,8 +162,6 @@ class AutoReloadingAppServer(AppServer):
 		Call `shouldRestart` from outside the class.
 
 		"""
-		self.initiateShutdown()
-		self._closeThread.join()
 		sys.stdout.flush()
 		sys.stderr.flush()
 		# calling execve() is problematic, since the file
@@ -202,10 +202,12 @@ class AutoReloadingAppServer(AppServer):
 			time.sleep(pollInterval)
 			for f, mtime in ImportSpy.modloader.fileList().items():
 				if self.fileUpdated(f, mtime):
-					print '*** The file', f, 'has changed.  The server is restarting now.'
+					print '*** The file', f, 'has changed.'
+					print
+					print 'The AppServer is restarting now...'
 					self._autoReload = False
 					return self.shouldRestart()
-		print 'Autoreload Monitor stopped'
+		print 'Autoreload Monitor stopped.'
 		sys.stdout.flush()
 
 	def fileUpdated(self, filename, mtime, getmtime=os.path.getmtime):
