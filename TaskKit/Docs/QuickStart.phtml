@@ -42,7 +42,7 @@ This modularity is one of the real strengths of Webware and in sharp contrast to
 where people tend to think in Zope and not in Python terms. In a perfect world one should
 be able to use web wrappers (for Zope, Webware, Quixote,..) around clearly designed Python
 classes and not be forced to use one framework. Time will tell if this is just a dream
-or if people will reinvent the "python wheels" over and over again.</p>
+or if people will reinvent the "Python wheels" over and over again.</p>
 
 <a name="Tasks"></a><h2>Tasks</h2>
 
@@ -106,7 +106,7 @@ of <code>proceed()</code></p>
 Don't count on that in future versions, it will probably be removed. Just use <code>proceed()</code> instead
 (take a look at <code>TaskKit/Tests/BasicTest.py</code>). Another API change after version 0.5 of Webware was
 the removal of the <code>close</code> variable in <code>run()</code>. If you plan to make serious use of TaskKit
-it's better to take the newest CVS snapshot of Webware, otherwise you will have to delete all occurences of
+it's better to take the newest SVN snapshot of Webware, otherwise you will have to delete all occurences of
 <code>close</code> afterwards. Another thing to remember about tasks is, that they know nothing about
 scheduling, how often they will run (periodically or just once) or if they are on hold. All this is managed
 by the task wrapper class <code>TaskManager</code>, which will be discussed shortly. Let's look at some more
@@ -114,7 +114,7 @@ examples first.</p>
 
 <a name="GeneratingStaticPages"></a><h2>Generating static pages</h2>
 
-<p>On a high trafic web site (a la <a href="http://slashdot.org">slashdot</a>) it's
+<p>On a high traffic web site (a la <a href="http://slashdot.org">slashdot</a>) it's
 common practice to use semistatic page generation techniques. For example
 you can generate the entry page as a static page once per minute. During this time
 the content will not be completely accurate (e.g. the number of comments will certainly
@@ -167,7 +167,7 @@ separate folder (with an empty <code>__init__.py</code> file to make this folder
 package). First of all we create a new <code>Scheduler</code> object, start it as a thread and add
 a periodic page generation object (of type <code>PageGenerator</code>) with the
 <code>addPeriodicAction</code> method (this will probably be changed in the near future to
-the more constitent name <code>addPeriodicTask</code>). The first parameter here is the first
+the more consistent name <code>addPeriodicTask</code>). The first parameter here is the first
 execution time (which can be in the future), the second is the period (in seconds), the third an instance
 of our task class and the last parameter is a unique task name which allows us to find the task
 later on (e.g. if we want to change the period or put the task on hold).</p>
@@ -192,7 +192,7 @@ later on (e.g. if we want to change the period or put the task on hold).</p>
 
 <p>When you fire up this example you will notice that the timing is not 100% accurate. The reason for this
 seems to be an imprecise <code>wait()</code> function in the Python <code>threading</code> module.
-Unfortunately this method in indispensible because we need to be able to wake up a sleeping scheduler when
+Unfortunately this method is indispensible because we need to be able to wake up a sleeping scheduler when
 scheduling new tasks with first execution times smaller than <code>scheduler.nextTime()</code>. This is
 achieved through the <code>notify()</code> method, which sets the <code>notifyEvent</code>
 (<code>scheduler._notifyEvent.set()</code>). On Unix we could use <code>sleep</code> and a <code>signal</code>

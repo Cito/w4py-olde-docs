@@ -1,5 +1,5 @@
 import os, sys
-sys.path.insert(1, os.path.abspath('../..'))
+sys.path.insert(1, os.path.abspath(os.path.join(os.pardir, os.pardir)))
 import TaskKit
 
 from TaskKit.Scheduler import Scheduler
@@ -12,8 +12,8 @@ class SimpleTask(Task):
 	def run(self):
 		if self.proceed():
 			print self.name(), time()
-##			print "Increasing period"
-##			self.handle().setPeriod(self.handle().period()+2)
+			# print "Increasing period"
+			# self.handle().setPeriod(self.handle().period()+2)
 		else:
 			print "Should not proceed", self.name()
 			print "proceed for %s=%s, isRunning=%s" % (self.name(), self.proceed(), self._handle._isRunning)
@@ -21,7 +21,7 @@ class SimpleTask(Task):
 
 class LongTask(Task):
 	def run(self):
-		while 1:			
+		while 1:
 			sleep(2)
 			print "proceed for %s=%s, isRunning=%s" % (self.name(), self.proceed(), self._handle._isRunning)
 			if self.proceed():
@@ -42,15 +42,15 @@ def main():
 	print "Demanding LongTask"
 	scheduler.runTaskNow('LongTask')
 	sleep(1)
-#	print "Stopping LongTask"
-#	scheduler.stopTask("LongTask")
+	# print "Stopping LongTask"
+	# scheduler.stopTask("LongTask")
 	sleep(2)
-#	print "Deleting 'SimpleTask1'"
-#	scheduler.unregisterTask("SimpleTask1")
+	# print "Deleting 'SimpleTask1'"
+	# scheduler.unregisterTask("SimpleTask1")
 	sleep(4)
 	print "Calling stop"
 	scheduler.stop()
-##	sleep(2)
+	sleep(2)
 	print "Test Complete"
 
 

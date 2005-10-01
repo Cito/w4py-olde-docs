@@ -1,7 +1,7 @@
 import os, sys
-sys.path.insert(1, os.path.abspath('../..'))
+sys.path.insert(1, os.path.abspath(os.path.join(os.pardir, os.pardir)))
 import TaskKit
-#from MiscUtils import unittest
+# from MiscUtils import unittest
 import unittest
 
 
