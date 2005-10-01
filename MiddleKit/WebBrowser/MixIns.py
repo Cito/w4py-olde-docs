@@ -1,9 +1,15 @@
-"""
-This file contains "mix-in" classes that are mixed in with classes found in MiddleKit.Core and .Run. The mix-ins are named directly after their target classes, which is how they get bound in InstallMixIns().
+"""MixIns
 
-The InstallMixIns() functions is called from this module. So all you need do is import this module to make the mix-ins take effect. This is done in __init__.py.
+This file contains "mix-in" classes that are mixed in with classes
+found in MiddleKit.Core and .Run. The mix-ins are named directly
+after their target classes, which is how they get bound in InstallMixIns().
 
-If you add another mix-in then update the list of names found in InstallMixIns().
+The InstallMixIns() functions is called from this module.
+So all you need do is import this module to make the mix-ins take effect.
+This is done in __init__.py.
+
+If you add another mix-in then update the list of names found
+in InstallMixIns().
 
 """
 
@@ -29,13 +35,22 @@ class ObjectStore:
 		return self.htObjectsInList(objs, className)
 
 	def htObjectsInList(self, objs, adjective):
-		""" Returns an HTML string for a list of MiddleKit objects and their attributes. The adjective describes the type of objects and is used in the output (for example 'Customer'). This is a utility method for use by anyone. """
+		"""Get HTML for list of onjects.
+
+		Returns an HTML string for a list of MiddleKit objects
+		and their attributes. The adjective describes the type
+		of objects and is used in the output (for example 'Customer').
+		This is a utility method for use by anyone.
+
+		"""
 		if objs is None:
 			objs = []
 		ht = []
 		suffix = ('s', '')[len(objs)==1]
-		ht.append('<span class=TablePrefix>%i %s object%s</span>' % (len(objs), adjective, suffix))
-		ht.append('<table border=1 cellspacing=0 cellpadding=2 class=ObjectsTable>')
+		ht.append('<span class="TablePrefix">%i %s object%s</span>'
+			% (len(objs), adjective, suffix))
+		ht.append('<table border="1" cellspacing="0" cellpadding="2"'
+			' class="ObjectsTable">')
 		if objs:
 			klass = objs[0].klass()
 			ht.append(klass.htHeadingsRow())
@@ -47,7 +62,8 @@ class ObjectStore:
 					ht.append(klass.htHeadingsRow())
 				ht.append(obj.htAttrsRow())
 		else:
-			ht.append('<tr> <td class=NoObjectsCell> No %s objects. </td> </tr>' % adjective)
+			ht.append('<tr><td class="NoObjectsCell">'
+				'No %s objects.</td></tr>' % adjective)
 		ht.append('</table>\n')
 		return ''.join(ht)
 
@@ -56,11 +72,11 @@ class Klass:
 
 	def htHeadingsRow(self):
 		ht = ['<tr>']
-		ht.append('<td class=TableHeading> class </td>')
-		ht.append('<td class=TableHeading> serial </td>')
+		ht.append('<th class="TableHeading">class</th>')
+		ht.append('<th class="TableHeading">serial</th>')
 		for attr in self.allAttrs():
 			heading = splitWords(attr.name())
-			ht.append('<td class=TableHeading> %s </td>' % heading)
+			ht.append('<th class="TableHeading">%s</th>' % heading)
 		ht.append('</tr>\n')
 		return ''.join(ht)
 
@@ -69,11 +85,12 @@ class MiddleObject:
 
 	def htAttrsRow(self):
 		ht = ['<tr>']
-		ht.append('<td class=TableData> %s </td>' % self.__class__.__name__)
-		ht.append('<td class=TableData> %i </td>' % self.serialNum())
+		ht.append('<td class="TableData">%s</td>' % self.__class__.__name__)
+		ht.append('<td class="TableData">%i</td>' % self.serialNum())
 		for attr in self.klass().allAttrs():
 			value = getattr(self, '_'+attr.name())
-			ht.append('<td class=TableData> %s </td>' % attr.htValue(value, self))
+			ht.append('<td class="TableData">%s</td>'
+				% attr.htValue(value, self))
 		ht.append('</tr>\n')
 		return ''.join(ht)
 
@@ -110,7 +127,8 @@ class ObjRefAttr:
 			objSerialNum = value & 0xFFFFFFFFL
 			klass = obj.store().klassForId(classSerialNum)
 			klassName = klass.name()
-			return '<a href=BrowseObject?class=%s&serialNum=%i>%s.%i</a>' % (klassName, objSerialNum, klassName, objSerialNum)
+			return '<a href="BrowseObject?class=%s&serialNum=%i">%s.%i</a>' \
+				% (klassName, objSerialNum, klassName, objSerialNum)
 		else:
 			return htmlEncode(str(value))
 
@@ -119,7 +137,8 @@ class ListAttr:
 
 	def htValue(self, value, obj):
 		if value is None:
-			return '<a href=BrowseList?class=%s&serialNum=%i&attr=%s>list</a>' % (obj.klass().name(), obj.serialNum(), self.name())
+			return '<a href="BrowseList?class=%s&serialNum=%i&attr=%s">list' \
+				'</a>' % (obj.klass().name(), obj.serialNum(), self.name())
 
 
 def InstallMixIns():
@@ -133,7 +152,8 @@ def InstallMixIns():
 		for place in places:
 			nameSpace = {}
 			try:
-				exec 'from MiddleKit.%s.%s import %s' % (place, name, name) in nameSpace
+				exec 'from MiddleKit.%s.%s import %s' \
+					% (place, name, name) in nameSpace
 			except ImportError:
 				pass
 			else:

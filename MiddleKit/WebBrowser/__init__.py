@@ -1,3 +1,5 @@
+debug = 0
+
 def contextInitialize(app, ctxPath):
 	import os, sys
 
@@ -7,7 +9,7 @@ def contextInitialize(app, ctxPath):
 		sys.path.insert(1, os.path.normpath(os.path.join(ctxPath, os.pardir, os.pardir)))
 		import MiddleKit
 
-	if 0:
+	if debug:
 		sys.stdout.flush()
 		print '>> MiddleKit:', MiddleKit
 		print '>> getcwd:', os.getcwd()

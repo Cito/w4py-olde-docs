@@ -6,7 +6,7 @@ from MiscUtils.Funcs import hostName as HostName
 class SelectModel(SitePage):
 
 	def writeSideBar(self):
-		self.writeln('<a href=?showHelp=1 class=SideBarLink>Help</a>')
+		self.writeln('<a href="?showHelp=1" class="SideBarLink">Help</a>')
 
 	def writeContent(self):
 		self.writeModelForm()
@@ -15,21 +15,21 @@ class SelectModel(SitePage):
 		if self.request().hasField('showHelp'):
 			self.writeHelp()
 
-	def writeModelForm(self, method='GET', action='SelectDatabase'):
+	def writeModelForm(self, method='get', action='SelectDatabase'):
 		self.writeHeading('Enter a model filename:')
 		if method:
-			method = 'method=' + method
+			method = 'method="%s"' % method
 		if action:
-			action = 'action=' + action
+			action = 'action="%s"' % action
 		value = self.request().value('modelFilename', None)
 		if value:
-			value = 'value=' + value
+			value = 'value="%s"' % value
 		self.writeln('''
 <form %(method)s %(action)s>
 	<!-- Model filename: -->
-	<input type=text name=modelFilename size=50 %(value)s>
-	<br>
-	<input type=submit value=OK>
+	<input type="text" name="modelFilename" size="50" %(value)s>
+	&nbsp;
+	<input type="submit" value="OK">
 </form>
 ''' % locals())
 
@@ -41,7 +41,7 @@ class SelectModel(SitePage):
 			for modelFilename in recentModels:
 				self.writeModelLink(modelFilename)
 		else:
-			wr('<br> None')
+			wr('<p>None</p>')
 
 	def writeKnownModels(self):
 		wr = self.writeln
@@ -55,9 +55,10 @@ class SelectModel(SitePage):
 			for filename in filenames:
 				self.writeModelLink(filename)
 		else:
-			wr('<br> None')
+			wr('<p>None</p>')
 
 	def writeModelLink(self, filename):
 		prettyName = os.path.split(filename)
 		prettyName = '%s - %s' % (prettyName[1], prettyName[0])
-		self.writeln('<br><a href=SelectDatabase?modelFilename=%s>%s</a>' % (filename, prettyName))
+		self.writeln('<p><a href="SelectDatabase?modelFilename=%s">%s</a></p>'
+			% (filename, prettyName))

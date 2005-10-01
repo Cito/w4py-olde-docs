@@ -29,16 +29,15 @@ class StorePage(SitePage):
 		if not self._store:
 			self.saveFieldsToCookies()
 			modelFilename = self.modelFilename()
-
 			# MK will need access to the Python classes for the model.
 			# We expect to find them with the actual model file,
 			# so we update sys.path appropriately:
 			extraDir = os.path.dirname(modelFilename)
 			if extraDir not in sys.path:
 				sys.path.insert(1, extraDir)
-
 			req = self.request()
-			self._store = MySQLObjectStore(host=req.value('host'), user=req.value('user'), passwd=req.value('password'))
+			self._store = MySQLObjectStore(host=req.value('host'),
+				user=req.value('user'), passwd=req.value('password'))
 			self._store.readModelFileNamed(modelFilename)
 			self._store.connect()
 		return self._store
@@ -48,9 +47,12 @@ class StorePage(SitePage):
 
 	def writeTopBar(self):
 		names = os.path.split(self.modelFilename())
-		self.writeln('<a href=SelectModel class=SelectLink>SELECT</a> <span class=StatusBar>%s - %s</span>' % (names[1], names[0]))
+		self.writeln('<p><a href="SelectModel" class="SelectLink">SELECT</a>'
+			' <span class=StatusBar>%s - %s</span></p>' % (names[1], names[0]))
 		req = self.request()
-		self.writeln('<br> <a href=SelectDatabase class=SelectLink>SELECT</a> <span class=StatusBar>db=%s, host=%s, user=%s</span>' % (req.value('database'), req.value('host'), req.value('user')))
+		self.writeln('<p><a href="SelectDatabase" class="SelectLink">SELECT</a>'
+			' <span class="StatusBar">db=%s, host=%s, user=%s</span></p>'
+			% (req.value('database'), req.value('host'), req.value('user')))
 
 	def writeSideBar(self):
 		self.writeKlasses()
@@ -68,7 +70,8 @@ class StorePage(SitePage):
 				style = 'CurClassLink'
 			else:
 				style = 'ClassLink'
-			self.writeln('<a href=BrowseObjects?class=%s class=%s> %s </a> <br>\n' % (name, style, urlName))
+			self.writeln('<p><a href="BrowseObjects?class=%s" class"=%s">'
+				'%s</a></p>' % (name, style, urlName))
 
 	def writeContent(self):
-		self.writeln('Woops. Forgot to override writeContent().')
+		self.writeln('<p>Woops. Forgot to override writeContent().</p>')

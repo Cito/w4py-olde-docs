@@ -1,97 +1,106 @@
-<style type="text/css">
-<!--
-	/*** Generic stuff ***/
 
-	body				{	font-family: Arial, Helvetica, sans-serif;
-							font-size: smaller;
-							color: black;
-							background-color: white;
-						}
+/*** Generic stuff ***/
 
-	p					{	font-family: Arial, Helvetica, sans-serif;
-							font-size: smaller;
-						}
+body				{	font-family: Arial, Helvetica, sans-serif;
+						font-size: 9pt;
+						color: black;
+						background-color: white;
+						margin: 0pt;
+						padding: 0pt;
+					}
 
-	form				{	font-family: Arial, Helvetica, sans-serif;
-							font-size: smaller;
-						}
+p					{	font-family: Arial, Helvetica, sans-serif;
+						font-size: 9pt;
+					}
 
+h4 				{	font-family: Arial, Helvetica, sans-serif;
+						font-size: 10pt;
+						font-weight: bold;
+					}
 
-	/*** Page layout parts ***/
+form				{	font-family: Arial, Helvetica, sans-serif;
+						font-size: 9pt;
+					}
 
-	.TitleBar			{	font-family: Tahoma, Arial, sans-serif;
-							font-size: 18pt;
-							font-weight: bold;
-							color: white;
-							background-color: #00A;
-						}
-
-	.TopBar				{	background-color: #CCF;
-						}
-
-	.SideBar			{	background-color: #EEE;
-						}
-
-	.ContentWell		{
-						}
+input				{	font-family: Arial, Helvetica, sans-serif;
+						font-size: 9pt;
+					}
 
 
-	/*** Status Bar ***/
+/*** Page layout parts ***/
 
-	.StatusBar			{
-						}
+.TitleBar			{	font-family: Tahoma, Arial, Helvetica, sans-serif;
+						font-size: 18pt;
+						font-weight: bold;
+						color: white;
+						background-color: #00A;
+						padding: 2pt 4pt;
+					}
 
-	.SelectLink			{
-						}
+.TopBar				{	background-color: #CCF;
+					}
 
+.SideBar			{	background-color: #EEE;
+						padding: 8pt 4pt;
+					}
 
-	/*** Side Bar **/
-
-	.SideBarLink		{
-						}
-
-
-	/*** Text pieces ***/
-
-	.Heading			{	font-weight: bold;
-						}
-
-	.Help				{	font-family: Times, "Times New Roman", serif;
-						}
+.ContentWell		{	padding: 4pt 8pt;
+					}
 
 
-	/*** Class links ***/
+/*** Status Bar ***/
 
-	.ClassLink			{	font-size: smaller;
-						}
+.StatusBar			{
+					}
 
-	.CurClassLink		{	text-decoration: none;
-							font-weight: bold;
-							color: black;
-						}
+.SelectLink			{
+					}
 
 
-	/*** Table of data, usually objects ***/
+/*** Side Bar **/
 
-	.ObjectsTable		{
-						}
+.SideBarLink		{
+					}
 
-	.TablePrefix		{	font-size: smaller;
-							font-weight: bold;
-						}
 
-	.NoObjectsCell		{	font-size: smaller;
-						}
+/*** Text pieces ***/
 
-	.TableHeading		{	font-size: smaller;
-							font-weight: bold;
-							background-color: #FFD;
-							vertical-align: bottom;
-							align: right;
-						}
+.Heading			{	font-weight: bold;
+					}
 
-	.TableData			{	font-size: smaller;
-						}
+.Help				{	font-family: Times, "Times New Roman", serif;
+					}
 
--->
-</style>
+
+/*** Class links ***/
+
+.ClassLink			{	font-size: 9pt;
+					}
+
+.CurClassLink		{	text-decoration: none;
+						font-weight: bold;
+						color: black;
+					}
+
+
+/*** Table of data, usually objects ***/
+
+.ObjectsTable		{
+					}
+
+.TablePrefix		{	font-size: 9pt;
+						font-weight: bold;
+					}
+
+.NoObjectsCell		{	font-size: 9pt;
+					}
+
+.TableHeading		{	font-size: 9pt;
+						font-weight: bold;
+						background-color: #FFD;
+						vertical-align: bottom;
+						text-align: right;
+					}
+
+.TableData			{	font-size: 9pt;
+					}
