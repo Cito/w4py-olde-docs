@@ -95,8 +95,10 @@ class UserManagerToFile(UserManager):
 
 	def setUserClass(self, userClass):
 		""" Overridden to mix in UserMixIn to the class that is passed in. """
-		from MiscUtils.MixIn import MixIn
-		MixIn(userClass, UserMixIn)
+		# cz: doing so with MiscUtils.Mixin lead to errors later
+		# when pickling the user, so I'm doing it this way now:
+		if UserMixIn not in userClass.__bases__:
+			userClass.__bases__ = userClass.__bases__ + (UserMixIn,)
 		self.baseOfUserManagerToFile.setUserClass(self, userClass)
 
 
