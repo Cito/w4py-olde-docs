@@ -147,7 +147,7 @@ class CompileTest(unittest.TestCase):
 		self.assertEquals( output, expect )
 
 	def testScript_Braces(self):
-		psp = '''
+		psp = '''\
 <%@page indentType="braces" %>
 <% for i in range(3): { %>
 	<%= i %><br/>
