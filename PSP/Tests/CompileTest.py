@@ -25,7 +25,6 @@ import imp
 import logging
 import unittest
 from PSP import Context, PSPCompiler
-from path import path
 from StringIO import StringIO
 
 # There is a circular dependency between AppServer and Application in imports

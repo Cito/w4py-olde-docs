@@ -1,9 +1,14 @@
 import unittest
 import os
-import fcntl
 import time
 import signal
 import re
+try:
+	import fcntl
+except ImportError:
+	raise ImportError, 'We currently neeed the fcntl module here,' \
+		' which is unfortunately only available under Unix.'
+
 
 class AppServerTest(unittest.TestCase):
 
@@ -17,9 +22,10 @@ class AppServerTest(unittest.TestCase):
 			" ThreadedAppServer http" % (launch, webwaredir, workdir)
 		# print cmd
 		dummy, self._output = os.popen4(cmd)
-		# set the output from the appserver to non-blocking mode, so that
+		# Set the output from the appserver to non-blocking mode, so that
 		# we can test the output without waiting indefinitely. This is
 		# Posix-specific, but there is probably a Win32 equivalent.
+		# @@ cz: There should be a better solution that works under Win.
 		fcntl.fcntl(self._output.fileno(), fcntl.F_SETFL, os.O_NONBLOCK)
 		self.assertAppServerSays('^Ready (.*).$', wait=10)
 

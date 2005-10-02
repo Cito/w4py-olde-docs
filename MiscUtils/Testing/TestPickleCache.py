@@ -7,71 +7,68 @@ def writePickleCache(data, filename, pickleVersion=1, source=None, verbose=None)
 """
 
 import unittest
-from os.path import join
-
-#from FixPath import progDir
+import os
 from MiscUtils.PickleCache import *
 
-
-# the directory that this file is in.
-progDir = os.path.dirname( __file__ )
-assert progDir.endswith('MiscUtils/Testing'), 'progDir="%s"' % progDir
-
+# the directory that this file is in:
+# from FixPath import progDir
+progDir = os.path.dirname(__file__)
+assert os.path.basename(progDir) == 'Testing' and \
+	os.path.basename(os.path.dirname(progDir)) == 'MiscUtils', \
+	'Test needs to run in Testing/MiscUtils.'
 
 
 class TestPickleCache(unittest.TestCase):
 
 	def test(self):
-		sys.setcheckinterval(10000)  # keep the code sequence tight for the 'source is newer' test
-#		print 'Testing PickleCache...'
+		# print 'Testing PickleCache...'
 		iters = 3
 		for iter in range(iters):
+			# print 'Iteration', iter + 1
 			self.oneIterTest()
-#		print 'Success.'
+		# print 'Success.'
 
 	def oneIterTest(self):
-		sourcePath = self.sourcePath = join(progDir, 'foo.dict')
+		sourcePath = self.sourcePath = os.path.join(progDir, 'foo.dict')
 		picklePath = self.picklePath = PickleCache().picklePath(sourcePath)
 		self.remove(picklePath) # make sure we're clean
-
 		data = self.data = {'x': 1}
 		self.writeSource()
 		try:
-			# no pickle cache yet
+			# test 1: no pickle cache yet
 			assert readPickleCache(sourcePath) is None
 			self.writePickle()
-
-			# correct
-			assert readPickleCache(sourcePath)==data, repr(readPickleCache(sourcePath))
-
-			# wrong pickle version
-			assert readPickleCache(sourcePath, pickleVersion=2)==None
-			self.writePickle()  # restore
-
-			# wrong data source
-			assert readPickleCache(sourcePath, source='notTest')==None
-			self.writePickle()  # restore
-
-			# wrong python version
+			# test 2: correctness
+			assert readPickleCache(sourcePath) == data, \
+				repr(readPickleCache(sourcePath))
+			# test 3: wrong pickle version
+			assert readPickleCache(sourcePath, pickleVersion=2) is None
+			self.writePickle() # restore
+			# test 4: wrong data source
+			assert readPickleCache(sourcePath, source='notTest') is None
+			self.writePickle() # restore
+			# test 5: wrong Python version
 			try:
 				saveVersion = sys.version_info
-				sys.version_info = (sys.version_info[0]+1,) + sys.version_info[1:]
-				assert readPickleCache(sourcePath)==None
-				self.writePickle()  # restore
+				sys.version_info = (sys.version_info[0] + 1,) \
+					+ sys.version_info[1:]
+				assert readPickleCache(sourcePath) is None
+				self.writePickle() # restore
 			finally:
 				sys.version_info = saveVersion
-
-			# source is newer
+			# test 6: source is newer
 			self.remove(picklePath)
 			self.writePickle()
-			import time; time.sleep(1)  # I think it's creepy that on Linux we have to sleep 1 in order for one file to looker newer than the other...
+			# we have to allow for the granularity of getmtime()
+			# (see the comment in the docstring of PickleCache.py)
+			import time; time.sleep(2)
 			self.writeSource()
-			assert readPickleCache(sourcePath)==None
-			self.writePickle()  # restore
+			assert readPickleCache(sourcePath) is None
+			self.writePickle() # restore
 		finally:
+			pass
 			self.remove(sourcePath)
 			self.remove(picklePath)
-
 
 	def remove(self, filename):
 		try:

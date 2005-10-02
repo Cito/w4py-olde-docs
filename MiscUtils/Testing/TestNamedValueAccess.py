@@ -1,5 +1,5 @@
 import os, sys
-newPath = os.path.abspath('../..')
+newPath = os.path.abspath(os.path.join(os.pardir, os.pardir))
 if newPath not in sys.path:
 	sys.path.insert(1, newPath)
 
