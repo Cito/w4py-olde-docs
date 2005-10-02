@@ -14,9 +14,9 @@ import PidFile
 from threading import Thread, Event
 
 try: # backward compatibility for Python < 2.3
-  True, False
+	True, False
 except NameError:
-  True, False = 1, 0
+	True, False = 1, 0
 
 """
 There is only one instance of AppServer, `globalAppServer` contains

@@ -16,9 +16,9 @@ from types import *
 from WebUtils.Funcs import htmlEncode
 
 try: # backward compatibility for Python < 2.3
-  True, False
+	True, False
 except NameError:
-  True, False = 1, 0
+	True, False = 1, 0
 
 class HTTPException(Exception):
 	"""HTTPException template class.

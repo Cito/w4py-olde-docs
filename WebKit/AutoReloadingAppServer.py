@@ -19,9 +19,9 @@ import sys
 import select
 
 try: # backward compatibility for Python < 2.3
-  True, False
+	True, False
 except NameError:
-  True, False = 1, 0
+	True, False = 1, 0
 
 # Attempt to use python-fam (fam = File Alteration Monitor) instead of polling
 # to see if files have changed.  If python-fam is not installed, we fall back

@@ -5,9 +5,9 @@ import exceptions
 import types
 
 try: # backward compatibility for Python < 2.3
-  True, False
+	True, False
 except NameError:
-  True, False = 1, 0
+	True, False = 1, 0
 
 debug = 0
 

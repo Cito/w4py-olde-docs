@@ -5,7 +5,11 @@ Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else
 """
 
 import md5, os, random, string, time, sys, tempfile
-True, False = 1==1, 1==0
+
+try: # backward compatibility for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 def commas(number):
