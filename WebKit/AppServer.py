@@ -275,8 +275,8 @@ class AppServer(ConfigurableForServerSidePath, Object):
 				return None
 			plugIn.install()
 		except:
-			import traceback
-			traceback.print_exc(file=sys.stderr)
+			from traceback import print_exc
+			print_exc(file=sys.stderr)
 			self.error('Plug-in %s raised exception.' % path)
 		return plugIn
 
@@ -426,19 +426,15 @@ def kill(pid):
 		os.kill(pid, SIGINT)
 	except:
 		if os.name == 'nt':
-			try:
-				import win32api
-			except:
-				print "Win32 API extensions not present."
-			try:
-				handle = win32api.OpenProcess(1, 0, pid)
-				win32api.TerminateProcess(handle, 0)
-			except:
-				pass
-		print "WebKit cannot terminate the running process."
+			import win32api
+			handle = win32api.OpenProcess(1, 0, pid)
+			win32api.TerminateProcess(handle, 0)
+		else:
+			raise
 
 def stop(*args, **kw):
 	"""Stop the AppServer (which may be in a different process)."""
+	print "Stopping the AppServer..."
 	if kw.has_key('workDir'):
 		# app directory
 		pidfile = os.path.join(kw['workDir'], "appserverpid.txt")
@@ -450,7 +446,12 @@ def stop(*args, **kw):
 	except:
 		print "Cannot read process id from pidfile."
 	else:
-		kill(pid)
+		try:
+			kill(pid)
+		except:
+			from traceback import print_exc
+			print_exc(1)
+			print "WebKit cannot terminate the running process."
 
 if __name__=='__main__':
 	main()
