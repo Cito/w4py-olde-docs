@@ -6,6 +6,7 @@ except ImportError:
 import threading, socket
 from WebKit.ThreadedAppServer import Handler
 from WebKit.ASStreamOut import ASStreamOut
+from os import getenv
 import time
 import errno
 
@@ -16,25 +17,10 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 	"""
 
-	# This sends certain CGI variables.  These are some that
-	# should be sent, but aren't:
-	# SERVER_ADDR
-	# SERVER_PORT
-	# SERVER_SOFTWARE
-	# SERVER_NAME
-	# HTTP_CONNECTION
-	# SERVER_PROTOCOL
-	# HTTP_KEEP_ALIVE
-
-	# These I don't think are needed:
-	# DOCUMENT_ROOT
-	# PATH_TRANSLATED
-	# GATEWAY_INTERFACE
-	# PATH
-	# SERVER_SIGNATURE
-	# SCRIPT_NAME (?)
-	# SCRIPT_FILENAME (?)
-	# SERVER_ADMIN (?)
+	# This sends the common CGI variables, except the following:
+	# HTTP_CONNECTION, HTTP_KEEP_ALIVE
+	# DOCUMENT_ROOT, PATH_TRANSLATED, SCRIPT_FILENAME
+	# SERVER_NAME, SERVER_ADMIN, SERVER_SIGNATURE
 
 	def handleRequest(self):
 		"""Handle a request.
@@ -43,7 +29,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		self.doTransaction(env, myInput) to perform the response.
 
 		"""
-		self.server_version = 'Webware/0.1'
+		self.server_version = 'Webware/' + self._server.version()
 		env = {}
 		if self.headers.has_key('Content-Type'):
 			env['CONTENT_TYPE'] = self.headers['Content-Type']
@@ -61,7 +47,13 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		else:
 			env['REQUEST_URI'] = path
 			env['QUERY_STRING'] = ''
+			env['SCRIPT_NAME'] = ''
+		env['PATH'] = getenv('PATH', '')
 		env['PATH_INFO'] = env['REQUEST_URI']
+		env['SERVER_ADDR'], env['SERVER_PORT'] = map(str, self._serverAddress)
+		env['SERVER_SOFTWARE'] = self.server_version
+		env['SERVER_PROTOCOL'] = self.protocol_version
+		env['GATEWAY_INTERFACE'] = 'CGI/1.1'
 		myInput = ''
 		if self.headers.has_key('Content-Length'):
 			myInput = self.rfile.read(int(self.headers['Content-Length']))
@@ -107,8 +99,8 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		"""
 		if headers.has_key('Location'):
 			if not headers.has_key('Status'):
-				# @@: is this the right status header?
-				headers['Status'] = '301 Moved Temporarily'
+				# @@ is this the right status header?
+				headers['Status'] = '301 Moved Permanently'
 
 	def sendStatus(self, headers):
 		"""Send status."""
@@ -172,14 +164,14 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 			self.processResponse(streamOut._buffer)
 			self._sock.shutdown(2)
 		except socket.error, e:
-			if e[0]==errno.EPIPE: #broken pipe
+			if e[0] == errno.EPIPE: # broken pipe
 				return
-			print "HTTPServer: output error:", e	# lame
+			print "HTTPServer: output error:", e # lame
 
 	def dispatchRawRequest(self, requestDict, streamOut):
 		"""Dispatch the request."""
 		transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
 		streamOut.close()
-		transaction._application=None
+		transaction._application = None
 		transaction.die()
 		del transaction
