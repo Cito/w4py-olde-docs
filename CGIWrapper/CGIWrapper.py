@@ -105,6 +105,7 @@ class CGIWrapper(NamedValueAccess):
 			'UserErrorMessage': 'The site is having technical difficulties'
 				' with this page. An error has been logged, and the problem'
 				' will be fixed as soon as possible. Sorry!',
+			'LogErrors': 1,
 			'ErrorLogFilename': 'Errors.csv',
 			'SaveErrorMessages': 1,
 			'ErrorMessagesDir': 'ErrorMsgs',

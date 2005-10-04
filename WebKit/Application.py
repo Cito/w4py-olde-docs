@@ -204,6 +204,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			'UserErrorMessage': 'The site is having technical difficulties'
 				' with this page. An error has been logged, and the problem'
 				' will be fixed as soon as possible. Sorry!',
+			'LogErrors': 1,
 			'ErrorLogFilename': 'Logs/Errors.csv',
 			'SaveErrorMessages': 1,
 			'ErrorMessagesDir': 'ErrorMsgs',

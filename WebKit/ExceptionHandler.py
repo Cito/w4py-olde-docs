@@ -480,6 +480,8 @@ class ExceptionHandler(Object):
 		in CSV format. Invoked by `handleException`.
 
 		"""
+		if not self.setting('LogErrors'):
+			return
 		logline = (
 			asctime(localtime(self._time)),
 			self.basicServletName(),
@@ -501,8 +503,7 @@ class ExceptionHandler(Object):
 				element = '"%s"' % element
 			return element
 		logline = map(fixElement, logline)
-		f.write(','.join(logline))
-		f.write('\n')
+		f.write(','.join(logline) + '\n')
 		f.close()
 
 	def emailException(self, htmlErrMsg):

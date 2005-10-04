@@ -136,7 +136,7 @@ If true, then the execution of each script is logged with useful information suc
 <dt><b>ScriptLogFilename</b>
 &nbsp; <code> = 'Scripts.csv'</code></dt>
 <dd>
-This is the name of the file that script executions are logged to. This value makes no difference if <code>LogScripts</code> is false/0. If the filename is not an absolute path, then it is relative to the directory of the CGI Wrapper.
+This is the name of the file that script executions are logged to if <code>LogScripts</code> is true. If the filename is not an absolute path, then it is relative to the directory of the CGI Wrapper.
 </dd>
 </dl>
 
@@ -179,7 +179,7 @@ This is the error message that is displayed to the user when an uncaught excepti
 <dt><b>ErrorLogFilename</b>
 &nbsp; <code> = 'Errors.csv'</code></dt>
 <dd>
-This is the name of the file where CGI Wrapper logs exceptions. Each entry contains the date &amp; time, filename, pathname, exception name &amp; data, and the HTML error message filename (assuming there is one).
+This is the name of the file where CGI Wrapper logs exceptions if <code>LogErrors</code> is true. Each entry contains the date &amp; time, filename, pathname, exception name &amp; data, and the HTML error message filename (assuming there is one).
 </dd>
 </dl>
 
@@ -220,11 +220,11 @@ The SMTP server to use for sending e-mail error messages.
 &nbsp; <code> =</code></dt>
 <dd>
 <pre class="py">{
-    'From':         'webware@mydomain',
-    'To':           [webware@mydomain'],
-    'Reply-to':     'webware@mydomain',
+    'From': 'webware@mydomain',
+    'To': [webware@mydomain'],
+    'Reply-to': 'webware@mydomain',
     'Content-type': 'text/html',
-    'Subject':      'Error'
+    'Subject': 'Error'
 }</pre>
 The e-mail MIME headers used for e-mailing error messages. Be sure to configure 'From', 'To' and 'Reply-to' before using this feature.
 </dd>

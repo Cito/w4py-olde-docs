@@ -67,6 +67,8 @@
 	"'The site is having technical difficulties with this page. An error has been logged, and the problem will be fixed as soon as possible. Sorry!'",
 	"This is the error message that is displayed to the user when an uncaught exception escapes a servlet."),
 
+('LogErrors', '1', "If true, then exceptions will be logged to an error log file."),
+
 ('ErrorLogFilename', "'Logs/Errors.csv'", "The name of the file where exceptions are logged. Each entry contains the date & time, filename, pathname, exception name & data, and the HTML error message filename (assuming there is one)."),
 
 ('SaveErrorMessages', '1', "If true, then errors (e.g., uncaught exceptions) will produce an HTML file with both the user message and debugging information. Developers/administrators can view these files after the fact, to see the details of what went wrong."),
