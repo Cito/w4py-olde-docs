@@ -266,16 +266,16 @@ Errors
     Default ``0`` (false/html in body).
 ``ErrorEmailServer``:
     The SMTP server to use for sending e-mail error messages.
-    Default: ``"mail.-.com"`` (i.e., unset)
+    Default: ``'localhost'``
 ``ErrorEmailHeaders``:
     The e-mail headers used for e-mailing error messages. Be sure to
     configure ``"From"``, ``"To"`` and ``"Reply-to"`` before turning
     ``EmailErrors`` on.  Default::
 
         {
-            'From':         '-@-.com',
-            'To':           ['-@-.com'],
-            'Reply-to':     '-@-.com',
+            'From':         'webware@mydomain,
+            'To':           ['webware@mydomain'],
+            'Reply-to':     'webware@mydomain',
             'Content-type': 'text/html',
             'Subject':      'Error'
         }

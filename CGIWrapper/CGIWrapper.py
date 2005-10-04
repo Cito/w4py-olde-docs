@@ -87,27 +87,36 @@ class CGIWrapper(NamedValueAccess):
 		"""
 
 		return {
-			'ScriptsHomeDir':         'Scripts',
-			'ChangeDir':              1,
-			'ExtraPaths':             [],
-			'ExtraPathsIndex':        1,
-			'LogScripts':             1,
-			'ScriptLogFilename':      'Scripts.csv',
-			'ScriptLogColumns':       ['environ.REMOTE_ADDR', 'environ.REQUEST_METHOD', 'environ.REQUEST_URI', 'responseSize', 'scriptName', 'serverStartTimeStamp', 'serverDuration', 'scriptDuration', 'errorOccurred'],
-			'ClassNames':			['', 'Page'],
-			'ShowDebugInfoOnErrors':  1,
-			'UserErrorMessage':       'The site is having technical difficulties with this page. An error has been logged, and the problem will be fixed as soon as possible. Sorry!',
-			'ErrorLogFilename':       'Errors.csv',
-			'SaveErrorMessages':      1,
-			'ErrorMessagesDir':       'ErrorMsgs',
-			'EmailErrors':            0, # be sure to review the following settings when enabling error e-mails
-			'ErrorEmailServer':       'mail.-.com',
-			'ErrorEmailHeaders':      { 'From':         '-@-.com',
-				                        'To':           ['-@-.com'],
-				                        'Reply-to':     '-@-.com',
-				                        'Content-type': 'text/html',
-				                        'Subject':      'Error'
-									}
+			'ScriptsHomeDir': 'Scripts',
+			'ChangeDir': 1,
+			'ExtraPaths': [],
+			'ExtraPathsIndex': 1,
+			'LogScripts': 1,
+			'ScriptLogFilename': 'Scripts.csv',
+			'ScriptLogColumns': [
+				'environ.REMOTE_ADDR',
+				'environ.REQUEST_METHOD', 'environ.REQUEST_URI',
+				'responseSize', 'scriptName',
+				'serverStartTimeStamp', 'serverDuration',
+				'scriptDuration', 'errorOccurred'
+			],
+			'ClassNames': ['', 'Page'],
+			'ShowDebugInfoOnErrors': 1,
+			'UserErrorMessage': 'The site is having technical difficulties'
+				' with this page. An error has been logged, and the problem'
+				' will be fixed as soon as possible. Sorry!',
+			'ErrorLogFilename': 'Errors.csv',
+			'SaveErrorMessages': 1,
+			'ErrorMessagesDir': 'ErrorMsgs',
+			'EmailErrors': 0,
+			'ErrorEmailServer': 'localhost',
+			'ErrorEmailHeaders': {
+				'From': 'webware@mydomain',
+				'To': ['webware@mydomain'],
+				'Reply-to': 'webware@mydomain',
+				'Content-type': 'text/html',
+				'Subject': 'Error'
+			}
 		}
 
 	def configFilename(self):
@@ -121,7 +130,7 @@ class CGIWrapper(NamedValueAccess):
 		file. The config filename is taken from
 		configFilename().
 		"""
-		
+
 		try:
 			file = open(self.configFilename())
 		except IOError:

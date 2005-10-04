@@ -185,47 +185,50 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""The default Application.config."""
 		return {
 			'PrintConfigAtStartUp': 1,
-			'LogActivity':          1,
-			'ActivityLogFilename':  'Logs/Activity.csv',
-			'ActivityLogColumns':
-			['request.remoteAddress', 'request.method',
-			 'request.uri', 'response.size',
-			 'servlet.name', 'request.timeStamp',
-			 'transaction.duration',
-			 'transaction.errorOccurred'],
-			'SessionStore':         'Dynamic',
-			'SessionTimeout':        60,  # minutes
+			'LogActivity': 1,
+			'ActivityLogFilename': 'Logs/Activity.csv',
+			'ActivityLogColumns': [
+				'request.remoteAddress', 'request.method',
+				'request.uri', 'response.size',
+				'servlet.name', 'request.timeStamp',
+				'transaction.duration',
+				'transaction.errorOccurred'
+				],
+			'SessionStore': 'Dynamic',
+			'SessionTimeout': 60,
 			'IgnoreInvalidSession': 1,
 			'UseAutomaticPathSessions': 0,
-
-			# Error handling
 			'ShowDebugInfoOnErrors': 1,
 			'IncludeFancyTraceback': 0,
 			'FancyTracebackContext': 5,
-			'UserErrorMessage':      'The site is having technical difficulties with this page. An error has been logged, and the problem will be fixed as soon as possible. Sorry!',
-			'ErrorLogFilename':      'Logs/Errors.csv',
-			'SaveErrorMessages':     1,
-			'ErrorMessagesDir':      'ErrorMsgs',
-			'EmailErrors':           0, # be sure to review the following settings when enabling error e-mails
-			'ErrorEmailServer':      'mail.-.com',
-			'ErrorEmailHeaders':     { 'From':         '-@-.com',
-			                           'To':           ['-@-.com'],
-			                           'Reply-to':     '-@-.com',
-			                           'content-type': 'text/html',
-			                           'Subject':      'Error'
-			                         },
+			'UserErrorMessage': 'The site is having technical difficulties'
+				' with this page. An error has been logged, and the problem'
+				' will be fixed as soon as possible. Sorry!',
+			'ErrorLogFilename': 'Logs/Errors.csv',
+			'SaveErrorMessages': 1,
+			'ErrorMessagesDir': 'ErrorMsgs',
+			'EmailErrors': 0,
+			'ErrorEmailServer': 'localhost',
+			'ErrorEmailHeaders': {
+				'From': 'webware@mydomain',
+				'To': ['webware@mydomain'],
+				'Reply-to': 'webware@mydomain',
+				'content-type': 'text/html',
+				'Subject': 'Error'
+				},
 			'MaxValueLengthInExceptionReport': 500,
-			'RPCExceptionReturn':    'traceback',
-			'ReportRPCExceptionsInWebKit':   1,
-			'Contexts':              { 'default':  'Examples',
-			                           'Admin':    'Admin',
-			                           'Examples': 'Examples',
-			                           'Testing':  'Testing',
-			                           'Docs':     'Docs',
-			                         },
-			'Debug':	{
+			'RPCExceptionReturn': 'traceback',
+			'ReportRPCExceptionsInWebKit': 1,
+			'Contexts': {
+				'default': 'Examples',
+				'Admin': 'Admin',
+				'Examples': 'Examples',
+				'Testing': 'Testing',
+				'Docs': 'Docs',
+				},
+			'Debug': {
 				'Sessions': 0,
-			},
+				},
 			'EnterDebuggerOnException': 0,
 			'OldStyleActions': 0,
 			'DirectoryFile': ['index', 'Index', 'main', 'Main'],
@@ -233,12 +236,12 @@ class Application(ConfigurableForServerSidePath, Object):
 			'ExtensionCascadeOrder': ['.py','.psp','.kid','.html'],
 			'ExtraPathInfo': 1,
 			'ExtensionsToIgnore': ['.pyc', '.pyo', '.py~',
-					       '.psp~', '.html~', '.bak',
-					       '.tmpl'],
+				'.psp~', '.html~', '.bak', '.tmpl'
+				],
 			'ExtensionsToServe': [],
 			'FilesToHide': ['.*','*~', '*.bak', '*.tmpl',
-					'*.config', '__init__.*',
-					'*.pyc', '*.pyo'],
+				'*.config', '__init__.*', '*.pyc', '*.pyo'
+				],
 			'FilesToServe': [],
 			'UnknownFileTypes': {
 				'ReuseServlets': 1,

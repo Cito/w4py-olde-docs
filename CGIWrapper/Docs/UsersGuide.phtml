@@ -209,7 +209,7 @@ If true, error messages are e-mail out according to the ErrorEmailServer and Err
 
 <dl>
 <dt><b>ErrorEmailServer</b>
-&nbsp; <code> = 'mail.-.com'</code></dt>
+&nbsp; <code> = 'localhost'</code></dt>
 <dd>
 The SMTP server to use for sending e-mail error messages.
 </dd>
@@ -220,9 +220,9 @@ The SMTP server to use for sending e-mail error messages.
 &nbsp; <code> =</code></dt>
 <dd>
 <pre class="py">{
-    'From':         '-@-.com',
-    'To':           ['-@-.com'],
-    'Reply-to':     '-@-.com',
+    'From':         'webware@mydomain',
+    'To':           [webware@mydomain'],
+    'Reply-to':     'webware@mydomain',
     'Content-type': 'text/html',
     'Subject':      'Error'
 }</pre>

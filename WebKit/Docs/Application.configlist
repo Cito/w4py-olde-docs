@@ -77,13 +77,13 @@
 
 ('EmailErrorReportAsAttachment', '0', "1 to make html error reports be emailed as text with an html attachment, or 0 to make the html the body of the message."),
 
-('ErrorEmailServer', "'mail.-.com'", "The SMTP server to use for sending e-mail error messages."),
+('ErrorEmailServer', "'localhost'", "The SMTP server to use for sending e-mail error messages."),
 
 ('ErrorEmailHeaders',
 	'''{
-<br> &nbsp; &nbsp; 'From':         '-@-.com',
-<br> &nbsp; &nbsp; 'To':           ['-@-.com'],
-<br> &nbsp; &nbsp; 'Reply-to':     '-@-.com',
+<br> &nbsp; &nbsp; 'From':         'webware@mydomain',
+<br> &nbsp; &nbsp; 'To':           ['webware@mydomain'],
+<br> &nbsp; &nbsp; 'Reply-to':     'webware@mydomain',
 <br> &nbsp; &nbsp; 'Content-type': 'text/html',
 <br> &nbsp; &nbsp; 'Subject':      'Error'
 <br>}''',
