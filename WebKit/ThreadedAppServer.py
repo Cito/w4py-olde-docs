@@ -819,8 +819,8 @@ def run(workDir=None):
 	"""
 	global server
 	server = None
-	global exitstatus
-	exitstatus = 0
+	global exitStatus
+	exitStatus = 0
 	runAgain = True
 	while runAgain: # looping in support of RestartAppServerError
 		try:
@@ -861,16 +861,16 @@ def run(workDir=None):
 				if isinstance(e, SystemExit):
 					print "Exiting AppServer%s." % (
 						e[0] == 3 and ' for reload' or '')
-					exitstatus = e[0]
+					exitStatus = e[0]
 				elif (isinstance(e, KeyboardInterrupt) or
 						(isinstance(e, IOError) and e[0] == errno.EINTR)):
 					print "Exiting AppServer due to keyboard interrupt."
-					exitstatus = 0
+					exitStatus = 0
 				else:
 					import traceback
 					traceback.print_exc(file=sys.stderr)
 					print "Exiting AppServer due to above exception."
-					exitstatus = 1
+					exitStatus = 1
 				sys.stdout.flush()
 				sys.stderr.flush()
 				if server and server.running:
@@ -880,7 +880,7 @@ def run(workDir=None):
 			AppServerModule.globalAppServer = None
 	sys.stdout.flush()
 	sys.stderr.flush()
-	return exitstatus
+	return exitStatus
 
 def shutDown(signum, frame):
 	"""Signal handler for shutting down the server."""
