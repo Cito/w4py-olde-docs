@@ -1,13 +1,14 @@
 import unittest
 import os
 import time
-import signal
-import re
-try:
-	import fcntl
-except ImportError:
-	raise ImportError, 'We currently neeed the fcntl module here,' \
-		' which is unfortunately only available under Unix.'
+from re import compile as reCompile
+from threading import Thread
+from Queue import Queue, Empty
+#~ try:
+	#~ import fcntl
+#~ except ImportError:
+	#~ raise ImportError, 'We currently neeed the fcntl module here,' \
+		#~ ' which is unfortunately only available under Unix.'
 
 
 class AppServerTest(unittest.TestCase):
@@ -18,63 +19,73 @@ class AppServerTest(unittest.TestCase):
 		dirname = os.path.dirname
 		webwaredir = dirname(dirname(dirname(workdir)))
 		launch = os.path.join(workdir, 'Launch.py')
-		cmd = "python %s --webware-dir=%s --work-dir=%s" \
-			" ThreadedAppServer http" % (launch, webwaredir, workdir)
-		# print cmd
-		dummy, self._output = os.popen4(cmd)
+		self._cmd = "python %s --webware-dir=%s --work-dir=%s" \
+			" ThreadedAppServer " % (launch, webwaredir, workdir)
+		self._output = os.popen(self._cmd + "start")
 		# Set the output from the appserver to non-blocking mode, so that
 		# we can test the output without waiting indefinitely. This is
 		# Posix-specific, but there is probably a Win32 equivalent.
 		# @@ cz: There should be a better solution that works under Win.
-		fcntl.fcntl(self._output.fileno(), fcntl.F_SETFL, os.O_NONBLOCK)
-		self.assertAppServerSays('^Ready (.*).$', wait=10)
+		#~ fcntl.fcntl(self._output.fileno(), fcntl.F_SETFL, os.O_NONBLOCK)
+		def pullStream(stream, queue):
+			"""Copy output from stream to queue."""
+			while self._output:
+				line = self._output.readline()
+				if not line:
+					break
+				self._queue.put(line)
+		self._queue = Queue()
+		self._thread = Thread(target=pullStream,
+			args=(self._output, self._queue))
+		self._thread.start()
+		self.assertAppServerSays('^Ready (.*).$')
 
-	def assertAppServerSays(self, pattern, flags=re.MULTILINE, wait=5):
+	def assertAppServerSays(self, pattern, wait=5):
 		"""Check that the appserver output contains the specified pattern.
 
 		If the appserver does not output the pattern within the given number
 		of seconds, an assertion is raised.
 
 		"""
-		if not self.waitForAppServer(pattern, flags, wait):
-			assert False, "Expected appserver to say '%s'," \
-				" but after waiting %d seconds it said: %s" \
+		if not self.waitForAppServer(pattern, wait):
+			assert False, "Expected appserver to say '%s',\n" \
+				"but after waiting %d seconds it said:\n%s" \
 				% (pattern, wait, self._actualAppServerOutput)
 
-	def waitForAppServer(self, pattern, flags=re.MULTILINE, wait=5):
+	def waitForAppServer(self, pattern, wait=5):
 		"""Check that the appserver output contains the specified pattern.
 
 		Returns True or False depending on whether the pattern was seen.
 
 		"""
 		start = time.time()
-		data = ''
+		comp = reCompile(pattern)
+		lines = []
+		found = False
 		while 1:
-			data += self.getOutput()
-			if re.search(pattern, data, flags):
-				return True
-			time.sleep(0.2)
-			now = time.time()
-			if now - start > wait:
-				break
-		self._actualAppServerOutput = data
-		return False
-
-	def getOutput(self):
-		data = ''
-		try:
-			data = self._output.read()
-		except IOError, e:
-			pass
-		return data
+			try:
+				line = self._queue.get_nowait()
+				print line
+			except Empty:
+				line = None
+			if line is None:
+				now = time.time()
+				if now - start > wait:
+					break
+				time.sleep(0.2)
+			else:
+				if len(lines) > 9:
+					del lines[0]
+				lines.append(line)
+				if comp.search(line):
+					found = True
+					break
+		self._actualAppServerOutput = ''.join(lines)
+		return found
 
 	def tearDown(self):
-		try:
-			pidfile = open(os.path.join(self.workDir(), 'appserverpid.txt'))
-		except:
-			pass
-		else:
-			pid = int(pidfile.read())
-			pidfile.close()
-			os.kill(pid, signal.SIGTERM)
-		self.assertAppServerSays('^AppServer has been shutdown.$', wait=10)
+		print self._cmd + "stop"
+		output = os.popen(self._cmd + "stop")
+		#print output.read()
+		self.assertAppServerSays('^AppServer has been shutdown.$')
+		self._output = None
