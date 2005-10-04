@@ -4,31 +4,26 @@ import time
 from re import compile as reCompile
 from threading import Thread
 from Queue import Queue, Empty
-#~ try:
-	#~ import fcntl
-#~ except ImportError:
-	#~ raise ImportError, 'We currently neeed the fcntl module here,' \
-		#~ ' which is unfortunately only available under Unix.'
+from urllib import urlopen
 
 
 class AppServerTest(unittest.TestCase):
 
 	def setUp(self):
-		# start the appserver
+		"""Setup fixture and test starting."""
 		workdir = self.workDir()
 		dirname = os.path.dirname
 		webwaredir = dirname(dirname(dirname(workdir)))
 		launch = os.path.join(workdir, 'Launch.py')
-		self._cmd = "python %s --webware-dir=%s --work-dir=%s" \
-			" ThreadedAppServer " % (launch, webwaredir, workdir)
-		self._output = os.popen(self._cmd + "start")
-		# Set the output from the appserver to non-blocking mode, so that
-		# we can test the output without waiting indefinitely. This is
-		# Posix-specific, but there is probably a Win32 equivalent.
-		# @@ cz: There should be a better solution that works under Win.
-		#~ fcntl.fcntl(self._output.fileno(), fcntl.F_SETFL, os.O_NONBLOCK)
+		cmd = "python %s --webware-dir=%s --work-dir=%s" \
+			" ThreadedAppServer" % (launch, webwaredir, workdir)
+		self._output = os.popen(cmd)
+		# Setting the appserver output to non-blocking mode
+		# could be done as follows on Unix systems:
+		# fcntl.fcntl(self._output.fileno(), fcntl.F_SETFL, os.O_NONBLOCK)
+		# But, since this does not work on Windows systems,
+		# we will pull the output in a separate thread:
 		def pullStream(stream, queue):
-			"""Copy output from stream to queue."""
 			while self._output:
 				line = self._output.readline()
 				if not line:
@@ -38,7 +33,19 @@ class AppServerTest(unittest.TestCase):
 		self._thread = Thread(target=pullStream,
 			args=(self._output, self._queue))
 		self._thread.start()
+		self.assertAppServerSays('^WebKit AppServer')
+		self.assertAppServerSays('Webware for Python$')
+		self.assertAppServerSays('^EnableHTTP\s*=\s*True$')
+		self.assertAppServerSays('^HTTPPort\s*=\s*8080$')
+		self.assertAppServerSays('^Host\s*=\s*127.0.0.1$')
 		self.assertAppServerSays('^Ready (.*).$')
+		# We will also test the built-in HTTP server with this:
+		try:
+			data = urlopen('http://localhost:8080').read()
+		except IOError:
+			data = '<h2>Could not read page.</h2>'
+		assert data.find('<h1>Welcome to Webware!</h1>') > 0
+		assert data.find('<h2>Test passed.</h2>') > 0
 
 	def assertAppServerSays(self, pattern, wait=5):
 		"""Check that the appserver output contains the specified pattern.
@@ -65,7 +72,6 @@ class AppServerTest(unittest.TestCase):
 		while 1:
 			try:
 				line = self._queue.get_nowait()
-				print line
 			except Empty:
 				line = None
 			if line is None:
@@ -84,8 +90,11 @@ class AppServerTest(unittest.TestCase):
 		return found
 
 	def tearDown(self):
-		print self._cmd + "stop"
-		output = os.popen(self._cmd + "stop")
-		#print output.read()
+		"""Teardown fixture and test stopping."""
+		try:
+			data = urlopen('http://localhost:8080/stop').read()
+		except IOError:
+			data = '<h2>Could not read page.</h2>'
+		assert data.find('<h2>The AppServer has been stopped.</h2>') > 0
 		self.assertAppServerSays('^AppServer has been shutdown.$')
 		self._output = None
