@@ -59,8 +59,8 @@ class NewPage(Servlet):
     def notImplemented(self):
         raise self.exc.NotImplemented
 
-    ## The 200-series of statuses aren't errors, so they aren't set
-    ## by exceptions.  200 OK is the default, of course.
+    # The 200-series of statuses aren't errors, so they aren't set
+    # by exceptions.  200 OK is the default, of course.
 
     def statusCreated(self):
         self.response().setStatus(201, 'Created')
@@ -80,8 +80,8 @@ class NewPage(Servlet):
             host = host[string.find(host, '//'):] # get rid of http://
             host = host[:string.find(host, '/')] # get rid of rest of path
             return host
-        ## @@: maybe this should check if it's https, and the applicable
-        ## port number for that... then we need a protocol method too
+        # @@: maybe this should check if it's https, and the applicable
+        # port number for that... then we need a protocol method too
         host = self._environ['HTTP_HOST']
         port = int(self._environ['HTTP_PORT'])
         if port != 80:
@@ -100,9 +100,9 @@ class NewPage(Servlet):
                 path = path[:path.find('/%s/' % contextName)]
                 return path
             else:
-                ## @@: I should be checking for something else here,
-                ## like a servlet name or something, as in
-                ## /WK/SomeServlet (in default context)
+                # @@: I should be checking for something else here,
+                # like a servlet name or something, as in
+                # /WK/SomeServlet (in default context)
                 return ''
         return req.adapterName()
 
@@ -119,8 +119,8 @@ class NewPage(Servlet):
                 return path
             else:
                 return ''
-        ## @@: There should be a urljoin function... I guess urlparse
-        ## might even have it, but whatever...
+        # @@: There should be a urljoin function... I guess urlparse
+        # might even have it, but whatever...
         return '%s/%s' % (req.webKitURL(), contextName)
 
     def servletURL(self, extraPath=1, queryString=0):
@@ -131,7 +131,7 @@ class NewPage(Servlet):
             absolute=1, host=0):
         assert absolute, 'Relative URLs not yet supported'
         if not servletName:
-            ## @@: doesn't work with packages
+            # @@: doesn't work with packages
             servletName = self.__class__.__name__
         extraPath = extraPath or ''
         if args:
@@ -216,6 +216,7 @@ class NewPage(Servlet):
                or req.hasField('_action_%s.x' % action):
                 self._contentAction = action
         self.writeHTML()
+
 
     ## Access ##
 
@@ -449,6 +450,7 @@ class NewPage(Servlet):
             self._response.write(str(arg))
         self._response.write('\n')
 
+
     ## Threading ##
 
     def canBeThreaded(self):
@@ -468,7 +470,8 @@ class NewPage(Servlet):
         return []
 
     ## Utility functions ##
-    ## (you should just have a standard module for these, though)
+
+    # (you should just have a standard module for these, though) #
 
     def htmlEncode(self, s):
         return Funcs.htmlEncode(s)
@@ -481,6 +484,7 @@ class NewPage(Servlet):
 
     def urlDecode(self, s):
         return Funcs.urlDecode(s)
+
 
     ## Delegation and forwarding ##
 
@@ -511,6 +515,7 @@ class NewPage(Servlet):
         """
         return apply(self.application().callMethodOfServlet, (self.transaction(), URL, method) + args, kwargs)
 
+
     ## Self utility ##
 
     def sessionEncode(self, url=None):
@@ -522,6 +527,7 @@ class NewPage(Servlet):
         if url == None:
             url = self.request().uri()
         return self.session().sessionEncode(url)
+
 
     ## Exception reports ##
 
@@ -538,9 +544,8 @@ class NewPage(Servlet):
 See WebKit/ExceptionHandler.py for more information.
 ''')
 
-    ############################################################
-    ## Messages
-    ############################################################
+
+    ## Messages ##
 
     def resetResponse(self):
         """

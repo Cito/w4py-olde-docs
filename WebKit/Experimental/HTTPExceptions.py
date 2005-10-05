@@ -90,7 +90,7 @@ class AuthenticationRequiredError(HTTPError):
     def headers(self, servlet=None):
         return {'WWW-Authenticate': 'Basic realm="%s"' % self._realm}
 
-## These are for spelling mistakes.  I'm unsure about their benefit.
+# These are for spelling mistakes.  I'm unsure about their benefit.
 AuthenticationRequired = AuthenticationRequiredError
 AuthorizationRequiredError = AuthenticationRequiredError
 AuthorizationRequired = AuthenticationRequiredError
