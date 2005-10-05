@@ -22,8 +22,7 @@
 
 from WebKit.ServletFactory import ServletFactory
 
-import string
-import os,sys,string
+import os, sys, string
 from PSP import Context, PSPCompiler
 import time, threading
 
@@ -36,14 +35,14 @@ class PSPServletFactory(ServletFactory):
 	"""
 
 	def __init__(self,application):
-		ServletFactory.__init__(self,application)
+		ServletFactory.__init__(self, application)
 		self.cacheDir = application.serverSidePath('Cache/PSP')
 		sys.path.append(self.cacheDir)
 		self._cacheClassFiles = self._cacheClasses
 		l = ['_'] * 256
 		for c in string.digits + string.letters:
 			l[ord(c)] = c
-		self._classNameTrans = string.join(l, '')
+		self._classNameTrans = ''.join(l)
 		if application.setting('ClearPSPCacheOnStart', 1):
 			self.clearFileCache()
 		self._lock = threading.RLock()
@@ -60,7 +59,7 @@ class PSPServletFactory(ServletFactory):
 		Also, clear the class files stored on disk.
 
 		"""
-		ServletFactory.flushCache()
+		ServletFactory.flushCache(self)
 		self.clearFileCache()
 
 	def clearFileCache(self):
@@ -78,7 +77,7 @@ class PSPServletFactory(ServletFactory):
 		"""
 		# Compute class name by taking the path and substituting
 		# underscores for all non-alphanumeric characters:
-		return string.translate(os.path.splitdrive(pagename)[1], self._classNameTrans)
+		return os.path.splitdrive(pagename)[1].translate(self._classNameTrans)
 
 	def loadClassFromFile(self, transaction, filename, classname):
 		"""Create an actual class instance.
