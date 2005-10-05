@@ -90,7 +90,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 		self._verbose = self.setting('Verbose')
 		self._plugIns = []
-		self._reqCount = 0
+		self._requestID = 0
 
 		self.checkForInstall()
 		self.config() # cache the config
@@ -347,7 +347,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		since it was launched.
 
 		"""
-		return self._reqCount
+		return self._requestID
 
 	def isPersistent(self):
 		"""Check whether the AppServer is persistent.

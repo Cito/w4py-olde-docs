@@ -292,9 +292,10 @@ class ThreadedAppServer(AppServer):
 			if i > max:
 				max = i
 		average = average / len(self._threadUseCounter)
-		if debug: print "Average Thread Use: ", avg
-		if debug: print "Max Thread Use: ", max
-		if debug: print "ThreadCount: ", self.threadCount
+		if debug:
+			print "Average Thread Use: ", avg
+			print "Max Thread Use: ", max
+			print "ThreadCount: ", self.threadCount
 
 		if len(self._threadUseCounter) < self._maxServerThreads:
 			return #not enough samples
@@ -394,7 +395,7 @@ class ThreadedAppServer(AppServer):
 			while 1:
 				try:
 					handler = self._requestQueue.get()
-					if handler is None: #None means time to quit
+					if handler is None: # None means time to quit
 						if debug:
 							print "Thread retrieved None, quitting."
 						break
@@ -667,7 +668,7 @@ class MonitorHandler(Handler):
 		BUFSIZE = 8*1024
 		dict = self.receiveDict()
 		if dict['format'] == "STATUS":
-			conn.send(str(self.server._reqCount))
+			conn.send(str(self.server._requestID))
 		elif dict['format'] == 'QUIT':
 			conn.send("OK")
 			conn.close()
