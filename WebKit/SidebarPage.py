@@ -28,7 +28,7 @@ class SidebarPage(Page):
 	## StyleSheet ##
 
 	def writeStyleSheet(self):
-		"""We're using a simply internal style sheet.
+		"""We're using a simple internal style sheet.
 
 		This way we avoid having to care about where an external style
 		sheet should be located when this class is used in another context.
@@ -44,11 +44,11 @@ body {
 	margin: 0pt;
 	padding: 0pt;
 }
-h1 { font-size: 20pt; }
-h2 { font-size: 18pt; }
-h3 { font-size: 16pt; }
-h4 { font-size: 14pt; }
-h5 { font-size: 12pt; }
+h1 { font-size: 18pt; }
+h2 { font-size: 16pt; }
+h3 { font-size: 14pt; }
+h4 { font-size: 12pt; }
+h5 { font-size: 11pt; }
 -->
 </style>''')
 
@@ -112,7 +112,7 @@ h5 { font-size: 12pt; }
 			suffix = ' ' + suffix
 		else:
 			suffix = ''
-		if url:
+		if url is not None:
 			title = '<a href="%s">%s</a>' % (url, title)
 		self.writeln('<div style="margin-left:%dpt">%s%s</div>'
 			% (4*indentLevel, title, suffix))
