@@ -1,13 +1,13 @@
 """HTTPExceptions
 
 HTTPExceptions are for situations that are predicted by the
-HTTP spec.  Where the ``200 OK`` response is typical, a
+HTTP spec. Where the ``200 OK`` response is typical, a
 ``404 Not Found`` or ``301 Moved Temporarily`` response is not
 entirely unexpected.
 
 `Application` catches all `HTTPException` exceptions (and subclasses
 of HTTPException), and instead of being errors these are translated
-into responses.  In various places these can also be caught and
+into responses. In various places these can also be caught and
 changed, for instance an `HTTPAuthenticationRequired` could be
 turned into a normal login page.
 """
@@ -20,6 +20,7 @@ try: # backward compatibility for Python < 2.3
 except NameError:
 	True, False = 1, 0
 
+
 class HTTPException(Exception):
 	"""HTTPException template class.
 
@@ -30,7 +31,7 @@ class HTTPException(Exception):
 	    description that goes with it (like ``(200, "OK")``)
 	`_description`:
 	    the long-winded description, to be presented
-	    in the response page.  Or you can override description()
+	    in the response page. Or you can override description()
 	    if you want something more context-sensitive.
 
 	"""
@@ -56,6 +57,7 @@ class HTTPException(Exception):
 
 		The HTML page that should be sent with the error,
 		usually a description of the problem.
+
 		"""
 		return '''
 <html><head><title>%(code)s %(title)s</title></head>
@@ -106,19 +108,23 @@ class HTTPException(Exception):
 	## Misc ##
 
 	def headers(self):
-		"""
+		"""Get headers.
+
 		Additional headers that should be sent with the
-		response, not including the Status header.  For instance,
-		the redirect exception adds a Location header
+		response, not including the Status header. For instance,
+		the redirect exception adds a Location header.
+
 		"""
 		return {}
 
 	def setTransaction(self, trans):
-		"""
+		"""Set transaction.
+
 		When the exception is caught by `Application`, it tells
-		the exception what the transaction is.  This way you
+		the exception what the transaction is. This way you
 		can resolve relative paths, or otherwise act in a manner
 		sensitive of the context of the error.
+
 		"""
 		self._transaction = trans
 
@@ -273,7 +279,7 @@ class HTTPTemporaryRedirect(HTTPMovedPermanently):
 	"""HTTPExcecption "temporary tedirect" subclass.
 
 	Like HTTPMovedPermanently, except the redirect is only valid for this
-	request.  Internally identical to HTTPMovedPermanently, except with a
+	request. Internally identical to HTTPMovedPermanently, except with a
 	different response code. Browsers will check the server for each request
 	to see where it's redirected to.
 
@@ -295,10 +301,20 @@ class HTTPNotFound(HTTPException):
 	"""HTTPExcecption "not found" subclass.
 
 	When the requested resource does not exist. To be more secretive,
-	it is okay to return a 404 if access to the resource is not	permitted
+	it is okay to return a 404 if access to the resource is not permitted
 	(you are not required to use HTTPForbidden, though it makes it more
 	clear why access was disallowed).
 
 	"""
 	_code = 404, 'Not Found'
 	_description = 'The resource you were trying to access was not found'
+
+	def html(self):
+		trans = self._transaction
+		page = trans.application()._404Page
+		if page:
+			req = trans.request()
+			url = req.adapterName() + req.urlPath()
+			return page % url
+		else:
+			return HTTPException.html(self)

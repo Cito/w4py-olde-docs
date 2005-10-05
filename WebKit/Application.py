@@ -101,6 +101,17 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		self.startSessionSweeper()
 
+		try: # try to get a 404 error page from the working dir
+			self._404Page = open(os.path.join(self._serverSidePath,
+				"404Text.txt")).read()
+		except: # if not found in the working dir,
+			try: # then try the directory this file is located in
+				self._404Page = open(os.path.join(
+					os.path.dirname(os.path.abspath(__file__)),
+					"404Text.txt")).read()
+			except: # otherwise fall back to standard exception
+				self._404Page = None
+
 
 	def initVersions(self):
 		"""Get and store versions.
@@ -366,6 +377,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		Returns the absolute server-side path of the WebKit application.
 		If the optional path is passed in, then it is joined with the
 		server side directory to form a path relative to the app server.
+
 		"""
 		if path:
 			return os.path.normpath(
