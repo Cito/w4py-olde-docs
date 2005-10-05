@@ -88,13 +88,10 @@ h5 { font-size: 11pt; }
 			'%s</td><td style="background-color:#202080;color:white;'
 			'padding:8pt 6pt;font-size:16pt;font-weight:bold;'
 			'text-align:center;vertical-align:middle">'
-			'%s</td></tr>' % (self.cornerTitle(), self.title()))
+			'%s</td></tr>' % (cornerTitle, title))
 
 	def writeSidebar(self):
-		self.startMenu()
-		self.writeln('<p style="color:red">Woops.'
-			' Someone forgot to override writeSidebar().</p>')
-		self.endMenu()
+		self.writeWebKitSidebarSections()
 
 	def cornerTitle(self):
 		return ''
