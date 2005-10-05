@@ -3,9 +3,10 @@ from ExamplePage import ExamplePage
 class Welcome(ExamplePage):
 
 	def writeContent(self):
-		self.writeln('<h2>Welcome to WebKit %s!</h2>' % self.application().webKitVersionString())
+		wr = self.writeln
+		wr('<h2>Welcome to WebKit %s!</h2>' % self.application().webKitVersionString())
 		adapter = self.request().adapterName()
-		self.writeln('''\
+		wr('''\
 		<p> Along the side of this page you will see various links that will take you to:</p>
 		<ul>
 			<li>The different WebKit examples.</li>
@@ -23,20 +24,22 @@ class Welcome(ExamplePage):
 		and <a href="%(adapter)s/Docs/ComponentIndex.html">all other components</a>
 		of <a href="%(adapter)s/Docs/">Webware for Python</a>.</p>''' % locals())
 		from os.path import join
-		self.writeln('<p>The location of the WebKit documentation on the server is:</p>')
-		self.writeln('<blockquote>%s</blockquote>' % join(self.application().webKitPath(), 'Docs'))
-		self.writeln('<p>The documentation for Webware for Python is located here:</p>')
-		self.writeln('<blockquote>%s</blockquote>' % join(self.application().webwarePath(), 'Docs'))
+		wr('<p>The location of the documentation on the server:</p>')
+		wr('<ul>')
+		wr('<li>WebKit: <tt>%s</tt></li>'
+			% join(self.application().webKitPath(), 'Docs'))
+		wr('<li>Webware for Python: <tt>%s</tt>'
+			% join(self.application().webwarePath(), 'Docs'))
+		wr('</ul>')
 		req = self.request()
 		extraURLPath = req.extraURLPath()
 		if extraURLPath and extraURLPath != '/':
-			self.writeln('''
-			<p>extraURLPath information was found on the URL,
+			wr('''
+			<p><b>Note:</b> extraURLPath information was found on the URL,
 			and a servlet was not found to process it.
 			Processing has been delegated to this servlet.</p>''')
-			self.writeln('<ul>')
-			self.writeln('<li>serverSidePath of this servlet is: <tt>%s</tt></li>' % req.serverSidePath())
-			self.writeln('<li>extraURLPath data is: <tt>%s</tt></li>' % extraURLPath)
-			self.writeln('</ul>')
-
-
+			wr('<ul>')
+			wr('<li>serverSidePath: <tt>%s</tt></li>'
+				% req.serverSidePath())
+			wr('<li> extraURLPath: <tt>%s</tt></li>' % extraURLPath)
+			wr('</ul>')
