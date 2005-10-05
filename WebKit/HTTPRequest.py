@@ -32,12 +32,12 @@ class HTTPRequest(Request):
 		self._parents = []
 		if dict:
 			# Dictionaries come in from web server adapters like the CGIAdapter
-			assert dict['format']=='CGI'
-			self._time    = dict['time']
+			assert dict['format'] == 'CGI'
+			self._time = dict['time']
 			self._environ = dict['environ']
-			self._input   = dict['input']
+			self._input = dict['input']
 			self._requestID = dict['requestID']
-			self._fields  = FieldStorage.FieldStorage(self._input,
+			self._fields = FieldStorage.FieldStorage(self._input,
 				environ=self._environ, keep_blank_values=1, strict_parsing=0)
 			self._fields.parse_qs()
 			self._cookies = Cookie()
@@ -51,10 +51,10 @@ class HTTPRequest(Request):
 		else:
 			# If there's no dictionary, we pretend we're a CGI script and see what happens...
 			import time
-			self._time    = time.time()
+			self._time = time.time()
 			self._environ = os.environ.copy()
-			self._input   = None
-			self._fields  = cgi.FieldStorage(keep_blank_values=1)
+			self._input = None
+			self._fields = cgi.FieldStorage(keep_blank_values=1)
 			self._cookies = Cookie()
 
 		# Debugging
@@ -93,7 +93,7 @@ class HTTPRequest(Request):
 			keys = self._fields.keys()
 		except TypeError:
 			# This can happen if, for example, the request is an XML-RPC request,
-			# not a regular POST from an HTML form.  In that case we just create
+			# not a regular POST from an HTML form. In that case we just create
 			# an empty set of fields.
 			keys = []
 		dict = {}
@@ -103,7 +103,7 @@ class HTTPRequest(Request):
 			if type(value) is not ListType:
 				if value.filename:
 					if debug: print "Uploaded File Found"
-				else:  # i.e., if we don't have a list,
+				else: # i.e., if we don't have a list,
 					# we have one of those cgi.MiniFieldStorage objects.
 					value = value.value # Get it's value.
 			else:
@@ -125,9 +125,9 @@ class HTTPRequest(Request):
 		# Get session ID from cookie if available
 		self._cookieSession = self._cookies.get('_SID_', None)
 
-		self._transaction    = None
+		self._transaction = None
 		self._serverRootPath = ""
-		self._extraURLPath  = ""
+		self._extraURLPath = ""
 
 		# try to get automatic path session
 		# if UseAutomaticPathSessions is enabled in Application.config
@@ -138,7 +138,7 @@ class HTTPRequest(Request):
 		if self._environ['PATH_INFO'][1:6] == '_SID_':
 			self._pathSession = self._environ['PATH_INFO'][7:].split('/',1)[0]
 			self._cookies['_SID_'] = self._pathSession
-			sidstring = '_SID_=' +  self._pathSession +'/'
+			sidstring = '_SID_=' + self._pathSession +'/'
 			self._environ['REQUEST_URI'] = self._environ[
 				'REQUEST_URI'].replace(sidstring,'')
 			self._environ['PATH_INFO'] = self._environ[
@@ -305,10 +305,10 @@ class HTTPRequest(Request):
 
 		"""
 		self._absolutepath = 0
-		#if self._environ.has_key('WK_URI'): #added by the adapter
+		# if self._environ.has_key('WK_URI'): # added by the adapter
 		#	self._environ['PATH_INFO'] = self._environ['WK_URI']
 		#	return self._environ['WK_URI']
-		if self._environ.has_key('WK_ABSOLUTE'): #set by the adapter, used by modpHandler
+		if self._environ.has_key('WK_ABSOLUTE'): # set by the adapter, used by modpHandler
 			self._absolutepath = 1
 			return self.fsPath()
 		return self._environ['PATH_INFO']
@@ -320,27 +320,26 @@ class HTTPRequest(Request):
 	def urlPathDir(self):
 		"""Same as urlPath, but only gives the directory."""
 		path = self.urlPath()
-		if not path[:-1] == "/":
-			path = path[:string.rfind(path, "/")+1]
+		if not path[:-1] == '/':
+			path = path[:path.rfind('/')+1]
 		return path
 
 
 	_evars = ('PATH_INFO', 'REQUEST_URI', 'SCRIPT_NAME')
 	_pvars = ('_absolutepath', '_serverSidePath', '_serverSideContextPath',
-		  '_adapterName')
+		'_adapterName')
 
 	def getstate(self):
 		"""Debugging and testing code. This will likely be removed in the future."""
 		rv = []
 		env = self._environ
 		for key in self._evars:
-			rv.append("  * env['%s'] = %s" % (key, env.get(key,"* no def *")))
+			rv.append("  * env['%s'] = %s"
+				% (key, env.get(key, "* no def *")))
 		for key in self._pvars + ('_contextName', '_extraURLPath'):
-			if not hasattr(self,key):
-				# reload cached values.
-				self.serverSideContextPath()
-			rv.append("  * req.%s = %s" % (key, getattr(self,key, "* no def *")))
-		return string.join(rv, '\n')
+			rv.append("  * req.%s = %s"
+				% (key, getattr(self, key, "* no def *")))
+		return '\n'.join(rv)
 
 	def setURLPath(self, path):
 		"""Set the URL path of the request."
@@ -364,11 +363,12 @@ class HTTPRequest(Request):
 		server side directory to form a path relative to the object.
 
 		"""
-		#if not hasattr(self, '_serverSidePath'):
+		# if not hasattr(self, '_serverSidePath'):
 		#	app = self._transaction.application()
-		#	self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
+		#	self._serverSidePath = app.serverSideInfoForRequest(self)[0]
 		if path:
-			return os.path.normpath(os.path.join(os.path.dirname(self._serverSidePath), path))
+			return os.path.normpath(os.path.join(os.path.dirname(
+				self._serverSidePath), path))
 		else:
 			return self._serverSidePath
 
@@ -382,11 +382,12 @@ class HTTPRequest(Request):
 		is in a subdirectory of the main context directory.
 
 		"""
-		#if not hasattr(self, '_serverSideContextPath'):
+		# if not hasattr(self, '_serverSideContextPath'):
 		#	app = self._transaction.application()
-		#	self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
-		if path: # The contextPath is already the dirname, no need to dirname it again
-			return os.path.normpath(os.path.join(self._serverSideContextPath, path))
+		#	self._serverSideContextPath = app.serverSideInfoForRequest(self)[1]
+		if path: # contextPath is already dirname, no need to dirname it again
+			return os.path.normpath(os.path.join(
+				self._serverSideContextPath, path))
 		else:
 			return self._serverSideContextPath
 
@@ -396,25 +397,25 @@ class HTTPRequest(Request):
 		This isn't necessarily the same as the name of the directory containing the context.
 
 		"""
-		#if not hasattr(self, '_contextName'):
+		# if not hasattr(self, '_contextName'):
 		#	app = self._transaction.application()
-		#	self._serverSidePath, self._serverSideContextPath, self._contextName = app.serverSideInfoForRequest(self)
+		#	self._contextName = app.serverSideInfoForRequest(self)[2]
 		return self._contextName
 
 	def servletURI(self):
-		"""This is the URI of the servlet, without any query strings or extra path info."""
-
-		sspath=self.serverSidePath() #ensure that extraURLPath has been stripped
-		pinfo=self.pathInfo()
+		"""Return the URI of the servlet, without any query strings or extra path info."""
+		pinfo = self.pathInfo()
 		if not self._extraURLPath:
-			if pinfo and pinfo[-1]=="/": pinfo = pinfo[:-1]
+			if pinfo and pinfo[-1] == "/":
+				pinfo = pinfo[:-1]
 			return pinfo
-		pos = string.rfind(pinfo, self._extraURLPath)
-		if pos==-1:
-			URI=pinfo
+		pos = pinfo.rfind(self._extraURLPath)
+		if pos == -1:
+			URI = pinfo
 		else:
-			URI=pinfo[:pos]
-		if URI and URI[-1]=="/": URI=URI[:-1]
+			URI = pinfo[:pos]
+		if URI and URI[-1] == "/":
+			URI = URI[:-1]
 		return URI
 
 	def uriWebKitRoot(self):
@@ -432,10 +433,10 @@ class HTTPRequest(Request):
 	def fsPath(self):
 		"""The filesystem path of the request, using the webserver's docroot."""
 		docroot = self._environ['DOCUMENT_ROOT']
-		requri = self._environ['REQUEST_URI'][1:]#strip leading /
+		requri = self._environ['REQUEST_URI'][1:] # strip leading /
 		if self.queryString():
 			qslength = len(self.queryString())+1
-			requri = requri[:-qslength] ##pull off the query string and the ?-mark
+			requri = requri[:-qslength] # pull off the query string and the ?-mark
 		fspath = os.path.join(docroot,requri)
 		return fspath
 
@@ -459,8 +460,8 @@ class HTTPRequest(Request):
 
 		"""
 		fullurl = self.serverURL()
-		if fullurl[-1]!="/":
-			fullurl = fullurl[:string.rfind(fullurl,"/")+1]
+		if fullurl[-1] != '/':
+			fullurl = fullurl[:fullurl.rfind('/')+1]
 		return fullurl
 
 	def siteRoot(self):
@@ -472,11 +473,11 @@ class HTTPRequest(Request):
 			'../../'
 
 		You can use this as a prefix to a URL that you know is based off
-		the home location.  Any time you are in a servlet that may have been
+		the home location. Any time you are in a servlet that may have been
 		forwarded to from another servlet at a different level,
-		you should prefix your URL's with this.  That is, if servlet "Foo/Bar"
+		you should prefix your URL's with this. That is, if servlet "Foo/Bar"
 		forwards to "Qux", then the qux servlet should use siteRoot() to construct all
-		links to avoid broken links.  This works properly because this method
+		links to avoid broken links. This works properly because this method
 		computes the path based on the _original_ servlet, not the location of the
 		servlet that you have forwarded to.
 
@@ -543,7 +544,7 @@ class HTTPRequest(Request):
 		return self._rawRequest
 
 	def environ(self):
-		return self._environ  # @@ 2000-05-01 ce: To implement ExceptionHandler.py
+		return self._environ # @@ 2000-05-01 ce: To implement ExceptionHandler.py
 
 	def addParent(self, servlet):
 		self._parents.append(servlet)
@@ -569,7 +570,7 @@ class HTTPRequest(Request):
 		or the documented uploaded in a PUT request).
 
 		The file might not be rewound to the beginning if there
-		was valid, form-encoded POST data.  Pass rewind=1 if
+		was valid, form-encoded POST data. Pass rewind=1 if
 		you want to be sure you get the entire body of the request.
 
 		"""
@@ -650,7 +651,7 @@ class HTTPRequest(Request):
 		Typically from the set GET, POST, PUT, DELETE, OPTIONS and TRACE.
 
 		"""
-		return string.upper(self._environ['REQUEST_METHOD'])
+		return self._environ['REQUEST_METHOD'].upper()
 
 	def sessionId(self):
 		"""Return a string with the session id specified by the client, or None if there isn't one."""
@@ -708,10 +709,10 @@ class HTTPRequest(Request):
 		# @@ 2002-06-08 ib: should this also return the unparsed body
 		# of the request?
 		info = [
-			('time',    self._time),
+			('time', self._time),
 			('environ', self._environ),
-			('input',   self._input),
-			('fields',  self._fields),
+			('input', self._input),
+			('fields', self._fields),
 			('cookies', self._cookies)
 		]
 
@@ -732,14 +733,16 @@ class HTTPRequest(Request):
 		"""
 		return htmlInfo(self.info())
 		info = self.info()
-		res = ['<table border=1>\n']
+		res = ['<table border="1">\n']
 		for pair in info:
 			value = pair[1]
-			if hasattr(value, 'items') and (type(value) is type({}) or hasattr(value, '__getitem__')):
+			if hasattr(value, 'items') and (type(value) is type({})
+					or hasattr(value, '__getitem__')):
 				value = _infoForDict(value)
-			res.append('<tr valign=top> <td> %s </td>  <td> %s&nbsp;</td> </tr>\n' % (pair[0], value))
+			res.append('<tr valign="top"><td>%s</td><td>%s&nbsp;</td></tr>\n'
+				% (pair[0], value))
 		res.append('</table>\n')
-		return string.join(res, '')
+		return ''.join(res)
 
 	exceptionReportAttrNames = Request.exceptionReportAttrNames + (
 		'uri servletPath serverSidePath pathInfo pathTranslated'
@@ -794,14 +797,16 @@ def htmlInfo(info):
 	Useful for inspecting objects via web browsers.
 
 	"""
-	res = ['<table border=1>\n']
+	res = ['<table border="1">\n']
 	for pair in info:
 		value = pair[1]
-		if hasattr(value, 'items') and (type(value) is type({}) or hasattr(value, '__getitem__')):
+		if hasattr(value, 'items') and (type(value) is type({})
+				or hasattr(value, '__getitem__')):
 			value = htmlInfo(_infoForDict(value))
-		res.append('<tr valign=top> <td> %s </td>  <td> %s&nbsp;</td> </tr>\n' % (pair[0], value))
+		res.append('<tr valign="top"><td>%s</td><td>%s&nbsp;</td></tr>\n'
+			% (pair[0], value))
 	res.append('</table>\n')
-	return string.join(res, '')
+	return ''.join(res)
 
 def _infoForDict(dict):
 	"""Return an "info" structure for any dictionary-like object."""
