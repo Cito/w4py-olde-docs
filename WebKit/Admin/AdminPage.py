@@ -16,7 +16,6 @@ class AdminPage(SidebarPage):
 		return 'WebKit AppServer'
 
 	def writeSidebar(self):
-		app = self.application()
 		self.writeAdminMenu()
 		self.writeWebKitSidebarSections()
 
