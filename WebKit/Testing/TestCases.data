@@ -4,51 +4,56 @@
 # Each line describes a test case.
 # Lines that are blank or begin with '#' are ignored.
 
-
 # Good URLs
-/                      --> Show /Examples/Welcome
-/Welcome               --> "
-/Examples/Welcome      --> "
-/Examples/             --> "
-/Admin/                --> Show admin pages
-/Testing/Dir/File.html --> Display the file
-/Examples/Welcome.py   --> Display the file
+/ \
+/Welcome \
+/Welcome.py \
+/Examples/Welcome \
+/Examples/ \
+/Examples/Welcome.py   --> Show /Examples/Welcome
+/Admin/ \
+/Admin/Main --> Show admin pages
 
 # Redirects
                        --> Redirect to /
 /Admin                 --> Redirect to /Admin/
 /Examples              --> Redirect to /Examples/
 
-# Combo cases
+# Display files
+/Testing/Dir/File.html --> Display the file
 /Testing/Dir \
-/Testing/Dir/File.html --> display
-
-/Examples \
-/Examples/Welcome \
-/Examples/Welcome     --> shows the Welcome page each time
+/Testing/Dir/          --> Display the index file
 
 # Bad: Slashes after files
-/Welcome/              --> Error: 404 Not found
-/Examples/Welcome/     --> "
+/Welcome/ \
+/Examples/Welcome/     --> Error 404: Not Found<br>if ExtraPathInfo is not set
 
-# Bad: Unknown URLs
-/BadURL \ 
+# Bad: Unknown URLs (wrong name, slashes after files)
+/BadURL \
 /BadURL/ \
 /Examples/BadURL \
 /Examples/BadURL/ \
-/Examples/BadURL/MoreBad --> 404 Not Found<br>or if ExtraPathInfo is set,<br>then the Examples/Welcome<br> page with extraURLPath<br> information displayed.
-/File.badext --> "
-/Examples/File.badext  --> "
+/Examples/BadURL/MoreBad \
+/File.badext \
+/Examples/File.badext --> Error 404: Not Found<br>or if ExtraPathInfo is set, then<br>the Examples/Welcome page<br>displays extra path info.
 
 # Embedded Servlets
-/Testing/Servlet/Extra/Path/Info  \
-/Testing/Servlet/Extra/Path/Info/ --> Only when ExtraPathInfo=1,<br>otherwise 404.
+/Testing/Servlet/ \
+/Testing/Servlet/Extra/Path/Info \
+/Testing/Servlet/Extra/Path/Info/ \
+/Testing/Servlet/More/Info? --> Error 404: Not Found<br>if ExtraPathInfo is not set,<br>otherwise the test servlet<br>displays extra path info.
 
-/Testing/IncludeURLTest --> shows includeURL test.
-/Testing/Dir/IncludeURLTest2 --> shows lower level includeURL test.
+# Including
+/Testing/IncludeURLTest --> IncludeURLTest test
+/Testing/Dir/IncludeURLTest2 --> lower level IncludeURLTest test
 
+# Forwarding
 /Testing/Forward1 --> Forward1Target
 /Testing/Forward2 --> Dir/Forward2Target
 /Testing/Dir/Forward3 --> Forward3Target
-/Testing/SetCookie --> Test HTTPResponse.setCookie
-/Testing/TestIMS --> IMS Test Pass
+
+# Cookies
+/Testing/SetCookie --> Test of HTTPResponse.setCookie
+
+# If-Modified-Since
+/Testing/TestIMS --> TestIMS passed
