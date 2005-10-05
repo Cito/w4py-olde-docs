@@ -236,7 +236,7 @@ class Installer:
 		self.createBrowsableSource()
 		self.createComponentIndex()
 		self.createComponentIndexes(keep)
-		self.createContexts()
+		self.createDocContexts()
 
 	def processHtmlDocFiles(self):
 		print 'Processing html doc files...'
@@ -474,7 +474,7 @@ class Installer:
 			os.remove(indexfile)
 		print
 
-	def createContexts(self):
+	def createDocContexts(self):
 		"""Create a WebKit context for every Docs directory."""
 		print 'Making all Docs directories browsable via WebKit...'
 		docsDirs = ['Docs']
@@ -508,6 +508,9 @@ class Installer:
 				print 'Docs cannot be made browsable via WebKit.'
 		else:
 			print 'Docs directories are already registered with WebKit.'
+		# Copy favicon to the default context:
+		open('WebKit/Examples/favicon.ico', 'wb').write(
+			open('Docs/favicon.ico', 'rb').read())
 		print
 
 	def backupConfigs(self):
