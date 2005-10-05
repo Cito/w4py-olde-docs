@@ -6,68 +6,74 @@ import sys
 class AppControl(AdminSecurity):
 
 	def writeContent(self):
-
+		req = self.request()
+		wr = self.writeln
 		action = self.request().field("action",None)
+
 		if action == None:
 			if not self.application().server().isPersistent():
-				self.write('<b>You are running the <i>OneShot</i> version WebKit. None of the options below are applicable.</b> <p>')
-			self.write( """
-		<form method=post>
-		<table cellspacing = '0' cellpadding = '0'>
-			<tr>
-				<td><input type=submit name="action" value="Shutdown"></td>
-			</tr>
-			<tr>
-				<td><input type=submit name="action" value="ClearCache"></td>
-				<td>Clear the Servlet instance cache in Application and the class caches of each servlet factory</td>
-			</tr>
-			<tr>
-				<td><input type=submit name="action" value="Reload"></td>
-				<td>Reload the selected modules.  Be Careful!</td>
-			</tr>
-		""")
+				wr('<p><b>You are running the <i>OneShot</i> version of WebKit.'
+					' None of the options below are applicable.</b><p>')
+			wr('''<form method="post">
+<table cellspacing="4" cellpadding="4">
+<tr><td><input type="submit" name="action" value="Shutdown"></td>
+<td>Shut down the AppServer. You need to restart it manually afterwards.</td>
+</tr><tr>
+<td><input type="submit" name="action" value="Clear cache"></td>
+<td>Clear the class and instance caches of each servlet factory.</td>
+</tr><tr>
+<td><input type="submit" name="action" value="Reload"></td>
+<td>Reload the selected Python modules. Be Careful!</td></tr>''')
 			mods = sys.modules.keys()
 			mods.sort()
-			for i in mods:
-				self.write("""<tr><td colspan=2><input type=checkbox name=reloads value="%s"> %s </td></tr>""" % (i,i))
+			wr('<tr><td></td><td>')
+			for m in mods:
+				wr('<input type="checkbox" name="reloads" value="%s">'
+					' %s<br>' % (m, m))
+			wr('</td></tr>\n</table>\n</form>')
 
-			self.write("""
-			</table>
-			</form>
-			""")
-
-		elif action == "ClearCache":
-			self.write("""<p>Clearing Application instance cache...""")
-			self.application().flushServletCache()
-			self.write("Done")
-			self.write("Clearing Servlet factory class caches...")
-			for i in self.application()._factoryList:
-				self.write("<p>Clearing: %s..." % i.__class__)
-				i.flushCache()
-				self.write("Done")
-			self.write("""<p>
-			Cache Flushed
-			<p>Click here to view the Servlet cache: <a href="ServletCache">Servlet Cache </a>
-			""" \
-					   )
+		elif action == "Clear cache":
+			from WebKit.URLParser import ServletFactoryManager
+			factories = filter(lambda f: f._classCache,
+				ServletFactoryManager._factories)
+			wr('<p>')
+			for factory in factories:
+				wr('Flushing cache of %s...<br>' % factory.name())
+				factory.flushCache()
+			wr('</p>')
+			wr('<p style="color:green">The caches of all factories'
+				' have been flushed.</p>')
+			wr('<p>Click here to view the Servlet cache:'
+				' <a href="ServletCache">Servlet Cache</a></p>')
 
 		elif action == "Reload":
-			self.write("""<p>Reloading selected modules.  Any existing classes will continue to use the old module definitions, as will any functions/variables imported using 'from'.  Use ClearCache to clean out any Servlets in this condition.<p>""")
-
-			reloadnames = self.request().field("reloads",None)
+			wr('<p>Reloading selected modules. Any existing classes'
+				' will continue to use the old module definitions,'
+				' as will any functions/variables imported using "from".'
+				' Use "Clear Cache" to clean out any servlets'
+				' in this condition.<p>')
+			reloadnames = req.field("reloads", None)
 			if not type(reloadnames) == type([]):
-				reloadnames = [reloadnames,]
-			for i in reloadnames:
-				if i and sys.modules.get(i,None):
-					self.write("<br>Reloading %s, %s" % (i, self.htmlEncode(str(sys.modules[i]))))
+				reloadnames = [reloadnames]
+			wr('<p>')
+			for m in reloadnames:
+				if m and sys.modules.get(m, None):
+					wr("Reloading %s...<br>" %
+						self.htmlEncode(str(sys.modules[m])))
 					try:
-						reload(sys.modules[i])
+						reload(sys.modules[m])
 					except Exception, e:
-						self.write("<br><font color='red'>Could not reload %s, error was %s</font>" % (i,e))
-			self.write("<p>Done")
+						wr('<span style="color:red">Could not reload,'
+							' error was "%s".</span><br>' % e)
+			wr('</p>')
+			wr('<p style="color:green">The selected modules'
+				' have been reloaded.</p>')
 
 		elif action == "Shutdown":
-			self.write("<B> Shutting down the Application server")
+			wr('<p>Shutting down the Application server...</p>')
 			self.application().server().initiateShutdown()
-			self.write("<p>Good Luck!</b>")
+			self.write('<p style="color:green"><b>Good Luck!</b></p>')
+
+		else:
+			wr('<p>Cannot perform "%s".</p>' % action)
 

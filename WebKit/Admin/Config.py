@@ -14,4 +14,5 @@ class Config(AdminSecurity):
 		self.writeln(Funcs.htmlForDict(self.application().config()))
 
 	def heading(self, heading):
-		self.writeln('<p><br><table align=center width=100%% bgcolor=black><tr><td><b><font color=white>%s</font></b></td></tr></table>' % heading)
+		self.writeln('<h4 style="background-color:#555;color:white;'
+			'padding:2pt;margin:1px;margin-top:12pt">%s</h4>' % heading)

@@ -6,7 +6,7 @@ from MiscUtils.DataTable import DataTable
 class DumpCSV(AdminSecurity):
 
 	def filename(self):
-		""" Overidden by subclasses to specify what filename to show. """
+		"""Overidden by subclasses to specify what filename to show."""
 		return None
 
 	def awake(self, trans):
@@ -21,41 +21,40 @@ class DumpCSV(AdminSecurity):
 
 	def writeContent(self):
 		if not os.path.exists(self._filename):
-			self.writeln('<p> File does not exist.')
+			self.writeln('<p>File does not exist.</p>')
 			return
-
 		table = DataTable(self._filename)
-
 		if len(table)==1:
 			plural = ''
 		else:
 			plural = 's'
-		self.writeln('<p>%d row%s' % (len(table), plural))
-		self.writeln('<br><table align=center border=0 cellpadding=2 cellspacing=2>')
-
-
+		self.writeln('<p>%d row%s</p>' % (len(table), plural))
+		self.writeln('<table cellpadding="2" cellspacing="2">')
 		# Head row gets special formatting
 		self._headings = map(lambda col: string.strip(col.name()), table.headings())
 		self._numCols = len(self._headings)
-		self.writeln('<tr bgcolor=black>')
+		self.writeln('<tr style="background-color:#555">')
 		for value in self._headings:
-			self.writeln('<td><font face="Arial, Helvetica" color=white><b> ', value, ' </b></font></td>')
+			self.writeln('<th style="color:white">', value, '</th>')
 		self.writeln('</tr>')
-
 		# Data rows
 		rowIndex = 1
 		for row in table:
-			self.writeln('<tr bgcolor=#EEEEEE>')
+			self.writeln('<tr style="background-color:#EEE">')
 			colIndex = 0
 			for value in row:
-				if colIndex<self._numCols: # for those cases where a row has more columns that the header row.
-					self.writeln('<td> ', self.cellContents(rowIndex, colIndex, value), ' </td>')
+				if colIndex < self._numCols: # for those cases where a row has more columns that the header row.
+					self.writeln('<td>',
+						self.cellContents(rowIndex, colIndex, value), '</td>')
 				colIndex = colIndex + 1
 			self.writeln('</tr>')
 			rowIndex = rowIndex + 1
-
 		self.writeln('</table>')
 
 	def cellContents(self, rowIndex, colIndex, value):
-		""" This is a hook for subclasses to customize the contents of a cell based on any criteria (including location). """
+		"""Hook for subclasses to customize the contents of a cell.
+
+		Based on any criteria (including location).
+
+		"""
 		return value

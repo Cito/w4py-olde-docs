@@ -22,12 +22,17 @@ class Main(AdminSecurity):
 			('Up Since',        asctime(localtime(app.server().startTime()))),
 			('Num Requests',    app.server().numRequests()),
 			('Working Dir',     os.getcwd()),
-			('Active Sessions', len(app.sessions())),
-		]
-
-		self.writeln('<table align=center cellspacing=0 cellpadding=0 border=0>')
+			('Active Sessions', len(app.sessions()))
+			]
+		self.writeln('<h2 style="text-align:center">'
+			'WebKit Administration Pages</h2>')
+		self.writeln('<table cellspacing="2" cellpadding="4" align="center"'
+			' style="margin-left:auto;margin-right:auto">')
 		for label, value in info:
-			self.writeln('<tr> <td> <b>%s:</b> </td> <td>%s</td> </tr>' % (label, value))
+			self.writeln('<tr">'
+				'<th style="background-color:#DDD">%s:</th>'
+				'<td style="background-color:#EEE">%s</td></tr>'
+				% (label, value))
 		self.writeln('</table>')
 
 	def writeSignature(self):
@@ -42,4 +47,5 @@ begin-parse
 	'GlobalTime': %s
 }
 end-parse
--->''' % (repr(app.webKitVersion()), repr(localtime(curTime)), repr(gmtime(curTime))))
+-->''' % (repr(app.webKitVersion()),
+		repr(localtime(curTime)), repr(gmtime(curTime))))
