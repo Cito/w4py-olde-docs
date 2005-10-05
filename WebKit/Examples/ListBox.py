@@ -52,13 +52,13 @@ style="width:%(width)dpt;text-align:center">
 </select>
 <p>
 <input name="_action_new" type="submit" value="New">
-<input name=_action_delete type="submit" value=Delete>
+<input name="_action_delete" type="submit" value="Delete">
 &nbsp; &nbsp; &nbsp;
-<input name="_action_taller" type="submit" value=Taller>
-<input name="_action_shorter" type="submit" value=Shorter>
+<input name="_action_taller" type="submit" value="Taller">
+<input name="_action_shorter" type="submit" value="Shorter">
 &nbsp; &nbsp; &nbsp;
-<input name="_action_wider" type="submit" value=Wider>
-<input name="_action_narrower" type="submit" value=Narrower>
+<input name="_action_wider" type="submit" value="Wider">
+<input name="_action_narrower" type="submit" value="Narrower">
 </p>
 </form>
 </div>
