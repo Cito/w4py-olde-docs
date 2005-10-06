@@ -49,7 +49,7 @@ class HTTPContent(HTTPServlet):
 		HTTPServlet.awake(self, transaction)
 		self._response    = transaction.response()
 		self._request     = transaction.request()
-		self._session     = None  # don't create unless needed
+		self._session     = None # don't create unless needed
 		assert self._transaction is not None
 		assert self._response    is not None
 		assert self._request     is not None
@@ -74,45 +74,34 @@ class HTTPContent(HTTPServlet):
 	def _respond(self, transaction):
 		"""Respond to action.
 
-		Handles actions if an ``_action_`` or ``_action_XXX``
-		field is defined, otherwise invokes `writeHTML`.
+		Handles actions if an ``_action_`` or ``_action_name`` field is
+		defined, otherwise invokes `writeHTML`. This implementation makes
+		sure that exactly one action per request is handled. ``_action_``
+		takes precedence over ``_action_name``; and if there are multiple
+		``action_name`` fields, the precedence is given by the order of
+		the names in the actions() method. If no action field matches,
+		the default action is run. The value of the ``_action_`` field
+		is transformed to a method name using the methodNameForAction(),
+		whereas ``name`` in ``_action_name`` is left unchanged.
+
 		Invoked by both `respondToGet` and `respondToPost`.
 
 		"""
 		req = transaction.request()
-
-		# Support old style actions, i.e. mapping through methodNameForAction()
-		# This has been disabled by default from version 0.6 upwards, but you
-		# can enable it with the setting OldStyleActions in Application.config.
-		# @@cz: We should enable this additional mapping again; I see no
-		# performance or securits issues here, and since methodNameForAction()
-		# is by default the identity, everything stays compatible. Or, we
-		# should get rid of this and the OldStyleActions setting completely.
-		# Leaving this as an option makes things only more confusing.
-		if self.transaction().application().setting('OldStyleActions', ) \
-				and req.hasField('_action_'):
+		# First check whether there is an _action_ field:
+		if req.hasField('_action_'):
 			action = self.methodNameForAction(req.field('_action_'))
-			actions = self._actionSet()
-			if actions.has_key(action):
-				self.preAction(action)
-				apply(getattr(self, action), (transaction,))
-				self.postAction(action)
+			if action in self.actions():
+				self.handleAction(action)
 				return
-			else:
-				raise HTTPContentError, "Action '%s' is not' \
-					' in the public list of actions, %s, for %s." \
-					% (action, actions.keys(), self)
-
-		# Check for actions
+		# Next, check whether there is an _acion_name field:
 		for action in self.actions():
-			if req.hasField('_action_%s' % action) or \
-					req.field('_action_', None) == action or \
-					(req.hasField('_action_%s.x' % action) and \
+			if req.hasField('_action_%s' % action) or (
+					req.hasField('_action_%s.x' % action) and
 					req.hasField('_action_%s.y' % action)):
 				self.handleAction(action)
 				return
-
-		# If no action was found, run the default.
+		# If no action was found, run the default:
 		self.defaultAction()
 
 	def defaultAction(self):
@@ -127,7 +116,6 @@ class HTTPContent(HTTPServlet):
 	def sleep(self, transaction):
 		"""Let servlet speel again.
 
-		:ignore:
 		We unset some variables. Very boring.
 
 		"""
@@ -258,18 +246,19 @@ class HTTPContent(HTTPServlet):
 		pass
 
 	def methodNameForAction(self, name):
-		"""
-		This method exists only to support "old style" actions
-		from WebKit 0.5.x and below.
+		"""Return method name for an action name.
 
 		Invoked by _respond() to determine the method name for a given action
-		name (which usually comes from an HTML submit button in a form).
-		This implementation simply returns the name. Subclasses could "mangle"
-		the names or look them up in a dictionary; they should override this
-		method when action names don't match their method names.
+		name which has been derived as the value of an ``_action_`` field.
+		Since this is usually the label of an HTML submit button in a form,
+		it is often needed to transform it in order to get a valid method name
+		(for instance, blanks could be replaced by underscores and the like).
+		This default implementation of the name transformation is the identity,
+		it simply returns the name. Subclasses should override this method
+		when action names don't match their method names; they could "mangle"
+		the action names or look the method names up in a dictionary.
 
 		"""
-		# @@cz: see my comment above where this method is used
 		return name
 
 	def urlEncode(self, s):
@@ -278,7 +267,7 @@ class HTTPContent(HTTPServlet):
 		Quotes special characters using the % substitutions.
 
 		"""
-		## @@: urllib.quote, or
+		# @@: urllib.quote, or
 		return Funcs.urlEncode(s)
 
 	def urlDecode(self, s):
@@ -362,23 +351,6 @@ class HTTPContent(HTTPServlet):
 		if url == None:
 			url = self.request().uri()
 		return self.session().sessionEncode(url)
-
-
-	## Private Utility ##
-
-	def _actionSet(self):
-		"""Return dictionary for actions.
-
-		Returns a dictionary whose keys are the names returned by actions().
-		The dictionary is used for a quick set-membership-test in self._respond.
-		Subclasses don't generally override this method or invoke it.
-
-		"""
-		if not hasattr(self, '_actionDict'):
-			self._actionDict = {}
-			for action in self.actions():
-				self._actionDict[action] = 1
-		return self._actionDict
 
 
 	## Exception Reports ##

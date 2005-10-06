@@ -143,13 +143,17 @@
 	<span class="filename">Webware/bin/editfile.py</span> (and edit
 	<span class="filename">editfile.py</span> so that it opens your
 	editor).</li>
-	<li>In <code>WebKit.Page</code>, removed use of the internal
-	<code>method _actionSet()</code> which cached the list of actions
+    <li>Removed the <span class="filename">Application.config</span> setting
+    <code>OldStyleActions</code> and re-implemented support of the
+    <code>methodNameForAction()</code> transformation. Note that "old style"
+    actions took an additional <code>transaction</code> parameter, but
+    otherwise the action handling is now downward compatible.</li>
+	<li>In <code>WebKit.Page</code> resp. <code>WebKit.HTTPContent</code>,
+    removed both the internal method <code>_actionSet()</code> and the internal
+    dictionary <code>_actionDict</code> which cached the list of actions
 	for the servlet. This was redundant code, and its removal allows a servlet
 	to use dynamic actions (i.e. to make the action list dependent on the
-	permissions of the logged-in user). Note that <code>_actionSet()</code>
-	is still used for "old-style" actions to maintain backwards compatibility
-	[@@ maybe we get rid of them completely?].</li>
+	permissions of the logged-in user).</li>
 	<li>Fixed a bug in <tt>mod_webkit</tt> for Apache&nbsp;2.X that might
 	have been causing <tt>mod_webkit</tt> to retry connections to the app
 	server unnecessarily in some cases. (This does not apply to the

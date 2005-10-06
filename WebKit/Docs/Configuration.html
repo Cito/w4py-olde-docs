@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="document" id="configuration-guide">
-<h1 class="header">Configuration Guide</h1>
+<h1 class="title">Configuration Guide</h1>
 <div class="contents topic" id="contents">
 <p class="topic-title first"><a name="contents">Contents</a></p>
 <ul class="simple">
@@ -283,16 +283,16 @@ attachment, or 0 to make the html the body of the message.
 Default <tt class="docutils literal"><span class="pre">0</span></tt> (false/html in body).</dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorEmailServer</span></tt>:</dt>
 <dd>The SMTP server to use for sending e-mail error messages.
-Default: <tt class="docutils literal"><span class="pre">&quot;mail.-.com&quot;</span></tt> (i.e., unset)</dd>
+Default: <tt class="docutils literal"><span class="pre">'localhost'</span></tt></dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorEmailHeaders</span></tt>:</dt>
 <dd><p class="first">The e-mail headers used for e-mailing error messages. Be sure to
 configure <tt class="docutils literal"><span class="pre">&quot;From&quot;</span></tt>, <tt class="docutils literal"><span class="pre">&quot;To&quot;</span></tt> and <tt class="docutils literal"><span class="pre">&quot;Reply-to&quot;</span></tt> before turning
 <tt class="docutils literal"><span class="pre">EmailErrors</span></tt> on.  Default:</p>
 <pre class="last literal-block">
 {
-    'From':         '-&#64;-.com',
-    'To':           ['-&#64;-.com'],
-    'Reply-to':     '-&#64;-.com',
+    'From':         'webware&#64;mydomain,
+    'To':           ['webware&#64;mydomain'],
+    'Reply-to':     'webware&#64;mydomain',
     'Content-type': 'text/html',
     'Subject':      'Error'
 }
@@ -420,9 +420,6 @@ the <tt class="docutils literal"><span class="pre">AutoReloadPollInterval</span>
 </dd>
 </dl>
 </div>
-</div>
-<div class="footer">
-Webware for Python (<a href="http://www.webwareforpython.org">www.webwareforpython.org</a>)
 </div>
 </body>
 </html>

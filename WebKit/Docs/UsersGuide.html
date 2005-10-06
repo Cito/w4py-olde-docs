@@ -9,7 +9,7 @@
 </head>
 <body>
 <div class="document" id="webkit-user-s-guide">
-<h1 class="header">WebKit User's Guide</h1>
+<h1 class="title">WebKit User's Guide</h1>
 <p>Webware for Python</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -306,7 +306,12 @@ def actions(self):
 </li>
 </ol>
 <p>The <tt class="docutils literal"><span class="pre">ListBox</span></tt> example shows the use of actions (in
-<tt class="docutils literal"><span class="pre">WebKit/Examples/ListBox.py</span></tt>)</p>
+<tt class="docutils literal"><span class="pre">WebKit/Examples/ListBox.py</span></tt>).</p>
+<p>Note that if you procede as in 1., you can add a <tt class="docutils literal"><span class="pre">methodNameForAction()</span></tt>
+method to your class transforming the value from the submit button (its
+label) to a valid method name. This will be needed, for instance, if there
+is a blank in the label on the button. However, usually it's simpler to
+procede as in 2. in such cases.</p>
 </div>
 <div class="section" id="plug-ins">
 <h1><a class="toc-backref" href="#id37" name="plug-ins">Plug-ins</a></h1>
@@ -372,9 +377,6 @@ feedback and testing.</p>
 <p>The design was inspired by both Apple's WebObjects and Java's
 Servlets.</p>
 </div>
-</div>
-<div class="footer">
-Webware for Python (<a href="http://www.webwareforpython.org">www.webwareforpython.org</a>)
 </div>
 </body>
 </html>

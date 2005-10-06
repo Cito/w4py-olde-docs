@@ -242,7 +242,6 @@ class Application(ConfigurableForServerSidePath, Object):
 				'Sessions': 0,
 				},
 			'EnterDebuggerOnException': 0,
-			'OldStyleActions': 0,
 			'DirectoryFile': ['index', 'Index', 'main', 'Main'],
 			'UseCascadingExtensions': 1,
 			'ExtensionCascadeOrder': ['.py','.psp','.kid','.html'],
