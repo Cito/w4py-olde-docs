@@ -86,9 +86,10 @@ else:
 <h4>Request Variables:</h4>
 
 <table><% for i in self.request()._environ.keys():
-	res.write('<tr><td style="color:red;font-size:small">'
+	res.write('<tr valign="top"><td style="color:red;font-size:small">'
 		+str(i)+'&nbsp;</td><td style="color:blue;font-size:small">'
-		+self.request()._environ[i].replace(',', ', ')+'</td></tr>') %></table>
+		+self.request()._environ[i].replace(',', ', ').replace(';', '; ')
+		+'</td></tr>') %></table>
 
 <hr>
 
