@@ -139,15 +139,20 @@ def main(args=None):
 		logFile, pidFile, user, group, appServer
 	if args is None:
 		args = sys.argv[1:]
-	# Get the name of the app server even if placed in front
-	if args and not args[0].startswith('-'):
-		arg0 = args.pop(0)
-	else:
-		arg0 = None
-	# Get all options:
+	args1 = [] # StartOptions
+	args2 = [] # AppServerOptions
+	# Get all app server options :
+	while args:
+		arg = args.pop(0)
+		if not arg.startswith('-') or (arg.startswith('--')
+				and 2 < arg.find('.', 2) < arg.find('=', 5)):
+			args2.append(arg)
+		else:
+			args1.append(arg)
+	# Get all launch options:
 	from getopt import getopt, GetoptError
 	try:
-		opts, args = getopt(args, 'd:w:l:po:i:u:g:', [
+		opts, args1 = getopt(args1, 'd:w:l:po:i:u:g:', [
 			'work-dir=', 'webware-dir=', 'library=', 'run-profile',
 			'log-file=', 'pid-file=', 'user=', 'group='])
 	except GetoptError, error:
@@ -170,8 +175,7 @@ def main(args=None):
 			user = arg
 		elif opt in ('-g', '--group'):
 			group = arg
-	if arg0: # move app server name behind options
-		args.insert(0, arg0)
+	args = args1 + args2
 	# Figure out the group id:
 	gid = group
 	if gid is not None:

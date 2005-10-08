@@ -190,7 +190,7 @@ I generally call this script <tt class="docutils literal"><span class="pre">star
 if [ `hostname` = lothlorien.colorstudy.com ] ; then
     WORKING=$HOME/prog/webware/WorkingDir
     WEBWARE=$HOME/prog/webware/Webware
-    OPS=&quot;--AppServer.AutoReload=1&quot;
+    OPS=&quot;AppServer.AutoReload=1&quot;
 fi
 
 # this is my production environment
@@ -214,18 +214,18 @@ to change configuration parameters, like setting some parameters depending on
 whether the environment is a development or production environment.</p>
 <p>Some options that you may be particularly interested in:</p>
 <dl class="docutils">
-<dt><tt class="docutils literal"><span class="pre">--AppServer.AutoReload</span></tt>:</dt>
+<dt><tt class="docutils literal"><span class="pre">AppServer.AutoReload</span></tt>:</dt>
 <dd>Setting this to <tt class="docutils literal"><span class="pre">1</span></tt> will make the AppServer restart if there have been
 changes to any loaded files.  This is very nice during development.</dd>
-<dt><tt class="docutils literal"><span class="pre">--AppServer.AdapterPort</span></tt>:</dt>
+<dt><tt class="docutils literal"><span class="pre">AppServer.AdapterPort</span></tt>:</dt>
 <dd>If you want multiple applications running on the same machine (e.g., one
 for development, one for production), you have to use different ports.</dd>
-<dt><tt class="docutils literal"><span class="pre">--Application.ShowDebugInfoOnErrors</span></tt>:</dt>
+<dt><tt class="docutils literal"><span class="pre">Application.ShowDebugInfoOnErrors</span></tt>:</dt>
 <dd>You probably don't want to have this on in production, but it's nice
 during development.</dd>
-<dt><tt class="docutils literal"><span class="pre">--Application.SaveErrorMessages</span></tt>:</dt>
+<dt><tt class="docutils literal"><span class="pre">Application.SaveErrorMessages</span></tt>:</dt>
 <dd>During development you probably want this off.</dd>
-<dt><tt class="docutils literal"><span class="pre">--Application.EmailErrors</span></tt>:</dt>
+<dt><tt class="docutils literal"><span class="pre">Application.EmailErrors</span></tt>:</dt>
 <dd>Turn on for production.</dd>
 </dl>
 <p>For more settings, see the <a class="reference" href="Configuration.html">Configuration</a> document.</p>

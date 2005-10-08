@@ -172,7 +172,7 @@ I generally call this script ``start``, and it looks something like this::
     if [ `hostname` = lothlorien.colorstudy.com ] ; then
         WORKING=$HOME/prog/webware/WorkingDir
         WEBWARE=$HOME/prog/webware/Webware
-        OPS="--AppServer.AutoReload=1"
+        OPS="AppServer.AutoReload=1"
     fi
 
     # this is my production environment
@@ -197,18 +197,18 @@ whether the environment is a development or production environment.
 
 Some options that you may be particularly interested in:
 
-``--AppServer.AutoReload``:
+``AppServer.AutoReload``:
     Setting this to ``1`` will make the AppServer restart if there have been
     changes to any loaded files.  This is very nice during development.
-``--AppServer.AdapterPort``:
+``AppServer.AdapterPort``:
     If you want multiple applications running on the same machine (e.g., one
     for development, one for production), you have to use different ports.
-``--Application.ShowDebugInfoOnErrors``:
+``Application.ShowDebugInfoOnErrors``:
     You probably don't want to have this on in production, but it's nice
     during development.
-``--Application.SaveErrorMessages``:
+``Application.SaveErrorMessages``:
     During development you probably want this off.
-``--Application.EmailErrors``:
+``Application.EmailErrors``:
     Turn on for production.
 
 For more settings, see the Configuration__ document.

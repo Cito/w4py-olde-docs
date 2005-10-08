@@ -1,9 +1,8 @@
-import string, sys, os
+import sys, os
 from types import DictType
 from MiscUtils import AbstractError, NoDefault
 from WebKit.ImportSpy import modloader
 from Funcs import valueForString
-
 
 
 class ConfigurationError(Exception):
@@ -154,7 +153,7 @@ class Configurable:
 		keys.sort()
 		width = max(map(lambda key: len(key), keys))
 		for key in keys:
-			dest.write(string.ljust(key, width)+' = '+str(self.setting(key))+'\n')
+			dest.write(key.ljust(width)+' = '+str(self.setting(key))+'\n')
 		dest.write('\n')
 
 	def commandLineConfig(self):
@@ -167,11 +166,11 @@ class Configurable:
 _settings = {}
 def addCommandLineSetting(name, value):
 	"""
-	Take a setting, like --AppServer.Verbose=0, and call
+	Take a setting, like "AppServer.Verbose=0", and call
 	addCommandLineSetting('AppServer.Verbose', '0'), and
 	it will override any settings in AppServer.config
 	"""
-	configName, settingName = string.split(name, '.', 1)
+	configName, settingName = name.split('.', 1)
 	value = valueForString(value)
 	if not _settings.has_key(configName):
 		_settings[configName] = {}
@@ -180,11 +179,10 @@ def addCommandLineSetting(name, value):
 def commandLineSetting(configName, settingName, default=NoDefault):
 	"""
 	Retrieve a command-line setting.  You can use this with
-	non-existent classes, like --Context.Root=/WK, and then
+	non-existent classes, like "Context.Root=/WK", and then
 	fetch it back with commandLineSetting('Context', 'Root').
 	"""
 	if default is NoDefault:
 		return _settings[configName][settingName]
 	else:
 		return _settings.get(configName, {}).get(settingName, default)
-

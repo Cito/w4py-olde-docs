@@ -11,7 +11,7 @@
 # Configuration section
 
 WORKDIR=/opt/Webware/WebKit  # working dir or path to webkit
-PID_FILE=/var/run/webkit.pid  
+PID_FILE=/var/run/webkit.pid
 LOG=/var/log/webkit
 PYTHONPATH=
 
@@ -44,7 +44,7 @@ case "$1" in
 	start)
 		echo -n  "Starting WebKit: "
 		pushd $WORKDIR > /dev/null
-		LAUNCH="python Launch.py ThreadedAppServer --AppServer.PidFile=$PID_FILE"
+		LAUNCH="python Launch.py ThreadedAppServer AppServer.PidFile=$PID_FILE"
 
 		# log separator
 		echo "----------------------------------------------------------------------" >> $LOG

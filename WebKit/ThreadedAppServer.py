@@ -36,7 +36,7 @@ DefaultConfig = {
 	'Host':                 '127.0.0.1',
 	'EnableAdapter':        1,
 	'AdapterPort':          8086,
-	'EnableMonitor':		0,
+	'EnableMonitor':        0,
 	'MonitorPort':          8085,
 	'EnableHTTP':           1,
 	'HTTPPort':             8080,
@@ -45,8 +45,9 @@ DefaultConfig = {
 	'StartServerThreads':   10,
 
 	# @@ 2000-04-27 ce: None of the following settings are implemented
-	# 'RequestQueueSize':     16,#	'RequestBufferSize':    64*1024,
-	# 'SocketType':           'inet',      # inet, unix
+	# 'RequestQueueSize': 16,
+	# 'RequestBufferSize': 64*1024,
+	# 'SocketType': 'inet', # inet, unix
 }
 
 # Need to know this value for communications
@@ -912,7 +913,7 @@ the AppServer and record the pid of the process in appserverpid.txt
 """
 
 import re
-settingRE = re.compile(r'^--([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
+settingRE = re.compile(r'^(?:--)?([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
 from MiscUtils import Configurable
 
 def main(args):
@@ -935,7 +936,7 @@ def main(args):
 			Configurable.addCommandLineSetting(name, value)
 		elif i == "stop":
 			import AppServer
-			function=AppServer.stop
+			function = AppServer.stop
 		elif i == "daemon":
 			daemon = True
 		elif i == "start":

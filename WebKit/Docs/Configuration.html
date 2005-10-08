@@ -27,7 +27,7 @@
 </div>
 <div class="section" id="command-line-configuration">
 <h1><a class="toc-backref" href="#id3" name="command-line-configuration">Command Line Configuration</a></h1>
-<p>Each of these can be set in the <tt class="docutils literal"><span class="pre">.config</span></tt> files, but they can be overridden with the command line.  Run <tt class="docutils literal"><span class="pre">AppServer</span></tt> with switches in the form <tt class="docutils literal"><span class="pre">--ClassName.SettingName=value</span></tt>, e.g. <tt class="docutils literal"><span class="pre">--AppServer.Port=1</span></tt></p>
+<p>Each of these can be set in the <tt class="docutils literal"><span class="pre">.config</span></tt> files, but they can be overridden with the command line.  Run <tt class="docutils literal"><span class="pre">AppServer</span></tt> with switches in the form <tt class="docutils literal"><span class="pre">ClassName.SettingName=value</span></tt>, e.g. <tt class="docutils literal"><span class="pre">AppServer.Port=1</span></tt></p>
 <p>The <tt class="docutils literal"><span class="pre">value</span></tt> is coerced into a Python type: if it starts with one of the characters <tt class="docutils literal"><span class="pre">({[&quot;'</span></tt> -- i.e., parenthesis (expression), dictionary, list, or string -- then the value with be eval'ed.  If it can be turned into an integer or float, then it will be converted, otherwise it will be left as a string.  Some examples:</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">1</span></tt> == 1</li>
