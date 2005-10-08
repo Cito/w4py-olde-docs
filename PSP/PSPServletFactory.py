@@ -24,7 +24,7 @@ from WebKit.ServletFactory import ServletFactory
 
 import os, sys, string
 from PSP import Context, PSPCompiler
-import time, threading
+import time
 
 
 class PSPServletFactory(ServletFactory):
@@ -45,7 +45,6 @@ class PSPServletFactory(ServletFactory):
 		self._classNameTrans = ''.join(t)
 		if application.setting('ClearPSPCacheOnStart', 0):
 			self.clearFileCache()
-		self._lock = threading.RLock()
 
 	def uniqueness(self):
 		return 'file'
