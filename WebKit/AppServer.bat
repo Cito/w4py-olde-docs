@@ -16,8 +16,8 @@ rem   -O with optimization (.pyo instead of .pyc)
 rem   -u unbuffered output (useful for debugging)
 set PY_OPTS=
 :getopt
-if %1==-O goto setopt
-if %1==-u goto setopt
+if (%1)==(-O) goto setopt
+if (%1)==(-u) goto setopt
 goto continue
 :setopt
 set PY_OPTS=%PY_OPTS% %1
