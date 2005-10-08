@@ -293,9 +293,8 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		plugIns = map(lambda path, ssp=self.serverSidePath: ssp(path), plugIns)
 
 		# Scan each directory named in the PlugInDirs list.
-		# If those directories contain Python packages (that
-		# don't have a "dontload" file) then add them to the
-		# plugs in list.
+		# If those directories contain Python packages (that don't have
+		# a "dontload" file) then add them to the plugs in list.
 		for plugInDir in self.setting('PlugInDirs'):
 			plugInDir = self.serverSidePath(plugInDir)
 			for filename in os.listdir(plugInDir):
@@ -304,7 +303,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 					and os.path.exists(os.path.join(filename, '__init__.py'))
 					and os.path.exists(os.path.join(filename, 'Properties.py'))
 					and not os.path.exists(os.path.join(filename, 'dontload'))
-					and os.path.basename(filename)!='WebKit'
+					and os.path.basename(filename) != 'WebKit'
 					and filename not in plugIns):
 					plugIns.append(filename)
 

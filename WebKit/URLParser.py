@@ -74,7 +74,7 @@ class ContextParser(URLParser):
 	that then it is the ``default`` context (and the entire URL is passed
 	to the default context's FileParser).
 
-	There is generally only one ContextParser, which can be	found as
+	There is generally only one ContextParser, which can be found as
 	``application.rootURLParser()``.
 
 	"""
@@ -201,8 +201,8 @@ class ContextParser(URLParser):
 
 		if hasattr(mod, 'contextInitialize'):
 			# @@ gat 2003-07-23: switched back to old method
-			# @@ of passing	application as first parameter
-			# @@to contextInitialize for backward compatibility
+			# @@ of passing application as first parameter
+			# @@ to contextInitialize for backward compatibility
 			result = mod.contextInitialize(application(),
 				os.path.normpath(os.path.join(os.getcwd(), dir)))
 			# @@: funny hack...?
