@@ -39,11 +39,11 @@ class PSPServletFactory(ServletFactory):
 		self.cacheDir = application.serverSidePath('Cache/PSP')
 		sys.path.append(self.cacheDir)
 		self._cacheClassFiles = self._cacheClasses
-		l = ['_'] * 256
+		t = ['_'] * 256
 		for c in string.digits + string.letters:
-			l[ord(c)] = c
-		self._classNameTrans = ''.join(l)
-		if application.setting('ClearPSPCacheOnStart', 1):
+			t[ord(c)] = c
+		self._classNameTrans = ''.join(t)
+		if application.setting('ClearPSPCacheOnStart', 0):
 			self.clearFileCache()
 		self._lock = threading.RLock()
 
@@ -54,22 +54,18 @@ class PSPServletFactory(ServletFactory):
 		return ['.psp']
 
 	def flushCache(self):
-		"""Clean out the cache of classes we keep in memory.
-
-		Also, clear the class files stored on disk.
-
-		"""
+		"""Clean out the cache of classes in memory and on disk."""
 		ServletFactory.flushCache(self)
 		self.clearFileCache()
 
 	def clearFileCache(self):
 		"""Clear class files stored on disk."""
 		import glob
-		files = glob.glob(os.path.join(self.cacheDir,'*.*'))
+		files = glob.glob(os.path.join(self.cacheDir, '*.*'))
 		map(os.remove, files)
 
 	def computeClassName(self,pagename):
-		"""Generates a <hopefully> unique class/file name for each PSP file.
+		"""Generates a (hopefully) unique class/file name for each PSP file.
 
 		Argument: pagename: the path to the PSP source file
 		Returns: A unique name for the class generated fom this PSP source file.
