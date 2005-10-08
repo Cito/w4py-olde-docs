@@ -1,5 +1,5 @@
 from WebKit.SidebarPage import SidebarPage
-import string, os
+import os
 
 
 class ExamplePage(SidebarPage):
