@@ -31,7 +31,7 @@ globalAppServer = None
 DefaultConfig = {
 	'PrintConfigAtStartUp': True,
 	'Verbose':              True,
-	'PlugIns':              ['../PSP'],
+	'PlugIns':              [],
 	'CheckInterval':        100,
 	'PlugInPackages':       [],
 	'PidFile':				'appserverpid.txt',

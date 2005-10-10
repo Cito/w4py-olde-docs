@@ -105,7 +105,7 @@ class ServletFactory(Object):
 		servlet name specified in the URL. This is used in PSP.
 
 		"""
-		debug=0
+		debug = 0
 
 		# Pull out the full server side path and the context path
 		request = transaction.request()
@@ -120,8 +120,10 @@ class ServletFactory(Object):
 			remainder = string.replace(remainder, '\\', '_')
 			remainder = string.replace(remainder, '/','_')
 			fullmodname = string.replace(remainder,'.','_')
-			if debug: print __file__, "fullmodname=",fullmodname
-			if len(fullmodname) > 100: fullmodname=fullmodname[:-50]
+			if debug:
+				print __file__, "fullmodname=", fullmodname
+			if len(fullmodname) > 100:
+				fullmodname=fullmodname[:-50]
 			modname=os.path.splitext(os.path.basename(
 				serverSidePathToImport))[0]
 			fp, pathname, stuff = imp.find_module(modname,
@@ -129,7 +131,6 @@ class ServletFactory(Object):
 			module = imp.load_module(fullmodname, fp, pathname, stuff)
 			module.__donotreload__ = 1
 			return module
-
 
 		# First, we'll import the context's package.
 		directory, contextDirName = os.path.split(contextPath)
@@ -173,7 +174,8 @@ class ServletFactory(Object):
 
 		"""
 		debug = 0
-		if debug: print __file__, fullModuleName, moduleName, directory
+		if debug:
+			print __file__, fullModuleName, moduleName, directory
 		if not forceReload:
 			module = sys.modules.get(fullModuleName, None)
 			if module is not None:
@@ -219,7 +221,6 @@ class ServletFactory(Object):
 		"""
 		request = transaction.request()
 		path = request.serverSidePath()
-
 		# Do we need to import/reimport the class
 		# because the file changed on disk or isn't in cache?
 		mtime = os.path.getmtime(path)
@@ -372,6 +373,6 @@ class PythonServletFactory(ServletFactory):
 			assert type(theClass) is ClassType
 		else:
 			assert type(theClass) is ClassType \
-			       or isinstance(theClass, type)
+				or isinstance(theClass, type)
 		assert issubclass(theClass, Servlet)
 		return theClass

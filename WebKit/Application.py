@@ -247,7 +247,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			'ExtensionCascadeOrder': ['.py','.psp','.kid','.html'],
 			'ExtraPathInfo': 1,
 			'ExtensionsToIgnore': ['.pyc', '.pyo', '.py~',
-				'.psp~', '.html~', '.bak', '.tmpl'
+				'.psp~', '.kid~', '.html~', '.bak', '.tmpl'
 				],
 			'ExtensionsToServe': [],
 			'FilesToHide': ['.*','*~', '*.bak', '*.tmpl',

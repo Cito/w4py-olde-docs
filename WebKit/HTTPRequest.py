@@ -421,7 +421,7 @@ class HTTPRequest(Request):
 	def uriWebKitRoot(self):
 		if not self._serverRootPath:
 			self._serverRootPath = ''
-			loc = self.urlPath() #self.servletURI()
+			loc = self.urlPath() # self.servletURI()
 			loc,curr = os.path.split(loc)
 			while 1:
 				loc,curr = os.path.split(loc)

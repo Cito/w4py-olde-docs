@@ -8,7 +8,7 @@ debug = 0
 class UnknownFileTypeServletFactory(ServletFactory):
 	"""The servlet factory for unknown file types.
 
-	I.e. all files other than .py, .psp and the other types we support.
+	I.e. all files other than .py, .psp, .kid and the other types we support.
 
 	"""
 

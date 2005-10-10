@@ -11,11 +11,11 @@
 return "PSP Hello"
 </psp:method>
 
-<h1 align="center"><font color="navy">Hello from PSP!</h1>
+<h1 align="center" style="color:navy">Hello from PSP!</h1>
 
 <p align="center"><img src="psplogo.png"><%-- This image is served by WebKit --%></p>
 
-<p>This is <strong>PSP</strong>. You can browse through <a href="PSPDocs.psp">docs</a></a> here.</p>
+<p>This is <strong>PSP</strong>. You can browse through the <a href="PSPDocs.psp">docs</a> here.</p>
 
 <p>Here are some examples. <a href="PSPTests">PSPTests</a> shows most of the functionality:</p>
 

@@ -26,8 +26,9 @@ class View(PSPExamplePage):
 					'No such file %r exists</p>' % basename)
 				return
 			text = open(filename).read()
-			text = text.replace('<', '&lt;').replace('>', '&gt;').replace('\n', '<br>')
-			self.write(text)
+			text = self.htmlEncode(text)
+			text = text.replace('\n', '<br>').replace('\t', ' '*4)
+			self.write('<pre>%s</pre>' % text)
 		else:
 			doc = self.__class__.__doc__.split('\n', 1)
 			doc[1] = '</p>\n<p>'.join(doc[1].split('\n\n'))

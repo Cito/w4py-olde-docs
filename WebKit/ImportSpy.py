@@ -142,22 +142,19 @@ class ModuleLoader(ihooks.ModuleLoader):
 		self._fileList[filepath] = modtime
 		# send notification that this file was imported
 		if self._notifyHook:
-			self._notifyHook(filepath,modtime)
+			self._notifyHook(filepath, modtime)
 
 	def recordFileName(self, stuff, mod, isfile=os.path.isfile):
 		"""Record a file."""
 		file, pathname, desc = stuff
-
 		fileList = self._fileList
 		if mod:
 			assert sys.modules.has_key(mod.__name__)
 			self._modulesSet.add(mod)
-
 			# __orig_file__ is used for cheetah and psp mods; we want to
 			# record the source filenames, not the auto-generated modules:
 			f2 = getattr(mod, '__orig_file__', 0)
 			f = getattr(mod, '__file__', 0)
-
 			if f2 and f2 not in fileList.keys():
 				try:
 					if isfile(f2):
@@ -175,7 +172,6 @@ class ModuleLoader(ihooks.ModuleLoader):
 						self.watchFile(os.path.join(f, '__init__.py'))
 				except OSError:
 					pass
-
 		# Also record filepaths which weren't successfully loaded, which
 		# may happen due to a syntax error in a servlet, because we also
 		# want to know when such a file is modified:

@@ -2,12 +2,22 @@ name = 'KidKit'
 
 version = ('X', 'Y', 0)
 
-docs = [ {'name': "Users Guide", 'file': 'UsersGuide.html'} ]
+docs = [ {'name': "User's Guide", 'file': 'UsersGuide.html'} ]
 
 status = 'alpha'
 
-requiredPyVersion = (2, 0, 0)
+requiredPyVersion = (2, 3, 0)
 
-synopsis = """KidKit is a Webware plugin that automatically compiles
-Kid templates as needed.
-"""
+requiredKidVersion = (0, 6, 4)
+
+synopsis = """KidKit is a Webware plug-in that allows Kid templates
+to be automatically compiled and run as servlets by the WebKit application server.
+Kid is a simple template language for XML based vocabularies written in Python.
+You need to install the Kid package before you can use the KidKit plug-in."""
+
+WebKitConfig = {
+	'examplePages': [
+		'Welcome', 'Time1', 'Time2', 'Files',
+		'ServletInfo', 'SimpleForm', 'Mandelbrot',
+	]
+}

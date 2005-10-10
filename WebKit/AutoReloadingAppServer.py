@@ -39,7 +39,7 @@ standardLibraryPrefix = '%s/lib/python%i.%i' % \
 
 DefaultConfig = {
 	'AutoReload': False,
-	'AutoReloadPollInterval': 1,  # in seconds
+	'AutoReloadPollInterval': 1, # in seconds
 }
 
 
@@ -254,9 +254,9 @@ class AutoReloadingAppServer(AppServer):
 		# server is shutdown. We use a pipe because it needs to be an object
 		# which will wake up the call to 'select':
 		r,w = os.pipe()
-		r = os.fdopen(r,'r')
-		w = os.fdopen(w,'w')
-		self._pipe = pipe = (r,w)
+		r = os.fdopen(r, 'r')
+		w = os.fdopen(w, 'w')
+		self._pipe = pipe = (r, w)
 		while self._autoReload:
 			try:
 				# We block here until a file has been changed, or until

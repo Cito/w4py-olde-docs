@@ -20,11 +20,10 @@
 
 """
 
+import os, sys, time
+from glob import glob
 from WebKit.ServletFactory import ServletFactory
-
-import os, sys, string
 from PSP import Context, PSPCompiler
-import time
 
 
 class PSPServletFactory(ServletFactory):
@@ -36,11 +35,12 @@ class PSPServletFactory(ServletFactory):
 
 	def __init__(self,application):
 		ServletFactory.__init__(self, application)
-		self.cacheDir = application.serverSidePath('Cache/PSP')
-		sys.path.append(self.cacheDir)
+		self._cacheDir = application.serverSidePath('Cache/PSP')
+		sys.path.append(self._cacheDir)
 		self._cacheClassFiles = self._cacheClasses
 		t = ['_'] * 256
-		for c in string.digits + string.letters:
+		from string import digits, letters
+		for c in digits + letters:
 			t[ord(c)] = c
 		self._classNameTrans = ''.join(t)
 		if application.setting('ClearPSPCacheOnStart', 0):
@@ -59,15 +59,14 @@ class PSPServletFactory(ServletFactory):
 
 	def clearFileCache(self):
 		"""Clear class files stored on disk."""
-		import glob
-		files = glob.glob(os.path.join(self.cacheDir, '*.*'))
+		files = glob(os.path.join(self._cacheDir, '*.*'))
 		map(os.remove, files)
 
-	def computeClassName(self,pagename):
+	def computeClassName(self, pagename):
 		"""Generates a (hopefully) unique class/file name for each PSP file.
 
 		Argument: pagename: the path to the PSP source file
-		Returns: A unique name for the class generated fom this PSP source file.
+		Returns: a unique name for the class generated fom this PSP source file
 
 		"""
 		# Compute class name by taking the path and substituting
@@ -81,7 +80,7 @@ class PSPServletFactory(ServletFactory):
 		module within the context's package (and appropriate subpackages).
 
 		"""
-		module = self.importAsPackage(transaction,filename)
+		module = self.importAsPackage(transaction, filename)
 		assert module.__dict__.has_key(classname), \
 			'Cannot find expected class named %s in %s.' \
 				% (repr(classname), repr(filename))
@@ -90,7 +89,7 @@ class PSPServletFactory(ServletFactory):
 
 	def loadClass(self, transaction, path):
 		classname = self.computeClassName(path)
-		classfile = os.path.join(self.cacheDir, classname + ".py")
+		classfile = os.path.join(self._cacheDir, classname + ".py")
 		mtime = os.path.getmtime(path)
 		if not os.path.exists(classfile) \
 				or os.path.getmtime(classfile) != mtime:

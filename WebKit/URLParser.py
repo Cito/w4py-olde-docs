@@ -463,7 +463,7 @@ class _FileParser(URLParser):
 		return good
 
 	def parseIndex(self, trans, requestPath):
-		"""Return index servlet-
+		"""Return index servlet.
 
 		Return the servlet for a directory index (i.e., ``Main`` or
 		``index``).  When `parse` encounters a directory and there's nothing
@@ -482,7 +482,7 @@ class _FileParser(URLParser):
 		``DirectoryFile``, which is a list of base names, by default
 		``["Main", "index", "main", "Index"]``, which are searched in order.
 		A file with any extension is allowed, so the index can be an HTML file,
-		a PSP file, a Python servlet, etc.
+		a PSP file, a Kid template, a Python servlet, etc.
 
 		"""
 		# If requestPath is empty, then we're missing the trailing slash:

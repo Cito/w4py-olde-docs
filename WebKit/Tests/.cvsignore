@@ -1,1 +1,4 @@
 *.pyc
+*.pyo
+address.text
+http.text

@@ -1,6 +1,6 @@
 from WebKit.Examples.ExamplePage import ExamplePage
 import os
-import glob
+from glob import glob
 
 class PSPExamplePage(ExamplePage):
 
@@ -11,7 +11,7 @@ class PSPExamplePage(ExamplePage):
 		"""Create a list of dictionaries, where each dictionary stores information about a particular script."""
 		examples = []
 		filesyspath = self.request().serverSidePath()
-		files = glob.glob(os.path.join(os.path.dirname(filesyspath),"*.psp"))
+		files = glob(os.path.join(os.path.dirname(filesyspath), "*.psp"))
 		for i in files:
 			file = os.path.split(i)[1]
 			script = {}
