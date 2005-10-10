@@ -421,8 +421,8 @@ def main():
 def kill(pid):
 	"""Kill a process."""
 	try:
-		from signal import SIGINT
-		os.kill(pid, SIGINT)
+		from signal import SIGTERM
+		os.kill(pid, SIGTERM)
 	except:
 		if os.name == 'nt':
 			import win32api

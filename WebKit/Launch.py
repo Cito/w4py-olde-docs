@@ -279,6 +279,18 @@ def main(args=None):
 		pass # use the default value
 	# Prepare the arguments for launchWebKit:
 	args = (appServer, workDir, args)
+	# Handle special case where app server shall be stopped:
+	if 'stop' in args[2]:
+		print 'Stopping WebKit.%s...' % appServer
+		errorlevel = launchWebKit(*args)
+		if not errorlevel:
+			if pidFile and os.path.exists(pidFile):
+				try:
+					os.remove(pidFile)
+				except:
+					print 'The pid file could not be removed.'
+					print
+		sys.exit(errorlevel)
 	# Handle the pid file:
 	if pidFile:
 		pidFile = os.path.expanduser(pidFile)
@@ -287,7 +299,7 @@ def main(args=None):
 			pid = int(open(pidFile).read())
 		except:
 			pid = None
-		if pid:
+		if pid is not None:
 			print 'According to the pid file, the server is still running.'
 			# Try to kill an already running server:
 			killed = 0
@@ -417,25 +429,34 @@ def main(args=None):
 		if log:
 			sys.stdout, sys.stderr = stdout, stderr
 			log.close()
-		# Restore server process group:
+		# Restore server process group and user.
+		# Note that because we changed the real group and
+		# user id of the process (most secure thing), we
+		# cannot change them back now, but we try anyway:
 		if oldgid is not None:
 			try:
 				os.setgid(oldgid)
 			except:
 				pass
-		# Restore server process user:
+			else:
+				oldgid = None
 		if olduid is not None:
 			try:
 				os.setuid(olduid)
 			except:
 				pass
-		# Remove the pid file again:
-		if pidFile:
+			else:
+				olduid = None
+		# Remove the pid file again.
+		# Note that this may fail when the group or user id
+		# has been changed, but we try anyway:
+		if pidFile and os.path.exists(pidFile):
 			try:
 				os.remove(pidFile)
 			except:
-				print 'The pid file could not be removed.'
-				print
+				if oldgid is None and olduid is None:
+					print 'The pid file could not be removed.'
+					print
 	sys.exit(errorlevel)
 
 if __name__ == '__main__':
