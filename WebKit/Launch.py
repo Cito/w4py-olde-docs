@@ -36,6 +36,8 @@ AppServer:
 AppServerOptions:
   Options that shall be passed to the application server.
   For instance, the ThreadedAppServer accepts: start, stop, daemon
+  You can also change configuration settings here by passing
+  arguments of the form ClassName.SettingName=value
 
 Please note that the default values for the StartOptions and the AppServer
 can be easily changed at the top of the Launch.py script.
@@ -114,7 +116,7 @@ def launchWebKit(appServer=appServer, workDir=None, args=None):
 	if workDir:
 		args.append('workdir=' + workDir)
 	# Allow for a .py on the server name:
-	if appServer[-3:]=='.py':
+	if appServer[-3:] == '.py':
 		appServer = appServer[:-3]
 	# Import the app server's main() function:
 	try:
@@ -139,13 +141,17 @@ def main(args=None):
 		logFile, pidFile, user, group, appServer
 	if args is None:
 		args = sys.argv[1:]
-	args1 = [] # StartOptions
-	args2 = [] # AppServerOptions
-	# Get all app server options :
+	# Accept AppServer even if placed before StartOptions:
+	if args and not args[0].startswith('-'):
+		arg2 = args.pop(0)
+	else:
+		arg2 = None
+	# Accept AppServerOptions that look like StartOptions:
+	args1 = []; args2 = []
 	while args:
 		arg = args.pop(0)
-		if not arg.startswith('-') or (arg.startswith('--')
-				and 2 < arg.find('.', 2) < arg.find('=', 5)):
+		if arg.startswith('--') and \
+			2 < arg.find('.', 2) < arg.find('=', 5):
 			args2.append(arg)
 		else:
 			args1.append(arg)
@@ -157,6 +163,7 @@ def main(args=None):
 			'log-file=', 'pid-file=', 'user=', 'group='])
 	except GetoptError, error:
 		print str(error)
+		print
 		usage()
 	for opt, arg in opts:
 		if opt in ('-d', '--work-dir'):
@@ -175,7 +182,11 @@ def main(args=None):
 			user = arg
 		elif opt in ('-g', '--group'):
 			group = arg
-	args = args1 + args2
+	if arg2:
+		appServer = arg2
+	elif args1 and not args1[0].startswith('-'):
+		appServer = args1.pop(0)
+	args = args2 + args1
 	# Figure out the group id:
 	gid = group
 	if gid is not None:
@@ -272,11 +283,6 @@ def main(args=None):
 			continue # do not include WebKit and duplicates
 		path.append(p)
 	sys.path = path # set the new search path
-	# Get the name of the app server module:
-	try:
-		appServer = args.pop(0)
-	except IndexError:
-		pass # use the default value
 	# Prepare the arguments for launchWebKit:
 	args = (appServer, workDir, args)
 	# Handle special case where app server shall be stopped:
