@@ -184,7 +184,8 @@ def main(args=None):
 			group = arg
 	if arg2:
 		appServer = arg2
-	elif args1 and not args1[0].startswith('-'):
+	elif args1 and not args1[0].startswith('-') \
+		and args1[0].find('=') < 0:
 		appServer = args1.pop(0)
 	args = args2 + args1
 	# Figure out the group id:
