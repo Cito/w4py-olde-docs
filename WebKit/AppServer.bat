@@ -1,6 +1,7 @@
 @echo off
 
 rem WebKit application server launch script for Windows.
+rem This wrapper script is needed for the AutoReload mechanism.
 
 rem Check whether this is a cmd-like shell
 set CMD=cmd

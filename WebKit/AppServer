@@ -1,6 +1,7 @@
 #!/bin/sh
 
 # WebKit application server launch script for Unix.
+# This wrapper script is needed for the AutoReload mechanism.
 
 # You may give the following Python parameters in advance,
 # followed by the parameters passed on to ThreadedAppServer:
