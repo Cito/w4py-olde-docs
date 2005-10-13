@@ -1,10 +1,23 @@
 #!/usr/bin/env python
 """Threaded Application Server
 
+The AppServer is the main process of WebKit. It handles requests for
+servlets from webservers.
+
 ThreadedAppServer uses a threaded model for handling multiple requests.
+
 At one time there were other experimental execution models for AppServer,
 but none of these were successful and have been removed.
 The ThreadedAppServer/AppServer distinction is thus largely historical.
+
+ThreadedAppServer takes the following command line arguments:
+
+start: start the AppServer (default argument)
+stop: stop the currently running Apperver
+daemon: run as a daemon
+ClassName.SettingName=value: change configuration settings
+
+When started, AppServer records its pid in appserverpid.txt.
 
 """
 
@@ -904,17 +917,11 @@ import signal
 signal.signal(signal.SIGINT, shutDown)
 signal.signal(signal.SIGTERM, shutDown)
 
-usage = """
-The AppServer is the main process of WebKit. It handles requests for servlets
-from webservers. ThreadedAppServer takes the following command line arguments:
-stop: Stop the currently running Apperver.
-daemon: run as a daemon If AppServer is called with no arguments, it will start
-the AppServer and record the pid of the process in appserverpid.txt
-"""
-
 import re
 settingRE = re.compile(r'^(?:--)?([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
 from MiscUtils import Configurable
+
+usage = re.search('\n.* arguments:\n\n(.*\n)*?\n', __doc__).group(0).strip()
 
 def main(args):
 	"""Command line interface.
@@ -945,6 +952,7 @@ def main(args):
 			workDir = i[8:]
 		else:
 			print usage
+			return
 
 	if daemon:
 		if os.name == "posix":
