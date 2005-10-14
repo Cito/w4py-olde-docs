@@ -908,12 +908,15 @@ def shutDown(signum, frame):
 		server.running = 2
 		if signum == signal.SIGINT:
 			raise KeyboardInterrupt
+		elif signum == signal.SIGHUP:
+			sys.exit(3) # force reload
 		else:
-			sys.exit(0)
+			sys.exit(0) # normal exit
 	else:
 		print 'No running app server was found.'
 
 import signal
+signal.signal(signal.SIGHUP, shutDown)
 signal.signal(signal.SIGINT, shutDown)
 signal.signal(signal.SIGTERM, shutDown)
 
