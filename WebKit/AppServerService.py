@@ -156,7 +156,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
 				if not workDir:
 					workDir = os.path.dirname(__file__)
 				os.chdir(workDir)
-				workDir = os.path.curdir
+				workDir = os.curdir
 				# Switch the output to the logFile specified above:
 				stdout, stderr = sys.stdout, sys.stderr
 				logFile = self._logFile

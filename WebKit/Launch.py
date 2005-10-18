@@ -238,7 +238,7 @@ def main(args=None):
 		print error.strerror
 		print 'Check the --work-dir option.'
 		sys.exit(1)
-	workDir = os.path.curdir
+	workDir = os.curdir
 	# Expand user components in directories:
 	if webwareDir:
 		webwareDir = os.path.expanduser(webwareDir)
