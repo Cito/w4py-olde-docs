@@ -64,32 +64,30 @@
 <li><a class="reference" href="#appserver-notes" id="id51" name="id51">AppServer Notes</a><ul>
 <li><a class="reference" href="#stopping-the-app-server" id="id52" name="id52">Stopping the App Server</a></li>
 <li><a class="reference" href="#reloading-servlets" id="id53" name="id53">Reloading Servlets</a></li>
-<li><a class="reference" href="#launching-the-appserver-at-unix-boot-up" id="id54" name="id54">Launching the AppServer at UNIX boot up</a><ul>
-<li><a class="reference" href="#redhat" id="id55" name="id55">Redhat</a></li>
-<li><a class="reference" href="#debian" id="id56" name="id56">Debian</a></li>
-<li><a class="reference" href="#other-sytems" id="id57" name="id57">Other Sytems</a></li>
-<li><a class="reference" href="#additional-notes" id="id58" name="id58">Additional Notes</a></li>
+<li><a class="reference" href="#launching-the-appserver-at-unix-boot-up" id="id54" name="id54">Launching the AppServer at Unix boot up</a><ul>
+<li><a class="reference" href="#start-script-configuration" id="id55" name="id55">Start script configuration</a></li>
+<li><a class="reference" href="#activating-the-start-script" id="id56" name="id56">Activating the start script</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#running-threadedappserver-as-a-windows-nt-2k-xp-service" id="id59" name="id59">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></li>
-<li><a class="reference" href="#other-notes" id="id60" name="id60">Other Notes</a></li>
+<li><a class="reference" href="#running-threadedappserver-as-a-windows-nt-2k-xp-service" id="id57" name="id57">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></li>
+<li><a class="reference" href="#other-notes" id="id58" name="id58">Other Notes</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#troubleshooting" id="id61" name="id61">Troubleshooting</a><ul>
-<li><a class="reference" href="#bad-marshal-data" id="id62" name="id62">Bad Marshal Data</a></li>
+<li><a class="reference" href="#troubleshooting" id="id59" name="id59">Troubleshooting</a><ul>
+<li><a class="reference" href="#bad-marshal-data" id="id60" name="id60">Bad Marshal Data</a></li>
 </ul>
 </li>
 </ul>
 </div>
 <div class="section" id="introduction">
 <h1><a class="toc-backref" href="#id15" name="introduction">Introduction</a></h1>
-<p>WebKit provides an application server that runs on both UNIX and
+<p>WebKit provides an application server that runs on both Unix and
 Windows as a persistent application (i.e., an application that stays
 running over the span of multiple requests).</p>
 <p>This install guide takes you through the installation process while
 showing you what options are available and how you would use
 them. There are notes for specific operating systems and web servers
-preceded with tags such as <strong>UNIX</strong>, <strong>WinNT</strong>, <strong>IIS</strong>, etc.</p>
+preceded with tags such as <strong>Unix</strong>, <strong>WinNT</strong>, <strong>IIS</strong>, etc.</p>
 <p>WebKit is fairly easy to install, but there are some important things
 to know. You will be doing yourself a favor by reading through this
 guide from top to bottom (skipping sections that don't apply to you).</p>
@@ -341,7 +339,7 @@ under Webware/WebKit/ that must be writable by that user:</p>
 <li>Sessions</li>
 </ul>
 <p>The easiest way to do this is to make these directories writeable by
-all (on UNIX, that would be <tt class="docutils literal"><span class="pre">cd</span> <span class="pre">Webware/WebKit;</span> <span class="pre">chmod</span> <span class="pre">-R</span> <span class="pre">a+rwX</span>
+all (on Unix, that would be <tt class="docutils literal"><span class="pre">cd</span> <span class="pre">Webware/WebKit;</span> <span class="pre">chmod</span> <span class="pre">-R</span> <span class="pre">a+rwX</span>
 <span class="pre">Cache</span> <span class="pre">ErrorMsgs</span> <span class="pre">Logs</span> <span class="pre">Sessions</span></tt>).</p>
 <p>You may wish to set it up this way at first, and review the
 permissions and create a new user later.</p>
@@ -548,7 +546,7 @@ to accomplish by downloading software at <a class="reference" href="http://www.F
 you can also learn more about FastCGI.</p>
 <p>The top of <tt class="docutils literal"><span class="pre">WebKit/Adapters/FCGIAdapter.py</span></tt> contains a doc string
 explaining its setup.</p>
-<p>Note that to date, we have only gotten this to work on UNIX.</p>
+<p>Note that to date, we have only gotten this to work on Unix.</p>
 </div>
 <div class="section" id="mod-python">
 <h3><a class="toc-backref" href="#id41" name="mod-python">mod_python</a></h3>
@@ -558,7 +556,7 @@ considerably slower than <a class="reference" href="#mod-webkit">mod_webkit</a>.
 much more difficult to configure.  Its use is <em>not</em> recommended.</p>
 <p>The top of <tt class="docutils literal"><span class="pre">WebKit/Adapters/ModPythonAdapter.py</span></tt> contains a doc
 string explaining the setup.</p>
-<p>This has been tested on both UNIX and Windows.  On Windows you should
+<p>This has been tested on both Unix and Windows.  On Windows you should
 use mod_python 2.7.4 or later because there is a bug in earlier
 versions of mod_python for Windows that can cause Apache to crash or
 return incorrect responses under heavy load.</p>
@@ -734,8 +732,8 @@ You can see all of these options if you run <tt class="docutils literal"><span c
 without any parameters.</p>
 <p>When you list the created directory, you will see something like this:</p>
 <pre class="literal-block">
-404Text.txt  Cache/       ErrorMsgs/   Logs/        WebKit.cgi   Lib/
-AppServer*   Configs/     Launch.py    Sessions/    MyContext/
+404Text.txt  Cache/     ErrorMsgs/  Lib/    MyContext/  WebKit.cgi
+AppServer*   Configs/   Launch.py   Logs/   Sessions/   webkit*
 </pre>
 <p>Here's what the files and directories are for:</p>
 <dl class="docutils">
@@ -759,15 +757,12 @@ considerable size (even just during development), so you'll want to
 purge these every so often.</dd>
 <dt><tt class="docutils literal"><span class="pre">Launch.py</span></tt>:</dt>
 <dd>Called by the <tt class="docutils literal"><span class="pre">AppServer</span></tt> script to launch the AppServer.</dd>
+<dt><tt class="docutils literal"><span class="pre">Lib</span></tt>:</dt>
+<dd>An example for an application-specific library package that can be created
+<tt class="docutils literal"><span class="pre">-l</span></tt> option (in this case, <tt class="docutils literal"><span class="pre">-l</span> <span class="pre">Lib</span></tt>. Import modules from this directory
+like <tt class="docutils literal"><span class="pre">from</span> <span class="pre">Lib.SitePage</span> <span class="pre">import</span> <span class="pre">SitePage</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">Logs</span></tt>:</dt>
 <dd>Logs of accesses.</dd>
-<dt><tt class="docutils literal"><span class="pre">Sessions</span></tt>:</dt>
-<dd>Users sessions. These should be cleaned out automatically, you won't
-have to look in this directory.</dd>
-<dt><tt class="docutils literal"><span class="pre">WebKit.cgi</span></tt>:</dt>
-<dd>A CGI script/adapter for accessing the AppServer here. You can still use
-the other adapters, but most of them don't need to be configured for the
-individual applications. I still recommend <tt class="docutils literal"><span class="pre">mod_webkit</span></tt> or <tt class="docutils literal"><span class="pre">wkcgi</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">MyContext</span></tt>:</dt>
 <dd>The directory for your default context. This is where you put your servlets.
 you can change its name and location with the <tt class="docutils literal"><span class="pre">`-c</span></tt> and <tt class="docutils literal"><span class="pre">-d</span></tt> options.
@@ -775,10 +770,16 @@ You can also change this subsequently in the <tt class="docutils literal"><span 
 in the <tt class="docutils literal"><span class="pre">Configs</span></tt> directory, where you can also configure more than one
 context. You may also want to remove the other standard contexts that come
 with Webware from the config file.</dd>
-<dt><tt class="docutils literal"><span class="pre">Lib</span></tt>:</dt>
-<dd>An example for an application-specific library package that can be created
-<tt class="docutils literal"><span class="pre">-l</span></tt> option (in this case, <tt class="docutils literal"><span class="pre">-l</span> <span class="pre">Lib</span></tt>. Import modules from this directory
-like <tt class="docutils literal"><span class="pre">from</span> <span class="pre">Lib.SitePage</span> <span class="pre">import</span> <span class="pre">SitePage</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">Sessions</span></tt>:</dt>
+<dd>Users sessions. These should be cleaned out automatically, you won't
+have to look in this directory.</dd>
+<dt><tt class="docutils literal"><span class="pre">WebKit.cgi</span></tt>:</dt>
+<dd>A CGI script/adapter for accessing the AppServer here. You can still use
+the other adapters, but most of them don't need to be configured for the
+individual applications. I still recommend <tt class="docutils literal"><span class="pre">mod_webkit</span></tt> or <tt class="docutils literal"><span class="pre">wkcgi</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">webkit*</span></tt>:</dt>
+<dd>If you are running under Unix, you can use this as a start script
+(see <a class="reference" href="#webkit-init-script">webkit init script</a>).</dd>
 </dl>
 </div>
 </div>
@@ -794,20 +795,20 @@ back to the adapter.</p>
 Application Control interface.  This is a servlet located in the Admin
 context.  A username and password are required -- the username is
 always <tt class="docutils literal"><span class="pre">admin</span></tt>, and the password is set when you run <tt class="docutils literal"><span class="pre">install.py</span></tt>.
-(You can change the password through the
-<tt class="docutils literal"><span class="pre">WebKit/Configs/Application.config</span></tt> file).  This shutdown method is
-safer than doing a ctrl-c from a terminal, as described below.</p>
+(You can change the password through the <tt class="docutils literal"><span class="pre">WebKit/Configs/Application.config</span></tt>
+file).  This shutdown method is safer than doing a Control-C from a terminal,
+as described below.</p>
 <p>On all OSs, stopping the app server may also be accomplished by simply
 going to its terminal/command window and hitting Control-C. The app
 server is designed to intercept this interruption and shut down as
 gracefully as possible. This includes saving session data to disk, if
 necessary.</p>
-<p>On UNIX, a running appserver may be stopped from a terminal by typing
+<p>On Unix, a running appserver may be stopped from a terminal by typing
 <tt class="docutils literal"><span class="pre">./AppServer</span> <span class="pre">stop</span></tt>.</p>
 <p>On Windows Control-C normally shuts the app server down <em>gracefully</em>,
 where as Control-Break does not. Keep that in mind and use Control-C,
 unless the server is unresponsive to it.</p>
-<p>On UNIX if you don't have access to the terminal window of the app
+<p>On Unix if you don't have access to the terminal window of the app
 server (perhaps because you used rlogin, telnet or ssh to remotely
 access the machine), and &quot;AppServer stop&quot; doesn't work, you can use
 <tt class="docutils literal"><span class="pre">ps</span> <span class="pre">-ax</span> <span class="pre">|</span> <span class="pre">grep</span> <span class="pre">ThreadedAppServer</span></tt> to get the pid and <tt class="docutils literal"><span class="pre">kill</span> <span class="pre">&lt;pid&gt;</span></tt> to
@@ -846,82 +847,105 @@ definitions can still exist.  AutoReload is generally the best
 solution.</p>
 </div>
 <span id="webkit-init-script"></span><div class="section" id="launching-the-appserver-at-unix-boot-up">
-<h2><a class="toc-backref" href="#id54" name="launching-the-appserver-at-unix-boot-up">Launching the AppServer at UNIX boot up</a></h2>
-<p>The script <tt class="docutils literal"><span class="pre">WebKit/webkit</span></tt> is a UNIX shell script launching WebKit
+<h2><a class="toc-backref" href="#id54" name="launching-the-appserver-at-unix-boot-up">Launching the AppServer at Unix boot up</a></h2>
+<p>The script <tt class="docutils literal"><span class="pre">WebKit/webkit</span></tt> is a Unix shell script launching WebKit
 at boot time through the standard &quot;init&quot; mechanisms.</p>
-<p>To start WebKit at boot time, make the necessary variable
-modifications in the script, like so:</p>
+<p>There are several variants of this script for various flavors of Unix
+available in the folder <tt class="docutils literal"><span class="pre">WebKit/StartScripts</span></tt>. The <tt class="docutils literal"><span class="pre">install.py</span></tt>
+script copies the variant that it thinks is the best fit to <tt class="docutils literal"><span class="pre">WebKit/webkit</span></tt>.
+If the script does not fit to your system, you may want to try out other
+variants or the <tt class="docutils literal"><span class="pre">Generic</span></tt> script that should fit on most systems.</p>
+<p>If you create a working directory using <tt class="docutils literal"><span class="pre">bin/MakeAppWorkDir.py</span></tt> as
+explained above, the <tt class="docutils literal"><span class="pre">webkit</span></tt> start script will also be copied to the
+working directory.</p>
+<p>In order to start WebKit at boot time, copy this script to the system
+folder that is destined for start scripts, which is usually <tt class="docutils literal"><span class="pre">/etc/init.d/</span></tt>
+(e.g. for SuSE or Debian Linux or Solaris) or <tt class="docutils literal"><span class="pre">/etc/rc.d/init.d/</span></tt> (e.g. for
+RedHat or Mandrake Linux). Instead of copying the script, you can also make
+a symbolic link refering to the script located in your working directory.
+If you do this, the script will be able to determine the location of the
+working directory from the symbolic link and you do not have to set the
+location in the script itself.</p>
+<div class="section" id="start-script-configuration">
+<h3><a class="toc-backref" href="#id55" name="start-script-configuration">Start script configuration</a></h3>
+<p>At the top of the start script, you will find a configuration section where
+you can change several variables that influence the start-up process.
+The main configuration parameters are the following:</p>
 <pre class="literal-block">
-WEBKIT_DIR=/opt/Webware/WebKit
-PID_FILE=$WEBKIT_DIR/appserverpid.txt
-LOG=/var/log/webkit
-PYTHONPATH=
-PYTHONPATH_ADDONS=
+WORK_DIR      the location of your working directory
+
+LOG_FILE      the location of the log file which records the standard
+              and error output of the application server
+
+PID_FILE      the location of the pid file which records the process id
+              of the Python application server
+
+WEBWARE_USER  the user to run the application server
 </pre>
-<div class="section" id="redhat">
-<h3><a class="toc-backref" href="#id55" name="redhat">Redhat</a></h3>
-<p>Now put this script in <tt class="docutils literal"><span class="pre">/etc/rc.d/init.d</span></tt> and do this:</p>
-<pre class="literal-block">
-# cd /etc/rc.d/init.d
-# chmod a+rx webkit
-# chkconfig webkit reset
-</pre>
-<p>That takes care of getting it started for future boots, but this first
-time you need to jump start it:</p>
-<pre class="literal-block">
-# ./webkit start
-</pre>
-<p>You can use chkconfig to put this in at the right runlevels. By
-default, it is set up properly for the default Apache install, which
-is to say that the AppServer starts up before Apache and shuts down
-after Apache.</p>
-<p>By default, the script is in runlevels 2-5 at start priority 75, stop
-priority 25.</p>
+<p>Note that the pid file records the pid of the Python application server, not
+the pid of the wrapper script <tt class="docutils literal"><span class="pre">AppServer</span></tt> which is responsible for the
+AutoReload mechanism.</p>
+<p>For security reasons, you shouldn't use <tt class="docutils literal"><span class="pre">root</span></tt> as the Webware user, but
+a user with the least possible permissions, maybe even <tt class="docutils literal"><span class="pre">nobody</span></tt>. By
+default, the start script uses the owner of the <tt class="docutils literal"><span class="pre">AppServer</span></tt> script.</p>
+<p>For the log file and the pid file, you may either use the standard locations
+on your system, usually something like <tt class="docutils literal"><span class="pre">/var/log/webkit.log</span></tt> and
+<tt class="docutils literal"><span class="pre">/var/log/webkit.pid</span></tt> (use different names for different instances),
+or you may store them in the working directory and its <tt class="docutils literal"><span class="pre">Logs</span></tt> subdirectory.
+In the first case, the files should be written as the root user, because
+other users usually won't have writing permission for the standard locations.
+In the second case, the files should be written as the Webware user, so
+you won't need to be <tt class="docutils literal"><span class="pre">root</span></tt> to restart the application server.
+Therefore, the configuration section has another variable <tt class="docutils literal"><span class="pre">LAUNCH_AS_WEBWARE</span></tt>
+that determines whether Webware will launch as <tt class="docutils literal"><span class="pre">root</span></tt> and then
+(after writing the pid and log files) switch to the Webware user, or whether
+Webware will immediately launch and write both files as the Webware user.</p>
+<p>By default, the script will start as the Webware user and will write the files
+to the working directory, so you have to unset <tt class="docutils literal"><span class="pre">LAUNCH_AS_WEBWARE</span></tt> if you
+want to use the standard system locations for the files instead.</p>
+<p>The start script also passes the variable <tt class="docutils literal"><span class="pre">PYTHONOPTS</span></tt> to the <tt class="docutils literal"><span class="pre">AppServer</span></tt>
+script. You can add options <tt class="docutils literal"><span class="pre">-U</span></tt> for unbuffered output (to the log file)
+or <tt class="docutils literal"><span class="pre">-O</span></tt> if you want to use optimized Python files (i.e. <tt class="docutils literal"><span class="pre">.pyo</span></tt> instead
+of <tt class="docutils literal"><span class="pre">.pyc</span></tt>). You can also add additional Python libraries with <tt class="docutils literal"><span class="pre">PYTHONPATH</span></tt>.</p>
 </div>
-<div class="section" id="debian">
-<h3><a class="toc-backref" href="#id56" name="debian">Debian</a></h3>
-<p>Now put this script in <tt class="docutils literal"><span class="pre">/etc/init.d</span></tt> and do this:</p>
+<div class="section" id="activating-the-start-script">
+<h3><a class="toc-backref" href="#id56" name="activating-the-start-script">Activating the start script</a></h3>
+<p>First try whether your start script works:</p>
 <pre class="literal-block">
-# cd /etc/init.d
-# chmod a+rx webkit
-# update-rc.d webkit defaults
+&gt; ./webkit start
 </pre>
-<p>That takes care of getting it started for future boots, but this first
-time you need to jump start it:</p>
+<p>The WebKit application server should now be launched and you should see
+it in the output of the <tt class="docutils literal"><span class="pre">ps</span></tt> command.</p>
+<p>Also try to stop WebKit by typing:</p>
 <pre class="literal-block">
-# ./webkit start
+&gt; ./webkit stop
 </pre>
-<p>You can use update-rc.d to put this in at the right runlevels.  See
-<tt class="docutils literal"><span class="pre">man</span> <span class="pre">update-rc.d</span></tt> for more information.</p>
-</div>
-<div class="section" id="other-sytems">
-<h3><a class="toc-backref" href="#id57" name="other-sytems">Other Sytems</a></h3>
-<p>(&#64;&#64; someone check this)</p>
-<p>You should put the <tt class="docutils literal"><span class="pre">webkit</span></tt> script either in <tt class="docutils literal"><span class="pre">/etc/rc.d/init.d/</span></tt>
-or <tt class="docutils literal"><span class="pre">/etc/init.d/</span></tt> depending on what you system has.  For the example
-we'll assume <tt class="docutils literal"><span class="pre">/etc/rc.d/init.d/</span></tt>.  You should then
-make symbolic links, like:</p>
+<p>To activate the script for future boots, you still have to put symbolic links
+to the runlevel directories in which you want to launch WebKit.
+On some systems, you have to do this manually. For example, if the start script
+is <tt class="docutils literal"><span class="pre">/etc/init.d/webkit</span></tt>, you would create the symbolic links like that:</p>
 <pre class="literal-block">
-# cd /etc/rc0.d
-# ln -s ../rc.d/init.d/webkit K75webkit
+&gt; cd /etc/rc0.d
+&gt; ln -s ../init.d/webkit K75webkit
 (repeat for rc1.d and rc6.d)
-# cd /etc/rc2.d
-# ln -s ../rc.d/init.d/webkit S25webkit
+&gt; cd /etc/rc2.d
+&gt; ln -s ../init.d/webkit S25webkit
 (repeat for rc3.d, rc4.d, and rc5.d)
 </pre>
-</div>
-<div class="section" id="additional-notes">
-<h3><a class="toc-backref" href="#id58" name="additional-notes">Additional Notes</a></h3>
-<p>You will notice the variables <tt class="docutils literal"><span class="pre">PYTHONPATH</span></tt> and <tt class="docutils literal"><span class="pre">PYTHON_PATH</span></tt> which
-are both set to blank. The first prevents inheriting <tt class="docutils literal"><span class="pre">PYTHON_PATH</span></tt>
-from the environment (as security paranoia). You can comment this out
-if you prefer to inherit the Python path. The second allows you
-specify additional Python path components (regardless of whether or
-not you inherited the path).</p>
+<p>Some systems also provide a command line tool for this purpose, which will
+depend on the flavor of Unix you are using. For instance, you will use
+<tt class="docutils literal"><span class="pre">insserv</span></tt> on SuSE Linux, <tt class="docutils literal"><span class="pre">chkconfig</span></tt> for RedHat (Fedora),
+<tt class="docutils literal"><span class="pre">update-rc.d</span></tt> for Debian (Ubuntu) or <tt class="docutils literal"><span class="pre">rc-update</span></tt> for Gentoo.</p>
+<p>Take care to launch the script after your web server and database and other
+services you are using. You can do this by using appropriate numbers for the
+symbolic links or setting approriate hints for the command line tools at
+the top of the script.</p>
+<p>See the corresponding <tt class="docutils literal"><span class="pre">man</span></tt> pages or administrator handbook of your Unix
+system for the details of installing start scripts.</p>
 </div>
 </div>
 <div class="section" id="running-threadedappserver-as-a-windows-nt-2k-xp-service">
-<h2><a class="toc-backref" href="#id59" name="running-threadedappserver-as-a-windows-nt-2k-xp-service">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></h2>
+<h2><a class="toc-backref" href="#id57" name="running-threadedappserver-as-a-windows-nt-2k-xp-service">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></h2>
 <p><tt class="docutils literal"><span class="pre">AppServerService</span></tt> is a script that runs the <tt class="docutils literal"><span class="pre">ThreadedAppServer</span></tt>
 as a Windows NT Service.  This means it can be started and stopped
 from the Control Panel or from the command line using <tt class="docutils literal"><span class="pre">net</span> <span class="pre">start</span></tt>
@@ -959,15 +983,15 @@ the following commands:</p>
 </pre>
 </div>
 <div class="section" id="other-notes">
-<h2><a class="toc-backref" href="#id60" name="other-notes">Other Notes</a></h2>
+<h2><a class="toc-backref" href="#id58" name="other-notes">Other Notes</a></h2>
 <p>See <a class="reference" href="#stopping-the-app-server">Stopping the App Server</a> and <a class="reference" href="#reloading-servlets">Reloading Servlets</a> above in
 <a class="reference" href="#adapters">Adapters</a>.</p>
 </div>
 </div>
 <div class="section" id="troubleshooting">
-<h1><a class="toc-backref" href="#id61" name="troubleshooting">Troubleshooting</a></h1>
+<h1><a class="toc-backref" href="#id59" name="troubleshooting">Troubleshooting</a></h1>
 <div class="section" id="bad-marshal-data">
-<h2><a class="toc-backref" href="#id62" name="bad-marshal-data">Bad Marshal Data</a></h2>
+<h2><a class="toc-backref" href="#id60" name="bad-marshal-data">Bad Marshal Data</a></h2>
 <p>The most common installation problem is a Python exception appearing
 in your browser that says &quot;bad marshal data&quot;. This is always caused by
 pointing the web browser to the app server:</p>

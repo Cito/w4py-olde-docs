@@ -58,8 +58,8 @@ without any parameters.
 
 When you do this, you'll see this directory structure::
 
-    404Text.txt  Cache/       ErrorMsgs/   Logs/        WebKit.cgi   Lib/
-    AppServer*   Configs/     Launch.py    Sessions/    Context/
+    404Text.txt  Cache/     Context/    Launch.py   Logs/       WebKit.cgi
+    AppServer*   Configs/   ErrorMsgs/  Lib/        Sessions/   webkit*
 
 Here's what the files and directories are for:
 
@@ -77,12 +77,23 @@ Here's what the files and directories are for:
 ``Configs``:
     Configuration files for the application. These files are copied from
     ``WebKit/Configs``, but are specific to this application/AppServer.
+``Context``:
+    The directory for your default context. This is where you put your servlets.
+    you can change its name and location with the ```-c`` and ``-d`` options.
+    You can also change this subsequently in the ``Application.config`` file
+    in the ``Configs`` directory, where you can also configure more than one
+    context. You may also want to remove the other standard contexts that come
+    with Webware from the config file.
 ``ErrorMsgs``:
     HTML pages for any errors that occur. These can pile up and take up
     considerable size (even just during development), so you'll want to
     purge these every so often.
 ``Launch.py``:
     Called by the ``AppServer`` script to launch the AppServer.
+``Lib``:
+    An example for an application-specific library package that can be created
+    ``-l`` option (in this case, ``-l Lib``. Import modules from this directory
+    like ``from Lib.SitePage import SitePage``.
 ``Logs``:
     Logs of accesses.
 ``Sessions``:
@@ -92,17 +103,12 @@ Here's what the files and directories are for:
     A CGI script/adapter for accessing the AppServer here. You can still use
     the other adapters, but most of them don't need to be configured for the
     individual applications. I still recommend ``mod_webkit`` or ``wkcgi``.
-``Context``:
-    The directory for your default context. This is where you put your servlets.
-    you can change its name and location with the ```-c`` and ``-d`` options.
-    You can also change this subsequently in the ``Application.config`` file
-    in the ``Configs`` directory, where you can also configure more than one
-    context. You may also want to remove the other standard contexts that come
-    with Webware from the config file.
-``Lib``:
-    An example for an application-specific library package that can be created
-    ``-l`` option (in this case, ``-l Lib``. Import modules from this directory
-    like ``from Lib.SitePage import SitePage``.
+``webkit*``:
+    If you are running under Unix, you can use this as a start script
+    (see the `WebKit Install Guide`__).
+
+__ InstallGuide.html
+
 
 Using a version control system for your application
 ---------------------------------------------------

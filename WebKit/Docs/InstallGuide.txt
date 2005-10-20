@@ -4,17 +4,18 @@ WebKit Install Guide
 
 .. contents:: Contents
 
+
 Introduction
 ============
 
-WebKit provides an application server that runs on both UNIX and
+WebKit provides an application server that runs on both Unix and
 Windows as a persistent application (i.e., an application that stays
 running over the span of multiple requests).
 
 This install guide takes you through the installation process while
 showing you what options are available and how you would use
 them. There are notes for specific operating systems and web servers
-preceded with tags such as **UNIX**, **WinNT**, **IIS**, etc.
+preceded with tags such as **Unix**, **WinNT**, **IIS**, etc.
 
 WebKit is fairly easy to install, but there are some important things
 to know. You will be doing yourself a favor by reading through this
@@ -34,6 +35,7 @@ during development, and security and performance during deployment.
 
 You can always e-mail webware-discuss@lists.sourceforge.net to give
 feedback, discuss features and get help using WebKit.
+
 
 Quick Start
 ===========
@@ -65,8 +67,10 @@ above is a simple way to start the AppServer in the console window
 you are working in.  (There are scripts to run it
 automatically at boot up, see `webkit init script`_).
 
+
 Prerequisites
 =============
+
 
 Python
 ------
@@ -92,6 +96,7 @@ __ http://www.python.org/download/
 To determine if threading is enabled, start the Python interpreter
 from the command line and enter ``import thread``. If you don't get an
 exception, all is well.
+
 
 Web Server
 ----------
@@ -177,6 +182,7 @@ Other Servers
 
 Other servers should work using a `CGI adapter`_.
 
+
 Webware Version
 ---------------
 
@@ -198,6 +204,7 @@ generally fairly stable.
 
 __ http://www.webwareforpython.org/Wiki/subversionrepositoryaccess
 __ http://svnbook.red-bean.com
+
 
 Operating Systems
 -----------------
@@ -246,6 +253,7 @@ Windows:
   It's generally recommended to simply use forward slashes (/) for all
   your file paths.
 
+
 Installing Webware
 ==================
 
@@ -260,6 +268,7 @@ Also, you can run the install program as many times as you like with
 no ill effect, so if you're not sure whether or not it has been run,
 feel free to do so again.  If you're debugging a problem with the
 installation, you can run ``install.py -v`` for verbose output.
+
 
 Architecture
 ============
@@ -287,6 +296,7 @@ If you are not using the built-in web server, you must
 get your web server and app server talking to each other.
 For this purpose, you must use a WebKit adapter_.
 
+
 Permissions
 -----------
 
@@ -308,11 +318,12 @@ under Webware/WebKit/ that must be writable by that user:
 * Sessions
 
 The easiest way to do this is to make these directories writeable by
-all (on UNIX, that would be ``cd Webware/WebKit; chmod -R a+rwX
+all (on Unix, that would be ``cd Webware/WebKit; chmod -R a+rwX
 Cache ErrorMsgs Logs Sessions``).
 
 You may wish to set it up this way at first, and review the
 permissions and create a new user later.
+
 
 .. _adapter:
 
@@ -347,6 +358,7 @@ These adapters are not really recommended:
 * mod_snake_
 * ISAPI_ (*alpha*, for IIS)
 * OneShot_ (unusual to use, sometimes buggy)
+
 
 .. _`CGI Adapter`:
 
@@ -563,7 +575,7 @@ you can also learn more about FastCGI.
 The top of ``WebKit/Adapters/FCGIAdapter.py`` contains a doc string
 explaining its setup.
 
-Note that to date, we have only gotten this to work on UNIX.
+Note that to date, we have only gotten this to work on Unix.
 
 mod_python
 ~~~~~~~~~~
@@ -576,7 +588,7 @@ much more difficult to configure.  Its use is *not* recommended.
 The top of ``WebKit/Adapters/ModPythonAdapter.py`` contains a doc
 string explaining the setup.
 
-This has been tested on both UNIX and Windows.  On Windows you should
+This has been tested on both Unix and Windows.  On Windows you should
 use mod_python 2.7.4 or later because there is a bug in earlier
 versions of mod_python for Windows that can cause Apache to crash or
 return incorrect responses under heavy load.
@@ -629,6 +641,7 @@ It currently has some memory leaks and is not well tested.  It is
 looking for a maintainer.  There's no documentation for it, and you
 must compile it yourself.
 
+
 Renaming Adapters
 -----------------
 
@@ -643,6 +656,7 @@ manipulations.  Mod_rewrite is extremely general.
 
 .. _mod_rewrite: http://webware.colorstudy.net/twiki/bin/view/Webware/ModRewriteRecipes
 
+
 Adapter Problems (not CGI)
 --------------------------
 
@@ -653,6 +667,7 @@ exist in your apache document root.  Also, you may not have a file or
 directory in your document root with the same name as one of WebKit's
 contexts.  So, you can't have a directory named Examples in your
 document root.
+
 
 Configuration
 =============
@@ -665,6 +680,7 @@ __ UsersGuide.html#Configuration
 
 The settings referenced below are found in the configuration file,
 ``WebKit/Configs/Application.config``.
+
 
 Sessions
 --------
@@ -726,6 +742,7 @@ See Configuration__ in the User's Guide for more information.
 
 __ UsersGuide.html#Configuration
 
+
 Contexts
 --------
 
@@ -768,6 +785,7 @@ Note that a context can contain an ``__init__.py`` which will be
 executed when the context is loaded at app server startup. You can put
 any kind of initialization code you deem appropriate there.
 
+
 .. _MakeAppWorkDir:
 
 Creating a Working Directory
@@ -792,8 +810,8 @@ without any parameters.
 
 When you list the created directory, you will see something like this::
 
-    404Text.txt  Cache/       ErrorMsgs/   Logs/        WebKit.cgi   Lib/
-    AppServer*   Configs/     Launch.py    Sessions/    MyContext/
+    404Text.txt  Cache/     ErrorMsgs/  Lib/    MyContext/  WebKit.cgi
+    AppServer*   Configs/   Launch.py   Logs/   Sessions/   webkit*
 
 Here's what the files and directories are for:
 
@@ -817,15 +835,12 @@ Here's what the files and directories are for:
     purge these every so often.
 ``Launch.py``:
     Called by the ``AppServer`` script to launch the AppServer.
+``Lib``:
+    An example for an application-specific library package that can be created
+    ``-l`` option (in this case, ``-l Lib``. Import modules from this directory
+    like ``from Lib.SitePage import SitePage``.
 ``Logs``:
     Logs of accesses.
-``Sessions``:
-    Users sessions. These should be cleaned out automatically, you won't
-    have to look in this directory.
-``WebKit.cgi``:
-    A CGI script/adapter for accessing the AppServer here. You can still use
-    the other adapters, but most of them don't need to be configured for the
-    individual applications. I still recommend ``mod_webkit`` or ``wkcgi``.
 ``MyContext``:
     The directory for your default context. This is where you put your servlets.
     you can change its name and location with the ```-c`` and ``-d`` options.
@@ -833,10 +848,16 @@ Here's what the files and directories are for:
     in the ``Configs`` directory, where you can also configure more than one
     context. You may also want to remove the other standard contexts that come
     with Webware from the config file.
-``Lib``:
-    An example for an application-specific library package that can be created
-    ``-l`` option (in this case, ``-l Lib``. Import modules from this directory
-    like ``from Lib.SitePage import SitePage``.
+``Sessions``:
+    Users sessions. These should be cleaned out automatically, you won't
+    have to look in this directory.
+``WebKit.cgi``:
+    A CGI script/adapter for accessing the AppServer here. You can still use
+    the other adapters, but most of them don't need to be configured for the
+    individual applications. I still recommend ``mod_webkit`` or ``wkcgi``.
+``webkit*``:
+    If you are running under Unix, you can use this as a start script
+    (see `webkit init script`_).
 
 
 AppServer Notes
@@ -855,9 +876,9 @@ The recommended method of stopping the AppServer is through the
 Application Control interface.  This is a servlet located in the Admin
 context.  A username and password are required -- the username is
 always ``admin``, and the password is set when you run ``install.py``.
-(You can change the password through the
-``WebKit/Configs/Application.config`` file).  This shutdown method is
-safer than doing a ctrl-c from a terminal, as described below.
+(You can change the password through the ``WebKit/Configs/Application.config``
+file).  This shutdown method is safer than doing a Control-C from a terminal,
+as described below.
 
 On all OSs, stopping the app server may also be accomplished by simply
 going to its terminal/command window and hitting Control-C. The app
@@ -865,18 +886,19 @@ server is designed to intercept this interruption and shut down as
 gracefully as possible. This includes saving session data to disk, if
 necessary.
 
-On UNIX, a running appserver may be stopped from a terminal by typing
+On Unix, a running appserver may be stopped from a terminal by typing
 ``./AppServer stop``.
 
 On Windows Control-C normally shuts the app server down *gracefully*,
 where as Control-Break does not. Keep that in mind and use Control-C,
 unless the server is unresponsive to it.
 
-On UNIX if you don't have access to the terminal window of the app
+On Unix if you don't have access to the terminal window of the app
 server (perhaps because you used rlogin, telnet or ssh to remotely
 access the machine), and "AppServer stop" doesn't work, you can use
 ``ps -ax | grep ThreadedAppServer`` to get the pid and ``kill <pid>`` to
 effect a Control-C.
+
 
 Reloading Servlets
 ------------------
@@ -918,86 +940,118 @@ solution.
 
 .. _`webkit init script`:
 
-Launching the AppServer at UNIX boot up
+Launching the AppServer at Unix boot up
 ---------------------------------------
 
-The script ``WebKit/webkit`` is a UNIX shell script launching WebKit
+The script ``WebKit/webkit`` is a Unix shell script launching WebKit
 at boot time through the standard "init" mechanisms.
 
-To start WebKit at boot time, make the necessary variable
-modifications in the script, like so::
+There are several variants of this script for various flavors of Unix
+available in the folder ``WebKit/StartScripts``. The ``install.py``
+script copies the variant that it thinks is the best fit to ``WebKit/webkit``.
+If the script does not fit to your system, you may want to try out other
+variants or the ``Generic`` script that should fit on most systems.
 
-    WEBKIT_DIR=/opt/Webware/WebKit
-    PID_FILE=$WEBKIT_DIR/appserverpid.txt
-    LOG=/var/log/webkit
-    PYTHONPATH=
-    PYTHONPATH_ADDONS=
+If you create a working directory using ``bin/MakeAppWorkDir.py`` as
+explained above, the ``webkit`` start script will also be copied to the
+working directory.
 
-Redhat
-~~~~~~
+In order to start WebKit at boot time, copy this script to the system
+folder that is destined for start scripts, which is usually ``/etc/init.d/``
+(e.g. for SuSE or Debian Linux or Solaris) or ``/etc/rc.d/init.d/`` (e.g. for
+RedHat or Mandrake Linux). Instead of copying the script, you can also make
+a symbolic link refering to the script located in your working directory.
+If you do this, the script will be able to determine the location of the
+working directory from the symbolic link and you do not have to set the
+location in the script itself.
 
-Now put this script in ``/etc/rc.d/init.d`` and do this::
+Start script configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    # cd /etc/rc.d/init.d
-    # chmod a+rx webkit
-    # chkconfig webkit reset
+At the top of the start script, you will find a configuration section where
+you can change several variables that influence the start-up process.
+The main configuration parameters are the following::
 
-That takes care of getting it started for future boots, but this first
-time you need to jump start it::
+    WORK_DIR      the location of your working directory
 
-    # ./webkit start
+    LOG_FILE      the location of the log file which records the standard
+                  and error output of the application server
 
-You can use chkconfig to put this in at the right runlevels. By
-default, it is set up properly for the default Apache install, which
-is to say that the AppServer starts up before Apache and shuts down
-after Apache.
+    PID_FILE      the location of the pid file which records the process id
+                  of the Python application server
 
-By default, the script is in runlevels 2-5 at start priority 75, stop
-priority 25.
+    WEBWARE_USER  the user to run the application server
 
-Debian
-~~~~~~
+Note that the pid file records the pid of the Python application server, not
+the pid of the wrapper script ``AppServer`` which is responsible for the
+AutoReload mechanism.
 
-Now put this script in ``/etc/init.d`` and do this::
+For security reasons, you shouldn't use ``root`` as the Webware user, but
+a user with the least possible permissions, maybe even ``nobody``. By
+default, the start script uses the owner of the ``AppServer`` script.
 
-    # cd /etc/init.d
-    # chmod a+rx webkit
-    # update-rc.d webkit defaults
+For the log file and the pid file, you may either use the standard locations
+on your system, usually something like ``/var/log/webkit.log`` and
+``/var/log/webkit.pid`` (use different names for different instances),
+or you may store them in the working directory and its ``Logs`` subdirectory.
+In the first case, the files should be written as the root user, because
+other users usually won't have writing permission for the standard locations.
+In the second case, the files should be written as the Webware user, so
+you won't need to be ``root`` to restart the application server.
+Therefore, the configuration section has another variable ``LAUNCH_AS_WEBWARE``
+that determines whether Webware will launch as ``root`` and then
+(after writing the pid and log files) switch to the Webware user, or whether
+Webware will immediately launch and write both files as the Webware user.
 
-That takes care of getting it started for future boots, but this first
-time you need to jump start it::
+By default, the script will start as the Webware user and will write the files
+to the working directory, so you have to unset ``LAUNCH_AS_WEBWARE`` if you
+want to use the standard system locations for the files instead.
 
-    # ./webkit start
+The start script also passes the variable ``PYTHONOPTS`` to the ``AppServer``
+script. You can add options ``-U`` for unbuffered output (to the log file)
+or ``-O`` if you want to use optimized Python files (i.e. ``.pyo`` instead
+of ``.pyc``). You can also add additional Python libraries with ``PYTHONPATH``.
 
-You can use update-rc.d to put this in at the right runlevels.  See
-``man update-rc.d`` for more information.
+Activating the start script
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Other Sytems
-~~~~~~~~~~~~
+First try whether your start script works::
 
-(@@ someone check this)
+    > ./webkit start
 
-You should put the ``webkit`` script either in ``/etc/rc.d/init.d/``
-or ``/etc/init.d/`` depending on what you system has.  For the example
-we'll assume ``/etc/rc.d/init.d/``.  You should then
-make symbolic links, like::
+The WebKit application server should now be launched and you should see
+it in the output of the ``ps`` command.
 
-    # cd /etc/rc0.d
-    # ln -s ../rc.d/init.d/webkit K75webkit
+Also try to stop WebKit by typing::
+
+    > ./webkit stop
+
+To activate the script for future boots, you still have to put symbolic links
+to the runlevel directories in which you want to launch WebKit.
+On some systems, you have to do this manually. For example, if the start script
+is ``/etc/init.d/webkit``, you would create the symbolic links like that::
+
+    > cd /etc/rc0.d
+    > ln -s ../init.d/webkit K75webkit
     (repeat for rc1.d and rc6.d)
-    # cd /etc/rc2.d
-    # ln -s ../rc.d/init.d/webkit S25webkit
+    > cd /etc/rc2.d
+    > ln -s ../init.d/webkit S25webkit
     (repeat for rc3.d, rc4.d, and rc5.d)
 
-Additional Notes
-~~~~~~~~~~~~~~~~
 
-You will notice the variables ``PYTHONPATH`` and ``PYTHON_PATH`` which
-are both set to blank. The first prevents inheriting ``PYTHON_PATH``
-from the environment (as security paranoia). You can comment this out
-if you prefer to inherit the Python path. The second allows you
-specify additional Python path components (regardless of whether or
-not you inherited the path).
+Some systems also provide a command line tool for this purpose, which will
+depend on the flavor of Unix you are using. For instance, you will use
+``insserv`` on SuSE Linux, ``chkconfig`` for RedHat (Fedora),
+``update-rc.d`` for Debian (Ubuntu) or ``rc-update`` for Gentoo.
+
+Take care to launch the script after your web server and database and other
+services you are using. You can do this by using appropriate numbers for the
+symbolic links or setting approriate hints for the command line tools at
+the top of the script.
+
+See the corresponding ``man`` pages or administrator handbook of your Unix
+system for the details of installing start scripts.
+
 
 Running ThreadedAppServer as a Windows NT/2K/XP Service
 -------------------------------------------------------
@@ -1042,14 +1096,17 @@ And finally, to uninstall the service, stop it and then run::
 
     > python AppServerService.py remove
 
+
 Other Notes
 -----------
 
 See `Stopping the App Server`_ and `Reloading Servlets`_ above in
 Adapters_.
 
+
 Troubleshooting
 ===============
+
 
 Bad Marshal Data
 ----------------

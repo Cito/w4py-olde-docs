@@ -19,6 +19,7 @@ try:
 except ImportError:
 	from StringIO import StringIO
 
+
 class OutputCatcher:
 	"""Auxiliary class for logging output."""
 	def __init__(self, output, log):
@@ -34,7 +35,9 @@ class Installer:
 
 	The _comps attribute is a list of components,
 	each of which is an instance of MiscUtils.PropertiesObject.
+
 	"""
+
 
 	## Init ##
 
@@ -48,7 +51,9 @@ class Installer:
 		from DocSupport.autotoc import AutoToC
 		self._autotoc = AutoToC()
 
-	## debug printing facility
+
+	## debug printing facility ##
+
 	def _nop (self, msg): pass
 	def _printMsg (self, msg): print '  ' + msg
 
@@ -70,6 +75,7 @@ class Installer:
 			self.detectComponents()
 			self.installDocs(keepdocs)
 			self.backupConfigs()
+			self.copyStartScript()
 			self.compileModules()
 			self.fixPermissions()
 			self.setupWebKitPassword(passprompt, defaultpass)
@@ -535,6 +541,31 @@ class Installer:
 				if not os.path.exists(backupPath):
 					open(backupPath, 'wb').write(open(fullPath, 'rb').read())
 
+	def copyStartScript(self):
+		"""Copy the most appropriate start script to WebKit/webkit."""
+		if os.name == 'posix':
+			print 'Copying start script...',
+			ex = os.path.exists
+			if ex('/etc/rc.status') and \
+				ex('/sbin/startproc') and \
+				ex('/sbin/killproc'):
+				s = 'SuSE'
+			elif ex('/etc/init.d/functions') or \
+				ex('/etc/rc.d/init.d/functions'):
+				s = 'RedHat'
+			elif ex('/sbin/start-stop/daemon'):
+				s = 'Debian'
+			elif ex('/etc/rc.subr'):
+				s = 'NetBSD'
+			else:
+				s = 'Generic'
+			print s
+			# Copy start script:
+			s = 'WebKit/StartScripts/' + s
+			t = 'WebKit/webkit'
+			open(t, 'wb').write(open(s, 'rb').read())
+			print
+
 	def compileModules(self):
 		import compileall
 		print 'Byte compiling all modules...'
@@ -551,10 +582,14 @@ class Installer:
 		if os.name == 'posix':
 			print 'Setting permissions on CGI scripts...'
 			for comp in self._comps:
-				for filename in glob('%s/*.cgi' % comp['dirname']):
-					cmd = 'chmod a+rx %s' % filename
+				for filename in glob(comp['dirname'] + '/*.cgi'):
+					cmd = 'chmod a+rx ' + filename
 					self.printMsg(cmd)
 					os.system(cmd)
+			print 'Setting permission on start script...'
+			cmd = 'chmod a+rx WebKit/webkit'
+			self.printMsg(cmd)
+			os.system(cmd)
 			print
 
 	def printGoodbye(self):

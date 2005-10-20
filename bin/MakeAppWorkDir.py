@@ -137,11 +137,15 @@ class MakeAppWorkDir:
 	def copyOtherFiles(self):
 		"""Make a copy of any other necessary files in the new work dir."""
 		self.msg("Copying other files...")
-		otherFiles = ('AppServer', '404Text.txt')
+		otherFiles = ('AppServer', 'webkit', '404Text.txt')
 		for name in otherFiles:
 			if name == 'AppServer':
 				if self._osType == 'nt':
 					name += '.bat'
+				chmod = 1
+			elif name == 'webkit':
+				if self._osType != 'posix':
+					continue
 				chmod = 1
 			else:
 				chmod = 0

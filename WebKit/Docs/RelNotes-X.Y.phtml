@@ -3,14 +3,9 @@
 <p><% name %> version <% versionString %> released on <% releaseDate %></p>
 
 <a name="Introduction"></a><h2>Introduction</h2>
-<ul>
-	<li>...</li>
-</ul>
-
-<a name="MajorChanges"></a><h2>Major Changes</h2>
-<ul>
-	<li>...</li>
-</ul>
+<p>It has taken much longer than expected to finish this release.
+The following will mention only few of the many changes,
+improvements and bugfixes that have been made since the last release.</p>
 
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
@@ -18,14 +13,18 @@
 	lastModified() method which returns the modification time of the data.
 	This has been integrated into the UnknownFileType servlet for handling
 	static files.</li>
-	<li>AppServer script detects <code>-u</code> (unbuffered output) and
-	<code>-O</code> (optimize) parameters and passes them to Python.
-	These parameters must precede any other parameters. Other parameters
-	will be passed to <code>ThreadedAppServer</code> normally.</li>
-	<li>Configuration files can be written as Python modules
-	instead of as Python dictionaries. Any global variables
-	in the module are equivalent to top-level keys in the
-	configuration dictionary.</li>
+	<li>The <span class="filename">AppServer</span> script detects
+	<code>-u</code> (unbuffered output) and	<code>-O</code> (optimize)
+	parameters and passes them to Python. These parameters must precede
+	any other parameters. Other parameters will be passed to
+	<code>ThreadedAppServer</code> normally.</li>
+	<li>Configuration parameters can now be overridden with the command line.
+	You can run <span class="filename">AppServer</span> with switches in the
+	form <code>ClassName.SettingName=value</code>, e.g.
+	<code>AppServer.AdapterPort=8087</code>.</li>
+	<li>Configuration files can be written as Python modules instead of as
+	Python dictionaries. Any global variables in the module are equivalent
+	to top-level keys in the configuration dictionary.</li>
 	<li><span class="filename">MakeAppWorkDir.py</span> accepts a new option
 	<code>-d</code> allowing to point the default context to a location not
 	inside the working directory, so you can keep your code completely separate
@@ -56,6 +55,15 @@
 	debugger. I've tested it on Windows only, using both PythonWin
 	and JEdit with the JPyDbg plugin.
 	See <span class="filename">WebKit/DebugAppServer.py</span> for details.</li>
+	<li>New debugging feature: by turning on the configuration variable
+	<code>IncludeErrorLink</code> in
+	<span class="filename">Application.config</span>, an <a href="#">[edit]</a>
+	link will be put next to each line in tracebacks. That link will point
+	to a file of type <tt>application/x-webkit-edit-file</tt>, which you
+	should configure your browser to run with
+	<span class="filename">Webware/bin/editfile.py</span> (and edit
+	<span class="filename">editfile.py</span> so that it opens your
+	editor).</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
@@ -111,9 +119,17 @@
 	<li>Added <code>transaction()</code> method to <code>RPCServlet</code>
 	so that there's a way for a method to get the transaction object if
 	needed.</li>
+	<li>The Unix start script <span class="filename">WebKit/webkit</span>
+	which was based on RedHat Linux has been replaced by a folder
+	<span class="filename">WebKit/StartScripts</span> with a bunch of
+	start sripts for various flavors of Unix, including a "generic" version.
+	The installer will try to copy the most appropriate start script
+	to <span class="filename">WebKit/webkit</span>. If instead of copying,
+	you create a link to the start script in your working directory, it will
+	find out the location of the working directory automatically.</li>
 </ul>
 
-<a name="MinorChanges"></a><h2>Minor API Changes</h2>
+<a name="Changes"></a><h2>API Changes</h2>
 <ul>
 	<li>The <code>Port</code> setting in
 	<span class="filename">AppServer.config</span> has been deprecated in
@@ -124,7 +140,18 @@
 	<li>The scripts <span class="filename">ThreadedAppServerService.py</span>
 	in the WebKit directory and <span class="filename">NTService</span> created
 	by <span class="filename">MakeAppWorkDir.py</span> were both renamed to
-	<span class="filename">AppServerService.py</span>.
+	<span class="filename">AppServerService.py</span>.</li>
+	<li>Removed the <span class="filename">Application.config</span> setting
+	<code>OldStyleActions</code> and re-implemented support of the
+	<code>methodNameForAction()</code> transformation. Note that "old style"
+	actions took an additional <code>transaction</code> parameter, but
+	otherwise the action handling is now downward compatible.</li>
+	<li>In <code>WebKit.Page</code> resp. <code>WebKit.HTTPContent</code>,
+	removed both the internal method <code>_actionSet()</code> and the internal
+	dictionary <code>_actionDict</code> which cached the list of actions
+	for the servlet. This was redundant code, and its removal allows a servlet
+	to use dynamic actions (i.e. to make the action list dependent on the
+	permissions of the logged-in user).</li>
 </ul>
 
 <a name="Bugfixes"></a><h2>Bugfixes</h2>
@@ -134,26 +161,6 @@
 	you'd get that expired session for one request, but on the second request
 	you'd get a new session. Now it correctly returns a new empty session with
 	a new session ID on the first request after expiration.</li>
-	<li>New debugging feature: by turning on the configuration variable
-	<code>IncludeErrorLink<code> in
-	<span class="filename">Application.config</span>, an <a href="#">[edit]</a>
-	link will be put next to each line in tracebacks. That link will point
-	to a file of type <tt>application/x-webkit-edit-file</tt>, which you
-	should configure your browser to run with
-	<span class="filename">Webware/bin/editfile.py</span> (and edit
-	<span class="filename">editfile.py</span> so that it opens your
-	editor).</li>
-    <li>Removed the <span class="filename">Application.config</span> setting
-    <code>OldStyleActions</code> and re-implemented support of the
-    <code>methodNameForAction()</code> transformation. Note that "old style"
-    actions took an additional <code>transaction</code> parameter, but
-    otherwise the action handling is now downward compatible.</li>
-	<li>In <code>WebKit.Page</code> resp. <code>WebKit.HTTPContent</code>,
-    removed both the internal method <code>_actionSet()</code> and the internal
-    dictionary <code>_actionDict</code> which cached the list of actions
-	for the servlet. This was redundant code, and its removal allows a servlet
-	to use dynamic actions (i.e. to make the action list dependent on the
-	permissions of the logged-in user).</li>
 	<li>Fixed a bug in <tt>mod_webkit</tt> for Apache&nbsp;2.X that might
 	have been causing <tt>mod_webkit</tt> to retry connections to the app
 	server unnecessarily in some cases. (This does not apply to the

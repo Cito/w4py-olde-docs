@@ -6,7 +6,8 @@ Configuration Guide
 Command Line Configuration
 ==========================
 
-Each of these can be set in the ``.config`` files, but they can be overridden with the command line.  Run ``AppServer`` with switches in the form ``ClassName.SettingName=value``, e.g. ``AppServer.Port=1``
+Each of these can be set in the ``.config`` files, but they can be overridden
+with the command line.  Run ``AppServer`` with switches in the form ``ClassName.SettingName=value``, e.g. ``AppServer.AdapterPort=8087``.
 
 The ``value`` is coerced into a Python type: if it starts with one of the characters ``({["'`` -- i.e., parenthesis (expression), dictionary, list, or string -- then the value with be eval'ed.  If it can be turned into an integer or float, then it will be converted, otherwise it will be left as a string.  Some examples:
 
