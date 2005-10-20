@@ -154,7 +154,7 @@ h5 { font-size: 11pt; }
 		self.menuItem('WebKit ' + app.webKitVersionString())
 		self.menuItem('Webware ' + app.webwareVersionString())
 		import string, sys
-		self.menuItem('Python ' + string.split(sys.version)[0])
+		self.menuItem('Python ' + sys.version.split(' ', 1)[0])
 
 	def writeContent(self):
 		self.writeln('Woops, someone forgot to override writeContent().')

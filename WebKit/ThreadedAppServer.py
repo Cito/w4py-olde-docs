@@ -38,11 +38,6 @@ import errno
 import traceback
 from WebUtils import Funcs
 
-try: # backward compatibility for Python < 2.3
-	True, False
-except NameError:
-	True, False = 1, 0
-
 debug = 0
 
 DefaultConfig = {
@@ -87,7 +82,7 @@ class ThreadedAppServer(AppServer):
 
 	The transaction is connected directly to the socket, so that the
 	response is sent directly (if streaming is used, like if you call
-	``response.flush()``).  Thus the ThreadedAppServer packages the
+	``response.flush()``). Thus the ThreadedAppServer packages the
 	socket/response, rather than value being returned up the call chain.
 
 	"""
@@ -145,15 +140,13 @@ class ThreadedAppServer(AppServer):
 
 		Adds a socket handler for `serverAddress` -- `serverAddress`
 		is a tuple (*host*, *port*), where *host* is the interface
-		to connect to (for instance, the IP address on a machine
-		with multiple IP numbers), and *port* is the port (e.g.
-		HTTP is on 80 by default, and Webware adapters use 8086 by
-		default)
+		to connect to (for instance, the IP address on a machine with
+		multiple IP numbers), and *port* is the port (e.g. HTTP is on
+		80 by default, and Webware adapters use 8086 by default).
 
-		The `handlerClass` is a subclass of `Handler`, and is used
-		to handle the actual request -- usually returning control
-		back to ThreadedAppServer in some fashion.  See `Handler`
-		for more.
+		The `handlerClass` is a subclass of `Handler`, and is used to
+		handle the actual request -- usually returning control back
+		to ThreadedAppServer in some fashion. See `Handler` for more.
 
 		"""
 
@@ -388,7 +381,7 @@ class ThreadedAppServer(AppServer):
 		"""The main loop for worker threads.
 
 		Worker threads poll the ``_requestQueue`` to find a request handler
-		waiting to run.  If they find a None in the queue, this thread has
+		waiting to run. If they find a None in the queue, this thread has
 		been selected to die, which is the way the loop ends.
 
 		The handler object does all the work when its `handleRequest` method
@@ -544,7 +537,7 @@ class Handler:
 	will subclass this. A Handler takes a socket to interact with, and
 	creates a raw request.
 
-	Handlers will be reused.  When a socket is received `activate` will be
+	Handlers will be reused. When a socket is received `activate` will be
 	called -- but the handler should not do anything, as it is still running
 	in the main thread. The handler is put into a queue, and a worker thread
 	picks it up and runs `handleRequest`, which subclasses should override.
@@ -625,7 +618,7 @@ HTTP/1.0 505 HTTP Version Not Supported\r
 Content-type: text/plain\r
 \r
 Error: Invalid AppServer protocol: %s.\r
-Sorry, I don't speak HTTP.  You must connect via an adaptor.\r
+Sorry, I don't speak HTTP.  You must connect via an adapter.\r
 See the Troubleshooting section of the WebKit Install Guide.\r
 ''' % msg)
 				self._sock.close()
@@ -745,7 +738,7 @@ class AdapterHandler(Handler):
 	"""Adapter handler.
 
 	Handles the Adapter protocol (as used in mod_webkit, wkcgi,
-	WebKit.cgi, HTTPAdapter, etc).  This protocol passes a marshalled
+	WebKit.cgi, HTTPAdapter, etc). This protocol passes a marshalled
 	dictionary which contains the keys ``format`` and ``environ``.
 	``format`` is currently always the string ``CGI``, and ``environ``
 	is a dictionary of string: string, with values like those passed
@@ -753,7 +746,7 @@ class AdapterHandler(Handler):
 
 	The handler adds one more key, ``input``, which contains a file
 	object based off the socket, which contains the body of the
-	request (the POST data, for instance).  It's left to Application
+	request (the POST data, for instance). It's left to Application
 	to handle that data.
 
 	"""
@@ -793,7 +786,7 @@ class AdapterHandler(Handler):
 
 		if verbose:
 			duration = '%0.2f secs' % (time.time() - self._startTime)
-			duration = string.ljust(duration, 19)
+			duration = duration.ljust(19)
 			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID, duration, requestURI))
 
 		transaction._application=None
@@ -906,9 +899,9 @@ def shutDown(signum, frame):
 		print "Shutting down at", time.asctime(time.localtime(time.time()))
 		sys.stdout.flush()
 		server.running = 2
-		if signum == signal.SIGINT:
+		if signum == SIGINT:
 			raise KeyboardInterrupt
-		elif signum == signal.SIGHUP:
+		elif signum == SIGHUP:
 			sys.exit(3) # force reload
 		else:
 			sys.exit(0) # normal exit
@@ -916,15 +909,28 @@ def shutDown(signum, frame):
 		print 'No running app server was found.'
 
 import signal
-signal.signal(signal.SIGHUP, shutDown)
-signal.signal(signal.SIGINT, shutDown)
-signal.signal(signal.SIGTERM, shutDown)
+
+try:
+	SIGHUP = signal.SIGHUP
+	signal.signal(SIGHUP, shutDown)
+except AttributeError:
+	SIGHUP = None
+try:
+	SIGINT = signal.SIGINT
+	signal.signal(SIGINT, shutDown)
+except AttributeError:
+	SIGINT = None
+try:
+	SIGTERM = signal.SIGTERM
+	signal.signal(SIGTERM, shutDown)
+except AttributeError:
+	SIGTERM = None
 
 import re
 settingRE = re.compile(r'^(?:--)?([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
 from MiscUtils import Configurable
 
-usage = re.search('\n.* arguments:\n\n(.*\n)*?\n', __doc__).group(0).strip()
+usage = re.search('\n.* arguments:\n\n(.*\n)*?\n', __doc__).group(0)
 
 def main(args):
 	"""Command line interface.

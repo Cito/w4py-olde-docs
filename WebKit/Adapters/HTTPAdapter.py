@@ -14,7 +14,7 @@ AppWorkDir = None
 ############################################################
 
 try:
-	import os, sys, string
+	import os, sys
 	if not WebwareDir:
 		WebwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
 	sys.path.insert(0, WebwareDir)
@@ -25,7 +25,7 @@ try:
 		sys.path.insert(0, AppWorkDir)
 
 	from WebKit.Adapters.Adapter import Adapter
-	(host, port) = string.split(open(os.path.join(webKitDir, 'address.text')).read(), ':')
+	(host, port) = open(os.path.join(webKitDir, 'address.text')).read().split(':')
 	if os.name=='nt' and host=='':
 		# MS Windows doesn't like a blank host name
 		host = 'localhost'
@@ -58,7 +58,7 @@ class HTTPAdapter(HTTPHandler, Adapter):
 class ThreadedHTTPServer(BaseHTTPServer.HTTPServer):
 	"""
 	A threaded version of BaseHTTPServer.
-	
+
 	Model taken from a 2001 comp.lang.python post by Michael Abbott.
 	"""
 
@@ -77,7 +77,7 @@ class ThreadedHTTPServer(BaseHTTPServer.HTTPServer):
 		t.start()
 		self._threads[self._threadID] = t
 		self._threadID += 1
-		
+
 	# This part of the processing is run in its own thread
 	def handle_request_body(self, request, client_address, threadID):
 		if self.verify_request(request, client_address):
@@ -160,5 +160,3 @@ signal.signal(signal.SIGTERM, shutDown)
 
 if __name__ == '__main__':
 	main()
-
-

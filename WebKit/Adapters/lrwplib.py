@@ -21,9 +21,9 @@
 #
 #------------------------------------------------------------------------
 
-import  sys, socket, string
-import  os, cgi
-from    cStringIO import StringIO
+import sys, socket
+import os, cgi
+from cStringIO import StringIO
 
 
 __version__ = '1.0'
@@ -41,233 +41,233 @@ SocketError         = 'lrwp.SocketError'
 #---------------------------------------------------------------------------
 
 class Request:
-    '''
-    Encapsulates the request/response IO objects and CGI-Environment.
-    An instance of this class is returned
-    '''
-    def __init__(self, lrwp):
-        self.inp = lrwp.inp
-        self.out = lrwp.out
-        self.err = lrwp.out
-        self.env = lrwp.env
-        self.lrwp = lrwp
+	'''
+	Encapsulates the request/response IO objects and CGI-Environment.
+	An instance of this class is returned
+	'''
+	def __init__(self, lrwp):
+		self.inp = lrwp.inp
+		self.out = lrwp.out
+		self.err = lrwp.out
+		self.env = lrwp.env
+		self.lrwp = lrwp
 
-    def finish(self):
-        self.lrwp.finish()
+	def finish(self):
+		self.lrwp.finish()
 
-    def getFieldStorage(self):
-        method = 'POST'
-        if self.env.has_key('REQUEST_METHOD'):
-            method = string.upper(self.env['REQUEST_METHOD'])
-        if method == 'GET':
-            return cgi.FieldStorage(environ=self.env, keep_blank_values=1)
-        else:
-            return cgi.FieldStorage(fp=self.inp, environ=self.env, keep_blank_values=1)
+	def getFieldStorage(self):
+		method = 'POST'
+		if self.env.has_key('REQUEST_METHOD'):
+			method = self.env['REQUEST_METHOD'].upper()
+		if method == 'GET':
+			return cgi.FieldStorage(environ=self.env, keep_blank_values=1)
+		else:
+			return cgi.FieldStorage(fp=self.inp, environ=self.env, keep_blank_values=1)
 
 
 #---------------------------------------------------------------------------
 
 class LRWP:
-    def __init__(self, name, host, port, vhost='', filter='', useStdio=0):
-        '''
-        Construct an LRWP object.
-            name        The name or alias of this request handler.  Requests
-                        matching http://host/name will be directed to this
-                        LRWP object.
-            host        Hostname or IP address to connect to.
-            port        Port number to connect on.
-            vhost       If this handler is to only be available to a specific
-                        virtual host, name it here.
-            filter      A space separated list of file extenstions that should
-                        be directed to this handler in filter mode.  (Not yet
-                        supported.)
-        '''
-        self.name = name
-        self.host = host
-        self.port = port
-        self.vhost = vhost
-        self.filter = filter
-        self.useStdio = useStdio
-        self.sock = None
-        self.env = None
-        self.inp = None
-        self.out = None
 
-    #----------------------------------------
-    def connect(self):
-        '''
-        Establishes the connection to the web server, using the parameters given
-        at construction.
-        '''
-        try:
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.sock.connect((self.host, self.port)) # Changed to two item tuple with Python 2.0 - I think!
-            self.sock.send("%s\xFF%s\xFF%s" % (self.name, self.vhost, self.filter) )
-            buf = self.sock.recv(1024)
-            if buf != 'OK':
-                raise ConnectError, buf
-        except socket.error, val:
-            raise SocketError, val
+	def __init__(self, name, host, port, vhost='', filter='', useStdio=0):
+		'''
+		Construct an LRWP object.
+			name        The name or alias of this request handler.  Requests
+						matching http://host/name will be directed to this
+						LRWP object.
+			host        Hostname or IP address to connect to.
+			port        Port number to connect on.
+			vhost       If this handler is to only be available to a specific
+						virtual host, name it here.
+			filter      A space separated list of file extenstions that should
+						be directed to this handler in filter mode.  (Not yet
+						supported.)
+		'''
+		self.name = name
+		self.host = host
+		self.port = port
+		self.vhost = vhost
+		self.filter = filter
+		self.useStdio = useStdio
+		self.sock = None
+		self.env = None
+		self.inp = None
+		self.out = None
 
-    #----------------------------------------
-    def acceptRequest(self):
-        '''
-        Wait for, and accept a new request from the Web Server.  Reads the
-        name=value pairs that comprise the CGI environment, followed by the
-        post data, if any.  Constructs and returns a Request object.
-        '''
-        if self.out:
-            self.finish()
-        try:
-            # get the length of the environment data
-            data = self.recvBlock(LENGTHSIZE)
-            if not data:        # server closed down
-                raise ConnectionClosed
-            length = string.atoi(data)
+	#----------------------------------------
+	def connect(self):
+		'''
+		Establishes the connection to the web server, using the parameters given
+		at construction.
+		'''
+		try:
+			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+			self.sock.connect((self.host, self.port)) # Changed to two item tuple with Python 2.0 - I think!
+			self.sock.send("%s\xFF%s\xFF%s" % (self.name, self.vhost, self.filter) )
+			buf = self.sock.recv(1024)
+			if buf != 'OK':
+				raise ConnectError, buf
+		except socket.error, val:
+			raise SocketError, val
 
-            # and then the environment data
-            data = self.recvBlock(length)
-            if not data:        # server closed down
-                raise ConnectionClosed
-            data = string.split(data, '\000')
-            self.env = {}
-            for x in data:
-                x = string.split(x, '=')
-                if len(x) > 1:
-                    self.env[x[0]] = string.join(x[1:], '=')
+	#----------------------------------------
+	def acceptRequest(self):
+		'''
+		Wait for, and accept a new request from the Web Server.  Reads the
+		name=value pairs that comprise the CGI environment, followed by the
+		post data, if any.  Constructs and returns a Request object.
+		'''
+		if self.out:
+			self.finish()
+		try:
+			# get the length of the environment data
+			data = self.recvBlock(LENGTHSIZE)
+			if not data:        # server closed down
+				raise ConnectionClosed
+			length = int(data)
 
-            # now get the size of the POST data
-            data = self.recvBlock(LENGTHSIZE)
-            if not data:        # server closed down
-                raise ConnectionClosed
-            length = string.atoi(data)
+			# and then the environment data
+			data = self.recvBlock(length)
+			if not data:        # server closed down
+				raise ConnectionClosed
+			data = data.split('\000')
+			self.env = {}
+			for x in data:
+				x = x.split('=')
+				if len(x) > 1:
+					self.env[x[0]] = '='.join(x[1:])
 
-            # and the POST data...
-            if length:
-                data = self.recvBlock(length)
-                if not data:        # server closed down
-                    raise ConnectionClosed
-                self.inp = StringIO(data)
-            else:
-                self.inp = StringIO()
+			# now get the size of the POST data
+			data = self.recvBlock(LENGTHSIZE)
+			if not data:        # server closed down
+				raise ConnectionClosed
+			length = int(data)
 
-            self.out = StringIO()
+			# and the POST data...
+			if length:
+				data = self.recvBlock(length)
+				if not data:        # server closed down
+					raise ConnectionClosed
+				self.inp = StringIO(data)
+			else:
+				self.inp = StringIO()
 
-            # do the switcheroo on the sys IO objects, etc.
-            if self.useStdio:
-                self.saveStdio = sys.stdin, sys.stdout, sys.stderr, os.environ
-                sys.stdin, sys.stdout, sys.stderr, os.environ = \
-                    self.inp, self.out, self.out, self.env
+			self.out = StringIO()
 
-            return Request(self)
+			# do the switcheroo on the sys IO objects, etc.
+			if self.useStdio:
+				self.saveStdio = sys.stdin, sys.stdout, sys.stderr, os.environ
+				sys.stdin, sys.stdout, sys.stderr, os.environ = \
+					self.inp, self.out, self.out, self.env
 
-        except socket.error, val:
-            raise SocketError, val
+			return Request(self)
+
+		except socket.error, val:
+			raise SocketError, val
 
 
-    #----------------------------------------
-    def recvBlock(self, size):
-        '''
-        Pull an exact number of bytes from the socket, taking into
-        account the possibility of multiple packets...
-        '''
-        numRead = 0
-        data = []
-        while numRead < size:
-            buf = self.sock.recv(size - numRead);
-            if not buf:
-                return ''
-            data.append(buf)
-            numRead = numRead + len(buf)
+	#----------------------------------------
+	def recvBlock(self, size):
+		'''
+		Pull an exact number of bytes from the socket, taking into
+		account the possibility of multiple packets...
+		'''
+		numRead = 0
+		data = []
+		while numRead < size:
+			buf = self.sock.recv(size - numRead);
+			if not buf:
+				return ''
+			data.append(buf)
+			numRead = numRead + len(buf)
 
-        return string.join(data, '')
+		return ''.join(data)
 
-    #----------------------------------------
-    def finish(self):
-        '''
-        Complete the request and send the output back to the webserver.
-        '''
-        doc = self.out.getvalue()
-        size = LENGTHFMT % (len(doc), )
-        try:
-            self.sock.send(size)
-            self.sock.send(doc)
-        except socket.error, val:
-            raise SocketError, val
+	#----------------------------------------
+	def finish(self):
+		'''
+		Complete the request and send the output back to the webserver.
+		'''
+		doc = self.out.getvalue()
+		size = LENGTHFMT % (len(doc), )
+		try:
+			self.sock.send(size)
+			self.sock.send(doc)
+		except socket.error, val:
+			raise SocketError, val
 
-        if self.useStdio:
-            sys.stdin, sys.stdout, sys.stderr, os.environ = self.saveStdio
+		if self.useStdio:
+			sys.stdin, sys.stdout, sys.stderr, os.environ = self.saveStdio
 
-        self.env = None
-        self.inp = None
-        self.out = None
+		self.env = None
+		self.inp = None
+		self.out = None
 
-    #----------------------------------------
-    def close(self):
-        '''
-        Close the LRWP connection to the web server.
-        '''
-        self.sock.close()
-        self.sock = None
-        self.env = None
-        self.inp = None
-        self.out = None
+	#----------------------------------------
+	def close(self):
+		'''
+		Close the LRWP connection to the web server.
+		'''
+		self.sock.close()
+		self.sock = None
+		self.env = None
+		self.inp = None
+		self.out = None
 
 #---------------------------------------------------------------------------
 
 
 def _test():
-    import os, time
+	import os, time
 
-    eol = '\r\n'
-    appname = 'testapp1'
-    vhost = ''
-    host = 'localhost'
-    port = 5081
-    if len(sys.argv) > 1:
-        appname = sys.argv[1]
-    if len(sys.argv) > 2:
-        host = sys.argv[2]
-    if len(sys.argv) > 3:
-        port = string.atoi(sys.argv[3])
-    if len(sys.argv) > 4:
-        vhost = sys.argv[4]
+	eol = '\r\n'
+	appname = 'testapp1'
+	vhost = ''
+	host = 'localhost'
+	port = 5081
+	if len(sys.argv) > 1:
+		appname = sys.argv[1]
+	if len(sys.argv) > 2:
+		host = sys.argv[2]
+	if len(sys.argv) > 3:
+		port = int(sys.argv[3])
+	if len(sys.argv) > 4:
+		vhost = sys.argv[4]
 
-    lrwp = LRWP(appname, host, port, vhost)
-    lrwp.connect()
+	lrwp = LRWP(appname, host, port, vhost)
+	lrwp.connect()
 
-    count = 0
-    while count < 5:        # exit after servicing 5 requests
-        req = lrwp.acceptRequest()
+	count = 0
+	while count < 5:        # exit after servicing 5 requests
+		req = lrwp.acceptRequest()
 
-        doc = ['<HTML><HEAD><TITLE>LRWP TestApp ('+appname+')</TITLE></HEAD>\n<BODY>\n']
-        count = count + 1
-        doc.append('<H2>LRWP test app ('+appname+')</H2><P>')
-        doc.append('<b>request count</b> = %d<br>' % (count, ))
-        if hasattr(os, 'getpid'):
-            doc.append('<b>pid</b> = %s<br>' % (os.getpid(), ))
-        doc.append('<br><b>post data:</b> ' + req.inp.read() + '<br>')
+		doc = ['<HTML><HEAD><TITLE>LRWP TestApp ('+appname+')</TITLE></HEAD>\n<BODY>\n']
+		count = count + 1
+		doc.append('<H2>LRWP test app ('+appname+')</H2><P>')
+		doc.append('<b>request count</b> = %d<br>' % (count, ))
+		if hasattr(os, 'getpid'):
+			doc.append('<b>pid</b> = %s<br>' % (os.getpid(), ))
+		doc.append('<br><b>post data:</b> ' + req.inp.read() + '<br>')
 
-        doc.append('<P><HR><P><pre>')
-        keys = req.env.keys()
-        keys.sort()
-        for k in keys:
-            doc.append('<b>%-20s :</b>  %s\n' % (k, req.env[k]))
-        doc.append('\n</pre><P><HR>\n')
-        doc.append('</BODY></HTML>\n')
+		doc.append('<P><HR><P><pre>')
+		keys = req.env.keys()
+		keys.sort()
+		for k in keys:
+			doc.append('<b>%-20s :</b>  %s\n' % (k, req.env[k]))
+		doc.append('\n</pre><P><HR>\n')
+		doc.append('</BODY></HTML>\n')
 
 
-        req.out.write('Content-type: text/html' + eol)
-        req.out.write(eol)
-        req.out.write(string.join(doc, ''))
+		req.out.write('Content-type: text/html' + eol)
+		req.out.write(eol)
+		req.out.write(''.join(doc))
 
-        req.finish()
+		req.finish()
 
-    lrwp.close()
+	lrwp.close()
 
 
 if __name__ == '__main__':
-    #import pdb
-    #pdb.run('_test()')
-    _test()
-
+	#import pdb
+	#pdb.run('_test()')
+	_test()

@@ -1,5 +1,5 @@
 from UserDict import UserDict
-import os, string, sys, types
+import os, sys, types
 
 class WillNotRunError(Exception): pass
 
@@ -42,7 +42,7 @@ class PropertiesObject(UserDict):
 		self.update(dict)
 		self.cleanPrivateItems()
 
-		
+
 	def readFileNamed(self, filename):
 		self['filename'] = filename
 		results = {}
@@ -58,7 +58,7 @@ class PropertiesObject(UserDict):
 	def cleanPrivateItems(self):
 		""" Removes items whose keys start with a double underscore, such as __builtins__. """
 		for key in self.keys():
-			if key[:2]=='__':
+			if key[:2] == '__':
 				del self[key]
 
 	def createDerivedItems(self):
@@ -68,14 +68,14 @@ class PropertiesObject(UserDict):
 
 	def _versionString(self, version):
 		""" For a sequence containing version information such as (2, 0, 0, 'pre'), this returns a printable string such as '2.0-pre'. The micro version number is only excluded from the string if it is zero. """
-		ver = map(lambda x: str(x), version)
-		if ver[2]=='0': # e.g., if minor version is 0
+		ver = map(str, version)
+		if ver[2] == '0': # e.g., if minor version is 0
 			numbers = ver[:2]
 		else:
 			numbers = ver[:3]
 		rest = ver[3:]
-		numbers = string.join(numbers, '.')
-		rest = string.join(rest, '-')
+		numbers = '.'.join(numbers)
+		rest = '-'.join(rest)
 		if rest:
 			return numbers + rest
 		else:
@@ -92,13 +92,13 @@ class PropertiesObject(UserDict):
 		try:
 			# Invoke each of the checkFoo() methods
 			for key in self.willRunKeys():
-				methodName = 'check' + string.upper(key[0]) + key[1:]
+				methodName = 'check' + key[0].upper() + key[1:]
 				method = getattr(self, methodName)
 				method()
 		except WillNotRunError, msg:
 			self['willNotRunReason'] = msg
 			return
-		self['willRun'] = 1  # we passed all the tests
+		self['willRun'] = 1 # we passed all the tests
 
 	def willRunKeys(self):
 		""" Returns a list of keys whose values should be examined in order to determine if the component will run. Used by createWillRun(). """
@@ -109,17 +109,16 @@ class PropertiesObject(UserDict):
 		if not pyVer:
 			# Prior 2.0 there was no version_info
 			# So we parse it out of .version which is a string
-			pyVer = string.split(sys.version)[0]
-			pyVer = string.split(pyVer, '.')
-			pyVer = map(lambda x: int(x), pyVer)
-		if tuple(pyVer)<tuple(self['requiredPyVersion']):
-			raise WillNotRunError, 'Required python ver is %s, but actual ver is %s.' % (self['requiredPyVersion'], pyVer)
+			pyVer = sys.version.split(' ', 1)[0].split('.')
+			pyVer = map(int, pyVer)
+		if tuple(pyVer) < tuple(self['requiredPyVersion']):
+			raise WillNotRunError, 'Required Python ver is %s, but actual ver is %s.' % (self['requiredPyVersion'], pyVer)
 
 	def checkRequiredOpSys(self):
 		requiredOpSys = self.get('requiredOpSys', None)
 		if requiredOpSys:
 			# We accept a string or list of strings
-			if type(requiredOpSys)==types.StringType:
+			if type(requiredOpSys) == types.StringType:
 				requiredOpSys = [requiredOpSys]
 			if not os.name in requiredOpSys:
 				raise WillNotRunError, 'Required op sys is %s, but actual op sys is %s.' % (requiredOpSys, os.name)
@@ -128,7 +127,7 @@ class PropertiesObject(UserDict):
 		deniedOpSys = self.get('deniedOpSys', None)
 		if deniedOpSys:
 			# We accept a string or list of strings
-			if type(deniedOpSys)==types.StringType:
+			if type(deniedOpSys) == types.StringType:
 				deniedOpSys = [deniedOpSys]
 			if os.name in deniedOpSys:
 				raise WillNotRunError, 'Will not run on op sys %s and actual op sys is %s.' % (deniedOpSys, os.name)

@@ -6,6 +6,17 @@ from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleKit.Core.ListAttr import ListAttr
 
+try: # backward compatibility for Python < 2.2
+	object
+except NameError:
+	class object:
+		pass
+try: # backward compatibility for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
+
+
 class MiddleObject(object, NamedValueAccess):
 	"""
 	MiddleObject is the abstract superclass of objects that are

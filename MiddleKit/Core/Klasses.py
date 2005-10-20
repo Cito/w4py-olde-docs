@@ -62,7 +62,7 @@ class Klasses(ModelObject, UserDict):
 			# different sandboxes of your application (development, test and
 			# production) would match up even as you add and remove classes.
 			# However, renaming classes changes the id!
-			from sets import Set
+			from sets import Set # needs Python >= 2.3
 			allIds = Set()
 			for klass in self._model._allKlassesInOrder:
 				klass.setId(allIds)

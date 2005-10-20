@@ -2,12 +2,6 @@ from Common import *
 from MiscUtils.Funcs import excstr
 
 
-try: # backward compatibility for Python < 2.3
-	True, False
-except NameError:
-	True, False = 1, 0
-
-
 class Servlet(Object):
 	"""A general servlet.
 

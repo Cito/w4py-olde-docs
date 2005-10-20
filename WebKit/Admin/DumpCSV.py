@@ -1,4 +1,4 @@
-import os, string
+import os
 from AdminSecurity import AdminSecurity
 from MiscUtils.DataTable import DataTable
 
@@ -31,7 +31,7 @@ class DumpCSV(AdminSecurity):
 		self.writeln('<p>%d row%s</p>' % (len(table), plural))
 		self.writeln('<table cellpadding="2" cellspacing="2">')
 		# Head row gets special formatting
-		self._headings = map(lambda col: string.strip(col.name()), table.headings())
+		self._headings = map(lambda col: col.name().strip(), table.headings())
 		self._numCols = len(self._headings)
 		self.writeln('<tr style="background-color:#555">')
 		for value in self._headings:

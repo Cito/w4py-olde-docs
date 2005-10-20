@@ -1,6 +1,5 @@
 """This module defines a class for handling writing reponses."""
 
-import string
 import exceptions
 import types
 
@@ -78,7 +77,7 @@ class ASStreamOut:
 				self._needCommit = True
 			return False
 		try:
-			self._buffer = self._buffer + string.join(self._chunks,'')
+			self._buffer = self._buffer + ''.join(self._chunks)
 		finally:
 			self._chunks = []
 			self._chunkLen = False
@@ -94,7 +93,7 @@ class ASStreamOut:
 		if self._buffer: # if flush has been called, return what was flushed:
 			return self._buffer
 		else: # otherwise return the buffered chunks
-			return string.join(self._chunks,'')
+			return ''.join(self._chunks)
 
 	def clear(self):
 		"""Try to clear any accumulated response data.

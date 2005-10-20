@@ -18,11 +18,6 @@ except ImportError:
 		DateTime = None
 from MiscUtils.DateInterval import timeDecode
 
-try: # backward compatibility for Python < 2.3
-	True, False
-except NameError:
-	True, False = 1, 0
-
 debug = 0
 
 class HTTPResponse(Response):
@@ -51,12 +46,12 @@ class HTTPResponse(Response):
 	def header(self, name, default=NoDefault):
 		""" Returns the value of the specified header. """
 		if default is NoDefault:
-			return self._headers[string.lower(name)]
+			return self._headers[name.lower()]
 		else:
-			return self._headers.get(string.lower(name), default)
+			return self._headers.get(name.lower(), default)
 
 	def hasHeader(self, name):
-		return self._headers.has_key(string.lower(name))
+		return self._headers.has_key(name.lower())
 
 	def setHeader(self, name, value):
 		"""Sets a specific header by name.
@@ -67,7 +62,7 @@ class HTTPResponse(Response):
 
 		"""
 		assert self._committed == 0, "Headers have already been sent"
-		self._headers[string.lower(name)] = value
+		self._headers[name.lower()] = value
 
 
 	def addHeader(self, name, value):
@@ -307,11 +302,11 @@ class HTTPResponse(Response):
 			headers.append(('Set-Cookie', cookie.headerValue()))
 		for i in headers:
 			hdrstr = i[0] + ': ' + i[1] + '\r\n'
-			if string.lower(i[0]) == 'status':
-				headerstring = string.join((hdrstr, headerstring),'')
+			if i[0].lower() == 'status':
+				headerstring = ''.join((hdrstr, headerstring))
 			else:
-				headerstring = string.join((headerstring, hdrstr),'')
-		headerstring = string.join((headerstring,'\r\n'),'')
+				headerstring = ''.join((headerstring, hdrstr))
+		headerstring = ''.join((headerstring,'\r\n'))
 		self._strmOut.prepend(headerstring)
 
 	def recordSession(self):
@@ -409,11 +404,11 @@ class HTTPResponse(Response):
 
 		"""
 		linesep = "\n"
-		lines = string.split(headerstr,"\n")
-		for i in lines:
-			sep = string.find(i, ":")
+		lines = headerstr.split("\n")
+		for line in lines:
+			sep = line.find(":")
 			if sep:
-				self.setHeader(i[:sep], string.rstrip(i[sep+1:]))
+				self.setHeader(line[:sep], line[sep+1:].rstrip())
 
 
 	## Exception reporting ##

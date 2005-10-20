@@ -80,8 +80,8 @@ class XMLRPCServlet(RPCServlet):
 		except:
 			# internal error, report as HTTP server error
 			print 'XMLRPCServlet internal error'
-			print string.join(traceback.format_exception(sys.exc_info()[0],
-				sys.exc_info()[1],sys.exc_info()[2]))
+			print ''.join(traceback.format_exception(
+				sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
 			transaction.response().setStatus(500, 'Server Error')
 			self.handleException(transaction)
 

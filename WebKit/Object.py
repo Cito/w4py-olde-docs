@@ -9,6 +9,12 @@ except:
 	import MiscUtils
 from MiscUtils.NamedValueAccess import NamedValueAccess
 
+try: # backward compatibility for Python < 2.2
+	object
+except NameError:
+	class object:
+		pass
+
 
 class Object(object, NamedValueAccess):
 	"""Object is the root class for all classes in the WebKit.

@@ -49,11 +49,10 @@ import time
 
 from socket import *
 import sys
-import string
 
 from Adapter import Adapter
 
-debug=0
+debug = 0
 __adapter = None
 bufsize = 32*1024
 
@@ -76,7 +75,7 @@ class ModPythonAdapter(Adapter):
 
 			#make sure env is a dictionary (may not be for Apache2)
 			env=dict(env)
-			
+
 			# Fix up the path
 			if not env.has_key('PATH_INFO'): env['PATH_INFO']=req.path_info
 
@@ -103,7 +102,7 @@ class ModPythonAdapter(Adapter):
 
 			#make sure env is a dictionary (may not be for Apache2)
 			env=dict(env)
-			
+
 			# Special environment setup needed for psp handler
 			env['WK_ABSOLUTE']=1
 
@@ -137,7 +136,7 @@ class ModPythonAdapter(Adapter):
 		fn = req.filename
 		if debug:
 			ot.write("TH: Filename: %s\n"%fn)
-		ext = fn[string.rfind(fn,"."):]
+		ext = fn[fn.rfind("."):]
 		if debug:
 			ot.write("TH: Extension: %s\n"%ext)
 
@@ -171,17 +170,19 @@ class ModPythonAdapter(Adapter):
 			return
 		headerData = self.headerData() + data
 		self.setHeaderData(headerData)
-		headerend = string.find(headerData, "\r\n\r\n")
+		headerend = headerData.find("\r\n\r\n")
 		if headerend < 0:
 			return
 		headers = headerData[:headerend]
-		for header in string.split(headers, "\r\n"):
-			colon = string.find(header, ':')
+		for header in headers.split("\r\n"):
+			colon = header.find(':')
 			name = header[:colon]
 			value = header[colon+1:]
 			req.headers_out.add(name, value)
-			if string.lower(name) == 'content-type': req.content_type = value
-			if string.lower(name) == 'status': req.status = int(string.split(string.lstrip(value),' ')[0])
+			if name.lower() == 'content-type':
+				req.content_type = value
+			if name.lower() == 'status':
+				req.status = int(value.lstrip().split(' ', 1)[0])
 		req.send_http_header()
 		req.write(headerData[headerend+4:])
 		self.setDoneHeader(1)
@@ -194,10 +195,9 @@ class ModPythonAdapter(Adapter):
 		traceback.print_exc(file=sys.stderr)
 
 		output = apply(traceback.format_exception, sys.exc_info())
-		output = string.join(output, '')
-		output = string.replace(output, '&', '&amp;')
-		output = string.replace(output, '<', '&lt;')
-		output = string.replace(output, '>', '&gt;')
+		output = ''.join(output)
+		output = output.replace('&', '&amp;'
+			).replace('<', '&lt;').replace('>', '&gt;')
 		req.write('''
 <html><body>
 <p><pre>ERROR
@@ -272,11 +272,10 @@ def _adapter(req):
 	if __adapter is None:
 		appWorkDir = req.get_options()['AppWorkDir']
 		WEBWARE_ADDRESS_FILE = os.path.join(appWorkDir, 'address.text')
-		(host, port) = string.split(open(WEBWARE_ADDRESS_FILE).read(), ':')
+		(host, port) = open(WEBWARE_ADDRESS_FILE).read().split(':')
 		port = int(port)
 		__adapter = ModPythonAdapter(host, port, appWorkDir)
 	return __adapter
-
 
 
 def handler(req):

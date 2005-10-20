@@ -468,12 +468,12 @@ class Application(ConfigurableForServerSidePath, Object):
 			self.runTransaction(trans)
 			trans.response().deliver()
 		except:
+			raise # !!!!@@@
 			if trans:
 				trans.setErrorOccurred(1)
 			if self.setting('EnterDebuggerOnException') and sys.stdin.isatty():
 				import pdb
 				pdb.post_mortem(sys.exc_info()[2])
-
 			self.handleExceptionInTransaction(sys.exc_info(), trans)
 			trans.response().deliver()
 

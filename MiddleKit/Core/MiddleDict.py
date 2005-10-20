@@ -1,5 +1,13 @@
 from UserDict import UserDict
-from types import StringTypes
+try:
+	from types import StringTypes
+except: # fallback for Python < 2.3
+	from types import StringType, UnicodeType
+	StringTypes = (StringType, UnicodeType)
+try: # backward compatibility for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 class MiddleDict(UserDict):

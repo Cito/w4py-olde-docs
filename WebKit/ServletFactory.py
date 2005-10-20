@@ -117,13 +117,12 @@ class ServletFactory(Object):
 		# and give it a unique name:
 		if fullname == None:
 			remainder = serverSidePathToImport
-			remainder = string.replace(remainder, '\\', '_')
-			remainder = string.replace(remainder, '/','_')
-			fullmodname = string.replace(remainder,'.','_')
+			fullmodname = remainder.replace(
+				'\\', '_').replace('/', '_').replace('.', '_')
 			if debug:
 				print __file__, "fullmodname=", fullmodname
 			if len(fullmodname) > 100:
-				fullmodname=fullmodname[:-50]
+				fullmodname = fullmodname[:-50]
 			modname=os.path.splitext(os.path.basename(
 				serverSidePathToImport))[0]
 			fp, pathname, stuff = imp.find_module(modname,
@@ -139,9 +138,8 @@ class ServletFactory(Object):
 		directory = contextPath
 
 		# Now we'll break up the rest of the path into components.
-		remainder = path[len(contextPath)+1:]
-		remainder = string.replace(remainder, '\\', '/')
-		remainder = string.split(remainder, '/')
+		remainder = path[len(contextPath)+1:].replace('\\', '/')
+		remainder = remainder.split('/')
 
 		# Import all subpackages of the context package
 		for name in remainder[:-1]:

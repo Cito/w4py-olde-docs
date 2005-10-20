@@ -6,10 +6,6 @@ import base64
 from WebKit.Cookie import Cookie
 from types import *
 
-try: # backward compatibility for Python < 2.3
-  True, False
-except NameError:
-  True, False = 1, 0
 
 class NewPage(Servlet):
 
@@ -28,7 +24,7 @@ class NewPage(Servlet):
             httpMethodName = trans.request().method()
             method = self._methodForRequestType.get(httpMethodName)
             if not method:
-                methName = 'respondTo' + string.capitalize(httpMethodName)
+                methName = 'respondTo' + httpMethodName.capitalize()
                 method = getattr(self, methName, self.notImplemented)
                 self._methodForRequestType[httpMethodName] = method
             method()
@@ -77,8 +73,8 @@ class NewPage(Servlet):
         env = self.request().environ()
         if env.has_key('SCRIPT_URI'):
             host = env['SCRIPT_URI']
-            host = host[string.find(host, '//'):] # get rid of http://
-            host = host[:string.find(host, '/')] # get rid of rest of path
+            host = host[host.find('//'):] # get rid of http://
+            host = host[:host.find('/')] # get rid of rest of path
             return host
         # @@: maybe this should check if it's https, and the applicable
         # port number for that... then we need a protocol method too

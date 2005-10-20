@@ -4,7 +4,10 @@ from MiddleKit import StringTypes
 from MiddleKit.Core.ListAttr import ListAttr
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleDict import MiddleDict
-from sets import Set
+try:
+    from sets import Set
+except ImportError: # fallback for Python < 2.3
+    from UserDict import UserDict as Set
 
 
 class Klass(MiddleDict, ModelObject):

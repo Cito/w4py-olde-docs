@@ -25,7 +25,7 @@ import sys
 _real_stdout = sys.stdout
 sys.stdout = _console = StringIO()  # to capture the console output of the application
 
-import os, string
+import os
 from Adapter import *
 from MiscUtils.Funcs import charWrap
 from WebUtils.Funcs import htmlEncode
@@ -67,7 +67,7 @@ class OneShotAdapter(Adapter):
 
 			from WebKit import Profiler
 			Profiler.startTime = time.time()
-			
+
 			print 'ONE SHOT MODE\n'
 
 			from WebKit.OneShotAppServer import OneShotAppServer
@@ -99,22 +99,22 @@ class OneShotAdapter(Adapter):
 			if self.setting('ShowConsole'):
 				# show the contents of the console, but only if we
 				# are serving up an HTML file
-				endheaders = string.find(rs._buffer,"\r\n\r\n")
+				endheaders = rs._buffer.find("\r\n\r\n")
 				if endheaders == None:
-					endheaders = string.find(rs._buffer,"\n\n")
+					endheaders = rs._buffer.find("\n\n")
 				if not endheaders:
 					print "No Headers Found"
 					return
-				headers = string.split(rs._buffer[:endheaders],"\n")
+				headers = rs._buffer[:endheaders].split("\n")
 				entries = []
-				for i in headers:
-					entries.append(string.split(i, ":"))
+				for header in headers:
+					entries.append(header.split(":"))
 				found = 0
 				for name, value in entries:
-					if name.lower()=='content-type':
+					if name.lower() == 'content-type':
 						found = 1
 						break
-				if found and string.strip(string.lower(value))=='text/html':
+				if found and value.strip().lower() == 'text/html':
 					self.showConsole(_console.getvalue())
 		except:
 			import traceback
@@ -124,11 +124,8 @@ class OneShotAdapter(Adapter):
 			traceback.print_exc(file=sys.stderr)
 
 			output = apply(traceback.format_exception, sys.exc_info())
-			output = string.join(output, '')
-			output = string.replace(output, '&', '&amp;')
-			output = string.replace(output, '<', '&lt;')
-			output = string.replace(output, '>', '&gt;')
-			output = string.replace(output, '"', '&quot;')
+			output = ''.join(output).replace('&', '&amp;').replace(
+				'<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
 			sys.stdout.write('''Content-type: text/html
 
 <html><body>
@@ -159,11 +156,8 @@ def main(webKitDir=None):
 		traceback.print_exc(file=sys.stderr)
 
 		output = apply(traceback.format_exception, sys.exc_info())
-		output = string.join(output, '')
-		output = string.replace(output, '&', '&amp;')
-		output = string.replace(output, '<', '&lt;')
-		output = string.replace(output, '>', '&gt;')
-		output = string.replace(output, '"', '&quot;')
+		output = ''.join(output).replace('&', '&amp;').replace(
+			'<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
 		sys.stdout.write('''Content-type: text/html
 
 <html><body>

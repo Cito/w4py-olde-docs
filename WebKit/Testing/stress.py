@@ -34,7 +34,7 @@ the fact that they will contain stale session ids.
 """
 
 
-import sys, string, os, time
+import sys, os, time
 from glob import glob
 from socket import *
 from marshal import dumps
@@ -87,7 +87,7 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
 				data = data+newdata
 			#sys.stdout.write(data)
 		# END
-		if string.count(data, 'Session Expired'):
+		if data.count('Session Expired'):
 			raise Exception, 'Session expired.'
 		if delay:
 			sleep(delay)
@@ -98,8 +98,8 @@ def stress(maxRequests, minParallelRequests=1, maxParallelRequests=1, delay=0.0,
 	""" Executes a stress test on the AppServer according to the arguments. """
 
 	# Taken from CGIAdaptor:
-	(host, port) = string.split(open('../address.text').read(), ':')
-	if os.name=='nt' and host=='': # MS Windows doesn't like a blank host name
+	(host, port) = open('../address.text').read().split(':')
+	if os.name == 'nt' and host == '': # MS Windows doesn't like a blank host name
 		host = 'localhost'
 	port = int(port)
 	bufsize = 32*1024

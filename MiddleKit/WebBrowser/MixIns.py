@@ -155,6 +155,8 @@ def InstallMixIns():
 				exec 'from MiddleKit.%s.%s import %s' \
 					% (place, name, name) in nameSpace
 			except ImportError:
+				#~ if place=="Run":
+					#~ raise
 				pass
 			else:
 				pyClass = nameSpace[name]

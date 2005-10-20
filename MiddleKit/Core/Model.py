@@ -308,7 +308,7 @@ class Model(Configurable):
 		for klass in self._allKlassesInOrder:
 			klass.buildDependencies()
 		allKlasses = []
-		from sets import Set
+		from sets import Set # needs Python >= 2.3
 		visited = Set()
 		for klass in self._allKlassesInOrder:
 			if not klass.dependents:

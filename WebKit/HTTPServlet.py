@@ -61,7 +61,7 @@ class HTTPServlet(Servlet):
 					return
 		method = self._methodForRequestType.get(httpMethodName, None)
 		if not method:
-			methName = 'respondTo' + string.capitalize(httpMethodName)
+			methName = 'respondTo' + httpMethodName.capitalize()
 			method = getattr(self, methName, self.notImplemented)
 			self._methodForRequestType[httpMethodName] = method
 		method(trans)

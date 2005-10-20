@@ -14,7 +14,10 @@ from MiddleKit.Core.ListAttr import ListAttr
 from PerThreadList import PerThreadList, NonThreadedList
 from PerThreadDict import PerThreadDict, NonThreadedDict
 import thread
-import weakref
+try:
+	from weakref import WeakValueDictionary
+except: # fallback for Python < 2.1
+	from UserDict import UserDict as WeakValueDictionary
 
 
 class UnknownObjectError(LookupError):

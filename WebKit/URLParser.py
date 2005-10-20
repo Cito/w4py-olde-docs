@@ -16,9 +16,14 @@ up by `Application` (accessible through `Application.rootURLParser`).
 import WebKit.ImportSpy as imp
 import re, os, sys
 from MiscUtils.ParamFactory import ParamFactory
-import warnings
 from WebKit.HTTPExceptions import *
 from WebUtils.Funcs import urlDecode
+
+try: # backward compatibility for Python < 2.1
+	from warnings import warn
+except ImportError:
+	def warn(s, **a):
+		print s
 
 # Legal characters for use in a module name -- used when turning
 # an entire path into a module name.
@@ -349,8 +354,8 @@ class _FileParser(URLParser):
 			names = self.filenamesForBaseName(baseName)
 
 		if len(names) > 1:
-			warnings.warn("More than one file matches %s in %s: %s"
-						  % (requestPath, self._path, names))
+			warn("More than one file matches %s in %s: %s"
+				% (requestPath, self._path, names))
 			raise HTTPNotFound # @@: add info
 		elif not names:
 			return self.parseIndex(trans, requestPath)
@@ -495,9 +500,8 @@ class _FileParser(URLParser):
 			names = self.filenamesForBaseName(
 				os.path.join(self._path, directoryFile))
 			if len(names) > 1:
-				warnings.warn(
-					"More than one file matches the index file %s in %s: %s"
-						% (directoryFile, self._path, names))
+				warn("More than one file matches the index file %s in %s: %s"
+					% (directoryFile, self._path, names))
 				raise HTTPNotFound
 			elif names:
 				if requestPath and not self._extraPathInfo:
