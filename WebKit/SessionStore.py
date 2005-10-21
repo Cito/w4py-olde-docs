@@ -44,10 +44,8 @@ class SessionStore(Object):
 		""" Subclasses must invoke super. """
 		Object.__init__(self)
 		self._app = app
-
 		try:
-			import cPickle
-			pickle = cPickle
+			import cPickle as pickle
 		except ImportError:
 			import pickle
 		if hasattr(pickle, 'HIGHEST_PROTOCOL'):
