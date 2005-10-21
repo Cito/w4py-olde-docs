@@ -468,7 +468,6 @@ class Application(ConfigurableForServerSidePath, Object):
 			self.runTransaction(trans)
 			trans.response().deliver()
 		except:
-			raise # !!!!@@@
 			if trans:
 				trans.setErrorOccurred(1)
 			if self.setting('EnterDebuggerOnException') and sys.stdin.isatty():
@@ -558,7 +557,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		else:
 			# For backward compatibility (Servlet.runTransaction implements
 			# this same sequence of calls, but by keeping it in the servlet
-			# it's easier for the servlet to catch exceptions.
+			# it's easier for the servlet to catch exceptions).
 			try:
 				trans.awake()
 				trans.respond()
