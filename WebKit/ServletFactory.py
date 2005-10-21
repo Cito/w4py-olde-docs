@@ -334,7 +334,14 @@ class PythonServletFactory(ServletFactory):
 		return 'file'
 
 	def extensions(self):
-		return ['.py']
+		# The extensions of ordinary Python servlets. Besides .py, we also
+		# allow .pyc and .pyo files as Python servlets, so you can use
+		# servlets in the production environment without the source code.
+		# Otherwise they would be treated as ordinary files which might
+		# become a security hole (though the standard configuration ignores
+		# the .pyc and .pyo files). If you use all of them, make sure .py
+		# comes before .pyc and .pyo in the ExtensionCascadeOrder.
+		return ['.py','.pyc','.pyo']
 
 
 	## Import ##
