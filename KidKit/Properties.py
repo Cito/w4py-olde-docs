@@ -18,6 +18,6 @@ You need to install the Kid package before you can use the KidKit plug-in."""
 WebKitConfig = {
 	'examplePages': [
 		'Welcome', 'Time1', 'Time2', 'Files',
-		'ServletInfo', 'SimpleForm', 'Mandelbrot',
+		'ServletInfo', 'SimpleForm', 'MandelbrotSet',
 	]
 }
