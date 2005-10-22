@@ -109,7 +109,13 @@ class Klass:
 
 	def writePyImports(self):
 		wr = self._pyOut.write
-		wr('import types\n')
+		wr('''
+import types
+try:
+	from decimal import Decimal
+except ImportError:
+	Decimal = float
+''')
 		if nativeDateTime:
 			wr('import datetime\n')
 		if mxDateTime:
@@ -347,6 +353,24 @@ class FloatAttr:
 				value = float(value)
 			elif not isinstance(value, types.FloatType):
 				raise TypeError, 'expecting float type, but got value %r of type %r instead' % (value, type(value))
+''')
+
+
+class DecimalAttr:
+
+	def stringToValue(self, string):
+		return float(string)
+
+	def writePySetChecks(self, out):
+		Attr.writePySetChecks.im_func(self, out)
+		out.write('''\
+		if value is not None:
+			if isinstance(value, (types.IntType, types.LongType)):
+				value = float(value)
+			elif isinstance(value, types.FloatType):
+				value = Decimal(str(value))
+			elif not isinstance(value, Decimal):
+				raise TypeError, 'expecting decimal type, but got value %r of type %r instead' % (value, type(value))
 ''')
 
 
