@@ -21,14 +21,16 @@ Or you can run a few:
 Run all tests like this:
 > python Test.py
 
-Here is another example config file for a fresh MySQL 3.x installation on
+Here is another example config file for a fresh MySQL installation on
 Windows:
 
 # LocalConfig.py
 dbName = 'MySQL'
 storeArgs = {'user': 'root'}
-sqlCommand = 'C:\\mysql\\bin\\mysql -u root'
-sqlVersionCommand = 'mysql --version'
+sqlClient = r'"C:\Program Files\MySQL\MySQL Server 4.1\bin\mysql" '
+  # typical MySQL 3.x: sqlClient = 'C:\\mysql\\bin\\mysql -u root'
+sqlCommand = sqlClient + '-u root'
+sqlVersionCommand = sqlClient + '--version'
 # end
 
 You can see what databases are supported by looking in the MiddleKit/Run
