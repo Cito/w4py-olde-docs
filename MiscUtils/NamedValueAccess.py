@@ -461,6 +461,8 @@ def valueForKey(obj, key, default=NoDefault):
 	  function that allows multiple, qualified keys.
 	"""
 
+	assert obj is not None
+	
 	# We only accept strings for keys
 	assert type(key) is types.StringType
 
