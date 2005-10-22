@@ -368,7 +368,7 @@ class MiddleObject(object, NamedValueAccess):
 
 	## Accessing attributes by name ##
 
-  	def valueForKey(self, attrName, default=NoDefault):
+	def valueForKey(self, attrName, default=NoDefault):
 		"""
 		Returns the value of the named attribute by invoking its "get"
 		accessor method. You can use this when you want a value whose
@@ -421,7 +421,11 @@ class MiddleObject(object, NamedValueAccess):
 			pySetName = attr.pySetName()
 			method = getattr(self, pySetName, None)
 		if method is None:
-			raise LookupError, attrName
+			attrs = self.klass().allAttrs()
+			attrs = [a.name() for a in attrs]
+			attrs.sort()
+			attrs = ','.join(attrs)
+			raise LookupError, '%s, class=%s, all attrs=%s' % (attrName, self.__class__, attrs)
 		return method(value)
 
 	def valueForAttr(self, attr, default=NoDefault):
