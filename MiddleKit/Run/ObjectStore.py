@@ -103,7 +103,7 @@ class ObjectStore(ModelUser):
 		if self.setting('CacheObjectsForever', False):
 			return {}
 		else:
-			return weakref.WeakValueDictionary()
+			return WeakValueDictionary()
 
 	## Manipulating the objects in the store ##
 
@@ -121,6 +121,9 @@ class ObjectStore(ModelUser):
 			return self._objects[key]
 		else:
 			return self._objects.get(key, default)
+
+	def add(self, object, noRecurse=0):
+		return self.addObject(object, noRecurse)
 
 	def addObject(self, object, noRecurse=0):
 		"""
@@ -341,6 +344,12 @@ class ObjectStore(ModelUser):
 	def fetchObjectsOfClass(self, className, isDeep=1):
 		""" Fetches all objects of a given class. If isDeep is 1, then all subclasses are also returned. """
 		raise AbstractError, self.__class__
+
+	def fetch(self, *args, **namedArgs):
+		"""
+		An alias for fetchObjectsOfClass().
+		"""
+		return self.fetchObjectsOfClass(*args, **namedArgs)
 
 
 	## Other ##
