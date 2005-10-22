@@ -560,8 +560,17 @@ class ExceptionHandler(Object):
 			body.write(htmlErrMsg)
 
 		# Send the message
-		server = smtplib.SMTP(self.setting('ErrorEmailServer'))
+		server = self.setting('ErrorEmailServer') # can be: server, server:port, server:port:user:password
+		parts = server.split(':')
+		if len(parts)==1:
+			server = smtplib.SMTP(parts[0])
+		else:
+			server = smtplib.SMTP(parts[0], int(parts[1]))  # server and port
 		server.set_debuglevel(0)
+		if len(parts)==3:
+			server.login(parts[2], '')  # user and no password
+		elif len(parts)==4:
+			server.login(parts[2], parts[3])  # user and password
 		server.sendmail(headers['From'], headers['To'], message.getvalue())
 		server.quit()
 
