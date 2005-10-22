@@ -3,7 +3,7 @@ from MiscUtils.Funcs import uniqueId
 import time
 
 
-class User:
+class User(object):
 	"""
 	@@ 2001-02-19 ce: docs
 	"""
