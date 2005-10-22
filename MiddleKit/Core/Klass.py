@@ -305,6 +305,7 @@ class Klass(MiddleDict, ModelObject):
 		if self._pyClass==0:
 			if self._klassContainer._model._havePythonClasses:
 				self._pyClass = self._klassContainer._model.pyClassForName(self.name())
+				assert self._pyClass.__name__==self.name(), 'self.name()=%r, self._pyClass=%r' % (self.name(), self._pyClass)
 				self._pyClass._mk_klass = self
 			else:
 				self._pyClass = None
