@@ -61,15 +61,15 @@ def htmlDecode(s, codes=htmlCodesReversed):
 
 _urlEncode = {}
 for i in range(256):
-	_urlEncode[chr(i)] = '%%%02x' % i
-from string import letters, digits, atoi
-for c in letters + digits + '_,.-/':
+	_urlEncode[chr(i)] = '%%%02X' % i
+from string import letters, digits
+for c in letters + digits + '_.-/':
 	_urlEncode[c] = c
 _urlEncode[' '] = '+'
 
 def urlEncode(s):
 	"""Return the encoded version of the given string, safe for using as a URL."""
-	return ''.join(map(lambda c: _urlEncode[c], list(s)))
+	return ''.join(map(lambda c: _urlEncode[c], s))
 
 def urlDecode(s):
 	"""Return the decoded version of the given string.
@@ -78,12 +78,11 @@ def urlDecode(s):
 	For example, a URL whose % coding is incorrect.
 
 	"""
-	mychr = chr
-	parts = s.replace('+', ' ').split('%')
-	for i in range(1, len(parts)):
-		part = parts[i]
-		parts[i] = mychr(atoi(part[:2], 16)) + part[2:]
-	return ''.join(parts)
+	p1 = s.replace('+', ' ').split('%')
+	p2 = [p1.pop(0)]
+	for p in p1:
+		p2.append(chr(int(p[:2], 16)) + p[2:])
+	return ''.join(p2)
 
 def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=None):
 	"""Return an HTML string with a <table> where each row is a key-value pair."""
@@ -117,10 +116,10 @@ def requestURI(dict):
 
 	"""
 	uri = dict.get('REQUEST_URI', None)
-	if uri==None:
+	if uri == None:
 		uri = dict.get('SCRIPT_NAME', '') + dict.get('PATH_INFO', '')
 		query = dict.get('QUERY_STRING', '')
-		if query!='':
+		if query != '':
 			uri = uri + '?' + query
 	return uri
 
