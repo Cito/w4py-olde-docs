@@ -316,9 +316,17 @@ the WebKit modules and your custom servlets.</p>
 back up to top. In other words, the browser makes a request to the web
 server which in turn makes a request to the app server. The response
 then goes from the app server to the web server to the browser.</p>
-<p>If you are not using the built-in web server, you must
+<p>For development and casual use, you can replace Apache with
+the WebKit built-in web server that can be activated with the
+<tt class="docutils literal"><span class="pre">AppServer.config</span></tt> setting <tt class="docutils literal"><span class="pre">EnableHTTP</span></tt>. The port can be specified
+with the setting <tt class="docutils literal"><span class="pre">HTTPPort</span></tt> and will be <tt class="docutils literal"><span class="pre">8080</span></tt> by default.</p>
+<p>If you are not using the built-in web server, you will have to
 get your web server and app server talking to each other.
-For this purpose, you must use a WebKit <a class="reference" href="#adapter">adapter</a>.</p>
+For this purpose, you must use a WebKit <a class="reference" href="#adapter">adapter</a>. You must also
+activate the WebKit app server listener for adapters with the
+<tt class="docutils literal"><span class="pre">AppServer.config</span></tt> setting <tt class="docutils literal"><span class="pre">EnableAdapter</span></tt>. The port can be specified
+with the setting <tt class="docutils literal"><span class="pre">AdapterPort</span></tt> and will be <tt class="docutils literal"><span class="pre">8086</span></tt> by default.
+You can use several app servers listenting on different ports.</p>
 <div class="section" id="permissions">
 <h2><a class="toc-backref" href="#id29" name="permissions">Permissions</a></h2>
 <p>Webware runs as whatever user you run the AppServer as.  So, while

@@ -292,9 +292,18 @@ back up to top. In other words, the browser makes a request to the web
 server which in turn makes a request to the app server. The response
 then goes from the app server to the web server to the browser.
 
-If you are not using the built-in web server, you must
+For development and casual use, you can replace Apache with
+the WebKit built-in web server that can be activated with the
+``AppServer.config`` setting ``EnableHTTP``. The port can be specified
+with the setting ``HTTPPort`` and will be ``8080`` by default.
+
+If you are not using the built-in web server, you will have to
 get your web server and app server talking to each other.
-For this purpose, you must use a WebKit adapter_.
+For this purpose, you must use a WebKit adapter_. You must also
+activate the WebKit app server listener for adapters with the
+``AppServer.config`` setting ``EnableAdapter``. The port can be specified
+with the setting ``AdapterPort`` and will be ``8086`` by default.
+You can use several app servers listenting on different ports.
 
 
 Permissions
