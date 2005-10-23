@@ -863,19 +863,21 @@ def run(workDir=None):
 				sys.stderr.flush()
 				runAgain = True
 			except Exception, e:
-				if not doesRunHandleExceptions:
-					raise
-				print
 				if isinstance(e, SystemExit):
+					print
 					print "Exiting AppServer%s." % (
 						e[0] == 3 and ' for reload' or '')
 					exitStatus = e[0]
 				elif (isinstance(e, KeyboardInterrupt) or
 						(isinstance(e, IOError) and e[0] == errno.EINTR)):
+					print
 					print "Exiting AppServer due to keyboard interrupt."
 					exitStatus = 0
 				else:
+					if not doesRunHandleExceptions:
+						raise
 					import traceback
+					print
 					traceback.print_exc(file=sys.stderr)
 					print "Exiting AppServer due to above exception."
 					exitStatus = 1
