@@ -33,15 +33,15 @@ improvements and bugfixes that have been made since the last release.</p>
 	set the ownership of the working directory files. To see all options,
 	run the command without any parameters.</li>
 	<li>Added <code>EnterDebuggerOnException</code> option to
-	<code>Application.config</code>. If True, and if the AppServer is running
-	from an interactive terminal, an uncaught exception will cause the AppServer
-	to enter the debugger, allowing the developer to call functions, investigate
-	variables, etc. See Python debugger (pdb) docs for more information.
-	You will certainly want to turn this off when deploying the site.
-	Defaults to False (off).</li>
+	<span class="filename">Application.config</span>. If True, and if the
+	AppServer is running from an interactive terminal, an uncaught exception
+	will cause the AppServer to enter the debugger, allowing the developer to
+	call functions, investigate variables, etc. See Python debugger (pdb) docs
+	for more information. You will certainly want to turn this off when
+	deploying the site. Defaults to False (off).</li>
 	<li>The AppServer now includes an experimental built-in HTTP web server.
 	See the <a href="InstallGuide.html">InstallGuide</a> for more details.</li>
-	<li>Added new <code>Application.config</code> option
+	<li>Added new <span class="filename">Application.config</span> option
 	<code>UseCookieSessions</code> that defaults to True. If set to False,
 	then a session cookie will never be sent in the response. Use this along
 	with <code>UseAutomaticPathSessions</code> to <em>only</em> use path
@@ -78,27 +78,6 @@ improvements and bugfixes that have been made since the last release.</p>
 	reloaded without restarting the entire server anyway).</li>
 	<li><code>XMLRPCServlet</code> now allows <code>xmlrpclib.Fault</code>
 	exceptions to be passed through unmolested.</li>
-	<li><p>Previously, attempting to start an already-running AppServer
-	would fail when it couldn't grab the socket to listen on, but it would
-	have already overwritten the pid file.</p>
-	<p>Now pid file handling is much improved:</p>
-	<ul>
-		<li>The AppServer will refuse to start if it detects that the pid file
-		exists and the process is still running.</li>
-		<li>A stale pid file left over from a crash or forcible termination
-		will be detected and removed.</li>
-		<li>You can override the path of the pid file using the
-		<code>PidFile</code> setting in AppServer.config. By default,
-		the pid is written to <span class="filename">appserverpid.txt</span>
-		in the working directory (or WebKit path if you're not using a working
-		directory).</li>
-		<li>You can disable the use of the pid file by setting it to
-		<code>None</code> in <span class="filename">AppServer.config</span>.
-		This seems to be a good idea on Windows because Windows often
-		reuses the same pid right away, so if the appserver crashes, and it
-		tries to restart and it happens to reuse the same pid, the restart
-		will fail.</li>
-	</ul></li>
 	<li><code>Page</code> has been refactored into <code>HTTPContent</code>
 	and <code>Page</code>. <code>HTTPContent</code> can be used as a base
 	class for servlets which generate non-HTML content. As <code>Page</code>
@@ -119,6 +98,39 @@ improvements and bugfixes that have been made since the last release.</p>
 	<li>Added <code>transaction()</code> method to <code>RPCServlet</code>
 	so that there's a way for a method to get the transaction object if
 	needed.</li>
+	<li><p>Previously, attempting to start an already-running AppServer
+	would fail when it couldn't grab the socket to listen on, but it would
+	have already overwritten the pid file.</p>
+	<p>Now pid file handling is much improved:</p>
+	<ul>
+		<li>The AppServer will refuse to start if it detects that the pid file
+		exists and the process is still running.</li>
+		<li>A stale pid file left over from a crash or forcible termination
+		will be detected and removed.</li>
+		<li>You can override the path of the pid file using the
+		<code>PidFile</code> setting in
+		<span class="filename">AppServer.config</span>. By default,
+		the pid is written to <span class="filename">appserverpid.txt</span>
+		in the working directory (or WebKit path if you're not using a working
+		directory).</li>
+		<li>You can disable the use of the pid file by setting it to
+		<code>None</code> in <span class="filename">AppServer.config</span>.
+		This seems to be a good idea on Windows because Windows often
+		reuses the same pid right away, so if the appserver crashes, and it
+		tries to restart and it happens to reuse the same pid, the restart
+		will fail.</li>
+	</ul></li>
+	<li><p>The shutdown handling has been improved. Sending <tt>SIGHUP</tt>
+	now results in exiting with exit code 3 which is used for reloading via
+	the AppServer script.</p></li>
+	<li>The <span class="filename">Launch.py</span> file has been improved
+	and supports several new command line options.</li>
+	<li>The <span class="filename">AppServer</span> and
+	<span class="filename">Launch.py</span> don't need to be called from
+	the working directory any more, and the location of the working
+	directory is assumed to be the location of the script,
+	and not hard coded in <span class="filename">Launch.py</span>.
+	You can still change this at the top of the script, however.</li>
 	<li>The Unix start script <span class="filename">WebKit/webkit</span>
 	which was based on RedHat Linux has been replaced by a folder
 	<span class="filename">WebKit/StartScripts</span> with a bunch of
@@ -127,9 +139,11 @@ improvements and bugfixes that have been made since the last release.</p>
 	to <span class="filename">WebKit/webkit</span>. If instead of copying,
 	you create a link to the start script in your working directory, it will
 	find out the location of the working directory automatically.</li>
+	<li>The Examples and Admin sections have been improved and adapted
+	to the API changes.</li>
 </ul>
 
-<a name="Changes"></a><h2>API Changes</h2>
+<a name="Changes"></a><h2>Changes</h2>
 <ul>
 	<li>The <code>Port</code> setting in
 	<span class="filename">AppServer.config</span> has been deprecated in
@@ -152,6 +166,52 @@ improvements and bugfixes that have been made since the last release.</p>
 	for the servlet. This was redundant code, and its removal allows a servlet
 	to use dynamic actions (i.e. to make the action list dependent on the
 	permissions of the logged-in user).</li>
+	<li><p>The semantics for the awake-respond-sleep cycle have changed so
+	that Servlet.sleep() is <em>always</em> called, even when an unhandled
+	exception occurs in Servlet.awake() or Servlet.respond().
+	Servlet.sleep() is called even when Page.endResponse() or
+	Page.sendRedirectAndEnd() have been called to end servlet
+	processing prematurely.  This behaviour differs from previous
+	versions, in which sleep() was called only if awake() succeeded.</p>
+	<p>The intent of this change is to guarantee servlets the chance to free
+	resources, without having to be prepared to catch all possible exceptions
+	within awake() to do so.</p>
+	<p>The programmer should ensure that sleep does not attempt to free
+	resources which were never allocated, as sleep() may be called even when
+	awake() did not succeed.</p>
+	<pre class="py">
+		def awake(...):
+			initialize resource A
+			initialize resource B
+
+		def sleep(...):
+			if resource B was initialized:
+				finalize resource B
+			if resource A was initialized:
+				finalize resource A
+	</pre></li>
+	<li>The PythonServletFactory had only served <tt>.py</tt> source files
+	so far. Now it will serve <tt>.pyc</tt> and <tt>.pyo</tt> files as well.
+	For the default configuration, this makes no difference, since <tt>.pyc</tt>
+	and <tt>.pyo</tt> are in both settings <tt>ExtensionsToIgnore</tt> and
+	<tt>FilesToHide</tt>, so they will not be served anyway. By removing
+	<tt>.pyc</tt> and <tt>.pyo</tt> away from these settings, you can now
+	install servlets without their source code. This will be a little bit
+	more perfomant in the production environment, but most of all it will
+	prevent customers and administrators from messing around with the source
+	code and give a certain level of protection as closed source (this feature
+	had been requested several times). Before, <tt>.pyc</tt> and <tt>.pyo</tt>
+	had not been executed, but delivered as unknown file tyes which does not
+	make much sense and can be a security problem, for instance when database
+	passwords and other information is stored in the servlets. By using
+	<tt>ExtensionCascadeOrder</tt>, you can also determine a priority, such as
+	<tt>.py</tt> first (if available), then <tt>.pyo</tt>, then <tt>.pyc</tt>.
+	However, the standard configuration still ignores/hides <tt>.pyc</tt> and
+	<tt>.pyo</tt> files completely and looks only at the <tt>.py</tt> file,
+	so you still have to change the settings explicitely in
+	<span class="filename">AppServer.config</span> if you want to use this.
+	Also, note that <tt>.pyc</tt> and <tt>.pyo</tt> files can be decompiled
+	so this will be no real unsurmountable protection.</li>
 </ul>
 
 <a name="Bugfixes"></a><h2>Bugfixes</h2>
