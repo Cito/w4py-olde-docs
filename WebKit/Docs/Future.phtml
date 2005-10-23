@@ -5,7 +5,7 @@
 
 <a name="Warning"></a><h2>Warning</h2>
 
-<p>This document hasn't been seriously combed over in some time.  It is definitely out of date.  You can find better information about known bugs and future work in the Wiki and in the SourceForge bug tracker, both accessible from the <a href="http://webware.sourceforge.net/">Webware Home Page</a>.</p>
+<p>This document hasn't been seriously combed over in some time.  It is definitely out of date.  You can find better information about known bugs and future work in the <a href="http://wiki.w4py.org">Wiki</a> and in the <a href="http://sourceforge.net/tracker/?group_id=4866&atid=104866">SourceForge bug tracker</a>, both accessible from the <a href="http://www.webwareforpython.org">Webware Home Page</a>.</p>
 
 <a name="Future"></a><h2>Future Work/Limitations</h2>
 
@@ -18,7 +18,6 @@
 <a name="KnownBugs"></a><h3>Known Bugs</h3>
 
 <ol>
-	<li>The <i>stop</i> command for the <i>webkit</i> "rc" script does not work.</li>
 	<li>There is one report that indicates that Application.serverSidePath() may be broken when using MakeAppWorkDir.</li>
 	<li>Contexts do not have separate name spaces.</li>
 	<li>The ListBox example does not take kindly to a Refresh/Reload after a delete operation. In essence, you are telling the ListBox to delete the same object twice.</li>
@@ -61,7 +60,6 @@
 	<li>If a Python file has only one class that inherits from Servlet, then use that as the Servlet class (rather than requiring the name be the same as the file).</li>
 	<!-- These have been discussed on the devel list prior to the last release.
 	Expect to see these changing in the near future in SVN in the next release. -->
-	<li>Incoproate If-Modified-Since - addressed in patch 608957</li>
 	<li>Adopt the code in NewThreadedAppServer as a new model for the ThreadedAppServer.</li>
 	<li>Adopt the code in serverSideInfoForRequestNewAlgorithm in Application.</li>
 	<li>Make ThreadeAppServer easily subclassed to allow for customization to AppServer behavior.</li>
@@ -80,13 +78,12 @@
 	<li>Beef up the User's Guide.</li>
 	<li>User's Guide: Create a caching section to discuss the virtues of doing so. Color example became 12 X faster on the server side.</li>
 	<li>Create a tutorial.</li>
-	<li>Docs: Provide links to 'pythondoc' generated documentation of the classes.</li>
 	</ol></li>
 
 	<li><b>Food for thought, considerations, reviews</b>
 	<ol>
 	<li>Consider this statement from the FastCGI docs: Redirects are handled similar to CGI.  Location headers with values that begin with "/" are treated as internal-redirects; otherwise, they are treated as external redirects (302).</li>
-	<li>Consider if we need to support &lt;form action="x.py?a=1" method="POST"&gt; where you will have both a query string and posted data.</li>
+	<li>Consider if we need to support &lt;form action="x.py?a=1" method="post"&gt; where you will have both a query string and posted data.</li>
 	<li>Application modifies sys.path so that servlets can say "from SuperServlet import SuperServlet" where SuperServlet is located in the same directory as the Servlet. We'd prefer a more sophisticated technique which does not modify sys.path and does not affect other servlets. (Or maybe this would go away with a new one-process-per-application architecture.)</li>
 	</ol></li>
 
