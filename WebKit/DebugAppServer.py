@@ -89,8 +89,17 @@ class DebugAppServer(OriginalThreadedAppServer):
 
 		"""
 		self.initThread()
-		OriginalThreadedAppServer.mainloop(self)
-		self.delThread()
+		try:
+			OriginalThreadedAppServer.mainloop(self)
+		finally:
+			self.delThread()
+			sys.stdout.flush()
+			sys.stderr.flush()
+			if self. running:
+				self.initiateShutdown()
+				self._closeThread.join()
+				sys.stdout.flush()
+				sys.stderr.flush()
 
 	def createApplication(self):
 		"""Create and return an application object. Invoked by __init__."""
