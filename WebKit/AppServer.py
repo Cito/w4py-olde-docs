@@ -67,10 +67,12 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		and starts the request handling loop.
 
 		"""
+		self.running = 0
 		self._startTime = time.time()
 
 		global globalAppServer
-		assert globalAppServer is None, 'more than one app server; or __init__() invoked more than once'
+		assert globalAppServer is None, \
+			'More than one app server; or __init__() invoked more than once.'
 		globalAppServer = self
 
 		ConfigurableForServerSidePath.__init__(self)
@@ -94,14 +96,14 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self._app = self.createApplication()
 		self.loadPlugIns()
 
-		self.running = 2 # server is running
-
 		# @@ 2003-03 ib: shouldn't this just be in a subclass's __init__?
 		if self.isPersistent():
 			self._closeEvent = Event()
-			self._closeThread = Thread(target=self.closeThread, name="CloseThread")
+			self._closeThread = Thread(target=self.closeThread,
+				name="CloseThread")
 			# self._closeThread.setDaemon(1)
 			self._closeThread.start()
+		self.running = 1
 
 	def checkForInstall(self):
 		"""Check whether Webware was installed.

@@ -98,42 +98,49 @@ class ThreadedAppServer(AppServer):
 		"""
 
 		self._defaultConfig = None
-		AppServer.__init__(self, path)
-		threadCount = self.setting('StartServerThreads')
-		self._maxServerThreads = self.setting('MaxServerThreads')
-		self._minServerThreads = self.setting('MinServerThreads')
-		self._threadPool = []
-		self._threadCount = 0
-		self._threadUseCounter = []
-		# twice the number of threads we have:
-		self._requestQueue = Queue.Queue(self._maxServerThreads * 2)
-		self._addr = {}
-		self._requestID = 0
+		self.runnig = 0
+		try:
+			AppServer.__init__(self, path)
+			threadCount = self.setting('StartServerThreads')
+			self._maxServerThreads = self.setting('MaxServerThreads')
+			self._minServerThreads = self.setting('MinServerThreads')
+			self._threadPool = []
+			self._threadCount = 0
+			self._threadUseCounter = []
+			# twice the number of threads we have:
+			self._requestQueue = Queue.Queue(self._maxServerThreads * 2)
+			self._addr = {}
+			self._requestID = 0
 
-		out = sys.stdout
+			out = sys.stdout
 
-		out.write('Creating %d threads' % threadCount)
-		for i in range(threadCount):
-			self.spawnThread()
-			out.write(".")
-			out.flush()
-		out.write("\n")
+			out.write('Creating %d threads' % threadCount)
+			for i in range(threadCount):
+				self.spawnThread()
+				out.write(".")
+				out.flush()
+			out.write("\n")
 
-		self._socketHandlers = {}
-		self._handlerCache = {}
-		self._sockets = {}
+			self._socketHandlers = {}
+			self._handlerCache = {}
+			self._sockets = {}
 
-		if self.setting('EnableAdapter'):
-			self.addSocketHandler(AdapterHandler)
+			if self.setting('EnableAdapter'):
+				self.addSocketHandler(AdapterHandler)
 
-		if self.setting('EnableMonitor'):
-			self.addSocketHandler(MonitorHandler)
+			if self.setting('EnableMonitor'):
+				self.addSocketHandler(MonitorHandler)
 
-		if self.setting('EnableHTTP'):
-			from WebKit.HTTPServer import HTTPAppServerHandler
-			self.addSocketHandler(HTTPAppServerHandler)
+			if self.setting('EnableHTTP'):
+				from WebKit.HTTPServer import HTTPAppServerHandler
+				self.addSocketHandler(HTTPAppServerHandler)
 
-		self.readyForRequests()
+			self.readyForRequests()
+		except:
+			if self.running:
+				self.initiateShutdown()
+				self._closeThread.join()
+			raise
 
 	def addSocketHandler(self, handlerClass, serverAddress=None):
 		"""Add socket handler.
@@ -160,11 +167,12 @@ class ThreadedAppServer(AppServer):
 			sock.bind(serverAddress)
 			sock.listen(1024)
 		except:
-			if self.running > 2:
-				self.initiateShutdown()
-			self._closeThread.join()
+			print "Error: Can not listen for %s on %s" % (
+				handlerClass.settingPrefix, str(serverAddress))
+			sys.stdout.flush()
 			raise
-		print "Listening for %s on %s" % (handlerClass.settingPrefix, serverAddress)
+		print "Listening for %s on %s" % (
+			handlerClass.settingPrefix, str(serverAddress))
 		f = open(self.serverSidePath(
 			'%s.text' % handlerClass.protocolName), 'w')
 		f.write('%s:%d' % (serverAddress[0], serverAddress[1]))
@@ -862,31 +870,32 @@ def run(workDir=None):
 				sys.stdout.flush()
 				sys.stderr.flush()
 				runAgain = True
+			except SystemExit, e:
+				print
+				print "Exiting AppServer%s." % (
+					e[0] == 3 and ' for reload' or '')
+				exitStatus = e[0]
 			except Exception, e:
-				if isinstance(e, SystemExit):
-					print
-					print "Exiting AppServer%s." % (
-						e[0] == 3 and ' for reload' or '')
-					exitStatus = e[0]
-				elif (isinstance(e, KeyboardInterrupt) or
+				if (isinstance(e, KeyboardInterrupt) or
 						(isinstance(e, IOError) and e[0] == errno.EINTR)):
 					print
 					print "Exiting AppServer due to keyboard interrupt."
 					exitStatus = 0
 				else:
-					if not doesRunHandleExceptions:
+					if doesRunHandleExceptions:
+						import traceback
+						print
+						traceback.print_exc(file=sys.stderr)
+						print "Exiting AppServer due to above exception."
+						exitStatus = 1
+					else:
 						raise
-					import traceback
-					print
-					traceback.print_exc(file=sys.stderr)
-					print "Exiting AppServer due to above exception."
-					exitStatus = 1
-				sys.stdout.flush()
-				sys.stderr.flush()
-				if server and server.running:
-					server.initiateShutdown()
-					server._closeThread.join()
 		finally:
+			sys.stdout.flush()
+			sys.stderr.flush()
+			if server and server.running:
+				server.initiateShutdown()
+				server._closeThread.join()
 			AppServerModule.globalAppServer = None
 	sys.stdout.flush()
 	sys.stderr.flush()
