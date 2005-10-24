@@ -1,21 +1,24 @@
-<% header('%s 0.8 Release Notes' % name) %>
+<% header('%s Release Notes' % name) %>
 
 <h2>Release Notes</h2>
 
-<!-- @@ 2001-03-11 ce: this needs to be automated -->
-
 <div class="contents"><ul>
-<li><a href="RelNotes-0.8.1.html">0.8.1</a></li>
-<li><a href="RelNotes-0.8.html">0.8</a></li>
-<li><a href="RelNotes-0.7.html">0.7</a></li>
-<li><a href="RelNotes-0.6.1.html">0.6.1</a></li>
-<li><a href="RelNotes-0.6.html">0.6</a></li>
-<li><a href="RelNotes-0.5.1.html">0.5.1</a></li>
-<li><a href="RelNotes-0.5.html">0.5</a></li>
-<li><a href="RelNotes-0.4.1.html">0.4.1</a></li>
-<li><a href="RelNotes-0.4.html">0.4</a></li>
-<li><a href="RelNotes-0.3.html">0.3</a></li>
-<li><a href="RelNotes-0.2.html">0.2</a></li>
-</ul></div>
+<% from glob import glob
+r = {}
+for f in glob('Docs/RelNotes-*.*html'):
+	if f.endswith('.html'):
+		v = f[14:-5]
+	elif f.endswith('.phtml'):
+		v = f[14:-6]
+	else:
+		continue
+	if v == 'X.Y':
+		continue
+	r[v] = None
+r = r.keys()
+r.sort(lambda x, y: cmp(y.split('.'), x.split('.')))
+for v in r:
+	print '<li><a href="RelNotes-%s.html">%s</a></li>' % (v, v)
+%></ul></div>
 
 <% footer() %>
