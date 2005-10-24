@@ -363,7 +363,7 @@ class PythonServletFactory(ServletFactory):
 			if iskeyword(name):
 				name = name + '_'
 			# If the mangled name does not exist either, report an error:
-			if not hasattr(module, name) is None:
+			if not hasattr(module, name):
 				raise ValueError, \
 					'Cannot find expected servlet class %r in %r.' \
 						% (name, path)
