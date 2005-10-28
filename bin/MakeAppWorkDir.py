@@ -38,6 +38,12 @@ WorkDir:
 #   CVS or SVN repository. In the case of a CVS repository, the
 #   .cvsignore files should be created automatically, and in case
 #   of SVN, the corresponding svn propset commands should be issued.
+# * MakeAppWorkDir.py should set the admin password like install.py does.
+#   At the same time, install.py should be able to do a "app-less" install,
+#   from which the admin can create appdirs using MakeAppWorkDir.py.
+#   The idea here is that the results of install.py should only be "shared"
+#   resources, and "per-app" resources (like the admin password) should be
+#   deferred (or, at least, deferrable) to MakeAppWorkDir.py.
 # CREDITS
 # * Contributed to Webware for Python by Robin Dunn
 # * Improved by Christoph Zwerschke
