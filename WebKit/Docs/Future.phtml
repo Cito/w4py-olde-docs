@@ -83,6 +83,7 @@
 	<li><b>Food for thought, considerations, reviews</b>
 	<ol>
 	<li>Consider this statement from the FastCGI docs: Redirects are handled similar to CGI.  Location headers with values that begin with "/" are treated as internal-redirects; otherwise, they are treated as external redirects (302).</li>
+	<li>FastCGI app server: The idea is that if the app server itself supports FastCGI, then it can be used directly with FastCGI enabled web servers sans the infamous "adapter". Dan Green has brought this up in Webware-discuss.</li>
 	<li>Consider if we need to support &lt;form action="x.py?a=1" method="post"&gt; where you will have both a query string and posted data.</li>
 	<li>Application modifies sys.path so that servlets can say "from SuperServlet import SuperServlet" where SuperServlet is located in the same directory as the Servlet. We'd prefer a more sophisticated technique which does not modify sys.path and does not affect other servlets. (Or maybe this would go away with a new one-process-per-application architecture.)</li>
 	</ol></li>
