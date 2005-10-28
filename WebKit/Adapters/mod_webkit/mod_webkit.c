@@ -59,7 +59,7 @@ unsigned long resolve_host(char *value) {
     int x;
 
     /* Check if we only have digits in the string */
-    for (x=0; value[x]!='\0'; x++) {
+    for (x = 0; value[x] != '\0'; x++) {
         if (!isdigit(value[x]) && value[x] != '.') {
             break;
         }
@@ -70,7 +70,7 @@ unsigned long resolve_host(char *value) {
         struct hostent *host;
 
         host=gethostbyname(value);
-        if (host==NULL) return 0;
+        if (host == NULL) return 0;
         return ((struct in_addr *)host->h_addr_list[0])->s_addr;
     } else {
         /* If we found only digits we use inet_addr() */
@@ -220,15 +220,15 @@ static int wksock_open(request_rec *r, unsigned long address, int port, wkcfg* c
 
     /* Tries to connect to appserver (continues trying while error is EINTR) */
     do {
-        ret=connect(sock,(struct sockaddr *)&addr,sizeof(struct sockaddr_in));
+        ret = connect(sock,(struct sockaddr *)&addr,sizeof(struct sockaddr_in));
 #ifdef WIN32
-        if (ret==SOCKET_ERROR) errno=WSAGetLastError()-WSABASEERR;
+        if (ret == SOCKET_ERROR) errno = WSAGetLastError() - WSABASEERR;
 #endif /* WIN32 */
-    } while (ret==-1 && (errno==EINTR || errno==EAGAIN));
+    } while (ret == -1 && (errno == EINTR || errno == EAGAIN));
 
     /* Check if we connected */
-    if (ret==-1) {
-        log_message("Can not connect to WebKit AppServer",r);
+    if (ret == -1) {
+        log_message("Can not connect to WebKit AppServer", r);
         return -1;
     }
 #ifdef TCP_NODELAY
@@ -389,7 +389,7 @@ static int content_handler(request_rec *r)
     cfg =  ap_get_module_config(r->per_dir_config, &webkit_module);
     if (cfg == NULL) {
         log_message("No cfg", r);
-        cfg = (wkcfg*) wk_create_dir_config(r->pool,"/");
+        cfg = (wkcfg*) wk_create_dir_config(r->pool, "/");
     }
 
     env_dict = setup_WFILE(r);

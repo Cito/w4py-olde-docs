@@ -87,7 +87,7 @@ static const char *handle_wkserver(cmd_parms *cmd, void *mconfig,
         (char*)apr_pstrdup(cmd->server->process->pool, cfg->host),
         APR_UNSPEC, cfg->port, 0, cmd->server->process->pool);
     cfg->apraddr = apraddr;
-    if (err !=APR_SUCCESS)
+    if (err != APR_SUCCESS)
         log_error("Couldn't resolve hostname for WebKit Server", cmd->server);
     return NULL;
 }
@@ -206,30 +206,32 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
 
     //log_message("In wksock_open", r);
 
-    if (cfg->apraddr==NULL) {
+    if (cfg->apraddr == NULL) {
       log_error("No Valid Host Configured", r->server);
       return NULL;
     }
-    if ((rv = apr_socket_create(&aprsock, AF_INET,
-            SOCK_STREAM, r->pool)) != APR_SUCCESS) {
+    if ((rv = apr_socket_create(&aprsock, AF_INET, SOCK_STREAM,
+#if (APR_MAJOR_VERSION > 0)
+            APR_PROTO_TCP,
+#endif
+            r->pool)) != APR_SUCCESS) {
         log_error("Failure creating socket for appserver connection",r->server);
         return NULL;
     }
 
     /* Tries to connect to appserver (continues trying while error is EINTR) */
     do {
-        rv = apr_connect(aprsock, cfg->apraddr);
-        //ret=connect(sock,(struct sockaddr *)&addr, sizeof(struct sockaddr_in));
+        rv = apr_socket_connect(aprsock, cfg->apraddr);
 #ifdef WIN32
-        //if (rv==SOCKET_ERROR) errno = WSAGetLastError() - WSABASEERR;
-        if (rv != APR_SUCCESS) errno = WSAGetLastError() - WSABASEERR;
+        if (rv != APR_SUCCESS)
+            errno = WSAGetLastError() - WSABASEERR;
 #endif /* WIN32 */
-    } //while (ret==-1 && (errno==EINTR || errno==EAGAIN));
-    while (rv !=APR_SUCCESS  && (errno==EINTR || errno==EAGAIN));
+    }
+    while (rv != APR_SUCCESS && (errno == EINTR || errno == EAGAIN));
 
     /* Check if we connected */
-    if (rv!=APR_SUCCESS){
-        log_message("Can not open socket connection to WebKit AppServer",r);
+    if (rv != APR_SUCCESS) {
+        log_message("Can not open socket connection to WebKit AppServer", r);
         return NULL;
     }
 
@@ -249,7 +251,11 @@ static void discard_script_output(apr_bucket_brigade *bb)
     const char *buf;
     apr_size_t len;
     apr_status_t rv;
-    APR_BRIGADE_FOREACH(e, bb) {
+
+    for (e = APR_BRIGADE_FIRST(bb);
+            e != APR_BRIGADE_SENTINEL(bb);
+            e = APR_BUCKET_NEXT(e)) {
+
         if (APR_BUCKET_IS_EOS(e)) {
             break;
         }
@@ -257,6 +263,7 @@ static void discard_script_output(apr_bucket_brigade *bb)
         if (rv != APR_SUCCESS) {
             break;
         }
+
     }
 }
 
@@ -293,9 +300,9 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
      */
 
     aprlen = int_dict->ptr - int_dict->str;
-    rv = apr_send(aprsock, int_dict->str, &aprlen);
+    rv = apr_socket_send(aprsock, int_dict->str, &aprlen);
     aprlen = length;
-    rv = apr_send(aprsock,whole_dict->str,&aprlen);
+    rv = apr_socket_send(aprsock,whole_dict->str,&aprlen);
 
     /* This is copied from mod_cgi */
 
@@ -321,7 +328,10 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
             return 2;
         }
 
-        APR_BRIGADE_FOREACH(bucket, bb) {
+        for (bucket = APR_BRIGADE_FIRST(bb);
+                bucket != APR_BRIGADE_SENTINEL(bb);
+                bucket = APR_BUCKET_NEXT(bucket)) {
+
             const char *data;
             apr_size_t len;
 
@@ -344,11 +354,11 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
             apr_bucket_read(bucket, &data, &len, APR_BLOCK_READ);
 
             do {
-                aprlen=len;
-                rv = apr_send(aprsock, data, &aprlen);
-                len = len-aprlen;
+                aprlen = len;
+                rv = apr_socket_send(aprsock, data, &aprlen);
+                len = len - aprlen;
                 data += aprlen;
-            } while (len >0 && rv==APR_SUCCESS);
+            } while (len > 0 && rv == APR_SUCCESS);
 
             if (rv != APR_SUCCESS) {
                 /* silly server stopped reading, soak up remaining message */
@@ -365,6 +375,8 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     /* @@ gtalvola 2002-12-03:
      * I had to remove this call to shutdown in order
      * to get this to work on Windows. I don't know why.
+     * @@ chrisz 2005-28-10:
+     * btw, this is deprecated and should be apr_socket_shutdown instead
     */
     //apr_shutdown(aprsock, APR_SHUTDOWN_WRITE);
 
@@ -445,7 +457,7 @@ static int webkit_handler(request_rec *r)
     cfg =  ap_get_module_config(r->per_dir_config, &webkit_module);
     if (cfg == NULL) {
         log_message("No cfg", r);
-        cfg = (wkcfg*) webkit_create_dir_config(r->pool,"/");
+        cfg = (wkcfg*) webkit_create_dir_config(r->pool, "/");
     }
 
     env_dict = setup_WFILE(r);
@@ -476,7 +488,7 @@ static int webkit_handler(request_rec *r)
         key = tentry[i].key;
         value = tentry[i].val;
         write_string(key, env_dict);
-        if (value !=NULL)
+        if (value != NULL)
             write_string(value, env_dict);
         else
             w_byte(TYPE_NONE, env_dict);
