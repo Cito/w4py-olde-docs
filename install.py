@@ -216,7 +216,8 @@ class Installer:
 			pattern = "('AdminPassword'\s*:)\s*'.*?'"
 		else: # keyword arguments style
 			pattern = "(AdminPassword\\s*=)\\s*['\"].*?['\"]"
-		repl = "\g<1> '%s'" % (password,)
+		repl = "\g<1> '%s'" % password.replace( # escape critical characters
+			'\\', '\\\\\\\\').replace("'", "\\\\'").replace('%', '\\\\045')
 		from re import subn
 		data, count = subn(pattern, repl, data)
 		if count != 1:
