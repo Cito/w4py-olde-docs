@@ -59,7 +59,7 @@ Improved by Christoph Zwerschke - cito at online.de.
 # Version format is (Major, Minor, Sub, Alpha/Beta/etc)
 # The Sub is optional, and if 0 is not returned.
 # Examples: (0, 8, 1, 'b1'), (0, 8, 2) or (0, 9, 0, 'rc1')
-# releaseDate format should be 'MM/DD'YY'.
+# releaseDate format should be 'MM/DD/YY'.
 
 # Update this to change the current version and release date:
 version = ('X', 'Y', 0)
