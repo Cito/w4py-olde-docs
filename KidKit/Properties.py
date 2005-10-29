@@ -8,7 +8,7 @@ status = 'alpha'
 
 requiredPyVersion = (2, 3, 0)
 
-requiredKidVersion = (0, 6, 4)
+requiredKidVersion = (0, 6, 0)
 
 synopsis = """KidKit is a Webware plug-in that allows Kid templates
 to be automatically compiled and run as servlets by the WebKit application server.
