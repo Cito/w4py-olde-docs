@@ -361,7 +361,7 @@ AppServer.config
     default WebKit looks in the ``Webware/`` directory (``..``) for
     plugins -- several of which are shipped with Webware.  Default
     ``[".."]``.  See `Creating Plugins`__ for information on creating
-    your own plug-ins. @@ ib: are these really differently cased?
+    your own plug-ins.
 
     __ Developing.html#creatingplugins
 
@@ -378,13 +378,18 @@ AppServer.config
     If true, then additional messages are printed while the AppServer
     runs, most notably information about each request such as size and
     response time.  Default ``1`` (true).
-``ServerThreads``:
+``MaxServerThreads``:
     The maximum number of threads in the request handler thread pool,
     and therefore, the maximum number of concurrent requests that can
     be served. Unless you have a serious load on a high end machine,
-    the default is generally sufficient.  Default ``10``.  @@ ib: I
-    don't believe this is correct -- I think more threads are
-    created on demand, but only this many threads sit around waiting.
+    the default is generally sufficient.  Default ``20``.
+``MinServerThreads``:
+    The minimum number of threads in the request handler thread pool.
+    This makes sure that always some threads are available immediately,
+    even when there had been no activity for a long time.  Default ``5``.
+``StartServerThreads``:
+    The number of threads in the request handler thread pool that will
+    be created when the application server starts.  Default ``10``.
 ``CheckInterval``:
     The number of virtual instructions after which Python will check
     for thread switches, signal handlers, etc. This is passed directly

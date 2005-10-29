@@ -382,7 +382,7 @@ for plugins.  Each plugin is a subdirectory of its own.  By
 default WebKit looks in the <tt class="docutils literal"><span class="pre">Webware/</span></tt> directory (<tt class="docutils literal"><span class="pre">..</span></tt>) for
 plugins -- several of which are shipped with Webware.  Default
 <tt class="docutils literal"><span class="pre">[&quot;..&quot;]</span></tt>.  See <a class="reference" href="Developing.html#creatingplugins">Creating Plugins</a> for information on creating
-your own plug-ins. &#64;&#64; ib: are these really differently cased?</p>
+your own plug-ins.</p>
 <p class="last">The advantage of a plug-in directory is that you can add new
 plug-ins to the app server simply by dropping them into the
 directory; no additional configuration is necessary.</p>
@@ -397,13 +397,18 @@ you use -- <tt class="docutils literal"><span class="pre">PlugInDirs</span></tt>
 <dd>If true, then additional messages are printed while the AppServer
 runs, most notably information about each request such as size and
 response time.  Default <tt class="docutils literal"><span class="pre">1</span></tt> (true).</dd>
-<dt><tt class="docutils literal"><span class="pre">ServerThreads</span></tt>:</dt>
+<dt><tt class="docutils literal"><span class="pre">MaxServerThreads</span></tt>:</dt>
 <dd>The maximum number of threads in the request handler thread pool,
 and therefore, the maximum number of concurrent requests that can
 be served. Unless you have a serious load on a high end machine,
-the default is generally sufficient.  Default <tt class="docutils literal"><span class="pre">10</span></tt>.  &#64;&#64; ib: I
-don't believe this is correct -- I think more threads are
-created on demand, but only this many threads sit around waiting.</dd>
+the default is generally sufficient.  Default <tt class="docutils literal"><span class="pre">20</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">MinServerThreads</span></tt>:</dt>
+<dd>The minimum number of threads in the request handler thread pool.
+This makes sure that always some threads are available immediately,
+even when there had been no activity for a long time.  Default <tt class="docutils literal"><span class="pre">5</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">StartServerThreads</span></tt>:</dt>
+<dd>The number of threads in the request handler thread pool that will
+be created when the application server starts.  Default <tt class="docutils literal"><span class="pre">10</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">CheckInterval</span></tt>:</dt>
 <dd>The number of virtual instructions after which Python will check
 for thread switches, signal handlers, etc. This is passed directly

@@ -3,9 +3,10 @@
 <p><% name %> version <% versionString %> released on <% releaseDate %></p>
 
 <a name="Introduction"></a><h2>Introduction</h2>
-<p>It has taken much longer than expected to finish this release.
-The following will mention only few of the many changes,
-improvements and bugfixes that have been made since the last release.</p>
+<p>It has taken much longer than usual to finish this release,
+and it is impossible to track and list every change.
+So the following will mention only a few of the many changes,
+improvements and bugfixes that have been made.</p>
 
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
@@ -28,7 +29,7 @@ improvements and bugfixes that have been made since the last release.</p>
 	<li><span class="filename">MakeAppWorkDir.py</span> accepts a new option
 	<code>-d</code> allowing to point the default context to a location not
 	inside the working directory, so you can keep your code completely separate
-	from the working directiory. It also accepts <code>-l</code> options to
+	from the working directory. It also accepts <code>-l</code> options to
 	add multiple application library dirs to the Python path, and options to
 	set the ownership of the working directory files. To see all options,
 	run the command without any parameters.</li>
@@ -86,7 +87,7 @@ improvements and bugfixes that have been made since the last release.</p>
 	methods it previously did, and this change should not require any changes
 	to end-user code.</li>
 	<li><code>XMLRPCServlets</code> are now allowed to return None as part of
-	their marshalled response. This improves usability in an all-Python
+	their marshaled response. This improves usability in an all-Python
 	environment at the possible cost of compatibility problems
 	with non-Python clients. To revert to the old behavior, where an
 	attempt to respond with <code>None</code> caused an exception, add
@@ -171,7 +172,7 @@ improvements and bugfixes that have been made since the last release.</p>
 	exception occurs in Servlet.awake() or Servlet.respond().
 	Servlet.sleep() is called even when Page.endResponse() or
 	Page.sendRedirectAndEnd() have been called to end servlet
-	processing prematurely.  This behaviour differs from previous
+	processing prematurely.  This behavior differs from previous
 	versions, in which sleep() was called only if awake() succeeded.</p>
 	<p>The intent of this change is to guarantee servlets the chance to free
 	resources, without having to be prepared to catch all possible exceptions
@@ -197,7 +198,7 @@ improvements and bugfixes that have been made since the last release.</p>
 	<tt>FilesToHide</tt>, so they will not be served anyway. By removing
 	<tt>.pyc</tt> and <tt>.pyo</tt> away from these settings, you can now
 	install servlets without their source code. This will be a little bit
-	more perfomant in the production environment, but most of all it will
+	more performant in the production environment, but most of all it will
 	prevent customers and administrators from messing around with the source
 	code and give a certain level of protection as closed source (this feature
 	had been requested several times). Before, <tt>.pyc</tt> and <tt>.pyo</tt>
