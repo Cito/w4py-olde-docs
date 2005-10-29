@@ -12,7 +12,7 @@ requiredKidVersion = (0, 6, 4)
 
 synopsis = """KidKit is a Webware plug-in that allows Kid templates
 to be automatically compiled and run as servlets by the WebKit application server.
-Kid is a simple template language for XML based vocabularies written in Python.
+Kid is a simple templating language for XML based vocabularies written in Python.
 You need to install the Kid package before you can use the KidKit plug-in."""
 
 WebKitConfig = {
