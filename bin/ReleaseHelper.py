@@ -1,213 +1,197 @@
 #!/usr/bin/env python
-"""
-Helps with cutting Python releases.
 
-This script creates a tar file named Webware-VER.tar.gz from a live CVS
-workspace. The workspace is updated, but is not destroyed in the process.
-The workspace should NOT have had install.py run on it, or your distro
-will end up with generated docs.
+"""Helper for cutting Python releases.
 
-To run:
+This script creates a compressed tar file named Webware-VER.tar.gz
+in the parent directory of Webware. The package can be built either
+from a live SVN workspace or from a tag in the SVN repository.
 
-  > ReleaseHelper.py
+The live SVN workspace will be used if you call the script without
+any arguments, like that:
 
-- The version number is taken from Webware/Properties.py like you would
-  expect.
-- You don't have to be in the current directory:
-    > bin/ReleaseHelper.py
-    > Webware/bin/ReleaseHelper.py
-- This script only works on posix. Releases are not created on Windows
-  because permissions and EOLs can be problematic for other platforms.
+  > bin/ReleaseHelper.py
+
+Since the release will be created from the files in the live workspace,
+it should be clean and up to date and not have had install.py run on it,
+or your distro will end up with generated docs. However, the versions
+should have been set with the bin/setversion script.
+
+The workspace will not be touched in the process.
+
+The version number for the release tarball is taken from
+Webware/Properties.py like you would expect.
+
+Instead of using the workspace, you can also export the release directly
+from a SVN tag in the repository, for instance:
+
+  > bin/ReleaseHelper.py tag=Release-0.9b3
+
+This will export the SVN files tagged with Release-0_9b3 and build the
+tarball Webware-0.9b3.tar.gz in Webware's parent directory.
+
+This means the release will match exactly what is in the SVN,
+reducing the risk of local changes, modified files, or new files
+which are not in SVN from showing up in the release.
+
+This script only works on Posix. Releases are not created on Windows
+because permissions and EOLs can be problematic for other platforms.
 
 For more information, see the Release Procedures in the Webware docs.
 
-TO DO
-
-  - Using ProperitesObject, this program could suggest a version string
-    from the Webware version.
 """
 
 import os, sys, time
 
 
 class ReleaseHelper:
-	def __init__(self):
-		self.args = { 'method' : 'export'
-			}
+
 	def main(self):
 		self.writeHello()
 		self.checkPlatform()
 		self.readArgs()
+		self.build_release()
 
-		if self.args.get("method",None) == "export":
-			return self.release_export()
+	def build_release(self):
+		"""Prepare a release by using the SVN export approach.
 
-		self.release_current()
+		This is used when a tag name is specified on the command line, like
 
-	def release_current(self):
+			> bin/ReleaseHelper.py tag=Release-0.9b3
 
-		progPath = os.path.join(os.getcwd(), sys.argv[0])  # the location of this script
-		webwarePath = os.path.dirname(os.path.dirname(progPath))  # because we're in Webware/bin/
-		parentPath = os.path.dirname(webwarePath)  # where the tarball will land
+		This will export the SVN files tagged with Release-0_9b3 and build the
+		tarball Webware-0.9b3.tar.gz in your parent directory.
 
-		self.chdir(webwarePath)
+		This means the release will match exactly what is in the SVN,
+		and reduces the risk of local changes, modified files, or new
+		files which are not in SVN from showing up in the release.
 
-		if os.path.exists('install.log'):
-			self.error('This Webware has already been installed.')
-
-		from MiscUtils.PropertiesObject import PropertiesObject
-		props = PropertiesObject(os.path.join(webwarePath, 'Properties.py'))
-		ver = props['versionString']
-		print 'Webware version is:', ver
-
-		self.run('cvs update -dP')  # get new directories; prune empty ones
-
-		try:
-			tempName = os.tmpnam()
-			os.mkdir(tempName)
-			self.run('cp -pr %s %s' % (webwarePath, tempName))
-
-			# Get rid of CVS files
-			self.run("find %s -name '.cvs*' -exec rm {} \;" % tempName)
-			self.run("rm -rf `find %s -name CVS -print`" % tempName)
-
-			self.chdir(tempName)
-			pkgName = 'Webware-%s.tar.gz' % ver
-			self.run('tar czf %s Webware' % pkgName)
-
-			# Put the results next to the Webware directory
-			self.run('cp %s %s' % (pkgName, parentPath))
-
-			assert os.path.exists(os.path.join(parentPath, pkgName))
-
-		finally:
-			# Clean up
-			self.run('rm -rf %s' % tempName)
-
-		self.writeGoodBye(locals())
-
-	def release_export(self):
-		"""
-		Prepare a release by using the cvs export approach.  This means the release will
-		match exactly what is in CVS, and reduces the risk of local changes, modified
-		files, or new files which are not in CVS from showing up in the release.
-
-		Furthermore, this takes the version number from the checked out information.
-		This means it is possible to specify a tag=cvstag on the command line and
-		build a release associated with that tag.
-
-		    > ReleaseHelper.py [tag=cvstag]
-
-	        So specifying a CVS tag such as Release-0_7 will export the CVS files tagged
-		with Release-0_7 and build Webware-0.7.tar.gz
 		"""
 
-		self.writeHello()
-		self.checkPlatform()
-		self.readArgs()
+		url = self.args.get('url', ' http://svn.w4py.org/Webware/tags')
 
-		progPath = os.path.join(os.getcwd(), sys.argv[0])  # the location of this script
-		webwarePath = os.path.dirname(os.path.dirname(progPath))  # because we're in Webware/bin/
-		parentPath = os.path.dirname(webwarePath)  # where the tarball will land
-		if webwarePath not in sys.path:
-			# insert in the path but ahead of anything that PYTHONPATH might
-			# have created.
-			sys.path.insert(1,webwarePath)
-
-		self.chdir(webwarePath)
-		from MiscUtils.PropertiesObject import PropertiesObject
-
-		if self.args.has_key('tag'):
-			dtag = '-r ' + self.args['tag']
-			datestamp = ''
+		tag = self.args.get('tag', None)
+		if tag:
+			print "Creating tarball from tag %s ..." % tag
 		else:
-			# timestamp for tomorrow to insure we get latest data off
-			# of the trunk.  Is this needed?
-			year,month,day = time.gmtime(time.time()+3600*24)[:3]
-			dtag = '-D %04d-%02d-%02d' % (year,month,day)
+			print "Creating tarball from current workspace..."
 
-			# timestamp for time of release used to in versioning the file.
-			year,month,day = time.localtime(time.time())[:3]
-			datestamp = "%04d%02d%02d" % (year,month,day)
+		# the location of this script:
+		progPath = os.path.join(os.getcwd(), sys.argv[0])
+		# we assume this script is located in Webware/bin/
+		webwarePath = os.path.dirname(os.path.dirname(progPath))
+		# make the Webware directory our current directory
+		self.chdir(webwarePath)
+		# the tarball will land in its parent directory:
+		tarDir = os.pardir
 
-			# drop leading 2 digits from year. (Ok, itn's not Y2K but it is short
-			# and unique in a narrow time range of 100 years.)
-			datestamp = datestamp[2:]
+		if webwarePath not in sys.path:
+			sys.path.insert(1, webwarePath)
+		from MiscUtils.PropertiesObject import PropertiesObject
 
-			print "No cvs tag specified, assuming snapshot of CVS."
-
-		tempName = "ReleaseHelper-Export"
-		if os.path.exists( tempName ):
-			print "There is incomplete ReleaseHelper data in:", tempName
+		target = 'ReleaseHelper-Export'
+		if os.path.exists(target):
+			print "There is incomplete ReleaseHelper data in:", target
 			print "Please remove this directory."
 			return 1
 
-		cleanup = [ tempName ]
+		cleanup = [target]
+
+		if tag:
+			source = '%s/%s' % (url, tag)
+		else:
+			source = '.'
 
 		try:
-			self.run('cvs -z3 export %s -d %s Webware' % (dtag, tempName))
-			if not os.path.exists( tempName ):
-				print "** Unable to find the exported package.  Perhaps the tag %s does not exist." % \
-				      self.args['tag']
-				return 1
-			props = PropertiesObject(os.path.join(webwarePath, tempName, 'Properties.py'))
+			self.run('svn export -q %s %s' % (source, target))
+			if not os.path.exists(target):
+				print "Unable to export from %r" % source
+				if tag:
+					print "Perhaps the tag %r does not exist." % tag
+				self.error()
+			propertiesFile = os.path.join(target, 'Properties.py')
+			if not os.path.exists(propertiesFile):
+				self.error('Properties.py not found.')
+			props = PropertiesObject(propertiesFile)
+			if props.get('name', None) != 'Webware for Python':
+				self.error('This is not a Webware package.')
 			ver = props['versionString']
 
 			print "Webware version is:", ver
-			if datestamp:
+
+			if not tag:
+				# timestamp for time of release used to in versioning the file
+				year, month, day = time.localtime(time.time())[:3]
+				datestamp = "%04d%02d%02d" % (year,month,day)
+				# drop leading 2 digits from year. (Ok, itn's not Y2K but it
+				# is short and unique in a narrow time range of 100 years.)
+				datestamp = datestamp[2:]
 				ver = ver + "-" + datestamp
 				print "Packaged release will be:", ver
 
 			pkgDir = "Webware-%s" % ver
 
 			if os.path.exists(pkgDir):
-				print "** %s is in the way, please remove it." % pkgDir
-				return
+				self.error("%s is in the way, please remove it." % pkgDir)
 
-			# rename the tempName to the pkgDir so the extracted parent
+			# rename the target to the pkgDir so the extracted parent
 			# directory from the tarball will be unique to this package.
-			self.run("mv %s %s" % (tempName, pkgDir))
+			self.run("mv %s %s" % (target, pkgDir))
 
-			cleanup.append( pkgDir )
+			cleanup.append(pkgDir)
 
-			pkgName = os.path.join(parentPath, pkgDir + ".tar.gz")
+			pkgName = os.path.join(pkgDir + ".tar.gz")
 
 			# cleanup .cvs files
 			self.run("find %s -name '.cvs*' -exec rm {} \;" % pkgDir)
 
-			# cleanup any other files not part of this release. (ie: documentation?)
+			# We could cleanup any other files not part of this release here.
+			# (For instance, we could create releases without documentation).
 
-			# build any internal documentation for release.
+			# We could also create additional files to be part of this release
+			# without being part of the repository, for instance documentation
+			# that is automatically created from markup.
 
-			self.run('tar czf %s %s' % (pkgName, pkgDir))
+			pkgPath = os.path.join(tarDir, pkgName)
 
-			assert os.path.exists(os.path.join(parentPath, pkgName))
+			if os.path.exists(pkgPath):
+				self.error("%s is in the way, please remove it." % pkgPath)
 
-		finally:
-			# Clean up
+			self.run('tar -czf %s %s' % (pkgPath, pkgDir))
+
+			if not os.path.exists(pkgPath):
+				self.error('Could not create tarball.')
+
+		finally: # Clean up
 			for path in cleanup:
 				if os.path.exists(path):
-					self.run('rm -rf %s' % os.path.join(webwarePath, path))
+					self.run('rm -rf ' + path)
 
-		self.writeGoodBye(locals())
+		print
+		print "file:", pkgName
+		print "dir:", os.path.abspath(tarDir)
+		print "size:", os.path.getsize(pkgPath), 'Bytes'
+		print
+		print 'Success.'
+		print
 
 	def writeHello(self):
+		print
 		print 'Webware for Python'
 		print 'Release Helper'
 		print
 
 	def checkPlatform(self):
-		if os.name!='posix':
-			print 'This script only runs on posix. Your op sys is %s.' % os.name
-			print 'Webware release are always created on posix machines.'
-			print 'These releases work on both posix and MS Windows.'
+		if os.name != 'posix':
+			print 'This script only runs on Posix. Your op sys is %s.' % os.name
+			print 'Webware release are always created on Posix machines.'
+			print 'These releases work on both Posix and MS Windows.'
 			self.error()
 
 	def readArgs(self):
-		args = self.args.copy()     # initialize with default.
+		args = {}
 		for arg in sys.argv[1:]:
 			try:
-				name, value = arg.split('=')
+				name, value = arg.split('=', 1)
 			except ValueError:
 				self.error('Invalid argument: %s' % arg)
 			args[name] = value
@@ -219,23 +203,15 @@ class ReleaseHelper:
 		sys.exit(1)
 
 	def chdir(self, path):
-		print 'chdir %s' % path
+		print 'cmd> chdir %s' % path
 		os.chdir(path)
 
 	def run(self, cmd):
-		""" Runs an arbitrary UNIX command. """
+		"""Runs an arbitrary Unix command."""
 		print 'cmd>', cmd
 		results = os.popen(cmd).read()
-		print results
-
-	def writeGoodBye(self, vars):
-		print
-		print 'file: %(pkgName)s' % vars
-		print 'dir:  %(parentPath)s' % vars
-		print 'size: %i' % os.path.getsize(os.path.join(vars['parentPath'], vars['pkgName']))
-		print
-		print 'Success.'
-		print
+		if results:
+			print results
 
 
 if __name__=='__main__':
