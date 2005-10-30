@@ -129,6 +129,7 @@ Test the current version before releasing it:
     it has been set in the preceding step. See above for this procedure.
 
 [ ] Commit these changes on the workspace to the tag in the repository.
+    Your SVN client may warn you to do so on a tag path, ignore this.
     From then on, the tag in the repository should not be touched any more
     (this should be really a tag only, not a branch).
 </pre>
@@ -180,17 +181,18 @@ Test the released tarball, preferably under Unix and also under Windows.
     > ncftpput -V upload.sf.net /incoming Webware-VER.tar.gz
 
     * Log into <a href="http://sf.net">sf.net</a>.
-    * Go to the <a href="https://sf.net/project/?group_id=4866">Webware Project Page</a>
+    * Go to the <a href="https://sourceforge.net/projects/webware/">Webware Project Page</a>
       at SourceForge.
     * Click 'Admin' in the top menu bar.
-    * Click 'Edit/Release Files' in the second menu bar.
+    * Click 'File Releases' in the second menu bar.
     * Proceed to completion, but don't send users notification of
       release until final test is performed and the web site is updated.
     * Reference for the above: <a href="http://sf.net/docman/display_doc.php?docid=6445&group_id=1">"Guide to the SourceForge FRS"</a>
     * Download the release from SourceForge and test again.
     * Review the trove categorization and update if necessary
-      - Go to Admin
-      - Read down and see the link for trove categorization
+      - Click 'Admin' in the top menu bar.
+      - Click 'Public Info' in the second menu bar.
+      - Click 'Edit Trove Categorization'.
 
 [ ] Publish for download from the www.w4py.org web server:
 
@@ -209,14 +211,15 @@ Test the released tarball, preferably under Unix and also under Windows.
       In general you should not be editing files directly on the HomePage
       site because that site only has read-only access to CVS.
 
-    * Note that the <a href="http://webware.sf.net">webware.sf.net</a> homepage is not really used any more.
+    * Note that the <a href="http://webware.sf.net">webware.sf.net</a> home page is not really used any more.
       The index page is redirected via .htaccess to <a href="http://www.w4py.org">www.w4py.org</a>
       (nevertheless, the site is still available and can still be
       accessed as <a href="http://webware.sourceforge.net/oldsite/">http://webware.sourceforge.net/oldsite/</a>).
       So you can skip the following step.
 
     * Update your own copy of the HomePage:
-      > cvs co HomePage
+      * Checkout the current version:
+        > cvs co HomePage
       * Update:
         * Last updated (at top of page)
         * Version number, including links
@@ -224,7 +227,8 @@ Test the released tarball, preferably under Unix and also under Windows.
         * Project status
         * Testimonials
       * Review all text and links
-      > cvs ci
+      * Checkin the updated version:
+        > cvs ci
 
     * We should still copy and install Webware in the <a href="http://webware.sf.net">webware.sf.net</a>
       web page directory so the documentation can be browsed online there.
@@ -233,20 +237,20 @@ Test the released tarball, preferably under Unix and also under Windows.
     * Copy the tarball to your SourceForge account.
       > scp Webware-VER.tar.gz $USER@webware.sf.net:
 
-    * Login to the SourceForge account and extract the tarball.
+    * Login to the SourceForge account.
       > ssh $USER@webware.sf.net
 
     * Extract the Webware folder and create a symbolic link to it:
-
       > cd /home/groups/w/we/webware/htdocs/
       > rm -rf Webware
       > tar -xzf ~/Webware-VER.tar.gz
-      > chmod -R g+w Webware-VER
       > ln -s Webware-VER Webware
       > cd Webware
       > ./install.py
+      > chmod -R g+w .
 
-    * Again, you can skip the following step:
+    * Since you probably did not make changes to the home page
+      through CVS, you can skip the following step again:
 
     * Update the HomePage on SourceForge from CVS.
       > cvs -q up -dP
