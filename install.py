@@ -556,7 +556,7 @@ class Installer:
 			elif ex('/etc/init.d/functions') or \
 				ex('/etc/rc.d/init.d/functions'):
 				s = 'RedHat'
-			elif ex('/sbin/start-stop/daemon'):
+			elif ex('/sbin/start-stop-daemon'):
 				s = 'Debian'
 			elif ex('/etc/rc.subr'):
 				s = 'NetBSD'
