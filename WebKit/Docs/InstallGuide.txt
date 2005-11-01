@@ -804,7 +804,7 @@ You can create a working directory for your applications that is
 separate from the Webware installation.  To do this you will use the
 script ``bin/MakeAppWorkDir.py``.  You should run it like::
 
-    $ python Webware/bin/MakeAppWorkDir WorkDir
+    $ python Webware/bin/MakeAppWorkDir.py WorkDir
 
 This will create a directory *WorkDir* that will contain a
 directory structure for your application. Name if after your
