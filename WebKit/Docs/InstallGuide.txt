@@ -433,8 +433,6 @@ wkcgi executable.  This file looks like::
     MaxConnectAttempts = 10
     ConnectRetryDelay = 1
 
-(@@ special Windows instructions?)
-
 Python CGI Adapter
 ~~~~~~~~~~~~~~~~~~
 
@@ -766,8 +764,13 @@ admin page, you will see a sidebar that links to all the contexts.
 Another way to look at contexts is a means for "directory
 partitioning". If you have two distinct web applications (for example,
 ``PythonTutor`` and ``DayTrader``), you will likely put each of these
-in their own context (@@ should also mention reasons for running
-multiple appserver instances).
+in their own context. In this configuration, both web applications
+would be served by the same appserver instance. Note that there may
+be also reasons to run multiple appserver instances for serving your
+web applications. For instance, this would allow you to start and stop
+them independently, run them under different users to give them
+different permissions, or partition resources like number of threads
+individually among the web applications.
 
 Instead of adding your own contexts you may wish to use
 MakeAppWorkDir_, which will partition your application from the
