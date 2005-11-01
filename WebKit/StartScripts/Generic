@@ -26,8 +26,10 @@ APP_NAME=`basename "$0"`
 # The location of the start sript:
 if [ -h "$0" ]; then
 	# Get the target file if start script is given as a link:
-	PY_CMD="import os;print os.readlink('$0')"
-	START_SCRIPT=`python -c "$PY_CMD"`
+	START_SCRIPT=`echo "import os;p='$0'
+while os.path.islink(p):
+	p = os.readlink(p)
+print p" | python`
 else
 	START_SCRIPT="$0"
 fi
@@ -62,9 +64,8 @@ PID_FILE="$WORK_DIR/webkit.pid"
 # You should use a low-privilege account,
 # like the work dir owner, wwwrun or nobody.
 # This will use the owner of the AppServer script:
-PY_CMD="import os,pwd;
-print pwd.getpwuid(os.stat('$APP_SERVER')[4])[0]"
-WEBWARE_USER=`python -c "$PY_CMD"`
+WEBWARE_USER=`echo "import os,pwd;
+print pwd.getpwuid(os.stat('$APP_SERVER')[4])[0]" | python`
 
 # Unset the following variable if you want to store the
 # pid and log files as the user running the start script
@@ -100,7 +101,10 @@ case "$1" in
 		fi
 		rm -f "$PID_FILE"
 	fi
-	if [ "$WEBWARE_USER" ]; then
+	if [ "$WEBWARE_USER" == "$USER" ]; then
+		"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" \
+			-o "$LOG_FILE" -i "$PID_FILE" > /dev/null &
+	else
 		if [ "$LAUNCH_AS_WEBWARE" ]; then
 			# Switch user first, then create pid and log files:
 			CMD="\"$APP_SERVER\" $PYTHONOPTS"
@@ -111,9 +115,6 @@ case "$1" in
 			"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" \
 				-i "$PID_FILE" -u $WEBWARE_USER >> "$LOG_FILE" 2>&1 &
 		fi
-	else
-		"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" \
-			-o "$LOG_FILE" -i "$PID_FILE" > /dev/null &
 	fi
 	echo "done"
 	;;

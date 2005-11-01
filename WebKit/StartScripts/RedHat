@@ -120,7 +120,10 @@ start()
 		fi
 		rm -f "$PID_FILE"
 	fi
-	if [ "$WEBWARE_USER" ]; then
+	if [ "$WEBWARE_USER" == "$USER" ]; then
+		"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" \
+			-o "$LOG_FILE" -i "$PID_FILE" > /dev/null &
+	else
 		if [ "$LAUNCH_AS_WEBWARE" ]; then
 			# Switch user first, then create pid and log files:
 			CMD="\"$APP_SERVER\" $PYTHONOPTS"
@@ -131,9 +134,6 @@ start()
 			"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" -i "$PID_FILE" \
 				-u $WEBWARE_USER >> $LOG_FILE 2>&1 &
 		fi
-	else
-		"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" \
-			-o "$LOG_FILE" -i "$PID_FILE" > /dev/null &
 	fi
 	RETVAL=$?
 	[ "$RETVAL" = 0 ] && success || failure
