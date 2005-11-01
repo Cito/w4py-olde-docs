@@ -28,7 +28,7 @@ if [ -h "$0" ]; then
 	# Get the target file if start script is given as a link:
 	START_SCRIPT=`echo "import os;p='$0'
 while os.path.islink(p):
-	p = os.readlink(p)
+	p = os.path.join(os.path.dirname(p), os.readlink(p))
 print p" | python`
 else
 	START_SCRIPT="$0"
