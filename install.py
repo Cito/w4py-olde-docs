@@ -460,13 +460,15 @@ class Installer:
 				for filename in files:
 					item = {'dirname': os.path.basename(filename)}
 					filename = item['dirname']
-					item['name'] = filename[filename.rfind('-')+1:filename.rfind('.')]
-					try:
-						item['ver'] = map(int, item['name'].split('.'))
-					except ValueError:
-						item['ver'] = None
+					ver = filename[
+						filename.rfind('-') + 1 : filename.rfind('.')]
+					item['name'] = ver
+					i = 0
+					while i < len(ver) and ver[i] in '.0123456789':
+						i += 1
+					item['ver'] = map(int, ver[:i].split('.'))
 					releaseNotes.append(item)
-				releaseNotes.sort(lambda a, b: cmp(a['ver'], b['ver']))
+				releaseNotes.sort(lambda a, b: cmp(b['ver'], a['ver']))
 				for item in releaseNotes:
 					ht.append(link % (item['dirname'], item['name']))
 			else:
