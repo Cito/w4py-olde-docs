@@ -432,7 +432,6 @@ AdapterPort = 8086
 MaxConnectAttempts = 10
 ConnectRetryDelay = 1
 </pre>
-<p>(&#64;&#64; special Windows instructions?)</p>
 </div>
 <div class="section" id="python-cgi-adapter">
 <h3><a class="toc-backref" href="#id33" name="python-cgi-adapter">Python CGI Adapter</a></h3>
@@ -697,8 +696,13 @@ admin page, you will see a sidebar that links to all the contexts.</p>
 <p>Another way to look at contexts is a means for &quot;directory
 partitioning&quot;. If you have two distinct web applications (for example,
 <tt class="docutils literal"><span class="pre">PythonTutor</span></tt> and <tt class="docutils literal"><span class="pre">DayTrader</span></tt>), you will likely put each of these
-in their own context (&#64;&#64; should also mention reasons for running
-multiple appserver instances).</p>
+in their own context. In this configuration, both web applications
+would be served by the same appserver instance. Note that there may
+be also reasons to run multiple appserver instances for serving your
+web applications. For instance, this would allow you to start and stop
+them independently, run them under different users to give them
+different permissions, or partition resources like number of threads
+individually among the web applications.</p>
 <p>Instead of adding your own contexts you may wish to use
 <a class="reference" href="#makeappworkdir">MakeAppWorkDir</a>, which will partition your application from the
 Webware installation.</p>
@@ -727,7 +731,7 @@ any kind of initialization code you deem appropriate there.</p>
 separate from the Webware installation.  To do this you will use the
 script <tt class="docutils literal"><span class="pre">bin/MakeAppWorkDir.py</span></tt>.  You should run it like:</p>
 <pre class="literal-block">
-$ python Webware/bin/MakeAppWorkDir WorkDir
+$ python Webware/bin/MakeAppWorkDir.py WorkDir
 </pre>
 <p>This will create a directory <em>WorkDir</em> that will contain a
 directory structure for your application. Name if after your
