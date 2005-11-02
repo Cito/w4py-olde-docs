@@ -101,7 +101,7 @@ case "$1" in
 		fi
 		rm -f "$PID_FILE"
 	fi
-	if [ "$WEBWARE_USER" == "$USER" ]; then
+	if [ -z "$WEBWARE_USER" -o "$WEBWARE_USER" = "$USER" ]; then
 		"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" \
 			-o "$LOG_FILE" -i "$PID_FILE" > /dev/null &
 	else
