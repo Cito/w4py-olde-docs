@@ -6,7 +6,7 @@
 #
 # /etc/init.d/webkit
 #
-# Generic init.d start script for Unix
+# Generic init.d shell start script for Unix
 #
 # Note: You will find more sophisticated start scripts
 # for various Unix flavors in the StartScripts folder.
