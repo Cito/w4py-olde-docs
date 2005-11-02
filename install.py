@@ -26,8 +26,10 @@ class OutputCatcher:
 		self.output = output
 		self.log = log
 	def write(self, stuff):
-		self.output.write(stuff)
-		self.log.append(stuff)
+		if stuff:
+			self.output.write(stuff)
+			self.output.flush()
+			self.log.append(stuff)
 
 
 class Installer:
@@ -463,10 +465,14 @@ class Installer:
 					ver = filename[
 						filename.rfind('-') + 1 : filename.rfind('.')]
 					item['name'] = ver
-					i = 0
-					while i < len(ver) and ver[i] in '.0123456789':
-						i += 1
-					item['ver'] = map(int, ver[:i].split('.'))
+					if ver == 'X.Y':
+						item['ver'] = ver.split('.')
+					else:
+						i = 0
+						while i < len(ver) and ver[i] in '.0123456789':
+							i += 1
+						if i:
+							item['ver'] = map(int, ver[:i].split('.'))
 					releaseNotes.append(item)
 				releaseNotes.sort(lambda a, b: cmp(b['ver'], a['ver']))
 				for item in releaseNotes:
