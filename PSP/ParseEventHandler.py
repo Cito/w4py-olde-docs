@@ -261,9 +261,9 @@ class ParseEventHandler:
 		gen = MethodEndGenerator(self._reader.getChars(start, stop),attrs)
 		self.addGenerator(gen)
 
-	#####################################################################
-	##The generation of the page begins here
-	#####################################################################
+	# --------------------------------------
+	# The generation of the page begins here
+	# --------------------------------------
 
 	def beginProcessing(self):
 		pass

@@ -398,7 +398,7 @@ class ObjectStore(ModelUser):
 		If you subclass MiddleObject, then you're taken care of.
 		"""
 		self.willChange()
-		self._changedObjects[object] = object  ## @@ 2000-10-06 ce: Should this be keyed by the object.key()? Does it matter?
+		self._changedObjects[object] = object  # @@ 2000-10-06 ce: Should this be keyed by the object.key()? Does it matter?
 
 
 	## Serial numbers ##

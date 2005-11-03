@@ -56,8 +56,8 @@ class Adapter(Configurable, Object):
 		data = dumps(dict)
 		s.send(dumps(int(len(data))))
 		s.send(data)
-		
-		sent=0				
+
+		sent=0
 		inputLength = len(myInput)
 		while sent < inputLength:
 			chunk = s.send(myInput[sent:])
@@ -68,8 +68,8 @@ class Adapter(Configurable, Object):
 		bufsize = 8*1024
 		# @@ 2000-04-26 ce: this should be configurable, also we should run some tests on different sizes
 		# @@ 2001-01-25 jsl: It really doesn't make a massive difference.  8k is fine and recommended.
-		
-##		s.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('ll',0,5)) #wait for 0.5 seconds for data
+
+		#s.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('ll',0,5)) #wait for 0.5 seconds for data
 		while 1:
 			data = s.recv(bufsize)
 			if not data:
@@ -81,4 +81,4 @@ class Adapter(Configurable, Object):
 	def processResponse(self, data):
 		""" Process response data as it arrives."""
 		self._respData = self._respData + data
-		
+

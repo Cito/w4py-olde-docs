@@ -72,7 +72,7 @@ class Cookie(Object):
 	#   We can optimize later.
 
 
-    ## Init ##
+	## Init ##
 
 	def __init__(self, name, value):
 		"""Create a cookie.
@@ -158,7 +158,7 @@ class Cookie(Object):
 		"""
 		When sent, this should delete the cookie from the user's
 		browser, by making it empty, expiring it in the past,
-		and setting its max-age to 0.  One of these will delete
+		and setting its max-age to 0. One of these will delete
 		the cookie for any browser (which one actually works
 		depends on the browser).
 		"""

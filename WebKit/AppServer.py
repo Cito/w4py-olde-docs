@@ -1,6 +1,19 @@
 #!/usr/bin/env python
-"""
-.. inline:: AppServer
+"""The AppServer singleton.
+
+The `AppServer` singleton is the controlling object/process/thread.
+`AppServer` receives requests and dispatches them to `Application`
+(via `Application.dispatchRawRequest`).
+
+`ThreadedAppServer` completes the implementation, dispatching
+these requests to separate threads. `AppServer`, at least in the
+abstract, could support different execution models and environments,
+but that support is not yet realized (Will it ever be realized?).
+
+The distinction between `AppServer` and `Application` is somewhat
+vague -- both are global singletons and both handle dispatching requests.
+`AppServer` works on a lower level, handling sockets and threads.
+
 """
 
 from Common import *
@@ -39,18 +52,9 @@ DefaultConfig = {
 class AppServer(ConfigurableForServerSidePath, Object):
 	"""The AppServer singleton.
 
-	The `AppServer` a singleton is the controlling object/process/thread.
+	The `AppServer` singleton is the controlling object/process/thread.
 	`AppServer` receives requests and dispatches them to `Application`
 	(via `Application.dispatchRawRequest`).
-
-	`ThreadedAppServer` completes the implementation, dispatching
-	these requests to separate threads. `AppServer`, at least in the
-	abstract, could support different execution models and environments,
-	but that support is not yet realized (Will it ever be realized?).
-
-	The distinction between `AppServer` and `Application` is somewhat
-	vague -- both are global singletons and both handle dispatching requests.
-	`AppServer` works on a lower level, handling sockets and threads.
 
 	"""
 

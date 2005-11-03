@@ -262,18 +262,16 @@ class Application(ConfigurableForServerSidePath, Object):
 		}
 
 	def configFilename(self):
-		":ignore:"
 		return self.serverSidePath('Configs/Application.config')
 
 	def configReplacementValues(self):
-		":ignore:"
 		return self._server.configReplacementValues()
 
 
 	## Versions ##
 
 	def version(self):
-		"""Returns the version of the application.
+		"""Return the version of the application.
 
 		This implementation returns '0.1'. Subclasses should
 		override to return the correct version number.
@@ -285,21 +283,21 @@ class Application(ConfigurableForServerSidePath, Object):
 		return '0.1'
 
 	def webwareVersion(self):
-		"""Returns the Webware version as a tuple."""
+		"""Return the Webware version as a tuple."""
 		return self._webwareVersion
 
 	def webwareVersionString(self):
-		"""Returns the Webware version as a printable string."""
+		"""Return the Webware version as a printable string."""
 		return self._webwareVersionString
 
 	def webKitVersion(self):
-		""" Returns the WebKit version as a tuple. """
+		""" Return the WebKit version as a tuple."""
 		# @@ 2003-03 ib: This is synced with Webware now, should be removed
 		# because redundant (and not that useful anyway)
 		return self._webKitVersion
 
 	def webKitVersionString(self):
-		""" Returns the WebKit version as a printable string. """
+		"""Return the WebKit version as a printable string."""
 		return self._webKitVersionString
 
 
@@ -317,7 +315,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			return self._sessions.get(sessionId, default)
 
 	def hasSession(self, sessionId):
-		"""Check whether session `sessionId` exist."""
+		"""Check whether session `sessionId` exists."""
 		return self._sessions.has_key(sessionId)
 
 	def sessions(self):
@@ -541,7 +539,7 @@ class Application(ConfigurableForServerSidePath, Object):
 	def runTransactionViaServlet(self, servlet, trans):
 		"""Execute the transaction using the servlet.
 
-		This is	the `awake`/`respond`/`sleep` sequence of calls, or if
+		This is the `awake`/`respond`/`sleep` sequence of calls, or if
 		the servlet supports it, a single `runTransaction` call (which is
 		presumed to make the awake/respond/sleep calls on its own). Using
 		`runTransaction` allows the servlet to override the basic call
@@ -550,7 +548,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		Called by `runTransaction`.
 
 		"""
-
 		trans.setServlet(servlet)
 		if hasattr(servlet, 'runTransaction'):
 			servlet.runTransaction(trans)

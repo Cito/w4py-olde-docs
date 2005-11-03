@@ -9,9 +9,7 @@ WebwareDir = None
 AppWorkDir = None
 
 
-############################################################
-## Path setup
-############################################################
+## Path setup ##
 
 try:
 	import os, sys
@@ -31,17 +29,15 @@ try:
 		host = 'localhost'
 	port = int(port)
 except 0:
-	## @@: Is there something we should do with exceptions here?
-	## I'm apt to just let them print to stderr and quit like normal,
-	## but I'm not sure.
+	# @@: Is there something we should do with exceptions here?
+	# I'm apt to just let them print to stderr and quit like normal,
+	# but I'm not sure.
 	pass
 
 import BaseHTTPServer, threading, socket
 
 
-############################################################
-## HTTP Server
-############################################################
+## HTTP Server ##
 
 from WebKit.HTTPServer import HTTPHandler
 
@@ -107,9 +103,7 @@ def run(serverAddress, klass=HTTPAdapter):
 	httpd.serve_forever()
 
 
-############################################################
-## Comand-line interface
-############################################################
+## Comand-line interface ##
 
 usage = """HTTPServer - Standalone HTTP server to connect to AppServer
 Usage:

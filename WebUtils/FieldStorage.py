@@ -21,13 +21,13 @@ class FieldStorage(cgi.FieldStorage):
 		Explicitly parse the query string, even if it's a POST request
 		"""
 		self._method = string.upper(self._environ['REQUEST_METHOD'])
-		if self._method == "GET" or  self._method == "HEAD":
+		if self._method == "GET" or self._method == "HEAD":
 			# print __file__, "bailing on GET or HEAD request"
-			return  #bail because cgi.FieldStorage already did this
+			return # bail because cgi.FieldStorage already did this
 		self._qs = self._environ.get('QUERY_STRING', None)
 		if not self._qs:
 			# print __file__, "bailing on no query_string"
-			return  ##bail if no query string
+			return # bail if no query string
 
 		name_value_pairs = string.splitfields(self._qs, '&')
 		dict = {}

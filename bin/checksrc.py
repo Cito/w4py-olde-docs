@@ -6,7 +6,10 @@ checksrc.py
 
 INTRODUCTION
 
-This utility checks for violations of various source code conventions in the hope of keeping the project clean and consistent. Please see Webware/Documentation/StyleGuidelines.html for more information including some guidelines not checked for by this utility.
+This utility checks for violations of various source code conventions
+in the hope of keeping the project clean and consistent.
+Please see Webware/Documentation/StyleGuidelines.html for more information
+including some guidelines not checked for by this utility.
 
 
 COMMAND LINE
@@ -27,7 +30,8 @@ And often you run it from the Webware directory like so:
 
 AS A MODULE AND CLASS
 
-If you imported this as a module, you would use the CheckSrc class, possibly like so:
+If you imported this as a module, you would use the CheckSrc class,
+possibly like so:
 	from CheckSrc import CheckSrc
 	CheckSrc().check()
 
@@ -41,21 +45,32 @@ If you imported this as a module, you would use the CheckSrc class, possibly lik
 	cs.setOutput('results.text')
 	cs.check()
 
-And of course, you could subclass CheckSrc() to customize it, which is why even command line utils get done with classes (rather than collections of functions and nekkid code).
+And of course, you could subclass CheckSrc() to customize it,
+which is why even command line utils get done with classes
+(rather than collections of functions and nekkid code).
 
-You can also setDirectory(), setOutput() setRecurse() and setVerbose() the defaults of which are '.', sys.stdout, 1 and 0.
+You can also setDirectory(), setOutput() setRecurse() and setVerbose()
+the defaults of which are '.', sys.stdout, 1 and 0.
 
 
 CAVEATS
 
-Note that checksrc.py takes a line oriented approach. Since it does not actually properly parse Python code, it can be fooled in some cases. Therefore, it's possible to get false alarms. While we could implement a full parser to close the gap, doing so would be labor intensive with little pay off. So we live with a few false alarms.
+Note that checksrc.py takes a line oriented approach. Since it does not
+actually properly parse Python code, it can be fooled in some cases.
+Therefore, it's possible to get false alarms. While we could implement
+a full parser to close the gap, doing so would be labor intensive with
+little pay off. So we live with a few false alarms.
 
-However, we currently don't skip multi-line strings which is the source of *many* false alarms. This needs to be addressed soon. There is some code for it in checkFileLines(), but it is far from complete and may be the wrong approach.
+However, we currently don't skip multi-line strings which is the source
+of *many* false alarms. This needs to be addressed soon. There is some
+code for it in checkFileLines(), but it is far from complete and ma
+ be the wrong approach.
 
 
 CONFIG FILES
 
-You can modify the behavior of checksrc.py for a particular directory by creating a .checksrc.config file like so:
+You can modify the behavior of checksrc.py for a particular directory
+by creating a .checksrc.config file like so:
 
 {
 	'SkipDirs': ['Cache'],
@@ -69,7 +84,9 @@ You can modify the behavior of checksrc.py for a particular directory by creatin
 Some notes:
 	* You can specify some or all of the options.
 	* SkipDirs and SkipFiles both require lists of filenames.
-	* DisableError keys are error codes defined by checksrc.py. You can find these out by running checksrc with the -h command line option or checking the source below.
+	* DisableError keys are error codes defined by checksrc.py.
+	  You can find these out by running checksrc with the
+	  -h command line option or checking the source below.
 	* The value for disabling an error:
 		* Can be an individual filename or a list of filenames.
 		* Can be '*' for "all files".
@@ -88,7 +105,9 @@ RULES
 	X Method and attribute names have no underscores after the first character.
 	X Expressions following if, while and return are not enclosed in parenthesees, ().
 	- Data attributes not only start with an underscore _, but are followed by a lower case letter.
-	- Class defs and category comments, ## Like this ## are preceded by 2 blank lines and are followed by one blank line (unless the class implementation is pass).
+	- Class defs and category comments, ## Like this ##
+	  are preceded by 2 blank lines and are followed by one blank line
+	  (unless the class implementation is pass).
 
 
 FUTURE
@@ -101,7 +120,9 @@ Consider setting _charNum for the current location.
 
 Consider (optionally) displaying the source line.
 
-Maybe: Experiment with including the name of the last seen method/function with the error messages to help guide the user to where the error occurred.
+Maybe: Experiment with including the name of the last seen method/function
+with the error messages to help guide the user to where the error occurred.
+
 """
 
 
@@ -164,14 +185,19 @@ class CheckSrc:
 		return self._directory
 
 	def setDirectory(self, dir):
-		""" Sets the directory that checking starts in. """
+		"""Sets the directory that checking starts in."""
 		self._directory = dir
 
 	def output(self):
 		return self._out
 
 	def setOutput(self, output):
-		""" Sets the destination output which can either be an object which must respond to write() or a string which is a filename used for one invocation of check(). """
+		"""Set the destination output.
+
+		It can either be an object which must respond to write() or
+		a string which is a filename used for one invocation of check().
+
+		"""
 		if type(output) is type(''):
 			self._out = open(output, 'w')
 			self._shouldClose = 1
@@ -183,21 +209,29 @@ class CheckSrc:
 		return self._recurse
 
 	def setRecurse(self, flag):
-		""" Sets whether or not to recurse into subdirectories. """
+		"""Set whether or not to recurse into subdirectories."""
 		self._recurse = flag
 
 	def verbose(self):
 		return self._verbose
 
 	def setVerbose(self, flag):
-		""" Sets whether or not to print extra information during check (such as every directory and file name scanned). """
+		"""Set whether or not to print extra information during check.
+
+		For instance, print every directory and file name scanned.
+		"""
 		self._verbose = flag
 
 
 	## Command line use ##
 
 	def readArgs(self, args=sys.argv):
-		""" Reads a list of arguments in command line style (e.g., sys.argv). You can pass your own args if you like, otherwise sys.argv is used. Returns 1 on success; 0 otherwise. """
+		"""Read a list of arguments in command line style (e.g., sys.argv).
+
+		You can pass your own args if you like, otherwise sys.argv is used.
+		Returns 1 on success; 0 otherwise.
+
+		"""
 		setDir = setOut = 0
 		for arg in args[1:]:
 			if arg=='-h' or arg=='--help':
@@ -262,14 +296,22 @@ Error codes and their messages:
 	## Printing, errors, etc. ##
 
 	def write(self, *args):
-		""" Invoked by self for all printing so that output can be easily redirected. """
+		"""Invoked by self for all printing.
+
+		This allows output to be easily redirected.
+
+		"""
 		write = self._out.write
 		for arg in args:
 			write(str(arg))
 
 	def error(self, msgCode, args):
-		""" Invoked by self when a source code error is detected. Prints the error message and it's location. Does not raise exceptions or halt the program. """
+		"""Invoked by self when a source code error is detected.
 
+		Prints the error message and it's location.
+		Does not raise exceptions or halt the program.
+
+		"""
 		# Implement the DisableErrors option
 		disableNames = self.setting('DisableErrors', {}).get(msgCode, [])
 		if '*' in disableNames or self._fileName in disableNames:
@@ -281,12 +323,21 @@ Error codes and their messages:
 		self.write(self.location(), msg, '\n')
 
 	def fatalError(self, msg):
-		""" Reports a fatal error such as an invalid configuration file and raises CheckSrcError. """
+		"""Report a fatal error and raise CheckSrcError.
+
+		For instance, handle an invalid configuration file.
+
+		"""
 		self.write('FATAL ERROR: %s\n' % msg)
 		raise CheckSrcError
 
 	def location(self):
-		""" Returns a string indicating the current location such as "fileName:lineNum:charNum". The string may be shorter if the latter components are undefined. """
+		"""Return a string indicating the current location.
+
+		The string format is "fileName:lineNum:charNum:".
+		The string may be shorter if the latter components are undefined.
+
+		"""
 		s = ''
 		if self._fileName!=None:
 			s = s + self._fileName
@@ -299,7 +350,7 @@ Error codes and their messages:
 		return s
 
 	def printDir(self):
-		""" Self utility method to print the directory being processed. """
+		"""Self utility method to print the directory being processed."""
 		self.write('\n', self._dirName, '\n')
 		self._printedDir = 1
 
@@ -316,7 +367,6 @@ Error codes and their messages:
 			dict = eval(contents)
 		except:
 			self.fatalError('Invalid config file at %s.' % filename)
-
 		# For DisableErrors, we expect a dictionary keyed by error codes.
 		# For each code, we allow a value that is either a string or a list.
 		# But for ease-of-use purposes, we now convert single strings to
@@ -347,14 +397,18 @@ Error codes and their messages:
 			self._out.close()
 
 	def checkDir(self, arg, dirName, names):
-		""" Invoked by os.path.walk() which is kicked off by check(). Recursively checks the given directory and all it's subdirectories. """
+		"""Invoked by os.path.walk() which is kicked off by check().
+
+		Recursively checks the given directory and all it's subdirectories.
+
+		"""
 		# Initialize location attributes.
 		# These are updated while processing and
 		# used when reporting errors.
-		self._dirName  = dirName
+		self._dirName = dirName
 		self._fileName = None
-		self._lineNum  = None
-		self._charNum  = None
+		self._lineNum = None
+		self._charNum = None
 		self._printedDir = 0
 
 		if self._verbose:
@@ -418,7 +472,7 @@ Error codes and their messages:
 			# @@ 2000-10-10 ce: not finished. maybe not even good approach...
 			# This version handles multiline strings
 			self._lineNum = 1
-			inMLS = 0  # MS = multi-line string
+			inMLS = 0 # MS = multi-line string
 			for line in lines:
 				# the dbg var is used for debugging output
 				# you could set to self, sys.stdout, _DummyWriter,
@@ -529,7 +583,7 @@ Error codes and their messages:
 			if '_' in group[6:]:
 				bad = 1
 				# Make sure it's not one of those __foo__ identifiers.
-				group = group[5:]  # shave off "self."
+				group = group[5:] # shave off "self."
 				if len(group)>4 and group[:2]=='__' and group[-2:]=='__':
 					if not '_' in group[2:-2]:
 						bad = 0
@@ -543,7 +597,7 @@ Error codes and their messages:
 		keywords = ['if', 'while', 'return']
 		msg = string.join(keywords[:-1], ', ') + ' and ' + keywords[-1]
 		parts = string.split(line)
-		if len(parts)>1  and  parts[0] in keywords  and  parts[1][0]=='(':
+		if len(parts)>1 and parts[0] in keywords and parts[1][0]=='(':
 			keyword = parts[0]
 			self.error('ExtraParens', locals())
 

@@ -286,11 +286,11 @@ class Server:
 		# magic method dispatcher
 		return _Method(self.__requestValue, name)
 
-	## note: to call a remote object with an non-standard name, use
-	## result getattr(server, "strange-python-name")(args)
+	# note: to call a remote object with an non-standard name, use
+	# result getattr(server, "strange-python-name")(args)
 
 
-ServerProxy = Server   # be like xmlrpclib for those who might guess or expect it
+ServerProxy = Server # be like xmlrpclib for those who might guess or expect it
 
 
 
