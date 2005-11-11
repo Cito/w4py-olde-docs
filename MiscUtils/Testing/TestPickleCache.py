@@ -12,13 +12,14 @@ from MiscUtils.PickleCache import *
 
 # the directory that this file is in:
 # from FixPath import progDir
-progDir = os.path.dirname(__file__)
+progPath = os.path.join(os.getcwd(), __file__)
+progDir = os.path.dirname(progPath)
 assert os.path.basename(progDir) == 'Testing' and \
 	os.path.basename(os.path.dirname(progDir)) == 'MiscUtils', \
 	'Test needs to run in Testing/MiscUtils.'
 
 
-class TestPickleCache(unittest.TestCase):
+class TestPickleCache:
 
 	def test(self):
 		# print 'Testing PickleCache...'
@@ -85,5 +86,5 @@ class TestPickleCache(unittest.TestCase):
 		assert os.path.exists(self.picklePath)
 
 
-#if __name__=='__main__':
-#	TestPickleCache().test()
+if __name__=='__main__':
+	TestPickleCache().test()
