@@ -114,7 +114,7 @@ class HTTPContent(HTTPServlet):
 		pass
 
 	def sleep(self, transaction):
-		"""Let servlet speel again.
+		"""Let servlet sleep again.
 
 		We unset some variables. Very boring.
 

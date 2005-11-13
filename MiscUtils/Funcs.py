@@ -127,7 +127,7 @@ else:
 		return os.open(path, os.O_RDWR|os.O_CREAT|os.O_EXCL, 0600), path
 
 def wordWrap(s, width=78):
-	"""Returnsa version of the string word wrapped to the given width.
+	"""Return a version of the string word wrapped to the given width.
 
 	Respects existing newlines in the string.
 

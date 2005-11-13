@@ -140,7 +140,7 @@ Webware calls the servlet like this:</p>
 <ul class="simple">
 <li>An unused servlet is taken from the pool, or another servlet is created.</li>
 <li><tt class="docutils literal"><span class="pre">awake(transaction)</span></tt> is called. This is a good place to set up data for
-your servlet.  ou can put information in instance variables for use later
+your servlet. You can put information in instance variables for use later
 on. But be warned -- those instance variables will hang around potentially
 for a long time if you don't delete them later (in <tt class="docutils literal"><span class="pre">sleep</span></tt>).</li>
 <li>Several low-level methods are called, which Page isolates you from. We will

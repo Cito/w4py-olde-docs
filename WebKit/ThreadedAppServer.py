@@ -259,7 +259,7 @@ class ThreadedAppServer(AppServer):
 	# These methods handle the thread pool. The AppServer pre-allocates
 	# threads, and reuses threads for requests. So as more threads
 	# are needed with varying load, new threads are spawned, and if there
-	# are excess threads than threads are removed.
+	# are excess threads, then threads are removed.
 
 	def updateThreadUsage(self):
 		"""Update the threadUseCounter list.
