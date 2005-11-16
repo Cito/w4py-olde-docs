@@ -46,12 +46,12 @@ class HTTPResponse(Response):
 	def header(self, name, default=NoDefault):
 		""" Returns the value of the specified header. """
 		if default is NoDefault:
-			return self._headers[name.lower()]
+			return self._headers[name.capitalize()]
 		else:
-			return self._headers.get(name.lower(), default)
+			return self._headers.get(name.capitalize(), default)
 
 	def hasHeader(self, name):
-		return self._headers.has_key(name.lower())
+		return self._headers.has_key(name.capitalize())
 
 	def setHeader(self, name, value):
 		"""Sets a specific header by name.
@@ -62,7 +62,7 @@ class HTTPResponse(Response):
 
 		"""
 		assert self._committed == 0, "Headers have already been sent"
-		self._headers[name.lower()] = value
+		self._headers[name.capitalize()] = value
 
 
 	def addHeader(self, name, value):
