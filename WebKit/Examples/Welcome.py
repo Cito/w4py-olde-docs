@@ -28,7 +28,7 @@ class Welcome(ExamplePage):
 		wr('<ul>')
 		wr('<li>WebKit: <tt>%s</tt></li>'
 			% join(self.application().webKitPath(), 'Docs'))
-		wr('<li>Webware for Python: <tt>%s</tt>'
+		wr('<li>Webware for Python: <tt>%s</tt></li>'
 			% join(self.application().webwarePath(), 'Docs'))
 		wr('</ul>')
 		req = self.request()

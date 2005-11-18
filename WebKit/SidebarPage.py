@@ -27,14 +27,7 @@ class SidebarPage(Page):
 
 	## StyleSheet ##
 
-	def writeStyleSheet(self):
-		"""We're using a simple internal style sheet.
-
-		This way we avoid having to care about where an external style
-		sheet should be located when this class is used in another context.
-
-		"""
-		self.writeln('''<style type="text/css">
+	_styleSheet = '''
 <!--
 body {
 	color: #080810;
@@ -49,46 +42,79 @@ h2 { font-size: 16pt; }
 h3 { font-size: 14pt; }
 h4 { font-size: 12pt; }
 h5 { font-size: 11pt; }
+table#PageTable {
+	border-collapse: collapse;
+}
+td#CornerTitle {
+	background-color: #101040;
+	color: white;
+	padding: 6pt 6pt;
+	font-size: 14pt;
+	text-align: center;
+	vertical-align: middle;
+}
+td#Banner {
+	background-color: #202080;
+	color: white;
+	padding: 8pt 6pt;
+	font-size: 16pt;
+	font-weight: bold;
+	text-align: center;
+	vertical-align: middle;
+}
+td#Sidebar {
+	background-color: #E8E8F0;
+	padding: 4pt;
+	font-size: 10pt;
+	line-height: 13pt;
+	vertical-align: top;
+	white-space: nowrap;
+	height: 100%;
+}
+td#Sidebar div {
+	margin-bottom: 1pt;
+}
+td#Sidebar div.MenuHeading {
+	font-weight: bold;
+	margin-top: 6pt;
+	margin-bottom: 3pt;
+	width: 12em;
+}
+td#Content {
+	padding: 8pt;
+	vertical-align: top;
+	width: 100%;
+}
 -->
-</style>''')
+'''
+
+	def writeStyleSheet(self):
+		"""We're using a simple internal style sheet.
+
+		This way we avoid having to care about where an external style
+		sheet should be located when this class is used in another context.
+
+		"""
+		self.writeln('<style type="text/css">%s</style>' % self._styleSheet)
 
 
 	## Content methods ##
 
 	def writeBodyParts(self):
-
-		# begin
 		wr = self.writeln
-		wr('<table border="0" cellpadding="0" cellspacing="0" width="100%">')
-
-		# banner
+		wr('<table id="PageTable">')
 		self.writeBanner()
-
-		# sidebar
-		wr('<tr><td style="background-color:#E8E8F0;'
-			'padding:4pt;font-size:10pt;'
-			'vertical-align:top;white-space:nowrap;height:100%">')
+		wr('<tr><td id="Sidebar">')
 		self.writeSidebar()
 		wr('</td>')
-
-		# content
-		wr('<td style="padding:8pt;vertical-align:top;width:100%">')
+		wr('<td id="Content">')
 		self.writeContent()
 		wr('</td>')
-
-		# end
 		wr('</tr></table>')
 
 	def writeBanner(self):
-		# header
-		title, cornerTitle = self.title(), self.cornerTitle()
-		self.writeln('<tr><td style="background-color:#101040;color:white;'
-			'padding:6pt 6pt;font-size:14pt;'
-			'text-align:center;vertical-align:middle">'
-			'%s</td><td style="background-color:#202080;color:white;'
-			'padding:8pt 6pt;font-size:16pt;font-weight:bold;'
-			'text-align:center;vertical-align:middle">'
-			'%s</td></tr>' % (cornerTitle, title))
+		self.writeln('<tr><td id="CornerTitle">%s</td>' % self.cornerTitle(),
+			'<td id="Banner">%s</td></tr>' % self.title())
 
 	def writeSidebar(self):
 		self.writeWebKitSidebarSections()
@@ -100,9 +126,7 @@ h5 { font-size: 11pt; }
 	## Menu ##
 
 	def menuHeading(self, title):
-		self.writeln('<div style="font-weight:bold;'
-			'margin-top:6pt;margin-bottom:3pt;width:12em">%s</div>' % title)
-		self._wroteHeading = 1
+		self.writeln('<div class="MenuHeading">%s</div>' % title)
 
 	def menuItem(self, title, url=None, suffix=None, indentLevel=1):
 		if suffix:
@@ -153,8 +177,8 @@ h5 { font-size: 11pt; }
 		self.menuHeading('Versions')
 		self.menuItem('WebKit ' + app.webKitVersionString())
 		self.menuItem('Webware ' + app.webwareVersionString())
-		import string, sys
-		self.menuItem('Python ' + sys.version.split(' ', 1)[0])
+		from sys import version
+		self.menuItem('Python ' + version.split(' ', 1)[0])
 
 	def writeContent(self):
 		self.writeln('Woops, someone forgot to override writeContent().')
