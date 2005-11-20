@@ -7,6 +7,16 @@ from WebUtils.Funcs import htmlForDict, htmlEncode
 from HTTPResponse import HTTPResponse
 from types import DictType, StringType
 
+
+try: # linecache update workaround for Python < 2.4
+	traceback.format_exc # check version
+except AttributeError: # Python < 2.4
+	from linecache import checkcache
+else: # Python >= 2.4
+	# the linecache module updates the cache automatically
+	def checkcache(): pass
+
+
 class singleton: pass
 
 
@@ -161,6 +171,8 @@ class ExceptionHandler(Object):
 		if self._res:
 			self._res.recordEndTime()
 			self._time = self._res.endTime()
+
+		checkcache() # update the linecache
 
 		self.logExceptionToConsole()
 
