@@ -45,6 +45,7 @@ typedef struct wkcfg {
   apr_sockaddr_t* apraddr; /* apache2 sockaddr */
   int retrydelay;
   int retryattempts;
+  apr_array_header_t *passheaders; /* List of HTTP headers to pass through to AppServer */
 } wkcfg;
 
 /* Use to log errors */
@@ -57,16 +58,14 @@ typedef struct wkcfg {
 module AP_MODULE_DECLARE_DATA webkit_module;
 
 /* A quick debug logging function, only prints if LogLevel=debug */
-int log_message(char* msg, request_rec* r) {
+#if 0	/* 1 to enable */
+int log_debug(char* msg, request_rec* r) {
     ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, msg);
     return 0;
 }
-
-/* Logging function that takes a server_rec instead of request_rec */
-int log_message_s(char* msg, server_rec* s) {
-    ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, s, msg);
-    return 0;
-}
+#else
+# define log_debug(msg, r) /* nothing */
+#endif
 
 /* ====================================================================
  * Command handler for the WKServer command.
@@ -125,6 +124,25 @@ static const char *handle_connectretrydelay(cmd_parms *cmd, void *mconfig,
 }
 
 /* ====================================================================
+ * Command handler for the PassHeader command.
+ * Takes 1 argument,
+ * the HTTP header to pass through to the AppServer.
+ * ==================================================================== */
+static const char *handle_passheader(cmd_parms *cmd, void *mconfig,
+                                                const char *word1)
+{
+    wkcfg* cfg;
+
+    cfg = (wkcfg *) mconfig;
+
+    if (word1 != NULL) {
+        const char **header = (const char **)apr_array_push(cfg->passheaders);
+        *header = word1;
+    }
+    return NULL;
+}
+
+/* ====================================================================
  * This function gets called to create a per-directory configuration
  * record. This will be called for the "default" server environment, and for
  * each directory for which the parser finds any of our directives applicable.
@@ -139,6 +157,7 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
 {
 
     wkcfg *cfg;
+    char **header;
     //char *dname = dirspec;
     apr_sockaddr_t *apraddr;
     apr_status_t rv;
@@ -153,6 +172,15 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
     cfg->apraddr=NULL;
     cfg->retryattempts = 10;
     cfg->retrydelay = 1;
+    cfg->passheaders = apr_array_make(p, 1, sizeof(char *));
+    /*
+     * Pass the "If-Modified-Since" HTTP header through.
+     * Servlets may inspect this value and, if the object has not changed,
+     * return "Status: 304" and no body.
+     */
+    header = (char **)apr_array_push(cfg->passheaders);
+    *header = "If-Modified-Since";
+
 
     //cfg->addr = resolve_host(cfg->host);
 
@@ -163,7 +191,7 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
      */
 
     if (rv != APR_SUCCESS){
-      log_message_s("couldn't resolve localhost",NULL);
+      log_error("couldn't resolve WKServer address",NULL);
     }
 
     cfg->apraddr=apraddr;
@@ -179,14 +207,14 @@ WFILE* setup_WFILE(request_rec* r)
     WFILE* wf = NULL;
     wf = (WFILE*)apr_pcalloc(r->pool, sizeof(WFILE));
     if (wf == NULL) {
-        log_message("Failed to get WFILE structure\n", r);
+        log_error("Failed to get WFILE structure", r->server);
         return wf;
     }
     wf->str = NULL; wf->ptr = NULL; wf->end = NULL;
     wf->str = (char*)apr_pcalloc(r->pool, 4096);
 
     if (wf->str == NULL) {
-        log_message("Couldn't allocate memory", r);
+        log_error("Couldn't allocate memory", r->server);
         return NULL;
     }
     wf->end = wf->str + 4096;
@@ -204,7 +232,7 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
     apr_status_t rv;
     apr_socket_t *aprsock;
 
-    //log_message("In wksock_open", r);
+    log_debug("In wksock_open", r);
 
     if (cfg->apraddr == NULL) {
       log_error("No Valid Host Configured", r->server);
@@ -231,7 +259,8 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
 
     /* Check if we connected */
     if (rv != APR_SUCCESS) {
-        log_message("Can not open socket connection to WebKit AppServer", r);
+        apr_socket_close(aprsock);
+        log_error("Can not open socket connection to WebKit AppServer", r->server);
         return NULL;
     }
 
@@ -287,7 +316,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     const char *location;
     char sbuf[MAX_STRING_LEN];
 
-    //log_message("In transact_with_appserver",r);
+    log_debug("In transact_with_appserver",r);
 
     aprsock = wksock_open(r, cfg->addr, cfg->port, cfg);
     if (aprsock == NULL) return 1;
@@ -386,11 +415,12 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     b = apr_bucket_eos_create(c->bucket_alloc);
     APR_BRIGADE_INSERT_TAIL(bb, b);
 
-    if ((ret = ap_scan_script_header_err_brigade(r, bb, sbuf)) != HTTP_OK) {
-      //return log_error("the Appserver provided an invalid response", r->server);
+    if ((ret = ap_scan_script_header_err_brigade(r, bb, sbuf)) != OK) {
+      log_error("the Appserver provided an invalid response", r->server);
+      //return;
     }
     sprintf(sbuf,"Status: %i",r->status);
-    log_message(sbuf,r);
+    log_debug(sbuf,r);
 
     location = apr_table_get(r->headers_out, "Location");
     if (location && location[0] == '/' && r->status == 200) {
@@ -451,12 +481,12 @@ static int webkit_handler(request_rec *r)
     if (strcmp(r->handler, "webkit-handler"))
         return DECLINED;
 
-    log_message("In webkit_handler",r);
+    log_debug("In webkit_handler",r);
 
     cfg = NULL;
     cfg =  ap_get_module_config(r->per_dir_config, &webkit_module);
     if (cfg == NULL) {
-        log_message("No cfg", r);
+        log_debug("No cfg", r);
         cfg = (wkcfg*) webkit_create_dir_config(r->pool, "/");
     }
 
@@ -465,7 +495,7 @@ static int webkit_handler(request_rec *r)
     int_dict = setup_WFILE(r);
 
     if (env_dict == NULL || whole_dict == NULL) {
-        log_message("Couldn't allocate Python data structures", r);
+        log_error("Couldn't allocate Python data structures", r->server);
         return HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -493,20 +523,21 @@ static int webkit_handler(request_rec *r)
         else
             w_byte(TYPE_NONE, env_dict);
     }
-    /* If the "If-Modified-Since" HTTP header is present,
-     * add it to the environment.  Servlets may inspect this
-     * value and, if the object has not changed,
-     * return "Status: 304" and no body.
-     */
-    key = "If-Modified-Since";
-    value = apr_table_get(r->headers_in, key);
-    if (value && *value) {
-        write_string(key, env_dict);
-        write_string(value, env_dict);
+    array_header = cfg->passheaders;
+    if (array_header) {
+        char **headers = (char **)array_header->elts;
+        for (i = 0; i < array_header->nelts; i++) {
+            key = headers[i];
+            value = apr_table_get(r->headers_in, key);
+            if (value && *value) {
+                write_string(key, env_dict);
+                write_string(value, env_dict);
+            }
+        }
     }
     w_byte(TYPE_NULL, env_dict);
     /* end dictionary */
-    //log_message("Built env dictionary", r);
+    log_debug("Built env dictionary", r);
 
     /* We can start building the full dictionary now */
     w_byte(TYPE_DICT, whole_dict);
@@ -517,7 +548,7 @@ static int webkit_handler(request_rec *r)
     /* patch from Ken Lalonde to make the time entry useful,
      * (who knew?? I didn't think this would work and didn't bother)
      */
-    w_long((long)time(0), whole_dict); /* value */
+    w_long((long)apr_time_sec(r->request_time), whole_dict); /* value */
 
     write_string("environ", whole_dict); /* key */
 
@@ -532,7 +563,7 @@ static int webkit_handler(request_rec *r)
 
     write_integer((int)length, int_dict);
 
-    log_message("dictionaries built",r);
+    log_debug("dictionaries built",r);
 
     /* now we try to send it */
     for (conn_attempt = 1; conn_attempt<=cfg->retryattempts; conn_attempt++) {
@@ -546,7 +577,7 @@ static int webkit_handler(request_rec *r)
         sprintf(msgbuf,
             "Couldn't connect to AppServer, attempt %i of %i, sleeping %i second(s)",
             conn_attempt, cfg->retryattempts, cfg->retrydelay);
-        log_message(msgbuf, r);
+        log_error(msgbuf, r->server);
         apr_sleep(cfg->retrydelay * APR_USEC_PER_SEC);
     }
     log_error("timed out trying to connect to appserver -- giving up.", r->server);
@@ -616,6 +647,15 @@ static const command_rec webkit_cmds[] =
         OR_OPTIONS,                /* where available, allow directory to overide
                                     * if AllowOverride Options is specified */
         "ConnectRetryDelay directive.  One argument, an integer giving the number of seconds to wait before retrying a connect to an AppServer that didn't respond."
+                                   /* directive description */
+    ),
+    AP_INIT_TAKE1(
+        "PassHeader",              /* directive name */
+        handle_passheader,         /* config action routine */
+        NULL,                      /* argument to include in call */
+        OR_OPTIONS,                /* where available, allow directory to overide
+                                    * if AllowOverride Options is specified */
+        "PassHeader directive.  One argument, an HTTP header to be passed through to the AppServer."
                                    /* directive description */
     ),
     {NULL}

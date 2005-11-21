@@ -472,7 +472,7 @@ is in its own directory.
 Posix Installation
 ^^^^^^^^^^^^^^^^^^
 
-To install:
+To install::
 
   $ cd /path/to/Webware/WebKit/Adapters/mod_webkit
   # or mod_webkit2 for Apache 2.0
@@ -532,18 +532,31 @@ Some Apache 2 users have found that they must use "127.0.0.1" instead
 of "localhost", since Apache 2 defaults to using ipv6 addresses first.
 
 With these lines, any URL that starts with ``/WK/`` will be directed to the
-AppServer on 8086.  You can also use::
+AppServer on port 8086.  You can also use::
 
     AddHandler psp-handler .psp
 
-To run PSP files that are found anywhere (similar to how PHP would
+to run PSP files that are found anywhere (similar to how PHP would
 work, for example).  You still need the ``/WK`` portion to tell
 mod_webkit where to find the AppServer.  This also works::
 
     Action py-serverpages /WK/
     AddType py-serverpages .py
 
-Which will run Python servlets from any location.
+which will run Python servlets from any location.
+
+To pass additional client HTTP headers through to the AppServer,
+use the ``PassHeader`` Apache directive.
+For example::
+
+    PassHeader Accept-Language
+
+Your servlet code can access the header value like this::
+
+    lang = self.request().environ().get('Accept-Language')
+
+If the client request contains the header ``Accept-Language: fr``,
+the above code will set ``lang`` to ``"fr"``.
 
 .. _AOLServer:
 

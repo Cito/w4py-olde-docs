@@ -34,6 +34,7 @@ typedef struct wkcfg {
     unsigned long addr;     /* resolved host address */
     int retrydelay;
     int retryattempts;
+    array_header *passheaders; /* List of HTTP headers to pass through to AppServer */
 } wkcfg;
 
 /*A quick logging macro */
@@ -46,11 +47,17 @@ typedef struct wkcfg {
 
 module MODULE_VAR_EXPORT webkit_module;
 
-/* A quick logging function */
-int log_message(char* msg, request_rec* r) {
-    ap_log_error(APLOG_MARK, APLOG_ERR, r->server, msg);
+/* A quick debug logging function, only prints if LogLevel=debug */
+#if 0   /* 1 to enable */
+int log_debug(char* msg, request_rec* r) {
+    ap_log_error(APLOG_MARK, APLOG_DEBUG, r->server, msg);
     return 0;
 }
+#else
+# define log_debug(msg, r) /* nothing */
+#endif
+
+
 
 /* ====================================================================
  * Returns a unsigned long representing the ip address of a string
@@ -131,6 +138,24 @@ static const char *handle_connectretrydelay(cmd_parms *cmd, void *mconfig,
 }
 
 /* ====================================================================
+ * Command handler for the PassHeader command.
+ * Takes 1 argument,
+ * the HTTP header to pass through to the AppServer.
+ * ==================================================================== */
+static const char *handle_passheader(cmd_parms *cmd, void *mconfig, char *word1)
+{
+    wkcfg* cfg;
+    
+    cfg = (wkcfg *) mconfig;
+    
+    if (word1 != NULL) {
+        char **header = (char **)ap_push_array(cfg->passheaders);
+	*header = word1;
+    }
+    return NULL;
+}
+
+/* ====================================================================
  * This function gets called to create a per-directory configuration
  * record. This will be called for the "default" server environment, and for
  * each directory for which the parser finds any of our directives applicable.
@@ -144,6 +169,7 @@ static const char *handle_connectretrydelay(cmd_parms *cmd, void *mconfig,
 static void *wk_create_dir_config(pool *p, char *dirspec)
 {
     wkcfg *cfg;
+    char **header;
     //char *dname = dirspec;
 
     /*
@@ -159,6 +185,14 @@ static void *wk_create_dir_config(pool *p, char *dirspec)
     cfg->addr = resolve_host(cfg->host);
     cfg->retryattempts = 10;
     cfg->retrydelay = 1;
+    cfg->passheaders = ap_make_array(p, 1, sizeof(char *));
+    /*
+     * Pass the "If-Modified-Since" HTTP header through.
+     * Servlets may inspect this value and, if the object has not changed,
+     * return "Status: 304" and no body.
+     */
+    header = (char **)ap_push_array(cfg->passheaders);
+    *header = "If-Modified-Since";
     return (void *) cfg;
 }
 
@@ -171,14 +205,14 @@ WFILE* setup_WFILE(request_rec* r)
     WFILE* wf = NULL;
     wf = ap_pcalloc(r->pool, sizeof(WFILE));
     if (wf == NULL) {
-        log_message("Failed to get WFILE structure\n", r);
+        log_error("Failed to get WFILE structure\n", r->server);
         return wf;
     }
     wf->str = NULL; wf->ptr = NULL; wf->end = NULL;
     wf->str = ap_pcalloc(r->pool, 4096);
 
     if (wf->str == NULL) {
-        log_message("Couldn't allocate memory", r);
+        log_error("Couldn't allocate memory", r->server);
         return NULL;
     }
     wf->end = wf->str + 4096;
@@ -199,15 +233,11 @@ static int wksock_open(request_rec *r, unsigned long address, int port, wkcfg* c
 
     /* Check if we have a valid host address */
     if (address == 0) {
-        log_message("cannot connect to unspecified host", r);
+        log_error("cannot connect to unspecified host", r->server);
         return -1;
     }
 
-    /* Check if we have a valid port number. */
-    if (port < 1024) {
-        log_message("invalid port, must be geater than 1024",r);
-        //port = 8007;
-    }
+    memset(&addr, 0, sizeof addr);
     addr.sin_addr.s_addr = address;
     addr.sin_port = htons(port);
     addr.sin_family = AF_INET;
@@ -228,7 +258,8 @@ static int wksock_open(request_rec *r, unsigned long address, int port, wkcfg* c
 
     /* Check if we connected */
     if (ret == -1) {
-        log_message("Can not connect to WebKit AppServer", r);
+        ap_pclosesocket(r->pool, sock);
+        log_error("Can not connect to WebKit AppServer", r->server);
         return -1;
     }
 #ifdef TCP_NODELAY
@@ -269,14 +300,14 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
      * and we don't want to accidentally submit the same request twice.
      */
 
-    //log_message("creating buffsocket",r);
+    log_debug("creating buffsocket",r);
     buffsocket=ap_bcreate(r->pool,B_SOCKET+B_RDWR);
 
-    //log_message("push socket into fd",r);
+    log_debug("push socket into fd",r);
     ap_bpushfd(buffsocket,sock,sock);
 
     /* Now we send the request to the AppServer */
-    //log_message("writing request to buff",r);
+    log_debug("writing request to buff",r);
     bs = ap_bwrite(buffsocket, int_dict->str, int_dict->ptr - int_dict->str);
     bs = ap_bwrite(buffsocket,whole_dict->str,length);
 
@@ -297,7 +328,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
                 if (sent < n) {
                     retry++;
                     sleep(1);
-                    log_message("Have to retry sending input to appserver",r);
+                    log_error("Have to retry sending input to appserver", r->server);
                 }
                 else break;
                 if (retry == 10) {
@@ -314,7 +345,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     ap_bflush(buffsocket);
     /* Done sending */
 
-    //log_message("Sent Request to client", r);
+    log_debug("Sent Request to client", r);
 
     /* Let the AppServer know we're done */
     shutdown(sock, 1);
@@ -323,11 +354,11 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     /* Now we get the response from the AppServer */
     ap_hard_timeout("wk_read",r);
 
-    //log_message("scanning for headers",r);
+    log_debug("scanning for headers",r);
     /* pull out headers */
     if ((ret=ap_scan_script_header_err_buff(r, buffsocket, NULL))) {
         if(ret>=500 || ret < 0) {
-            log_message("cannot scan servlet headers ", r);
+            log_error("cannot scan servlet headers ", r->server);
             return 2;
         }
 
@@ -337,19 +368,19 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     ap_send_http_header(r);
 
     /* now we just send the reply straight to the client */
-    //log_message("Sending response", r);
+    log_debug("Sending response", r);
 
     length = ap_send_fb(buffsocket, r);
     //sprintf(msgbuf, "Sent %i bytes to the client", length);
-    //log_message(msgbuf, r);
+    //log_debug(msgbuf, r);
 
     /* Kill timeouts, close buffer and socket and return */
     ap_kill_timeout(r);
 
-    //log_message("closing buffsocket",r);
+    log_debug("closing buffsocket",r);
     ap_bclose(buffsocket);
 
-    //log_message("Done", r);
+    log_debug("Done", r);
 
     return 0;
 }
@@ -388,7 +419,7 @@ static int content_handler(request_rec *r)
     cfg = NULL;
     cfg =  ap_get_module_config(r->per_dir_config, &webkit_module);
     if (cfg == NULL) {
-        log_message("No cfg", r);
+        log_debug("No cfg", r);
         cfg = (wkcfg*) wk_create_dir_config(r->pool, "/");
     }
 
@@ -397,7 +428,7 @@ static int content_handler(request_rec *r)
     int_dict = setup_WFILE(r);
 
     if (env_dict == NULL || whole_dict == NULL) {
-        log_message("Couldn't allocate Python data structures", r);
+        log_error("Couldn't allocate Python data structures", r->server);
         return HTTP_INTERNAL_SERVER_ERROR;
     }
 
@@ -423,21 +454,22 @@ static int content_handler(request_rec *r)
         else
             w_byte(TYPE_NONE, env_dict);
     }
-    /* If the "If-Modified-Since" HTTP header is present,
-     * add it to the environment.  Servlets may inspect this
-     * value and, if the object has not changed,
-     * return "Status: 304" and no body.
-     */
-    key = "If-Modified-Since";
-    value = ap_table_get(r->headers_in, key);
-    if (value && *value) {
-        write_string(key, env_dict);
-        write_string(value, env_dict);
+    hdr_arr = cfg->passheaders;
+    if (hdr_arr) {
+        char **headers = (char **)hdr_arr->elts;
+        for (i = 0; i < hdr_arr->nelts; i++) {
+            key = headers[i];
+            value = ap_table_get(r->headers_in, key);
+            if (value && *value) {
+                write_string(key, env_dict);
+                write_string(value, env_dict);
+            }
+        }
     }
 
     w_byte(TYPE_NULL, env_dict);
     /* end dictionary */
-    //log_message("Built env dictionary", r);
+    log_debug("Built env dictionary", r);
 
     /* We can start building the full dictionary now */
     w_byte(TYPE_DICT, whole_dict);
@@ -448,7 +480,7 @@ static int content_handler(request_rec *r)
     /* patch from Ken Lalonde to make the time entry useful,
      * (who knew?? I didn't think this would work and didn't bother)
      */
-    w_long((long)time(0), whole_dict); /* value */
+    w_long((long)r->request_time, whole_dict); /* value */
 
     write_string("environ", whole_dict); /* key */
 
@@ -469,16 +501,16 @@ static int content_handler(request_rec *r)
         if (result == 0) {
             return OK;
         } else if (result == 2) {
-            log_message("error transacting with app server -- giving up.", r);
+            log_error("error transacting with app server -- giving up.", r->server);
             return HTTP_INTERNAL_SERVER_ERROR;
         }
         sprintf(msgbuf,
             "Couldn't connect to AppServer, attempt %i of %i",
             conn_attempt, cfg->retryattempts);
-        log_message(msgbuf, r);
+        log_error(msgbuf, r->server);
         sleep(cfg->retrydelay);
     }
-    log_message("error transacting with app server -- giving up.", r);
+    log_error("error transacting with app server -- giving up.", r->server);
     return HTTP_INTERNAL_SERVER_ERROR;
 }
 
@@ -544,6 +576,16 @@ static const command_rec webkit_cmds[] =
                                      * if AllowOverride Options is specified */
         TAKE1,                      /* arguments */
         "ConnectRetryDelay directive.  One argument, an integer giving the number of seconds to wait before retrying a connect to an AppServer that didn't respond."
+                                    /* directive description */
+    },
+    {
+        "PassHeader",		    /* directive name */
+        handle_passheader,	    /* config action routine */
+        NULL,                       /* argument to include in call */
+        OR_OPTIONS,                 /* where available, allow directory to overide
+                                     * if AllowOverride Options is specified */
+        TAKE1,                      /* arguments */
+        "PassHeader directive.  One argument, an HTTP header to be passed through to the AppServer."
                                     /* directive description */
     },
     {NULL}
