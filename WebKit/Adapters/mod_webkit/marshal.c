@@ -8,11 +8,8 @@
 #include <string.h>
 #include "mod_webkit.h"
 
-/*
-#define w_byte(c, p) if ((p)->ptr != (p)->end) *(p)->ptr++ = (c); else w_more(c, p)
-*/
 
-char* expand_memory(WFILE* p, long add)
+static char* expand_memory(WFILE* p, long add)
 {
     char* newptr;
     long currsize;
@@ -65,15 +62,7 @@ void w_more(int c, WFILE *p)
     if (p->str == NULL)
         return; /* An error already occurred, we're screwed */
     expand_memory(p, 0);
-    *p->ptr++ = c;
-}
-
-void w_byte(char c, WFILE* p)
-{
-    if ((p)->ptr != (p)->end)
-        *(p)->ptr++ = (c);
-    else
-        w_more(c, p);
+    *p->ptr++ = (char)c;
 }
 
 void w_string(const char *s, int n, WFILE *p)
@@ -87,16 +76,16 @@ void w_string(const char *s, int n, WFILE *p)
 
 void w_short(int x, WFILE *p)
 {
-    w_byte( x      & 0xff, p);
-    w_byte((x>> 8) & 0xff, p);
+    w_byte((char)( x      & 0xff), p);
+    w_byte((char)((x>> 8) & 0xff), p);
 }
 
 void w_long(long x, WFILE *p)
 {
-    w_byte((int)( x      & 0xff), p);
-    w_byte((int)((x>> 8) & 0xff), p);
-    w_byte((int)((x>>16) & 0xff), p);
-    w_byte((int)((x>>24) & 0xff), p);
+    w_byte((char)( x      & 0xff), p);
+    w_byte((char)((x>> 8) & 0xff), p);
+    w_byte((char)((x>>16) & 0xff), p);
+    w_byte((char)((x>>24) & 0xff), p);
 }
 
 #if SIZEOF_LONG > 4

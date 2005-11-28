@@ -27,20 +27,15 @@ typedef struct {
     request_rec* r; /* just for debugging */
 } WFILE;
 
-char* expand_memory(WFILE* p, long add);
 void insert_data(WFILE* dest, WFILE* src);
 void w_more(int c, WFILE *p);
-void w_byte(int c, WFILE* p);
+#define w_byte(c, p) if ((p)->ptr != (p)->end) *(p)->ptr++ = (c); \
+			else w_more(c, p)
 void w_string(const char *s, int n, WFILE *p);
 void w_short(int x, WFILE *p);
 void w_long(long x, WFILE *p);
 #if SIZEOF_LONG > 4
 void w_long64(long x, WFILE *p);
-}
 #endif
 void write_string(const char* s, WFILE* p);
 void write_integer(int number, WFILE* wf);
-
-int log_message(char* msg, request_rec* r);
-int log_message_s(char* msg, server_rec* s);
-WFILE* setup_WFILE(request_rec* r);

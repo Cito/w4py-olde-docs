@@ -202,7 +202,7 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
  *  Initialize the WFILE structure.
  *  This is used by the marshalling functions.
  * ==================================================================== */
-WFILE* setup_WFILE(request_rec* r)
+static WFILE* setup_WFILE(request_rec* r)
 {
     WFILE* wf = NULL;
     wf = (WFILE*)apr_pcalloc(r->pool, sizeof(WFILE));

@@ -62,7 +62,7 @@ int log_debug(char* msg, request_rec* r) {
 /* ====================================================================
  * Returns a unsigned long representing the ip address of a string
  * ==================================================================== */
-unsigned long resolve_host(char *value) {
+static unsigned long resolve_host(char *value) {
     int x;
 
     /* Check if we only have digits in the string */
@@ -200,7 +200,7 @@ static void *wk_create_dir_config(pool *p, char *dirspec)
  * Initialize the WFILE structure
  * This is used by the marshalling functions.
  * ==================================================================== */
-WFILE* setup_WFILE(request_rec* r)
+static WFILE* setup_WFILE(request_rec* r)
 {
     WFILE* wf = NULL;
     wf = ap_pcalloc(r->pool, sizeof(WFILE));
