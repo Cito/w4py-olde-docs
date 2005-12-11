@@ -75,7 +75,8 @@ class KidServletFactory(ServletFactory):
 	def __init__(self,application):
 		ServletFactory.__init__(self, application)
 		setting = application.setting
-		defaultOutput = setting('KidOutputMethod')
+		global defaultOutput # the default output method
+		defaultOutput = setting('KidOutputMethod', defaultOutput)
 		self._cacheTemplates = setting('CacheKidTemplates', True)
 		self._useCache = setting('UseKidKitCache', False)
 		if self._useCache:
