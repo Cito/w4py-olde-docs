@@ -114,7 +114,7 @@ class Session(Object):
 		See also: expiring()
 
 		"""
-		return getattr(self, '_isExpired', 0)
+		return getattr(self, '_isExpired', 0) or self._timeout == 0
 
 	def isNew(self):
 		"""Check whether the session is new."""
@@ -171,6 +171,8 @@ class Session(Object):
 	def __delitem__(self, name):
 		self.delValue(name)
 
+	def __contains__(self, name):
+		return self.hasValue(name)
 
 	## Transactions ##
 
