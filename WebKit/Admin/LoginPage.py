@@ -29,10 +29,13 @@ stored in the <tt>Application.config</tt> file in the <tt>WebKit/Configs</tt> di
 			if name.lower() not in ('username', 'password', 'login', 'logout', 'loginid'):
 				for v in list(value):
 					self.writeln('<input type="hidden" name="%s" value="%s">' % (name, v))
-		# Create a "unique" login id and put it in the form as well as in the session.
-		# Login will only be allowed if they match.
-		loginid = ''.join(map(lambda x: '%02d' % x,
-				localtime(time())[:6])) + str(randint(10000, 99999))
+		if self.session().hasValue('loginid'):
+			loginid = self.session().value('loginid')
+		else:
+			# Create a "unique" login id and put it in the form as well as in the session.
+			# Login will only be allowed if they match.
+			loginid = ''.join(map(lambda x: '%02d' % x,
+					localtime(time())[:6])) + str(randint(10000, 99999))
+			self.session().setValue('loginid', loginid)
 		self.writeln('<input type="hidden" name="loginid" value="%s">' % loginid)
-		self.session().setValue('loginid', loginid)
 		self.writeln('</form>\n<p>&nbsp;</p></div>')

@@ -24,20 +24,12 @@ else:
 			request = self.request()
 			trans = self.transaction()
 			app = self.application()
-			# Get login id and clear it from the session
-			loginid = session.value('loginid', None)
-			if loginid: session.delValue('loginid')
-			# Are they logging out?
-			if request.hasField('logout'):
-				# They are logging out. Clear all session variables:
-				session.values().clear()
-				request.fields()['extra'] = 'You have been logged out.'
-				app.forward(trans, 'LoginPage')
-				return
-			elif request.hasField('login') \
+			# Are they logging in?
+			if request.hasField('login') \
 					and request.hasField('username') \
 					and request.hasField('password'):
-				# They are logging in. Clear session:
+				# They are logging in. Get login id and clear session:
+				loginid = session.value('loginid', None)
 				session.values().clear()
 				# Check if this is a valid user/password
 				username = request.field('username')
@@ -54,13 +46,19 @@ else:
 						' (And make sure cookies are enabled.)'
 					app.forward(trans, 'LoginPage')
 					return
-			# They aren't logging in; are they already logged in?
+			# Are they logging out?
+			elif request.hasField('logout'):
+				# They are logging out. Clear all session variables:
+				session.values().clear()
+				request.fields()['extra'] = 'You have been logged out.'
+				app.forward(trans, 'LoginPage')
+				return
+			# Are they already logged in?
 			elif session.value('authenticated_user_admin', None):
 				# They are already logged in; write the HTML for this page:
 				AdminPage.writeHTML(self)
 			else:
 				# They need to log in.
-				session.values().clear()
 				app.forward(trans, 'LoginPage')
 				return
 
