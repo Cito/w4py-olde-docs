@@ -63,10 +63,17 @@ class MSSQLObjectStore(SQLObjectStore):
 			#print '>> connection string=%r' % s
 			conn = self.dbapiModule().DriverConnect(s)
 		else:
+			# extract the database arg if it was provided
+			if args.has_key('database'):
+				database = args['database']
+				del args['database']
+			else:
+				database = None
 			conn = self.dbapiModule().connect(**args)
 			cur = conn.cursor()
 			try:
-				sql = 'use '+self._model.sqlDatabaseName()+';'
+				db = database or self._model.sqlDatabaseName()
+				sql = 'use '+db+';'
 				#print '>> use string=%r' % sql
 				cur.execute(sql)
 			except Exception, e:
