@@ -172,7 +172,14 @@ class SQLObjectStore(ObjectStore):
 			if poolSize:
 				args = self._dbArgs.copy()
 				self.augmentDatabaseArgs(args, pool=1)
-				self._pool = DBPool(self.dbapiModule(), poolSize, **args)
+				try:
+					self._pool = DBPool(self.dbapiModule(), poolSize, **args)
+				except TypeError:
+					if args.has_key('database'):
+						del args['database']
+						self._pool = DBPool(self.dbapiModule(), poolSize, **args)
+					else:
+						raise
 
 	def augmentDatabaseArgs(self, args, pool=0):
 		# give subclasses the opportunity to add or change
@@ -330,6 +337,7 @@ class SQLObjectStore(ObjectStore):
 			fetchSQLStart = klass.fetchSQLStart()
 			className = klass.name()
 			if serialNum is not None:
+				serialNum = int(serialNum)  # make sure it's a valid int (suppose it came in as a string: 'foo')
 				clauses = 'where %s=%d' % (klass.sqlSerialColumnName(), serialNum)
 			if self._markDeletes:
 				clauses = self.addDeletedToClauses(clauses)
@@ -355,6 +363,10 @@ class SQLObjectStore(ObjectStore):
 				self.doneWithConnection(conn)
 		objs.extend(deepObjs)
 		return objs
+
+	def refreshObject(self, obj):
+		assert obj.store() is self
+		return self.fetchObject(obj.klass(), obj.serialNum())
 
 
 	## Klasses ##
