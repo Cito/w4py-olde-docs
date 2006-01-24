@@ -206,7 +206,12 @@ class SQLObjectStore(ObjectStore):
 			klassesById = {}
 			for (id, name) in cur.fetchall():
 				assert id, "Id must be a non-zero int. id=%r, name=%r" % (id, name)
-				klass = self._model.klass(name)
+				try:
+					klass = self._model.klass(name)
+				except KeyError:
+					filename = self._model.filename()
+					msg = '%s  The database has a class id for %r in the _MKClassIds table, but no such class exists in the model %s. The model and the db are not in sync.' % (name, name, filename)
+					raise KeyError, msg
 				klassesById[id] = klass
 				klass.setId(id)
 		finally:
