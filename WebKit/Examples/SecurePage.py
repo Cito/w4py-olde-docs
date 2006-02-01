@@ -29,30 +29,33 @@ class SecurePage(ExamplePage, Configurable):
 	def awake(self, trans):
 		ExamplePage.awake(self, trans) # awaken our superclass
 		if self.setting('RequireLogin'):
-			# Handle four cases: logout, login attempt, already logged in, and not already logged in.
+			# Handle four cases: login attempt, logout, already logged in, and not already logged in.
 			session = trans.session()
 			request = trans.request()
 			app = trans.application()
-			# Get login id and immediately clear it from the session:
-			loginid = session.value('loginid', None)
-			if loginid:
-				session.delValue('loginid')
 			# Are they logging out?
 			if request.hasField('logout'):
-				# They are logging out. Clear all session variables and take them to the
-				# Login page with a "logged out" message.
+				# They are logging out. Clear all session variables:
 				session.values().clear()
 				request.setField('extra', 'You have been logged out.')
-				request.setField('action', '/'.split(request.urlPath())[-1])
+				request.setField('action', request.urlPath().split('/')[-1])
 				app.forward(trans, 'LoginPage')
+			# Is the session expired?
 			elif request.isSessionExpired():
 				# Login page with a "logged out" message.
 				session.values().clear()
 				request.setField('extra', 'Your session has expired.')
-				request.setField('action', '/'.split(request.urlPath())[-1])
+				request.setField('action', request.urlPath().split('/')[-1])
 				app.forward(trans, 'LoginPage')
-			elif request.hasField('login') and request.hasField('username') and request.hasField('password'):
-				# They are logging in. Clear session:
+			# Are they already logged in?
+			elif self.getLoggedInUser():
+				return
+			# Are they logging in?
+			elif request.hasField('login') \
+					and request.hasField('username') \
+					and request.hasField('password'):
+				# They are logging in. Get login id and clear session:
+				loginid = session.value('loginid', None)
 				session.values().clear()
 				# Get request fields:
 				username = request.field('username')
@@ -70,12 +73,13 @@ class SecurePage(ExamplePage, Configurable):
 				else:
 					# Failed login attempt; have them try again:
 					request.setField('extra', 'Login failed. Please try again.')
+					request.setField('action', request.urlPath().split('/')[-1])
 					app.forward(trans, 'LoginPage')
-			# They aren't logging in; are they already logged in?
-			elif not self.getLoggedInUser():
+			else:
 				# They need to log in.
 				session.values().clear()
 				# Send them to the login page:
+				request.setField('action', request.urlPath().split('/')[-1])
 				app.forward(trans, 'LoginPage')
 		else:
 			# No login is required.

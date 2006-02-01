@@ -32,6 +32,7 @@
 	<li><b>Major Items</b>
 	<ol>
 	<li>Rearchitect app servers, applications, contexts, etc. One process per application (not several applications per process). Don't worry though. 99% of servlet code will be unaffected by these changes.</li>
+	<li>ImportSpy should really just be removed &ndash; periodically scanning sys.modules has the same effect, without an import hook.</li>
 	<li>CheckSource.py: A program to check the source code conventions.</li>
 	<li>FormKit: A plug-in to aid the construction and validation of forms. (Already in progress.)</li>
 	<li>Role-based security and user-authentication. Goal is to eliminate, as much as possible, developer-written security logic. This should be provided by the WebKit and be configurable.</li>

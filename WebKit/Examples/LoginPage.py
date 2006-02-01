@@ -20,10 +20,13 @@ class LoginPage(ExamplePage):
 			extra = 'You have been automatically logged out due to inactivity.'
 		if extra:
 			self.writeln('<p style="color:#333399">%s</p>' % self.htmlEncode(extra))
-		# Create a "unique" login id and put it in the form as well as in the session.
-		# Login will only be allowed if they match.
-		loginid = uniqueId(self)
-		self.session().setValue('loginid', loginid)
+		if self.session().hasValue('loginid'):
+			loginid = self.session().value('loginid')
+		else:
+			# Create a "unique" login id and put it in the form as well as in the session.
+			# Login will only be allowed if they match.
+			loginid = uniqueId(self)
+			self.session().setValue('loginid', loginid)
 		action = request.field('action', '')
 		if action:
 			action = ' action="%s"' % action
@@ -43,7 +46,9 @@ style="background-color:#CCCCEE;border:1px solid #3333CC;width:20em">
 		# except for the special values used by the login mechanism itself
 		for name, value in request.fields().items():
 			if name not in ('login', 'loginid', 'username', 'password', 'extra', 'logout'):
-				for v in list(value):
+				if isinstance(value, str):
+					value = [value]
+				for v in value:
 					self.writeln('''<input type="hidden" name="%s" value="%s">'''
 							   % (self.htmlEncode(name), self.htmlEncode(v)))
 		self.writeln('</form>\n<p>&nbsp;</p></div>')

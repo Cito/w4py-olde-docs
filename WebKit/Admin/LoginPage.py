@@ -27,7 +27,9 @@ stored in the <tt>Application.config</tt> file in the <tt>WebKit/Configs</tt> di
 </table>''')
 		for name, value in self.request().fields().items():
 			if name.lower() not in ('username', 'password', 'login', 'logout', 'loginid'):
-				for v in list(value):
+				if isinstance(value, str):
+					value = [value]
+				for v in value:
 					self.writeln('<input type="hidden" name="%s" value="%s">' % (name, v))
 		if self.session().hasValue('loginid'):
 			loginid = self.session().value('loginid')
