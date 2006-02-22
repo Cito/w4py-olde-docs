@@ -492,6 +492,9 @@ class _FileParser(URLParser):
 		"""
 		# If requestPath is empty, then we're missing the trailing slash:
 		if not requestPath:
+			qs = trans.request().queryString()
+			if qs:
+				qs = "?" + qs 
 			raise HTTPMovedPermanently(
 				webkitLocation=trans.request().urlPath() + "/")
 		if requestPath == '/':
