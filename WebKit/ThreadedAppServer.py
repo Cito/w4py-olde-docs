@@ -98,7 +98,6 @@ class ThreadedAppServer(AppServer):
 		"""
 
 		self._defaultConfig = None
-		self.runnig = 0
 		try:
 			AppServer.__init__(self, path)
 			threadCount = self.setting('StartServerThreads')

@@ -496,7 +496,7 @@ class _FileParser(URLParser):
 			if qs:
 				qs = "?" + qs 
 			raise HTTPMovedPermanently(
-				webkitLocation=trans.request().urlPath() + "/")
+				webkitLocation=trans.request().urlPath() + "/" + qs)
 		if requestPath == '/':
 			requestPath = ''
 		for directoryFile in self._directoryFile:
