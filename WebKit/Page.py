@@ -130,24 +130,40 @@ class Page(HTTPContent):
 		"""Write the parts included in the <head> element.
 
 		Writes the parts inside the ``<head>...</head>`` tags.
-		Invokes `writeTitle` and `writeStyleSheet`. Subclasses
-		can override this to add additional items and should
-		invoke super.
+		Invokes `writeTitle` and then `writeMetaData`, `writeStyleSheet`
+		and `writeJavaScript`. Subclasses should override the `title`
+		method and the three latter methods only.
+
 		"""
 		self.writeTitle()
+		self.writeMetaData()
 		self.writeStyleSheet()
+		self.writeJavaScript()
 
 	def writeTitle(self):
 		"""Write the <title> element of the page.
 
 		Writes the ``<title>`` portion of the page.
-		Uses `title`, which is where you should override..
+		Uses `title`, which is where you should override.
 
 		"""
 		self.writeln('\t<title>%s</title>' % self.title())
 
+	def writeMetaData(self):
+		"""Write the meta data for the page.
+
+		This default implementation does nothing.
+		Subclasses should override if necessary.
+
+		A typical implementation is:
+
+		    self.writeln('\t<meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">')
+
+		"""
+		pass
+
 	def writeStyleSheet(self):
-		"""Write the style sheet for the page.
+		"""Write the CSS for the page.
 
 		This default implementation does nothing.
 		Subclasses should override if necessary.
@@ -155,6 +171,19 @@ class Page(HTTPContent):
 		A typical implementation is:
 
 		    self.writeln('\t<link rel="stylesheet" href="StyleSheet.css" type="text/css">')
+
+		"""
+		pass
+
+	def writeJavaScript(self):
+		"""Write the JavaScript for the page.
+
+		This default implementation does nothing.
+		Subclasses should override if necessary.
+
+		A typical implementation is:
+
+		    self.writeln('\t<script type="text/javascript" src="ajax.js"></script>')
 
 		"""
 		pass
@@ -204,7 +233,6 @@ class Page(HTTPContent):
 
 		"""
 		self.writeln('<p> This page has not yet customized its content. </p>')
-
 
 	def preAction(self, actionName):
 		"""Things to do before actions.
