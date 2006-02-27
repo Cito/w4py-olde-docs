@@ -34,5 +34,6 @@ WebKitConfig = {
 		'PushServlet',
 		'RequestInformation',
 		'Image',
+		'AjaxSuggest',
 	]
 }
