@@ -15,6 +15,7 @@
 #include "apr_buckets.h"
 #include "apr_lib.h"
 #include "apr_strings.h"
+#include "apr_version.h"
 
 /*
  * Configuration record. Used for both per-directory and per-server
