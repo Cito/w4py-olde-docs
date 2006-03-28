@@ -120,8 +120,9 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
 	def sendHeaders(self, headers):
 		"""Send headers."""
-		for header, value in headers.items():
-			self.send_header(header, value)
+		for header in headers.keys():
+			for value in headers.getheaders(header):
+				self.send_header(header, value)
 		self.end_headers()
 
 	def sendBody(self, bodyFile):
