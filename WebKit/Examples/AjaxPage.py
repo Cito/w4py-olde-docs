@@ -11,10 +11,6 @@ import StringIO, traceback, time, random
 
 from ExamplePage import ExamplePage as BaseClass
 
-debug = 0 # set to 1 if you want to see debugging output
-response_timeout = 90 # timeout of the client waiting for a response in seconds
-
-
 # PyJavascript and quote_js based on ideas from Nevow 0.4.1 (www.nevow.org)
 
 def quote_js(what):
@@ -70,6 +66,14 @@ class AjaxPage(BaseClass):
 
 	"""
 
+	# Class level variables that can be overridden by servlet instances:
+	debug = 0 # set to 1 if you want to see debugging output
+	# The following is the estimated timeout of clients waiting for a response.
+	# If a request takes longer than this, the result will be polled by the
+	# client using a separate Javascript polling mechanism. This will be only
+	# needed for long-running queries. If you don't need it, set to 0 or None:
+	timeout = 90 # timeout of the client waiting for a response in seconds
+
 	# Class level variables to help make client code simpler:
 	document = PyJavascript('document')
 	setTag = PyJavascript('ajax_setTag')
@@ -80,14 +84,22 @@ class AjaxPage(BaseClass):
 	generic_ajax = PyJavascript('generic_ajax')
 	generic_ajax_form = PyJavascript('generic_ajax_form')
 	this = PyJavascript('this')
+
+	# Response Queue for timed out queries:
 	_responseQueue = {}
 
 	def writeJavaScript(self):
 		BaseClass.writeJavaScript(self)
 		self.writeln('<script type="text/javascript" src="ajaxpage.js"></script>')
+		if self.timeout:
+			self.writeln('<script type="text/javascript" src="ajaxpage2.js"></script>')
 
 	def actions(self):
-		return BaseClass.actions(self) + ['ajax_controller', 'ajax_response']
+		a = BaseClass.actions(self)
+		a.append('ajax_controller')
+		if self.timeout:
+			a.append('ajax_response')
+		return a
 
 	def ajax_allowed(self):
 		return []
@@ -99,16 +111,17 @@ class AjaxPage(BaseClass):
 		results from long-running queries.
 
 		"""
-		who = self.session().identifier()
-		# timeout until the next time this function is called by the client:
-		wait = random.choice(range(3, 8)) # make it random to avoid synchronization
-		cmd = 'wait = %s;' % wait
-		if self._responseQueue.get(who, []): # add in other commands
-			cmd += ';'.join([str(val) for req_number, val in self._responseQueue[who]])
-			self._responseQueue[who] = []
-		if debug:
-			print "Ajax returns from queue:", cmd
-		self.write(cmd) # write out at least the wait variable
+		if self.timeout:
+			who = self.session().identifier()
+			# timeout until the next time this function is called by the client:
+			wait = random.choice(range(3, 8)) # make it random to avoid synchronization
+			cmd = 'wait = %s;' % wait
+			if self._responseQueue.get(who, []): # add in other commands
+				cmd += ';'.join([str(val) for req_number, val in self._responseQueue[who]])
+				self._responseQueue[who] = []
+			if self.debug:
+				self.log("Ajax returns from queue: " + cmd)
+			self.write(cmd) # write out at least the wait variable
 
 	def ajax_controller(self):
 		"""Execute function f with arguments a on the server side.
@@ -122,7 +135,8 @@ class AjaxPage(BaseClass):
 		if type(args) != type([]):
 			args = [args]
 		req_number = args.pop()
-		start_time = time.time()
+		if self.timeout:
+			start_time = time.time()
 		val = self.alert('There was some problem!')
 		if func in self.ajax_allowed():
 			try:
@@ -131,8 +145,8 @@ class AjaxPage(BaseClass):
 				val = self.alert('%s, although an approved function, was not found' % func)
 			else:
 				try: # pull off sequence number added to "fix" IE
-					if debug:
-						print "Ajax call %s(%s)" % (func, args)
+					if self.debug:
+						self.log("Ajax call %s(%s)" % (func, args))
 					val = str(func_obj(*args))
 				except Exception:
 					err = StringIO.StringIO()
@@ -142,17 +156,21 @@ class AjaxPage(BaseClass):
 					err.close()
 		else:
 			val = self.alert('%s is not an approved function' % func)
-		if time.time() - start_time < response_timeout:
+		if self.timeout:
+			in_time = time.time() - start_time < self.timeout
+		else:
+			in_time = 1
+		if in_time:
 			# If the computation of the function did not last very long,
 			# deliver it immediately back to the client with this response:
-			if debug:
-				print "Ajax returns immediately:", val
+			if self.debug:
+				self.log("Ajax returns immediately: " + str(val))
 			self.write(val)
 		else:
 			# If the client request might have already timed out,
 			# put the result in the queue and let client poll it:
-			if debug:
-				print "Ajax puts in queue:", val
+			if self.debug:
+				self.log("Ajax puts in queue: " + str(val))
 			who = self.session().identifier()
 			if not self._responseQueue.has_key(who):
 				self._responseQueue[who] = [(req_number, val)]

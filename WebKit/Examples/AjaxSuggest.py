@@ -26,6 +26,8 @@ for i in range(max_words):
 
 class AjaxSuggest(AjaxPage):
 
+	timeout = None # we have no long-running queries
+
 	def writeJavaScript(self):
 		AjaxPage.writeJavaScript(self)
 		self.writeln('<script type="text/javascript" src="ajaxsuggest.js"></script>')
@@ -53,8 +55,8 @@ JavaScript enabled in order for this to work.</p>
 <p>Start typing in some lowercase letters,
 and get random words starting with these characters suggested:</p>''')
 		self.writeln('''<form>
-<input type="text" name="query" id="query" onkeyup="getSuggestions();" autocomplete="off">
-<input type="submit" value="Submit"><div class="hide" id="suggestions"></div></form>''')
+<div><input type="text" name="query" id="query" onkeyup="getSuggestions();" autocomplete="off">
+<input type="submit" value="Submit"></div><div class="hide" id="suggestions"></div></form>''')
 
 	def ajax_allowed(self):
 		"""Register the suggest method for use with Ajax."""

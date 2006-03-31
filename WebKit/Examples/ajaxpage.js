@@ -1,16 +1,11 @@
 /*
-	Ajax Javascript library used by AjaxPage.
+	Basic Ajax Javascript functions used by AjaxPage.
 
 	Written by John Dickinson based on ideas from
 	Apple developer code (developer.apple.com)
 	and Nevow 0.4.1 (www.nevow.org).
-
-	Refactoring of existing Ajax functionality to allow server-initiated data
-	to be processed client side and to prevent server timeouts.
 */
 
-var server_response;
-var dying = false;
 var request_count = 0;
 
 function createRequest()
@@ -24,7 +19,6 @@ function createRequest()
 	return req;
 }
 
-// Open connection for the controller
 function openConnection(req, url)
 {
 	if (req) {
@@ -43,64 +37,6 @@ function openConnection(req, url)
 		req.send(null);
 	}
 }
-
-// Open connection for the response
-function openResponseConnection(count)
-{
-	if (!server_response) {
-		server_response = createRequest();
-	}
-	if (server_response) {
-		server_response.onreadystatechange = processResponse;
-		var loc = document.location.toString();
-		if (loc.indexOf('?') != -1) {
-			loc = loc.substr(0, loc.indexOf('?'));
-		}
-		server_response.open("GET", loc+"?_action_=ajax_response&req_count="+count.toString(), true);
-		server_response.send(null);
-	}
-}
-
-function processResponse()
-{
-	var wait = (3 + Math.random() * 5); // 3 - 8 seconds
-	if (server_response.readyState == 4) {
-		if (server_response.status == 200) {
-			try {
-				eval(server_response.responseText);
-			} catch(e) {
-				; // ignore errors
-			}
-			if (!dying) {
-				request_count += 1;
-				// reopen the response connection after a wait period
-				setTimeout("openResponseConnection(request_count)", wait*1000);
-			}
-		}
-	}
-}
-
-function shutdown()
-{
-	if (server_response) {
-		server_response.abort();
-	}
-	dying = true;
-}
-
-var userAgent = navigator.userAgent.toLowerCase()
-if (userAgent.indexOf("msie") != -1) {
-	/* IE specific stuff: */
-	/* Abort last request so we don't 'leak' connections. */
-	window.attachEvent("onbeforeunload", shutdown)
-	/* Set unload flag. */
-} else if (document.implementation && document.implementation.createDocument) {
-	/* Mozilla specific stuff (onbeforeunload is in v1.7+ only). */
-	window.addEventListener("beforeunload", shutdown, false)
-}
-
-// Open initial connection back to server.
-openResponseConnection(request_count);
 
 // Generic Ajax call:
 function generic_ajax(pre_action, func) {
