@@ -12,7 +12,7 @@ from string import ascii_lowercase
 from AjaxPage import AjaxPage
 
 max_suggestions = 10
-max_words = 1000
+max_words = 5000
 max_letters = 5
 
 # Create some random "words":
@@ -26,7 +26,7 @@ for i in range(max_words):
 
 class AjaxSuggest(AjaxPage):
 
-	timeout = None # we have no long-running queries
+	clientPolling = None # we have no long-running queries
 
 	def writeJavaScript(self):
 		AjaxPage.writeJavaScript(self)

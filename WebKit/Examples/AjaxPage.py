@@ -64,15 +64,17 @@ class AjaxPage(BaseClass):
 	are able to be called by an Ajax-enabled web page. This is very similar
 	in functionality to Webware's actions.
 
+	A polling mechanism can be used for long running requests (e.g. generating
+	reports) or if you want to send commands to the client without the client
+	first triggering an event (e.g. for a chat application). In the first case,
+	you should also specify a timeout after which polling shall be used.
+
 	"""
 
 	# Class level variables that can be overridden by servlet instances:
-	debug = 0 # set to 1 if you want to see debugging output
-	# The following is the estimated timeout of clients waiting for a response.
-	# If a request takes longer than this, the result will be polled by the
-	# client using a separate Javascript polling mechanism. This will be only
-	# needed for long-running queries. If you don't need it, set to 0 or None:
-	timeout = 90 # timeout of the client waiting for a response in seconds
+	debug = 0 # set to True if you want to see debugging output
+	clientPolling = 1 # set to True if you want to use the polling mechanism
+	responseTimeout = 90 # timeout of client waiting for a response in seconds
 
 	# Class level variables to help make client code simpler:
 	document = PyJavascript('document')
@@ -90,32 +92,41 @@ class AjaxPage(BaseClass):
 
 	def writeJavaScript(self):
 		BaseClass.writeJavaScript(self)
-		self.writeln('<script type="text/javascript" src="ajaxpage.js"></script>')
-		if self.timeout:
-			self.writeln('<script type="text/javascript" src="ajaxpage2.js"></script>')
+		s = '<script type="text/javascript" src="ajaxpage%s.js"></script>'
+		self.writeln(s % '')
+		if self.clientPolling:
+			self.writeln(s % '2')
 
 	def actions(self):
 		a = BaseClass.actions(self)
 		a.append('ajax_controller')
-		if self.timeout:
+		if self.clientPolling:
 			a.append('ajax_response')
 		return a
 
 	def ajax_allowed(self):
 		return []
 
+	def ajax_clientPollingInterval(self):
+		"""Set the interval for the client polling.
+
+		You should always make it a little random to avoid synchronization.
+
+		"""
+		return random.choice(range(3, 8))
+
 	def ajax_response(self):
 		"""Return queued Javascript functions to be executed by the client.
 
 		This is polled by the client in random intervals in order to get
-		results from long-running queries.
+		results from long-running queries or push content to the client.
 
 		"""
-		if self.timeout:
+		if self.clientPolling:
 			who = self.session().identifier()
-			# timeout until the next time this function is called by the client:
-			wait = random.choice(range(3, 8)) # make it random to avoid synchronization
-			cmd = 'wait = %s;' % wait
+			# Set the timeout until the next time this function is called
+			# by the client, using the Javascript wait variable:
+			cmd = 'wait=%s;' % self.ajax_clientPollingInterval()
 			if self._responseQueue.get(who, []): # add in other commands
 				cmd += ';'.join([str(val) for req_number, val in self._responseQueue[who]])
 				self._responseQueue[who] = []
@@ -135,7 +146,7 @@ class AjaxPage(BaseClass):
 		if type(args) != type([]):
 			args = [args]
 		req_number = args.pop()
-		if self.timeout:
+		if self.clientPolling and self.responseTimeout:
 			start_time = time.time()
 		val = self.alert('There was some problem!')
 		if func in self.ajax_allowed():
@@ -156,8 +167,8 @@ class AjaxPage(BaseClass):
 					err.close()
 		else:
 			val = self.alert('%s is not an approved function' % func)
-		if self.timeout:
-			in_time = time.time() - start_time < self.timeout
+		if self.clientPolling and self.responseTimeout:
+			in_time = time.time() - start_time < self.responseTimeout
 		else:
 			in_time = 1
 		if in_time:
@@ -178,10 +189,16 @@ class AjaxPage(BaseClass):
 				self._responseQueue[who].append((req_number, val))
 
 	def ajax_cmdToClient(self, cmd):
-		remote_address = self.request().remoteAddress()
-		if not self._responseQueue.has_key(remote_address):
-			self._responseQueue[remote_address] = []
-		self._responseQueue[remote_address].append((None, cmd))
+		"""Send Javascript commands to the client.
+
+		Client polling must be activitated if you want to use this.
+
+		"""
+		if self.clientPolling:
+			who = self.session().identifier()
+			if not self._responseQueue.has_key(who):
+				self._responseQueue[who] = []
+			self._responseQueue[who].append((None, cmd))
 
 	def preAction(self, action_name):
 		if action_name.startswith('ajax_'):
