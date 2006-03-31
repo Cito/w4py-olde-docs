@@ -3,15 +3,16 @@
 #
 # Written by John Dickinson based on ideas from
 # Apple developer code (developer.apple.com)
-# and Nevow 0.4.1 (www.nevow.org),
-# with minor changes made by Robert Forkel.
+# and Nevow 0.4.1 (www.nevow.org).
+# Minor changes by Robert Forkel and Christoph Zwerschke.
 #
 
-import StringIO, traceback, time
+import StringIO, traceback, time, random
 
 from ExamplePage import ExamplePage as BaseClass
 
-RESPONSE_TIMEOUT = 100
+debug = 0 # set to 1 if you want to see debugging output
+response_timeout = 90 # timeout of the client waiting for a response in seconds
 
 
 # PyJavascript and quote_js based on ideas from Nevow 0.4.1 (www.nevow.org)
@@ -23,7 +24,7 @@ def quote_js(what):
 	elif isinstance(what, (int, long, float, PyJavascript)):
 		ret = str(what)
 	else:
-		ret = "'%s'" % str(what).replace('\\','\\\\').replace('\'','\\\'').replace('\n','\\n')
+		ret = "'%s'" % str(what).replace('\\', '\\\\').replace('\'', '\\\'').replace('\n', '\\n')
 	return ret
 
 
@@ -41,7 +42,7 @@ class PyJavascript(object):
 
 	def __call__(self, *a, **kw):
 		args = ','.join([quote_js(i) for i in a])
-		kwargs = ','.join(['%s=%s' % (k,quote_js(v)) for k,v in kw.items()])
+		kwargs = ','.join(['%s=%s' % (k, quote_js(v)) for k, v in kw.items()])
 		if args and kwargs:
 			allargs = '%s,%s' % (args, kwargs)
 		elif not kwargs:
@@ -50,7 +51,7 @@ class PyJavascript(object):
 			allargs = kwargs
 		return self.__class__('%s(%s)' % (self, allargs))
 
-	def __getitem__(self,index):
+	def __getitem__(self, index):
 		return self.__class__('%s[%s]' % (self, quote_js(index)))
 
 	def __repr__(self):
@@ -65,7 +66,7 @@ class AjaxPage(BaseClass):
 	Subclasses should override the method ajax_allowed() which returns a list
 	of method names. These method names refer to Webware Servlet methods that
 	are able to be called by an Ajax-enabled web page. This is very similar
-	in functionality to webware's actions.
+	in functionality to Webware's actions.
 
 	"""
 
@@ -86,47 +87,53 @@ class AjaxPage(BaseClass):
 		self.writeln('<script type="text/javascript" src="ajaxpage.js"></script>')
 
 	def actions(self):
-		return BaseClass.actions(self) + ['ajax_controller','ajax_response']
+		return BaseClass.actions(self) + ['ajax_controller', 'ajax_response']
 
 	def ajax_allowed(self):
 		return []
 
 	def ajax_response(self):
-		who = self.request().remoteAddress()
-		start_time = time.time()
-		request_count = self.request().fields().get('req_count')
-		while True:
-			if self._responseQueue.get(who,[]):
-				self.write(';'.join([str(val) for req_number, val in self._responseQueue[who]]))
-				self._responseQueue[who] = []
-				break
-			else:
-				# Check for timeout,
-				if time.time() - start_time > RESPONSE_TIMEOUT:
-					break
-				# Also check to see if the server wants to shut down:
-				if self.application().server().running <= 2:
-					self.write(self.alert('The server is shutting down'
-						' and your request is not finished. Please try again later.'))
-					break
+		"""Return queued Javascript functions to be executed by the client.
+
+		This is polled by the client in random intervals in order to get
+		results from long-running queries.
+
+		"""
+		who = self.session().identifier()
+		# timeout until the next time this function is called by the client:
+		wait = random.choice(range(3, 8)) # make it random to avoid synchronization
+		cmd = 'wait = %s;' % wait
+		if self._responseQueue.get(who, []): # add in other commands
+			cmd += ';'.join([str(val) for req_number, val in self._responseQueue[who]])
+			self._responseQueue[who] = []
+		if debug:
+			print "Ajax returns from queue:", cmd
+		self.write(cmd) # write out at least the wait variable
 
 	def ajax_controller(self):
+		"""Execute function f with arguments a on the server side.
+
+		Returns Javascript function to be executed by the client immediately.
+
+		"""
 		fields = self.request().fields()
 		func = fields.get('f')
 		args = fields.get('a', [])
 		if type(args) != type([]):
 			args = [args]
-		req_number = args[-1]
+		req_number = args.pop()
 		start_time = time.time()
 		val = self.alert('There was some problem!')
 		if func in self.ajax_allowed():
 			try:
-				func_obj = getattr(self,func)
+				func_obj = getattr(self, func)
 			except AttributeError:
 				val = self.alert('%s, although an approved function, was not found' % func)
 			else:
 				try: # pull off sequence number added to "fix" IE
-					val = str(func_obj(*args[:-1]))
+					if debug:
+						print "Ajax call %s(%s)" % (func, args)
+					val = str(func_obj(*args))
 				except Exception:
 					err = StringIO.StringIO()
 					traceback.print_exc(file=err)
@@ -135,11 +142,18 @@ class AjaxPage(BaseClass):
 					err.close()
 		else:
 			val = self.alert('%s is not an approved function' % func)
-
-		if time.time() - start_time < RESPONSE_TIMEOUT:
+		if time.time() - start_time < response_timeout:
+			# If the computation of the function did not last very long,
+			# deliver it immediately back to the client with this response:
+			if debug:
+				print "Ajax returns immediately:", val
 			self.write(val)
 		else:
-			who = self.request().remoteAddress()
+			# If the client request might have already timed out,
+			# put the result in the queue and let client poll it:
+			if debug:
+				print "Ajax puts in queue:", val
+			who = self.session().identifier()
 			if not self._responseQueue.has_key(who):
 				self._responseQueue[who] = [(req_number, val)]
 			else:
@@ -155,7 +169,7 @@ class AjaxPage(BaseClass):
 		if action_name.startswith('ajax_'):
 			pass
 		else:
-			BaseClass.preAction(self,action_name)
+			BaseClass.preAction(self, action_name)
 
 	def postAction(self, action_name):
 		if action_name.startswith('ajax_'):
