@@ -132,7 +132,11 @@ class AjaxPage(BaseClass):
 				self._responseQueue[who] = []
 			if self.debug:
 				self.log("Ajax returns from queue: " + cmd)
-			self.write(cmd) # write out at least the wait variable
+		else:
+			if self.debug:
+				self.log("Ajax tells the client to stop polling.")
+			cmd = 'dying = true;'
+		self.write(cmd) # write out at least the wait variable
 
 	def ajax_controller(self):
 		"""Execute function f with arguments a on the server side.
