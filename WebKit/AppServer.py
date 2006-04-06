@@ -206,12 +206,15 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 	def configReplacementValues(self):
 		"""Get config values that need to be escaped."""
-		# Since these strings will be eval'ed we need to double
-		# escape any backslashes.
+		# Since these strings may be eval'ed as ordinary strings,
+		# we need to use forward slashes instead of backslashes.
+		# Note: This is only needed for old style config files.
+		# In new style config files, they are note eval'ed, but used
+		# directly, so double escaping would be a bad idea here.
 		return {
-			'WebwarePath' : self._webwarePath.replace('\\', '\\\\'),
-			'WebKitPath'  : self._webKitPath.replace('\\', '\\\\'),
-			'serverSidePath' : self._serverSidePath.replace('\\', '\\\\'),
+			'WebwarePath': self._webwarePath.replace('\\', '/'),
+			'WebKitPath': self._webKitPath.replace('\\', '/'),
+			'serverSidePath': self._serverSidePath.replace('\\', '/'),
 			}
 
 

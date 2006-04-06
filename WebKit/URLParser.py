@@ -110,6 +110,7 @@ class ContextParser(URLParser):
 		contexts = app.setting('Contexts')
 		defaultContext = ''
 		for name, dir in contexts.items():
+			dir = os.path.normpath(dir) # for Windows
 			if name == 'default':
 				defaultContext = dir
 			else:
@@ -124,7 +125,6 @@ class ContextParser(URLParser):
 				if name not in ('Admin', 'Examples', 'Docs', 'Testing'):
 					defaultContext = name
 					break
-
 		if self._contexts.has_key(defaultContext):
 			self._defaultContext = defaultContext
 		else:
@@ -494,7 +494,7 @@ class _FileParser(URLParser):
 		if not requestPath:
 			qs = trans.request().queryString()
 			if qs:
-				qs = "?" + qs 
+				qs = "?" + qs
 			raise HTTPMovedPermanently(
 				webkitLocation=trans.request().urlPath() + "/" + qs)
 		if requestPath == '/':
