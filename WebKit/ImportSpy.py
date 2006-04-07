@@ -26,7 +26,6 @@ of ImportSpy by setting `UseImportSpy` in Application.config to False.
 try: # if possible, use new (PEP 302) import hooks
 	from sys import meta_path, path_hooks
 except ImportError:
-	raise
 	meta_path = path_hooks = None
 
 
