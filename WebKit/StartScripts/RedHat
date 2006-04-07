@@ -81,9 +81,9 @@ export PYTHONPATH
 ### END LOCAL CONFIGURATION
 
 # Source RedHat Linux function library:
-if [ -f /etc/init.d/functions ] ; then
+if [ -f /etc/init.d/functions ]; then
 	. /etc/init.d/functions
-elif [ -f /etc/rc.d/init.d/functions ] ; then
+elif [ -f /etc/rc.d/init.d/functions ]; then
 	. /etc/rc.d/init.d/functions
 else
 	# Note that we don't really use the function library
@@ -109,9 +109,9 @@ start()
 		fi
 	fi
 	# Check if the server is already running:
-	if [ -f "$PID_FILE" ] ; then
+	if [ -f "$PID_FILE" ]; then
 		PID=`cat "$PID_FILE"`
-		if ps -p $PID > /dev/null; then
+		if ps -p $PID >/dev/null; then
 			RETVAL=1
 			echo -n "already running "
 			failure
@@ -122,59 +122,93 @@ start()
 	fi
 	if [ -z "$WEBWARE_USER" -o "$WEBWARE_USER" = "$USER" ]; then
 		"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" \
-			-o "$LOG_FILE" -i "$PID_FILE" > /dev/null &
+			-o "$LOG_FILE" -i "$PID_FILE" >/dev/null &
 	else
 		if [ "$LAUNCH_AS_WEBWARE" ]; then
 			# Switch user first, then create pid and log files:
 			CMD="\"$APP_SERVER\" $PYTHONOPTS"
 			CMD="$CMD -d \"$WORK_DIR\" -o \"$LOG_FILE\" -i \"$PID_FILE\""
-			runuser $WEBWARE_USER -c "$CMD" > /dev/null &
+			runuser $WEBWARE_USER -c "$CMD" >/dev/null &
 		else
 			# Create pid and log files first, then switch user:
 			"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" -i "$PID_FILE" \
-				-u $WEBWARE_USER >> $LOG_FILE 2>&1 &
+				-u $WEBWARE_USER >>$LOG_FILE 2>&1 &
 		fi
 	fi
-	RETVAL=$?
-	[ "$RETVAL" = 0 ] && success || failure
+	if [ "$?" = 0 ]; then
+		t=0
+		tmax=50
+		while ((t<tmax)); do
+			if sleep 0.1 2>/dev/null; then
+				let t++
+			else
+				sleep 1
+				let t+=10
+			fi
+			if [ -s "$PID_FILE" ]; then
+				break
+			fi
+		done
+		if ((t<tmax)); then
+			RETVAL=0
+			success
+			echo
+			sleep 0.5 2>/dev/null || sleep 1
+			return
+		fi
+	fi
+	RETVAL=1
+	failure
 	echo
 }
 
 stop()
 {
 	echo -n $"Stopping $APP_NAME: "
-	if [ -f "$PID_FILE" ] ; then
+	if [ -s "$PID_FILE" ]; then
 		PID=`cat "$PID_FILE"`
 		if [ -d "/proc/$PID" ]; then
-			if kill $PID > /dev/null 2>&1 ; then
-				success
-			else
-				RETVAL=1
-				failure
-				echo
-				return
+			if kill $PID >/dev/null 2>&1; then
+				t=0
+				tmax=100
+				while ((t<tmax)); do
+					if sleep 0.1 2>/dev/null; then
+						let t++
+					else
+						sleep 1
+						let t+=10
+					fi
+					if [ ! -d "/proc/$PID" ]; then
+						break
+					fi
+				done
+				if ((t<tmax)); then
+					rm -f "$PID_FILE"
+					success
+					echo
+					sleep 0.5 2>/dev/null || sleep 1
+					return
+				fi
 			fi
 		else
-			RETVAL=1
+			rm -f "$PID_FILE"
 			echo -n "not running "
-			failure
 		fi
-		rm -f "$PID_FILE"
 	else
-		RETVAL=1
 		echo -n "not running "
-		failure
 	fi
+	RETVAL=1
+	failure
 	echo
 }
 
 reload()
 {
 	echo -n $"Reloading $APP_NAME: "
-	if [ -f "$PID_FILE" ] ; then
+	if [ -s "$PID_FILE" ]; then
 		PID=`cat "$PID_FILE"`
 		if [ -d "/proc/$PID" ]; then
-			if kill -HUP $PID > /dev/null 2>&1 ; then
+			if kill -HUP $PID >/dev/null 2>&1; then
 				success
 			else
 				RETVAL=1
@@ -189,6 +223,7 @@ reload()
 		failure
 	fi
 	echo
+	sleep 0.5 2>/dev/null || sleep 1
 }
 
 restart() {
@@ -199,7 +234,7 @@ restart() {
 
 condrestart()
 {
-	if [ -f "$PID_FILE" ] ; then
+	if [ -s "$PID_FILE" ]; then
 		PID=`cat "$PID_FILE"`
 		if [ -d "/proc/$PID" ]; then
 			restart
@@ -209,7 +244,7 @@ condrestart()
 
 status()
 {
-	if [ -f "$PID_FILE" ] ; then
+	if [ -s "$PID_FILE" ]; then
 		PID=`cat "$PID_FILE"`
 		if [ -d "/proc/$PID" ]; then
 			echo $"$APP_NAME (pid $PID) is running..."
