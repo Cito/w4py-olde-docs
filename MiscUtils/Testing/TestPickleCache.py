@@ -19,7 +19,7 @@ assert os.path.basename(progDir) == 'Testing' and \
 	'Test needs to run in Testing/MiscUtils.'
 
 
-class TestPickleCache:
+class TestPickleCache(unittest.TestCase):
 
 	def test(self):
 		# print 'Testing PickleCache...'
@@ -67,7 +67,6 @@ class TestPickleCache:
 			assert readPickleCache(sourcePath) is None
 			self.writePickle() # restore
 		finally:
-			pass
 			self.remove(sourcePath)
 			self.remove(picklePath)
 

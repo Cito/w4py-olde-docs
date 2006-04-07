@@ -23,7 +23,7 @@ alltestnames = [
 	'MiscUtils.Testing.TestNamedValueAccess.makeTestSuite',
 	'MiscUtils.Testing.TestError.TestError',
 	'MiscUtils.Testing.TestFuncs.TestFuncs',
-#	'MiscUtils.Testing.TestPickleCache.TestPickleCache',
+	'MiscUtils.Testing.TestPickleCache.TestPickleCache',
 	'MiscUtils.Testing.TestDataTable.TestDataTable',
 	'MiscUtils.Testing.TestDictForArgs',
 
