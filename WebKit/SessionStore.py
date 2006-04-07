@@ -124,15 +124,29 @@ class SessionStore(Object):
 	## Convenience methods ##
 
 	def items(self):
-		return map(lambda key, self=self: (key, self[key]), self.keys())
+		itms = []
+		for k in self.keys():
+			try:
+				itms.append((k, self[k]))
+			except KeyError:
+				# since we aren't using a lock here, some keys
+				# could be already deleted again during this loop
+				pass
+		return itms
 
 	def values(self):
-		return map(lambda key, self=self: self[key], self.keys())
+		vals = []
+		for k in self.keys():
+			try:
+				vals.append(self[k])
+			except KeyError:
+				pass
+		return vals
 
 	def get(self, key, default=None):
-		if self.has_key(key):
+		try:
 			return self[key]
-		else:
+		except KeyError:
 			return default
 
 
