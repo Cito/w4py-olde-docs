@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """The AppServer singleton.
 
 The `AppServer` singleton is the controlling object/process/thread.
@@ -18,9 +19,10 @@ vague -- both are global singletons and both handle dispatching requests.
 
 from Common import *
 from Object import Object
-from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 from Application import Application
+from ImportManager import ImportManager
 from PlugIn import PlugIn
+from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 import Profiler
 import PidFile
 
@@ -28,7 +30,7 @@ from threading import Thread, Event
 
 """
 There is only one instance of AppServer, `globalAppServer` contains
-that instance.  Use it like::
+that instance. Use it like::
 
     from WebKit.AppServer import globalAppServer
 """
@@ -38,14 +40,19 @@ globalAppServer = None
 
 DefaultConfig = {
 	'PrintConfigAtStartUp': True,
-	'Verbose':              True,
-	'PlugIns':              [],
-	'CheckInterval':        100,
-	'PlugInPackages':       [],
-	'PidFile':				'appserverpid.txt',
-
-	# @@ 2000-04-27 ce: None of the following settings are implemented
-	# 'ApplicationClassName': 'Application',
+	'Verbose': True,
+	'Host': '127.0.0.1',
+	'EnableAdapter': True,
+	'AdapterPort': 8086,
+	'EnableHTTP': True,
+	'HTTPPort': 8080,
+	'PlugIns': [],
+	'PlugInDirs': [],
+	'StartServerThreads': 10,
+	'MaxServerThreads': 20,
+	'MinServerThreads': 5,
+	'CheckInterval': 100,
+	'PidFile': 'appserverpid.txt',
 }
 
 
@@ -79,10 +86,13 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			'More than one app server; or __init__() invoked more than once.'
 		globalAppServer = self
 
+		# Set up the import manager:
+		self._imp = ImportManager()
+
 		ConfigurableForServerSidePath.__init__(self)
 		Object.__init__(self)
 		if path is None:
-			path = os.path.dirname(__file__)  #os.getcwd()
+			path = os.path.dirname(__file__) # os.getcwd()
 		self._serverSidePath = os.path.abspath(path)
 		self._webKitPath = os.path.abspath(os.path.dirname(__file__))
 		self._webwarePath = os.path.dirname(self._webKitPath)
@@ -227,10 +237,10 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	def printStartUpMessage(self):
 		"""Invoked by __init__, prints a little intro."""
 		print 'WebKit AppServer', self.version()
-		print 'part of Webware for Python'
+		print 'Part of Webware for Python.'
 		print 'Copyright 1999-2001 by Chuck Esterbrook. All Rights Reserved.'
 		print 'WebKit and Webware are open source.'
-		print 'Please visit:  http://webware.sourceforge.net'
+		print 'Please visit: http://www.webwareforpython.org'
 		print
 		print 'Process id is', os.getpid()
 		print 'Date/time is', time.asctime(time.localtime(time.time()))
@@ -400,7 +410,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		sys.stderr.flush()
 		sys.stderr.write('ERROR: %s\n' % msg)
 		sys.stderr.flush()
-		sys.exit(1)  # @@ 2000-05-29 ce: Doesn't work. Perhaps because of threads
+		sys.exit(1) # @@ 2000-05-29 ce: Doesn't work. Perhaps because of threads
 
 
 ## Main ##
@@ -415,7 +425,7 @@ def main():
 		print "Use one of the adapters such as WebKit.cgi (with ThreadedAppServer)"
 		print "or OneShot.cgi"
 		server.shutDown()
-	except Exception, exc:  # Need to kill the Sweeper thread somehow
+	except Exception, exc: # Need to kill the sweeper thread somehow
 		print "Caught exception:", exc
 		print "Exiting AppServer..."
 		server.shutDown()

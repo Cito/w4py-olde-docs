@@ -1,7 +1,6 @@
 import sys, os
 from types import DictType
 from MiscUtils import AbstractError, NoDefault
-from WebKit.ImportSpy import modloader
 from Funcs import valueForString
 
 
@@ -117,7 +116,9 @@ class Configurable:
 			contents = file.read()
 			isDict = contents.strip().startswith('{')
 			file.close()
-			modloader.watchFile(filename)
+			from WebKit.AppServer import globalAppServer
+			if globalAppServer:
+				globalAppServer._imp.watchFile(filename)
 			replacements = self.configReplacementValues()
 			if replacements and isDict:
 				try:

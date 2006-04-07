@@ -21,6 +21,6 @@
 
 ('AutoReload', '0', 'If true, the application server will monitor all source files for modifications, and will restart itself as necessary to pick up changes.  This feature only works on posix systems.'),
 
-('AutoReloadPollInterval', '1', 'If AutoReload is activated and FAM (File Alternation Monitor) is not installed, the application server will periodically check for source files for changes.  This setting specifies the number of seconds to wait between checking the source files.'),
+('AutoReloadPollInterval', '1', 'If AutoReload is activated and FAM (File Alternation Monitor) is not installed or ImportSpy is deactivated, the application server will periodically check for source files for changes.  This setting specifies the number of seconds to wait between checking the source files.'),
 
 ]

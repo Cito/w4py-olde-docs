@@ -3,7 +3,6 @@ from WebKit.Servlet import Servlet
 import sys
 from types import ClassType, BuiltinFunctionType
 from keyword import iskeyword
-import ImportSpy as imp # provides find_module and load_module
 import threading
 
 
@@ -37,8 +36,9 @@ class ServletFactory(Object):
 		"""
 		Object.__init__(self)
 		self._app = application
-		self._cacheClasses = self._app.setting("CacheServletClasses",1)
-		self._cacheInstances = self._app.setting("CacheServletInstances",1)
+		self._imp = self._app._imp
+		self._cacheClasses = self._app.setting("CacheServletClasses", 1)
+		self._cacheInstances = self._app.setting("CacheServletInstances", 1)
 		# All caches are keyed on the path.
 		# _classCache caches the servlet classes, in dictionaries
 		# with keys 'mtime' and 'class'.  'mtime' is the
@@ -125,9 +125,9 @@ class ServletFactory(Object):
 				fullmodname = fullmodname[:-50]
 			modname=os.path.splitext(os.path.basename(
 				serverSidePathToImport))[0]
-			fp, pathname, stuff = imp.find_module(modname,
+			fp, pathname, stuff = self._imp.find_module(modname,
 				[os.path.dirname(serverSidePathToImport)])
-			module = imp.load_module(fullmodname, fp, pathname, stuff)
+			module = self._imp.load_module(fullmodname, fp, pathname, stuff)
 			module.__donotreload__ = 1
 			return module
 
@@ -188,8 +188,8 @@ class ServletFactory(Object):
 					file = open(initPy, 'w')
 					file.write('#')
 					file.close()
-			fp, pathname, stuff = imp.find_module(moduleName, [directory])
-			module = imp.load_module(fullModuleName, fp, pathname, stuff)
+			fp, pathname, stuff = self._imp.find_module(moduleName, [directory])
+			module = self._imp.load_module(fullModuleName, fp, pathname, stuff)
 		finally:
 			if fp is not None:
 				fp.close()
@@ -258,10 +258,8 @@ class ServletFactory(Object):
 					if servlet.__class__ is theClass:
 						return servlet
 
-		# Use a lock to prevent multiple simultaneous
-		# imports of the same module.
-		# @@ ib 2004-06: Aren't imports threadsafe already? Or maybe not,
-		# because we are using tricky import techniques (e.g., __import__)
+		# Use a lock to prevent multiple simultaneous imports of the same
+		# module. Note that (only) the import itself is already threadsafe.
 		self._importLock.acquire()
 		try:
 			mtime = os.path.getmtime(path)

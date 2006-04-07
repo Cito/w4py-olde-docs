@@ -2,7 +2,7 @@
 
 """DebugAppServer
 
-DebugAppServer executes all requests within the main thread, allowing
+`DebugAppServer` executes all requests within the main thread, allowing
 servlets to be easily debugged using any Python debugger. The drawback is
 that only one request can be processed at a time using this approach.
 
@@ -32,7 +32,7 @@ Tested on:
 	- JEdit with the JPyDbg plugin, on Windows
 """
 
-import ThreadedAppServer, ImportSpy, Profiler
+import ThreadedAppServer, Profiler
 import sys
 
 # We are going to replace ThreadedAppServer with our own class,
@@ -56,7 +56,7 @@ class DebugAppServer(OriginalThreadedAppServer):
 
 	## Init ##
 
-	excludePrefixes = ('WebKit', 'MiscUtils', 'WebUtils',  'TaskKit')
+	excludePrefixes = ('WebKit', 'MiscUtils', 'WebUtils', 'TaskKit')
 
 	def __init__(self, path=None):
 		"""Initialize DebugAppServer."""
@@ -65,6 +65,7 @@ class DebugAppServer(OriginalThreadedAppServer):
 		# Replace the request queue with a dummy object that merely
 		# runs request handlers as soon as they are "pushed"
 		self._requestQueue = DummyRequestQueue()
+		print 'You are running the debugging app server.'
 
 	def config(self):
 		"""Return default configuration."""
@@ -108,15 +109,17 @@ class DebugAppServer(OriginalThreadedAppServer):
 		self._closeThread.join()
 		sys.stdout.flush()
 		sys.stderr.flush()
-		ImportSpy.modloader.delModules(includePythonModules=False,
+		self._imp.delModules(includePythonModules=False,
 			excludePrefixes=self.excludePrefixes)
-		ImportSpy.reset()
 		raise ThreadedAppServer.RestartAppServerError
 
 
 from Application import Application
 from WebKit.Transaction import Transaction
+
+
 class DebugApplication(Application):
+	"""This is a modified Application class for debugging."""
 
 
 	## Overridden methods ##

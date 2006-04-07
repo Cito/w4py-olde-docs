@@ -13,7 +13,6 @@ up by `Application` (accessible through `Application.rootURLParser`).
 """
 
 
-import WebKit.ImportSpy as imp
 import re, os, sys
 from MiscUtils.ParamFactory import ParamFactory
 from WebKit.HTTPExceptions import *
@@ -101,6 +100,7 @@ class ContextParser(URLParser):
 		# Need to set this here because we need for initialization, during
 		# which AppServer.globalAppServer.application() doesn't yet exist:
 		self._app = app
+		self._imp= app._imp
 		# self._context will be a dictionary of context
 		# names and context directories.  It is set by
 		# `addContext`.
@@ -171,7 +171,7 @@ class ContextParser(URLParser):
 	def addContext(self, name, dir):
 		"""Add a context to the system.
 
-		The context will be	imported as a package, going by `name`,
+		The context will be imported as a package, going by `name`,
 		from the given directory. The directory doesn't have to match
 		the context name.
 
@@ -192,10 +192,10 @@ class ContextParser(URLParser):
 			if sys.modules.has_key(importAsName):
 				mod = sys.modules[importAsName]
 			else:
-				res = imp.find_module(packageName, [localDir])
+				res = self._imp.find_module(packageName, [localDir])
 				if res is None:
 					raise ImportError, '__init__.py could not be found'
-				mod = imp.load_module(name, *res)
+				mod = self._imp.load_module(name, *res)
 		except ImportError, e:
 			pass
 		except TypeError, e: # TypeError can be raised by imp.load_module()
@@ -517,7 +517,7 @@ class _FileParser(URLParser):
 	def initModule(self):
 		"""Get the __init__ module object for this FileParser's directory."""
 		try:
-			result = imp.find_module('__init__', [self._path])
+			result = self._imp.find_module('__init__', [self._path])
 			if result is None:
 				return None
 			file, initPath, desc = result
@@ -526,7 +526,7 @@ class _FileParser(URLParser):
 				fullName = fullName[:-50]
 			module = None
 			try:
-				module = imp.load_module(fullName, file, initPath, desc)
+				module = self._imp.load_module(fullName, file, initPath, desc)
 			except:
 				pass
 			file.close()
@@ -827,6 +827,7 @@ def initApp(app):
 		ServletFactoryManager.addServletFactory(factory(app))
 
 	cls = _FileParser
+	cls._imp = app._imp
 	cls._filesToHideRegexes = []
 	cls._filesToServeRegexes = []
 	from fnmatch import translate as fnTranslate

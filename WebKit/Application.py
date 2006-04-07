@@ -1,16 +1,12 @@
 #!/usr/bin/env python
 
-from Common import *
 from UserDict import UserDict
-from Object import Object
 from types import FloatType, ClassType
 
-from ExceptionHandler import ExceptionHandler
-
+from Common import *
+from Object import Object
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
-
-from TaskKit.Scheduler import Scheduler
-
+from ExceptionHandler import ExceptionHandler
 from HTTPRequest import HTTPRequest
 from Transaction import Transaction
 from Session import Session
@@ -48,7 +44,7 @@ class Application(ConfigurableForServerSidePath, Object):
 	or you can do::
 
 	    from AppServer import globalAppServer
-	    application = AppServer.application()
+	    application = globalAppServer.application()
 
 	Settings for Application are taken from ``Configs/Application.config``,
 	and it is used for many global settings, even if they aren't closely tied
@@ -65,6 +61,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._server = server
 		self._serverSidePath = server.serverSidePath()
 
+		self._imp = server._imp # the import manager
+
 		ConfigurableForServerSidePath.__init__(self)
 		Object.__init__(self)
 
@@ -75,10 +73,13 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		self._shutDownHandlers = []
 
-		# For TaskManager:
+		# Initialize TaskManager:
 		if self._server.isPersistent():
+			from TaskKit.Scheduler import Scheduler
 			self._taskManager = Scheduler(1)
 			self._taskManager.start()
+		else:
+			self._taskManager = None
 
 		# Define this before initializing URLParser, so that contexts have a
 		# chance to override this. Also be sure to define it before loading the
@@ -112,7 +113,6 @@ class Application(ConfigurableForServerSidePath, Object):
 			except: # otherwise fall back to standard exception
 				self._404Page = None
 
-
 	def initVersions(self):
 		"""Get and store versions.
 
@@ -122,15 +122,13 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		from MiscUtils.PropertiesObject import PropertiesObject
 		props = PropertiesObject(os.path.join(self.webwarePath(),
-						      'Properties.py'))
+			'Properties.py'))
 		self._webwareVersion = props['version']
 		self._webwareVersionString = props['versionString']
-
 		props = PropertiesObject(os.path.join(self.webKitPath(),
-						      'Properties.py'))
+			'Properties.py'))
 		self._webKitVersion = props['version']
 		self._webKitVersionString = props['versionString']
-
 
 	def taskManager(self):
 		"""Accessor: `TaskKit.Scheduler` instance."""
@@ -148,9 +146,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		task = SessionTask.SessionTask(self._sessions)
 		tm = self.taskManager()
 		sweepinterval = self.setting('SessionTimeout')*60/10
-		tm.addPeriodicAction(time.time()+sweepinterval,
-				     sweepinterval, task, "SessionSweeper")
-		print "Session Sweeper started"
+		tm.addPeriodicAction(time.time() + sweepinterval,
+			sweepinterval, task, "SessionSweeper")
+		print "Session sweeper has started."
 
 	def shutDown(self):
 		"""Shut down the application.
@@ -162,7 +160,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		print "Application is shutting down..."
 		self.running = 0
 		if hasattr(self, '_sessSweepThread'):
-			# We don't always have this, hence the 'if' above
+			# We don't always have this, hence the 'if' above.
 			self._closeEvent.set()
 			self._sessSweepThread.join()
 			del self._sessSweepThread
@@ -259,6 +257,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				'Technique': 'serveContent',
 				'CacheContent': 0,
 				},
+			'UseImportSpy': 1,
 		}
 
 	def configFilename(self):
@@ -340,13 +339,15 @@ class Application(ConfigurableForServerSidePath, Object):
 		if sessId:
 			try:
 				session = self.session(sessId)
-				if debug: print prefix, 'retrieved session =', session
+				if debug:
+					print prefix, 'retrieved session =', session
 			except KeyError:
 				sessId = None
 		if not sessId:
 			session = Session(transaction)
 			self._sessions[session.identifier()] = session
-			if debug: print prefix, 'created session =', session
+			if debug:
+				print prefix, 'created session =', session
 		transaction.setSession(session)
 		return session
 
@@ -389,7 +390,6 @@ class Application(ConfigurableForServerSidePath, Object):
 	def webKitPath(self):
 		"""The Path of the ``Webware/WebKit/`` directory."""
 		return self._server.webKitPath()
-
 
 	def name(self):
 		"""The name by which this was started. Usually ``AppServer``."""
@@ -821,7 +821,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		if request.queryString():
 			url = url + '?' + request.queryString()
 		if self.setting('Debug')['Sessions']:
-			print ">> [sessions] handling unnecessary path session, redirecting to", url
+			print ">> [sessions] handling unnecessary path session,' \
+				' redirecting to", url
 		transaction.response().sendRedirect(url)
 
 

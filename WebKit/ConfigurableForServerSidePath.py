@@ -28,8 +28,8 @@ class ConfigurableForServerSidePath(Configurable):
 		self.serverSidePath(), if the name ends with
 		``Filename`` or ``Dir``.
 		"""
-		
+
 		value = Configurable.setting(self, name, default)
-		if name[-8:]=='Filename' or name[-3:]=='Dir':
+		if name[-8:] == 'Filename' or name[-3:] == 'Dir':
 			value = self.serverSidePath(value)
 		return value

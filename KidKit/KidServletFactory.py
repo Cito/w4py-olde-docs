@@ -21,7 +21,6 @@ CREDITS:
 
 import os, sys, time
 from glob import glob
-from WebKit.ImportSpy import watchFile
 from WebKit.ServletFactory import ServletFactory
 from WebKit.Servlet import Servlet
 from WebKit.Page import Page
@@ -72,7 +71,7 @@ def kidClass(module):
 class KidServletFactory(ServletFactory):
 	"""Servlet factory for Kid templates."""
 
-	def __init__(self,application):
+	def __init__(self, application):
 		ServletFactory.__init__(self, application)
 		setting = application.setting
 		global defaultOutput # the default output method
@@ -149,7 +148,7 @@ class KidServletFactory(ServletFactory):
 		# Setting __orig_file__ here is already too late,
 		module.__orig_file__ = path
 		# so we need to tell ImportSpy explicitely about the file:
-		watchFile(path)
+		self._imp.watchFile(path)
 		theClass = kidClass(module)
 		theClass._orig_file = path
 		theClass.__name__ = self.computeClassName(path)

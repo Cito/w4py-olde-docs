@@ -115,4 +115,6 @@
 
 ('ReportRPCExceptionsInWebKit', '1', "1 means report exceptions in RPC servlets in the same way as exceptions in other servlets, i.e. in the logfiles, the error log, and/or by email.  0 means don't report the exceptions on the server side at all; this is useful if your RPC servlets are raising exceptions by design and you don't want to be notified."),
 
+('UseImportSpy', '1', "If this is set to true, ImportSpy will be used for keeping track of imported modules. Since this can lead to problems with incompatible importing mechanisms, the use of ImportSpy can be completely disabled by setting UseImportSpy to false. In this case, the AutoReload feature falls back to periodically checking sys.modules."),
+
 ]

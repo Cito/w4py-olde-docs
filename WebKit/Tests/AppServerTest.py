@@ -33,8 +33,10 @@ class AppServerTest(unittest.TestCase):
 		self._thread = Thread(target=pullStream,
 			args=(self._output, self._queue))
 		self._thread.start()
-		self.assertAppServerSays('^WebKit AppServer')
-		self.assertAppServerSays('Webware for Python$')
+		self.assertAppServerSays('^WebKit AppServer ')
+		self.assertAppServerSays(' Webware for Python.$')
+		self.assertAppServerSays(' by Chuck Esterbrook.')
+		self.assertAppServerSays('^WebKit and Webware are open source.$')
 		self.assertAppServerSays('^EnableHTTP\s*=\s*True$')
 		self.assertAppServerSays('^HTTPPort\s*=\s*8080$')
 		self.assertAppServerSays('^Host\s*=\s*127.0.0.1$')
