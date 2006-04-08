@@ -13,7 +13,13 @@ hook = KidExamplePage.writeContent ?>
 <p>This is the <strong>KidKit</strong> plug-in that allows you
 to automatically compile and run <strong>Kid</strong> templates
 through the WebKit application server. You can browse through the
-<a href="${servlet.request().uriWebKitRoot() + 'KidKit/Docs/UsersGuide.html'}">docs</a> here.</p>
+<a href="${servlet.request().uriWebKitRoot() + 'KidKit/Docs/UsersGuide.html'}">KidKit
+docs</a> here.</p>
+
+<p>You are currently using Kid version
+<strong py:content="kid.__version__">(version)</strong>.
+See the <a href="http://kid.lesscode.org">Kid homepage</a>
+for more information about Kid templates.</p>
 
 <h4 style="text-align:center">Here are some examples.</h4>
 
