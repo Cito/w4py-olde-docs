@@ -20,7 +20,8 @@
 	<li>The Examples context has now a servlet <code>AjaxSuggest</code>
 	demonstrating the use of Ajax with Webware for Python.
 	A baseclass <code>AjaxPage</code> and the necessary JavaScript
-	supporting these techniques are also included in the Examples context.</li>
+	supporting these techniques are also included in the Examples context.
+    (Thanks to John Dickinson and Robert Forkel.)</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
@@ -28,12 +29,12 @@
 	<li>The auto reloading app server used the <code>ImportSpy</code> module
 	to keep track of which modules have been imported. <code>ImportSpy</code>
 	was based on the old <code>ihooks</code> module which could raise problems
-	with other incompatible importing mechanisms like Cheetah templates or
-	when using zipped Python eggs. This problem has been tackled from two sides,
-	first by replacing ihooks with new (PEP 302) import hooks if available
-	(they were implemented in Python 2.3), and second by allowing to suppress
-	the use of <code>ImportSpy</code> completely by setting
-	<code>UseImportSpy</code> to False in <code>Application.config</code>.
+	with other incompatible importing mechanisms like Cheetah templates or when
+    using zipped Python eggs. This problem has been tackled from two sides,
+    first by replacing ihooks with new (PEP 302) import hooks if available (they
+    were implemented in Python 2.3), and second by allowing to suppress	the use
+    of <code>ImportSpy</code> completely by setting	<code>UseImportSpy</code>
+    to False in <span class="filename">AppServer.config</span>.
 	In this case, <code>sys.modules</code> will be polled regularly.
 	The <code>ImportSpy</code> module now contains only the import hooks,
 	the rest of the functionality for tracking and managing concurrent import

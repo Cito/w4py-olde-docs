@@ -18,7 +18,7 @@ PEP 302, falling back to the old ihooks module if the new hooks are not availabl
 In some cases this may become problematic, when other templating systems are
 used with Webware which are also using ihook support to load their templates,
 or if they are using zipimports. Therefore, it is possible to suppress the use
-of ImportSpy by setting `UseImportSpy` in Application.config to False.
+of ImportSpy by setting `UseImportSpy` in AppServer.config to False.
 
 """
 

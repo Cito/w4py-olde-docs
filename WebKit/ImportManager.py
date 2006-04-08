@@ -4,9 +4,10 @@ Manages imported modules and protects against concurrent imports.
 
 Keeps lists of all imported Python modules and templates as well as other
 config files used by Webware for Python. For modules which are not directly
-imported, ImportManager cam use ImportSpy to keep track of them. This can
+imported, ImportManager can use ImportSpy to keep track of them. This can
 be used to detect changes in source files, templates or config files in order
-to reload them automatically by the AutoReloadingAppServer.
+to reload them automatically by the AutoReloadingAppServer. The use of
+ImportSpy can be suppressed with the``UseImportSpy`` setting.
 
 """
 

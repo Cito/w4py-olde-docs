@@ -257,7 +257,6 @@ class Application(ConfigurableForServerSidePath, Object):
 				'Technique': 'serveContent',
 				'CacheContent': 0,
 				},
-			'UseImportSpy': 1,
 		}
 
 	def configFilename(self):

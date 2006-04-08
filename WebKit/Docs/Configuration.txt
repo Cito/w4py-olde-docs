@@ -402,7 +402,8 @@ AppServer.config
     or changes to the Webware source files, and reload the server as
     necessary to pick up the changes.
 
-    This uses python-fam (fam = File Alteration Monitor) if present.
-    Otherwise, or when ImportSpy has been disabled in Application.config,
-    it resorts to polling. The polling interval can be set with the
-    ``AutoReloadPollInterval`` setting which defaults to 1 second.
+    This uses python-fam (fam = file alteration monitor) if available.
+    Otherwise, or when ImportSpy has been disabled by setting
+    ``UseImportSpy`` to false, it resorts to polling. The polling interval
+    ìn seconds can be set with the ``AutoReloadPollInterval`` setting which
+    defaults to 1 second.

@@ -7,7 +7,7 @@ that adds a file-monitoring and restarting to the AppServer. Used mostly like::
 
     from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 
-If `UseImportSpy` is set to False in Application.config, or FAM support is
+If `UseImportSpy` is set to False in AppServer.config, or FAM support is
 not available, this requires regular polling. The interval for the polling
 in seconds can be set with `AutoReloadPollInterval` in AppServer.config.
 
@@ -37,6 +37,7 @@ except ImportError:
 DefaultConfig = {
 	'AutoReload': False,
 	'AutoReloadPollInterval': 1, # in seconds
+	'UseImportSpy': 1,
 }
 
 
@@ -94,7 +95,7 @@ class AutoReloadingAppServer(AppServer):
 
 	def activateAutoReload(self):
 		"""Start the monitor thread."""
-		if self._app.setting('UseImportSpy'):
+		if self.setting('UseImportSpy'):
 			s = self._imp.activateImportSpy()
 			print 'ImportSpy activated (using %s).' % s
 		self._use_fam = False

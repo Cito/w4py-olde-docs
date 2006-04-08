@@ -23,4 +23,6 @@
 
 ('AutoReloadPollInterval', '1', 'If AutoReload is activated and FAM (File Alternation Monitor) is not installed or ImportSpy is deactivated, the application server will periodically check for source files for changes.  This setting specifies the number of seconds to wait between checking the source files.'),
 
+('UseImportSpy', '1', "If this is set to true, ImportSpy will be used for keeping track of imported modules. Since this can lead to problems with incompatible importing mechanisms, the use of ImportSpy can be completely disabled by setting UseImportSpy to false. In this case, the AutoReload feature falls back to periodically checking sys.modules."),
+
 ]
