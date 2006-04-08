@@ -112,7 +112,9 @@ class PropertiesObject(UserDict):
 			pyVer = sys.version.split(' ', 1)[0].split('.')
 			pyVer = map(int, pyVer)
 		if tuple(pyVer) < tuple(self['requiredPyVersion']):
-			raise WillNotRunError, 'Required Python ver is %s, but actual ver is %s.' % (self['requiredPyVersion'], pyVer)
+			raise WillNotRunError, 'Required Python ver is %s, but actual ver is %s.' % (
+				'.'.join(map(str, self['requiredPyVersion'])),
+				'.'.join(map(str, pyVer)))
 
 	def checkRequiredOpSys(self):
 		requiredOpSys = self.get('requiredOpSys', None)
@@ -121,7 +123,8 @@ class PropertiesObject(UserDict):
 			if type(requiredOpSys) == types.StringType:
 				requiredOpSys = [requiredOpSys]
 			if not os.name in requiredOpSys:
-				raise WillNotRunError, 'Required op sys is %s, but actual op sys is %s.' % (requiredOpSys, os.name)
+				raise WillNotRunError, 'Required op sys is %s, but actual op sys is %s.' % (
+					'/'.join(requiredOpSys), os.name)
 
 	def checkDeniedOpSys(self):
 		deniedOpSys = self.get('deniedOpSys', None)
@@ -130,7 +133,8 @@ class PropertiesObject(UserDict):
 			if type(deniedOpSys) == types.StringType:
 				deniedOpSys = [deniedOpSys]
 			if os.name in deniedOpSys:
-				raise WillNotRunError, 'Will not run on op sys %s and actual op sys is %s.' % (deniedOpSys, os.name)
+				raise WillNotRunError, 'Will not run on op sys %s and actual op sys is %s.' % (
+					'/'.join(deniedOpSys), os.name)
 
 	def checkRequiredSoftware(self):
 		""" Not implemented. No op right now. """
