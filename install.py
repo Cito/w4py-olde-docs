@@ -99,11 +99,12 @@ class Installer:
 
 	def printHello(self):
 		from time import time, localtime, asctime
+		from string import replace
 		print '%(name)s %(versionString)s' % self._props
 		print 'Installer'
 		print
-		self.printKeyValue('Date', asctime(localtime(time())))
-		self.printKeyValue('Python Ver', sys.version)
+		self.printKeyValue('Cur Date', asctime(localtime(time())))
+		self.printKeyValue('Python', replace(sys.version, ') [', ')\n['))
 		self.printKeyValue('Op Sys', os.name)
 		self.printKeyValue('Platform', sys.platform)
 		self.printKeyValue('Cur Dir', os.getcwd())
