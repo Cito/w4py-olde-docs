@@ -2,6 +2,7 @@
 # Webware for Python
 
 def InstallInWebKit(appServer):
+	app = appServer.application()
 	from WebKit.PlugIn import PlugInError
 	try:
 		try:
@@ -26,7 +27,6 @@ def InstallInWebKit(appServer):
 					'.'.join(map(str, kidVersion)))
 		try:
 			from KidServletFactory import KidServletFactory
-			app = appServer.application()
 			app.addServletFactory(KidServletFactory(app))
 		except:
 			from traceback import print_exc
@@ -34,5 +34,16 @@ def InstallInWebKit(appServer):
 			raise PlugInError, 'Cannot install Kid servlet factory.'
 	except PlugInError, e:
 		print e
-		print "KidKit will not be loaded."
-		return
+		print "KidKit will not be loaded, '.kid' extension will be ignored."
+		# We need to disable the '.kid' extension because otherwise the kid
+		# templates would be delivered as ordinary files (security problem).
+		e = app.setting('ExtensionsToIgnore', [])
+		if '.kid' not in e:
+			e.append('.kid')
+			app.setSetting('ExtensionsToIgnore', e)
+		e = app.setting('FilesToHide', [])
+		if '*.kid' not in e:
+			e.append('*.kid')
+			app.setSetting('FilesToHide', e)
+		from WebKit.URLParser import initParser
+		initParser(app)

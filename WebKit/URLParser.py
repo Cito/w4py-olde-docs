@@ -374,7 +374,6 @@ class _FileParser(URLParser):
 		trans.request()._serverSidePath = name
 		return ServletFactoryManager.servletForFile(trans, name)
 
-
 	def filenamesForBaseName(self, baseName):
 		"""Find all files for a given base name.
 
@@ -807,7 +806,7 @@ ServletFactoryManager = ServletFactoryManagerClass()
 ## Global Init ##
 
 def initApp(app):
-	"""Initializes the application.
+	"""Initialize the application.
 
 	Installs the proper servlet factories, and gets some settings from
 	Application.config. Also saves the application in _globalApplication
@@ -819,13 +818,17 @@ def initApp(app):
 	"""
 	global _globalApplication
 	_globalApplication = app
-
 	from UnknownFileTypeServlet import UnknownFileTypeServletFactory
 	from ServletFactory import PythonServletFactory
+
 	ServletFactoryManager.reset()
 	for factory in [UnknownFileTypeServletFactory, PythonServletFactory]:
 		ServletFactoryManager.addServletFactory(factory(app))
 
+	initParser(app)
+
+def initParser(app):
+	"""Initialize the FileParser Class."""
 	cls = _FileParser
 	cls._imp = app._imp
 	cls._filesToHideRegexes = []
