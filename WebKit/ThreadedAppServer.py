@@ -874,11 +874,14 @@ def run(workDir=None):
 				print "Exiting AppServer%s." % (
 					e[0] == 3 and ' for reload' or '')
 				exitStatus = e[0]
+			except KeyboardInterrupt:
+				print
+				print "Exiting AppServer due to keyboard interrupt."
+				exitStatus = 0
 			except Exception, e:
-				if (isinstance(e, KeyboardInterrupt) or
-						(isinstance(e, IOError) and e[0] == errno.EINTR)):
+				if isinstance(e, IOError) and e[0] == errno.EINTR:
 					print
-					print "Exiting AppServer due to keyboard interrupt."
+					print "Exiting AppServer due to interrupt signal."
 					exitStatus = 0
 				else:
 					if doesRunHandleExceptions:
