@@ -21,7 +21,7 @@
 	demonstrating the use of Ajax with Webware for Python.
 	A baseclass <code>AjaxPage</code> and the necessary JavaScript
 	supporting these techniques are also included in the Examples context.
-    (Thanks to John Dickinson and Robert Forkel.)</li>
+	(Thanks to John Dickinson and Robert Forkel.)</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
@@ -30,17 +30,17 @@
 	to keep track of which modules have been imported. <code>ImportSpy</code>
 	was based on the old <code>ihooks</code> module which could raise problems
 	with other incompatible importing mechanisms like Cheetah templates or when
-    using zipped Python eggs. This problem has been tackled from two sides,
-    first by replacing ihooks with new (PEP 302) import hooks if available (they
-    were implemented in Python 2.3), and second by allowing to suppress	the use
-    of <code>ImportSpy</code> completely by setting	<code>UseImportSpy</code>
-    to False in <span class="filename">AppServer.config</span>.
+	using zipped Python eggs. This problem has been tackled from two sides,
+	first by replacing ihooks with new (PEP 302) import hooks if available (they
+	were implemented in Python 2.3), and second by allowing to suppress the use
+	of <code>ImportSpy</code> completely by setting <code>UseImportSpy</code>
+	to False in <span class="filename">AppServer.config</span>.
 	In this case, <code>sys.modules</code> will be polled regularly.
 	The <code>ImportSpy</code> module now contains only the import hooks,
 	the rest of the functionality for tracking and managing concurrent import
 	has been sourced out to the new <code>ImportManager</code> module.</li>
 	<li>The start script for RedHat/Fedora Linux has been improved. A timing issue
-	with the "restart" option has been solved.</li>
+	with the "restart" option has been solved (reported by Mike Trisko).</li>
 </ul>
 
 <a name="Security"></a><h2>Security</h2>
@@ -55,6 +55,9 @@
 
 <a name="Bugfixes"></a><h2>Bugfixes</h2>
 <ul>
+	<li>The <span class="filename">Monitor.py</span> for monitoring the
+	application server and the monitor service were broken and have been
+	fixed. You need to set <code>EnableMonitor</code> to use this.</li>
 	<li>Fixed bug in HTTP server that prevented multiple cookies from being
 	set at the same time.</li>
 	<li>Fixed a race condition in SessionStore (Ben Parker).</li>

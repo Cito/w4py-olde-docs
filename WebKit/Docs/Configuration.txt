@@ -345,11 +345,24 @@ AppServer.config
     be listening at a different port.  Default: ``8086``.
 ``EnableHTTP``:
     Activate the built-in HTTP server.  The HTTP server will listen
-    on the port specified by the ``HTTPPort`` setting.
-    Default: ``1`` (true)
+    on the port specified by the ``HTTPPort`` setting.  Default: ``1`` (true)
 ``HTTPPort``:
     The port the built-in HTTP server listens on.  You can point a
     browser to this port.  Default: ``8080``.
+``EnableMonitor``:
+    Whether the application server should listen for monitor service requests.
+    Monitor is a minimal service that accepts a simple protocol and returns a
+    value indicating the status of the server. If you enable this, a separate
+    monitoring program such as ``Monitor.py`` can provide additional assurance
+    that the application server continues running at all times.
+    Default: ``0`` (false)
+``HTTPPort``:
+    The port the built-in HTTP server listens on.  You can point a
+    browser to this port.
+``MonitorPort``:
+    The port for the monitor service.  You cannot point a browser to this port.
+    You may wish to change this if you have another application running at this
+    port, or if you are running more than one AppServer.  Default: ``8085``.
 ``PidFile``:
     When the AppServer starts up, the process id will be written
     into this file.  The path will be relative to the working directory
@@ -407,3 +420,5 @@ AppServer.config
     ``UseImportSpy`` to false, it resorts to polling. The polling interval
     ìn seconds can be set with the ``AutoReloadPollInterval`` setting which
     defaults to 1 second.
+
+    By default, ``AutoReload`` is set to ``0`` (false).

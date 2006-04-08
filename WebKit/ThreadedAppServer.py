@@ -671,7 +671,7 @@ class MonitorHandler(Handler):
 	settingPrefix = 'Monitor'
 
 	def handleRequest(self):
-		verbose = self.server._verbose
+		verbose = self._server._verbose
 		startTime = time.time()
 		if verbose:
 			print 'BEGIN REQUEST'
@@ -682,11 +682,11 @@ class MonitorHandler(Handler):
 		BUFSIZE = 8*1024
 		dict = self.receiveDict()
 		if dict['format'] == "STATUS":
-			conn.send(str(self.server._requestID))
+			conn.send(str(self._server._requestID))
 		elif dict['format'] == 'QUIT':
 			conn.send("OK")
 			conn.close()
-			self.server.shutDown()
+			self._server.shutDown()
 
 
 from WebKit.ASStreamOut import ASStreamOut
@@ -802,7 +802,7 @@ class AdapterHandler(Handler):
 
 	def makeInput(self):
 		"""Create a file-like object from the socket."""
-		return self._sock.makefile("rb",8012)
+		return self._sock.makefile("rb", 8012)
 
 # Determines whether the main look should run in another thread.
 # On Win NT/2K/XP, we run the mainloop in a different thread because

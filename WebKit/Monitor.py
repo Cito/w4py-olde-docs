@@ -2,7 +2,7 @@
 
 """Fault tolerance system for WebKit.
 
-:author: Jay Love
+Contributed to Webware for Python by Jay Love.
 
 This module is intended to provide additional assurance that the
 AppServer continues running at all times. This module will be
@@ -44,15 +44,15 @@ Module global:
 `defaultServer`:
     default ``"ThreadedAppServer"``. The type of AppServer to start up
     (as listed in ``Launch.py``)
-`checkInterval`:
+`monitorInterval`:
     default 10. Seconds between checks.
 `maxStartTime`:
-    deafult 120. Seconds to wait for AppServer to start before killing
+    default 120. Seconds to wait for AppServer to start before killing
     it and trying again.
 """
 
 defaultServer = "ThreadedAppServer"
-checkInterval = 10 # add to config if this implementation is adopted
+monitorInterval = 10 # add to config if this implementation is adopted
 maxStartTime = 120
 
 import socket
@@ -90,27 +90,27 @@ def createServer(setupPath=0):
 	import WebKit
 	code = 'from WebKit.%s import main' % serverName
 	exec code
-	main(['monitor',])
+	main(['start'])
 
 def startupCheck():
 	"""Make sure the AppServer starts up correctly."""
 	global debug
 	count = 0
 	print "Waiting for start..."
-	time.sleep(checkInterval/2) #give the server a chance to start
+	time.sleep(monitorInterval/2) # give the server a chance to start
 	while 1:
 		if checkServer(0):
 			break
-		count = count + checkInterval
+		count = count + monitorInterval
 		if count > maxStartTime:
 			print "Couldn't start AppServer."
 			print "Killing AppServer..."
-			os.kill(srvpid,signal.SIGKILL)
+			os.kill(srvpid, signal.SIGKILL)
 			sys.exit(1)
 		print "Waiting for start..."
-		time.sleep(checkInterval)
+		time.sleep(monitorInterval)
 
-def startServer(killcurrent = 1):
+def startServer(killcurrent=1):
 	"""Start the AppServer.
 
 	If `killcurrent` is true or not provided, kill the current AppServer.
@@ -120,16 +120,20 @@ def startServer(killcurrent = 1):
 	global debug
 	if os.name == 'posix':
 		if killcurrent:
-			try: os.kill(srvpid,signal.SIGTERM)
-			except: pass
-			try: os.waitpid(srvpid,0)
-			except: pass
+			try:
+				os.kill(srvpid, signal.SIGTERM)
+			except:
+				pass
+			try:
+				os.waitpid(srvpid, 0)
+			except:
+				pass
 		srvpid = os.fork()
 		if srvpid == 0:
 			createServer(not killcurrent)
 			sys.exit()
 
-def checkServer(restart = 1):
+def checkServer(restart=1):
 	"""Send a check request to the AppServer.
 
 	If restart is 1, then attempt to restart the server
@@ -148,7 +152,7 @@ def checkServer(restart = 1):
 		s.connect(addr)
 		s.send(statstr)
 		s.shutdown(1)
-		resp = s.recv(9)  #up to 1 billion requests!
+		resp = s.recv(9) # up to 1 billion requests!
 		monwait = time.time() - sts
 		if debug:
 			print "Processed %s Requests." % resp
@@ -176,7 +180,7 @@ def main(args):
 
 	running = 1
 
-	file = open("monitorpid.txt","w")
+	file = open("monitorpid.txt", "w")
 	if os.name == 'posix':
 		file.write(str(os.getpid()))
 	file.flush()
@@ -189,8 +193,10 @@ def main(args):
 		if debug:
 			print "Startup check exception:", e
 			print "Exiting monitor..."
-		try:	os.kill(srvpid,signal.SIGTERM)
-		except: pass
+		try:
+			os.kill(srvpid, signal.SIGTERM)
+		except:
+			pass
 		sys.exit()
 
 	while running:
@@ -198,17 +204,21 @@ def main(args):
 			if debug:
 				print "Checking server..."
 			checkServer()
-			time.sleep(checkInterval)
+			time.sleep(monitorInterval)
 		except Exception, e:
 			if debug:
 				print "Exception:", e
 			if not running:
 				return
 			print "Exiting Monitor..."
-			try: os.kill(srvpid,signal.SIGTERM)
-			except: sys.exit(0)
-			try: os.waitpid(srvpid,0) #prevent zombies
-			except: sys.exit(0)
+			try:
+				os.kill(srvpid, signal.SIGTERM)
+			except:
+				sys.exit(0)
+			try:
+				os.waitpid(srvpid, 0) # prevent zombies
+			except:
+				sys.exit(0)
 
 
 def shutDown(signum, frame):
@@ -253,9 +263,9 @@ def stop():
 	(from the PID file ``monitorpid.txt``).
 
 	"""
-	pid = int(open("monitorpid.txt","r").read())
+	pid = int(open("monitorpid.txt", "r").read())
 	# this goes to the other running instance of this module
-	os.kill(pid,signal.SIGINT)
+	os.kill(pid, signal.SIGINT)
 
 
 ## Command line interface ##
@@ -311,16 +321,32 @@ if __name__=='__main__':
 			print e
 			usage()
 		if not wwdir in sys.path:
-			sys.path.insert(0,wwdir)
+			sys.path.insert(0, wwdir)
 		sys.path.remove('')
 		try:
 			sys.path.remove('.')
 		except:
 			pass
 
-	cfg = open(os.path.join(wwdir,"WebKit","Configs/AppServer.config"))
-	cfg = eval(cfg.read())
-	addr = ((cfg['Host'],cfg['Port']-1))
+	cfgfile = open(os.path.join(wwdir, "WebKit",
+		"Configs/AppServer.config")).read()
+	cfg = { 'True': 1==1, 'False': 1==0, 'WebwarePath': wwdir }
+	if cfgfile.lstrip().startswith('{'):
+		cfg = eval(cfgfile, cfg)
+	else:
+		exec cfgfile in cfg
+	if not cfg.has_key('EnableMonitor') or not cfg['EnableMonitor']:
+		print "Monitoring has not been enabled in AppServer.config!"
+		sys.exit()
+	if cfg.has_key('Host'):
+		host = cfg['Host']
+	else:
+		host = '127.0.0.1'
+	if cfg.has_key('MonitorPort'):
+		port = cfg['MonitorPort']
+	else:
+		port = 8085
+	addr = (host, port)
 
 	if 'stop' in args:
 		stop()
