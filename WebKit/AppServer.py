@@ -244,6 +244,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		print
 		print 'Process id is', os.getpid()
 		print 'Date/time is', time.asctime(time.localtime(time.time()))
+		print 'Python is', sys.version.replace(') [', ')\n[')
 		print
 		if self.setting('PrintConfigAtStartUp'):
 			self.printConfig()
