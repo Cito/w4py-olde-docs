@@ -145,9 +145,9 @@ static const char *handle_connectretrydelay(cmd_parms *cmd, void *mconfig,
 static const char *handle_passheader(cmd_parms *cmd, void *mconfig, char *word1)
 {
     wkcfg* cfg;
-    
+
     cfg = (wkcfg *) mconfig;
-    
+
     if (word1 != NULL) {
         char **header = (char **)ap_push_array(cfg->passheaders);
 	*header = word1;
@@ -530,7 +530,7 @@ static void wk_init(server_rec *s, pool *p) {
 
 #if MODULE_MAGIC_NUMBER >= 19980527
     /* Tell apache we're here */
-    ap_add_version_component("mod_webkit/0.9");
+    ap_add_version_component("mod_webkit/0.9.1");
 #endif
 }
 

@@ -605,7 +605,7 @@ static int webkit_post_config(apr_pool_t *pconf, apr_pool_t *plog,
                                 apr_pool_t *ptemp, server_rec *s)
 {
     /* Tell Apache we're here */
-    ap_add_version_component(ptemp, "mod_webkit2/0.9");
+    ap_add_version_component(ptemp, "mod_webkit2/0.9.1");
     return OK;
 }
 

@@ -23,6 +23,11 @@ the Makefile so that APXS points to the full path to apxs.
 
 To install, run 'make install'. Then modify httpd.conf to load the module.
 
+To build on Windows, use the Microsoft Visual C++ project file mod_webkit.dsp,
+or use msvctk.bat with the free Microsoft Visual C++ 2003 Toolkit.
+For your convenience, a pre-compiled mod_webkit.dll is already included in
+this directory, just place it into your Apache modules directory.
+
 To enable this module for serving WebKit content, just set the handler for
 a directory to 'webkit-handler'. Then inform the module where the appserver
 is running using the WKServer configuration directive. It takes 2
