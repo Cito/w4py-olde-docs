@@ -51,8 +51,9 @@ Test the current version before releasing it:
     (Admin, Examples, Docs etc.) are working. Also check the various
     tests in the Testing context.
 
-[ ] Make sure that mod_webkit and all other important components can
-    be compiled, linked and used without problems.
+[ ] Make sure that mod_webkit, mod_webkit2 and all other important components
+    can be compiled, linked and used without problems. If mod_webkit or
+    mod_webkit2 have changed, provide a new mod_webkit.dll for Windows users.
 </pre>
 
 
@@ -69,12 +70,12 @@ Test the current version before releasing it:
 
 [ ] Update the HTML pages that are created from reStructuredText
     (currently these exist only in the folder WebKit/Docs).
-    * Docutils (0.3.9) must be installed
+    * Docutils (0.4) must be installed
       (that's why this is not done in the Webware installer)
     * Copy buildhtml.py from the Docutils tools directory
       somewhere to the PATH
     > cd WebKit/Docs
-    > buildhtml.py --stylesheet=../../Docs/Doc.css
+    > buildhtml.py --link-stylesheet=../../Docs/Doc.css --link-stylesheet
     * check the produced HTML pages
     The installer will modify these HTML pages later to display the
     same header and footer as the other HTML pages.

@@ -650,11 +650,8 @@ Installation is finished.''' % ((os.sep,)*2)
 			page = open(htmlFile).read()
 			if page.find('<meta name="generator" content="Docutils') > 0 \
 				and page.find('<h1 class="title">') > 0:
-				# This has obvisouly been created with docutils; modify it
+				# This has obvisouly been created with Docutils; modify it
 				# to match style, header and footer of all the other docs.
-				page = page.replace(
-					'<link rel="stylesheet" href="default.css"',
-					'<link rel="stylesheet" href="../../Docs/Doc.css"')
 				page = page.replace('<h1 class="title">',
 					'<h1 class="header">')
 				page = page.replace('</body>\n</html>', self._htFooter)

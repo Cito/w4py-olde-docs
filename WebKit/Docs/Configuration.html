@@ -3,15 +3,15 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.3.9: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.4: http://docutils.sourceforge.net/" />
 <title>Configuration Guide</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="configuration-guide">
 <h1 class="title">Configuration Guide</h1>
-<div class="contents topic" id="contents">
-<p class="topic-title first"><a name="contents">Contents</a></p>
+<div class="contents topic">
+<p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
 <ul class="simple">
 <li><a class="reference" href="#command-line-configuration" id="id3" name="id3">Command Line Configuration</a></li>
 <li><a class="reference" href="#application-config" id="id4" name="id4">Application.config</a><ul>
@@ -25,8 +25,8 @@
 <li><a class="reference" href="#appserver-config" id="id10" name="id10">AppServer.config</a></li>
 </ul>
 </div>
-<div class="section" id="command-line-configuration">
-<h1><a class="toc-backref" href="#id3" name="command-line-configuration">Command Line Configuration</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id3" id="command-line-configuration" name="command-line-configuration">Command Line Configuration</a></h1>
 <p>Each of these can be set in the <tt class="docutils literal"><span class="pre">.config</span></tt> files, but they can be overridden
 with the command line.  Run <tt class="docutils literal"><span class="pre">AppServer</span></tt> with switches in the form <tt class="docutils literal"><span class="pre">ClassName.SettingName=value</span></tt>, e.g. <tt class="docutils literal"><span class="pre">AppServer.AdapterPort=8087</span></tt>.</p>
 <p>The <tt class="docutils literal"><span class="pre">value</span></tt> is coerced into a Python type: if it starts with one of the characters <tt class="docutils literal"><span class="pre">({[&quot;'</span></tt> -- i.e., parenthesis (expression), dictionary, list, or string -- then the value with be eval'ed.  If it can be turned into an integer or float, then it will be converted, otherwise it will be left as a string.  Some examples:</p>
@@ -40,12 +40,12 @@ with the command line.  Run <tt class="docutils literal"><span class="pre">AppSe
 </ul>
 <p>Be careful about special characters in the shell.  All the characters <tt class="docutils literal"><span class="pre">()</span> <span class="pre">[]</span> <span class="pre">'</span> <span class="pre">&quot;</span></tt> are special, and need to be quoted (with <tt class="docutils literal"><span class="pre">\</span></tt> or with single or double quotation marks).</p>
 </div>
-<div class="section" id="application-config">
-<h1><a class="toc-backref" href="#id4" name="application-config">Application.config</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id4" id="application-config" name="application-config">Application.config</a></h1>
 <p><tt class="docutils literal"><span class="pre">Application.config</span></tt> covers not only the application, but a number
 of components that use it as a central point of configuration.</p>
-<div class="section" id="general-settings">
-<h2><a class="toc-backref" href="#id5" name="general-settings">General Settings</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id5" id="general-settings" name="general-settings">General Settings</a></h2>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">Contexts</span></tt>:</dt>
 <dd><p class="first">This dictionary maps context names to the directory holding the
@@ -76,8 +76,8 @@ interactively when <tt class="docutils literal"><span class="pre">install.py</sp
 <dd>Print the configuration to the console when AppServer starts.</dd>
 </dl>
 </div>
-<div class="section" id="path-handling">
-<h2><a class="toc-backref" href="#id6" name="path-handling">Path Handling</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id6" id="path-handling" name="path-handling">Path Handling</a></h2>
 <p>These configuration settings control which files are exposed to users,
 which files are hidden, and some of how those files get chosen.</p>
 <dl class="docutils">
@@ -205,8 +205,8 @@ with some known problems.  Default:</p>
 </dd>
 </dl>
 </div>
-<div class="section" id="caching">
-<h2><a class="toc-backref" href="#id7" name="caching">Caching</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id7" id="caching" name="caching">Caching</a></h2>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">CacheServletClasses</span></tt>:</dt>
 <dd>When set to zero, the AppServer will not cache the classes that
@@ -226,8 +226,8 @@ take a long time to compile, this can give a speedup.  Default:
 <tt class="docutils literal"><span class="pre">1</span></tt> (true/caching does not persist)</dd>
 </dl>
 </div>
-<div class="section" id="errors">
-<h2><a class="toc-backref" href="#id8" name="errors">Errors</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id8" id="errors" name="errors">Errors</a></h2>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">ShowDebugInfoOnErrors</span></tt>:</dt>
 <dd>If true, then uncaught exceptions will not only display a message
@@ -320,8 +320,8 @@ raising exceptions by design and you don't want to be notified.
 Default: <tt class="docutils literal"><span class="pre">1</span></tt> (true/do report exceptions).</dd>
 </dl>
 </div>
-<div class="section" id="logging">
-<h2><a class="toc-backref" href="#id9" name="logging">Logging</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id9" id="logging" name="logging">Logging</a></h2>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">LogActivity</span></tt>:</dt>
 <dd>If true, then the execution of each servlet is logged with useful
@@ -345,8 +345,8 @@ qualified arbitrarily deep.  Default: <tt class="docutils literal"><span class="
 </dl>
 </div>
 </div>
-<div class="section" id="appserver-config">
-<h1><a class="toc-backref" href="#id10" name="appserver-config">AppServer.config</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id10" id="appserver-config" name="appserver-config">AppServer.config</a></h1>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">Host</span></tt>:</dt>
 <dd>The IP address at which the application server will listen for requests.
@@ -366,11 +366,24 @@ port, or if you are running more than one AppServer they must each
 be listening at a different port.  Default: <tt class="docutils literal"><span class="pre">8086</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">EnableHTTP</span></tt>:</dt>
 <dd>Activate the built-in HTTP server.  The HTTP server will listen
-on the port specified by the <tt class="docutils literal"><span class="pre">HTTPPort</span></tt> setting.
-Default: <tt class="docutils literal"><span class="pre">1</span></tt> (true)</dd>
+on the port specified by the <tt class="docutils literal"><span class="pre">HTTPPort</span></tt> setting.  Default: <tt class="docutils literal"><span class="pre">1</span></tt> (true)</dd>
 <dt><tt class="docutils literal"><span class="pre">HTTPPort</span></tt>:</dt>
 <dd>The port the built-in HTTP server listens on.  You can point a
 browser to this port.  Default: <tt class="docutils literal"><span class="pre">8080</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">EnableMonitor</span></tt>:</dt>
+<dd>Whether the application server should listen for monitor service requests.
+Monitor is a minimal service that accepts a simple protocol and returns a
+value indicating the status of the server. If you enable this, a separate
+monitoring program such as <tt class="docutils literal"><span class="pre">Monitor.py</span></tt> can provide additional assurance
+that the application server continues running at all times.
+Default: <tt class="docutils literal"><span class="pre">0</span></tt> (false)</dd>
+<dt><tt class="docutils literal"><span class="pre">HTTPPort</span></tt>:</dt>
+<dd>The port the built-in HTTP server listens on.  You can point a
+browser to this port.</dd>
+<dt><tt class="docutils literal"><span class="pre">MonitorPort</span></tt>:</dt>
+<dd>The port for the monitor service.  You cannot point a browser to this port.
+You may wish to change this if you have another application running at this
+port, or if you are running more than one AppServer.  Default: <tt class="docutils literal"><span class="pre">8085</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">PidFile</span></tt>:</dt>
 <dd>When the AppServer starts up, the process id will be written
 into this file.  The path will be relative to the working directory
@@ -420,9 +433,12 @@ little gain.  Default <tt class="docutils literal"><span class="pre">100</span><
 to notice changes to source files, including servlets, PSP's templates,
 or changes to the Webware source files, and reload the server as
 necessary to pick up the changes.</p>
-<p class="last">This uses the python FAM (fam = File Alteration Monitor) if present.
-Otherwise it resorts to polling. The polling interval can be set with
-the <tt class="docutils literal"><span class="pre">AutoReloadPollInterval</span></tt> setting which defaults to 1 second.</p>
+<p>This uses python-fam (fam = file alteration monitor) if available.
+Otherwise, or when ImportSpy has been disabled by setting
+<tt class="docutils literal"><span class="pre">UseImportSpy</span></tt> to false, it resorts to polling. The polling interval
+in seconds can be set with the <tt class="docutils literal"><span class="pre">AutoReloadPollInterval</span></tt> setting which
+defaults to 1 second.</p>
+<p class="last">By default, <tt class="docutils literal"><span class="pre">AutoReload</span></tt> is set to <tt class="docutils literal"><span class="pre">0</span></tt> (false).</p>
 </dd>
 </dl>
 </div>

@@ -3,7 +3,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.3.9: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.4: http://docutils.sourceforge.net/" />
 <title>WebKit User's Guide</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
@@ -21,8 +21,8 @@
 </tr>
 </tbody>
 </table>
-<div class="contents topic" id="contents">
-<p class="topic-title first"><a name="contents">Contents</a></p>
+<div class="contents topic">
+<p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
 <ul class="simple">
 <li><a class="reference" href="#synopsis" id="id20" name="id20">Synopsis</a></li>
 <li><a class="reference" href="#feedback" id="id21" name="id21">Feedback</a></li>
@@ -50,23 +50,23 @@
 <li><a class="reference" href="#known-bugs" id="id39" name="id39">Known Bugs</a></li>
 </ul>
 </div>
-<div class="section" id="synopsis">
-<h1><a class="toc-backref" href="#id20" name="synopsis">Synopsis</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id20" id="synopsis" name="synopsis">Synopsis</a></h1>
 <p>WebKit provides Python classes for generating dynamic content from a
 web-based, server-side application. It is a significantly more
 powerful alternative to CGI scripts for application-oriented
 development.</p>
 </div>
-<div class="section" id="feedback">
-<h1><a class="toc-backref" href="#id21" name="feedback">Feedback</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id21" id="feedback" name="feedback">Feedback</a></h1>
 <p>You can e-mail <a class="reference" href="mailto:webware-discuss&#64;lists.sourceforge.net">webware-discuss&#64;lists.sourceforge.net</a> to give feedback,
 discuss features, and get help using WebKit.  If you have a bug to
 report, use the <a class="reference" href="http://sourceforge.net/tracker/?atid=104866&amp;group_id=4866&amp;func=browse">bug tracker</a>.</p>
 </div>
-<div class="section" id="introduction">
-<h1><a class="toc-backref" href="#id22" name="introduction">Introduction</a></h1>
-<div class="section" id="overview">
-<h2><a class="toc-backref" href="#id23" name="overview">Overview</a></h2>
+<div class="section">
+<h1><a class="toc-backref" href="#id22" id="introduction" name="introduction">Introduction</a></h1>
+<div class="section">
+<h2><a class="toc-backref" href="#id23" id="overview" name="overview">Overview</a></h2>
 <p>The core concepts of the WebKit are the Application, Servlet, Request,
 Response and Transaction, for which there are one or more Python
 classes.</p>
@@ -107,8 +107,8 @@ the user's web browser.</li>
 </ul>
 <p>For a more detailed guide, see <a class="reference" href="http://colorstudy.com/software/webware/Anatomy.html">Anatomy of a Webware Transaction</a>.</p>
 </div>
-<div class="section" id="compared-to-cgi-applications">
-<h2><a class="toc-backref" href="#id24" name="compared-to-cgi-applications">Compared to CGI applications</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id24" id="compared-to-cgi-applications" name="compared-to-cgi-applications">Compared to CGI applications</a></h2>
 <p>The alternative to a server-side application is a set of CGI
 scripts. However, a CGI script must always be launched from scratch
 and many common tasks will be performed repeatedly for each
@@ -123,16 +123,16 @@ simple applications. Webware includes a <a class="reference" href="../../CGIWrap
 to encapsulate your CGI scripts with robust error handling, e-mail
 notifications, etc.</p>
 </div>
-<div class="section" id="papers">
-<h2><a class="toc-backref" href="#id25" name="papers">Papers</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id25" id="papers" name="papers">Papers</a></h2>
 <p>You should also consider reading the <a class="reference" href="http://www.webwareforpython.org/Papers">papers</a> which have been
 written about Webware for Python, particularly the &quot;Introduction to
 Webware for Python&quot; that was presented by Chuck Esterbrook at the
 9th International Python Conference in 2001.</p>
 </div>
 </div>
-<div class="section" id="errors-uncaught-exceptions">
-<h1><a class="toc-backref" href="#id26" name="errors-uncaught-exceptions">Errors / Uncaught Exceptions</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id26" id="errors-uncaught-exceptions" name="errors-uncaught-exceptions">Errors / Uncaught Exceptions</a></h1>
 <p>One of the conveniences provided by WebKit is the handling of uncaught
 exceptions. The response to an uncaught exception is:</p>
 <ul class="simple">
@@ -153,8 +153,8 @@ using the settings <tt class="docutils literal"><span class="pre">ErrorEmailServ
 <p>Archived error messages can be browsed through the <a class="reference" href="#administration">administration</a> page.</p>
 <p>Error handling behavior can be configured as described in <a class="reference" href="Configuration.html#errors">Configuration</a>.</p>
 </div>
-<div class="section" id="configuration">
-<h1><a class="toc-backref" href="#id27" name="configuration">Configuration</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id27" id="configuration" name="configuration">Configuration</a></h1>
 <p>There are several configuration parameters through which you can alter
 how WebKit behaves. They are described below, including their default
 values. Note that you can override the defaults by placing config
@@ -169,8 +169,8 @@ example:</p>
 </pre>
 <p>See the <a class="reference" href="Configuration.html">Configuration Guide</a> for more information on settings.</p>
 </div>
-<div class="section" id="administration">
-<h1><a class="toc-backref" href="#id28" name="administration">Administration</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id28" id="administration" name="administration">Administration</a></h1>
 <p>WebKit has a built-in administration page that you can access via the
 <tt class="docutils literal"><span class="pre">Admin</span></tt> context. You can see a list of all contexts in the sidebar
 of any <tt class="docutils literal"><span class="pre">Example</span></tt> or <tt class="docutils literal"><span class="pre">Admin</span></tt> page.</p>
@@ -185,10 +185,10 @@ password when you run <tt class="docutils literal"><span class="pre">install.py<
 with WebKit, so you may wish to examine their source in
 <tt class="docutils literal"><span class="pre">WebKit/Admin/</span></tt>.</p>
 </div>
-<div class="section" id="debugging">
-<h1><a class="toc-backref" href="#id29" name="debugging">Debugging</a></h1>
-<div class="section" id="print">
-<h2><a class="toc-backref" href="#id30" name="print">print</a></h2>
+<div class="section">
+<h1><a class="toc-backref" href="#id29" id="debugging" name="debugging">Debugging</a></h1>
+<div class="section">
+<h2><a class="toc-backref" href="#id30" id="print" name="print">print</a></h2>
 <p>The most common technique is the infamous <tt class="docutils literal"><span class="pre">print</span></tt> statement. The
 results of <tt class="docutils literal"><span class="pre">print</span></tt> statements go to the console where the WebKit
 application server was started (not to the HTML page as would happen
@@ -204,8 +204,8 @@ href=InstallGuide.html#Adapters_OneShot>OneShot.cgi</a>, then you will
 need to set <span class=name>ShowConsole</span> to 1 in <span
 class=filename>WebKit/Configs/OneShotAdapter.config</span>. -->
 </div>
-<div class="section" id="raising-exceptions">
-<h2><a class="toc-backref" href="#id31" name="raising-exceptions">Raising Exceptions</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id31" id="raising-exceptions" name="raising-exceptions">Raising Exceptions</a></h2>
 <p>Uncaught expections are trapped at the application level where a
 useful error page is saved with information such as the traceback,
 environment, fields, etc. You can configure the application to
@@ -219,8 +219,8 @@ more powerful versions of the <tt class="docutils literal"><span class="pre">pri
 raise Exception, 'self = %s' % self
 </pre>
 </div>
-<div class="section" id="restarting-the-server">
-<h2><a class="toc-backref" href="#id32" name="restarting-the-server">Restarting the Server</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id32" id="restarting-the-server" name="restarting-the-server">Restarting the Server</a></h2>
 <p>When a servlet's source code changes, it is reloaded. However,
 ancestor classes of servlets and library modules are not.
 You may wish to enable the auto-reloading feature in the <a class="reference" href="Configuration.html#appserver-config">AppServer.config</a>
@@ -229,8 +229,8 @@ file to mitigate this problem.</p>
 <p>Another option is to use the AppControl page of the <a class="reference" href="#administration">Admin</a> context
 to clear the servlet instance and class cache.</p>
 </div>
-<div class="section" id="assertions">
-<h2><a class="toc-backref" href="#id33" name="assertions">Assertions</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id33" id="assertions" name="assertions">Assertions</a></h2>
 <p>Assertions are used to ensure that the internal conditions of the
 application are as expected. An assertion is equivalent to an <tt class="docutils literal"><span class="pre">if</span></tt>
 statement coupled with an exception. For example:</p>
@@ -239,8 +239,8 @@ assert shoppingCart.total()&gt;=0.0, \
     'shopping cart total is %0.2f' % shoppingCart.total()
 </pre>
 </div>
-<div class="section" id="html-validation">
-<h2><a class="toc-backref" href="#id34" name="html-validation">HTML Validation</a></h2>
+<div class="section">
+<h2><a class="toc-backref" href="#id34" id="html-validation" name="html-validation">HTML Validation</a></h2>
 <p>You can validate the HTML in your pages using the <a class="reference" href="http://www.htmlhelp.com/tools/validator/">Web Designer
 Group's HTML Validator</a>.  It is available as a <a class="reference" href="http://www.htmlhelp.com/tools/validator/packages/">RPM package</a>, in
 Debian as <tt class="docutils literal"><span class="pre">wdg-html-validator</span></tt> and you can also install the <a class="reference" href="http://www.htmlhelp.com/tools/validator/source.html">source</a>.</p>
@@ -255,8 +255,8 @@ def writeBodyParts(self):
 page.</p>
 </div>
 </div>
-<div class="section" id="naming-conventions">
-<h1><a class="toc-backref" href="#id35" name="naming-conventions">Naming Conventions</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id35" id="naming-conventions" name="naming-conventions">Naming Conventions</a></h1>
 <p>Cookies and form values that are named with surrounding underscores
 (such as <tt class="docutils literal"><span class="pre">_sid_</span></tt> and <tt class="docutils literal"><span class="pre">_action_</span></tt>) are generally reserved by WebKit
 and various plugins and extensions for their own internal purposes. If
@@ -265,8 +265,8 @@ you refrain from using surrounding underscores in your own names, then
 and [b] when new names are introduced by future versions of WebKit,
 they won't break your application.</p>
 </div>
-<div class="section" id="actions">
-<h1><a class="toc-backref" href="#id36" name="actions">Actions</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id36" id="actions" name="actions">Actions</a></h1>
 <p>Suppose you have a web page with a form and one or more
 buttons. Normally, when the form is submitted, a method such as
 Servlet's <tt class="docutils literal"><span class="pre">respondToPost()</span></tt> or Page's <tt class="docutils literal"><span class="pre">writeBody()</span></tt>, will be
@@ -312,8 +312,8 @@ label) to a valid method name. This will be needed, for instance, if there
 is a blank in the label on the button. However, usually it's simpler to
 procede as in 2. in such cases.</p>
 </div>
-<div class="section" id="plug-ins">
-<h1><a class="toc-backref" href="#id37" name="plug-ins">Plug-ins</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id37" id="plug-ins" name="plug-ins">Plug-ins</a></h1>
 <p>A plug-in is a software component that is loaded by WebKit in order to
 provide additional WebKit functionality without necessarily having to
 modify WebKit's source.</p>
@@ -326,8 +326,8 @@ author's choice as to what to provide and in what manner.</p>
 conventions in order to work with WebKit. See <a class="reference" href="Developing.html#creatingplugins">Creating Plugins</a> for
 information about writing your own.</p>
 </div>
-<div class="section" id="how-do-i-develop-an-app">
-<h1><a class="toc-backref" href="#id38" name="how-do-i-develop-an-app">How do I develop an app?</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id38" id="how-do-i-develop-an-app" name="how-do-i-develop-an-app">How do I develop an app?</a></h1>
 <p>The answer to that question might not seem clear after being deluged
 with all the details. Here's a summary:</p>
 <ul class="simple">
@@ -365,8 +365,8 @@ via the announce list:
 </li>
 </ul>
 </div>
-<div class="section" id="known-bugs">
-<h1><a class="toc-backref" href="#id39" name="known-bugs">Known Bugs</a></h1>
+<div class="section">
+<h1><a class="toc-backref" href="#id39" id="known-bugs" name="known-bugs">Known Bugs</a></h1>
 <p>Known bugs and future work in general are documented in <a class="reference" href="Future.html">Future</a>.</p>
 <p>Credit</p>
 <p>Authors: Chuck Esterbrook, Jay Love, Geoff Talvola, Ian Bicking
