@@ -9,12 +9,12 @@ except:
 	from Funcs import *
 
 # Used in testSafeDescription() below.
-class Foo: 
+class Foo:
 	pass
 
 class TestFuncs( unittest.TestCase ):
 
-		
+
 	def testCommas(self):
 		testSpec = '''
 			0 '0'
@@ -42,23 +42,23 @@ class TestFuncs( unittest.TestCase ):
 			result = eval(tests[i+1])
 			#print '%r yields %r' % (source, result)
 			assert commas(source)==result, '%r %r' % (commas(source), result)
-	
+
 			# Now try the source as a string instead of a number:
 			source = eval("'%s'" % tests[i])
 			#print '%r yields %r' % (source, result)
 			assert commas(source)==result, '%r %r' % (commas(source), result)
-	
+
 			i = i+2
-	
-	
+
+
 	def testLocalIP(self):
 		ip = localIP()
 		assert localIP()==ip  # second invocation
 		assert localIP(useCache=None)==ip
 		assert localIP(remote=None, useCache=None)==ip, 'See if this works: localIP(remote=None).  If this fails, dont worry.'
 		assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80), useCache=None)==ip
-	
-	
+
+
 	def testHostName(self):
 		# About all we can do is invoke hostName() to see that no
 		# exceptions are thrown, and do a little type checking on the
@@ -66,20 +66,20 @@ class TestFuncs( unittest.TestCase ):
 		host = hostName()
 		assert host is None  or  type(host) is type(''), \
 			'host type = %s, host = %s' % (type(host), repr(host))
-	
-	
+
+
 	def testSafeDescription(self):
 		# @@ I think these tests could fail in earlier versions of Python
 		# because types displayed slightly different names.
 		sd = safeDescription
-	
+
 		# basics:
 		assert sd(1)=="what=1 class=<type 'int'>", sd(1)
 		assert sd(1, 'x')=="x=1 class=<type 'int'>", sd(1, 'x')
 		assert sd('x')=="what='x' class=<type 'str'>", sd('x')
 		f = Foo()
 		assert sd(f).find('TestFuncs.Foo')!=-1, sd(f)
-	
+
 		# new object type:
 		try:
 			object  # more recent versions of Python have a builtin object type
@@ -89,17 +89,20 @@ class TestFuncs( unittest.TestCase ):
 			class Bar(object): pass
 			b = Bar()
 			assert sd(b).find('TestFuncs.Bar')!=-1, sd(b)
-	
+
 		# okay now test that safeDescription eats exceptions from repr():
 		class Baz:
 			def __repr__(self):
 				raise KeyError, 'bogus'
 		b = Baz()
 		try:
-			assert sd(b).find("(exception from repr(x): exceptions.KeyError: 'bogus')")!=-1, sd(b)
+			s = sd(b)
+			s = s.replace("<class 'exceptions.KeyError'>", 'exceptions.KeyError') # new style
 		except:
-			assert 0, 'failure: should not get exception'
-	
+			s = 'failure: should not get exception'
+		assert s.find("(exception from repr(x): exceptions.KeyError: 'bogus')")!=-1, s
+
+
 	def testUniqueId(self):
 		lastResult = None
 		for x in range(5):
@@ -107,13 +110,13 @@ class TestFuncs( unittest.TestCase ):
 			assert type(result) is type('')
 			assert len(result)==32
 			assert result!=lastResult
-	
+
 			result = uniqueId(self.testUniqueId)
 			assert type(result) is type('')
 			assert len(result)==32
 			assert result!=lastResult
-	
-	
+
+
 	def testValueForString(self):
 		evalCases = '''
 			1
@@ -130,34 +133,34 @@ class TestFuncs( unittest.TestCase ):
 			"z"
 			"""1234"""
 		'''
-	
+
 		stringCases = '''
 			kjasdfkasdf
 			2389234lkdsflkjsdf
 			*09809
 		'''
-	
+
 		evalCases = [s.strip() for s in evalCases.strip().split('\n')]
 		for case in evalCases:
 			assert valueForString(case)==eval(case), 'case=%r, valueForString()=%r, eval()=%r' % (case, valueForString(case), eval(case))
-	
+
 		stringCases = [s.strip() for s in stringCases.strip().split('\n')]
 		for case in stringCases:
 			assert valueForString(case)==case, 'case=%r, valueForString()=%r' % (case, valueForString(case))
-	
-	
+
+
 	def testWordWrap(self):
 		# an example with some spaces and newlines
 		msg = """Arthur:  "The Lady of the Lake, her arm clad in the purest \
 	shimmering samite, held aloft Excalibur from the bosom of the water, \
 	signifying by Divine Providence that I, Arthur, was to carry \
 	Excalibur. That is why I am your king!"
-	
+
 	Dennis:  "Listen. Strange women lying in ponds distributing swords is \
 	no basis for a system of government. Supreme executive power derives \
 	from a mandate from the masses, not from some farcical aquatic \
 	ceremony!\""""
-	
+
 		for margin in range(20, 200, 20):
 			s = wordWrap(msg, margin)
 			for line in s.split('\n'):
