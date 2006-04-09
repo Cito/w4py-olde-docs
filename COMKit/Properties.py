@@ -32,4 +32,4 @@ def willRunFunc():
 	except ImportError:
 		pass
 	if not success:
-		return 'The pythoncom module is required to work with COM.'
+		return 'The pythoncom module (pywin32 library) is required to work with COM.'
