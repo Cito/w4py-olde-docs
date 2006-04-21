@@ -24,12 +24,12 @@ of ImportSpy by setting `UseImportSpy` in AppServer.config to False.
 
 
 try: # if possible, use new (PEP 302) import hooks
-	from sys import meta_path, path_hooks
+	from sys import path_hooks, path_importer_cache
 except ImportError:
-	meta_path = path_hooks = None
+	path_hooks = None
 
 
-if meta_path is not None and path_hooks is not None:
+if path_hooks is not None:
 
 	from os.path import isdir
 
@@ -41,18 +41,18 @@ if meta_path is not None and path_hooks is not None:
 
 		def __init__(self, path=None):
 			assert self._imp
-			if path is not None and not isdir(path):
+			if path and isdir(path):
+				self.path = path
+			else:
 				raise ImportError
-			self.path = path
 
-		def find_module(self, fullname, path=None):
-			subname = fullname.split('.')[-1]
-			path = self.path and [self.path] or path
+		def find_module(self, fullname):
 			try:
-				self.file, self.filename, self.info = self._imp.find_module(subname, path)
+				self.file, self.filename, self.info = self._imp.find_module(
+					fullname.split('.')[-1], [self.path])
 			except ImportError:
-				return None
-			if self.file and self.filename and self.info:
+				self.file = None
+			if self.file:
 				return self
 			else:
 				return None
@@ -66,8 +66,8 @@ if meta_path is not None and path_hooks is not None:
 	def activate(imp_manager):
 		assert not ImportSpy._imp
 		ImportSpy._imp = imp_manager
-		meta_path.append(ImportSpy())
 		path_hooks.append(ImportSpy)
+		path_importer_cache.clear()
 		imp_manager.recordModules()
 		return 'new import hooks'
 
