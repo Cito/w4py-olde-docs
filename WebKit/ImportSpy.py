@@ -40,6 +40,7 @@ if path_hooks is not None:
 		_imp = None
 
 		def __init__(self, path=None):
+			"""Create importer."""
 			assert self._imp
 			if path and isdir(path):
 				self.path = path
@@ -47,6 +48,7 @@ if path_hooks is not None:
 				raise ImportError
 
 		def find_module(self, fullname):
+			"""Replaces imp.find_module."""
 			try:
 				self.file, self.filename, self.info = self._imp.find_module(
 					fullname.split('.')[-1], [self.path])
@@ -58,12 +60,14 @@ if path_hooks is not None:
 				return None
 
 		def load_module(self, fullname):
+			"""Replaces imp.load_module."""
 			mod = self._imp.load_module(fullname, self.file, self.filename, self.info)
 			if mod:
 				mod.__loader__ = self
 			return mod
 
 	def activate(imp_manager):
+		"""Activate ImportSpy."""
 		assert not ImportSpy._imp
 		ImportSpy._imp = imp_manager
 		path_hooks.append(ImportSpy)
@@ -107,6 +111,7 @@ else: # Python < 2.3, fall back to using the old ihooks module
 			return mod
 
 	def activate(imp_manager):
+		"""Activate ImportSpy."""
 		assert not ImportSpy._imp
 		ImportSpy._imp = imp_manager
 		ImportSpy()
