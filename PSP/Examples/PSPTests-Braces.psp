@@ -62,13 +62,16 @@ See the <a href="View.py?filename=<%=os.path.basename(self.request().serverSideP
 <hr>
 
 <h4>Unix system info:</h4>
-<table bgcolor="gray" cellpadding="4"><%
+<table bgcolor="gray"><%
 if os.name == 'posix': {
-	for i in os.uname(): {
-		res.write('<tr><td style="color:white">'+str(i)+'</td></tr>')
+	for info, value in zip(('OS name', 'Hostname',
+		'OS release', 'OS version', 'Hardware'), os.uname()): {
+		res.write('<tr><td>' + info + ':&nbsp;</th>'
+			'<td style="color:white">' + str(value) + '</td></tr>')
 	}
 } else: {
-		res.write('<tr><td style="color:white">This is not a Unix system.</td></tr>')
+		res.write('<tr><td style="color:white">'
+			'This is not a Unix system.</td></tr>')
 }
 %></table>
 
@@ -89,9 +92,9 @@ if os.name == 'posix': {
 <h4>Request Variables:</h4>
 
 <table><% for i in self.request()._environ.keys(): {
-res.write('<tr valign="top">><td style="color:red;font-size:small">'
+res.write('<tr valign="top"><td style="color:red;font-size:small">'
 	+str(i)+'&nbsp;</td><td style="color:blue;font-size:small">'
-	+self.request()._environ[i].replace(',', ', ').replace(';', '; ')
+	+self.request()._environ[i].replace(',', ', ').replace(';', '; ').replace(':', ': ')
 	+'</td></tr>') } %></table>
 
 <hr>
