@@ -6,8 +6,14 @@ def InstallInWebKit(appServer):
 	from WebKit.PlugIn import PlugInError
 	try:
 		try:
-			from KidKit.Properties import requiredKidVersion
+			from KidKit.Properties import requiredSoftware
 		except ImportError:
+			raise PlugInError, 'Cannot determine required software.'
+		for soft in requiredSoftware:
+			if soft['name'] == 'kid':
+				requiredKidVersion = soft['version']
+				break
+		else:
 			raise PlugInError, 'Cannot determine required Kid version.'
 		try:
 			import kid

@@ -19,17 +19,17 @@ requiredSoftware = [
 ]
 
 def willRunFunc():
-	# WebKit doesn't check requiredSoftware yet.
-	# So we do so:
-	success = 0
+	# WebKit doesn't check requiredSoftware yet. So we do so:
 	try:
-		# For reasons described in the __init__.py, we can't actually import pythoncom
-		# here, but we need to see if the module is available.  We can use the "imp"
-		# standard module to accomplish this.
+		# For reasons described in the __init__.py, we can't actually import
+		# pythoncom here, but we need to see if the module is available.
+		# We can use the "imp" standard module to accomplish this.
 		import imp
-		imp.find_module('pythoncom')
-		success = 1
+		for soft in requiredSoftware:
+			imp.find_module(soft['name'])
 	except ImportError:
-		pass
+		success = 0
+	else:
+		success = 1
 	if not success:
-		return 'The pythoncom module (pywin32 library) is required to work with COM.'
+		return 'The pythoncom module (pywin32 library) is required to use COMKit.'
