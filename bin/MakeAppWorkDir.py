@@ -6,7 +6,7 @@ INTRODUCTION
 
 This utility builds a directory tree that can be used as the current
 working directory of an instance of the WebKit application server.
-By using a separate directory tree like this your application can run
+By using a separate directory tree like this, your application can run
 without needing write access etc. to the Webware directory tree, and
 you can also run more than one application server at once using the
 same Webware code. This makes it easy to reuse and keep Webware
@@ -55,9 +55,13 @@ class MakeAppWorkDir:
 	"""Make a new application runtime directory for Webware.
 
 	This class breaks down the steps needed to create a new runtime
-	directory for webware.  That includes all the needed
+	directory for Webware. That includes all the needed
 	subdirectories, default configuration files, and startup scripts.
 	Each step can be overridden in a derived class if needed.
+
+	Existing files will not be overwritten, but access permissions
+	will be changed accordingly in any case.
+
 	"""
 
 	def __init__(self, webwareDir, workDir, verbose=1, osType=None,
@@ -92,7 +96,11 @@ class MakeAppWorkDir:
 		You can override the steps taken here with your own methods.
 
 		"""
-		self.msg("Making a new WebKit runtime directory...")
+		if os.path.exists(self._workDir):
+			self.msg("The target directory already exists.")
+			self.msg("Adding everything needed for a WebKit runtime directory...")
+		else:
+			self.msg("Making a new WebKit runtime directory...")
 		self.msg()
 		self.makeDirectories()
 		self.copyConfigFiles()
@@ -113,13 +121,15 @@ class MakeAppWorkDir:
 		for dir in standardDirs:
 			dir = os.path.join(self._workDir, dir)
 			if os.path.exists(dir):
-				self.msg("\tWarning: %s already exists." % dir)
+				self.msg("\t%s already exists." % dir)
 			else:
 				os.mkdir(dir)
 				self.msg("\t%s" % dir)
 		for dir in self._libraryDirs:
 			dir = os.path.join(self._workDir, dir)
-			if not os.path.exists(dir):
+			if os.path.exists(dir):
+				self.msg("\t%s already exists." % dir)
+			else:
 				os.makedirs(dir)
 				open(os.path.join(dir, '__init__.py'), 'w').write('#\n')
 				self.msg("\t%s created." % dir)
@@ -133,8 +143,11 @@ class MakeAppWorkDir:
 		for name in configs:
 			newname = os.path.join(self._workDir, "Configs",
 				os.path.basename(name))
-			self.msg("\t%s" % newname)
-			shutil.copyfile(name, newname)
+			if os.path.exists(newname):
+				self.msg("\t%s already exists." % newname)
+			else:
+				self.msg("\t%s" % newname)
+				shutil.copyfile(name, newname)
 			mode = os.stat(newname)[stat.ST_MODE]
 			# remove public read/write/exec perms
 			os.chmod(newname, mode & 0770)
@@ -156,7 +169,11 @@ class MakeAppWorkDir:
 			else:
 				chmod = 0
 			newname = os.path.join(self._workDir, os.path.basename(name))
-			if not os.path.exists(newname):
+			if os.path.exists(newname):
+				self.msg("\t%s already exists." % newname)
+				if chmod:
+					os.chmod(newname, 0755)
+			else:
 				oldname = os.path.join(self._webKitDir, name)
 				if os.path.exists(oldname):
 					self.msg("\t%s" % newname)
@@ -190,7 +207,10 @@ class MakeAppWorkDir:
 			if name.endswith('Service.py') and self._osType != 'nt':
 				continue
 			newname = os.path.join(workDir, name)
-			if not os.path.exists(newname):
+			if os.path.exists(newname):
+				self.msg("\t%s already exists." % newname)
+				os.chmod(newname, 0755)
+			else:
 				oldname = os.path.join(webKitDir, name)
 				if os.path.exists(oldname):
 					self.msg("\t%s" % newname)
@@ -201,7 +221,10 @@ class MakeAppWorkDir:
 					self.msg("\tWarning: Cannot find %r." % oldname)
 		name = 'WebKit.cgi'
 		newname = os.path.join(workDir, os.path.basename(name))
-		if not os.path.exists(newname):
+		if os.path.exists(newname):
+			self.msg("\t%s already exists." % newname)
+			os.chmod(newname, 0755)
+		else:
 			oldname = os.path.join(webKitDir, os.path.join('Adapters', name))
 			if os.path.exists(oldname):
 				self.msg("\t%s" % newname)
@@ -234,11 +257,16 @@ class MakeAppWorkDir:
 				configDir =  configDir.lstrip(os.altsep)
 		else:
 			configDir = contextDir
-		if not os.path.exists(contextDir):
+		if os.path.exists(contextDir):
+			self.msg("\t%s already exists." % contextDir)
+		else:
+			self.msg("\t%s" % contextDir)
 			os.makedirs(contextDir)
 		for name in exampleContext:
 			filename = os.path.join(contextDir, name)
-			if not os.path.exists(filename):
+			if os.path.exists(filename):
+				self.msg("\t%s already exists." % filename)
+			else:
 				self.msg("\t%s" % filename)
 				open(filename, "w").write(exampleContext[name])
 		self.msg("Updating config for default context...")
@@ -249,15 +277,18 @@ class MakeAppWorkDir:
 		output  = open(filename, 'w')
 		foundContext = 0
 		for line in content:
-			if line.startswith("Contexts['default'] = "):
+			if line.startswith("Contexts[%r] = %r\n"
+					% (self._contextName, configDir)):
+				foundContext += 1
+			elif line.startswith("Contexts['default'] = "):
 				output.write("Contexts[%r] = %r\n"
 					% (self._contextName, configDir))
 				output.write("Contexts['default'] = %r\n"
 					% self._contextName)
-				foundContext += 1
+				foundContext += 2
 			else:
 				output.write(line)
-		if not foundContext:
+		if foundContext < 2:
 			self.msg("\tWarning: Default context could not be set.")
 		self.msg()
 
@@ -265,18 +296,24 @@ class MakeAppWorkDir:
 		self.msg("Creating .cvsignore files...")
 		files = {
 			'.': '*.pyc\n*.pyo\n'
-					'address.*\nhttpd.*\nappserverpid.*\nprofile.pstats',
+				'address.*\nhttpd.*\nappserverpid.*\nprofile.pstats',
 			'Cache': '[a-zA-Z0-9]*',
 			'ErrorMsgs': '[a-zA-Z0-9]*',
 			'Logs': '[a-zA-Z0-9]*',
 			'Sessions': '[a-zA-Z0-9]*',
 			self._contextName: '*.pyc\n*.pyo' }
+		foundFiles = 0
 		for dir, contents in files.items():
 			filename = os.path.join(self._workDir,
 				dir, '.cvsignore')
-			f = open(filename, 'w')
-			f.write(contents)
-			f.close()
+			if os.path.exists(filename):
+				foundFiles += 1
+			else:
+				f = open(filename, 'w')
+				f.write(contents)
+				f.close()
+		if foundFiles:
+			self.msg("\tDid not change existing .cvsignore files.")
 		self.msg()
 
 	def changeOwner(self):
@@ -496,9 +533,6 @@ def main(args=None):
 		usage()
 	if args:# too many parameters
 		usage()
-	if os.path.exists(workDir):
-		print "The target directory already exists!"
-		sys.exit(1)
 	if not contextName:
 		if contextDir:
 			contextName = os.path.basename(contextDir)

@@ -2,8 +2,14 @@
 
 <p><% name %> version <% versionString %> released on <% releaseDate %></p>
 
-<p>This release contains a few fixes and improvements of WebKit, MiddleKit and KidKit.</p>
-
-<p>The changes in Python 2.5 have been incorporated, but this has not yet been thoroughly tested.</p>
+<ul>
+<li>This release of Webware for Python includes a few fixes and improvements of
+the WebKit, MiddleKit and KidKit plug-ins (see the respective release notes).</li>
+<li>The <span class="filename">MakeAppWorkDir.py</span> script now allows to
+be run on an existing directory. This will create all missing files and directories,
+and set access permissions accordingly (requested by Andreas Poisel).</li>
+<li>Compatibility with Python&nbsp;2.5 has been factored in, although this has not
+yet been throughly tested (and a stable version is not yet available anyway).</li>
+</ul>
 
 <% footer() %>
