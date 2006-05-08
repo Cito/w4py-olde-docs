@@ -37,7 +37,7 @@ except ImportError:
 DefaultConfig = {
 	'AutoReload': False,
 	'AutoReloadPollInterval': 1, # in seconds
-	'UseImportSpy': 1,
+	'UseImportSpy': True,
 }
 
 
