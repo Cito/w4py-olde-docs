@@ -353,7 +353,7 @@ pointing your browser to:
     http://localhost:8080
 
 In a productive environment, you will probably want to use Apache or another
-web server instead of the built-in HTTP server. The most somple (but least
+web server instead of the built-in HTTP server. The most simple (but least
 performant) solution to do this is by using the Python WebKit.cgi CGI script.
 Copy it to your web server's cgi-bin directory or anywhere else that it will
 execute CGIs from. If you see import errors, you may need to modify the file
