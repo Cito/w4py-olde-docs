@@ -109,7 +109,7 @@ class AutoReloadingAppServer(AppServer):
 					self._use_fam = True
 				except IOError:
 					print 'FAM not available, fall back to polling.'
-					self._fc = NOne
+					self._fc = None
 			if self._use_fam:
 				print 'AutoReload Monitor started, using FAM.'
 				target = self.fileMonitorThreadLoopFAM
