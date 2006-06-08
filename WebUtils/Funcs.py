@@ -68,20 +68,36 @@ for c in letters + digits + '_.-/':
 _urlEncode[' '] = '+'
 
 def urlEncode(s):
-	"""Return the encoded version of the given string, safe for using as a URL."""
+	"""Return the encoded version of the given string.
+
+	The resulting string is safe for using as a URL.
+
+	With Python 2.4 and newer, you should use
+	urllib.quote_plus() instead of urlEncode().
+
+	"""
 	return ''.join(map(lambda c: _urlEncode[c], s))
 
 def urlDecode(s):
 	"""Return the decoded version of the given string.
 
-	Note that invalid URLs will throw exceptons.
-	For example, a URL whose % coding is incorrect.
+	Note that invalid URLs will not throw exceptions.
+	For example, incorrect % codings will be ignored.
+
+	With Python 2.4 and newer, you should use
+	urllib.unquote_plus() instead of urlDecode().
 
 	"""
 	p1 = s.replace('+', ' ').split('%')
 	p2 = [p1.pop(0)]
 	for p in p1:
-		p2.append(chr(int(p[:2], 16)) + p[2:])
+		if len(p[:2].strip()) == 2:
+			try:
+				p2.append(chr(int(p[:2], 16)) + p[2:])
+			except ValueError:
+				p2.append('%' + p)
+		else:
+			p2.append('%' + p)
 	return ''.join(p2)
 
 def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=None):
@@ -126,7 +142,7 @@ def requestURI(dict):
 def normURL(path):
 	"""Normalizes a URL path, like os.path.normpath.
 
-	Acts on	a URL independant of operating system environment.
+	Acts on a URL independant of operating system environment.
 
 	"""
 	if not path:
