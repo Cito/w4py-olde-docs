@@ -68,6 +68,7 @@ server = None
 
 class NotEnoughDataError(Exception):
 	pass
+
 class ProtocolError(Exception):
 	pass
 
@@ -245,7 +246,7 @@ class ThreadedAppServer(AppServer):
 					threadCheck = 0
 					self.manageThreadCount()
 				else:
-					threadCheck = threadCheck + 1
+					threadCheck += 1
 
 				self.restartIfNecessary()
 
@@ -280,7 +281,7 @@ class ThreadedAppServer(AppServer):
 		count = 0
 		for i in self._threadPool:
 			if i._processing:
-				count = count + 1
+				count += 1
 		return count
 
 	def manageThreadCount(self):
@@ -296,11 +297,10 @@ class ThreadedAppServer(AppServer):
 		# the minserverthreads) are tricky. When working
 		# with this, remember thread creation is *cheap*.
 
-		average = 0
-		max = 0
-		debug = 0
+		average = max = 0
 
-		if debug: print "ThreadUse Samples=%s" % str(self._threadUseCounter)
+		if debug:
+			print "ThreadUse Samples:", self._threadUseCounter
 		for i in self._threadUseCounter:
 			average += i
 			if i > max:
@@ -312,11 +312,11 @@ class ThreadedAppServer(AppServer):
 			print "ThreadCount: ", self.threadCount
 
 		if len(self._threadUseCounter) < self._maxServerThreads:
-			return #not enough samples
+			return # not enough samples
 
-		margin = self._threadCount / 2 #smoothing factor
+		margin = self._threadCount / 2 # smoothing factor
 		if debug:
-			print "margin=", margin
+			print "Margin:", margin
 
 		if average > self._threadCount - margin and \
 			self._threadCount < self._maxServerThreads:
@@ -342,7 +342,6 @@ class ThreadedAppServer(AppServer):
 		Worker threads poll with the `threadloop` method.
 
 		"""
-		debug = 0
 		if debug:
 			print "Spawning new thread"
 		t = Thread(target=self.threadloop)
@@ -403,7 +402,7 @@ class ThreadedAppServer(AppServer):
 		self.initThread()
 
 		t = threading.currentThread()
-		t.processing = False
+		t._processing = False
 
 		try:
 			while 1:
@@ -413,12 +412,12 @@ class ThreadedAppServer(AppServer):
 						if debug:
 							print "Thread retrieved None, quitting."
 						break
-					t.processing = True
+					t._processing = True
 					try:
 						handler.handleRequest()
 					except:
 						traceback.print_exc(file=sys.stderr)
-					t.processing = False
+					t._processing = False
 					handler.close()
 				except Queue.Empty:
 					pass
@@ -536,6 +535,7 @@ class ThreadedAppServer(AppServer):
 				host,
 				port)
 			return self._addr[settingPrefix]
+
 
 class Handler:
 	"""A very general socket handler.
@@ -720,14 +720,13 @@ class TASASStreamOut(ASStreamOut):
 		the buffer out on the socket.
 
 		"""
-		debug = 0
 		result = ASStreamOut.flush(self)
 		if result: # a True return value means we can send
 			reslen = len(self._buffer)
 			sent = 0
 			while sent < reslen:
 				try:
-					sent = sent + self._socket.send(
+					sent += self._socket.send(
 						self._buffer[sent:sent+8192])
 				except socket.error, e:
 					if e[0] == errno.EPIPE: # broken pipe
@@ -952,11 +951,9 @@ def main(args):
 	for ThreadedAppServer.
 
 	"""
-
 	function = run
 	daemon = False
 	workDir = None
-
 	for i in args[:]:
 		if settingRE.match(i):
 			match = settingRE.match(i)
@@ -975,7 +972,6 @@ def main(args):
 		else:
 			print usage
 			return
-
 	if daemon:
 		if os.name == "posix":
 			pid = os.fork()
@@ -983,5 +979,4 @@ def main(args):
 				sys.exit()
 		else:
 			print "Daemon mode not available on your OS."
-
 	return function(workDir=workDir)
