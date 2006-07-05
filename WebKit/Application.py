@@ -663,25 +663,27 @@ class Application(ConfigurableForServerSidePath, Object):
 		currentContextName = req._contextName
 		req.setURLPath(urlPath)
 		req.addParent(currentServlet)
-		# We use a try/finally to make sure everything gets restored properly
-		# in the event of an exception in an included servlet.
+
+		# Run the included servlet.
+		# (2006-07-05 cz: Do not use try/finally here, because exception
+		# handling should happen in the context of the included servlet.)
+		servlet = self._rootURLParser.findServletForTransaction(trans)
+		trans._servlet = servlet
+		# We will interpret an EndResponse in an included page to mean that
+		# the current page may continue processing.
 		try:
-			servlet = self._rootURLParser.findServletForTransaction(trans)
-			trans._servlet = servlet
-			# We will interpret an EndResponse in an included page to mean that
-			# the current page may continue processing.
-			try:
-				servlet.runTransaction(trans)
-			except EndResponse:
-				pass
-			self.returnServlet(servlet, trans)
-		finally:
-			req.popParent()
-			req.setURLPath(currentPath)
-			req._serverSidePath = currentServerSidePath
-			req._serverSideContextPath = currentServerSideContextPath
-			req._contextName = currentContextName
-			trans._servlet = currentServlet
+			servlet.runTransaction(trans)
+		except EndResponse:
+			pass
+		self.returnServlet(servlet, trans)
+
+		# Restore everything properly
+		req.popParent()
+		req.setURLPath(currentPath)
+		req._serverSidePath = currentServerSidePath
+		req._serverSideContextPath = currentServerSideContextPath
+		req._contextName = currentContextName
+		trans._servlet = currentServlet
 
 	def resolveInternalRelativePath(self, trans, url, context=None):
 		"""Return the absolute internal path.
