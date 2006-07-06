@@ -33,6 +33,8 @@ class StorePage(SitePage):
 			# We expect to find them with the actual model file,
 			# so we update sys.path appropriately:
 			extraDir = os.path.dirname(modelFilename)
+			# We need the parent directory of the model package:
+			extraDir = os.path.dirname(extraDir)
 			if extraDir not in sys.path:
 				sys.path.insert(1, extraDir)
 			req = self.request()
@@ -40,6 +42,13 @@ class StorePage(SitePage):
 				user=req.value('user'), passwd=req.value('password'))
 			self._store.readModelFileNamed(modelFilename)
 			self._store.connect()
+			recentModels = self.request().cookie('recentModels', [])
+			if recentModels:
+				recentModels = recentModels.split(';')
+			if modelFilename not in recentModels:
+				recentModels.append(modelFilename)
+				recentModels = ';'.join(recentModels)
+				self.response().setCookie('recentModels', ';'.join(recentModels))
 		return self._store
 
 
@@ -66,7 +75,7 @@ class StorePage(SitePage):
 		modelFilename = self.urlEncode(self.modelFilename())
 		for name in names:
 			urlName = self.urlEncode(name)
-			if name==curClassName:
+			if name == curClassName:
 				style = 'CurClassLink'
 			else:
 				style = 'ClassLink'

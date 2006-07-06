@@ -38,6 +38,8 @@ class SelectModel(SitePage):
 		self.writeHeading('Select a recent model:')
 		recentModels = self.request().cookie('recentModels', [])
 		if recentModels:
+			recentModels = recentModels.split(';')
+		if recentModels:
 			for modelFilename in recentModels:
 				self.writeModelLink(modelFilename)
 		else:
