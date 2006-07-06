@@ -5,6 +5,7 @@ from types import ClassType, BuiltinFunctionType
 from keyword import iskeyword
 import threading
 
+debug = 0
 
 class ServletFactory(Object):
 	"""Servlet factory template.
@@ -105,7 +106,6 @@ class ServletFactory(Object):
 		servlet name specified in the URL. This is used in PSP.
 
 		"""
-		debug = 0
 
 		# Pull out the full server side path and the context path
 		request = transaction.request()
@@ -121,9 +121,7 @@ class ServletFactory(Object):
 				'\\', '_').replace('/', '_').replace('.', '_')
 			if debug:
 				print __file__, "fullmodname=", fullmodname
-			if len(fullmodname) > 100:
-				fullmodname = fullmodname[:-50]
-			modname=os.path.splitext(os.path.basename(
+			modname = os.path.splitext(os.path.basename(
 				serverSidePathToImport))[0]
 			fp, pathname, stuff = self._imp.find_module(modname,
 				[os.path.dirname(serverSidePathToImport)])
@@ -171,7 +169,6 @@ class ServletFactory(Object):
 		__init__.py if that file doesn't already exist.
 
 		"""
-		debug = 0
 		if debug:
 			print __file__, fullModuleName, moduleName, directory
 		if not forceReload:
@@ -359,7 +356,7 @@ class PythonServletFactory(ServletFactory):
 			# You may also have a servlet name that is a Python reserved word.
 			# Automatically append an underscore in these cases:
 			if iskeyword(name):
-				name = name + '_'
+				name += '_'
 			# If the mangled name does not exist either, report an error:
 			if not hasattr(module, name):
 				raise ValueError, \

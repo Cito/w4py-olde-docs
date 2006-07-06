@@ -23,13 +23,18 @@ class AppControl(AdminSecurity):
 <td>Clear the class and instance caches of each servlet factory.</td>
 </tr><tr>
 <td><input type="submit" name="action" value="Reload"></td>
-<td>Reload the selected Python modules. Be Careful!</td></tr>''')
-			mods = sys.modules.keys()
-			mods.sort()
+<td>Reload the selected Python modules. Be careful!</td></tr>''')
+			modnames = sys.modules.keys()
+			modnames.sort()
 			wr('<tr><td></td><td>')
-			for m in mods:
-				wr('<input type="checkbox" name="reloads" value="%s">'
-					' %s<br>' % (m, m))
+			for n in modnames:
+				m = sys.modules[n]
+				if not n.endswith('__init__') \
+						and not hasattr(m, '__path__') \
+						and not hasattr(m, '__orig_file__'):
+					# show only the easily reloadable modules
+					wr('<input type="checkbox" name="reloads" value="%s">'
+						' %s<br>' % (n, n))
 			wr('</td></tr>\n</table>\n</form>')
 
 		elif action == "Clear cache":
@@ -56,12 +61,12 @@ class AppControl(AdminSecurity):
 			if not type(reloadnames) == type([]):
 				reloadnames = [reloadnames]
 			wr('<p>')
-			for m in reloadnames:
-				if m and sys.modules.get(m, None):
-					wr("Reloading %s...<br>" %
-						self.htmlEncode(str(sys.modules[m])))
+			for n in reloadnames:
+				m = sys.modules.get(n)
+				if m:
+					wr("Reloading %s...<br>" % self.htmlEncode(str(m)))
 					try:
-						reload(sys.modules[m])
+						reload(m)
 					except Exception, e:
 						wr('<span style="color:red">Could not reload,'
 							' error was "%s".</span><br>' % e)
