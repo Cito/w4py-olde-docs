@@ -2,13 +2,16 @@
 all: wkcgi
 
 CFLAGS = -O2
+LIBS =
+# Solaris:
+# LIBS = -lsocket -lnsl
 COMMON = ../common
 
 .c.o:
 	$(CC) $(CFLAGS) -c $(@D)/$(<F) -o $(@D)/$(@F)
 
-
 wkcgi: wkcgi.o marshal.o environ.o wkcommon.o parsecfg.o
+	$(CC) $(LIBS) $(^F) -o $(@D)/$(@F)
 
 wkcgi.o: wkcgi.c wkcgi.h
 
@@ -24,7 +27,5 @@ wkcommon.o: $(COMMON)/wkcommon.c $(COMMON)/wkcommon.h
 parsecfg.o: $(COMMON)/parsecfg.c
 	$(CC) $(CFLAGS) -c $(COMMON)/parsecfg.c
 
-
 clean:
-	-rm *.o
-	-rm wkcgi
+	-rm -f wkcgi *.o
