@@ -177,7 +177,7 @@ class Model:
 						try:
 							klass = self.klass(klassName)
 						except KeyError:
-							raise SampleError(linenum, "Class '%s' is not defined" % tableName)
+							raise SampleError(linenum, "Class '%s' is not defined" % klassName)
 						samples = self._klassSamples.get(klass, None)
 						if samples is None:
 							samples = self._klassSamples[klass] = []
@@ -863,14 +863,19 @@ class ObjRefAttr:
 			# caveat: MS SQL Server supports subselects but complains "Subqueries are not allowed in this context. Only scalar expressions are allowed." so more work is needed in its SQL generator
 		else:
 			# the de facto technique of <serialnum> or <class name>.<serial num>
-			input = input.split()[0]  # this gets rid of the sample value comment described above
+			input = input.split()
+			# this gets rid of the sample value comment described above
+			if input:
+				input = input[0]
+			else:
+				input = ''
 			parts = input.split('.')
 			if len(parts)==2:
 				className = parts[0]
 				objSerialNum = parts[1]
 			else:
 				className = self.targetClassName()
-				objSerialNum = input
+				objSerialNum = input or 'null'
 			klass = self.klass().klasses()._model.klass(className)
 			klassId = klass.id()
 			if self.setting('UseBigIntObjRefColumns', False):

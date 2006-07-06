@@ -59,13 +59,11 @@ td.dataTable2 {
 <p>Create the directories for the project:</p>
 
 <table class="cmd"><tr><td>
-&gt; <span class="typed">mkdir Videos</span><br>
-&gt; <span class="typed">cd Videos</span><br>
-&gt; <span class="typed">mkdir Middle</span><br>
-&gt; <span class="typed">cd Middle</span><br>
+&gt; <span class="typed">mkdir -p Videos/Middle/Videos.mkmodel</span><br>
+&gt; <span class="typed">cd Videos/Middle</span><br>
 </td></tr></table>
 
-<p>You could create the required MK files by hand, but we'll use the included template instead. Copy <span class="filename">MiddleKit/Resources/Template.mkmodel</span> to <span class="filename">Videos/Middle/</span> and rename it to <span class="filename">Videos.mkmodel</span>. Note that an MK model is specified by a directory that contains additional files.</p>
+<p>You could create the required MK files by hand, but we'll use the included template instead. Copy <span class="filename">MiddleKit/Resources/Template.mkmodel/Classes.csv</span> to <span class="filename">Videos/Middle/Videos.mkmodel</span>. Note that an MK model is specified by a directory that contains additional files.</p>
 
 <p>You can edit the object model with popular spreadsheet programs such as Excel, StarOffice, etc. For new files, use the <span class="menuCmd">Save as...</span> command to choose the CSV or "comma-separated value" format. If necessary, you can create the file with a common text editor, but this method of editing becomes tedious because there is no column alignment (which is what the spreadsheet programs give you).</p>
 
@@ -111,13 +109,15 @@ td.dataTable2 {
 
 <table class="cmd"><tr><td>
 &gt; <span class="typed">python /Projects/Webware/MiddleKit/Design/Generate.py</span><br>
-generate.py: error: Missing options.<br>
-Usage: generate.py --db DBNAME --model FILENAME [--sql] [--py] [--outdir DIRNAME]<br>
-       generate.py -h | --help <br>
+Generate.py: error: Missing options.<br>
+Usage: Generate.py --db DBNAME --model FILENAME [--sql] [--py] [--config FILENAME] [--outdir DIRNAME]<br>
+       Generate.py -h | --help<br>
 <br>
-       * Known databases include: MSSQL, MySQL<br>
+       * Known databases include: MSSQL, MySQL, PostgreSQL<br>
        * If neither --sql nor --py are specified, both are generated.<br>
        * If --outdir is not specified, then the base filename (sans extension) is used.<br>
+       * --config lets you specify a different config filename inside the model.<br>
+         This is mostly useful for the regression test suite.<br>
 &gt;
 </td></tr></table>
 
@@ -146,7 +146,7 @@ Generating Python...
 python /Projects/Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos<br>
 ^D<br></span>
 > <span class="typed">chmod u+x generate</span><br>
-> <span class="typed">generate</span><br>
+> <span class="typed">./generate</span><br>
 Generating SQL...<br>
 Generating Python...
 </td></tr></table>
@@ -155,7 +155,7 @@ Generating Python...
 
 <table class="cmd"><tr><td>
 &gt; <span class="typed">copy con generate.bat<br>
-python /Projects/Webware/MiddleKit/Design/Generate.py --db MySQL --model Videos<br>
+python C:\Projects\Webware\MiddleKit\Design\Generate.py --db MySQL --model Videos<br>
 ^Z<br></span>
 > <span class="typed">generate</span><br>
 Generating SQL...<br>
@@ -165,7 +165,9 @@ Generating Python...
 
 <a name="CreateData"></a><h2>Create sample data</h2>
 
-<p>Create a new CSV file at <span class="filename">Videos.mkmodel/Samples.csv</span>:</p>
+Copy the template file <span class="filename">MiddleKit/Resources/Template.mkmodel/Samples.csv</span> to <span class="filename">Videos/Middle/Videos.mkmodel</span> and edit it to contain the following sample data. Or, you can grab this file from:</p>
+
+<pre class="filename">MiddleKit/Docs/Videos/Middle/Videos.mkmodel/Samples.csv</pre>
 
 <table class="dataTable">
 <tr class="dataTable1"><td class="dataTable1">Movie objects</td><td class="dataTable1">&nbsp;</td><td class="dataTable1">&nbsp;</td></tr>
@@ -298,16 +300,16 @@ if __name__=='__main__':
 
 <p>If you get an error that MiddleKit cannot be imported, make sure that <span class="filename">Webware/</span> is in your path. You can do this temporarily for your command line session by setting PYTHONPATH:</p>
 
-<p>Windows and UNIX.csh:</p>
+<p>Windows (and UNIX.csh):</p>
 
 <table class="cmd"><tr><td>
-> <span class="typed">set pythonpath=/Projects/Webware</span>
+> <span class="typed">set PYTHONPATH=C:\Projects\Webware</span>
 </td></tr></table>
 
 <p>UNIX.sh:</p>
 
 <table class="cmd"><tr><td>
-> <span class="typed">pythonpath=/Projects/Webware</span>
+> <span class="typed">export PYTHONPATH=/Projects/Webware</span>
 </td></tr></table>
 
 
@@ -331,6 +333,7 @@ def main():
 
 <b>    movie = Movie()
     movie.setTitle('The Terminator')
+    movie.setYear(1984)
     movie.setRating('r')
     store.addObject(movie)
     store.saveChanges()</b>
