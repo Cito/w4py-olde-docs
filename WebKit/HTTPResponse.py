@@ -33,7 +33,7 @@ class HTTPResponse(Response):
 		self._committed = 0
 
 		if headers is None:
-			self._headers = {}#{'Content-type': 'text/html'}
+			self._headers = {}
 			self.setHeader('Content-type','text/html')
 		else:
 			self._headers = headers
@@ -310,35 +310,41 @@ class HTTPResponse(Response):
 		self._strmOut.prepend(headerstring)
 
 	def recordSession(self):
-		"""Record session id.
+		"""Record session ID.
 
-		Invoked by commit() to record the session id in the response
+		Invoked by commit() to record the session ID in the response
 		(if a session exists). This implementation sets a cookie for
 		that purpose. For people who don't like sweets, a future version
 		could check a setting and instead of using cookies, could parse
-		the HTML and update all the relevant URLs to include the session id
+		the HTML and update all the relevant URLs to include the session ID
 		(which implies a big performance hit). Or we could require site
 		developers to always pass their URLs through a function which adds
-		the session id (which implies pain). Personally, I'd rather just
+		the session ID (which implies pain). Personally, I'd rather just
 		use cookies. You can experiment with different techniques by
 		subclassing Session and overriding this method. Just make sure
 		Application knows which "session" class to use.
+
+		It should be also considered to automatically add the server port
+		to the cookie name in order to distinguish application instances
+		running on different ports on the same server, or to use the port
+		cookie-attribute introduced with RFC 2965 for that purpose.
 
 		"""
 		if not self._transaction.application().setting('UseCookieSessions', True):
 			return
 		sess = self._transaction._session
-		if debug: prefix = '>> recordSession:'
 		if sess:
-			cookie = Cookie('_SID_', sess.identifier())
+			cookie = Cookie(self._transaction.application()._session_name, sess.identifier())
 			cookie.setPath('/')
 			if sess.isExpired() or sess.timeout() == 0:
 				# Invalid -- tell client to forget the cookie.
 				cookie.delete()
 			self.addCookie(cookie)
-			if debug: print prefix, 'setting sid =', sess.identifier()
+			if debug:
+				print '>> recordSession: Setting SID =', sess.identifier()
 		else:
-			if debug: print prefix, 'did not set sid'
+			if debug:
+				print '>> recordSession: Did not set SID.'
 
 	def reset(self):
 		"""Reset the response (such as headers, cookies and contents)."""

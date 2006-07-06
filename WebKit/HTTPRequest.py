@@ -122,32 +122,9 @@ class HTTPRequest(Request):
 			dict[key] = self._cookies[key].value
 		self._cookies = dict
 
-		# Get session ID from cookie if available
-		self._cookieSession = self._cookies.get('_SID_', None)
-
 		self._transaction = None
-		self._serverRootPath = ""
-		self._extraURLPath = ""
-
-		# try to get automatic path session
-		# if UseAutomaticPathSessions is enabled in Application.config
-		# Application.py redirects the browser to a url with SID in path
-		# http://gandalf/a/_SID_=2001080221301877755/Examples/
-		# _SID_ is extracted and removed from path
-		self._pathSession = None
-		if self._environ['PATH_INFO'][1:6] == '_SID_':
-			self._pathSession = self._environ['PATH_INFO'][7:].split('/',1)[0]
-			self._cookies['_SID_'] = self._pathSession
-			sidstring = '_SID_=' + self._pathSession +'/'
-			self._environ['REQUEST_URI'] = self._environ[
-				'REQUEST_URI'].replace(sidstring,'')
-			self._environ['PATH_INFO'] = self._environ[
-				'PATH_INFO'].replace(sidstring,'')
-			if self._environ.has_key('PATH_TRANSLATED'):
-				self._environ['PATH_TRANSLATED'] = self._environ[
-					'PATH_TRANSLATED'].replace(sidstring,'')
-			assert(not self._environ.has_key('WK_URI')) # obsolete?
-
+		self._serverRootPath = self._extraURLPath = ""
+		self._cookieSession = self._pathSession = None
 		self._sessionExpired = 0
 
 		# Save the original urlPath.
@@ -165,11 +142,29 @@ class HTTPRequest(Request):
 	def transaction(self):
 		return self._transaction
 
-
 	def setTransaction(self, trans):
 		"""This method should be invoked after the transaction is created for this request."""
 		self._transaction = trans
-
+		self._sidname = trans.application()._session_name
+		# Get session ID from cookie if available
+		self._cookieSession = self._cookies.get(self._sidname, None)
+		# try to get automatic path session
+		# if UseAutomaticPathSessions is enabled in Application.config
+		# Application.py redirects the browser to a url with SID in path
+		# http://gandalf/a/_SID_=2001080221301877755/Examples/
+		# _SID_ is extracted and removed from path
+		p = self._environ['PATH_INFO'].split('/' ,2)
+		if len(p) and not p[0] and p[1].startswith(self._sidname + '='):
+			self._pathSession = p[1].split('=', 1)[1]
+			self._cookies[self._sidname] = self._pathSession
+			sidstring = p[1] +'/'
+			self._environ['REQUEST_URI'] = self._environ[
+				'REQUEST_URI'].replace(sidstring, '')
+			self._environ['PATH_INFO'] = self._environ[
+				'PATH_INFO'].replace(sidstring, '')
+			if self._environ.has_key('PATH_TRANSLATED'):
+				self._environ['PATH_TRANSLATED'] = self._environ[
+					'PATH_TRANSLATED'].replace(sidstring, '')
 
 	## Values ##
 
@@ -305,9 +300,6 @@ class HTTPRequest(Request):
 
 		"""
 		self._absolutepath = 0
-		# if self._environ.has_key('WK_URI'): # added by the adapter
-		#	self._environ['PATH_INFO'] = self._environ['WK_URI']
-		#	return self._environ['WK_URI']
 		if self._environ.has_key('WK_ABSOLUTE'): # set by the adapter, used by modpHandler
 			self._absolutepath = 1
 			return self.fsPath()
@@ -655,7 +647,7 @@ class HTTPRequest(Request):
 
 	def sessionId(self):
 		"""Return a string with the session id specified by the client, or None if there isn't one."""
-		sid = self.value('_SID_', None)
+		sid = self.value(self._sidname, None)
 		if self._transaction.application().setting('Debug')['Sessions']:
 			print '>> sessionId: returning sid =', sid
 		return sid
@@ -680,7 +672,7 @@ class HTTPRequest(Request):
 		"""
 		# Modify the request so that it looks like a hashed version of the
 		# given session ID was passed in
-		self.setField('_SID_', sessionID)
+		self.setField(self._sidname, sessionID)
 
 		if force:
 			# Force this session ID to exist, so that a random session ID

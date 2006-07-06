@@ -1,10 +1,8 @@
 from Common import *
-from MiscUtils.Funcs import uniqueId, hostName
+from MiscUtils.Funcs import uniqueId
 from time import localtime, time
 import re
 
-# Only compute this once, for improved speed.
-_hostname = hostName()
 
 class SessionError(Exception):
 	pass
@@ -47,18 +45,15 @@ class Session(Object):
 
 	def __init__(self, trans, identifier=None):
 		Object.__init__(self)
-		self._lastAccessTime  = self._creationTime = time()
-		self._isExpired       = 0
-		self._numTrans        = 0
-		self._values          = {}
-		self._timeout = trans.application().setting('SessionTimeout')*60
-		sessionPrefix = trans.application().setting('SessionPrefix', None)
-		if sessionPrefix == 'hostname':
-			self._prefix = _hostname + '-'
-		elif sessionPrefix is None:
-			self._prefix = ''
-		else:
-			self._prefix = sessionPrefix + '-'
+
+		self._lastAccessTime = self._creationTime = time()
+		self._isExpired = 0
+		self._numTrans = 0
+		self._values = {}
+		app = trans.application()
+		self._timeout = app._session_timeout
+		self._prefix = app._session_prefix
+		self._sidname = app._session_name
 
 		if identifier:
 			if re.search(r'[^\w\.\-]', identifier) is not None:
@@ -72,14 +67,14 @@ class Session(Object):
 				self._identifier = self._prefix + ''.join(
 					map(lambda x: '%02d' % x,
 						localtime(time())[:6])) + '-' + uniqueId(self)
-				if not trans.application().hasSession(self._identifier):
+				if not app.hasSession(self._identifier):
 					break
-				attempts = attempts + 1
+				attempts += 1
 			else:
 				raise SessionError, \
 					"Can't create valid session id after %d attempts." % attempts
 
-		if trans.application().setting('Debug')['Sessions']:
+		if app.setting('Debug')['Sessions']:
 			print '>> [session] Created session, timeout=%s, id=%s, self=%s' % (
 				self._timeout, self._identifier, self)
 
@@ -223,14 +218,10 @@ class Session(Object):
 	def sessionEncode(self, url):
 		"""Encode the session ID as a parameter to a url."""
 		import urlparse
-		sid = '_SID_=' + self.identifier()
-		url=list(urlparse.urlparse(url)) #make a list
-		if url[4] == '':
-			url.pop(4)
-			url.insert(4, sid)
-		else:
-			params=url.pop(4)
-			url.insert(4, params + "&" + sid)
+		url = list(urlparse.urlparse(url)) # make a list
+		if url[4]:
+			url[4] += '&'
+		url[4] += '%s=%s' % (self._sidname, self.identifier())
 		url = urlparse.urlunparse(url)
 		return url
 

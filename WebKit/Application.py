@@ -86,10 +86,19 @@ class Application(ConfigurableForServerSidePath, Object):
 		# sessions, in case the loading of the sessions causes an exception.
 		self._exceptionHandlerClass = ExceptionHandler
 
+		self._session_prefix = self.setting('SessionPrefix', None) or ''
+		if self._session_prefix:
+			if self._session_prefix == 'hostname':
+				from MiscUtils.Funcs import hostName
+				self._session_prefix = hostName()
+			self._session_prefix += '-'
+		self._session_timeout = self.setting('SessionTimeout')*60
+		self._session_name = self.setting('SessionName', None) or '_SID_'
+
 		# For session store:
-		sessionStore = 'Session%sStore' % self.setting('SessionStore')
-		exec 'from %s import %s' % (sessionStore, sessionStore)
-		klass = locals()[sessionStore]
+		session_store = 'Session%sStore' % self.setting('SessionStore')
+		exec 'from %s import %s' % (session_store, session_store)
+		klass = locals()[session_store]
 		assert isinstance(klass, ClassType) or issubclass(klass, Object)
 		self._sessions = klass(self)
 
@@ -145,7 +154,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		import time
 		task = SessionTask.SessionTask(self._sessions)
 		tm = self.taskManager()
-		sweepinterval = self.setting('SessionTimeout')*60/10
+		sweepinterval = self._session_timeout/10
 		tm.addPeriodicAction(time.time() + sweepinterval,
 			sweepinterval, task, "SessionSweeper")
 		print "Session sweeper has started."
@@ -741,8 +750,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		req = transaction.request()
 		editlink = req.adapterName() + "/Admin/EditFile"
-		self._exceptionHandlerClass(self, transaction, excInfo,
-						 {"editlink": editlink})
+		self._exceptionHandlerClass(self, transaction,
+			excInfo, {"editlink": editlink})
 
 	def rootURLParser(self):
 		"""Accessor: the Rool URL parser.
@@ -799,10 +808,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		newSid = transaction.session().identifier()
 		request = transaction.request()
-		url = request.adapterName() + '/_SID_='+ newSid + '/' \
-			+ request.pathInfo() + (request.extraURLPath() or '')
-		if request.queryString():
-			url = url + '?' + request.queryString()
+		url = '%s/%s=%s/%s%s%s' % (request.adapterName(), self._session_name,
+			newSid, request.pathInfo(), request.extraURLPath() or '',
+			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:
 			print '>> [sessions] handling UseAutomaticPathSessions,' \
 				' redirecting to', url
@@ -817,10 +825,9 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		"""
 		request = transaction.request()
-		url = request.adapterName() + '/' + request.pathInfo() + (request.extraURLPath() or '')
-
-		if request.queryString():
-			url = url + '?' + request.queryString()
+		url = '%s/%s%s%s' % (request.adapterName(),
+			request.pathInfo(), request.extraURLPath() or '',
+			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:
 			print ">> [sessions] handling unnecessary path session,' \
 				' redirecting to", url

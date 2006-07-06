@@ -49,6 +49,8 @@
 
 ('SessionPrefix', 'None', '''This setting can be used to prefix the session IDs with a string.  Possible values are None (don't use a prefix), "hostname" (use the hostname as the prefix), or any other string (use that string as the prefix).  Why would you want to use this?  It can be used along with some mod_rewrite magic to do simple load balancing with session affinity.'''),
 
+('SessionName', "'_SID_'", '''This setting can be used to change the name of the field holding the session ID. When the session ID is stored in a cookie and there are applications running on different ports on the same host, you should choose different names for the session IDs, since the web browsers usually do not distinguish the ports when storing cookies (the port cookie-attribute introduced with RFC 2965 is not used).'''),
+
 ('ExtraPathInfo', '0', '''When enabled, this setting allows a servlet to be followed by additional path components which are accessible via HTTPRequest's extraURLPath(). For subclassers of Page, this would be self.request().extraURLPath(). This may degrade performance when turned on.'''),
 
 ('CacheServletClasses', '1', 'When set to zero, the app server will not cache the classes that are loaded for servlets. This is for development and debugging.'),

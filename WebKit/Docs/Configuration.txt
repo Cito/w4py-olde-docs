@@ -150,6 +150,14 @@ which files are hidden, and some of how those files get chosen.
 
     .. _mod_rewrite: http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html
 
+``SessionName``:
+    This setting can be used to change the name of the field holding
+    the session ID. When the session ID is stored in a cookie and there
+    are applications running on different ports on the same host, you
+    should choose different names for the session IDs, since the web
+    browsers usually do not distinguish the ports when storing cookies
+    (the port cookie-attribute introduced with RFC 2965 is not used).
+    Default: ``_SID_``.
 ``ExtraPathInfo``:
     When enabled, this setting allows a servlet to be followed by
     additional path components which are accessible via HTTPRequest's
