@@ -569,13 +569,13 @@ class Application(ConfigurableForServerSidePath, Object):
 			finally:
 				trans.sleep()
 
-	def forward(self, trans, url, context=None):
-		"""Forward the request to a different (internal) url.
+	def forward(self, trans, url):
+		"""Forward the request to a different (internal) URL.
 
 		The transaction's URL is changed to point to the new servlet,
 		and the transaction is simply run again.
 
-		Output is _not_ accumulated, so if the original servlet	had any output,
+		Output is _not_ accumulated, so if the original servlet had any output,
 		the new output will _replace_ the old output.
 
 		You can change the request in place to control the servlet you are
@@ -589,7 +589,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		trans.response().reset()
 
 		# Include the other servlet
-		self.includeURL(trans, url, context)
+		self.includeURL(trans, url)
 
 		# Raise an exception to end processing of this request
 		raise EndResponse
@@ -597,8 +597,7 @@ class Application(ConfigurableForServerSidePath, Object):
 	def callMethodOfServlet(self, trans, url, method, *args, **kw):
 		"""Call method of another servlet.
 
-		Call a method of the servlet referred to by the url, potentially in
-		a particular context (use the context keyword argument). Calls sleep()
+		Call a method of the servlet referred to by the URL. Calls sleep()
 		and awake() before and after the method call. Or, if the servlet
 		defines it, then `runMethodForTransaction` is used (analogous to the
 		use of `runTransaction` in `forward`).
@@ -607,20 +606,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		`respond`, `method` is called (`method` should be a string, ``*args``
 		and ``**kw`` are passed as arguments to that method).
 
-		A `context` keyword argument (as used in `forward`) is also allowed,
-		though it isn't present in the method signature.
-
 		"""
-		# 3-03 ib@@: Does anyone actually use this method?
-		# 2003-04-08 jdh: I use callMethodOfServlet, but I don't use
-		# this little context trick.  Not sure what you were referring to.
-		if kw.has_key('context'):
-			context = kw['context']
-			del kw['context']
-		else:
-			context = None
 
-		urlPath = self.resolveInternalRelativePath(trans, url, context)
+		urlPath = self.resolveInternalRelativePath(trans, url)
 		req = trans.request()
 		currentPath = req.urlPath()
 		currentServlet = trans._servlet
@@ -655,15 +643,14 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		return result
 
-	def includeURL(self, trans, url, context=None):
+	def includeURL(self, trans, url):
 		"""Include another servlet.
 
-		Include the servlet given by the url, potentially in context (or
-		current context). Like `forward`, except control is ultimately
-		returned to the servlet.
+		Include the servlet given by the URL. Like `forward`,
+		except control is ultimately returned to the servlet.
 
 		"""
-		urlPath = self.resolveInternalRelativePath(trans, url, context)
+		urlPath = self.resolveInternalRelativePath(trans, url)
 		req = trans.request()
 		currentPath = req.urlPath()
 		currentServlet = trans._servlet
@@ -694,35 +681,27 @@ class Application(ConfigurableForServerSidePath, Object):
 		req._contextName = currentContextName
 		trans._servlet = currentServlet
 
-	def resolveInternalRelativePath(self, trans, url, context=None):
+	def resolveInternalRelativePath(self, trans, url):
 		"""Return the absolute internal path.
 
-		Given a URL and an optional context, return the absolute
-		internal URL. URLs are assumed relative to the current URL.
-
+		Given a URL, return the absolute internal URL.
+		URLs are assumed relative to the current URL.
 		Absolute paths are returned unchanged.
 
 		"""
-		req = trans.request()
 		if not url.startswith('/'):
-			origPath = req.urlPath()
-			if origPath.endswith('/'):
-				origDir = origPath
-			else:
-				origDir = os.path.dirname(origPath)
+			origDir = trans.request().urlPath()
+			if not origDir.endswith('/'):
+				origDir = os.path.dirname(origDir)
 				if not origDir.endswith('/'):
 					origDir += '/'
-			path = origDir + url
-		else:
-			if context is None:
-				context = req._contextName
-			path = '/%s%s' % (context, url)
-		# Deal with .. in the path
+			url = origDir + url
+		# Deal with . and .. in the path:
 		parts = []
-		for part in path.split('/'):
-			if part == '..':
+		for part in url.split('/'):
+			if parts and part == '..':
 				parts.pop()
-			else:
+			elif part != '.':
 				parts.append(part)
 		return '/'.join(parts)
 

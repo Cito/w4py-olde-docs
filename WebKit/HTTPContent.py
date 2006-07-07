@@ -278,7 +278,7 @@ class HTTPContent(HTTPServlet):
 		"""
 		return Funcs.urlDecode(s)
 
-	def forward(self, URL, context=None):
+	def forward(self, URL):
 		"""Forward request.
 
 		Forwards this request to another servlet.
@@ -287,9 +287,9 @@ class HTTPContent(HTTPServlet):
 		to pass in the transaction as the first argument.
 
 		"""
-		self.application().forward(self.transaction(), URL, context)
+		self.application().forward(self.transaction(), URL)
 
-	def includeURL(self, URL, context=None):
+	def includeURL(self, URL):
 		"""Include output from other servlet.
 
 		Includes the response of another servlet
@@ -299,7 +299,7 @@ class HTTPContent(HTTPServlet):
 		to pass in the transaction as the first argument.
 
 		"""
-		self.application().includeURL(self.transaction(), URL, context)
+		self.application().includeURL(self.transaction(), URL)
 
 	def callMethodOfServlet(self, URL, method, *args, **kwargs):
 		"""Call a method of another servlet.
@@ -307,9 +307,6 @@ class HTTPContent(HTTPServlet):
 		See `Application.callMethodOfServlet` for details.
 		The main difference is that here you don't have
 		to pass in the transaction as the first argument.
-
-		A `context` keyword argument is also possible, even
-		though it isn't present in the method signature.
 
 		"""
 		return apply(self.application().callMethodOfServlet, (self.transaction(), URL, method) + args, kwargs)
