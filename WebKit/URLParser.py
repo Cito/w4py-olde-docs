@@ -18,7 +18,7 @@ from MiscUtils.ParamFactory import ParamFactory
 from WebKit.HTTPExceptions import *
 from WebUtils.Funcs import urlDecode
 
-debug = 1
+debug = 0
 
 try: # backward compatibility for Python < 2.1
 	from warnings import warn
