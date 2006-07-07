@@ -146,9 +146,9 @@ class Servlet(Object):
 				self._serverSidePath = self._request.serverSidePath(path)
 			else:
 				self._serverSidePath = self._transaction.request().serverSidePath(path)
-		if path.startswith('/'):
-			path = path[1:]
 		if path:
+			if path.startswith('/'):
+				path = path[1:]
 			return os.path.normpath(os.path.join(
 				os.path.dirname(self._serverSidePath), path))
 		else:
