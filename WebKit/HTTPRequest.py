@@ -143,7 +143,7 @@ class HTTPRequest(Request):
 		return self._transaction
 
 	def setTransaction(self, trans):
-		"""This method should be invoked after the transaction is created for this request."""
+		"""Should be invoked after the transaction is created for this request."""
 		self._transaction = trans
 		self._sidname = trans.application()._session_name
 		# Get session ID from cookie if available
@@ -153,11 +153,11 @@ class HTTPRequest(Request):
 		# Application.py redirects the browser to a url with SID in path
 		# http://gandalf/a/_SID_=2001080221301877755/Examples/
 		# _SID_ is extracted and removed from path
-		p = self._environ['PATH_INFO'].split('/' ,2)
-		if len(p) and not p[0] and p[1].startswith(self._sidname + '='):
+		p = self._environ['PATH_INFO'].split('/', 2)
+		if len(p) > 1 and not p[0] and p[1].startswith(self._sidname + '='):
 			self._pathSession = p[1].split('=', 1)[1]
 			self._cookies[self._sidname] = self._pathSession
-			sidstring = p[1] +'/'
+			sidstring = p[1] + '/'
 			self._environ['REQUEST_URI'] = self._environ[
 				'REQUEST_URI'].replace(sidstring, '')
 			self._environ['PATH_INFO'] = self._environ[
