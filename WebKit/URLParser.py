@@ -248,7 +248,11 @@ class ContextParser(URLParser):
 		# this should probably go in the Transaction class:
 		trans._fileParserInitSeen = {}
 		if not requestPath:
-			raise HTTPMovedPermanently(webkitLocation='/')
+			p = '/'
+			q = req.queryString()
+			if q:
+				p += "?" + q
+			raise HTTPMovedPermanently(location=p)
 		req = trans.request()
 		if req._absolutepath:
 			contextName = self._defaultContext
@@ -336,8 +340,8 @@ class _FileParser(URLParser):
 		req = trans.request()
 
 		if req._absolutepath:
-			name = requestPath
-			restPart = req._environ['PATH_INFO']
+			name = req._fsPath
+			restPart = req._pathInfo
 
 		else:
 			# First decode the URL, since we are dealing with filenames here:
@@ -502,13 +506,14 @@ class _FileParser(URLParser):
 		a PSP file, a Kid template, a Python servlet, etc.
 
 		"""
+		req = trans.request()
 		# If requestPath is empty, then we're missing the trailing slash:
 		if not requestPath:
-			qs = trans.request().queryString()
-			if qs:
-				qs = "?" + qs
-			raise HTTPMovedPermanently(
-				webkitLocation=trans.request().urlPath() + "/" + qs)
+			p = req.serverURL() + '/'
+			q = req.queryString()
+			if q:
+				p += "?" + q
+			raise HTTPMovedPermanently(location=p)
 		if requestPath == '/':
 			requestPath = ''
 		for directoryFile in self._directoryFile:
@@ -521,8 +526,8 @@ class _FileParser(URLParser):
 			elif names:
 				if requestPath and not self._extraPathInfo:
 					raise HTTPNotFound
-				trans.request()._serverSidePath = names[0]
-				trans.request()._extraURLPath = requestPath
+				req._serverSidePath = names[0]
+				req._extraURLPath = requestPath
 				return ServletFactoryManager.servletForFile(trans, names[0])
 		raise HTTPNotFound # @@: add correct information here
 

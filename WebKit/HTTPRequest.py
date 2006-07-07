@@ -108,7 +108,6 @@ class HTTPRequest(Request):
 
 		self._fieldStorage = self._fields
 		self._fields = dict
-		self._pathInfo = None
 
 		# We use Tim O'Malley's Cookie class to get the cookies,
 		# but then change them into an ordinary dictionary of values
@@ -122,12 +121,12 @@ class HTTPRequest(Request):
 		self._cookieSession = self._pathSession = None
 		self._sessionExpired = 0
 
-		# Save the original urlPath and set self._absolutepath:
-		self._originalURLPath = self.urlPath()
+		self._absolutepath = self._environ.has_key('WK_ABSOLUTE') # set by the adapter
 		if self._absolutepath:
-			self._adapterName = ''
-		else:
-			self._adapterName = self._environ.get('SCRIPT_NAME', '')
+			self._fsPath = self.fsPath()
+		self._adapterName = self.servletPath()
+		self._pathInfo = self.pathInfo()
+		self._originalURLPath = self.urlPath()
 
 		if debug:
 			print "Done setting up request, found keys %r" % self._fields.keys()
@@ -152,7 +151,7 @@ class HTTPRequest(Request):
 		# Application.py redirects the browser to a url with SID in path
 		# http://gandalf/a/_SID_=2001080221301877755/Examples/
 		# _SID_ is extracted and removed from path
-		p = self.pathInfo()
+		p = self._pathInfo
 		if p:
 			p = p.split('/', 2)
 			if len(p) > 1 and not p[0] and p[1].startswith(self._sidname + '='):
@@ -298,14 +297,13 @@ class HTTPRequest(Request):
 
 		For example, http://host/WebKit.cgi/Context/Servlet?x=1 yields '/Context/Servlet'.
 
-		Sets self._absolutepath if this has to be interpreted as a filesystem path.
+		If self._absolutepath is set, this refers to the filesystem path.
 
 		"""
-		self._absolutepath = self._environ.has_key('WK_ABSOLUTE') # set by the adapter
 		if self._absolutepath:
-			return self.fsPath()
+			return self._fsPath
 		else:
-			return self.pathInfo()
+			return self._pathInfo
 
 	def originalURLPath(self):
 		"""Return the URL path of the _original_ servlet before any forwarding."""
@@ -318,43 +316,16 @@ class HTTPRequest(Request):
 	def setURLPath(self, path):
 		"""Set the URL path of the request.
 
+		If self._absolutepath is set, this refers to the filesystem path.
+
 		There is rarely a need to do this. Proceed with caution.
 
 		"""
-		self._environ['PATH_INFO'] = path
-		self._environ['REQUEST_URI'] = self.adapterName() + path
-
-	def baseURL(self):
-		"""Get the base URL of the request, including the protocol."""
-		env = self._environ
-		url = ['http']
-		if env.get('HTTPS', '').lower() == 'on':
-			url.append('s')
-		url.append('://')
-		host = env.get('HTTP_HOST', '') # includes the port
-		if host:
-			url.append(host)
+		if self._absolutepath:
+			self._fsPath = path
 		else:
-			host = env.get('SERVER_NAME', '') or 'localhost'
-			url.append(host)
-			port = env.get('SERVER_PORT', None)
-			if port:
-				try:
-					port = int(port)
-				except:
-					port = None
-			if port:
-				if url[1] == 's':
-					if port == 443:
-						port = None
-				else:
-					if port == 80:
-						port = None
-			if port:
-				url.append(':%d' % port)
-		if self._adapterName:
-			url.append(self._adapterName)
-		return ''.join(url)
+			self._pathInfo = self._environ['PATH_INFO'] = path
+			self._environ['REQUEST_URI'] = self._adapterName + path
 
 	def serverSidePath(self, path=None):
 		"""Return the absolute server-side path of the request.
@@ -395,7 +366,7 @@ class HTTPRequest(Request):
 
 	def servletURI(self):
 		"""Return the URI of the servlet, without any query strings or extra path info."""
-		p = self.pathInfo()
+		p = self._pathInfo
 		if not self._extraURLPath:
 			if p.endswith('/'):
 				p = p[:-1]
@@ -421,38 +392,64 @@ class HTTPRequest(Request):
 
 	def fsPath(self):
 		"""The filesystem path of the request according to the webserver."""
-		fspath = self._environ.get('SCRIPT_FILENAME', None)
+		fspath = self.servletFilePath()
 		if not fspath:
+			fspath = self.servletPath()
 			docroot = self._environ['DOCUMENT_ROOT']
-			uri = self._environ['REQUEST_URI']
-			if uri.startswith('/'):
-				uri = uri[1:]
-			if self.queryString():
-				qslen = len(self.queryString()) + 1
-				uri = uri[:-qslen] # pull off the query string and the ?-mark
-			fspath = os.path.join(docroot, uri)
+			fspath = os.path.join(docroot, fspath)
 		return fspath
 
 	def serverURL(self):
 		"""Return the full internet path to this request.
 
+		This is the URL that was actually received by the
+		webserver before any rewriting took place.
+
 		The path is returned without any extra path info or query strings,
-		i.e. www.my.own.host.com/WebKit/TestPage.py
+		i.e. http://www.my.own.host.com:8080/WebKit/TestPage.py
 
 		"""
-		host = self._environ['HTTP_HOST']
-		adapter = self.adapterName()
-		path = self.urlPath()
-		return host + adapter + path
+		url = self._environ.get('SCRIPT_URI', None)
+		if not url:
+			scheme = 'http'
+			if self._environ.get('HTTPS', '').lower() == 'on':
+				scheme += 's'
+			host = self._environ['HTTP_HOST'] # includes port
+			url = scheme + '://' + host + self.serverPath()
+		return url
 
 	def serverURLDir(self):
-		"""Return the Directory of the URL in full internet form.
+		"""Return the directory of the URL in full internet form.
 
-		This is the same as serverURL,
-		but removes the actual page name if it was included.
+		Same as serverURL, but removes the actual page.
 
 		"""
 		fullurl = self.serverURL()
+		if fullurl and not fullurl.endswith('/'):
+			fullurl = fullurl[:fullurl.rfind('/') + 1]
+		return fullurl
+
+	def serverPath(self):
+		"""Return the webserver URL path of this request.
+
+		This is the URL that was actually received by the
+		webserver before any rewriting took place.
+
+		Same as serverURL, but without scheme and host.
+
+		"""
+		url = self._environ.get('SCRIPT_URL', None)
+		if not url:
+			url = self._adapterName + self._pathInfo
+		return url
+
+	def serverPathDir(self):
+		"""Return the directory of the webserver URL path.
+
+		Same as serverPath, but removes the actual page.
+
+		"""
+		fullurl = self.serverPath()
 		if fullurl and not fullurl.endswith('/'):
 			fullurl = fullurl[:fullurl.rfind('/') + 1]
 		return fullurl
@@ -598,9 +595,9 @@ class HTTPRequest(Request):
 		"""Return the URI of the script, sans host."""
 		return self._environ.get('SCRIPT_NAME', '')
 
-	def servletPath(self):
+	def servletFilePath(self):
 		"""Return the filesystem path of the script."""
-		return self._environ.get('SCRIPT_FILE_NAME', '')
+		return self._environ.get('SCRIPT_FILENAME', '')
 
 	def contextPath(self):
 		"""Return the portion of the request URI that is the context of the request."""

@@ -257,7 +257,7 @@ class HTTPMovedPermanently(HTTPException):
 	def location(self):
 		"""The location that we will be redirecting to."""
 		if self._webkitLocation:
-			location = self._transaction.request().baseURL()
+			location = self._transaction.request()._adapterName
 			if not self._webkitLocation.startswith('/'):
 				location += '/'
 			location += self._webkitLocation
