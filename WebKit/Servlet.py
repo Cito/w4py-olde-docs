@@ -143,11 +143,14 @@ class Servlet(Object):
 		"""Return the filesystem path of the page on the server."""
 		if self._serverSidePath is None:
 			if hasattr(self, "_request") and self._request is not None:
-				self._serverSidePath = self._request.serverSidePath()
+				self._serverSidePath = self._request.serverSidePath(path)
 			else:
-				self._serverSidePath = self._transaction.request().serverSidePath()
+				self._serverSidePath = self._transaction.request().serverSidePath(path)
+		if path.startswith('/'):
+			path = path[1:]
 		if path:
-			return os.path.normpath(os.path.join(os.path.dirname(self._serverSidePath), path))
+			return os.path.normpath(os.path.join(
+				os.path.dirname(self._serverSidePath), path))
 		else:
 			return self._serverSidePath
 

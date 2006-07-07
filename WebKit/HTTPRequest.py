@@ -334,9 +334,11 @@ class HTTPRequest(Request):
 		server side directory to form a path relative to the object.
 
 		"""
+		if path.startswith('/'):
+			path = path[1:]
 		if path:
-			return os.path.normpath(os.path.join(os.path.dirname(
-				self._serverSidePath), path))
+			return os.path.normpath(os.path.join(
+				os.path.dirname(self._serverSidePath), path))
 		else:
 			return self._serverSidePath
 
@@ -350,6 +352,8 @@ class HTTPRequest(Request):
 		if the request is in a subdirectory of the main context directory.
 
 		"""
+		if path.startswith('/'):
+			path = path[1:]
 		if path:
 			return os.path.normpath(os.path.join(
 				self._serverSideContextPath, path))
