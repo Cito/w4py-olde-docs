@@ -289,6 +289,27 @@ class HTTPRequest(Request):
 		env = self._environ
 		return env.get('REMOTE_NAME', env['REMOTE_ADDR'])
 
+	def accept(self, which=None):
+		"""Returns preferences as requested by the user agent.
+
+		The accepted preferences are returned as a list of codes
+		in the same order as they appeared in the header.
+		In other words, the explicit weighting criteria are ignored.
+
+		If you do not define otherwise which preferences you are
+		interested in ('language', 'charset', 'encoding'), by default
+		you will get the user preferences for the content types.
+
+		"""
+		var = 'HTTP_ACCEPT'
+		if which:
+			var += '_' + which.upper()
+		prefs = []
+		for pref in self._environ.get(var, '').split(','):
+			pref = pref.split(';', 1)[0].strip()
+			prefs.append(pref)
+		return prefs
+
 
 	## Path ##
 
@@ -573,9 +594,12 @@ class HTTPRequest(Request):
 
 		"""
 		fs = self.fieldStorage()
-		if rewind:
-			fs.file.seek(0)
-		return fs.file
+		if fs and fs.file:
+			if rewind:
+				fs.file.seek(0)
+			return fs.file
+		else:
+			return None
 
 	def time(self):
 		"""Return the time that the request was received."""
