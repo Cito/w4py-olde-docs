@@ -253,12 +253,14 @@ class Application(ConfigurableForServerSidePath, Object):
 			'UseCascadingExtensions': 1,
 			'ExtensionCascadeOrder': ['.py','.psp','.kid','.html'],
 			'ExtraPathInfo': 1,
-			'ExtensionsToIgnore': ['.pyc', '.pyo', '.py~',
-				'.psp~', '.kid~', '.html~', '.bak', '.tmpl'
+			'ExtensionsToIgnore': [
+				'.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
+				'.py~', '.psp~', '.kid~', '.html~', '.tmpl~'
 				],
 			'ExtensionsToServe': [],
-			'FilesToHide': ['.*','*~', '*.bak', '*.tmpl',
-				'*.config', '__init__.*', '*.pyc', '*.pyo'
+			'FilesToHide': [
+				'.*', '*~', '*.bak', '*.py_bak', '*.tmpl',
+				'*.pyc', '*.pyo', '__init__.*', '*.config'
 				],
 			'FilesToServe': [],
 			'UnknownFileTypes': {
