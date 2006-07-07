@@ -331,23 +331,27 @@ class HTTPRequest(Request):
 		if env.get('HTTPS', '').lower() == 'on':
 			url.append('s')
 		url.append('://')
-		url.append(env.get('SERVER_NAME', '')
-			or env.get('HTTP_HOST', '') or 'localhost')
-		port = env.get('SERVER_PORT', None)
-		if port:
-			try:
-				port = int(port)
-			except:
-				port = None
-		if port:
-			if url[1] == 's':
-				if port == 443:
+		host = env.get('HTTP_HOST', '') # includes the port
+		if host:
+			url.append(host)
+		else:
+			host = env.get('SERVER_NAME', '') or 'localhost'
+			url.append(host)
+			port = env.get('SERVER_PORT', None)
+			if port:
+				try:
+					port = int(port)
+				except:
 					port = None
-			else:
-				if port == 80:
-					port = None
-		if port:
-			url.append(':%d' % port)
+			if port:
+				if url[1] == 's':
+					if port == 443:
+						port = None
+				else:
+					if port == 80:
+						port = None
+			if port:
+				url.append(':%d' % port)
 		if self._adapterName:
 			url.append(self._adapterName)
 		return ''.join(url)
