@@ -18,6 +18,8 @@ from MiscUtils.ParamFactory import ParamFactory
 from WebKit.HTTPExceptions import *
 from WebUtils.Funcs import urlDecode
 
+debug = 1
+
 try: # backward compatibility for Python < 2.1
 	from warnings import warn
 except ImportError:
@@ -247,26 +249,30 @@ class ContextParser(URLParser):
 		trans._fileParserInitSeen = {}
 		if not requestPath:
 			raise HTTPMovedPermanently(webkitLocation='/')
-		context = filter(lambda x: x, requestPath.split('/'))
-		if requestPath.endswith('/'):
-			context.append('')
-		request = []
-		while context:
-			contextName = '/'.join(context)
-			if self._contexts.has_key(contextName):
-				break
-			request.insert(0, context.pop())
-		if context:
-			if request:
-				request.insert(0, '')
-				requestPath = '/'.join(request)
-			else:
-				requestPath = ''
-		else:
+		req = trans.request()
+		if req._absolutepath:
 			contextName = self._defaultContext
+		else:
+			context = filter(lambda x: x, requestPath.split('/'))
+			if requestPath.endswith('/'):
+				context.append('')
+			parts = []
+			while context:
+				contextName = '/'.join(context)
+				if self._contexts.has_key(contextName):
+					break
+				parts.insert(0, context.pop())
+			if context:
+				if parts:
+					parts.insert(0, '')
+					requestPath = '/'.join(parts)
+				else:
+					requestPath = ''
+			else:
+				contextName = self._defaultContext
 		context = self._contexts[contextName]
-		trans.request()._serverSideContextPath = context
-		trans.request()._contextName = contextName
+		req._serverSideContextPath = context
+		req._contextName = contextName
 		fpp = FileParser(context)
 		return fpp.parse(trans, requestPath)
 
@@ -324,53 +330,61 @@ class _FileParser(URLParser):
 		hidden, etc.  See its documentation for more information.
 
 		"""
-		# First decode the URL, since we are dealing with filenames here:
-		requestPath = urlDecode(requestPath)
+		if debug:
+			print "FP(%r) parses %r" % (self._path, requestPath)
 
-		# print "FP(%r) parses %r" % (self._path, requestPath)
+		req = trans.request()
 
-		result = self.parseInit(trans, requestPath)
-		if result is not None:
-			return result
+		if req._absolutepath:
+			name = requestPath
+			restPart = req._environ['PATH_INFO']
 
-		assert not requestPath or requestPath.startswith('/'), \
-			"Not what I expected: %s" % repr(requestPath)
-		if not requestPath or requestPath == '/':
-			return self.parseIndex(trans, requestPath)
-
-		parts = requestPath[1:].split('/', 1)
-
-		nextPart = parts[0]
-		if len(parts) > 1:
-			restPart = '/' + parts[1]
 		else:
-			restPart = ''
+			# First decode the URL, since we are dealing with filenames here:
+			requestPath = urlDecode(requestPath)
 
-		baseName = os.path.join(self._path, nextPart)
-		if restPart and not self._extraPathInfo:
-			names = [baseName]
-		else:
-			names = self.filenamesForBaseName(baseName)
+			result = self.parseInit(trans, requestPath)
+			if result is not None:
+				return result
 
-		if len(names) > 1:
-			warn("More than one file matches %s in %s: %s"
-				% (requestPath, self._path, names))
-			raise HTTPNotFound # @@: add info
-		elif not names:
-			return self.parseIndex(trans, requestPath)
+			assert not requestPath or requestPath.startswith('/'), \
+				"Not what I expected: %s" % repr(requestPath)
+			if not requestPath or requestPath == '/':
+				return self.parseIndex(trans, requestPath)
 
-		name = names[0]
-		if os.path.isdir(name):
-			# directories are dispatched to FileParsers
-			# rooted in that directory
-			fpp = FileParser(name)
-			return fpp.parse(trans, restPart)
+			parts = requestPath[1:].split('/', 1)
 
-		if restPart and not self._extraPathInfo:
-			raise HTTPNotFound
+			nextPart = parts[0]
+			if len(parts) > 1:
+				restPart = '/' + parts[1]
+			else:
+				restPart = ''
 
-		trans.request()._extraURLPath = restPart
-		trans.request()._serverSidePath = name
+			baseName = os.path.join(self._path, nextPart)
+			if restPart and not self._extraPathInfo:
+				names = [baseName]
+			else:
+				names = self.filenamesForBaseName(baseName)
+
+			if len(names) > 1:
+				warn("More than one file matches %s in %s: %s"
+					% (requestPath, self._path, names))
+				raise HTTPNotFound # @@: add info
+			elif not names:
+				return self.parseIndex(trans, requestPath)
+
+			name = names[0]
+			if os.path.isdir(name):
+				# directories are dispatched to FileParsers
+				# rooted in that directory
+				fpp = FileParser(name)
+				return fpp.parse(trans, restPart)
+
+			if restPart and not self._extraPathInfo:
+				raise HTTPNotFound
+
+		req._serverSidePath = name
+		req._extraURLPath = restPart
 		return ServletFactoryManager.servletForFile(trans, name)
 
 	def filenamesForBaseName(self, baseName):
