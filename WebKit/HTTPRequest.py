@@ -26,8 +26,6 @@ class HTTPRequest(Request):
 	## Initialization ##
 
 	def __init__(self, dict={}):
-		# import pprint
-		# pprint.pprint(dict)
 		Request.__init__(self)
 		self._parents = []
 		if dict:
@@ -78,14 +76,11 @@ class HTTPRequest(Request):
 		# e.g., http://localhost/WebKit.cgi
 		if not self._environ.has_key('PATH_INFO'):
 			self._environ['PATH_INFO'] = ''
-
 		# Fix #2: No REQUEST_URI
 		# REQUEST_URI isn't actually part of the CGI standard and some
 		# web servers like IIS don't set it (as of 8/22/2000).
 		if not self._environ.has_key('REQUEST_URI'):
 			self._environ['REQUEST_URI'] = requestURI(self._environ)
-
-		self._adapterName = self._environ.get('SCRIPT_NAME', '')
 
 		# We use the cgi module to get the fields,
 		# but then change them into an ordinary dictionary of values:
@@ -97,20 +92,20 @@ class HTTPRequest(Request):
 			# an empty set of fields.
 			keys = []
 		dict = {}
-
 		for key in keys:
 			value = self._fields[key]
 			if type(value) is not ListType:
 				if value.filename:
-					if debug: print "Uploaded File Found"
+					if debug:
+						print "Uploaded File Found"
 				else: # i.e., if we don't have a list,
 					# we have one of those cgi.MiniFieldStorage objects.
-					value = value.value # Get it's value.
+					value = value.value # get it's value.
 			else:
 				value = map(lambda miniFieldStorage: miniFieldStorage.value,
-					value) # extract those .value's
-
+					value) # extract those value's
 			dict[key] = value
+
 		self._fieldStorage = self._fields
 		self._fields = dict
 		self._pathInfo = None
@@ -123,12 +118,16 @@ class HTTPRequest(Request):
 		self._cookies = dict
 
 		self._transaction = None
-		self._serverRootPath = self._extraURLPath = ""
+		self._serverRootPath = self._extraURLPath = ''
 		self._cookieSession = self._pathSession = None
 		self._sessionExpired = 0
 
-		# Save the original urlPath.
+		# Save the original urlPath and set self._absolutepath:
 		self._originalURLPath = self.urlPath()
+		if self._absolutepath:
+			self._adapterName = ''
+		else:
+			self._adapterName = self._environ.get('SCRIPT_NAME', '')
 
 		if debug:
 			print "Done setting up request, found keys %r" % self._fields.keys()
@@ -153,18 +152,22 @@ class HTTPRequest(Request):
 		# Application.py redirects the browser to a url with SID in path
 		# http://gandalf/a/_SID_=2001080221301877755/Examples/
 		# _SID_ is extracted and removed from path
-		p = self._environ['PATH_INFO'].split('/', 2)
-		if len(p) > 1 and not p[0] and p[1].startswith(self._sidname + '='):
-			self._pathSession = p[1].split('=', 1)[1]
-			self._cookies[self._sidname] = self._pathSession
-			sidstring = p[1] + '/'
-			self._environ['REQUEST_URI'] = self._environ[
-				'REQUEST_URI'].replace(sidstring, '')
-			self._environ['PATH_INFO'] = self._environ[
-				'PATH_INFO'].replace(sidstring, '')
-			if self._environ.has_key('PATH_TRANSLATED'):
-				self._environ['PATH_TRANSLATED'] = self._environ[
-					'PATH_TRANSLATED'].replace(sidstring, '')
+		p = self.pathInfo()
+		if p:
+			p = p.split('/', 2)
+			if len(p) > 1 and not p[0] and p[1].startswith(self._sidname + '='):
+				self._pathSession = p[1].split('=', 1)[1]
+				self._cookies[self._sidname] = self._pathSession
+				sidpart = p[1] + '/'
+				del p[1]
+				self._environ['PATH_INFO'] = '/'.join(p)
+				if self._environ.has_key('REQUEST_URI'):
+					self._environ['REQUEST_URI'] = self._environ[
+						'REQUEST_URI'].replace(sidpart, '')
+				if self._environ.has_key('PATH_TRANSLATED'):
+					self._environ['PATH_TRANSLATED'] = self._environ[
+						'PATH_TRANSLATED'].replace(sidpart, '')
+
 
 	## Values ##
 
@@ -264,7 +267,7 @@ class HTTPRequest(Request):
 		self._sessionExpired = sessionExpired
 
 
-	## Authentication ##
+	## Remote info ##
 
 	def remoteUser(self):
 		"""Always returns None since authentication is not yet supported.
@@ -272,11 +275,7 @@ class HTTPRequest(Request):
 		Take from CGI variable REMOTE_USER.
 
 		"""
-		# @@ 2000-03-26 ce: maybe belongs in section below. clean up docs
 		return self._environ['REMOTE_USER']
-
-
-	## Remote info ##
 
 	def remoteAddress(self):
 		"""Return a string containing the IP address of the client that sent the request."""
@@ -291,6 +290,7 @@ class HTTPRequest(Request):
 		env = self._environ
 		return env.get('REMOTE_NAME', env['REMOTE_ADDR'])
 
+
 	## Path ##
 
 	def urlPath(self):
@@ -298,12 +298,14 @@ class HTTPRequest(Request):
 
 		For example, http://host/WebKit.cgi/Context/Servlet?x=1 yields '/Context/Servlet'.
 
+		Sets self._absolutepath if this has to be interpreted as a filesystem path.
+
 		"""
-		self._absolutepath = 0
-		if self._environ.has_key('WK_ABSOLUTE'): # set by the adapter, used by modpHandler
-			self._absolutepath = 1
+		self._absolutepath = self._environ.has_key('WK_ABSOLUTE') # set by the adapter
+		if self._absolutepath:
 			return self.fsPath()
-		return self._environ['PATH_INFO']
+		else:
+			return self.pathInfo()
 
 	def originalURLPath(self):
 		"""Return the URL path of the _original_ servlet before any forwarding."""
@@ -311,42 +313,44 @@ class HTTPRequest(Request):
 
 	def urlPathDir(self):
 		"""Same as urlPath, but only gives the directory."""
-		path = self.urlPath()
-		if not path[:-1] == '/':
-			path = path[:path.rfind('/')+1]
-		return path
-
-
-	_evars = ('PATH_INFO', 'REQUEST_URI', 'SCRIPT_NAME')
-	_pvars = ('_absolutepath', '_serverSidePath', '_serverSideContextPath',
-		'_adapterName')
-
-	def getstate(self):
-		"""Debugging and testing code. This will likely be removed in the future."""
-		rv = []
-		env = self._environ
-		for key in self._evars:
-			rv.append("  * env['%s'] = %s"
-				% (key, env.get(key, "* no def *")))
-		for key in self._pvars + ('_contextName', '_extraURLPath'):
-			rv.append("  * req.%s = %s"
-				% (key, getattr(self, key, "* no def *")))
-		return '\n'.join(rv)
+		return os.path.dirname(self.urlPath())
 
 	def setURLPath(self, path):
-		"""Set the URL path of the request."
+		"""Set the URL path of the request.
 
 		There is rarely a need to do this. Proceed with caution.
-		The only known current use for this is Application.forwardRequest().
 
 		"""
-		if hasattr(self, '_serverSidePath'):
-			del self._serverSidePath
-			del self._serverSideContextPath
-		if hasattr(self, '_serverSideDir'):
-			del self._serverSideDir
 		self._environ['PATH_INFO'] = path
 		self._environ['REQUEST_URI'] = self.adapterName() + path
+
+	def baseURL(self):
+		"""Get the base URL of the request, including the protocol."""
+		env = self._environ
+		url = ['http']
+		if env.get('HTTPS', '').lower() == 'on':
+			url.append('s')
+		url.append('://')
+		url.append(env.get('SERVER_NAME', '')
+			or env.get('HTTP_HOST', '') or 'localhost')
+		port = env.get('SERVER_PORT', None)
+		if port:
+			try:
+				port = int(port)
+			except:
+				port = None
+		if port:
+			if url[1] == 's':
+				if port == 443:
+					port = None
+			else:
+				if port == 80:
+					port = None
+		if port:
+			url.append(':%d' % port)
+		if self._adapterName:
+			url.append(self._adapterName)
+		return ''.join(url)
 
 	def serverSidePath(self, path=None):
 		"""Return the absolute server-side path of the request.
@@ -355,9 +359,6 @@ class HTTPRequest(Request):
 		server side directory to form a path relative to the object.
 
 		"""
-		# if not hasattr(self, '_serverSidePath'):
-		#	app = self._transaction.application()
-		#	self._serverSidePath = app.serverSideInfoForRequest(self)[0]
 		if path:
 			return os.path.normpath(os.path.join(os.path.dirname(
 				self._serverSidePath), path))
@@ -370,14 +371,11 @@ class HTTPRequest(Request):
 		If the optional path is passed in, then it is joined with the server side
 		context directory to form a path relative to the object.
 
-		This directory could be different from the result of serverSidePath() if the request
-		is in a subdirectory of the main context directory.
+		This directory could be different from the result of serverSidePath()
+		if the request is in a subdirectory of the main context directory.
 
 		"""
-		# if not hasattr(self, '_serverSideContextPath'):
-		#	app = self._transaction.application()
-		#	self._serverSideContextPath = app.serverSideInfoForRequest(self)[1]
-		if path: # contextPath is already dirname, no need to dirname it again
+		if path:
 			return os.path.normpath(os.path.join(
 				self._serverSideContextPath, path))
 		else:
@@ -389,47 +387,46 @@ class HTTPRequest(Request):
 		This isn't necessarily the same as the name of the directory containing the context.
 
 		"""
-		# if not hasattr(self, '_contextName'):
-		#	app = self._transaction.application()
-		#	self._contextName = app.serverSideInfoForRequest(self)[2]
 		return self._contextName
 
 	def servletURI(self):
 		"""Return the URI of the servlet, without any query strings or extra path info."""
-		pinfo = self.pathInfo()
+		p = self.pathInfo()
 		if not self._extraURLPath:
-			if pinfo and pinfo[-1] == "/":
-				pinfo = pinfo[:-1]
-			return pinfo
-		pos = pinfo.rfind(self._extraURLPath)
-		if pos == -1:
-			URI = pinfo
-		else:
-			URI = pinfo[:pos]
-		if URI and URI[-1] == "/":
-			URI = URI[:-1]
-		return URI
+			if p.endswith('/'):
+				p = p[:-1]
+			return p
+		i = p.rfind(self._extraURLPath)
+		if i >= 0:
+			p = p[:i]
+		if p.endswith('/'):
+			p = p[:-1]
+		return p
 
 	def uriWebKitRoot(self):
 		if not self._serverRootPath:
 			self._serverRootPath = ''
-			loc = self.urlPath() # self.servletURI()
-			loc,curr = os.path.split(loc)
+			loc = self.urlPath()
+			loc, curr = os.path.split(loc)
 			while 1:
-				loc,curr = os.path.split(loc)
-				if curr:
-					self._serverRootPath = self._serverRootPath + "../"
-				else: break
+				loc, curr = os.path.split(loc)
+				if not curr:
+					break
+				self._serverRootPath += "../"
 		return self._serverRootPath
 
 	def fsPath(self):
-		"""The filesystem path of the request, using the webserver's docroot."""
-		docroot = self._environ['DOCUMENT_ROOT']
-		requri = self._environ['REQUEST_URI'][1:] # strip leading /
-		if self.queryString():
-			qslength = len(self.queryString())+1
-			requri = requri[:-qslength] # pull off the query string and the ?-mark
-		fspath = os.path.join(docroot,requri)
+		"""The filesystem path of the request according to the webserver."""
+		fspath = self._environ.get('SCRIPT_FILENAME', None)
+		if not fspath:
+			docroot = self._environ['DOCUMENT_ROOT']
+			uri = self._environ['REQUEST_URI']
+			if uri.startswith('/'):
+				uri = uri[1:]
+			if self.queryString():
+				qslen = len(self.queryString()) + 1
+				uri = uri[:-qslen] # pull off the query string and the ?-mark
+			fspath = os.path.join(docroot, uri)
 		return fspath
 
 	def serverURL(self):
@@ -442,7 +439,7 @@ class HTTPRequest(Request):
 		host = self._environ['HTTP_HOST']
 		adapter = self.adapterName()
 		path = self.urlPath()
-		return host+adapter+path
+		return host + adapter + path
 
 	def serverURLDir(self):
 		"""Return the Directory of the URL in full internet form.
@@ -452,8 +449,8 @@ class HTTPRequest(Request):
 
 		"""
 		fullurl = self.serverURL()
-		if fullurl[-1] != '/':
-			fullurl = fullurl[:fullurl.rfind('/')+1]
+		if fullurl and not fullurl.endswith('/'):
+			fullurl = fullurl[:fullurl.rfind('/') + 1]
 		return fullurl
 
 	def siteRoot(self):
@@ -474,12 +471,14 @@ class HTTPRequest(Request):
 		servlet that you have forwarded to.
 
 		"""
-		url = self.originalURLPath()[1:]
+		url = self.originalURLPath()
+		if url.startswith('/'):
+			url = url[1:]
 		contextName = self.contextName() + '/'
 		if url.startswith(contextName):
 			url = url[len(contextName):]
-		numStepsBackward = len(url.split('/')) - 1
-		return '../' * numStepsBackward
+		numStepsBack = len(url.split('/')) - 1
+		return '../' * numStepsBack
 
 	def siteRootFromCurrentServlet(self):
 		"""Return the URL path componentes necessary to get back home from the current servlet.
@@ -488,7 +487,9 @@ class HTTPRequest(Request):
 		relative to the _current_ servlet, not the _original_ servlet.
 
 		"""
-		url = self.urlPath()[1:]
+		url = self.urlPath()
+		if url.startswith('/'):
+			url = url[1:]
 		contextName = self.contextName() + '/'
 		if url.startswith(contextName):
 			url = url[len(contextName):]
@@ -505,19 +506,19 @@ class HTTPRequest(Request):
 
 		"""
 		urlPath = self.urlPath()
-		if urlPath[:1] == '/':
+		if urlPath.startswith('/'):
 			urlPath = urlPath[1:]
 		parts = urlPath.split('/')
 		newParts = []
 		for part in parts:
-			if part == '..':
-				if newParts:
-					newParts.pop()
-			else:
+			if part == '..' and newParts:
+				newParts.pop()
+			elif part != '.':
 				newParts.append(part)
 		if newParts[:1] == [self.contextName()]:
 			newParts[:1] = []
 		return '/'.join(newParts)
+
 
 	## Special ##
 
@@ -536,7 +537,7 @@ class HTTPRequest(Request):
 		return self._rawRequest
 
 	def environ(self):
-		return self._environ # @@ 2000-05-01 ce: To implement ExceptionHandler.py
+		return self._environ
 
 	def addParent(self, servlet):
 		self._parents.append(servlet)
@@ -590,13 +591,16 @@ class HTTPRequest(Request):
 	# @@ 2000-05-10: See FUTURE section of class doc string
 
 	def servletPath(self):
-		# @@ 2000-03-26 ce: document
-		return self._environ['SCRIPT_NAME']
+		"""Return the URI of the script, sans host."""
+		return self._environ.get('SCRIPT_NAME', '')
+
+	def servletPath(self):
+		"""Return the filesystem path of the script."""
+		return self._environ.get('SCRIPT_FILE_NAME', '')
 
 	def contextPath(self):
 		"""Return the portion of the request URI that is the context of the request."""
-		# @@ 2000-03-26 ce: this comes straight from Java servlets. Do we want this?
-		raise NotImplementedError
+		return self._serverSideContextPath
 
 	def pathInfo(self):
 		"""Return any extra path information associated with the URL the client sent with this request.
@@ -604,10 +608,7 @@ class HTTPRequest(Request):
 		Equivalent to CGI variable PATH_INFO.
 
 		"""
-		if self._pathInfo is None:
-			self._pathInfo = self._environ['PATH_INFO'][1:]
-			# The [1:] above strips the preceding '/' that we get with Apache 1.3
-		return self._pathInfo
+		return self._environ.get('PATH_INFO', '')
 
 	def pathTranslated(self):
 		"""Return any extra path information after the servlet name but before the query string.
@@ -616,9 +617,7 @@ class HTTPRequest(Request):
 		Equivalent to CGI variable PATH_TRANSLATED.
 
 		"""
-		# return self._environ['PATH_TRANSLATED']
-		# @@ 2000-06-22 ce: resolve this
-		return self._environ.get('PATH_TRANSLATED', None)
+		return self._environ.get('PATH_TRANSLATED', '')
 
 	def queryString(self):
 		"""Return the query string portion of the URL for this request.
@@ -629,13 +628,13 @@ class HTTPRequest(Request):
 		return self._environ.get('QUERY_STRING', '')
 
 	def uri(self):
-		""" Returns the request URI, which is the entire URL except for the query string.
+		"""Returns the URI for this request (everything after the host name).
 
-		@@TR 2003-03-22: I think this docstring is wrong, as REQUEST_URI
-		does contain the query string with Apache.
+		Taken from the CGI variable REQUEST_URI. If not available,
+		constructed from SCRIPT_NAME, PATH_INFO and QUERY_STRING.
 
 		"""
-		return self._environ['REQUEST_URI']
+		return requestURI(self._environ)
 
 	def method(self):
 		"""Return the HTTP request method (in all uppercase).
@@ -646,14 +645,18 @@ class HTTPRequest(Request):
 		return self._environ['REQUEST_METHOD'].upper()
 
 	def sessionId(self):
-		"""Return a string with the session id specified by the client, or None if there isn't one."""
+		"""Return a string with the session ID specified by the client.
+
+		Returns None if there is no session ID.
+
+		"""
 		sid = self.value(self._sidname, None)
 		if self._transaction.application().setting('Debug')['Sessions']:
 			print '>> sessionId: returning sid =', sid
 		return sid
 
 	def setSessionId(self, sessionID, force=False):
-		"""Allows you to set the session id.
+		"""Allows you to set the session ID.
 
 		This needs to be called _before_ attempting to use the session.
 		This would be useful if the session ID is being passed in through
@@ -684,6 +687,7 @@ class HTTPRequest(Request):
 
 	def hasCookieSession(self):
 		return self._cookieSession is not None
+
 
 	## Inspection ##
 

@@ -5,7 +5,7 @@ class IncludeURLTest2(IncludeURLTest):
 	"""This is the second part of the URL test code.
 
 	It gets included into the IncludeURLTest, and calls methods
-	on other servlets to	verify the references continue to work.
+	on other servlets to verify the references continue to work.
 
 	"""
 
@@ -17,6 +17,6 @@ class IncludeURLTest2(IncludeURLTest):
 		self.writeln('<p>%s</p>' %
 			self.__class__.__doc__.replace('\n\n', '</p><p>'))
 		self.writeStatus()
-		self.cmos("/","serverSidePath",
+		self.cmos("/Testing/", "serverSidePath",
 			  "Expect to see the serverSidePath of the Testing/Main module.")
 		self.writeln('</body>')

@@ -257,12 +257,10 @@ class HTTPMovedPermanently(HTTPException):
 	def location(self):
 		"""The location that we will be redirecting to."""
 		if self._webkitLocation:
-			environ = self._transaction.request().environ()
+			location = self._transaction.request().baseURL()
 			if not self._webkitLocation.startswith('/'):
-				self._webkitLocation = '/' + self._webkitLocation
-			location = 'http://%s%s%s' % (environ.get('HTTP_HOST',
-					environ.get('SERVER_NAME', 'localhost')),
-				environ.get('SCRIPT_NAME', ''), self._webkitLocation)
+				location += '/'
+			location += self._webkitLocation
 		else:
 			location = self._location
 		return location
@@ -313,8 +311,7 @@ class HTTPNotFound(HTTPException):
 		trans = self._transaction
 		page = trans.application()._404Page
 		if page:
-			req = trans.request()
-			url = req.adapterName() + req.urlPath()
-			return page % url
+			uri = trans.request().uri()
+			return page % uri
 		else:
 			return HTTPException.html(self)

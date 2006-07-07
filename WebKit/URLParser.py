@@ -259,8 +259,6 @@ class ContextParser(URLParser):
 		if context:
 			if request:
 				request.insert(0, '')
-				if not request[-1]:
-					request[-1] = '/'
 				requestPath = '/'.join(request)
 			else:
 				requestPath = ''
@@ -341,6 +339,7 @@ class _FileParser(URLParser):
 			return self.parseIndex(trans, requestPath)
 
 		parts = requestPath[1:].split('/', 1)
+
 		nextPart = parts[0]
 		if len(parts) > 1:
 			restPart = '/' + parts[1]

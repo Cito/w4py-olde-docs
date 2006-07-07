@@ -1,4 +1,4 @@
-from WebKit.Page import Page,NoDefault
+from WebKit.Page import Page
 
 class IncludeURLTest(Page):
 	"""Test includeURL redirection.
@@ -39,36 +39,33 @@ class IncludeURLTest(Page):
 				% (self.htmlEncode(key), self.htmlEncode(value)))
 		self.writeln('</ul>')
 		self.writeStatus()
-		self.cmos('/Dir/IncludeURLTest2', 'writeStatus',
+		self.cmos('/Testing/Dir/IncludeURLTest2', 'writeStatus',
 			"Expect to see the status written by IncludeURLTest2"
 			" which is the same format as the above status,"
-			" only relative to /Dir/IncludeURLTest2")
+			" only relative to /Testing/Dir.")
 		self.cmos('Dir/IncludeURLTest2', 'serverSidePath',
 			"This returns the serverSide Path of the"
 			" Dir/IncludeURLTest2 servlet. Notice that there is"
 			" no leading '/' which means this test is relative to"
-			" the current directory and not the root of the context."
-			" Since we are the current directory and siteRoot are"
-			" the same, it should work.")
-		self.cmos('/', 'name',
+			" the current directory.")
+		self.cmos('/Testing/', 'name',
 			"This returns the name of the module at the top of"
-			" this context which is Main")
-		self.cmos('/Main', 'serverSidePath',
+			" the Testing context which is 'Main'.")
+		self.cmos('/Testing/Main', 'serverSidePath',
 			"This returns the serverSidePath of the servlet"
 			" accessed at the top of this context.")
 		self.cmos('Main', 'serverSidePath',
 			"This returns the serverSidePath of the servlet"
 			" accessed 'Main' and should be the same as the"
-			" servlet accessed through '/' in the test above.")
-		self.writeln('<h4>Including Dir/IncludeURLTest2</h4>')
+			" servlet accessed through the Testing context.")
+		self.writeln('<h4>Including Dir/IncludeURLTest2:</h4>')
 		self.write('<div style="margin-left:2em">')
 		self.includeURL('Dir/IncludeURLTest2')
 		self.write('</div>')
-		self.writeln("<h4>Including the URL '/'"
-			" which is the root of the context %s</h4>"
+		self.writeln("<h4>Including the Main servlet of the %s context:</h4>"
 			% self.request().contextName())
 		self.write('<div style="margin-left:2em">')
-		self.includeURL('/Main')
+		self.includeURL('Main')
 		self.write('</div>')
 		self.writeln('<h4>%s complete.</h4>' % self.__class__.__name__)
 		self.writeln('</body>')
@@ -93,17 +90,18 @@ class IncludeURLTest(Page):
 		w("SCRIPT_FILENAME:         %s" % env.get('SCRIPT_FILENAME', ''))
 		self.writeln('</pre>')
 
-	def cmos(self,url,method,desc):
-		a = self.application()
-		t = self.transaction()
-		self.writeln('<p>Calling'
-			' <tt>callMethodOfServlet(t, "%s", "%s")</tt></p>'
-			'<p>%s</p>' % (url,method, desc) )
-		self.write('<div style="margin-left:2em">')
-		x = a.callMethodOfServlet(t, url, method )
-		self.write('</div>')
-		self.writeln('<p><tt>callMethodOfServlet</tt> returned "<tt>%s</tt>"</p>'
-			% (self.htmlEncode(str(x))))
-
 	def w(self, msg):
 		self.writeln(self.htmlEncode(msg))
+
+	def cmos(self, url, method, desc):
+		app = self.application()
+		trans = self.transaction()
+		self.writeln('<p>Calling'
+			' <tt>callMethodOfServlet(t, "%s", "%s")</tt>:</p>'
+			'<p>%s</p>' % (url, method, desc) )
+		self.write('<div style="margin-left:2em">')
+		ret = app.callMethodOfServlet(trans, url, method)
+		self.write('</div>')
+		self.writeln('<p><tt>callMethodOfServlet</tt> returned %s.</p>'
+			% (ret is not None and '<tt>%s</tt>'
+					% self.htmlEncode(repr(ret)) or 'nothing'))

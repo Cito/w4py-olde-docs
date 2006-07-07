@@ -427,10 +427,10 @@ class Application(ConfigurableForServerSidePath, Object):
 		objects = UserDict({
 			'application': self,
 			'transaction': transaction,
-			'request':	 transaction.request(),
-			'response':	transaction.response(),
-			'servlet':	 transaction.servlet(),
-			'session':	 transaction._session, #don't cause creation of session
+			'request': transaction.request(),
+			'response': transaction.response(),
+			'servlet': transaction.servlet(),
+			'session': transaction._session, # don't cause creation of session
 		})
 		for column in self.setting('ActivityLogColumns'):
 			try:
@@ -607,7 +607,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		and ``**kw`` are passed as arguments to that method).
 
 		"""
-
 		urlPath = self.resolveInternalRelativePath(trans, url)
 		req = trans.request()
 		currentPath = req.urlPath()
@@ -616,7 +615,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		currentServerSideContextPath = req._serverSideContextPath
 		currentContextName = req._contextName
 		currentServerRootPath = req._serverRootPath
-		currentPathInfo = req._pathInfo
 		currentExtraURLPath = req._extraURLPath
 		req.setURLPath(urlPath)
 		req.addParent(currentServlet)
@@ -636,7 +634,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		req._serverSideContextPath = currentServerSideContextPath
 		req._contextName = currentContextName
 		req._serverRootPath = currentServerRootPath
-		req._pathInfo = currentPathInfo
 		req._extraURLPath = currentExtraURLPath
 		req.popParent()
 		trans._servlet = currentServlet
@@ -844,7 +841,7 @@ Largely historical.
 """
 
 if __name__=='__main__':
-	if len(sys.argv)!=2:
+	if len(sys.argv) != 2:
 		sys.stderr.write('WebKit: Application: Expecting one filename argument.\n')
 	requestDict = eval(open(sys.argv[1]).read())
 	main(requestDict)
