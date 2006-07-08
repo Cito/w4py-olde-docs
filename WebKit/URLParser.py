@@ -267,13 +267,13 @@ class ContextParser(URLParser):
 		# This is a hack...
 		# this should probably go in the Transaction class:
 		trans._fileParserInitSeen = {}
+		req = trans.request()
 		if not requestPath:
 			p = '/'
 			q = req.queryString()
 			if q:
 				p += "?" + q
 			raise HTTPMovedPermanently(location=p)
-		req = trans.request()
 		if req._absolutepath:
 			contextName = self._defaultContext
 		else:
