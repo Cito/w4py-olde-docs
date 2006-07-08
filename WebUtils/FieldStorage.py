@@ -1,11 +1,11 @@
 """
-This module defines a subClass of the standard Python cgi.FieldStorage class
+This module defines a subclass of the standard Python cgi.FieldStorage class
 with an extra method that will allow a FieldStorage to parse a query string
 even in a POST request.
 """
 
 
-import cgi, os, urllib, string
+import cgi, os, urllib
 
 class FieldStorage(cgi.FieldStorage):
 
@@ -14,13 +14,12 @@ class FieldStorage(cgi.FieldStorage):
 		self._environ = environ
 		self._strict_parsing = strict_parsing
 		self._keep_blank_values = keep_blank_values
-		cgi.FieldStorage.__init__(self, fp, headers, outerboundary, environ, keep_blank_values, strict_parsing)
+		cgi.FieldStorage.__init__(self, fp, headers, outerboundary,
+			environ, keep_blank_values, strict_parsing)
 
 	def parse_qs(self):
-		"""
-		Explicitly parse the query string, even if it's a POST request
-		"""
-		self._method = string.upper(self._environ['REQUEST_METHOD'])
+		"""Explicitly parse the query string, even if it's a POST request."""
+		self._method = self._environ.get('REQUEST_METHOD', '').upper()
 		if self._method == "GET" or self._method == "HEAD":
 			# print __file__, "bailing on GET or HEAD request"
 			return # bail because cgi.FieldStorage already did this
@@ -29,23 +28,20 @@ class FieldStorage(cgi.FieldStorage):
 			# print __file__, "bailing on no query_string"
 			return # bail if no query string
 
-		name_value_pairs = string.splitfields(self._qs, '&')
-		dict = {}
-		for name_value in name_value_pairs:
-			nv = string.splitfields(name_value, '=')
+		r = {}
+		for name_value in self._qs.split('&'):
+			nv = name_value.split('=', 2)
 			if len(nv) != 2:
 				if self._strict_parsing:
-					raise ValueError, "bad query field: %s" % `name_value`
+					raise ValueError, "bad query field: %r" % (name_value,)
 				continue
-			name = urllib.unquote(string.replace(nv[0], '+', ' '))
-			value = urllib.unquote(string.replace(nv[1], '+', ' '))
+			name = urllib.unquote(nv[0].replace('+', ' '))
+			value = urllib.unquote(nv[1].replace('+', ' '))
 			if len(value) or self._keep_blank_values:
-				if dict.has_key (name):
-					dict[name].append(value)
-					# print "appending"
+				if r.has_key(name):
+					r[name].append(value)
 				else:
-					dict[name] = [value]
-					# print "no append"
+					r[name] = [value]
 
 		# Only append values that aren't already in the FieldStorage's keys;
 		# This makes POSTed vars override vars on the query string
@@ -53,10 +49,7 @@ class FieldStorage(cgi.FieldStorage):
 			# This makes sure self.keys() are available, even
 			# when valid POST data wasn't encountered.
 			self.list = []
-		keys = self.keys()
-		for key, values in dict.items():
-			if key not in keys:
+		for key, values in r.items():
+			if not self.has_key(key):
 				for value in values:
-					self.list.append(cgi.MiniFieldStorage(key,value))
-					# print "adding %s=%s" % (str(key),str(value))
-
+					self.list.append(cgi.MiniFieldStorage(key, value))
