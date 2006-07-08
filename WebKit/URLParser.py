@@ -537,13 +537,18 @@ class _FileParser(URLParser):
 		if requestPath == '/':
 			requestPath = ''
 		for directoryFile in self._directoryFile:
-			names = self.filenamesForBaseName(
-				os.path.join(self._path, directoryFile))
+			basename = os.path.join(self._path, directoryFile)
+			names = self.filenamesForBaseName(basename)
+			if len(names) > 1 and self._useCascading:
+				for ext in self._cascadeOrder:
+					if basename + ext in names:
+						names = [basename + ext]
+						break
 			if len(names) > 1:
 				warn("More than one file matches the index file %s in %s: %s"
 					% (directoryFile, self._path, names))
 				raise HTTPNotFound
-			elif names:
+			if names:
 				if requestPath and not self._extraPathInfo:
 					raise HTTPNotFound
 				req._serverSidePath = names[0]
