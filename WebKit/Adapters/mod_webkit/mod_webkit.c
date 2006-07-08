@@ -150,7 +150,7 @@ static const char *handle_passheader(cmd_parms *cmd, void *mconfig, char *word1)
 
     if (word1 != NULL) {
         char **header = (char **)ap_push_array(cfg->passheaders);
-	*header = word1;
+        *header = word1;
     }
     return NULL;
 }
@@ -170,7 +170,6 @@ static void *wk_create_dir_config(pool *p, char *dirspec)
 {
     wkcfg *cfg;
     char **header;
-    //char *dname = dirspec;
 
     /*
      * Allocate the space for our record from the pool supplied.
@@ -407,8 +406,6 @@ static int content_handler(request_rec *r)
     int i;
     char msgbuf[MAX_STRING_LEN];
     int conn_attempt = 0;
-    //int conn_attempt_delay = 1;
-    //int max_conn_attempt = 10;
     WFILE* whole_dict=NULL;
     WFILE* int_dict = NULL;
     const char *value;
@@ -433,7 +430,7 @@ static int content_handler(request_rec *r)
     }
 
     ap_add_common_vars(r);
-    ap_add_cgi_vars(r);
+    ap_add_cgi_vars(r); /* not included in the common_vars above */
 
     /* Build the environment dictionary */
 
@@ -467,6 +464,22 @@ static int content_handler(request_rec *r)
         }
     }
 
+#ifdef SECURITY_HOLE_PASS_AUTHORIZATION
+    /* Ordinarily Apache only makes the username available to CGI scripts,
+    keeping the password secret. It can be configured to make the complete
+    credential details available, but only by completely rebuilding the
+    server with SECURITY_HOLE_PASS_AUTHORIZATION set (enabling this feature
+    is considered a security risk). By setting the same constant, you can
+    have mod_webkit pass the authorization information to WebKit instead.
+    (suggested by Maximillian Dornseif 2003-10-27) */
+    key = "Authorization";
+    value = ap_table_get(r->headers_in, key);
+    if (value && *value) {
+      write_string("X-HTTP_AUTHORIZATION", env_dict);
+      write_string(value, env_dict);
+    }
+#endif
+
     w_byte(TYPE_NULL, env_dict);
     /* end dictionary */
     log_debug("Built env dictionary", r);
@@ -477,9 +490,7 @@ static int content_handler(request_rec *r)
     write_string("CGI", whole_dict); /* value */
     write_string("time", whole_dict); /* key */
     w_byte(TYPE_INT, whole_dict); /* value */
-    /* patch from Ken Lalonde to make the time entry useful,
-     * (who knew?? I didn't think this would work and didn't bother)
-     */
+    /* patch from Ken Lalonde to make the time entry useful */
     w_long((long)r->request_time, whole_dict); /* value */
 
     write_string("environ", whole_dict); /* key */
@@ -579,8 +590,8 @@ static const command_rec webkit_cmds[] =
                                     /* directive description */
     },
     {
-        "PassHeader",		    /* directive name */
-        handle_passheader,	    /* config action routine */
+        "PassHeader",               /* directive name */
+        handle_passheader,          /* config action routine */
         NULL,                       /* argument to include in call */
         OR_OPTIONS,                 /* where available, allow directory to overide
                                      * if AllowOverride Options is specified */

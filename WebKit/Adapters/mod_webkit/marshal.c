@@ -14,7 +14,6 @@ static char* expand_memory(WFILE* p, long add)
     char* newptr;
     long currsize;
     long newsize = 0;
-    //char log_msg[500];
 
     //log_message("Expanding Memory",p->r);
 
@@ -40,7 +39,6 @@ static char* expand_memory(WFILE* p, long add)
 void insert_data(WFILE* dest, WFILE* src)
 {
     long src_len, dest_avail, len_need;
-    //char log_msg[500];
 
     //log_message("inserting data", dest->r);
 

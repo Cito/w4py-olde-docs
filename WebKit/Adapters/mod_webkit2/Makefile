@@ -21,6 +21,11 @@ APACHECTL=apachectl
 # INC=-I`$(APXS) -q INCLUDEDIR`
 # LD_SHLIB=`$(APXS) -q LDFLAGS_SHLIB`
 
+#   You can pass authorization information (passwords)
+#   from Apache to WebKit, even if Apache has not been
+#   compiled with this feature, by defining the following:
+#DEF=-DSECURITY_HOLE_PASS_AUTHORIZATION
+
 SRC = mod_webkit.c marshal.c
 OBJ = ${SRC:.c=.o}
 SOBJ = ${SRC:.c=.lo}
@@ -33,7 +38,7 @@ mod_webkit.la: $(OBJ)
 	$(APXS) -c -o mod_webkit.la $(SOBJ)
 
 mod_webkit.o: mod_webkit.c
-	$(APXS) -c mod_webkit.c
+	$(APXS) $(DEF) -c mod_webkit.c
 
 marshal.o: marshal.c
 	$(APXS) -c marshal.c

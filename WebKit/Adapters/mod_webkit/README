@@ -10,6 +10,10 @@ because I haven't adjusted the Makefile for static building. If you
 prefer static apache modules, just follow the apache directions for building.
 There are 2 source files, mod_webkit.c and marshal.c.
 
+Ordinarily Apache only makes the username available to WebKit for
+password protected pages, keeping the password secret. See the
+Makefile on how to let mod_webkit pass that information anyway.
+
 To build, just run 'make'. The Makefile uses apxs for the building and
 installing, so you'll need to have that installed. If you're running an
 RPM based distribution, it's usually included in apache-devel. Also, the Makefile
@@ -18,7 +22,7 @@ so that APXS points to the full path to apxs.
 
 To install, run 'make install', and hope for the best. In my brief testing,
 make install put the module in the right place, but didn't get the LoadModule
-directive right (On Redhat). If you would rather be safe than sorry,
+directive right (on Redhat). If you would rather be safe than sorry,
 run 'make', then copy the resulting mod_webkit.so to your apache module
 directory. Then modify httpd.conf to load the module.
 

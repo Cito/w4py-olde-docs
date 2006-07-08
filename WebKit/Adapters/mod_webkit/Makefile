@@ -16,6 +16,11 @@ APACHECTL=apachectl
 #INC=-Imy/include/dir
 #LIB=-Lmy/lib/dir -lmylib
 
+#   You can pass authorization information (passwords)
+#   from Apache to WebKit, even if Apache has not been
+#   compiled with this feature, by defining the following:
+#DEF=-DSECURITY_HOLE_PASS_AUTHORIZATION
+
 #   the default target
 all: mod_webkit.so
 

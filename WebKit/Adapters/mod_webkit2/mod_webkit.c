@@ -156,10 +156,9 @@ static const char *handle_passheader(cmd_parms *cmd, void *mconfig,
  * ==================================================================== */
 static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
 {
-
     wkcfg *cfg;
     char **header;
-    //char *dname = dirspec;
+
     apr_sockaddr_t *apraddr;
     apr_status_t rv;
 
@@ -181,7 +180,6 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
      */
     header = (char **)apr_array_push(cfg->passheaders);
     *header = "If-Modified-Since";
-
 
     //cfg->addr = resolve_host(cfg->host);
 
@@ -470,8 +468,6 @@ static int webkit_handler(request_rec *r)
     int i;
     char msgbuf[MAX_STRING_LEN];
     int conn_attempt = 0;
-    //int conn_attempt_delay = 1;
-    //int max_conn_attempt = 10;
     WFILE* whole_dict=NULL;
     WFILE* int_dict = NULL;
     const char *value;
@@ -536,6 +532,23 @@ static int webkit_handler(request_rec *r)
             }
         }
     }
+
+#ifdef SECURITY_HOLE_PASS_AUTHORIZATION
+    /* Ordinarily Apache only makes the username available to CGI scripts,
+    keeping the password secret. It can be configured to make the complete
+    credential details available, but only by completely rebuilding the
+    server with SECURITY_HOLE_PASS_AUTHORIZATION set (enabling this feature
+    is considered a security risk). By setting the same constant, you can
+    have mod_webkit pass the authorization information to WebKit instead.
+    (suggested by Maximillian Dornseif 2003-10-27) */
+    key = "Authorization";
+    value = apr_table_get(r->headers_in, key);
+    if (value && *value) {
+      write_string("X-HTTP_AUTHORIZATION", env_dict);
+      write_string(value, env_dict);
+    }
+#endif
+
     w_byte(TYPE_NULL, env_dict);
     /* end dictionary */
     log_debug("Built env dictionary", r);
@@ -546,9 +559,7 @@ static int webkit_handler(request_rec *r)
     write_string("CGI", whole_dict); /* value */
     write_string("time", whole_dict); /* key */
     w_byte(TYPE_INT, whole_dict); /* value */
-    /* patch from Ken Lalonde to make the time entry useful,
-     * (who knew?? I didn't think this would work and didn't bother)
-     */
+    /* patch from Ken Lalonde to make the time entry useful */
     w_long((long)apr_time_sec(r->request_time), whole_dict); /* value */
 
     write_string("environ", whole_dict); /* key */
