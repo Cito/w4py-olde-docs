@@ -224,8 +224,14 @@ class ThreadedAppServer(AppServer):
 			while self.running > 2:
 
 				# block for timeout seconds waiting for connections
-				input, output, exc = select.select(
-					self._sockets.values(), [], [], timeout)
+				try:
+					input, output, exc = select.select(
+						self._sockets.values(), [], [], timeout)
+				except select.error, e:
+					if e[0] == errno.EINTR:
+						continue
+					else:
+						raise
 
 				for sock in input:
 					self._requestID += 1
@@ -902,6 +908,8 @@ def run(workDir=None):
 	sys.stderr.flush()
 	return exitStatus
 
+# Signal handlers
+
 def shutDown(signum, frame):
 	"""Signal handler for shutting down the server."""
 	global server
@@ -920,7 +928,40 @@ def shutDown(signum, frame):
 	else:
 		print 'No running app server was found.'
 
+try:
+	# Use the threadframe module for dumping thread stack frames:
+	# http://www.majid.info/mylos/stories/2004/06/10/threadframe.html
+	import threadframe
+
+	def threadDump(signum, frame):
+		"""Signal handler for dumping thread stack frames to stdout."""
+		print
+		print "App server has been signaled to attempt a thread dump."
+		print
+		print "Thread stack frame dump at", time.asctime(time.localtime(time.time()))
+		sys.stdout.flush()
+		frames = threadframe.dict()
+		items = frames.items()
+		items.sort()
+		print
+		print "-" * 79
+		print
+		for thread_id, frame in items:
+			print 'Thread ID: %d (reference count = %d)' % (
+				thread_id, sys.getrefcount(frame))
+			print ''.join(traceback.format_list(traceback.extract_stack(frame)))
+		items.sort()
+		print "-" * 79
+		print
+		sys.stdout.flush()
+
+except ImportError:
+	# threadframe module not available
+	threadDump = None
+
 import signal
+
+# Shutdown signals
 
 try:
 	SIGHUP = signal.SIGHUP
@@ -928,15 +969,33 @@ try:
 except AttributeError:
 	SIGHUP = None
 try:
-	SIGINT = signal.SIGINT
-	signal.signal(SIGINT, shutDown)
-except AttributeError:
-	SIGINT = None
-try:
 	SIGTERM = signal.SIGTERM
 	signal.signal(SIGTERM, shutDown)
 except AttributeError:
 	SIGTERM = None
+try:
+	# this is Ctrl-C on Windows
+	SIGINT = signal.SIGINT
+	signal.signal(SIGINT, shutDown)
+except AttributeError:
+	SIGINT = None
+
+if threadDump:
+
+	# Signals for creating a thread dump
+
+	try:
+		SIGQUIT = signal.SIGQUIT
+		signal.signal(SIGQUIT, threadDump)
+	except AttributeError:
+		SIGQUIT = None
+	try:
+		# this is Ctrl-Break on Windows (not Cygwin)
+		SIGBREAK = signal.SIGBREAK
+		signal.signal(SIGBREAK, threadDump)
+	except AttributeError:
+		SIGBREAK = None
+
 
 import re
 settingRE = re.compile(r'^(?:--)?([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
