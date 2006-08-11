@@ -105,46 +105,44 @@ class Configurable:
 
 	def userConfig(self):
 		""" Returns the user config overrides found in the optional config file, or {} if there is no such file. The config filename is taken from configFilename(). """
+		filename = self.configFilename()
+		if not filename:
+			return {}
 		try:
-			filename = self.configFilename()
-			if filename is None:
-				return {}
-			file = open(filename)
+			# open the config file in universal newline mode,
+			# in case it has been edited on a different platform
+			contents = open(filename, 'U').read()
 		except IOError:
 			return {}
-		else:
-			contents = file.read()
-			isDict = contents.strip().startswith('{')
-			file.close()
-			from WebKit.AppServer import globalAppServer
-			if globalAppServer:
-				globalAppServer._imp.watchFile(filename)
-			replacements = self.configReplacementValues()
-			if replacements and isDict:
-				try:
-					contents = contents % replacements
-				except:
-					raise ConfigurationError, 'Unable to embed replacement text in %s.' % self.configFilename()
 
-			evalContext = replacements.copy()
-			evalContext['True'] = 1==1
-			evalContext['False'] = 1==0
+		isDict = contents.lstrip().startswith('{')
+		from WebKit.AppServer import globalAppServer
+		if globalAppServer:
+			globalAppServer._imp.watchFile(filename)
+		replacements = self.configReplacementValues()
+		if replacements and isDict:
 			try:
-				if isDict:
-					config = eval(contents, evalContext)
-					# @@ 2005-04-03 ce: to do: catch syntax error and convert to native line endings
-				else:
-					exec contents in evalContext
-					# @@ 2005-04-03 ce: to do: catch syntax error and convert to native line endings
-					config = evalContext
-					for name in config.keys():
-						if name.startswith('_'):
-							del config[name]
-			except Exception, e:
-				raise ConfigurationError, 'Invalid configuration file, %s (%s).' % (self.configFilename(), e)
-			if type(config) is not DictType:
-				raise ConfigurationError, 'Invalid type of configuration. Expecting dictionary, but got %s.'  % type(config)
-			return config
+				contents = contents % replacements
+			except:
+				raise ConfigurationError, 'Unable to embed replacement text in %s.' % filename
+
+		evalContext = replacements.copy()
+		evalContext['True'] = 1==1
+		evalContext['False'] = 1==0
+		try:
+			if isDict:
+				config = eval(contents, evalContext)
+			else:
+				exec contents in evalContext
+				config = evalContext
+				for name in config.keys():
+					if name.startswith('_'):
+						del config[name]
+		except Exception, e:
+			raise ConfigurationError, 'Invalid configuration file, %s (%s).' % (filename, e)
+		if type(config) is not DictType:
+			raise ConfigurationError, 'Invalid type of configuration. Expecting dictionary, but got %s.'  % type(config)
+		return config
 
 	def printConfig(self, dest=None):
 		""" Prints the configuration to the given destination, which defaults to stdout. A fixed with font is assumed for aligning the values to start at the same column. """
