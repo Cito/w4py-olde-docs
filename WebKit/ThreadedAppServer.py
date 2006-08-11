@@ -636,10 +636,10 @@ See the Troubleshooting section of the WebKit Install Guide.\r
 ''' % msg)
 				self._sock.close()
 				return None
-			print 'ERROR:', msg
-			print 'ERROR: you can only connect to', self._serverAddress[1], \
-				'via an adapter,'
-			print '       like mod_webkit or wkcgi, not with a browser.'
+			print "ERROR:", msg
+			print "ERROR: you can only connect to", self._serverAddress[1], \
+				"via an adapter,"
+			print "       like mod_webkit or wkcgi, not with a browser."
 			raise
 		if type(dictLength) != type(1):
 			self._sock.close()
@@ -680,11 +680,11 @@ class MonitorHandler(Handler):
 		verbose = self._server._verbose
 		startTime = time.time()
 		if verbose:
-			print 'BEGIN REQUEST'
+			print "BEGIN REQUEST"
 			print time.asctime(time.localtime(startTime))
 		conn = self._sock
 		if verbose:
-			print 'receiving request from', conn
+			print "receiving request from", conn
 		BUFSIZE = 8*1024
 		dict = self.receiveDict()
 		if dict['format'] == "STATUS":
@@ -862,7 +862,11 @@ def run(workDir=None):
 					t.start()
 					try:
 						while server.running > 1:
-							time.sleep(1) # wait for exception
+							try:
+								time.sleep(1) # wait for interrupt
+							except:
+								if server.running < 3:
+									raise # shutdown
 					finally:
 						t.join()
 				else:
@@ -926,7 +930,7 @@ def shutDown(signum, frame):
 		else:
 			sys.exit(0) # normal exit
 	else:
-		print 'No running app server was found.'
+		print "No running app server was found."
 
 try:
 	# Use the threadframe module for dumping thread stack frames:
@@ -947,12 +951,11 @@ try:
 		print "-" * 79
 		print
 		for thread_id, frame in items:
-			print 'Thread ID: %d (reference count = %d)' % (
+			print "Thread ID: %d (reference count = %d)" % (
 				thread_id, sys.getrefcount(frame))
 			print ''.join(traceback.format_list(traceback.extract_stack(frame)))
 		items.sort()
 		print "-" * 79
-		print
 		sys.stdout.flush()
 
 except ImportError:
