@@ -64,7 +64,6 @@ class HTTPResponse(Response):
 		assert self._committed == 0, "Headers have already been sent"
 		self._headers[name.capitalize()] = value
 
-
 	def addHeader(self, name, value):
 		"""Adds a specific header by name."""
 		print "addHeader is deprecated. Use setHeader()."
@@ -294,20 +293,23 @@ class HTTPResponse(Response):
 		if self._committed:
 			print "response.writeHeaders called when already committed"
 			return
-		headers = []
-		headerstring = ''
-		for key, value in self._headers.items():
-			headers.append((key, value))
-		for cookie in self._cookies.values():
-			headers.append(('Set-Cookie', cookie.headerValue()))
-		for i in headers:
-			hdrstr = i[0] + ': ' + i[1] + '\r\n'
-			if i[0].lower() == 'status':
-				headerstring = ''.join((hdrstr, headerstring))
-			else:
-				headerstring = ''.join((headerstring, hdrstr))
-		headerstring = ''.join((headerstring,'\r\n'))
-		self._strmOut.prepend(headerstring)
+		# make sure the status header comes first
+		if self._headers.has_key('Status'):
+			# store and temporarily delete status
+			status = self._headers['Status']
+			del self._headers['Status']
+		else:
+			# invent meaningful status
+			status = self._headers.has_key('Location') \
+				and '302 Redirect' or '200 OK'
+		head = ['Status: %s' % status]
+		head.extend(map(lambda h: '%s: %s' % h, self._headers.items()))
+		self._headers['Status'] = status # restore status
+		head.extend(map(lambda c: 'Set-Cookie: %s' % c.headerValue(),
+			self._cookies.values()))
+		head.append('')
+		head = '\r\n'.join(head)
+		self._strmOut.prepend(head)
 
 	def recordSession(self):
 		"""Record session ID.
