@@ -26,7 +26,7 @@ class HTTPResponse(Response):
 	## Init ##
 
 	def __init__(self, transaction, strmOut, headers=None):
-		""" Initializes the request. """
+		"""Initialize the request."""
 
 		Response.__init__(self, transaction, strmOut)
 
@@ -38,13 +38,13 @@ class HTTPResponse(Response):
 		else:
 			self._headers = headers
 
-		self._cookies   = {}
+		self._cookies = {}
 
 
 	## Headers ##
 
 	def header(self, name, default=NoDefault):
-		""" Returns the value of the specified header. """
+		"""Return the value of the specified header."""
 		if default is NoDefault:
 			return self._headers[name.capitalize()]
 		else:
@@ -54,28 +54,34 @@ class HTTPResponse(Response):
 		return self._headers.has_key(name.capitalize())
 
 	def setHeader(self, name, value):
-		"""Sets a specific header by name.
+		"""Set a specific header by name.
 
 		Parameters:
-			name: Header Name
-			value: Header Value
+			name: the header name
+			value: the header value
 
 		"""
 		assert self._committed == 0, "Headers have already been sent"
 		self._headers[name.capitalize()] = value
 
 	def addHeader(self, name, value):
-		"""Adds a specific header by name."""
-		print "addHeader is deprecated. Use setHeader()."
+		"""deprecated: HTTPResponse.addHeader() on 01/02/12 in 0.6.
+
+		Use setHeader() instead.@
+
+		Add a specific header by name.
+
+		"""
+		self.deprecated(self.addHeader)
 		assert self._committed == 0
 		self.setHeader(name, value)
 
 	def headers(self, name=None):
-		""" Returns a dictionary-style object of all Header objects contained by this request. """
+		"""Return a dictionary-style object of all header objects contained by this request."""
 		return self._headers
 
 	def clearHeaders(self):
-		"""Clears all the headers.
+		"""Clear all the headers.
 
 		You might consider a setHeader('Content-type', 'text/html')
 		or something similar after this.
@@ -88,16 +94,15 @@ class HTTPResponse(Response):
 	## Cookies ##
 
 	def cookie(self, name):
-		"""Returns the value of the specified cookie."""
+		"""Return the value of the specified cookie."""
 		return self._cookies[name]
 
 	def hasCookie(self, name):
-		"""Returns True if the specified cookie is present."""
+		"""Return True if the specified cookie is present."""
 		return self._cookies.has_key(name)
 
-
 	def setCookie(self, name, value, path='/', expires='ONCLOSE',
-		      secure=False):
+			secure=False):
 		"""Set a cookie.
 
 		You can also set the path (which defaults to /).
@@ -154,7 +159,7 @@ class HTTPResponse(Response):
 		self.addCookie(cookie)
 
 	def addCookie(self, cookie):
-		"""Adds a cookie that will be sent with this response.
+		"""Add a cookie that will be sent with this response.
 
 		cookie is a Cookie object instance. See WebKit.Cookie.
 
@@ -164,7 +169,7 @@ class HTTPResponse(Response):
 		self._cookies[cookie.name()] = cookie
 
 	def delCookie(self, name):
-		"""Deletes a cookie at the browser.
+		"""Delete a cookie at the browser.
 
 		To do so, one has to create and send to the browser a cookie with
 		parameters that will cause the browser to delete it.
@@ -187,7 +192,7 @@ class HTTPResponse(Response):
 		return self._cookies
 
 	def clearCookies(self):
-		"""Clears all the cookies."""
+		"""Clear all the cookies."""
 		assert self._committed == 0
 		self._cookies = {}
 
@@ -203,7 +208,7 @@ class HTTPResponse(Response):
 	## Special responses ##
 
 	def sendError(self, code, msg=''):
-		"""Sets the status code to the specified code and message."""
+		"""Set the status code to the specified code and message."""
 		assert self._committed == 0, "Response already partially sent"
 		self.setStatus(code, msg)
 
@@ -251,9 +256,8 @@ class HTTPResponse(Response):
 		self._strmOut.flush()
 		self._strmOut.autoCommit(autoFlush)
 
-
 	def isCommitted(self):
-		"""Checks whether response is already commited.
+		"""Check whether response is already commited.
 
 		Checks whether the reponse has already been partially or completely sent.
 		If this returns true, no new headers/cookies can be added
@@ -387,22 +391,6 @@ class HTTPResponse(Response):
 
 		"""
 		return self._strmOut.size()
-
-	#def appendRawResponse(self, rawRes):
-	#	"""Appends the contents of the raw response.
-	#
-	#	The contents returned by some transaction's rawResponse() are added
-	#	to this response. The headers of the receiving response take precedence
-	#	over the appended response. This method was built primarily to support
-	#	Application.forwardRequest().
-	#
-	#	"""
-	#	assert self._committed == 0
-	#	headers = rawRes.get('headers', [])
-	#	for key, value in headers:
-	#		if not self._headers.has_key(key):
-	#			self._headers[key] = value
-	#	self.write(rawRes['contents'])
 
 	def mergeTextHeaders(self, headerstr):
 		"""Merge text into our headers.

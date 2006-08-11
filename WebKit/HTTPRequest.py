@@ -523,7 +523,7 @@ class HTTPRequest(Request):
 		return '../' * numStepsBackward
 
 	def servletPathFromSiteRoot(self):
-		"""Returns the "servlet path" of this servlet relative to the siteRoot.
+		"""Return the "servlet path" of this servlet relative to the siteRoot.
 
 		In other words, everything after the name of the context (if present).
 		If you append this to the result of self.siteRoot() you get back to the
@@ -657,7 +657,7 @@ class HTTPRequest(Request):
 		return self._environ.get('QUERY_STRING', '')
 
 	def uri(self):
-		"""Returns the URI for this request (everything after the host name).
+		"""Return the URI for this request (everything after the host name).
 
 		Taken from the CGI variable REQUEST_URI. If not available,
 		constructed from SCRIPT_NAME, PATH_INFO and QUERY_STRING.
@@ -685,7 +685,7 @@ class HTTPRequest(Request):
 		return sid
 
 	def setSessionId(self, sessionID, force=False):
-		"""Allows you to set the session ID.
+		"""Set the session ID.
 
 		This needs to be called _before_ attempting to use the session.
 		This would be useful if the session ID is being passed in through
@@ -779,7 +779,7 @@ class HTTPRequest(Request):
 	def serverSideDir(self):
 		"""deprecated: HTTPRequest.serverSideDir() on 01/24/01 in 0.5.
 
-		use serverSidePath() instead.@
+		Use serverSidePath() instead.@
 
 		Return the directory of the Servlet (as given through __init__()'s path).
 
@@ -792,7 +792,7 @@ class HTTPRequest(Request):
 	def relativePath(self, joinPath):
 		"""deprecated: HTTPRequest.relativePath() on 01/24/01 in 0.5.
 
-		use serverSidePath() instead.@
+		Use serverSidePath() instead.@
 
 		Return a new path which includes the servlet's path appended by 'joinPath'.
 		Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned.
