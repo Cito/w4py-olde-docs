@@ -1,4 +1,5 @@
-from WebKit.HTTPContent import HTTPContent
+from ExamplePage import ExamplePage
+
 try:
 	import gd # GD module
 except ImportError:
@@ -11,8 +12,18 @@ except ImportError:
 	except ImportError:
 		pil = None
 
+def image_lib_link(lib=None):
+	if not lib:
+		lib = gd and 'gd' or 'pil'
+	name, src = {
+		'gd': ('GD module',
+			'newcenturycomputers.net/projects/gdmodule.html'),
+		'pil': ('Python Imaging Library (PIL)',
+			'www.pythonware.com/products/pil/')}[lib]
+	return '<a href="http://%s">%s</a>' % (src, name)
 
-class Image(HTTPContent):
+
+class Image(ExamplePage):
 	"""Dynamic image generation example.
 
 	This example creates an image of a sinusoid.
@@ -25,7 +36,7 @@ class Image(HTTPContent):
 	"""
 
 	def defaultAction(self):
-		if gd or pil:
+		if self.request().field('typ', None) == '.png' and (gd or pil):
 			image = self.generatePNGImage()
 			res = self.response()
 			res.setHeader("Content-Type", "image/png")
@@ -35,13 +46,19 @@ class Image(HTTPContent):
 			# res.setHeader('Content-Disposition', 'attachment; filename=foo.png')
 			self.write(image)
 		else:
-			self.writeln('<html><head><title>Image Demo</title>'
-				'<body style="background-color:white;padding:16;font-family:sans-serif">'
-				'<h2>WebKit Image Generation Demo</h2>'
-				'<h4 style="color:red">Sorry:'
-					' This page requires the Python Imaging Library or the GD module.</h4>'
-				'</p>See <a href="http://python.org/topics/web/graphics.html">'
-				'python.org/topics/web/graphics.html</a>.</p></body></html>')
+			self.writeHTML()
+
+	def writeContent(self):
+		wr = self.writeln
+		wr('<h2>WebKit Image Generation Demo</h2>')
+		if gd or pil:
+			wr('<img src="Image?typ=.png">')
+			wr('<p>This image has just been generated using the %s.</p>' %
+				image_lib_link())
+		else:
+			wr('<h4 style="color:red">Sorry: No image library available.</h4>')
+			wr('<p>This example requires the %s.</p>' % ' or the '.join(
+				map(image_lib_link, ('gd', 'pil'))))
 
 	def generatePNGImage(self):
 		"""Generate and return a PNG image using gdmodule."""
