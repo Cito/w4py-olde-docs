@@ -168,11 +168,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		print "Application is shutting down..."
 		self.running = 0
-		if hasattr(self, '_sessSweepThread'):
-			# We don't always have this, hence the 'if' above.
-			self._closeEvent.set()
-			self._sessSweepThread.join()
-			del self._sessSweepThread
 		self._sessions.storeAllSessions()
 		if self._server.isPersistent():
 			self.taskManager().stop()
