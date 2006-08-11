@@ -4,6 +4,8 @@ import os, mimetypes, time
 
 debug = 0
 
+file_read_mode = os.sys.platform == 'OpenVMS' and 'r' or 'rb'
+
 
 class UnknownFileTypeServletFactory(ServletFactory):
 	"""The servlet factory for unknown file types.
@@ -179,13 +181,13 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 
 		filename = self.filename(trans)
 		try:
-			f = open(filename, 'rb')
+			f = open(filename, file_read_mode)
 		except IOError:
 			raise HTTPExceptions.HTTPNotFound
 			return
 
 		stat = os.fstat(f.fileno())
-		fileSize,mtime = stat[6],stat[8]
+		fileSize, mtime = stat[6], stat[8]
 
 		if debug:
 			print '>> UnknownFileType.serveContent()'
@@ -238,7 +240,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 				print '>> sending directly'
 			numBytesSent = 0
 			while numBytesSent<fileSize:
-				data = f.read(min(fileSize-numBytesSent,ReadBufferSize))
+				data = f.read(min(fileSize-numBytesSent, ReadBufferSize))
 				if data == '':
 					break # unlikely, but safety first
 				response.write(data)
