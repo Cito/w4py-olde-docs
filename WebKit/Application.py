@@ -150,14 +150,16 @@ class Application(ConfigurableForServerSidePath, Object):
 		session objects (and disk copies of those objects) that have expired.
 
 		"""
-		from Tasks import SessionTask
-		import time
-		task = SessionTask.SessionTask(self._sessions)
-		tm = self.taskManager()
-		sweepinterval = self._session_timeout/10
-		tm.addPeriodicAction(time.time() + sweepinterval,
-			sweepinterval, task, "SessionSweeper")
-		print "Session sweeper has started."
+		if self._session_timeout:
+			tm = self.taskManager()
+			if tm:
+				from Tasks import SessionTask
+				import time
+				task = SessionTask.SessionTask(self._sessions)
+				sweepinterval = self._session_timeout/10
+				tm.addPeriodicAction(time.time() + sweepinterval,
+					sweepinterval, task, "SessionSweeper")
+				print "Session sweeper has started."
 
 	def shutDown(self):
 		"""Shut down the application.

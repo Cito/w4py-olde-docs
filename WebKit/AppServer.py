@@ -153,12 +153,14 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 	def closeThread(self):
 		"""This method is called when the shutdown sequence is initiated."""
-		self._closeEvent.wait()
+		if self.isPersistent():
+			self._closeEvent.wait()
 		self.shutDown()
 
 	def initiateShutdown(self):
 		"""Ask the master thread to begin the shutdown."""
-		self._closeEvent.set()
+		if self.isPersistent():
+			self._closeEvent.set()
 
 	def recordPID(self):
 		"""Save the pid of the AppServer to a file."""
