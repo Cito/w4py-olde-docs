@@ -311,7 +311,7 @@ class HTTPResponse(Response):
 		self._headers['Status'] = status # restore status
 		head.extend(map(lambda c: 'Set-Cookie: %s' % c.headerValue(),
 			self._cookies.values()))
-		head.append('')
+		head.extend(['']*2) # this adds one empy line
 		head = '\r\n'.join(head)
 		self._strmOut.prepend(head)
 
