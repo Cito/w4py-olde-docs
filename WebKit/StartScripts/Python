@@ -101,9 +101,19 @@ if opt=='start':
 	# Check if the server is already running:
 	if os.path.isfile(PID_FILE):
 		PID=open(PID_FILE).read()
-		if not os.system('ps -p %s > /dev/null' % PID):
-			print "already running"
-			sys.exit(0)
+		if PID:
+			# Check on the command line if it is really our pid file:
+			ps=os.popen('ps -o command= -p %s 2>/dev/null' % PID)
+			out=ps.read()
+			if ps.close():
+				# MacOs has only "command", SunOS has only "args"
+				ps=os.popen('ps -o args= -p %s 2>/dev/null' % PID)
+				out=ps.read()
+				if ps.close():
+					out=None
+			if out and ' -i %s ' % PID_FILE in out:
+				print "already running"
+				sys.exit(0)
 		try:
 			os.remove(PID_FILE)
 		except OSError:
@@ -112,38 +122,48 @@ if opt=='start':
 	GROUP=grp.getgrgid(os.getgid())[0]
 	if (not WEBWARE_USER or WEBWARE_USER==USER) \
 		and (not WEBWARE_GROUP or WEBWARE_GROUP==GROUP):
-		CMD='"%s" %s -d "%s" -o "%s" -i "%s" > /dev/null &' % \
-			(APP_SERVER, PYTHONOPTS, WORK_DIR, LOG_FILE, PID_FILE)
+		CMD='"%s" %s -i "%s" -d "%s" -o "%s" > /dev/null &' % \
+			(APP_SERVER, PYTHONOPTS, PID_FILE, WORK_DIR, LOG_FILE)
 		os.system(CMD)
 	else:
 		if LAUNCH_AS_WEBWARE:
 			# Switch user first, then create pid and log files:
-			CMD='"%s" %s -d "%s" -o "%s" -i "%s"' % \
-				(APP_SERVER, PYTHONOPTS, WORK_DIR, LOG_FILE, PID_FILE)
+			CMD='"%s" %s -i "%s" -d "%s" -o "%s"' % \
+				(APP_SERVER, PYTHONOPTS, PID_FILE, WORK_DIR, LOG_FILE)
 			os.system('su %s -c "%s" > /dev/null &' % (WEBWARE_USER, CMD))
 		else:
 			# Create pid and log files first, then switch user:
-			CMD='"%s" %s -d "%s" -i "%s" -u %s >> "%s" 2>&1 &' % \
-				(APP_SERVER, PYTHONOPTS, WORK_DIR,
-				PID_FILE, WEBWARE_USER, LOG_FILE)
+			CMD='"%s" %s -i "%s" -d "%s" -u %s >> "%s" 2>&1 &' % \
+				(APP_SERVER, PYTHONOPTS, PID_FILE,
+				WORK_DIR, WEBWARE_USER, LOG_FILE)
 			os.system(CMD)
 	print "done"
 elif opt=='stop':
 	print "Stopping %s ..." % APP_NAME,
 	if os.path.isfile(PID_FILE):
 		PID=open(PID_FILE).read()
-		if os.system('ps -p %s > /dev/null' % PID):
-			print "not running"
-		else:
-			try:
-				os.kill(int(PID), signal.SIGTERM)
-			except OSError:
-				print "error"
-				print "Could not kill process %s named in %s" \
-					% (PID, PID_FILE)
-				sys.exit(1)
+		if PID:
+			ps=os.popen('ps -o command= -p %s 2>/dev/null' % PID)
+			out=ps.read()
+			if ps.close():
+				ps=os.popen('ps -o args= -p %s 2>/dev/null' % PID)
+				out=ps.read()
+				if ps.close():
+					out=None
+			if out and ' -i %s ' % PID_FILE in out:
+				try:
+					os.kill(int(PID), signal.SIGTERM)
+				except OSError:
+					print "error"
+					print "Could not kill process %s named in %s" \
+						% (PID, PID_FILE)
+					sys.exit(1)
+				else:
+					print "done"
 			else:
-				print "done"
+				print "not running (removing stale pid file)"
+		else:
+			print "not running (removing empty pid file)"
 		try:
 			os.remove(PID_FILE)
 		except OSError:

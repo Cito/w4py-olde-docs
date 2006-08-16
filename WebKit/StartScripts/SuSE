@@ -117,12 +117,12 @@ case "$1" in
 			startproc -f -l /dev/null \
 				$WEBWARE_USER $WEBWARE_GROUP \
 				"$APP_SERVER" $PYTHONOPTS \
-				-d "$WORK_DIR" -o "$LOG_FILE" -i "$PID_FILE"
+				-i "$PID_FILE" -d "$WORK_DIR" -o "$LOG_FILE"
 		else
 			# Create pid and log files first, then switch user:
 			startproc -f -l "$LOG_FILE" \
 				"$APP_SERVER" $PYTHONOPTS \
-				-d "$WORK_DIR" -i "$PID_FILE" \
+				-i "$PID_FILE" -d "$WORK_DIR" \
 				$WEBWARE_USER $WEBWARE_GROUP
 		fi
 		rc_status -v

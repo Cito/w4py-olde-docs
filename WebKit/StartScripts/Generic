@@ -87,33 +87,39 @@ case "$1" in
 	# Keep backup of last log file:
 	if [ "$LOG_OLD" -a -f "$LOG_FILE" ]; then
 		if [ -s "$LOG_FILE" ]; then
-			mv "$LOG_FILE" "$LOG_FILE$LOG_OLD"
+			mv -f "$LOG_FILE" "$LOG_FILE$LOG_OLD"
 		else
-			rm "$LOG_FILE"
+			rm -f "$LOG_FILE"
 		fi
 	fi
 	# Check if the server is already running:
 	if [ -f "$PID_FILE" ] ; then
 		PID=`cat "$PID_FILE"`
-		if ps -p $PID > /dev/null; then
-			echo "already running"
-			exit 0
+		if [ "$PID" ]; then
+			# Check on the command line if it is really our pid file
+			# (MacOs has only "command", SunOS has only "args"):
+			if (ps -o command= -p $PID 2>/dev/null \
+					|| ps -o args= -p $PID 2>/dev/null) \
+					| grep -q " -i $PID_FILE "; then
+				echo "already running"
+				exit 0
+			fi
 		fi
 		rm -f "$PID_FILE"
 	fi
 	if [ -z "$WEBWARE_USER" -o "$WEBWARE_USER" = "$USER" ]; then
-		"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" \
-			-o "$LOG_FILE" -i "$PID_FILE" > /dev/null &
+		"$APP_SERVER" $PYTHONOPTS -i "$PID_FILE" \
+			-d "$WORK_DIR" -o "$LOG_FILE" > /dev/null &
 	else
 		if [ "$LAUNCH_AS_WEBWARE" ]; then
 			# Switch user first, then create pid and log files:
 			CMD="\"$APP_SERVER\" $PYTHONOPTS"
-			CMD="$CMD -d \"$WORK_DIR\" -o \"$LOG_FILE\" -i \"$PID_FILE\""
+			CMD="$CMD -i \"$PID_FILE\" -d \"$WORK_DIR\" -o \"$LOG_FILE\""
 			su $WEBWARE_USER -c "$CMD" > /dev/null &
 		else
 			# Create pid and log files first, then switch user:
-			"$APP_SERVER" $PYTHONOPTS -d "$WORK_DIR" \
-				-i "$PID_FILE" -u $WEBWARE_USER >> "$LOG_FILE" 2>&1 &
+			"$APP_SERVER" $PYTHONOPTS -i "$PID_FILE" \
+				-d "$WORK_DIR" -u $WEBWARE_USER >> "$LOG_FILE" 2>&1 &
 		fi
 	fi
 	echo "done"
@@ -122,16 +128,22 @@ case "$1" in
 	printf "Stopping $APP_NAME ... "
 	if [ -f "$PID_FILE" ] ; then
 		PID=`cat "$PID_FILE"`
-		if ps -p $PID > /dev/null; then
-			if kill $PID > /dev/null 2>&1 ; then
-				echo "done"
+		if [ "$PID" ]; then
+			if (ps -o command= -p $PID 2>/dev/null \
+					|| ps -o args= -p $PID 2>/dev/null) \
+					| grep -q " -i $PID_FILE "; then
+				if kill $PID > /dev/null 2>&1 ; then
+					echo "done"
+				else
+					echo "error"
+					echo "Could not kill process $PID named in $PID_FILE"
+					exit 1
+				fi
 			else
-				echo "error"
-				echo "Could not kill process $PID named in $PID_FILE"
-				exit 1
+				echo "not running (removing stale pid file)"
 			fi
 		else
-			echo "not running"
+			echo "not running (removing empty pid file)"
 		fi
 		rm -f "$PID_FILE"
 	else
