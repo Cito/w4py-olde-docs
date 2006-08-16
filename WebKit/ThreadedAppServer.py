@@ -159,8 +159,6 @@ class ThreadedAppServer(AppServer):
 
 		if serverAddress is None:
 			serverAddress = self.address(handlerClass.settingPrefix)
-		self._socketHandlers[serverAddress] = handlerClass
-		self._handlerCache[serverAddress] = []
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		try:
@@ -171,13 +169,20 @@ class ThreadedAppServer(AppServer):
 				handlerClass.settingPrefix, str(serverAddress))
 			sys.stdout.flush()
 			raise
-		print "Listening for %s on %s" % (
-			handlerClass.settingPrefix, str(serverAddress))
-		f = open(self.serverSidePath(
-			'%s.text' % handlerClass.protocolName), 'w')
-		f.write('%s:%d' % (serverAddress[0], serverAddress[1]))
-		f.close()
+		serverAddress = sock.getsockname() # resolve/normalize
+		self._socketHandlers[serverAddress] = handlerClass
+		self._handlerCache[serverAddress] = []
 		self._sockets[serverAddress] = sock
+		s = ':'.join(map(str, serverAddress))
+		print "Listening for %s on %s" % (handlerClass.settingPrefix, s)
+		try:
+			f = open(self.serverSidePath(
+				'%s.text' % handlerClass.protocolName), 'w')
+		except IOError:
+			print "Error: Could not write %s.text" % handlerClass.protocolName
+		else:
+			f.write(s)
+			f.close()
 
 	def isPersistent(self):
 		return True
@@ -519,8 +524,7 @@ class ThreadedAppServer(AppServer):
 		try:
 			return self._addr[settingPrefix]
 		except KeyError:
-			host = self.setting(settingPrefix + 'Host',
-						self.setting('Host'))
+			host = self.setting(settingPrefix + 'Host', self.setting('Host'))
 			if settingPrefix == 'Adapter':
 				# jdh 2004-12-01:
 				# 'Port' has been renamed to 'AdapterPort'. However, we don't
@@ -537,9 +541,7 @@ class ThreadedAppServer(AppServer):
 					print "Please update your AppServer.config file."
 			else:
 				port = self.setting(settingPrefix + 'Port')
-			self._addr[settingPrefix] = (
-				host,
-				port)
+			self._addr[settingPrefix] = (host, port)
 			return self._addr[settingPrefix]
 
 
