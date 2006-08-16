@@ -6,7 +6,7 @@
 #
 # /etc/init.d/webkit
 #
-# init.d script for NetBSD
+# init.d script for NetBSD and FreeBSD
 #
 # PROVIDE: webkit
 # REQUIRE: LOGIN
