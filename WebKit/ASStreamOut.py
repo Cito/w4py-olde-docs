@@ -6,7 +6,7 @@ try: # backward compatibility for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0
-	lambda bool(x): x and True or False
+	bool = lambda x: x and True or False
 
 debug = 0
 
