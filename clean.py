@@ -17,7 +17,10 @@ files = '''
 CGIWrapper/Errors.csv
 CGIWrapper/Scripts.csv
 CGIWrapper/ErrorMsgs/*.html
+WebKit/appserverpid.txt
 WebKit/address.text
+WebKit/http.text
+WebKit/monitor.text
 WebKit/Logs/*.csv
 WebKit/ErrorMsgs/*.html
 '''
