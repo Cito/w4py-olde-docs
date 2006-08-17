@@ -1,14 +1,15 @@
-import BaseHTTPServer, mimetools
+from WebKit.ThreadedAppServer import Handler
+from WebKit.ASStreamOut import ASStreamOut
+from WebUtils import Funcs
+from MiscUtils.Funcs import timestamp
+
+import BaseHTTPServer
+import sys, os, socket, time, errno
 try:
 	from cStringIO import StringIO
 except ImportError:
 	from StringIO import StringIO
-import threading, socket
-from WebKit.ThreadedAppServer import Handler
-from WebKit.ASStreamOut import ASStreamOut
-from os import getenv
-import time
-import errno
+
 
 class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 	"""Handles incoming requests.
@@ -26,7 +27,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		"""Handle a request.
 
 		Actually performs the request, creating the environment and calling
-		self.doTransaction(env, myInput) to perform the response.
+		self.doTransaction(env, input) to perform the response.
 
 		"""
 		self.server_version = 'Webware/' + self._server.version()
@@ -48,16 +49,27 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			env['REQUEST_URI'] = path
 			env['QUERY_STRING'] = ''
 			env['SCRIPT_NAME'] = ''
-		env['PATH'] = getenv('PATH', '')
+		env['PATH'] = os.getenv('PATH', '')
 		env['PATH_INFO'] = env['REQUEST_URI']
 		env['SERVER_ADDR'], env['SERVER_PORT'] = map(str, self._serverAddress)
 		env['SERVER_SOFTWARE'] = self.server_version
 		env['SERVER_PROTOCOL'] = self.protocol_version
 		env['GATEWAY_INTERFACE'] = 'CGI/1.1'
-		myInput = ''
-		if self.headers.has_key('Content-Length'):
-			myInput = self.rfile.read(int(self.headers['Content-Length']))
-		self.doTransaction(env, myInput)
+		input = self.headers.has_key('Content-Length') \
+			and self.rfile.read(int(self.headers['Content-Length'])) or ''
+
+		if self._server._verbose:
+			requestURI = Funcs.requestURI(env)
+			startTime = time.time()
+			sys.stdout.write('%5i  %s  %s\n' % (self._requestID,
+				timestamp()['pretty'], requestURI))
+
+		self.doTransaction(env, input)
+
+		if self._server._verbose:
+			duration = ('%0.2f secs' % (time.time() - startTime)).ljust(19)
+			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID,
+				duration, requestURI))
 
 	do_GET = do_POST = do_HEAD = handleRequest
 	# These methods are used in WebDAV requests:
@@ -83,56 +95,24 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		sends the actual HTTP response (response code, headers, body).
 
 		"""
-		s = StringIO(data)
-		headers = mimetools.Message(s)
-		self.doLocation(headers)
-		self.sendStatus(headers)
-		self.sendHeaders(headers)
-		self.sendBody(s)
-
-	def doLocation(self, headers):
-		"""Process location header.
-
-		If there's a Location header and no Status header,
-		we need to add a Status header ourselves.
-
-		"""
-		if headers.has_key('Location'):
-			if not headers.has_key('Status'):
-				# @@ is this the right status header?
-				headers['Status'] = '301 Moved Permanently'
-
-	def sendStatus(self, headers):
-		"""Send status."""
-		if not headers.has_key('Status'):
-			status = "200 OK"
+		status, data = data.split('\r\n', 1)
+		status, code, message = status.split(None, 2)
+		try:
+			assert status == 'Status:'
+			code = int(code)
+			assert 2 <= code/100 < 6
+		except:
+			sys.stdout.write('%5i  HTTPServer error: Missing status header\n'
+				% self._requestID)
 		else:
-			status = headers['Status']
-			del headers['Status']
-		pos = status.find(' ')
-		if pos == -1:
-			code = int(status)
-			message = ''
-		else:
-			code = int(status[:pos])
-			message = status[pos:].strip()
-		self.send_response(code, message)
-
-	def sendHeaders(self, headers):
-		"""Send headers."""
-		for header in headers.keys():
-			for value in headers.getheaders(header):
-				self.send_header(header, value)
-		self.end_headers()
-
-	def sendBody(self, bodyFile):
-		"""Send body."""
-		self.wfile.write(bodyFile.read())
-		bodyFile.close()
+			self.send_response(code, message)
+			self.wfile.write(data)
 
 	def log_request(self, code='-', size='-'):
-		"""Log request."""
-		# Set LogActivity instead.
+		"""Log an accepted request.
+
+		Do nothing (use the LogActivity setting instead).
+		"""
 		pass
 
 
@@ -150,14 +130,14 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 		"""Handle a request."""
 		HTTPHandler.__init__(self, self._sock, self._sock.getpeername(), None)
 
-	def doTransaction(self, env, myInput):
+	def doTransaction(self, env, input):
 		"""Process transaction."""
 		streamOut = ASStreamOut()
 		requestDict = {
 			'format': 'CGI',
 			'time': time.time(),
 			'environ': env,
-			'input': StringIO(myInput),
+			'input': StringIO(input),
 			'requestID': self._requestID,
 			}
 		self.dispatchRawRequest(requestDict, streamOut)
@@ -167,7 +147,8 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 		except socket.error, e:
 			if e[0] == errno.EPIPE: # broken pipe
 				return
-			print "HTTPServer: output error:", e # lame
+			sys.stdout.write('%5i  HTTPServer output error: %s\n' % e
+				% self._requestID)
 
 	def dispatchRawRequest(self, requestDict, streamOut):
 		"""Dispatch the request."""

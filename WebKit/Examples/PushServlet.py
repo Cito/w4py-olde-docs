@@ -18,7 +18,7 @@ class PushServlet(Page):
 
 	def respond(self, transaction):
 		# this isn't necessary, but it's here as an example:
-		self.response().streamOut().autoCommit(1)
+		self.response().streamOut().setAutoCommit()
 		# send the initial header:
 		self.initialHeader()
 		# push new content 6 times:

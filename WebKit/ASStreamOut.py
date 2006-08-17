@@ -1,12 +1,12 @@
 """This module defines a class for handling writing reponses."""
 
 import exceptions
-import types
 
 try: # backward compatibility for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0
+	lambda bool(x): x and True or False
 
 debug = 0
 
@@ -19,13 +19,13 @@ class ASStreamOut:
 	The key attributes of this class are:
 
 	`_autoCommit`:
-	    if True (1), the stream will automatically start sending data
-	    once it has accumulated `_bufferSize` data.  This means that
+	    If True, the stream will automatically start sending data
+	    once it has accumulated `_bufferSize` data. This means that
 	    it will ask the response to commit itself, without developer
-	    interaction.
+	    interaction. By default, this is set to False.
 	`_bufferSize`:
-	    The size of the data buffer.  This is only used when autocommit
-	    is true (1).  If not using autocommit, the whole response is
+	    The size of the data buffer. This is only used when autocommit
+	    is True. If not using autocommit, the whole response is
 	    buffered and sent in one shot when the servlet is done.
 	`flush()`:
 	    Send the accumulated response data now. Will ask the `Response`
@@ -43,20 +43,21 @@ class ASStreamOut:
 		self._chunkLen= 0
 		self._closed = False
 
-	def autoCommit(self, val=0):
-		"""Get/Set the value of _autoCommit."""
-		# @@ 2003-03 ib: doing both get and set in the same function
-		# @@ is not good.
-		assert type(val) is types.IntType, "autoCommit must be an integer"
-		self._autoCommit = val
-		return val
+	def autoCommit(self):
+		"""Get the auto commit mode."""
+		return self._autoCommit
 
-	def bufferSize(self, size=8192):
-		"""Return the buffer size and set a new size if one is provided."""
-		# @@ 2003-03 ib: again, get/set not good
-		assert type(size) is types.IntType, "bufferSize must be an Integer"
-		self._bufferSize=size
+	def setAutoCommit(self, autoCommit=True):
+		"""Set the auto commit mode."""
+		self._autoCommit = bool(autoCommit)
+
+	def bufferSize(self):
+		"""Get the buffer size."""
 		return self._bufferSize
+
+	def setBufferSize(self, bufferSize=8192):
+		"""Set the buffer size."""
+		self._bufferSize = int(bufferSize)
 
 	def flush(self):
 		"""Flush stream.
@@ -77,7 +78,7 @@ class ASStreamOut:
 				self._needCommit = True
 			return False
 		try:
-			self._buffer = self._buffer + ''.join(self._chunks)
+			self._buffer += ''.join(self._chunks)
 		finally:
 			self._chunks = []
 			self._chunkLen = False
@@ -107,7 +108,7 @@ class ASStreamOut:
 			raise InvalidCommandSequence()
 		self._buffer = ''
 		self._chunks = []
-		self._chunkLen=0
+		self._chunkLen = 0
 
 	def close(self):
 		"""Close this buffer. No more data may be sent."""
@@ -137,8 +138,8 @@ class ASStreamOut:
 		if self._buffer:
 			self._buffer = charstr + self._buffer
 		else:
-			self._chunks.insert(0,charstr)
-			self._chunkLen = self._chunkLen + len(charstr)
+			self._chunks.insert(0, charstr)
+			self._chunkLen += len(charstr)
 
 	def pop(self, count):
 		"""Remove count bytes from the front of the buffer."""
@@ -149,9 +150,7 @@ class ASStreamOut:
 		self._buffer = self._buffer[count:]
 
 	def committed(self):
-		"""
-		Are we committed?
-		"""
+		"""Are we committed?"""
 		return self._committed
 
 
@@ -165,7 +164,7 @@ class ASStreamOut:
 		"""
 		return self._needCommit
 
-	def commit(self, autoCommit=1):
+	def commit(self, autoCommit=True):
 		"""Called by the Response to tell us to go.
 
 		If `_autoCommit` is True, then we will be placed into autoCommit mode.
@@ -183,7 +182,7 @@ class ASStreamOut:
 			print ">>> ASStreamOut writing %s characters" % len(charstr)
 		assert not self._closed, "Stream Already Closed"
 		self._chunks.append(charstr)
-		self._chunkLen = self._chunkLen + len(charstr)
+		self._chunkLen += len(charstr)
 		if self._autoCommit and self._chunkLen > self._bufferSize:
 			if debug:
 				print ">>> ASStreamOut.write flushing"

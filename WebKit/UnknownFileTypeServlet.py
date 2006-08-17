@@ -1,5 +1,6 @@
 from ServletFactory import ServletFactory
 import HTTPExceptions
+
 import os, mimetypes, time
 
 debug = 0
@@ -71,7 +72,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		filename = getattr(self, '_serverSideFilename', None)
 		if filename is None:
 			filename = trans.request().serverSidePath()
-			self._serverSideFilename = filename  # cache it
+			self._serverSideFilename = filename # cache it
 		return filename
 
 	def shouldCacheContent(self):
@@ -158,7 +159,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		# @@ 2001-01-25 ce: isn't there a func in WebUtils to get script name?
 		# because some servers are different?
 		newURL = os.path.split(env['SCRIPT_NAME'])[0] + env['PATH_INFO']
-		newURL = newURL.replace('//', '/')  # hacky
+		newURL = newURL.replace('//', '/') # hacky
 		trans.response().sendRedirect(newURL)
 
 	def lastModified(self, trans):
@@ -174,8 +175,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		MaxCacheContentSize = 128*1024
 		ReadBufferSize = 32*1024
 
-		#start sending automatically
-		response.streamOut().autoCommit(1)
+		# start sending automatically
+		response.streamOut().setAutoCommit()
 
 		filename = self.filename(trans)
 		try:

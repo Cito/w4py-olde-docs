@@ -20,6 +20,7 @@ from MiscUtils.DateInterval import timeDecode
 
 debug = 0
 
+
 class HTTPResponse(Response):
 
 
@@ -254,7 +255,7 @@ class HTTPResponse(Response):
 		if not self._committed:
 			self.commit()
 		self._strmOut.flush()
-		self._strmOut.autoCommit(autoFlush)
+		self._strmOut.setAutoCommit(autoFlush)
 
 	def isCommitted(self):
 		"""Check whether response is already commited.
@@ -276,7 +277,8 @@ class HTTPResponse(Response):
 		if debug:
 			print "HTTPResponse deliver called"
 		self.recordEndTime()
-		if not self._committed: self.commit()
+		if not self._committed:
+			self.commit()
 
 	def commit(self):
 		"""Commit response.

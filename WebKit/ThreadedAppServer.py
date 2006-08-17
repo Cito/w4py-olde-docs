@@ -25,18 +25,11 @@ from Common import *
 import AppServer as AppServerModule
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 from MiscUtils.Funcs import timestamp
-from marshal import dumps, loads
-import os, sys
-from threading import Lock, Thread, Event
-import threading
-import Queue
-import select
-import socket
-import threading
-import time
-import errno
-import traceback
 from WebUtils import Funcs
+
+from marshal import dumps, loads
+import os, sys, threading, Queue, select, socket, time, errno, traceback
+
 
 debug = 0
 
@@ -368,7 +361,7 @@ class ThreadedAppServer(AppServer):
 		"""
 		if debug:
 			print "Spawning new thread"
-		t = Thread(target=self.threadloop)
+		t = threading.Thread(target=self.threadloop)
 		t._processing = False
 		t.start()
 		self._threadPool.append(t)
@@ -713,10 +706,10 @@ class MonitorHandler(Handler):
 		if verbose:
 			print "receiving request from", conn
 		BUFSIZE = 8*1024
-		dict = self.receiveDict()
-		if dict['format'] == "STATUS":
+		requestDict = self.receiveDict()
+		if requestDict['format'] == "STATUS":
 			conn.send(str(self._server._requestID))
-		elif dict['format'] == 'QUIT':
+		elif requestDict['format'] == 'QUIT':
 			conn.send("OK")
 			conn.close()
 			self._server.shutDown()
@@ -804,17 +797,20 @@ class AdapterHandler(Handler):
 		self._startTime = time.time()
 
 		data = []
-		dict = self.receiveDict()
-		if not dict:
+		requestDict = self.requestDict()
+		if not requestDict:
 			return
-		if verbose:
-			requestURI = dict.has_key('environ') and Funcs.requestURI(dict['environ']) or None
-			sys.stdout.write('%5i  %s  %s\n' % (self._requestID, timestamp()['pretty'], requestURI))
 
-		dict['input'] = self.makeInput()
-		dict['requestID'] = self._requestID
+		if verbose:
+			requestURI = requestDict.has_key('environ') \
+				and Funcs.requestURI(requestDict['environ']) or '-'
+			sys.stdout.write('%5i  %s  %s\n' % (self._requestID,
+				timestamp()['pretty'], requestURI))
+
+		requestDict['input'] = self.makeInput()
+		requestDict['requestID'] = self._requestID
 		streamOut = TASASStreamOut(self._sock)
-		transaction = self._server._app.dispatchRawRequest(dict, streamOut)
+		transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
 		streamOut.close()
 
 		try:
@@ -824,9 +820,9 @@ class AdapterHandler(Handler):
 			pass
 
 		if verbose:
-			duration = '%0.2f secs' % (time.time() - self._startTime)
-			duration = duration.ljust(19)
-			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID, duration, requestURI))
+			duration = ('%0.2f secs' % (time.time() - self._startTime)).ljust(19)
+			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID,
+				duration, requestURI))
 
 		transaction._application=None
 		transaction.die()

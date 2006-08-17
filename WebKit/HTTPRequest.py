@@ -1,15 +1,18 @@
 from Common import *
-from Request import Request
-from Session import Session, SessionError
-from WebKit.Cookie import CookieEngine
-Cookie = CookieEngine.SimpleCookie
-import os, cgi, sys, traceback
-from types import ListType
 from WebUtils.Funcs import requestURI
 from WebUtils import FieldStorage
+from WebKit.Cookie import CookieEngine
+Cookie = CookieEngine.SimpleCookie
+from Request import Request
+from Session import Session, SessionError
 import HTTPResponse
 
+import os, cgi, sys, traceback
+from types import ListType
+
+
 debug=0
+
 
 class HTTPRequest(Request):
 	"""A type of Message for HTTP requests.
