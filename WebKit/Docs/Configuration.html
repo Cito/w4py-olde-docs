@@ -167,6 +167,14 @@ user back to the computer they first accessed.  This way the
 backend servers do not have to share session data.  Default:
 <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
 </dd>
+<dt><tt class="docutils literal"><span class="pre">SessionName</span></tt>:</dt>
+<dd>This setting can be used to change the name of the field holding
+the session ID. When the session ID is stored in a cookie and there
+are applications running on different ports on the same host, you
+should choose different names for the session IDs, since the web
+browsers usually do not distinguish the ports when storing cookies
+(the port cookie-attribute introduced with RFC 2965 is not used).
+Default: <tt class="docutils literal"><span class="pre">_SID_</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">ExtraPathInfo</span></tt>:</dt>
 <dd>When enabled, this setting allows a servlet to be followed by
 additional path components which are accessible via HTTPRequest's
@@ -174,32 +182,23 @@ additional path components which are accessible via HTTPRequest's
 <tt class="docutils literal"><span class="pre">self.request().extraURLPath()</span></tt>.  Default: <tt class="docutils literal"><span class="pre">0</span></tt> (false).</dd>
 <dt><tt class="docutils literal"><span class="pre">UnknownFileTypes</span></tt>:</dt>
 <dd><p class="first">This setting controls the manner in which WebKit serves &quot;unknown
-extensions&quot; such as .html, .gif, .jpeg, etc. The default settings
-specify that the servlet matching the file be cached in memory,
-that the contents of the file be cached in memory and that the
-file timestamp to be checked on every request. This works well for
-most sites.</p>
-<p>If your site has a large amount of static files being served via
-WebKit, you should consider changing <tt class="docutils literal"><span class="pre">&quot;CacheContent&quot;</span></tt> to 0. If
-you are confident that your static files do not get updated while
-the app server is live, then you might consider changing
-<tt class="docutils literal"><span class="pre">&quot;CheckDate&quot;</span></tt> to <tt class="docutils literal"><span class="pre">0</span></tt> for (slightly) better performance.  If
-you are concerned about performance, use <a class="reference" href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html">mod_rewrite</a> to avoid
+extensions&quot; such as .html, .css, .js, .gif, .jpeg etc. The default
+setting specifies that the servlet matching the file is cached in memory.
+You may also specify that the contents of the files shall be cached
+in memory if they are not too large.</p>
+<p>If you are concerned about performance, use <a class="reference" href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html">mod_rewrite</a> to avoid
 accessing WebKit for static content.</p>
-<p>The <tt class="docutils literal"><span class="pre">Technique</span></tt> setting can be switch to
-<tt class="docutils literal"><span class="pre">&quot;redirectSansAdapter&quot;</span></tt>, but this is an experimental setting
-with some known problems.  Default:</p>
+<p>The <tt class="docutils literal"><span class="pre">Technique</span></tt> setting can be switched to <tt class="docutils literal"><span class="pre">&quot;redirectSansAdapter&quot;</span></tt>,
+but this is an experimental setting with some known problems.</p>
+<p>Default:</p>
 <pre class="last literal-block">
 {
-    'ReuseServlets': 1,
-
-    # Technique choices:
-    # serveContent, redirectSansAdapter
-    'Technique': 'serveContent',
-
+    'ReuseServlets': 1, # cache servlets in memory
+    'Technique': 'serveContent', # or 'redirectSansAdapter'
     # If serving content:
-    'CacheContent': 1,  # set to 0 to reduce memory use
-    'CheckDate':    1,
+    'CacheContent': 0, # set to 1 for caching file content
+    'MaxCacheContentSize': 128*1024, # cache files up to this size
+    'ReadBufferSize': 32*1024 # read buffer size when serving files
 }
 </pre>
 </dd>

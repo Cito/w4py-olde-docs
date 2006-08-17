@@ -1,5 +1,7 @@
 from ServletFactory import ServletFactory
 import HTTPExceptions
+from HTTPServlet import HTTPServlet
+from MiscUtils.Configurable import Configurable
 
 import os, mimetypes, time
 
@@ -34,8 +36,7 @@ fileCache = {}
 	# UnknownFileTypeServlets, but with that approach subclasses cannot
 	# dynamically serve content from different locations.
 
-from HTTPServlet import HTTPServlet
-from MiscUtils.Configurable import Configurable
+
 class UnknownFileTypeServlet(HTTPServlet, Configurable):
 	"""Servlet for unknown file types.
 
@@ -98,14 +99,21 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 			assert application is not None
 		self._application = application
 
+	def defaultConfig(self):
+		"""Get the default config.
+
+		Taken from Application's 'UnknownFileTypes' default setting.
+
+		"""
+		return self._application.defaultConfig()['UnknownFileTypes']
+
 	def userConfig(self):
 		"""Get the user config.
 
-		This is taken from the 'UnknownFileTypes' section
-		in the Application's configuration.
+		Taken from Application's 'UnknownFileTypes' user setting.
 
 		"""
-		return self._application.setting('UnknownFileTypes')
+		return self._application.userConfig().get('UnknownFileTypes', {})
 
 	def configFilename(self):
 		return self._application.configFilename()
@@ -171,9 +179,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 	def serveContent(self, trans):
 		response = trans.response()
 
-		# @@ temp variables, move to config
-		MaxCacheContentSize = 128*1024
-		ReadBufferSize = 32*1024
+		MaxCacheContentSize = self.setting('MaxCacheContentSize')
+		ReadBufferSize = self.setting('ReadBufferSize')
 
 		# start sending automatically
 		response.streamOut().setAutoCommit()
@@ -238,7 +245,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 			if debug:
 				print '>> sending directly'
 			numBytesSent = 0
-			while numBytesSent<fileSize:
+			while numBytesSent < fileSize:
 				data = f.read(min(fileSize-numBytesSent, ReadBufferSize))
 				if data == '':
 					break # unlikely, but safety first

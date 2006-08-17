@@ -95,21 +95,19 @@
 
 ('UnknownFileTypes',
 	'''{
-<br> &nbsp; &nbsp; 'ReuseServlets': 1,
-<br>
-<br> &nbsp; &nbsp; # Technique choices:
-<br> &nbsp; &nbsp; # serveContent, redirectSansAdapter
-<br> &nbsp; &nbsp; 'Technique': 'serveContent',
-<br>
+<br> &nbsp; &nbsp; 'ReuseServlets': 1, # cache servlets in memory
+<br> &nbsp; &nbsp; 'Technique': 'serveContent', # or 'redirectSansAdapter'
 <br> &nbsp; &nbsp; # If serving content:
-<br> &nbsp; &nbsp; 'CacheContent': 1,  # set to 0 to reduce memory use
-<br> &nbsp; &nbsp; 'CheckDate':    1,
+<br> &nbsp; &nbsp; 'CacheContent': 0, # set to 1 for caching file content
+<br> &nbsp; &nbsp; 'MaxCacheContentSize': 128*1024, # cache files up to this size
+<br> &nbsp; &nbsp; 'ReadBufferSize': 32*1024 # read buffer size when serving files
 <br>}''',
-	'''This setting controls the manner in which WebKit serves "unknown extensions" such as .html, .gif, .jpeg, etc. The default settings specify that the servlet matching the file be cached in memory, that the contents of the file be cached in memory and that the file timestamp to be checked on every request. This works well for most sites.
+	'''This setting controls the manner in which WebKit serves "unknown extensions" such as .html, .css, .js, .gif, .jpeg etc. The default setting specifies that the servlet matching the file is cached in memory. You may also specify that the contents of the files shall be cached in memory if they are not too large.
 
-	<br><br> If your site has a large amount of static files being served via WebKit, you should consider changing 'CacheContent' to 0. If you are confident that your static files do not get updated while the app server is live, then you might consider changing 'CheckDate' to 0 for better performance.
+	<br><br> If you are concerned about performance, use mod_rewrite_ to avoid
+    accessing WebKit for static content.
 
-	<br><br> The 'Technique' setting can be switch to 'redirectSansAdapter', but this is an experimental setting with some known problems. '''),
+	<br><br> The 'Technique' setting can be switched to 'redirectSansAdapter', but this is an experimental setting with some known problems. '''),
 
 ('MaxValueLengthInExceptionReport', '500', "Values in exception reports are truncated to this length, to avoid excessively long exception reports.  Set this to None if you don't want any truncation."),
 

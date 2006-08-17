@@ -262,8 +262,10 @@ class Application(ConfigurableForServerSidePath, Object):
 			'FilesToServe': [],
 			'UnknownFileTypes': {
 				'ReuseServlets': 1,
-				'Technique': 'serveContent',
+				'Technique': 'serveContent', # serveContent or redirectSansAdapter
 				'CacheContent': 0,
+				'MaxCacheContentSize': 128*1024,
+				'ReadBufferSize': 32*1024
 				},
 		}
 
