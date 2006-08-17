@@ -148,6 +148,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		Profiler.readyTime = time.time()
 		Profiler.readyDuration = Profiler.readyTime - Profiler.startTime
 		print "Ready (%.2f seconds after launch)." % Profiler.readyDuration
+		print
 		sys.stdout.flush()
 		sys.stderr.flush()
 
