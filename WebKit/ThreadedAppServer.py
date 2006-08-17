@@ -173,16 +173,29 @@ class ThreadedAppServer(AppServer):
 		self._socketHandlers[serverAddress] = handlerClass
 		self._handlerCache[serverAddress] = []
 		self._sockets[serverAddress] = sock
-		s = ':'.join(map(str, serverAddress))
-		print "Listening for %s on %s" % (handlerClass.settingPrefix, s)
+		adr_str = ':'.join(map(str, serverAddress))
+		print "Listening for %s on %s" % (handlerClass.settingPrefix, adr_str)
+		# write text file with server address
+		adr_file = self.addressFileName(handlerClass)
+		if os.path.exists(adr_file):
+			print "Warning: %s already exists" % adr_file
+			try:
+				os.unlink(adr_file)
+			except OSError: # we cannot remove the file
+				if open(adr_file).read() == adr_str:
+					return # same content, so never mind
+				else:
+					print "Error: Could not remove", adr_file
+					sys.stdout.flush()
+					raise
 		try:
-			f = open(self.serverSidePath(
-				'%s.text' % handlerClass.protocolName), 'w')
-		except IOError:
-			print "Error: Could not write %s.text" % handlerClass.protocolName
-		else:
-			f.write(s)
+			f = open(adr_file, 'w')
+			f.write(adr_str)
 			f.close()
+		except IOError:
+			print "Error: Could not write", adr_file
+			sys.stdout.flush()
+			raise
 
 	def isPersistent(self):
 		return True
@@ -477,6 +490,14 @@ class ThreadedAppServer(AppServer):
 		# Close all sockets now:
 		for sock in self._sockets.values():
 			sock.close()
+		# Remove the text files with the server addresses:
+		for handler in self._socketHandlers.values():
+			adr_file = self.addressFileName(handler)
+			if os.path.exists(adr_file):
+				try:
+					os.unlink(adr_file)
+				except OSError:
+					print "Warning: Could not remove", adr_file
 		# Tell all threads to end:
 		for i in range(self._threadCount):
 			self._requestQueue.put(None)
@@ -543,6 +564,10 @@ class ThreadedAppServer(AppServer):
 				port = self.setting(settingPrefix + 'Port')
 			self._addr[settingPrefix] = (host, port)
 			return self._addr[settingPrefix]
+
+	def addressFileName(self, handlerClass):
+		"""Get the name of the text file with the server address."""
+		return ('%s.text' % handlerClass.protocolName)
 
 
 class Handler:

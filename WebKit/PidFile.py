@@ -12,31 +12,29 @@ def removePidFile(pidfile):
 
 
 class PidFile:
+
 	def __init__(self, path):
 		self._path = path
 		self._createdPID = 0
 		if os.path.exists(path):
 			try:
-				f = open(path)
-				pid = int(f.read())
-				f.close()
+				pid = int(open(path).read())
 			except (IOError, ValueError, TypeError):
 				# can't open file or read PID from file.  File is probably
 				# invalid or stale, so try to delete it.
 				pid = None
-				print "%s is invalid or cannot be opened.  Attempting to remove it." % path
-				os.unlink(self._path)  # not sure if we should catch errors here or not.
+				print "%s is invalid or cannot be opened; attempting to remove it." % path
+				os.unlink(path) # not sure if we should catch errors here or not
 			else:
 				if self.pidRunning(pid):
 					raise ProcessRunning()
 				else:
 					print "%s is stale; removing." % path
 					try:
-						os.unlink(self._path)
+						os.unlink(path)
 					except OSError:
 						# maybe the other process has just quit and has removed the file.
-						# Try continuing...
-						pass
+						pass # try continuing...
 
 		pidfile = open(path, 'w')
 		pidfile.write(str(self.getCurrentPID()))
@@ -63,7 +61,7 @@ class PidFile:
 				import win32con
 				import pywintypes
 				try:
-					h = win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, 0, pid)
+					win32api.OpenProcess(win32con.PROCESS_QUERY_INFORMATION, 0, pid)
 				except pywintypes.error, e:
 					if e[0] == 87: # returned when process does not exist
 						return 0
@@ -87,7 +85,7 @@ class PidFile:
 		self.remove()
 
 	def remove(self):
-		# only remove the file if we created it.  Otherwise attempting to start
+		# Only remove the file if we created it. Otherwise attempting to start
 		# a second process will remove the file created by the first.
 		if self._createdPID:
 			try:
