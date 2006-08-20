@@ -72,11 +72,21 @@ def urlEncode(s):
 
 	The resulting string is safe for using as a URL.
 
-	With Python 2.4 and newer, you should use
-	urllib.quote_plus() instead of urlEncode().
+	Identical to urllib.quote_plus(s) in Python 2.4,
+	but faster for older Python versions.
 
 	"""
-	return ''.join(map(lambda c: _urlEncode[c], s))
+	return ''.join(map(_urlEncode.get, s))
+
+_urlDecode = {}
+for i in range(256):
+	_urlDecode['%02x' % i] = _urlDecode['%02X' % i] = chr(i)
+
+try:
+	UnicodeDecodeError
+except: # Python < 2.3
+	class UnicodeDecodeError(Exception):
+		pass
 
 def urlDecode(s):
 	"""Return the decoded version of the given string.
@@ -84,21 +94,20 @@ def urlDecode(s):
 	Note that invalid URLs will not throw exceptions.
 	For example, incorrect % codings will be ignored.
 
-	With Python 2.4 and newer, you should use
-	urllib.unquote_plus() instead of urlDecode().
+	Identical to urllib.unquote_plus(s) in Python 2.4.,
+	but faster and more exact for older Python versions.
 
 	"""
-	p1 = s.replace('+', ' ').split('%')
-	p2 = [p1.pop(0)]
-	for p in p1:
-		if len(p[:2].strip()) == 2:
-			try:
-				p2.append(chr(int(p[:2], 16)) + p[2:])
-			except ValueError:
-				p2.append('%' + p)
-		else:
-			p2.append('%' + p)
-	return ''.join(p2)
+	s = s.replace('+', ' ').split('%')
+	for i in xrange(1, len(s)):
+		t = s[i]
+		try:
+			s[i] = _urlDecode[t[:2]] + t[2:]
+		except KeyError:
+			s[i] = '%' + t
+		except UnicodeDecodeError:
+			s[i] = unichr(int(t[:2], 16)) + t[2:]
+	return ''.join(s)
 
 def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=None):
 	"""Return an HTML string with a <table> where each row is a key-value pair."""
