@@ -5,9 +5,10 @@
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
 	<li>As suggested by Alex Southgate, WebKit now uses Fazal Majid's
-	<code>threadframe</code> module to print thread stack frames when
-	receiving a <code>SIGQUIT</code> signal. Under Windows,
-	<code>SIGBREAK</code> (Ctrl-Break) is used instead.</li>
+	<a href="http://www.majid.info/mylos/stories/2004/06/10/threadframe.html">threadframe</a>
+	module (that needs to be installed separately from Webware) in order to
+	print thread stack frames when receiving a <code>SIGQUIT</code> signal.
+	On Windows, <code>SIGBREAK</code> (Ctrl-Break) can be used instead.</li>
 	<li>Finding the directory index file ignored cascading extensions.
 	If there was an index.py and an index.html file, you got a "not found"
 	error, even with <code>UseCascadingExtensions = True</code> and
