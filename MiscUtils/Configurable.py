@@ -111,7 +111,7 @@ class Configurable:
 		try:
 			# open the config file in universal newline mode,
 			# in case it has been edited on a different platform
-			contents = open(filename, 'U').read()
+			contents = open(filename, 'rU').read()
 		except IOError:
 			return {}
 
