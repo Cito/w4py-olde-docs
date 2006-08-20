@@ -19,14 +19,13 @@
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
 <ul>
-	<li>Made urlDecode() behave like urllib.unquote_plus():
-    All illegal codes will now be silently ignored (suggested
-    by Ben Parker). Like implemented in Python 2.4, codes with only
-    one digit will be considered illegal now.</li>
-    <li>Instead of urlEncode() and urlDecode(), you should use
-    urllib.quote_plus() and urllib.unquote_plus() from Python 2.4 on,
-    since this is implemented now faster in urllib, and the behavior is
-    now the same. Added a note to the docstrings of these functions.</li>
+	<li><code>urlDecode()</code> and <code>urlEncode()</code> in
+	<code>WebUtils.Funcs</code> now use the same implementation as
+	<code>quote_plus()</code> and <code>unquote_plus()</code> in
+	<code>urllib</code> of Python 2.4, which is faster than in older
+	Python and Webware versions. This also means that <code>urlDecode()</code>
+	now silently ignores erroneous encoding (as had been suggested
+	by Ben Parker), including codes with only one digit.</li>
 </ul>
 
 <a name="Security"></a><h2>Security</h2>
