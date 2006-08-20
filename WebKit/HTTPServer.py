@@ -103,7 +103,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			assert 2 <= code/100 < 6
 		except:
 			sys.stdout.write('%5i  HTTPServer error: Missing status header\n'
-				% self._requestID)
+				% (self._requestID,))
 		else:
 			self.send_response(code, message)
 			self.wfile.write(data)
@@ -147,8 +147,8 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 		except socket.error, e:
 			if e[0] == errno.EPIPE: # broken pipe
 				return
-			sys.stdout.write('%5i  HTTPServer output error: %s\n' % e
-				% self._requestID)
+			sys.stdout.write('%5i  HTTPServer output error: %s\n'
+				% (self._requestID, e))
 
 	def dispatchRawRequest(self, requestDict, streamOut):
 		"""Dispatch the request."""
