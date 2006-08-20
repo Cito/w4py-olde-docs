@@ -797,7 +797,7 @@ class AdapterHandler(Handler):
 		self._startTime = time.time()
 
 		data = []
-		requestDict = self.requestDict()
+		requestDict = self.receiveDict()
 		if not requestDict:
 			return
 
