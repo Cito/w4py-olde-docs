@@ -1,11 +1,11 @@
-'''
+"""
 Tests various functions of Users and Roles
 
 To run these tests:
 	cd Webware
 	python AllTests.py UserKit.Tests.Test
-'''	
-	
+"""
+
 import os, sys, glob
 import shutil
 import logging
@@ -15,21 +15,19 @@ import UserKit
 
 _log = logging.getLogger(__name__)
 
-TEST_CODE_DIR = os.path.dirname( __file__ )	# e.g. ".../Webware/UserKit/Tests"
-
-
+TEST_CODE_DIR = os.path.dirname(__file__) # e.g. ".../Webware/UserKit/Tests"
 
 
 class BasicRoleTest(unittest.TestCase):
 
 	def roleClasses(self):
-		""" Returns a list of all Role classes for testing. """
+		"""Return a list of all Role classes for testing."""
 		from UserKit.Role import Role
 		from UserKit.HierRole import HierRole
 		return [Role, HierRole]
 
 	def testA_RoleBasics(self):
-		""" Invokes testRole() with each class returned by roleClasses. """
+		"""Invoke testRole() with each class returned by roleClasses."""
 		for roleClass in self.roleClasses():
 			self.checkRoleClass(roleClass)
 
