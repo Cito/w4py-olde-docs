@@ -5,11 +5,10 @@ class Main(KidExamplePage):
 
 	def respond(self, trans):
 		from WebKit.URLParser import ServletFactoryManager
-		if filter(lambda n: n.startswith('Kid'),
-			map(lambda f: f.name(), ServletFactoryManager._factories)):
-			trans.application().forward(trans, '/Welcome')
-		else:
-			KidExamplePage.respond(self, trans)
+		for factory in ServletFactoryManager._factories:
+			if factory.name().startswith('KidServlet'):
+				trans.application().forward(trans, 'Welcome')
+		KidExamplePage.respond(self, trans)
 
 	def writeContent(self):
 		self.writeln('''<h4 style="color:red">Kid templates not installed.</h4>
