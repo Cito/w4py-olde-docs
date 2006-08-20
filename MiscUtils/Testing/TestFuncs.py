@@ -97,7 +97,10 @@ class TestFuncs( unittest.TestCase ):
 		b = Baz()
 		try:
 			s = sd(b)
-			s = s.replace("<class 'exceptions.KeyError'>", 'exceptions.KeyError') # new style
+			s = s.replace("<class 'exceptions.KeyError'>", # new style
+				'exceptions.KeyError')
+			s = s.replace("<type 'exceptions.KeyError'>", # even newer style
+				'exceptions.KeyError')
 		except:
 			s = 'failure: should not get exception'
 		assert s.find("(exception from repr(x): exceptions.KeyError: 'bogus')")!=-1, s
