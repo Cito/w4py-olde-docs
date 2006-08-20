@@ -54,11 +54,11 @@ based on your input as you type.</p>
 JavaScript enabled in order for this to work.</p>
 <p>Start typing in some lowercase letters,
 and get random words starting with these characters suggested:</p>''')
-		self.writeln('''<form>
-<div><input type="text" name="query" id="query" onkeyup="getSuggestions();" autocomplete="off">
+		self.writeln('''<form><div>
+<input type="text" name="query" id="query" onkeyup="getSuggestions();" autocomplete="off">
 <input type="submit" value="Submit"></div><div class="hide" id="suggestions"></div></form>''')
 
-	def ajax_allowed(self):
+	def ajax_methods(self):
 		"""Register the suggest method for use with Ajax."""
 		return ['suggest']
 

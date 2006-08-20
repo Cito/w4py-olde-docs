@@ -14,7 +14,7 @@ function initPage() {
 
 // Function to be associated with input control (initiates the Ajax request):
 function getSuggestions() {
-	generic_ajax(false, 'suggest', escape(document.getElementById('query').value));
+	ajax_call(false, 'suggest', escape(document.getElementById('query').value));
 }
 
 // Function handling the Ajax response:
@@ -22,7 +22,7 @@ function handleSuggestions(res) {
 	if (res.length > 0) {
 		var e = document.getElementById('suggestions');
 		e.innerHTML = '<div onmouseover="suggestOver(this)" onmouseout="suggestOut(this)" onclick="clearSuggestions()" class="suggest_link red">close</div>';
-		for(i=0; i < res.length; i++) {
+		for (i=0; i < res.length; i++) {
 		e.innerHTML += '<div onmouseover="suggestOver(this)" onmouseout="suggestOut(this)" onclick="setQuery(this.innerHTML)" class="suggest_link">' + res[i] + '</div>';
 		}
 		e.className = 'show';
