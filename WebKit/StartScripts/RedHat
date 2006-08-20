@@ -112,7 +112,7 @@ start()
 	if [ -f "$PID_FILE" ] ; then
 		PID=`cat "$PID_FILE"`
 		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null
+			if ps -o command= -p $PID 2>/dev/null \
 					| grep -q " -i $PID_FILE "; then
 				RETVAL=1
 				echo -n "already running "
@@ -171,7 +171,7 @@ stop()
 	if [ -s "$PID_FILE" ]; then
 		PID=`cat "$PID_FILE"`
 		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null
+			if ps -o command= -p $PID 2>/dev/null \
 					| grep -q " -i $PID_FILE "; then
 				if kill $PID >/dev/null 2>&1; then
 					t=0
@@ -217,7 +217,7 @@ reload()
 	if [ -s "$PID_FILE" ]; then
 		PID=`cat "$PID_FILE"`
 		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null
+			if ps -o command= -p $PID 2>/dev/null \
 					| grep -q " -i $PID_FILE "; then
 				if kill -HUP $PID >/dev/null 2>&1; then
 					success
@@ -252,7 +252,7 @@ condrestart()
 	if [ -s "$PID_FILE" ]; then
 		PID=`cat "$PID_FILE"`
 		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null
+			if ps -o command= -p $PID 2>/dev/null \
 					| grep -q " -i $PID_FILE "; then
 				restart
 			fi
@@ -265,7 +265,7 @@ status()
 	if [ -s "$PID_FILE" ]; then
 		PID=`cat "$PID_FILE"`
 		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null
+			if ps -o command= -p $PID 2>/dev/null \
 					| grep -q " -i $PID_FILE "; then
 				echo $"$APP_NAME (pid $PID) is running..."
 			else
