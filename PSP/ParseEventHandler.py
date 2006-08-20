@@ -270,7 +270,7 @@ class ParseEventHandler:
 
 	def endProcessing(self):
 		self._writer.println('# Generated automatically by PSP compiler on %s\n'
-			% time.asctime())
+			% time.asctime(time.localtime(time.time())))
 		self.generateHeader()
 		self.generateAll('psp:file')
 		self.generateDeclarations() # I'll overwrite this later when I can handle extends
