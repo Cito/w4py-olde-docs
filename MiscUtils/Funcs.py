@@ -96,6 +96,17 @@ if sys.version_info >= (2, 3, None, None):
 	# Just use the Python 2.3 built-in versions.
 	from tempfile import mktemp, mkstemp
 else:
+	try:
+		from tempfile import _counter
+	except ImportError:
+		class _Counter:
+			def __init__(self):
+				self.i = 0
+			def get_next(self):
+				self.i += 1
+				return self.i
+		_counter = _Counter()
+
 	def mktemp(suffix="", dir=None):
 		"""User-callable function to return a unique temporary file name.
 
@@ -104,10 +115,11 @@ else:
 		having to take over the module level variable, tempdir.
 
 		"""
-		if not dir: dir = tempfile.gettempdir()
+		if not dir:
+			dir = tempfile.gettempdir()
 		pre = tempfile.gettempprefix()
 		while 1:
-			i = tempfile._counter.get_next()
+			i = _counter.get_next()
 			file = os.path.join(dir, pre + str(i) + suffix)
 			if not os.path.exists(file):
 				return file
