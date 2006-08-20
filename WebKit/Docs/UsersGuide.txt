@@ -224,9 +224,9 @@ Dumping Thread Stack Frames
 -----------------------------
 
 If you install the `threadframe`__ module, you can dump the stack frames
-of all running threads to standard output by simply sending a ``SIGQUIT``
-or ``SIGBREAK`` signal to the application server. Under Windows, this can
-be done by pressing Ctrl-Break.
+of all running Webware application server threads to standard output by
+simply sending a ``SIGQUIT`` or ``SIGBREAK`` signal to the application server.
+On Windows, this can be done by pressing Ctrl-Break.
 
 __ http://www.majid.info/mylos/stories/2004/06/10/threadframe.html
 
