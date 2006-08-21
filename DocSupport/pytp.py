@@ -116,7 +116,7 @@ class PyTP:
         stdout = sys.stdout
         output = []
         pos = 0
-        while 1:
+        while pos < len(input):
             m = self._tags.search(input, pos)
             if m is None:
                 break
