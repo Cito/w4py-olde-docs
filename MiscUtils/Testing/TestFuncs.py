@@ -37,26 +37,29 @@ class TestFuncs( unittest.TestCase ):
 		tests = string.split(testSpec)
 		count = len(tests)
 		i = 0
-		while i<count:
+		while i < count:
 			source = eval(tests[i])
 			result = eval(tests[i+1])
 			#print '%r yields %r' % (source, result)
-			assert commas(source)==result, '%r %r' % (commas(source), result)
+			assert commas(source) == result, \
+				'%r %r' % (commas(source), result)
 
 			# Now try the source as a string instead of a number:
 			source = eval("'%s'" % tests[i])
 			#print '%r yields %r' % (source, result)
-			assert commas(source)==result, '%r %r' % (commas(source), result)
+			assert commas(source)==result, \
+				'%r %r' % (commas(source), result)
 
-			i = i+2
+			i += 2
 
 
 	def testLocalIP(self):
 		ip = localIP()
-		assert localIP()==ip  # second invocation
-		assert localIP(useCache=None)==ip
-		assert localIP(remote=None, useCache=None)==ip, 'See if this works: localIP(remote=None).  If this fails, dont worry.'
-		assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80), useCache=None)==ip
+		assert localIP() == ip  # second invocation
+		assert localIP(useCache=None) == ip
+		assert localIP(remote=None, useCache=None) == ip, \
+			'See if this works: localIP(remote=None). If this fails, dont worry.'
+		assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80), useCache=None) == ip
 
 
 	def testHostName(self):
@@ -74,11 +77,11 @@ class TestFuncs( unittest.TestCase ):
 		sd = safeDescription
 
 		# basics:
-		assert sd(1)=="what=1 class=<type 'int'>", sd(1)
-		assert sd(1, 'x')=="x=1 class=<type 'int'>", sd(1, 'x')
-		assert sd('x')=="what='x' class=<type 'str'>", sd('x')
+		assert sd(1) == "what=1 class=<type 'int'>", sd(1)
+		assert sd(1, 'x') == "x=1 class=<type 'int'>", sd(1, 'x')
+		assert sd('x') == "what='x' class=<type 'str'>", sd('x')
 		f = Foo()
-		assert sd(f).find('TestFuncs.Foo')!=-1, sd(f)
+		assert sd(f).find('TestFuncs.Foo') != -1, sd(f)
 
 		# new object type:
 		try:
@@ -88,7 +91,7 @@ class TestFuncs( unittest.TestCase ):
 		else:
 			class Bar(object): pass
 			b = Bar()
-			assert sd(b).find('TestFuncs.Bar')!=-1, sd(b)
+			assert sd(b).find('TestFuncs.Bar') != -1, sd(b)
 
 		# okay now test that safeDescription eats exceptions from repr():
 		class Baz:
@@ -97,13 +100,14 @@ class TestFuncs( unittest.TestCase ):
 		b = Baz()
 		try:
 			s = sd(b)
+			s = s.replace("'bogus'", 'bogus') # new style
 			s = s.replace("<class 'exceptions.KeyError'>", # new style
 				'exceptions.KeyError')
 			s = s.replace("<type 'exceptions.KeyError'>", # even newer style
 				'exceptions.KeyError')
 		except:
 			s = 'failure: should not get exception'
-		assert s.find("(exception from repr(x): exceptions.KeyError: 'bogus')")!=-1, s
+		assert s.find("(exception from repr(x): exceptions.KeyError: bogus)") != -1, s
 
 
 	def testUniqueId(self):
@@ -111,13 +115,13 @@ class TestFuncs( unittest.TestCase ):
 		for x in range(5):
 			result = uniqueId()
 			assert type(result) is type('')
-			assert len(result)==32
-			assert result!=lastResult
+			assert len(result) == 32
+			assert result != lastResult
 
 			result = uniqueId(self.testUniqueId)
 			assert type(result) is type('')
-			assert len(result)==32
-			assert result!=lastResult
+			assert len(result) == 32
+			assert result != lastResult
 
 
 	def testValueForString(self):
@@ -145,11 +149,15 @@ class TestFuncs( unittest.TestCase ):
 
 		evalCases = [s.strip() for s in evalCases.strip().split('\n')]
 		for case in evalCases:
-			assert valueForString(case)==eval(case), 'case=%r, valueForString()=%r, eval()=%r' % (case, valueForString(case), eval(case))
+			assert valueForString(case) == eval(case), \
+				'case=%r, valueForString()=%r, eval()=%r' \
+					% (case, valueForString(case), eval(case))
 
 		stringCases = [s.strip() for s in stringCases.strip().split('\n')]
 		for case in stringCases:
-			assert valueForString(case)==case, 'case=%r, valueForString()=%r' % (case, valueForString(case))
+			assert valueForString(case) == case, \
+				'case=%r, valueForString()=%r' \
+					% (case, valueForString(case))
 
 
 	def testWordWrap(self):
@@ -167,5 +175,5 @@ class TestFuncs( unittest.TestCase ):
 		for margin in range(20, 200, 20):
 			s = wordWrap(msg, margin)
 			for line in s.split('\n'):
-				assert len(line)<=margin, 'len=%i, margin=%i, line=%r' % (len(line), margin, line)
-
+				assert len(line) <= margin, \
+					'len=%i, margin=%i, line=%r' % (len(line), margin, line)

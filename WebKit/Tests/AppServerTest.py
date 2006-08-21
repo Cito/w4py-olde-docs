@@ -6,6 +6,11 @@ from threading import Thread
 from Queue import Queue, Empty
 from urllib import urlopen
 
+try: # backward compatibility for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
+
 
 class AppServerTest(unittest.TestCase):
 
