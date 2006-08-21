@@ -205,10 +205,15 @@ from CSVJoiner import joinCSVFields
 from string import join, replace, split, strip
 from types import *
 
-try:
+try: # backward compatibility for Python < 2.2
 	StringTypes
 except NameError:
 	StringTypes = StringType
+
+try: # backward compatibility for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 try:
 	from MiscUtils import NoDefault
@@ -272,11 +277,11 @@ class TableColumn:
 
 		# spec is a string such as 'name' or 'name:type'
 		fields = split(spec, ':')
-		if len(fields)>2:
+		if len(fields) > 2:
 			raise DataTableError, 'Invalid column spec %s' % repr(spec)
 		self._name = fields[0]
 
-		if len(fields)==1:
+		if len(fields) == 1:
 			self._type = None
 		else:
 			self.setType(fields[1])
@@ -289,7 +294,7 @@ class TableColumn:
 
 	def setType(self, type):
 		""" Sets the type (by a string containing the name) of the heading. Usually invoked by DataTable to set the default type for columns whose types were not specified. """
-		if type==None:
+		if type == None:
 			self._type = None
 		else:
 			try:
@@ -313,17 +318,17 @@ class TableColumn:
 		if self._type is StringType:
 			value = str(rawValue)
 		elif self._type is IntType:
-			if rawValue=='':
+			if rawValue == '':
 				value = 0
 			else:
 				value = int(rawValue)
 		elif self._type is LongType:
-			if rawValue=='':
+			if rawValue == '':
 				value = 0
 			else:
 				value = long(rawValue)
 		elif self._type is FloatType:
-			if rawValue=='':
+			if rawValue == '':
 				value = 0.0
 			else:
 				value = float(rawValue)
@@ -342,7 +347,7 @@ class DataTable:
 	See the doc string for this module.
 	"""
 
-	usePickleCache = 1
+	usePickleCache = True
 
 
 	## Init ##
@@ -395,7 +400,7 @@ class DataTable:
 	def readLines(self, lines, delimiter=',', allowComments=1, stripWhite=1):
 		if self._defaultType is None:
 			self._defaultType = 'string'
-		haveReadHeadings = 0
+		haveReadHeadings = False
 		parse = CSVParser(fieldSep=delimiter, allowComments=allowComments, stripWhitespace=stripWhite).parse
 		for line in lines:
 			# process a row, either headings or data
@@ -406,7 +411,7 @@ class DataTable:
 					self._rows.append(row)
 				else:
 					self.setHeadings(values)
-					haveReadHeadings = 1
+					haveReadHeadings = True
 		if values is None:
 			raise DataTableError, "Unfinished multiline record."
 		return self
@@ -430,7 +435,7 @@ class DataTable:
 					numCols -= 1
 					break
 				numCols += 1
-			if numCols<=0:
+			if numCols <= 0:
 				return
 
 			def strip(x):
@@ -441,7 +446,7 @@ class DataTable:
 
 			# read rows of data
 			maxCol = chr(ord('A') + numCols - 1)
-			haveReadHeadings = 0
+			haveReadHeadings = False
 			rowNum = row
 			numBlankRows = 0
 			valuesBuffer = {}   # keyed by row number
@@ -471,11 +476,11 @@ class DataTable:
 							self._rows.append(row)
 						else:
 							self.setHeadings(values)
-							haveReadHeadings = 1
+							haveReadHeadings = True
 					numBlankRows = 0
 				else:
 					numBlankRows += 1
-					if numBlankRows>maxBlankRows:
+					if numBlankRows > maxBlankRows:
 						# consider end of spreadsheet
 						break
 				rowNum += 1
@@ -515,7 +520,7 @@ class DataTable:
 	def commit(self):
 		if self._changed:
 			self.save()
-			self._changed = 0
+			self._changed = False
 
 
 	## Headings ##
@@ -562,7 +567,7 @@ class DataTable:
 		if not isinstance(object, TableRecord):
 			object = TableRecord(self, object)
 		self._rows.append(object)
-		self._changed = 1
+		self._changed = True
 
 
 	## Queries ##
@@ -571,10 +576,10 @@ class DataTable:
 		records = []
 		keys = dict.keys()
 		for record in self._rows:
-			matches = 1
+			matches = True
 			for key in keys:
 				if record[key]!=dict[key]:
-					matches = 0
+					matches = False
 					break
 			if matches:
 				records.append(record)
@@ -675,15 +680,15 @@ class TableRecord:
 				raise DataTableError, 'Unknown type for values %s.' % valuesType
 
 	def initFromSequence(self, values):
-		if len(self._headings)<len(values):
+		if len(self._headings) < len(values):
 			raise DataTableError, ('There are more values than headings.\nheadings(%d, %s)\nvalues(%d, %s)' % (len(self._headings), self._headings, len(values), values))
 		self._values = []
 		numHeadings = len(self._headings)
 		numValues = len(values)
-		assert numValues<=numHeadings
+		assert numValues <= numHeadings
 		for i in range(numHeadings):
 			heading = self._headings[i]
-			if i>=numValues:
+			if i >= numValues:
 				self._values.append(BlankValues[heading.type()])
 			else:
 				self._values.append(heading.valueForRawValue(values[i]))
@@ -701,9 +706,9 @@ class TableRecord:
 		"""
 		The object is expected to response to hasValueForKey(name) and
 		valueForKey(name) for each of the headings in the table. It's
-		alright if the object returns 0 for hasValueForKey(). In that
+		alright if the object returns False for hasValueForKey(). In that
 		case, a "blank" value is assumed (such as zero or an empty
-		string). If hasValueForKey() returns 1, then valueForKey() must
+		string). If hasValueForKey() returns True, then valueForKey() must
 		return a value.
 		"""
 		self._values = []
@@ -790,7 +795,6 @@ class TableRecord:
 		return self.valueForKey(attr['Name'], default)
 
 
-
 def main(args=None):
 	if args is None:
 		args = sys.argv
@@ -801,5 +805,5 @@ def main(args=None):
 		print
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main()

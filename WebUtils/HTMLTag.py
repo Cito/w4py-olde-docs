@@ -55,18 +55,20 @@ Reference.
 # - extra checking about what tags are allowed or disallowed inside other tags
 # - minor tweaks
 
-
 # Check for Python 2.0
 import sys
 pyVer = getattr(sys, 'version_info', None)
-if pyVer is None  or  pyVer[0]<2:
+if pyVer is None or pyVer[0] < 2:
 	raise Exception, 'HTMLTag requires Python 2.0 or greater.'
 
+try: # backward compatibility for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
-runFast = 1
+runFast = True
 	# if enabled, overrides some key SGMLParser methods for more speed.
 	# changing this has no effect once the module is imported (unless you reload())
-
 
 from sgmllib import SGMLParser
 from MiscUtils import NoDefault
@@ -114,7 +116,7 @@ class HTMLTag:
 
 	Subtags is a convenient list of only the tags in the children:
 		print tag.numSubtags()
-		print tag.subtagAT(0)
+		print tag.subtagAt(0)
 		print tag.subtags()
 
 	You can search a tag and all the tags it contains for a tag with a particular
@@ -223,7 +225,7 @@ class HTMLTag:
 		wr('%s<%s>\n' % (spacer, self._name))
 		for key, value in self._attrs.items():
 			wr('%s  %s = %s\n' % (spacer, key.ljust(12), value))
-		indent = indent+1
+		indent += 1
 		for child in self._children:
 			if isinstance(child, HTMLTag):
 				child.pprint(out, indent)
@@ -305,7 +307,7 @@ class HTMLTag:
 		The method tagWithMatchingAttr() (e.g., sans underscore) is more commonly
 		used.
 		"""
-		if self._attrs.get(name, None)==value:
+		if self._attrs.get(name, None) == value:
 			return self
 		for tag in self._subtags:
 			matchingTag = tag._tagWithMatchingAttr(name, value)
@@ -346,7 +348,7 @@ class HTMLReader(SGMLParser):
 
 	If your HTML file doesn't contain root <html> ... </html> tags wrapping
 	everything, a fake root tag will be constructed for you, unless you pass
-	in fakeRootTagIfNeeded=0.
+	in fakeRootTagIfNeeded=False.
 
 	Besides fixing your reader manually, you could conceivably loop through the
 	permutations of the various empty tags to see if one of them resulted in a
@@ -388,18 +390,18 @@ class HTMLReader(SGMLParser):
 
 	## Init ##
 
-	def __init__(self, emptyTags=None, extraEmptyTags=None, fakeRootTagIfNeeded=1):
+	def __init__(self, emptyTags=None, extraEmptyTags=None, fakeRootTagIfNeeded=True):
 		SGMLParser.__init__(self)
 		self._filename  = None
 		self._rootTag   = None
 		self._fakeRootTagIfNeeded = fakeRootTagIfNeeded
-		self._usedFakeRootTag = 0
+		self._usedFakeRootTag = False
 		self._tagStack  = []
-		self._finished  = 0
+		self._finished  = False
 
 		# Options
-		self._printsStack = 0
-		self._ignoreWS   = 1
+		self._printsStack = False
+		self._ignoreWS   = True
 		self._endingTag  = 'html'
 
 		# Handle optional args
@@ -413,7 +415,7 @@ class HTMLReader(SGMLParser):
 
 	## Reading ##
 
-	def readFileNamed(self, filename, retainRootTag=1):
+	def readFileNamed(self, filename, retainRootTag=True):
 		"""
 		Reads the given file. Relies on readString(). See that method for more
 		information.
@@ -422,7 +424,7 @@ class HTMLReader(SGMLParser):
 		contents = open(filename).read()
 		return self.readString(contents, retainRootTag)
 
-	def readString(self, string, retainRootTag=1):
+	def readString(self, string, retainRootTag=True):
 		"""
 		Reads the given string, storing the results and returning the root tag. You
 		could continue to use HTMLReader object or disregard it and simply use the root
@@ -430,13 +432,13 @@ class HTMLReader(SGMLParser):
 		"""
 		self._rootTag  = None
 		self._tagStack = []
-		self._finished = 0
+		self._finished = False
 		self.reset()
 		self._lineNumber = 1
 		self.computeTagContainmentConfig()
 		try:
 			for line in string.split('\n'):
-				self.feed(line+'\n')
+				self.feed(line + '\n')
 				self._lineNumber += 1
 			self.close()
 		finally:
@@ -470,7 +472,7 @@ class HTMLReader(SGMLParser):
 	def rootTag(self):
 		"""
 		Returns the root tag. May return None if no HTML has been read yet, or if the
-		last invocation of one of the read methods was passed retainRootTag=0.
+		last invocation of one of the read methods was passed retainRootTag=False.
 		"""
 		return self._rootTag
 
@@ -513,7 +515,7 @@ class HTMLReader(SGMLParser):
 		"""
 		Sets the boolean value of the "prints stack" option. This is a debugging
 		option which will print the internal tag stack during HTML processing. The
-		default value is 0.
+		default value is False.
 		"""
 		self._printsStack = flag
 
@@ -527,7 +529,7 @@ class HTMLReader(SGMLParser):
 		"""
 		if args is None:
 			args = sys.argv
-		if len(args)<2:
+		if len(args) < 2:
 			self.usage()
 		return self.readFileNamed(args[1])
 
@@ -565,7 +567,7 @@ class HTMLReader(SGMLParser):
 			# We'll never have any children. Boo hoo.
 			assert self._rootTag, 'Cannot start HTML with an empty tag: %r' % tag
 			self._tagStack[-1].addChild(tag)
-			empty = 1
+			empty = True
 		else:
 			# We could have children, so we go on the stack
 			# Also, if this is the first tag, then make it the root.
@@ -583,11 +585,11 @@ class HTMLReader(SGMLParser):
 				self._rootTag = HTMLTag('html')
 				self._tagStack.append(self._rootTag)
 				self._tagStack[-1].addChild(tag)
-				self._usedFakeRootTag = 1
+				self._usedFakeRootTag = True
 			else:
 				self._rootTag = tag
 			self._tagStack.append(tag)
-			empty = 0
+			empty = False
 		if self._printsStack:
 			prefix = ('START', '-----')[empty]
 			print '%s %s: %r' % (prefix, name.ljust(6), self._tagStack)
@@ -595,8 +597,8 @@ class HTMLReader(SGMLParser):
 	def unknown_endtag(self, name):
 		if self._finished:
 			return
-		if name==self._endingTag:
-			self._finished = 1
+		if name == self._endingTag:
+			self._finished = True
 		openingTag = self._tagStack.pop()
 		if self._printsStack:
 			print 'END   %s: %r' % (name.ljust(6), self._tagStack)
@@ -607,7 +609,7 @@ class HTMLReader(SGMLParser):
 			openingTag.closedBy(name, self._lineNumber)
 
 	def close(self):
-		if len(self._tagStack)>0 and not (len(self._tagStack)==1 and self._usedFakeRootTag):
+		if len(self._tagStack) > 0 and not (len(self._tagStack) == 1 and self._usedFakeRootTag):
 			raise HTMLTagIncompleteError('line %i: tagStack = %r' % (self._lineNumber, self._tagStack), line=self._lineNumber, tagStack=repr(self._tagStack))
 		SGMLParser.close(self)
 
@@ -615,13 +617,10 @@ class HTMLReader(SGMLParser):
 	## Self utility ##
 
 	def _updateEmptyTagDict(self):
-		"""
-		Creates a dictionary out of the empty tag list for quick look up. e.g., we are
-		simulating a "set".
-		"""
+		"""Create a dictionary out of the empty tag list for quick look up."""
 		dict = {}
 		for tag in self._emptyTagList:
-			dict[tag] = 1
+			dict[tag] = None
 		self._emptyTagDict = dict
 
 	# The following dict defines for various tags either:
@@ -633,7 +632,8 @@ class HTMLReader(SGMLParser):
 		'html':   'canOnlyHave head body',
 		'head':   'cannotHave  html head body',
 		'body':   'cannotHave  html head body',
-		'table':  'canOnlyHave tr thead tbody tfoot a',  # a because in IE you can wrap a row in <a> to make the entire row clickable
+		'table':  'canOnlyHave tr thead tbody tfoot a',
+		# a because in IE you can wrap a row in <a> to make the entire row clickable
 		'tr':     'canOnlyHave th td',
 		'td':     'cannotHave  td tr',
 		'select': 'canOnlyHave option',
@@ -665,10 +665,10 @@ class TagConfig:
 
 	def __init__(self, name, tags):
 		self.name = name
-		# turn list of tags into a dict/set for fast lookup (e.g., avoid linear searches)
+		# turn list of tags into a dict/set for fast lookup (avoid linear searches)
 		dict = {}
 		for tag in tags:
-			dict[tag] = 1
+			dict[tag] = None
 		self.tags = dict
 
 	def encounteredTag(self, tag, lineNum):
@@ -697,6 +697,6 @@ configClassForName = {
 }
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	html = HTMLReader().main()
 	html.pprint()
