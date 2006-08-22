@@ -29,11 +29,11 @@ class AppServerTest(unittest.TestCase):
 		# But, since this does not work on Windows systems,
 		# we will pull the output in a separate thread:
 		def pullStream(stream, queue):
-			while self._output:
-				line = self._output.readline()
+			while stream:
+				line = stream.readline()
 				if not line:
 					break
-				self._queue.put(line)
+				queue.put(line)
 		self._queue = Queue()
 		self._thread = Thread(target=pullStream,
 			args=(self._output, self._queue))
@@ -42,7 +42,7 @@ class AppServerTest(unittest.TestCase):
 		self.assertAppServerSays(' Webware for Python.$')
 		self.assertAppServerSays(' by Chuck Esterbrook.')
 		self.assertAppServerSays('^WebKit and Webware are open source.$')
-		self.assertAppServerSays('^EnableHTTP\s*=\s*%s$' % str(True))
+		self.assertAppServerSays('^EnableHTTP\s*=\s*(True|1)$')
 		self.assertAppServerSays('^HTTPPort\s*=\s*8080$')
 		self.assertAppServerSays('^Host\s*=\s*127.0.0.1$')
 		self.assertAppServerSays('^Ready (.*).$')
