@@ -23,8 +23,8 @@ class TestPickleCache(unittest.TestCase):
 
 	def test(self):
 		# print 'Testing PickleCache...'
-		iters = 3
-		for iter in range(iters):
+		iterations = 2
+		for iter in range(iterations):
 			# print 'Iteration', iter + 1
 			self.oneIterTest()
 		# print 'Success.'
@@ -39,33 +39,34 @@ class TestPickleCache(unittest.TestCase):
 			# test 1: no pickle cache yet
 			assert readPickleCache(sourcePath) is None
 			self.writePickle()
-			# test 2: correctness
-			assert readPickleCache(sourcePath) == data, \
-				repr(readPickleCache(sourcePath))
-			# test 3: wrong pickle version
-			assert readPickleCache(sourcePath, pickleVersion=2) is None
-			self.writePickle() # restore
-			# test 4: wrong data source
-			assert readPickleCache(sourcePath, source='notTest') is None
-			self.writePickle() # restore
-			# test 5: wrong Python version
-			try:
-				saveVersion = sys.version_info
-				sys.version_info = (sys.version_info[0] + 1,) \
-					+ sys.version_info[1:]
+			if havePython22OrGreater:
+				# test 2: correctness
+				assert readPickleCache(sourcePath) == data, \
+					repr(readPickleCache(sourcePath))
+				# test 3: wrong pickle version
+				assert readPickleCache(sourcePath, pickleVersion=2) is None
+				self.writePickle() # restore
+				# test 4: wrong data source
+				assert readPickleCache(sourcePath, source='notTest') is None
+				self.writePickle() # restore
+				# test 5: wrong Python version
+				try:
+					saveVersion = sys.version_info
+					sys.version_info = (sys.version_info[0] + 1,) \
+						+ sys.version_info[1:]
+					assert readPickleCache(sourcePath) is None
+					self.writePickle() # restore
+				finally:
+					sys.version_info = saveVersion
+				# test 6: source is newer
+				self.remove(picklePath)
+				self.writePickle()
+				# we have to allow for the granularity of getmtime()
+				# (see the comment in the docstring of PickleCache.py)
+				import time; time.sleep(2)
+				self.writeSource()
 				assert readPickleCache(sourcePath) is None
 				self.writePickle() # restore
-			finally:
-				sys.version_info = saveVersion
-			# test 6: source is newer
-			self.remove(picklePath)
-			self.writePickle()
-			# we have to allow for the granularity of getmtime()
-			# (see the comment in the docstring of PickleCache.py)
-			import time; time.sleep(2)
-			self.writeSource()
-			assert readPickleCache(sourcePath) is None
-			self.writePickle() # restore
 		finally:
 			self.remove(sourcePath)
 			self.remove(picklePath)
@@ -82,7 +83,8 @@ class TestPickleCache(unittest.TestCase):
 	def writePickle(self):
 		assert not os.path.exists(self.picklePath)
 		writePickleCache(self.data, self.sourcePath, pickleVersion=1, source='test')
-		assert os.path.exists(self.picklePath)
+		if havePython22OrGreater:
+			assert os.path.exists(self.picklePath)
 
 
 if __name__=='__main__':
