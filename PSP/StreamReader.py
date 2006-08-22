@@ -27,7 +27,6 @@ from Context import *
 
 import types
 import copy
-import string
 import os
 
 
@@ -70,14 +69,14 @@ class Mark:
 
 	def popStream(self):
 		if len(self.includeStack) == 0:
-			return 0 #false
-		list=self.includeStack[len(self.includeStack)-1]
+			return 0 # false
+		list = self.includeStack[len(self.includeStack)-1]
 		del self.includeStack[len(self.includeStack)-1]
-		self.cursor=list[0]
-		self.fileid=list[1]
-		self.baseDir=list[2]
-		self.encoding=list[3]
-		self.stream=list[4]
+		self.cursor = list[0]
+		self.fileid = list[1]
+		self.baseDir = list[2]
+		self.encoding = list[3]
+		self.stream = list[4]
 		return 1 # true
 
 class StreamReader:
@@ -92,7 +91,7 @@ class StreamReader:
 		self._pspfile = filename
 		self._ctxt = ctxt
 		self._filehandle = None
-		self.sourcefiles=[]
+		self.sourcefiles = []
 		self.current = None
 		self.size = 0
 		self.master=None
@@ -102,11 +101,11 @@ class StreamReader:
 
 	def registerSourceFile(self, file):
 		self.sourcefiles.append(file)
-		self.size = self.size+1 #what is size for?
-		return len(self.sourcefiles)-1
+		self.size += 1 # what is size for?
+		return len(self.sourcefiles) - 1
 
 	def pushFile(self, file, encoding=None):
-		assert type(file)==type('')
+		assert type(file) == type('')
 		# if type(file) != type(''):
 		# we've got an open file handle - don't think this case exists
 		# Don't know what this master stuff is, but until I do, implement it.
@@ -120,19 +119,19 @@ class StreamReader:
 		if parent != None and not isAbsolute:
 			file = os.path.join(parent,file)
 		fileid = self.registerSourceFile(file)
-		handle = open(file,'r')
+		handle = open(file, 'r')
 		stream = handle.read()
-		handle.seek(0,0)
+		handle.seek(0, 0)
 		lines = handle.readlines()
 		z = 0
 		for i in lines:
-			lines[z]=string.replace(i,'\r\n','\n')
-			z = z + 1
-		stream=string.join(lines,'')
+			lines[z] = i.replace('\r\n', '\n').replace('\r', '\n')
+			z += 1
+		stream = ''.join(lines)
 
 		if self.current == None:
 			self.current = mark = Mark(self, fileid, stream,
-				self._ctxt.getBaseUri(),encoding)
+				self._ctxt.getBaseUri(), encoding)
 		else:
 			self.current.pushStream(fileid, stream,
 				self._ctxt.getBaseUri(), encoding) # don't use yet
@@ -140,11 +139,11 @@ class StreamReader:
 	def popFile(self):
 		if self.current == None:
 			return 0
-		self.size = self.size - 1 # @@ what the hell is this?
+		self.size -= 1 # @@ what the hell is this?
 		r = self.current.popStream()
 		return r
 
-	def getFile(self,i):
+	def getFile(self, i):
 		return self.sourcefiles[i]
 
 	def newSourceFile(self,filename):
@@ -162,7 +161,7 @@ class StreamReader:
 		Return the point before the string, but move reader past it.
 
 		"""
-		pt = string.find(self.current.stream[self.current.cursor:],st)
+		pt = self.current.stream.find(st, self.current.cursor)
 		if pt == -1:
 			self.current.cursor = len(self.current.stream)
 			if self.hasMoreInput():
@@ -171,9 +170,9 @@ class StreamReader:
 			else:
 				raise "EndofInputError"
 		else:
-			self.current.cursor = self.current.cursor+pt
-			ret =  self.Mark()
-			self.current.cursor = self.current.cursor+len(st)
+			self.current.cursor = pt
+			ret = self.Mark()
+			self.current.cursor += len(st)
 			return ret
 
 	def reset(self, mark):
@@ -188,10 +187,10 @@ class StreamReader:
 	def Advance(self,length):
 		"""Advance length characters"""
 		if length + self.current.cursor <= len(self.current.stream):
-			self.current.cursor = self.current.cursor+length
+			self.current.cursor += length
 		else:
 			prog = len(self.current.stream) - self.current.cursor
-			self.current.cursor = len(self.current.stream) # @@ -1?
+			self.current.cursor = len(self.current.stream)
 			if self.hasMoreInput():
 				self.Advance(length-prog)
 			else:
@@ -238,7 +237,7 @@ class StreamReader:
 		i = 0
 		while self.isSpace():
 			self.nextChar()
-			i = i+1
+			i += 1
 		return i
 
 	def getChars(self,start,stop):
@@ -259,12 +258,12 @@ class StreamReader:
 	def nextContent(self):
 		"""Find next < char."""
 		cur_cursor = self.current.cursor
-		self.current.cursor = self.current.cursor+1
-		pt = string.find(self.current.stream[self.current.cursor:],'<')
+		self.current.cursor += 1
+		pt = self.current.stream.find('<', self.current.cursor)
 		if pt == -1:
-				self.current.cursor = len(self.current.stream) # @@ -1?
+			self.current.cursor = len(self.current.stream)
 		else:
-			self.current.cursor=self.current.cursor+pt
+			self.current.cursor = pt
 		return self.current.stream[cur_cursor:self.current.cursor]
 
 	def parseTagAttributes(self):
@@ -309,7 +308,7 @@ class StreamReader:
 		self.skipSpaces()
 		value = self.parseToken(1)
 		self.skipSpaces()
-		valuedict[name]=value
+		valuedict[name] = value
 
 	def parseToken(self, quoted):
 		# This may not be quite right:
@@ -317,10 +316,10 @@ class StreamReader:
 		self.skipSpaces()
 		ch = self.peekChar()
 		if quoted:
-			if (ch=='\"' or ch == "\'"):
+			if (ch == '\"' or ch == "\'"):
 				endquote = ch
 				ch = self.nextChar()
-				ch=self.peekChar()
+				ch = self.peekChar()
 				while ch != None and ch != endquote:
 					ch = self.nextChar()
 					if ch == '\\':
@@ -339,4 +338,4 @@ class StreamReader:
 						if ch == '\"' or ch == "'" or ch == '>' or ch == '%':
 							ch = self.nextChar()
 					buffer.append(ch)
-		return string.join(buffer,'')
+		return ''.join(buffer)

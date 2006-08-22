@@ -50,7 +50,7 @@ class PSPParser:
 
 	"""
 
-	checklist=[]
+	checklist = []
 
 	def __init__(self,ctxt):
 		self._reader = ctxt.getReader()
@@ -317,8 +317,8 @@ class PSPParser:
 			stop = reader.Mark()
 			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
 			handler.handleMethod(start, stop, attrs)
-			start=stop
-			stop=reader.skipUntil(CLOSE_METHOD_2) #skip past the close marker, return the point before the close marker
+			start = stop
+			stop = reader.skipUntil(CLOSE_METHOD_2) #skip past the close marker, return the point before the close marker
 			handler.handleMethodEnd(start, stop, attrs)
 			return 1
 		return 0
@@ -334,7 +334,7 @@ class PSPParser:
 		OPEN_INDIVIDUAL_PARAM = "<psp:param"
 		CLOSE_INDIVIDUAL_PARAM = "/>"
 		if reader.Matches(OPEN_INCLUDE):
-			param={}
+			param = {}
 			start = reader.Mark()
 			reader.Advance(len(OPEN_INCLUDE))
 			reader.skipSpaces()
@@ -367,7 +367,7 @@ class PSPParser:
 		OPEN_INDIVIDUAL_PARAM = "<psp:param"
 		CLOSE_INDIVIDUAL_PARAM = "/>"
 		if reader.Matches(OPEN_INSERT):
-			param={}
+			param = {}
 			start = reader.Mark()
 			reader.Advance(len(OPEN_INSERT))
 			reader.skipSpaces()

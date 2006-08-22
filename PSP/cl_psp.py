@@ -4,15 +4,13 @@ from ServletWriter import ServletWriter
 from Context import *
 from PSPCompiler import *
 
-import os
-import string
-import sys
+import os, sys
 
 #move this to a class like JPS?
 
 def PSPCompile(*args):
-	pspfilename=args[0]
-	fil,ext=string.split(os.path.basename(pspfilename),'.')
+	pspfilename = args[0]
+	fil, ext= os.path.basename(pspfilename).split('.')
 	classname = fil + '_' + ext
 	pythonfilename = classname + '.py'
 	context = PSPCLContext(pspfilename)

@@ -21,20 +21,16 @@
 """
 
 import unittest
-import doctest
 from PSP import PSPUtils
 
-
-# def suite():
-# 	'''
-# 	Combine our unittest with our doctests.
-# 	'''
-# 	result = unittest.TestSuite()
-#
-# 	result.addTest(doctest.DocTestSuite(PSPUtils))
-# 	result.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(PSPUtilsTest))
-#
-# 	return result
+if 0:
+	import doctest
+	def suite():
+		"""Combine our unittest with our doctests."""
+		result = unittest.TestSuite()
+		result.addTest(doctest.DocTestSuite(PSPUtils))
+		result.addTest(unittest.defaultTestLoader.loadTestsFromTestCase(PSPUtilsTest))
+		return result
 
 
 class PSPUtilsTest(unittest.TestCase):

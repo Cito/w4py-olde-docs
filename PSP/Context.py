@@ -77,7 +77,6 @@ class PSPContext:
 		"""Set the PSPWriter instance for this context."""
 		raise NotImplementedError
 
-
 	def setPythonFileName(self):
 		"""Set the name of the .py file to generate."""
 		raise NotImplementedError

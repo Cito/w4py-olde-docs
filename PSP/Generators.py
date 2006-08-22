@@ -27,18 +27,8 @@
 
 """
 
-import re
-import PSPUtils
-import BraceConverter
-try:
-	import string
-except:
-	pass
-
-try:
-	import os
-except:
-	pass
+import os, re
+import PSPUtils, BraceConverter
 
 # These are global so that the ParseEventHandler and this module agree:
 ResponseObject = 'res'
@@ -49,7 +39,7 @@ class GenericGenerator:
 	""" Base class for the generators """
 	def __init__(self, ctxt=None):
 		self._ctxt = ctxt
-		self.phase='Service'
+		self.phase = 'Service'
 
 
 class ExpressionGenerator(GenericGenerator):
@@ -82,11 +72,9 @@ class CharDataGenerator(GenericGenerator):
 
 	def generate(self, writer, phase=None):
 		# Quote any existing backslash so generated Python will not interpret it when running.
-		self.chars = string.replace(self.chars, '\\', r'\\')
-
+		self.chars = self.chars.replace('\\', r'\\')
 		# Quote any single quotes so it does not get confused with our triple-quotes:
-		self.chars = string.replace(self.chars,'"',r'\"')
-
+		self.chars = self.chars.replace('"', r'\"')
 		self.generateChunk(writer)
 
 	def generateChunk(self, writer, start=0, stop=None):
@@ -114,20 +102,20 @@ class ScriptGenerator(GenericGenerator):
 			bc = BraceConverter.BraceConverter()
 			lines = PSPUtils.splitLines(PSPUtils.removeQuotes(self.chars))
 			for line in lines:
-				bc.parseLine(line,writer)
+				bc.parseLine(line, writer)
 			return
 		# Check for whitespace at the beginning and if less than 2 spaces, remove:
-		if self.chars[:1]==' ' and self.chars[:2]!= '  ':
-			self.chars=string.lstrip(self.chars)
+		if self.chars[:1] == ' ' and self.chars[:2] != '  ':
+			self.chars = self.chars.lstrip()
 		lines = PSPUtils.splitLines(PSPUtils.removeQuotes(self.chars))
 		# userIndent check
 		if len(lines[-1]) > 0 and lines[-1][-1] == '$':
 			lastline = lines[-1] = lines[-1][:-1]
 			if lastline == '':
 				lastline = lines[-2] # handle endscript marker on its own line
-			count=0
-			while lastline[count] in string.whitespace:
-				count = count + 1
+			count = 0
+			while lastline[count].isspace():
+				count += 1
 			userIndent = lastline[:count]
 		else:
 			userIndent = writer.EMPTY_STRING
@@ -137,20 +125,20 @@ class ScriptGenerator(GenericGenerator):
 		writer.printList(lines)
 		writer.printChars('\n')
 		# Check for a block:
-		# lastline = string.splitfields(PSPUtils.removeQuotes(self.chars),'\n')[-1]
-		commentstart = string.find(lastline,'#') # @@ this fails if '#' part of string
+		# lastline = string.splitfields(PSPUtils.removeQuotes(self.chars), '\n')[-1]
+		commentstart = lastline.find('#') # @@ this fails if '#' part of string
 		if commentstart > 0:
 			lastline = lastline[:commentstart]
-		blockcheck=string.rstrip(lastline)
+		blockcheck = lastline.rstrip()
 		if len(blockcheck) > 0 and blockcheck[-1] == ':':
 			writer.pushIndent()
 			writer.println()
 			writer._blockcount = writer._blockcount+1
 			# Check for end of block, "pass" by itself:
-		if string.strip(self.chars) == 'pass' and writer._blockcount > 0:
+		if self.chars.strip() == 'pass' and writer._blockcount > 0:
 			writer.popIndent()
 			writer.println()
-			writer._blockcount = writer._blockcount-1
+			writer._blockcount -= 1
 		# Set userIndent for subsequent HTML:
 		writer._userIndent = userIndent
 
@@ -164,7 +152,7 @@ class EndBlockGenerator(GenericGenerator):
 		if writer._blockcount > 0:
 			writer.popIndent()
 			writer.println()
-			writer._blockcount = writer._blockcount-1
+			writer._blockcount -= 1
 		writer._userIndent = writer.EMPTY_STRING
 
 
@@ -273,7 +261,7 @@ self.transaction().application().includeURL(self.transaction(), __pspincludepath
 """
 
 	def __init__(self, attrs, param, ctxt):
-		GenericGenerator.__init__(self,ctxt)
+		GenericGenerator.__init__(self, ctxt)
 		self.attrs = attrs
 		self.param = param
 		self.scriptgen = None
@@ -294,34 +282,34 @@ class InsertGenerator(GenericGenerator):
 
 	If the attribute static is set to true or 1, we include the file now,
 	at compile time. Otherwise, we use a function added to every PSP page
-	named __includeFile,	which reads the file at run time.
+	named __includeFile, which reads the file at run time.
 
 	"""
 
 	def __init__(self, attrs, param, ctxt):
-		GenericGenerator.__init__(self,ctxt)
+		GenericGenerator.__init__(self, ctxt)
 		self.attrs = attrs
 		self.param = param
-		self.static=1
+		self.static = 1
 		self.scriptgen = None
 
 		self.page = attrs.get('file')
 		if self.page == None:
 			raise "No Page attribute in Include"
-		thepath=self._ctxt.resolveRelativeURI(self.page)
+		thepath = self._ctxt.resolveRelativeURI(self.page)
 
 		self.static = attrs.get('static', None)
-		if self.static == string.lower("true") or self.static == "1":
-			self.static=1
+		if self.static.lower() == "true" or self.static == "1":
+			self.static = 1
 
 		if not os.path.exists(thepath):
 			print self.page
-			raise "Invalid included file",thepath
-		self.page=thepath
+			raise "Invalid included file", thepath
+		self.page = thepath
 
 		if not self.static:
 			self.scriptgen = ScriptGenerator("self.__includeFile('%s')"
-				% string.replace(thepath, '\\', '\\\\'), None)
+				% thepath.replace('\\', '\\\\'), None)
 
 	def generate(self, writer, phase=None):
 		# JSP does this in the servlet. I'm doing it here because
@@ -331,7 +319,7 @@ class InsertGenerator(GenericGenerator):
 		# file, after escaping any triple-double quotes."""
 		if self.static:
 			data = open(self.page).read()
-			data=string.replace(data,'"""',r'\"""')
+			data= data.replace('"""', r'\"""')
 			writer.println('res.write("""'+data+'""")')
 			writer.println()
 		else:

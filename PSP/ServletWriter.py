@@ -23,9 +23,9 @@
 """
 
 from Context import *
-
 from MiscUtils.Funcs import mkstemp
-import string, os, sys, tempfile
+import os, sys, tempfile
+
 
 class ServletWriter:
 	"""This file creates the servlet source code.
@@ -61,15 +61,15 @@ class ServletWriter:
 			self._indent = self._indentSpaces # ' '*self._indentSpaces
 
 	def setIndentType(self, type):
-		if type=="tabs":
-			self._useTabs=1
+		if type == "tabs":
+			self._useTabs = 1
 			self.setIndention()
-		elif type=="spaces":
-			self._useTabs=0
+		elif type == "spaces":
+			self._useTabs = 0
 			self.setIndention()
-		elif type=="braces":
-			self._useTabs=0
-			self._useBraces=1
+		elif type == "braces":
+			self._useTabs = 0
+			self._useBraces = 1
 			self.setIndention()
 
 	def close(self):
@@ -80,18 +80,18 @@ class ServletWriter:
 
 	def pushIndent(self):
 		"""this is very key, have to think more about it"""
-		self._tabcnt = self._tabcnt + 1
+		self._tabcnt += 1
 
 	def popIndent(self):
 		if self._tabcnt > 0:
-			self._tabcnt = self._tabcnt - 1
+			self._tabcnt -= 1
 
 	def printComment(self, start, stop, chars):
 		if start and stop:
 			self.println('## from ' + str(start))
 			self.println('## from ' + str(stop))
 		if chars:
-			sp = string.split(chars,'\n')
+			sp = chars.split('\n')
 			for i in sp:
 				self._filehandle.write(self.indent(''))
 				self._filehandle.write('##')

@@ -24,14 +24,13 @@
 """
 
 import re
-import string
 import sys
 
 
 class BraceConverter:
 
 	CSKIP = re.compile("(^[^\"'{}:#]+)")
-	COLONBRACE=re.compile(":\s*{\s*([^\s].*)?$")
+	COLONBRACE = re.compile(":\s*{\s*([^\s].*)?$")
 
 	def __init__(self):
 		self.inquote = 0
@@ -47,7 +46,7 @@ class BraceConverter:
 		self.line = line
 		if self.inquote and self.line:
 			self.skipquote(writer)
-		self.line = string.lstrip(self.line)
+		self.line = self.line.lstrip()
 		if not self.line:
 			writer.printChars('\n')
 			return
@@ -75,7 +74,7 @@ class BraceConverter:
 					self.openBlock(writer)
 				elif ch == '#':
 					writer.printChars(self.line)
-					self.line=""
+					self.line = ""
 				else:
 					# should never get here
 					raise Exception()
@@ -107,18 +106,18 @@ class BraceConverter:
 	def openBrace(self,writer):
 		"""Open brace encountered."""
 		writer.printChars("{")
-		self.line=self.line[1:]
-		self.dictlevel = self.dictlevel + 1
+		self.line = self.line[1:]
+		self.dictlevel += 1
 
 	def closeBrace(self,writer):
 		"""Close brace encountered."""
 		if self.dictlevel:
 			writer.printChars("}")
-			self.line=self.line[1:]
-			self.dictlevel = self.dictlevel - 1
+			self.line = self.line[1:]
+			self.dictlevel -= 1
 		else:
 			writer.popIndent()
-			self.line = string.lstrip(self.line[1:])
+			self.line = self.line[1:].lstrip()
 			if (self.line):
 				writer.printChars('\n')
 				writer.printIndent()
@@ -130,31 +129,31 @@ class BraceConverter:
 		or the current non-escaped quote sequence is encountered.
 
 		"""
-		pos = string.find(self.line,self.quotechars)
-		if -1 == pos:
+		pos = self.line.find(self.quotechars)
+		if pos == -1:
 			writer.printChars(self.line)
-			self.line=""
+			self.line = ""
 		elif (pos > 0) and self.line[pos-1] == '\\':
-			pos = pos +1
+			pos += 1
 			writer.printChars(self.line[:pos])
 			self.line = self.line[pos:]
 			self.skipquote(writer)
 		else:
-			pos = pos + len(self.quotechars)
+			pos += len(self.quotechars)
 			writer.printChars(self.line[:pos])
 			self.line = self.line[pos:]
 			self.inquote = 0
 
 	def handleQuote(self,quote,writer):
 		"Check and handle if current pos is a single or triple quote."""
-		self.inquote=1
+		self.inquote = 1
 		triple = quote*3
-		if self.line[0:3]==triple:
-			self.quotechars=triple
+		if self.line[0:3] == triple:
+			self.quotechars = triple
 			writer.printChars(triple)
 			self.line = self.line[3:]
 		else:
-			self.quotechars=quote
+			self.quotechars = quote
 			writer.printChars(quote)
 			self.line = self.line[1:]
 
@@ -169,19 +168,19 @@ if __name__ == "__main__":
 			self._tabcnt = 0
 			self._blockcount = 0 # a hack to handle nested blocks of python code
 			self._indentSpaces = ServletWriter.SPACES
-			self._useTabs=1
-			self._useBraces=0
-			self._indent='\t'
+			self._useTabs = 1
+			self._useBraces = 0
+			self._indent = '\t'
 			self._userIndent = ServletWriter.EMPTY_STRING
 	test = r'''
-	for x in range(10) :{ q={
-	'test':x
+	for x in range(10): { q = {
+	'test': x
 	}
 	print x
 	}
 
-	for x in range(10) :{ q={'test':x}; print x} else :{ print "\"done\"" #""}{
-	x = { 'test1':{'sub2':{'subsub1':2}} # yee ha
+	for x in range(10): { q= {'test': x}; print x} else: { print "\"done\"" #""}{
+	x = { 'test1': {'sub2': {'subsub1': 2}} # yee ha
 	}
 	} print "all done"
 
@@ -189,4 +188,4 @@ if __name__ == "__main__":
 	p = BraceConverter()
 	dw = DummyWriter()
 	for line in test.split('\n'):
-		p.parseLine(line,dw)
+		p.parseLine(line, dw)
