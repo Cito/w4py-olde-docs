@@ -1,7 +1,6 @@
-
-
 from ExamplePage import ExamplePage
 from WebUtils import Funcs
+
 
 class FileUpload(ExamplePage):
 	"""	This servlet shows how to handle uploaded files.
@@ -46,13 +45,11 @@ class FileUpload(ExamplePage):
 <tr><th>disposition</th><td>%s</td></tr>
 <tr><th>disposition_options</th><td>%s</td></tr>
 <tr><th>headers</th><td>%s</td></tr>
-<tr><th>size</th><td>%s</td></tr>
-<tr><th valign="top">contents:</th>
+<tr><th>size</th><td>%s bytes</td></tr>
+<tr><th valign="top">contents</th>
 <td><pre style="font-size:small;margin:0pt">%s</pre></td></tr>
 </table></body>
 		''' % (f.filename, f.type, f.type_options,
 			f.disposition, f.disposition_options,
 			f.headers, len(contents),
 			Funcs.htmlEncode(contents.strip())))
-
-
