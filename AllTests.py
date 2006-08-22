@@ -52,6 +52,10 @@ except ImportError: # Python < 2.3
     print "This module needs the Python logging system"
     print "available at http://www.red-dove.com/python_logging.html"
     raise
+try:
+	True, False
+except NameError: # Python < 2.3
+	True, False = 1, 0
 
 import sys, os, site
 from MiscUtils.Configurable import Configurable
