@@ -47,7 +47,7 @@ style="width:%(width)dpt;text-align:center">
 		vars = self.vars()
 		for item in vars['list']:
 			self.writeln('<option value="%d">%s</option>' % (index, self.htmlEncode(item['name'])))
-			index = index + 1
+			index += 1
 		self.writeln('''
 </select>
 <p>
@@ -74,13 +74,13 @@ style="width:%(width)dpt;text-align:center">
 	## Commands ##
 
 	def vars(self):
-		"""Returns a dictionary of values, stored in the session, for this page only."""
+		"""Return a dictionary of values, stored in the session, for this page only."""
 		return self.session().value('form')
 
 	def new(self):
 		vars = self.vars()
 		vars['list'].append({'name': 'New item %d'%vars['newCount']})
-		vars['newCount'] = vars['newCount'] + 1
+		vars['newCount'] += 1
 		self.writeBody()
 
 	def delete(self):
@@ -103,24 +103,24 @@ style="width:%(width)dpt;text-align:center">
 
 	def taller(self):
 		vars = self.vars()
-		vars['height'] = vars['height'] + self.heightChange()
+		vars['height'] += self.heightChange()
 		self.writeBody()
 
 	def shorter(self):
 		vars = self.vars()
 		if vars['height'] > 2:
-			vars['height'] = vars['height'] - self.heightChange()
+			vars['height'] -= self.heightChange()
 		self.writeBody()
 
 	def wider(self):
 		vars = self.vars()
-		vars['width'] = vars['width'] + self.widthChange()
+		vars['width'] += self.widthChange()
 		self.writeBody()
 
 	def narrower(self):
 		vars = self.vars()
 		if vars['width'] >= 60:
-			vars['width'] = vars['width'] - self.widthChange()
+			vars['width'] -= self.widthChange()
 		self.writeBody()
 
 

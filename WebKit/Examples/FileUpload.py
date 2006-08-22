@@ -3,7 +3,7 @@ from WebUtils import Funcs
 
 
 class FileUpload(ExamplePage):
-	"""	This servlet shows how to handle uploaded files.
+	"""This servlet shows how to handle uploaded files.
 
 	The process is fairly self explanatory. You use a form like the one below in the
 	writeContent method. When the form is uploaded, the request field with the name you
@@ -21,35 +21,32 @@ class FileUpload(ExamplePage):
 	def title(self):
 		return "File Upload Example"
 
-	def actions(self):
-		return ExamplePage.actions(self) + ['fileupload']
-
 	def writeContent(self):
-		self.writeln('''<h1>Upload Test</h1>
-<p>%s<p>
-
-<form action="FileUpload.py" method="post" enctype="multipart/form-data">
+		self.writeln("<h1>Upload Test</h1>")
+		try:
+			f = self.request().field('filename')
+			contents = f.file.read()
+		except:
+			output = '''<p>%s<p>
+<form method="post" enctype="multipart/form-data">
 <input type="file" name="filename">
-<input type="submit" name="_action_fileupload" value="Upload File">
-</form>''' % (Funcs.htmlEncode(self.__doc__)))
-
-	def fileupload(self):
-		f = self.request().field('filename')
-		contents = f.file.read()
-		self.write('''<body style="background-color:#EEEEFF;padding:6pt">
-<h4>Here's the file you submitted:</h4>
-<table border cellspacing="0" cellpadding="6">
-<tr><th>name</th><td><strong>%s</strong></td></tr>
-<tr><th>type</th><td>%s</td></tr>
-<tr><th>type_options</th><td>%s</td></tr>
-<tr><th>disposition</th><td>%s</td></tr>
-<tr><th>disposition_options</th><td>%s</td></tr>
-<tr><th>headers</th><td>%s</td></tr>
-<tr><th>size</th><td>%s bytes</td></tr>
-<tr><th valign="top">contents</th>
-<td><pre style="font-size:small;margin:0pt">%s</pre></td></tr>
-</table></body>
-		''' % (f.filename, f.type, f.type_options,
-			f.disposition, f.disposition_options,
-			f.headers, len(contents),
-			Funcs.htmlEncode(contents.strip())))
+<input type="submit" value="Upload File">
+</form>''' % Funcs.htmlEncode(self.__doc__)
+		else:
+			output = '''<h4>Here's the file you submitted:</h4>
+	<table border cellspacing="0" cellpadding="6">
+	<tr><th>name</th><td><strong>%s</strong></td></tr>
+	<tr><th>type</th><td>%s</td></tr>
+	<tr><th>type_options</th><td>%s</td></tr>
+	<tr><th>disposition</th><td>%s</td></tr>
+	<tr><th>disposition_options</th><td>%s</td></tr>
+	<tr><th>headers</th><td>%s</td></tr>
+	<tr><th>size</th><td>%s bytes</td></tr>
+	<tr><th valign="top">contents</th>
+	<td><pre style="font-size:small;margin:0pt">%s</pre></td></tr>
+	</table>''' % (
+				f.filename, f.type, f.type_options,
+				f.disposition, f.disposition_options,
+				f.headers, len(contents),
+				Funcs.htmlEncode(contents.strip()))
+		self.writeln(output)
