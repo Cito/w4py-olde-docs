@@ -72,14 +72,16 @@ class TestFuncs( unittest.TestCase ):
 
 
 	def testSafeDescription(self):
-		# @@ I think these tests could fail in earlier versions of Python
-		# because types displayed slightly different names.
 		sd = safeDescription
 
 		# basics:
-		assert sd(1) == "what=1 class=<type 'int'>", sd(1)
-		assert sd(1, 'x') == "x=1 class=<type 'int'>", sd(1, 'x')
-		assert sd('x') == "what='x' class=<type 'str'>", sd('x')
+		s = sd(1).replace('type=', 'class=')
+		assert s == "what=1 class=<type 'int'>", s
+		s = sd(1, 'x').replace('type=', 'class=')
+		assert s == "x=1 class=<type 'int'>", s
+		s = sd('x').replace('type=', 'class=')
+		s = s.replace("<type 'string'>", "<type 'str'>")
+		assert s == "what='x' class=<type 'str'>", s
 		f = Foo()
 		assert sd(f).find('TestFuncs.Foo') != -1, sd(f)
 
