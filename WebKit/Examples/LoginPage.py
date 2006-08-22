@@ -46,7 +46,7 @@ style="background-color:#CCCCEE;border:1px solid #3333CC;width:20em">
 		# except for the special values used by the login mechanism itself
 		for name, value in request.fields().items():
 			if name not in ('login', 'loginid', 'username', 'password', 'extra', 'logout'):
-				if isinstance(value, str):
+				if type(value) != type([]):
 					value = [value]
 				for v in value:
 					self.writeln('''<input type="hidden" name="%s" value="%s">'''
