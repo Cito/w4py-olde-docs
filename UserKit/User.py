@@ -3,7 +3,7 @@ from MiscUtils.Funcs import uniqueId
 import time
 
 
-class User(object):
+class User:
 	"""
 	@@ 2001-02-19 ce: docs
 	"""
@@ -34,7 +34,7 @@ class User(object):
 		return self._manager
 
 	def setManager(self, manager):
-		""" Sets the manager, which can only be done once. """
+		"""Set the manager, which can only be done once."""
 		assert self._manager is None
 		from UserManager import UserManager
 		assert isinstance(manager, UserManager)
@@ -64,7 +64,7 @@ class User(object):
 		return self._name
 
 	def setName(self, name):
-		""" Sets the name, which can only be done once. """
+		"""Set the name, which can only be done once."""
 		assert self._name is None
 		self._name = name
 		# @@ 2001-02-15 ce: do we need to notify the manager
@@ -95,7 +95,7 @@ class User(object):
 	## Log in and out ##
 
 	def login(self, password, fromMgr=0):
-		""" Returns self if the login is successful and None otherwise. """
+		"""Return self if the login is successful and None otherwise."""
 		if not fromMgr:
 			# Our manager needs to know about this
 			# So make sure we go through him
