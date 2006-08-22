@@ -40,8 +40,19 @@ alltestnames = [
 
 ]
 
+try:
+    import unittest
+except ImportError: # Python < 2.1
+    print "This module needs the Python unittest package (PyUnit)"
+    print "available at http://pyunit.sourceforge.net"
+    raise
+try:
+    import logging
+except ImportError: # Python < 2.3
+    print "This module needs the Python logging system"
+    print "available at http://www.red-dove.com/python_logging.html"
+    raise
 
-import unittest, logging
 import sys, os, site
 from MiscUtils.Configurable import Configurable
 
