@@ -153,8 +153,8 @@ class Configurable:
 		try:
 			True, False
 		except NameError: # Python < 2.3
-			evalContext['True'] = 1==1
-			evalContext['False'] = 1==0
+			evalContext['True'] = 1
+			evalContext['False'] = 0
 		try:
 			if isDict:
 				config = eval(contents, evalContext)

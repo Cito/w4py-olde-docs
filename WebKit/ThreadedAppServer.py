@@ -346,7 +346,7 @@ class ThreadedAppServer(AppServer):
 				self.spawnThread()
 		elif average < self._threadCount - margin and \
 			self._threadCount > self._minServerThreads:
-			n=min(self._threadCount - self._minServerThreads,
+			n = min(self._threadCount - self._minServerThreads,
 				self._threadCount - max)
 			self.absorbThread(n)
 		else:
@@ -796,7 +796,6 @@ class AdapterHandler(Handler):
 		verbose = self._server._verbose
 		self._startTime = time.time()
 
-		data = []
 		requestDict = self.receiveDict()
 		if not requestDict:
 			return
@@ -824,7 +823,7 @@ class AdapterHandler(Handler):
 			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID,
 				duration, requestURI))
 
-		transaction._application=None
+		transaction._application = None
 		transaction.die()
 		del transaction
 
@@ -939,7 +938,6 @@ def run(workDir=None):
 
 def shutDown(signum, frame):
 	"""Signal handler for shutting down the server."""
-	global server
 	print
 	print "App server has been signaled to shutdown."
 	if server and server.running > 2:

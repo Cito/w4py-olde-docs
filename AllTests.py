@@ -41,17 +41,17 @@ alltestnames = [
 ]
 
 try:
-    import unittest
+	import unittest
 except ImportError: # Python < 2.1
-    print "This module needs the Python unittest package (PyUnit)"
-    print "available at http://pyunit.sourceforge.net"
-    raise
+	print "This module needs the Python unittest package (PyUnit)"
+	print "available at http://pyunit.sourceforge.net"
+	raise
 try:
-    import logging
+	import logging
 except ImportError: # Python < 2.3
-    print "This module needs the Python logging system"
-    print "available at http://www.red-dove.com/python_logging.html"
-    raise
+	print "This module needs the Python logging system"
+	print "available at http://www.red-dove.com/python_logging.html"
+	raise
 try:
 	True, False
 except NameError: # Python < 2.3
@@ -108,7 +108,7 @@ class _AllTestsConfig(Configurable):
 		if not os.path.exists(theFilename):
 			_log.info(' Creating new configuration file at "%s".'
 				' You can customize it to run more tests.', theFilename)
-			fp= open(theFilename, 'w')
+			fp = open(theFilename, 'w')
 			fp.write(_AllTestsConfig._DEFAULT_CONFIG)
 			fp.close()
 
@@ -142,7 +142,7 @@ def checkAndAddPaths(listOfPaths):
 		if os.path.exists(ap):
 			site.addsitedir(ap)
 		else:
-			numBadPaths = numBadPaths + 1
+			numBadPaths += 1
 			print 'WARNING: Trying to add paths to sys.path,'
 			print '  but could not find "%s".' % ap
 

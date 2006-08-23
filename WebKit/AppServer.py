@@ -470,5 +470,5 @@ def stop(*args, **kw):
 			print_exc(1)
 			print "WebKit cannot terminate the running process."
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main()

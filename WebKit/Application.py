@@ -418,10 +418,10 @@ class Application(ConfigurableForServerSidePath, Object):
 		filename = self.serverSidePath(
 			self.setting('ActivityLogFilename'))
 		if os.path.exists(filename):
-			file = open(filename, 'a')
+			f = open(filename, 'a')
 		else:
-			file = open(filename, 'w')
-			file.write(','.join(self.setting('ActivityLogColumns'))+'\n')
+			f = open(filename, 'w')
+			f.write(','.join(self.setting('ActivityLogColumns')) + '\n')
 		values = []
 		# We use UserDict on the next line because we know it inherits
 		# NamedValueAccess and reponds to valueForName()
@@ -444,9 +444,8 @@ class Application(ConfigurableForServerSidePath, Object):
 			else:
 				value = str(value)
 			values.append(value)
-		file.write(','.join(values)+'\n')
-		file.close()
-
+		f.write(','.join(values) + '\n')
+		f.close()
 		for i in objects.keys():
 			objects[i] = None
 
@@ -771,7 +770,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		# @@ 2003-02 ib: does anyone care?
 		pass
 
-	def handleMissingPathSession(self,transaction):
+	def handleMissingPathSession(self, transaction):
 		"""Redirect requests without session info in the path.
 
 		if UseAutomaticPathSessions is enabled in Application.config
@@ -841,7 +840,7 @@ could raise exceptions that aren't caught. See `CGIAdapter` and
 Largely historical.
 """
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	if len(sys.argv) != 2:
 		sys.stderr.write('WebKit: Application: Expecting one filename argument.\n')
 	requestDict = eval(open(sys.argv[1]).read())
