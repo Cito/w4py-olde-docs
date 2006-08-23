@@ -3,9 +3,19 @@ import HTTPExceptions
 from HTTPServlet import HTTPServlet
 from MiscUtils.Configurable import Configurable
 
-import os, mimetypes, time
+import os, time, mimetypes
 
 debug = 0
+
+try:
+	mimetypes.common_types
+except AttributeError: # Fallback for Python < 2.2
+	if not mimetypes.types_map.has_key('.css'):
+		mimetypes.types_map['.css'] = 'text/css'
+	def guess_type(url, strict=1):
+		return mimetypes.guess_type(url)
+else:
+	guess_type = mimetypes.guess_type
 
 
 class UnknownFileTypeServletFactory(ServletFactory):
@@ -209,7 +219,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		if file is None:
 			if debug:
 				print '>> not found in cache'
-			fileType = mimetypes.guess_type(filename)
+			fileType = guess_type(filename, 0)
 			mimeType = fileType[0]
 			mimeEncoding = fileType[1]
 			if mimeType is None:
