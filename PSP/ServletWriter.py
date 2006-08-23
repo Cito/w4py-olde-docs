@@ -76,7 +76,18 @@ class ServletWriter:
 		self._filehandle.close()
 		if os.path.exists(self._pyfilename):
 			os.remove(self._pyfilename)
-		os.rename(self._temp, self._pyfilename)
+		try:
+				os.rename(self._temp, self._pyfilename)
+		except OSError:
+			# The operation may fail on some Unix flavors
+			# if the files are on different filesystems.
+			# In this case, we try to move the files manually:
+			f = file(self._pyfilename, 'wb')
+			try:
+				f.write(open(self._temp, 'rb').read())
+			finally:
+				f.close()
+			os.remove(self._temp)
 
 	def pushIndent(self):
 		"""this is very key, have to think more about it"""
