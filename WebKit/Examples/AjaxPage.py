@@ -10,6 +10,29 @@ import StringIO, traceback, time, random
 
 from ExamplePage import ExamplePage as BaseClass
 
+try:
+	bool
+except NameError: # Fallback for Python < 2.3
+	bool = lambda x: x and 1 or 0
+
+try:
+	object
+except NameError: # Fallback for Python < 2.2
+	class object: pass
+	std_isinstance = isinstance
+	def isinstance(obj, cinf):
+		if type(cinf) == type(()):
+			for ci in cinf:
+				if type(obj) == type(object):
+					if std_isinstance(obj, ci):
+						return 1
+				else:
+					if type(obj) == type(ci):
+						return 1
+			return 0
+		else:
+			return std_isinstance(obj, cinf)
+
 
 def quoteJs(what):
 	"""Return quoted JavaScript string corresponding to the Python object."""

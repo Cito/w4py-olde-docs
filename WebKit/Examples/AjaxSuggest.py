@@ -6,8 +6,7 @@
 # with minor changes made by Christoph Zwerschke.
 #
 
-from random import choice
-from string import ascii_lowercase
+from random import randint
 
 from AjaxPage import AjaxPage
 
@@ -20,7 +19,7 @@ suggestions = []
 for i in range(max_words):
 	word = []
 	for j in range(max_letters):
-		word.append(choice(ascii_lowercase))
+		word.append(chr(randint(97, 122)))
 	suggestions.append(''.join(word))
 
 
@@ -72,6 +71,6 @@ and get random words starting with these characters suggested:</p>''')
 		e.g. using json-py's (sourceforge.net/projects/json-py/) JsonWriter.
 
 		"""
-		s = filter(lambda w: w.startswith(prefix), suggestions) or ['none']
+		s = filter(lambda w,prefix=prefix: w.startswith(prefix), suggestions) or ['none']
 		return "handleSuggestions([%s]);" % ",".join(
 			map(lambda w: "'%s'" % w, s[:max_suggestions]))

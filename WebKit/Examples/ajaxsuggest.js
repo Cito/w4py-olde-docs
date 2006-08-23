@@ -23,7 +23,7 @@ function handleSuggestions(res) {
 		var e = document.getElementById('suggestions');
 		e.innerHTML = '<div onmouseover="suggestOver(this)" onmouseout="suggestOut(this)" onclick="clearSuggestions()" class="suggest_link red">close</div>';
 		for (i=0; i < res.length; i++) {
-		e.innerHTML += '<div onmouseover="suggestOver(this)" onmouseout="suggestOut(this)" onclick="setQuery(this.innerHTML)" class="suggest_link">' + res[i] + '</div>';
+            e.innerHTML += '<div onmouseover="suggestOver(this)" onmouseout="suggestOut(this)" onclick="setQuery(this.innerHTML)" class="suggest_link">' + res[i] + '</div>';
 		}
 		e.className = 'show';
 	} else {
