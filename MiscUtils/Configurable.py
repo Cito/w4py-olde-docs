@@ -112,9 +112,11 @@ class Configurable:
 			# open the config file in universal newline mode,
 			# in case it has been edited on a different platform
 			contents = open(filename, 'rU').read()
-		except IOError:
+		except IOError, e:
+			print 'WARNING: Config file', filename
+			print '  not loaded: %s.' % e.strerror
+			print
 			return {}
-
 		isDict = contents.lstrip().startswith('{')
 		from WebKit.AppServer import globalAppServer
 		if globalAppServer:
@@ -125,10 +127,12 @@ class Configurable:
 				contents = contents % replacements
 			except:
 				raise ConfigurationError, 'Unable to embed replacement text in %s.' % filename
-
 		evalContext = replacements.copy()
-		evalContext['True'] = 1==1
-		evalContext['False'] = 1==0
+		try:
+			True, False
+		except NameError: # Python < 2.3
+			evalContext['True'] = 1==1
+			evalContext['False'] = 1==0
 		try:
 			if isDict:
 				config = eval(contents, evalContext)
@@ -142,6 +146,11 @@ class Configurable:
 			raise ConfigurationError, 'Invalid configuration file, %s (%s).' % (filename, e)
 		if type(config) is not DictType:
 			raise ConfigurationError, 'Invalid type of configuration. Expecting dictionary, but got %s.'  % type(config)
+		try:
+			True, False
+		except NameError: # Python < 2.3
+			del evalContext['True']
+			del evalContext['False']
 		return config
 
 	def printConfig(self, dest=None):
