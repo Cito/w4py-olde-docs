@@ -9,9 +9,7 @@ class ConfigurationError(Exception):
 
 
 class Configurable:
-	"""
-	Configurable is an abstract superclass that provides configuration
-	file functionality for subclasses.
+	"""Abstract superclass for configuration file functionality.
 
 	Subclasses should override:
 
@@ -22,17 +20,14 @@ class Configurable:
 		                   override the configuration such as
 		                   'Pinger.config'
 
-
 	Subclasses typically use the setting() method, for example:
 
 		time.sleep(self.setting('Frequency'))
-
 
 	They might also use the printConfig() method, for example:
 
 		self.printConfig()      # or
 		self.printConfig(file)
-
 
 	Users of your software can create a file with the same name as
 	configFilename() and selectively override settings. The format of
@@ -40,6 +35,7 @@ class Configurable:
 
 	Subclasses can also override userConfig() in order to obtain the
 	user configuration settings from another source.
+
 	"""
 
 	## Init ##
@@ -51,7 +47,12 @@ class Configurable:
 	## Configuration
 
 	def config(self):
-		""" Returns the configuration of the object as a dictionary. This is a combination of defaultConfig() and userConfig(). This method caches the config. """
+		"""Return the configuration of the object as a dictionary.
+
+		This is a combination of defaultConfig() and userConfig().
+		This method caches the config.
+
+		"""
 		if self._config is None:
 			self._config = self.defaultConfig()
 			self._config.update(self.userConfig())
@@ -59,52 +60,72 @@ class Configurable:
 		return self._config
 
 	def setting(self, name, default=NoDefault):
-		""" Returns the value of a particular setting in the configuration. """
+		"""Return the value of a particular setting in the configuration."""
 		if default is NoDefault:
 			try:
 				return self.config()[name]
 			except KeyError:
-				raise KeyError, '%s config keys are: %s' % (name, self.config().keys())
+				raise KeyError, \
+					'%s config keys are: %s' % (name, self.config().keys())
 		else:
 			return self.config().get(name, default)
 
 	def setSetting(self, name, value):
+		"""Set a particular configuration setting."""
 		self.config()[name] = value
 
 	def hasSetting(self, name):
+		"""Check whether a configuration setting has been changed."""
 		return self.config().has_key(name)
 
 	def defaultConfig(self):
-		""" Returns a dictionary containing all the default values for the settings. This implementation returns {}. Subclasses should override. """
+		"""Return a dictionary with all the default values for the settings.
+
+		This implementation returns {}. Subclasses should override.
+
+		"""
 		return {}
 
 	def configFilename(self):
-		"""
-		Returns the filename by which users can override the
-		configuration. Subclasses must override to specify a
-		name. Returning None is valid, in which case no user
-		config file will be loaded."""
+		"""Return the full name of the user config file.
 
+		Users can override the configuration by this config file.
+		Subclasses must override to specify a name.
+		Returning None is valid, in which case no user config file
+		will be loaded.
+
+		"""
 		raise AbstractError, self.__class__
 
 	def configName(self):
-		"""
-		Returns the name of the configuration file (the portion
-		before the '.config').  This is used on the command-line.
+		"""Return the name of the configuration file without the extension.
+
+		This is the portion of the config file name before the '.config'.
+		This is used on the command-line.
+
 		"""
 		return os.path.splitext(os.path.basename(self.configFilename()))[0]
 
 	def configReplacementValues(self):
-		"""
-		Returns a dictionary suitable for use with "string % dict"
-		that should be used on the text in the config file.  If an
-		empty dictionary (or None) is returned then no substitution
+		"""Return a dictionary for substitutions in the config file.
+
+		This must be a dictionary suitable for use with "string % dict"
+		that should be used on the text in the config file.
+		If an empty dictionary (or None) is returned, then no substitution
 		will be attempted.
+
 		"""
 		return {}
 
 	def userConfig(self):
-		""" Returns the user config overrides found in the optional config file, or {} if there is no such file. The config filename is taken from configFilename(). """
+		"""Return the user config overrides.
+
+		These settings can be found in the optional config file.
+		Returns {} if there is no such file.
+
+		The config filename is taken from configFilename().
+
+		"""
 		filename = self.configFilename()
 		if not filename:
 			return {}
@@ -126,7 +147,8 @@ class Configurable:
 			try:
 				contents = contents % replacements
 			except:
-				raise ConfigurationError, 'Unable to embed replacement text in %s.' % filename
+				raise ConfigurationError, \
+					'Unable to embed replacement text in %s.' % filename
 		evalContext = replacements.copy()
 		try:
 			True, False
@@ -143,9 +165,11 @@ class Configurable:
 					if name.startswith('_'):
 						del config[name]
 		except Exception, e:
-			raise ConfigurationError, 'Invalid configuration file, %s (%s).' % (filename, e)
+			raise ConfigurationError, \
+				'Invalid configuration file, %s (%s).' % (filename, e)
 		if type(config) is not DictType:
-			raise ConfigurationError, 'Invalid type of configuration. Expecting dictionary, but got %s.'  % type(config)
+			raise ConfigurationError, 'Invalid type of configuration.' \
+				' Expecting dictionary, but got %s.' % type(config)
 		try:
 			True, False
 		except NameError: # Python < 2.3
@@ -154,29 +178,41 @@ class Configurable:
 		return config
 
 	def printConfig(self, dest=None):
-		""" Prints the configuration to the given destination, which defaults to stdout. A fixed with font is assumed for aligning the values to start at the same column. """
+		"""Print the configuration to the given destination.
+
+		The default destionation is stdout. A fixed with font is assumed
+		for aligning the values to start at the same column.
+
+		"""
 		if dest is None:
 			dest = sys.stdout
 		keys = self.config().keys()
 		keys.sort()
-		width = max(map(lambda key: len(key), keys))
+		width = max(map(len, keys))
 		for key in keys:
-			dest.write(key.ljust(width)+' = '+str(self.setting(key))+'\n')
+			dest.write('%s = %s\n'
+				% (key.ljust(width), str(self.setting(key))))
 		dest.write('\n')
 
 	def commandLineConfig(self):
-		"""
-		Settings that came from the command line (via
-		addCommandLineSetting).
+		"""Return the settings that came from the command-line.
+
+		These settings come via addCommandLineSetting().
+
 		"""
 		return _settings.get(self.configName(), {})
 
+
+## Command line settings ##
+
 _settings = {}
 def addCommandLineSetting(name, value):
-	"""
+	"""Override the configuration with a command-line setting.
+
 	Take a setting, like "AppServer.Verbose=0", and call
 	addCommandLineSetting('AppServer.Verbose', '0'), and
 	it will override any settings in AppServer.config
+
 	"""
 	configName, settingName = name.split('.', 1)
 	value = valueForString(value)
@@ -185,10 +221,11 @@ def addCommandLineSetting(name, value):
 	_settings[configName][settingName] = value
 
 def commandLineSetting(configName, settingName, default=NoDefault):
-	"""
-	Retrieve a command-line setting.  You can use this with
-	non-existent classes, like "Context.Root=/WK", and then
-	fetch it back with commandLineSetting('Context', 'Root').
+	"""Retrieve a command-line setting.
+
+	You can use this with non-existent classes, like "Context.Root=/WK",
+	and then fetch it back with commandLineSetting('Context', 'Root').
+
 	"""
 	if default is NoDefault:
 		return _settings[configName][settingName]
