@@ -280,7 +280,7 @@ self.transaction().application().includeURL(self.transaction(), __pspincludepath
 class InsertGenerator(GenericGenerator):
 	"""Include files designated by the psp:insert syntax.
 
-	If the attribute static is set to true or 1, we include the file now,
+	If the attribute 'static' is set to True or 1, we include the file now,
 	at compile time. Otherwise, we use a function added to every PSP page
 	named __includeFile, which reads the file at run time.
 
@@ -290,23 +290,18 @@ class InsertGenerator(GenericGenerator):
 		GenericGenerator.__init__(self, ctxt)
 		self.attrs = attrs
 		self.param = param
-		self.static = 1
 		self.scriptgen = None
 
 		self.page = attrs.get('file')
-		if self.page == None:
-			raise "No Page attribute in Include"
+		if not self.page:
+			raise "No file attribute in include"
 		thepath = self._ctxt.resolveRelativeURI(self.page)
-
-		self.static = attrs.get('static', None)
-		if self.static.lower() == "true" or self.static == "1":
-			self.static = 1
-
 		if not os.path.exists(thepath):
 			print self.page
 			raise "Invalid included file", thepath
 		self.page = thepath
 
+		self.static = str(attrs.get('static')).lower() in ('true', 'yes', '1')
 		if not self.static:
 			self.scriptgen = ScriptGenerator("self.__includeFile('%s')"
 				% thepath.replace('\\', '\\\\'), None)

@@ -253,7 +253,7 @@ The path parameter can point to any valid url on this WebKit AppServer. This fun
 the WebKit Application's forwardRequestFast function, which means that the current Request, Response and Session objects
 will also be used by the URL to which this request is sent.</p>
 
-<p><b>Example:</b> <span class="py">&lt;psp:include path="myfile.html" &gt;</span></p>
+<p><b>Example:</b> <span class="py">&lt;psp:include path="myfile.html"&gt;</span></p>
 
 <a name="PSPInsert"></a><h3>Insert Tag &ndash; &lt;psp:insert ...&gt;</h3>
 
@@ -266,11 +266,11 @@ The contents of the insert file will not be escaped in any way except for triple
 
 <p>At every request of this servlet, this file will be read from disk and sent along with the rest of the ouput of the page.</p>
 
-<p>This tag accepts one additional parameter, "static", which can be set to "true" or "1".
-Setting this attribute to true will cause the inserted file's contents to be embedded in the PSP class at generation time.
+<p>This tag accepts one additional parameter, "static", which can be set to "True" or "1".
+Setting this attribute to True will cause the inserted file's contents to be embedded in the PSP class at generation time.
 Any subsequent changes to the file will not be seen by the servlet. (This was the default behavior prior to PSP 0.4).</p>
 
-<p><b>Example:</b> <span class="py">&lt;psp:insert file="myfile.html" &gt;</span></p>
+<p><b>Example:</b> <span class="py">&lt;psp:insert file="myfile.html"&gt;</span></p>
 
 <a name="Directives"></a><h2>Directives</h2>
 
@@ -400,7 +400,7 @@ for example, if you want all integers to be formatted with commas like "1,234,56
 
 <p>The include directive tells the parser to insert another file at this point in the page and to parse it for psp content.
 It is generally no problem to include an html file this way. However, if you do not want your include file to be parsed,
-you may use the <i>&lt;psp:include</i> tag described below.</p>
+you may use the <i>&lt;psp:include ...&gt;</i> tag described above.</p>
 
 <h5>Example</h5>
 
