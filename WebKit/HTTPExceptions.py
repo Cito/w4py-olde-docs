@@ -12,13 +12,7 @@ changed, for instance an `HTTPAuthenticationRequired` could be
 turned into a normal login page.
 """
 
-from types import *
 from WebUtils.Funcs import htmlEncode
-
-try: # backward compatibility for Python < 2.3
-	True, False
-except NameError:
-	True, False = 1, 0
 
 
 class HTTPException(Exception):
@@ -129,109 +123,6 @@ class HTTPException(Exception):
 		self._transaction = trans
 
 
-class HTTPNotImplemented(HTTPException):
-	"""HTTPExcecption "not implemented" subclass.
-
-	When methods (like GET, POST, PUT, PROPFIND, etc) are not
-	implemented for this resource.
-
-	"""
-	_code = 501, "Not Implemented"
-	_description = "The method given is not yet implemented by this application"
-
-class HTTPForbidden(HTTPException):
-	"""HTTPExcecption "forbidden" subclass.
-
-	When access is not allowed to this resource. If the user is anonymous,
-	and must be authenticated, then HTTPAuthenticationRequired is a preferable
-	exception. If the user should not be able to get to this resource (at
-	least through the path they did), or is authenticated and still doesn't
-	have access, or no one is allowed to view this, then HTTPForbidden would
-	be the proper response.
-
-	"""
-	_code = 403, 'Forbidden'
-	_description = "You are not authorized to access this resource"
-
-class HTTPAuthenticationRequired(HTTPException):
-	"""HTTPExcecption "authentication required" subclass.
-
-	HTTPAuthenticationRequired will usually cause the browser to open up an
-	HTTP login box, and after getting login information from the user, the
-	browser will resubmit the request. However, this should also trigger
-	login pages in properly set up environments (though much code will not
-	work this way).
-
-	Browsers will usually not send authentication information unless they
-	receive this response, even when other pages on the site have given 401
-	responses before. So when using this authentication every request will
-	usually be doubled, once without authentication, once with.
-
-	"""
-	_code = 401, 'Authentication Required'
-	_description = "You must log in to access this resource"
-	def __init__(self, realm=None, *args):
-		if not realm:
-			realm = 'Password required'
-		assert realm.find('"') == -1, 'Realm must not contain "'
-		self._realm = realm
-		HTTPException.__init__(self, *args)
-
-	def headers(self):
-		return {'WWW-Authenticate': 'Basic realm="%s"' % self._realm}
-
-
-# This is for wording mistakes. I'm unsure about their benefit.
-HTTPAuthorizationRequired = HTTPAuthenticationRequired
-"""
-There is also an alias `HTTPAuthorizationRequired`, as it is hard
-to distinguish between these two names.
-"""
-
-class HTTPMethodNotAllowed(HTTPException):
-	"""HTTPExcecption "method not allowed" subclass.
-
-	When a method (like GET, PROPFIND, POST, etc) is not allowed
-	on this resource (usually because it does not make sense, not
-	because it is not permitted). Mostly for WebDAV.
-
-	"""
-	_code = 405, 'Method Not Allowed'
-	_description = 'The method is not supported on this resource'
-
-class HTTPConflict(HTTPException):
-	"""HTTPExcecption "conflict" subclass.
-
-	When there's a locking conflict on this resource (in response to something
-	like a PUT, not for most other conflicts). Mostly for WebDAV.
-
-	"""
-	_code = 409, 'Conflict'
-
-class HTTPUnsupportedMediaType(HTTPException):
-	"""HTTPExcecption "unsupported media type" subclass."""
-	_code = 415, 'Unsupported Media Type'
-
-class HTTPInsufficientStorage(HTTPException):
-	"""HTTPExcecption "insufficient storage" subclass.
-
-	When there is not sufficient storage, usually in response to a PUT when
-	there isn't enough disk space. Mostly for WebDAV.
-
-	"""
-	_code = 507, 'Insufficient Storage'
-	_description = 'There was not enough storage space on the server to complete your request'
-
-class HTTPPreconditionFailed(HTTPException):
-	"""HTTPExcecption "Precondition Failed" subclass.
-
-	During compound, atomic operations, when a precondition for an early
-	operation fail, then later operations in will fail with this code.
-	Mostly for WebDAV.
-
-	"""
-	_code = 412, 'Precondition Failed'
-
 class HTTPMovedPermanently(HTTPException):
 	"""HTTPExcecption "moved permanently" subclass.
 
@@ -273,6 +164,7 @@ class HTTPMovedPermanently(HTTPException):
 		return 'The resource you are accessing has been moved to' \
 			' <a href="%s">%s</a>' % ((htmlEncode(self.location()),)*2)
 
+
 class HTTPTemporaryRedirect(HTTPMovedPermanently):
 	"""HTTPExcecption "temporary tedirect" subclass.
 
@@ -287,6 +179,7 @@ class HTTPTemporaryRedirect(HTTPMovedPermanently):
 # This is what people mean most often:
 HTTPRedirect = HTTPTemporaryRedirect
 
+
 class HTTPBadRequest(HTTPException):
 	"""HTTPExcecption "bad request" subclass.
 
@@ -294,6 +187,69 @@ class HTTPBadRequest(HTTPException):
 
 	"""
 	_code = 400, 'Bad Request'
+
+
+class HTTPAuthenticationRequired(HTTPException):
+	"""HTTPExcecption "authentication required" subclass.
+
+	HTTPAuthenticationRequired will usually cause the browser to open up an
+	HTTP login box, and after getting login information from the user, the
+	browser will resubmit the request. However, this should also trigger
+	login pages in properly set up environments (though much code will not
+	work this way).
+
+	Browsers will usually not send authentication information unless they
+	receive this response, even when other pages on the site have given 401
+	responses before. So when using this authentication every request will
+	usually be doubled, once without authentication, once with.
+
+	"""
+	_code = 401, 'Authentication Required'
+	_description = "You must log in to access this resource"
+
+	def __init__(self, realm=None, *args):
+		if not realm:
+			realm = 'Password required'
+		assert realm.find('"') == -1, 'Realm must not contain "'
+		self._realm = realm
+		HTTPException.__init__(self, *args)
+
+	def headers(self):
+		return {'WWW-Authenticate': 'Basic realm="%s"' % self._realm}
+
+# This is for wording mistakes. I'm unsure about their benefit.
+HTTPAuthorizationRequired = HTTPAuthenticationRequired
+"""
+There is also an alias `HTTPAuthorizationRequired`, as it is hard
+to distinguish between these two names.
+"""
+
+
+class HTTPSessionExpired(HTTPException):
+	"""HTTPExcecption "session expired" subclass.
+
+	This is the same as HTTPAuthenticationRequired, but should be used
+	in the situation when a session has expired.
+
+	"""
+	_code = 401, 'Session Expired'
+	_description = 'Your login session has expired - please log in again'
+
+
+class HTTPForbidden(HTTPException):
+	"""HTTPExcecption "forbidden" subclass.
+
+	When access is not allowed to this resource. If the user is anonymous,
+	and must be authenticated, then HTTPAuthenticationRequired is a preferable
+	exception. If the user should not be able to get to this resource (at
+	least through the path they did), or is authenticated and still doesn't
+	have access, or no one is allowed to view this, then HTTPForbidden would
+	be the proper response.
+
+	"""
+	_code = 403, 'Forbidden'
+	_description = "You are not authorized to access this resource"
+
 
 class HTTPNotFound(HTTPException):
 	"""HTTPExcecption "not found" subclass.
@@ -315,3 +271,80 @@ class HTTPNotFound(HTTPException):
 			return page % uri
 		else:
 			return HTTPException.html(self)
+
+
+class HTTPMethodNotAllowed(HTTPException):
+	"""HTTPExcecption "method not allowed" subclass.
+
+	When a method (like GET, PROPFIND, POST, etc) is not allowed
+	on this resource (usually because it does not make sense, not
+	because it is not permitted). Mostly for WebDAV.
+
+	"""
+	_code = 405, 'Method Not Allowed'
+	_description = 'The method is not supported on this resource'
+
+
+class HTTPRequestTimeout(HTTPException):
+	"""HTTPExcecption "request timeout" subclass.
+
+	The client did not produce a request within the time that the
+	server was prepared to wait. The client may repeat the request
+	without modifications at any later time.
+
+	"""
+	_code = 408, 'Request Timeout'
+
+
+class HTTPConflict(HTTPException):
+	"""HTTPExcecption "conflict" subclass.
+
+	When there's a locking conflict on this resource (in response to
+	something like a PUT, not for most other conflicts). Mostly for WebDAV.
+
+	"""
+	_code = 409, 'Conflict'
+
+
+class HTTPUnsupportedMediaType(HTTPException):
+	"""HTTPExcecption "unsupported media type" subclass.
+
+	The server is refusing to service the request because the entity
+	of the request is in a format not supported by the requested resource
+	for the requested method.
+
+	"""
+	_code = 415, 'Unsupported Media Type'
+
+
+class HTTPPreconditionFailed(HTTPException):
+	"""HTTPExcecption "Precondition Failed" subclass.
+
+	During compound, atomic operations, when a precondition for an early
+	operation fail, then later operations in will fail with this code.
+	Mostly for WebDAV.
+
+	"""
+	_code = 412, 'Precondition Failed'
+
+
+class HTTPNotImplemented(HTTPException):
+	"""HTTPExcecption "not implemented" subclass.
+
+	When methods (like GET, POST, PUT, PROPFIND, etc) are not
+	implemented for this resource.
+
+	"""
+	_code = 501, "Not Implemented"
+	_description = "The method given is not yet implemented by this application"
+
+
+class HTTPInsufficientStorage(HTTPException):
+	"""HTTPExcecption "insufficient storage" subclass.
+
+	When there is not sufficient storage, usually in response to a PUT when
+	there isn't enough disk space. Mostly for WebDAV.
+
+	"""
+	_code = 507, 'Insufficient Storage'
+	_description = 'There was not enough storage space on the server to complete your request'
