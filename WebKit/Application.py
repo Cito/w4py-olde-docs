@@ -351,6 +351,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				if debug:
 					print prefix, 'retrieved session =', session
 			except KeyError:
+				transaction.request().setSessionExpired(1)
 				sessId = None
 		if not sessId:
 			session = Session(transaction)
