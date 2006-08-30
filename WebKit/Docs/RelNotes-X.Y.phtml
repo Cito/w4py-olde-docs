@@ -95,6 +95,10 @@
 	servlet. Particularly, the <code>writeExceptionReport()</code> method of
 	the including or forwarding servlet was called, an not the method of the
 	included or forwarded servlet. (Reported by Oliver Bock)</li>
+	<li>The Request method <code>isSessionExpired()</code> and the Application
+	setting <code>IgnoreInvalidSession</code> did not work any more due to a
+	larger rewrite of the Application module after Webware version 0.8.1. This
+	functionality has been reimplemented. (Reported by Niurka Perez)</li>
 	<li>Building wkcgi on Solaris needs socket and nsl (bug 727052). The
 	makefile does now support a LIBS macro and the proper setting needs only
 	be commented out. See also the note in the README file.</li>
