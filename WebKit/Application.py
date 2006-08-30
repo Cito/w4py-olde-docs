@@ -352,6 +352,8 @@ class Application(ConfigurableForServerSidePath, Object):
 					print prefix, 'retrieved session =', session
 			except KeyError:
 				transaction.request().setSessionExpired(1)
+				if not self.setting('IgnoreInvalidSession'):
+					raise HTTPExceptions.HTTPSessionExpired
 				sessId = None
 		if not sessId:
 			session = Session(transaction)
