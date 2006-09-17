@@ -41,14 +41,15 @@
 <li><a class="reference" href="#dumping-thread-stack-frames" id="id33" name="id33">Dumping Thread Stack Frames</a></li>
 <li><a class="reference" href="#restarting-the-server" id="id34" name="id34">Restarting the Server</a></li>
 <li><a class="reference" href="#assertions" id="id35" name="id35">Assertions</a></li>
-<li><a class="reference" href="#html-validation" id="id36" name="id36">HTML Validation</a></li>
+<li><a class="reference" href="#using-wingide" id="id36" name="id36">Using WingIDE</a></li>
+<li><a class="reference" href="#html-validation" id="id37" name="id37">HTML Validation</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#naming-conventions" id="id37" name="id37">Naming Conventions</a></li>
-<li><a class="reference" href="#actions" id="id38" name="id38">Actions</a></li>
-<li><a class="reference" href="#plug-ins" id="id39" name="id39">Plug-ins</a></li>
-<li><a class="reference" href="#how-do-i-develop-an-app" id="id40" name="id40">How do I develop an app?</a></li>
-<li><a class="reference" href="#known-bugs" id="id41" name="id41">Known Bugs</a></li>
+<li><a class="reference" href="#naming-conventions" id="id38" name="id38">Naming Conventions</a></li>
+<li><a class="reference" href="#actions" id="id39" name="id39">Actions</a></li>
+<li><a class="reference" href="#plug-ins" id="id40" name="id40">Plug-ins</a></li>
+<li><a class="reference" href="#how-do-i-develop-an-app" id="id41" name="id41">How do I develop an app?</a></li>
+<li><a class="reference" href="#known-bugs" id="id42" name="id42">Known Bugs</a></li>
 </ul>
 </div>
 <div class="section">
@@ -248,7 +249,31 @@ assert shoppingCart.total()&gt;=0.0, \
 </pre>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id36" id="html-validation" name="html-validation">HTML Validation</a></h2>
+<h2><a class="toc-backref" href="#id36" id="using-wingide" name="using-wingide">Using WingIDE</a></h2>
+<p>Here is what you need to do in order to debug a Webware web site
+using the <a class="reference" href="http://wingware.com">WingIDE</a> development environment:</p>
+<ul>
+<li><p class="first">Use the <a class="reference" href="InstallGuide.html#makeappworkdir">MakeAppWorkDir</a> script
+to make a local app work dir for your project.</p>
+</li>
+<li><p class="first">Create a run-debug.py script in the work directory with these contents:</p>
+<pre class="literal-block">
+import sys, Launch
+Launch.main([sys.argv[0]] + ['DebugAppServer'] + sys.argv[1:])
+</pre>
+</li>
+<li><p class="first">Add that file to the WingIDE project if you haven't already.</p>
+</li>
+<li><p class="first">Right-click and choose &quot;Set As Main Debug File&quot;.</p>
+</li>
+</ul>
+<p>Now you can run from WingIDE, set break points, examine the stack, use
+a Python prompt tied to any stack prompt, etc.</p>
+<p>WingIDE also has a &quot;Debug &gt; Attach to Process...&quot; command which could
+be useful to debug a test or production server.</p>
+</div>
+<div class="section">
+<h2><a class="toc-backref" href="#id37" id="html-validation" name="html-validation">HTML Validation</a></h2>
 <p>You can validate the HTML in your pages using the <a class="reference" href="http://www.htmlhelp.com/tools/validator/">Web Designer
 Group's HTML Validator</a>.  It is available as a <a class="reference" href="http://www.htmlhelp.com/tools/validator/packages/">RPM package</a>, in
 Debian as <tt class="docutils literal"><span class="pre">wdg-html-validator</span></tt> and you can also install the <a class="reference" href="http://www.htmlhelp.com/tools/validator/source.html">source</a>.</p>
@@ -264,7 +289,7 @@ page.</p>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id37" id="naming-conventions" name="naming-conventions">Naming Conventions</a></h1>
+<h1><a class="toc-backref" href="#id38" id="naming-conventions" name="naming-conventions">Naming Conventions</a></h1>
 <p>Cookies and form values that are named with surrounding underscores
 (such as <tt class="docutils literal"><span class="pre">_sid_</span></tt> and <tt class="docutils literal"><span class="pre">_action_</span></tt>) are generally reserved by WebKit
 and various plugins and extensions for their own internal purposes. If
@@ -274,7 +299,7 @@ and [b] when new names are introduced by future versions of WebKit,
 they won't break your application.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id38" id="actions" name="actions">Actions</a></h1>
+<h1><a class="toc-backref" href="#id39" id="actions" name="actions">Actions</a></h1>
 <p>Suppose you have a web page with a form and one or more
 buttons. Normally, when the form is submitted, a method such as
 Servlet's <tt class="docutils literal"><span class="pre">respondToPost()</span></tt> or Page's <tt class="docutils literal"><span class="pre">writeBody()</span></tt>, will be
@@ -321,7 +346,7 @@ is a blank in the label on the button. However, usually it's simpler to
 procede as in 2. in such cases.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id39" id="plug-ins" name="plug-ins">Plug-ins</a></h1>
+<h1><a class="toc-backref" href="#id40" id="plug-ins" name="plug-ins">Plug-ins</a></h1>
 <p>A plug-in is a software component that is loaded by WebKit in order to
 provide additional WebKit functionality without necessarily having to
 modify WebKit's source.</p>
@@ -335,7 +360,7 @@ conventions in order to work with WebKit. See <a class="reference" href="Develop
 information about writing your own.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id40" id="how-do-i-develop-an-app" name="how-do-i-develop-an-app">How do I develop an app?</a></h1>
+<h1><a class="toc-backref" href="#id41" id="how-do-i-develop-an-app" name="how-do-i-develop-an-app">How do I develop an app?</a></h1>
 <p>The answer to that question might not seem clear after being deluged
 with all the details. Here's a summary:</p>
 <ul class="simple">
@@ -374,7 +399,7 @@ via the announce list:
 </ul>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id41" id="known-bugs" name="known-bugs">Known Bugs</a></h1>
+<h1><a class="toc-backref" href="#id42" id="known-bugs" name="known-bugs">Known Bugs</a></h1>
 <p>Known bugs and future work in general are documented in <a class="reference" href="Future.html">Future</a>.</p>
 <p>Credit</p>
 <p>Authors: Chuck Esterbrook, Jay Love, Geoff Talvola, Ian Bicking
