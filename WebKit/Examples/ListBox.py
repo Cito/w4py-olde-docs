@@ -1,6 +1,8 @@
 from ExamplePage import ExamplePage
 from types import ListType
 
+debug = 0
+
 
 class ListBox(ExamplePage):
 	"""List box example.
@@ -10,45 +12,49 @@ class ListBox(ExamplePage):
 
 	The source is a good example of how to use awake() and actions.
 
+	It also shows how to avoid repeated exectution on refresh/reload.
+
 	"""
 
 	def awake(self, transaction):
 		ExamplePage.awake(self, transaction)
-		sess = transaction.session()
-		if not sess.hasValue('form'):
-			sess.setValue('form', {
+		sess = self.session()
+		if sess.hasValue('vars'):
+			self.vars = sess.value('vars')
+		else:
+			self.vars = {
 				'list':      [],
 				'height':    10,
 				'width':    250,
 				'newCount':   1,
-			})
+				'formCount':  1,
+			}
+			sess.setValue('vars', self.vars)
 		self._error = None
 
 	def writeContent(self):
-		sess = self.session()
-		self.writeln('<div style="text-align:center">')
-		if 0: # Debugging
-			self.writeln('<p>fields = %s</p>' % self.htmlEncode(str(self.request().fields())))
-			self.writeln('<p>vars = %s</p>' % self.htmlEncode(str(self.vars())))
+		enc, wr = self.htmlEncode, self.writeln
+		wr('<div style="text-align:center">')
+		if debug:
+			wr('<p>fields = %s</p>' % enc(str(self.request().fields())))
+			wr('<p>vars = %s</p>' % enc(str(self.vars)))
 		# Intro text is provided by our class' doc string:
 		intro = self.__class__.__doc__.split('\n\n')
-		self.writeln('<h2>%s</h2>' % intro.pop(0))
+		wr('<h2>%s</h2>' % intro.pop(0))
 		for s in intro:
-			self.writeln('<p>%s</p>' % s.replace('\n', '<br>'))
-		if not self._error:
-			self._error = '&nbsp;'
-		self.writeln('<p style="color:red">%s</p>' % self._error)
-		self.writeln('''
+			wr('<p>%s</p>' % s.replace('\n', '<br>'))
+		wr('<p style="color:red">%s</p>' % (self._error or '&nbsp;'))
+		wr('''
 <form method="post">
+<input name="formCount" type="hidden" value="%(formCount)d">
 <select multiple="yes" name="list" size="%(height)d"
 style="width:%(width)dpt;text-align:center">
-''' % sess.value('form'))
+''' % self.vars)
 		index = 0
-		vars = self.vars()
-		for item in vars['list']:
-			self.writeln('<option value="%d">%s</option>' % (index, self.htmlEncode(item['name'])))
+		for item in self.vars['list']:
+			wr('<option value="%d">%s</option>' % (index, enc(item['name'])))
 			index += 1
-		self.writeln('''
+		wr('''
 </select>
 <p>
 <input name="_action_new" type="submit" value="New">
@@ -73,19 +79,16 @@ style="width:%(width)dpt;text-align:center">
 
 	## Commands ##
 
-	def vars(self):
-		"""Return a dictionary of values, stored in the session, for this page only."""
-		return self.session().value('form')
-
 	def new(self):
-		vars = self.vars()
-		vars['list'].append({'name': 'New item %d'%vars['newCount']})
-		vars['newCount'] += 1
+		"""Add a new item to the list box."""
+		req = self.request()
+		self.vars['list'].append(
+			{'name': 'New item %d' % self.vars['newCount']})
+		self.vars['newCount'] += 1
 		self.writeBody()
 
 	def delete(self):
-		"""Delete the selected items in the list whose indices are passed in through the form."""
-		vars = self.vars()
+		"""Delete the selected items in the list box."""
 		req = self.request()
 		if req.hasField('list'):
 			indices = req.field('list')
@@ -96,36 +99,41 @@ style="width:%(width)dpt;text-align:center">
 			indices.reverse() # in reverse order
 			# remove the objects:
 			for index in indices:
-				del vars['list'][index]
+				del self.vars['list'][index]
 		else:
 			self._error = 'You must select a row to delete.'
 		self.writeBody()
 
 	def taller(self):
-		vars = self.vars()
-		vars['height'] += self.heightChange()
+		self.vars['height'] += self.heightChange()
 		self.writeBody()
 
 	def shorter(self):
-		vars = self.vars()
-		if vars['height'] > 2:
-			vars['height'] -= self.heightChange()
+		if self.vars['height'] > 2:
+			self.vars['height'] -= self.heightChange()
 		self.writeBody()
 
 	def wider(self):
-		vars = self.vars()
-		vars['width'] += self.widthChange()
+		self.vars['width'] += self.widthChange()
 		self.writeBody()
 
 	def narrower(self):
-		vars = self.vars()
-		if vars['width'] >= 60:
-			vars['width'] -= self.widthChange()
+		if self.vars['width'] >= 60:
+			self.vars['width'] -= self.widthChange()
 		self.writeBody()
 
 
 	## Actions ##
 
 	def actions(self):
-		return ExamplePage.actions(self) + \
-			['new', 'delete', 'taller', 'shorter', 'wider', 'narrower']
+		acts = ExamplePage.actions(self)
+		# check whether form is valid (no repeated execution)
+		try:
+			formCount = int(self.request().field('formCount'))
+		except:
+			formCount = 0
+		if formCount == self.vars['formCount']:
+			acts.extend(['new', 'delete',
+				'taller', 'shorter', 'wider', 'narrower'])
+			self.vars['formCount'] += 1
+		return acts
