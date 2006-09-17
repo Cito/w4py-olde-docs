@@ -35,11 +35,11 @@ debug = 0
 
 DefaultConfig = {
 	'Host':                 '127.0.0.1',
-	'EnableAdapter':        1,
+	'EnableAdapter':        True,
 	'AdapterPort':          8086,
-	'EnableMonitor':        0,
+	'EnableMonitor':        False,
 	'MonitorPort':          8085,
-	'EnableHTTP':           1,
+	'EnableHTTP':           False,
 	'HTTPPort':             8080,
 	'MaxServerThreads':     20,
 	'MinServerThreads':     5,
@@ -846,6 +846,14 @@ class RestartAppServerError(Exception):
 	"""Raised by DebugAppServer when needed."""
 	pass
 
+os_chdir = os.chdir
+
+def chdir(path, force=False):
+	"""Execute os.chdir() with safety provision."""
+	assert force, \
+		"You cannot reliably use os.chdir() in a threaded environment.\n" \
+		+ 16*" " + "Set force=True if you want to do it anway (using a lock)."
+	os_chdir(path)
 
 ## Script usage ##
 
@@ -863,6 +871,7 @@ def run(workDir=None):
 	server = None
 	global exitStatus
 	exitStatus = 0
+	os.chdir = chdir # inhibit use of os.chdir()
 	runAgain = True
 	while runAgain: # looping in support of RestartAppServerError
 		try:
@@ -932,6 +941,7 @@ def run(workDir=None):
 			AppServerModule.globalAppServer = None
 	sys.stdout.flush()
 	sys.stderr.flush()
+	os.chdir = os_chdir # allow use of os.chdir() again
 	return exitStatus
 
 # Signal handlers
