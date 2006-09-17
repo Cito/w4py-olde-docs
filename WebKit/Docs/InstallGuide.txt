@@ -76,8 +76,8 @@ Python
 ------
 
 Webware of course requires Python.  It has been tested with Python
-2.0, 2.1, 2.2 and 2.4.  Python 1.5.2 isn't supported anymore.  If you
-get an error message about the version, you're probably unwittingly
+version ranging from 2.0 to 2.5.  Python 1.5.2 isn't supported anymore.
+If you get an error message about the version, you're probably unwittingly
 running the wrong version of Python.  Change the ``AppServer``
 or ``AppServer.bat`` scripts, giving the full path to the correct
 Python interpreter.
@@ -268,6 +268,14 @@ Also, you can run the install program as many times as you like with
 no ill effect, so if you're not sure whether or not it has been run,
 feel free to do so again.  If you're debugging a problem with the
 installation, you can run ``install.py -v`` for verbose output.
+
+
+Updating Webware
+================
+
+When updating to a new major or minor version of Webware, check whether
+the Webware release notes recommend updating or recreating the working
+directories of your Webware applications.
 
 
 Architecture
