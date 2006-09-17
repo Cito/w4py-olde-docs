@@ -257,6 +257,29 @@ statement coupled with an exception. For example::
     assert shoppingCart.total()>=0.0, \
         'shopping cart total is %0.2f' % shoppingCart.total()
 
+Using WingIDE
+-------------
+
+Here is what you need to do in order to debug a Webware web site
+using the `WingIDE <http://wingware.com>`_ development environment:
+
+* Use the `MakeAppWorkDir <InstallGuide.html#makeappworkdir>`_ script
+  to make a local app work dir for your project.
+* Create a run-debug.py script in the work directory with these contents::
+
+    import sys, Launch
+    Launch.main([sys.argv[0]] + ['DebugAppServer'] + sys.argv[1:])
+
+* Add that file to the WingIDE project if you haven't already.
+* Right-click and choose "Set As Main Debug File".
+
+Now you can run from WingIDE, set break points, examine the stack, use
+a Python prompt tied to any stack prompt, etc.
+
+WingIDE also has a "Debug > Attach to Process..." command which could
+be useful to debug a test or production server.
+
+
 HTML Validation
 ---------------
 
