@@ -5,7 +5,7 @@
 
 <a name="Warning"></a><h2>Warning</h2>
 
-<p>This document hasn't been seriously combed over in some time.  It is definitely out of date.  You can find better information about known bugs and future work in the <a href="http://wiki.w4py.org">Wiki</a> and in the <a href="http://sourceforge.net/tracker/?group_id=4866">SourceForge tracker systems</a>, both accessible from the <a href="http://www.webwareforpython.org">Webware Home Page</a>. The SourceForge task manager is currently not used since these systems should be sufficient and we do not want to scatter issues in too many systems.</p>
+<p>This document is mostly outdated and out of touch with development. You can find better information about known bugs and future work in the <a href="http://wiki.w4py.org">Wiki</a> and in the <a href="http://sourceforge.net/tracker/?group_id=4866">SourceForge tracker systems</a>, both accessible from the <a href="http://www.webwareforpython.org">Webware Home Page</a>. The SourceForge task manager is currently not used since these systems should be sufficient and we do not want to scatter issues in too many systems.</p>
 
 <a name="Future"></a><h2>Future Work/Limitations</h2>
 
@@ -18,12 +18,7 @@
 <a name="KnownBugs"></a><h3>Known Bugs</h3>
 
 <ol>
-	<li>There is one report that indicates that Application.serverSidePath() may be broken when using MakeAppWorkDir.</li>
-	<li>Contexts do not have separate name spaces.</li>
-	<li>The ListBox example does not take kindly to a Refresh/Reload after a delete operation. In essence, you are telling the ListBox to delete the same object twice.</li>
-	<li>Problems have been reported with cookies on MS IE for the Mac.</li>
-	<li>The OneShot adapter does not clean old sessions when using SessionFileStore.</li>
-	<li>If a context appears in the Contexts setting once by name and once as the default, Application seems to load it twice.</li>
+	<li>...</li>
 </ol>
 
 <a name="ToDo"></a><h3>To Do</h3>
@@ -31,10 +26,7 @@
 
 	<li><b>Major Items</b>
 	<ol>
-	<li>Rearchitect app servers, applications, contexts, etc. One process per application (not several applications per process). Don't worry though. 99% of servlet code will be unaffected by these changes.</li>
-	<li>ImportSpy should really just be removed &ndash; periodically scanning sys.modules has the same effect, without an import hook.</li>
 	<li>CheckSource.py: A program to check the source code conventions.</li>
-	<li>FormKit: A plug-in to aid the construction and validation of forms. (Already in progress.)</li>
 	<li>Role-based security and user-authentication. Goal is to eliminate, as much as possible, developer-written security logic. This should be provided by the WebKit and be configurable.</li>
 	<li>Write a custom adaptor for Apache, Netscape, MS, etc.</li>
 	<li>Distribution and load balancing.</li>
@@ -56,14 +48,8 @@
 	<li>Right now, if the Application itself (as opposed to Servlets) throws an exception, it doesn't get captured nicely. However, it is displayed in the app server's console.</li>
 	<li>The exception handler is pretty nice and has features like logging, e-mail, gathering debugging info, etc. However, on occasions it can throw exceptions too. There should be a simpler, secondary exception handler for when this happens.</li>
 	<li>Review the timestamp caching logic and its relation to .pyc files if any.</li>
-	<li>AppServer: Servlets get reloaded when they are changed, but not the Servlets ancestor classes.</li>
 	<li>Add "Last-modified:" to generic files that are served via WebKit.</li>
 	<li>If a Python file has only one class that inherits from Servlet, then use that as the Servlet class (rather than requiring the name be the same as the file).</li>
-	<!-- These have been discussed on the devel list prior to the last release.
-	Expect to see these changing in the near future in SVN in the next release. -->
-	<li>Adopt the code in NewThreadedAppServer as a new model for the ThreadedAppServer.</li>
-	<li>Adopt the code in serverSideInfoForRequestNewAlgorithm in Application.</li>
-	<li>Make ThreadeAppServer easily subclassed to allow for customization to AppServer behavior.</li>
 	</ol></li>
 
 	<li><b>Testing</b>
@@ -76,14 +62,19 @@
 
 	<li><b>Docs</b>
 	<ol>
-	<li>Beef up the User's Guide.</li>
+	<li>Add a Getting Started Guide and a Screencast.</li>
+	<li>Beef up the User's Guide and Tutorial.</li>
 	<li>User's Guide: Create a caching section to discuss the virtues of doing so. Color example became 12 X faster on the server side.</li>
-	<li>Create a tutorial.</li>
-	<li>Add special Windows instructions in the InstallGuide.</li>
+
 	</ol></li>
 
 	<li><b>Food for thought, considerations, reviews</b>
 	<ol>
+	<li>Consider including FormKit, FunFormKit or FormEncode:
+	A plug-in to aid the construction and validation of forms.</li>
+	<li>Consider adding a simple helper lib for generating HTML
+	(such as SimpleHTMLGen) to the WebUtils package.</li>
+	<li>Support <a href="http://www.python.org/dev/peps/pep-0333/">WSGI</a>.</li>
 	<li>Consider this statement from the FastCGI docs: Redirects are handled similar to CGI.  Location headers with values that begin with "/" are treated as internal-redirects; otherwise, they are treated as external redirects (302).</li>
 	<li>FastCGI app server: The idea is that if the app server itself supports FastCGI, then it can be used directly with FastCGI enabled web servers sans the infamous "adapter". Dan Green has brought this up in Webware-discuss.</li>
 	<li>Consider if we need to support &lt;form action="x.py?a=1" method="post"&gt; where you will have both a query string and posted data.</li>
@@ -92,10 +83,14 @@
 
 	<li><b>Check out</b>
 	<ol>
+	<li><a href="http://pythonpaste.org">Python Paste</a></li>
+	<li><a href="http://www.djangoproject.com">Django</a></li>
+	<li><a href="http://www.turbogears.org">TurboGears</a></li>
+	<li><a href="http://pylonshq.com">Pylons</a></li>
+	<li><a href="http://webpy.org">web.py</a></li>
 	<li><a href="http://aquarium.sourceforge.net">Aquarium</a></li>
 	<li><a href="http://www.zope.org/Members/Amos/WhatIsAcquisition">http://www.zope.org/Members/Amos/WhatIsAcquisition</a></li>
 	<li><a href="http://www.zope.org/Members/jim/Info/IPC8/AcquisitionAlgebra/index.html">http://www.zope.org/Members/jim/Info/IPC8/AcquisitionAlgebra/index.html</a></li>
-	<li><a href="http://www.x-works.com">http://www.x-works.com</a></li>
 	<li>FastCGI related: <a href="http://www.tfarmbruster.com/fcgi_sa.htm">http://www.tfarmbruster.com/fcgi_sa.htm</a></li>
 	</ol></li>
 
