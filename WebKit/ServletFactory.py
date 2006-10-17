@@ -115,7 +115,7 @@ class ServletFactory(Object):
 
 		# There is no context, so import the module standalone
 		# and give it a unique name:
-		if fullname == None:
+		if not fullname or not path.startswith(contextPath):
 			remainder = serverSidePathToImport
 			fullmodname = remainder.replace(
 				'\\', '_').replace('/', '_').replace('.', '_')
