@@ -4,6 +4,8 @@
 * Author: Jay Love (jsliv@jslove.org)                         *
 **************************************************************/
 
+#define VERSION_COMPONENT "mod_webkit2/0.9.3"
+
 #include "mod_webkit.h"
 #include "http_config.h"
 #include "http_core.h"
@@ -50,7 +52,7 @@ typedef struct wkcfg {
 } wkcfg;
 
 /* Use to log errors */
-#define log_error(message,server) ap_log_error(APLOG_MARK, APLOG_ERR, 0, server, message)
+#define log_error(message, server) ap_log_error(APLOG_MARK, APLOG_ERR, 0, server, message)
 
 /*
  * Declare ourselves so the configuration routines can find and know us.
@@ -169,7 +171,7 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
 
     cfg->port = 8086;
     cfg->host = "localhost";
-    cfg->apraddr=NULL;
+    cfg->apraddr = NULL;
     cfg->retryattempts = 10;
     cfg->retrydelay = 1;
     cfg->passheaders = apr_array_make(p, 1, sizeof(char *));
@@ -183,17 +185,17 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
 
     //cfg->addr = resolve_host(cfg->host);
 
-    rv=apr_sockaddr_info_get(&apraddr, cfg->host,APR_UNSPEC, cfg->port, 0, p);
+    rv = apr_sockaddr_info_get(&apraddr, cfg->host, APR_UNSPEC, cfg->port, 0, p);
     /*
      * Now fill in the defaults.  If there are any `parent' configuration
      * records, they'll get merged as part of a separate callback.
      */
 
     if (rv != APR_SUCCESS){
-      log_error("couldn't resolve WKServer address",NULL);
+      log_error("couldn't resolve WKServer address", NULL);
     }
 
-    cfg->apraddr=apraddr;
+    cfg->apraddr = apraddr;
     return (void *) cfg;
 }
 
@@ -242,7 +244,7 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
             APR_PROTO_TCP,
 #endif
             r->pool)) != APR_SUCCESS) {
-        log_error("Failure creating socket for appserver connection",r->server);
+        log_error("Failure creating socket for appserver connection", r->server);
         return NULL;
     }
 
@@ -315,7 +317,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     const char *location;
     char sbuf[MAX_STRING_LEN];
 
-    log_debug("In transact_with_appserver",r);
+    log_debug("In transact_with_appserver", r);
 
     aprsock = wksock_open(r, cfg->addr, cfg->port, cfg);
     if (aprsock == NULL) return 1;
@@ -330,7 +332,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     aprlen = int_dict->ptr - int_dict->str;
     rv = apr_socket_send(aprsock, int_dict->str, &aprlen);
     aprlen = length;
-    rv = apr_socket_send(aprsock,whole_dict->str,&aprlen);
+    rv = apr_socket_send(aprsock, whole_dict->str, &aprlen);
 
     /* This is copied from mod_cgi */
 
@@ -418,8 +420,8 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
       log_error("the Appserver provided an invalid response", r->server);
       //return;
     }
-    sprintf(sbuf,"Status: %i",r->status);
-    log_debug(sbuf,r);
+    sprintf(sbuf, "Status: %i", r->status);
+    log_debug(sbuf, r);
 
     location = apr_table_get(r->headers_out, "Location");
     if (location && location[0] == '/' && r->status == 200) {
@@ -464,11 +466,11 @@ static int webkit_handler(request_rec *r)
 {
     long length;
     wkcfg *cfg;
-    WFILE* env_dict=NULL;
+    WFILE* env_dict = NULL;
     int i;
     char msgbuf[MAX_STRING_LEN];
     int conn_attempt = 0;
-    WFILE* whole_dict=NULL;
+    WFILE* whole_dict = NULL;
     WFILE* int_dict = NULL;
     const char *value;
     const char *key;
@@ -478,7 +480,7 @@ static int webkit_handler(request_rec *r)
     if (strcmp(r->handler, "webkit-handler"))
         return DECLINED;
 
-    log_debug("In webkit_handler",r);
+    log_debug("In webkit_handler", r);
 
     cfg = NULL;
     cfg =  ap_get_module_config(r->per_dir_config, &webkit_module);
@@ -504,7 +506,7 @@ static int webkit_handler(request_rec *r)
     //hdr_arr = ap_table_elts(r->subprocess_env);
     array_header = (apr_array_header_t*)apr_table_elts(r->subprocess_env);
     //elts = (table_entry *) hdr_arr->elts;
-    tentry=(apr_table_entry_t*)array_header->elts;
+    tentry = (apr_table_entry_t*)array_header->elts;
 
     /* start dictionary */
     w_byte(TYPE_DICT, env_dict);
@@ -575,10 +577,10 @@ static int webkit_handler(request_rec *r)
 
     write_integer((int)length, int_dict);
 
-    log_debug("dictionaries built",r);
+    log_debug("dictionaries built", r);
 
     /* now we try to send it */
-    for (conn_attempt = 1; conn_attempt<=cfg->retryattempts; conn_attempt++) {
+    for (conn_attempt = 1; conn_attempt <= cfg->retryattempts; conn_attempt++) {
         int result = transact_with_app_server(r, cfg, whole_dict, int_dict, length);
         if (result == 0) {
             return OK;
@@ -603,7 +605,10 @@ static int psp_handler(request_rec *r) {
 
     if (strcmp(r->handler, "psp-handler"))
         return DECLINED;
-    r->handler=(char*)apr_pstrdup(r->pool, "webkit-handler");
+
+    log_debug("In psp_handler", r);
+
+    r->handler = (char*)apr_pstrdup(r->pool, "webkit-handler");
     apr_table_add(r->subprocess_env, "WK_ABSOLUTE", "1");
 
     return webkit_handler(r);
@@ -616,7 +621,7 @@ static int webkit_post_config(apr_pool_t *pconf, apr_pool_t *plog,
                                 apr_pool_t *ptemp, server_rec *s)
 {
     /* Tell Apache we're here */
-    ap_add_version_component(ptemp, "mod_webkit2/0.9.1");
+    ap_add_version_component(ptemp, VERSION_COMPONENT);
     return OK;
 }
 
@@ -708,7 +713,7 @@ static const command_rec webkit_cmds[] =
 
 static void webkit_register_hooks(apr_pool_t *p)
 {
-  ap_hook_post_config(webkit_post_config,NULL,NULL,APR_HOOK_MIDDLE);
+  ap_hook_post_config(webkit_post_config, NULL, NULL, APR_HOOK_MIDDLE);
   ap_hook_handler(webkit_handler, NULL, NULL, APR_HOOK_MIDDLE);
   ap_hook_handler(psp_handler, NULL, NULL, APR_HOOK_MIDDLE);
 }

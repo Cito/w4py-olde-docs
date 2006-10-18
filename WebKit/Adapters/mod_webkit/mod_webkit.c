@@ -4,6 +4,8 @@
 * Author: Jay Love (jsliv@jslove.org)                         *
 **************************************************************/
 
+#define VERSION_COMPONENT "mod_webkit2/0.9.3"
+
 #include "mod_webkit.h"
 
 /*
@@ -38,7 +40,7 @@ typedef struct wkcfg {
 } wkcfg;
 
 /*A quick logging macro */
-#define log_error(message,server) ap_log_error(APLOG_MARK, APLOG_ERR, server, message)
+#define log_error(message, server) ap_log_error(APLOG_MARK, APLOG_ERR, server, message)
 
 /*
  * Declare ourselves so the configuration routines can find and know us.
@@ -76,7 +78,7 @@ static unsigned long resolve_host(char *value) {
         /* If we found also characters we use gethostbyname()*/
         struct hostent *host;
 
-        host=gethostbyname(value);
+        host = gethostbyname(value);
         if (host == NULL) return 0;
         return ((struct in_addr *)host->h_addr_list[0])->s_addr;
     } else {
@@ -242,14 +244,14 @@ static int wksock_open(request_rec *r, unsigned long address, int port, wkcfg* c
     addr.sin_family = AF_INET;
 
     /* Open the socket */
-    sock=ap_psocket(r->pool, AF_INET, SOCK_STREAM, 0);
-    if (sock==-1) {
+    sock = ap_psocket(r->pool, AF_INET, SOCK_STREAM, 0);
+    if (sock == -1) {
         return -1;
     }
 
     /* Tries to connect to appserver (continues trying while error is EINTR) */
     do {
-        ret = connect(sock,(struct sockaddr *)&addr,sizeof(struct sockaddr_in));
+        ret = connect(sock, (struct sockaddr *)&addr, sizeof(struct sockaddr_in));
 #ifdef WIN32
         if (ret == SOCKET_ERROR) errno = WSAGetLastError() - WSABASEERR;
 #endif /* WIN32 */
@@ -299,16 +301,16 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
      * and we don't want to accidentally submit the same request twice.
      */
 
-    log_debug("creating buffsocket",r);
-    buffsocket=ap_bcreate(r->pool,B_SOCKET+B_RDWR);
+    log_debug("creating buffsocket", r);
+    buffsocket = ap_bcreate(r->pool, B_SOCKET+B_RDWR);
 
-    log_debug("push socket into fd",r);
-    ap_bpushfd(buffsocket,sock,sock);
+    log_debug("push socket into fd", r);
+    ap_bpushfd(buffsocket, sock, sock);
 
     /* Now we send the request to the AppServer */
-    log_debug("writing request to buff",r);
+    log_debug("writing request to buff", r);
     bs = ap_bwrite(buffsocket, int_dict->str, int_dict->ptr - int_dict->str);
-    bs = ap_bwrite(buffsocket,whole_dict->str,length);
+    bs = ap_bwrite(buffsocket, whole_dict->str, length);
 
     /* Now we pump through any client input. */
     if ((ret = ap_setup_client_block(r, REQUEST_CHUNKED_ERROR)) != 0)
@@ -320,8 +322,8 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
         int retry = 0;
 
         while ((n = ap_get_client_block(r, buff, MAX_STRING_LEN)) > 0) {
-            retry=0;
-            sent=0;
+            retry = 0;
+            sent = 0;
             while (retry < 10) {
                 sent = sent + ap_bwrite(buffsocket, buff+sent, n-sent);
                 if (sent < n) {
@@ -351,12 +353,12 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     ap_kill_timeout(r);
 
     /* Now we get the response from the AppServer */
-    ap_hard_timeout("wk_read",r);
+    ap_hard_timeout("wk_read", r);
 
-    log_debug("scanning for headers",r);
+    log_debug("scanning for headers", r);
     /* pull out headers */
-    if ((ret=ap_scan_script_header_err_buff(r, buffsocket, NULL))) {
-        if(ret>=500 || ret < 0) {
+    if ((ret = ap_scan_script_header_err_buff(r, buffsocket, NULL))) {
+        if (ret >= 500 || ret < 0) {
             log_error("cannot scan servlet headers ", r->server);
             return 2;
         }
@@ -376,7 +378,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     /* Kill timeouts, close buffer and socket and return */
     ap_kill_timeout(r);
 
-    log_debug("closing buffsocket",r);
+    log_debug("closing buffsocket", r);
     ap_bclose(buffsocket);
 
     log_debug("Done", r);
@@ -402,11 +404,11 @@ static int content_handler(request_rec *r)
 {
     long length;
     wkcfg *cfg;
-    WFILE* env_dict=NULL;
+    WFILE* env_dict = NULL;
     int i;
     char msgbuf[MAX_STRING_LEN];
     int conn_attempt = 0;
-    WFILE* whole_dict=NULL;
+    WFILE* whole_dict = NULL;
     WFILE* int_dict = NULL;
     const char *value;
     const char *key;
@@ -446,7 +448,7 @@ static int content_handler(request_rec *r)
         key = elts[i].key;
         value = ap_table_get(r->subprocess_env, elts[i].key);
         write_string(key, env_dict);
-        if (value !=NULL)
+        if (value != NULL)
             write_string(value, env_dict);
         else
             w_byte(TYPE_NONE, env_dict);
@@ -507,7 +509,7 @@ static int content_handler(request_rec *r)
     write_integer((int)length, int_dict);
 
     /* now we try to send it */
-    for (conn_attempt = 1; conn_attempt<=cfg->retryattempts; conn_attempt++) {
+    for (conn_attempt = 1; conn_attempt <= cfg->retryattempts; conn_attempt++) {
         int result = transact_with_app_server(r, cfg, whole_dict, int_dict, length);
         if (result == 0) {
             return OK;
@@ -541,7 +543,7 @@ static void wk_init(server_rec *s, pool *p) {
 
 #if MODULE_MAGIC_NUMBER >= 19980527
     /* Tell apache we're here */
-    ap_add_version_component("mod_webkit/0.9.1");
+    ap_add_version_component(VERSION_COMPONENT);
 #endif
 }
 
@@ -622,7 +624,7 @@ static const command_rec webkit_cmds[] =
 static const handler_rec webkit_handlers[] =
 {
     {"webkit-handler", content_handler},
-    {"psp-handler",psp_handler},
+    {"psp-handler", psp_handler},
     {NULL}
 };
 
