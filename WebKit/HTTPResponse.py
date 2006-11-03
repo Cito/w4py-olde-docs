@@ -290,6 +290,8 @@ class HTTPResponse(Response):
 		if debug:
 			print "HTTPResponse commit"
 		self.recordSession()
+		if self._transaction.errorOccurred():
+			self.setStatus(500, 'Server Error')
 		self.writeHeaders()
 		self._committed = 1
 		self._strmOut.commit()
