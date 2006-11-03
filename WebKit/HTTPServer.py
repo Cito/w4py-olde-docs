@@ -5,10 +5,6 @@ from MiscUtils.Funcs import timestamp
 
 import BaseHTTPServer
 import sys, os, socket, time, errno
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
 
 
 class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -35,6 +31,9 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		if self.headers.has_key('Content-Type'):
 			env['CONTENT_TYPE'] = self.headers['Content-Type']
 			del self.headers['Content-Type']
+		if self.headers.has_key('Content-Length'):
+			env['CONTENT_LENGTH'] = self.headers['Content-Length']
+			del self.headers['Content-Type']
 		key = 'If-Modified-Since'
 		if self.headers.has_key(key):
 			env[key] = self.headers[key]
@@ -55,16 +54,13 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		env['SERVER_SOFTWARE'] = self.server_version
 		env['SERVER_PROTOCOL'] = self.protocol_version
 		env['GATEWAY_INTERFACE'] = 'CGI/1.1'
-		input = self.headers.has_key('Content-Length') \
-			and self.rfile.read(int(self.headers['Content-Length'])) or ''
-
 		if self._server._verbose:
 			requestURI = Funcs.requestURI(env)
 			startTime = time.time()
 			sys.stdout.write('%5i  %s  %s\n' % (self._requestID,
 				timestamp()['pretty'], requestURI))
 
-		self.doTransaction(env, input)
+		self.doTransaction(env, self.rfile)
 
 		if self._server._verbose:
 			duration = ('%0.2f secs' % (time.time() - startTime)).ljust(19)
@@ -137,7 +133,7 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 			'format': 'CGI',
 			'time': time.time(),
 			'environ': env,
-			'input': StringIO(input),
+			'input': input,
 			'requestID': self._requestID,
 			}
 		self.dispatchRawRequest(requestDict, streamOut)
