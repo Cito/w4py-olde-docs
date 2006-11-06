@@ -33,7 +33,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			del self.headers['Content-Type']
 		if self.headers.has_key('Content-Length'):
 			env['CONTENT_LENGTH'] = self.headers['Content-Length']
-			del self.headers['Content-Type']
+			del self.headers['Content-Length']
 		key = 'If-Modified-Since'
 		if self.headers.has_key(key):
 			env[key] = self.headers[key]
