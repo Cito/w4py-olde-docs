@@ -27,21 +27,13 @@ APACHECTL=apachectl
 #DEF=-DSECURITY_HOLE_PASS_AUTHORIZATION
 
 SRC = mod_webkit.c marshal.c
-OBJ = ${SRC:.c=.o}
-SOBJ = ${SRC:.c=.lo}
 
 #   the default target
 all: mod_webkit.la
 
 #   compile the DSO file
-mod_webkit.la: $(OBJ)
-	$(APXS) -c -o mod_webkit.la $(SOBJ)
-
-mod_webkit.o: mod_webkit.c
-	$(APXS) $(DEF) -c mod_webkit.c
-
-marshal.o: marshal.c
-	$(APXS) -c marshal.c
+mod_webkit.la: $(SRC)
+	$(APXS) -c -o mod_webkit.la $(DEF) $(SRC)
 
 #   install the DSO file into the Apache installation
 #   and activate it in the Apache configuration
