@@ -1,3 +1,6 @@
+from MiscUtils.Funcs import positive_id
+
+
 class Role:
 	"""
 	Roles are used in conjuction with RoleUser to provide role-based security.
@@ -42,12 +45,18 @@ class Role:
 		return str(self._name)
 
 	def __repr__(self):
-		return '<%s %r instance at %X>' % (self.__class__, self._name, id(self))
+		return '<%s %r instance at %x>' % (
+			self.__class__, self._name, positive_id(self))
 
 
 	## The big question ##
 
 	def playsRole(self, role):
-		""" Returns true if the receiving role plays the role passed in. For Role, this is simply a test of equality. Subclasses may override this method to provide richer semantics (such as hierarchical roles). """
+		"""Return true if the receiving role plays the role passed in.
+
+		For Role, this is simply a test of equality. Subclasses may override
+		this method to provide richer semantics (such as hierarchical roles).
+
+		"""
 		assert isinstance(role, Role)
-		return self==role
+		return self == role

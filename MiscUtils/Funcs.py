@@ -5,6 +5,7 @@ Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else
 """
 
 import md5, os, random, time, sys, tempfile
+from struct import calcsize
 
 try: # backward compatibility for Python < 2.3
 	True, False
@@ -31,7 +32,7 @@ def commas(number):
 	else:
 		i = len(number)
 	while 1:
-		i = i-3
+		i -= 3
 		if i <= 0 or number[i-1] == '-':
 			break
 		number[i:i] = [',']
@@ -64,12 +65,12 @@ def charWrap(s, width, hanging=0):
 			t = s[width:]
 			s = s[:width]
 			lines[i] = s
-			i = i + 1
+			i += 1
 			lines.insert(i, None)
 			s = hanging + t
 		else:
 			lines[i] = s
-		i = i + 1
+		i += 1
 	return '\n'.join(lines)
 
 
@@ -137,6 +138,7 @@ else:
 		"""
 		path = mktemp(suffix, dir)
 		return os.open(path, os.O_RDWR|os.O_CREAT|os.O_EXCL, 0600), path
+
 
 def wordWrap(s, width=78):
 	"""Return a version of the string word wrapped to the given width.
@@ -251,6 +253,37 @@ def localIP(remote=('www.yahoo.com', 80), useCache=1):
 	return _localIP
 
 
+# Addresses can "look negative" on some boxes, some of the time. If you
+# feed a "negative address" to an %x format, Python 2.3 displays it as
+# unsigned, but produces a FutureWarning, because Python 2.4 will display
+# it as signed. So when you want to prodce an address, use positive_id()
+# to obtain it. _address_mask is 2**(number_of_bits_in_a_native_pointer).
+# Adding this to a negative address gives a positive int with the same
+# hex representation as the significant bits in the original.
+# This idea and code were taken from ZODB (http://svn.zope.org).
+
+_address_mask = 256L ** calcsize('P')
+
+def positive_id(obj):
+	"""Return id(obj) as a non-negative integer."""
+	result = id(obj)
+	if result < 0:
+		result += _address_mask
+		assert result > 0
+	return result
+
+
+def _descExc(reprOfWhat, e):
+	"""Return a description of an exception.
+
+	This is a private function for use by safeDescription().
+
+	"""
+	try:
+		return '(exception from repr(%s): %s: %s)' % (reprOfWhat, e.__class__, e)
+	except:
+		return '(exception from repr(%s))' % reprOfWhat
+
 def safeDescription(x, what='what'):
 	"""Return the repr() of x and its class (or type) for help in debugging.
 
@@ -284,16 +317,6 @@ def safeDescription(x, what='what'):
 			cRepr = _descExc('type(x)', e)
 		return '%s=%s type=%s' % (what, xRepr, cRepr)
 
-def _descExc(reprOfWhat, e):
-	"""Return a description of an exception.
-
-	This is a private function for use by safeDescription().
-
-	"""
-	try:
-		return '(exception from repr(%s): %s: %s)' % (reprOfWhat, e.__class__, e)
-	except:
-		return '(exception from repr(%s))' % reprOfWhat
 
 def timestamp(numSecs=None):
 	"""Return a dictionary whose keys give different versions of the timestamp.

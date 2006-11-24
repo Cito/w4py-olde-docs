@@ -1,5 +1,4 @@
 import unittest
-import string
 import os
 from glob import glob
 from StringIO import StringIO
@@ -24,7 +23,7 @@ class TestDataTable( unittest.TestCase):
 	def _testSource(self, name, src, headings, data):
 		# print name
 		dt = DataTable()
-		lines = split(src, '\n')
+		lines = src.split('\n')
 		dt.readLines(lines)
 		assert [col.name() for col in dt.headings()] == headings
 		i = 0
@@ -33,7 +32,7 @@ class TestDataTable( unittest.TestCase):
 			self.assertEquals(dt[i].asList(), match,
 				'For element %d, I expected "%s" but got "%s"'
 				% (i, match, dt[i].asList()))
-			i = i + 1
+			i += 1
 
 	def test01_withPickle(self):
 		DataTable.usePickleCache = 1

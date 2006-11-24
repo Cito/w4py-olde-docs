@@ -1,4 +1,5 @@
 from Common import *
+from MiscUtils.Funcs import positive_id
 
 # If this is Python 2.2 or greater, import the standard Cookie module
 # as CookieEngine. Otherwise, import WebUtils.Cookie as CookieEngine.
@@ -90,7 +91,7 @@ class Cookie(Object):
 	def __repr__(self):
 		return '%s(id=0x%x, name=%r, domain=%r,' \
 			' path=%r, value=%r, expires=%r, maxAge=%r)' % (
-			self.__class__.__name__, id(self), self.name(), self.domain(),
+			self.__class__.__name__, positiveid(self), self.name(), self.domain(),
 			self.path(), self.value(), self.expires(), self.maxAge())
 
 
@@ -176,5 +177,5 @@ class Cookie(Object):
 
 		"""
 		items = self._cookies.items()
-		assert(len(items)==1)
+		assert(len(items) == 1)
 		return items[0][1].OutputString()
