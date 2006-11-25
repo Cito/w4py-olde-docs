@@ -3,13 +3,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.4: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
 <title>WebKit Install Guide</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="webkit-install-guide">
 <h1 class="title">WebKit Install Guide</h1>
+
 <div class="contents topic">
 <p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
 <ul class="simple">
@@ -369,9 +370,9 @@ adapter is the go-between of the web server and the app server.</p>
 <p>There are several adapters for Webware.  However, it is <strong>highly</strong>
 recommended that you either use <a class="reference" href="#wkcgi">wkcgi</a> or <a class="reference" href="#mod-webkit">mod_webkit</a>.  Mod_webkit is
 the fastest adapter, but requires you to use Apache and usually to
-have root access to the computer.  Wkcgi uses CGI, and so is easy to
-install.  Because it's small and written in C, wkcgi is still very
-fast.</p>
+have root access to the computer.  The wkcgi program uses CGI, and so
+is easy to install.  Because it's small and written in C, wkcgi is
+still very fast.</p>
 <p>All the adapters:</p>
 <ul class="simple">
 <li><a class="reference" href="#wkcgi">wkcgi</a>, C-based CGI script</li>
@@ -448,11 +449,10 @@ Python interpreter to be started for each request.  It is located in
 <tt class="docutils literal"><span class="pre">WebKit/Adapters/WebKit.cgi</span></tt> -- you may wish to point the first line
 (<tt class="docutils literal"><span class="pre">#!/usr/bin/env</span> <span class="pre">python</span></tt>) to the actual path of the Python
 interpreter (e.g., <tt class="docutils literal"><span class="pre">#!/usr/local/bin/python</span></tt>).</p>
-<p>Otherwise, follow the instructions for <a class="reference" href="#wkcgi">wkcgi</a>.  There is no
-configuration, and <tt class="docutils literal"><span class="pre">WebKit.cgi</span></tt> should be able to find the host and
-port of the AppServer automatically.</p>
-<!-- Note: If you get Internal Error, always check the AppServer is
-running. -->
+<p>Otherwise, follow the instructions for <a class="reference" href="#wkcgi">wkcgi</a>.  Particularly, make sure
+that the script is executable. There is no configuration, and <tt class="docutils literal"><span class="pre">WebKit.cgi</span></tt>
+should be able to find the host and port of the AppServer automatically.</p>
+<!-- Note: If you get Internal Error, always check the AppServer is running. -->
 </div>
 <div class="section">
 <h3><a class="toc-backref" href="#id35" id="mod-webkit" name="mod-webkit">mod_webkit</a></h3>

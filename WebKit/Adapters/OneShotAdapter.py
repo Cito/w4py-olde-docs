@@ -9,23 +9,26 @@ An example, URL:
 
 """
 
+import sys, os, time
 
-# 2000-08-07 ce: For accuracy purposes, we want to record the timestamp as early as possible.
-import time
+# 2000-08-07 ce: For accuracy purposes,
+# we want to record the timestamp as early as possible:
 _timestamp = time.time()
 
-
-# 2000-08-07 ce: We have to reassign sys.stdout *immediately* because it's referred to as a default parameter value in Configurable.py which happens to be our ancestor class as well as the ancestor class of AppServer and Application. The Configurable method that uses sys.stdout for a default parameter value must not execute before we rewire sys.stdout. Tricky, tricky.
-# 2000-12-04 ce: Couldn't this be fixed by Configurable taking None as the default and then using sys.stdout if arg==None?
+# 2000-08-07 ce: We have to reassign sys.stdout *immediately* because it's
+# referred to as a default parameter value in Configurable.py which happens
+# to be our ancestor class as well as the ancestor class of AppServer and
+# Application. The Configurable method that uses sys.stdout for a default
+# parameter value must not execute before we rewire sys.stdout. Tricky, tricky.
+# 2000-12-04 ce: Couldn't this be fixed by Configurable taking None as the
+# default and then using sys.stdout if arg==None?
 try:
 	from cStringIO import StringIO
 except ImportError:
 	from StringIO import StringIO
-import sys
 _real_stdout = sys.stdout
-sys.stdout = _console = StringIO()  # to capture the console output of the application
+sys.stdout = _console = StringIO() # to capture the console output of the application
 
-import os
 from Adapter import *
 from MiscUtils.Funcs import charWrap
 from WebUtils.Funcs import htmlEncode
@@ -45,23 +48,18 @@ class OneShotAdapter(Adapter):
 	def run(self):
 
 		try:
-#			myInput = ''
-#			if os.environ.has_key('CONTENT_LENGTH'):
-#				length = int(os.environ['CONTENT_LENGTH'])
-#				if length:
-#					myInput = sys.stdin.read(length)
-			#myInput = sys.stdin.read()
 
 			# MS Windows: no special translation of end-of-lines
-			if os.name=='nt':
+			if os.name == 'nt':
 				import msvcrt
 				msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 
 			dict = {
 				'format':  'CGI',
 				'time':    _timestamp,
-				'environ': os.environ.data, # ce: a little tricky. We use marshal which only works on built-in types, so we need environ's dictionary
-#				'input':   myInput,
+				# ce: a little tricky. We use marshal which only works
+				# on built-in types, so we need environ's dictionary:
+				'environ': os.environ.data,
 				'input':   sys.stdin,
 			}
 
@@ -73,42 +71,52 @@ class OneShotAdapter(Adapter):
 			from WebKit.OneShotAppServer import OneShotAppServer
 			appSvr = OneShotAppServer(self._webKitDir)
 
-			# It is important to call transaction.die() after using it, rather than just
-			# letting it fall out of scope, to avoid circular references
+			# It is important to call transaction.die() after using it, rather than
+			# just letting it fall out of scope, to avoid circular references
 			from WebKit.ASStreamOut import ASStreamOut
 			rs = ASStreamOut()
 			transaction = appSvr.dispatchRawRequest(dict, rs)
 			rs.close()
-			transaction.die()
-			del transaction
+			if transaction:
+				transaction.die()
+				del transaction
 
 			appSvr.shutDown()
 			appSvr = None
 
-			print "AppServer Run Time %.2f seconds" % ( time.time() - Profiler.startTime )
+			print "AppServer run time %.2f seconds" % (time.time() - Profiler.startTime)
+
 			sys.stdout = _real_stdout
 
 			# MS Windows: no special translation of end-of-lines
-			if os.name=='nt':
+			if os.name == 'nt':
 				import msvcrt
 				msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 
-			write = sys.stdout.write
-			write(rs._buffer)
+			response = rs._buffer
+			if response:
+				sys.stdout.write(response)
+			else:
+				sys.stdout.write('''Content-type: text/html\n
+	<html><head><title>WebKit CGI Error</title><body>
+	<h3>WebKit CGI Error</h3>
+	<h4>No response from application server</h4>
+	</body></html>\n''')
 
 			if self.setting('ShowConsole'):
 				# show the contents of the console, but only if we
 				# are serving up an HTML file
-				endheaders = rs._buffer.find("\r\n\r\n")
+				endheaders = response.find("\r\n\r\n")
 				if endheaders == None:
-					endheaders = rs._buffer.find("\n\n")
+					endheaders = response.find("\n\n")
 				if not endheaders:
 					print "No Headers Found"
 					return
-				headers = rs._buffer[:endheaders].split("\n")
+				headers = response[:endheaders].split("\n")
 				entries = []
 				for header in headers:
-					entries.append(header.split(":"))
+					if header:
+						entries.append(header.split(":", 1))
 				found = 0
 				for name, value in entries:
 					if name.lower() == 'content-type':
@@ -118,28 +126,30 @@ class OneShotAdapter(Adapter):
 					self.showConsole(_console.getvalue())
 		except:
 			import traceback
-
-			sys.stderr.write('[%s] [error] WebKit.OneShotAdapter: Error while responding to request (unknown)\n' % (time.asctime(time.localtime(time.time()))))
+			sys.stderr.write('[%s] [error] WebKit.OneShotAdapter:'
+				' Error while responding to request (unknown)\n'
+				% (time.asctime(time.localtime(time.time()))))
 			sys.stderr.write('Python exception:\n')
 			traceback.print_exc(file=sys.stderr)
-
-			output = apply(traceback.format_exception, sys.exc_info())
-			output = ''.join(output).replace('&', '&amp;').replace(
-				'<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-			sys.stdout.write('''Content-type: text/html
-
-<html><body>
-<p><pre>ERROR
-
-%s</pre>
+			sys.stdout = _real_stdout
+			output = ''.join(traceback.format_exception(*sys.exc_info()))
+			output = htmlEncode(output)
+			sys.stdout.write('''Content-type: text/html\n
+<html><head><title>WebKit CGI Error</title><body>
+<h3>WebKit CGI Error</h3>
+<pre>%s</pre>
 </body></html>\n''' % output)
 
 	def showConsole(self, contents):
 		width = self.setting('ConsoleWidth')
 		if width:
-			contents = charWrap(contents, self.setting('ConsoleWidth'), self.setting('ConsoleHangingIndent'))
+			contents = charWrap(contents, self.setting('ConsoleWidth'),
+				self.setting('ConsoleHangingIndent'))
 		contents = htmlEncode(contents)
-		sys.stdout.write('<br><p><table><tr><td bgcolor=#EEEEEE><pre>%s</pre></td></tr></table>' % contents)
+		sys.stdout.write('''<br><br><table>
+<tr><td style="background-color: #eee">
+<pre>%s</pre>
+</td></tr></table>''' % contents)
 
 
 def main(webKitDir=None):
@@ -150,18 +160,16 @@ def main(webKitDir=None):
 		OneShotAdapter(webKitDir).run()
 	except:
 		import traceback
-
-		sys.stderr.write('[%s] [error] OneShotAdapter: Error while responding to request (unknown)\n' % (time.asctime(time.localtime(time.time()))))
+		sys.stderr.write('[%s] [error] OneShotAdapter:'
+			' Error while responding to request (unknown)\n'
+			% (time.asctime(time.localtime(time.time()))))
 		sys.stderr.write('Python exception:\n')
 		traceback.print_exc(file=sys.stderr)
-
-		output = apply(traceback.format_exception, sys.exc_info())
-		output = ''.join(output).replace('&', '&amp;').replace(
-			'<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-		sys.stdout.write('''Content-type: text/html
-
-<html><body>
-<p><pre>ERROR
-
-%s</pre>
+		output = ''.join(traceback.format_exception(*sys.exc_info()))
+		output = htmlEncode(output)
+		sys.stdout.write('''Content-type: text/html\n
+<html><head><title>CGI Error</title><body>
+<h3>CGI Error</h3>
+<pre>%s</pre>
 </body></html>\n''' % output)
+

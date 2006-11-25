@@ -1,8 +1,8 @@
 import os, sys, time, socket
-from marshal import dumps, loads
+from marshal import dumps
 from WebKit.Object import Object
 from MiscUtils.Configurable import Configurable
-import struct, errno
+import struct
 
 class Adapter(Configurable, Object):
 
@@ -10,7 +10,7 @@ class Adapter(Configurable, Object):
 		Configurable.__init__(self)
 		Object.__init__(self)
 		self._webKitDir = webKitDir
-		self._respData = ''
+		self._respData = []
 
 	def name(self):
 		return self.__class__.__name__
@@ -22,12 +22,14 @@ class Adapter(Configurable, Object):
 		}
 
 	def configFilename(self):
-		return os.path.join(self._webKitDir, 'Configs/%s.config' % self.name())
+		return os.path.join(self._webKitDir, 'Configs', '%s.config' % self.name())
 
 	def transactWithAppServer(self, env, myInput, host, port):
-		"""
-		Used by subclasses that are communicating with a separate app server via
-		socket.  Returns the unmarshaled response dictionary.
+		"""Get response from the application server.
+
+		Used by subclasses that are communicating with a separate app server
+		via socket. Returns the unmarshaled response dictionary.
+
 		"""
 		dict = {
 				'format': 'CGI',
@@ -46,9 +48,9 @@ class Adapter(Configurable, Object):
 				s.connect((host, port))
 				break
 			except socket.error:
-				# retry
+				# Retry
 				if retries <= self.setting('NumRetries'):
-					retries = retries + 1
+					retries += 1
 					time.sleep(self.setting('SecondsBetweenRetries'))
 				else:
 					raise 'timed out waiting for connection to app server'
@@ -57,11 +59,11 @@ class Adapter(Configurable, Object):
 		s.send(dumps(int(len(data))))
 		s.send(data)
 
-		sent=0
+		sent = 0
 		inputLength = len(myInput)
 		while sent < inputLength:
 			chunk = s.send(myInput[sent:])
-			sent = sent+chunk
+			sent += chunk
 		s.shutdown(1)
 
 		# Get the response from the AppServer
@@ -69,16 +71,17 @@ class Adapter(Configurable, Object):
 		# @@ 2000-04-26 ce: this should be configurable, also we should run some tests on different sizes
 		# @@ 2001-01-25 jsl: It really doesn't make a massive difference.  8k is fine and recommended.
 
-		#s.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('ll',0,5)) #wait for 0.5 seconds for data
+		# Wait for 0.5 seconds for data:
+		# s.setsockopt(socket.SOL_SOCKET, socket.SO_RCVTIMEO, struct.pack('ll',0,5))
+
 		while 1:
 			data = s.recv(bufsize)
 			if not data:
 				break
 			self.processResponse(data)
-		return self._respData
 
+		return ''.join(self._respData)
 
 	def processResponse(self, data):
-		""" Process response data as it arrives."""
-		self._respData = self._respData + data
-
+		"""Process response data as it arrives."""
+		self._respData.append(data)

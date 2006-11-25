@@ -356,9 +356,9 @@ adapter is the go-between of the web server and the app server.
 There are several adapters for Webware.  However, it is **highly**
 recommended that you either use wkcgi_ or mod_webkit_.  Mod_webkit is
 the fastest adapter, but requires you to use Apache and usually to
-have root access to the computer.  Wkcgi uses CGI, and so is easy to
-install.  Because it's small and written in C, wkcgi is still very
-fast.
+have root access to the computer.  The wkcgi program uses CGI, and so
+is easy to install.  Because it's small and written in C, wkcgi is
+still very fast.
 
 All the adapters:
 
@@ -451,12 +451,11 @@ Python interpreter to be started for each request.  It is located in
 (``#!/usr/bin/env python``) to the actual path of the Python
 interpreter (e.g., ``#!/usr/local/bin/python``).
 
-Otherwise, follow the instructions for wkcgi_.  There is no
-configuration, and ``WebKit.cgi`` should be able to find the host and
-port of the AppServer automatically.
+Otherwise, follow the instructions for wkcgi_.  Particularly, make sure
+that the script is executable. There is no configuration, and ``WebKit.cgi``
+should be able to find the host and port of the AppServer automatically.
 
-.. Note: If you get Internal Error, always check the AppServer is
-   running.
+.. Note: If you get Internal Error, always check the AppServer is running.
 
 mod_webkit
 ~~~~~~~~~~

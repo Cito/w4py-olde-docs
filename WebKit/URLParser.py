@@ -269,7 +269,7 @@ class ContextParser(URLParser):
 		trans._fileParserInitSeen = {}
 		req = trans.request()
 		if not requestPath:
-			p = '/'
+			p = req.adapterName() + '/'
 			q = req.queryString()
 			if q:
 				p += "?" + q

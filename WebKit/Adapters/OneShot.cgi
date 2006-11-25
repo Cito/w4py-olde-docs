@@ -1,13 +1,12 @@
 #!/usr/bin/env python
 
 # If the Webware installation is located somewhere else,
-# then set the WebwareDir variable to point to it.
-# For example, WebwareDir = '/Servers/Webware'
+# then set the webwareDir variable to point to it here:
 WebwareDir = None
 
 # If you used the MakeAppWorkDir.py script to make a separate
-# application working directory, specify it here.
-AppWorkDir = None
+# application working directory, specify it here:
+workDir = None
 
 try:
 	import os, sys
@@ -15,30 +14,23 @@ try:
 		WebwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
 	sys.path.insert(1, WebwareDir)
 	webKitDir = os.path.join(WebwareDir, 'WebKit')
-	if AppWorkDir is None:
-		AppWorkDir = webKitDir
+	if workDir is None:
+		workDir = webKitDir
 	else:
-		sys.path.insert(1, AppWorkDir)
-
+		sys.path.insert(1, workDir)
 	import WebKit.Adapters.OneShotAdapter
-	WebKit.Adapters.OneShotAdapter.main(AppWorkDir)
+	WebKit.Adapters.OneShotAdapter.main(workDir)
 except:
-	import string, sys, traceback
+	import sys, traceback
 	from time import asctime, localtime, time
-
 	sys.stderr.write('[%s] [error] WebKit: Error in adapter\n' % asctime(localtime(time())))
 	sys.stderr.write('Error while executing script\n')
 	traceback.print_exc(file=sys.stderr)
-
-	output = apply(traceback.format_exception, sys.exc_info())
-	output = string.join(output, '')
-	output = string.replace(output, '&', '&amp;')
-	output = string.replace(output, '<', '&lt;')
-	output = string.replace(output, '>', '&gt;')
-	output = string.replace(output, '"', '&quot;')
-	sys.stdout.write('''Content-type: text/html
-
-<html><body>
-<p>ERROR
-<p><pre>%s</pre>
+	output = ''.join(traceback.format_exception(*sys.exc_info()))
+	output = output.replace('&', '&amp;').replace(
+		'<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
+	sys.stdout.write('''Content-type: text/html\n
+<html><head><title>WebKit CGI Error</title><body>
+<h3>WebKit CGI Error</h3>
+<pre>%s</pre>
 </body></html>\n''' % output)

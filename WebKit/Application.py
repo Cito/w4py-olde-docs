@@ -55,7 +55,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	## Init ##
 
-	def __init__(self, server):
+	def __init__(self, server, useSessionSweeper=1):
 		"""Called only by `AppServer`, sets up the Application."""
 
 		self._server = server
@@ -109,7 +109,8 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		self.running = 1
 
-		self.startSessionSweeper()
+		if useSessionSweeper:
+			self.startSessionSweeper()
 
 		try: # try to get a 404 error page from the working dir
 			self._404Page = open(os.path.join(self._serverSidePath,
@@ -467,28 +468,27 @@ class Application(ConfigurableForServerSidePath, Object):
 		exceptions, which are then passed on to `handleExceptionInTransaction`.
 
 		"""
-		trans = None
-		try:
-			request = self.createRequestForDict(requestDict)
+		request = self.createRequestForDict(requestDict)
+		if request:
 			trans = Transaction(application=self, request=request)
-			request.setTransaction(trans)
-			response = request.responseClass()(trans, strmOut)
-			trans.setResponse(response)
-			self.runTransaction(trans)
-			trans.response().deliver()
-		except:
 			if trans:
-				trans.setErrorOccurred(1)
-			if self.setting('EnterDebuggerOnException') and sys.stdin.isatty():
-				import pdb
-				pdb.post_mortem(sys.exc_info()[2])
-			self.handleExceptionInTransaction(sys.exc_info(), trans)
-			trans.response().deliver()
-
-		if self.setting('LogActivity'):
-			self.writeActivityLog(trans)
-		request.clearTransaction()
-		response.clearTransaction()
+				request.setTransaction(trans)
+				response = request.responseClass()(trans, strmOut)
+				if response:
+					trans.setResponse(response)
+					try:
+						self.runTransaction(trans)
+					except:
+						trans.setErrorOccurred(1)
+						if self.setting('EnterDebuggerOnException') and sys.stdin.isatty():
+							import pdb
+							pdb.post_mortem(sys.exc_info()[2])
+						self.handleExceptionInTransaction(sys.exc_info(), trans)
+					trans.response().deliver()
+					response.clearTransaction()
+				if self.setting('LogActivity'):
+					self.writeActivityLog(trans)
+			request.clearTransaction()
 		return trans
 
 	def createRequestForDict(self, requestDict):
@@ -814,24 +814,6 @@ class Application(ConfigurableForServerSidePath, Object):
 
 
 ## Main ##
-
-def main(requestDict):
-	"""Return a raw reponse.
-
-	This method is mostly used by OneShotAdapter.py.
-
-	"""
-	from WebUtils.HTMLForException import HTMLForException
-	try:
-		assert type(requestDict) is type({})
-		app = Application(useSessionSweeper=0)
-		return app.runRawRequest(requestDict).response().rawResponse()
-	except:
-		return {
-			'headers': [('Content-type', 'text/html')],
-			'contents': '<html><body>%s</html></body>' % HTMLForException()
-		}
-
 
 """
 You can run Application as a main script, in which case it expects a
