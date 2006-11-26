@@ -13,7 +13,7 @@
 
 # Set Program Parameters
 
-webKitDir = None
+webwareDir = None
 
 LRWPappName = 'testing'
 
@@ -24,14 +24,14 @@ LRWPport = 81
 #-----------------------------------------------------------------------------
 
 import os, sys
-
-if webKitDir is None:
-	webKitDir = os.path.dirname(os.getcwd())
-webwareDir = os.path.dirname(webKitDir)
-sys.path.insert(1, webwareDir)
-
-from Adapter import Adapter
 from lrwplib import LRWP
+from Adapter import Adapter
+
+
+if not webwareDir:
+	webwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
+sys.path.insert(1, webwareDir)
+webKitDir = os.path.join(webwareDir, 'WebKit')
 
 
 class LRWPAdapter(Adapter):

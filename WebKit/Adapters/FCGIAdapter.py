@@ -25,8 +25,8 @@ To use this adapter, you must have a fastcgi capable web server.
 For Apache, you'll need to add the following lines to your httpd.conf file, or
 put them in another file and include that file in httpd.conf
 
-#I have the file in my cgi-bin directory, but you might as well put it in html.
-#the -host is the port it communicates on
+# I have the file in my cgi-bin directory, but you might as well put it in html.
+# the -host is the port it communicates on
 FastCgiExternalServer ../cgi-bin/FCGIWebKit.py -host localhost:33333 # the path is from the SERVER ROOT
 
 <Location /FCGIWebKit.py>  #or whatever name you chose for the file above
@@ -77,18 +77,62 @@ CHANGES
 
 """
 
-# Set WebKitDir to the directory where WebKit is located
-WebKitDir = '/usr/local/Webware/WebKit'
+# If the Webware installation is located somewhere else,
+# then set the webwareDir variable to point to it here:
+webwareDir = None
 
-import fcgi, time
-from marshal import dumps, loads
+
+import sys, os, time
 from socket import *
-import os
-import sys
+import fcgi
+from Adapter import Adapter
 
-timestamp = time.time()
 
-_AddressFile='address.text'
+class FCGIAdapter(Adapter):
+
+	def run(self):
+		"""Block waiting for new request."""
+		while fcgi.isFCGI():
+			req = fcgi.FCGI()
+			self.FCGICallback(req)
+
+	def FCGICallback(self,req):
+		"""This function is called whenever a request comes in."""
+		try:
+			# Transact with the app server
+			response = self.transactWithAppServer(req.env, req.inp.read(), host, port)
+			# deliver it!
+			req.out.write(response)
+			req.out.flush()
+		except:
+			import traceback
+			# Log the problem to stderr
+			stderr = req.err
+			stderr.write('[%s] [error] WebKit.FCGIAdapter:'
+				' Error while responding to request (unknown)\n'
+				% (time.asctime(time.localtime(time.time()))))
+			stderr.write('Python exception:\n')
+			traceback.print_exc(file=stderr)
+			# Report the problem to the browser
+			output = ''.join(traceback.format_exception(*sys.exc_info()))
+			output = HTMLEncode(output)
+			sys.pr('''Content-type: text/html\n
+<html><head><title>WebKit CGI Error</title><body>
+<h3>WebKit CGI Error</h3>
+%s
+</body></html>\n''' % output)
+		req.Finish()
+		return
+
+	def pr(self, *args):
+		"""Just a quick and easy print function."""
+		try:
+			req=self.req
+			req.out.write(''.join(map(str, args)) + '\n')
+			req.out.flush()
+		except:
+			pass
+
 
 HTMLCodes = [
 	['&', '&amp;'],
@@ -109,6 +153,9 @@ def HTMLEncode(s, codes=HTMLCodes):
 		s = s.replace(code[0], code[1])
 	return s
 
+
+# Start FCGI Adapter
+
 if os.name != 'posix':
 	print "This adapter is only available on UNIX"
 	sys.exit(1)
@@ -119,70 +166,14 @@ if not fcgi.isFCGI():
 	print "This module cannot be run from the command line"
 	sys.exit(1)
 
-addrfile=os.path.join(WebKitDir, _AddressFile)
-(host, port) = open(addrfile).read().split(':')
+if not webwareDir:
+	webwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
+sys.path.insert(1, webwareDir)
+webKitDir = os.path.join(webwareDir, 'WebKit')
+os.chdir(webKitDir)
+
+host, port = open(os.path.join(webKitDir, 'address.text')).read().split(':', 1)
 port = int(port)
 
-os.chdir(WebKitDir)
-sys.path.append(os.path.abspath(os.path.join(WebKitDir, "..")))
-
-from Adapter import Adapter
-
-class FCGIAdapter(Adapter):
-	def run(self):
-		"""Block waiting for new request."""
-		while fcgi.isFCGI():
-			req = fcgi.FCGI()
-			self.FCGICallback(req)
-
-	def FCGICallback(self,req):
-		"""This function is called whenever a request comes in."""
-		import sys
-
-		try:
-			# Transact with the app server
-			response = self.transactWithAppServer(req.env, req.inp.read(), host, port)
-
-			# deliver it!
-			req.out.write(response)
-			req.out.flush()
-		except:
-			import traceback
-
-			# Log the problem to stderr
-			stderr = req.err
-			stderr.write('[%s] [error] WebKit.FCGIAdapter:'
-				' Error while responding to request (unknown)\n'
-				% (time.asctime(time.localtime(time.time()))))
-			stderr.write('Python exception:\n')
-			traceback.print_exc(file=stderr)
-
-			# Report the problem to the browser
-			output = apply(traceback.format_exception, sys.exc_info())
-			output = ''.join(output)
-			output = HTMLEncode(output)
-			self.pr('''Content-type: text/html
-
-<html><body>
-<p><pre>ERROR
-
-%s</pre>
-</body></html>\n''' % output)
-		req.Finish()
-		return
-
-	#easy print function
-	def pr(self,*args):
-		"""Just a quick and easy print function."""
-		try:
-			req=self.req
-			s=''
-			for i in args: s=s+str(i)
-			req.out.write(s+'\n')
-			req.out.flush()
-		except:
-			pass
-
-#print "Starting"
-fcgiloop = FCGIAdapter(WebKitDir)
+fcgiloop = FCGIAdapter(webKitDir)
 fcgiloop.run()

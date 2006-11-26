@@ -4,6 +4,7 @@ from WebKit.Object import Object
 from MiscUtils.Configurable import Configurable
 import struct
 
+
 class Adapter(Configurable, Object):
 
 	def __init__(self, webKitDir):

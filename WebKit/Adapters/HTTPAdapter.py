@@ -1,40 +1,40 @@
 #!/usr/bin/env python
-# If the Webware installation is located somewhere else,
-# then set the WebwareDir variable to point to it.
-# For example, WebwareDir = '/Servers/Webware'
-WebwareDir = None
 
 # If you used the MakeAppWorkDir.py script to make a separate
-# application working directory, specify it here.
-AppWorkDir = None
+# application working directory, specify it here:
+workDir = None
+
+# If the Webware installation is located somewhere else,
+# then set the webwareDir variable to point to it here:
+webwareDir = None
+
+
+import sys, os
+import BaseHTTPServer, threading, socket
 
 
 ## Path setup ##
 
 try:
-	import os, sys
-	if not WebwareDir:
-		WebwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
-	sys.path.insert(0, WebwareDir)
-	webKitDir = os.path.join(WebwareDir, 'WebKit')
-	if AppWorkDir is None:
-		AppWorkDir = webKitDir
+	if not webwareDir:
+		webwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
+	sys.path.insert(0, webwareDir)
+	webKitDir = os.path.join(webwareDir, 'WebKit')
+	if workDir is None:
+		workDir = webKitDir
 	else:
-		sys.path.insert(0, AppWorkDir)
-
+		sys.path.insert(0, workDir)
 	from WebKit.Adapters.Adapter import Adapter
-	(host, port) = open(os.path.join(webKitDir, 'address.text')).read().split(':')
-	if os.name=='nt' and host=='':
+	host, port = open(os.path.join(webKitDir, 'address.text')).read().split(':')
+	if os.name == 'nt' and host == '':
 		# MS Windows doesn't like a blank host name
 		host = 'localhost'
 	port = int(port)
-except 0:
+except:
 	# @@: Is there something we should do with exceptions here?
 	# I'm apt to just let them print to stderr and quit like normal,
 	# but I'm not sure.
 	pass
-
-import BaseHTTPServer, threading, socket
 
 
 ## HTTP Server ##
@@ -69,7 +69,7 @@ class ThreadedHTTPServer(BaseHTTPServer.HTTPServer):
 		except socket.error:
 			return
 		t = threading.Thread(target=self.handle_request_body,
-						 args=(request, client_address, self._threadID))
+				args=(request, client_address, self._threadID))
 		t.start()
 		self._threads[self._threadID] = t
 		self._threadID += 1
@@ -118,8 +118,8 @@ Options:
 def main():
 	import getopt
 	try:
-		opts, args = getopt.getopt(sys.argv[1:], 'p:h:d',
-								   ['port=', 'host=', 'daemon'])
+		opts, args = getopt.getopt(sys.argv[1:],
+			'p:h:d', ['port=', 'host=', 'daemon'])
 	except getopt.GetoptError:
 		print usage
 		sys.exit(2)
@@ -140,10 +140,8 @@ def main():
 	run((host, port))
 
 def shutDown(arg1, arg2):
-	"""
-	We have to have a shutdown handler, because ThreadedAppServer
-	installs one that we have to overwrite.
-	"""
+	# We have to have a shutdown handler, because ThreadedAppServer
+	# installs one that we have to overwrite.
 	import sys
 	print 'Shutting down.'
 	sys.exit()

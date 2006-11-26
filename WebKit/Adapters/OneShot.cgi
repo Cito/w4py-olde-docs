@@ -2,7 +2,7 @@
 
 # If the Webware installation is located somewhere else,
 # then set the webwareDir variable to point to it here:
-WebwareDir = None
+webwareDir = None
 
 # If you used the MakeAppWorkDir.py script to make a separate
 # application working directory, specify it here:
@@ -10,10 +10,10 @@ workDir = None
 
 try:
 	import os, sys
-	if not WebwareDir:
-		WebwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
-	sys.path.insert(1, WebwareDir)
-	webKitDir = os.path.join(WebwareDir, 'WebKit')
+	if not webwareDir:
+		webwareDir = os.path.dirname(os.path.dirname(os.getcwd()))
+	sys.path.insert(1, webwareDir)
+	webKitDir = os.path.join(webwareDir, 'WebKit')
 	if workDir is None:
 		workDir = webKitDir
 	else:
