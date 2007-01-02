@@ -597,12 +597,11 @@ class HTTPRequest(Request):
 
 		"""
 		fs = self.fieldStorage()
-		if fs and fs.file:
-			if rewind:
-				fs.file.seek(0)
-			return fs.file
-		else:
+		if fs is None:
 			return None
+		if rewind and fs.file:
+			fs.file.seek(0)
+		return fs.file
 
 	def time(self):
 		"""Return the time that the request was received."""
