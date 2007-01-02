@@ -1,8 +1,9 @@
 from SessionStore import SessionStore
 import SessionMemoryStore, SessionFileStore
-import os, time, threading
+import time, threading
 
 debug = 0
+
 
 class SessionDynamicStore(SessionStore):
 	"""Stores the session in Memory and Files.
@@ -18,6 +19,10 @@ class SessionDynamicStore(SessionStore):
 	'DynamicSessionTimeout', which sets the default time for a session to stay
 	in memory with no activity. Default is 15 minutes. When specifying this in
 	Application.config, use minutes.
+
+	One-shot session (usually created by crawler bots) aren't moved to FileStore
+	on periodical clean-up. They are still saved on SessionStore shutdown. This
+	reduces the number of files in the Sessions directory.
 
 	"""
 
@@ -240,7 +245,11 @@ class SessionDynamicStore(SessionStore):
 		for i in self._memoryStore.keys():
 			try:
 				if self._memoryStore[i].lastAccessTime() < delta:
-					self.MovetoFile(i)
+					if self._memoryStore[i].isNew():
+						if debug:
+							print "trashing one-shot session", i
+					else:
+						self.MovetoFile(i)
 			except KeyError:
 				pass
 
