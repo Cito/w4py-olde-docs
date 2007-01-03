@@ -141,11 +141,11 @@ def requestURI(dict):
 
 	"""
 	uri = dict.get('REQUEST_URI', None)
-	if uri == None:
+	if uri is None:
 		uri = dict.get('SCRIPT_NAME', '') + dict.get('PATH_INFO', '')
 		query = dict.get('QUERY_STRING', '')
 		if query != '':
-			uri = uri + '?' + query
+			uri += '?' + query
 	return uri
 
 def normURL(path):
@@ -158,10 +158,10 @@ def normURL(path):
 		return
 	initialslash = path[0] == '/'
 	lastslash = path[-1] == '/'
-	comps = '/'.split(path)
+	comps = path.split('/')
 	newcomps = []
 	for comp in comps:
-		if comp in ('','.'):
+		if comp in ('', '.'):
 			continue
 		if comp != '..':
 			newcomps.append(comp)
@@ -169,7 +169,7 @@ def normURL(path):
 			newcomps.pop()
 	path = '/'.join(newcomps)
 	if path and lastslash:
-		path = path + '/'
+		path += '/'
 	if initialslash:
 		path = '/' + path
 	return path
