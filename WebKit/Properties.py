@@ -35,5 +35,6 @@ WebKitConfig = {
 		'RequestInformation',
 		'Image',
 		'AjaxSuggest',
+		'JSONRPCClient',
 	]
 }
