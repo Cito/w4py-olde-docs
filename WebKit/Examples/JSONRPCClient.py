@@ -38,8 +38,9 @@ class JSONRPCClient(ExamplePage):
 			<p>The example uses a JSON-RPC JavaScript client
 			based on Jan-Klaas' "JavaScript o lait" library
 			(<a href="http://jsolait.net">jsolait</a>).
-			You can also use <a href="http://dojotoolkit.org">dojo</a>
-			or <a href="http://pyjamas.pyworks.org">pyjamas</a>
+			You can also use other JavaScript libraries and toolkits
+			such as <a href="http://dojotoolkit.org">dojo</a> or
+			<a href="http://pyjamas.pyworks.org">pyjamas</a>
 			for that purpose.</p>
 			<p>In order to run the JSON-RPC servlet,
 			<a href="http://cheeseshop.python.org/pypi/simplejson">simplejson</a>
