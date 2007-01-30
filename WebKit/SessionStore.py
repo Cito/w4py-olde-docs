@@ -116,9 +116,18 @@ class SessionStore(Object):
 
 		"""
 		curTime = time.time()
-		for key, sess in self.items():
-			if (curTime - sess.lastAccessTime()) >= sess.timeout()  or  sess.timeout()==0:
-				del self[key]
+		for key in self.keys():
+			try:
+				sess = self[key]
+			except KeyError:
+				pass # session was already deleted by some other thread
+			else:
+				if curTime - sess.lastAccessTime() >= sess.timeout() \
+						or sess.timeout() == 0:
+					try:
+						del self[key]
+					except KeyError:
+						pass # already deleted by some other thread
 
 
 	## Convenience methods ##
