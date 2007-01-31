@@ -13,10 +13,10 @@ sqlVersionCommand = 'mysql --version'
 
 It can be useful to run one test at a time, especially when developing a
 new adapter:
-> python MKBasic
+> python Test.py MKBasic
 
 Or you can run a few:
-> python MKBasic MKDateTime MKNone
+> python Test.py MKBasic MKDateTime MKNone
 
 Run all tests like this:
 > python Test.py
