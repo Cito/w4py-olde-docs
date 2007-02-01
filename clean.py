@@ -36,12 +36,12 @@ def walk_remove(pattern, dirname, names):
 	pattern = os.path.join(dirname, pattern)
 	remove(pattern)
 
-print "Cleaning up..."
-
-for pattern in files.splitlines():
-	if pattern:
-		print pattern
-		if '/' in pattern:
-			remove(pattern)
-		else:
-			os.path.walk('.', walk_remove, pattern)
+if __name__ == '__main__':
+	print "Cleaning up..."
+	for pattern in files.splitlines():
+		if pattern:
+			print pattern
+			if '/' in pattern:
+				remove(pattern)
+			else:
+				os.path.walk('.', walk_remove, pattern)
