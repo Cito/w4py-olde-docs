@@ -1,4 +1,4 @@
-import sys
+import sys, types
 from types import ClassType, StringType
 from MiscUtils import NoDefault
 from MiscUtils.Funcs import safeDescription
@@ -115,7 +115,33 @@ class ObjectStore(ModelUser):
 		else:
 			return self._objects.has_key(key)
 
-	def object(self, key, default=NoDefault):
+	def object(self, a, b=NoDefault, c=NoDefault):
+		""" Returns an object described by the given arguments, or potentially a default value.
+
+		store.object(anObjectKey) - return the object with the given key, or raise a KeyError if it does not reside in memory.
+		store.object(anObjectKey, defaultValue) - return the object or defaultValue (no exception will be raised)
+		store.object(someClass, serialNum) - return the object of the given class and serial num, or raise a KeyError
+		store.object(someClass, serialNum, defaultValue) - return the object or defaultValue (no exception will be raised)
+
+		`someClass` can be a Python class, a string (the name of a class) or a MiddleKit.Core.Klass
+
+		"""
+		if isinstance(a, ObjectKey):
+			return self.objectForKey(a, b)
+		else:
+			return self.objectForClassAndSerial(a, b, c)
+
+	def objectForClassAndSerial(self, klass, serialNum, default=NoDefault):
+		if isinstance(klass, (types.ClassType, types.TypeType)):
+			klass = klass.__name__
+		elif isinstance(klass, BaseKlass):
+			klass = klass.name()
+		else:
+			assert isinstance(klass, str)
+		key = ObjectKey().initFromClassNameAndSerialNum(klass, serialNum)
+		return self.objectForKey(key, default)
+
+	def objectForKey(self, key, default=NoDefault):
 		""" Returns an object from the store by it's given key. If no default is given and the object is not in the store, then an exception is raised. Note: This method doesn't currently fetch objects from the persistent store. """
 		if default is NoDefault:
 			return self._objects[key]
