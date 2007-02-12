@@ -44,7 +44,7 @@ ThreadedAppServer.doesRunHandleExceptions = False
 
 
 class DebugAppServer(OriginalThreadedAppServer):
-	"""Sigle-threaded AppServer for debugging purposes.
+	"""Single-threaded AppServer for debugging purposes.
 
 	We are piggybacking on 99% of the code in ThreadedAppServer. Our
 	trick is to replace the request queue with a dummy object that
