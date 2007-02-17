@@ -61,11 +61,10 @@ def htmlDecode(s, codes=htmlCodesReversed):
 
 _urlEncode = {}
 for i in range(256):
-	_urlEncode[chr(i)] = '%%%02X' % i
-from string import letters, digits
-for c in letters + digits + '_.-/':
-	_urlEncode[c] = c
-_urlEncode[' '] = '+'
+	c = chr(i)
+	_urlEncode[c] = c == ' ' and '+' \
+		or i < 128 and (c.isalnum() or c in '_.-/') and c \
+		or '%%%02X' % i
 
 def urlEncode(s):
 	"""Return the encoded version of the given string.
@@ -94,7 +93,7 @@ def urlDecode(s):
 	Note that invalid URLs will not throw exceptions.
 	For example, incorrect % codings will be ignored.
 
-	Identical to urllib.unquote_plus(s) in Python 2.4.,
+	Identical to urllib.unquote_plus(s) in Python 2.4,
 	but faster and more exact for older Python versions.
 
 	"""
