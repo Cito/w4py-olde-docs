@@ -1,5 +1,6 @@
-from ExamplePage import ExamplePage
 import os
+
+from ExamplePage import ExamplePage
 
 class View(ExamplePage):
 	"""View the source of a WebKit servlet.

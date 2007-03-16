@@ -1,5 +1,6 @@
 from ExamplePage import ExamplePage
 
+
 class Welcome(ExamplePage):
 
 	def writeContent(self):

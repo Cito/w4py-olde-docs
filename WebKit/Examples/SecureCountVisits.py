@@ -1,5 +1,6 @@
 from SecurePage import SecurePage
 
+
 class SecureCountVisits(SecurePage):
 	"""Secured version of counting visits example."""
 

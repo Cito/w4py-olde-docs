@@ -1,6 +1,7 @@
+from time import asctime, localtime
+
 from Common import *
 from Message import Message
-from time import asctime, localtime
 
 
 class Request(Message):

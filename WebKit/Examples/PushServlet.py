@@ -1,6 +1,7 @@
+from time import sleep
 
 from WebKit.Page import Page
-from time import sleep
+
 
 class PushServlet(Page):
 	"""Pushing Content Demo.

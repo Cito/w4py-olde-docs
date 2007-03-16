@@ -1,3 +1,6 @@
+import os, cgi, sys, traceback
+from types import ListType
+
 from Common import *
 from WebUtils.Funcs import requestURI
 from WebUtils import FieldStorage
@@ -7,11 +10,7 @@ from Request import Request
 from Session import Session, SessionError
 import HTTPResponse
 
-import os, cgi, sys, traceback
-from types import ListType
-
-
-debug = 0
+debug = False
 
 
 class HTTPRequest(Request):

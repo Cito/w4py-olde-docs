@@ -1,9 +1,9 @@
+import os, time, mimetypes
+
 from ServletFactory import ServletFactory
 import HTTPExceptions
 from HTTPServlet import HTTPServlet
 from MiscUtils.Configurable import Configurable
-
-import os, time, mimetypes
 
 debug = 0
 

@@ -1,5 +1,6 @@
-from ExamplePage import ExamplePage
 from time import *
+
+from ExamplePage import ExamplePage
 
 
 class ShowTime(ExamplePage):

@@ -4,19 +4,21 @@
 # See Examples/XMLRPCExample.py for sample usage.
 #
 
-# Sometimes xmlrpclib is installed as a package, sometimes not.  So we'll
-# make sure it works either way.
+# Sometimes xmlrpclib is installed as a package, sometimes not.
+# So we'll make sure it works either way.
 try:
 	from xmlrpclib import xmlrpclib
 except ImportError:
 	import xmlrpclib
+
 import sys, string, traceback
-from RPCServlet import RPCServlet
 
 try: # backward compatibility for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0
+
+from RPCServlet import RPCServlet
 
 
 class XMLRPCServlet(RPCServlet):

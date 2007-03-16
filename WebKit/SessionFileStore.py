@@ -1,7 +1,8 @@
-from SessionStore import SessionStore
 import os
 from glob import glob
 import threading
+
+from SessionStore import SessionStore
 
 debug = 0
 

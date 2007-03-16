@@ -1,11 +1,13 @@
-from Common import *
-from WebKit.Servlet import Servlet
 import sys
 from types import ClassType, BuiltinFunctionType
 from keyword import iskeyword
 import threading
 
-debug = 0
+from Common import *
+from WebKit.Servlet import Servlet
+
+debug = False
+
 
 class ServletFactory(Object):
 	"""Servlet factory template.

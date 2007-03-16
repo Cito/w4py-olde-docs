@@ -1,6 +1,5 @@
 from SessionStore import SessionStore
 from SessionFileStore import SessionFileStore
-import os
 
 
 class SessionMemoryStore(SessionStore):

@@ -1,5 +1,6 @@
-from MiscUtils.Configurable import Configurable
 from ExamplePage import ExamplePage
+from MiscUtils.Configurable import Configurable
+
 
 class SecurePage(ExamplePage, Configurable):
 	"""Password-based security example.

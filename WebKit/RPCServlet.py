@@ -1,5 +1,6 @@
-from HTTPServlet import HTTPServlet
 import traceback, sys
+
+from HTTPServlet import HTTPServlet
 
 
 class RPCServlet(HTTPServlet):

@@ -4,6 +4,7 @@
 
 from ExamplePage import ExamplePage
 
+
 class JSONRPCClient(ExamplePage):
 	"""Demo client for using the JSON-RPC example."""
 

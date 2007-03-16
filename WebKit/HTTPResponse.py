@@ -1,14 +1,7 @@
-from Common import *
-from Response import Response
-from WebKit.Cookie import Cookie
 from types import *
 
-# time.gmtime() no longer returns a tuple, and there is no globally defined type
-# for this at the moment.
-TimeTupleType = type(time.gmtime(0))
-
-# Import mxDateTime if it exists, but we can get along with it
-# if not.
+# Import mxDateTime if it exists,
+# but we can get along with it if not.
 try:
 	from mx import DateTime
 except ImportError:
@@ -16,9 +9,17 @@ except ImportError:
 		import DateTime
 	except ImportError:
 		DateTime = None
+
+# time.gmtime() no longer returns a tuple, and there is no globally defined type
+# for this at the moment.
+TimeTupleType = type(time.gmtime(0))
+
+from Common import *
+from Response import Response
+from WebKit.Cookie import Cookie
 from MiscUtils.DateInterval import timeDecode
 
-debug = 0
+debug = False
 
 
 class HTTPResponse(Response):

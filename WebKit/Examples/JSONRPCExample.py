@@ -4,6 +4,7 @@
 
 from WebKit.JSONRPCServlet import JSONRPCServlet
 
+
 class JSONRPCExample(JSONRPCServlet):
 	"""Example JSON-RPC servlet.
 

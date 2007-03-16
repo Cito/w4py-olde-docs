@@ -1,6 +1,7 @@
+import traceback
+
 from Common import *
 from WebUtils.Funcs import htmlEncode
-import traceback
 
 
 class Transaction(Object):

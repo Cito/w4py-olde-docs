@@ -1,8 +1,8 @@
+import re
+from time import localtime, time
+
 from Common import *
 from MiscUtils.Funcs import uniqueId
-from time import localtime, time
-import re
-
 
 class SessionError(Exception):
 	pass

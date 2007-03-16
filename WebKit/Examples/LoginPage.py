@@ -1,6 +1,7 @@
 from ExamplePage import ExamplePage
 from MiscUtils.Funcs import uniqueId
 
+
 class LoginPage(ExamplePage):
 	"""A log-in screen for the example pages."""
 

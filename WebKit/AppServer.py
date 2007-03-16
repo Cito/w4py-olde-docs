@@ -17,6 +17,8 @@ vague -- both are global singletons and both handle dispatching requests.
 
 """
 
+from threading import Thread, Event
+
 from Common import *
 from Object import Object
 from Application import Application
@@ -25,8 +27,6 @@ from PlugIn import PlugIn
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 import Profiler
 import PidFile
-
-from threading import Thread, Event
 
 """
 There is only one instance of AppServer, `globalAppServer` contains

@@ -1,5 +1,3 @@
-from ExamplePage import ExamplePage
-
 try:
 	import gd # GD module
 except ImportError:
@@ -21,6 +19,8 @@ def image_lib_link(lib=None):
 		'pil': ('Python Imaging Library (PIL)',
 			'www.pythonware.com/products/pil/')}[lib]
 	return '<a href="http://%s">%s</a>' % (src, name)
+
+from ExamplePage import ExamplePage
 
 
 class Image(ExamplePage):

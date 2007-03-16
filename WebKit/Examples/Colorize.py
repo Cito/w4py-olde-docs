@@ -1,9 +1,10 @@
-from WebKit.Page import Page
 import os, sys
 try:
 	from cStringIO import StringIO
 except:
 	from StringIO import StringIO
+
+from WebKit.Page import Page
 
 
 class Colorize(Page):

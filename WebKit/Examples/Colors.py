@@ -1,6 +1,6 @@
 import os
-from ExamplePage import ExamplePage
 
+from ExamplePage import ExamplePage
 
 # Helper functions
 

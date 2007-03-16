@@ -1,6 +1,7 @@
+import time, threading
+
 from SessionStore import SessionStore
 import SessionMemoryStore, SessionFileStore
-import time, threading
 
 debug = 0
 

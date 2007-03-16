@@ -1,7 +1,5 @@
-from RPCServlet import RPCServlet
 import sys, traceback, types
 from time import time
-from MiscUtils.PickleRPC import RequestError, SafeUnpickler
 
 try:
 	from cPickle import dumps, PickleError
@@ -12,6 +10,9 @@ try:
 	import zlib
 except ImportError:
 	zlib = None
+
+from RPCServlet import RPCServlet
+from MiscUtils.PickleRPC import RequestError, SafeUnpickler
 
 
 class PickleRPCServlet(RPCServlet, SafeUnpickler):

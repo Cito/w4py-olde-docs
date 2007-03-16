@@ -1,6 +1,5 @@
 from Common import *
 from Servlet import Servlet
-import string
 
 
 class HTTPServlet(Servlet):
@@ -89,4 +88,3 @@ class HTTPServlet(Servlet):
 		res.write = lambda *args: None
 		self.respondToGet(trans)
 		res.write = w
-

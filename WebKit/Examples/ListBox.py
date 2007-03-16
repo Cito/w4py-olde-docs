@@ -1,5 +1,6 @@
-from ExamplePage import ExamplePage
 from types import ListType
+
+from ExamplePage import ExamplePage
 
 debug = 0
 

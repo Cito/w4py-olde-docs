@@ -32,8 +32,9 @@ Tested on:
 	- JEdit with the JPyDbg plugin, on Windows
 """
 
-import ThreadedAppServer, Profiler
 import sys
+
+import ThreadedAppServer, Profiler
 
 # We are going to replace ThreadedAppServer with our own class,
 # so we need to save a reference to the original class.

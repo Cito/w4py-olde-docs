@@ -1,11 +1,12 @@
-from Common import *
+from types import DictType, StringType
 import time, traceback, types, random, sys, MimeWriter, smtplib, StringIO
 from time import asctime, localtime
+
+from Common import *
 from MiscUtils.Funcs import dateForEmail
 from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict, htmlEncode
 from HTTPResponse import HTTPResponse
-from types import DictType, StringType
 
 
 try: # linecache update workaround for Python < 2.4
