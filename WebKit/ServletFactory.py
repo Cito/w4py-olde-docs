@@ -1,4 +1,3 @@
-import sys
 from types import ClassType, BuiltinFunctionType
 from keyword import iskeyword
 import threading

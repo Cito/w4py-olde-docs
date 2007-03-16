@@ -4,8 +4,8 @@ A very general (dumb) message class.
 
 """
 
-
 from Common import *
+
 
 class Message(Object):
 	"""A very general message class.

@@ -1,4 +1,4 @@
-import os, cgi, sys, traceback
+import cgi, traceback
 from types import ListType
 
 from Common import *

@@ -22,7 +22,7 @@ When started, AppServer records its pid in appserverpid.txt.
 """
 
 from marshal import dumps, loads
-import os, sys, threading, Queue, select, socket, time, errno, traceback
+import threading, Queue, select, socket, errno, traceback
 
 from Common import *
 import AppServer as AppServerModule

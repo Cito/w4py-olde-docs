@@ -10,26 +10,22 @@ than traditional CGI programming. Everything gets cached.
 
 """
 
-from Common import *
-import AppServer as AppServerModule
-from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
-from MiscUtils.Funcs import timestamp
+import threading, Queue, select, socket, errno, traceback
 from marshal import dumps, loads
-import os, sys
 from threading import Lock, Thread, Event
-import threading
-import Queue
-import select
-import socket
-import threading
-import time
-import errno
-import traceback
-from WebUtils import Funcs
+
 try:
 	from cStringIO import StringIO
 except ImportError:
 	from StringIO import StringIO
+
+from Common import *
+import AppServer as AppServerModule
+from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
+from MiscUtils.Funcs import timestamp
+from WebUtils import Funcs
+
+
 
 debug = 0
 

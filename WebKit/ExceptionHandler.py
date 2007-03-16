@@ -1,5 +1,5 @@
-from types import DictType, StringType
-import time, traceback, types, random, sys, MimeWriter, smtplib, StringIO
+from types import DictType, ListType, StringType
+import traceback, random, MimeWriter, smtplib, StringIO
 from time import asctime, localtime
 
 from Common import *
@@ -537,7 +537,7 @@ class ExceptionHandler(Object):
 					 + str(sys.exc_info()[0]) + ': ' \
 					 + str(sys.exc_info()[1])
 		for h,v in headers.items():
-			if isinstance(v, types.ListType):
+			if isinstance(v, ListType):
 				v = ','.join(v)
 			writer.addheader(h, v)
 

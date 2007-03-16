@@ -11,7 +11,7 @@ ImportSpy can be suppressed with the``UseImportSpy`` setting.
 
 """
 
-import os, sys, imp
+import imp
 
 from Common import *
 
