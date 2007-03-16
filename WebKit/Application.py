@@ -10,10 +10,11 @@ from ExceptionHandler import ExceptionHandler
 from HTTPRequest import HTTPRequest
 from Transaction import Transaction
 from Session import Session
+from ASStreamOut import ConnectionAbortedError
 import URLParser
 import HTTPExceptions
 
-debug = 0
+debug = False
 
 
 class EndResponse(Exception):
@@ -478,13 +479,18 @@ class Application(ConfigurableForServerSidePath, Object):
 					trans.setResponse(response)
 					try:
 						self.runTransaction(trans)
+					except ConnectionAbortedError:
+						trans.setErrorOccurred(True)
 					except:
-						trans.setErrorOccurred(1)
+						trans.setErrorOccurred(True)
 						if self.setting('EnterDebuggerOnException') and sys.stdin.isatty():
 							import pdb
 							pdb.post_mortem(sys.exc_info()[2])
 						self.handleExceptionInTransaction(sys.exc_info(), trans)
-					trans.response().deliver()
+					try:
+						trans.response().deliver()
+					except ConnectionAbortedError:
+						trans.setErrorOccurred(True)
 					response.clearTransaction()
 				if self.setting('LogActivity'):
 					self.writeActivityLog(trans)

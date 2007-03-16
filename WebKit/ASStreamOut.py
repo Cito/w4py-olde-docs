@@ -8,10 +8,14 @@ except NameError:
 	True, False = 1, 0
 	bool = lambda x: x and True or False
 
-debug = 0
+debug = False
 
 class InvalidCommandSequence(exceptions.Exception):
 	pass
+
+class ConnectionAbortedError(Exception):
+	pass
+
 
 class ASStreamOut:
 	"""This is a response stream to the client.
@@ -39,8 +43,8 @@ class ASStreamOut:
 		self._committed = False
 		self._needCommit = False
 		self._chunks = []
-		self._buffer=''
-		self._chunkLen= 0
+		self._buffer = ''
+		self._chunkLen = 0
 		self._closed = False
 
 	def autoCommit(self):
@@ -68,7 +72,8 @@ class ASStreamOut:
 		if the buffer is full enough).
 
 		"""
-		assert not self._closed, "Trying to flush when already closed"
+		if self._closed:
+			raise ConnectionAbortedError
 		if debug:
 			print ">>> Flushing ASStreamOut"
 		if not self._committed:
@@ -180,7 +185,8 @@ class ASStreamOut:
 		"""Write a string to the buffer."""
 		if debug:
 			print ">>> ASStreamOut writing %s characters" % len(charstr)
-		assert not self._closed, "Stream Already Closed"
+		if self._closed:
+			raise ConnectionAbortedError
 		self._chunks.append(charstr)
 		self._chunkLen += len(charstr)
 		if self._autoCommit and self._chunkLen > self._bufferSize:

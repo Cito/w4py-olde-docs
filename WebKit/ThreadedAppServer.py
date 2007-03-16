@@ -21,17 +21,18 @@ When started, AppServer records its pid in appserverpid.txt.
 
 """
 
-from Common import *
-import AppServer as AppServerModule
-from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
-from MiscUtils.Funcs import timestamp
-from WebUtils import Funcs
-
 from marshal import dumps, loads
 import os, sys, threading, Queue, select, socket, time, errno, traceback
 
+from Common import *
+import AppServer as AppServerModule
+from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
+from ASStreamOut import ASStreamOut, ConnectionAbortedError
 
-debug = 0
+from MiscUtils.Funcs import timestamp
+from WebUtils import Funcs
+
+debug = False
 
 DefaultConfig = {
 	'Host':                 '127.0.0.1',
@@ -441,7 +442,7 @@ class ThreadedAppServer(AppServer):
 		finally:
 			self.delThread()
 		if debug:
-				print threading.currentThread(), "Quitting."
+			print threading.currentThread(), "Quitting."
 
 	def initThread(self):
 		"""Initialize thread.
@@ -715,7 +716,13 @@ class MonitorHandler(Handler):
 			self._server.shutDown()
 
 
-from WebKit.ASStreamOut import ASStreamOut
+silent_errnos = [] # silently ignore these errors:
+for e in 'EPIPE', 'ECONNABORTED', 'ECONNRESET':
+    try:
+        silent_errnos.append(getattr(errno, e))
+    except AttributeError:
+        pass
+
 class TASASStreamOut(ASStreamOut):
 	"""Response stream for ThreadedAppServer.
 
@@ -747,22 +754,19 @@ class TASASStreamOut(ASStreamOut):
 
 		"""
 		result = ASStreamOut.flush(self)
-		if result: # a True return value means we can send
+		if result: # a true return value means we can send
 			reslen = len(self._buffer)
 			sent = 0
+			bufferSize = self._bufferSize
 			while sent < reslen:
 				try:
 					sent += self._socket.send(
-						self._buffer[sent:sent+8192])
+						self._buffer[sent:sent+bufferSize])
 				except socket.error, e:
-					if e[0] == errno.EPIPE: # broken pipe
-						pass
-					elif hasattr(errno, 'ECONNRESET') \
-							and e[0] == errno.ECONNRESET:
-						pass
-					else:
-						print "StreamOut Error: ", e
-					break
+					if debug or e[0] not in silent_errnos:
+						print "StreamOut Error:", e
+					self._closed = True
+					raise ConnectionAbortedError
 			self.pop(sent)
 
 
@@ -808,9 +812,14 @@ class AdapterHandler(Handler):
 
 		requestDict['input'] = self.makeInput()
 		requestDict['requestID'] = self._requestID
+
 		streamOut = TASASStreamOut(self._sock)
 		transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
-		streamOut.close()
+		try:
+			streamOut.close()
+			aborted = False
+		except ConnectionAbortedError:
+			aborted = True
 
 		try:
 			self._sock.shutdown(1)
@@ -821,11 +830,12 @@ class AdapterHandler(Handler):
 		if verbose:
 			duration = ('%0.2f secs' % (time.time() - self._startTime)).ljust(19)
 			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID,
-				duration, requestURI))
+				duration, aborted and '*connection aborted*' or requestURI))
 
 		transaction._application = None
 		transaction.die()
 		del transaction
+
 
 	def makeInput(self):
 		"""Create a file-like object from the socket."""
