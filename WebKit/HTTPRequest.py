@@ -11,7 +11,7 @@ import os, cgi, sys, traceback
 from types import ListType
 
 
-debug=0
+debug = 0
 
 
 class HTTPRequest(Request):
@@ -39,7 +39,7 @@ class HTTPRequest(Request):
 			self._input = dict['input']
 			self._requestID = dict['requestID']
 			self._fields = FieldStorage.FieldStorage(self._input,
-				environ=self._environ, keep_blank_values=1, strict_parsing=0)
+				environ=self._environ, keep_blank_values=True, strict_parsing=False)
 			self._fields.parse_qs()
 			self._cookies = Cookie()
 			if self._environ.has_key('HTTP_COOKIE'):
@@ -55,7 +55,7 @@ class HTTPRequest(Request):
 			self._time = time.time()
 			self._environ = os.environ.copy()
 			self._input = None
-			self._fields = cgi.FieldStorage(keep_blank_values=1)
+			self._fields = cgi.FieldStorage(keep_blank_values=True)
 			self._cookies = Cookie()
 
 		# Debugging
@@ -122,7 +122,7 @@ class HTTPRequest(Request):
 		self._transaction = None
 		self._serverRootPath = self._extraURLPath = ''
 		self._cookieSession = self._pathSession = None
-		self._sessionExpired = 0
+		self._sessionExpired = False
 
 		self._absolutepath = self._environ.has_key('WK_ABSOLUTE') # set by the adapter
 		if self._absolutepath:
@@ -258,7 +258,7 @@ class HTTPRequest(Request):
 	def isSessionExpired(self):
 		"""Return whether or not this request originally contained an expired session ID.
 
-		Only works if the Application.config setting "IgnoreInvalidSession" is set to 1;
+		Only works if the Application.config setting "IgnoreInvalidSession" is set to true;
 		otherwise you get a canned error page on an invalid session,
 		so your servlet never gets processed.
 
@@ -584,7 +584,7 @@ class HTTPRequest(Request):
 		"""Return the parents list."""
 		return self._parents
 
-	def rawInput(self, rewind=0):
+	def rawInput(self, rewind=False):
 		"""Get the raw input from the request.
 
 		This gives you a file-like object for the data that was
@@ -592,7 +592,7 @@ class HTTPRequest(Request):
 		or the documented uploaded in a PUT request).
 
 		The file might not be rewound to the beginning if there
-		was valid, form-encoded POST data. Pass rewind=1 if
+		was valid, form-encoded POST data. Pass rewind=True if
 		you want to be sure you get the entire body of the request.
 
 		"""

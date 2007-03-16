@@ -31,7 +31,7 @@ class HTTPResponse(Response):
 
 		Response.__init__(self, transaction, strmOut)
 
-		self._committed = 0
+		self._committed = False
 
 		if headers is None:
 			self._headers = {}
@@ -62,7 +62,7 @@ class HTTPResponse(Response):
 			value: the header value
 
 		"""
-		assert self._committed == 0, "Headers have already been sent"
+		assert not self._committed, "Headers have already been sent."
 		self._headers[name.capitalize()] = value
 
 	def addHeader(self, name, value):
@@ -74,7 +74,7 @@ class HTTPResponse(Response):
 
 		"""
 		self.deprecated(self.addHeader)
-		assert self._committed == 0
+		assert not self._committed, "Headers have already been sent."
 		self.setHeader(name, value)
 
 	def headers(self, name=None):
@@ -88,7 +88,7 @@ class HTTPResponse(Response):
 		or something similar after this.
 
 		"""
-		assert self._committed == 0
+		assert not self._committed, "Headers have already been sent."
 		self._headers = {}
 
 
@@ -165,7 +165,7 @@ class HTTPResponse(Response):
 		cookie is a Cookie object instance. See WebKit.Cookie.
 
 		"""
-		assert self._committed == 0
+		assert not self._committed, "Headers have already been sent."
 		assert isinstance(cookie, Cookie)
 		self._cookies[cookie.name()] = cookie
 
@@ -194,7 +194,7 @@ class HTTPResponse(Response):
 
 	def clearCookies(self):
 		"""Clear all the cookies."""
-		assert self._committed == 0
+		assert not self._committed, "Headers have already been sent."
 		self._cookies = {}
 
 
@@ -202,7 +202,7 @@ class HTTPResponse(Response):
 
 	def setStatus(self, code, msg=''):
 		"""Set the status code of the response, such as 200, 'OK'."""
-		assert self._committed == 0, "Headers already sent."
+		assert not self._committed, "Headers have already been sent."
 		self.setHeader('Status', str(code) + ' ' + msg)
 
 
@@ -210,7 +210,7 @@ class HTTPResponse(Response):
 
 	def sendError(self, code, msg=''):
 		"""Set the status code to the specified code and message."""
-		assert self._committed == 0, "Response already partially sent"
+		assert not self._committed, "Response already partially sent."
 		self.setStatus(code, msg)
 
 	def sendRedirect(self, url):
@@ -226,7 +226,7 @@ class HTTPResponse(Response):
 		# ftp://ftp.isi.edu/in-notes/rfc2616.txt
 		# Sections: 10.3.3 and others
 
-		assert self._committed == 0, "Headers already sent"
+		assert not self._committed, "Headers have already been sent."
 
 		self.setHeader('Status', '302 Redirect')
 		self.setHeader('Location', url)
@@ -240,15 +240,16 @@ class HTTPResponse(Response):
 
 	def write(self, charstr=None):
 		"""Write charstr to the response stream."""
-		if charstr: self._strmOut.write(charstr)
+		if charstr:
+			self._strmOut.write(charstr)
 		if not self._committed and self._strmOut._needCommit:
 			self.commit()
 
-	def flush(self, autoFlush=1):
+	def flush(self, autoFlush=True):
 		"""Send all accumulated response data now.
 
 		Commits the response headers and tells the underlying stream to flush.
-		if autoFlush is 1, the responseStream will flush itself automatically
+		if autoFlush is true, the responseStream will flush itself automatically
 		from now on.
 
 		"""
@@ -293,7 +294,7 @@ class HTTPResponse(Response):
 		if self._transaction.errorOccurred():
 			self.setStatus(500, 'Server Error')
 		self.writeHeaders()
-		self._committed = 1
+		self._committed = True
 		self._strmOut.commit()
 
 	def writeHeaders(self):
@@ -358,7 +359,7 @@ class HTTPResponse(Response):
 
 	def reset(self):
 		"""Reset the response (such as headers, cookies and contents)."""
-		assert self._committed == 0, "Cannot reset the response; it has already been sent."
+		assert not self._committed, "Cannot reset the response; it has already been sent."
 		self._headers = {}
 		self.setHeader('Content-type','text/html')
 		self._cookies = {}
