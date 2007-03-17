@@ -87,14 +87,15 @@ class Application(ConfigurableForServerSidePath, Object):
 		# sessions, in case the loading of the sessions causes an exception.
 		self._exceptionHandlerClass = ExceptionHandler
 
-		self._session_prefix = self.setting('SessionPrefix', None) or ''
+		self._session_prefix = self.setting('SessionPrefix') or ''
 		if self._session_prefix:
 			if self._session_prefix == 'hostname':
 				from MiscUtils.Funcs import hostName
 				self._session_prefix = hostName()
 			self._session_prefix += '-'
 		self._session_timeout = self.setting('SessionTimeout')*60
-		self._session_name = self.setting('SessionName', None) or '_SID_'
+		self._session_name = self.setting('SessionName') \
+			or self.defaultConfig()['SessionName']
 
 		# For session store:
 		session_store = 'Session%sStore' % self.setting('SessionStore')
@@ -213,6 +214,8 @@ class Application(ConfigurableForServerSidePath, Object):
 				],
 			'SessionStore': 'Dynamic',
 			'SessionTimeout': 60,
+			'SessionPrefix': '',
+			'SessionName': '_SID_',
 			'IgnoreInvalidSession': 1,
 			'UseAutomaticPathSessions': 0,
 			'ShowDebugInfoOnErrors': 1,
