@@ -1,5 +1,6 @@
 from DumpCSV import DumpCSV
 
+
 class Errors(DumpCSV):
 
 	def filename(self):

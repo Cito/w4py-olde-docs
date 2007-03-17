@@ -1,6 +1,7 @@
+import sys
+
 from AdminPage import AdminPage
 from AdminSecurity import AdminSecurity
-import sys
 
 
 class AppControl(AdminSecurity):

@@ -1,5 +1,6 @@
 from WebKit.Page import Page
 
+
 class EditFile(Page):
 
 	def writeHTML(self):

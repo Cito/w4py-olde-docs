@@ -1,6 +1,8 @@
-from AdminPage import AdminPage
 from random import randint
 from time import time, localtime
+
+from AdminPage import AdminPage
+
 
 class LoginPage(AdminPage):
 	"""The log-in screen for the admin pages."""

@@ -1,5 +1,6 @@
-from WebKit.SidebarPage import SidebarPage
 import os
+
+from WebKit.SidebarPage import SidebarPage
 
 
 class AdminPage(SidebarPage):

@@ -1,5 +1,6 @@
-from AdminSecurity import *
+from AdminSecurity import AdminSecurity
 from WebUtils import Funcs
+
 
 class Config(AdminSecurity):
 

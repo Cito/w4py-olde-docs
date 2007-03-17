@@ -1,4 +1,3 @@
-import string, types
 from AdminPage import AdminPage
 
 # Set this to 0 if you want to allow everyone to access secure pages
@@ -6,7 +5,9 @@ from AdminPage import AdminPage
 require_login = 1
 
 if not require_login:
+
 	class AdminSecurity(AdminPage):
+
 		def writeHTML(self):
 			session = self.session()
 			request = self.request()
@@ -18,7 +19,9 @@ if not require_login:
 			AdminPage.writeHTML(self)
 
 else:
+
 	class AdminSecurity(AdminPage):
+
 		def writeHTML(self):
 			session = self.session()
 			request = self.request()

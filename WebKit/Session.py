@@ -1,5 +1,4 @@
 import re
-from time import localtime, time
 
 from Common import *
 from MiscUtils.Funcs import uniqueId
@@ -46,7 +45,7 @@ class Session(Object):
 	def __init__(self, trans, identifier=None):
 		Object.__init__(self)
 
-		self._lastAccessTime = self._creationTime = time()
+		self._lastAccessTime = self._creationTime = time.time()
 		self._isExpired = 0
 		self._numTrans = 0
 		self._values = {}
@@ -66,7 +65,7 @@ class Session(Object):
 			while attempts < 10000:
 				self._identifier = self._prefix + ''.join(
 					map(lambda x: '%02d' % x,
-						localtime(time())[:6])) + '-' + uniqueId(self)
+						time.localtime(time.time())[:6])) + '-' + uniqueId(self)
 				if not app.hasSession(self._identifier):
 					break
 				attempts += 1
@@ -179,7 +178,7 @@ class Session(Object):
 		updates the 'lastAccessTime'.
 
 		"""
-		self._lastAccessTime = time()
+		self._lastAccessTime = time.time()
 		self._numTrans += 1
 
 	def respond(self, trans):
