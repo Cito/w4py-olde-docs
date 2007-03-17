@@ -55,13 +55,7 @@ defaultServer = "ThreadedAppServer"
 monitorInterval = 10 # add to config if this implementation is adopted
 maxStartTime = 120
 
-import socket
-import time
-import os
-import asyncore
-import sys
-import signal
-import string
+import os, sys, time, socket, signal
 from marshal import dumps
 
 global serverName

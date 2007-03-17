@@ -11,7 +11,7 @@ try:
 except ImportError:
 	import xmlrpclib
 
-import sys, string, traceback
+import sys, traceback
 
 try: # backward compatibility for Python < 2.3
 	True, False

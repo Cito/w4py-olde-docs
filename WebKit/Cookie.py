@@ -5,8 +5,7 @@ from MiscUtils.Funcs import positive_id
 # If this is Python 2.2 or greater, import the standard Cookie module
 # as CookieEngine. Otherwise, import WebUtils.Cookie as CookieEngine.
 # This is because there is a nasty bug in the Cookie.py module
-# included in Python 2.1 and earlier, and Python 1.5.2 doesn't even
-# include Cookie.py at all.
+# included in Python 2.1 and earlier.
 
 pyVer = getattr(sys, 'version_info', None)
 if pyVer and pyVer[:2] >= (2, 2):
@@ -15,7 +14,7 @@ if pyVer and pyVer[:2] >= (2, 2):
 	# from the path that might cause us to import from the WebKit
 	# directory, then import Cookie using that restricted path --
 	# that ought to ensure that we're using Python's module.
-	import imp, string, sys, os
+	import imp
 	path = []
 	thisDir = os.path.abspath(os.path.dirname(__file__))
 	for dir in sys.path:
@@ -25,7 +24,7 @@ if pyVer and pyVer[:2] >= (2, 2):
 			continue
 		path.append(dir)
 	try:
-		(file, pathname, description) = imp.find_module('Cookie', path)
+		file, pathname, description = imp.find_module('Cookie', path)
 		CookieEngine = imp.load_module('Cookie', file, pathname, description)
 	except:
 		if file:
