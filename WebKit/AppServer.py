@@ -246,7 +246,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		print 'Please visit: http://www.webwareforpython.org'
 		print
 		print 'Process id is', os.getpid()
-		print 'Date/time is', time.asctime(time.localtime(time.time()))
+		print 'Date/time is', asclocaltime()
 		print 'Python is', sys.version.replace(') [', ')\n[')
 		print
 		if self.setting('PrintConfigAtStartUp'):

@@ -1,5 +1,3 @@
-from time import asctime, localtime
-
 from Common import *
 from Message import Message
 
@@ -39,7 +37,7 @@ class Request(Message):
 
 	def timeStamp(self):
 		"""Return time() as a human readable string, useful for logging and debugging."""
-		return asctime(localtime(self.time()))
+		return asclocaltime(self.time())
 
 
 	## Input ##

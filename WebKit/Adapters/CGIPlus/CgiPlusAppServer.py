@@ -145,7 +145,7 @@ class MonitorHandler(Handler):
 		startTime = time.time()
 		if verbose:
 			print 'BEGIN REQUEST'
-			print time.asctime(time.localtime(startTime))
+			print asclocaltime(startTime)
 		conn = self._sock
 		if verbose:
 			print 'receiving request from', conn
@@ -279,7 +279,7 @@ def run(workDir=None):
 
 def shutDown(arg1,arg2):
 	global server
-	print "Shutdown Called", time.asctime(time.localtime(time.time()))
+	print "Shutdown Called", asclocaltime()
 	if server:
 		server.initiateShutdown()
 	else:

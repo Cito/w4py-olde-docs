@@ -702,7 +702,7 @@ class MonitorHandler(Handler):
 		startTime = time.time()
 		if verbose:
 			print "BEGIN REQUEST"
-			print time.asctime(time.localtime(startTime))
+			print asclocaltime(startTime)
 		conn = self._sock
 		if verbose:
 			print "receiving request from", conn
@@ -961,7 +961,7 @@ def shutDown(signum, frame):
 	print
 	print "App server has been signaled to shutdown."
 	if server and server.running > 2:
-		print "Shutting down at", time.asctime(time.localtime(time.time()))
+		print "Shutting down at", asclocaltime()
 		sys.stdout.flush()
 		server.running = 2
 		if signum == SIGINT:
@@ -983,7 +983,7 @@ try:
 		print
 		print "App server has been signaled to attempt a thread dump."
 		print
-		print "Thread stack frame dump at", time.asctime(time.localtime(time.time()))
+		print "Thread stack frame dump at", asclocaltime()
 		sys.stdout.flush()
 		frames = threadframe.dict()
 		items = frames.items()

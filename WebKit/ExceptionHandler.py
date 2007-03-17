@@ -1,6 +1,5 @@
 from types import DictType, ListType, StringType
 import traceback, random, MimeWriter, smtplib, StringIO
-from time import asctime, localtime
 
 from Common import *
 from MiscUtils.Funcs import dateForEmail
@@ -218,7 +217,7 @@ class ExceptionHandler(Object):
 		if stderr is None:
 			stderr = sys.stderr
 		stderr.write('[%s] [error] WebKit: Error while executing script %s\n'
-			% (asctime(localtime(self._time)), self.servletPathname()))
+			% (asclocaltime(self._time), self.servletPathname()))
 		traceback.print_exc(file=stderr)
 
 	def publicErrorPage(self):
@@ -397,7 +396,7 @@ class ExceptionHandler(Object):
 		"""
 		self.writeTitle('MiscInfo')
 		info = {
-			'time':        asctime(localtime(self._time)),
+			'time':        asclocaltime(self._time),
 			'filename':    self.servletPathname(),
 			'os.getcwd()': os.getcwd(),
 			'sys.path':    sys.path,
@@ -478,7 +477,7 @@ class ExceptionHandler(Object):
 
 		"""
 		return 'Error-%s-%s-%d.html' % (self.basicServletName(),
-			'-'.join(map(lambda x: '%02d' % x, localtime(self._time)[:6])),
+			'-'.join(map(lambda x: '%02d' % x, time.localtime(self._time)[:6])),
 				random.randint(10000, 99999))
 			# @@ 2000-04-21 ce: Using the timestamp & a
 			# random number is a poor technique for
@@ -496,7 +495,7 @@ class ExceptionHandler(Object):
 		if not self.setting('LogErrors'):
 			return
 		logline = (
-			asctime(localtime(self._time)),
+			asclocaltime(self._time),
 			self.basicServletName(),
 			self.servletPathname(),
 			str(self._exc[0]),
@@ -551,7 +550,7 @@ class ExceptionHandler(Object):
 				'WebKit caught an exception while processing ' +
 				'a request for "%s" ' % self.servletPathname() +
 				'at %s (timestamp: %s).  ' %
-				(asctime(localtime(self._time)), self._time) +
+				(asclocaltime(self._time), self._time) +
 				'The plain text traceback from Python is printed below and ' +
 				'the full HTML error report from WebKit is attached.\n\n'
 				)
