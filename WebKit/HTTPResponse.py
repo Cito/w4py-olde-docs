@@ -348,7 +348,7 @@ class HTTPResponse(Response):
 		sess = self._transaction._session
 		if sess:
 			cookie = Cookie(self._transaction.application()._session_name, sess.identifier())
-			cookie.setPath('/')
+			cookie.setPath(self._transaction.request().adapterName() + '/')
 			if sess.isExpired() or sess.timeout() == 0:
 				# Invalid -- tell client to forget the cookie.
 				cookie.delete()
