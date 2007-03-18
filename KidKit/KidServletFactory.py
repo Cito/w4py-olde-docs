@@ -1,17 +1,16 @@
 """Servlet factory for Kid templates.
 
-This allows you to run kid template files directly from within Webware.
+This allows you to run Kid template files directly from within Webware.
 Compiled templates are cached either along with the templates or in the
 Cache/KidKit subdirectory of the WebKit working directory.
 
 Note that the Kid package itself is not part of Webware; you need to install
-it separately. You also need to install the ElementTree package to use Kid.
+it separately (see http://www.kid-templating.org for more information).
 
 
 CREDITS:
 
-* Kid has been developed by Ryan Tomayko (http://lesscode.org).
-* ElementTree has been developed by Fredrik Lundh (http://effbot.org).
+* Kid has been developed by Ryan Tomayko (rtomayko<at>gmail.com).
 * KidKit was contributed by Winston Wolff (winstonw<at>stratolab.com).
   Based on the Cheetah servlet factory. No caching, fixed servlet hook.
 * Improved version contributed by Christoph Zwerschke (cito<at>online.de).
@@ -26,8 +25,13 @@ from WebKit.Servlet import Servlet
 from WebKit.Page import Page
 defaultHook = Page.respond # the default hook for Kid servlets
 defaultOutput = 'html' # the default Kid output method
+defaultFormat = 'default' # the default Kid output format
 
 from kid import load_template, output_methods
+try: # output formatting exists in newer Kid versions only
+	from kid.format import output_formats
+except:
+	output_formats = None
 from kid.compiler import KidFile
 
 from KidKit.Examples.KidExamplePage import KidExamplePage
@@ -49,6 +53,14 @@ def kidClass(module):
 	except:
 		output = defaultOutput
 	assert output in output_methods
+	if output_formats is None:
+		format = None
+	else:
+		try:
+			format = module.format
+		except:
+			format = defaultFormat
+		assert format in output_formats
 
 	class KidServlet(ServletClass):
 		"""The base class for a Kid servlet."""
@@ -56,13 +68,18 @@ def kidClass(module):
 		_module = module
 		_template = module.Template()
 		_output = output
+		_format = format
 
 		def writeTemplate(self, *args, **kwargs):
 			self._template.servlet = self
 			response = self._response
 			fragment = response.size() > 0
-			self._template.write(self._response,
-				fragment=fragment, output=output)
+			if format is None:
+				self._template.write(self._response,
+					fragment=fragment, output=output)
+			else:
+				self._template.write(self._response,
+					fragment=fragment, output=output, format=format)
 
 	setattr(KidServlet, writeMethod, KidServlet.writeTemplate)
 	return KidServlet
@@ -76,6 +93,8 @@ class KidServletFactory(ServletFactory):
 		setting = application.setting
 		global defaultOutput # the default output method
 		defaultOutput = setting('KidOutputMethod', defaultOutput)
+		global defaultFormat # the default output format
+		defaultFormat = setting('KidOutputFormat', defaultFormat)
 		self._cacheTemplates = setting('CacheKidTemplates', True)
 		self._useCache = setting('UseKidKitCache', False)
 		if self._useCache:
@@ -111,7 +130,7 @@ class KidServletFactory(ServletFactory):
 		map(os.remove, files)
 
 	def computeClassName(self, pagename):
-		"""Generates a (hopefully) unique class/file name for each Kid file.
+		"""Generate a (hopefully) unique class/file name for each Kid file.
 
 		Argument: pagename: the path to the Kid template file
 		Returns: a unique name for the class generated fom this Kid file

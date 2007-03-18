@@ -4,7 +4,7 @@ version = ('X', 'Y', 0)
 
 docs = [ {'name': "User's Guide", 'file': 'UsersGuide.html'} ]
 
-status = 'alpha'
+status = 'beta'
 
 requiredPyVersion = (2, 3, 0)
 
@@ -25,9 +25,8 @@ WebKitConfig = {
 def willRunFunc():
 	# WebKit doesn't check requiredSoftware yet. So we do so:
 	try:
-		import imp
 		for soft in requiredSoftware:
-			imp.find_module(soft['name'])
+			__import__(soft['name'])
 	except ImportError:
 		success = 0
 	else:

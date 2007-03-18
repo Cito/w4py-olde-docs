@@ -2,8 +2,9 @@
 
 <p><% name %> version <% versionString %></p>
 
-<p>First version created by Winston Wolff, January 2005.<br>
-Improved version by Christoph Zwerschke, October 2005.</p>
+<p>Created by Winston Wolff, January 2005.<br>
+Improved version by Christoph Zwerschke, October 2005.
+Lates changes by Christoph Zwerschke, March 2007.</p>
 
 <h2>Synopsis</h2>
 
@@ -13,24 +14,16 @@ render them automatically when they are addressed via Webware's application serv
 This is very similar to the concept of Python Server Pages (PSP), but Kid provides some
 unique features making it an amazing modern alternative to PSP.</p>
 
-<p>Kid and KidKit are currently under development, so consider
-KidKit still <em>alpha</em> at the moment (August 2006).
-If you use Kid a lot, feel free to improve this component.</p>
-
 <h2>Requirements</h2>
 
 <p>Contrary to PSP, Kid itself is not included in Webware. You need to install
-the Kid package separately. Note that Kid needs the ElementTree package and
-optionally makes use of the cElementTree package (future versions of Kid may
-also utilize the xml.etree package that comes shipped with Python 2.5).</p>
+the Kid package separately.</p>
 
 <p>You can download Kid from
-<a href="http://kid.lesscode.org">kid.lesscode.org</a>,
-and ElementTree from
-<a href="http://effbot.org/downloads/#elementtree">effbot.org/downloads/#elementtree</a>.</p>
+<a href="http://www.kid-templating.org/">www.kid-templating.org/</a>.</p>
 
-<p>The current KidKit has been tested with Kid versions from 0.6 up to 0.9.3,
-and ElementTree version 1.2.6. Other versions may work as well.</p>
+<p>The current KidKit has been tested with Kid versions from 0.6 up to 0.9.5.
+Other versions may work as well.</p>
 
 <h2>Feedback</h2>
 
@@ -67,8 +60,11 @@ which control the behavior of KidKit.</p>
 
 <ul>
 <li><b>KidOutputMethod</b><br>
-The default output method for Kid. Possible values are:
+The default output method for Kid. Some possible values are:
 'xml', 'html', 'html-strict', 'xhtml' and 'xhtml-strict'.</li>
+<li><b>KidOutputMethod</b><br>
+The default output format for Kid. Some possible values are:
+'default', 'compact', 'newlines', 'pretty', 'wrap', 'nice', 'ugly', 'named'.</li>
 <li><b>CacheKidTemplates</b><br>
 Set this to False if you do not want compiled Kid templates (i.e. the
 <tt>.py</tt> or <tt>.pyc</tt> files) to be cached on disk.
@@ -96,7 +92,7 @@ give a speedup when templates are called for the first time.</li>
 <p>In the simplest case, you can just take a Kid template file with the
 extension <tt>.kid</tt> and place it into a directory that is a valid Webware
 context. For instance, you will find the following file with the name
-<tt>Time2.kid</tt> in the <i>KidKitExamples</i> context:
+<tt>Time2.kid</tt> in the <i>KidKitExamples</i> context:</p>
 
 <pre class="py">
 &lt;?xml version='1.0' encoding='utf-8'?&gt;
@@ -214,7 +210,7 @@ Enter your name here: &lt;INPUT TYPE="text" NAME="name"&gt;
 the output method for an individual template by setting the variable
 <tt>output</tt> at the global level. For instance, you could add
 the following line as first line (before the <tt>html</tt> tag) to the
-Kid template above:
+Kid template above:</p>
 
 <pre class="py">
 &lt;?python output='xhtml-strict' ?&gt;
@@ -246,8 +242,7 @@ Enter your name here: &lt;input type="text" name="name" /&gt;
 <h2>Credits</h2>
 
 <ul>
-<li>Kid has been developed by Ryan Tomayko (http://lesscode.org).</li>
-<li>ElementTree has been developed by Fredrik Lundh (http://effbot.org).</li>
+<li>Kid has been developed by Ryan Tomayko (rtomayko&lt;at&gt;gmail.com).</li>
 <li>KidKit was contributed to Webware in January 2005
 by Winston Wolff (winstonw&lt;at&gt;stratolab.com).
 The first version was based on the Cheetah servlet factory
@@ -257,6 +252,8 @@ by Christoph Zwerschke (cito&lt;at&gt;online.de).
 The new version is based on the PSP servlet factory.
 KidKit now supports caching and several configuration parameters
 for controlling caching, servlet hooks and output methods.</li>
+<li>Support for newer Kid versions, particularly output formatting,
+added by Christoph Zwerschke in March 2007.</li>
 </ul>
 
 <% footer() %>
