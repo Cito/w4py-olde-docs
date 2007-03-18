@@ -89,8 +89,16 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
 		data = ''.join(data)
 		# process response
 		# sys.stdout.write(data)
-		if not data.startswith('Status: 200 OK'):
-			status = data.split('\n', 1)[0]
+		try:
+			if not data.startswith('Status: '):
+				raise ValueError
+			else:
+				status = data.split('\n', 1)[0]
+				code = int(status.split()[1])
+		except:
+			status = 'no status'
+			code = 0
+		if code not in (200,): # accepted status codes
 			status = dicts[i]['environ']['PATH_INFO'] + ' ' + status
 			raise Exception, status
 		if delay:
@@ -103,7 +111,11 @@ def stress(maxRequests,
 	minParallelRequests=1, maxParallelRequests=1, delay=0.0, slowconn=0):
 	"""Execute stress test on the AppServer according to the arguments."""
 	# taken from CGIAdapter:
-	host, port = open('../address.text').read().split(':')
+	try:
+		host, port = open('../address.text').read().split(':')
+	except:
+		print "Please start the application server first."
+		return
 	if os.name == 'nt' and host == '':
 		# MS Windows doesn't like a blank host name
 		host = 'localhost'
