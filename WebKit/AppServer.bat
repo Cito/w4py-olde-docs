@@ -3,6 +3,9 @@
 rem WebKit application server launch script for Windows.
 rem This wrapper script is needed for the AutoReload mechanism.
 
+rem You may want to use a specific Python executable:
+set PYTHON=python
+
 rem Check whether this is a cmd-like shell
 set CMD=cmd
 if "%~n0"=="~n0" set CMD=dos
@@ -43,7 +46,7 @@ if %CMD%==cmd pushd %~dp0
 
 rem As long as the app server returns a 3, it wants to be restarted:
 :restart
-python%PY_OPTS% Launch.py ThreadedAppServer %ARGS%
+%PYTHON%%PY_OPTS% Launch.py ThreadedAppServer %ARGS%
 if errorlevel 3 goto restart
 
 rem Change back to old working directory:
