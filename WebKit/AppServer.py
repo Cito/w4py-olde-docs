@@ -41,16 +41,8 @@ globalAppServer = None
 DefaultConfig = {
 	'PrintConfigAtStartUp': True,
 	'Verbose': True,
-	'Host': '127.0.0.1',
-	'EnableAdapter': True,
-	'AdapterPort': 8086,
-	'EnableHTTP': True,
-	'HTTPPort': 8080,
 	'PlugIns': [],
 	'PlugInDirs': [],
-	'StartServerThreads': 10,
-	'MaxServerThreads': 20,
-	'MinServerThreads': 5,
 	'CheckInterval': 100,
 	'PidFile': 'appserverpid.txt',
 }

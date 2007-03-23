@@ -17,7 +17,7 @@ stop: stop the currently running Apperver
 daemon: run as a daemon
 ClassName.SettingName=value: change configuration settings
 
-When started, AppServer records its pid in appserverpid.txt.
+When started, the app server records its pid in appserverpid.txt.
 
 """
 
@@ -35,21 +35,21 @@ from WebUtils import Funcs
 debug = False
 
 DefaultConfig = {
-	'Host':                 '127.0.0.1',
-	'EnableAdapter':        True,
-	'AdapterPort':          8086,
-	'EnableMonitor':        False,
-	'MonitorPort':          8085,
-	'EnableHTTP':           False,
-	'HTTPPort':             8080,
-	'MaxServerThreads':     20,
-	'MinServerThreads':     5,
-	'StartServerThreads':   10,
-
-	# @@ 2000-04-27 ce: None of the following settings are implemented
-	# 'RequestQueueSize': 16,
-	# 'RequestBufferSize': 64*1024,
-	# 'SocketType': 'inet', # inet, unix
+	'Host': 'localhost', # same as '127.0.0.1'
+	'EnableAdapter': True, # enable WebKit adapter
+	'AdapterPort': 8086,
+	'EnableMonitor': False, # disable status monitoring
+	'MonitorPort': 8085,
+	'EnableHTTP': True, # enable built-in HTTP server
+	'HTTPPort': 8080,
+	'StartServerThreads': 10, # initial number of server threads
+	'MinServerThreads': 5, # minimum number
+	'MaxServerThreads': 20, # maxium number
+	# @@ the following settings are not yet officially documented
+	'RequestQueueSize': 0, # means twice the maximum number of threads
+	'RequestBufferSize': 8*1024, # 8 kBytes
+	# @@ the following setting is not yet implemented
+	# 'SocketType': 'inet', # inet, inet6, unix
 }
 
 # Need to know this value for communications
@@ -86,55 +86,56 @@ class ThreadedAppServer(AppServer):
 	## Init ##
 
 	def __init__(self, path=None):
-		"""
-		Setup the AppServer, create an initial thread pool
-		(threads created with `spawnThread`), record the PID
-		in a file, and add any enabled handlers (Adapter, HTTP, Monitor).
-		"""
+		"""Setup the AppServer.
 
+		Create an initial thread pool (threads created with `spawnThread`),
+		and the request queue, record the PID in a file, and add any enabled
+		handlers (Adapter, HTTP, Monitor).
+
+		"""
 		self._defaultConfig = None
-		try:
-			AppServer.__init__(self, path)
-			threadCount = self.setting('StartServerThreads')
-			self._maxServerThreads = self.setting('MaxServerThreads')
-			self._minServerThreads = self.setting('MinServerThreads')
-			self._threadPool = []
-			self._threadCount = 0
-			self._threadUseCounter = []
-			# twice the number of threads we have:
-			self._requestQueue = Queue.Queue(self._maxServerThreads * 2)
-			self._addr = {}
-			self._requestID = 0
+		AppServer.__init__(self, path)
 
-			out = sys.stdout
+		threadCount = self.setting('StartServerThreads')
+		self._maxServerThreads = self.setting('MaxServerThreads')
+		self._minServerThreads = self.setting('MinServerThreads')
+		self._requestQueueSize = self.setting('RequestQueueSize')
+		if not self._requestQueueSize:
+			# if not set, make queue size twice the max number of threads
+			self._requestQueueSize = 2 * self._maxServerThreads
+		elif self._requestQueueSize < self._maxServerThreads:
+			# otherwise do not make it smaller than the max number of threads
+			self._requestQueueSize = self._maxServerThreads
+		self._requestBufferSize = self.setting('RequestBufferSize')
 
-			out.write('Creating %d threads' % threadCount)
-			for i in range(threadCount):
-				self.spawnThread()
-				out.write(".")
-				out.flush()
-			out.write("\n")
+		self._threadPool = []
+		self._threadCount = 0
+		self._threadUseCounter = []
+		self._requestQueue = Queue.Queue(self._requestQueueSize)
+		self._addr = {}
+		self._requestID = 0
 
-			self._socketHandlers = {}
-			self._handlerCache = {}
-			self._sockets = {}
+		out = sys.stdout
+		out.write('Creating %d threads' % threadCount)
+		for i in range(threadCount):
+			self.spawnThread()
+			out.write(".")
+			out.flush()
+		out.write("\n")
 
-			if self.setting('EnableAdapter'):
-				self.addSocketHandler(AdapterHandler)
+		self._socketHandlers = {}
+		self._handlerCache = {}
+		self._sockets = {}
 
-			if self.setting('EnableMonitor'):
-				self.addSocketHandler(MonitorHandler)
+		if self.setting('EnableAdapter'):
+			self.addSocketHandler(AdapterHandler)
+		if self.setting('EnableMonitor'):
+			self.addSocketHandler(MonitorHandler)
+		if self.setting('EnableHTTP'):
+			from WebKit.HTTPServer import HTTPAppServerHandler
+			self.addSocketHandler(HTTPAppServerHandler)
 
-			if self.setting('EnableHTTP'):
-				from WebKit.HTTPServer import HTTPAppServerHandler
-				self.addSocketHandler(HTTPAppServerHandler)
-
-			self.readyForRequests()
-		except:
-			if self.running:
-				self.initiateShutdown()
-				self._closeThread.join()
-			raise
+		self.readyForRequests()
 
 	def addSocketHandler(self, handlerClass, serverAddress=None):
 		"""Add socket handler.
@@ -226,7 +227,7 @@ class ThreadedAppServer(AppServer):
 
 		"""
 
-		threadCheckInterval = self._maxServerThreads*2
+		threadCheckInterval = self._maxServerThreads * 2
 		threadUpdateDivisor = 5 # grab stat interval
 		threadCheck = 0
 
@@ -835,7 +836,8 @@ class AdapterHandler(Handler):
 
 	def makeInput(self):
 		"""Create a file-like object from the socket."""
-		return self._sock.makefile("rb", 8012)
+		return self._sock.makefile("rb", self._requestBufferSize)
+
 
 # Determines whether the main look should run in another thread.
 # On Win NT/2K/XP, we run the mainloop in a different thread because
@@ -848,9 +850,11 @@ def runMainLoopInThread():
 # Set to False in DebugAppServer so Python debuggers can trap exceptions:
 doesRunHandleExceptions = True
 
+
 class RestartAppServerError(Exception):
 	"""Raised by DebugAppServer when needed."""
 	pass
+
 
 os_chdir = os.chdir
 
@@ -860,6 +864,7 @@ def chdir(path, force=False):
 		"You cannot reliably use os.chdir() in a threaded environment.\n" \
 		+ 16*" " + "Set force=True if you want to do it anway (using a lock)."
 	os_chdir(path)
+
 
 ## Script usage ##
 
@@ -1060,8 +1065,7 @@ def main(args):
 			value = i[match.end():]
 			Configurable.addCommandLineSetting(name, value)
 		elif i == "stop":
-			import AppServer
-			function = AppServer.stop
+			function = AppServerModule.stop
 		elif i == "daemon":
 			daemon = True
 		elif i == "start":

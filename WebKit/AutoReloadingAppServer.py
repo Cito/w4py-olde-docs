@@ -13,17 +13,11 @@ in seconds can be set with `AutoReloadPollInterval` in AppServer.config.
 
 """
 
-from AppServer import AppServer
-import os
-from threading import Thread
-import time
-import sys
 import select
+from threading import Thread
 
-try: # backward compatibility for Python < 2.3
-	True, False
-except NameError:
-	True, False = 1, 0
+from Common import *
+from AppServer import AppServer
 
 # Attempt to use python-fam (FAM = File Alteration Monitor) instead of polling
 # to see if files have changed. Get it from http://python-fam.sourceforge.net.

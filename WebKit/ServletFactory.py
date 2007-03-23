@@ -39,8 +39,8 @@ class ServletFactory(Object):
 		Object.__init__(self)
 		self._app = application
 		self._imp = self._app._imp
-		self._cacheClasses = self._app.setting("CacheServletClasses", 1)
-		self._cacheInstances = self._app.setting("CacheServletInstances", 1)
+		self._cacheClasses = self._app.setting("CacheServletClasses", True)
+		self._cacheInstances = self._app.setting("CacheServletInstances", True)
 		# All caches are keyed on the path.
 		# _classCache caches the servlet classes, in dictionaries
 		# with keys 'mtime' and 'class'.  'mtime' is the
@@ -127,13 +127,13 @@ class ServletFactory(Object):
 			fp, pathname, stuff = self._imp.find_module(modname,
 				[os.path.dirname(serverSidePathToImport)])
 			module = self._imp.load_module(fullmodname, fp, pathname, stuff)
-			module.__donotreload__ = 1
+			module.__donotreload__ = True
 			return module
 
 		# First, we'll import the context's package.
 		directory, contextDirName = os.path.split(contextPath)
 		self._importModuleFromDirectory(fullname, contextDirName,
-			directory, isPackageDir=1)
+			directory, isPackageDir=True)
 		directory = contextPath
 
 		# Now we'll break up the rest of the path into components.
@@ -144,20 +144,21 @@ class ServletFactory(Object):
 		for name in remainder[:-1]:
 			fullname = '%s.%s' % (fullname, name)
 			self._importModuleFromDirectory(fullname, name,
-				directory, isPackageDir=1)
+				directory, isPackageDir=True)
 			directory = os.path.join(directory, name)
 
-		# Finally, import the module itself as though it was part of the package
-		# or subpackage, even though it may be located somewhere else.
+		# Finally, import the module itself as though it was part of the
+		# package or subpackage, even though it may be located somewhere else.
 		moduleFileName = os.path.basename(serverSidePathToImport)
 		moduleDir = os.path.dirname(serverSidePathToImport)
 		name, ext = os.path.splitext(moduleFileName)
 		fullname = '%s.%s' % (fullname, name)
 		module = self._importModuleFromDirectory(fullname, name,
-			moduleDir, forceReload=1)
+			moduleDir, forceReload=True)
 		return module
 
-	def _importModuleFromDirectory(self, fullModuleName, moduleName, directory, isPackageDir=0, forceReload=0):
+	def _importModuleFromDirectory(self, fullModuleName, moduleName,
+			directory, isPackageDir=False, forceReload=False):
 		"""Imports the given module from the given directory.
 
 		fullModuleName should be the full dotted name that will be given
@@ -179,19 +180,22 @@ class ServletFactory(Object):
 		fp = None
 		try:
 			if isPackageDir:
-				# Check if __init__.py is in the directory -- if not, make an empty one.
+				# check if __init__.py is in the directory
 				packageDir = os.path.join(directory, moduleName)
 				initPy = os.path.join(packageDir, '__init__.py')
 				if not os.path.exists(initPy):
+					# if it does not exist, make an empty one
 					file = open(initPy, 'w')
 					file.write('#')
 					file.close()
-			fp, pathname, stuff = self._imp.find_module(moduleName, [directory])
-			module = self._imp.load_module(fullModuleName, fp, pathname, stuff)
+			fp, pathname, stuff = self._imp.find_module(moduleName,
+				[directory])
+			module = self._imp.load_module(fullModuleName,
+				fp, pathname, stuff)
 		finally:
 			if fp is not None:
 				fp.close()
-		module.__donotreload__ = 1
+		module.__donotreload__ = True
 		return module
 
 	def loadClass(self, transaction, path):
@@ -267,7 +271,8 @@ class ServletFactory(Object):
 					'class': self.loadClass(transaction, path)}
 			elif mtime > self._classCache[path]['mtime']:
 				self._classCache[path]['mtime'] = mtime
-				self._classCache[path]['class'] = self.loadClass(transaction, path)
+				self._classCache[path]['class'] = self.loadClass(
+					transaction, path)
 			theClass = self._classCache[path]['class']
 			if not self._cacheClasses:
 				del self._classCache[path]

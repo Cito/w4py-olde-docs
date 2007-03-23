@@ -1,12 +1,19 @@
 #!/usr/bin/env python
-"""
-AppServer
+"""CGIPlusAppServer
 
-The WebKit app server is a WASD CgiPLus server that accepts requests, hands
+This WebKit app server is a WASD CGIplus server that accepts requests, hands
 them off to the Application and sends the request back over the connection.
 
 The fact that the app server stays resident is what makes it so much quicker
 than traditional CGI programming. Everything gets cached.
+
+CGIPlusAppServer takes the following command line arguments:
+
+start: start the AppServer (default argument)
+stop: stop the currently running Apperver
+ClassName.SettingName=value: change configuration settings
+
+When started, the app server records its pid in appserverpid.txt.
 
 """
 
@@ -27,16 +34,6 @@ from WebUtils import Funcs
 
 
 debug = False
-
-DefaultConfig = {
-	'MaxServerThreads':        1,
-	'MinServerThreads':        1,
-	'StartServerThreads':      1,
-}
-
-# Need to know this value for communications
-# Note that this limits the size of the dictionary we receive from the AppServer to 2,147,483,647 bytes
-intLength = len(dumps(int(1)))
 
 server = None
 
@@ -221,11 +218,7 @@ import signal
 signal.signal(signal.SIGINT, shutDown)
 signal.signal(signal.SIGTERM, shutDown)
 
-usage = """
-The AppServer is the main process of WebKit.  It handles requests for
-servlets from webservers.  ThreadedAppServer takes the following
-command line arguments: stop: Stop the currently running Apperver.
-"""
+usage = re.search('\n.* arguments:\n\n(.*\n)*?\n', __doc__).group(0)
 
 import re
 settingRE = re.compile(r'^--([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
@@ -242,8 +235,7 @@ def main(args):
 			value = i[match.end():]
 			Configurable.addCommandLineSetting(name, value)
 		elif i == "stop":
-			import AppServer
-			function=AppServer.stop
+			function = AppServerModule.stop
 		elif i == "start":
 			pass
 		elif i[:8] == "workdir=":

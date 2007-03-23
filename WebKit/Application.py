@@ -202,8 +202,8 @@ class Application(ConfigurableForServerSidePath, Object):
 	def defaultConfig(self):
 		"""The default Application.config."""
 		return {
-			'PrintConfigAtStartUp': 1,
-			'LogActivity': 1,
+			'PrintConfigAtStartUp': True,
+			'LogActivity': True,
 			'ActivityLogFilename': 'Logs/Activity.csv',
 			'ActivityLogColumns': [
 				'request.remoteAddress', 'request.method',
@@ -216,19 +216,20 @@ class Application(ConfigurableForServerSidePath, Object):
 			'SessionTimeout': 60,
 			'SessionPrefix': '',
 			'SessionName': '_SID_',
-			'IgnoreInvalidSession': 1,
-			'UseAutomaticPathSessions': 0,
-			'ShowDebugInfoOnErrors': 1,
-			'IncludeFancyTraceback': 0,
+			'IgnoreInvalidSession': True,
+			'UseAutomaticPathSessions': False,
+			'ShowDebugInfoOnErrors': True,
+			'IncludeFancyTraceback': False,
 			'FancyTracebackContext': 5,
 			'UserErrorMessage': 'The site is having technical difficulties'
 				' with this page. An error has been logged, and the problem'
 				' will be fixed as soon as possible. Sorry!',
-			'LogErrors': 1,
+			'LogErrors': True,
 			'ErrorLogFilename': 'Logs/Errors.csv',
-			'SaveErrorMessages': 1,
+			'SaveErrorMessages': True,
 			'ErrorMessagesDir': 'ErrorMsgs',
-			'EmailErrors': 0,
+			'EmailErrors': False,
+			'EmailErrorReportAsAttachment': False,
 			'ErrorEmailServer': 'localhost',
 			'ErrorEmailHeaders': {
 				'From': 'webware@mydomain',
@@ -239,7 +240,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				},
 			'MaxValueLengthInExceptionReport': 500,
 			'RPCExceptionReturn': 'traceback',
-			'ReportRPCExceptionsInWebKit': 1,
+			'ReportRPCExceptionsInWebKit': True,
 			'Contexts': {
 				'default': 'Examples',
 				'Admin': 'Admin',
@@ -250,11 +251,11 @@ class Application(ConfigurableForServerSidePath, Object):
 			'Debug': {
 				'Sessions': 0,
 				},
-			'EnterDebuggerOnException': 0,
+			'EnterDebuggerOnException': False,
 			'DirectoryFile': ['index', 'Index', 'main', 'Main'],
-			'UseCascadingExtensions': 1,
+			'UseCascadingExtensions': True,
 			'ExtensionCascadeOrder': ['.py','.psp','.kid','.html'],
-			'ExtraPathInfo': 1,
+			'ExtraPathInfo': True,
 			'ExtensionsToIgnore': [
 				'.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
 				'.py~', '.psp~', '.kid~', '.html~', '.tmpl~'
@@ -266,9 +267,9 @@ class Application(ConfigurableForServerSidePath, Object):
 				],
 			'FilesToServe': [],
 			'UnknownFileTypes': {
-				'ReuseServlets': 1,
+				'ReuseServlets': True,
 				'Technique': 'serveContent', # serveContent or redirectSansAdapter
-				'CacheContent': 0,
+				'CacheContent': False,
 				'MaxCacheContentSize': 128*1024,
 				'ReadBufferSize': 32*1024
 				},
