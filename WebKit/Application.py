@@ -545,16 +545,18 @@ class Application(ConfigurableForServerSidePath, Object):
 				return
 		servlet = None
 		try:
-			servlet = self._rootURLParser.findServletForTransaction(trans)
-			self.runTransactionViaServlet(servlet, trans)
-		except HTTPExceptions.HTTPException, err:
-			err.setTransaction(trans)
-			trans.response().displayError(err)
-		except EndResponse:
-			pass
-		if servlet:
-			# Return the servlet to its pool
-			self.returnServlet(servlet, trans)
+			try:
+				servlet = self._rootURLParser.findServletForTransaction(trans)
+				self.runTransactionViaServlet(servlet, trans)
+			except HTTPExceptions.HTTPException, err:
+				err.setTransaction(trans)
+				trans.response().displayError(err)
+			except EndResponse:
+				pass
+		finally:
+			if servlet:
+				# Return the servlet to its pool
+				self.returnServlet(servlet, trans)
 
 	def runTransactionViaServlet(self, servlet, trans):
 		"""Execute the transaction using the servlet.
