@@ -4,7 +4,7 @@
 	A utility class that holds information about the file we are parsing
 	and the environment we are doing it in.
 
-	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.net)
+	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
 	Permission to use, copy, modify, and distribute this software and its
 	documentation for any purpose and without fee or royalty is hereby granted,

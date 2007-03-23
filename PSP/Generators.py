@@ -6,7 +6,7 @@
 	Each of these elements is put into a list maintained by the ParseEventHandler object.  When it comes
 	time to output the Source Code, each generator is called in turn to create it's source.
 
-	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.net)
+	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
 	Permission to use, copy, modify, and distribute this software and its
 	documentation for any purpose and without fee or royalty is hereby granted,

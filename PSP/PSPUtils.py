@@ -1,7 +1,7 @@
 
 """A bunch of utility functions for the PSP generator.
 
-	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.net)
+	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
 	Permission to use, copy, modify, and distribute this software and its
 	documentation for any purpose and without fee or royalty is hereby granted,

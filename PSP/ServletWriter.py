@@ -1,7 +1,7 @@
 
 """This module holds the actual file writer class.
 
-	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.net)
+	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
 	Permission to use, copy, modify, and distribute this software and its
 	documentation for any purpose and without fee or royalty is hereby granted,
