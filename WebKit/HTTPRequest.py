@@ -29,7 +29,7 @@ class HTTPRequest(Request):
 
 	def __init__(self, dict={}):
 		Request.__init__(self)
-		self._parents = []
+		self._stack = []
 		if dict:
 			# Dictionaries come in from web server adapters like the CGIAdapter
 			assert dict['format'] == 'CGI'
@@ -37,20 +37,21 @@ class HTTPRequest(Request):
 			self._environ = dict['environ']
 			self._input = dict['input']
 			self._requestID = dict['requestID']
-			self._fields = FieldStorage.FieldStorage(self._input,
-				environ=self._environ, keep_blank_values=True, strict_parsing=False)
+			self._fields = FieldStorage.FieldStorage(
+				self._input, environ=self._environ,
+				keep_blank_values=True, strict_parsing=False)
 			self._fields.parse_qs()
 			self._cookies = Cookie()
 			if self._environ.has_key('HTTP_COOKIE'):
 				# Protect the loading of cookies with an exception handler,
-				# because some cookies from MSIE are known to break the cookie module.
+				# because MSIE cookies sometimes can break the cookie module.
 				try:
 					self._cookies.load(self._environ['HTTP_COOKIE'])
 				except:
 					traceback.print_exc(file=sys.stderr)
 		else:
-			# If there's no dictionary, we pretend we're a CGI script and see what happens...
-			import time
+			# If there's no dictionary, we pretend we're a CGI script
+			# and see what happens...
 			self._time = time.time()
 			self._environ = os.environ.copy()
 			self._input = None
@@ -127,7 +128,6 @@ class HTTPRequest(Request):
 			self._fsPath = self.fsPath()
 		self._adapterName = self.servletPath()
 		self._pathInfo = self.pathInfo()
-		self._originalURLPath = self.urlPath()
 
 		if debug:
 			print "Done setting up request, found keys %r" % self._fields.keys()
@@ -221,10 +221,11 @@ class HTTPRequest(Request):
 			return self._cookies.get(name, default)
 
 	def hasCookie(self, name):
+		"""Return whether a cookie with the given name exists."""
 		return self._cookies.has_key(name)
 
 	def cookies(self):
-		"""Return a dictionary-style object of all Cookie objects the client sent with this request."""
+		"""Return a dict of all cookies the client sent with this request."""
 		return self._cookies
 
 
@@ -251,11 +252,11 @@ class HTTPRequest(Request):
 		return self._transaction.session()
 
 	def isSessionExpired(self):
-		"""Return whether or not this request originally contained an expired session ID.
+		"""Return whether the request originally had an expired session ID.
 
-		Only works if the Application.config setting "IgnoreInvalidSession" is set to true;
-		otherwise you get a canned error page on an invalid session,
-		so your servlet never gets processed.
+		Only works if the Application.config setting "IgnoreInvalidSession"
+		is set to true; otherwise you get a canned error page on an invalid
+		session, so your servlet never gets processed.
 
 		"""
 		return self._sessionExpired
@@ -275,7 +276,7 @@ class HTTPRequest(Request):
 		return self._environ['REMOTE_USER']
 
 	def remoteAddress(self):
-		"""Return a string containing the IP address of the client that sent the request."""
+		"""Return a string containing the IP address of the client."""
 		return self._environ['REMOTE_ADDR']
 
 	def remoteName(self):
@@ -288,7 +289,7 @@ class HTTPRequest(Request):
 		return env.get('REMOTE_NAME', env['REMOTE_ADDR'])
 
 	def accept(self, which=None):
-		"""Returns preferences as requested by the user agent.
+		"""Return preferences as requested by the user agent.
 
 		The accepted preferences are returned as a list of codes
 		in the same order as they appeared in the header.
@@ -312,9 +313,10 @@ class HTTPRequest(Request):
 	## Path ##
 
 	def urlPath(self):
-		"""Return the URL path of the servlet sans host, adapter and query string.
+		"""Return URL path without host, adapter and query string.
 
-		For example, http://host/WebKit.cgi/Context/Servlet?x=1 yields '/Context/Servlet'.
+		For example, http://host/WebKit.cgi/Context/Servlet?x=1
+		yields '/Context/Servlet'.
 
 		If self._absolutepath is set, this refers to the filesystem path.
 
@@ -325,8 +327,11 @@ class HTTPRequest(Request):
 			return self._pathInfo
 
 	def originalURLPath(self):
-		"""Return the URL path of the _original_ servlet before any forwarding."""
-		return self._originalURLPath
+		"""Return URL path of the original servlet before any forwarding."""
+		if self._path:
+			return self._path[0][1]
+		else:
+			self.urlPath()
 
 	def urlPathDir(self):
 		"""Same as urlPath, but only gives the directory."""
@@ -364,8 +369,8 @@ class HTTPRequest(Request):
 	def serverSideContextPath(self, path=None):
 		"""Return the absolute server-side path of the context of this request.
 
-		If the optional path is passed in, then it is joined with the server side
-		context directory to form a path relative to the object.
+		If the optional path is passed in, then it is joined with the server
+		side context directory to form a path relative to the object.
 
 		This directory could be different from the result of serverSidePath()
 		if the request is in a subdirectory of the main context directory.
@@ -382,13 +387,14 @@ class HTTPRequest(Request):
 	def contextName(self):
 		"""Return the name of the context of this request.
 
-		This isn't necessarily the same as the name of the directory containing the context.
+		This isn't necessarily the same as the name of the directory
+		containing the context.
 
 		"""
 		return self._contextName
 
 	def servletURI(self):
-		"""Return the URI of the servlet, without any query strings or extra path info."""
+		"""Return servlet URI without any query strings or extra path info."""
 		p = self._pathInfo
 		if not self._extraURLPath:
 			if p.endswith('/'):
@@ -478,7 +484,10 @@ class HTTPRequest(Request):
 		return fullurl
 
 	def siteRoot(self):
-		"""Return the URL path components necessary to get back home from the current location.
+		"""Return the relative URL path of the home location.
+
+		This includes all URL path components necessary to get back home
+		from the current location.
 
 		Examples:
 			''
@@ -487,12 +496,12 @@ class HTTPRequest(Request):
 
 		You can use this as a prefix to a URL that you know is based off
 		the home location. Any time you are in a servlet that may have been
-		forwarded to from another servlet at a different level,
-		you should prefix your URL's with this. That is, if servlet "Foo/Bar"
-		forwards to "Qux", then the qux servlet should use siteRoot() to construct all
+		forwarded to from another servlet at a different level, you should
+		prefix your URL's with this. That is, if servlet "Foo/Bar" forwards
+		to "Qux", then the qux servlet should use siteRoot() to construct all
 		links to avoid broken links. This works properly because this method
-		computes the path based on the _original_ servlet, not the location of the
-		servlet that you have forwarded to.
+		computes the path based on the _original_ servlet, not the location
+		of the servlet that you have forwarded to.
 
 		"""
 		url = self.originalURLPath()
@@ -505,7 +514,10 @@ class HTTPRequest(Request):
 		return '../' * numStepsBack
 
 	def siteRootFromCurrentServlet(self):
-		"""Return the URL path componentes necessary to get back home from the current servlet.
+		"""Return relative URL path to home seen from the current servlet.
+
+		This includes all URL path components necessary to get back home
+		from the current servlet (not from the original request).
 
 		Similar to siteRoot() but instead, it returns the site root
 		relative to the _current_ servlet, not the _original_ servlet.
@@ -524,9 +536,9 @@ class HTTPRequest(Request):
 		"""Return the "servlet path" of this servlet relative to the siteRoot.
 
 		In other words, everything after the name of the context (if present).
-		If you append this to the result of self.siteRoot() you get back to the
-		current servlet. This is useful for saving the path to the current servlet
-		in a database, for example.
+		If you append this to the result of self.siteRoot() you get back to
+		the current servlet. This is useful for saving the path to the current
+		servlet in a database, for example.
 
 		"""
 		urlPath = self.urlPath()
@@ -557,38 +569,47 @@ class HTTPRequest(Request):
 		return self._adapterName
 
 	def rawRequest(self):
-		"""Return the raw request that was used to initialize this request object."""
+		"""Return the raw request used to initialize this request object."""
 		return self._rawRequest
 
 	def environ(self):
+		"""Get the environment for the request."""
 		return self._environ
 
-	def addParent(self, servlet):
-		self._parents.append(servlet)
+	def push(self, obj, url=None):
+		"""Push object and URL path on a stack, setting a new URL."""
+		urlPath = self.urlPath()
+		self._stack.append((obj, urlPath,
+			self._serverSidePath, self._serverSideContextPath,
+			self._contextName, self._serverRootPath,
+			self._extraURLPath))
+		if url is not None:
+			self.setURLPath(url)
 
-	def popParent(self):
-		if self._parents:
-			self._parents.pop()
+	def pop(self):
+		"""Pop URL path and object from the stack, returning the object."""
+		if self._stack:
+			(obj, urlPath,
+				self._serverSidePath, self._serverSideContextPath,
+				self._contextName, self._serverRootPath,
+				self._extraURLPath) = self._stack.pop()
+			self.setURLPath(urlPath)
+			return obj
 
-	def parent(self):
-		"""Get the servlet that passed this request to us, if any."""
-		if self._parents:
-			return self._parents[len(self._parents)-1]
-
-	def parents(self):
-		"""Return the parents list."""
-		return self._parents
+	def previousURLPaths(self):
+		"""Return the list of all previous URL paths."""
+		return [s[1] for s in self._stack]
 
 	def rawInput(self, rewind=False):
 		"""Get the raw input from the request.
 
-		This gives you a file-like object for the data that was
-		sent with the request (e.g., the body of a POST request,
-		or the documented uploaded in a PUT request).
+		This gives you a file-like object for the data that was sent with
+		the request (e.g., the body of a POST request, or the document
+		uploaded in a PUT request).
 
-		The file might not be rewound to the beginning if there
-		was valid, form-encoded POST data. Pass rewind=True if
-		you want to be sure you get the entire body of the request.
+		The file might not be rewound to the beginning if there was valid,
+		form-encoded POST data. Pass rewind=True if you want to be sure
+		you get the entire body of the request.
 
 		"""
 		fs = self.fieldStorage()
@@ -625,21 +646,22 @@ class HTTPRequest(Request):
 		return self._environ.get('SCRIPT_FILENAME', '')
 
 	def contextPath(self):
-		"""Return the portion of the request URI that is the context of the request."""
+		"""Return the portion of the URI that is the context of the request."""
 		return self._serverSideContextPath
 
 	def pathInfo(self):
-		"""Return any extra path information associated with the URL the client sent with this request.
+		"""Return any extra path information as sent by the client.
 
+		This is anything after the servlet name but before the query string.
 		Equivalent to CGI variable PATH_INFO.
 
 		"""
 		return self._environ.get('PATH_INFO', '')
 
 	def pathTranslated(self):
-		"""Return any extra path information after the servlet name but before the query string.
+		"""Return extra path information translated as file system path.
 
-		The path is translated to a file system path.
+		This is the same as pathInfo() but translated to the file system.
 		Equivalent to CGI variable PATH_TRANSLATED.
 
 		"""
@@ -706,7 +728,8 @@ class HTTPRequest(Request):
 		if force:
 			# Force this session ID to exist, so that a random session ID
 			# won't be created in case it's a new session.
-			self._transaction.application().createSessionWithID(self._transaction, sessionID)
+			self._transaction.application().createSessionWithID(
+				self._transaction, sessionID)
 
 	def hasPathSession(self):
 		return self._pathSession is not None
@@ -723,8 +746,8 @@ class HTTPRequest(Request):
 		Return a list of tuples where each tuple has a key/label (a string)
 		and a value (any kind of object).
 
-		Values are typically atomic values such as numbers and strings
-		or another list of tuples in the same fashion. This is for debugging only.
+		Values are typically atomic values such as numbers and strings or
+		another list of tuples in the same fashion. This is for debugging only.
 
 		"""
 		# @@ 2000-04-10 ce: implement and invoke super if appropriate
@@ -767,8 +790,8 @@ class HTTPRequest(Request):
 		return ''.join(res)
 
 	exceptionReportAttrNames = Request.exceptionReportAttrNames + (
-		'uri servletPath serverSidePath pathInfo pathTranslated'
-		' queryString method sessionId parents fields cookies environ'.split())
+		'uri servletPath serverSidePath pathInfo pathTranslated queryString'
+		' method sessionId previousURLPaths fields cookies environ'.split())
 
 
 	## Deprecated ##
@@ -778,7 +801,7 @@ class HTTPRequest(Request):
 
 		Use serverSidePath() instead.@
 
-		Return the directory of the Servlet (as given through __init__()'s path).
+		Return the servlet directory (as given through __init__()'s path).
 
 		"""
 		self.deprecated(self.serverSideDir)
@@ -791,8 +814,8 @@ class HTTPRequest(Request):
 
 		Use serverSidePath() instead.@
 
-		Return a new path which includes the servlet's path appended by 'joinPath'.
-		Note that if 'joinPath' is an absolute path, then only 'joinPath' is returned.
+		Return a new path with the servlet's path appended by 'joinPath'.
+		If 'joinPath' is an absolute path, then only 'joinPath' is returned.
 
 		"""
 		self.deprecated(self.relativePath)
@@ -811,7 +834,6 @@ _infoMethods = (
 	HTTPRequest.method,
 	HTTPRequest.sessionId
 )
-
 
 def htmlInfo(info):
 	"""Return a single HTML string that represents the info structure.

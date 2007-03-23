@@ -495,6 +495,18 @@ class Application(ConfigurableForServerSidePath, Object):
 					except ConnectionAbortedError:
 						trans.setErrorOccurred(True)
 					response.clearTransaction()
+					# release possible servlets on the stack
+					while 1:
+						servlet = request.pop()
+						if servlet is None:
+							break
+						self.returnServlet(servlet, trans)
+						servlet.resetKeyBindings()
+					# get current servlet (this may have changed)
+					servlet = trans.servlet()
+					if servlet:
+						# return the current servlet to its pool
+						self.returnServlet(servlet, trans)
 				if self.setting('LogActivity'):
 					self.writeActivityLog(trans)
 			request.clearTransaction()
@@ -531,8 +543,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		Called by `dispatchRawRequest`.
 
 		"""
-		# @@ gtalvola: I'm guessing this is not the ideal place
-		# @@ to put this code. But, it works.
 		if self.setting('UseAutomaticPathSessions'):
 			request = trans.request()
 			request_has_cookie_session = request.hasCookieSession()
@@ -543,20 +553,14 @@ class Application(ConfigurableForServerSidePath, Object):
 			elif not request_has_cookie_session and not request_has_path_session:
 				self.handleMissingPathSession(trans)
 				return
-		servlet = None
 		try:
-			try:
-				servlet = self._rootURLParser.findServletForTransaction(trans)
-				self.runTransactionViaServlet(servlet, trans)
-			except HTTPExceptions.HTTPException, err:
-				err.setTransaction(trans)
-				trans.response().displayError(err)
-			except EndResponse:
-				pass
-		finally:
-			if servlet:
-				# Return the servlet to its pool
-				self.returnServlet(servlet, trans)
+			servlet = self.rootURLParser().findServletForTransaction(trans)
+			self.runTransactionViaServlet(servlet, trans)
+		except HTTPExceptions.HTTPException, err:
+			err.setTransaction(trans)
+			trans.response().displayError(err)
+		except EndResponse:
+			pass
 
 	def runTransactionViaServlet(self, servlet, trans):
 		"""Execute the transaction using the servlet.
@@ -621,37 +625,26 @@ class Application(ConfigurableForServerSidePath, Object):
 		and ``**kw`` are passed as arguments to that method).
 
 		"""
-		urlPath = self.resolveInternalRelativePath(trans, url)
-		req = trans.request()
-		currentPath = req.urlPath()
-		currentServlet = trans._servlet
-		currentServerSidePath = req._serverSidePath
-		currentServerSideContextPath = req._serverSideContextPath
-		currentContextName = req._contextName
-		currentServerRootPath = req._serverRootPath
-		currentExtraURLPath = req._extraURLPath
-		req.setURLPath(urlPath)
-		req.addParent(currentServlet)
-
-		servlet = self._rootURLParser.findServletForTransaction(trans)
-		trans._servlet = servlet
+		# store current request and set the new URL
+		request = trans.request()
+		request.push(trans.servlet(),
+			self.resolveInternalRelativePath(trans, url))
+		# get new servlet
+		servlet = self.rootURLParser().findServletForTransaction(trans)
+		trans.setServlet(servlet)
+		# call method of included servlet
 		if hasattr(servlet, 'runMethodForTransaction'):
 			result = servlet.runMethodForTransaction(trans, method, *args, **kw)
 		else:
 			servlet.awake(trans)
 			result = getattr(servlet, method)(*args, **kw)
 			servlet.sleep(trans)
-
-		# Put things back
-		req.setURLPath(currentPath)
-		req._serverSidePath = currentServerSidePath
-		req._serverSideContextPath = currentServerSideContextPath
-		req._contextName = currentContextName
-		req._serverRootPath = currentServerRootPath
-		req._extraURLPath = currentExtraURLPath
-		req.popParent()
-		trans._servlet = currentServlet
-
+		# return new servlet to its pool
+		self.returnServlet(servlet, trans)
+		# release bindings of new servlet
+		servlet.resetKeyBindings()
+		# restore current request
+		trans.setServlet(request.pop())
 		return result
 
 	def includeURL(self, trans, url):
@@ -661,36 +654,26 @@ class Application(ConfigurableForServerSidePath, Object):
 		except control is ultimately returned to the servlet.
 
 		"""
-		urlPath = self.resolveInternalRelativePath(trans, url)
-		req = trans.request()
-		currentPath = req.urlPath()
-		currentServlet = trans._servlet
-		currentServerSidePath = req._serverSidePath
-		currentServerSideContextPath = req._serverSideContextPath
-		currentContextName = req._contextName
-		req.setURLPath(urlPath)
-		req.addParent(currentServlet)
-
-		# Run the included servlet.
-		# (2006-07-05 cz: Do not use try/finally here, because exception
-		# handling should happen in the context of the included servlet.)
-		servlet = self._rootURLParser.findServletForTransaction(trans)
-		trans._servlet = servlet
-		# We will interpret an EndResponse in an included page to mean that
-		# the current page may continue processing.
+		# store current request and set the new URL
+		request = trans.request()
+		request.push(trans.servlet(),
+			self.resolveInternalRelativePath(trans, url))
+		# get new servlet
+		servlet = self.rootURLParser().findServletForTransaction(trans)
+		trans.setServlet(servlet)
+		# run the included servlet
 		try:
 			servlet.runTransaction(trans)
 		except EndResponse:
+			# we interpret an EndResponse in an included page to mean
+			# that the current page may continue processing
 			pass
+		# return new servlet to its pool
 		self.returnServlet(servlet, trans)
-
-		# Restore everything properly
-		req.popParent()
-		req.setURLPath(currentPath)
-		req._serverSidePath = currentServerSidePath
-		req._serverSideContextPath = currentServerSideContextPath
-		req._contextName = currentContextName
-		trans._servlet = currentServlet
+		# release bindings of new servlet
+		servlet.resetKeyBindings()
+		# restore current request
+		trans.setServlet(request.pop())
 
 	def resolveInternalRelativePath(self, trans, url):
 		"""Return the absolute internal path.
@@ -707,7 +690,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				if not origDir.endswith('/'):
 					origDir += '/'
 			url = origDir + url
-		# Deal with . and .. in the path:
+		# deal with . and .. in the path
 		parts = []
 		for part in url.split('/'):
 			if parts and part == '..':
@@ -738,8 +721,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		`ExceptionHandler.ExceptionHandler`.
 
 		"""
-		req = transaction.request()
-		editlink = req.adapterName() + "/Admin/EditFile"
+		request = transaction.request()
+		editlink = request.adapterName() + "/Admin/EditFile"
 		self._exceptionHandlerClass(self, transaction,
 			excInfo, {"editlink": editlink})
 

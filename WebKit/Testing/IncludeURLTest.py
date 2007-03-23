@@ -82,6 +82,7 @@ class IncludeURLTest(Page):
 		w("serverSideContextPath(): %s" % req.serverSideContextPath())
 		w("extraURLPath():          %s" % req.extraURLPath())
 		w("urlPath():               %s" % req.urlPath())
+		w("previousURLPaths():      %s" % ', '.join(req.previousURLPaths()))
 		w("adapterName():           %s" % req.adapterName())
 		w("Environment:" )
 		w("REQUEST_URI:             %s" % env.get('REQUEST_URI', ''))
