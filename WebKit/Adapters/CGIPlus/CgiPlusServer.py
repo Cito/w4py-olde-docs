@@ -1,23 +1,25 @@
-import sys
-import os
+from Common import *
 import mimetools
 try:
 	from cStringIO import StringIO
 except ImportError:
 	from StringIO import StringIO
 from WebKit.CgiPlusAppServer import Handler, CPASStreamOut
-import time
 
 
 class CgiPlusHandler:
-	"""Handles incoming requests.  Recreated with every request.
-	Abstract base class.
+	"""Handle incoming requests.
+
+	Recreated with every request. Abstract base class.
+
 	"""
+
 	def __init__(self, env, rfile, wfile):
 		self.env = env
 		self.rfile = rfile
 		self.wfile = wfile
 		self._discardOutput = False
+
 	def handleRequest(self):
 		"""
 		Actually performs the request, creating the environment and
@@ -29,7 +31,7 @@ class CgiPlusHandler:
 		if self.env.has_key('CONTENT_LENGTH'):
 			length = int(self.env['CONTENT_LENGTH'])
 			if length > 0:
-				myInput = myInput + self.rfile.read(length)
+				myInput += self.rfile.read(length)
 		self.doTransaction(self.env, myInput)
 
 	def processResponse(self, data):

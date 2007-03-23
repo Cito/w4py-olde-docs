@@ -26,8 +26,7 @@ from MiscUtils.Funcs import timestamp
 from WebUtils import Funcs
 
 
-
-debug = 0
+debug = False
 
 DefaultConfig = {
 	'MaxServerThreads':        1,
@@ -61,7 +60,7 @@ class CgiPlusAppServer(AppServer):
 		self._handler = handlerClass
 
 	def isPersistent(self):
-		return 0
+		return False
 
 	def recordPID(self):
 		"""Currently do nothing."""
@@ -104,8 +103,7 @@ class CgiPlusAppServer(AppServer):
 			sys.stderr = StringIO()
 
 	def shutDown(self):
-		self.running=0
-		self._shuttingdown=1  #jsl-is this used anywhere?
+		self.running = 0
 		print "CgiPlusAppServer: Shutting Down"
 		AppServer.shutDown(self)
 
@@ -136,29 +134,6 @@ class Handler:
 		pass
 
 
-class MonitorHandler(Handler):
-
-	protcolName = 'monitor'
-
-	def handleRequest(self):
-		verbose = self.server._verbose
-		startTime = time.time()
-		if verbose:
-			print 'BEGIN REQUEST'
-			print asclocaltime(startTime)
-		conn = self._sock
-		if verbose:
-			print 'receiving request from', conn
-		BUFSIZE = 8*1024
-		dict = self.receiveDict()
-		if dict['format'] == "STATUS":
-			conn.send(str(self.server._reqCount))
-		if dict['format'] == 'QUIT':
-			conn.send("OK")
-			conn.close()
-			self.server.shutDown()
-
-
 from WebKit.ASStreamOut import ASStreamOut
 class CPASStreamOut(ASStreamOut):
 	"""Response stream for CgiPLusAppServer.
@@ -178,55 +153,12 @@ class CPASStreamOut(ASStreamOut):
 
 	def flush(self):
 		result = ASStreamOut.flush(self)
-		if result: ##a true return value means we can send
+		if result: # a true return value means we can send
 			reslen = len(self._buffer)
 			self._file.write(self._buffer)
 			self._file.flush()
 			sent = reslen
 			self.pop(sent)
-
-
-class AdapterHandler(Handler):
-
-	protocolName = 'address'
-
-	def handleRequest(self):
-		verbose = self._server._verbose
-		self._startTime = time.time()
-		if verbose:
-			print '%5i  %s ' % (self._requestID, timestamp()['pretty']),
-
-		data = []
-		dict = self.receiveDict()
-		if dict and verbose and dict.has_key('environ'):
-			requestURI = Funcs.requestURI(dict['environ'])
-			print requestURI
-		else:
-			requestURI = None
-
-		dict['input'] = self.makeInput()
-		streamOut = TASASStreamOut(self._sock)
-		transaction = self._server._app.dispatchRawRequest(dict, streamOut)
-		streamOut.close()
-
-		try:
-			self._sock.shutdown(1)
-			self._sock.close()
-		except:
-			pass
-
-		if self._server._verbose:
-			duration = '%0.2f secs' % (time.time() - self._startTime)
-			duration = string.ljust(duration, 19)
-			print '%5i  %s  %s' % (self._requestID, duration, requestURI)
-			print
-
-		transaction._application=None
-		transaction.die()
-		del transaction
-
-	def makeInput(self):
-		return self._sock.makefile("rb",8012)
 
 
 # Set to False in DebugAppServer so Python debuggers can trap exceptions
@@ -241,7 +173,7 @@ def run(workDir=None):
 	global server
 	from WebKit.CgiPlusServer import CgiPlusAppServerHandler
 	runAgain = True
-	while runAgain:  # looping in support of RestartAppServerError
+	while runAgain: # looping in support of RestartAppServerError
 		try:
 			try:
 				runAgain = False
@@ -277,7 +209,7 @@ def run(workDir=None):
 	sys.exit()
 
 
-def shutDown(arg1,arg2):
+def shutDown(arg1, arg2):
 	global server
 	print "Shutdown Called", asclocaltime()
 	if server:
@@ -293,9 +225,6 @@ usage = """
 The AppServer is the main process of WebKit.  It handles requests for
 servlets from webservers.  ThreadedAppServer takes the following
 command line arguments: stop: Stop the currently running Apperver.
-daemon: run as a daemon If AppServer is called with no arguments, it
-will start the AppServer and record the pid of the process in
-appserverpid.txt
 """
 
 import re
@@ -304,7 +233,6 @@ from MiscUtils import Configurable
 
 def main(args):
 	function = run
-	daemon = 0
 	workDir = None
 	sys.stdout = StringIO()
 	for i in args[:]:
@@ -316,8 +244,6 @@ def main(args):
 		elif i == "stop":
 			import AppServer
 			function=AppServer.stop
-		elif i == "daemon":
-			daemon=1
 		elif i == "start":
 			pass
 		elif i[:8] == "workdir=":

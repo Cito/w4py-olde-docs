@@ -1,19 +1,19 @@
-#!/$1$DKA200/TOOLS/python/vms/bin/python.exe.1
+#!/usr/bin/env python
 
 import os, sys
 
-webwarePath = '/webware092_root'
-appWorkPath = '/webware092_root'
+webwarePath = '/usr/local/Webware'
+appWorkPath = '/usr/local/Webware'
 
 
 def main(args):
 	global webwarePath, appWorkPath
 	newArgs = []
 	for arg in args:
-		if arg.startswith('--webware-path='):
-			webwarePath = arg[15:]
-		elif arg.startswith('--working-path='):
-			appWorkPath = arg[15:]
+		if arg.startswith('--webware-dir='):
+			webwarePath = arg[14:]
+		elif arg.startswith('--work-dir='):
+			appWorkPath = arg[11:]
 		else:
 			newArgs.append(arg)
 	args = newArgs
