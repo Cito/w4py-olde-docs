@@ -118,7 +118,6 @@ class HTTPRequest(Request):
 			dict[key] = self._cookies[key].value
 		self._cookies = dict
 
-		self._transaction = None
 		self._serverRootPath = self._extraURLPath = ''
 		self._cookieSession = self._pathSession = None
 		self._sessionExpired = False
@@ -139,12 +138,9 @@ class HTTPRequest(Request):
 	def responseClass(self):
 		return HTTPResponse.HTTPResponse
 
-	def transaction(self):
-		return self._transaction
-
 	def setTransaction(self, trans):
 		"""Should be invoked after the transaction is created for this request."""
-		self._transaction = trans
+		Request.setTransaction(self, trans)
 		self._sidname = trans.application()._session_name
 		# Get session ID from cookie if available
 		self._cookieSession = self._cookies.get(self._sidname, None)

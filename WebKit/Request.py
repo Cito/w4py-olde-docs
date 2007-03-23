@@ -28,6 +28,7 @@ class Request(Message):
 	def __init__(self):
 		"""Subclasses are responsible for invoking super and initializing self._time."""
 		Message.__init__(self)
+		self._transaction = None
 
 
 	## Access ##
@@ -116,6 +117,22 @@ class Request(Message):
 
 		"""
 		return 0
+
+
+	## Transactions ##
+
+	def responseClass(self):
+		"""Get the corresponding response class."""
+		raise NotImplementedError
+
+	def setTransaction(self, trans):
+		"""Set a transaction container."""
+		self._transaction = trans
+
+	def transaction(self):
+		"""Get the transaction container."""
+		return self._transaction
+
 
 	## Cleanup ##
 
