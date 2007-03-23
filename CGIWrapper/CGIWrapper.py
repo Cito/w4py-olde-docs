@@ -10,8 +10,8 @@ from time import time, localtime, gmtime, asctime
 serverStartTime  = time()
 
 # Some imports
-import cgi, os, string, sys, traceback, random
-from types import *
+import cgi, os, sys, traceback, random
+from types import DictType, FloatType
 
 if '' not in sys.path:
 	sys.path.insert(0, '')
@@ -139,7 +139,7 @@ class CGIWrapper(NamedValueAccess):
 		else:
 			config = eval(file.read())
 			file.close()
-			assert type(config) is type({})
+			assert type(config) is DictType
 			return config
 
 	def config(self):
@@ -185,7 +185,7 @@ class CGIWrapper(NamedValueAccess):
 		if badNames:
 			print 'Content-type: text/html\n'
 			print '<html><body>'
-			print '<p>ERROR: Missing', string.join(badNames, ', ')
+			print '<p>ERROR: Missing', ', '.join(badNames)
 			print '</body></html>'
 			sys.exit(0)
 
@@ -200,9 +200,9 @@ class CGIWrapper(NamedValueAccess):
 		pathname = os.path.split(self._environ['SCRIPT_FILENAME'])[0] # This removes the CGI Wrapper's filename part
 		filename = self._environ['PATH_INFO'][1:]
 		ext      = os.path.splitext(filename)[1]
-		if ext=='':
+		if ext == '':
 			# No extension - we assume a Python CGI script
-			if filename[0]=='_':
+			if filename[0] == '_':
 				# underscores denote private scripts packaged with CGI Wrapper, such as '_admin.py'
 				filename = os.path.join(pathname, filename+'.py')
 			else:
@@ -225,7 +225,7 @@ class CGIWrapper(NamedValueAccess):
 			file = open(filename, 'a')
 		else:
 			file = open(filename, 'w')
-			file.write(string.join(self.setting('ScriptLogColumns'), ',')+'\n')
+			file.write(','.join(self.setting('ScriptLogColumns')) + '\n')
 		values = []
 		for column in self.setting('ScriptLogColumns'):
 			value = self.valueForName(column)
@@ -234,7 +234,7 @@ class CGIWrapper(NamedValueAccess):
 			else:
 				value = str(value)
 			values.append(value)
-		file.write(string.join(values, ',')+'\n')
+		file.write(','.join(values) + '\n')
 		file.close()
 
 	def version(self):
@@ -310,7 +310,7 @@ class CGIWrapper(NamedValueAccess):
 			html.append(self.htmlDebugInfo())
 
 		html.append('</body></html>')
-		return string.join(html, '')
+		return ''.join(html)
 
 	def htmlDebugInfo(self):
 		"""
@@ -337,7 +337,7 @@ class CGIWrapper(NamedValueAccess):
 			htTitle('Environment'),   htDictionary(self._environ, {'PATH': ';'}),
 			htTitle('Ids'),           htTable(osIdTable(), ['name', 'value'])])
 
-		return string.join(html, '')
+		return ''.join(html)
 
 	def saveHTMLErrorPage(self, html):
 		"""
@@ -355,7 +355,7 @@ class CGIWrapper(NamedValueAccess):
 		"""Construct a filename for an HTML error page, not including the 'ErrorMessagesDir' setting."""
 		return 'Error-%s-%s-%d.html' % (
 			os.path.split(self._scriptPathname)[1],
-			string.join(map(lambda x: '%02d' % x, localtime(self._scriptEndTime)[:6]), '-'),
+			'-'.join(map(lambda x: '%02d' % x, localtime(self._scriptEndTime)[:6])),
 			random.randint(10000, 99999))
 			# @@ 2000-04-21 ce: Using the timestamp & a random number is a poor technique for filename uniqueness, but this works for now
 
@@ -381,7 +381,7 @@ class CGIWrapper(NamedValueAccess):
 		else:
 			f = open(filename, 'w')
 			f.write('time,filename,pathname,exception name,exception data,error report filename\n')
-		f.write(string.join(logline, ','))
+		f.write(','.join(logline))
 		f.write('\n')
 		f.close()
 
@@ -392,11 +392,11 @@ class CGIWrapper(NamedValueAccess):
 		headers = self.setting('ErrorEmailHeaders')
 		msg = []
 		for key in headers.keys():
-			if key!='From' and key!='To':
+			if key != 'From' and key != 'To':
 				msg.append('%s: %s\n' % (key, headers[key]))
 		msg.append('\n')
 		msg.append(html)
-		msg = string.join(msg, '')
+		msg = ''.join(msg)
 
 		# dbg code, in case you're having problems with your e-mail
 		# open('error-email-msg.text', 'w').write(msg)
@@ -469,7 +469,7 @@ class CGIWrapper(NamedValueAccess):
 			if self._servingScript:
 				execfile(self._scriptPathname, self._namespace)
 				for name in self.setting('ClassNames'):
-					if name=='':
+					if name == '':
 						name = os.path.splitext(self._scriptName)[0]
 					if self._namespace.has_key(name):         # our hook for class-oriented scripts
 						print self._namespace[name](info).html()
@@ -489,9 +489,9 @@ class CGIWrapper(NamedValueAccess):
 
 			# Not really an error, if it was sys.exit(0)
 			excInfo = sys.exc_info()
-			if excInfo[0]==SystemExit:
+			if excInfo[0] == SystemExit:
 				code = excInfo[1].code
-				if code==0 or code==None:
+				if code == 0 or code == None:
 					self._errorOccurred = 0
 
 			# Clean up
@@ -554,12 +554,12 @@ def htDictionary(dict, addSpace=None):
 	html = ['<table width=100% border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>']
 	for key in keys:
 		value = dict[key]
-		if addSpace!=None  and  addSpace.has_key(key):
+		if addSpace != None and addSpace.has_key(key):
 			target = addSpace[key]
-			value = string.join(string.split(value, target), '%s '%target)
+			value = ('%s ' % target).join(value.split(target))
 		html.append('<tr> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (key, value))
 	html.append('</table>')
-	return string.join(html, '')
+	return ''.join(html)
 
 def osIdTable():
 	"""
@@ -590,23 +590,19 @@ def htTable(listOfDicts, keys=None):
 
 	if not listOfDicts:
 		return ''
-
 	if keys is None:
 		keys = listOfDicts[0].keys()
 		keys.sort()
-
 	s = '<table border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>\n<tr>'
 	for key in keys:
 		s = '%s<td><b>%s</b></td>' % (s, key)
-	s = s + '</tr>\n'
-
+	s += '</tr>\n'
 	for row in listOfDicts:
-		s = s + '<tr>'
+		s += '<tr>'
 		for key in keys:
 			s = '%s<td>%s</td>' % (s, row[key])
-		s = s + '</tr>\n'
-
-	s = s + '</table>'
+		s += '</tr>\n'
+	s += '</table>'
 	return s
 
 
@@ -621,17 +617,13 @@ def main():
 		# catch exceptions here that might come from the wrapper, including
 		# ones generated while it's handling exceptions.
 		import traceback
-
 		sys.stderr.write('[%s] [error] CGI Wrapper: Error while executing script (unknown)\n' % (
 			asctime(localtime(time()))))
 		sys.stderr.write('Error while executing script\n')
 		traceback.print_exc(file=sys.stderr)
-
 		output = apply(traceback.format_exception, sys.exc_info())
-		output = string.join(output, '')
-		output = string.replace(output, '&', '&amp;')
-		output = string.replace(output, '<', '&lt;')
-		output = string.replace(output, '>', '&gt;')
+		output = ''.join(output)
+		output = output.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 		stdout.write('''Content-type: text/html
 
 <html><body>
@@ -640,6 +632,6 @@ def main():
 </body></html>\n''' % output)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	isMain = 1
 	main()
