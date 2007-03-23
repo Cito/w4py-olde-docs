@@ -45,7 +45,7 @@ import WebUtils.HTTPStatusCodes
 # @@ 2000-01-14 ce: move this
 #
 if not NamedValueAccess in UserDict.__bases__:
-	UserDict.__bases__ = UserDict.__bases__ + (NamedValueAccess,)
+	UserDict.__bases__ += (NamedValueAccess,)
 
 	def _UserDict_hasValueForKey(self, key):
 		return self.has_key(key)
@@ -204,10 +204,10 @@ class CGIWrapper(NamedValueAccess):
 			# No extension - we assume a Python CGI script
 			if filename[0] == '_':
 				# underscores denote private scripts packaged with CGI Wrapper, such as '_admin.py'
-				filename = os.path.join(pathname, filename+'.py')
+				filename = os.path.join(pathname, filename + '.py')
 			else:
 				# all other scripts are based in the directory named by the 'ScriptsHomeDir' setting
-				filename = os.path.join(pathname, self.setting('ScriptsHomeDir'), filename+'.py')
+				filename = os.path.join(pathname, self.setting('ScriptsHomeDir'), filename + '.py')
 			self._servingScript = 1
 		else:
 			# Hmmm, some kind of extension like maybe '.html'. Leave out the 'ScriptsHomeDir' and leave the extension alone
@@ -475,7 +475,9 @@ class CGIWrapper(NamedValueAccess):
 						print self._namespace[name](info).html()
 						break
 			else:
-				self._headers = { 'Location': os.path.split(self._environ['SCRIPT_NAME'])[0] + self._environ['PATH_INFO'] }
+				self._headers = { 'Location':
+					os.path.split(self._environ['SCRIPT_NAME'])[0]
+					+ self._environ['PATH_INFO'] }
 
 			# Note the end time of the script
 			self._scriptEndTime = time()
