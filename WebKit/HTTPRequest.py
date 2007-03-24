@@ -328,8 +328,8 @@ class HTTPRequest(Request):
 
 	def originalURLPath(self):
 		"""Return URL path of the original servlet before any forwarding."""
-		if self._path:
-			return self._path[0][1]
+		if self._stack:
+			return self._stack[0][1]
 		else:
 			self.urlPath()
 
