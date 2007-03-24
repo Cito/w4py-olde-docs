@@ -10,6 +10,7 @@ of HTTPException), and instead of being errors these are translated
 into responses. In various places these can also be caught and
 changed, for instance an `HTTPAuthenticationRequired` could be
 turned into a normal login page.
+
 """
 
 from WebUtils.Funcs import htmlEncode
@@ -77,7 +78,8 @@ class HTTPException(Exception):
 		"""The HTML body of the page."""
 		body = self.htDescription()
 		if self.args:
-			body += ''.join(['<p>%s</p>\n' % str(l) for l in self.args])
+			body += ''.join(['<p>%s</p>\n'
+				% htmlEncode(str(p)) for p in self.args])
 		return body
 
 	def description(self):
@@ -268,7 +270,7 @@ class HTTPNotFound(HTTPException):
 		page = trans.application()._404Page
 		if page:
 			uri = trans.request().uri()
-			return page % uri
+			return page % htmlEncode(uri)
 		else:
 			return HTTPException.html(self)
 
