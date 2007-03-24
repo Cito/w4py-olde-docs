@@ -28,7 +28,6 @@ from Common import *
 import AppServer as AppServerModule
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 from ASStreamOut import ASStreamOut, ConnectionAbortedError
-
 from MiscUtils.Funcs import timestamp
 from WebUtils import Funcs
 
@@ -48,6 +47,7 @@ DefaultConfig = {
 	# @@ the following settings are not yet officially documented
 	'RequestQueueSize': 0, # means twice the maximum number of threads
 	'RequestBufferSize': 8*1024, # 8 kBytes
+	'ResponseBufferSize': 8*1024, # 8 kBytes
 	# @@ the following setting is not yet implemented
 	# 'SocketType': 'inet', # inet, inet6, unix
 }
@@ -107,6 +107,7 @@ class ThreadedAppServer(AppServer):
 			# otherwise do not make it smaller than the max number of threads
 			self._requestQueueSize = self._maxServerThreads
 		self._requestBufferSize = self.setting('RequestBufferSize')
+		self._responseBufferSize = self.setting('ResponseBufferSize')
 
 		self._threadPool = []
 		self._threadCount = 0
@@ -733,14 +734,14 @@ class TASStreamOut(ASStreamOut):
 
 	"""
 
-	def __init__(self, sock):
+	def __init__(self, sock, autoCommit=False, bufferSize=8192):
 		"""Create stream.
 
 		We get an extra `sock` argument, which is the socket which we'll
 		stream output to (if we're streaming).
 
 		"""
-		ASStreamOut.__init__(self)
+		ASStreamOut.__init__(self, autoCommit, bufferSize)
 		self._socket = sock
 
 	def flush(self):
@@ -811,7 +812,7 @@ class AdapterHandler(Handler):
 		requestDict['input'] = self.makeInput()
 		requestDict['requestID'] = self._requestID
 
-		streamOut = TASStreamOut(self._sock)
+		streamOut = TASStreamOut(self._sock, bufferSize=self._responseBufferSize)
 		transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
 		try:
 			streamOut.close()

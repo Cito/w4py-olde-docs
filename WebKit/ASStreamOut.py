@@ -37,9 +37,9 @@ class ASStreamOut:
 
 	"""
 
-	def __init__(self):
-		self._autoCommit = False
-		self._bufferSize = 8192
+	def __init__(self, autoCommit=False, bufferSize=8192):
+		self._autoCommit = autoCommit
+		self._bufferSize = bufferSize
 		self._committed = False
 		self._needCommit = False
 		self._chunks = []
@@ -157,7 +157,6 @@ class ASStreamOut:
 	def committed(self):
 		"""Are we committed?"""
 		return self._committed
-
 
 	def needCommit(self):
 		"""Request for commitment.
