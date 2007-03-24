@@ -412,6 +412,18 @@ AppServer.config
     to ``sys.setcheckinterval()``.  Benchmarks have shown 100 to give a
     worthwhile performance boost with higher values resulting in
     little gain.  Default: ``100``.
+``RequestQueueSize``:
+    The size of the queue for request handlers that is worked off by the
+    server threads.  A size of zero is interpreted as two times the maximum
+    number of worker threads, which has proven to be a reasonable number.
+    Default: ``0`` (``2*MaxServerThreads``).
+``RequestBufferSize``:
+    Buffer size used for reading incoming socket requests.  Default: ``8192``.
+``ResponseBufferSize``:
+    Buffer size for the output response stream.  This is only used when a
+    servlet has set ``autoFlush`` to True using the ``flush()`` method of
+    the Response.  Otherwise, the whole response is buffered and sent in one
+    shot when the servlet is done.  Default: ``8192``.
 ``AutoReload``:
     Enables the AutoReloadingAppServer module.  This module is designed
     to notice changes to source files, including servlets, PSP's templates,
