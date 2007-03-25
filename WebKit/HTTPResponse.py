@@ -17,7 +17,8 @@ from Common import *
 TimeTupleType = type(time.gmtime(0))
 
 from Response import Response
-from WebKit.Cookie import Cookie
+from Cookie import Cookie
+from HTTPExceptions import HTTPException, HTTPServerError
 from MiscUtils.DateInterval import timeDecode
 
 debug = False
@@ -227,13 +228,10 @@ class HTTPResponse(Response):
 		"""
 		# ftp://ftp.isi.edu/in-notes/rfc2616.txt
 		# Sections: 10.3.3 and others
-
 		assert not self._committed, "Headers have already been sent."
-
 		self.setHeader('Status', '302 Redirect')
 		self.setHeader('Location', url)
 		self.setHeader('Content-type', 'text/html')
-
 		self.write('<html><body>This page has been redirected'
 			' to <a href="%s">%s</a>.</body> </html>' % (url, url))
 
@@ -294,7 +292,11 @@ class HTTPResponse(Response):
 			print "HTTPResponse commit"
 		self.recordSession()
 		if self._transaction.errorOccurred():
-			self.setStatus(500, 'Server Error')
+			err = self._transaction.error()
+			if not isinstance(err, HTTPException):
+				err = HTTPServerError()
+				self._transaction.setError(err)
+			self.setErrorHeaders(err)
 		self.writeHeaders()
 		self._committed = True
 		self._strmOut.commit()
@@ -419,16 +421,17 @@ class HTTPResponse(Response):
 	exceptionReportAttrNames = Response.exceptionReportAttrNames + [
 		'committed', 'headers', 'cookies']
 
-	def displayError(self, err):
-		"""Display HTTPException errors, with status codes."""
-
-		assert not self._committed, "Already committed"
+	def setErrorHeaders(self, err):
+		"""Set error headers for an HTTPException."""
 		for header, value in err.headers().items():
 			self.setHeader(header, value)
-		self.setHeader('Status',
-			'%s %s' % (err.code(), err.codeMessage()))
-		self._strmOut.clear()
+		self.setStatus(err.code(), err.codeMessage())
 		self.setHeader('Content-type', 'text/html')
+
+	def displayError(self, err):
+		"""Display HTTPException errors, with status codes."""
+		assert not self._committed, "Already committed"
+		self._strmOut.clear()
 		self._strmOut.write(err.html())
 		uri = self._transaction.request().uri()
 		print 'HTTPResponse: %s: %s' % (uri, err.codeMessage())

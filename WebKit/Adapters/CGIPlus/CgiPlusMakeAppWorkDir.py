@@ -139,7 +139,7 @@ class MakeAppWorkDir:
 	def copyOtherFiles(self):
 		"""Make a copy of any other necessary files in the new work dir."""
 		self.msg("Copying other files...")
-		otherFiles = ('404Text.txt',)
+		otherFiles = ('error404.html',)
 		for name in otherFiles:
 			if name == 'AppServer':
 				if self._osType == 'nt':
@@ -283,7 +283,7 @@ class MakeAppWorkDir:
 Congratulations, you've just created a runtime working directory for Webware.
 
 Don't forget to set a correct security profile on this created directory tree.
-The accounts which will execute the application need READ access to this 
+The accounts which will execute the application need READ access to this
 directory tree.
 
 

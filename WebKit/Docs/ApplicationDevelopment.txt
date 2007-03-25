@@ -58,14 +58,11 @@ without any parameters.
 
 When you do this, you'll see this directory structure::
 
-    404Text.txt  Cache/     Context/    Launch.py   Logs/       WebKit.cgi
-    AppServer*   Configs/   ErrorMsgs/  Lib/        Sessions/   webkit*
+    AppServer*  Configs/  error404.html  Launch.py  Logs/      WebKit.cgi
+    Cache/      Context/  ErrorMsgs/     Lib/       Sessions/  webkit*
 
 Here's what the files and directories are for:
 
-``404Text.txt``:
-    The text when a page is not found (actually the HTML from <body> to
-    </body>).
 ``AppServer``:
     The script to start up the AppServer for this application.
     Each application will have its own AppServer, and its own process.
@@ -84,6 +81,11 @@ Here's what the files and directories are for:
     in the ``Configs`` directory, where you can also configure more than one
     context. You may also want to remove the other standard contexts that come
     with Webware from the config file.
+``error404.html``:
+    The static HTML page to be displayed when a page is not found. You can
+    remove this to display a standard error message, modify the page according
+    to your preferences, or use a custom error servlet instead by setting
+    ``ErrorPage`` in the ``Application.config`` file appropriately.
 ``ErrorMsgs``:
     HTML pages for any errors that occur. These can pile up and take up
     considerable size (even just during development), so you'll want to

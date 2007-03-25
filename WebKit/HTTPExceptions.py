@@ -31,6 +31,9 @@ class HTTPException(Exception):
 
 	"""
 
+	def __str__(self):
+		return '%d %s' % (self.code(), self.codeMessage())
+
 
 	## Error codes ##
 
@@ -267,7 +270,7 @@ class HTTPNotFound(HTTPException):
 
 	def html(self):
 		trans = self._transaction
-		page = trans.application()._404Page
+		page = trans.application()._error404
 		if page:
 			uri = trans.request().uri()
 			return page % htmlEncode(uri)
@@ -328,6 +331,16 @@ class HTTPPreconditionFailed(HTTPException):
 
 	"""
 	_code = 412, 'Precondition Failed'
+
+
+class HTTPServerError(HTTPException):
+	"""HTTPExcecption "Server Error" subclass.
+
+	The server encountered an unexpected condition which prevented it
+	from fulfilling the request.
+
+	"""
+	_code = 500, 'Server Error'
 
 
 class HTTPNotImplemented(HTTPException):

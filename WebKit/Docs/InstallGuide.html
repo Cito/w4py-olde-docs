@@ -157,15 +157,12 @@ exception, all is well.</p>
 </div>
 <div class="section">
 <h2><a class="toc-backref" href="#id19" id="web-server" name="web-server">Web Server</a></h2>
-<p>Webware's built-in web server is adequate for development
-and casual use.
-Beyond that, you will want to use Webware in concert with
-another web server.</p>
-<p>Any web server that supports CGI should be usable with
-Webware.  Apache is the best supported platform, both on Posix and
-Windows systems.  There is some experimental support for Xitami.  For
-all other web servers (IIS included) you should expect to use CGI to
-interface with the AppServer.</p>
+<p>Webware's built-in web server is adequate for development and casual use.
+Beyond that, you will want to use Webware in concert with another web server.</p>
+<p>Any web server that supports CGI should be usable with Webware.
+Apache is the best supported platform, both on Posix and Windows systems.
+There is some experimental support for Xitami.  For all other web servers
+(IIS included) you should expect to use CGI to interface with the AppServer.</p>
 <div class="section">
 <h3><a class="toc-backref" href="#id20" id="apache" name="apache">Apache</a></h3>
 <p>Apache is the best supported web server, both on Posix and Windows
@@ -764,14 +761,11 @@ You can see all of these options if you run <tt class="docutils literal"><span c
 without any parameters.</p>
 <p>When you list the created directory, you will see something like this:</p>
 <pre class="literal-block">
-404Text.txt  Cache/     ErrorMsgs/  Lib/    MyContext/  WebKit.cgi
-AppServer*   Configs/   Launch.py   Logs/   Sessions/   webkit*
+AppServer*  Configs/       ErrorMsgs/  Lib/   MyContext/  WebKit.cgi
+Cache/      error404.html  Launch.py   Logs/  Sessions/   webkit*
 </pre>
 <p>Here's what the files and directories are for:</p>
 <dl class="docutils">
-<dt><tt class="docutils literal"><span class="pre">404Text.txt</span></tt>:</dt>
-<dd>The text when a page is not found (actually the HTML from &lt;body&gt; to
-&lt;/body&gt;).</dd>
 <dt><tt class="docutils literal"><span class="pre">AppServer</span></tt>:</dt>
 <dd>The script to start up the AppServer for this application.
 Each application will have its own AppServer, and its own process.
@@ -783,6 +777,11 @@ script that can be used to start the AppServer as a service.</dd>
 <dt><tt class="docutils literal"><span class="pre">Configs</span></tt>:</dt>
 <dd>Configuration files for the application. These files are copied from
 <tt class="docutils literal"><span class="pre">WebKit/Configs</span></tt>, but are specific to this application/AppServer.</dd>
+<dt><tt class="docutils literal"><span class="pre">error404.html</span></tt>:</dt>
+<dd>The static HTML page to be displayed when a page is not found. You can
+remove this to display a standard error message, modify the page according
+to your preferences, or use a custom error servlet instead by setting
+<tt class="docutils literal"><span class="pre">ErrorPage</span></tt> in the <tt class="docutils literal"><span class="pre">Application.config</span></tt> file appropriately.</dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorMsgs</span></tt>:</dt>
 <dd>HTML pages for any errors that occur. These can pile up and take up
 considerable size (even just during development), so you'll want to
@@ -914,9 +913,6 @@ PID_FILE      the location of the pid file which records the process id
 
 WEBWARE_USER  the user to run the application server
 </pre>
-<p>Note that the pid file records the pid of the Python application server, not
-the pid of the wrapper script <tt class="docutils literal"><span class="pre">AppServer</span></tt> which is responsible for the
-AutoReload mechanism.</p>
 <p>For security reasons, you shouldn't use <tt class="docutils literal"><span class="pre">root</span></tt> as the Webware user, but
 a user with the least possible permissions, maybe even <tt class="docutils literal"><span class="pre">nobody</span></tt>. By
 default, the start script uses the owner of the <tt class="docutils literal"><span class="pre">AppServer</span></tt> script.</p>
@@ -935,6 +931,11 @@ Webware will immediately launch and write both files as the Webware user.</p>
 <p>By default, the script will start as the Webware user and will write the files
 to the working directory, so you have to unset <tt class="docutils literal"><span class="pre">LAUNCH_AS_WEBWARE</span></tt> if you
 want to use the standard system locations for the files instead.</p>
+<p>Note that the application server maintains its own pid file, usually called
+<tt class="docutils literal"><span class="pre">appserverpid.txt</span></tt>. You should use a different pid file for the start script,
+although it actually records the same pid, i.e. the pid of Webware's Python
+application server, not the pid of the wrapper script <tt class="docutils literal"><span class="pre">AppServer</span></tt> which is
+responsible for the AutoReload mechanism.</p>
 <p>The start script also passes the variable <tt class="docutils literal"><span class="pre">PYTHONOPTS</span></tt> to the <tt class="docutils literal"><span class="pre">AppServer</span></tt>
 script. You can add options <tt class="docutils literal"><span class="pre">-U</span></tt> for unbuffered output (to the log file)
 or <tt class="docutils literal"><span class="pre">-O</span></tt> if you want to use optimized Python files (i.e. <tt class="docutils literal"><span class="pre">.pyo</span></tt> instead

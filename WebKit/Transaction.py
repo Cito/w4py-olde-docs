@@ -34,10 +34,10 @@ class Transaction(Object):
 		self._response = None
 		self._session = None
 		self._servlet = None
-		self._errorOccurred = 0
+		self._error = None
 
 	attrNames = ('application', 'request', 'response',
-		'session', 'servlet', 'errorOccurred')
+		'session', 'servlet', 'errorOccurred', 'error')
 
 	def __repr__(self):
 		s = []
@@ -102,19 +102,21 @@ class Transaction(Object):
 		return self._response.endTime() - self._request.time()
 
 	def errorOccurred(self):
-		return self._errorOccurred
+		"""Check whether a server error occured."""
+		return isinstance(self._error, Exception)
 
-	def setErrorOccurred(self, flag):
-		"""Set error occured flag.
+	def error(self):
+		"""Return Exception instance if there was any."""
+		return self._error
 
-		Invoked by the application if an exception is raised to the
+	def setError(self, err):
+		"""Set Exception instance.
+
+		Invoked by the application if an Exception is raised to the
 		application level.
 
 		"""
-		self._errorOccurred = flag
-		# self._servlet = None
-		# @@ 2002-02-05 ce: disabled above statement so that
-		# @@ custom exception handlers can examine the servlet
+		self._error = err
 
 
 	## Transaction stages ##

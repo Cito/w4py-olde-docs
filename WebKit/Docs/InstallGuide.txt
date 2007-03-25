@@ -101,16 +101,13 @@ exception, all is well.
 Web Server
 ----------
 
-Webware's built-in web server is adequate for development
-and casual use.
-Beyond that, you will want to use Webware in concert with
-another web server.
+Webware's built-in web server is adequate for development and casual use.
+Beyond that, you will want to use Webware in concert with another web server.
 
-Any web server that supports CGI should be usable with
-Webware.  Apache is the best supported platform, both on Posix and
-Windows systems.  There is some experimental support for Xitami.  For
-all other web servers (IIS included) you should expect to use CGI to
-interface with the AppServer.
+Any web server that supports CGI should be usable with Webware.
+Apache is the best supported platform, both on Posix and Windows systems.
+There is some experimental support for Xitami.  For all other web servers
+(IIS included) you should expect to use CGI to interface with the AppServer.
 
 Apache
 ~~~~~~
@@ -842,14 +839,11 @@ without any parameters.
 
 When you list the created directory, you will see something like this::
 
-    404Text.txt  Cache/     ErrorMsgs/  Lib/    MyContext/  WebKit.cgi
-    AppServer*   Configs/   Launch.py   Logs/   Sessions/   webkit*
+    AppServer*  Configs/       ErrorMsgs/  Lib/   MyContext/  WebKit.cgi
+    Cache/      error404.html  Launch.py   Logs/  Sessions/   webkit*
 
 Here's what the files and directories are for:
 
-``404Text.txt``:
-    The text when a page is not found (actually the HTML from <body> to
-    </body>).
 ``AppServer``:
     The script to start up the AppServer for this application.
     Each application will have its own AppServer, and its own process.
@@ -861,6 +855,11 @@ Here's what the files and directories are for:
 ``Configs``:
     Configuration files for the application. These files are copied from
     ``WebKit/Configs``, but are specific to this application/AppServer.
+``error404.html``:
+    The static HTML page to be displayed when a page is not found. You can
+    remove this to display a standard error message, modify the page according
+    to your preferences, or use a custom error servlet instead by setting
+    ``ErrorPage`` in the ``Application.config`` file appropriately.
 ``ErrorMsgs``:
     HTML pages for any errors that occur. These can pile up and take up
     considerable size (even just during development), so you'll want to
@@ -1038,7 +1037,7 @@ want to use the standard system locations for the files instead.
 Note that the application server maintains its own pid file, usually called
 ``appserverpid.txt``. You should use a different pid file for the start script,
 although it actually records the same pid, i.e. the pid of Webware's Python
-application server, not the pid of the wrapper script ``AppServer` which is
+application server, not the pid of the wrapper script ``AppServer`` which is
 responsible for the AutoReload mechanism.
 
 The start script also passes the variable ``PYTHONOPTS`` to the ``AppServer``

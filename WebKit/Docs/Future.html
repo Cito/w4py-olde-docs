@@ -50,6 +50,12 @@ so feel free to jump in!</p>
 <div class="section">
 <h3><a id="major-items" name="major-items">Major Items</a></h3>
 <ul class="simple">
+<li>Drop backward compatibility down to Python 2.0 and require Python 2.3
+or Python 2.4 instead. Make use of the new Python features like new-style
+classes, properties, sets, decorators etc. and get rid of old garbage and
+workarounds for old Python versions.</li>
+<li>Use distutils instead of our own installer, use Python eggs instead of
+our own plug-in concept.</li>
 <li>CheckSource.py: A program to check the source code conventions.</li>
 <li>Role-based security and user-authentication. Goal is to eliminate,
 as much as possible, developer-written security logic.
@@ -61,10 +67,12 @@ This should be provided by the WebKit and be configurable.</li>
 clearing logs, displaying a maximum of information at a time, etc.
 Consider using module 'resource'.</li>
 <li>Investigate case insensitive URLs, especially for the Windows platform.</li>
-<li>Plug-ins:
-* In ExamplePage, automatically support examples of any plug-in
-* Better docs
-* Properties.config. 'Load', 0, 1 or the name of the required op sys</li>
+<li>Plug-ins:<ul>
+<li>In ExamplePage, automatically support examples of any plug-in</li>
+<li>Better docs</li>
+<li>Properties.config. 'Load', 0, 1 or the name of the required op sys</li>
+</ul>
+</li>
 </ul>
 </div>
 <div class="section">
@@ -137,10 +145,10 @@ this would go away with a new one-process-per-application architecture.)</li>
 <h3><a id="check-out" name="check-out">Check out</a></h3>
 <ul class="simple">
 <li><a class="reference" href="http://pythonpaste.org">Python Paste</a></li>
-<li><a class="reference" href="http://www.djangoproject.com">Django</a></li>
-<li><a class="reference" href="http://www.turbogears.org">TurboGears</a></li>
-<li><a class="reference" href="http://pylonshq.com">Pylons</a></li>
-<li><a class="reference" href="http://webpy.org">web.py</a></li>
+<li><a class="reference" href="http://www.djangoproject.com">Django</a>,
+<a class="reference" href="http://www.turbogears.org">TurboGears</a>,
+<a class="reference" href="http://pylonshq.com">Pylons</a>,
+<a class="reference" href="http://webpy.org">web.py</a></li>
 <li><a class="reference" href="http://aquarium.sourceforge.net">Aquarium</a></li>
 <li><a class="reference" href="http://www.zope.org/Members/Amos/WhatIsAcquisition">http://www.zope.org/Members/Amos/WhatIsAcquisition</a></li>
 <li><a class="reference" href="http://www.zope.org/Members/jim/Info/IPC8/AcquisitionAlgebra/index.html">http://www.zope.org/Members/jim/Info/IPC8/AcquisitionAlgebra/index.html</a></li>

@@ -156,7 +156,7 @@ class MakeAppWorkDir:
 	def copyOtherFiles(self):
 		"""Make a copy of any other necessary files in the new work dir."""
 		self.msg("Copying other files...")
-		otherFiles = ('AppServer', 'webkit', '404Text.txt')
+		otherFiles = ('AppServer', 'webkit', 'error404.html')
 		for name in otherFiles:
 			if name == 'AppServer':
 				if self._osType == 'nt':

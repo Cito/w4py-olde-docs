@@ -8,11 +8,11 @@ from Object import Object
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 from ExceptionHandler import ExceptionHandler
 from HTTPRequest import HTTPRequest
+from HTTPExceptions import HTTPException, HTTPSessionExpired
 from Transaction import Transaction
 from Session import Session
 from ASStreamOut import ConnectionAbortedError
 import URLParser
-import HTTPExceptions
 
 debug = False
 
@@ -67,10 +67,16 @@ class Application(ConfigurableForServerSidePath, Object):
 		ConfigurableForServerSidePath.__init__(self)
 		Object.__init__(self)
 
+		print 'Initializing Application...'
+		print 'Current directory:', os.getcwd()
+
 		if self.setting('PrintConfigAtStartUp'):
 			self.printConfig()
 
 		self.initVersions()
+
+		self.readError404Page()
+		self.initErrorPage()
 
 		self._shutDownHandlers = []
 
@@ -104,8 +110,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		assert isinstance(klass, ClassType) or issubclass(klass, Object)
 		self._sessions = klass(self)
 
-		print 'Current directory:', os.getcwd()
-
 		URLParser.initApp(self)
 		self._rootURLParser = URLParser.ContextParser(self)
 
@@ -114,16 +118,51 @@ class Application(ConfigurableForServerSidePath, Object):
 		if useSessionSweeper:
 			self.startSessionSweeper()
 
-		try: # try to get a 404 error page from the working dir
-			self._404Page = open(os.path.join(self._serverSidePath,
-				"404Text.txt")).read()
-		except: # if not found in the working dir,
-			try: # then try the directory this file is located in
-				self._404Page = open(os.path.join(
-					os.path.dirname(os.path.abspath(__file__)),
-					"404Text.txt")).read()
-			except: # otherwise fall back to standard exception
-				self._404Page = None
+	def readError404Page(self):
+		"""Read 404 error page in the working dir or next to this module."""
+		dirs = (self._serverSidePath,
+			os.path.dirname(os.path.abspath(__file__)))
+		pages = ('error404.html', '404Text.txt')
+		for dir in dirs:
+			for page in pages:
+				try:
+					self._error404 = open(os.path.join(dir, page)).read()
+					if page != pages[0]:
+						print 'Deprecation warning: ' \
+							'Please use %s instead of %s' % pages
+				except:
+					continue
+				else:
+					break
+			else:
+				continue
+			break
+		else:
+			self._error404 = None
+
+	def initErrorPage(self):
+		"""Evaluate the ErrorPage setting."""
+		urls = self.setting('ErrorPage') or None
+		if urls:
+			try:
+				errors = urls.keys()
+			except AttributeError:
+				errors = ['Exception']
+				urls = { errors[0]: urls }
+			for err in errors:
+				if urls[err] and not urls[err].startswith('/'):
+					urls[err] = '/' + urls[err]
+		self._errorPage = urls
+
+	def getErrorPage(self, errorClass):
+		"""Return the error page url corresponding to an error class."""
+		if self._errorPage.has_key(errorClass.__name__):
+			return self._errorPage[errorClass.__name__]
+		if errorClass is not Exception:
+			for errorClass in errorClass.__bases__:
+				url = self.getErrorPage(errorClass)
+				if url:
+					return url
 
 	def initVersions(self):
 		"""Get and store versions.
@@ -238,6 +277,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				'content-type': 'text/html',
 				'Subject': 'Error'
 				},
+			'ErrorPage': None,
 			'MaxValueLengthInExceptionReport': 500,
 			'RPCExceptionReturn': 'traceback',
 			'ReportRPCExceptionsInWebKit': True,
@@ -249,7 +289,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				'Docs': 'Docs',
 				},
 			'Debug': {
-				'Sessions': 0,
+				'Sessions': False,
 				},
 			'EnterDebuggerOnException': False,
 			'DirectoryFile': ['index', 'Index', 'main', 'Main'],
@@ -268,7 +308,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			'FilesToServe': [],
 			'UnknownFileTypes': {
 				'ReuseServlets': True,
-				'Technique': 'serveContent', # serveContent or redirectSansAdapter
+				'Technique': 'serveContent', # or redirectSansAdapter
 				'CacheContent': False,
 				'MaxCacheContentSize': 128*1024,
 				'ReadBufferSize': 32*1024
@@ -359,7 +399,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			except KeyError:
 				transaction.request().setSessionExpired(1)
 				if not self.setting('IgnoreInvalidSession'):
-					raise HTTPExceptions.HTTPSessionExpired
+					raise HTTPSessionExpired
 				sessId = None
 		if not sessId:
 			session = Session(transaction)
@@ -481,20 +521,11 @@ class Application(ConfigurableForServerSidePath, Object):
 				response = request.responseClass()(trans, strmOut)
 				if response:
 					trans.setResponse(response)
-					try:
-						self.runTransaction(trans)
-					except ConnectionAbortedError:
-						trans.setErrorOccurred(True)
-					except:
-						trans.setErrorOccurred(True)
-						if self.setting('EnterDebuggerOnException') and sys.stdin.isatty():
-							import pdb
-							pdb.post_mortem(sys.exc_info()[2])
-						self.handleExceptionInTransaction(sys.exc_info(), trans)
+					self.runTransaction(trans)
 					try:
 						trans.response().deliver()
-					except ConnectionAbortedError:
-						trans.setErrorOccurred(True)
+					except ConnectionAbortedError, err:
+						trans.setError(err)
 					response.clearTransaction()
 					# release possible servlets on the stack
 					while 1:
@@ -546,22 +577,69 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		if self.setting('UseAutomaticPathSessions'):
 			request = trans.request()
-			request_has_cookie_session = request.hasCookieSession()
-			request_has_path_session = request.hasPathSession()
-			if request_has_cookie_session and request_has_path_session:
+			hasCookieSession = request.hasCookieSession()
+			hasPathSession = request.hasPathSession()
+			if hasCookieSession and hasPathSession:
 				self.handleUnnecessaryPathSession(trans)
 				return
-			elif not request_has_cookie_session and not request_has_path_session:
+			elif not hasCookieSession and not hasPathSession:
 				self.handleMissingPathSession(trans)
 				return
+		servlet = None
 		try:
 			servlet = self.rootURLParser().findServletForTransaction(trans)
 			self.runTransactionViaServlet(servlet, trans)
-		except HTTPExceptions.HTTPException, err:
-			err.setTransaction(trans)
-			trans.response().displayError(err)
 		except EndResponse:
 			pass
+		except ConnectionAbortedError, err:
+			trans.setError(err)
+		except Exception, err:
+			trans.setError(err)
+			isHTTPException = isinstance(err, HTTPException)
+			if isHTTPException:
+				err.setTransaction(trans)
+			# get custom error page corresponding to the exception
+			# (but do not use a custom page if response is already committed)
+			if self._errorPage and not trans.response().isCommitted():
+				url = self.getErrorPage(err.__class__)
+				if isHTTPException and not url:
+					# get custom error page for status code
+					code = err.code()
+					if self._errorPage.has_key(code):
+						url = self._errorPage[code]
+			else:
+				url = None
+			if url:
+				# forward to custom error page
+				trans.setError(err)
+				if servlet:
+					self.returnServlet(servlet, trans)
+					servlet.resetKeyBindings()
+					trans.setServlet(None)
+				request = trans.request()
+				originalURL = request.urlPath()
+				request.setURLPath(url)
+				try:
+					servlet = self.rootURLParser(
+						).findServletForTransaction(trans)
+				finally:
+					request.setURLPath(originalURL)
+				trans.response().reset()
+				try:
+					self.runTransactionViaServlet(servlet, trans)
+				except EndResponse:
+					pass
+			elif isHTTPException:
+				# display standard http error page
+				trans.response().displayError(err)
+			else:
+				# standard error handling
+				if self.setting('EnterDebuggerOnException') \
+						and sys.stdin.isatty():
+					import pdb
+					pdb.post_mortem(sys.exc_info()[2])
+				self.handleExceptionInTransaction(
+					sys.exc_info(), trans)
 
 	def runTransactionViaServlet(self, servlet, trans):
 		"""Execute the transaction using the servlet.
@@ -635,7 +713,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		trans.setServlet(servlet)
 		# call method of included servlet
 		if hasattr(servlet, 'runMethodForTransaction'):
-			result = servlet.runMethodForTransaction(trans, method, *args, **kw)
+			result = servlet.runMethodForTransaction(
+				trans, method, *args, **kw)
 		else:
 			servlet.awake(trans)
 			result = getattr(servlet, method)(*args, **kw)
@@ -822,6 +901,7 @@ Largely historical.
 
 if __name__ == '__main__':
 	if len(sys.argv) != 2:
-		sys.stderr.write('WebKit: Application: Expecting one filename argument.\n')
+		sys.stderr.write('WebKit: Application:'
+			' Expecting one filename argument.\n')
 	requestDict = eval(open(sys.argv[1]).read())
 	main(requestDict)

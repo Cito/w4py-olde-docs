@@ -82,14 +82,11 @@ Webware installation.</dd>
 without any parameters.</p>
 <p>When you do this, you'll see this directory structure:</p>
 <pre class="literal-block">
-404Text.txt  Cache/     Context/    Launch.py   Logs/       WebKit.cgi
-AppServer*   Configs/   ErrorMsgs/  Lib/        Sessions/   webkit*
+AppServer*  Configs/  error404.html  Launch.py  Logs/      WebKit.cgi
+Cache/      Context/  ErrorMsgs/     Lib/       Sessions/  webkit*
 </pre>
 <p>Here's what the files and directories are for:</p>
 <dl class="docutils">
-<dt><tt class="docutils literal"><span class="pre">404Text.txt</span></tt>:</dt>
-<dd>The text when a page is not found (actually the HTML from &lt;body&gt; to
-&lt;/body&gt;).</dd>
 <dt><tt class="docutils literal"><span class="pre">AppServer</span></tt>:</dt>
 <dd>The script to start up the AppServer for this application.
 Each application will have its own AppServer, and its own process.
@@ -108,6 +105,11 @@ You can also change this subsequently in the <tt class="docutils literal"><span 
 in the <tt class="docutils literal"><span class="pre">Configs</span></tt> directory, where you can also configure more than one
 context. You may also want to remove the other standard contexts that come
 with Webware from the config file.</dd>
+<dt><tt class="docutils literal"><span class="pre">error404.html</span></tt>:</dt>
+<dd>The static HTML page to be displayed when a page is not found. You can
+remove this to display a standard error message, modify the page according
+to your preferences, or use a custom error servlet instead by setting
+<tt class="docutils literal"><span class="pre">ErrorPage</span></tt> in the <tt class="docutils literal"><span class="pre">Application.config</span></tt> file appropriately.</dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorMsgs</span></tt>:</dt>
 <dd>HTML pages for any errors that occur. These can pile up and take up
 considerable size (even just during development), so you'll want to
