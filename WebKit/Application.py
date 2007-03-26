@@ -586,50 +586,70 @@ class Application(ConfigurableForServerSidePath, Object):
 				self.handleMissingPathSession(trans)
 				return
 		servlet = None
+		findServlet = self.rootURLParser().findServletForTransaction
 		try:
-			servlet = self.rootURLParser().findServletForTransaction(trans)
+			servlet = findServlet(trans)
 			self.runTransactionViaServlet(servlet, trans)
 		except EndResponse:
 			pass
 		except ConnectionAbortedError, err:
 			trans.setError(err)
 		except Exception, err:
-			trans.setError(err)
-			isHTTPException = isinstance(err, HTTPException)
-			if isHTTPException:
-				err.setTransaction(trans)
-			# get custom error page corresponding to the exception
-			# (but do not use a custom page if response is already committed)
-			if self._errorPage and not trans.response().isCommitted():
+			urls = []
+			while 1:
+				trans.setError(err)
+				isHTTPException = isinstance(err, HTTPException)
+				if isHTTPException:
+					err.setTransaction(trans)
+				# Get custom error page corresponding to the exception,
+				# but do not use custom page if response is already committed:
+				if not self._errorPage or trans.response().isCommitted():
+					break
 				url = self.getErrorPage(err.__class__)
 				if isHTTPException and not url:
 					# get custom error page for status code
 					code = err.code()
 					if self._errorPage.has_key(code):
 						url = self._errorPage[code]
-			else:
-				url = None
-			if url:
+				if not url or url in urls:
+					# If there is no custom error page configured,
+					# or we get into a circular chain of error pages,
+					# then we fall back to standard error handling.
+					break
+				urls.append(url)
 				# forward to custom error page
-				trans.setError(err)
 				if servlet:
 					self.returnServlet(servlet, trans)
 					servlet.resetKeyBindings()
-					trans.setServlet(None)
+					servlet = None
+					trans.setServlet(servlet)
 				request = trans.request()
 				originalURL = request.urlPath()
 				request.setURLPath(url)
 				try:
-					servlet = self.rootURLParser(
-						).findServletForTransaction(trans)
-				finally:
-					request.setURLPath(originalURL)
-				trans.response().reset()
-				try:
-					self.runTransactionViaServlet(servlet, trans)
+					try:
+						servlet = findServlet(trans)
+					finally:
+						# give the error page the original URL as information
+						request.setURLPath(originalURL)
+					trans.response().reset()
+					try:
+						self.runTransactionViaServlet(servlet, trans)
+					except EndResponse:
+						pass
 				except EndResponse:
 					pass
-			elif isHTTPException:
+				except ConnectionAbortedError, err:
+					trans.setError(err)
+				except Exception, err:
+					# If the custom error page itself throws an exception,
+					# display the new exception instead of the original one,
+					# so we notice that something is broken here.
+					request.setURLPath(url)
+					url = None
+				if url:
+					return # error has already been handled
+			if isHTTPException:
 				# display standard http error page
 				trans.response().displayError(err)
 			else:
