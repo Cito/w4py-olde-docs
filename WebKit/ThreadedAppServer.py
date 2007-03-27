@@ -812,7 +812,7 @@ class AdapterHandler(Handler):
 		requestDict['input'] = self.makeInput()
 		requestDict['requestID'] = self._requestID
 
-		streamOut = TASStreamOut(self._sock, bufferSize=self._responseBufferSize)
+		streamOut = TASStreamOut(self._sock, bufferSize=self._server._responseBufferSize)
 		transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
 		try:
 			streamOut.close()
@@ -837,7 +837,7 @@ class AdapterHandler(Handler):
 
 	def makeInput(self):
 		"""Create a file-like object from the socket."""
-		return self._sock.makefile("rb", self._requestBufferSize)
+		return self._sock.makefile("rb", self._server._requestBufferSize)
 
 
 # Determines whether the main look should run in another thread.
