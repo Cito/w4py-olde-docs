@@ -326,13 +326,6 @@ class HTTPRequest(Request):
 		else:
 			return self._pathInfo
 
-	def originalURLPath(self):
-		"""Return URL path of the original servlet before any forwarding."""
-		if self._stack:
-			return self._stack[0][1]
-		else:
-			self.urlPath()
-
 	def urlPathDir(self):
 		"""Same as urlPath, but only gives the directory."""
 		return os.path.dirname(self.urlPath())
@@ -578,8 +571,8 @@ class HTTPRequest(Request):
 
 	def push(self, obj, url=None):
 		"""Push object and URL path on a stack, setting a new URL."""
-		urlPath = self.urlPath()
-		self._stack.append((obj, urlPath,
+		urlPath, uri = self.urlPath(), self.uri()
+		self._stack.append((obj, urlPath, uri,
 			self._serverSidePath, self._serverSideContextPath,
 			self._contextName, self._serverRootPath,
 			self._extraURLPath))
@@ -589,16 +582,68 @@ class HTTPRequest(Request):
 	def pop(self):
 		"""Pop URL path and object from the stack, returning the object."""
 		if self._stack:
-			(obj, urlPath,
+			(obj, urlPath, uri,
 				self._serverSidePath, self._serverSideContextPath,
 				self._contextName, self._serverRootPath,
 				self._extraURLPath) = self._stack.pop()
 			self.setURLPath(urlPath)
 			return obj
 
+	def servlet(self):
+		"""Get current servlet for this request."""
+		return self._transaction.servlet()
+
+	def originalServlet(self):
+		"""Get original servlet before any forwarding."""
+		if self._stack:
+			return self._stack[0][0]
+		else:
+			self.servlet()
+
+	def previousServlet(self):
+		"""Get the servlet that passed this request to us, if any."""
+		if self._stack:
+			return self._stack[-1][0]
+
+	parent = previousServlet # kept old name as synonym
+
+	def previousServlets(self):
+		"""Get the list of all previous servlets."""
+		return [s[0] for s in self._stack]
+
+	parents = previousServlets # kept old name as synonym
+
+	def originalURLPath(self):
+		"""Get URL path of the original servlet before any forwarding."""
+		if self._stack:
+			return self._stack[0][1]
+		else:
+			self.urlPath()
+
+	def previousURLPath(self):
+		"""Get the previous URL path, if any."""
+		if self._stack:
+			return self._stack[-1][1]
+
 	def previousURLPaths(self):
-		"""Return the list of all previous URL paths."""
+		"""Get the list of all previous URL paths."""
 		return [s[1] for s in self._stack]
+
+	def originalURI(self):
+		"""Get URI of the original servlet before any forwarding."""
+		if self._stack:
+			return self._stack[0][2]
+		else:
+			self.uri()
+
+	def previousURI(self):
+		"""Get the previous URI, if any."""
+		if self._stack:
+			return self._stack[-1][2]
+
+	def previousURIs(self):
+		"""Get the list of all previous URIs."""
+		return [s[2] for s in self._stack]
 
 	def rawInput(self, rewind=False):
 		"""Get the raw input from the request.
