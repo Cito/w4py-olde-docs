@@ -618,7 +618,7 @@ class HTTPRequest(Request):
 		if self._stack:
 			return self._stack[0][1]
 		else:
-			self.urlPath()
+			return self.urlPath()
 
 	def previousURLPath(self):
 		"""Get the previous URL path, if any."""
@@ -634,7 +634,7 @@ class HTTPRequest(Request):
 		if self._stack:
 			return self._stack[0][2]
 		else:
-			self.uri()
+			return self.uri()
 
 	def previousURI(self):
 		"""Get the previous URI, if any."""
