@@ -56,7 +56,7 @@ class HTTPServlet(Servlet):
 						'If-Modified-Since', None)
 				if if_modified_since and if_modified_since.split(';')[0] == lm:
 					trans.response().setStatus(304, 'Not Modified')
-					#print "304", request.serverSidePath()
+					# print "304", request.serverSidePath()
 					return
 		method = self._methodForRequestType.get(httpMethodName, None)
 		if not method:

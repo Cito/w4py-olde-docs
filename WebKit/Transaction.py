@@ -92,6 +92,8 @@ class Transaction(Object):
 
 	def setServlet(self, servlet):
 		self._servlet = servlet
+		if servlet and self._request:
+			servlet._serverSidePath = self._request.serverSidePath()
 
 	def duration(self):
 		"""Return the duration, in seconds, of the transaction.

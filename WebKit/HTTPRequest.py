@@ -119,6 +119,8 @@ class HTTPRequest(Request):
 			dict[key] = self._cookies[key].value
 		self._cookies = dict
 
+		self._contextName = None
+		self._serverSidePath = self._serverSideContextPath = None
 		self._serverRootPath = self._extraURLPath = ''
 		self._cookieSession = self._pathSession = None
 		self._sessionExpired = False
@@ -569,25 +571,24 @@ class HTTPRequest(Request):
 		"""Get the environment for the request."""
 		return self._environ
 
-	def push(self, obj, url=None):
-		"""Push object and URL path on a stack, setting a new URL."""
+	def push(self, servlet, url=None):
+		"""Push servlet and URL path on a stack, setting a new URL."""
 		urlPath, uri = self.urlPath(), self.uri()
-		self._stack.append((obj, urlPath, uri,
+		self._stack.append((servlet, urlPath, uri, self._contextName,
 			self._serverSidePath, self._serverSideContextPath,
-			self._contextName, self._serverRootPath,
-			self._extraURLPath))
+			self._serverRootPath, self._extraURLPath))
 		if url is not None:
 			self.setURLPath(url)
 
 	def pop(self):
-		"""Pop URL path and object from the stack, returning the object."""
+		"""Pop URL path and servlet from the stack, returning the servlet."""
 		if self._stack:
-			(obj, urlPath, uri,
+			(servlet, urlPath, uri, self._contextName,
 				self._serverSidePath, self._serverSideContextPath,
-				self._contextName, self._serverRootPath,
-				self._extraURLPath) = self._stack.pop()
-			self.setURLPath(urlPath)
-			return obj
+				self._serverRootPath, self._extraURLPath) = self._stack.pop()
+			if urlPath is not None:
+				self.setURLPath(urlPath)
+			return servlet
 
 	def servlet(self):
 		"""Get current servlet for this request."""

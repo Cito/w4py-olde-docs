@@ -530,15 +530,15 @@ class Application(ConfigurableForServerSidePath, Object):
 					# release possible servlets on the stack
 					while 1:
 						servlet = request.pop()
-						if servlet is None:
+						if not servlet:
 							break
-						self.returnServlet(servlet, trans)
+						self.returnServlet(servlet)
 						servlet.resetKeyBindings()
 					# get current servlet (this may have changed)
 					servlet = trans.servlet()
 					if servlet:
 						# return the current servlet to its pool
-						self.returnServlet(servlet, trans)
+						self.returnServlet(servlet)
 				if self.setting('LogActivity'):
 					self.writeActivityLog(trans)
 			request.clearTransaction()
@@ -585,7 +585,6 @@ class Application(ConfigurableForServerSidePath, Object):
 			elif not hasCookieSession and not hasPathSession:
 				self.handleMissingPathSession(trans)
 				return
-		servlet = None
 		findServlet = self.rootURLParser().findServletForTransaction
 		try:
 			servlet = findServlet(trans)
@@ -618,25 +617,8 @@ class Application(ConfigurableForServerSidePath, Object):
 					break
 				urls.append(url)
 				# forward to custom error page
-				if servlet:
-					self.returnServlet(servlet, trans)
-					servlet.resetKeyBindings()
-					servlet = None
-					trans.setServlet(servlet)
-				request = trans.request()
-				originalURL = request.urlPath()
-				request.setURLPath(url)
 				try:
-					try:
-						servlet = findServlet(trans)
-					finally:
-						# give the error page the original URL as information
-						request.setURLPath(originalURL)
-					trans.response().reset()
-					try:
-						self.runTransactionViaServlet(servlet, trans)
-					except EndResponse:
-						pass
+					self.forward(trans, url)
 				except EndResponse:
 					pass
 				except ConnectionAbortedError, err:
@@ -645,7 +627,6 @@ class Application(ConfigurableForServerSidePath, Object):
 					# If the custom error page itself throws an exception,
 					# display the new exception instead of the original one,
 					# so we notice that something is broken here.
-					request.setURLPath(url)
 					url = None
 				if url:
 					return # error has already been handled
@@ -740,7 +721,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			result = getattr(servlet, method)(*args, **kw)
 			servlet.sleep(trans)
 		# return new servlet to its pool
-		self.returnServlet(servlet, trans)
+		self.returnServlet(servlet)
 		# release bindings of new servlet
 		servlet.resetKeyBindings()
 		# restore current request
@@ -769,7 +750,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			# that the current page may continue processing
 			pass
 		# return new servlet to its pool
-		self.returnServlet(servlet, trans)
+		self.returnServlet(servlet)
 		# release bindings of new servlet
 		servlet.resetKeyBindings()
 		# restore current request
@@ -799,8 +780,8 @@ class Application(ConfigurableForServerSidePath, Object):
 				parts.append(part)
 		return '/'.join(parts)
 
-	def returnServlet(self, servlet, trans):
-		servlet.close(trans)
+	def returnServlet(self, servlet):
+		servlet.close()
 
 	def handleException(self):
 		"""Handle exceptions.

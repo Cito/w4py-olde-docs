@@ -142,10 +142,7 @@ class Servlet(Object):
 	def serverSidePath(self, path=None):
 		"""Return the filesystem path of the page on the server."""
 		if self._serverSidePath is None:
-			if hasattr(self, "_request") and self._request is not None:
-				self._serverSidePath = self._request.serverSidePath()
-			else:
-				self._serverSidePath = self._transaction.request().serverSidePath()
+			self._serverSidePath = self._transaction.request().serverSidePath()
 		if path:
 			if path.startswith('/'):
 				path = path[1:]
@@ -157,9 +154,10 @@ class Servlet(Object):
 
 	## Deprecated ##
 
-	def close(self, trans):
+	def close(self):
 		if self._factory:
-			self._factory.returnServlet(trans, self)
+			self._factory.returnServlet(self)
+			self._factory = None
 
 	def setFactory(self, factory):
 		self._factory = factory

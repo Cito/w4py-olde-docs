@@ -289,7 +289,7 @@ class ServletFactory(Object):
 				self._servletPool[path] = []
 		return servlet
 
-	def returnServlet(self, trans, servlet):
+	def returnServlet(self, servlet):
 		"""Return servlet to the pool.
 
 		Called by Servlet.close(), which returns the servlet
@@ -298,7 +298,7 @@ class ServletFactory(Object):
 		"""
 		if servlet.canBeReused() and not servlet.canBeThreaded() \
 				and self._cacheInstances:
-			path = trans.request().serverSidePath()
+			path = servlet.serverSidePath()
 			self._servletPool[path].append(servlet)
 
 	def flushCache(self):
