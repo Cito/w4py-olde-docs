@@ -594,7 +594,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		except ConnectionAbortedError, err:
 			trans.setError(err)
 		except Exception, err:
-			urls = []
+			urls = {}
 			while 1:
 				trans.setError(err)
 				isHTTPException = isinstance(err, HTTPException)
@@ -610,12 +610,12 @@ class Application(ConfigurableForServerSidePath, Object):
 					code = err.code()
 					if self._errorPage.has_key(code):
 						url = self._errorPage[code]
-				if not url or url in urls:
+				if not url or urls.has_key(url):
 					# If there is no custom error page configured,
 					# or we get into a circular chain of error pages,
 					# then we fall back to standard error handling.
 					break
-				urls.append(url)
+				urls[url] = None
 				# forward to custom error page
 				try:
 					self.forward(trans, url)

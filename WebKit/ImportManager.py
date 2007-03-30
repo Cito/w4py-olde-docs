@@ -66,7 +66,6 @@ class ImportManager(Object):
 		self._lock = ImportLock()
 		self._fileList = {}
 		self._moduleFiles = {}
-		self._otherFiles = set()
 		self._notifyHook = None
 
 	def load_module(self, name, file, filename, info):
@@ -124,8 +123,6 @@ class ImportManager(Object):
 		self._fileList[path] = modtime
 		if modname:
 			self._moduleFiles[modname] = path
-		else:
-			self._otherFiles.add(path)
 		# send notification that this file was imported
 		if self._notifyHook:
 			self._notifyHook(path, modtime)
