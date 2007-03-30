@@ -2,6 +2,11 @@
 # JSON-RPC demo client contributed by Christoph Zwerschke
 #
 
+try:
+    import simplejson
+except ImportError:
+    simplejson = None
+
 from ExamplePage import ExamplePage
 
 
@@ -10,6 +15,8 @@ class JSONRPCClient(ExamplePage):
 
 	def writeJavaScript(self):
 		ExamplePage.writeJavaScript(self)
+		if not simplejson:
+			return
 		self.write('''\
 			<script type="text/javascript" src="jsonrpc.js"></script>
 			<script type="text/javascript">
@@ -46,9 +53,7 @@ class JSONRPCClient(ExamplePage):
 			<p>In order to run the JSON-RPC servlet,
 			<a href="http://cheeseshop.python.org/pypi/simplejson">simplejson</a>
 			must be installed on your server.''')
-		try:
-			import simplejson
-		except ImportError:
+		if not simplejson:
 			self.write(''' <span style="color:red">
 			Unfortunately, simplejson is not installed.</span>''')
 			return

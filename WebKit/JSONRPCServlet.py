@@ -3,8 +3,12 @@
 #
 
 import traceback
-import simplejson # http://cheeseshop.python.org/pypi/simplejson
 import cStringIO as StringIO
+try:
+    import simplejson
+except ImportError:
+    print "ERROR: simplejson is not installed."
+    print "Get it from http://cheeseshop.python.org/pypi/simplejson"
 
 from WebKit.HTTPContent import HTTPContent
 
