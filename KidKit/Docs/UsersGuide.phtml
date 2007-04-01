@@ -69,17 +69,18 @@ The default output format for Kid. Some possible values are:
 If nothing is specified, 'default' is used.</li>
 <li><b>CacheKidTemplates</b><br>
 Set this to False if you do not want compiled Kid templates (i.e. the
-<tt>.py</tt> or <tt>.pyc</tt> files) to be cached on disk.
-Please note that Webware still caches servlets in memory.
+<tt>.py</tt> or <tt>.pyc</tt> files) to be cached on disk. Otherwise,
+Kid templates will be cached (this is the default). Please note that if
+you set this to False, Webware still caches servlets in memory.
 Use the parameters <b>CacheServletClasses</b> and <b>CacheServletInstances</b>
 to control this behavior (set them to False for debugging).
 </li>
 <li><b>UseKidKitCache</b><br>
 Set this to True if you want to use a separate KidKit file cache subdirectory
-<tt>Cache/KidKit</tt> to be used for storing the compiled Kid templates.
-The following two options are only applicable if this is set to True
-(this is the default). If this is set to False, Kid will cache the compiled
-modules along with the templates.</li>
+<tt>Cache/KidKit</tt> to be used for storing the compiled Kid templates. The
+following two options are only applicable if this is set to True. If this is
+set to False, Kid will cache the compiled modules along with the templates
+(this is the default).</li>
 <li><b>CacheKidSource</b><br>
 Set this to True if you want to store the source code of the compiled templates
 (i.e. the <tt>.py</tt> files) in the cache directory as well. Otherwise, only
