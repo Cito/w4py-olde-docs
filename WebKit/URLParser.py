@@ -26,9 +26,6 @@ except ImportError:
 	def warn(s, **a):
 		print s
 
-# Legal characters for use in a module name -- used when turning
-# an entire path into a module name.
-moduleNameRE = re.compile('[^a-zA-Z_]')
 
 _globalApplication = None
 def application():
@@ -558,23 +555,30 @@ class _FileParser(URLParser):
 
 	def initModule(self):
 		"""Get the __init__ module object for this FileParser's directory."""
-		try:
-			result = self._imp.find_module('__init__', [self._path])
-			if result is None:
-				return None
-			file, initPath, desc = result
-			fullName = moduleNameRE.sub('_', os.path.join(self._path, '__init__'))
-			if len(fullName) > 100:
-				fullName = fullName[:-50]
-			module = None
-			try:
-				module = self._imp.load_module(fullName, file, initPath, desc)
-			except:
-				pass
-			file.close()
-			return module
-		except ImportError:
-			return None
+		path = self._path
+		if not path.endswith(os.sep):
+			path += os.sep
+		normpath = os.path.normcase(path)
+		# try guessing the package name from sys.path
+		for dir in sys.path:
+			normdir = os.path.normcase(dir)
+			if normpath.startswith(normdir + os.sep):
+				name = path[len(dir)+1:-1]
+				name = name.replace(os.sep, '.')
+				if os.altsep:
+					name = name.replace(os.altsep, '.')
+				if name in sys.modules:
+					# do not reload the package if not needed
+					return sys.modules[name]
+				try:
+					file, dir, desc = self._imp.find_module(name, dir)
+					try:
+						module = self._imp.load_module(name, file, dir, desc)
+					finally:
+						file.close()
+					return module
+				except ImportError, TypeError:
+					pass
 
 	def parseInit(self, trans, requestPath):
 		"""Partse the __init_ file.
