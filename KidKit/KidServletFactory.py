@@ -34,8 +34,6 @@ except:
 	output_formats = None
 from kid.compiler import KidFile
 
-from KidKit.Examples.KidExamplePage import KidExamplePage
-
 
 def kidClass(module):
 	"""Return a WebKit servlet class for a Kid template module."""
@@ -98,7 +96,7 @@ class KidServletFactory(ServletFactory):
 		self._cacheTemplates = setting('CacheKidTemplates', True)
 		self._useCache = setting('UseKidKitCache', False)
 		if self._useCache:
-			self._cacheSource = setting('CacheKidSource', False)
+			self._cacheSource = setting('CacheKidSource', True)
 			self._clearCache = setting('ClearKidCacheOnStart', False)
 			self._cacheDir = application.serverSidePath('Cache/KidKit')
 			if self._clearCache:
