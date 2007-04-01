@@ -26,6 +26,9 @@ except ImportError:
 	def warn(s, **a):
 		print s
 
+# Legal characters for use in a module name -- used when turning
+# an entire path into a module name.
+moduleNameRE = re.compile('[^a-zA-Z_]')
 
 _globalApplication = None
 def application():
@@ -556,32 +559,25 @@ class _FileParser(URLParser):
 	def initModule(self):
 		"""Get the __init__ module object for this FileParser's directory."""
 		path = self._path
-		if not path.endswith(os.sep):
-			path += os.sep
-		normpath = os.path.normcase(path)
-		# try guessing the package name from sys.path
-		for dir in sys.path:
-			normdir = os.path.normcase(dir)
-			if normpath.startswith(normdir + os.sep):
-				name = path[len(dir)+1:-1]
-				name = name.replace(os.sep, '.')
-				if os.altsep:
-					name = name.replace(os.altsep, '.')
-				if name in sys.modules:
-					# do not reload the package if not needed
-					return sys.modules[name]
-				try:
-					file, dir, desc = self._imp.find_module(name, dir)
-					try:
-						module = self._imp.load_module(name, file, dir, desc)
-					finally:
-						file.close()
-					return module
-				except ImportError, TypeError:
-					pass
+		# if this directory is a context, return the context package
+		for context, dir in self._app.contexts().items():
+			if dir == path:
+				# avoid reloading of the context package
+				return sys.modules[context]
+		name = 'WebKit.Cache.' + moduleNameRE.sub('_', path)
+		try:
+			file, path, desc = self._imp.find_module('__init__', [path])
+			try:
+				module = self._imp.load_module(name, file, path, desc)
+			finally:
+				if file is not None:
+					file.close()
+			return module
+		except ImportError, TypeError:
+			pass
 
 	def parseInit(self, trans, requestPath):
-		"""Partse the __init_ file.
+		"""Parse the __init_ file.
 
 		Returns the resulting servlet, or None if no __init__ hooks were found.
 
@@ -877,17 +873,16 @@ def initApp(app):
 def initParser(app):
 	"""Initialize the FileParser Class."""
 	cls = _FileParser
+	cls._app = app
 	cls._imp = app._imp
+	cls._contexts = app.contexts
 	cls._filesToHideRegexes = []
 	cls._filesToServeRegexes = []
 	from fnmatch import translate as fnTranslate
-	import re
 	for pattern in app.setting('FilesToHide'):
-		cls._filesToHideRegexes.append(
-			re.compile(fnTranslate(pattern)))
+		cls._filesToHideRegexes.append(re.compile(fnTranslate(pattern)))
 	for pattern in app.setting('FilesToServe'):
-		cls._filesToServeRegexes.append(
-			re.compile(fnTranslate(pattern)))
+		cls._filesToServeRegexes.append(re.compile(fnTranslate(pattern)))
 	cls._toIgnore = app.setting('ExtensionsToIgnore')
 	cls._toServe = app.setting('ExtensionsToServe')
 	cls._useCascading = app.setting('UseCascadingExtensions')
