@@ -61,10 +61,12 @@ which control the behavior of KidKit.</p>
 <ul>
 <li><b>KidOutputMethod</b><br>
 The default output method for Kid. Some possible values are:
-'xml', 'html', 'html-strict', 'xhtml' and 'xhtml-strict'.</li>
-<li><b>KidOutputMethod</b><br>
+'html', 'html-strict', 'xhtml', 'xhtml-strict' and 'xml'.
+If nothing is specified, 'html' is used.</li>
+<li><b>KidOutputFormat</b><br>
 The default output format for Kid. Some possible values are:
-'default', 'compact', 'newlines', 'pretty', 'wrap', 'nice', 'ugly', 'named'.</li>
+'default', 'compact', 'newlines', 'pretty', 'wrap', 'nice', 'ugly', 'named'.
+If nothing is specified, 'default' is used.</li>
 <li><b>CacheKidTemplates</b><br>
 Set this to False if you do not want compiled Kid templates (i.e. the
 <tt>.py</tt> or <tt>.pyc</tt> files) to be cached on disk.
@@ -74,17 +76,20 @@ to control this behavior (set them to False for debugging).
 </li>
 <li><b>UseKidKitCache</b><br>
 Set this to True if you want to use a separate KidKit file cache subdirectory
-<tt>Cache/KidKit</tt> to be used for storing the compiled Kid templates. The
-following two options are only applicable if this is set to True. If this is
-set to False, Kid will cache the compiled modules along with the templates.</li>
+<tt>Cache/KidKit</tt> to be used for storing the compiled Kid templates.
+The following two options are only applicable if this is set to True
+(this is the default). If this is set to False, Kid will cache the compiled
+modules along with the templates.</li>
 <li><b>CacheKidSource</b><br>
 Set this to True if you want to store the source code of the compiled templates
 (i.e. the <tt>.py</tt> files) in the cache directory as well. Otherwise, only
-the compiled Python modules (i.e. the <tt>.pyc</tt> files) will be stored on disk.</li>
+the compiled Python modules (i.e. the <tt>.pyc</tt> files) will be stored on disk
+(this is the default).</li>
 <li><b>ClearKidCacheOnStart</b><br>
 Set this to True in order to clear the Kid cache on disk every time the
-AppServer starts. Otherwise the Kid cache directory will persist, which can
-give a speedup when templates are called for the first time.</li>
+AppServer starts. Otherwise the Kid cache directory will persist,
+which can give a speedup when templates are called for the first time
+(this is the default).</li>
 </ul>
 
 <h2>Writing Kid templates</h2>

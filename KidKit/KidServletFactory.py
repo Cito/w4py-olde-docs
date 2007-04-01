@@ -98,7 +98,7 @@ class KidServletFactory(ServletFactory):
 		self._cacheTemplates = setting('CacheKidTemplates', True)
 		self._useCache = setting('UseKidKitCache', False)
 		if self._useCache:
-			self._cacheSource = setting('CacheKidSource', True)
+			self._cacheSource = setting('CacheKidSource', False)
 			self._clearCache = setting('ClearKidCacheOnStart', False)
 			self._cacheDir = application.serverSidePath('Cache/KidKit')
 			if self._clearCache:
