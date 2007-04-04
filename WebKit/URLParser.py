@@ -564,7 +564,7 @@ class _FileParser(URLParser):
 			if dir == path:
 				# avoid reloading of the context package
 				return sys.modules[context]
-		name = 'WebKit.Cache.' + moduleNameRE.sub('_', path)
+		name = 'WebKit_Cache_' + moduleNameRE.sub('_', path)
 		try:
 			file, path, desc = self._imp.find_module('__init__', [path])
 			try:
