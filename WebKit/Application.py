@@ -103,12 +103,63 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._session_name = self.setting('SessionName') \
 			or self.defaultConfig()['SessionName']
 
-		# For session store:
-		session_store = 'Session%sStore' % self.setting('SessionStore')
-		exec 'from %s import %s' % (session_store, session_store)
-		klass = locals()[session_store]
-		assert isinstance(klass, ClassType) or issubclass(klass, Object)
-		self._sessions = klass(self)
+		# Get session class:
+		sessionModule = self.setting('SessionModule')
+		className = sessionModule.split('.')[-1]
+		try:
+			exec 'from %s import %s' % (sessionModule, className)
+		except ImportError:
+			self._sessionClass = None
+		else:
+			try:
+				klass = locals()[className]
+				if not isinstance(klass, ClassType) \
+						and not issubclass(klass, Object):
+					raise KeyError
+				self._sessionClass = klass
+			except KeyError:
+				print "ERROR: Session module" \
+					" does not contain class", className
+				self._sessionClass = None
+		if not self._sessionClass:
+			print "ERROR: Session class not found!"
+
+		# Get and initialize session store class:
+		sessionStore = self.setting('SessionStore').split('.')
+		packageName = '.'.join(sessionStore[:-1])
+		if packageName:
+			packageName += '.'
+		className = sessionStore[-1]
+		for prefix, suffix in (('Session', 'Store'), (None, None)):
+			name = className
+			if prefix:
+				if name.startswith(prefix):
+					continue
+				name = prefix + name
+			if suffix:
+				if name.endswith(suffix):
+					continue
+				name += suffix
+			try:
+				exec 'from %s%s import %s' % (packageName, name, name)
+			except ImportError:
+				pass
+			else:
+				try:
+					klass = locals()[name]
+					if not isinstance(klass, ClassType) \
+							and not issubclass(klass, Object):
+						raise KeyError
+				except KeyError:
+					print "ERROR: SessionStore module" \
+						" does not contain class", name
+				else:
+					self._sessions = klass(self)
+					break
+		else:
+			self._sessions = None
+		if not self._sessions:
+			print "ERROR: Session store not found!"
 
 		URLParser.initApp(self)
 		self._rootURLParser = URLParser.ContextParser(self)
@@ -251,6 +302,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				'transaction.duration',
 				'transaction.errorOccurred'
 				],
+			'SessionModule': 'Session',
 			'SessionStore': 'Dynamic',
 			'SessionTimeout': 60,
 			'SessionPrefix': '',
@@ -390,7 +442,7 @@ class Application(ConfigurableForServerSidePath, Object):
 					raise HTTPSessionExpired
 				sessId = None
 		if not sessId:
-			session = Session(transaction)
+			session = self._sessionClass(transaction)
 			self._sessions[session.identifier()] = session
 			if debug:
 				print prefix, 'created session =', session
@@ -399,7 +451,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	def createSessionWithID(self, transaction, sessionID):
 		"""Create a session object with our session ID."""
-		sess = Session(transaction, sessionID)
+		sess = self._sessionClass(transaction, sessionID)
 		# Replace the session if it didn't already exist,
 		# otherwise we just throw it away.  setdefault is an atomic
 		# operation so this guarantees that 2 different
