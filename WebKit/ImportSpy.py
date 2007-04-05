@@ -53,15 +53,17 @@ if path_hooks is not None:
 				self.file, self.filename, self.info = self._imp.find_module(
 					fullname.split('.')[-1], [self.path])
 			except ImportError:
-				self.file = None
-			if self.file:
-				return self
+				pass
 			else:
-				return None
+				return self
 
 		def load_module(self, fullname):
 			"""Replaces imp.load_module."""
-			mod = self._imp.load_module(fullname, self.file, self.filename, self.info)
+			try:
+				mod = self._imp.load_module(fullname, self.file, self.filename, self.info)
+			finally:
+				if self.file:
+					self.file.close()
 			if mod:
 				mod.__loader__ = self
 			return mod
