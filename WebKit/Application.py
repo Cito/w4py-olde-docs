@@ -409,7 +409,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		transaction.application()._sessions.setdefault(sessionID, sess)
 
 	def sessionTimeout(self, transaction):
-		"""The timeout (in seconds) for a user session.
+		"""Get the timeout (in seconds) for a user session.
 
 		Overwrite to make this transaction dependent.
 
