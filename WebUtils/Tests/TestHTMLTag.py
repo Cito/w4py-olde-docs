@@ -1,12 +1,12 @@
 import os, sys
+
 sys.path.insert(1, os.path.abspath('../..'))
+
 from WebUtils.HTMLTag import HTMLReader
+from MiscUtils import StringIO
+
 #from MiscUtils import unittest
 import unittest
-try:
-	from cStringIO import StringIO
-except:
-	from StringIO import StringIO
 
 
 class HTMLTagTest(unittest.TestCase):

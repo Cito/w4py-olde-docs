@@ -91,10 +91,8 @@ try:
 except ImportError:
 	zlib = None
 
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
+from MiscUtils import StringIO
+
 
 class Error(Exception):
 	"""

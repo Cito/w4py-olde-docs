@@ -1,13 +1,10 @@
+import os
 from WebUtils.Funcs import htmlEncode
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
-import os, string
+from MiscUtils import StringIO
 
 def encodeWithIndentation(html):
-	html = string.replace(htmlEncode(html), '  ', '&nbsp; ')
-	return string.replace(html, '\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
+	html = htmlEncode(html).replace('  ', '&nbsp; ')
+	return html.replace('\t', '&nbsp;&nbsp;&nbsp;&nbsp;')
 
 def validateHTML(html):
 	"""
@@ -25,9 +22,9 @@ def validateHTML(html):
 	input, output = os.popen4('validate')
 	input.write(html)
 	input.close()
-	out = output.readlines() 
+	out = output.readlines()
 	output.close()
-	
+
 	errorLines = {}
 	for line in out:
 		if line[0:5] == 'Line ':

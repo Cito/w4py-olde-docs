@@ -1,9 +1,9 @@
 import unittest
 import os
 from glob import glob
-from StringIO import StringIO
 
 #import FixPath
+from MiscUtils import StringIO
 from MiscUtils.DataTable import *
 
 

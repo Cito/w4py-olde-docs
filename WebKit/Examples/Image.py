@@ -1,9 +1,4 @@
 try:
-	from cStringIO import StringIO
-except:
-	from StringIO import StringIO
-
-try:
 	import gd # GD module
 except ImportError:
 	gd = None
@@ -25,6 +20,7 @@ def image_lib_link(lib=None):
 			'www.pythonware.com/products/pil/')}[lib]
 	return '<a href="http://%s">%s</a>' % (src, name)
 
+from MiscUtils import StringUI
 from ExamplePage import ExamplePage
 
 

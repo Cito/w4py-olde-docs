@@ -1,9 +1,7 @@
 from CodeGenerator import CodeGenerator
 from MiscUtils import AbstractError
 from time import asctime, localtime, time
-import string
 import os, sys, types
-from types import *
 from MiddleKit.Core.ObjRefAttr import objRefJoin
 
 
@@ -17,7 +15,9 @@ try:
 except ImportError:
 	mxDateTime = None
 
-assert nativeDateTime is not None or mxDateTime is not None, "Cannot find Python's native datetime module or egenix's mx.DateTime module. You must have at least one."
+assert nativeDateTime is not None or mxDateTime is not None, \
+    "Cannot find Python's native datetime module "\
+    " or egenix's mx.DateTime module. You must have at least one."
 
 
 class PythonGenerator(CodeGenerator):
@@ -42,10 +42,10 @@ class Model:
 				open(filename, 'w').write('#')
 
 		for klass in self._allKlassesInOrder:
-			filename = os.path.join(dirname, klass.name()+'.py')
+			filename = os.path.join(dirname, klass.name() + '.py')
 			klass.writePyStubIfNeeded(generator, filename)
 
-			filename = os.path.join(dirname, 'GeneratedPy', 'Gen'+klass.name()+'.py')
+			filename = os.path.join(dirname, 'GeneratedPy', 'Gen' + klass.name() + '.py')
 			klass.writePy(generator, filename)
 
 		filename = os.path.join(dirname, 'GeneratedPy', '__init__.py')
@@ -56,7 +56,7 @@ class ModelObject:
 
 	def writePy(self, generator, out=sys.stdout):
 		""" Writes the Python code to define a table for the class. The target can be a file or a filename. """
-		if isinstance(out, StringTypes):
+		if isinstance(out, types.StringTypes):
 			out = open(out, 'w')
 			close = 1
 		else:
@@ -127,9 +127,9 @@ except ImportError:
 			pkg = self._klasses._model.setting('Package', '')
 			if pkg:
 				pkg += '.'
-			#backPath = repr('../' * (pkg.count('.')+1))
+			# backPath = repr('../' * (pkg.count('.') + 1))
 			backPath = 'dirname(__file__)'
-			for i in xrange(pkg.count('.')+1):
+			for i in xrange(pkg.count('.') + 1):
 				backPath = 'dirname(%s)' % backPath
 			wr('''\
 import sys
@@ -162,7 +162,7 @@ del sys.path[0]
 		wr('\t\t%s.__init__(self)\n' % self.supername())
 		maxLen = self.maxAttrNameLen()
 		for attr in self.attrs():
-			name = string.ljust(attr.name(), maxLen)
+			name = attr.name().ljust(maxLen)
 			wr('\t\tself._%s = %r\n' % (name, attr.defaultValue()))
 		wr('\n')
 
@@ -229,7 +229,7 @@ class Attr:
 	def writePySet(self, out):
 		name = self.name()
 		pySetName = self.pySetName()
-		capName = string.upper(name[0]) + name[1:]
+		capName = name[0].upper() + name[1:]
 		values = locals()
 		out.write('\n\tdef %(pySetName)s(self, value):\n' % values)
 		self.writePySetChecks(out)
@@ -499,7 +499,7 @@ class AnyDateTimeAttr:
 			if not isinstance(typeNames, tuple):
 				typeNames = (typeNames,)
 			for typeName in typeNames:
-				dateTimeTypes.append('datetime.'+typeName)
+				dateTimeTypes.append('datetime.' + typeName)
 		if mxDateTime:
 			# egenix's mx.DateTime types
 			typeNames = self.mxDateTimeTypeName()
@@ -508,7 +508,7 @@ class AnyDateTimeAttr:
 			for typeName in typeNames:
 				dateTimeTypes.append('mxDateTime.' + typeName)
 		assert dateTimeTypes
-		if len(dateTimeTypes)>1:
+		if len(dateTimeTypes) > 1:
 			dateTimeTypes = '(' + ', '.join(dateTimeTypes) + ')'
 		else:
 			dateTimeTypes = dateTimeTypes[0]
@@ -524,7 +524,7 @@ class AnyDateTimeAttr:
 			if not isinstance(typeNames, tuple):
 				typeNames = (typeNames,)
 			for typeName in typeNames:
-				dateTimeTypes.append('datetime.'+typeName)
+				dateTimeTypes.append('datetime.' + typeName)
 			dateTimeTypes = '(' + ', '.join(dateTimeTypes) + ')'
 			out.write('''
 	def %s(self):
@@ -652,7 +652,7 @@ class ListAttr:
 
 	def writePyGet(self, out, names):
 		""" Subclass responsibility. """
-		raise SubclassResponsibility
+		raise AbstractError
 
 	def writePySet(self, out, names=None):
 		""" Raises an exception in order to ensure that our inherited "PySet" code generation is used. """

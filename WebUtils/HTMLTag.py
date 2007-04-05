@@ -71,8 +71,7 @@ runFast = True
 	# changing this has no effect once the module is imported (unless you reload())
 
 from sgmllib import SGMLParser
-from MiscUtils import NoDefault
-import types
+from MiscUtils import NoDefault, AbstractError
 from types import StringType
 
 
@@ -169,7 +168,7 @@ class HTMLTag:
 		Adds a child to the receiver. The child will be another tag or a string
 		(CDATA).
 		"""
-		assert isinstance(child, HTMLTag) or type(child) is types.StringType, \
+		assert isinstance(child, HTMLTag) or type(child) is StringType, \
 			'Invalid child: %r' % child
 		self._children.append(child)
 		if isinstance(child, HTMLTag):
@@ -543,7 +542,7 @@ class HTMLReader(SGMLParser):
 	def handle_data(self, data):
 		if self._finished:
 			return
-		assert type(data) is types.StringType
+		assert type(data) is StringType
 		if self._ignoreWS:
 			data = data.strip()
 			if not data:

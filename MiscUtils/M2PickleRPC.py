@@ -7,15 +7,12 @@ Based on m2xmlrpclib.py which is
 	Copyright (c) 1999-2002 Ng Pheng Siong. All rights reserved
 """
 
+import sys
+from MiscUtils import StringIO
 from PickleRPC import Transport
-import base64, string, sys
 from M2Crypto import SSL, httpslib, m2urllib
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
 
-__version__ = 1   # version of M2PickleRPC
+__version__ = 1 # version of M2PickleRPC
 
 class M2Transport(Transport):
 	user_agent = "M2PickleRPC.py/%s - %s" % (__version__, Transport.user_agent)
@@ -38,7 +35,7 @@ class M2Transport(Transport):
 	# @@ workarounds below are necessary because M2Crypto seems to
 	# return from fileobject.read() early!  So we have to call it
 	# over and over to get the full data.
-	
+
 	def parse_response(self, f):
 		"""
 		Workaround M2Crypto issue mentioned above

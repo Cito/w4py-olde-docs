@@ -25,7 +25,7 @@ import imp
 import logging
 import unittest
 from PSP import Context, PSPCompiler
-from StringIO import StringIO
+from MiscUtils import StringIO
 
 # There is a circular dependency between AppServer and Application in imports
 # so I have to import both AppServer before Page imports Application.

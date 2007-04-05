@@ -10,20 +10,17 @@ Typically usage is::
 The globals provided are:
 * the modules: `os`, `sys`, `time`
 * the class `StringIO`
-* the names `True` and `False` for older Python versions
 * the root class `Object`
+* the names `True` and `False` for older Python versions
 * the package `WebUtils`
-* the class `AbstractError`, an exception that methods in abstract classes often raise.
+* the exception class `AbstractError` that methods in abstract classes often raise
+* the singleton `NoDefault`  that can be used to initialize default arguments
+* the method `asclocaltime` that can be used for building time stamps in log files
 
 """
 
 
 import os, sys, time
-
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
 
 try: # backward compatibility for Python < 2.3
 	True, False
@@ -32,10 +29,7 @@ except NameError:
 
 from Object import Object
 import WebUtils
-from MiscUtils import NoDefault
-from MiscUtils import AbstractError
-
-# @@ 2000-05-10 ce: Consider if all the following should be located in MiscUtils
+from MiscUtils import StringIO, AbstractError, NoDefault
 
 def asclocaltime(t = None):
 	"""Return a readable string of the current, local time. Useful for time stamps in log files."""
@@ -44,5 +38,4 @@ def asclocaltime(t = None):
 	return time.asctime(time.localtime(t))
 
 
-# @@ 2002-11-10 ce: Tombstone is now deprecated (post 0.7)
-Tombstone = NoDefault
+

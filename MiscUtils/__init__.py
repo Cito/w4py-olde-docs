@@ -2,11 +2,23 @@
 # Webware for Python
 # See Docs/index.html
 
-__all__ = ['Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error', 'Funcs', 'MixIn', 'NamedValueAccess', 'PropertiesObject', 'unittest']
+__all__ = [
+    'Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error',
+    'Funcs', 'MixIn', 'NamedValueAccess', 'PropertiesObject', 'unittest']
+
+try:
+	from cStringIO import StringIO
+except ImportError:
+	from StringIO import StringIO
+
+try: # backward compatibility for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 try:
-	AbstractError  # Python might build this in some day.
+	AbstractError # Python might build this in some day.
 except NameError:
 	class AbstractError(NotImplementedError):
 		"""
@@ -28,7 +40,8 @@ except NameError:
 		"""
 		pass
 
-# @@ 2002-11-10 ce: SubclassResponsibilityError is deprecated in favor of AbstractError, post 0.7
+# @@ 2002-11-10 ce: SubclassResponsibilityError is deprecated
+# in favor of AbstractError, post 0.7
 SubclassResponsibilityError = AbstractError
 
 
@@ -62,6 +75,9 @@ class NoDefault:
 	(This is similar to the subclassing situation.)
 	"""
 	pass
+
+# @@ 2002-11-10 ce: Tombstone is now deprecated (post 0.7)
+Tombstone = NoDefault
 
 
 def InstallInWebKit(appServer):

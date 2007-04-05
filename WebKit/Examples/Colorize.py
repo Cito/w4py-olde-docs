@@ -1,9 +1,6 @@
 import os, sys
-try:
-	from cStringIO import StringIO
-except:
-	from StringIO import StringIO
 
+from MiscUtils import StringIO
 from WebKit.Page import Page
 
 

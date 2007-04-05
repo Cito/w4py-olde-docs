@@ -3,10 +3,7 @@
 #
 
 import traceback
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
+from MiscUtils import StringIO
 try:
     import simplejson
 except ImportError:

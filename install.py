@@ -12,12 +12,8 @@ FUTURE
 
 import os, sys
 from glob import glob
+from MiscUtils import StringIO
 from MiscUtils.PropertiesObject import PropertiesObject
-
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
 
 
 class OutputCatcher:

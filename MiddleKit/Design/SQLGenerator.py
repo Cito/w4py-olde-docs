@@ -4,8 +4,8 @@ from glob import glob
 from time import asctime, localtime, time
 from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import objRefJoin
-from MiscUtils import CSVParser
-import string
+from MiscUtils import AbstractError, CSVParser
+
 
 class SampleError:
 
@@ -62,7 +62,7 @@ class SQLGenerator(CodeGenerator):
 		Subclasses must override to return 1 or 0, indicating their SQL variant supports DEFAULT <value> in the CREATE statement.
 		Subclass responsibility.
 		"""
-		raise SubclassResponsibility
+		raise AbstractError
 
 
 class ModelObject:

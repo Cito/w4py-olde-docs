@@ -6,12 +6,8 @@
 # Some changes by Robert Forkel and Christoph Zwerschke.
 #
 
-import  traceback, time, random
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
-
+import traceback, time, random
+from MiscUtils import StringIO
 from ExamplePage import ExamplePage as BaseClass
 
 try:
