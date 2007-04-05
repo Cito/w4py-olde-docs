@@ -14,8 +14,8 @@ up by `Application` (accessible through `Application.rootURLParser`).
 
 import re, os, sys
 
+from HTTPExceptions import HTTPNotFound, HTTPMovedPermanently
 from MiscUtils.ParamFactory import ParamFactory
-from WebKit.HTTPExceptions import *
 from WebUtils.Funcs import urlDecode
 
 debug = 0

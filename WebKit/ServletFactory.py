@@ -3,7 +3,7 @@ from keyword import iskeyword
 import threading
 
 from Common import *
-from WebKit.Servlet import Servlet
+from Servlet import Servlet
 
 debug = False
 

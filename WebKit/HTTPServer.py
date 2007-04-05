@@ -1,8 +1,8 @@
 import sys, os, socket, time, errno
 import BaseHTTPServer
 
-from WebKit.ThreadedAppServer import Handler
-from WebKit.ASStreamOut import ASStreamOut
+from ThreadedAppServer import Handler
+from ASStreamOut import ASStreamOut
 from WebUtils import Funcs
 from MiscUtils.Funcs import timestamp
 

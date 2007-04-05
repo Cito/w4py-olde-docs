@@ -104,7 +104,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 		HTTPServlet.__init__(self)
 		Configurable.__init__(self)
 		if application is None:
-			from WebKit.AppServer import globalAppServer
+			from AppServer import globalAppServer
 			application = globalAppServer.application()
 			assert application is not None
 		self._application = application

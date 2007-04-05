@@ -13,7 +13,7 @@ except ImportError:
     print "ERROR: simplejson is not installed."
     print "Get it from http://cheeseshop.python.org/pypi/simplejson"
 
-from WebKit.HTTPContent import HTTPContent
+from HTTPContent import HTTPContent
 
 debug = 0
 

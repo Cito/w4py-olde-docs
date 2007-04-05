@@ -116,7 +116,7 @@ class DebugAppServer(OriginalThreadedAppServer):
 
 
 from Application import Application
-from WebKit.Transaction import Transaction
+from Transaction import Transaction
 
 
 class DebugApplication(Application):

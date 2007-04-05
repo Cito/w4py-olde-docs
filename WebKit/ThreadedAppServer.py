@@ -133,7 +133,7 @@ class ThreadedAppServer(AppServer):
 		if self.setting('EnableMonitor'):
 			self.addSocketHandler(MonitorHandler)
 		if self.setting('EnableHTTP'):
-			from WebKit.HTTPServer import HTTPAppServerHandler
+			from HTTPServer import HTTPAppServerHandler
 			self.addSocketHandler(HTTPAppServerHandler)
 
 		self.readyForRequests()
