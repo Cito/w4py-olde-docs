@@ -8,7 +8,9 @@ Typically usage is::
 	from Common import *
 
 The globals provided are:
-* the modules: `os`, `sys`, and `time`
+* the modules: `os`, `sys`, `time`
+* the class `StringIO`
+* the names `True` and `False` for older Python versions
 * the root class `Object`
 * the package `WebUtils`
 * the class `AbstractError`, an exception that methods in abstract classes often raise.

@@ -13,8 +13,8 @@
 #               Net (I don't remember where and I can't find it now...) and
 #               has been significantly modified to fix several bugs, be more
 #               readable, more robust at handling large CGI data and return
-#               document sizes, and also to fit the model that we had previously
-#               used for FastCGI.
+#               document sizes, and also to fit the model that we had
+#               previously used for FastCGI.
 #
 #     WARNING:  If you don't know what you are doing, don't tinker with this
 #               module!
@@ -32,21 +32,24 @@
 
 
 import os, sys, socket, errno
-from cStringIO import StringIO
+try:
+	from cStringIO import StringIO
+except:
+	from StringIO import StringIO
 import cgi
 
 #---------------------------------------------------------------------------
 
 # Set various FastCGI constants
 # Maximum number of requests that can be handled
-FCGI_MAX_REQS=1
+FCGI_MAX_REQS = 1
 FCGI_MAX_CONNS = 1
 
 # Supported version of the FastCGI protocol
 FCGI_VERSION_1 = 1
 
 # Boolean: can this application multiplex connections?
-FCGI_MPXS_CONNS=0
+FCGI_MPXS_CONNS = 0
 
 # Record types
 FCGI_BEGIN_REQUEST = 1 ; FCGI_ABORT_REQUEST = 2 ; FCGI_END_REQUEST   = 3
@@ -59,7 +62,7 @@ FCGI_MAXTYPE = FCGI_UNKNOWN_TYPE
 # Types of management records
 ManagementTypes = [FCGI_GET_VALUES]
 
-FCGI_NULL_REQUEST_ID=0
+FCGI_NULL_REQUEST_ID = 0
 
 # Masks for flags component of FCGI_BEGIN_REQUEST
 FCGI_KEEP_CONN = 1
@@ -106,7 +109,7 @@ class record:
 		self.content = ""
 		while len(self.content) < contentLength:
 			data = sock.recv(contentLength - len(self.content))
-			self.content = self.content + data
+			self.content += data
 		if paddingLength != 0:
 			padding = sock.recv(paddingLength)
 
@@ -134,20 +137,22 @@ class record:
 	def writeRecord(self, sock):
 		content = self.content
 		if self.recType == FCGI_BEGIN_REQUEST:
-			content = chr(self.role>>8) + chr(self.role & 255) + chr(self.flags) + 5*'\000'
+			content = chr(self.role>>8) + chr(self.role & 255) \
+				+ chr(self.flags) + 5*'\000'
 
 		elif self.recType == FCGI_UNKNOWN_TYPE:
 			content = chr(self.unknownType) + 7*'\000'
 
-		elif self.recType==FCGI_GET_VALUES or self.recType==FCGI_PARAMS:
+		elif self.recType == FCGI_GET_VALUES or self.recType == FCGI_PARAMS:
 			content = ""
 			for i in self.values.keys():
-				content = content + writePair(i, self.values[i])
+				content += writePair(i, self.values[i])
 
-		elif self.recType==FCGI_END_REQUEST:
+		elif self.recType == FCGI_END_REQUEST:
 			v = self.appStatus
-			content = chr((v>>24)&255) + chr((v>>16)&255) + chr((v>>8)&255) + chr(v&255)
-			content = content + chr(self.protocolStatus) + 3*'\000'
+			content = chr((v>>24)&255) + chr((v>>16)&255) \
+				+ chr((v>>8)&255) + chr(v&255)
+			content += chr(self.protocolStatus) + 3*'\000'
 
 		cLen = len(content)
 		eLen = (cLen + 7) & (0xFFFF - 7) # align to an 8-byte boundary
@@ -169,18 +174,19 @@ class record:
 
 def readPair(s, pos):
 	nameLen = ord(s[pos])
-	pos = pos + 1
+	pos += 1
 	if nameLen & 128:
 		b = map(ord, s[pos:pos+3])
-		pos = pos + 3
+		pos += 3
 		nameLen = ((nameLen&127)<<24) + (b[0]<<16) + (b[1]<<8) + b[2]
 	valueLen = ord(s[pos])
-	pos = pos + 1
+	pos += 1
 	if valueLen & 128:
-		b = map(ord, s[pos:pos+3]) ; pos=pos+3
+		b = map(ord, s[pos:pos+3])
+		pos += 3
 		valueLen = ((valueLen&127)<<24) + (b[0]<<16) + (b[1]<<8) + b[2]
 	return (s[pos:pos+nameLen], s[pos+nameLen:pos+nameLen+valueLen],
-		pos+nameLen+valueLen)
+		pos + nameLen + valueLen)
 
 #---------------------------------------------------------------------------
 
@@ -189,12 +195,14 @@ def writePair(name, value):
 	if l < 128:
 		s = chr(l)
 	else:
-		s = chr(128|(l>>24)&255) + chr((l>>16)&255) + chr((l>>8)&255) + chr(l&255)
-	l=len(value)
+		s = chr(128|(l>>24)&255) + chr((l>>16)&255) \
+			+ chr((l>>8)&255) + chr(l&255)
+	l = len(value)
 	if l < 128:
-		s = s + chr(l)
+		s += chr(l)
 	else:
-		s = s + chr(128|(l>>24)&255) + chr((l>>16)&255) + chr((l>>8)&255) + chr(l&255)
+		s += chr(128|(l>>24)&255) + chr((l>>16)&255) \
+			+ chr((l>>8)&255) + chr(l&255)
 	return s + name + value
 
 #---------------------------------------------------------------------------
@@ -203,9 +211,9 @@ def HandleManTypes(r, conn):
 	if r.recType == FCGI_GET_VALUES:
 		r.recType = FCGI_GET_VALUES_RESULT
 		v = {}
-		vars={'FCGI_MAX_CONNS' : FCGI_MAX_CONNS,
-			  'FCGI_MAX_REQS'  : FCGI_MAX_REQS,
-			  'FCGI_MPXS_CONNS': FCGI_MPXS_CONNS}
+		vars = {'FCGI_MAX_CONNS' : FCGI_MAX_CONNS,
+				'FCGI_MAX_REQS'  : FCGI_MAX_REQS,
+				'FCGI_MPXS_CONNS': FCGI_MPXS_CONNS}
 		for i in r.values.keys():
 			if vars.has_key(i):
 				v[i] = vars[i]
@@ -264,13 +272,15 @@ class FCGI:
 			elif r.reqId == 0:
 				# Oh, poopy. It's a management record of an unknown type.
 				# Signal the error.
-				r2=record()
-				r2.recType = FCGI_UNKNOWN_TYPE ; r2.unknownType=r.recType
+				r2 = record()
+				r2.recType = FCGI_UNKNOWN_TYPE
+				r2.unknownType = r.recType
 				r2.writeRecord(self.conn)
 				continue # charge onwards
 
 			# Ignore requests that aren't active
-			elif r.reqId != self.requestId and r.recType != FCGI_BEGIN_REQUEST:
+			elif r.reqId != self.requestId \
+					and r.recType != FCGI_BEGIN_REQUEST:
 				continue
 
 			# If we're already doing a request, ignore further BEGIN_REQUESTs
@@ -280,28 +290,31 @@ class FCGI:
 			# Begin a new request
 			if r.recType == FCGI_BEGIN_REQUEST:
 				self.requestId = r.reqId
-				if r.role == FCGI_AUTHORIZER:   remaining=1
-				elif r.role == FCGI_RESPONDER:  remaining=2
-				elif r.role == FCGI_FILTER:     remaining=3
+				if r.role == FCGI_AUTHORIZER:
+					remaining = 1
+				elif r.role == FCGI_RESPONDER:
+					remaining = 2
+				elif r.role == FCGI_FILTER:
+					remaining = 3
 
 			elif r.recType == FCGI_PARAMS:
 				if r.content == "":
-					remaining = remaining-1
+					remaining -= 1
 				else:
 					for i in r.values.keys():
 						self.env[i] = r.values[i]
 
 			elif r.recType == FCGI_STDIN:
 				if r.content == "":
-					remaining = remaining-1
+					remaining -= 1
 				else:
-					stdin = stdin + r.content
+					stdin += r.content
 
-			elif r.recType==FCGI_DATA:
+			elif r.recType == FCGI_DATA:
 				if r.content == "":
-					remaining = remaining - 1
+					remaining -= 1
 				else:
-					data = data + r.content
+					data += r.content
 		# end of while remaining:
 
 		self.inp = sys.stdin  = StringIO(stdin)
@@ -319,7 +332,7 @@ class FCGI:
 			self.err.seek(0, 0)
 			self.out.seek(0, 0)
 
-			r=record()
+			r = record()
 			r.recType = FCGI_STDERR
 			r.reqId = self.requestId
 			data = self.err.read()
@@ -347,15 +360,12 @@ class FCGI:
 			r.writeRecord(self.conn)
 			self.conn.close()
 
-
 	def getFieldStorage(self):
 		method = 'GET'
 		if self.env.has_key('REQUEST_METHOD'):
 			method = self.env['REQUEST_METHOD'].upper()
-		if method == 'GET':
-			return cgi.FieldStorage(environ=self.env, keep_blank_values=1)
-		else:
-			return cgi.FieldStorage(fp=self.inp, environ=self.env, keep_blank_values=1)
+		return cgi.FieldStorage(fp=method != 'GET' and self.inp or None,
+			environ=self.env, keep_blank_values=1)
 
 	def getNextChunk(self, data):
 		chunk = data[:8192]
@@ -370,11 +380,11 @@ def _startup():
 	global _init
 	_init = 1
 	try:
-		s=socket.fromfd(sys.stdin.fileno(), socket.AF_INET,
-						socket.SOCK_STREAM)
+		s = socket.fromfd(sys.stdin.fileno(), socket.AF_INET,
+							socket.SOCK_STREAM)
 		s.getpeername()
 	except socket.error, (err, errmsg):
-		if err!=errno.ENOTCONN:       # must be a non-fastCGI environment
+		if err != errno.ENOTCONN:       # must be a non-fastCGI environment
 			global _isFCGI
 			_isFCGI = 0
 			return
@@ -385,11 +395,11 @@ def _startup():
 #---------------------------------------------------------------------------
 
 def _test():
-	counter=0
+	counter = 0
 	try:
 		while isFCGI():
 			req = Accept()
-			counter = counter + 1
+			counter += 1
 
 			try:
 				fs = req.getFieldStorage()
@@ -434,9 +444,9 @@ def _test():
 		import traceback
 		f = open('traceback', 'w')
 		traceback.print_exc(file = f)
-		#  f.write('%s' % doc)
+		# f.write('%s' % doc)
 
-if __name__=='__main__':
-	#import pdb
-	#pdb.run('_test()')
+if __name__ == '__main__':
+	# import pdb
+	# pdb.run('_test()')
 	_test()

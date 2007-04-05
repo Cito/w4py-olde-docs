@@ -6,7 +6,11 @@
 # Some changes by Robert Forkel and Christoph Zwerschke.
 #
 
-import StringIO, traceback, time, random
+import  traceback, time, random
+try:
+	from cStringIO import StringIO
+except ImportError:
+	from StringIO import StringIO
 
 from ExamplePage import ExamplePage as BaseClass
 
@@ -162,7 +166,7 @@ class AjaxPage(BaseClass):
 							self.log("Ajax call %s(%s)" % (call, args))
 						cmd = str(method(*args))
 					except Exception:
-						err = StringIO.StringIO()
+						err = StringIO()
 						traceback.print_exc(file=err)
 						e = err.getvalue()
 						cmd = self.alert('%s was called,'

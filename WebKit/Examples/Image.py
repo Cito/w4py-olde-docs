@@ -1,4 +1,9 @@
 try:
+	from cStringIO import StringIO
+except:
+	from StringIO import StringIO
+
+try:
 	import gd # GD module
 except ImportError:
 	gd = None
@@ -62,7 +67,6 @@ class Image(ExamplePage):
 
 	def generatePNGImage(self):
 		"""Generate and return a PNG image using gdmodule."""
-		import StringIO
 		from math import sin, pi
 		X, Y = (320, 160)
 		def T(p):
@@ -94,7 +98,7 @@ class Image(ExamplePage):
 		def f(x): # sin function
 			return (x, sin(x))
 		lines(map(f, map(lambda x: x*2*pi/X, xrange(X+1))), blue)
-		f = StringIO.StringIO()
+		f = StringIO()
 		if gd:
 			im.writePng(f)
 		else:

@@ -1,5 +1,5 @@
 from types import DictType, ListType, StringType
-import traceback, random, MimeWriter, smtplib, StringIO
+import traceback, random, MimeWriter, smtplib
 
 from Common import *
 from MiscUtils.Funcs import dateForEmail
@@ -525,7 +525,7 @@ class ExceptionHandler(Object):
 		or in the body of the mail.
 
 		"""
-		message = StringIO.StringIO()
+		message = StringIO()
 		writer = MimeWriter.MimeWriter(message)
 
 		# Construct the message headers

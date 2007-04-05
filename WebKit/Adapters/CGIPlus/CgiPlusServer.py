@@ -1,9 +1,5 @@
 from Common import *
 import mimetools
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
 from WebKit.CgiPlusAppServer import Handler, CPASStreamOut
 
 

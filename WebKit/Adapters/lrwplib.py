@@ -23,7 +23,10 @@
 
 import sys, socket
 import os, cgi
-from cStringIO import StringIO
+try:
+	from cStringIO import StringIO
+except:
+	from StringIO import StringIO
 
 
 __version__ = '1.0'
@@ -59,10 +62,8 @@ class Request:
 		method = 'POST'
 		if self.env.has_key('REQUEST_METHOD'):
 			method = self.env['REQUEST_METHOD'].upper()
-		if method == 'GET':
-			return cgi.FieldStorage(environ=self.env, keep_blank_values=1)
-		else:
-			return cgi.FieldStorage(fp=self.inp, environ=self.env, keep_blank_values=1)
+		return cgi.FieldStorage(fp=method != 'GET' and self.inp or None,
+			environ=self.env, keep_blank_values=1)
 
 
 #---------------------------------------------------------------------------
@@ -97,13 +98,14 @@ class LRWP:
 	#----------------------------------------
 	def connect(self):
 		'''
-		Establishes the connection to the web server, using the parameters given
-		at construction.
+		Establishes the connection to the web server, using the parameters
+		given at construction.
 		'''
 		try:
 			self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-			self.sock.connect((self.host, self.port)) # Changed to two item tuple with Python 2.0 - I think!
-			self.sock.send("%s\xFF%s\xFF%s" % (self.name, self.vhost, self.filter) )
+			self.sock.connect((self.host, self.port))
+			self.sock.send("%s\xFF%s\xFF%s"
+				% (self.name, self.vhost, self.filter))
 			buf = self.sock.recv(1024)
 			if buf != 'OK':
 				raise ConnectError, buf
@@ -122,13 +124,13 @@ class LRWP:
 		try:
 			# get the length of the environment data
 			data = self.recvBlock(LENGTHSIZE)
-			if not data:        # server closed down
+			if not data: # server closed down
 				raise ConnectionClosed
 			length = int(data)
 
 			# and then the environment data
 			data = self.recvBlock(length)
-			if not data:        # server closed down
+			if not data: # server closed down
 				raise ConnectionClosed
 			data = data.split('\000')
 			self.env = {}
@@ -139,14 +141,14 @@ class LRWP:
 
 			# now get the size of the POST data
 			data = self.recvBlock(LENGTHSIZE)
-			if not data:        # server closed down
+			if not data: # server closed down
 				raise ConnectionClosed
 			length = int(data)
 
 			# and the POST data...
 			if length:
 				data = self.recvBlock(length)
-				if not data:        # server closed down
+				if not data: # server closed down
 					raise ConnectionClosed
 				self.inp = StringIO(data)
 			else:
@@ -175,11 +177,11 @@ class LRWP:
 		numRead = 0
 		data = []
 		while numRead < size:
-			buf = self.sock.recv(size - numRead);
+			buf = self.sock.recv(size - numRead)
 			if not buf:
 				return ''
 			data.append(buf)
-			numRead = numRead + len(buf)
+			numRead += len(buf)
 
 		return ''.join(data)
 
@@ -189,7 +191,7 @@ class LRWP:
 		Complete the request and send the output back to the webserver.
 		'''
 		doc = self.out.getvalue()
-		size = LENGTHFMT % (len(doc), )
+		size = LENGTHFMT % (len(doc),)
 		try:
 			self.sock.send(size)
 			self.sock.send(doc)
@@ -241,13 +243,14 @@ def _test():
 	while count < 5:        # exit after servicing 5 requests
 		req = lrwp.acceptRequest()
 
-		doc = ['<HTML><HEAD><TITLE>LRWP TestApp ('+appname+')</TITLE></HEAD>\n<BODY>\n']
-		count = count + 1
-		doc.append('<H2>LRWP test app ('+appname+')</H2><P>')
-		doc.append('<b>request count</b> = %d<br>' % (count, ))
+		doc = ['<HTML><HEAD><TITLE>LRWP TestApp (%s)</TITLE></HEAD>\n'
+			'<BODY>\n' % (appname,)]
+		count += 1
+		doc.append('<H2>LRWP test app (%s)</H2><P>' % (appname,))
+		doc.append('<b>request count</b> = %d<br>' % (count,))
 		if hasattr(os, 'getpid'):
-			doc.append('<b>pid</b> = %s<br>' % (os.getpid(), ))
-		doc.append('<br><b>post data:</b> ' + req.inp.read() + '<br>')
+			doc.append('<b>pid</b> = %s<br>' % (os.getpid(),))
+		doc.append('<br><b>post data:</b> %s<br>' % (req.inp.read(),))
 
 		doc.append('<P><HR><P><pre>')
 		keys = req.env.keys()
@@ -256,7 +259,6 @@ def _test():
 			doc.append('<b>%-20s :</b>  %s\n' % (k, req.env[k]))
 		doc.append('\n</pre><P><HR>\n')
 		doc.append('</BODY></HTML>\n')
-
 
 		req.out.write('Content-type: text/html' + eol)
 		req.out.write(eol)

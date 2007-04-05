@@ -3,7 +3,10 @@
 #
 
 import traceback
-import cStringIO as StringIO
+try:
+	from cStringIO import StringIO
+except ImportError:
+	from StringIO import StringIO
 try:
     import simplejson
 except ImportError:
@@ -66,7 +69,7 @@ class JSONRPCServlet(HTTPContent):
 					result = method(*params)
 					self.write(simplejson.dumps({'id': id, 'result': result}))
 				except Exception:
-					err = StringIO.StringIO()
+					err = StringIO()
 					traceback.print_exc(file=err)
 					e = err.getvalue()
 					cmd = self.error('%s was called,'

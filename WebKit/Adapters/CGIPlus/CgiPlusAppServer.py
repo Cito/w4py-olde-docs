@@ -21,11 +21,6 @@ import threading, Queue, select, socket, errno, traceback
 from marshal import dumps, loads
 from threading import Lock, Thread, Event
 
-try:
-	from cStringIO import StringIO
-except ImportError:
-	from StringIO import StringIO
-
 from Common import *
 import AppServer as AppServerModule
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
