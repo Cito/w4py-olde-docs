@@ -571,7 +571,7 @@ class _FileParser(URLParser):
 			file, path, desc = self._imp.find_module('__init__', [path])
 			module = self._imp.load_module(name, file, path, desc)
 			return module
-		except ImportError, TypeError:
+		except (ImportError, TypeError):
 			pass
 
 	def parseInit(self, trans, requestPath):
