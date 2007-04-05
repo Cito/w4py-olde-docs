@@ -288,7 +288,7 @@ Errors
         }
 ``ErrorPage``:
     You can use this to set up custom error pages for HTTP errors and any
-    other exceptions raised in Webware servlets. Set it to the URL of a
+    other exceptions raised in Webware servlets.  Set it to the URL of a
     custom error page (any Webware servlet) to catch all kinds of exceptions.
     If you want to catch only particular errors, you can set it to a dictionary
     mapping the names of the corresponding exception classes to the URL to
@@ -310,10 +310,13 @@ Errors
     will be automatically forwarded to the corresponding error page servlet.
     More specifically defined exceptions overrule the more generally defined.
     You can even forward from one error page to another error page unless
-    you are not creating loops. In an ``HTTPNotFound`` error page, the servlet
+    you are not creating loops.  In an ``HTTPNotFound`` error page, the servlet
     needs to determine the erroneous URI with ``self.request().previousURI()``,
     since the ``uri()`` method returns the URI of the current servlet, which
-    in the error page itself.  Default: ``None`` (no custom error page).
+    in the error page itself.  When a custom error page is displayed, the
+    standard error handler will not be called.  So if you want to generate
+    an error email or saved error report, you must do so explicitly in your
+    error page servlet.  Default: ``None`` (no custom error page).
 ``MaxValueLengthInExceptionReport``:
     Values in exception reports are truncated to this length, to avoid
     excessively long exception reports.  Set this to ``None`` if you
