@@ -324,18 +324,6 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	## Versions ##
 
-	def version(self):
-		"""Return the version of the application.
-
-		This implementation returns '0.1'. Subclasses should
-		override to return the correct version number.
-
-		"""
-		# @@ 2000-05-01 ce: Maybe this could be a setting 'AppVersion'
-		# @@ 2003-03 ib: Does anyone care about this?  What's this
-		# version even supposed to mean?
-		return '0.1'
-
 	def webwareVersion(self):
 		"""Return the Webware version as a tuple."""
 		return self._webwareVersion
