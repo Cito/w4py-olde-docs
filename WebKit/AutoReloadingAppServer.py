@@ -58,7 +58,7 @@ class AutoReloadingAppServer(AppServer):
 		AppServer.__init__(self, path)
 		self._autoReload = False
 		self._shouldRestart = False
-		self._use_fam = False
+		self._useFAM = False
 		if self.isPersistent():
 			if self.setting('AutoReload'):
 				self.activateAutoReload()
@@ -92,7 +92,7 @@ class AutoReloadingAppServer(AppServer):
 		if self.setting('UseImportSpy'):
 			s = self._imp.activateImportSpy()
 			print 'ImportSpy activated (using %s).' % s
-		self._use_fam = False
+		self._useFAM = False
 		if not self._autoReload:
 			if _fam and self._imp._spy:
 				# FAM will be only used when ImportSpy has been activated,
@@ -100,11 +100,11 @@ class AutoReloadingAppServer(AppServer):
 				try:
 					self._fc = _fam.open()
 					self._pipe = None
-					self._use_fam = True
+					self._useFAM = True
 				except IOError:
 					print 'FAM not available, fall back to polling.'
 					self._fc = None
-			if self._use_fam:
+			if self._useFAM:
 				print 'AutoReload Monitor started, using FAM.'
 				target = self.fileMonitorThreadLoopFAM
 			else:
@@ -124,7 +124,7 @@ class AutoReloadingAppServer(AppServer):
 
 		"""
 		self._autoReload = False
-		if self._use_fam and self._pipe:
+		if self._useFAM and self._pipe:
 			# Send a message down the pipe to wake up the monitor thread
 			# and tell him to quit.
 			self._pipe[1].write('close')

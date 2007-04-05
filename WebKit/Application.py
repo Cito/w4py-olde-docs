@@ -136,14 +136,14 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	def initSessions(self):
 		"""Initialize all session related attributes."""
-		self._session_prefix = self.setting('SessionPrefix') or ''
-		if self._session_prefix:
-			if self._session_prefix == 'hostname':
+		self._sessionPrefix = self.setting('SessionPrefix') or ''
+		if self._sessionPrefix:
+			if self._sessionPrefix == 'hostname':
 				from MiscUtils.Funcs import hostName
-				self._session_prefix = hostName()
-			self._session_prefix += '-'
-		self._session_timeout = self.setting('SessionTimeout')*60
-		self._session_name = self.setting('SessionName') \
+				self._sessionPrefix = hostName()
+			self._sessionPrefix += '-'
+		self._sessionTimeout = self.setting('SessionTimeout')*60
+		self._sessionName = self.setting('SessionName') \
 			or self.defaultConfig()['SessionName']
 		sessionModule = self.setting('SessionModule')
 		className = sessionModule.split('.')[-1]
@@ -228,13 +228,13 @@ class Application(ConfigurableForServerSidePath, Object):
 		session objects (and disk copies of those objects) that have expired.
 
 		"""
-		if self._session_timeout:
+		if self._sessionTimeout:
 			tm = self.taskManager()
 			if tm:
 				from Tasks import SessionTask
 				import time
 				task = SessionTask.SessionTask(self._sessions)
-				sweepinterval = self._session_timeout/10
+				sweepinterval = self._sessionTimeout/10
 				tm.addPeriodicAction(time.time() + sweepinterval,
 					sweepinterval, task, "SessionSweeper")
 				print "Session sweeper has started."
@@ -451,7 +451,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		Overwrite to make this transaction dependent.
 
 		"""
-		return self._session_timeout
+		return self._sessionTimeout
 
 	def sessionPrefix(self, transaction):
 		"""Get the prefix string for the session ID.
@@ -460,7 +460,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		Overwrite to make this transaction dependent.
 
 		"""
-		return self._session_prefix
+		return self._sessionPrefix
 
 	def sessionName(self, transaction):
 		"""Get the name of the field holding the session ID.
@@ -469,7 +469,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		Overwrite to make this transaction dependent.
 
 		"""
-		return self._session_name
+		return self._sessionName
 
 	def sessionCookiePath(self, transaction):
 		"""Get the cookie path for this transaction.
