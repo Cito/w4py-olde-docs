@@ -17,7 +17,8 @@ else: # Python >= 2.4
 	def checkcache(): pass
 
 
-class singleton: pass
+class singleton:
+	pass
 
 
 class ExceptionHandler(Object):
@@ -204,7 +205,10 @@ class ExceptionHandler(Object):
 		if self.setting('EmailErrors'):
 			if privateErrorPage is None:
 				privateErrorPage = self.privateErrorPage()
-			self.emailException(privateErrorPage)
+			try:
+				self.emailException(privateErrorPage)
+			except Exception, e:
+				print "Could not send error email:", e
 
 	def logExceptionToConsole(self, stderr=None):
 		"""Log an exception.
@@ -351,7 +355,7 @@ class ExceptionHandler(Object):
 		"""
 		rows = []
 		for name in attrNames:
-			value = getattr(obj, '_'+name, singleton) # go for data attribute
+			value = getattr(obj, '_' + name, singleton) # go for data attribute
 			try:
 				if value is singleton:
 					value = getattr(obj, name, singleton) # go for method
@@ -532,9 +536,8 @@ class ExceptionHandler(Object):
 		headers = self.setting('ErrorEmailHeaders').copy()
 		headers['Date'] = dateForEmail()
 		headers['Mime-Version'] = '1.0'
-		headers['Subject'] = headers.get('Subject','[WebKit Error]') + ' ' \
-					 + str(sys.exc_info()[0]) + ': ' \
-					 + str(sys.exc_info()[1])
+		headers['Subject'] = headers.get('Subject','[WebKit Error]') \
+			+ ' %s: %s' % sys.exc_info()[:2]
 		for h,v in headers.items():
 			if isinstance(v, ListType):
 				v = ','.join(v)
@@ -546,16 +549,13 @@ class ExceptionHandler(Object):
 			# start off with a text/plain part
 			part = writer.nextpart()
 			body = part.startbody('text/plain')
-			body.write(
-				'WebKit caught an exception while processing ' +
-				'a request for "%s" ' % self.servletPathname() +
-				'at %s (timestamp: %s).  ' %
-				(asclocaltime(self._time), self._time) +
-				'The plain text traceback from Python is printed below and ' +
-				'the full HTML error report from WebKit is attached.\n\n'
-				)
+			body.write('WebKit caught an exception while processing'
+				' a request for "%s" at %s (timestamp: %s).'
+				' The plain text traceback from Python is printed below and'
+				' the full HTML error report from WebKit is attached.\n\n'
+					% (self.servletPathname(),
+					asclocaltime(self._time), self._time))
 			traceback.print_exc(file=body)
-
 			# now add htmlErrMsg
 			part = writer.nextpart()
 			part.addheader('Content-Transfer-Encoding', '7bit')
@@ -563,7 +563,6 @@ class ExceptionHandler(Object):
 				'HTML version of WebKit error message')
 			body = part.startbody('text/html; name=WebKitErrorMsg.html')
 			body.write(htmlErrMsg)
-
 			# finish off
 			writer.lastpart()
 		else:
@@ -572,17 +571,31 @@ class ExceptionHandler(Object):
 			body.write(htmlErrMsg)
 
 		# Send the message
-		server = self.setting('ErrorEmailServer') # can be: server, server:port, server:port:user:password
-		parts = server.split(':')
-		if len(parts)==1:
-			server = smtplib.SMTP(parts[0])
+		server = self.setting('ErrorEmailServer')
+		# this setting can be: server, server:port, server:port:user:password
+		parts = server.split(':', 3)
+		server = parts[0]
+		try:
+			port = int(parts[1])
+		except (IndexError, ValueError):
+			port = None
+		if port:
+			server = smtplib.SMTP(server, port)
 		else:
-			server = smtplib.SMTP(parts[0], int(parts[1]))  # server and port
+			server = smtplib.SMTP(server)
 		server.set_debuglevel(0)
-		if len(parts)==3:
-			server.login(parts[2], '')  # user and no password
-		elif len(parts)==4:
-			server.login(parts[2], parts[3])  # user and password
+		try:
+			user = parts[2]
+			try:
+				passwd = parts[3]
+			except IndexError:
+				passwd = ''
+			server.login(user, passwd)
+		except AttributeError: # Python < 2.2
+			raise smtplib.SMTPException, \
+				"Python version doesn't support SMTP authentication"
+		except IndexError:
+			pass
 		server.sendmail(headers['From'], headers['To'], message.getvalue())
 		server.quit()
 

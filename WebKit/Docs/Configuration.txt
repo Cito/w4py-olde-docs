@@ -271,7 +271,8 @@ Errors
     html attachment, or False to make the html the body of the message.
     Default: ``False`` (html in body).
 ``ErrorEmailServer``:
-    The SMTP server to use for sending e-mail error messages.
+    The SMTP server to use for sending e-mail error messages, and, if
+    required, the port, username and password, all separated by colons.
     Default: ``'localhost'``.
 ``ErrorEmailHeaders``:
     The e-mail headers used for e-mailing error messages.  Be sure to
