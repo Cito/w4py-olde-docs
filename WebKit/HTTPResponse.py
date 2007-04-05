@@ -345,12 +345,14 @@ class HTTPResponse(Response):
 		cookie-attribute introduced with RFC 2965 for that purpose.
 
 		"""
-		if not self._transaction.application().setting('UseCookieSessions', True):
+		trans = self._transaction
+		app = trans.application()
+		if not app.setting('UseCookieSessions', True):
 			return
-		sess = self._transaction._session
+		sess = trans.session()
 		if sess:
-			cookie = Cookie(self._transaction.application()._session_name, sess.identifier())
-			cookie.setPath(self._transaction.request().adapterName() + '/')
+			cookie = Cookie(app.sessionName(trans), sess.identifier())
+			cookie.setPath(app.sessionCookiePath(trans))
 			if sess.isExpired() or sess.timeout() == 0:
 				# Invalid -- tell client to forget the cookie.
 				cookie.delete()

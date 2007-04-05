@@ -143,7 +143,7 @@ class HTTPRequest(Request):
 	def setTransaction(self, trans):
 		"""Should be invoked after the transaction is created for this request."""
 		Request.setTransaction(self, trans)
-		self._sidname = trans.application()._session_name
+		self._sidname = trans.application().sessionName(trans)
 		# Get session ID from cookie if available
 		self._cookieSession = self._cookies.get(self._sidname, None)
 		# try to get automatic path session

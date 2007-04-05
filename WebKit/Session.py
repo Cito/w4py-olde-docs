@@ -50,9 +50,9 @@ class Session(Object):
 		self._numTrans = 0
 		self._values = {}
 		app = trans.application()
-		self._timeout = app._session_timeout
-		self._prefix = app._session_prefix
-		self._sidname = app._session_name
+		self._timeout = app.sessionTimeout(trans)
+		self._prefix = app.sessionPrefix(trans)
+		self._sidname = app.sessionName(trans)
 
 		if identifier:
 			if re.search(r'[^\w\.\-]', identifier) is not None:

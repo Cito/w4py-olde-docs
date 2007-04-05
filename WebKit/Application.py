@@ -398,7 +398,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		return session
 
 	def createSessionWithID(self, transaction, sessionID):
-		# Create a session object with our session ID
+		"""Create a session object with our session ID."""
 		sess = Session(transaction, sessionID)
 		# Replace the session if it didn't already exist,
 		# otherwise we just throw it away.  setdefault is an atomic
@@ -407,6 +407,41 @@ class Application(ConfigurableForServerSidePath, Object):
 		# the session store, even if multiple threads are calling
 		# this method simultaneously.
 		transaction.application()._sessions.setdefault(sessionID, sess)
+
+	def sessionTimeout(self, transaction):
+		"""The timeout (in seconds) for a user session.
+
+		Overwrite to make this transaction dependent.
+
+		"""
+		return self._session_timeout
+
+	def sessionPrefix(self, transaction):
+		"""Get the prefix string for the session ID.
+
+
+		Overwrite to make this transaction dependent.
+
+		"""
+		return self._session_prefix
+
+	def sessionName(self, transaction):
+		"""Get the name of the field holding the session ID.
+
+
+		Overwrite to make this transaction dependent.
+
+		"""
+		return self._session_name
+
+	def sessionCookiePath(self, transaction):
+		"""Get the cookie path for this transaction.
+
+		The adapter name is used for security reasons, see:
+		http://www.net-security.org/dl/articles/cookie_path.pdf
+
+		"""
+		return transaction.request().adapterName() + '/'
 
 
 	## Misc Access ##
@@ -850,8 +885,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		newSid = transaction.session().identifier()
 		request = transaction.request()
-		url = '%s/%s=%s/%s%s%s' % (request.adapterName(), self._session_name,
-			newSid, request.pathInfo(), request.extraURLPath() or '',
+		url = '%s/%s=%s/%s%s%s' % (request.adapterName(),
+			self.sessionName(transaction), newSid,
+			request.pathInfo(), request.extraURLPath() or '',
 			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:
 			print '>> [sessions] handling UseAutomaticPathSessions,' \

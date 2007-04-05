@@ -76,7 +76,7 @@ class Transaction(Object):
 		"""
 		if not self._session:
 			self._session = self._application.createSessionForTransaction(self)
-			self._session.awake(self)  # give the new servlet a chance to set up
+			self._session.awake(self) # give the new servlet a chance to set up
 		return self._session
 
 	def setSession(self, session):
