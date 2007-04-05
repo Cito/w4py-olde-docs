@@ -222,12 +222,12 @@ class HTTPResponse(Response):
 		This method sets the headers and content for the redirect, but does
 		NOT change the cookies. Use clearCookies() as appropriate.
 
-		@@ 2002-03-21 ce: I thought cookies were ignored by user agents if a
-		redirect occurred. We should verify and update code or docs as appropriate.
+        See http://www.ietf.org/rfc/rfc2616 (section 10.3.3),
+        http://www.ietf.org/rfc/rfc3875 (section 6.2.3) and
+        http://support.microsoft.com/kb/176113
+        (removing cookies by IIS is considered a bug).
 
 		"""
-		# ftp://ftp.isi.edu/in-notes/rfc2616.txt
-		# Sections: 10.3.3 and others
 		assert not self._committed, "Headers have already been sent."
 		self.setHeader('Status', '302 Redirect')
 		self.setHeader('Location', url)
