@@ -100,6 +100,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self.printStartUpMessage()
 		sys.setcheckinterval(self.setting('CheckInterval'))
 		self._app = self.createApplication()
+		self.makeDirs()
 		self.loadPlugIns()
 
 		# @@ 2003-03 ib: shouldn't this just be in a subclass's __init__?
@@ -127,6 +128,13 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			print '> python install.py'
 			print
 			sys.exit(0)
+
+	def makeDirs(self):
+		"""Make sure some standard directories are always available."""
+		for dir in ('Cache', 'Sessions', 'ErrorMsgs', 'Logs'):
+			dir = os.path.join(self.serverSidePath(), dir)
+			if not os.path.exists(dir):
+				os.mkdir(dir)
 
 	def readyForRequests(self):
 		"""Declare ready for getting requests.

@@ -44,7 +44,7 @@ class AppServerTest(unittest.TestCase):
 		self.assertAppServerSays('^WebKit and Webware are open source.$')
 		self.assertAppServerSays('^EnableHTTP\s*=\s*(True|1)$')
 		self.assertAppServerSays('^HTTPPort\s*=\s*8080$')
-		self.assertAppServerSays('^Host\s*=\s*127.0.0.1$')
+		self.assertAppServerSays('^Host\s*=\s*(localhost|127.0.0.1)$')
 		self.assertAppServerSays('^Ready (.*).$')
 		# We will also test the built-in HTTP server with this:
 		try:

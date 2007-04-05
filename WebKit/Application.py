@@ -74,8 +74,6 @@ class Application(ConfigurableForServerSidePath, Object):
 			self.printConfig()
 
 		self.initVersions()
-
-		self.readError404Page()
 		self.initErrorPage()
 
 		self._shutDownHandlers = []
@@ -93,6 +91,51 @@ class Application(ConfigurableForServerSidePath, Object):
 		# sessions, in case the loading of the sessions causes an exception.
 		self._exceptionHandlerClass = ExceptionHandler
 
+		self.initSessions()
+
+		URLParser.initApp(self)
+		self._rootURLParser = URLParser.ContextParser(self)
+
+		self.running = 1
+
+		if useSessionSweeper:
+			self.startSessionSweeper()
+
+	def initErrorPage(self):
+		"""Initialize the error page related attributes."""
+		dirs = (self._serverSidePath,
+			os.path.dirname(os.path.abspath(__file__)))
+		pages = ('error404.html', '404Text.txt')
+		for dir in dirs:
+			for page in pages:
+				try:
+					self._error404 = open(os.path.join(dir, page)).read()
+					if page != pages[0]:
+						print 'Deprecation warning: ' \
+							'Please use %s instead of %s' % pages
+				except:
+					continue
+				else:
+					break
+			else:
+				continue
+			break
+		else:
+			self._error404 = None
+		urls = self.setting('ErrorPage') or None
+		if urls:
+			try:
+				errors = urls.keys()
+			except AttributeError:
+				errors = ['Exception']
+				urls = { errors[0]: urls }
+			for err in errors:
+				if urls[err] and not urls[err].startswith('/'):
+					urls[err] = '/' + urls[err]
+		self._errorPage = urls
+
+	def initSessions(self):
+		"""Initialize all session related attributes."""
 		self._session_prefix = self.setting('SessionPrefix') or ''
 		if self._session_prefix:
 			if self._session_prefix == 'hostname':
@@ -102,8 +145,6 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._session_timeout = self.setting('SessionTimeout')*60
 		self._session_name = self.setting('SessionName') \
 			or self.defaultConfig()['SessionName']
-
-		# Get session class:
 		sessionModule = self.setting('SessionModule')
 		className = sessionModule.split('.')[-1]
 		try:
@@ -121,10 +162,8 @@ class Application(ConfigurableForServerSidePath, Object):
 				print "ERROR: Session module" \
 					" does not contain class", className
 				self._sessionClass = None
-		if not self._sessionClass:
+		if self._sessionClass is None:
 			print "ERROR: Session class not found!"
-
-		# Get and initialize session store class:
 		sessionStore = self.setting('SessionStore').split('.')
 		packageName = '.'.join(sessionStore[:-1])
 		if packageName:
@@ -158,62 +197,8 @@ class Application(ConfigurableForServerSidePath, Object):
 					break
 		else:
 			self._sessions = None
-		if not self._sessions:
+		if self._sessions is None:
 			print "ERROR: Session store not found!"
-
-		URLParser.initApp(self)
-		self._rootURLParser = URLParser.ContextParser(self)
-
-		self.running = 1
-
-		if useSessionSweeper:
-			self.startSessionSweeper()
-
-	def readError404Page(self):
-		"""Read 404 error page in the working dir or next to this module."""
-		dirs = (self._serverSidePath,
-			os.path.dirname(os.path.abspath(__file__)))
-		pages = ('error404.html', '404Text.txt')
-		for dir in dirs:
-			for page in pages:
-				try:
-					self._error404 = open(os.path.join(dir, page)).read()
-					if page != pages[0]:
-						print 'Deprecation warning: ' \
-							'Please use %s instead of %s' % pages
-				except:
-					continue
-				else:
-					break
-			else:
-				continue
-			break
-		else:
-			self._error404 = None
-
-	def initErrorPage(self):
-		"""Evaluate the ErrorPage setting."""
-		urls = self.setting('ErrorPage') or None
-		if urls:
-			try:
-				errors = urls.keys()
-			except AttributeError:
-				errors = ['Exception']
-				urls = { errors[0]: urls }
-			for err in errors:
-				if urls[err] and not urls[err].startswith('/'):
-					urls[err] = '/' + urls[err]
-		self._errorPage = urls
-
-	def getErrorPage(self, errorClass):
-		"""Return the error page url corresponding to an error class."""
-		if self._errorPage.has_key(errorClass.__name__):
-			return self._errorPage[errorClass.__name__]
-		if errorClass is not Exception:
-			for errorClass in errorClass.__bases__:
-				url = self.getErrorPage(errorClass)
-				if url:
-					return url
 
 	def initVersions(self):
 		"""Get and store versions.
@@ -856,7 +841,18 @@ class Application(ConfigurableForServerSidePath, Object):
 		return '/'.join(parts)
 
 	def returnServlet(self, servlet):
+		"""Return the servlet to its pool."""
 		servlet.close()
+
+	def getErrorPage(self, errorClass):
+		"""Get the error page url corresponding to an error class."""
+		if self._errorPage.has_key(errorClass.__name__):
+			return self._errorPage[errorClass.__name__]
+		if errorClass is not Exception:
+			for errorClass in errorClass.__bases__:
+				url = self.getErrorPage(errorClass)
+				if url:
+					return url
 
 	def handleException(self):
 		"""Handle exceptions.

@@ -78,16 +78,19 @@ class SessionFileStore(SessionStore):
 		filename = self.filenameForKey(key)
 		self._lock.acquire()
 		try:
-			file = open(filename, 'wb')
 			try:
-				self.encoder()(item, file)
-			except: # error pickling the session.
-				print "Error saving session to disk:",key
-				file.close()
-				os.remove(filename) # remove file because it is corrupt.
+				file = open(filename, 'wb')
+				try:
+					try:
+						self.encoder()(item, file)
+					finally:
+						file.close()
+				except:
+					os.remove(filename) # remove file because it is corrupt
+					raise
+			except: # error pickling the session
+				print "Error saving session to disk:", key
 				self.application().handleException()
-			else:
-				file.close()
 		finally:
 			self._lock.release()
 
@@ -111,7 +114,7 @@ class SessionFileStore(SessionStore):
 		return os.path.exists(self.filenameForKey(key))
 
 	def keys(self):
-		start = len(self._sessionDir)+1
+		start = len(self._sessionDir) + 1
 		end = -len('.ses')
 		keys = glob(os.path.join(self._sessionDir, '*.ses'))
 		keys = map(lambda key, start=start, end=end: key[start:end], keys)
@@ -157,7 +160,7 @@ class SessionFileStore(SessionStore):
 	#	curTime = time.time()
 	#	for key in self.keys():
 	#		mtime = os.path.getmtime(self.filenameForKey(key))
-	#		if (curTime - mtime) >= sess.timeout()  or  sess.timeout()==0:
+	#		if (curTime - mtime) >= sess.timeout() or sess.timeout() == 0:
 	#			sess.expiring()
 	#			del self[key]
 

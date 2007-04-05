@@ -101,7 +101,7 @@ class PlugIn(Object):
 		# Give the module a pointer back to us
 		setattr(self._module, 'plugIn', self)
 
-		# Make a dubdirectory for it in the Cache directory:
+		# Make a subdirectory for it in the Cache directory:
 		cacheDir = os.path.join(self._appServer.serverSidePath(),
 			'Cache', self._name)
 		if not os.path.exists(cacheDir):
