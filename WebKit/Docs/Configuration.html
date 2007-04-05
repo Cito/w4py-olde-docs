@@ -129,6 +129,9 @@ for a particulary request does not match one of these patterns an
 <tt class="docutils literal"><span class="pre">HTTP</span> <span class="pre">403</span> <span class="pre">Forbidden</span></tt> error will be return.  This affects all
 requests, not just requests with autodetected extensions.  If set
 to <tt class="docutils literal"><span class="pre">[]</span></tt> then no restrictions are placed.  Default: <tt class="docutils literal"><span class="pre">[]</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">SessionModule</span></tt>:</dt>
+<dd>Can be used to replace the standard WebKit Session module with
+something else.  Default: <tt class="docutils literal"><span class="pre">Session</span></tt></dd>
 <dt><tt class="docutils literal"><span class="pre">SessionStore</span></tt>:</dt>
 <dd>This setting determines which of the three session stores is used
 by the application: <tt class="docutils literal"><span class="pre">File</span></tt>, <tt class="docutils literal"><span class="pre">Dynamic</span></tt> or <tt class="docutils literal"><span class="pre">Memory</span></tt>.  The
@@ -136,7 +139,8 @@ by the application: <tt class="docutils literal"><span class="pre">File</span></
 when finished.  <tt class="docutils literal"><span class="pre">Memory</span></tt> always keeps all sessions in memory,
 but will periodically back them up to disk.  <tt class="docutils literal"><span class="pre">Dynamic</span></tt> is a good
 cross between the two, which pushes excessive or inactive sessions
-out to disk.  Default: <tt class="docutils literal"><span class="pre">Dynamic</span></tt>.</dd>
+out to disk.  You can choose your own session store module as well.
+Default: <tt class="docutils literal"><span class="pre">Dynamic</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">SessionTimeout</span></tt>:</dt>
 <dd>Determines the amount of time (expressed in minutes) that passes
 before a user's session will timeout.  When a session times out,
@@ -288,7 +292,8 @@ ErrorEmailServer and ErrorEmailHeaders settings.  You must also set
 html attachment, or False to make the html the body of the message.
 Default: <tt class="docutils literal"><span class="pre">False</span></tt> (html in body).</dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorEmailServer</span></tt>:</dt>
-<dd>The SMTP server to use for sending e-mail error messages.
+<dd>The SMTP server to use for sending e-mail error messages, and, if
+required, the port, username and password, all separated by colons.
 Default: <tt class="docutils literal"><span class="pre">'localhost'</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorEmailHeaders</span></tt>:</dt>
 <dd><p class="first">The e-mail headers used for e-mailing error messages.  Be sure to
@@ -306,7 +311,7 @@ configure <tt class="docutils literal"><span class="pre">&quot;From&quot;</span>
 </dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorPage</span></tt>:</dt>
 <dd><p class="first">You can use this to set up custom error pages for HTTP errors and any
-other exceptions raised in Webware servlets. Set it to the URL of a
+other exceptions raised in Webware servlets.  Set it to the URL of a
 custom error page (any Webware servlet) to catch all kinds of exceptions.
 If you want to catch only particular errors, you can set it to a dictionary
 mapping the names of the corresponding exception classes to the URL to
@@ -324,7 +329,17 @@ which these exceptions should be redirected.  For instance:</p>
     'HTTPException': None
 }
 </pre>
-<p class="last">Default: <tt class="docutils literal"><span class="pre">None</span></tt> (no custom error page).</p>
+<p class="last">Whenever one of the configured exceptions is thrown in a servlet, you
+will be automatically forwarded to the corresponding error page servlet.
+More specifically defined exceptions overrule the more generally defined.
+You can even forward from one error page to another error page unless
+you are not creating loops.  In an <tt class="docutils literal"><span class="pre">HTTPNotFound</span></tt> error page, the servlet
+needs to determine the erroneous URI with <tt class="docutils literal"><span class="pre">self.request().previousURI()</span></tt>,
+since the <tt class="docutils literal"><span class="pre">uri()</span></tt> method returns the URI of the current servlet, which
+in the error page itself.  When a custom error page is displayed, the
+standard error handler will not be called.  So if you want to generate
+an error email or saved error report, you must do so explicitly in your
+error page servlet.  Default: <tt class="docutils literal"><span class="pre">None</span></tt> (no custom error page).</p>
 </dd>
 <dt><tt class="docutils literal"><span class="pre">MaxValueLengthInExceptionReport</span></tt>:</dt>
 <dd>Values in exception reports are truncated to this length, to avoid

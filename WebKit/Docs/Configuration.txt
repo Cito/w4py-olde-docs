@@ -109,6 +109,9 @@ which files are hidden, and some of how those files get chosen.
     ``HTTP 403 Forbidden`` error will be return.  This affects all
     requests, not just requests with autodetected extensions.  If set
     to ``[]`` then no restrictions are placed.  Default: ``[]``.
+``SessionModule``:
+    Can be used to replace the standard WebKit Session module with
+    something else.  Default: ``Session``
 ``SessionStore``:
     This setting determines which of the three session stores is used
     by the application: ``File``, ``Dynamic`` or ``Memory``.  The
@@ -116,7 +119,8 @@ which files are hidden, and some of how those files get chosen.
     when finished.  ``Memory`` always keeps all sessions in memory,
     but will periodically back them up to disk.  ``Dynamic`` is a good
     cross between the two, which pushes excessive or inactive sessions
-    out to disk.  Default: ``Dynamic``.
+    out to disk.  You can choose your own session store module as well.
+    Default: ``Dynamic``.
 ``SessionTimeout``:
     Determines the amount of time (expressed in minutes) that passes
     before a user's session will timeout.  When a session times out,
