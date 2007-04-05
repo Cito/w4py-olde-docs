@@ -165,4 +165,4 @@ class SessionFileStore(SessionStore):
 	## Self utility ##
 
 	def filenameForKey(self, key):
-		return self._sessionDir + '/%s.ses' % key
+		return os.path.join(self._sessionDir, '%s.ses' % key)
