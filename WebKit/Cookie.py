@@ -23,10 +23,10 @@ if pyVer and pyVer[:2] >= (2, 2):
 		if os.path.abspath(dir) == thisDir:
 			continue
 		path.append(dir)
+	file, pathname, description = imp.find_module('Cookie', path)
 	try:
-		file, pathname, description = imp.find_module('Cookie', path)
 		CookieEngine = imp.load_module('Cookie', file, pathname, description)
-	except:
+	finally:
 		if file:
 			file.close()
 else:

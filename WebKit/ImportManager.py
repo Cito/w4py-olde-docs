@@ -76,6 +76,8 @@ class ImportManager(Object):
 				mod = imp.load_module(name, file, filename, info)
 			finally:
 				self._lock.release()
+				if file:
+					file.close()
 			self.recordModule(mod)
 		except:
 			# Also record filepaths which weren't successfully loaded, which

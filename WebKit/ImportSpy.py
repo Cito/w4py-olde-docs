@@ -59,11 +59,7 @@ if path_hooks is not None:
 
 		def load_module(self, fullname):
 			"""Replaces imp.load_module."""
-			try:
-				mod = self._imp.load_module(fullname, self.file, self.filename, self.info)
-			finally:
-				if self.file:
-					self.file.close()
+			mod = self._imp.load_module(fullname, self.file, self.filename, self.info)
 			if mod:
 				mod.__loader__ = self
 			return mod

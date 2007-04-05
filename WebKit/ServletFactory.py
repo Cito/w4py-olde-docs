@@ -178,23 +178,17 @@ class ServletFactory(Object):
 			if module is not None:
 				return module
 		fp = None
-		try:
-			if isPackageDir:
-				# check if __init__.py is in the directory
-				packageDir = os.path.join(directory, moduleName)
-				initPy = os.path.join(packageDir, '__init__.py')
-				if not os.path.exists(initPy):
-					# if it does not exist, make an empty one
-					file = open(initPy, 'w')
-					file.write('#')
-					file.close()
-			fp, pathname, stuff = self._imp.find_module(moduleName,
-				[directory])
-			module = self._imp.load_module(fullModuleName,
-				fp, pathname, stuff)
-		finally:
-			if fp is not None:
-				fp.close()
+		if isPackageDir:
+			# check if __init__.py is in the directory
+			packageDir = os.path.join(directory, moduleName)
+			initPy = os.path.join(packageDir, '__init__.py')
+			if not os.path.exists(initPy):
+				# if it does not exist, make an empty one
+				file = open(initPy, 'w')
+				file.write('#')
+				file.close()
+		fp, pathname, stuff = self._imp.find_module(moduleName, [directory])
+		module = self._imp.load_module(fullModuleName, fp, pathname, stuff)
 		module.__donotreload__ = True
 		return module
 
