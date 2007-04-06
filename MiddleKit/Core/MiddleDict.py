@@ -1,9 +1,5 @@
 from UserDict import UserDict
-try:
-	from types import StringTypes
-except: # fallback for Python < 2.3
-	from types import StringType, UnicodeType
-	StringTypes = (StringType, UnicodeType)
+from MiddleKit import StringTypes
 try: # backward compatibility for Python < 2.3
 	True, False
 except NameError:
@@ -27,12 +23,13 @@ class MiddleDict(UserDict):
 		"""
 		original = self.get(key, default)
 		s = original
-		if isinstance(s, StringTypes):
+		if type(s) in StringTypes:
 			s = s.lower().strip()
 		if s in (False, '', None, 0, 0.0, '0', 'false'):
 			return False
 		elif s in (True, 1, '1', 1.0, 'true'):
 			return True
 		else:
-			raise ValueError, '%r for attr %r should be a boolean value (1, 0, True, False) but is %r instead' % (
-				key, self.get('Name', '(UNNAMED)'), original)
+			raise ValueError, ('%r for attr %r should be a boolean value'
+				' (1, 0, True, False) but is %r instead'
+				% (key, self.get('Name', '(UNNAMED)'), original))

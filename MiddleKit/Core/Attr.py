@@ -1,6 +1,7 @@
+import re
+
 from ModelObject import ModelObject
 from MiscUtils import NoDefault
-import re
 from MiddleKit import StringTypes
 from MiddleDict import MiddleDict
 
@@ -15,10 +16,10 @@ class Attr(MiddleDict, ModelObject):
 	def __init__(self, dict):
 		MiddleDict.__init__(self, {})
 		for key, value in dict.items():
-			if key=='Attribute':
+			if key == 'Attribute':
 				key = 'Name'
 			# @@ 2001-02-21 ce: should we always strip string fields? Probably.
-			if isinstance(value, StringTypes) and value.strip()=='':
+			if type(value) in StringTypes and value.strip() == '':
 				value = None
 			self[key] = value
 		match = nameRE.match(self['Name'])
@@ -102,7 +103,7 @@ class Attr(MiddleDict, ModelObject):
 	def _computePrefixes(self):
 		style = self.setting('AccessorStyle', 'methods').lower()
 		assert style in ('properties', 'methods')
-		if style=='properties':
+		if style == 'properties':
 			self._getPrefix = '_get_'
 			self._setPrefix = '_set_'
 			self._getCapped = False

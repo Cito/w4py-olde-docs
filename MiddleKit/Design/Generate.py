@@ -102,11 +102,11 @@ class Generate:
 
 	def generate(self, pyClass, model, configFilename, outdir):
 		""" Generates code using the given class, model and output directory. The pyClass may be a string, in which case a module of the same name is imported and the class extracted from that. The model may be a string, in which case it is considered a filename of a model. """
-		if isinstance(pyClass, StringTypes):
+		if type(pyClass) in StringTypes:
 			module = __import__(pyClass, globals())
 			pyClass = getattr(module, pyClass)
 		generator = pyClass()
-		if isinstance(model, StringTypes):
+		if type(model) in StringTypes:
 			generator.readModelFileNamed(model, configFilename=configFilename, havePythonClasses=0)
 		else:
 			generator.setModel(model)

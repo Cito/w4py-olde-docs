@@ -221,12 +221,12 @@ class Doc:
 
 		if args.has_key('otherkeys'):
 			self.otherKeys = args['otherkeys']
-			if isinstance(self.otherKeys, types.StringTypes):
+			if type(self.otherKeys) in StringTypes:
 				self.otherKeys = self.otherKeys.split()
 
 		if args.has_key('morekeys'):
 			moreKeys = args['morekeys']
-			if isinstance(moreKeys, types.StringTypes):
+			if type(moreKeys) in StringTypes:
 				moreKeys = moreKeys.split()
 			self.otherKeys += list(moreKeys)
 

@@ -2,6 +2,7 @@ from CodeGenerator import CodeGenerator
 from MiscUtils import AbstractError
 from time import asctime, localtime, time
 import os, sys, types
+from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import objRefJoin
 
 
@@ -56,7 +57,7 @@ class ModelObject:
 
 	def writePy(self, generator, out=sys.stdout):
 		""" Writes the Python code to define a table for the class. The target can be a file or a filename. """
-		if isinstance(out, types.StringTypes):
+		if type(out) in StringTypes:
 			out = open(out, 'w')
 			close = 1
 		else:
@@ -112,8 +113,13 @@ class Klass:
 		wr('''
 import types
 try:
+	from types import StringTypes
+except ImportError: # fallback for Python < 2.2
+	from types import StringType, UnicodeType
+	StringTypes = (StringType, UnicodeType)
+try:
 	from decimal import Decimal
-except ImportError:
+except ImportError: # fallback for Python < 2.4
 	Decimal = float
 ''')
 		if nativeDateTime:
@@ -192,7 +198,7 @@ class Attr:
 		""" Returns the default value as a legal Pythonic value. """
 		if self.has_key('Default'):
 			default = self['Default']
-			if isinstance(default, types.StringTypes):
+			if type(default) in StringTypes:
 				default = default.strip()
 			if not default:
 				return None
@@ -489,7 +495,7 @@ class AnyDateTimeAttr:
 			# mx.DateTime users get this convenience (which has been in MiddleKit
 			# for years):
 			out.write('''\
-			if isinstance(value, types.StringTypes):
+			if type(value) in StringTypes:
 				value = mxDateTime.%s(value)
 ''' % self.mxDateTimeTypeName().replace('Type', 'From'))
 		dateTimeTypes = []

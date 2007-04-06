@@ -41,7 +41,7 @@ class Klass(MiddleDict, ModelObject):
 			assert ')' in name, 'Invalid class spec. Missing ).'
 			self._name, rest = name.split('(')
 			self._supername, rest = rest.split(')')
-			assert rest.strip()==''
+			assert rest.strip() == ''
 			self._name = self._name.strip()
 			self._supername = self._supername.strip()
 		elif ':' in name:
@@ -59,7 +59,7 @@ class Klass(MiddleDict, ModelObject):
 		# fill in dictionary (self) with the contents of the dict argument
 		for key, value in dict.items():
 			# @@ 2001-02-21 ce: should we always strip string fields? Probably.
-			if isinstance(value, StringTypes) and value.strip()=='':
+			if type(value) in StringTypes and value.strip() == '':
 				value = None
 			self[key] = value
 
@@ -144,13 +144,15 @@ class Klass(MiddleDict, ModelObject):
 			# create an id that is a hash of the klass name
 			# see Klasses.assignClassIds()
 			allIds = id
-			limit = 2000000000  # the limit of 2 billion keeps the id easily in the range of a 32 bit signed int without going negative
+			# the limit of 2 billion keeps the id easily in the range
+			# of a 32 bit signed int without going negative
+			limit = 2000000000
 			id = abs(hash(self.name()) % limit)
-			assert id>0 and id<limit
+			assert 0 < id < limit
 			while id in allIds:
 				# adjust for collision
 				id += 1
-			assert id>0 and id<limit
+			assert 0 < id < limit
 			self._id = id
 		else:
 			self._id = id
@@ -176,7 +178,7 @@ class Klass(MiddleDict, ModelObject):
 		default is specified (in which case it is returned).
 		"""
 		if self._superklass:
-			if self._superklass.name()==name:
+			if self._superklass.name() == name:
 				return self._superklass
 			else:
 				return self._superklass.lookupAncestorKlass(name, default)
@@ -191,7 +193,7 @@ class Klass(MiddleDict, ModelObject):
 		Returns true if the klass is the same as, or inherits from,
 		the klass with the given name.
 		"""
-		if self.name()==name:
+		if self.name() == name:
 			return 1
 		else:
 			return self.lookupAncestorKlass(name, None) is not None
@@ -302,10 +304,10 @@ class Klass(MiddleDict, ModelObject):
 		attribute _mk_klass which is used by MiddleKit.Run.MiddleObject.
 
 		"""
-		if self._pyClass==0:
+		if self._pyClass == 0:
 			if self._klassContainer._model._havePythonClasses:
 				self._pyClass = self._klassContainer._model.pyClassForName(self.name())
-				assert self._pyClass.__name__==self.name(), 'self.name()=%r, self._pyClass=%r' % (self.name(), self._pyClass)
+				assert self._pyClass.__name__ == self.name(), 'self.name()=%r, self._pyClass=%r' % (self.name(), self._pyClass)
 				self._pyClass._mk_klass = self
 			else:
 				self._pyClass = None
@@ -364,7 +366,7 @@ class Klass(MiddleDict, ModelObject):
 			return 1
 		if self.model() is not other.model():
 			value = cmp(self.model().name(), other.model().name())
-			if value==0:
+			if value == 0:
 				value = cmp(self.name(), other.name())
 			return value
 		return cmp(self.name(), other.name())

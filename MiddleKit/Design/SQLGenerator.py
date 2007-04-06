@@ -351,7 +351,7 @@ class Klasses:
 		The target can be a file or a filename.
 
 		"""
-		if isinstance(out, StringTypes):
+		if type(out) in StringTypes:
 			out = open(out, 'w')
 			close = 1
 		else:

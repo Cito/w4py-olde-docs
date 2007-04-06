@@ -33,6 +33,6 @@ class AnyDateTimeAttr:
 			out.write('''\
 		# no DateTime, use strings
 		if value is not None:
-			if isinstance(value, StringTypes):
+			if type(value) in StringTypes:
 				raise TypeError, 'expecting string type, but got value %r of type %r instead' % (value, type(value))
 ''')

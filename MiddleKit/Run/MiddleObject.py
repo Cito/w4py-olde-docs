@@ -2,7 +2,6 @@ from MiscUtils.NamedValueAccess import NamedValueAccess
 from MiscUtils import NoDefault
 import ObjectStore
 import sys, types
-from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleKit.Core.ListAttr import ListAttr
 
@@ -85,18 +84,18 @@ class MiddleObject(object, NamedValueAccess):
 				# @@ 2000-10-29 ce: next line is major hack: hasSQLColumn()
 				attrs = [attr for attr in allAttrs if attr.hasSQLColumn()]
 				attrNames = [attr.name() for attr in attrs]
-				assert len(attrNames)+1==len(row)  # +1 because row has serialNumber
+				assert len(attrNames) + 1 == len(row)  # +1 because row has serialNumber
 				for name in attrNames:
 					setMethodName = 'set' + name[0].upper() + name[1:]
 					setMethod = getattr(self.__class__, setMethodName, '_'+name)
 					cache.append(setMethod)
 
-			assert len(cache)+1==len(row)
+			assert len(cache) + 1 == len(row)
 			self._mk_initing = 1
-			if self._mk_serialNum==0:
+			if self._mk_serialNum == 0:
 				self.setSerialNum(row[0])
 			else:
-				assert self._mk_serialNum==row[0]
+				assert self._mk_serialNum == row[0]
 			# Set all of our attributes with setFoo() or by assigning to _foo
 			for i in xrange(len(cache)):
 				value = row[i+1]
@@ -104,10 +103,10 @@ class MiddleObject(object, NamedValueAccess):
 				setter(self, value)
 		else:
 			self._mk_initing = 1
-			if self._mk_serialNum==0:
+			if self._mk_serialNum == 0:
 				self.setSerialNum(row[0])
 			else:
-				assert self._mk_serialNum==row[0]
+				assert self._mk_serialNum == row[0]
 			allAttrs = self.klass().allDataAttrs()
 			i = 1
 			for attr in allAttrs:
@@ -153,10 +152,10 @@ class MiddleObject(object, NamedValueAccess):
 		There are some restrictions: Once the serial number is a positive value, indicating a legitimate value from the object store, it cannot be set to anything else. Also, if the serial number is negative, indicating a temporary serial number for new objects that haven't been committed to the database, it can only be set to a positive value.
 		"""
 		assert type(value) in (type(0), type(0L)), "Type is: %r, value is: %r" % (type(value), value)
-		if self._mk_serialNum<0:
-			assert value>0
+		if self._mk_serialNum < 0:
+			assert value > 0
 		else:
-			assert self._mk_serialNum==0
+			assert self._mk_serialNum == 0
 		self._mk_serialNum = value
 		self._mk_key = None
 
@@ -183,7 +182,7 @@ class MiddleObject(object, NamedValueAccess):
 		Returns true if the object was newly created (whether added to the store or not). Objects
 		fetched from the database will return false.
 		"""
-		return self._mk_serialNum<1
+		return self._mk_serialNum < 1
 
 	def isDeleted(self):
 		return self._mk_isDeleted;
@@ -202,7 +201,7 @@ class MiddleObject(object, NamedValueAccess):
 		"""
 		Restrictions: Cannot set the key twice.
 		"""
-		assert self._mk_serialNum>=1, "Cannot make keys for objects that haven't been persisted yet."
+		assert self._mk_serialNum >= 1, "Cannot make keys for objects that haven't been persisted yet."
 		assert self._mk_key is None
 		self._mk_key = key
 
@@ -226,7 +225,7 @@ class MiddleObject(object, NamedValueAccess):
 		values. Only attributes defined in the MiddleKit object model
 		are included. An example return value might be
 			{ '_x': 1, '_y': 1 },
-		or if includeUnderscoresInKeys==0,
+		or if includeUnderscoresInKeys == 0,
 			{ 'x': 1, 'y': 1 }.
 		"""
 		allAttrs = {}
@@ -324,7 +323,7 @@ class MiddleObject(object, NamedValueAccess):
 			if verbose:
 				dump = 1
 			else:
-				dump = not key.startswith('_mk_') or key=='_mk_serialNum'
+				dump = not key.startswith('_mk_') or key == '_mk_serialNum'
 			if dump:
 				name = key.ljust(keyWidth)
 				out.write('%s = %s\n' % (name, getattr(self, key)))
