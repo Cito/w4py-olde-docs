@@ -145,60 +145,34 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._sessionTimeout = self.setting('SessionTimeout')*60
 		self._sessionName = self.setting('SessionName') \
 			or self.defaultConfig()['SessionName']
-		sessionModule = self.setting('SessionModule')
-		className = sessionModule.split('.')[-1]
+		moduleName = self.setting('SessionModule')
+		className = moduleName.split('.')[-1]
 		try:
-			exec 'from %s import %s' % (sessionModule, className)
+			exec 'from %s import %s' % (moduleName, className)
+			klass = locals()[className]
+			if not isinstance(klass, ClassType) \
+					and not issubclass(klass, Object):
+				raise ImportError
+			self._sessionClass = klass
 		except ImportError:
+			print "ERROR: Could not import Session class '%s'" \
+				" from module '%s'" % (className, moduleName)
 			self._sessionClass = None
-		else:
-			try:
-				klass = locals()[className]
-				if not isinstance(klass, ClassType) \
-						and not issubclass(klass, Object):
-					raise KeyError
-				self._sessionClass = klass
-			except KeyError:
-				print "ERROR: Session module" \
-					" does not contain class", className
-				self._sessionClass = None
-		if self._sessionClass is None:
-			print "ERROR: Session class not found!"
-		sessionStore = self.setting('SessionStore').split('.')
-		packageName = '.'.join(sessionStore[:-1])
-		if packageName:
-			packageName += '.'
-		className = sessionStore[-1]
-		for prefix, suffix in (('Session', 'Store'), (None, None)):
-			name = className
-			if prefix:
-				if name.startswith(prefix):
-					continue
-				name = prefix + name
-			if suffix:
-				if name.endswith(suffix):
-					continue
-				name += suffix
-			try:
-				exec 'from %s%s import %s' % (packageName, name, name)
-			except ImportError:
-				pass
-			else:
-				try:
-					klass = locals()[name]
-					if not isinstance(klass, ClassType) \
-							and not issubclass(klass, Object):
-						raise KeyError
-				except KeyError:
-					print "ERROR: SessionStore module" \
-						" does not contain class", name
-				else:
-					self._sessions = klass(self)
-					break
-		else:
+		moduleName = self.setting('SessionStore')
+		if moduleName in ('Dynamic', 'File', 'Memory'):
+			moduleName = 'Session%sStore' % moduleName
+		className = moduleName.split('.')[-1]
+		try:
+			exec 'from %s import %s' % (moduleName, className)
+			klass = locals()[className]
+			if not isinstance(klass, ClassType) \
+					and not issubclass(klass, Object):
+				raise ImportError
+			self._sessions = klass(self)
+		except ImportError:
+			print "ERROR: Could not import SessionStore class '%s'" \
+				" from module '%s'" % (className, moduleName)
 			self._sessions = None
-		if self._sessions is None:
-			print "ERROR: Session store not found!"
 
 	def initVersions(self):
 		"""Get and store versions.
