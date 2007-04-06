@@ -20,7 +20,7 @@ def image_lib_link(lib=None):
 			'www.pythonware.com/products/pil/')}[lib]
 	return '<a href="http://%s">%s</a>' % (src, name)
 
-from MiscUtils import StringUI
+from MiscUtils import StringIO
 from ExamplePage import ExamplePage
 
 
