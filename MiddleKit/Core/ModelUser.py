@@ -1,7 +1,8 @@
+import sys
+from types import ModuleType, ClassType
+
 from MiscUtils.MixIn import MixIn
 from MiscUtils import NoDefault
-import sys
-from types import *
 
 
 class ModelUser:
@@ -35,7 +36,7 @@ class ModelUser:
 
 	def readModelFileNamed(self, filename, modelClass=None, **keywords):
 		assert self._model is None, 'Cannot re-read a model.'
-		if modelClass==None:
+		if modelClass == None:
 			from MiddleKit.Core.Model import Model as modelClass
 		self._model = modelClass(**keywords)
 		self._model.read(filename)
@@ -54,7 +55,8 @@ class ModelUser:
 			print 'class =', self.__class__
 
 		modules = self.modulesForClass(self.__class__)
-		if verbose: print 'modules =', ', '.join(modules)
+		if verbose:
+			print 'modules =', ', '.join(modules)
 
 		modules.reverse()  # so that mix-ins in subclasses override super
 		modules = [sys.modules[m] for m in modules]
@@ -63,13 +65,18 @@ class ModelUser:
 			assert type(module) is ModuleType
 			self.installMixInsForModule(module, verbose)
 
-		if verbose: print
+		if verbose:
+			print
 
 
 	def installMixInsForModule(self, module, verbose=0):
-		# @@ 2000-10-18 ce: perhaps MixIns should be applied to the actual MiddleKit.Core class and not the custom one that possibly was passed into model. This would help with "invoking super" which may be a non-trivial operation in a mix-in of a generator module.
+		# @@ 2000-10-18 ce: perhaps MixIns should be applied to the actual
+		# MiddleKit.Core class and not the custom one that possibly was
+		# passed into model. This would help with "invoking super" which
+		# may be a non-trivial operation in a mix-in of a generator module.
 		coreClassNames = self._model.coreClassNames()
-		if verbose: print '>>', module
+		if verbose:
+			print '>>', module
 		for name in dir(module):
 			generatorThing = getattr(module, name)
 			if type(generatorThing) is ClassType:
@@ -78,7 +85,8 @@ class ModelUser:
 				if name in coreClassNames:
 					baseClass = self._model.coreClass(name)
 					if baseClass is not generatorThing:
-						if verbose: print '>> mixing %s into %s' % (generatorThing, baseClass)
+						if verbose:
+							print '>> mixing %s into %s' % (generatorThing, baseClass)
 						assert type(baseClass) is ClassType
 						assert type(generatorThing) is ClassType
 						MixIn(baseClass, generatorThing, mixInSuperMethods=1)
@@ -112,7 +120,7 @@ class ModelUser:
 		if modules is None:
 			modules = []
 		className = pyClass.__name__
-		if className!='ModelUser':
+		if className != 'ModelUser':
 			modules.append(pyClass.__module__)
 			for baseClass in pyClass.__bases__:
 				self.modulesForClass(baseClass, modules)

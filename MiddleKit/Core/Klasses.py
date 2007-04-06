@@ -6,9 +6,11 @@ from MiscUtils import NoDefault
 from MiscUtils.DataTable import DataTable
 from MiscUtils.DictForArgs import *
 from UserDict import UserDict
-from types import *
-import os
-import sys
+
+try: # backward compatibility for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 class Klasses(ModelObject, UserDict):
@@ -23,20 +25,16 @@ class Klasses(ModelObject, UserDict):
 
 	def __init__(self, model):
 		UserDict.__init__(self)
-
 		assert isinstance(model, Model)
 		self._model         = model
 		self._klasses       = []
 		self._filename      = None
 		self._name          = None
 		self._tableHeadings = None
-
 		self.initTypeMap()
-
 
 	def classNames(self):
 		return ['ModelObject', 'Klasses', 'Klass', 'Attr', 'BasicTypeAttr', 'ObjRefAttr', 'EnumAttr', 'DateTimeAttr']
-
 
 	def initTypeMap(self):
 		"""
@@ -44,16 +42,12 @@ class Klasses(ModelObject, UserDict):
 		Mapping to class names rather than actual classes is key, because in __init__, a different set of attribute classes can be passed in.
 		"""
 		map = {}
-
 		names = 'bool int long float string enum date time list ObjRef decimal'
 		names = names.split()
 		for name in names:
 			map[name] = name.capitalize()+'Attr'
-
 		map['datetime'] = 'DateTimeAttr'
-
 		self._typeNamesToAttrClassNames = map
-
 
 	def assignClassIds(self, generator):
 		if self.setting('UseHashForClassIds', False):
@@ -113,7 +107,7 @@ class Klasses(ModelObject, UserDict):
 					self.addKlass(klass)
 				else:
 					name = row['Attribute']
-					if name and name[0]!='#' and name[-1]!=':':
+					if name and name[0] != '#' and name[-1] != ':':
 						pyClassName = self.pyClassNameForAttrDict(row)
 						pyClass = self._model.coreClass(pyClassName)
 						klass.addAttr(pyClass(row))

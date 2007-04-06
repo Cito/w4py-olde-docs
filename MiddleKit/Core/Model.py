@@ -6,6 +6,10 @@ try:
 	from cPickle import load, dump
 except ImportError:
 	from pickle import load, dump
+try: # backward compatibility for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 class ModelError(Exception):
@@ -31,17 +35,20 @@ class ModelError(Exception):
 
 
 class Model(Configurable):
-	"""
-	A Model defines the classes, attributes and enumerations of an application.
+	"""A Model defines the classes, attributes and enumerations of an application.
 
-	It also provides access to the Python classes that implement these structures for use by other MiddleKit entities including code generators and object stores.
+	It also provides access to the Python classes that implement these structures
+	for use by other MiddleKit entities including code generators and object stores.
+
 	"""
 
 	pickleVersion = 1
 		# increment this if a non-compatible change is made in Klasses,
 		# Klass or Attr
 
-	def __init__(self, filename=None, classesFilename=None, configFilename=None, customCoreClasses={}, rootModel=None, havePythonClasses=1):
+	def __init__(self,
+			filename=None, classesFilename=None, configFilename=None,
+			customCoreClasses={}, rootModel=None, havePythonClasses=1):
 		Configurable.__init__(self)
 		self._havePythonClasses = havePythonClasses
 		self._filename = None
@@ -81,7 +88,7 @@ class Model(Configurable):
 		start = time.time()
 		assert self._filename is None, 'Cannot read twice.'
 		# Assume the .mkmodel extension if none is given
-		if os.path.splitext(filename)[1]=='':
+		if os.path.splitext(filename)[1] == '':
 			filename += '.mkmodel'
 		self._filename = os.path.abspath(filename)
 		self._name = None
@@ -105,10 +112,7 @@ class Model(Configurable):
 		# print '%.2f seconds\n' % dur
 
 	def readKlassesInModelDir(self):
-		"""
-		Reads the Classes.csv file, or the Classes.pickle.cache file as
-		appropriate.
-		"""
+		"""Read the Classes.csv or Classes.pickle.cache file as appropriate."""
 		path = None
 		csvPath = os.path.join(self._filename, 'Classes.csv')
 		if os.path.exists(csvPath):
@@ -152,12 +156,12 @@ class Model(Configurable):
 				name = klass.name()
 				if byName.has_key(name):
 					for i in range(len(inOrder)):
-						if inOrder[i].name()==name:
+						if inOrder[i].name() == name:
 							inOrder[i] = klass
 				else:
 					inOrder.append(klass)
 				byName[name] = klass
-		assert len(byName)==len(inOrder)
+		assert len(byName) == len(inOrder)
 		for name, klass in byName.items():
 			assert klass is self.klass(name)
 		for klass in inOrder:
@@ -178,12 +182,15 @@ class Model(Configurable):
 		if parentFilenames is None:
 			parentFilenames = self.setting('Inherit', [])
 		for filename in parentFilenames:
-			filename = os.path.abspath(os.path.join(os.path.dirname(self._filename), filename))
+			filename = os.path.abspath(os.path.join(
+				os.path.dirname(self._filename), filename))
 			if self._allModelsByFilename.has_key(filename):
 				model = self._allModelsByFilename[filename]
 				assert model!=self._rootModel
 			else:
-				model = self.__class__(filename, customCoreClasses=self._coreClasses, rootModel=self, havePythonClasses=self._havePythonClasses)
+				model = self.__class__(filename,
+					customCoreClasses=self._coreClasses,
+					rootModel=self, havePythonClasses=self._havePythonClasses)
 				self._allModelsByFilename[filename] = model
 			self._parents.append(model)
 
@@ -208,21 +215,25 @@ class Model(Configurable):
 		self._searchOrder = searchOrder
 
 	def dontReadParents(self):
-		"""
-		The attributes _parents and _searchOrder are set.
-		Used internally for the rare case of reading class files directly (instead of from a model directory).
+		"""Set attributes _parents and _searchOrder.
+
+		Used internally for the rare case of reading class files directly
+		(instead of from a model directory).
+
 		"""
 		self._parents = []
 		self._searchOrder = [self]
 
 	def allModelsDepthFirstLeftRight(self, parents=None):
-		"""
+		"""Return ordered list of models.
+
 		Returns a list of all models, including self, parents and
 		ancestors, in a depth-first, left-to-right order. Does not
 		remove duplicates (found in inheritance diamonds).
 
 		Mostly useful for readParents() to establish the lookup
 		order regarding model inheritance.
+
 		"""
 		if parents is None:
 			parents = []
@@ -232,7 +243,12 @@ class Model(Configurable):
 		return parents
 
 	def coreClass(self, className):
-		""" For the given name, returns a class from MiddleKit.Core or the custom set of classes that were passed in via initialization. """
+		"""Return code class.
+
+		For the given name, returns a class from MiddleKit.Core
+		or the custom set of classes that were passed in via initialization.
+
+		"""
 		pyClass = self._coreClasses.get(className, None)
 		if pyClass is None:
 			results = {}
@@ -243,17 +259,19 @@ class Model(Configurable):
 		return pyClass
 
 	def coreClassNames(self):
-		""" Returns a list of model class names found in MiddleKit.Core. """
+		"""Return a list of model class names found in MiddleKit.Core."""
 		# a little cheesy, but it does the job:
 		import MiddleKit.Core as Core
 		return Core.__all__
 
 	def klasses(self):
-		"""
-		Return an instance that inherits from Klasses, using the base
+		"""Get klasses.
+
+		Returns an instance that inherits from Klasses, using the base
 		classes passed to __init__, if any.
 
 		See also: klass(), allKlassesInOrder(), allKlassesByName()
+
 		"""
 		if self._klasses is None:
 			Klasses = self.coreClass('Klasses')
@@ -261,9 +279,11 @@ class Model(Configurable):
 		return self._klasses
 
 	def klass(self, name, default=NoDefault):
-		"""
+		"""Get klass.
+
 		Returns the klass with the given name, searching the parent
 		models if necessary.
+
 		"""
 		for model in self._searchOrder:
 			klass = model.klasses().get(name, None)
@@ -275,23 +295,28 @@ class Model(Configurable):
 			return default
 
 	def allKlassesInOrder(self):
-		"""
+		"""Get klasses in order.
+
 		Returns a sequence of all the klasses in this model, unique by
 		name, including klasses inherited from parent models.
 
 		The order is the order of declaration, top-down.
+
 		"""
 		return self._allKlassesInOrder
 
 	def allKlassesByName(self):
-		"""
+		"""Get klasses by name.
+
 		Returns a dictionary of all the klasses in this model, unique
 		by name, including klasses inherited from parent models.
+
 		"""
 		return self._allKlassesByName
 
 	def allKlassesInDependencyOrder(self):
-		"""
+		"""Get klasses in dependency order.
+
 		Returns a sequence of all the klasses in this model, in an
 		order such that klasses follow the klasses they refer to
 		(via obj ref attributes).
@@ -302,6 +327,7 @@ class Model(Configurable):
 		since there can be no definitive order when a cycle exists.
 		You can break cycles by setting Ref=False for some
 		attribute in the cycle.
+
 		"""
 		for klass in self._allKlassesInOrder:
 			klass.willBuildDependencies()
@@ -316,20 +342,24 @@ class Model(Configurable):
 				klass.recordDependencyOrder(allKlasses, visited)
 		# The above loop fails to capture classes that are in cycles,
 		# but in that case there really is no dependency order.
-		if len(allKlasses)<len(self._allKlassesInOrder):
-			raise ModelError('Cannot determine a dependency order among the classes due to a cycle. Try setting Ref=0 for one of the attributes to break the cycle.')
-		assert len(allKlasses)==len(self._allKlassesInOrder), '%r, %r, %r' % (len(allKlasses), len(self._allKlassesInOrder), allKlasses)
-		#print '>> allKlassesInDependencyOrder() =', ' '.join([klass.name() for klass in allKlasses])
+		if len(allKlasses) < len(self._allKlassesInOrder):
+			raise ModelError("Cannot determine a dependency order"
+				" among the classes due to a cycle. Try setting Ref=0"
+				" for one of the attributes to break the cycle.")
+		assert len(allKlasses) == len(self._allKlassesInOrder), \
+			'%r, %r, %r' % (len(allKlasses), len(self._allKlassesInOrder), allKlasses)
+		# print '>> allKlassesInDependencyOrder() =', ' '.join([k.name() for k in allKlasses])
 		return allKlasses
 
 	def pyClassForName(self, name):
-		"""
-		Returns the Python class for the given name, which must be
-		present in the object model. Accounts for
-		self.setting('Package').
+		"""Get Python class for name.
 
-		If you already have a reference to the model klass, then
-		you can just ask it for klass.pyClass().
+		Returns the Python class for the given name, which must be present
+		in the object model. Accounts for self.setting('Package').
+
+		If you already have a reference to the model klass, then you can
+		just ask it for klass.pyClass().
+
 		"""
 		pyClass = self._pyClassForName.get(name, None)
 		if pyClass is None:
@@ -340,7 +370,9 @@ class Model(Configurable):
 			try:
 				exec 'import %s%s as module' % (pkg, name) in results
 			except ImportError, exc:
-				raise ModelError("Could not import module for class '%s' due to %r.  If you've added this class recently, you need to re-generate your model." % (name, exc.args[0]))
+				raise ModelError("Could not import module for class '%s' due to %r."
+					" If you've added this class recently,"
+					" you need to re-generate your model." % (name, exc.args[0]))
 			pyClass = getattr(results['module'], 'pyClass', None)
 			if pyClass is None:
 				pyClass = getattr(results['module'], name)
@@ -362,10 +394,10 @@ class Model(Configurable):
 
 	def defaultConfig(self):
 		return {
-			'Threaded': 1,
+			'Threaded': True,
 			'ObjRefSuffixes': ('ClassId', 'ObjId'),
 			'UseBigIntObjRefColumns': False,
-#			'SQLLog': { 'File': 'stdout', },
+			# 'SQLLog': { 'File': 'stdout', },
 			'PreSQL': '',
 			'PostSQL': '',
 			'DropStatements': 'database',  # database, tables
@@ -377,8 +409,8 @@ class Model(Configurable):
 				'ValueColName': 'value',
 				'NameColName': 'name',
 			},
-				# can use: [cC]lassName, _ClassName, [aA]ttrName, _AttrName.
-				# "_" prefix means "as is", the others control the case of the first character.
+			# can use: [cC]lassName, _ClassName, [aA]ttrName, _AttrName.
+			# "_" prefix means "as is", the others control the case of the first character.
 		}
 
 	def usesExternalSQLEnums(self):
@@ -395,6 +427,7 @@ class Model(Configurable):
 		if out is None:
 			out = sys.stdout
 		if len(self._klasses.klassesInOrder()) < 1:
-			out.write("warning: Model '%s' doesn't contain any class definitions.\n" % self.name())
+			out.write("warning: Model '%s' doesn't contain any class definitions.\n"
+				% self.name())
 		for klass in self.klasses().klassesInOrder():
 			klass.printWarnings(out)
