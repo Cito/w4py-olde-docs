@@ -412,9 +412,9 @@ class Klass(MiddleDict, ModelObject):
 
 	def recordDependencyOrder(self, order, visited, indent=0):
 		#print '%srecordDependencyOrder() for %s' % (' '*indent*4, self.name())
-		if self in visited:
+		if visited.has_key(self):
 			return
-		visited.add(self)
+		visited[self] = None # better use visited.add(self) in Python >= 2.3
 		for klass in self.dependencies:
 			klass.recordDependencyOrder(order, visited, indent+1)
 		order.append(self)

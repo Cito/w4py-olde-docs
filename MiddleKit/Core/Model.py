@@ -334,11 +334,10 @@ class Model(Configurable):
 		for klass in self._allKlassesInOrder:
 			klass.buildDependencies()
 		allKlasses = []
-		from sets import Set # needs Python >= 2.3
-		visited = Set()
+		visited = {} # better use Set() in Python 2.3 and set() in Python >= 2.4
 		for klass in self._allKlassesInOrder:
 			if not klass.dependents:
-				#print '>>', klass.name()
+				# print '>>', klass.name()
 				klass.recordDependencyOrder(allKlasses, visited)
 		# The above loop fails to capture classes that are in cycles,
 		# but in that case there really is no dependency order.
