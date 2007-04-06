@@ -14,7 +14,7 @@ class SampleError:
 		self._error = error
 
 	def write(self,filename):
-		print '%s:%d: %s' % ( filename, self._line, self._error )
+		print '%s:%d: %s' % (filename, self._line, self._error)
 
 
 class SQLGenerator(CodeGenerator):
@@ -24,7 +24,8 @@ class SQLGenerator(CodeGenerator):
 		- InsertSample.sql
 		- Info.text
 
-	A subclass and further mix-ins are required for specific databases (since SQL varies from product to product).
+	A subclass and further mix-ins are required for specific databases
+	(since SQL varies from product to product).
 
 	The main method to invoke is generate():
 
@@ -33,8 +34,10 @@ class SQLGenerator(CodeGenerator):
 		gen.generate(dirname)
 
 	For subclassers:
-		- Subclasses should be named <DATABASE>SQLGenerator where <DATABASE> is the name of the particular database product.
-		- A good example of a custom subclass is MySQLSQLGenerator.py. Be sure to take a look at it.
+		- Subclasses should be named <DATABASE>SQLGenerator where <DATABASE>
+		  is the name of the particular database product.
+		- A good example of a custom subclass is MySQLSQLGenerator.py.
+		  Be sure to take a look at it.
 		- Candidates for customization include:
 			Klasses
 				dropDatabaseSQL()
@@ -59,7 +62,8 @@ class SQLGenerator(CodeGenerator):
 
 	def sqlSupportsDefaultValues(self):
 		"""
-		Subclasses must override to return 1 or 0, indicating their SQL variant supports DEFAULT <value> in the CREATE statement.
+		Subclasses must override to return 1 or 0,
+		indicating their SQL variant supports DEFAULT <value> in the CREATE statement.
 		Subclass responsibility.
 		"""
 		raise AbstractError
@@ -73,7 +77,8 @@ class Model:
 
 	def writeCreateSQL(self, generator, dirname):
 		"""
-		Creates the directory if necessary, sets the klasses' generator, and tells klasses to writeCreateSQL().
+		Creates the directory if necessary, sets the klasses' generator,
+		and tells klasses to writeCreateSQL().
 		"""
 		if not os.path.exists(dirname):
 			os.mkdir(dirname)
@@ -123,7 +128,8 @@ class Model:
 					wr('delete from %s;\n' % klass.sqlTableName())
 			wr('\n')
 
-			self._klassSamples = {}  # keyed by klass, value is list of SQL strings (comments or INSERT statements)
+			self._klassSamples = {} # keyed by klass,
+			# value is list of SQL strings (comments or INSERT statements)
 
 			filenames = glob(os.path.join(self._filename, 'Sample*.csv'))
 			for filename in filenames:
@@ -164,112 +170,133 @@ class Model:
 					fields = parse(line)
 				except CSVParser.ParseError, err:
 					raise SampleError(linenum, 'Syntax error: %s' % err)
-				if fields is None:	# parser got embedded newline; continue with the next line
+				if fields is None:	# parser got embedded newline; continue with next line
 					continue
 
 				try:
 					if self.areFieldsBlank(fields):
-						continue  # skip blank lines
-					if fields[0] and str(fields[0])[0]=='#':
-						continue
-					if fields[0].lower().endswith(' objects'):
+						pass # skip blank lines
+					elif fields[0] and str(fields[0])[0] == '#':
+						pass
+					elif fields[0].lower().endswith(' objects'):
 						klassName = fields[0].split()[0]
 						try:
 							klass = self.klass(klassName)
 						except KeyError:
-							raise SampleError(linenum, "Class '%s' is not defined" % klassName)
+							raise SampleError(linenum,
+								"Class '%s' is not defined" % klassName)
 						samples = self._klassSamples.get(klass, None)
 						if samples is None:
 							samples = self._klassSamples[klass] = []
 							samples.append('\n\n/* %s */\n\n' % klass.name())
 						tableName = klass.sqlTableName()
-						#print '>> table:', tableName
+						# print '>> table:', tableName
 						readColumns = 1
 						for attr in attrs:
 							attr.refByAttrName = None
 						attrs = []
-						continue
-					if readColumns:
-						if klass is None:
-							raise SampleError(linenum, "Have not yet seen an 'objects' declaration.")
-						names = [name for name in fields if name]
-						for name in names:
-							if name==klass.sqlSerialColumnName():
-								attrs.append(PrimaryKey(name, klass))
-							else:
-								# support "foo by bar"
-								name = name.strip()
-								parts = name.split(' ')
-								if len(parts)==1:
-									refByAttrName = None
+					elif readColumns:
+							if klass is None:
+								raise SampleError(linenum,
+									"Have not yet seen an 'objects' declaration.")
+							names = [name for name in fields if name]
+							for name in names:
+								if name == klass.sqlSerialColumnName():
+									attrs.append(PrimaryKey(name, klass))
 								else:
-									parts = [p.strip() for p in parts]
-									if len(parts)!=3 or parts[1].lower()!='by' or len(parts[2])==0:
-										raise SampleError(linenum, "Attribute '%s' of class '%s' is not in format 'foo' or 'foo-by-bar'" % (name, klass.name()))
-									name = parts[0]
-									refByAttrName = parts[2]
-									#print '>> refByAttrName:', name, refByAttrName
-								# locate the attr definiton
-								try:
-									attr = klass.lookupAttr(name)
-									attrs.append(attr)
-								except KeyError:
-									raise SampleError(linenum, "Class '%s' has no attribute '%s'" % (klass.name(), name))
-								# error checking for "foo by bar" and set refByAttre
-								if refByAttrName:
-									from MiddleKit.Core.ObjRefAttr import ObjRefAttr as ObjRefAttrClass
-									if not isinstance(attr, ObjRefAttrClass):
-										raise SampleError(linenum, "Cannot use 'by' feature with non-obj ref attributes. Attr %r of class %r is a %r." % (name, klass.name(), attr.__class__.__name__))
+									# support "foo by bar"
+									name = name.strip()
+									parts = name.split(' ')
+									if len(parts) == 1:
+										refByAttrName = None
+									else:
+										parts = [p.strip() for p in parts]
+										if len(parts) != 3 \
+												or parts[1].lower() != 'by' \
+												or len(parts[2]) == 0:
+											raise SampleError(linenum,
+												"Attribute '%s' of class '%s'"
+												" is not in format 'foo' or 'foo-by-bar'"
+												% (name, klass.name()))
+										name = parts[0]
+										refByAttrName = parts[2]
+										# print '>> refByAttrName:', name, refByAttrName
+									# locate the attr definiton
 									try:
-										refByAttr = attr.targetKlass().lookupAttr(refByAttrName)
+										attr = klass.lookupAttr(name)
+										attrs.append(attr)
 									except KeyError:
-										raise SampleError(linenum, "Attribute %r of class %r has a 'by' of %r but no such attribute can be found in target class %r." % (name, klass.name(), refByAttrName, attr.targetKlass().name()))
-									attr.refByAttr = refByAttr
-								else:
-									attr.refByAttr = None
+										raise SampleError(linenum,
+											"Class '%s' has no attribute '%s'"
+											% (klass.name(), name))
+									# error checking for "foo by bar" and set refByAttre
+									if refByAttrName:
+										from MiddleKit.Core.ObjRefAttr \
+											import ObjRefAttr as ObjRefAttrClass
+										if not isinstance(attr, ObjRefAttrClass):
+											raise SampleError(linenum,
+												"Cannot use 'by' feature with non-obj ref attributes."
+												" Attr %r of class %r is a %r."
+												% (name, klass.name(), attr.__class__.__name__))
+										try:
+											refByAttr = attr.targetKlass().lookupAttr(refByAttrName)
+										except KeyError:
+											raise SampleError(linenum,
+												"Attribute %r of class %r has a 'by' of %r,"
+												" but no such attribute can be found in target class %r."
+												% (name, klass.name(),
+													refByAttrName, attr.targetKlass().name()))
+										attr.refByAttr = refByAttr
+									else:
+										attr.refByAttr = None
 
-						# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
+							# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
+							for attr in attrs:
+								assert not attr.get('isDerived', 0)
+							colNames = [attr.sqlName() for attr in attrs]
+							# print '>> cols:', columns
+							colSql = ','.join(colNames)
+							readColumns = 0
+					else:
+						if klass is None:
+							raise SampleError(linenum,
+								"Have not yet seen an 'objects' declaration.")
+						values = fields[:len(attrs)]
+						preinsertSQL = []
+						i = 0
 						for attr in attrs:
-							assert not attr.get('isDerived', 0)
-						colNames = [attr.sqlName() for attr in attrs]
-						#print '>> cols:', columns
-						colSql = ','.join(colNames)
-						readColumns = 0
-						continue
-					if klass is None:
-						raise SampleError(linenum, "Have not yet seen an 'objects' declaration.")
-					values = fields[:len(attrs)]
-					preinsertSQL = []
-					i = 0
-					for attr in attrs:
-						try:
-							value = values[i]
-						except IndexError:
-							if i==0:
-								# too early to accept nulls?
-								raise SampleError(linenum, "Couldn't find value for attribute '%s'\nattrs = %r\nvalues for line = %r" % (attr.name(), [a.name() for a in attrs], values))
-							else:
-								# assume blank. Excel sometimes does not include all the commas
-								value = ''
-						value = attr.sqlForSampleInput(value)
-						if isinstance(value, tuple):
-							# sqlForSampleInput can return a 2 tuple: (presql, sqlValue)
-							assert len(value)==2
-							preinsertSQL.append(value[0])
-							value = value[1]
-						assert value, 'sql value cannot be blank: %r' % value
-						try:
-							values[i] = value
-						except IndexError:
-							values.append(value)
-						i += 1
-					values = ', '.join(values)
-					for stmt in preinsertSQL:
-						#print '>>', stmt
+							try:
+								value = values[i]
+							except IndexError:
+								if i == 0:
+									# too early to accept nulls?
+									raise SampleError(linenum,
+										"Couldn't find value for attribute"
+										" '%s'\nattrs = %r\nvalues for line = %r"
+										% (attr.name(), [a.name() for a in attrs], values))
+								else:
+									# assume blank
+									# (Excel sometimes doesn't include all the commas)
+									value = ''
+							value = attr.sqlForSampleInput(value)
+							if isinstance(value, tuple):
+								# sqlForSampleInput can return a 2 tuple: (presql, sqlValue)
+								assert len(value) == 2
+								preinsertSQL.append(value[0])
+								value = value[1]
+							assert value, 'sql value cannot be blank: %r' % value
+							try:
+								values[i] = value
+							except IndexError:
+								values.append(value)
+							i += 1
+						values = ', '.join(values)
+						for stmt in preinsertSQL:
+							#print '>>', stmt
+							samples.append(stmt)
+						stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
+						# print '>>', stmt
 						samples.append(stmt)
-					stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
-					#print '>>', stmt
-					samples.append(stmt)
 				except:
 					print
 					print 'Samples error:'
@@ -284,10 +311,9 @@ class Model:
 			for attr in attrs:
 				attr.refByAttr = None
 
-
 	def areFieldsBlank(self, fields):
 		""" Utility method for writeInsertSamplesSQLForLines(). """
-		if len(fields)==0:
+		if len(fields) == 0:
 			return 1
 		for field in fields:
 			if field:
@@ -307,16 +333,24 @@ class Klasses:
 		self._sqlGenerator = generator
 
 	def auxiliaryTableNames(self):
-		""" Returns a list of table names in addition to the tables that hold objects. One popular user of this method is dropTablesSQL(). """
+		"""Return a list of table names in addition to the tables that hold objects.
+
+		One popular user of this method is dropTablesSQL().
+
+		"""
 		return ['_MKClassIds']
 
 	def writeKeyValue(self, out, key, value):
-		""" Used by willCreateWriteSQL(). """
+		"""Used by willCreateWriteSQL()."""
 		key = key.ljust(12)
 		out.write('# %s = %s\n' % (key, value))
 
 	def writeCreateSQL(self, generator, out):
-		""" Writes the SQL to define the tables for a set of classes. The target can be a file or a filename. """
+		"""Write the SQL to define the tables for a set of classes.
+
+		The target can be a file or a filename.
+
+		"""
 		if isinstance(out, StringTypes):
 			out = open(out, 'w')
 			close = 1
@@ -350,45 +384,49 @@ class Klasses:
 
 		dbName = generator.sqlDatabaseName()
 		drop = generator.setting('DropStatements')
-		if drop=='database':
+		if drop == 'database':
 			wr(self.dropDatabaseSQL(dbName))
 			wr(self.createDatabaseSQL(dbName))
 			wr(self.useDatabaseSQL(dbName))
-		elif drop=='tables':
+		elif drop == 'tables':
 			wr(self.useDatabaseSQL(dbName))
 			wr(self.dropTablesSQL())
 		else:
 			raise Exception, 'Invalid value for DropStatements setting: %r' % drop
 
 	def dropDatabaseSQL(self, dbName):
-		"""
-		Returns SQL code that will remove the database with the given name.
+		"""Return SQL code that will remove the database with the given name.
+
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
+
 		"""
 		raise AbstractError, self.__class__
 
 	def dropTablesSQL(self):
-		"""
-		Returns SQL code that will remove each of the tables in the database.
+		"""Return SQL code that will remove each of the tables in the database.
+
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
+
 		"""
 		raise AbstractError, self.__class__
 
 	def createDatabaseSQL(self, dbName):
-		"""
-		Returns SQL code that will create the database with the given name.
+		"""Return SQL code that will create the database with the given name.
+
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
+
 		"""
 		raise AbstractError, self.__class__
 
 	def useDatabaseSQL(self, dbName):
-		"""
-		Returns SQL code that will use the database with the given name.
+		"""Return SQL code that will use the database with the given name.
+
 		Used by willWriteCreateSQL().
 		Subclass responsibility.
+
 		"""
 		raise AbstractError, self.__class__
 
@@ -421,7 +459,6 @@ create table _MKClassIds (
 			wr("\t(%s, '%s');\n" % (klass.id(), klass.name()))
 		wr('\n')
 
-
 	def listTablesSQL(self):
 		# return a SQL command to list all tables in the database
 		# this is database-specific, so by default we return nothing
@@ -433,7 +470,6 @@ create table _MKClassIds (
 			out.write('/* PostSQL start */\n' + sql + '\n/* PostSQL end */\n\n')
 		out.write(self.listTablesSQL())
 		out.write('/* end of generated SQL */\n')
-
 
 
 import KlassSQLSerialColumnName
@@ -460,7 +496,7 @@ class Klass:
 		sqlAttrs = []
 		nonSQLAttrs = []
 		for attr in self.allAttrs():
-			attr.containingKlass = self   # as opposed to the declaring klass of the attr
+			attr.containingKlass = self # as opposed to the declaring klass of the attr
 			if attr.hasSQLColumn():
 				sqlAttrs.append(attr)
 			else:
@@ -486,21 +522,25 @@ class Klass:
 		pass
 
 	def primaryKeySQLDef(self, generator):
+		"""Return SQL for primary key.
+
+		Returns a one-liner that becomes part of the CREATE statement for
+		creating the primary key of the table. SQL generators often override
+		this mix-in method to customize the creation of the primary key for
+		their SQL variant. This method should use self.sqlSerialColumnName()
+		and often ljust()s it by self.maxNameWidth().
+
 		"""
-		Returns a one liner that becomes part of the CREATE statement
-		for creating the primary key of the table. SQL generators often
-		override this mix-in method to customize the creation of the
-		primary key for their SQL variant. This method should use
-		self.sqlSerialColumnName() and often ljust()s it by
-		self.maxNameWidth().
-		"""
-		return '    %s int not null primary key,\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
+		return '    %s int not null primary key,\n' \
+			% self.sqlSerialColumnName().ljust(self.maxNameWidth())
 
 	def writeDeletedSQLDef(self, generator, out):
-		"""
-		Returns a the column definition that becomes part of the CREATE statement
-		for the deleted timestamp field of the table.
+		"""Return SQL for deleted timestamp.
+
+		Returns a the column definition that becomes part of the CREATE
+		statement for the deleted timestamp field of the table.
 		This is used if DeleteBehavior is set to "mark".
+
 		"""
 		row = {'Attribute': 'deleted', 'Type': 'DateTime'}
 		# create a "DateTimeAttr", so that the correct database type is used
@@ -510,26 +550,33 @@ class Klass:
 		datetime.writeCreateSQL(generator, out)
 
 	def maxNameWidth(self):
-		return 30   # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
+		return 30 # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below
 
 	def writeIndexSQLDefsInTable(self, wr):
-		"""
-		Subclasses should override this or writeIndexSQLDefsAfterTable, or no indexes will be created.
+		"""Return SQL for creating indexes in table.
+
+		Subclasses should override this or writeIndexSQLDefsAfterTable,
+		or no indexes will be created.
+
 		"""
 		pass
 
 	def writeIndexSQLDefsAfterTable(self, wr):
-		"""
-		Subclasses should override this or writeIndexSQLDefsInTable, or no indexes will be created.
+		""""Return SQL for creating indexes after table.
+
+		Subclasses should override this or writeIndexSQLDefsInTable,
+		or no indexes will be created.
+
 		"""
 		pass
 
 	def sqlTableName(self):
+		"""Return table name.
+
+		Can be overidden to allow for table names that do not conflict
+		with SQL reserved words. dr 08-08-2002 - MSSQL uses [tablename]
 		"""
-		Can be overidden to allow for table names that do not conflict with SQL
-		reserved words. dr 08-08-2002 - MSSQL uses [tablename]
-		"""
-		return '%s' % self.name()
+		return self.name()
 
 
 class Attr:
@@ -538,22 +585,31 @@ class Attr:
 		return self.name()
 
 	def hasSQLColumn(self):
-		""" Returns true if the attribute has a direct correlating SQL column in it's class' SQL table definition. Most attributes do. Those of type list do not. """
+		"""Return whether attribute corresponds to table column.
+
+		Returns true if the attribute has a direct correlating SQL column
+		in it's class' SQL table definition. Most attributes do.
+		Those of type list do not.
+
+		"""
 		return not self.get('isDerived', 0)
 
 	def sqlForSampleInput(self, input):
-		"""
+		"""Return SQL for sample input.
+
 		Users of Attr should invoke this method, but subclasses and mixins
 		should implement sqlForNonNoneSampleInput() instead.
+
 		"""
 		input = input.strip()
-		if input=='':
+		if input == '':
 			input = self.get('Default', '')
 		if input in (None, 'None', 'none'):
 			return self.sqlForNone()
 		else:
 			s = self.sqlForNonNoneSampleInput(input)
-			assert isinstance(s, str) or isinstance(s, tuple), '%r, %r, %r' % (s, type(s), self)
+			assert isinstance(s, str) or isinstance(s, tuple), \
+				'%r, %r, %r' % (s, type(s), self)
 			return s
 
 	def sqlForNone(self):
@@ -563,9 +619,11 @@ class Attr:
 		return input
 
 	def writeCreateSQL(self, generator, out):
-		"""
-		The klass argument is the containing klass of the attribute which can be different than
-		the declaring klass.
+		"""Write SQL create command.
+
+		The klass argument is the containing klass of the attribute
+		which can be different than the declaring klass.
+
 		"""
 		try:
 			if self.hasSQLColumn():
@@ -600,7 +658,8 @@ class Attr:
 				defaultSQL = ' ' + defaultSQL
 		else:
 			defaultSQL = ''
-		out.write('\t%s %s%s%s%s' % (name, self.sqlTypeOrOverride(), self.uniqueSQL(), notNullSQL, defaultSQL))
+		out.write('\t%s %s%s%s%s' % (name, self.sqlTypeOrOverride(),
+			self.uniqueSQL(), notNullSQL, defaultSQL))
 
 	def writeAuxiliaryCreateTable(self, generator, out):
 		# most attribute types have no such beast
@@ -617,21 +676,23 @@ class Attr:
 				default = self.sqlForSampleInput(str(default))
 		if default:
 			default = str(default).strip()
-			if default.lower()=='none':  # kind of redundant
+			if default.lower() == 'none':  # kind of redundant
 				default = None
 			return 'default ' + default
 		else:
 			return ''
 
 	def maxNameWidth(self):
-		return 30  # @@ 2000-09-14 ce: should compute that from names rather than hard code
+		return 30 # @@ 2000-09-14 ce: should compute that from names rather than hard code
 
 	def sqlTypeOrOverride(self):
-		"""
+		"""Return SQL type.
+
 		Returns the SQL type as specified by the attribute class, or
 		the SQLType that the user can specify in the model to override that.
 		For example, SQLType='image' for a string attribute.
 		Subclasses should not override this method, but sqlType() instead.
+
 		"""
 		return self.get('SQLType') or self.sqlType()
 
@@ -639,19 +700,19 @@ class Attr:
 		raise AbstractError, self.__class__
 
 	def sqlColumnName(self):
-		"""
+		"""Return SQL column name.
+
 		Returns the SQL column name corresponding to this attribute
 		which simply defaults to the attribute's name. Subclasses may
 		override to customize.
+
 		"""
 		if not self._sqlColumnName:
 			self._sqlColumnName = self.name()
 		return self._sqlColumnName
 
 	def uniqueSQL(self):
-		"""
-		Returns the SQL to use within a column definition to make it unique.
-		"""
+		"""Return SQL to use within a column definition to make it unique."""
 		return self.boolForKey('isUnique') and ' unique' or ''
 
 
@@ -672,7 +733,7 @@ class BoolAttr:
 			value = 1
 		else:
 			raise ValueError, "invalid bool input: %r" % input
-		assert value==0 or value==1, value
+		assert value in (0, 1), value
 		return str(value)
 
 
@@ -722,7 +783,8 @@ class DecimalAttr:
 		# SQL docs I read say:  decimal(precision, scale)
 		precision = self.get('Precision', None)
 		if precision is None:
-			if self.klass().klasses()._model.setting('UseMaxForDecimalPrecision', 0):  # that setting is for backwards compatibility
+			# the following setting is for backwards compatibility
+			if self.klass().klasses()._model.setting('UseMaxForDecimalPrecision', 0):
 				precision = self.get('Max', None)
 				if not precision:
 					precision = None
@@ -740,23 +802,27 @@ class DecimalAttr:
 class StringAttr:
 
 	def sqlType(self):
-		"""
+		"""Return SQL type.
+
 		Subclass responsibility.
-		Subclasses should take care that if self['Max']==self['Min'] then the "char" type is preferred over "varchar".
-		Also, most (if not all) SQL databases require different types depending on the length of the string.
+		Subclasses should take care that if self['Max'] == self['Min']
+		then the "char" type is preferred over "varchar".
+		Also, most (if not all) SQL databases require different types
+		depending on the length of the string.
+
 		"""
 		raise AbstractError, self.__class__
 
 	def sqlForNonNoneSampleInput(self, input):
 		value = input
-		if value=="''":
+		if value == "''":
 			value = ''
-		elif value.find('\\')!=-1:
+		elif value.find('\\') != -1:
 			if 1:
 				# add spaces before and after, to prevent
 				# syntax error if value begins or ends with "
 				value = eval('""" '+str(value)+' """')
-				value = repr(value[1:-1])	# trim off the spaces
+				value = repr(value[1:-1]) # trim off the spaces
 				value = value.replace('\\011', '\\t')
 				value = value.replace('\\012', '\\n')
 				return value
@@ -768,7 +834,7 @@ class StringAttr:
 class AnyDateTimeAttr:
 
 	def sqlType(self):
-		return self['Type']  # e.g., date, time and datetime
+		return self['Type'] # e.g., date, time and datetime
 
 	def sqlForNonNoneSampleInput(self, input):
 		return repr(input)
@@ -811,21 +877,27 @@ class ObjRefAttr:
 			else:
 				notNull = self.sqlNullSpec()
 			classIdDefault = ' default %s' % self.targetKlass().id()
-			#   ^ this makes the table a little to easier to work with in some cases (you can often just insert the obj id)
+			# ^ this makes the table a little to easier to work with in some cases
+			# (you can often just insert the obj id)
 			objIdRef = ''
-			if self.get('Ref', None) or \
-			  (self.setting('GenerateSQLReferencesForObjRefsToSingleClasses', False) and len(self.targetKlass().subklasses())==0):
-			  	if self.get('Ref', None) not in ('0', 0, 0.0, False):
-				  	objIdRef = self.objIdReferences()
-			out.write('\t%s %s%s%s%s, /* %s */ \n' % (classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault, self.classIdReferences(), self.targetClassName()))
-			out.write('\t%s %s%s%s' % (objIdName, self.sqlTypeOrOverride(), notNull, objIdRef))
+			if self.get('Ref', None) or (
+					self.setting('GenerateSQLReferencesForObjRefsToSingleClasses', False)
+						and len(self.targetKlass().subklasses()) == 0):
+				if self.get('Ref', None) not in ('0', 0, 0.0, False):
+					objIdRef = self.objIdReferences()
+			out.write('\t%s %s%s%s%s, /* %s */ \n' % (
+				classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault,
+					self.classIdReferences(), self.targetClassName()))
+			out.write('\t%s %s%s%s' % (objIdName, self.sqlTypeOrOverride(),
+				notNull, objIdRef))
 
 	def classIdReferences(self):
- 		return ' references _MKClassIds'
+		return ' references _MKClassIds'
 
 	def objIdReferences(self):
 		targetKlass = self.targetKlass()
-		return ' references %s(%s) ' % (targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
+		return ' references %s(%s) ' % (
+			targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
 
 	def sqlForNone(self):
 		if self.setting('UseBigIntObjRefColumns', False):
@@ -834,17 +906,17 @@ class ObjRefAttr:
 			return 'NULL,NULL'
 
 	def sqlForNonNoneSampleInput(self, input):
-		"""
-		Obj ref sample data format is "Class.serialNum", such as
-		"Thing.3". If the Class and period are missing, then the obj
-		ref's type is assumed.
+		"""Get SQL for non-None sample input.
+
+		Obj ref sample data format is "Class.serialNum", such as "Thing.3".
+		If the Class and period are missing, then the obj ref's type is assumed.
 
 		Also, a comment can follow the value after a space:
-		"User.3 Joe Schmoe" or
-		"User.3 - Joe Schmoe"
-		This is useful so that you can look at the sample later and
-		know what the obj ref value is referring to without having
-		to look it up. MiddleKit only looks at the first part ("User.3").
+		"User.3 Joe Schmoe" or "User.3 - Joe Schmoe"
+		This is useful so that you can look at the sample later and know
+		what the obj ref value is referring to without having to look it up.
+		MiddleKit only looks at the first part ("User.3").
+
 		"""
 		if self.refByAttr:
 			# the column was spec'ed as "foo by bar".
@@ -858,9 +930,13 @@ class ObjRefAttr:
 			sql = str(targetKlass.id()) + ',' + sql
 			# print '>> sql =', sql
 			return sql
-			# caveat: this only works if the object is found directly in the target class. i.e., inheritance is not supported
-			# caveat: this does not work if the UseBigIntObjRefColumns setting is true (by default it is false)
-			# caveat: MS SQL Server supports subselects but complains "Subqueries are not allowed in this context. Only scalar expressions are allowed." so more work is needed in its SQL generator
+			# caveat: this only works if the object is found directly in the
+			# target class. i.e., inheritance is not supported
+			# caveat: this does not work if the UseBigIntObjRefColumns setting
+			# is true (by default it is false)
+			# caveat: MS SQL Server supports subselects but complains
+			# "Subqueries are not allowed in this context. Only scalar expressions are allowed."
+			# so more work is needed in its SQL generator
 		else:
 			# the de facto technique of <serialnum> or <class name>.<serial num>
 			input = input.split()
@@ -870,7 +946,7 @@ class ObjRefAttr:
 			else:
 				input = ''
 			parts = input.split('.')
-			if len(parts)==2:
+			if len(parts) == 2:
 				className = parts[0]
 				objSerialNum = parts[1]
 			else:
@@ -965,10 +1041,12 @@ class EnumAttr:
 
 
 class PrimaryKey:
-	"""
+	"""Help class for dealing with primary keys.
+
 	This class is not a 'standard' attribute, but just a helper class for the
 	writeInsertSamplesSQLForLines method, in case the samples.csv file contains
 	a primary key column (i.e. the serial numbers are specified explicitly).
+
 	"""
 
 	def __init__(self, name, klass):
@@ -976,8 +1054,7 @@ class PrimaryKey:
 		self._klassid = klass.id()
 		self._props = {'isDerived': 0}
 
-		# this stuff is for PostgreSQLSQLGenerator, but it is awkward
-		# to keep it there.
+		# this is for PostgreSQLSQLGenerator, but it's awkward to keep it there
 		self._klass = klass
 		if not hasattr(klass, '_maxSerialNum'):
 			klass._maxSerialNum = 0
