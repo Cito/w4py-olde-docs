@@ -8,7 +8,7 @@ To run these tests:
 	python AllTests.py UserKit.Tests.UserManagerTest.makeTestSuite
 """
 
-import os, sys, glob
+import os
 import logging
 import unittest
 import shutil

@@ -20,7 +20,7 @@
 
 """
 
-import os, sys
+import os
 import imp
 import logging
 import unittest

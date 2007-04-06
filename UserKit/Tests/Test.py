@@ -6,14 +6,10 @@ To run these tests:
 	python AllTests.py UserKit.Tests.Test
 """
 
-import os, sys, glob
-import shutil
-import logging
+import os
 import unittest
 
 import UserKit
-
-_log = logging.getLogger(__name__)
 
 TEST_CODE_DIR = os.path.dirname(__file__) # e.g. ".../Webware/UserKit/Tests"
 
