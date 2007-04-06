@@ -83,7 +83,7 @@ runProfile = 0
 
 # The path to the log file, if you want to redirect the
 # standard output and standard error to a log file:
-logFile = None
+logFile = 'Logs/webkit.log'
 
 # The default app server to be used:
 appServer = 'ThreadedAppServer'
