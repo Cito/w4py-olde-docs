@@ -144,7 +144,7 @@ class datetime:
 			raise ValueError('The seconds value must be between 0 and 59 inclusive.')
 		else:
 			self.second = second
-		if not microsecond 0 <= microsecond < 1000000:
+		if not 0 <= microsecond < 1000000:
 			raise ValueError('The microseconds value must be between 0 and 999999 inclusive.')
 		else:
 			self.microsecond = microsecond
