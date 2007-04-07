@@ -1,15 +1,5 @@
 from types import FloatType, IntType, LongType, StringType, TupleType
 
-# Import mxDateTime if it exists,
-# but we can get along with it if not.
-try:
-	from mx import DateTime
-except ImportError:
-	try:
-		import DateTime
-	except ImportError:
-		DateTime = None
-
 from Common import *
 
 # time.gmtime() no longer returns a tuple, and there is no globally defined type
@@ -19,6 +9,7 @@ TimeTupleType = type(time.gmtime(0))
 from Response import Response
 from Cookie import Cookie
 from HTTPExceptions import HTTPException, HTTPServerError
+from MiscUtils import mxDateTime as DateTime
 from MiscUtils.DateInterval import timeDecode
 
 debug = False

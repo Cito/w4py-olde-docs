@@ -35,7 +35,7 @@ class UserManagerToFile(UserManager):
 		if os.path.exists(self._userDir):
 			serialNums = self.scanSerialNums()
 			if serialNums:
-				self._nextSerialNum = max(serialNums)+1
+				self._nextSerialNum = max(serialNums) + 1
 			else:
 				self._nextSerialNum = 1
 		else:
@@ -64,7 +64,7 @@ class UserManagerToFile(UserManager):
 		Loads the user with the given serial number from disk.
 		If there is no such user, a KeyError will be raised unless a default value was passed, in which case that value is returned.
 		"""
-		filename = str(serialNum)+'.user'
+		filename = str(serialNum) + '.user'
 		filename = os.path.join(self.userDir(), filename)
 		if os.path.exists(filename):
 			file = open(filename, 'r')
@@ -123,10 +123,10 @@ class UserManagerToFile(UserManager):
 
 	def userForExternalId(self, externalId, default=NoDefault):
 		for user in self._cachedUsers:
-			if user.externalId()==externalId:
+			if user.externalId() == externalId:
 				return user
 		for user in self.users():
-			if user.externalId()==externalId:
+			if user.externalId() == externalId:
 				return user
 		if default is NoDefault:
 			raise KeyError, externalId
@@ -135,10 +135,10 @@ class UserManagerToFile(UserManager):
 
 	def userForName(self, name, default=NoDefault):
 		for user in self._cachedUsers:
-			if user.name()==name:
+			if user.name() == name:
 				return user
 		for user in self.users():
-			if user.name()==name:
+			if user.name() == name:
 				return user
 		if default is NoDefault:
 			raise KeyError, name
@@ -171,7 +171,7 @@ class UserManagerToFile(UserManager):
 class UserMixIn:
 
 	def filename(self):
-		return os.path.join(self.manager().userDir(), str(self.serialNum()))+'.user'
+		return os.path.join(self.manager().userDir(), str(self.serialNum())) + '.user'
 
 	def save(self):
 		file = open(self.filename(), 'w')
@@ -195,7 +195,7 @@ class _UserList:
 			self._data = results
 
 	def __getitem__(self, index):
-		if index>=self._count:
+		if index >= self._count:
 			raise IndexError
 		if self._data:
 			# We have the data directly. Just return it

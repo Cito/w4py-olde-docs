@@ -8,7 +8,7 @@ To run these tests:
 	python AllTests.py UserKit.Tests.UserManagerTest.makeTestSuite
 """
 
-import os
+import os, sys
 import logging
 import unittest
 import shutil
@@ -31,20 +31,22 @@ class UserManagerTest(unittest.TestCase):
 		mgr = self.mgr
 		value = 5.1
 		mgr.setModifiedUserTimeout(value)
-		assert mgr.modifiedUserTimeout()==value
+		assert mgr.modifiedUserTimeout() == value
 		mgr.setCachedUserTimeout(value)
-		assert mgr.cachedUserTimeout()==value
+		assert mgr.cachedUserTimeout() == value
 		mgr.setActiveUserTimeout(value)
-		assert mgr.activeUserTimeout()==value
+		assert mgr.activeUserTimeout() == value
 
 	def checkUserClass(self):
 		mgr = self.mgr
 		from UserKit.User import User
-		class SubUser(User): pass
+		class SubUser(User):
+			pass
 		mgr.setUserClass(SubUser)
-		assert mgr.userClass()==SubUser, \
+		assert mgr.userClass() == SubUser, \
 			"We should be able to set a custom user class."
-		class Poser: pass
+		class Poser:
+			pass
 		self.assertRaises(Exception, mgr.setUserClass, Poser), \
 			"Setting a customer user class that doesn't extend UserKit.User should fail."
 
@@ -61,8 +63,7 @@ class _UserManagerToSomewhereTest(UserManagerTest):
 	"""
 
 	def setUp(self):
-		# Nothing for now
-		pass
+		pass # nothing for no
 
 	def tearDown(self):
 		self.mgr = None
@@ -70,82 +71,82 @@ class _UserManagerToSomewhereTest(UserManagerTest):
 	def testBasics(self):
 		mgr = self.mgr
 		user = self.user = mgr.createUser('foo', 'bar')
-		assert user.manager()==mgr
-		assert user.name()=='foo'
-		assert user.password()=='bar'
+		assert user.manager() == mgr
+		assert user.name() == 'foo'
+		assert user.password() == 'bar'
 		assert not user.isActive()
-		assert mgr.userForSerialNum(user.serialNum())==user
-		assert mgr.userForExternalId(user.externalId())==user
-		assert mgr.userForName(user.name())==user
-		externalId = user.externalId()  # for use later in testing
+		assert mgr.userForSerialNum(user.serialNum()) == user
+		assert mgr.userForExternalId(user.externalId()) == user
+		assert mgr.userForName(user.name()) == user
+		externalId = user.externalId() # for use later in testing
 
 		users = mgr.users()
-		assert len(users)==1
-		assert users[0]==user, 'users[0]=%r, user=%r' % (users[0], user)
-		assert len(mgr.activeUsers())==0
-		assert len(mgr.inactiveUsers())==1
+		assert len(users) == 1
+		assert users[0] == user, 'users[0]=%r, user=%r' % (users[0], user)
+		assert len(mgr.activeUsers()) == 0
+		assert len(mgr.inactiveUsers()) == 1
 
 		# login
 		user2 = mgr.login(user, 'bar')
-		assert user==user2
+		assert user == user2
 		assert user.isActive()
-		assert len(mgr.activeUsers())==1
-		assert len(mgr.inactiveUsers())==0
+		assert len(mgr.activeUsers()) == 1
+		assert len(mgr.inactiveUsers()) == 0
 
 		# logout
 		user.logout()
 		assert not user.isActive()
-		assert mgr.numActiveUsers()==0
+		assert mgr.numActiveUsers() == 0
 
 		# login via user
 		result = user.login('bar')
-		assert result==user
+		assert result == user
 		assert user.isActive()
-		assert mgr.numActiveUsers()==1
+		assert mgr.numActiveUsers() == 1
 
 		# logout via user
 		user.logout()
 		assert not user.isActive()
-		assert mgr.numActiveUsers()==0
+		assert mgr.numActiveUsers() == 0
 
 		# login a 2nd time, but with bad password
 		user.login('bar')
 		user.login('rab')
 		assert not user.isActive()
-		assert mgr.numActiveUsers()==0
+		assert mgr.numActiveUsers() == 0
 
 		# Check that we can access the user when he is not cached
 		mgr.clearCache()
 		user = mgr.userForSerialNum(1)
 		assert user
-		assert user.password()=='bar'
+		assert user.password() == 'bar'
 
 		if 0: # @@ 2001-04-15 ce: doesn't work yet
 			mgr.clearCache()
 			user = self.mgr.userForExternalId(externalId)
 			assert user
-			assert user.password()=='bar'
+			assert user.password() == 'bar'
 
 		mgr.clearCache()
 		user = self.mgr.userForName('foo')
 		assert user
-		assert user.password()=='bar'
+		assert user.password() == 'bar'
 
 	def testUserAccess(self):
 		mgr = self.mgr
 		user = mgr.createUser('foo', 'bar')
 
-		assert mgr.userForSerialNum(user.serialNum())==user
-		assert mgr.userForExternalId(user.externalId())==user
-		assert mgr.userForName(user.name())==user
+		assert mgr.userForSerialNum(user.serialNum()) == user
+		assert mgr.userForExternalId(user.externalId()) == user
+		assert mgr.userForName(user.name()) == user
 
 		self.assertRaises(KeyError, mgr.userForSerialNum, 1000)
 		self.assertRaises(KeyError, mgr.userForExternalId, 'asdf')
 		self.assertRaises(KeyError, mgr.userForName, 'asdf')
 
-		assert mgr.userForSerialNum(1000, 1)==1
-		assert mgr.userForExternalId('asdf', 1)==1
-		assert mgr.userForName('asdf', 1)==1
+		assert mgr.userForSerialNum(1000, 1) == 1
+		assert mgr.userForExternalId('asdf', 1) == 1
+		assert mgr.userForName('asdf', 1) == 1
 
 	def testDuplicateUser(self):
 		mgr = self.mgr
@@ -179,67 +180,89 @@ class UserManagerToFileTest(_UserManagerToSomewhereTest):
 
 class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 
+	def write(self, text):
+		self.output.append(text)
+
 	def setUp(self):
 		_UserManagerToSomewhereTest.setUp(self)
 
-		# Generate Python and SQL from our test MiddleKit Model
+		self.output = []
+		self.stdout, self.stderr = sys.stdout, sys.stderr
+		sys.stdout = sys.stderr = self
+		try:
 
-		from MiddleKit.Design.Generate import Generate
+			# Generate Python and SQL from our test MiddleKit Model
+			from MiddleKit.Design.Generate import Generate
 
-		generator = Generate()
+			generator = Generate()
 
-		modelFileName = os.path.join(TEST_CODE_DIR, 'UserManagerTest.mkmodel')
-		generationDir = os.path.join(TEST_CODE_DIR, 'mk_MySQL')
+			modelFileName = os.path.join(TEST_CODE_DIR, 'UserManagerTest.mkmodel')
+			generationDir = os.path.join(TEST_CODE_DIR, 'mk_MySQL')
 
-		# _log.debug('model: %s',modelFileName)
-		# @@ 2001-02-18 ce: woops: hard coding MySQL
+			# _log.debug('model: %s',modelFileName)
+			# @@ 2001-02-18 ce: woops: hard coding MySQL
 
-		args = 'Generate.py --db MySQL --model %s --outdir %s' % (modelFileName, generationDir)
-		Generate().main(args.split())
+			args = 'Generate.py --db MySQL --model %s --outdir %s' % (
+				modelFileName, generationDir)
+			Generate().main(args.split())
 
-		create_sql = os.path.join(generationDir, 'GeneratedSQL/Create.sql')
+			create_sql = os.path.join(generationDir, 'GeneratedSQL', 'Create.sql')
 
-		assert os.path.exists(create_sql), \
-			'The generation process should create some SQL files.'
-		assert os.path.exists(os.path.join(generationDir,'UserForMKTest.py')), \
-			'The generation process should create some Python files.'
+			assert os.path.exists(create_sql), \
+				'The generation process should create some SQL files.'
+			assert os.path.exists(os.path.join(generationDir,'UserForMKTest.py')), \
+				'The generation process should create some Python files.'
 
-		# Create our test database using info from AllTests.config
+			self.mysqlTestInfo = AllTests.config().setting('mysqlTestInfo')
+			# _log.info('mysqlTestInfo=%s', self.mysqlTestInfo)
 
-		mysqlClient = AllTests.config().setting('mysqlTestInfo')['mysqlClient']
-		assert mysqlClient.endswith('mysql')
-		executeSqlCmd = '%s < %s' % (mysqlClient, create_sql)
+			# Create our test database using info from AllTests.config
 
-		_log.debug('running: %s', executeSqlCmd)
-		os.system(executeSqlCmd)
+			self.mysqlClient = self.mysqlTestInfo['mysqlClient']
+			mysqlClientName = os.path.basename(self.mysqlClient)
+			assert mysqlClientName == 'mysql' or mysqlClientName == 'mysql.exe'
+			self.mysqlClient = ' '.join([self.mysqlClient] + ['--%s="%s"' % s
+					for s in self.mysqlTestInfo['DatabaseArgs'].items() if s[1]])
+			executeSqlCmd = '%s < %s' % (self.mysqlClient, create_sql)
 
-		# Create store, and connect to database
+			# _log.debug('running: %s', executeSqlCmd)
+			f = os.popen(executeSqlCmd)
+			self.output.append(f.read())
+			if f.close():
+				raise OSError, 'Error running: %s' % executeSqlCmd
 
-		from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
+			# Create store, and connect to database
 
-		mysqlTestInfo = AllTests.config().setting('mysqlTestInfo')
-		# _log.warn('mysqlTestInfo=%s', mysqlTestInfo)
-		store = MySQLObjectStore(**mysqlTestInfo['DatabaseArgs'])
+			from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
 
-		store.readModelFileNamed(modelFileName)
+			store = MySQLObjectStore(**self.mysqlTestInfo['DatabaseArgs'])
+			store.readModelFileNamed(modelFileName)
 
-		from MiddleKit.Run.MiddleObject import MiddleObject
-		from UserKit.UserManagerToMiddleKit import UserManagerToMiddleKit
-		from UserKit.Tests.mk_MySQL.UserForMKTest import UserForMKTest
-		assert issubclass(UserForMKTest, MiddleObject)
-		from UserKit.User import User
-		if User not in UserForMKTest.__bases__:
-			UserForMKTest.__bases__ = UserForMKTest.__bases__ + (User,)
-		assert issubclass(UserForMKTest, MiddleObject)
+			from MiddleKit.Run.MiddleObject import MiddleObject
+			from UserKit.UserManagerToMiddleKit import UserManagerToMiddleKit
+			from UserKit.Tests.mk_MySQL.UserForMKTest import UserForMKTest
+			assert issubclass(UserForMKTest, MiddleObject)
+			from UserKit.User import User
+			if User not in UserForMKTest.__bases__:
+				UserForMKTest.__bases__ = UserForMKTest.__bases__ + (User,)
+			assert issubclass(UserForMKTest, MiddleObject)
 
-		def __init__(self, manager, name, password):
-			base1 = self.__class__.__bases__[0]
-			base2 = self.__class__.__bases__[1]
-			base1.__init__(self)
-			base2.__init__(self, manager=manager, name=name, password=password)
+			def __init__(self, manager, name, password):
+				base1 = self.__class__.__bases__[0]
+				base2 = self.__class__.__bases__[1]
+				base1.__init__(self)
+				base2.__init__(self, manager=manager, name=name, password=password)
 
-		UserForMKTest.__init__ = __init__
-		self.mgr = self.userManagerClass()(userClass=UserForMKTest, store=store)
+			UserForMKTest.__init__ = __init__
+			self.mgr = self.userManagerClass()(userClass=UserForMKTest, store=store)
+
+		except:
+			sys.stdout, sys.stderr = self.stdout, self.stderr
+			print "Error in %s.SetUp." % self.__class__.__name__
+			print ''.join(self.output)
+			raise
+		else:
+			sys.stdout, sys.stderr = self.stdout, self.stderr
 
 	def testUserClass(self):
 		pass
@@ -249,23 +272,36 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 		return UserManagerToMiddleKit
 
 	def tearDown(self):
-		# clean out generated files
-		path = os.path.join(TEST_CODE_DIR, 'mk_MySQL')
-		if os.path.exists(path):
-			shutil.rmtree(path, ignore_errors=1)
+		self.output = []
+		self.stdout, self.stderr = sys.stdout, sys.stderr
+		sys.stdout = sys.stderr = self
 
-		# Drop tables from database
-		sqlDropTables = "drop table UserForMKTest, _MKClassIds"
+		try:
+			# clean out generated files
+			path = os.path.join(TEST_CODE_DIR, 'mk_MySQL')
+			if os.path.exists(path):
+				shutil.rmtree(path, ignore_errors=1)
 
-		mysqlTestInfo = AllTests.config().setting('mysqlTestInfo')
-		mysqlClient = mysqlTestInfo['mysqlClient']
-		db = mysqlTestInfo['database']
+			# Drop tables from database
+			sqlDropTables = "drop table UserForMKTest, _MKClassIds"
 
-		assert mysqlClient.endswith('mysql')
-		executeSqlCmd = '%s %s -e "%s"' % (mysqlClient, db, sqlDropTables)
+			db = self.mysqlTestInfo['database']
 
-		_log.debug('running: %s', executeSqlCmd)
-		os.system(executeSqlCmd)
+			executeSqlCmd = '%s %s -e "%s"' % (self.mysqlClient, db, sqlDropTables)
+
+			# _log.debug('running: %s', executeSqlCmd)
+			f = os.popen(executeSqlCmd)
+			self.output.append(f.read())
+			if f.close():
+				raise OSError, 'Error running: %s' % executeSqlCmd
+
+		except:
+			sys.stdout, sys.stderr = self.stdout, self.stderr
+			print "Error in %s.SetUp." % self.__class__.__name__
+			print ''.join(self.output)
+			raise
+		else:
+			sys.stdout, sys.stderr = self.stdout, self.stderr
 
 		_UserManagerToSomewhereTest.tearDown(self)
 
@@ -288,7 +324,7 @@ class RoleUserManagerToMiddleKitTest(UserManagerToMiddleKitTest):
 
 def makeTestSuite():
 	testClasses = [
-		UserManagerTest, UserManagerToFileTest, RoleUserManagerToFileTest ]
+		UserManagerTest, UserManagerToFileTest, RoleUserManagerToFileTest]
 
 	# See if AllTests.conf has been configured for MySQL
 	if AllTests.config().setting('hasMysql'):
@@ -302,5 +338,5 @@ def makeTestSuite():
 		_log.info('Skipping MySQL tests. MySQL is not configured in AllTests.config.')
 
 	make = unittest.makeSuite
-	tests = [unittest.makeSuite(clazz) for clazz in testClasses]
+	tests = [unittest.makeSuite(klass) for klass in testClasses]
 	return unittest.TestSuite(tests)

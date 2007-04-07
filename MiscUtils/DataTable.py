@@ -201,31 +201,17 @@ TO DO
 
 
 import os, sys
+from types import *
+
 from CSVParser import CSVParser
 from CSVJoiner import joinCSVFields
 from Funcs import positive_id
-from types import *
+from MiscUtils import NoDefault, StringTypes, mxDateTime
 
-try: # backward compatibility for Python < 2.2
-	StringTypes
-except NameError:
-	StringTypes = StringType
-
-try: # backward compatibility for Python < 2.3
+try: # for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0
-
-try:
-	from MiscUtils import NoDefault
-except ImportError:
-	class NoDefault:
-		pass
-
-try:
-	from mx.DateTime import DateTimeType, DateTimeFrom
-except ImportError:
-	pass
 
 
 ## Types ##
@@ -347,7 +333,7 @@ class TableColumn:
 			else:
 				value = float(rawValue)
 		elif self._type is DateTimeType:
-			value = DateTimeFrom(rawValue)
+			value = mxDateTime.DateTimeFrom(rawValue)
 		elif self._type is ObjectType:
 			value = rawValue
 		else:
@@ -571,7 +557,7 @@ class DataTable:
 		or a list of TableColumns or None. """
 		if not headings:
 			self._headings = []
-		elif isinstance(headings[0], StringTypes):
+		elif type(headings[0]) in StringTypes:
 			self._headings = map(lambda h: TableColumn(h), headings)
 		elif isinstance(headings[0], TableColumn):
 			self._headings = list(headings)
@@ -780,7 +766,7 @@ class TableRecord:
 		return len(self._values)
 
 	def __getitem__(self, key):
-		if isinstance(key, StringTypes):
+		if type(key) in StringTypes:
 			key = self._nameToIndexMap[key]
 		try:
 			return self._values[key]

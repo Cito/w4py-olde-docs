@@ -1,10 +1,15 @@
 from SQLGenerator import SQLGenerator
 
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
+
 
 class MySQLSQLGenerator(SQLGenerator):
 
 	def sqlSupportsDefaultValues(self):
-		return 1
+		return True
 
 
 class Klasses:

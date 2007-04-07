@@ -7,7 +7,7 @@ on the command line which contain the test cases to be run.
 
 Usage:
 	python AllTests.py                  - Runs all the unittests
-	python AllTests.py mypackage.MyFile - Runs the unittests in 'mypackage/MyFile'
+	python AllTests.py mypackage.MyFile - Runs the tests in 'mypackage/MyFile'
 
 This module also has a test-wide configuration file which can be accessed by
 the function AllTests.config().
@@ -78,24 +78,30 @@ class _AllTestsConfig(Configurable):
 {	# Edit this file to activate more tests
 
 	# Turn on tests that use MySQL?
-	'hasMysql' : 0,
+	'hasMysql': True,
 
 	# If hasMysql is true, then these are used to connect:
 	'mysqlTestInfo' : {
 
 		# Where is MySQLdb lib located?
-		'extraSysPath' : ['../SOMETHING/../MySQL-python-1.0.0/build/lib'],
+		# 'extraSysPath': ['/somewhere/MySQL-python-1.2.2/build/lib'],
+		'extraSysPath': [],
 
-		'mysqlClient'   : '/usr/local/mysql/bin/mysql',
-		'database'      : 'test', # Test case uses this,
+		# Where is the MySQL client located (if not on the path)?
+		# 'mysqlClient': '/usr/local/mysql/bin/mysql',
+		# 'mysqlClient': 'c:/progra~1/mysql/mysqls~1.0/bin/mysql.exe',
+		'mysqlClient': 'mysql',
+
+		# The name of the MySQL database to be used:
+		'database': 'test', # Test case uses this,
 		# but UserManagerTest.mkmodel/Settings.config also defines it.
 
-		# This is passed to MySQLObjectStore()
-		'DatabaseArgs'   : {
-		#	'host'    : 'localhost',
-		#	'port'    : '3306',
-			'user'    : 'test',
-			'passwd'  : '',
+		# This is passed to MySQLObjectStore():
+		'DatabaseArgs': {
+			'host': 'localhost',
+			'port': 3306,
+			'user': 'test', # should have all database privileges
+			'passwd': '',
 		},
 	}
 }
@@ -163,7 +169,7 @@ if __name__ == '__main__':
 	else:
 		testnames = sys.argv[1:]
 		# Turn up verbosity and logging level
-		verbosity = 2
+		verbosity = 3
 		logging.getLogger().setLevel(logging.DEBUG)
 		print 'Loading tests %s...' % testnames
 

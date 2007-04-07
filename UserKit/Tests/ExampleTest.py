@@ -88,7 +88,7 @@ class SimpleExampleTest(unittest.TestCase):
 		fooUser = self.mgr.createUser('foo', sha('bar').hexdigest())
 		fooUser.setRoles([staffRole])
 
-		# Check FOO user
+		# Check user "foo"
 		theUser = self.mgr.loginName('foo', sha('bar').hexdigest())
 		assert theUser.isActive(), 'User should be logged in now'
 		assert theUser == fooUser, \
@@ -98,7 +98,7 @@ class SimpleExampleTest(unittest.TestCase):
 		assert theUser.playsRole(customersRole), 'User "foo" should' \
 			' also be in customer role, since staff includes customers.'
 
-		# Check JOHN user
+		# Check user "John"
 		theUser = self.mgr.loginName('john', sha('doe').hexdigest())
 		assert theUser.isActive(), 'User should be logged in now.'
 		assert theUser == johnUser, \

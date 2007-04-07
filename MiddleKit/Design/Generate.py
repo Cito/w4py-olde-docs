@@ -10,9 +10,9 @@ import os, string, sys, types
 from getopt import getopt
 import FixPath
 import MiddleKit
-from MiddleKit import StringTypes
+from MiscUtils import StringTypes
 
-if sys.platform=='win32':
+if sys.platform == 'win32':
 	# without this, I can't see output from uncaught exceptions!
 	# perhaps this is caused by the recent incorporation of win32all (via DataTable)?
 	sys.stderr = sys.stdout
@@ -37,18 +37,19 @@ class Generate:
 		if opt.has_key('sql'):
 			print 'Generating SQL...'
 			self.generate(
-				pyClass=opt['db']+'SQLGenerator',
-				model=opt['model'],
-				configFilename=opt.get('config'),
-				outdir=os.path.join(outdir, 'GeneratedSQL'))
+				pyClass = opt['db'] + 'SQLGenerator',
+				model = opt['model'],
+				configFilename = opt.get('config'),
+				outdir = os.path.join(outdir, 'GeneratedSQL'))
 		if opt.has_key('py'):
 			print 'Generating Python...'
 			self.generate(
-				pyClass=opt['db']+'PythonGenerator',
-				model=opt['model'],
-				configFilename=opt.get('config'),
+				pyClass = opt['db'] + 'PythonGenerator',
+				model = opt['model'],
+				configFilename = opt.get('config'),
 				outdir=outdir)
-		model = MiddleKit.Core.Model.Model(opt['model'], configFilename=opt.get('config'), havePythonClasses=0)
+		model = MiddleKit.Core.Model.Model(opt['model'],
+			configFilename=opt.get('config'), havePythonClasses=0)
 		model.printWarnings()
 
 	def usage(self, errorMsg=None):
@@ -68,20 +69,20 @@ class Generate:
 
 	def options(self, args):
 		# Command line dissection
-		if type(args)==type(''):
+		if type(args) == type(''):
 			args = args.split()
 		optPairs, files = getopt(args[1:], 'h', ['help', 'db=', 'model=', 'sql', 'py', 'config=', 'outdir='])
-		if len(optPairs)<1:
+		if len(optPairs) < 1:
 			self.usage('Missing options.')
-		if len(files)>0:
+		if len(files) > 0:
 			self.usage('Extra files or options passed.')
 
 		# Turn the cmd line optPairs into a dictionary
 		opt = {}
 		for key, value in optPairs:
-			if len(key)>=2 and key[:2]=='--':
+			if len(key) >= 2 and key[:2] == '--':
 				key = key[2:]
-			elif key[0]=='-':
+			elif key[0] == '-':
 				key = key[1:]
 			opt[key] = value
 
@@ -107,11 +108,12 @@ class Generate:
 			pyClass = getattr(module, pyClass)
 		generator = pyClass()
 		if type(model) in StringTypes:
-			generator.readModelFileNamed(model, configFilename=configFilename, havePythonClasses=0)
+			generator.readModelFileNamed(model, configFilename=configFilename,
+				havePythonClasses=0)
 		else:
 			generator.setModel(model)
 		generator.generate(outdir)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	Generate().main(sys.argv)

@@ -20,7 +20,7 @@ from WebUtils.Funcs import urlDecode
 
 debug = 0
 
-try: # backward compatibility for Python < 2.1
+try: # for Python < 2.1
 	from warnings import warn
 except ImportError:
 	def warn(s, **a):

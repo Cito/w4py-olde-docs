@@ -29,15 +29,15 @@ class BasicRoleTest(unittest.TestCase):
 
 	def checkRoleClass(self, roleClass):
 		role = roleClass('foo', 'bar')
-		assert role.name()=='foo'
-		assert role.description()=='bar'
-		assert str(role)=='foo'
+		assert role.name() == 'foo'
+		assert role.description() == 'bar'
+		assert str(role) == 'foo'
 
 		role.setName('x')
-		assert role.name()=='x'
+		assert role.name() == 'x'
 
 		role.setDescription('y')
-		assert role.description()=='y'
+		assert role.description() == 'y'
 
 		assert role.playsRole(role)
 

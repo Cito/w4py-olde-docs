@@ -1,23 +1,17 @@
+from PythonGenerator import Attr
 from SQLPythonGenerator import SQLPythonGenerator
+from MiscUtils import mxDateTime
+
 
 class MSSQLPythonGenerator(SQLPythonGenerator):
 	pass
-
-
-
-from PythonGenerator import Attr
-
-try:
-	from mx import DateTime
-except ImportError:
-	DateTime = None
 
 
 class AnyDateTimeAttr:
 
 	def _delme_writePySetChecks(self, out):
 		Attr.writePySetChecks.im_func(self, out)
-		if DateTime:
+		if mxDateTime:
 			out.write('''\
 		# have DateTime
 		if value is not None:

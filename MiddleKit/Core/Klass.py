@@ -1,13 +1,21 @@
 from ModelObject import ModelObject
-from MiscUtils import NoDefault
-from MiddleKit import StringTypes
+from MiscUtils import NoDefault, StringTypes
 from MiddleKit.Core.ListAttr import ListAttr
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleDict import MiddleDict
+
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
+
 try:
-    from sets import Set
-except ImportError: # fallback for Python < 2.3
-    from UserDict import UserDict as Set
+    set
+except NameError: # fallback for Python < 2.4
+    try:
+        from sets import Set as set
+    except ImportError: # fallback for Python < 2.3
+        from UserDict import UserDict as set
 
 
 class Klass(MiddleDict, ModelObject):
@@ -25,7 +33,7 @@ class Klass(MiddleDict, ModelObject):
 		self._attrsByName = {}
 		self._superklass = None
 		self._subklasses = []
-		self._pyClass = 0   # 0 means never computed. None would mean computed, but not found.
+		self._pyClass = False   # False means never computed. None would mean computed, but not found.
 		self._backObjRefAttrs = None
 		self._allAttrs = None
 
@@ -54,7 +62,7 @@ class Klass(MiddleDict, ModelObject):
 		else:
 			self._name = name
 			self._supername = dict.get('Super', 'MiddleObject')
-		self._isAbstract = dict.get('isAbstract', 0)
+		self._isAbstract = dict.get('isAbstract', False)
 
 		# fill in dictionary (self) with the contents of the dict argument
 		for key, value in dict.items():
@@ -109,7 +117,7 @@ class Klass(MiddleDict, ModelObject):
 			attrs = klass.attrs()
 			allAttrs.extend(attrs)
 			for attr in attrs:
-				if not attr.get('isDerived', 0):
+				if not attr.get('isDerived', False):
 					allDataAttrs.append(attr)
 					if isinstance(attr, ObjRefAttr) or isinstance(attr, ListAttr):
 						allDataRefAttrs.append(attr)
@@ -140,7 +148,7 @@ class Klass(MiddleDict, ModelObject):
 		return self._id
 
 	def setId(self, id):
-		if isinstance(id, Set):
+		if isinstance(id, set):
 			# create an id that is a hash of the klass name
 			# see Klasses.assignClassIds()
 			allIds = id
@@ -194,7 +202,7 @@ class Klass(MiddleDict, ModelObject):
 		the klass with the given name.
 		"""
 		if self.name() == name:
-			return 1
+			return True
 		else:
 			return self.lookupAncestorKlass(name, None) is not None
 
@@ -213,7 +221,7 @@ class Klass(MiddleDict, ModelObject):
 			memo = {}
 		if memo.has_key(self):
 			return
-		memo[self] = 1
+		memo[self] = None
 		for k in self.subklasses():
 			k.descendants(init=0, memo=memo)
 		if init:
@@ -304,7 +312,7 @@ class Klass(MiddleDict, ModelObject):
 		attribute _mk_klass which is used by MiddleKit.Run.MiddleObject.
 
 		"""
-		if self._pyClass == 0:
+		if self._pyClass == False:
 			if self._klassContainer._model._havePythonClasses:
 				self._pyClass = self._klassContainer._model.pyClassForName(self.name())
 				assert self._pyClass.__name__ == self.name(), 'self.name()=%r, self._pyClass=%r' % (self.name(), self._pyClass)
@@ -331,7 +339,7 @@ class Klass(MiddleDict, ModelObject):
 			for klass in self._klassContainer._model.allKlassesInOrder():
 				# find all ObjRefAttrs of klass that refer to one of our targetKlasses
 				for attr in klass.attrs():
-					if not attr.get('isDerived', 0):
+					if not attr.get('isDerived', False):
 						if isinstance(attr, ObjRefAttr) and targetKlasses.has_key(attr.targetClassName()):
 							backObjRefAttrs.append(attr)
 			self._backObjRefAttrs = backObjRefAttrs

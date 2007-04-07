@@ -8,7 +8,6 @@ from MiscUtils.NamedValueAccess import \
 
 from MiscUtils import AbstractError, NoDefault
 import unittest
-#from MiscUtils import AbstractError, NoDefault, unittest
 from UserDict import UserDict
 import types
 
@@ -97,7 +96,7 @@ class LookupTest(NamedValueAccessTest):
 		self.classes = tClasses
 
 	def setUpObjects(self):
-		self.objs = map(lambda clazz: clazz(), self.classes)
+		self.objs = map(lambda klass: klass(), self.classes)
 
 	def lookup(self, obj, key, default=NoDefault):
 		raise AbstractError, self.__class__
@@ -254,7 +253,7 @@ class WrapperTest(NamedValueAccessTest):
 	def setUp(self):
 		def setUpObjects(self):
 			wrapper = NamedValueAccessWrapper
-			self.objs = map(lambda wrapper=wrapper: clazz(), self.classes)
+			self.objs = map(lambda klass, wrapper=wrapper: wrapper(klass()), self.classes)
 		LookupTest.setUpObjects = setUpObjects
 
 
@@ -272,7 +271,7 @@ def makeTestSuite():
 			MixInExtrasTest,
 	]
 	make = unittest.makeSuite
-	suites = [make(clazz, 'check') for clazz in testClasses]
+	suites = [make(klass, 'check') for klass in testClasses]
 	return unittest.TestSuite(suites)
 
 

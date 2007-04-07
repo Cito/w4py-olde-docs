@@ -1,7 +1,11 @@
-from SQLGenerator import SQLGenerator
-from string import find, join, ljust, lower, split, strip, upper
-from time import asctime, localtime, time
 import os, sys
+from time import asctime, localtime, time
+from SQLGenerator import SQLGenerator
+
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 def cleanConstraintName(name):
@@ -19,7 +23,7 @@ def cleanConstraintName(name):
 class MSSQLSQLGenerator(SQLGenerator):
 
 	def sqlSupportsDefaultValues(self):
-		return 1 # I think it does but I do not know how it is implemented
+		return True # I think it does but I do not know how it is implemented
 
 
 class Model:
@@ -112,7 +116,7 @@ create table _MKClassIds (
 
 	def writeKeyValue(self, out, key, value):
 		''' Used by willWriteSQL(). '''
-		key = ljust(key, 12)
+		key = key.ljust(12)
 		out.write('# %s = %s\n' % (key, value))
 
 	def willWriteSQL(self, generator, out):
@@ -187,7 +191,6 @@ class Klass:
 					indexName = cleanConstraintName(indexName)
 					wr('create index [%(indexName)s] on %(tableName)s(%(classIdName)s, %(objIdName)s);\n' % locals())
 		wr('\n')
-
 
 
 class Attr:
@@ -317,7 +320,7 @@ class ObjRefAttr:
 	def classIdReferences(self):
 		classIdName = self.sqlName().split(',')[0]
 		constraintName = cleanConstraintName('FK__%s__%s___MKClassIds__id' % (self.containingKlass.sqlTableName(), classIdName))
- 		return ' constraint [%s] references _MKClassIds' % constraintName
+		return ' constraint [%s] references _MKClassIds' % constraintName
 
 	def objIdReferences(self):
 		targetKlass = self.targetKlass()

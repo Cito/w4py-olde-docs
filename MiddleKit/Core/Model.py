@@ -6,7 +6,8 @@ try:
 	from cPickle import load, dump
 except ImportError:
 	from pickle import load, dump
-try: # backward compatibility for Python < 2.3
+
+try: # for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0

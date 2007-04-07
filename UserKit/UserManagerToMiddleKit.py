@@ -5,7 +5,6 @@ UserManagerToMiddleKit.py
 from UserManager import UserManager
 from MiscUtils import NoDefault
 import os
-from glob import glob
 from MiddleKit.Run.ObjectStore import UnknownObjectError
 
 
@@ -103,14 +102,12 @@ class UserManagerToMiddleKit(UserManager):
 	## UserManager concrete methods ##
 
 	def addUser(self, user):
-		UserManager.addUser(self, user)
 		self._store.addObject(user)
 		if self._saveNewUsers:
 			self._store.saveChanges()
+		UserManager.addUser(self, user)
 
 	def userForSerialNum(self, id, default=NoDefault):
-		# @@ 2001-02-18 ce: actually we shouldn't have to do this
-		# caching; MiddleKit does it for us.
 		user = self._cachedUsersBySerialNum.get(id, None)
 		if user is not None:
 			return user
@@ -118,16 +115,16 @@ class UserManagerToMiddleKit(UserManager):
 
 	def userForExternalId(self, externalId, default=NoDefault):
 		for user in self._cachedUsers:
-			if user.externalId()==externalId:
+			if user.externalId() == externalId:
 				return user
 		if self._useSQL:
 			users = self._store.fetchObjectsOfClass(self._userClass, clauses='where externalId=%r' % externalId)
 			if users:
-				assert len(users)==1
+				assert len(users) == 1
 				return users[0]
 		else:
 			for user in self.users():
-				if user.externalId()==externalId:
+				if user.externalId() == externalId:
 					return user
 		if default is NoDefault:
 			raise KeyError, externalId
@@ -136,16 +133,16 @@ class UserManagerToMiddleKit(UserManager):
 
 	def userForName(self, name, default=NoDefault):
 		for user in self._cachedUsers:
-			if user.name()==name:
+			if user.name() == name:
 				return user
 		if self._useSQL:
 			users = self._store.fetchObjectsOfClass(self._userClass, clauses='where name=%r' % name)
 			if users:
-				assert len(users)==1
+				assert len(users) == 1
 				return users[0]
 		else:
 			for user in self.users():
-				if user.name()==name:
+				if user.name() == name:
 					return user
 		if default is NoDefault:
 			raise KeyError, name

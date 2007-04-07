@@ -19,10 +19,9 @@ The globals provided are:
 
 """
 
-
 import os, sys, time
 
-try: # backward compatibility for Python < 2.3
+try: # for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0
@@ -36,6 +35,3 @@ def asclocaltime(t = None):
 	if t is None:
 		t = time.time()
 	return time.asctime(time.localtime(t))
-
-
-

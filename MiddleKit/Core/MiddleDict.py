@@ -1,6 +1,7 @@
 from UserDict import UserDict
-from MiddleKit import StringTypes
-try: # backward compatibility for Python < 2.3
+from MiscUtils import StringTypes
+
+try: # for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0

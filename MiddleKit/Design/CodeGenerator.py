@@ -27,7 +27,7 @@ from MiscUtils.Configurable import Configurable
 from time import asctime, localtime, time
 from MiddleKit.Core.ModelUser import ModelUser
 
-try: # backward compatibility for Python < 2.3
+try: # for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0

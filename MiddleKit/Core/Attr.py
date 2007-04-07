@@ -1,9 +1,13 @@
 import re
 
 from ModelObject import ModelObject
-from MiscUtils import NoDefault
-from MiddleKit import StringTypes
+from MiscUtils import NoDefault, StringTypes
 from MiddleDict import MiddleDict
+
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 nameRE = re.compile(r'^([A-Za-z_][A-Za-z_0-9]*)$')
 

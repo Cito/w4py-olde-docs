@@ -7,7 +7,7 @@ Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else
 import md5, os, random, time, sys, tempfile
 from struct import calcsize
 
-try: # backward compatibility for Python < 2.3
+try: # for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0

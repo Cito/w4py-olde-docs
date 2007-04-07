@@ -61,7 +61,7 @@ pyVer = getattr(sys, 'version_info', None)
 if pyVer is None or pyVer[0] < 2:
 	raise Exception, 'HTMLTag requires Python 2.0 or greater.'
 
-try: # backward compatibility for Python < 2.3
+try: # for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0

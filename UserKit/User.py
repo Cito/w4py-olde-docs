@@ -48,16 +48,7 @@ class User:
 	def externalId(self):
 		if self._externalId is None:
 			from time import localtime, time
-			attempts = 0
-			while attempts<10000:
-				self._externalId = uniqueId(self)
-				# @@ 2001-02-17 ce: check that manager doesn't already have this
-				# if mgr.userForExternalId(self._externalId, None) is None:
-				#	break
-				break
-				attempts += 1
-			else:
-				raise Exception, "Can't create valid external id after %i attempts." % attempts
+			self._externalId = uniqueId(self)
 		return self._externalId
 
 	def name(self):
@@ -101,7 +92,7 @@ class User:
 			# So make sure we go through him
 			return self.manager().login(self, password)
 		else:
-			if password==self.password():
+			if password == self.password():
 				self._isActive = 1
 				self._lastLoginTime = self._lastAccessTime = time.time()
 				return self

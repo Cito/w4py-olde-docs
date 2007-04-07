@@ -1,10 +1,9 @@
-from CodeGenerator import *
-import os, sys
+import os, sys, types
 from glob import glob
 from time import asctime, localtime, time
-from MiddleKit import StringTypes
+from CodeGenerator import *
 from MiddleKit.Core.ObjRefAttr import objRefJoin
-from MiscUtils import AbstractError, CSVParser
+from MiscUtils import AbstractError, StringTypes, CSVParser
 
 
 class SampleError:
@@ -279,7 +278,7 @@ class Model:
 									# (Excel sometimes doesn't include all the commas)
 									value = ''
 							value = attr.sqlForSampleInput(value)
-							if isinstance(value, tuple):
+							if isinstance(value, types.TupleType):
 								# sqlForSampleInput can return a 2 tuple: (presql, sqlValue)
 								assert len(value) == 2
 								preinsertSQL.append(value[0])
@@ -608,7 +607,7 @@ class Attr:
 			return self.sqlForNone()
 		else:
 			s = self.sqlForNonNoneSampleInput(input)
-			assert isinstance(s, str) or isinstance(s, tuple), \
+			assert type(s) in StringTypes + (types.TupleType,), \
 				'%r, %r, %r' % (s, type(s), self)
 			return s
 
@@ -743,7 +742,7 @@ class IntAttr:
 		return 'int'
 
 	def sqlForNonNoneSampleInput(self, input):
-		if not isinstance(input, int):
+		if not isinstance(input, types.IntType):
 			value = str(input)
 			if value.endswith('.0'):
 				# numeric values from Excel-based models are always float
@@ -1065,7 +1064,7 @@ class PrimaryKey:
 	def sqlName(self):
 		return self.name()
 
-	def get(self,key,default=0):
+	def get(self, key, default=0):
 		return self._props.get(key,default)
 
 	def sqlForSampleInput(self, input):

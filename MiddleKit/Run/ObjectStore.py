@@ -1,9 +1,7 @@
 import sys, types
-from types import ClassType, StringType
-from MiscUtils import NoDefault
+from MiscUtils import NoDefault, StringTypes
 from MiscUtils.Funcs import safeDescription
 from ObjectKey import ObjectKey
-from MiddleKit import StringTypes
 from MiddleKit.Core.ModelUser import ModelUser
 from MiddleKit.Core.Klass import Klass as BaseKlass
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
@@ -18,6 +16,11 @@ try:
 	from weakref import WeakValueDictionary
 except: # fallback for Python < 2.1
 	from UserDict import UserDict as WeakValueDictionary
+
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 class UnknownObjectError(LookupError):
@@ -161,7 +164,7 @@ class ObjectStore(ModelUser):
 		not any dependent objects.
 		"""
 		if not object.isInStore():
-			assert object.key()==None
+			assert object.key() == None
 			# Make the store aware of this new object
 			self.willChange()
 			self._newObjects.append(object)
@@ -447,9 +450,9 @@ class ObjectStore(ModelUser):
 		import types
 		assert aClass is not None
 		if not isinstance(aClass, BaseKlass):
-			if isinstance(aClass, ClassType):  # old Python classes
+			if isinstance(aClass, types.ClassType):  # old Python classes
 				aClass = self._model.klass(aClass.__name__)
-			elif isinstance(aClass, StringTypes):
+			elif type(aClass) in StringTypes:
 				aClass = self._model.klass(aClass)
 			elif isinstance(aClass, types.TypeType):  # new Python classes
 				aClass = self._model.klass(aClass.__name__)

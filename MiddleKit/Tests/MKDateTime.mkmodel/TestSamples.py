@@ -6,15 +6,15 @@ def test(store):
 	from MiddleKit.Design.PythonGenerator import nativeDateTime, mxDateTime
 
 	value = f.d()
-	match = False
+	match = None
 	if nativeDateTime:
-		match = value==nativeDateTime.date(2000, 1, 1)
+		match = value == nativeDateTime.date(2000, 1, 1)
 	if not match and mxDateTime:
-		match = value==mxDateTime.DateTime(2000, 1, 1)
+		match = value == mxDateTime.DateTime(2000, 1, 1)
 	assert match, value
 
 	value = f.t()
-	match = False
+	match = None
 	if nativeDateTime:
 		match = value==store.filterDateTimeDelta(nativeDateTime.time(13, 01))
 		if not match:
@@ -24,9 +24,9 @@ def test(store):
 	assert match, '%s, %s' % (value, type(value))
 
 	value = f.dt()
-	match = False
+	match = None
 	if nativeDateTime:
-		match = value==nativeDateTime.datetime(2000, 1, 1, 13, 1)
+		match = value == nativeDateTime.datetime(2000, 1, 1, 13, 1)
 	if not match and mxDateTime:
-		match = value==mxDateTime.DateTime(2000, 1, 1, 13, 1)
+		match = value == mxDateTime.DateTime(2000, 1, 1, 13, 1)
 	assert match, value

@@ -52,7 +52,7 @@ Major Items
 * Drop backward compatibility down to Python 2.0; require Python 2.3 or
   Python 2.4 instead. Make use of the new Python features like new-style
   classes, properties, sets, decorators etc. and get rid of old garbage
-  and workarounds for old Python versions.
+  and workarounds for old Python versions. Use isinstance() for type checking.
 
 * Use distutils instead of our own installer, use Python eggs instead of
   our own plug-in concept.

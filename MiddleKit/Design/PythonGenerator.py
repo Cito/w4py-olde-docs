@@ -1,24 +1,9 @@
-from CodeGenerator import CodeGenerator
-from MiscUtils import AbstractError
-from time import asctime, localtime, time
 import os, sys, types
-from MiddleKit import StringTypes
+from time import asctime, localtime, time
+
+from CodeGenerator import CodeGenerator
+from MiscUtils import AbstractError, StringTypes, mxDateTime, nativeDateTime
 from MiddleKit.Core.ObjRefAttr import objRefJoin
-
-
-try:
-	import datetime as nativeDateTime
-except ImportError:
-	nativeDateTime = None
-
-try:
-	import mx.DateTime as mxDateTime
-except ImportError:
-	mxDateTime = None
-
-assert nativeDateTime is not None or mxDateTime is not None, \
-    "Cannot find Python's native datetime module "\
-    " or egenix's mx.DateTime module. You must have at least one."
 
 
 class PythonGenerator(CodeGenerator):
@@ -123,11 +108,14 @@ except ImportError: # fallback for Python < 2.4
 	Decimal = float
 ''')
 		if nativeDateTime:
-			wr('import datetime\n')
+			if nativeDateTime.__name__ == 'datetime':
+				wr('import datetime\n')
+			else:
+				wr('import %s as datetime\n' % nativeDateTime.__name__)
 		if mxDateTime:
-			wr('from mx import DateTime as mxDateTime\n')
+			wr('import %s as mxDateTime\n' % mxDateTime.__name__)
 		supername = self.supername()
-		if supername=='MiddleObject':
+		if supername == 'MiddleObject':
 			wr('\n\nfrom MiddleKit.Run.MiddleObject import MiddleObject\n')
 		else:
 			pkg = self._klasses._model.setting('Package', '')
@@ -223,7 +211,7 @@ class Attr:
 	def writePyAccessors(self, out):
 		self.writePyGet(out)
 		self.writePySet(out)
-		if self.setting('AccessorStyle', 'methods')=='properties':
+		if self.setting('AccessorStyle', 'methods') == 'properties':
 			out.write('\n\n\t%s = property(%s, %s)\n\n' % (self.name(), self.pyGetName(), self.pySetName()))
 
 	def writePyGet(self, out):
@@ -298,7 +286,7 @@ class BoolAttr:
 			value = 0
 		else:
 			value = int(string)
-		assert value==0 or value==1, value
+		assert value == 0 or value == 1, value
 		return value
 
 	def writePySetChecks(self, out):
@@ -414,7 +402,7 @@ class EnumAttr:
 			_%(name)sAttr = self.klass().lookupAttr('%(name)s')
 		return _%(name)sAttr.enums()[self._%(name)s]
 ''' % locals())
-			if self.setting('AccessorStyle', 'methods')=='properties':
+			if self.setting('AccessorStyle', 'methods') == 'properties':
 				out.write('\n\n\t%(name)sString = property(%(getName)sString, "Returns the string form of %(name)s (instead of the integer value).")\n\n' % locals())
 
 	def writePySetChecks(self, out):
@@ -590,7 +578,7 @@ class ObjRefAttr:
 
 	def stringToValue(self, string):
 		parts = string.split('.')
-		if len(parts)==2:
+		if len(parts) == 2:
 			className = parts[0]
 			objSerialNum = parts[1]
 		else:
@@ -665,7 +653,7 @@ class ListAttr:
 		raise AssertionError, 'Lists do not have a set method.'
 
 	def writePyAddTo(self, out, names):
-		names['getParens'] = self.setting('AccessorStyle', 'methods')=='methods' and '()' or ''
+		names['getParens'] = self.setting('AccessorStyle', 'methods') == 'methods' and '()' or ''
 		out.write('''
 	def addTo%(capName)s(self, value):
 		assert value is not None
@@ -675,7 +663,7 @@ class ListAttr:
 		self.%(pyGetName)s().append(value)
 		value._set('%(backRefAttrName)s', self)
 		store = self.store()
-		if value.serialNum()==0 and self.isInStore():
+		if value.serialNum() == 0 and self.isInStore():
 			store.addObject(value)
 ''' % names)
 		del names['getParens']

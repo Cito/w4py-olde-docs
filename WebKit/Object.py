@@ -9,7 +9,7 @@ except:
 	import MiscUtils
 from MiscUtils.NamedValueAccess import NamedValueAccess
 
-try: # backward compatibility for Python < 2.2
+try: # for Python < 2.2
 	object
 except NameError:
 	class object:

@@ -9,7 +9,7 @@ debug = 0
 
 try:
 	mimetypes.common_types
-except AttributeError: # Fallback for Python < 2.2
+except AttributeError: # fallback for Python < 2.2
 	if not mimetypes.types_map.has_key('.css'):
 		mimetypes.types_map['.css'] = 'text/css'
 	def guess_type(url, strict=1):

@@ -6,11 +6,6 @@ __all__ = ['Core', 'Design', 'Run', 'StringTypes']
 
 import os
 
-try:
-	from types import StringTypes
-except ImportError: # fallback for Python < 2.2
-	from types import StringType, UnicodeType
-	StringTypes = (StringType, UnicodeType)
 
 def InstallInWebKit(appServer):
 	app = appServer.application()

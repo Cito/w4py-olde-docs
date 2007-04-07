@@ -2,6 +2,11 @@ from SQLObjectStore import SQLObjectStore
 from mx import ODBC # DR: 07-12-02 The ODBC.Windows module is flawed
 ODBC.Windows.threadsafety = ODBC.Windows.threadlevel # mx.ODBC.Windows has a threadlevel, not a threadsafety, even though DBABI2.0 says its threadsafety (http://www.python.org/topics/database/DatabaseAPI-2.0.html)
 
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
+
 
 class MSSQLObjectStore(SQLObjectStore):
 	_threadSafety = ODBC.Windows.threadsafety

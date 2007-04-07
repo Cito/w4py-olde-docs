@@ -1,12 +1,6 @@
-from WebKit.SidebarPage import SidebarPage
 import time
-try:
-	from mx import DateTime
-except ImportError:
-	try:
-		import DateTime
-	except ImportError:
-		DateTime = None
+from WebKit.SidebarPage import SidebarPage
+from MiscUtils import mxDateTime as DateTime
 
 cookieValues = [
 	('onclose', 'ONCLOSE'),

@@ -10,9 +10,14 @@ import os, shutil, string, sys, time, types
 from getopt import getopt
 import FixPath
 import MiddleKit
-from MiddleKit import StringTypes
+from MiscUtils import StringTypes
 from MiscUtils.Funcs import valueForString
 from WebUtils.Funcs import htmlEncode
+
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 class Doc:

@@ -11,11 +11,31 @@ try:
 except ImportError:
 	from StringIO import StringIO
 
-try: # backward compatibility for Python < 2.3
+try:
+	import mx.DateTime as mxDateTime
+except ImportError:
+	mxDateTime = None
+
+try:
+	import datetime as nativeDateTime
+except ImportError: # fallback for Python < 2.3
+	if mxDateTime is None:
+		try:
+			import BasicDateTime as nativeDateTime
+		except ImportError:
+			nativeDateTime = None
+
+try:
+	from types import StringTypes
+except ImportError: # fallback for Python < 2.2
+	from types import StringType, UnicodeType
+	StringTypes = (StringType, UnicodeType)
+
+try: # for Python < 2.3
 	True, False
 except NameError:
 	True, False = 1, 0
-
+	bool = lambda x: x and True or False
 
 try:
 	AbstractError # Python might build this in some day.

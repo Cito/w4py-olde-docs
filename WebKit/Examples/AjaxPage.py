@@ -10,14 +10,14 @@ import traceback, time, random
 from MiscUtils import StringIO
 from ExamplePage import ExamplePage as BaseClass
 
-try:
+try: # for Python < 2.3
 	bool
-except NameError: # Fallback for Python < 2.3
+except NameError:
 	bool = lambda x: x and 1 or 0
 
 try:
 	object
-except NameError: # Fallback for Python < 2.2
+except NameError: # fallback for Python < 2.2
 	class object: pass
 	std_isinstance = isinstance
 	def isinstance(obj, cinf):

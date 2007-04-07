@@ -1,16 +1,19 @@
 import sys, time, types
 
-from MiscUtils import NoDefault, AbstractError
-from MiscUtils import Funcs as funcs
 
 from MiddleObject import MiddleObject
 from ObjectStore import ObjectStore, UnknownObjectError
 from ObjectKey import ObjectKey
-from MiscUtils.MixIn import MixIn
-from MiscUtils.DBPool import DBPool
-from MiscUtils import CSVJoiner
-from MiddleKit import StringTypes
 from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
+from MiscUtils import NoDefault, StringTypes, AbstractError, CSVJoiner
+from MiscUtils import Funcs as funcs
+from MiscUtils.DBPool import DBPool
+from MiscUtils.MixIn import MixIn
+
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 class SQLObjectStoreError(Exception): pass
 class SQLObjectStoreThreadingError(SQLObjectStoreError): pass
@@ -688,7 +691,7 @@ class MiddleObjectMixIn:
 					value = 'NULL'
 				else:
 					value = ('NULL', 'NULL')
-			if isinstance(value, str):
+			if type(value) in StringTypes:
 				append(value)
 			else:
 				extend(value)  # value could be sequence for attrs that require multiple SQL columns
@@ -976,6 +979,6 @@ class DateAttr:
 			print '>> type of value =', type(value)
 			print '>> value = %r' % value
 			print
-		if not isinstance(value, StringTypes):
+		if not type(value) in StringTypes:
 			value = str(value).split()[0]
 		return "'%s'" % value

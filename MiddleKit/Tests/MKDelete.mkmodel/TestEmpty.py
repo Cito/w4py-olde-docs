@@ -195,6 +195,6 @@ def testCascadeWithRequiredBackRef(store):
 	store.saveChanges()
 	assert e.parts()
 
-	store._verboseDelete = True
+	store._verboseDelete = 1
 	store.deleteObject(e)
 	store.saveChanges()

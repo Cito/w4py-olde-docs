@@ -43,12 +43,12 @@ class DaysInMonth:
 		return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)
 
 	def test(self):
-		passed = True
+		passed = 1
 		for year in range (1,9999):
 			for month in range(1,12):
 				if DaysInMonth().calculate(year, month) <> calendar.monthrange(year, month)[1]:
 					print "Failed on %s-%s."%(year, month)
-					passed = False
+					passed = 0
 		if not passed:
 			print "FAILED"
 		else:
