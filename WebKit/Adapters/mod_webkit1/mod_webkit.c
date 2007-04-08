@@ -4,7 +4,7 @@
 * Author: Jay Love (jsliv@jslove.org)                         *
 **************************************************************/
 
-#define VERSION_COMPONENT "mod_webkit2/0.9.3"
+#define VERSION_COMPONENT "mod_webkit1/0.9.3"
 
 #include "mod_webkit.h"
 

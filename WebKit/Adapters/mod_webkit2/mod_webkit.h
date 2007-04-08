@@ -30,7 +30,7 @@ typedef struct {
 void insert_data(WFILE* dest, WFILE* src);
 void w_more(int c, WFILE *p);
 #define w_byte(c, p) if ((p)->ptr != (p)->end) *(p)->ptr++ = (c); \
-			else w_more(c, p)
+    else w_more(c, p)
 void w_string(const char *s, int n, WFILE *p);
 void w_short(int x, WFILE *p);
 void w_long(long x, WFILE *p);
