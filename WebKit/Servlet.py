@@ -152,7 +152,7 @@ class Servlet(Object):
 			return self._serverSidePath
 
 
-	## Deprecated ##
+	## Private ##
 
 	def close(self):
 		if self._factory:
