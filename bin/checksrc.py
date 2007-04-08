@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-"""
-checksrc.py
+"""checksrc.py
 
 
 INTRODUCTION
@@ -61,11 +60,6 @@ Therefore, it's possible to get false alarms. While we could implement
 a full parser to close the gap, doing so would be labor intensive with
 little pay off. So we live with a few false alarms.
 
-However, we currently don't skip multi-line strings which is the source
-of *many* false alarms. This needs to be addressed soon. There is some
-code for it in checkFileLines(), but it is far from complete and ma
- be the wrong approach.
-
 
 CONFIG FILES
 
@@ -103,16 +97,16 @@ RULES
 	X Methods do not start with "get".
 	X Data attributes start with an underscore _.
 	X Method and attribute names have no underscores after the first character.
-	X Expressions following if, while and return are not enclosed in parenthesees, ().
-	- Data attributes not only start with an underscore _, but are followed by a lower case letter.
+	X Expressions following if, while and return
+	  are not enclosed in parenthesees, ().
+	- Data attributes not only start with an underscore _,
+	  but are followed by a lower case letter.
 	- Class defs and category comments, ## Like this ##
 	  are preceded by 2 blank lines and are followed by one blank line
 	  (unless the class implementation is pass).
 
 
 FUTURE
-
-Fix the multiline string problem with tabs and spaces.
 
 Implement the spacing checks for class defs and category comments.
 
@@ -126,8 +120,10 @@ with the error messages to help guide the user to where the error occurred.
 """
 
 
-import re, string, sys, os
-from types import *
+import re, sys, os
+from types import StringType
+
+
 class NoDefault:
 	pass
 
@@ -137,13 +133,15 @@ class CheckSrc:
 	errors = {
 		'UncapFN': 'Uncapitalized filename.',
 		'CarRet': 'Carriage return \\r found.',
-		'StrayTab': 'Stray tab after other characters. No tabs allowed other than initial indentation.',
+		'StrayTab': 'Stray tab after other characters.'
+			' No tabs allowed other than initial indentation.',
 		'SpaceIndent': 'Found space as part of indentation. Use only tabs.',
 		'ClassNotCap': 'Class names should start with capital letters.',
 		'MethCap': 'Method name "%(name)s" should start with lower case letter.',
 		'GetMeth': 'Method name "%(name)s" should not start with "get".',
 		'NoUnderAttr': 'Data attributes should start with underscores: %(attribute)s.',
-		'ExtraUnder': 'Attributes and methods should not have underscores past the first character: %(attribute)s.',
+		'ExtraUnder': 'Attributes and methods should not have underscores'
+			' past the first character: %(attribute)s.',
 		'ExtraParens': 'No outer parenthesees should be used for %(keyword)s.',
 	}
 
@@ -167,7 +165,7 @@ class CheckSrc:
 		self._errorCodes = []
 		for (key, value) in self.__class__.errors.items():
 			self._errorCodes.append(key)
-			self._errors[string.lower(key)] = value
+			self._errors[key.lower()] = value
 
 		# Misc init
 		self._config = {}
@@ -198,7 +196,7 @@ class CheckSrc:
 		a string which is a filename used for one invocation of check().
 
 		"""
-		if type(output) is type(''):
+		if type(output) is StringType:
 			self._out = open(output, 'w')
 			self._shouldClose = 1
 		else:
@@ -234,18 +232,18 @@ class CheckSrc:
 		"""
 		setDir = setOut = 0
 		for arg in args[1:]:
-			if arg=='-h' or arg=='--help':
+			if arg == '-h' or arg == '--help':
 				self.usage()
 				return 0
-			elif arg=='-r':
+			elif arg == '-r':
 				self.setRecurse(1)
-			elif arg=='-R':
+			elif arg == '-R':
 				self.setRecurse(0)
-			elif arg=='-v':
+			elif arg == '-v':
 				self.setVerbose(1)
-			elif arg=='-V':
+			elif arg == '-V':
 				self.setVerbose(0)
-			elif arg[0]=='-':
+			elif arg[0] == '-':
 				self.usage()
 				return 0
 			else:
@@ -283,11 +281,11 @@ Error codes and their messages:
 		keys.sort()
 		maxLen = 0
 		for key in keys:
-			if len(key)>maxLen:
+			if len(key) > maxLen:
 				maxLen = len(key)
 		for key in keys:
-			paddedKey = string.ljust(key, maxLen)
-			wr('  %s = %s\n' % (paddedKey, self._errors[string.lower(key)]))
+			paddedKey = key.ljust(maxLen)
+			wr('  %s = %s\n' % (paddedKey, self._errors[key.lower()]))
 		wr('\n')
 
 		wr('.checksrc.config options include SkipDirs, SkipFiles and DisableErrors.\nSee the checksrc.py doc string for more info.\n')
@@ -319,7 +317,7 @@ Error codes and their messages:
 
 		if not self._printedDir:
 			self.printDir()
-		msg = self._errors[string.lower(msgCode)] % args
+		msg = self._errors[msgCode.lower()] % args
 		self.write(self.location(), msg, '\n')
 
 	def fatalError(self, msg):
@@ -339,14 +337,14 @@ Error codes and their messages:
 
 		"""
 		s = ''
-		if self._fileName!=None:
-			s = s + self._fileName
-			if self._lineNum!=None:
-				s = s + ':' + str(self._lineNum)
-				if self._charNum!=None:
-					s = s + ':' + str(self._charNum)
+		if self._fileName is not None:
+			s += self._fileName
+			if self._lineNum is not None:
+				s += ':' + str(self._lineNum)
+				if self._charNum is not None:
+					s += ':' + str(self._charNum)
 		if s:
-			s = s + ':'
+			s += ':'
 		return s
 
 	def printDir(self):
@@ -380,7 +378,7 @@ Error codes and their messages:
 		self._config = dict
 
 	def setting(self, name, default=NoDefault):
-		if default==NoDefault:
+		if default == NoDefault:
 			return self._config[name]
 		else:
 			return self._config.get(name, default)
@@ -428,7 +426,7 @@ Error codes and their messages:
 
 		skipFiles = self.setting('SkipFiles', [])
 		for name in names:
-			if len(name)>2 and name[-3:]=='.py' and name not in skipFiles:
+			if len(name) > 2 and name[-3:] == '.py' and name not in skipFiles:
 				try:
 					self.checkFile(dirName, name)
 				except CheckSrcError:
@@ -449,67 +447,48 @@ Error codes and their messages:
 		self.checkFileLines(lines)
 
 	def checkFilename(self, filename):
-		if filename[0]!=string.upper(filename[0]):
+		if filename[0] != filename[0].upper():
 			self.error('UncapFN', locals())
 
 	def checkFileContents(self, contents):
-		if os.name=='posix':
+		if os.name == 'posix':
 			if '\r' in contents:
 				self.error('CarRet', locals())
 
 	def checkFileLines(self, lines):
-		if 1:
-			# The following simple implementation captures the essence
-			# of what this method is all about. However, it doesn't
-			# deal with multiline strings which leads to more false
-			# alarms than we're willing to put up with.
-			# Keep this code for the sake of documentation/understanding.
-			self._lineNum = 1
-			for line in lines:
-				self.checkFileLine(line)
-				self._lineNum = self._lineNum + 1
-		else:
-			# @@ 2000-10-10 ce: not finished. maybe not even good approach...
-			# This version handles multiline strings
-			self._lineNum = 1
-			inMLS = 0 # MS = multi-line string
-			for line in lines:
-				# the dbg var is used for debugging output
-				# you could set to self, sys.stdout, _DummyWriter,
-				# or anything that responds to write().
-				dbg = self
-				#dbg.write('>> line = (%i:%s)\n' % (self._lineNum, string.replace(line, '\n', '\\n')))
-				dbg.write('>> line = (%i:%s)\n' % (self._lineNum, repr(line)))
-				index = string.find(line, "'''")
-				if index!=-1:
-					if not inMLS:
-						# We need to check for an MLS string that's on one line:
-						index = string.find(line, "'''", index+3)
-						if index==-1:
-							# Didn't find another delimiter. Not a one liner
-							inMLS = 1
-							line = line[:index]
-							dbg.write('>> in  MLS, line = (%s)\n' % string.replace(line, '\n', '\\n'))
-						else:
-							dbg.write('>> found one liner\n')
+		self._lineNum = 1
+		inMLS = None # MLS = multi-line string
+		for line in lines:
+			lineleft = line.lstrip()
+			if lineleft and not lineleft[0] == '#':
+				index = 0
+				wholeLineInMLS = inMLS
+				while index != -1:
+					if inMLS:
+						index = lineleft.find(inMLS, index)
+						if index != -1:
+							wholeLineInMLS = inMLS = None
+							index += 3
 					else:
-						inMLS = 0
-						line = line[index+3:]
-						dbg.write('>> out MLS, line = (%s)\n' % string.replace(line, '\n', '\\n'))
-				if line and (index!=-1 or not inMLS):
-					dbg.write('>> will check\n')
+						index2 = lineleft.find('"""', index)
+						if index2 != -1:
+							index = lineleft.find("'''", index)
+							if index != -1 and index < index2:
+								inMLS= "'''"
+							else:
+								index = index2
+								inMLS = '"""'
+							index += 3
+						else:
+							index = lineleft.find("'''", index)
+							if index != -1:
+								inMLS = "'''"
+								index += 3
+				if not wholeLineInMLS:
 					self.checkFileLine(line)
-				else:
-					dbg.write('>> NO check\n')
-				self._lineNum = self._lineNum + 1
-				dbg.write('\n')
+			self._lineNum += 1
 
 	def checkFileLine(self, line):
-		# Skip comment lines
-		stripped = string.strip(line)
-		if stripped and stripped[0]=='#':
-			return
-
 		self.checkTabsAndSpaces(line)
 		self.checkClassName(line)
 		self.checkMethodName(line)
@@ -518,12 +497,12 @@ Error codes and their messages:
 	def checkTabsAndSpaces(self, line):
 		foundTab = foundSpace = foundOther = 0
 		for c in line:
-			if c=='\t':
+			if c == '\t':
 				foundTab = 1
 				if foundSpace or foundOther:
 					self.error('StrayTab', locals())
 					break
-			elif c==' ':
+			elif c == ' ':
 				foundSpace = 1
 				if not foundOther:
 					self.error('SpaceIndent', locals())
@@ -532,26 +511,27 @@ Error codes and their messages:
 				foundOther = 1
 
 	def checkClassName(self, line):
-		if string.find(line, 'class')!=-1:
-			parts = string.split(line)
+		if line.find('class') != -1:
+			parts = line.split()
 			if 'class' in parts: # e.g. if 'class' is a standalone word
 				index = parts.index('class')
-				if index==0: # e.g. if start of the line
+				if index == 0: # e.g. if start of the line
 					name = parts[1]
-					if name and name[0]!=string.upper(name[0]):
+					if name and name[0] != name[0].upper():
 						self.error('ClassNotCap', locals())
 
 	def checkMethodName(self, line):
-		if string.find(line, 'def')!=-1:
-			parts = string.split(line)
+		if line.find('def') != -1:
+			parts = line.split()
 			if 'def' in parts: # e.g. if 'def' is a standalone word
 				index = parts.index('def')
-				if index==0 and line[0]=='\t': # e.g. if start of the line, and indented (indicating method and not function)
+				if index == 0 and line[0] == '\t':
+					# e.g. if start of the line, and indented (indicating method and not function)
 					name = parts[1]
-					name = name[:string.find('(', name)]
-					if name and name[0]!=string.lower(name[0]):
+					name = name[:name.find('(')]
+					if name and name[0] != name[0].lower():
 						self.error('MethCap', locals())
-					if len(name)>=3 and string.lower(name[:3])=='get':
+					if len(name) > 3 and name[:3].lower() == 'get':
 						self.error('GetMeth', locals())
 
 	def checkAttrNames(self, line):
@@ -565,7 +545,7 @@ Error codes and their messages:
 				except IndexError:
 					nextChar = ''
 				attribute = match.group()
-				if nextChar!='(':
+				if nextChar != '(':
 					self.error('NoUnderAttr', locals())
 
 			# Next
@@ -584,7 +564,7 @@ Error codes and their messages:
 				bad = 1
 				# Make sure it's not one of those __foo__ identifiers.
 				group = group[5:] # shave off "self."
-				if len(group)>4 and group[:2]=='__' and group[-2:]=='__':
+				if len(group) > 4 and group[:2] == '__' and group[-2:] == '__':
 					if not '_' in group[2:-2]:
 						bad = 0
 				if bad:
@@ -595,9 +575,11 @@ Error codes and their messages:
 
 	def checkExtraParens(self, line):
 		keywords = ['if', 'while', 'return']
-		msg = string.join(keywords[:-1], ', ') + ' and ' + keywords[-1]
-		parts = string.split(line)
-		if len(parts)>1 and parts[0] in keywords and parts[1][0]=='(':
+		msg = ', '.join(keywords[:-1]) + ' and ' + keywords[-1]
+		parts = line.split()
+		if (len(parts) > 1 and parts[0] in keywords
+				and parts[1][0] == '('
+				and not line.count(')') < line.count('(')):
 			keyword = parts[0]
 			self.error('ExtraParens', locals())
 
@@ -612,7 +594,7 @@ class _DummyWriter:
 		pass
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	cs = CheckSrc()
 	if cs.readArgs():
 		cs.check()
