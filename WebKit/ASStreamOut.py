@@ -90,7 +90,7 @@ class ASStreamOut:
 		return True
 
 	def buffer(self):
-		"""	Return accumulated data which has not yet been flushed.
+		"""Return accumulated data which has not yet been flushed.
 
 		We want to be able to get at this data without having to call flush
 		first, so that we can (for example) integrate automatic HTML validation.

@@ -49,7 +49,7 @@ class SecurePage(ExamplePage, Configurable):
 				request.setField('action', request.urlPath().split('/')[-1])
 				app.forward(trans, 'LoginPage')
 			# Are they already logged in?
-			elif self.getLoggedInUser():
+			elif self.loggedInUser():
 				return
 			# Are they logging in?
 			elif request.hasField('login') \
@@ -97,7 +97,7 @@ class SecurePage(ExamplePage, Configurable):
 		# If the user is already logged in, then process this request normally.
 		# Otherwise, do nothing.
 		# All of the login logic has already happened in awake().
-		if self.getLoggedInUser():
+		if self.loggedInUser():
 			ExamplePage.respond(self, trans)
 
 	def isValidUserAndPassword(self, username, password):
@@ -119,7 +119,7 @@ class SecurePage(ExamplePage, Configurable):
 			self.session().setValue('authenticated_user', None)
 			return 0
 
-	def getLoggedInUser(self):
+	def loggedInUser(self):
 		# Gets the name of the logged-in user, or returns None
 		# if there is no logged-in user.
 		return self.session().value('authenticated_user', None)

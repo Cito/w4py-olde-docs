@@ -30,7 +30,7 @@ class Colorize(Page):
 		if not os.path.exists(filename):
 			res.write('<h3 style="color:red">Error</h3><p>'
 				'The requested file %r does not exist'
-				' in the proper directory.</p>'	% os.path.basename(filename))
+				' in the proper directory.</p>' % os.path.basename(filename))
 			return
 		from DocSupport import py2html
 		myout = StringIO()

@@ -63,6 +63,7 @@ class SessionDynamicStore(SessionStore):
 		if debug:
 			print "SessionDynamicStore Initialized"
 
+
 	## Access ##
 
 	def __len__(self):
@@ -82,22 +83,14 @@ class SessionDynamicStore(SessionStore):
 			self._lock.acquire()
 			try:
 				if self._fileStore.has_key(key):
-					self.MovetoMemory(key)
-				#let it raise a KeyError otherwise
+					self.moveToMemory(key)
+				# let it raise a KeyError otherwise
 				return self._memoryStore[key]
 			finally:
 				self._lock.release()
 
-
 	def __setitem__(self, key, item):
 		self._memoryStore[key] = item
-		# @@ 2001-12-11 gat: Seems like a waste of time to attempt to delete the
-		# session from the file store on every single write operation. I see no
-		# harm in commenting out the rest of this method.
-		#	try:
-		#		del self._fileStore[key]
-		#	except KeyError:
-		#		pass
 
 	def __delitem__(self, key):
 		self._lock.acquire()
@@ -151,21 +144,23 @@ class SessionDynamicStore(SessionStore):
 		finally:
 			self._lock.release()
 
-	def MovetoMemory(self, key):
+	def moveToMemory(self, key):
 		self._lock.acquire()
 		try:
 			global debug
-			if debug: print ">> Moving %s to Memory" % key
+			if debug:
+				print ">> Moving %s to Memory" % key
 			self._memoryStore[key] = self._fileStore[key]
 			self._fileStore.removeKey(key)
 		finally:
 			self._lock.release()
 
-	def MovetoFile(self, key):
+	def moveToFile(self, key):
 		self._lock.acquire()
 		try:
 			global debug
-			if debug: print ">> Moving %s to File" % key
+			if debug:
+				print ">> Moving %s to File" % key
 			self._fileStore[key] = self._memoryStore[key]
 			del self._memoryStore[key]
 		finally:
@@ -177,6 +172,7 @@ class SessionDynamicStore(SessionStore):
 		self._fileStore.setEncoderDecoder(encoder, decoder)
 		SessionStore.setEncoderDecoder(self,encoder,decoder)
 
+
 	## Application support ##
 
 	def storeSession(self, session):
@@ -186,7 +182,7 @@ class SessionDynamicStore(SessionStore):
 		self._lock.acquire()
 		try:
 			for i in self._memoryStore.keys():
-				self.MovetoFile(i)
+				self.moveToFile(i)
 		finally:
 			self._lock.release()
 
@@ -205,7 +201,8 @@ class SessionDynamicStore(SessionStore):
 		So here, we only run the file sweep every fourth time.
 
 		"""
-		if debug: print "Session Sweep started"
+		if debug:
+			print "Session Sweep started"
 		try:
 			if self._fileSweepCount == 0:
 				self._fileStore.cleanStaleSessions(task)
@@ -213,17 +210,15 @@ class SessionDynamicStore(SessionStore):
 		except KeyError:
 			pass
 		if self._fileSweepCount < 4:
-			self._fileSweepCount = self._fileSweepCount + 1
+			self._fileSweepCount += 1
 		else:
 			self._fileSweepCount = 0
 		# Now move sessions from memory to file as necessary:
 		self.intervalSweep()
 
-
 # It's OK for a session to moved from memory to file or vice versa in between
 # the time we get the keys and the time we actually ask for the session's
 # access time. It may take a while for the fileStore sweep to get completed.
-
 
 	def intervalSweep(self):
 		"""The session sweeper interval function.
@@ -250,7 +245,7 @@ class SessionDynamicStore(SessionStore):
 						if debug:
 							print "trashing one-shot session", i
 					else:
-						self.MovetoFile(i)
+						self.moveToFile(i)
 			except KeyError:
 				pass
 
@@ -261,7 +256,7 @@ class SessionDynamicStore(SessionStore):
 				print excess, "sessions beyond the limit"
 			for i in keys[:excess]:
 				try:
-					self.MovetoFile(i)
+					self.moveToFile(i)
 				except KeyError:
 					pass
 

@@ -74,8 +74,8 @@ class ModSnakeAdapter(Adapter):
 		return {
 			PER_SVR_SERVER: server,
 			PER_SVR_PORT: '8086',
-			 PER_SVR_ADDRESS: 'localhost',
-			 PER_SVR_CHUNKSIZE: DEFAULT_CHUNKSIZE,
+			PER_SVR_ADDRESS: 'localhost',
+			PER_SVR_CHUNKSIZE: DEFAULT_CHUNKSIZE,
 			}
 
 	def cmd_WebwareChunkSize(self, per_dir, per_svr, chunksize):

@@ -18,5 +18,5 @@ class IncludeURLTest2(IncludeURLTest):
 			self.__class__.__doc__.replace('\n\n', '</p><p>'))
 		self.writeStatus()
 		self.cmos("/Testing/", "serverSidePath",
-			  "Expect to see the serverSidePath of the Testing/Main module.")
+			"Expect to see the serverSidePath of the Testing/Main module.")
 		self.writeln('</body>')

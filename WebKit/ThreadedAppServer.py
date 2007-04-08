@@ -563,7 +563,7 @@ class ThreadedAppServer(AppServer):
 
 	def addressFileName(self, handlerClass):
 		"""Get the name of the text file with the server address."""
-		return ('%s.text' % handlerClass.protocolName)
+		return '%s.text' % handlerClass.protocolName
 
 
 class Handler:
@@ -719,10 +719,10 @@ class MonitorHandler(Handler):
 
 silent_errnos = [] # silently ignore these errors:
 for e in 'EPIPE', 'ECONNABORTED', 'ECONNRESET':
-    try:
-        silent_errnos.append(getattr(errno, e))
-    except AttributeError:
-        pass
+	try:
+		silent_errnos.append(getattr(errno, e))
+	except AttributeError:
+		pass
 
 class TASStreamOut(ASStreamOut):
 	"""Response stream for ThreadedAppServer.

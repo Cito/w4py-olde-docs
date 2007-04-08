@@ -51,5 +51,5 @@ style="background-color:#CCCCEE;border:1px solid #3333CC;width:20em">
 					value = [value]
 				for v in value:
 					self.writeln('''<input type="hidden" name="%s" value="%s">'''
-							   % (self.htmlEncode(name), self.htmlEncode(v)))
+						% (self.htmlEncode(name), self.htmlEncode(v)))
 		self.writeln('</form>\n<p>&nbsp;</p></div>')

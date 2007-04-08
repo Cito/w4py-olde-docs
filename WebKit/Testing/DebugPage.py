@@ -2,7 +2,7 @@ from WebKit.Page import Page
 
 class DebugPage(Page):
 
-	def getstate(self):
+	def state(self):
 		_evars = ('PATH_INFO', 'REQUEST_URI', 'SCRIPT_NAME')
 		_pvars = ('urlPath', 'previousURLPaths',
 			'adapterName', 'contextName',
@@ -21,4 +21,4 @@ class DebugPage(Page):
 
 	def writeContent(self):
 		self.writeln('<h2><tt>%s</tt></h2>' % self.__class__.__name__)
-		self.writeln('<pre>%s</pre>' % self.getstate())
+		self.writeln('<pre>%s</pre>' % self.state())

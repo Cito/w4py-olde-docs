@@ -18,7 +18,8 @@ except NameError:
 try:
 	object
 except NameError: # fallback for Python < 2.2
-	class object: pass
+	class object:
+		pass
 	std_isinstance = isinstance
 	def isinstance(obj, cinf):
 		if type(cinf) == type(()):

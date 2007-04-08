@@ -5,10 +5,10 @@
 import traceback
 from MiscUtils import StringIO
 try:
-    import simplejson
+	import simplejson
 except ImportError:
-    print "ERROR: simplejson is not installed."
-    print "Get it from http://cheeseshop.python.org/pypi/simplejson"
+	print "ERROR: simplejson is not installed."
+	print "Get it from http://cheeseshop.python.org/pypi/simplejson"
 
 from HTTPContent import HTTPContent
 

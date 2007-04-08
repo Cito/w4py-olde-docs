@@ -14,10 +14,11 @@ except AttributeError: # Python < 2.4
 	from linecache import checkcache
 else: # Python >= 2.4
 	# the linecache module updates the cache automatically
-	def checkcache(): pass
+	def checkcache():
+		pass
 
 
-class singleton:
+class Singleton:
 	pass
 
 
@@ -87,7 +88,7 @@ class ExceptionHandler(Object):
 	## Init ##
 
 	def __init__(self, application, transaction, excInfo,
-				 formatOptions=None):
+			formatOptions=None):
 		"""Create an exception handler instance.
 
 		ExceptionHandler instances are created anew for each exception.
@@ -355,11 +356,11 @@ class ExceptionHandler(Object):
 		"""
 		rows = []
 		for name in attrNames:
-			value = getattr(obj, '_' + name, singleton) # go for data attribute
+			value = getattr(obj, '_' + name, Singleton) # go for data attribute
 			try:
-				if value is singleton:
-					value = getattr(obj, name, singleton) # go for method
-					if value is singleton:
+				if value is Singleton:
+					value = getattr(obj, name, Singleton) # go for method
+					if value is Singleton:
 						value = '(could not find attribute or method)'
 					else:
 						try:
@@ -697,8 +698,8 @@ def osIdTable():
 
 	"""
 
-	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp', 'getpid',
-		 'getppid', 'getuid']
+	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp',
+		'getpid', 'getppid', 'getuid']
 	table = []
 	for funcName in funcs:
 		if hasattr(os, funcName):

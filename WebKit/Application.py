@@ -638,7 +638,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				# but do not use custom page if response is already committed:
 				if not self._errorPage or trans.response().isCommitted():
 					break
-				url = self.getErrorPage(err.__class__)
+				url = self.errorPage(err.__class__)
 				if isHTTPException and not url:
 					# get custom error page for status code
 					code = err.code()
@@ -818,13 +818,13 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""Return the servlet to its pool."""
 		servlet.close()
 
-	def getErrorPage(self, errorClass):
+	def errorPage(self, errorClass):
 		"""Get the error page url corresponding to an error class."""
 		if self._errorPage.has_key(errorClass.__name__):
 			return self._errorPage[errorClass.__name__]
 		if errorClass is not Exception:
 			for errorClass in errorClass.__bases__:
-				url = self.getErrorPage(errorClass)
+				url = self.errorPage(errorClass)
 				if url:
 					return url
 

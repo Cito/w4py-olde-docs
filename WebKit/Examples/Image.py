@@ -65,7 +65,7 @@ class Image(ExamplePage):
 		"""Generate and return a PNG image using gdmodule."""
 		from math import sin, pi
 		X, Y = (320, 160)
-		def T(p):
+		def t(p):
 			# map coordinates: (x=0..2pi, y=-1..1) => (0..X, Y..0)
 			return (int((p[0]/(2*pi))*X), int(Y - ((p[1]+1)/2.0)*Y))
 		white, black, blue = (255, 255, 255), (0, 0, 0), (0, 0, 255)
@@ -77,7 +77,7 @@ class Image(ExamplePage):
 			im = pil.Image.new('RGB', (X, Y), white)
 			draw = pil.ImageDraw.Draw(im)
 		def text(pos, string, color):
-			pos = T(pos)
+			pos = t(pos)
 			if gd:
 				im.string(font, pos, string, color)
 			else:

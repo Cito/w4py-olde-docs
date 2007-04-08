@@ -58,7 +58,7 @@ class LRWPAdapter(Adapter):
 
 
 	def handler(self):
-		while (1):
+		while 1:
 			try:
 				# Accept requests
 				self.request = self.lrwp.acceptRequest()
