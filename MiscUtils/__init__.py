@@ -60,8 +60,8 @@ except NameError:
 		"""
 		pass
 
-# @@ 2002-11-10 ce: SubclassResponsibilityError is deprecated
-# in favor of AbstractError, post 0.7
+# @@ 2002-11-10 ce: SubclassResponsibilityError is is now deprecated (post 0.7)
+# @@ (will be removed after 1.0)
 SubclassResponsibilityError = AbstractError
 
 
@@ -97,6 +97,7 @@ class NoDefault:
 	pass
 
 # @@ 2002-11-10 ce: Tombstone is now deprecated (post 0.7)
+# @@ (will be removed after 1.0)
 Tombstone = NoDefault
 
 
