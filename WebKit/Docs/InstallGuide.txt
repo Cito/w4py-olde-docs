@@ -113,7 +113,7 @@ Apache
 ~~~~~~
 
 Apache is the best supported web server, both on Posix and Windows
-systems.  The mod_webkit_ adaptor is the fastest way to connect to
+systems.  The mod_webkit_ adapter is the fastest way to connect to
 Webware, and is only supported for Apache.  CGI is also available to
 Apache users through wkcgi_.  For Windows users compiled versions of
 mod_webkit and wkcgi (named ``wkcgi.exe``) are also available.
@@ -422,7 +422,7 @@ in ``.cgi`` and it's executable.  Check your error log if you are
 and for Apache see the document `Dynamic Content with CGI`__ for
 configuration help.
 
-__ http://httpd.apache.org/docs/2.0/howto/cgi.html
+__ http://httpd.apache.org/docs/2.2/howto/cgi.html
 
 If you get an Internal Error after a couple seconds, you don't have
 the AppServer running.  Start the AppServer (``cd WebKit;
@@ -458,28 +458,24 @@ mod_webkit
 ~~~~~~~~~~
 
 This is a native Apache module designed solely to communicate with
-WebKit.  It is written in C, and has been tested on Linux and
-Windows.  It can only be used with Apache.
+WebKit.  It is written in C, and has been tested on Linux and Windows.
+It can only be used with Apache.
 
-This adapter is the fastest of the adapters available for WebKit.  It
-is relatively easy to install, but you probably will need
-administrator or root access to the machine.
+This adapter is the fastest of the adapters available for WebKit.
+It is relatively easy to install, but you probably will need administrator
+or root access to the machine.
 
-The source code and a README file describing how to configure and
-build mod_webkit are located in the
-``Webware/WebKit/Adapters/mod_webkit`` directory.
-
-There are two versions, mod_webkit and mod_webkit2 -- mod_webkit2 is
-for use with Apache 2.0.  The other version is for Apache 1.3.  Each
-is in its own directory.
+The source code and a README file describing how to configure, build and
+install mod_webkit as a DSO module for Apache 2.2 are located in the ``Webware/WebKit/Adapters/mod_webkit2`` directory. You can also find an
+older version for Apache 1.3 in ``Webware/WebKit/Adapters/mod_webkit1``,
+but in the following we are assuming you are using Apache 2.2.
 
 Posix Installation
 ^^^^^^^^^^^^^^^^^^
 
 To install::
 
-  $ cd /path/to/Webware/WebKit/Adapters/mod_webkit
-  # or mod_webkit2 for Apache 2.0
+  $ cd /path/to/Webware/WebKit/Adapters/mod_webkit2
   $ make
   $ make install
 
@@ -512,28 +508,28 @@ location and add a line to your httpd.conf file to load the module
 Windows Installation
 ^^^^^^^^^^^^^^^^^^^^
 
-Copy ``WebKit/Adapters/mod_webkit/mod_webkit.dll`` (or the file from
-``mod_webkit2`` if you are using Apache 2) into your module directory
-for Apache (usually ``C:\Program Files\Apache Group\Apache\modules``).
+Copy ``WebKit/Adapters/mod_webkit2/mod_webkit.dll`` into your Apache 2.2
+module directory (usually located at ``C:\Program Files\Apache Software Foundation\Apache2.2\modules\mod_webkit.so``). You should also change
+the extension of the file to ``.so`` according to the Apache convention.
 
 Edit ``httpd.conf`` to include the line::
 
-    LoadModule webkit_module modules/mod_webkit.dll
+    LoadModule webkit_module modules/mod_webkit.so
 
-As well adding the configuration below.
+Then, add the configuration below to activate the module.
 
 Apache Configuration
 ^^^^^^^^^^^^^^^^^^^^
 
-You must also add a line like this to your httpd.conf::
+You must also add something like this to your httpd.conf::
 
     <Location /WK>
         WKServer localhost 8086
         SetHandler webkit-handler
     </Location>
 
-Some Apache 2 users have found that they must use "127.0.0.1" instead
-of "localhost", since Apache 2 defaults to using ipv6 addresses first.
+Some Apache 2.2 users have found that they must use "127.0.0.1" instead
+of "localhost", since Apache 2.2 defaults to using ipv6 addresses first.
 
 With these lines, any URL that starts with ``/WK/`` will be directed to the
 AppServer on port 8086.  You can also use::
@@ -629,9 +625,8 @@ considerably slower than mod_webkit_.  At the same time it is also
 much more difficult to configure.  Its use is *not* recommended.
 
 This adapter is similar to ModPython, but written for the mod_snake
-apache module.  mod_snake is another method of embedding a python
-interpreter into apache.  mod_snake may be preferable over mod_python
-if you need to work with Apache 2.0.
+Apache module.  mod_snake is another method of embedding a python
+interpreter into Apache.
 
 A doc string is included at the top of
 ``WebKit/Adapters/ModSnakeAdapter.py`` which describes the
@@ -687,7 +682,7 @@ Adapter Problems (not CGI)
 There is one gotcha in setting up the adapters that don't rely on CGI.
 For mod_webkit, ModPython and ModSnake, the name that you give to the
 adapter location in your Apache configuration file must not actually
-exist in your apache document root.  Also, you may not have a file or
+exist in your Apache document root.  Also, you may not have a file or
 directory in your document root with the same name as one of WebKit's
 contexts.  So, you can't have a directory named Examples in your
 document root.
