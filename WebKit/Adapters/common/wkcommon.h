@@ -1,4 +1,3 @@
-
 /* wkcommon.h */
 
 #include <stdlib.h>
@@ -33,8 +32,7 @@
 typedef struct {
 	WFILE* int_dict;
 	WFILE* whole_dict;
-}  DictHolder;
-
+} DictHolder;
 
 typedef struct {
 	char* host;
@@ -43,10 +41,10 @@ typedef struct {
 	int retry_delay;
 } Configuration;
 
+int log_message(char* msg);
 DictHolder* createDicts(EnvItem ** envItems);
 int wksock_open(unsigned long address, int port);
 unsigned long resolve_host(char *value);
 struct WFILE*  setup_WFILE();
-int freeWFILE(struct WFILE* wf); 
+int freeWFILE(struct WFILE* wf);
 Configuration* GetConfiguration(Configuration*, char*);
-

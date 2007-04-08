@@ -7,7 +7,6 @@
 
 extern char** environ;
 
-
 /*********************************************
 * Extract environ item from a string into an EnvItem, used for cgi
 **********************************************/
@@ -25,7 +24,6 @@ EnvItem* splitEnviron(char* envstr) {
 		else index ++;
 	}
 
-
 	item->key = calloc(sizeof(char), index+1);
 	item->val = calloc(sizeof(char), fullLen-index);
 
@@ -33,7 +31,6 @@ EnvItem* splitEnviron(char* envstr) {
 	memcpy(item->val, envstr+index+1, fullLen - index);
 
 	return item;
-	
 }
 
 int environLength() {
@@ -45,11 +42,10 @@ int environLength() {
 }
 
 EnvItem** extractEnviron() {
-
 	int envItems;
 	int item = 0;
 	EnvItem **itemList;
-	
+
 	envItems = environLength();
 
 	itemList = (EnvItem**) calloc(sizeof(EnvItem*), envItems+1);
@@ -60,25 +56,23 @@ EnvItem** extractEnviron() {
 	}
 
 	return itemList;
-}	
-
-
+}
 
 int freeEnviron( EnvItem** env) {
 	int i;
-	char msg[400];
+	// char msg[400];
 
-	//sprintf(msg, "Starting to free environment\r\n");
-	//log_message(msg);
+	// sprintf(msg, "Starting to free environment\r\n");
+	// log_message(msg);
 
 	for(i=0; env[i] != NULL; i++) {
-		//sprintf(msg, "Freeing item %i", i);
-		//log_message(msg);
-		//sprintf(msg, "Freeing key %.100s", env[i]->key);
-		//log_message(msg);
+		// sprintf(msg, "Freeing item %i", i);
+		// log_message(msg);
+		// sprintf(msg, "Freeing key %.100s", env[i]->key);
+		// log_message(msg);
 		if (env[i]->key !=NULL) free(env[i]->key);
-		//sprintf(msg, "Freeing val %.100s", env[i]->val);
-		//log_message(msg);
+		// sprintf(msg, "Freeing val %.100s", env[i]->val);
+		// log_message(msg);
 		if (env[i]->val !=NULL) free(env[i]->val);
 		free(env[i]);
 	}
@@ -86,7 +80,6 @@ int freeEnviron( EnvItem** env) {
 	free(env);
 	return 1;
 }
-
 
 #if 0
 

@@ -427,7 +427,7 @@ static int parse_simple(const char *file, FILE *fp, char *ptr, cfgStruct cfg[], 
                       (dynamic allocating)
               word_type ... what word type parse as
                             + CFG_PARAMETER ... parameter
-                            + CFG_VALUE ....... value 
+                            + CFG_VALUE ....... value
                             + CFG_SECTION ..... section
    OUTPUT     new current pointer (on error, return NULL)
 -------------------------------------------------- */
@@ -524,7 +524,7 @@ static int store_value(cfgStruct cfg[], const char *parameter, const char *value
 	long tmp;
 	unsigned long utmp;
 	float ftmp;
-	float dtmp;
+	double dtmp;
 	char *endptr;
 	char *strptr;
 	cfgList *listptr;
@@ -656,7 +656,7 @@ static int store_value(cfgStruct cfg[], const char *parameter, const char *value
 				return (CFG_NO_ERROR);
 
 			case CFG_FLOAT:
-				ftmp = strtod(value, &endptr);
+				ftmp = (float)strtod(value, &endptr);
 				if (*endptr) {
 					return (CFG_INVALID_NUMBER);
 				}
@@ -704,7 +704,7 @@ static int store_value(cfgStruct cfg[], const char *parameter, const char *value
 	      line ....... pointer to current working line
 	      type ....... file type
 	      section .... section number
-	      parameter_buf ... for error handling 
+	      parameter_buf ... for error handling
 	      parameter_line .. for error handling
    OUTPUT     CFG_NO_ERROR on success, CFG_JUST_RETURN_WITHOUT_MSG otherwise
    -------------------------------------------------- */
@@ -1000,8 +1000,8 @@ static char *dynamic_fgets(FILE *fp)
 
 /* --------------------------------------------------
    NAME       dump_simple
-   FUNCTION   
-   INPUT      
+   FUNCTION
+   INPUT
    OUTPUT     0 on success, -1 on error
    -------------------------------------------------- */
 static int dump_simple(FILE *fp, cfgStruct cfg[], cfgFileType type)
@@ -1057,8 +1057,8 @@ static int dump_simple(FILE *fp, cfgStruct cfg[], cfgFileType type)
 
 /* --------------------------------------------------
    NAME       dump_ini
-   FUNCTION   
-   INPUT      
+   FUNCTION
+   INPUT
    OUTPUT     0 on success, -1 on error
    -------------------------------------------------- */
 static int dump_ini(FILE *fp, cfgStruct cfg[], cfgFileType type, int max)
@@ -1120,8 +1120,8 @@ static int dump_ini(FILE *fp, cfgStruct cfg[], cfgFileType type, int max)
 
 /* --------------------------------------------------
    NAME       single_or_double_quote
-   FUNCTION   
-   INPUT      
+   FUNCTION
+   INPUT
    OUTPUT     none
    -------------------------------------------------- */
 static void single_or_double_quote(const char *str, char *ret)
@@ -1140,8 +1140,8 @@ static void single_or_double_quote(const char *str, char *ret)
 
 /* --------------------------------------------------
    NAME       fetch_simple
-   FUNCTION   
-   INPUT      
+   FUNCTION
+   INPUT
    OUTPUT     0 on success, -1 on error
    -------------------------------------------------- */
 static int fetch_simple(const char *file, FILE *fp, char *parameter_name, void *result_value, cfgValueType value_type)
@@ -1229,8 +1229,8 @@ static int fetch_simple(const char *file, FILE *fp, char *parameter_name, void *
 
 /* --------------------------------------------------
    NAME       fetch_ini
-   FUNCTION   
-   INPUT      
+   FUNCTION
+   INPUT
    OUTPUT     0 on success, -1 on error
    -------------------------------------------------- */
 static int fetch_ini(const char *file, FILE *fp, char *parameter_name, void *result_value, cfgValueType value_type, int section_num, const char *section_name)

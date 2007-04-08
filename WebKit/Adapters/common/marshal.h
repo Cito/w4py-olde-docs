@@ -1,20 +1,15 @@
-
-
-
 #ifndef MARSHAL_H
 #define MARSHAL_H
 
 typedef struct WFILE{
 
-	char *str; 
+	char *str;
 	char *ptr;
 	char *end;
 
 } WFILE;
 
-
-
-#define HUGE_STRING_LENGTH  4096 
+#define HUGE_STRING_LENGTH  4096
 #define TYPE_NULL	'0'
 #define TYPE_NONE	'N'
 #define TYPE_ELLIPSIS   '.'
@@ -31,9 +26,6 @@ typedef struct WFILE{
 #define TYPE_UNICODE	'u'
 #define TYPE_UNKNOWN	'?'
 
-
-
-
 void insert_data(WFILE* dest, WFILE* src);
 void w_byte(char c, WFILE* p);
 
@@ -43,6 +35,4 @@ void w_long(long x, WFILE* p);
 void write_string( char* s, long len, WFILE* p);
 void write_integer(int number, WFILE* wf);
 
-
 #endif
-
