@@ -449,11 +449,11 @@ class Application(ConfigurableForServerSidePath, Object):
 	def sessionCookiePath(self, trans):
 		"""Get the cookie path for this transaction.
 
-		The adapter name is used for security reasons, see:
+		The servlet path is used for security reasons, see:
 		http://www.net-security.org/dl/articles/cookie_path.pdf
 
 		"""
-		return trans.request().adapterName() + '/'
+		return trans.request().servletPath() + '/'
 
 
 	## Misc Access ##
@@ -951,7 +951,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		newSid = trans.session().identifier()
 		request = trans.request()
-		url = '%s/%s=%s%s%s%s' % (request.adapterName(),
+		url = '%s/%s=%s%s%s%s' % (request.servletPath(),
 			self.sessionName(trans), newSid,
 			request.pathInfo(), request.extraURLPath() or '',
 			request.queryString() and '?' + request.queryString() or '')
@@ -970,7 +970,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		"""
 		request = trans.request()
-		url = '%s%s%s%s' % (request.adapterName(),
+		url = '%s%s%s%s' % (request.servletPath(),
 			request.pathInfo(), request.extraURLPath() or '',
 			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:

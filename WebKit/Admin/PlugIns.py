@@ -13,7 +13,7 @@ class PlugIns(AdminSecurity):
 		if plugIns:
 			wr('<h4 style="text-align:center">'
 				'The following Plug-ins were found:</h4>')
-			adapter = self.request().adapterName()
+			path = self.request().servletPath()
 			wr('<table cellspacing="2" cellpadding="2" align="center"'
 				' style="margin-left:auto;margin-right:auto">')
 			wr('<tr style="background-color:#555;color:white">'
@@ -24,7 +24,7 @@ class PlugIns(AdminSecurity):
 				name, dir, ver = plugIn.name(), plugIn.directory(), \
 					plugIn.properties()['versionString']
 				wr('<tr style="background-color:#EEE;text-align:left">'
-					'<td><a href="%(adapter)s/%(name)s/Docs/index.html">'
+					'<td><a href="%(path)s/%(name)s/Docs/index.html">'
 					'%(name)s</a></td>'
 					'<td style="text-align:center">%(ver)s</td>'
 					'<td>%(dir)s</td></tr>' % locals())

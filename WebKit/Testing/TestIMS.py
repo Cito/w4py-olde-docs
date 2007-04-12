@@ -25,10 +25,10 @@ class TestIMS(SidebarPage):
 		self._host = sd['HTTP_HOST'] # includes the port
 		self._httpconnection = sd.get('HTTPS', '').lower() == 'on' \
 			and  httplib.HTTPSConnection or httplib.HTTPConnection
-		adapter = self.request().adapterName()
+		servletPath = self.request().servletPath()
 		self.write('<h2>Test If-Modified-Since support in Webware</h2>')
 		# pick a static file which is served up by Webwares UnknownFileHandler
-		self.runTest('%s/PSPExamples/psplogo.png' % adapter)
+		self.runTest('%s/PSPExamples/psplogo.png' % servletPath)
 
 	def runTest(self, path):
 		import time

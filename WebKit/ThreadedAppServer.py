@@ -29,7 +29,7 @@ import AppServer as AppServerModule
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 from ASStreamOut import ASStreamOut, ConnectionAbortedError
 from MiscUtils.Funcs import timestamp
-from WebUtils import Funcs
+from WebUtils.Funcs import requestURI
 
 debug = False
 
@@ -804,10 +804,10 @@ class AdapterHandler(Handler):
 			return
 
 		if verbose:
-			requestURI = requestDict.has_key('environ') \
-				and Funcs.requestURI(requestDict['environ']) or '-'
-			sys.stdout.write('%5i  %s  %s\n' % (self._requestID,
-				timestamp()['pretty'], requestURI))
+			uri = requestDict.has_key('environ') \
+				and requestURI(requestDict['environ']) or '-'
+			sys.stdout.write('%5i  %s  %s\n'
+				% (self._requestID, timestamp()['pretty'], uri))
 
 		requestDict['input'] = self.makeInput()
 		requestDict['requestID'] = self._requestID
@@ -828,8 +828,8 @@ class AdapterHandler(Handler):
 
 		if verbose:
 			duration = ('%0.2f secs' % (time.time() - self._startTime)).ljust(19)
-			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID,
-				duration, aborted and '*connection aborted*' or requestURI))
+			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID, duration,
+				aborted and '*connection aborted*' or uri))
 
 		transaction._application = None
 		transaction.die()

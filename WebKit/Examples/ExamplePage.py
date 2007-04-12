@@ -68,11 +68,11 @@ class ExamplePage(SidebarPage):
 		self.writeWebKitSidebarSections()
 
 	def writeExamplesMenu(self):
-		adapterName = self.request().adapterName()
+		servletPath = self.request().servletPath()
 		self.menuHeading('Examples')
 
 		# WebKit
-		self.menuItem('WebKit', '%s/Examples/' % adapterName)
+		self.menuItem('WebKit', '%s/Examples/' % servletPath)
 		if self.request().contextName()=='Examples':
 			self.writeExamplePagesItems()
 
@@ -80,7 +80,7 @@ class ExamplePage(SidebarPage):
 		for plugIn in self.application().server().plugIns():
 			if plugIn.hasExamplePages():
 				title = plugIn.name()
-				link = '%s/%s/' % (adapterName, plugIn.examplePagesContext())
+				link = '%s/%s/' % (servletPath, plugIn.examplePagesContext())
 				self.menuItem(title, link)
 				if plugIn.name()==self.request().contextName()[:-8]:
 					self.writeExamplePagesItems()
@@ -100,7 +100,7 @@ class ExamplePage(SidebarPage):
 			filename = 'Documentation/WebKit.html'
 			if os.path.exists(filename):
 				self.menuItem('Local WebKit docs',
-					self.request().adapterName() + '/' + filename)
+					self.request().servletPath() + '/' + filename)
 
 	def title(self):
 		return self.request().contextName()

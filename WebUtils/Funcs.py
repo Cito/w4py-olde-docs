@@ -132,17 +132,19 @@ def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=No
 	html.append('</table>')
 	return ''.join(html)
 
-def requestURI(dict):
+def requestURI(env):
 	"""Return the request URI for a given CGI-style dictionary.
 
 	Uses REQUEST_URI if available, otherwise constructs and returns it
-	from SCRIPT_NAME, PATH_INFO and QUERY_STRING.
+	from SCRIPT_URL, SCRIPT_NAME, PATH_INFO and QUERY_STRING.
 
 	"""
-	uri = dict.get('REQUEST_URI', None)
+	uri = env.get('REQUEST_URI', None)
 	if uri is None:
-		uri = dict.get('SCRIPT_NAME', '') + dict.get('PATH_INFO', '')
-		query = dict.get('QUERY_STRING', '')
+		uri = env.get('SCRIPT_URL', None)
+		if uri is None:
+			uri = env.get('SCRIPT_NAME', '') + env.get('PATH_INFO', '')
+		query = env.get('QUERY_STRING', '')
 		if query != '':
 			uri += '?' + query
 	return uri

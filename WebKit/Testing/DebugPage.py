@@ -5,7 +5,7 @@ class DebugPage(Page):
 	def state(self):
 		_evars = ('PATH_INFO', 'REQUEST_URI', 'SCRIPT_NAME')
 		_pvars = ('urlPath', 'previousURLPaths',
-			'adapterName', 'contextName',
+			'adapterName', 'servletPath', 'contextName',
 			'serverSidePath', 'serverSideContextPath',
 			'extraURLPath')
 		req = self.request()

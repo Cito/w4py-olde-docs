@@ -3,8 +3,8 @@ import BaseHTTPServer
 
 from ThreadedAppServer import Handler
 from ASStreamOut import ASStreamOut
-from WebUtils import Funcs
 from MiscUtils.Funcs import timestamp
+from WebUtils.Funcs import requestURI
 
 
 class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -55,17 +55,17 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		env['SERVER_PROTOCOL'] = self.protocol_version
 		env['GATEWAY_INTERFACE'] = 'CGI/1.1'
 		if self._server._verbose:
-			requestURI = Funcs.requestURI(env)
+			uri = requestURI(env)
 			startTime = time.time()
-			sys.stdout.write('%5i  %s  %s\n' % (self._requestID,
-				timestamp()['pretty'], requestURI))
+			sys.stdout.write('%5i  %s  %s\n'
+				% (self._requestID, timestamp()['pretty'], uri))
 
 		self.doTransaction(env, self.rfile)
 
 		if self._server._verbose:
 			duration = ('%0.2f secs' % (time.time() - startTime)).ljust(19)
-			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID,
-				duration, requestURI))
+			sys.stdout.write('%5i  %s  %s\n\n'
+				% (self._requestID, duration, uri))
 
 	do_GET = do_POST = do_HEAD = handleRequest
 	# These methods are used in WebDAV requests:

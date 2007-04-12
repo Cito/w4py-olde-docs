@@ -156,12 +156,12 @@ td#Content {
 
 	def writeContextsMenu(self):
 		self.menuHeading('Contexts')
-		adapterName = self.request().adapterName()
+		servletPath = self.request().servletPath()
 		ctxs = self.application().contexts().keys()
-		ctxs = filter(lambda ctx: ctx!='default' and ctx.find('/')<0, ctxs)
+		ctxs = filter(lambda ctx: ctx != 'default' and not '/' in ctx, ctxs)
 		ctxs.sort()
 		for ctx in ctxs:
-			self.menuItem(ctx, '%s/%s/' % (adapterName, ctx))
+			self.menuItem(ctx, '%s/%s/' % (servletPath, ctx))
 
 	def writeWebwareEmailMenu(self):
 		self.menuHeading('E-mail')

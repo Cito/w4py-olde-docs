@@ -29,4 +29,4 @@ class PSPExamplePage(ExamplePage):
 		if self.application().hasContext('Documentation'):
 			filename = 'Documentation/WebKit.html'
 			if os.path.exists(filename):
-				self.menuItem('Local WebKit docs', self.request().adapterName() + '/' + filename)
+				self.menuItem('Local WebKit docs', self.request().servletPath() + '/' + filename)

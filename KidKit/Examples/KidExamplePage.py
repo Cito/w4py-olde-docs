@@ -38,4 +38,4 @@ class KidExamplePage(ExamplePage):
 			filename = 'Documentation/WebKit.html'
 			if os.path.exists(filename):
 				self.menuItem('Local WebKit docs',
-					self.request().adapterName() + '/' + filename)
+					self.request().servletPath() + '/' + filename)

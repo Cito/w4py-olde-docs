@@ -2,7 +2,6 @@ import cgi, traceback
 from types import ListType
 
 from Common import *
-from WebUtils.Funcs import requestURI
 from WebUtils import FieldStorage
 from WebKit.Cookie import CookieEngine
 Cookie = CookieEngine.SimpleCookie
@@ -14,15 +13,7 @@ debug = False
 
 
 class HTTPRequest(Request):
-	"""A type of Message for HTTP requests.
-
-	FUTURE
-		* How about some documentation?
-		* The "Information" section is a bit screwed up.
-		  Because the WebKit server adapter is a CGI script,
-		  these values are oriented towards that rather than the servlet.
-
-	"""
+	"""A type of Message for HTTP requests."""
 
 
 	## Initialization ##
@@ -58,32 +49,50 @@ class HTTPRequest(Request):
 			self._fields = cgi.FieldStorage(keep_blank_values=True)
 			self._cookies = Cookie()
 
+		env = self._environ
+
 		# Debugging
 		if debug:
 			f = open('env.text', 'a')
 			save = sys.stdout
 			sys.stdout = f
 			print '>> env for request:'
-			keys = self._environ.keys()
+			keys = env.keys()
 			keys.sort()
 			for key in keys:
-				print '%s: %s' % (repr(key), repr(self._environ[key]))
+				print '%s: %s' % (repr(key), repr(env[key]))
 			print
 			sys.stdout = save
 			f.close()
 
-		# Fix up environ if it doesn't look right.
-
-		# Fix #1: No PATH_INFO
-		# This can happen when there is no extra path info past the adapter.
-		# e.g., http://localhost/WebKit.cgi
-		if not self._environ.has_key('PATH_INFO'):
-			self._environ['PATH_INFO'] = ''
-		# Fix #2: No REQUEST_URI
-		# REQUEST_URI isn't actually part of the CGI standard and some
-		# web servers like IIS don't set it (as of 8/22/2000).
-		if not self._environ.has_key('REQUEST_URI'):
-			self._environ['REQUEST_URI'] = requestURI(self._environ)
+		# Get adapter, servlet path and query string
+		self._servletPath = env.get('SCRIPT_NAME', '')
+		self._pathInfo = env.get('PATH_INFO', '')
+		self._queryString = env.get('QUERY_STRING', '')
+		if env.has_key('REQUEST_URI'):
+			self._uri = env['REQUEST_URI']
+			# correct servletPath if there was a redirection
+			if not self._uri.startswith(self._servletPath + '/'):
+				i = self._uri.find(self._pathInfo)
+				if i >= 0:
+					self._servletPath = self._uri[:i]
+		else:
+			# REQUEST_URI isn't actually part of the CGI standard and some
+			# web servers like IIS don't set it (as of 8/22/2000).
+			if env.has_key('SCRIPT_URL'):
+				self._uri = self._environ['SCRIPT_URL']
+				# correct servletPath if there was a redirection
+				if not self._uri.startswith(self._servletPath + '/'):
+					i = self._uri.find(self._pathInfo)
+					if i >= 0:
+						self._servletPath = self._uri[:i]
+			else:
+				self._uri = self._servletPath + self._pathInfo
+			if self._queryString:
+				self._uri += '?' + self._queryString
+		self._absolutepath = env.has_key('WK_ABSOLUTE') # set by adapter
+		if self._absolutepath:
+			self._fsPath = self.fsPath()
 
 		# We use the cgi module to get the fields,
 		# but then change them into an ordinary dictionary of values:
@@ -124,10 +133,6 @@ class HTTPRequest(Request):
 		self._serverRootPath = self._extraURLPath = ''
 		self._sessionExpired = False
 
-		self._absolutepath = self._environ.has_key('WK_ABSOLUTE') # set by the adapter
-		if self._absolutepath:
-			self._fsPath = self.fsPath()
-		self._adapterName = self.servletPath()
 		self._pathInfo = self.pathInfo()
 
 		if debug:
@@ -315,8 +320,10 @@ class HTTPRequest(Request):
 		if self._absolutepath:
 			self._fsPath = path
 		else:
-			self._pathInfo = self._environ['PATH_INFO'] = path
-			self._environ['REQUEST_URI'] = self._adapterName + path
+			self._pathInfo = path
+			self._uri = self._servletPath + path
+			if self._queryString:
+				self._uri += '?' + self._queryString
 
 	def serverSidePath(self, path=None):
 		"""Return the absolute server-side path of the request.
@@ -375,6 +382,7 @@ class HTTPRequest(Request):
 		return p
 
 	def uriWebKitRoot(self):
+		"""Return relative URL path of the WebKit root location."""
 		if not self._serverRootPath:
 			self._serverRootPath = ''
 			loc = self.urlPath()
@@ -388,7 +396,7 @@ class HTTPRequest(Request):
 
 	def fsPath(self):
 		"""The filesystem path of the request according to the webserver."""
-		fspath = self.servletFilePath()
+		fspath = self.adapterFileName()
 		if not fspath:
 			fspath = self.servletPath()
 			docroot = self._environ['DOCUMENT_ROOT']
@@ -398,21 +406,21 @@ class HTTPRequest(Request):
 	def serverURL(self):
 		"""Return the full internet path to this request.
 
-		This is the URL that was actually received by the
-		webserver before any rewriting took place.
+		This is the URL that was actually received by the webserver
+		before any rewriting took place.
 
 		The path is returned without any extra path info or query strings,
 		i.e. http://www.my.own.host.com:8080/WebKit/TestPage.py
 
 		"""
-		url = self._environ.get('SCRIPT_URI', None)
-		if not url:
+		if self._environ.has_key('SCRIPT_URI'):
+			return self._environ['SCRIPT_URI']
+		else:
 			scheme = 'http'
 			if self._environ.get('HTTPS', '').lower() == 'on':
 				scheme += 's'
 			host = self._environ['HTTP_HOST'] # includes port
-			url = scheme + '://' + host + self.serverPath()
-		return url
+			return scheme + '://' + host + self.serverPath()
 
 	def serverURLDir(self):
 		"""Return the directory of the URL in full internet form.
@@ -428,16 +436,16 @@ class HTTPRequest(Request):
 	def serverPath(self):
 		"""Return the webserver URL path of this request.
 
-		This is the URL that was actually received by the
-		webserver before any rewriting took place.
+		This is the URL that was actually received by the webserver
+		before any rewriting took place.
 
 		Same as serverURL, but without scheme and host.
 
 		"""
-		url = self._environ.get('SCRIPT_URL', None)
-		if not url:
-			url = self._adapterName + self._pathInfo
-		return url
+		if self._environ.has_key('SCRIPT_URL'):
+			return self._environ['SCRIPT_URL']
+		else:
+			return self._servletPath + self._pathInfo
 
 	def serverPathDir(self):
 		"""Return the directory of the webserver URL path.
@@ -528,12 +536,20 @@ class HTTPRequest(Request):
 	def adapterName(self):
 		"""Return the name of the adapter as it appears in the URL.
 
-		Example: '/WebKit.cgi'
-		This is useful in special cases when you are constructing URLs.
-		See Testing/Main.py for an example use.
+		Example: '/WK' or '/WebKit.cgi'
+		Does not reflect redirection by the webserver.
+		Equivalent to the CGI variable SCRIPT_NAME.
 
 		"""
-		return self._adapterName
+		return self._environ.get('SCRIPT_NAME', '')
+
+	def adapterFileName(self):
+		"""Return the filesystem path of the adapter.
+
+		Equivalent to the CGI variable SCRIPT_FILENAME.
+
+		"""
+		return self._environ.get('SCRIPT_FILENAME', '')
 
 	def rawRequest(self):
 		"""Return the raw request used to initialize this request object."""
@@ -545,8 +561,7 @@ class HTTPRequest(Request):
 
 	def push(self, servlet, url=None):
 		"""Push servlet and URL path on a stack, setting a new URL."""
-		urlPath, uri = self.urlPath(), self.uri()
-		self._stack.append((servlet, urlPath, uri, self._contextName,
+		self._stack.append((servlet, self.urlPath(), self._contextName,
 			self._serverSidePath, self._serverSideContextPath,
 			self._serverRootPath, self._extraURLPath))
 		if url is not None:
@@ -555,11 +570,11 @@ class HTTPRequest(Request):
 	def pop(self):
 		"""Pop URL path and servlet from the stack, returning the servlet."""
 		if self._stack:
-			(servlet, urlPath, uri, self._contextName,
+			(servlet, url, self._contextName,
 				self._serverSidePath, self._serverSideContextPath,
 				self._serverRootPath, self._extraURLPath) = self._stack.pop()
-			if urlPath is not None:
-				self.setURLPath(urlPath)
+			if url is not None:
+				self.setURLPath(url)
 			return servlet
 
 	def servlet(self):
@@ -653,15 +668,17 @@ class HTTPRequest(Request):
 
 	## Information ##
 
-	# @@ 2000-05-10: See FUTURE section of class doc string
-
 	def servletPath(self):
-		"""Return the URI of the script, sans host."""
-		return self._environ.get('SCRIPT_NAME', '')
+		"""Return the base URL for the servlets, sans host.
 
-	def servletFilePath(self):
-		"""Return the filesystem path of the script."""
-		return self._environ.get('SCRIPT_FILENAME', '')
+		This is useful in cases when you are constructing URLs.
+		See Testing/Main.py for an example use.
+
+		Roughly equivalent to the CGI variable SCRIPT_NAME,
+		but reflects redirection by the webserver.
+
+		"""
+		return self._servletPath
 
 	def contextPath(self):
 		"""Return the portion of the URI that is the context of the request."""
@@ -671,16 +688,16 @@ class HTTPRequest(Request):
 		"""Return any extra path information as sent by the client.
 
 		This is anything after the servlet name but before the query string.
-		Equivalent to CGI variable PATH_INFO.
+		Equivalent to the CGI variable PATH_INFO.
 
 		"""
-		return self._environ.get('PATH_INFO', '')
+		return self._pathInfo
 
 	def pathTranslated(self):
 		"""Return extra path information translated as file system path.
 
 		This is the same as pathInfo() but translated to the file system.
-		Equivalent to CGI variable PATH_TRANSLATED.
+		Equivalent to the CGI variable PATH_TRANSLATED.
 
 		"""
 		return self._environ.get('PATH_TRANSLATED', '')
@@ -688,19 +705,20 @@ class HTTPRequest(Request):
 	def queryString(self):
 		"""Return the query string portion of the URL for this request.
 
-		Taken from the CGI variable QUERY_STRING.
+		Equivalent to the CGI variable QUERY_STRING.
 
 		"""
-		return self._environ.get('QUERY_STRING', '')
+		return self._queryString
 
 	def uri(self):
 		"""Return the URI for this request (everything after the host name).
 
-		Taken from the CGI variable REQUEST_URI. If not available,
-		constructed from SCRIPT_NAME, PATH_INFO and QUERY_STRING.
+		This is the URL that was actually received by the webserver
+		before any rewriting took place, including the query string.
+		Equivalent to the CGI variable REQUEST_URI.
 
 		"""
-		return requestURI(self._environ)
+		return self._uri
 
 	def method(self):
 		"""Return the HTTP request method (in all uppercase).
@@ -804,8 +822,9 @@ class HTTPRequest(Request):
 		return ''.join(res)
 
 	exceptionReportAttrNames = Request.exceptionReportAttrNames + (
-		'uri servletPath serverSidePath pathInfo pathTranslated queryString'
-		' method sessionId previousURLPaths fields cookies environ'.split())
+		'uri adapterName servletPath serverSidePath'
+		' pathInfo pathTranslated queryString method'
+		' sessionId previousURLPaths fields cookies environ'.split())
 
 
 	## Deprecated ##
@@ -835,10 +854,22 @@ class HTTPRequest(Request):
 		self.deprecated(self.relativePath)
 		return os.path.join(self.serverSideDir(), joinPath)
 
+	def servletFilePath(self):
+		"""deprecated: HTTPRequest.servletFilePath() on 04/12/07 in 0.9.3.
+
+		Use adapterFileName() instead.@
+
+		Equivalent to the CGI variable SCRIPT_FILENAME.
+
+		"""
+		self.deprecated(self.servletFilePath)
+		return self.adapterFileName(file)
+
 
 ## Info Structure ##
 
 _infoMethods = (
+	HTTPRequest.adapterName,
 	HTTPRequest.servletPath,
 	HTTPRequest.contextPath,
 	HTTPRequest.pathInfo,

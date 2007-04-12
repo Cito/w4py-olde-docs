@@ -354,15 +354,15 @@ class Main(Page):
 		which you can get to from here:</p>
 		<ul>
 		''')
-		adapterName = self.request().adapterName()
+		servletPath = self.request().servletPath()
 		contextName = self.request().contextName()
 		ctxs = self.application().contexts().keys()
 		ctxs.sort()
 		for ctx in ctxs:
-			if ctx in ('default', contextName) or ctx.find('/') >= 0:
+			if ctx in ('default', contextName) or '/' in ctx:
 				continue
 			self.writeln('<li><a href="%s/%s/">%s</a></li>'
-				% (adapterName, ctx, ctx))
+				% (servletPath, ctx, ctx))
 		self.writeln('</ul>')
 """
 

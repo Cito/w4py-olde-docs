@@ -25,7 +25,7 @@ class Main(SidebarPage):
 	def writeTestCases(self):
 		wr = self.writeln
 		req = self.request()
-		adapterName = req.adapterName()
+		servletPath = req.servletPath()
 		filename = self.serverSidePath('TestCases.data')
 		self._cases = self.readFileNamed(filename)
 		wr('<table align="center" style="margin-left:auto;margin-right:auto"'
@@ -37,13 +37,13 @@ class Main(SidebarPage):
 			# For each URL, fix it up and make a name. Put in urls list.
 			urls = []
 			for url in case['URLs']:
-				url = adapterName + url
+				url = servletPath + url
 				if url:
 					urlName = self.htmlEncode(url)
 					urls.append((url, urlName))
 			if not urls:
 				continue
-			expectation = case['Expectation'] #self.htmlEncode(case['Expectation'])
+			expectation = case['Expectation'] # self.htmlEncode(case['Expectation'])
 			bgcolor = ['EEE', 'DDD'][caseNum % 2]
 			wr('<tr style="background-color:#%s">'
 				'<td>%d.</td><td>' % (bgcolor, caseNum))

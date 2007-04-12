@@ -271,7 +271,7 @@ class ContextParser(URLParser):
 		# If there is no path, redirect to the root path:
 		req = trans.request()
 		if not requestPath:
-			p = req.adapterName() + '/'
+			p = req.servletPath() + '/'
 			q = req.queryString()
 			if q:
 				p += "?" + q
