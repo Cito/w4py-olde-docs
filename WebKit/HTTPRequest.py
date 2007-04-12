@@ -122,7 +122,6 @@ class HTTPRequest(Request):
 		self._contextName = None
 		self._serverSidePath = self._serverSideContextPath = None
 		self._serverRootPath = self._extraURLPath = ''
-		self._cookieSession = self._pathSession = None
 		self._sessionExpired = False
 
 		self._absolutepath = self._environ.has_key('WK_ABSOLUTE') # set by the adapter
@@ -139,33 +138,6 @@ class HTTPRequest(Request):
 
 	def responseClass(self):
 		return HTTPResponse.HTTPResponse
-
-	def setTransaction(self, trans):
-		"""Should be invoked after the transaction is created for this request."""
-		Request.setTransaction(self, trans)
-		self._sidname = trans.application().sessionName(trans)
-		# Get session ID from cookie if available
-		self._cookieSession = self._cookies.get(self._sidname, None)
-		# try to get automatic path session
-		# if UseAutomaticPathSessions is enabled in Application.config
-		# Application.py redirects the browser to a url with SID in path
-		# http://gandalf/a/_SID_=2001080221301877755/Examples/
-		# _SID_ is extracted and removed from path
-		p = self._pathInfo
-		if p:
-			p = p.split('/', 2)
-			if len(p) > 1 and not p[0] and p[1].startswith(self._sidname + '='):
-				self._pathSession = p[1].split('=', 1)[1]
-				self._cookies[self._sidname] = self._pathSession
-				sidpart = p[1] + '/'
-				del p[1]
-				self._environ['PATH_INFO'] = '/'.join(p)
-				if self._environ.has_key('REQUEST_URI'):
-					self._environ['REQUEST_URI'] = self._environ[
-						'REQUEST_URI'].replace(sidpart, '')
-				if self._environ.has_key('PATH_TRANSLATED'):
-					self._environ['PATH_TRANSLATED'] = self._environ[
-						'PATH_TRANSLATED'].replace(sidpart, '')
 
 
 	## Values ##
@@ -744,8 +716,10 @@ class HTTPRequest(Request):
 		Returns None if there is no session ID.
 
 		"""
-		sid = self.value(self._sidname, None)
-		if self._transaction.application().setting('Debug')['Sessions']:
+		trans = self._transaction
+		app = trans.application()
+		sid = self.value(app.sessionName(trans), None)
+		if app.setting('Debug')['Sessions']:
 			print '>> sessionId: returning sid =', sid
 		return sid
 
@@ -769,19 +743,13 @@ class HTTPRequest(Request):
 		"""
 		# Modify the request so that it looks like a hashed version of the
 		# given session ID was passed in
-		self.setField(self._sidname, sessionID)
-
+		trans = self._transaction
+		app = trans.application()
+		self.setField(app.sessionName(trans), sessionID)
 		if force:
 			# Force this session ID to exist, so that a random session ID
 			# won't be created in case it's a new session.
-			self._transaction.application().createSessionWithID(
-				self._transaction, sessionID)
-
-	def hasPathSession(self):
-		return self._pathSession is not None
-
-	def hasCookieSession(self):
-		return self._cookieSession is not None
+			app.createSessionWithID(trans, sessionID)
 
 
 	## Inspection ##

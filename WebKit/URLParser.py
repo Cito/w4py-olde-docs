@@ -266,9 +266,9 @@ class ContextParser(URLParser):
 		through `Request.serverSidePath` and `Request.contextName`).
 
 		"""
-		# This is a hack...
-		# this should probably go in the Transaction class:
+		# This is a hack... should probably go in the Transaction class:
 		trans._fileParserInitSeen = {}
+		# If there is no path, redirect to the root path:
 		req = trans.request()
 		if not requestPath:
 			p = req.adapterName() + '/'
@@ -276,10 +276,11 @@ class ContextParser(URLParser):
 			if q:
 				p += "?" + q
 			raise HTTPMovedPermanently(location=p)
+		# Determine the context name:
 		if req._absolutepath:
 			contextName = self._defaultContext
 		else:
-			context = filter(lambda x: x, requestPath.split('/'))
+			context = filter(None, requestPath.split('/'))
 			if requestPath.endswith('/'):
 				context.append('')
 			parts = []

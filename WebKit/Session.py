@@ -52,7 +52,7 @@ class Session(Object):
 		app = trans.application()
 		self._timeout = app.sessionTimeout(trans)
 		self._prefix = app.sessionPrefix(trans)
-		self._sidname = app.sessionName(trans)
+		self._sessionName = app.sessionName(trans)
 
 		if identifier:
 			if re.search(r'[^\w\.\-]', identifier) is not None:
@@ -220,7 +220,7 @@ class Session(Object):
 		url = list(urlparse.urlparse(url)) # make a list
 		if url[4]:
 			url[4] += '&'
-		url[4] += '%s=%s' % (self._sidname, self.identifier())
+		url[4] += '%s=%s' % (self._sessionName, self.identifier())
 		url = urlparse.urlunparse(url)
 		return url
 

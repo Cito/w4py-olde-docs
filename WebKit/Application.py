@@ -145,6 +145,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._sessionTimeout = self.setting('SessionTimeout')*60
 		self._sessionName = self.setting('SessionName') \
 			or self.defaultConfig()['SessionName']
+		self._autoPathSessions = self.setting('UseAutomaticPathSessions')
 		moduleName = self.setting('SessionModule')
 		className = moduleName.split('.')[-1]
 		try:
@@ -375,7 +376,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""A dictionary of all the session objects."""
 		return self._sessions
 
-	def createSessionForTransaction(self, transaction):
+	def createSessionForTransaction(self, trans):
 		"""Get the session object for the transaction.
 
 		If the session already exists, returns that, otherwise creates
@@ -387,7 +388,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		debug = self.setting('Debug').get('Sessions')
 		if debug:
 			prefix = '>> [session] createSessionForTransaction:'
-		sessId = transaction.request().sessionId()
+		sessId = trans.request().sessionId()
 		if debug:
 			print prefix, 'sessId =', sessId
 		if sessId:
@@ -396,30 +397,30 @@ class Application(ConfigurableForServerSidePath, Object):
 				if debug:
 					print prefix, 'retrieved session =', session
 			except KeyError:
-				transaction.request().setSessionExpired(1)
+				trans.request().setSessionExpired(1)
 				if not self.setting('IgnoreInvalidSession'):
 					raise HTTPSessionExpired
 				sessId = None
 		if not sessId:
-			session = self._sessionClass(transaction)
+			session = self._sessionClass(trans)
 			self._sessions[session.identifier()] = session
 			if debug:
 				print prefix, 'created session =', session
-		transaction.setSession(session)
+		trans.setSession(session)
 		return session
 
-	def createSessionWithID(self, transaction, sessionID):
+	def createSessionWithID(self, trans, sessionID):
 		"""Create a session object with our session ID."""
-		sess = self._sessionClass(transaction, sessionID)
+		sess = self._sessionClass(trans, sessionID)
 		# Replace the session if it didn't already exist,
 		# otherwise we just throw it away.  setdefault is an atomic
 		# operation so this guarantees that 2 different
 		# copies of the session with the same ID never get placed into
 		# the session store, even if multiple threads are calling
 		# this method simultaneously.
-		transaction.application()._sessions.setdefault(sessionID, sess)
+		trans.application()._sessions.setdefault(sessionID, sess)
 
-	def sessionTimeout(self, transaction):
+	def sessionTimeout(self, trans):
 		"""Get the timeout (in seconds) for a user session.
 
 		Overwrite to make this transaction dependent.
@@ -427,7 +428,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		return self._sessionTimeout
 
-	def sessionPrefix(self, transaction):
+	def sessionPrefix(self, trans):
 		"""Get the prefix string for the session ID.
 
 
@@ -436,7 +437,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		return self._sessionPrefix
 
-	def sessionName(self, transaction):
+	def sessionName(self, trans):
 		"""Get the name of the field holding the session ID.
 
 
@@ -445,14 +446,14 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		return self._sessionName
 
-	def sessionCookiePath(self, transaction):
+	def sessionCookiePath(self, trans):
 		"""Get the cookie path for this transaction.
 
 		The adapter name is used for security reasons, see:
 		http://www.net-security.org/dl/articles/cookie_path.pdf
 
 		"""
-		return transaction.request().adapterName() + '/'
+		return trans.request().adapterName() + '/'
 
 
 	## Misc Access ##
@@ -491,7 +492,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	## Activity Log ##
 
-	def writeActivityLog(self, transaction):
+	def writeActivityLog(self, trans):
 		"""Write an entry to the activity log.
 
 		Writes an entry to the script log file. Uses settings
@@ -510,11 +511,11 @@ class Application(ConfigurableForServerSidePath, Object):
 		# NamedValueAccess and reponds to valueForName()
 		objects = UserDict({
 			'application': self,
-			'transaction': transaction,
-			'request': transaction.request(),
-			'response': transaction.response(),
-			'servlet': transaction.servlet(),
-			'session': transaction._session, # don't cause creation of session
+			'transaction': trans,
+			'request': trans.request(),
+			'response': trans.response(),
+			'servlet': trans.servlet(),
+			'session': trans._session, # don't cause creation of session
 		})
 		for column in self.setting('ActivityLogColumns'):
 			try:
@@ -609,19 +610,16 @@ class Application(ConfigurableForServerSidePath, Object):
 		Called by `dispatchRawRequest`.
 
 		"""
-		if self.setting('UseAutomaticPathSessions'):
-			request = trans.request()
-			hasCookieSession = request.hasCookieSession()
-			hasPathSession = request.hasPathSession()
-			if hasCookieSession and hasPathSession:
-				self.handleUnnecessaryPathSession(trans)
-				return
-			elif not hasCookieSession and not hasPathSession:
-				self.handleMissingPathSession(trans)
-				return
 		findServlet = self.rootURLParser().findServletForTransaction
 		try:
+			# remove the session identifier from the path
+			self.removePathSession(trans)
+			# determine the context and the servlet for the transaction
 			servlet = findServlet(trans)
+			# handle session field only now, because the name of the
+			# session id field can depend on the context
+			self.handlePathSession(trans)
+			# now everything is set, run the transaction
 			self.runTransactionViaServlet(servlet, trans)
 		except EndResponse:
 			pass
@@ -838,7 +836,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""
 		self._exceptionHandlerClass(self, None, sys.exc_info())
 
-	def handleExceptionInTransaction(self, excInfo, transaction):
+	def handleExceptionInTransaction(self, excInfo, trans):
 		"""Handle exception with info.
 
 		Handles exception `excInfo` (as returned by ``sys.exc_info()``)
@@ -847,10 +845,10 @@ class Application(ConfigurableForServerSidePath, Object):
 		`ExceptionHandler.ExceptionHandler`.
 
 		"""
-		request = transaction.request()
+		request = trans.request()
 		editlink = request.adapterName() + "/Admin/EditFile"
-		self._exceptionHandlerClass(self, transaction,
-			excInfo, {"editlink": editlink})
+		self._exceptionHandlerClass(self, trans, excInfo,
+			{"editlink": editlink})
 
 	def rootURLParser(self):
 		"""Accessor: the Rool URL parser.
@@ -893,7 +891,53 @@ class Application(ConfigurableForServerSidePath, Object):
 		# @@ 2003-02 ib: does anyone care?
 		pass
 
-	def handleMissingPathSession(self, transaction):
+	def removePathSession(self, trans):
+		"""Remove a possible session identifier from the path."""
+		request = trans.request()
+		# Try to get automatic path session:
+		# If UseAutomaticPathSessions is enabled in Application.config,
+		# Application redirects the browser to a URL with SID in path:
+		# http://gandalf/a/_SID_=2001080221301877755/Examples/
+		# The _SID_ part is extracted and removed from path here.
+		# Note that We do not check for the exact name of the field
+		# here because it may be context dependent.
+		p = request._pathInfo
+		if p:
+			p = p.split('/', 2)
+			if len(p) > 1 and not p[0] and '=' in p[1]:
+				s = p[1]
+				request._pathSID = s.split('=', 1)
+				s += '/'
+				del p[1]
+				env = request.environ()
+				request._pathInfo = env['PATH_INFO'] = '/'.join(p)
+				for v in ('REQUEST_URI', 'PATH_TRANSLATED'):
+					if env.has_key(v):
+						env[v] = env[v].replace(s, '', 1)
+			else:
+				request._pathSID = None
+		else:
+			request._pathSID = None
+
+	def handlePathSession(self, trans):
+		"""Handle the session identifier that has been found in the path."""
+		request = trans.request()
+		if request._pathSID:
+			sessionName = self.sessionName(trans)
+			if request._pathSID[0] == sessionName:
+				if request.hasCookie(sessionName):
+					self.handleUnnecessaryPathSession(trans)
+				request.cookies()[sessionName] = request._pathSID[1]
+			else:
+				if self._autoPathSessions:
+					if not request.hasCookie(sessionName):
+						self.handleMissingPathSession(trans)
+		else:
+			if self._autoPathSessions:
+				if not request.hasCookie(self.sessionName(trans)):
+					self.handleMissingPathSession(trans)
+
+	def handleMissingPathSession(self, trans):
 		"""Redirect requests without session info in the path.
 
 		if UseAutomaticPathSessions is enabled in Application.config
@@ -905,18 +949,19 @@ class Application(ConfigurableForServerSidePath, Object):
 		depend on cookie support.
 
 		"""
-		newSid = transaction.session().identifier()
-		request = transaction.request()
-		url = '%s/%s=%s/%s%s%s' % (request.adapterName(),
-			self.sessionName(transaction), newSid,
+		newSid = trans.session().identifier()
+		request = trans.request()
+		url = '%s/%s=%s%s%s%s' % (request.adapterName(),
+			self.sessionName(trans), newSid,
 			request.pathInfo(), request.extraURLPath() or '',
 			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:
 			print '>> [sessions] handling UseAutomaticPathSessions,' \
 				' redirecting to', url
-		transaction.response().sendRedirect(url)
+		trans.response().sendRedirect(url)
+		raise EndResponse
 
-	def handleUnnecessaryPathSession(self, transaction):
+	def handleUnnecessaryPathSession(self, trans):
 		"""Redirect request with unnecessary session info in the path.
 
 		This is called if it has been determined that the request has a path
@@ -924,14 +969,15 @@ class Application(ConfigurableForServerSidePath, Object):
 		unnecessary path session.
 
 		"""
-		request = transaction.request()
-		url = '%s/%s%s%s' % (request.adapterName(),
+		request = trans.request()
+		url = '%s%s%s%s' % (request.adapterName(),
 			request.pathInfo(), request.extraURLPath() or '',
 			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:
 			print ">> [sessions] handling unnecessary path session,' \
 				' redirecting to", url
-		transaction.response().sendRedirect(url)
+		trans.response().sendRedirect(url)
+		raise EndResponse
 
 
 ## Main ##
