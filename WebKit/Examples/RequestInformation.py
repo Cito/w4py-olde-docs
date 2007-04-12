@@ -9,12 +9,12 @@ class RequestInformation(ExamplePage):
 		self.writeln('<p>The following table shows the values for various request variables.</p>')
 		self.writeln('<table style="background-color:#EEEEFF;width:100%"'
 			' border="0" cellpadding="2" cellspacing="4" width="100%">')
-		self.dict('HTTPRequest.fields()', self.transaction().request().fields())
-		self.dict('HTTPRequest._environ', self.transaction().request()._environ)
-		self.dict('Cookies', self.transaction().request().cookies())
+		self.dict('HTTPRequest.fields()', self.request().fields())
+		self.dict('HTTPRequest._environ', self.request()._environ)
+		self.dict('Cookies', self.request().cookies())
 		self.writeln('</table>')
-		self.transaction().response().setCookie('TestCookieName','CookieValue')
-		self.transaction().response().setCookie('TestExpire1','Expires in 1 minutes', expires='+1m')
+		self.response().setCookie('TestCookieName','CookieValue')
+		self.response().setCookie('TestExpire1','Expires in 1 minutes', expires='+1m')
 
 	def pair(self, key, value):
 		valueType = type(value)
