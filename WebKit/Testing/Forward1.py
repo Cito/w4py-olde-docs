@@ -1,5 +1,6 @@
 from WebKit.HTTPServlet import HTTPServlet
 
+
 class Forward1(HTTPServlet):
 
 	def respond(self, trans):

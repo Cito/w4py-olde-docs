@@ -71,6 +71,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 
 	"""
 
+
 	## Candidates for subclass overrides ##
 
 	def filename(self, trans):

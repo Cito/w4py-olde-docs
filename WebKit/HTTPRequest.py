@@ -821,7 +821,7 @@ class HTTPRequest(Request):
 		res.append('</table>\n')
 		return ''.join(res)
 
-	exceptionReportAttrNames = Request.exceptionReportAttrNames + (
+	_exceptionReportAttrNames = Request._exceptionReportAttrNames + (
 		'uri adapterName servletPath serverSidePath'
 		' pathInfo pathTranslated queryString method'
 		' sessionId previousURLPaths fields cookies environ'.split())

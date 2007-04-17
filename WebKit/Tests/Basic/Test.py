@@ -2,6 +2,7 @@ import os
 import unittest
 from WebKit.Tests.AppServerTest import AppServerTest
 
+
 class TestBasicFunctionality(AppServerTest):
 
 	def workDir(self):

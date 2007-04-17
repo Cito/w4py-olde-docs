@@ -58,7 +58,7 @@ class DebugAppServer(OriginalThreadedAppServer):
 
 	## Init ##
 
-	excludePrefixes = ('WebKit', 'MiscUtils', 'WebUtils', 'TaskKit')
+	_excludePrefixes = 'WebKit MiscUtils WebUtils TaskKit'.split()
 
 	def __init__(self, path=None):
 		"""Initialize DebugAppServer."""
@@ -112,7 +112,7 @@ class DebugAppServer(OriginalThreadedAppServer):
 		sys.stdout.flush()
 		sys.stderr.flush()
 		self._imp.delModules(includePythonModules=False,
-			excludePrefixes=self.excludePrefixes)
+			excludePrefixes=self._excludePrefixes)
 		raise ThreadedAppServer.RestartAppServerError
 
 
@@ -180,7 +180,7 @@ ThreadedAppServer.ThreadedAppServer = DebugAppServer
 # into using DebugAppServer instead.
 main = ThreadedAppServer.main
 
-# Replace Tweak ThreadedAppServer so that it never runs the main loop in a thread
+# Tweak ThreadedAppServer so that it never runs the main loop in a thread:
 def runMainLoopInThread():
 	return 0
 ThreadedAppServer.runMainLoopInThread = runMainLoopInThread

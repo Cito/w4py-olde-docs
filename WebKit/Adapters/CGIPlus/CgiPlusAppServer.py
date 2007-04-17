@@ -70,7 +70,7 @@ class CgiPlusAppServer(AppServer):
 		self._wasd_running = True
 		environ_ini = os.environ
 		while 1:
-			if not self.running or not self._wasd_running:
+			if not self._running or not self._wasd_running:
 				return
 			# init environment cgi variables
 			os.environ = environ_ini.copy()
@@ -84,7 +84,7 @@ class CgiPlusAppServer(AppServer):
 			self.restartIfNecessary()
 			self.handler = None
 			sys.__stdout__.flush()
-			if not self.running or not self._wasd_running:
+			if not self._running or not self._wasd_running:
 				return
 			# when we want to exit don't send the eof, so
 			# WASD don't try to send the next request to the server
@@ -95,7 +95,7 @@ class CgiPlusAppServer(AppServer):
 			sys.stderr = StringIO()
 
 	def shutDown(self):
-		self.running = 0
+		self._running = 0
 		print "CgiPlusAppServer: Shutting Down"
 		AppServer.shutDown(self)
 
@@ -190,7 +190,7 @@ def run(workDir=None):
 				print
 				print "Exiting AppServer"
 				if server:
-					if server.running:
+					if server._running:
 						server.initiateShutdown()
 				# if we're here as a result of exit() being called,
 				# exit with that return code.

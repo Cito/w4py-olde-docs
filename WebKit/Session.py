@@ -3,6 +3,7 @@ import re
 from Common import *
 from MiscUtils.Funcs import uniqueId
 
+
 class SessionError(Exception):
 	pass
 
@@ -168,6 +169,7 @@ class Session(Object):
 	def __contains__(self, name):
 		return self.hasValue(name)
 
+
 	## Transactions ##
 
 	def awake(self, trans):
@@ -227,8 +229,9 @@ class Session(Object):
 
 	## Exception reports ##
 
-	exceptionReportAttrNames = 'lastAccessTime isExpired numTrans timeout values'.split()
+	_exceptionReportAttrNames = \
+		'lastAccessTime isExpired numTrans timeout values'.split()
 
 	def writeExceptionReport(self, handler):
 		handler.writeTitle(self.__class__.__name__)
-		handler.writeAttrs(self, self.exceptionReportAttrNames)
+		handler.writeAttrs(self, self._exceptionReportAttrNames)

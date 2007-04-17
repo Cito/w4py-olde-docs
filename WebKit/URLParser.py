@@ -28,9 +28,10 @@ except ImportError:
 
 # Legal characters for use in a module name -- used when turning
 # an entire path into a module name.
-moduleNameRE = re.compile('[^a-zA-Z_]')
+_moduleNameRE = re.compile('[^a-zA-Z_]')
 
 _globalApplication = None
+
 def application():
 	"""Returns the global Application."""
 	return _globalApplication
@@ -567,7 +568,7 @@ class _FileParser(URLParser):
 			if dir == path:
 				# avoid reloading of the context package
 				return sys.modules[context]
-		name = 'WebKit_Cache_' + moduleNameRE.sub('_', path)
+		name = 'WebKit_Cache_' + _moduleNameRE.sub('_', path)
 		try:
 			file, path, desc = self._imp.find_module('__init__', [path])
 			module = self._imp.load_module(name, file, path, desc)
@@ -746,14 +747,14 @@ class URLParameterParser(URLParser):
 	## Init ##
 
 	def __init__(self, fileParser=None):
-		self.fileParser = fileParser
+		self._fileParser = fileParser
 
 
 	## Parsing ##
 
 	def parse(self, trans, requestPath):
 		"""Delegates to `parseHook`."""
-		return self.parseHook(trans, requestPath, self.fileParser)
+		return self.parseHook(trans, requestPath, self._fileParser)
 
 	def parseHook(self, trans, requestPath, hook):
 		"""Munges the path.

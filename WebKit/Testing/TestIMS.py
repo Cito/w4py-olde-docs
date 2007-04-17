@@ -1,5 +1,6 @@
 from WebKit.SidebarPage import SidebarPage
 
+
 class TestIMS(SidebarPage):
 
 	def cornerTitle(Self):

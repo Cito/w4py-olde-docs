@@ -1,6 +1,7 @@
 from WebKit.Page import Page
 from WebKit.Testing.IncludeURLTest import IncludeURLTest
 
+
 class IncludeURLTest2(IncludeURLTest):
 	"""This is the second part of the URL test code.
 

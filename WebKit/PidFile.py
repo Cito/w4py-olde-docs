@@ -37,7 +37,7 @@ class PidFile:
 						pass # try continuing...
 
 		pidfile = open(path, 'w')
-		pidfile.write(str(self.getCurrentPID()))
+		pidfile.write(str(self.currentPID()))
 		pidfile.close()
 
 		self._createdPID = 1
@@ -69,7 +69,7 @@ class PidFile:
 				pass # couldn't import win32 modules
 			return 1
 
-	def getCurrentPID(self):
+	def currentPID(self):
 		if os.name == 'posix':
 			return os.getpid()
 		else:

@@ -77,12 +77,12 @@ class AutoReloadingAppServer(AppServer):
 		"""
 		print 'Stopping AutoReload Monitor...'
 		sys.stdout.flush()
-		self.running = 1
+		self._running = 1
 		self.deactivateAutoReload()
 		AppServer.shutDown(self)
 		sys.stdout.flush()
 		sys.stderr.flush()
-		self.running = 0
+		self._running = 0
 
 
 	## Activation of AutoReload ##
@@ -215,7 +215,7 @@ class AutoReloadingAppServer(AppServer):
 
 	def fileMonitorThreadLoopFAM(self, getmtime=os.path.getmtime):
 		"""Monitoring thread loop, but using the FAM library."""
-		self._pipe = self.requests = None
+		self._pipe = self._requests = None
 		# For all of the modules which have _already_ been loaded,
 		# we check to see if they've already been modified:
 		f = self._imp.updatedFile()

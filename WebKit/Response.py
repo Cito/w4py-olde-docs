@@ -18,6 +18,7 @@ class Response(Message):
 
 	"""
 
+
 	## Init ##
 
 	def __init__(self, trans, strmOut):
@@ -68,4 +69,4 @@ class Response(Message):
 
 	## Exception reporting ##
 
-	exceptionReportAttrNames = Message.exceptionReportAttrNames + ['endTime']
+	_exceptionReportAttrNames = Message._exceptionReportAttrNames + ['endTime']

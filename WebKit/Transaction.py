@@ -36,13 +36,13 @@ class Transaction(Object):
 		self._servlet = None
 		self._error = None
 
-	attrNames = ('application', 'request', 'response',
-		'session', 'servlet', 'errorOccurred', 'error')
+	_attrNames = 'application request response session servlet' \
+		' errorOccurred error'.split()
 
 	def __repr__(self):
 		s = []
-		for name in self.attrNames:
-			s.append('%s=%r' % (name, getattr(self, '_'+name, '(no attr)')))
+		for name in self._attrNames:
+			s.append('%s=%r' % (name, getattr(self, '_' + name, '(no attr)')))
 		s = ' '.join(s)
 		return '<%s %s>' % (self.__class__.__name__, s)
 
@@ -190,15 +190,15 @@ class Transaction(Object):
 
 	## Exception handling ##
 
-	exceptionReportAttrNames = ('application',
-		'request', 'response', 'session', 'servlet')
+	_exceptionReportAttrNames = \
+		'application request response session servlet'.split()
 
 	def writeExceptionReport(self, handler):
 		handler.writeTitle(self.__class__.__name__)
-		handler.writeAttrs(self, self.exceptionReportAttrNames)
+		handler.writeAttrs(self, self._exceptionReportAttrNames)
 
-		for name in self.exceptionReportAttrNames:
-			obj = getattr(self, '_'+name, None)
+		for name in self._exceptionReportAttrNames:
+			obj = getattr(self, '_' + name, None)
 			if obj:
 				try:
 					obj.writeExceptionReport(handler)

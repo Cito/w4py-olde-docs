@@ -2,9 +2,10 @@ from AdminPage import AdminPage
 
 # Set this to 0 if you want to allow everyone to access secure pages
 # with no login required. This should instead come from a config file.
-require_login = 1
+requireLogin = 1
 
-if not require_login:
+if not requireLogin:
+
 
 	class AdminSecurity(AdminPage):
 
@@ -19,6 +20,7 @@ if not require_login:
 			AdminPage.writeHTML(self)
 
 else:
+
 
 	class AdminSecurity(AdminPage):
 

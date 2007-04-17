@@ -139,7 +139,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
 		# Tell the SCM we are starting the stop process:
 		self.ReportServiceStatus(win32service.SERVICE_STOP_PENDING)
 		if self._server:
-			if self._server.running > 2:
+			if self._server._running > 2:
 				self._server.initiateShutdown()
 			for i in range(30): # wait at most 3 seconds for shutdown
 				if not self._server:
@@ -222,7 +222,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
 					self._server.mainloop()
 				print
 				sys.stdout.flush()
-				if self._server.running:
+				if self._server._running:
 					self._server.initiateShutdown()
 					self._server._closeThread.join()
 				if self._runProfile:
@@ -257,7 +257,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
 			except:
 				raise
 		finally:
-			if self._server and self._server.running:
+			if self._server and self._server._running:
 				self._server.initiateShutdown()
 				self._server._closeThread.join()
 			self._server = None

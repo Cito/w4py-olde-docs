@@ -22,6 +22,7 @@ if DateTime:
 
 cookieIndex = 1
 
+
 class SetCookie(SidebarPage):
 
 	def cornerTitle(Self):

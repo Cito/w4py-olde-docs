@@ -1,6 +1,7 @@
 from WebKit.Page import Page
 from WebUtils.Funcs import htmlEncode
 
+
 class Inspector(Page):
 
 	def writeContent(self):

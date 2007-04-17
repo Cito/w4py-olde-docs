@@ -1,5 +1,6 @@
 from WebKit.Page import Page
 
+
 class IncludeURLTest(Page):
 	"""Test includeURL redirection.
 

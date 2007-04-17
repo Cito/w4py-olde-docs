@@ -84,8 +84,8 @@ class Message(Object):
 
 	## Exception reports ##
 
-	exceptionReportAttrNames = ['args']
+	_exceptionReportAttrNames = ['args']
 
 	def writeExceptionReport(self, handler):
 		handler.writeTitle(self.__class__.__name__)
-		handler.writeAttrs(self, self.exceptionReportAttrNames)
+		handler.writeAttrs(self, self._exceptionReportAttrNames)

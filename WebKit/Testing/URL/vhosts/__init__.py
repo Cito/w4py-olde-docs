@@ -1,6 +1,7 @@
 import os
 from WebKit.URLParser import URLParser
 
+
 class VHostParser(URLParser):
 
 	def parseHook(self, trans, requestPath, app, hook):

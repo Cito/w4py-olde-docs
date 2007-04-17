@@ -1,6 +1,7 @@
 
 from WebKit.Page import Page
 
+
 class Main(Page):
 
 	def writeContent(self):

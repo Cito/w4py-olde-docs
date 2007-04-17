@@ -59,6 +59,4 @@ class Object(object, NamedValueAccess):
 			print 'Could not determine calling function.'
 
 	# 2000-05-21 ce: Sometimes used for debugging:
-	#
-	#def __del__(self):
-	#	print '>> del', self
+	# def __del__(self): print '>> del', self

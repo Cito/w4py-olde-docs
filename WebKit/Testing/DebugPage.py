@@ -1,5 +1,6 @@
 from WebKit.Page import Page
 
+
 class DebugPage(Page):
 
 	def state(self):

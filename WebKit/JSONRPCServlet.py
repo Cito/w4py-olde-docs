@@ -14,6 +14,7 @@ from HTTPContent import HTTPContent
 
 debug = 0
 
+
 class JSONRPCServlet(HTTPContent):
 	"""A superclass for Webware servlets using JSON-RPC techniques.
 

@@ -88,29 +88,24 @@ Some notes:
 
 RULES
 
-	X File names start with capital letter.
-	X (On POSIX) Files don't contain \r.
-	X Spaces are not used for indentation.
-	X Tabs are used only for initial indentation.
-	X Class names start with a capital letter.
-	X Method names start with a lower case letter.
-	X Methods do not start with "get".
-	X Data attributes start with an underscore _.
-	X Method and attribute names have no underscores after the first character.
-	X Expressions following if, while and return
+	* File names start with capital letter.
+	* (On POSIX) Files don't contain \r.
+	* Spaces are not used for indentation.
+	* Tabs are used only for initial indentation.
+	* Class names start with a capital letter.
+	* Method names start with a lower case letter.
+	* Methods do not start with "get".
+	* Data attributes start with an underscore _,
+	  and are followed by a lower case letter
+	* Method and attribute names have no underscores after the first character.
+	* Expressions following if, while and return
 	  are not enclosed in parenthesees, ().
-	- Data attributes not only start with an underscore _,
-	  but are followed by a lower case letter.
-	- Class defs and category comments, ## Like this ##
+	* Class defs and category comments, ## Like this ##
 	  are preceded by 2 blank lines and are followed by one blank line
 	  (unless the class implementation is pass).
 
 
 FUTURE
-
-Implement the spacing checks for class defs and category comments.
-
-Consider setting _charNum for the current location.
 
 Consider (optionally) displaying the source line.
 
@@ -131,35 +126,38 @@ class NoDefault:
 class CheckSrc:
 
 	errors = {
-		'UncapFN': 'Uncapitalized filename.',
-		'CarRet': 'Carriage return \\r found.',
-		'StrayTab': 'Stray tab after other characters.'
+		'UncapFN':
+			'Uncapitalized filename.',
+		'CarRet':
+			'Carriage return \\r found.',
+		'StrayTab':
+			'Stray tab after other characters.'
 			' No tabs allowed other than initial indentation.',
-		'SpaceIndent': 'Found space as part of indentation. Use only tabs.',
-		'ClassNotCap': 'Class names should start with capital letters.',
-		'MethCap': 'Method name "%(name)s" should start with lower case letter.',
+		'SpaceIndent':
+			'Found space as part of indentation. Use only tabs.',
+		'NoBlankLines':
+			'%(what)s must be preceded by %(separator)s.',
+		'ClassNotCap':
+			'Class names should start with capital letters.',
+		'MethCap':
+			'Method name "%(name)s" should start with a lower case letter.',
 		'GetMeth': 'Method name "%(name)s" should not start with "get".',
-		'NoUnderAttr': 'Data attributes should start with underscores: %(attribute)s.',
+		'NoUnderAttr': 'Data attributes should start with an underscore:'
+			' %(attribute)s.',
+		'NoLowerAttr': 'Data attributes should start with an underscore and'
+			' then a lower case letter: %(attribute)s.',
 		'ExtraUnder': 'Attributes and methods should not have underscores'
 			' past the first character: %(attribute)s.',
 		'ExtraParens': 'No outer parenthesees should be used for %(keyword)s.',
 	}
 
+	# This RE matches any kind of access of self (see checkAttrNames):
+	_accessRE = re.compile(r'self\.(\w+)\s*(\(?)')
+
 
 	## Init ##
 
 	def __init__(self):
-		# See checkAttrNames() for the use of the following REs
-
-		# This RE matches access of self that does not start with an
-		# underscore and does not end in (, indicating a method. For
-		# example, self.foo. This violates one the rules: data
-		# attributes should start with an underscore.
-		self._badAccessRE = re.compile(r'self\.[A-Za-z0-9][\w]*[^(]')
-
-		# This RE matches any kind of access of self
-		self._accessRE = re.compile(r'self\.[\w]+')
-
 		# Grab our own copy of errors with lower case keys
 		self._errors = {}
 		self._errorCodes = []
@@ -288,7 +286,8 @@ Error codes and their messages:
 			wr('  %s = %s\n' % (paddedKey, self._errors[key.lower()]))
 		wr('\n')
 
-		wr('.checksrc.config options include SkipDirs, SkipFiles and DisableErrors.\nSee the checksrc.py doc string for more info.\n')
+		wr('.checksrc.config options include SkipDirs, SkipFiles and DisableErrors.\n'
+		   'See the checksrc.py doc string for more info.\n')
 
 
 	## Printing, errors, etc. ##
@@ -314,7 +313,6 @@ Error codes and their messages:
 		disableNames = self.setting('DisableErrors', {}).get(msgCode, [])
 		if '*' in disableNames or self._fileName in disableNames:
 			return
-
 		if not self._printedDir:
 			self.printDir()
 		msg = self._errors[msgCode.lower()] % args
@@ -374,7 +372,6 @@ Error codes and their messages:
 			for key, value in de.items():
 				if type(value) is StringType:
 					de[key] = [value]
-
 		self._config = dict
 
 	def setting(self, name, default=NoDefault):
@@ -414,7 +411,7 @@ Error codes and their messages:
 
 		self.readConfig(dirName)
 
-		# Prune directories based on configuration
+		# Prune directories based on configuration:
 		skipDirs = self.setting('SkipDirs', [])
 		for dir in skipDirs:
 			try:
@@ -457,42 +454,71 @@ Error codes and their messages:
 
 	def checkFileLines(self, lines):
 		self._lineNum = 1
-		inMLS = None # MLS = multi-line string
+		self._blankLines = 2
+		self._inMLS = None # MLS = multi-line string
 		for line in lines:
-			lineleft = line.lstrip()
-			if lineleft and not lineleft[0] == '#':
-				index = 0
-				wholeLineInMLS = inMLS
-				while index != -1:
-					if inMLS:
-						index = lineleft.find(inMLS, index)
-						if index != -1:
-							wholeLineInMLS = inMLS = None
-							index += 3
-					else:
-						index2 = lineleft.find('"""', index)
-						if index2 != -1:
-							index = lineleft.find("'''", index)
-							if index != -1 and index < index2:
-								inMLS= "'''"
-							else:
-								index = index2
-								inMLS = '"""'
-							index += 3
-						else:
-							index = lineleft.find("'''", index)
-							if index != -1:
-								inMLS = "'''"
-								index += 3
-				if not wholeLineInMLS:
-					self.checkFileLine(line)
-			self._lineNum += 1
+			self.checkFileLine(line)
 
 	def checkFileLine(self, line):
-		self.checkTabsAndSpaces(line)
-		self.checkClassName(line)
-		self.checkMethodName(line)
-		self.checkExtraParens(line)
+		lineleft = line.lstrip()
+		if lineleft:
+			if not self.inMLS(lineleft):
+				self.checkTabsAndSpaces(line)
+				self.checkBlankLines(lineleft)
+				if lineleft[0] != '#':
+					parts = line.split()
+					self.checkClassName(parts)
+					self.checkMethodName(parts, line)
+					self.checkExtraParens(parts, lineleft)
+					self.checkAttrNames(lineleft)
+				self._blankLines = 0
+		else:
+			self._blankLines += 1
+		self._lineNum += 1
+
+	def inMLS(self, line):
+		inMLS = self._inMLS
+		wholeLineInMLS = inMLS
+		index = 0
+		while index != -1:
+			if inMLS:
+				index = line.find(inMLS, index)
+				if index != -1:
+					wholeLineInMLS = inMLS = None
+					index += 3
+			else:
+				index2 = line.find('"""', index)
+				if index2 != -1:
+					index = line.find("'''", index)
+					if index != -1 and index < index2:
+						inMLS = "'''"
+					else:
+						index = index2
+						inMLS = '"""'
+					index += 3
+				else:
+					index = line.find("'''", index)
+					if index != -1:
+						inMLS = "'''"
+						index += 3
+		self._inMLS = inMLS
+		return wholeLineInMLS
+
+	def checkBlankLines(self, line):
+		if line.startswith('##') and self._blankLines < 2:
+			what = 'Category comments'
+			separator = 'two blank lines'
+		elif (line.startswith('class ') and self._blankLines < 2
+				and not line.endswith('Exception):')
+				and not line.endswith('pass')):
+			what = 'Class definitions'
+			separator = 'two blank lines'
+		elif line.startswith('def ') and self._blankLines < 1:
+			what = 'Function definitions'
+			separator = 'one blank line'
+		else:
+			return
+		self.error('NoBlankLines', locals())
 
 	def checkTabsAndSpaces(self, line):
 		foundTab = foundSpace = foundOther = 0
@@ -510,73 +536,54 @@ Error codes and their messages:
 			else:
 				foundOther = 1
 
-	def checkClassName(self, line):
-		if line.find('class') != -1:
-			parts = line.split()
-			if 'class' in parts: # e.g. if 'class' is a standalone word
-				index = parts.index('class')
-				if index == 0: # e.g. if start of the line
-					name = parts[1]
-					if name and name[0] != name[0].upper():
-						self.error('ClassNotCap', locals())
+	def checkClassName(self, parts):
+		if 'class' in parts: # e.g. if 'class' is a standalone word
+			index = parts.index('class')
+			if index == 0: # e.g. if start of the line
+				name = parts[1]
+				if name and name[0] != name[0].upper():
+					self.error('ClassNotCap', locals())
 
-	def checkMethodName(self, line):
-		if line.find('def') != -1:
-			parts = line.split()
-			if 'def' in parts: # e.g. if 'def' is a standalone word
-				index = parts.index('def')
-				if index == 0 and line[0] == '\t':
-					# e.g. if start of the line, and indented (indicating method and not function)
-					name = parts[1]
-					name = name[:name.find('(')]
-					if name and name[0] != name[0].lower():
-						self.error('MethCap', locals())
-					if len(name) > 3 and name[:3].lower() == 'get':
-						self.error('GetMeth', locals())
+	def checkMethodName(self, parts, line):
+		if 'def' in parts: # e.g. if 'def' is a standalone word
+			index = parts.index('def')
+			if index == 0 and line[0] == '\t':
+				# e.g. if start of the line, and indented (indicating method and not function)
+				name = parts[1]
+				name = name[:name.find('(')]
+				if name and name[0] != name[0].lower():
+					self.error('MethCap', locals())
+				if len(name) > 3 and name[:3].lower() == 'get':
+					self.error('GetMeth', locals())
 
 	def checkAttrNames(self, line):
-		# Attribute names that are data (and not methods) should start with an underscore.
-		text = line
-		while text:
-			match = self._badAccessRE.search(text)
-			if match:
-				try:
-					nextChar = text[match.end()]
-				except IndexError:
-					nextChar = ''
-				attribute = match.group()
-				if nextChar != '(':
+		for match in self._accessRE.findall(line):
+			attribute = match[0]
+			isMethod = match[1] == '('
+			if not isMethod:
+				if not attribute[0] == '_':
+					# Attribute names that are data (and not methods)
+					# should start with an underscore.
 					self.error('NoUnderAttr', locals())
+				elif attribute[-2:] != '__' and not attribute[1:2].islower():
+					# The underscore should be followed by a lower case letter.
+					self.error('NoLowerAttr', locals())
+			# Attribute names should have no underscores after the first one.
+			if len(attribute) > 2 and attribute[:2] == '__':
+				inner = attribute[2:]
+				if len(inner) > 2 and inner[-2:] == '__':
+					inner = inner[:-2]
+			else:
+				if len(attribute) > 1 and attribute[0] == '_':
+					inner = attribute[1:]
+				else:
+					inner = attribute
+			if inner.find('_') >= 0:
+				self.error('ExtraUnder', locals())
 
-			# Next
-			text = text[match.end():]
-
-		# No attribute name should have an underscore after the first character
-		while text:
-			# Try to find a self.access
-			match = self._accessRE.search(text)
-			if not match:
-				break
-
-			# Check it for violations
-			group = match.group()
-			if '_' in group[6:]:
-				bad = 1
-				# Make sure it's not one of those __foo__ identifiers.
-				group = group[5:] # shave off "self."
-				if len(group) > 4 and group[:2] == '__' and group[-2:] == '__':
-					if not '_' in group[2:-2]:
-						bad = 0
-				if bad:
-					self.error('ExtraUnder', locals())
-
-			# Next
-			text = text[match.end():]
-
-	def checkExtraParens(self, line):
+	def checkExtraParens(self, parts, line):
 		keywords = ['if', 'while', 'return']
 		msg = ', '.join(keywords[:-1]) + ' and ' + keywords[-1]
-		parts = line.split()
 		if (len(parts) > 1 and parts[0] in keywords
 				and parts[1][0] == '('
 				and not line.count(')') < line.count('(')):

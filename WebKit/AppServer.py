@@ -70,7 +70,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		and starts the request handling loop.
 
 		"""
-		self.running = 0
+		self._running = 0
 		self._startTime = time.time()
 
 		global globalAppServer
@@ -110,7 +110,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 				name="CloseThread")
 			# self._closeThread.setDaemon(1)
 			self._closeThread.start()
-		self.running = 1
+		self._running = 1
 
 	def checkForInstall(self):
 		"""Check whether Webware was installed.
@@ -181,15 +181,15 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		"""Shut down the AppServer.
 
 		Subclasses may override and normally follow this sequence:
-			1. set self.running = 1 (request to shut down)
+			1. set self._running = 1 (request to shut down)
 			2. class specific statements for shutting down
 			3. Invoke super's shutDown() e.g., ``AppServer.shutDown(self)``
-			4. set self.running = 0 (server is completely down)
+			4. set self._running = 0 (server is completely down)
 
 		"""
 		print "AppServer is shutting down..."
 		sys.stdout.flush()
-		self.running = 1
+		self._running = 1
 		self._app.shutDown()
 		del self._plugIns
 		del self._app
@@ -204,7 +204,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		print "AppServer has been shutdown."
 		sys.stdout.flush()
 		sys.stderr.flush()
-		self.running = 0
+		self._running = 0
 
 
 	## Configuration ##

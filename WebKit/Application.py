@@ -96,7 +96,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		URLParser.initApp(self)
 		self._rootURLParser = URLParser.ContextParser(self)
 
-		self.running = 1
+		self._running = 1
 
 		if useSessionSweeper:
 			self.startSessionSweeper()
@@ -222,7 +222,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		"""
 		print "Application is shutting down..."
-		self.running = 0
+		self._running = 0
 		self._sessions.storeAllSessions()
 		if self._server.isPersistent():
 			self.taskManager().stop()

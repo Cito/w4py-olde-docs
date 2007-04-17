@@ -34,6 +34,7 @@ class HTTPContent(HTTPServlet):
 
 	"""
 
+
 	## Transactions ##
 
 	def awake(self, transaction):

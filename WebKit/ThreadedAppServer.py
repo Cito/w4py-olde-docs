@@ -208,10 +208,10 @@ class ThreadedAppServer(AppServer):
 		This is the main thread loop that accepts and dispatches
 		socket requests.
 
-		It goes through a loop as long as ``self.running > 2``.
-		Setting ``self.running = 2`` asks the the main loop to end.
-		When the main loop is finished, it sets ``self.running = 1``.
-		When the AppServer is completely down, it sets ``self.running = 0``.
+		It goes through a loop as long as ``self._running > 2``.
+		Setting ``self._running = 2`` asks the the main loop to end.
+		When the main loop is finished, it sets ``self._running = 1``.
+		When the AppServer is completely down, it sets ``self._running = 0``.
 
 		The loop waits for connections, then based on the connecting
 		port it initiates the proper Handler (e.g.,
@@ -232,10 +232,10 @@ class ThreadedAppServer(AppServer):
 		threadUpdateDivisor = 5 # grab stat interval
 		threadCheck = 0
 
-		self.running = 3 # server is in the main loop now
+		self._running = 3 # server is in the main loop now
 
 		try:
-			while self.running > 2:
+			while self._running > 2:
 
 				# block for timeout seconds waiting for connections
 				try:
@@ -271,7 +271,7 @@ class ThreadedAppServer(AppServer):
 				self.restartIfNecessary()
 
 		finally:
-			self.running = 1
+			self._running = 1
 
 
 	## Thread Management ##
@@ -474,13 +474,13 @@ class ThreadedAppServer(AppServer):
 		and tells all the threads to die.
 
 		"""
-		if self.running > 2:
-			self.running = 2 # ask main loop to finish
+		if self._running > 2:
+			self._running = 2 # ask main loop to finish
 		print "ThreadedAppServer is shutting down..."
 		sys.stdout.flush()
 		self.awakeSelect() # unblock select call in mainloop()
 		for i in range(30): # wait at most 3 seconds for shutdown
-			if self.running < 2:
+			if self._running < 2:
 				break
 			time.sleep(0.1)
 		# Close all sockets now:
@@ -506,7 +506,7 @@ class ThreadedAppServer(AppServer):
 		AppServer.shutDown(self)
 		sys.stdout.flush()
 		sys.stderr.flush()
-		self.running = 0
+		self._running = 0
 
 	def awakeSelect(self):
 		"""Awake the select() call.
@@ -904,11 +904,11 @@ def run(workDir=None):
 						target=_windowsmainloop)
 					t.start()
 					try:
-						while server.running > 1:
+						while server._running > 1:
 							try:
 								time.sleep(1) # wait for interrupt
 							except:
-								if server.running < 3:
+								if server._running < 3:
 									raise # shutdown
 					finally:
 						t.join()
@@ -947,7 +947,7 @@ def run(workDir=None):
 		finally:
 			sys.stdout.flush()
 			sys.stderr.flush()
-			if server and server.running:
+			if server and server._running:
 				server.initiateShutdown()
 				server._closeThread.join()
 			AppServerModule.globalAppServer = None
@@ -962,10 +962,10 @@ def shutDown(signum, frame):
 	"""Signal handler for shutting down the server."""
 	print
 	print "App server has been signaled to shutdown."
-	if server and server.running > 2:
+	if server and server._running > 2:
 		print "Shutting down at", asclocaltime()
 		sys.stdout.flush()
-		server.running = 2
+		server._running = 2
 		if signum == SIGINT:
 			raise KeyboardInterrupt
 		elif signum == SIGHUP:

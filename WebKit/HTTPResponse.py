@@ -411,7 +411,7 @@ class HTTPResponse(Response):
 
 	## Exception reporting ##
 
-	exceptionReportAttrNames = Response.exceptionReportAttrNames + [
+	_exceptionReportAttrNames = Response._exceptionReportAttrNames + [
 		'committed', 'headers', 'cookies']
 
 	def setErrorHeaders(self, err):
