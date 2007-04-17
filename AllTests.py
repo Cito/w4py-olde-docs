@@ -78,7 +78,7 @@ class _AllTestsConfig(Configurable):
 {	# Edit this file to activate more tests
 
 	# Turn on tests that use MySQL?
-	'hasMysql': True,
+	'hasMysql': False,
 
 	# If hasMysql is true, then these are used to connect:
 	'mysqlTestInfo' : {
