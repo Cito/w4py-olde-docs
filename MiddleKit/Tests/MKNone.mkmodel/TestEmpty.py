@@ -32,12 +32,12 @@ def test(store):
 	store.clear()
 
 	results = store.fetchObjectsOfClass(Foo)
-	assert len(results)==1
+	assert len(results) == 1
 	f = results[0]
-	assert f.ri()==1
-	assert f.ni()==None
-	assert f.rs()=='a'
-	assert f.ns()==None
+	assert f.ri() == 1
+	assert f.ni() == None
+	assert f.rs() == 'a'
+	assert f.ns() == None
 
 	return
 
@@ -69,22 +69,22 @@ b:int,i:int,l:long,f:float,s:string
 
 		# Try an immediate fetch
 		results = store.fetchObjectsOfClass(Thing)
-		assert len(results)==1
+		assert len(results) == 1
 		# This tests the uniquing feature of MiddleKit:
-		assert id(results[0])==id(t)
+		assert id(results[0]) == id(t)
 
 		# Clear the store's in memory objects and try a fetch again
 		store.clear()
 		results = store.fetchObjectsOfClass(Thing)
-		assert len(results)==1
-		assert results[0].allAttrs()==t.allAttrs()
+		assert len(results) == 1
+		assert results[0].allAttrs() == t.allAttrs()
 
 		# Make sure what we got from the store is what we put in
-		assert t.b()==values['b']
-		assert t.i()==values['i']
-		assert t.l()==values['l']
-		assert t.f()==values['f']
-		assert t.s()==values['s']
+		assert t.b() == values['b']
+		assert t.i() == values['i']
+		assert t.l() == values['l']
+		assert t.f() == values['f']
+		assert t.s() == values['s']
 
 		# Reset
 		store.clear()

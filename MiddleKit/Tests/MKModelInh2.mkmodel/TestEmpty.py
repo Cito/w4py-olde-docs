@@ -25,22 +25,22 @@ b:int,i:int,l:long,f:float,s:string,x:int
 
 		# Try an immediate fetch
 		results = store.fetchObjectsOfClass(Foo)
-		assert len(results)==1
+		assert len(results) == 1
 		# This tests the uniquing feature of MiddleKit:
-		assert id(results[0])==id(t)
+		assert id(results[0]) == id(t)
 
 		# Clear the store's in memory objects and try a fetch again
 		store.clear()
 		results = store.fetchObjectsOfClass(Foo)
-		assert len(results)==1
-		assert results[0].allAttrs()==t.allAttrs()
+		assert len(results) == 1
+		assert results[0].allAttrs() == t.allAttrs()
 
 		# Make sure what we got from the store is what we put in
 		for attr in list('bilsx'):
-			assert results[0]._get(attr)==values[attr]
+			assert results[0]._get(attr) == values[attr]
 
-		different = 0.000001    # @@ 2000-11-25 ce: more work needed on floats
-		assert abs(results[0]._get('f')-values['f'])<different
+		different = 0.000001 # @@ 2000-11-25 ce: more work needed on floats
+		assert abs(results[0]._get('f')-values['f']) < different
 
 		# Insert the fetched attributes
 		t2 = Foo()
@@ -49,8 +49,8 @@ b:int,i:int,l:long,f:float,s:string,x:int
 		store.addObject(t2)
 		store.saveChanges()
 		results = store.fetchObjectsOfClass(Foo)
-		assert len(results)==2, 'len=%r' % len(results)
-		assert results[0].allAttrs()==results[1].allAttrs()
+		assert len(results) == 2, 'len=%r' % len(results)
+		assert results[0].allAttrs() == results[1].allAttrs()
 
 		# Reset
 		store.clear()

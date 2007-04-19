@@ -8,8 +8,7 @@ from MiddleKit.Core.ListAttr import ListAttr
 try: # for Python < 2.2
 	object
 except NameError:
-	class object:
-		pass
+	class object: pass
 try: # for Python < 2.3
 	True, False
 except NameError:
@@ -123,12 +122,12 @@ class MiddleObject(object, NamedValueAccess):
 	def __repr__(self):
 		return self.debugStr()
 
-	debugKeys = 'serialNum'.split()
+	_debugKeys = 'serialNum'.split()
 
 	def debugStr(self):
 		out = [self.__class__.__name__, '(', '0x%x'%id(self)]
 		sep = ', '
-		for key in self.debugKeys:
+		for key in self._debugKeys:
 			out.append(sep)
 			out.append(key)
 			out.append('=')
@@ -185,7 +184,8 @@ class MiddleObject(object, NamedValueAccess):
 		return self._mk_serialNum < 1
 
 	def isDeleted(self):
-		return self._mk_isDeleted;
+		return self._mk_isDeleted
+
 
 	## Keys ##
 
@@ -245,12 +245,12 @@ class MiddleObject(object, NamedValueAccess):
 		This is used if the object is deleted, so we don't have dangling references.
 		"""
 		for attr in self.klass().allAttrs():
-			if isinstance( attr, ListAttr ):
+			if isinstance(attr, ListAttr):
 				listName = '_' + attr.name()
-				list = getattr( self, listName )
+				list = getattr(self, listName)
 				if list is not None and object in list:
-					delattr(self,listName)
-					setattr(self,listName,None)
+					delattr(self, listName)
+					setattr(self, listName, None)
 
 	def updateReferencingListAttrs(self):
 		"""
@@ -258,8 +258,8 @@ class MiddleObject(object, NamedValueAccess):
 		object to remove us from any list attributes that they might have.
 		"""
 		for attr in self.klass().allAttrs():
-			if isinstance( attr, ObjRefAttr ):
-				value = getattr( self, '_' + attr.name() )
+			if isinstance(attr, ObjRefAttr):
+				value = getattr(self, '_' + attr.name())
 				if value is not None:
 					if isinstance(value, (types.InstanceType, MiddleObject)):
 						value.removeObjectFromListAttrs(self)
@@ -482,7 +482,7 @@ class MiddleObject(object, NamedValueAccess):
 	_get = valueForKey
 	_set = setValueForKey
 
-	def clone(self,memo=None,depthAttr=None):
+	def clone(self, memo=None, depthAttr=None):
 		'''
 		Clone middle object(s) generically.
 
@@ -506,21 +506,22 @@ class MiddleObject(object, NamedValueAccess):
 		will take precedence over the value in the 'Copy' column for that attribute.
 
 		'''
-		def copyAttrValue(source,dest,attr,memo,depthAttr):
+
+		def copyAttrValue(source, dest, attr, memo, depthAttr):
 			if depthAttr and attr.has_key(depthAttr):
 				copymode = attr[depthAttr]
 			else:
 				copymode = attr.get('Copy', 'shallow')
 
-			if copymode == 'deep' and isinstance( attr, ObjRefAttr ):
+			if copymode == 'deep' and isinstance(attr, ObjRefAttr):
 				# clone the value of an attribute from the source object,
 				# and set it in the attribute of the dest object
-				value = apply( getattr(source,attr.pyGetName()), ())
+				value = apply(getattr(source, attr.pyGetName()), ())
 				if value:
-					clonedvalue = value.clone(memo,depthAttr)
+					clonedvalue = value.clone(memo, depthAttr)
 				else:
 					clonedvalue = None
-				retvalue = apply( getattr(dest,attr.pySetName()), (clonedvalue,))
+				retvalue = apply(getattr(dest, attr.pySetName()), (clonedvalue,))
 			elif copymode == 'none':
 				# Shouldn't set to attribute to None explicitly since attribute may have
 				# isRequired=1
@@ -529,16 +530,16 @@ class MiddleObject(object, NamedValueAccess):
 			else:
 				# copy the value of an attribute from the source object
 				# to the dest object
-				#print 'copying value of ' + attr.name()
-				value = apply( getattr(source,attr.pyGetName()), ())
-				retvalue = apply( getattr(dest,attr.pySetName()), (value,))
+				# print 'copying value of ' + attr.name()
+				value = apply(getattr(source, attr.pyGetName()), ())
+				retvalue = apply(getattr(dest, attr.pySetName()), (value,))
 
 		if memo is None:
-			#print 'Initializing memo'
+			# print 'Initializing memo'
 			memo = {}
 
 		# if we've already cloned this object, return the clone
-		if memo.has_key( self ):
+		if memo.has_key(self):
 			return memo[self]
 
 		# make an instance of ourselves
@@ -550,9 +551,9 @@ class MiddleObject(object, NamedValueAccess):
 		# iterate over our persistent attributes
 		for attr in self.klass().allDataAttrs():
 			if isinstance(attr, ListAttr):
-				valuelist = apply( getattr(self,attr.pyGetName()), ())
+				valuelist = apply(getattr(self, attr.pyGetName()), ())
 				setmethodname = "addTo" + attr.name()[0].upper() + attr.name()[1:]
-				setmethod = getattr(copy,setmethodname)
+				setmethod = getattr(copy, setmethodname)
 
 				# if cloning to create an extension object, we might want to copy fewer subobjects
 				copymode = attr['Copy']
@@ -564,15 +565,15 @@ class MiddleObject(object, NamedValueAccess):
 					setrefname = "set" + backrefname[0].upper() + backrefname[1:]
 					for value in valuelist:
 						# clone the value
-						valcopy = value.clone(memo,depthAttr)
+						valcopy = value.clone(memo, depthAttr)
 
 						# set the value's back ref to point to self
-						setrefmethod = getattr(valcopy,setrefname)
+						setrefmethod = getattr(valcopy, setrefname)
 						backrefattr = valcopy.klass().lookupAttr(backrefname)
-						apply( setrefmethod, (None,))
+						apply(setrefmethod, (None,))
 
 						# add the value to the list
-						retval = apply(setmethod,(valcopy,))
+						retval = apply(setmethod, (valcopy,))
 				elif attr['Copy'] == 'none':
 					# leave the list empty
 					pass

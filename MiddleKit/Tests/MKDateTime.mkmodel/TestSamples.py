@@ -16,11 +16,11 @@ def test(store):
 	value = f.t()
 	match = None
 	if nativeDateTime:
-		match = value==store.filterDateTimeDelta(nativeDateTime.time(13, 01))
+		match = value == store.filterDateTimeDelta(nativeDateTime.time(13, 01))
 		if not match:
-			match = value==nativeDateTime.timedelta(hours=13, minutes=01)
+			match = value == nativeDateTime.timedelta(hours=13, minutes=01)
 	if not match and mxDateTime:
-		match = value==mxDateTime.DateTimeDeltaFrom('13:01')
+		match = value == mxDateTime.DateTimeDeltaFrom('13:01')
 	assert match, '%s, %s' % (value, type(value))
 
 	value = f.dt()

@@ -24,56 +24,81 @@ except NameError:
 
 
 class UnknownObjectError(LookupError):
-	""" This is the exception returned by store.fetchObject() if the specified object cannot be found (unless you also passed in a default value in which case that value is returned). """
+	"""Unknown object error.
+
+	This is the exception returned by store.fetchObject() if the specified
+	object cannot be found (unless you also passed in a default value in
+	which case that value is returned).
+
+	"""
 	pass
 
 class DeleteError(Exception):
-	""" Base class for all delete exceptions """
+	"""Delete error.
+
+	Base class for all delete exceptions.
+
+	"""
 	pass
 
 class DeleteReferencedError(DeleteError):
-	"""
-	This is raised when you attempt to delete an object that is referenced by other objects with
-	onDeleteOther not set to detach or cascade.  You can call referencingObjectsAndAttrs() to get a
-	list of tuples of (object, attr) for the particular attributes that caused the error.
+	"""Delete referenced object error.
+
+	This is raised when you attempt to delete an object that is referenced
+	by other objects with onDeleteOther not set to detach or cascade.
+	You can call referencingObjectsAndAttrs() to get a list of tuples of
+	(object, attr) for the particular attributes that caused the error.
 	And you can call object() to get the object that was trying to be deleted.
-	This might not be the same as the object originally being deleted if a cascading
-	delete was happening.
+	This might not be the same as the object originally being deleted if a
+	cascading delete was happening.
+
 	"""
+
 	def __init__(self, text, object, referencingObjectsAndAttrs):
 		Exception.__init__(self, text)
 		self._object = object
 		self._referencingObjectsAndAttrs = referencingObjectsAndAttrs
+
 	def object(self):
 		return self._object
+
 	def referencingObjects(self):
 		return self._referencingObjectsAndAttrs
 
+
 class DeleteObjectWithReferencesError(DeleteError):
+	"""Delete object with references error.
+
+	This is raised when you attempt to delete an object that references other
+	objects, with onDeleteSelf=deny.  You can call attrs() to get a list of
+	attributes that reference other objects with onDeleteSelf=deny.
+	And you can call object() to get the object trying to be deleted that
+	contains those attrs.  This might not be the same as the object originally
+	being deleted if a cascading delete was happening.
+
 	"""
-	This is raised when you attempt to delete an object that references other objects,
-	with onDeleteSelf=deny.  You can call attrs() to get a list of attributes
-	that reference other objects with onDeleteSelf=deny.  And you can call object() to
-	get the object trying to be deleted that contains those attrs.
-	This might not be the same as the object originally being deleted if a cascading
-	delete was happening.
-	"""
+
 	def __init__(self, text, object, attrs):
 		Exception.__init__(self, text)
 		self._object = object
 		self._attrs = attrs
+
 	def object(self):
 		return self._object
+
 	def attrs(self):
 		return self._attrs
 
+
 class ObjectStore(ModelUser):
-	"""
+	"""The object store.
+
 	NOT IMPLEMENTED:
 		* revertChanges()
 
 	FUTURE
 		* expanded fetch
+
 	"""
 
 
@@ -82,12 +107,10 @@ class ObjectStore(ModelUser):
 	def __init__(self):
 		self._model          = None
 		self._newSerialNum   = -1
-		self._verboseDelete  =  0
+		self._verboseDelete  = False
 
 	def modelWasSet(self):
-		"""
-		Performs additional set up of the store after the model is set.
-		"""
+		"""Perform additional set up of the store after the model is set."""
 		ModelUser.modelWasSet(self)
 		self._threaded = self.setting('Threaded')
 		if self._threaded:
@@ -96,7 +119,7 @@ class ObjectStore(ModelUser):
 			self._deletedObjects = PerThreadList()
 			self._changedObjects = PerThreadDict()
 		else:
-			self._hasChanges     = 0
+			self._hasChanges     = False
 			self._newObjects     = NonThreadedList()
 			self._deletedObjects = NonThreadedList()
 			self._changedObjects = NonThreadedDict()
@@ -108,25 +131,35 @@ class ObjectStore(ModelUser):
 		else:
 			return WeakValueDictionary()
 
+
 	## Manipulating the objects in the store ##
 
 	def hasObject(self, object):
-		""" Checks if the object is in the store.  Note: this does not check the persistent store. """
+		"""Check if the object is in the store.
+
+		Note: this does not check the persistent store.
+
+		"""
 		key = object.key()
 		if key is None:
-			return 0
+			return False
 		else:
 			return self._objects.has_key(key)
 
 	def object(self, a, b=NoDefault, c=NoDefault):
-		""" Returns an object described by the given arguments, or potentially a default value.
+		"""Return object described by the given arguments, or default value.
 
-		store.object(anObjectKey) - return the object with the given key, or raise a KeyError if it does not reside in memory.
-		store.object(anObjectKey, defaultValue) - return the object or defaultValue (no exception will be raised)
-		store.object(someClass, serialNum) - return the object of the given class and serial num, or raise a KeyError
-		store.object(someClass, serialNum, defaultValue) - return the object or defaultValue (no exception will be raised)
+		store.object(anObjectKey) - return the object with the given key,
+			or raise a KeyError if it does not reside in memory.
+		store.object(anObjectKey, defaultValue) - return the object
+			or defaultValue (no exception will be raised)
+		store.object(someClass, serialNum) - return the object
+			of the given class and serial num, or raise a KeyError
+		store.object(someClass, serialNum, defaultValue) - return the object
+			or defaultValue (no exception will be raised)
 
-		`someClass` can be a Python class, a string (the name of a class) or a MiddleKit.Core.Klass
+		`someClass` can be a Python class, a string (the name of a class)
+			or a MiddleKit.Core.Klass
 
 		"""
 		if isinstance(a, ObjectKey):
@@ -145,23 +178,30 @@ class ObjectStore(ModelUser):
 		return self.objectForKey(key, default)
 
 	def objectForKey(self, key, default=NoDefault):
-		""" Returns an object from the store by it's given key. If no default is given and the object is not in the store, then an exception is raised. Note: This method doesn't currently fetch objects from the persistent store. """
+		"""Return an object from the store by it's given key.
+
+		If no default is given and the object is not in the store,
+		then an exception is raised.  Note: This method doesn't currently
+		fetch objects from the persistent store.
+
+		"""
 		if default is NoDefault:
 			return self._objects[key]
 		else:
 			return self._objects.get(key, default)
 
-	def add(self, object, noRecurse=0):
+	def add(self, object, noRecurse=False):
 		return self.addObject(object, noRecurse)
 
-	def addObject(self, object, noRecurse=0):
-		"""
-		Add the object and all referenced objects to the store.
-		You can insert the same object multiple times, and you can insert an object that was
-		loaded from the store.  In those cases, this is a no-op.
-		The noRecurse flag is used internally, and should be avoided in regular
-		MiddleKit usage; it causes only this object to be added to the store,
-		not any dependent objects.
+	def addObject(self, object, noRecurse=False):
+		"""Add the object and all referenced objects to the store.
+
+		You can insert the same object multiple times, and you can insert
+		an object that was loaded from the store.  In those cases, this is
+		a no-op.  The noRecurse flag is used internally, and should be avoided
+		in regular MiddleKit usage; it causes only this object to be added
+		to the store, not any dependent objects.
+
 		"""
 		if not object.isInStore():
 			assert object.key() == None
@@ -183,12 +223,15 @@ class ObjectStore(ModelUser):
 			#self._objects[key] = object
 
 	def deleteObject(self, object):
-		"""
+		"""Delete object.
+
 		Restrictions: The object must be contained in the store and obviously
 		you cannot remove it more than once.
+
 		"""
-		# First check if the delete is possible.  Then do the actual delete.  This avoids partially deleting
-		# objects only to have an exception halt the process in the middle.
+		# First check if the delete is possible.  Then do the actual delete.
+		# This avoids partially deleting objects only to have an exception
+		# halt the process in the middle.
 
 		objectsToDel = {}
 		detaches = []
@@ -209,14 +252,16 @@ class ObjectStore(ModelUser):
 			del self._objects[obj.key()]
 
 	def _deleteObject(self, object, objectsToDel, detaches, superobject=None):
-		"""
-		Compile the list of objects to be deleted. This is a recursive
-		method since deleting one object might be deleting others.
+		"""Compile the list of objects to be deleted.
+
+		This is a recursive method since deleting one object might be
+		deleting others.
 
 		object       - the object to delete
 		objectsToDel - a running dictionary of all objects to delete
 		detaches     - a running list of all detaches (eg, obj.attr=None)
 		superobject  - the object that was the cause of this invocation
+
 		"""
 		# Some basic assertions
 		assert self.hasObject(object), safeDescription(object)
@@ -263,10 +308,14 @@ class ObjectStore(ModelUser):
 		# objects will themselves be deleted.
 
 		# Remove from that list anything in the cascaded list
-		referencingObjectsAndAttrs = [(o,a) for o,a in referencingObjectsAndAttrs if not objectsToDel.has_key(id(o))]
+		referencingObjectsAndAttrs = [(o, a)
+			for o, a in referencingObjectsAndAttrs
+				if not objectsToDel.has_key(id(o))]
 
 		# Remove from that list anything in the cascaded list
-		referencedAttrsAndObjects = [(a,o) for a,o in referencedAttrsAndObjects if not objectsToDel.has_key(id(o))]
+		referencedAttrsAndObjects = [(a, o)
+			for a, o in referencedAttrsAndObjects
+				if not objectsToDel.has_key(id(o))]
 
 		# Check for onDeleteOther=deny
 		badObjectsAndAttrs = []
@@ -300,7 +349,10 @@ class ObjectStore(ModelUser):
 		for referencingObject, referencingAttr in referencingObjectsAndAttrs:
 			onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
 			if onDeleteOther == 'detach':
-				if v: print 'will set %s.%d.%s to None' % (referencingObject.klass().name(), referencingObject.serialNum(), referencingAttr.name())
+				if v:
+					print 'will set %s.%d.%s to None' % (
+						referencingObject.klass().name(),
+						referencingObject.serialNum(), referencingAttr.name())
 				detaches.append((referencingObject, referencingAttr))
 
 		# Detach objects with onDeleteSelf=detach
@@ -310,85 +362,124 @@ class ObjectStore(ModelUser):
 	## Changes ##
 
 	def hasChangesForCurrentThread(self):
-		''' return whether the current thread has changes to be committed '''
+		"""Return whether the current thread has changes to be committed."""
 		if self._threaded:
 			threadid = thread.get_ident()
-			return self._hasChanges.get(threadid,0)
+			return self._hasChanges.get(threadid, False)
 		else:
 			return self._hasChanges
 
 	def hasChanges(self):
-		''' return whether any thread has changes to be committed '''
+		"""Return whether any thread has changes to be committed."""
 		if self._threaded:
-			return 1 in self._hasChanges.values()
+			return True in self._hasChanges.values()
 		return self._hasChanges
 
 	def willChange(self):
 		if self._threaded:
 			threadid = thread.get_ident()
-			self._hasChanges[threadid] = 1
+			self._hasChanges[threadid] = True
 		else:
-			self._hasChanges = 1
+			self._hasChanges = True
 
 	def saveAllChanges(self):
-		""" Commits object changes to the object store by invoking commitInserts(), commitUpdates() and commitDeletions() all of which must by implemented by a concrete subclass. """
-		self.commitDeletions(allThreads=1)
-		self.commitInserts(allThreads=1)
-		self.commitUpdates(allThreads=1)
+		"""Commit object changes to the object store.
+
+		Done by invoking commitInserts(), commitUpdates() and commitDeletions()
+		all of which must by implemented by a concrete subclass.
+
+		"""
+		self.commitDeletions(allThreads=True)
+		self.commitInserts(allThreads=True)
+		self.commitUpdates(allThreads=True)
 		self._hasChanges = {}
 
 	def saveChanges(self):
-		""" Commits object changes to the object store by invoking commitInserts(), commitUpdates() and commitDeletions() all of which must by implemented by a concrete subclass. """
+		"""Commit object changes to the object store.
+
+		Done by invoking commitInserts(), commitUpdates() and commitDeletions()
+		all of which must by implemented by a concrete subclass.
+
+		"""
 		self.commitDeletions()
 		self.commitInserts()
 		self.commitUpdates()
 		if self._threaded:
-			self._hasChanges[thread.get_ident()] = 0
+			self._hasChanges[thread.get_ident()] = False
 		else:
-			self._hasChanges = 0
+			self._hasChanges = False
 
 	def commitInserts(self):
-		""" Invoked by saveChanges() to insert any news objects add since the last save. Subclass responsibility. """
+		"""Commit inserts.
+
+		Invoked by saveChanges() to insert any news objects add since the
+		last save. Subclass responsibility.
+
+		"""
 		raise AbstractError, self.__class__
 
 	def commitUpdates(self):
-		""" Invoked by saveChanges() to update the persistent store with any changes since the last save. """
+		"""Commit updates.
+
+		Invoked by saveChanges() to update the persistent store with any
+		changes since the last save.
+
+		"""
 		raise AbstractError, self.__class__
 
 	def commitDeletions(self):
-		""" Invoked by saveChanges() to delete from the persistent store any objects deleted since the last save. Subclass responsibility. """
+		"""Commit deletions.
+
+		Invoked by saveChanges() to delete from the persistent store any
+		objects deleted since the last save. Subclass responsibility.
+
+		"""
 		raise AbstractError, self.__class__
 
 	def revertChanges(self):
-		""" Discards all insertions and deletions, and restores changed objects to their original values. """
+		"""Revert changes.
+
+		Discards all insertions and deletions, and restores changed objects
+		to their original values.
+
+		"""
 		raise NotImplementedError
 
 
 	## Fetching ##
 
 	def fetchObject(self, className, serialNum, default=NoDefault):
-		""" Subclasses should raise UnknownObjectError if an object with the given className and serialNum does not exist, unless a default value was passed in, in which case that value should be returned. """
+		"""Fetch onkect of a given class.
+
+		Subclasses should raise UnknownObjectError if an object with the
+		given className and serialNum does not exist, unless a default value
+		was passed in, in which case that value should be returned.
+
+		"""
 		raise AbstractError, self.__class__
 
-	def fetchObjectsOfClass(self, className, isDeep=1):
-		""" Fetches all objects of a given class. If isDeep is 1, then all subclasses are also returned. """
+	def fetchObjectsOfClass(self, className, isDeep=True):
+		"""Fetch all objects of a given class.
+
+		If isDeep is True, then all subclasses are also returned.
+
+		"""
 		raise AbstractError, self.__class__
 
 	def fetch(self, *args, **namedArgs):
-		"""
-		An alias for fetchObjectsOfClass().
-		"""
+		"""An alias for fetchObjectsOfClass()."""
 		return self.fetchObjectsOfClass(*args, **namedArgs)
 
 
 	## Other ##
 
 	def clear(self):
-		"""
-		Clears all objects from the memory of the store. This does not
-		delete the objects in the persistent backing. This method can
-		only be invoked if there are no outstanding changes to be
-		saved. You can check for that with hasChanges().
+		"""Clear all objects from the memory of the store.
+
+		This does not delete the objects in the persistent backing.
+		This method can only be invoked if there are no outstanding changes
+		to be saved.  You can check for that with hasChanges().
+
 		"""
 		assert not self.hasChanges()
 		assert self._newObjects.isEmpty()
@@ -399,18 +490,19 @@ class ObjectStore(ModelUser):
 		self._newSerialNum   = -1
 
 	def discardEverything(self):
-		"""
-		Discards all cached objects, including any modification
-		tracking. However, objects in memory will not change state as
-		a result of this call.
+		"""Discard all cached objects.
 
-		This method is a severe form of clear() and is typically used
-		only for debugging or production emergencies.
+		This includes any modification tracking.  However, objects in memory
+		will not change state as a result of this call.
+
+		This method is a severe form of clear() and is typically used only
+		for debugging or production emergencies.
+
 		"""
 		if self._threaded:
 			self._hasChanges     = {}
 		else:
-			self._hasChanges     = 0
+			self._hasChanges     = False
 		self._objects        = self.emptyObjectCache()
 		self._newObjects.clear()
 		self._deletedObjects.clear()
@@ -421,19 +513,32 @@ class ObjectStore(ModelUser):
 	## Notifications ##
 
 	def objectChanged(self, object):
-		"""
-		MiddleObjects must send this message when one of their interesting attributes change, where an attribute is interesting if it's listed in the class model.
-		This method records the object in a set for later processing when the store's changes are saved.
+		"""Mark attributes as changed.
+
+		MiddleObjects must send this message when one of their interesting
+		attributes change, where an attribute is interesting if it's listed
+		in the class model.  This method records the object in a set for
+		later processing when the store's changes are saved.
 		If you subclass MiddleObject, then you're taken care of.
+
 		"""
 		self.willChange()
-		self._changedObjects[object] = object  # @@ 2000-10-06 ce: Should this be keyed by the object.key()? Does it matter?
+		self._changedObjects[object] = object
+		# @@ 2000-10-06 ce: Should this be keyed by the object.key()? Does it matter?
 
 
 	## Serial numbers ##
 
 	def newSerialNum(self):
-		""" Returns a new serial number for a newly created object. This is a utility methods for objects that have been created, but not yet committed to the persistent store. These serial numbers are actually temporary and replaced upon committal. Also, they are always negative to indicate that they are temporary, whereas serial numbers taken from the persistent store are positive. """
+		"""Return a new serial number for a newly created object.
+
+		This is a utility methods for objects that have been created, but
+		not yet committed to the persistent store. These serial numbers are
+		actually temporary and replaced upon committal. Also, they are always
+		negative to indicate that they are temporary, whereas serial numbers
+		taken from the persistent store are positive.
+
+		"""
 		self._newSerialNum -= 1
 		return self._newSerialNum
 
@@ -441,11 +546,15 @@ class ObjectStore(ModelUser):
 	## Self utility ##
 
 	def _klassForClass(self, aClass):
-		""" Returns a Klass object for the given class, which may be:
+		"""Return a Klass object for the given class.
+
+		This may be:
 			- the Klass object already
 			- a Python class
 			- a class name (e.g., string)
-		Users of this method include the various fetchObjectEtc() methods which take a "class" parameter.
+		Users of this method include the various fetchObjectEtc() methods
+		which take a "class" parameter.
+
 		"""
 		import types
 		assert aClass is not None
@@ -464,5 +573,11 @@ class ObjectStore(ModelUser):
 class Attr:
 
 	def shouldRegisterChanges(self):
-		""" MiddleObject asks attributes if changes should be registered. By default, all attributes respond true, but specific stores may choose to override this (a good example being ListAttr for SQLStore). """
-		return 1
+		"""Return whether changes should be registered.
+
+		MiddleObject asks attributes if changes should be registered.
+		By default, all attributes respond true, but specific stores may
+		choose to override this (a good example being ListAttr for SQLStore).
+
+		"""
+		return True

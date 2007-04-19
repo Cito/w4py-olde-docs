@@ -15,7 +15,7 @@ class BenchCSVParser:
 		self._iters = 100
 
 	def main(self):
-		if len(sys.argv)>1 and sys.argv[1].lower().startswith('prof'):
+		if len(sys.argv) > 1 and sys.argv[1].lower().startswith('prof'):
 			self._shouldProfile = 1
 		if self._shouldRunTestSuite:
 			from TestCSVParser import main
@@ -59,5 +59,5 @@ class BenchCSVParser:
 				self.parse(line)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	BenchCSVParser().main()

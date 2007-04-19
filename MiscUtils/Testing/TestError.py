@@ -20,7 +20,7 @@ def test():
 	print 'str: ', err
 	print 'repr:', repr(err)
 	assert err.object() is test
-	assert err.message()=='test'
+	assert err.message() == 'test'
 	print
 
 	err = Error(None, '', a=5, b='.')
@@ -71,5 +71,5 @@ class TestError(unittest.TestCase):
 		assert type(err['b']) is types.StringType
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	test()

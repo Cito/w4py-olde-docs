@@ -27,7 +27,7 @@ class Attr(MiddleDict, ModelObject):
 				value = None
 			self[key] = value
 		match = nameRE.match(self['Name'])
-		if match is None or len(match.groups())!=1:
+		if match is None or len(match.groups()) != 1:
 			raise ValueError, 'Bad name (%r) for attribute: %r.' % (self['Name'], dict)
 		self._getPrefix = None
 		self._setPrefix = None

@@ -30,7 +30,7 @@ class AdminPage(SidebarPage):
 		self.menuItem('Config', 'Config')
 		self.menuItem('Plug-ins', 'PlugIns')
 		self.menuItem('Servlet cache', 'ServletCache')
-		self.menuItem('Application Control','AppControl')
+		self.menuItem('Application Control', 'AppControl')
 		self.menuItem('Logout', 'Main?logout=yes')
 
 	def fileSize(self, filename):

@@ -52,7 +52,7 @@ class PSPParser:
 
 	checklist = []
 
-	def __init__(self,ctxt):
+	def __init__(self, ctxt):
 		self._reader = ctxt.getReader()
 		self._writer = ctxt.getServletWriter()
 		self._handler = None
@@ -61,7 +61,7 @@ class PSPParser:
 		self.tmplStop = 0 #marks the end of HTML code
 		self.currentFile = self._reader.Mark().getFile()
 
-	def setEventHandler(self,handler):
+	def setEventHandler(self, handler):
 		"""Set the handler this parser will use when it finds PSP code."""
 		self._handler = handler
 
@@ -126,7 +126,7 @@ class PSPParser:
 
 	def checkDirective(self, handler, reader):
 		"""Check for directives. I support two right now, page and include."""
-		validDirectives = ['page','include']
+		validDirectives = ['page', 'include']
 		OPEN_DIRECTIVE = r'<%@'
 		CLOSE_DIRECTIVE = r'%>'
 		if reader.Matches(OPEN_DIRECTIVE):
@@ -304,7 +304,7 @@ class PSPParser:
 		CLOSE_METHOD_2 = '</psp:method>'
 		CLOSE_METHOD_3 = '>'
 		attrs = None
-		validAttributes = ('name','params')
+		validAttributes = ('name', 'params')
 		if reader.Matches(OPEN_METHOD):
 			start = reader.Mark()
 			reader.Advance(len(OPEN_METHOD))
@@ -392,7 +392,7 @@ class PSPParser:
 		handler = self._handler
 		while reader.hasMoreInput():
 			# This is for XML style blocks, which I'm not handling yet
-			if until !=None and reader.Matches(until):
+			if until is not None and reader.Matches(until):
 				return
 			#If the file the reader is working on has changed due to a push or pop,
 			#flush any char data from the old file

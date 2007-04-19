@@ -89,8 +89,8 @@ class Image(ExamplePage):
 				im.lines(points, color)
 			else:
 				draw.line(points, color)
-		lines(((0,0), (2*pi, 0)), black) # x-axis
-		lines(((0,-1), (0,1)), black) # y-axis
+		lines(((0, 0), (2*pi, 0)), black) # x-axis
+		lines(((0, -1), (0, 1)), black) # y-axis
 		def f(x): # sin function
 			return (x, sin(x))
 		lines(map(f, map(lambda x: x*2*pi/X, xrange(X+1))), blue)

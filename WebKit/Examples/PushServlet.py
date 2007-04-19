@@ -7,15 +7,16 @@ class PushServlet(Page):
 	"""Pushing Content Demo.
 
 	This is a test servlet for the buffered output streams of the app servers.
-	This probably won't work with the CGI adapters. At least on Apache, the data
-	doesn't seem to get flushed.
+	This probably won't work with the CGI adapters. At least on Apache, the
+	data doesn't seem to get flushed.
 
-	This will not have the expected functionality on Internet Explorer, as it does
-	not support the x-mixed-replace content type. Opera does, though.
+	This will not have the expected functionality on Internet Explorer, as it
+	does not support the x-mixed-replace content type. Opera does, though.
 
 	"""
 
-	boundary = "if-you-see-this-your-browser-does-not-support-multipart/x-mixed-replace"
+	_boundary = "if-you-see-this-your-browser-does-not-support" \
+		"-multipart/x-mixed-replace"
 
 	def respond(self, transaction):
 		# this isn't necessary, but it's here as an example:
@@ -34,10 +35,10 @@ class PushServlet(Page):
 
 	def initialHeader(self):
 		self.response().setHeader("Content-type",
-			"multipart/x-mixed-replace; boundary=" + self.boundary)
+			"multipart/x-mixed-replace; boundary=" + self._boundary)
 
 	def sendBoundary(self):
-		self.write("--" + self.boundary)
+		self.write("--" + self._boundary)
 
 	def sendLF(self):
 		self.write("\r\n")
@@ -63,8 +64,8 @@ class PushServlet(Page):
 		if not count or count == 3:
 			wr('<h4>Note:</h4>')
 			if count == 5:
-				wr("<p>If you didn't get output for the last 30 seconds,"
-					" pushing contents is not supported.</p>")
+				wr("<p>If you didn't get output for the last 30 seconds, "
+					"pushing contents is not supported.</p>")
 			wr('<p>The Browser needs to support the <tt>x-mixed-replace</tt>'
 				' content type. Current versions of the Microsoft Internet'
 				' Explorer and other browsers may not have this functionality.'

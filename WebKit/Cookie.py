@@ -89,10 +89,11 @@ class Cookie(Object):
 		self._cookie = self._cookies[name]
 
 	def __repr__(self):
-		return '%s(id=0x%x, name=%r, domain=%r,' \
-			' path=%r, value=%r, expires=%r, maxAge=%r)' % (
-			self.__class__.__name__, positiveid(self), self.name(), self.domain(),
-			self.path(), self.value(), self.expires(), self.maxAge())
+		return ('%s(id=0x%x, name=%r, domain=%r, '
+				'path=%r, value=%r, expires=%r, maxAge=%r)'
+			% (self.__class__.__name__, positiveid(self),
+				self.name(), self.domain(),
+				self.path(), self.value(), self.expires(), self.maxAge()))
 
 
 	## Accessors ##

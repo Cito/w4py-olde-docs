@@ -67,9 +67,9 @@ global addr
 global running
 running = 0
 
-statstr = dumps({'format':'STATUS',})
+statstr = dumps({'format': 'STATUS'})
 statstr = dumps(len(statstr)) + statstr
-quitstr = dumps({'format':'QUIT',})
+quitstr = dumps({'format': 'QUIT'})
 quitstr = dumps(len(quitstr)) + quitstr
 
 debug = 1
@@ -95,7 +95,7 @@ def startupCheck():
 	while 1:
 		if checkServer(0):
 			break
-		count = count + monitorInterval
+		count += monitorInterval
 		if count > maxStartTime:
 			print "Couldn't start AppServer."
 			print "Killing AppServer..."
@@ -238,7 +238,7 @@ def shutDown(signum, frame):
 		print e
 		print "No Response to shutdown request, performing hard kill."
 		os.kill(srvpid, signal.SIGINT)
-		os.waitpid(srvpid,0)
+		os.waitpid(srvpid, 0)
 	sys.stdout.flush()
 	sys.stderr.flush()
 	return 0
@@ -288,7 +288,7 @@ arguments = ["start", "stop"]
 servernames = ["AsyncThreadedAppServer", "ThreadedAppServer"]
 optionalargs = ["daemon"]
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	global addr
 
 	if os.name != 'posix':
@@ -324,7 +324,7 @@ if __name__=='__main__':
 
 	cfgfile = open(os.path.join(wwdir, "WebKit",
 		"Configs/AppServer.config")).read()
-	cfg = { 'True': 1==1, 'False': 1==0, 'WebwarePath': wwdir }
+	cfg = {'True': 1 == 1, 'False': 1 == 0, 'WebwarePath': wwdir}
 	if cfgfile.lstrip().startswith('{'):
 		cfg = eval(cfgfile, cfg)
 	else:
@@ -348,7 +348,7 @@ if __name__=='__main__':
 
 	for i in servernames:
 		if i in args:
-			serverName=i
+			serverName = i
 
 	if 'daemon' in args: # fork and become a daemon
 		daemon = os.fork()

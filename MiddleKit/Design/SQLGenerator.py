@@ -8,11 +8,11 @@ from MiscUtils import AbstractError, StringTypes, CSVParser
 
 class SampleError:
 
-	def __init__(self,line,error):
+	def __init__(self, line, error):
 		self._line = line
 		self._error = error
 
-	def write(self,filename):
+	def write(self, filename):
 		print '%s:%d: %s' % (filename, self._line, self._error)
 
 
@@ -1065,7 +1065,7 @@ class PrimaryKey:
 		return self.name()
 
 	def get(self, key, default=0):
-		return self._props.get(key,default)
+		return self._props.get(key, default)
 
 	def sqlForSampleInput(self, input):
 		return input

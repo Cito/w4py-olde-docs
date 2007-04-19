@@ -21,7 +21,7 @@ class ObjectKey:
 
 	def initFromClassNameAndSerialNum(self, className, serialNum):
 		assert className is not None
-		assert serialNum>0
+		assert serialNum > 0
 		self._className = className
 		self._serialNum = serialNum
 		return self

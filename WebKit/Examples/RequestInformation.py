@@ -13,8 +13,8 @@ class RequestInformation(ExamplePage):
 		self.dict('HTTPRequest._environ', self.request()._environ)
 		self.dict('Cookies', self.request().cookies())
 		self.writeln('</table>')
-		self.response().setCookie('TestCookieName','CookieValue')
-		self.response().setCookie('TestExpire1','Expires in 1 minutes', expires='+1m')
+		self.response().setCookie('TestCookieName', 'CookieValue')
+		self.response().setCookie('TestExpire1', 'Expires in 1 minutes', expires='+1m')
 
 	def pair(self, key, value):
 		valueType = type(value)

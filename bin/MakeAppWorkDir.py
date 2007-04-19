@@ -301,7 +301,8 @@ class MakeAppWorkDir:
 			'ErrorMsgs': '[a-zA-Z0-9]*',
 			'Logs': '[a-zA-Z0-9]*',
 			'Sessions': '[a-zA-Z0-9]*',
-			self._contextName: '*.pyc\n*.pyo' }
+			self._contextName: '*.pyc\n*.pyo'
+		}
 		foundFiles = 0
 		for dir, contents in files.items():
 			filename = os.path.join(self._workDir,
@@ -322,7 +323,7 @@ class MakeAppWorkDir:
 		self.msg("Changing the ownership...")
 		uid = self._uid
 		if uid is None:
-			uid =os.getuid()
+			uid = os.getuid()
 		gid = self._gid
 		if gid is None:
 			gid = os.getgid()

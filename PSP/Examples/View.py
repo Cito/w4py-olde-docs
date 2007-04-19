@@ -1,5 +1,6 @@
-from PSP.Examples.PSPExamplePage import PSPExamplePage
 import os
+from PSP.Examples.PSPExamplePage import PSPExamplePage
+
 
 class View(PSPExamplePage):
 	"""View the source of a PSP page.

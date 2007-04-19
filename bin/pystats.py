@@ -58,13 +58,13 @@ Py 2.0: Use dict.setdefault() & +=
 """
 
 
-import os, re, string, sys
+import os, re, sys
 from UserDict import UserDict
 
 
 class Stats(UserDict):
 
-	statNames = string.split('files bytes lines funcs classes')
+	statNames = 'files bytes lines funcs classes'.split()
 
 	def __init__(self, dict=None):
 		UserDict.__init__(self, dict)
@@ -79,7 +79,12 @@ class Stats(UserDict):
 		return result
 
 	def copy(self):
-		""" Returns a real copy/duplicate of the receiver. (Note that userDict.copy() will do so, but subclassOfUserDict.copy() does not.) """
+		"""Return a real copy/duplicate of the receiver.
+
+		Note that userDict.copy() will do so,
+		but subclassOfUserDict.copy() does not.
+
+		"""
 		return self.__class__(self.data)
 
 	def write(self, file=sys.stdout):
@@ -87,9 +92,9 @@ class Stats(UserDict):
 			file.write('%8d' % self[name])
 
 def Stats_writeHeaders(nameWidth, file=sys.stdout):
-	""" This would be a class method in other OO languages: Stats.writeHeaders(). """
+	# This would be a class method in Python >= 2.2: Stats.writeHeaders().
 	file.write(' '*nameWidth)
-	for name in Stats.statNames:
+	for name in Stats._statNames:
 		file.write('%8s' % name)
 	file.write('\n')
 
@@ -112,7 +117,7 @@ class StatsNode:
 		self._totalStats = self._stats.copy()
 		for node in self._subNodes.values():
 			node.computeTotal()
-			self._totalStats = self._totalStats + node._totalStats
+			self._totalStats += node._totalStats
 
 	def processDir(self, dirName, extensions, recurse=1):
 		exceptions = (os.curdir, os.pardir, 'CVS', '.svn')
@@ -137,22 +142,22 @@ class StatsNode:
 		contents = open(pathname).read()
 
 		stats = self._stats
-		stats['bytes']   = stats['bytes'] + len(contents)
-		stats['lines']   = stats['lines'] + contents.count('\n')
-		stats['funcs']   = stats['funcs'] + len(self.funcDefRE.findall(contents))
-		stats['classes'] = stats['classes'] + len(self.classDefRE.findall(contents))
-		stats['files']   = stats['files'] + 1
+		stats['bytes'] += len(contents)
+		stats['lines'] += contents.count('\n')
+		stats['funcs'] += len(self.funcDefRE.findall(contents))
+		stats['classes'] += len(self.classDefRE.findall(contents))
+		stats['files'] += 1
 
 	def write(self, file=sys.stdout, recurse=1, indent=0, indenter='  '):
-		if indent==0:
+		if indent == 0:
 			Stats_writeHeaders(25, file)
 		spacer = indenter * indent
-		name = string.ljust(self._name, 25-len(spacer))
+		name = self._name.ljust(25-len(spacer))
 		file.write(spacer+name)
 		self._totalStats.write(file)
 		file.write('\n')
 		if recurse:
-			indent = indent + 1
+			indent += 1
 			keys = self._subNodes.keys()
 			keys.sort()
 			for key in keys:
@@ -160,6 +165,7 @@ class StatsNode:
 
 
 class PyStats:
+
 
 	## Init ##
 
@@ -232,23 +238,23 @@ Examples:
 
 	def readArgs(self, args=sys.argv):
 		for arg in args[1:]:
-			if arg=='-h' or arg=='--help':
+			if arg == '-h' or arg == '--help':
 				self.usage()
 				return 0
-			elif arg=='-r':
+			elif arg == '-r':
 				self.setRecurse(1)
-			elif arg=='-R':
+			elif arg == '-R':
 				self.setRecurse(0)
-			elif arg=='-s':
+			elif arg == '-s':
 				self.setShowSummary(1)
-			elif arg=='-S':
+			elif arg == '-S':
 				self.setShowSummary(0)
 			# We don't have any use for a verbose option right now.
-			#elif arg=='-v':
-			#	self.setVerbose(1)
-			#elif arg=='-V':
-			#	self.setVerbose(0)
-			elif arg[0]=='-':
+			# elif arg == '-v':
+			#     self.setVerbose(1)
+			# elif arg == '-V':
+			#     self.setVerbose(0)
+			elif arg[0] == '-':
 				self.usage()
 				return 0
 			else:
@@ -271,5 +277,5 @@ Examples:
 		self._rootNode.write(file, recurse)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	PyStats().main()

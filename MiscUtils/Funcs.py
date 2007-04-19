@@ -61,7 +61,7 @@ def charWrap(s, width, hanging=0):
 	i = 0
 	while i < len(lines):
 		s = lines[i]
-		while len(s)>width:
+		while len(s) > width:
 			t = s[width:]
 			s = s[:width]
 			lines[i] = s
@@ -102,10 +102,10 @@ else:
 	except ImportError:
 		class _Counter:
 			def __init__(self):
-				self.i = 0
+				self._counter = 0
 			def get_next(self):
-				self.i += 1
-				return self.i
+				self._counter += 1
+				return self._counter
 		_counter = _Counter()
 
 	def mktemp(suffix="", dir=None):

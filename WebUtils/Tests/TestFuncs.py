@@ -117,7 +117,7 @@ def TestHTMLEncodeAndDecode():
 	TestEncodeAndDecode(htmlEncode, htmlDecode, HTMLEncodeTests)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 
 	# To remove allChars, change to 'if 1:'
 	# (With allChars, we look really good - URLEncode() is 6 X faster.

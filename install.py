@@ -12,20 +12,23 @@ FUTURE
 
 import os, sys
 from glob import glob
+
 from MiscUtils import StringIO
 from MiscUtils.PropertiesObject import PropertiesObject
 
 
 class OutputCatcher:
 	"""Auxiliary class for logging output."""
+
 	def __init__(self, output, log):
-		self.output = output
-		self.log = log
+		self._output = output
+		self._log = log
+
 	def write(self, stuff):
 		if stuff:
-			self.output.write(stuff)
-			self.output.flush()
-			self.log.append(stuff)
+			self._output.write(stuff)
+			self._output.flush()
+			self._log.append(stuff)
 
 
 class Installer:
@@ -50,10 +53,13 @@ class Installer:
 		self._autotoc = AutoToC()
 
 
-	## debug printing facility ##
+	## Debug printing facility ##
 
-	def _nop (self, msg): pass
-	def _printMsg (self, msg): print '  ' + msg
+	def _nop (self, msg):
+		pass
+
+	def _printMsg (self, msg):
+		print '  ' + msg
 
 
 	## Running the installation ##
@@ -106,7 +112,7 @@ class Installer:
 		self.printKeyValue('Cur Dir', os.getcwd())
 		print
 
-	def checkPyVersion(self, minver=(2,0)):
+	def checkPyVersion(self, minver=(2, 0)):
 		"""Check for minimum required Python version."""
 		try:
 			ver = sys.version_info[:len(minver)]
@@ -667,6 +673,7 @@ Installation is finished.''' % ((os.sep,)*2)
 	def processPyTemplate(self, input, props):
 		"""Process a Python template."""
 		global scope
+
 		def header(title, titleclass=None, style=None):
 			"""Get the header of a document."""
 			if not titleclass:
@@ -688,9 +695,11 @@ Installation is finished.''' % ((os.sep,)*2)
 					'<!--', style, '-->', '</style>'))
 			css = '\n'.join(css)
 			return scope['htHeader'] % locals()
+
 		def footer():
 			"""Get the footer of a document."""
 			return scope['htFooter']
+
 		scope = props.copy()
 		try:
 			scope = dict(props)
@@ -725,7 +734,7 @@ if __name__ == '__main__':
 	else:
 		for o, a in opts:
 			if o in ("-v", "--verbose"):
-				verbose=1
+				verbose = 1
 			elif o == "--no-password-prompt":
 				passprompt = 0
 			elif o == "--set-password":

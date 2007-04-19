@@ -116,6 +116,7 @@ def _dummy_signal(*args, **kwargs):
 import signal
 signal.signal = _dummy_signal
 
+
 class AppServerService(win32serviceutil.ServiceFramework):
 
 	_svc_name_ = serviceName
@@ -265,10 +266,11 @@ class AppServerService(win32serviceutil.ServiceFramework):
 				sys.stdout, sys.stderr = stdout, stderr
 				log.close()
 
+
 ## Main ##
 
 def main():
 	win32serviceutil.HandleCommandLine(AppServerService)
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main()

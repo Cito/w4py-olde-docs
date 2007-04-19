@@ -21,16 +21,16 @@ class ListBox(ExamplePage):
 		ExamplePage.awake(self, transaction)
 		sess = self.session()
 		if sess.hasValue('vars'):
-			self.vars = sess.value('vars')
+			self._vars = sess.value('vars')
 		else:
-			self.vars = {
+			self._vars = {
 				'list':      [],
 				'height':    10,
 				'width':    250,
 				'newCount':   1,
 				'formCount':  1,
 			}
-			sess.setValue('vars', self.vars)
+			sess.setValue('vars', self._vars)
 		self._error = None
 
 	def writeContent(self):
@@ -38,7 +38,7 @@ class ListBox(ExamplePage):
 		wr('<div style="text-align:center">')
 		if debug:
 			wr('<p>fields = %s</p>' % enc(str(self.request().fields())))
-			wr('<p>vars = %s</p>' % enc(str(self.vars)))
+			wr('<p>vars = %s</p>' % enc(str(self._vars)))
 		# Intro text is provided by our class' doc string:
 		intro = self.__class__.__doc__.split('\n\n')
 		wr('<h2>%s</h2>' % intro.pop(0))
@@ -50,9 +50,9 @@ class ListBox(ExamplePage):
 <input name="formCount" type="hidden" value="%(formCount)d">
 <select multiple="yes" name="list" size="%(height)d"
 style="width:%(width)dpt;text-align:center">
-''' % self.vars)
+''' % self._vars)
 		index = 0
-		for item in self.vars['list']:
+		for item in self._vars['list']:
 			wr('<option value="%d">%s</option>' % (index, enc(item['name'])))
 			index += 1
 		wr('''
@@ -83,9 +83,9 @@ style="width:%(width)dpt;text-align:center">
 	def new(self):
 		"""Add a new item to the list box."""
 		req = self.request()
-		self.vars['list'].append(
-			{'name': 'New item %d' % self.vars['newCount']})
-		self.vars['newCount'] += 1
+		self._vars['list'].append(
+			{'name': 'New item %d' % self._vars['newCount']})
+		self._vars['newCount'] += 1
 		self.writeBody()
 
 	def delete(self):
@@ -100,27 +100,27 @@ style="width:%(width)dpt;text-align:center">
 			indices.reverse() # in reverse order
 			# remove the objects:
 			for index in indices:
-				del self.vars['list'][index]
+				del self._vars['list'][index]
 		else:
 			self._error = 'You must select a row to delete.'
 		self.writeBody()
 
 	def taller(self):
-		self.vars['height'] += self.heightChange()
+		self._vars['height'] += self.heightChange()
 		self.writeBody()
 
 	def shorter(self):
-		if self.vars['height'] > 2:
-			self.vars['height'] -= self.heightChange()
+		if self._vars['height'] > 2:
+			self._vars['height'] -= self.heightChange()
 		self.writeBody()
 
 	def wider(self):
-		self.vars['width'] += self.widthChange()
+		self._vars['width'] += self.widthChange()
 		self.writeBody()
 
 	def narrower(self):
-		if self.vars['width'] >= 60:
-			self.vars['width'] -= self.widthChange()
+		if self._vars['width'] >= 60:
+			self._vars['width'] -= self.widthChange()
 		self.writeBody()
 
 
@@ -133,8 +133,8 @@ style="width:%(width)dpt;text-align:center">
 			formCount = int(self.request().field('formCount'))
 		except:
 			formCount = 0
-		if formCount == self.vars['formCount']:
+		if formCount == self._vars['formCount']:
 			acts.extend(['new', 'delete',
 				'taller', 'shorter', 'wider', 'narrower'])
-			self.vars['formCount'] += 1
+			self._vars['formCount'] += 1
 		return acts

@@ -4,12 +4,13 @@ import os, string, sys
 class AdminPage:
 	"""
 	AdminPage is the abstract superclass of all CGI Wrapper administration CGI classes.
-	
+
 	Subclasses typically override title() and writeBody(), but may customize other methods.
-	
+
 	Subclasses use self._var for the various vars that are passed in from CGI Wrapper
 	and self.write() and self.writeln().
-	"""	
+	"""
+
 
 	## Init ##
 
@@ -20,7 +21,7 @@ class AdminPage:
 
 
 	## HTML ##
-	
+
 	def html(self):
 		self._html = []
 		self.writeHeader()
@@ -28,7 +29,7 @@ class AdminPage:
 		self.writeFooter()
 		return string.join(self._html, '')
 
-		
+
 	## Utility methods ##
 
 	def write(self, *args):
@@ -40,7 +41,7 @@ class AdminPage:
 			self._html.append(str(arg))
 		self._html.append('\n')
 
-		
+
 	## Content methods ##
 
 	def writeHeader(self):
@@ -63,7 +64,7 @@ class AdminPage:
 
 	def bodyTags(self):
 		return 'color=black bgcolor=white'
-	
+
 	def writeBanner(self):
 		self.writeln('''<table align=center bgcolor=darkblue cellpadding=5 cellspacing=0 width=100%%>
 			<tr><td align=center>

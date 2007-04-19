@@ -1,4 +1,5 @@
-"""
+"""PickleRPC.py
+
 PickleRPC provides a Server object for connection to Pickle-RPC servers
 for the purpose of making requests and receiving the responses.
 
@@ -74,8 +75,8 @@ xmlrpclib and then transformed from XML-orientation to Pickle-orientation.
 
 The zlib compression was adapted from code by Skip Montanaro that I found
 here: http://manatee.mojam.com/~skip/python/
-"""
 
+"""
 
 __version__ = 1   # version of PickleRPC protocol
 
@@ -159,6 +160,7 @@ class SafeUnpickler:
 	Note that the PickleRPCServlet class in WebKit is derived from this class
 	and uses its load() and loads() methods to do all unpickling.
 	"""
+
 	def allowedGlobals(self):
 		"""
 		Must return a list of (moduleName, klassName) tuples for all
@@ -215,21 +217,21 @@ class Server:
 		type, uri = urllib.splittype(uri)
 		if type not in ("http", "https"):
 			raise IOError, "unsupported Pickle-RPC protocol"
-		self.__host, self.__handler = urllib.splithost(uri)
-		if not self.__handler:
-			self.__handler = "/PickleRPC"
+		self._host, self._handler = urllib.splithost(uri)
+		if not self._handler:
+			self._handler = "/PickleRPC"
 
 		if transport is None:
 			if type == "https":
 				transport = SafeTransport()
 			else:
 				transport = Transport()
-		self.__transport = transport
+		self._transport = transport
 
-		self.__verbose = verbose
-		self.__binary = binary
-		self.__compressRequest = compressRequest
-		self.__acceptCompressedResponse = acceptCompressedResponse
+		self._verbose = verbose
+		self._binary = binary
+		self._compressRequest = compressRequest
+		self._acceptCompressedResponse = acceptCompressedResponse
 
 	def _request(self, methodName, args, keywords):
 		"""
@@ -242,24 +244,24 @@ class Server:
 			'args':       args,
 			'keywords':   keywords,
 		}
-		if self.__binary:
+		if self._binary:
 			request = dumps(request, 1)
 		else:
 			request = dumps(request)
-		if zlib is not None and self.__compressRequest and len(request) > 1000:
+		if zlib is not None and self._compressRequest and len(request) > 1000:
 			request = zlib.compress(request, 1)
 			compressed = 1
 		else:
 			compressed = 0
 
-		response = self.__transport.request(
-			self.__host,
-			self.__handler,
+		response = self._transport.request(
+			self._host,
+			self._handler,
 			request,
-			verbose=self.__verbose,
-			binary=self.__binary,
+			verbose=self._verbose,
+			binary=self._binary,
 			compressed=compressed,
-			acceptCompressedResponse=self.__acceptCompressedResponse
+			acceptCompressedResponse=self._acceptCompressedResponse
 			)
 
 		return response
@@ -276,13 +278,13 @@ class Server:
 			raise RequestError, 'Response does not have a value, expection or requestError.'
 
 	def __repr__(self):
-		return "<%s for %s%s>" % (self.__class__.__name__, self.__host, self.__handler)
+		return "<%s for %s%s>" % (self.__class__.__name__, self._host, self._handler)
 
 	__str__ = __repr__
 
 	def __getattr__(self, name):
 		# magic method dispatcher
-		return _Method(self.__requestValue, name)
+		return _Method(self._requestValue, name)
 
 	# note: to call a remote object with an non-standard name, use
 	# result getattr(server, "strange-python-name")(args)
@@ -299,14 +301,14 @@ class _Method:
 	"""
 
 	def __init__(self, send, name):
-		self.__send = send
-		self.__name = name
+		self._send = send
+		self._name = name
 
 	def __getattr__(self, name):
-		return _Method(self.__send, "%s.%s" % (self.__name, name))
+		return _Method(self._send, "%s.%s" % (self._name, name))
 
 	def __call__(self, *args, **keywords):  # note that keywords are supported
-		return self.__send(self.__name, args, keywords)
+		return self._send(self._name, args, keywords)
 
 
 class Transport(SafeUnpickler):
@@ -376,7 +378,7 @@ class Transport(SafeUnpickler):
 		connection.putheader("User-Agent", self.user_agent)
 
 	def send_content(self, connection, request_body, binary=0, compressed=0,
-					 acceptCompressedResponse=0):
+			acceptCompressedResponse=0):
 		if binary:
 			connection.putheader("Content-Type", "application/x-python-binary-pickled-dict")
 		else:
@@ -398,6 +400,7 @@ class Transport(SafeUnpickler):
 		# @@ gat: could this be made more memory-efficient?
 		return self.loads(zlib.decompress(f.read()))
 
+
 class SafeTransport(Transport):
 	"""
 	Handles an HTTPS transaction to a Pickle-RPC server.
@@ -414,8 +417,8 @@ class SafeTransport(Transport):
 		try:
 			HTTPS = httplib.HTTPS
 		except AttributeError:
-			raise NotImplementedError,\
-				  "your version of httplib doesn't support HTTPS"
+			raise NotImplementedError, \
+				"your version of httplib doesn't support HTTPS"
 		else:
 			return apply(HTTPS, (host, None), x509)
 
@@ -423,4 +426,3 @@ class SafeTransport(Transport):
 		if isinstance(host, types.TupleType):
 			host, x509 = host
 		connection.putheader("Host", host)
-

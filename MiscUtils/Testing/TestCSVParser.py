@@ -5,7 +5,7 @@ import unittest
 from MiscUtils.CSVParser import CSVParser, ParseError
 
 
-class CSVParserTests( unittest.TestCase ):
+class CSVParserTests(unittest.TestCase):
 	"""
 	TO DO
 
@@ -35,7 +35,7 @@ class CSVParserTests( unittest.TestCase ):
 		tests = [
 			# basics
 			('', []),
-			(',', ['','']),
+			(',', ['', '']),
 			(',,', ['', '', '']),
 			('a', ['a']),
 			('a,b', ['a', 'b']),
@@ -81,12 +81,14 @@ class CSVParserTests( unittest.TestCase ):
 			('''a,"Enums='b, c'"''', ['a', "Enums='b, c'"]),
 		]
 		for input, output in tests:
-			if input.find('\n')==-1:
+			if input.find('\n') == -1:
 				# single line
 				result = self.parse(input)
-				assert result==output, '\ninput=%r\nresult=%r\noutput=%r' % (input, result, output)
+				assert result == output, '\ninput=%r\nresult=%r\noutput=%r'\
+					% (input, result, output)
 				result = self.parse(input+'\n')
-				assert result==output, '\ninput=%r\nresult=%r\noutput=%r' % (input, result, output)
+				assert result == output, '\ninput=%r\nresult=%r\noutput=%r' \
+					% (input, result, output)
 			else:
 				# multiple lines
 				gotFields = 0
@@ -96,12 +98,13 @@ class CSVParserTests( unittest.TestCase ):
 					if result is not None:
 						gotFields = 1
 				assert gotFields
-				assert result==output, '\ninput=%r\nresult=%r\noutput=%r' % (input, result, output)
+				assert result == output, '\ninput=%r\nresult=%r\noutput=%r' \
+					% (input, result, output)
 
 def main():
 	suite = unittest.makeSuite(CSVParserTests, 'test')
 	runner = unittest.TextTestRunner()
 	runner.run(suite)
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main()

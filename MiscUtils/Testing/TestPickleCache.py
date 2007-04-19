@@ -8,6 +8,7 @@ def writePickleCache(data, filename, pickleVersion=1, source=None, verbose=None)
 
 import unittest
 import os
+import time
 from MiscUtils.PickleCache import *
 
 # the directory that this file is in:
@@ -30,10 +31,10 @@ class TestPickleCache(unittest.TestCase):
 		# print 'Success.'
 
 	def oneIterTest(self):
-		sourcePath = self.sourcePath = os.path.join(progDir, 'foo.dict')
-		picklePath = self.picklePath = PickleCache().picklePath(sourcePath)
+		sourcePath = self._sourcePath = os.path.join(progDir, 'foo.dict')
+		picklePath = self._picklePath = PickleCache().picklePath(sourcePath)
 		self.remove(picklePath) # make sure we're clean
-		data = self.data = {'x': 1}
+		data = self._data = {'x': 1}
 		self.writeSource()
 		try:
 			# test 1: no pickle cache yet
@@ -63,7 +64,7 @@ class TestPickleCache(unittest.TestCase):
 				self.writePickle()
 				# we have to allow for the granularity of getmtime()
 				# (see the comment in the docstring of PickleCache.py)
-				import time; time.sleep(2)
+				time.sleep(2)
 				self.writeSource()
 				assert readPickleCache(sourcePath) is None
 				self.writePickle() # restore
@@ -78,16 +79,16 @@ class TestPickleCache(unittest.TestCase):
 			pass
 
 	def writeSource(self):
-		f = open(self.sourcePath, 'w')
-		f.write(str(self.data))
+		f = open(self._sourcePath, 'w')
+		f.write(str(self._data))
 		f.close()
 
 	def writePickle(self):
-		assert not os.path.exists(self.picklePath)
-		writePickleCache(self.data, self.sourcePath, pickleVersion=1, source='test')
+		assert not os.path.exists(self._picklePath)
+		writePickleCache(self._data, self._sourcePath, pickleVersion=1, source='test')
 		if havePython22OrGreater:
-			assert os.path.exists(self.picklePath)
+			assert os.path.exists(self._picklePath)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	TestPickleCache().test()

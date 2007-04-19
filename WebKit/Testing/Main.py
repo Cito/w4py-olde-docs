@@ -50,7 +50,7 @@ class Main(SidebarPage):
 			for url, urlName in urls:
 				wr('<a href=%s>%s</a><br>' % (url, urlName))
 			wr('<td>%s</td></tr>' % expectation)
-			caseNum = caseNum + 1
+			caseNum += 1
 		wr('</table>')
 
 	def readFileNamed(self, filename):
@@ -74,13 +74,13 @@ class Main(SidebarPage):
 		cases = []
 		urls = []
 		for line in lines:
-			if line and line[0]!='#':
+			if line and line[0] != '#':
 				if line[-1] == '\\': # continuation line;
 					# means there are multiple URLs for this case
 					urls.append(line[:-1].strip())
 				else:
 					parts = line.split('-->')
-					if len(parts)!=2:
+					if len(parts) != 2:
 						self.error('Invalid line at %d.' % lineNum)
 					urls.append(parts[0].strip())
 					cases.append({
@@ -88,7 +88,7 @@ class Main(SidebarPage):
 						'Expectation': parts[1].strip(),
 					})
 					urls = [] # reset list of URLs
-			lineNum = lineNum + 1
+			lineNum += 1
 		return cases
 
 	def writeNotes(self):

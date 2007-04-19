@@ -101,12 +101,12 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 					raise RequestError, 'Cannot unpickle dict-rpc request.'
 				if not isinstance(req, types.DictType):
 					raise RequestError, \
-						'Expecting a dictionary for dict-rpc requests,' \
-						' but got %s instead.' % type(dict)
-				if req.get('version', 1)!=1:
+						'Expecting a dictionary for dict-rpc requests, ' \
+						'but got %s instead.' % type(dict)
+				if req.get('version', 1) != 1:
 					raise RequestError, 'Cannot handle version %s requests.' \
 						% req['version']
-				if req.get('action', 'call')!='call':
+				if req.get('action', 'call') != 'call':
 					raise RequestError, \
 						'Cannot handle the request action, %r.' % req['action']
 				try:
@@ -114,7 +114,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 				except KeyError:
 					raise RequestError, 'Missing method in request'
 				args = req.get('args', ())
-				if methodName=='__methods__.__getitem__':
+				if methodName == '__methods__.__getitem__':
 					# support PythonWin autoname completion
 					response['value'] = self.exposedMethods()[args[0]]
 				else:

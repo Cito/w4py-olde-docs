@@ -1,5 +1,3 @@
-import os, string, time
-
 
 if fields.has_key('bgcolor'):
 	bgcolor = fields['bgcolor'].value
@@ -15,7 +13,7 @@ print '''
 	</head>
 	<body %s>
 		<p align=center><font size=+1><b>Colors</b></font></p>
-		
+
 		<center>
 		<form>
 			bgcolor: <input type=next name=bgcolor value="%s">
@@ -40,7 +38,7 @@ for r in range(11):
 			# Compute brightness given RGB
 			brightness = (0.3*r**gamma + 0.6*g**gamma + 0.1*b**gamma)**(1/gamma)
 			# We then use brightness to determine a good font color for high contrast
-			if brightness<0.5:
+			if brightness < 0.5:
 				textcolor = 'white'
 			else:
 				textcolor = 'black'

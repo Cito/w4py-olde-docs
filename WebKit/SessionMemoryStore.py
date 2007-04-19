@@ -56,6 +56,7 @@ class SessionMemoryStore(SessionStore):
 		# Note, setdefault is atomic so no locking is needed.
 		return self._store.setdefault(key, default)
 
+
 	## Application support ##
 
 	def storeSession(self, session):
@@ -64,4 +65,4 @@ class SessionMemoryStore(SessionStore):
 	def storeAllSessions(self):
 		filestore = SessionFileStore(self._app)
 		for i in self.keys():
-			filestore[i]=self[i]
+			filestore[i] = self[i]

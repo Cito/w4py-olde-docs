@@ -43,7 +43,7 @@ class HTTPServlet(Servlet):
 		# For GET and HEAD, handle the HTTP If-Modified-Since header:
 		# if the object's last modified time is the same
 		# as the IMS header, we're done.
-		if httpMethodName in ('GET','HEAD'):
+		if httpMethodName in ('GET', 'HEAD'):
 			lm = self.lastModified(trans)
 			if lm:
 				lm = time.strftime('%a, %d %b %Y %H:%M:%S GMT',

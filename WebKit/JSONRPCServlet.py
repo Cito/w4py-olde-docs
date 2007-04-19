@@ -50,7 +50,7 @@ class JSONRPCServlet(HTTPContent):
 		request = self.request()
 		data = simplejson.loads(request.rawInput().read())
 		id, call, params = data["id"], data["method"], data["params"]
-		self.id = id
+		self._id = id
 		if call == 'system.listMethods':
 			result = self.json_methods()
 			self.write(simplejson.dumps({'id': id, 'result': result}))
@@ -58,8 +58,8 @@ class JSONRPCServlet(HTTPContent):
 			try:
 				method = getattr(self, call)
 			except AttributeError:
-				cmd = self.error('%s, although an approved method,'
-					' was not found' % call)
+				cmd = self.error('%s, although an approved method, '
+					'was not found' % call)
 			else:
 				try:
 					if debug:
@@ -70,11 +70,11 @@ class JSONRPCServlet(HTTPContent):
 					err = StringIO()
 					traceback.print_exc(file=err)
 					e = err.getvalue()
-					cmd = self.error('%s was called,'
-						' but encountered an error: %s' % (call, e))
+					cmd = self.error('%s was called, '
+						'but encountered an error: %s' % (call, e))
 					err.close()
 		else:
 			self.error('%s is not an approved method' % call)
 
 	def error(self, msg):
-		self.write(simplejson.dumps({'id': self.id, 'code': -1, 'error': msg}))
+		self.write(simplejson.dumps({'id': self._id, 'code': -1, 'error': msg}))

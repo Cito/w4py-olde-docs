@@ -2,6 +2,7 @@ from types import MethodType
 import sys
 
 if hasattr(sys, 'version_info') and sys.version_info[0] >= 2:
+
 	def MixIn(pyClass, mixInClass, makeAncestor=0, mixInSuperMethods=0):
 		"""
 		Mixes in the attributes of the mixInClass into the pyClass. These attributes are typically methods (but don't have to be). Note that private attributes, denoted by a double underscore, are not mixed in. Collisions are resolved by the mixInClass' attribute overwriting the pyClass'. This gives mix-ins the power to override the behavior of the pyClass.

@@ -70,6 +70,7 @@ COPYRIGHT
 
 Copyright (c) 2005 by Christoph Zwerschke.
 Licensed under the Open Software License version 2.1.
+
 """
 
 __version__ = '0.1'
@@ -79,10 +80,9 @@ __date__ = "$Date$"
 
 import sys, re
 try:
-    from cStringIO import StringIO
-except:
-    raise
-    from cStringIO import StringIO
+	from cStringIO import StringIO
+except ImportError:
+	from StringIO import StringIO
 
 
 class PyTP:
@@ -247,5 +247,5 @@ def main(args):
     pytp = PyTP()
     open(outfile, 'w').write(toc.process(open(infile).read()))
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main(sys.argv[1:])

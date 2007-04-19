@@ -51,6 +51,7 @@ class ModelObject:
 		if close:
 			out.close()
 
+
 class Klass:
 
 	def writePyStubIfNeeded(self, generator, filename):
@@ -146,7 +147,7 @@ del sys.path[0]
 	def maxAttrNameLen(self):
 		maxLen = 0
 		for attr in self.attrs():
-			if maxLen<len(attr.name()):
+			if maxLen < len(attr.name()):
 				maxLen = len(attr.name())
 		return maxLen
 
@@ -523,7 +524,7 @@ class AnyDateTimeAttr:
 			out.write('''
 	def %s(self):
 		if isinstance(self._%s, %s):
-		    self._%s = mxDateTime.mktime(self._%s.timetuple())
+			self._%s = mxDateTime.mktime(self._%s.timetuple())
 		return self._%s
 	''' % (self.pyGetName(), self.name(), dateTimeTypes, self.name(), self.name(), self.name()))
 		else:
@@ -531,6 +532,7 @@ class AnyDateTimeAttr:
 	def %s(self):
 		return self._%s
 	''' % (self.pyGetName(), self.name()))
+
 
 class DateAttr:
 
@@ -542,6 +544,7 @@ class DateAttr:
 
 	def writePyGet(self, out):
 		self.writePyGetAsMXDateTime(out)
+
 
 class TimeAttr:
 
@@ -573,6 +576,7 @@ class DateTimeAttr:
 
 	def writePyGet(self, out):
 		self.writePyGetAsMXDateTime(out)
+
 
 class ObjRefAttr:
 

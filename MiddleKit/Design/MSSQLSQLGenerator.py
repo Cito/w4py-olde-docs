@@ -14,9 +14,10 @@ def cleanConstraintName(name):
 	name = name.replace(']', '')
 	assert '[' not in name, name
 	assert ',' not in name, name
-	if len(name)>128:
-		raise Exception("name is %i chars long, but MS SQL Server only supports 128. this case is no currently handled. name=%r" % (
-			len(name), name))
+	if len(name) > 128:
+		raise Exception("name is %i chars long, but MS SQL Server only"
+			" supports 128. this case is no currently handled. name=%r"
+			% (len(name), name))
 	return name
 
 
@@ -52,14 +53,19 @@ class Klasses:
 		strList = []
 #		strList.append('use %s\ngo\n' % dbName)
 		strList.append('use Master\ngo\n')
-		strList.append("if exists( select * from master.dbo.sysdatabases where name = N'%s') drop database %s;\ngo \n" % (dbName, dbName))
+		strList.append("if exists("
+			"select * from master.dbo.sysdatabases where name = N'%s'"
+			") drop database %s;\ngo \n" % (dbName, dbName))
 
 		if 0:
 			self._klasses.reverse()
 			for klass in self._klasses:
 			# If table exists drop.
 				strList.append("print 'Dropping table %s'\n" % klass.name())
-				strList.append("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % klass.name() )
+				strList.append("if exists (select * from dbo.sysobjects"
+					" where id = object_id(N'[dbo].[%s]')"
+					" and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n"
+					% klass.name())
 				strList.append('drop table [dbo].%s\n' % klass.sqlTableName())
 				strList.append('go\n\n')
 			self._klasses.reverse()
@@ -72,7 +78,10 @@ class Klasses:
 		for klass in self._klasses:
 		# If table exists drop.
 			strList.append("print 'Dropping table %s'\n" % klass.name())
-			strList.append("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % klass.name() )
+			strList.append("if exists (select * from dbo.sysobjects"
+				" where id = object_id(N'[dbo].[%s]')"
+				" and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n"
+				% klass.name())
 			strList.append('drop table [dbo].%s\n' % klass.sqlTableName())
 			strList.append('go\n\n')
 		self._klasses.reverse()
@@ -83,7 +92,9 @@ class Klasses:
 		'''
 		Creates the database only if it does not already exist
 		'''
-		return 'Use Master\n' + 'go\n\n' + "if not exists( select * from master.dbo.sysdatabases where name = N'%s' ) create database %s;\ngo \n" % (dbName, dbName)
+		return ('Use Master\n' + 'go\n\n' + "if not exists("
+			"select * from master.dbo.sysdatabases where name = N'%s'"
+			") create database %s;\ngo \n" % (dbName, dbName))
 
 	def useDatabaseSQL(self, dbName):
 		return 'USE %s;\n\n' % dbName
@@ -138,20 +149,21 @@ create table _MKClassIds (
 		if sql:
 			wr('/* PreSQL start */\n' + sql + '\n/* PreSQL end */\n\n')
 
-# If database doesn't exist create it.
+		# If database doesn't exist create it.
 		dbName = generator.dbName()
-#		wr('Use %s\ngo\n\n' % dbName)\
-
+		# wr('Use %s\ngo\n\n' % dbName)\
 
 		rList = self._klasses[:]
 		rList.reverse()
-#		print str(type(rList))
-#		for klass in rList:
-# If table exists, then drop it.
-#			wr("if exists (select * from dbo.sysobjects where id = object_id(N'[dbo].[%s]') and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n" % klass.name() )
-#			wr('drop table [dbo].[%s]\n' % klass.name() )
-#			wr('go\n\n')
-
+		# print str(type(rList))
+		# for klass in rList:
+		#     # If table exists, then drop it.
+		#     wr("if exists (select * from dbo.sysobjects"
+		#         " where id = object_id(N'[dbo].[%s]')"
+		#         " and OBJECTPROPERTY(id, N'IsUserTable') = 1)\n"
+		#         % klass.name())
+		# wr('drop table [dbo].[%s]\n' % klass.name())
+		# wr('go\n\n')
 
 
 class Klass:
@@ -160,7 +172,8 @@ class Klass:
 		'''
 		Returns a one liner that becomes part of the CREATE statement for creating the primary key of the table. SQL generators often override this mix-in method to customize the creation of the primary key for their SQL variant. This method should use self.sqlIdName() and often ljust()s it by self.maxNameWidth().
 		'''
-		constraintName = cleanConstraintName('PK__%s__%s' % (self.sqlTableName(), self.sqlSerialColumnName()))
+		constraintName = cleanConstraintName('PK__%s__%s'
+			% (self.sqlTableName(), self.sqlSerialColumnName()))
 		return '	%s int constraint [%s] primary key not null identity(1, 1),\n' % (
 			self.sqlSerialColumnName().ljust(self.maxNameWidth()), constraintName)
 
@@ -189,7 +202,8 @@ class Klass:
 					tableName = self.sqlTableName()
 					indexName = 'IX__%(tableName)s__BackRef__%(attrName)s' % locals()
 					indexName = cleanConstraintName(indexName)
-					wr('create index [%(indexName)s] on %(tableName)s(%(classIdName)s, %(objIdName)s);\n' % locals())
+					wr('create index [%(indexName)s] on '
+						'%(tableName)s(%(classIdName)s, %(objIdName)s);\n' % locals())
 		wr('\n')
 
 
@@ -221,7 +235,8 @@ class Attr:
 		"""
 		if not self.boolForKey('isUnique'):
 			return ''
-		return ' constraint [UQ__%s__%s] unique' % (self.klass().name(), self.name())
+		return ' constraint [UQ__%s__%s] unique' % (
+			self.klass().name(), self.name())
 
 
 class DateTimeAttr:
@@ -229,10 +244,12 @@ class DateTimeAttr:
 	def sqlType(self):
 		return 'DateTime'
 
+
 class DateAttr:
 
 	def sqlType(self):
 		return 'DateTime'
+
 
 class TimeAttr:
 
@@ -252,11 +269,14 @@ class EnumAttr:
 	def sqlType(self):
 		if self.usesExternalSQLEnums():
 			tableName, valueColName, nameColName = self.externalEnumsSQLNames()
-			constraintName = cleanConstraintName('FK__%s__%s__%s__%s' % (
-				self.containingKlass.sqlTableName(), self.sqlName(), tableName, valueColName))
-			return 'int constraint [%s] references %s(%s)' % (constraintName, tableName, valueColName)
+			constraintName = cleanConstraintName('FK__%s__%s__%s__%s'
+				% (self.containingKlass.sqlTableName(), self.sqlName(),
+					tableName, valueColName))
+			return 'int constraint [%s] references %s(%s)' % (
+				constraintName, tableName, valueColName)
 		else:
 			return self.nativeEnumSQLType()
+
 
 class LongAttr:
 
@@ -270,11 +290,11 @@ class StringAttr:
 	def sqlType(self):
 		if not self['Max']:
 			return 'varchar(100) /* WARNING: NO LENGTH SPECIFIED */'
-		elif self['Min']==self['Max']:
+		elif self['Min'] == self['Max']:
 			return 'char(%s)' % self['Max']
 		else:
 			max = int(self['Max'])
-			if int(self['Max'])>8000:
+			if int(self['Max']) > 8000:
 				return 'text'
 			else:
 				ref = self.get('Ref', '')
@@ -286,13 +306,13 @@ class StringAttr:
 
 	def sqlForNonNoneSampleInput(self, input):
 		value = input
-		if value=="''":
+		if value == "''":
 			value = ''
-		elif value.find('\\')!=-1:
+		elif value.find('\\') != -1:
 			if 1:
 				# add spaces before and after, to prevent
 				# syntax error if value begins or ends with "
-				value = eval('""" '+str(value)+' """')
+				value = eval('""" ' + str(value) + ' """')
 				value = repr(value[1:-1])	# trim off the spaces
 				value = value.replace('\\011', '\\t')
 				value = value.replace('\\012', '\\n')
@@ -300,7 +320,7 @@ class StringAttr:
 				return value
 		value = repr(value)
 		value = value.replace("\\'", "''")
-		#print '>> value:', value
+		# print '>> value:', value
 		return value
 
 
@@ -311,7 +331,8 @@ class ObjRefAttr:
 	def sqlType(self):
 		if self.setting('UseBigIntObjRefColumns', False):
 			if self.get('Ref', None):
-				return 'bigint constraint %s foreign key references %(Type)s(%(Type)sId) ' % self
+				return ('bigint constraint %s foreign key'
+					' references %(Type)s(%(Type)sId) ' % self)
 			else:
 				return 'bigint /* relates to %s */ ' % self['Type']
 		else:
@@ -319,29 +340,33 @@ class ObjRefAttr:
 
 	def classIdReferences(self):
 		classIdName = self.sqlName().split(',')[0]
-		constraintName = cleanConstraintName('FK__%s__%s___MKClassIds__id' % (self.containingKlass.sqlTableName(), classIdName))
+		constraintName = cleanConstraintName('FK__%s__%s___MKClassIds__id'
+			% (self.containingKlass.sqlTableName(), classIdName))
 		return ' constraint [%s] references _MKClassIds' % constraintName
 
 	def objIdReferences(self):
 		targetKlass = self.targetKlass()
 		objIdName = self.sqlName().split(',')[1]
 		constraintName = 'FK__%s__%s__%s__%s' % (
-			self.containingKlass.sqlTableName(), objIdName, targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
+			self.containingKlass.sqlTableName(), objIdName,
+			targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
 		constraintName = cleanConstraintName(constraintName)
-		return ' constraint [%s] references %s(%s) ' % (
-			constraintName, targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
+		return ' constraint [%s] references %s(%s) ' % (constraintName,
+			targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
 
 	def sqlForNonNoneSampleInput(self, input):
 		sql = ObjRefAttr.mixInSuperSqlForNonNoneSampleInput(self, input)
-		if sql.find('(select')!=-1:
+		if sql.find('(select') != -1:
 			# MS SQL 2000 does not allow a subselect where an INSERT value is expected.
 			# It will complain:
 			# "Subqueries are not allowed in this context. Only scalar expressions are allowed."
 			# So we pass back some "pre-statements" to set up the scalar in a temp variable.
 			classId, objId = sql.split(',', 1)  # objId is the '(select...' part
-			refVarName = str('@ref_%03i_%s' % (ObjRefAttr.refVarCount, self.targetKlass().name()))
+			refVarName = str('@ref_%03i_%s'
+				% (ObjRefAttr.refVarCount, self.targetKlass().name()))
 			ObjRefAttr.refVarCount += 1
-			preSql = str('declare %s as int; set %s = %s;\n' % (refVarName, refVarName, objId))
+			preSql = str('declare %s as int; set %s = %s;\n' % (
+				refVarName, refVarName, objId))
 			sqlForValue = classId + ',' + refVarName
 			return (preSql, sqlForValue)
 		else:

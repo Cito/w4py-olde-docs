@@ -247,7 +247,8 @@ class MakeAppWorkDir:
 			'ErrorMsgs': '[a-zA-Z0-9]*',
 			'Logs': '[a-zA-Z0-9]*',
 			'Sessions': '[a-zA-Z0-9]*',
-			self._contextName: '*.pyc\n*.pyo' }
+			self._contextName: '*.pyc\n*.pyo'
+		}
 		for dir, contents in files.items():
 			filename = os.path.join(self._workDir,
 				dir, '.cvsignore')

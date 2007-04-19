@@ -18,8 +18,7 @@ except NameError:
 try:
 	object
 except NameError: # fallback for Python < 2.2
-	class object:
-		pass
+	class object: pass
 	std_isinstance = isinstance
 	def isinstance(obj, cinf):
 		if type(cinf) == type(()):
@@ -50,13 +49,13 @@ class PyJs(object):
 	"""This class simply tanslates a Python expression into a JavaScript string."""
 
 	def __init__(self, name):
-		self.__name = name
+		self._name = name
 
 	def __getattr__(self, aname):
 		return self.__class__('%s.%s' % (self, aname))
 
 	def __str__(self):
-		return self.__name
+		return self._name
 
 	def __call__(self, *a, **kw):
 		args = ','.join([quoteJs(i) for i in a])
@@ -94,9 +93,9 @@ class AjaxPage(BaseClass):
 	"""
 
 	# Class level variables that can be overridden by servlet instances:
-	debug = 0 # set to True if you want to see debugging output
-	clientPolling = 1 # set to True if you want to use the polling mechanism
-	responseTimeout = 90 # timeout of client waiting for a response in seconds
+	_debug = 0 # set to True if you want to see debugging output
+	_clientPolling = 1 # set to True if you want to use the polling mechanism
+	_responseTimeout = 90 # timeout of client waiting for a response in seconds
 
 	# Class level variables to help make client code simpler:
 	window, document, alert, this = map(PyJs,
@@ -112,13 +111,13 @@ class AjaxPage(BaseClass):
 		BaseClass.writeJavaScript(self)
 		s = '<script type="text/javascript" src="ajax%s.js"></script>'
 		self.writeln(s % 'call')
-		if self.clientPolling:
+		if self._clientPolling:
 			self.writeln(s % 'poll')
 
 	def actions(self):
 		a = BaseClass.actions(self)
 		a.append('ajax_call')
-		if self.clientPolling:
+		if self._clientPolling:
 			a.append('ajax_poll')
 		return a
 
@@ -149,44 +148,44 @@ class AjaxPage(BaseClass):
 			args = req.field('_', [])
 			if type(args) != type([]):
 				args = [args]
-			if self.clientPolling and self.responseTimeout:
+			if self._clientPolling and self._responseTimeout:
 				start_time = time.time()
 			if call in self.ajax_methods():
 				try:
 					method = getattr(self, call)
 				except AttributeError:
-					cmd = self.alert('%s, although an approved method,'
-						' was not found' % call)
+					cmd = self.alert('%s, although an approved method, '
+						'was not found' % call)
 				else:
 					try:
-						if self.debug:
+						if self._debug:
 							self.log("Ajax call %s(%s)" % (call, args))
 						cmd = str(method(*args))
 					except Exception:
 						err = StringIO()
 						traceback.print_exc(file=err)
 						e = err.getvalue()
-						cmd = self.alert('%s was called,'
-							' but encountered an error: %s' % (call, e))
+						cmd = self.alert('%s was called, '
+							'but encountered an error: %s' % (call, e))
 						err.close()
 			else:
 				cmd = self.alert('%s is not an approved method' % call)
 		else:
 			cmd = self.alert('Ajax call missing call parameter.')
-		if self.clientPolling and self.responseTimeout:
-			in_time = time.time() - start_time < self.responseTimeout
+		if self._clientPolling and self._responseTimeout:
+			in_time = time.time() - start_time < self._responseTimeout
 		else:
 			in_time = 1
 		if in_time:
 			# If the computation of the method did not last very long,
 			# deliver it immediately back to the client with this response:
-			if self.debug:
+			if self._debug:
 				self.log("Ajax returns immediately: " + str(cmd))
 			self.write(cmd)
 		else:
 			# If the client request might have already timed out,
 			# put the result in the queue and let client poll it:
-			if self.debug:
+			if self._debug:
 				self.log("Ajax puts in queue: " + str(cmd))
 			sid = self.session().identifier()
 			self._responseQueue.setdefault(sid, []).append(cmd)
@@ -198,7 +197,7 @@ class AjaxPage(BaseClass):
 		results from long-running queries or push content to the client.
 
 		"""
-		if self.clientPolling:
+		if self._clientPolling:
 			sid = self.session().identifier()
 			# Set the timeout until the next time this method is called
 			# by the client, using the Javascript wait variable:
@@ -207,12 +206,12 @@ class AjaxPage(BaseClass):
 				cmd.extend(map(str, self._responseQueue[sid]))
 				self._responseQueue[sid] = []
 			cmd = ';'.join(cmd) + ';'
-			if self.debug:
+			if self._debug:
 				self.log("Ajax returns from queue: " + cmd)
 		else:
-			if self.debug:
+			if self._debug:
 				self.log("Ajax tells the client to stop polling.")
-			cmd = 'dying = true;'
+			cmd = 'dying=true;'
 		self.write(cmd) # write out at least the wait variable
 
 	def ajax_push(self, cmd):
@@ -221,8 +220,8 @@ class AjaxPage(BaseClass):
 		Client polling must be activitated if you want to use this.
 
 		"""
-		if self.clientPolling:
-			if self.debug:
+		if self._clientPolling:
+			if self._debug:
 				self.log("Ajax pushes in queue: " + cmd)
 			sid = self.session().identifier()
 			self._responseQueue.setdefault(sid, []).append(cmd)
@@ -237,4 +236,4 @@ class AjaxPage(BaseClass):
 		if action_name.startswith('ajax_'):
 			pass
 		else:
-			BaseClass.postAction(self,action_name)
+			BaseClass.postAction(self, action_name)

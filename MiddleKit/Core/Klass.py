@@ -10,18 +10,19 @@ except NameError:
 	True, False = 1, 0
 
 try:
-    set
+	set
 except NameError: # fallback for Python < 2.4
-    try:
-        from sets import Set as set
-    except ImportError: # fallback for Python < 2.3
-        from UserDict import UserDict as set
+	try:
+		from sets import Set as set
+	except ImportError: # fallback for Python < 2.3
+		from UserDict import UserDict as set
 
 
 class Klass(MiddleDict, ModelObject):
 	"""
 	A Klass represents a class specification consisting primarily of a name and a list of attributes.
 	"""
+
 
 	## Init ##
 
@@ -56,7 +57,7 @@ class Klass(MiddleDict, ModelObject):
 			# deprecated: we used to use a C++-like syntax involving colons
 			# instead of a Python-like syntax with parens
 			parts = [part.strip() for part in name.split(':')]
-			if len(parts)!=2:
+			if len(parts) != 2:
 				raise RuntimeError, 'Invalid class spec: %s' % string
 			self._name, self._supername = parts
 		else:
@@ -393,38 +394,38 @@ class Klass(MiddleDict, ModelObject):
 		"""
 		Preps the klass for buildDependencies().
 		"""
-		self.dependencies = []  # who self depends on
-		self.dependents = []  # who depends on self
+		self._dependencies = []  # who self depends on
+		self._dependents = []  # who depends on self
 
 	def buildDependencies(self):
 		"""
 		A klass' immediate dependencies are its ancestor classes (which may have auxilliary tables
 		such as enums), the target klasses of all its obj ref attrs and their descendant classes.
 		"""
-		if self.dependents is not None:
+		if self._dependents is not None:
 			# already done
 			pass
 		klass = self.superklass()
-		while klass!=None:
-			self.dependencies.append(klass)
-			klass.dependents.append(self)
+		while klass != None:
+			self._dependencies.append(klass)
+			klass._dependents.append(self)
 			klass = klass.superklass()
 		from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 		for attr in self.allAttrs():
 			if isinstance(attr, ObjRefAttr):
 				klass = attr.targetKlass()
 				if klass is not self and attr.boolForKey('Ref', True):
-					self.dependencies.append(klass)
-					klass.dependents.append(self)
+					self._dependencies.append(klass)
+					klass._dependents.append(self)
 					for klass in klass.descendants():
-						self.dependencies.append(klass)
-						klass.dependents.append(self)
+						self._dependencies.append(klass)
+						klass._dependents.append(self)
 
 	def recordDependencyOrder(self, order, visited, indent=0):
 		#print '%srecordDependencyOrder() for %s' % (' '*indent*4, self.name())
 		if visited.has_key(self):
 			return
 		visited[self] = None # better use visited.add(self) in Python >= 2.3
-		for klass in self.dependencies:
+		for klass in self._dependencies:
 			klass.recordDependencyOrder(order, visited, indent+1)
 		order.append(self)

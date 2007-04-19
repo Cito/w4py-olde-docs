@@ -14,8 +14,7 @@ except AttributeError: # Python < 2.4
 	from linecache import checkcache
 else: # Python >= 2.4
 	# the linecache module updates the cache automatically
-	def checkcache():
-		pass
+	def checkcache(): pass
 
 
 class Singleton:
@@ -62,7 +61,7 @@ class ExceptionHandler(Object):
 
 		class ExceptionHandler(_ExceptionHandler):
 
-			hideValuesForFields = _ExceptionHandler.hideValuesForFields + ['foo', 'bar']
+			_hideValuesForFields = _ExceptionHandler._hideValuesForFields + ['foo', 'bar']
 
 			def work(self):
 				_ExceptionHandler.work(self)
@@ -77,12 +76,12 @@ class ExceptionHandler(Object):
 
 	"""
 	# keep these lower case to support case insensitivity:
-	hideValuesForFields = ['password', 'passwd', 'pwd',
-		'creditcard', 'credit card', 'cc']
+	_hideValuesForFields = ['password', 'passwd', 'pwd',
+		'creditcard', 'credit card', 'cc', 'pin', 'tan']
 	if 0: # for testing
-		hideValuesForFields.extend(['application', 'uri',
+		_hideValuesForFields.extend(['application', 'uri',
 			'http_accept', 'userid'])
-	hiddenString = '*** hidden ***'
+	_hiddenString = '*** hidden ***'
 
 
 	## Init ##
@@ -122,8 +121,8 @@ class ExceptionHandler(Object):
 		# Making remaining code safe for no transaction.
 		#
 		# if self._res is None:
-		# 	self._res = HTTPResponse()
-		# 	self._tra.setResponse(self._res)
+		#      self._res = HTTPResponse()
+		#      self._tra.setResponse(self._res)
 
 		# Cache MaxValueLengthInExceptionReport for speed
 		self._maxValueLength = self.setting('MaxValueLengthInExceptionReport')
@@ -261,10 +260,10 @@ class ExceptionHandler(Object):
 		Calls `writeHTML`, which uses ``self.write(...)`` to add content.
 
 		"""
-		self.html = []
+		self._html = []
 		self.writeHTML()
-		html = ''.join(self.html)
-		self.html = None
+		html = ''.join(self._html)
+		self._html = None
 		return html
 
 	def writeHTML(self):
@@ -291,12 +290,12 @@ class ExceptionHandler(Object):
 
 	def write(self, s):
 		"""Output `s` to the body."""
-		self.html.append(str(s))
+		self._html.append(str(s))
 
 	def writeln(self, s):
 		"""Output `s` plus a newline."""
-		self.html.append(str(s))
-		self.html.append('\n')
+		self._html.append(str(s))
+		self._html.append('\n')
 
 	def writeTitle(self, s):
 		"""Output the sub-heading to define a section."""
@@ -537,9 +536,9 @@ class ExceptionHandler(Object):
 		headers = self.setting('ErrorEmailHeaders').copy()
 		headers['Date'] = dateForEmail()
 		headers['Mime-Version'] = '1.0'
-		headers['Subject'] = headers.get('Subject','[WebKit Error]') \
+		headers['Subject'] = headers.get('Subject', '[WebKit Error]') \
 			+ ' %s: %s' % sys.exc_info()[:2]
-		for h,v in headers.items():
+		for h, v in headers.items():
 			if isinstance(v, ListType):
 				v = ','.join(v)
 			writer.addheader(h, v)
@@ -620,7 +619,7 @@ class ExceptionHandler(Object):
 		Use the extra key, row and table args as necessary.
 
 		"""
-		if row.has_key('attr') and key!='attr':
+		if row.has_key('attr') and key != 'attr':
 			return self.filterValue(value, row['attr'])
 		else:
 			return self.filterValue(value, key)
@@ -629,8 +628,8 @@ class ExceptionHandler(Object):
 		"""Filter values.
 
 		This is the core filter method that is used in all filtering.
-		By default, it simply returns self.hiddenString if the key is
-		in self.hideValuesForField (case insensitive). Subclasses
+		By default, it simply returns self._hiddenString if the key is
+		in self._hideValuesForField (case insensitive). Subclasses
 		could override for more elaborate filtering techniques.
 
 		"""
@@ -638,8 +637,8 @@ class ExceptionHandler(Object):
 			key = key.lower()
 		except:
 			pass
-		if key in self.hideValuesForFields:
-			return self.hiddenString
+		if key in self._hideValuesForFields:
+			return self._hiddenString
 		else:
 			return value
 

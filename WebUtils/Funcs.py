@@ -19,7 +19,7 @@ htmlCodes = [
 	['<', '&lt;'],
 	['>', '&gt;'],
 	['"', '&quot;'],
-#	['\n', '<br>']
+	# ['\n', '<br>'],
 ]
 
 htmlCodesReversed = htmlCodes[:]
@@ -117,7 +117,7 @@ def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=No
 		' style="background-color:#FFFFFF;font-size:10pt">']
 	for key in keys:
 		value = dict[key]
-		if addSpace!=None  and  addSpace.has_key(key):
+		if addSpace != None and addSpace.has_key(key):
 			target = addSpace[key]
 			value = target.join(value.split(target))
 		if filterValueCallBack:

@@ -128,7 +128,7 @@ class Application(ConfigurableForServerSidePath, Object):
 				errors = urls.keys()
 			except AttributeError:
 				errors = ['Exception']
-				urls = { errors[0]: urls }
+				urls = {errors[0]: urls}
 			for err in errors:
 				if urls[err] and not urls[err].startswith('/'):
 					urls[err] = '/' + urls[err]
@@ -306,7 +306,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			'EnterDebuggerOnException': False,
 			'DirectoryFile': ['index', 'Index', 'main', 'Main'],
 			'UseCascadingExtensions': True,
-			'ExtensionCascadeOrder': ['.py','.psp','.kid','.html'],
+			'ExtensionCascadeOrder': ['.py', '.psp', '.kid', '.html'],
 			'ExtraPathInfo': True,
 			'ExtensionsToIgnore': [
 				'.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
@@ -956,8 +956,8 @@ class Application(ConfigurableForServerSidePath, Object):
 			request.pathInfo(), request.extraURLPath() or '',
 			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:
-			print '>> [sessions] handling UseAutomaticPathSessions,' \
-				' redirecting to', url
+			print '>> [sessions] handling UseAutomaticPathSessions, ' \
+				'redirecting to', url
 		trans.response().sendRedirect(url)
 		raise EndResponse
 
@@ -974,8 +974,8 @@ class Application(ConfigurableForServerSidePath, Object):
 			request.pathInfo(), request.extraURLPath() or '',
 			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:
-			print ">> [sessions] handling unnecessary path session,' \
-				' redirecting to", url
+			print ">> [sessions] handling unnecessary path session, ' \
+				'redirecting to", url
 		trans.response().sendRedirect(url)
 		raise EndResponse
 

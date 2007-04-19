@@ -254,5 +254,5 @@ def main(args):
     toc = AutoToC()
     open(outfile, 'w').write(toc.process(open(infile).read()))
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main(sys.argv[1:])

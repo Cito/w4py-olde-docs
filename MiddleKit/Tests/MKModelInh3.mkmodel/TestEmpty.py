@@ -17,6 +17,6 @@ def test(store):
 
 	store.clear()
 	f = store.fetchObjectsOfClass('Foo')[0]
-	assert f.a()=='a'
-	assert f.b()=='b'
-	assert f.x()==1
+	assert f.a() == 'a'
+	assert f.b() == 'b'
+	assert f.x() == 1

@@ -19,4 +19,3 @@ fields = %s
 
 </html>
 ''' % fields
-

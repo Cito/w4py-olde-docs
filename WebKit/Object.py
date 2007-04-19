@@ -12,8 +12,7 @@ from MiscUtils.NamedValueAccess import NamedValueAccess
 try: # for Python < 2.2
 	object
 except NameError:
-	class object:
-		pass
+	class object: pass
 
 
 class Object(object, NamedValueAccess):

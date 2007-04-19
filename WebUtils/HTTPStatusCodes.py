@@ -3,17 +3,20 @@ HTTPStatusCodes.py
 
 
 TO DO
+
 	@@ document
 	@@ 2000-04-17 ce: Is there an RFC for this?
 
 
 DONE
 
-	* 2000-05-08 ce: Incorporated Matt Schinkel's (matt@null.net) re.sub() for stripping HTML tags in the ASCII version of the HTTP msg.
+	* 2000-05-08 ce: Incorporated Matt Schinkel's (matt@null.net) re.sub()
+	  for stripping HTML tags in the ASCII version of the HTTP msg.
+
 """
 
 
-import re, string
+import re
 
 
 HTTPStatusCodeList = [
@@ -62,16 +65,16 @@ HTTPStatusCodeListColumnNames = ('Code', 'Identifier', 'Description')
 
 
 HTTPStatusCodes = {}
-	#""" HTTPStatusCodes can be indexed by either their status code number of textual identifier. The result is a dictionary with keys code, identifier, asciiMessage and htmlMessage. """
+	""" HTTPStatusCodes can be indexed by either their status code number of textual identifier. The result is a dictionary with keys code, identifier, asciiMessage and htmlMessage. """
 
 
 # Construct HTTPStatusCodes dictionary
 for record in HTTPStatusCodeList:
 	code, identifier, htmlMsg = record
 	dict = {
-		'code':			code,
-		'identifier':	identifier,
-		'htmlMsg':		htmlMsg
+		'code':       code,
+		'identifier': identifier,
+		'htmlMsg':    htmlMsg
 	}
 	dict['asciiMsg'] = re.sub('<.*?>', '', htmlMsg)
 
@@ -88,10 +91,10 @@ def HTMLTableOfHTTPStatusCodes(codes=HTTPStatusCodeList, tableArgs='align=center
 		td = '<td %s>' % colArgs
 		res.append('<tr %s> %s %s </td>  %s %s </td>  %s %s </td> </tr>\n' % (rowArgs, td, code, td, identifier, td, htmlMsg))
 	res.append('</table>\n')
-	return string.join(res, '')
+	return ''.join(res)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	print '''<html>
 <head>
 	<title>HTTP Status Codes</title>

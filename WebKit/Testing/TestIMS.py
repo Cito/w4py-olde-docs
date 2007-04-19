@@ -66,7 +66,7 @@ class TestIMS(SidebarPage):
 				% (rsp.status, rsp.reason, size))
 		arpaformat = '%a, %d %b %Y %H:%M:%S GMT'
 		t = list(time.strptime(lm, arpaformat))
-		t[0] = t[0] - 1 # last year
+		t[0] -= 1 # last year
 		newlm = time.strftime(arpaformat, time.gmtime(time.mktime(t)))
 		self.writeTest('Opening <tt>%s</tt><br>with If-Modified-Since: %s'
 			% (path, newlm))
@@ -79,8 +79,8 @@ class TestIMS(SidebarPage):
 				% (rsp.status, rsp.reason))
 			return
 		if size != originalSize:
-			self.error('Received: %s %s, document size = %s,'
-				' expected size = %s.'
+			self.error('Received: %s %s, document size = %s, '
+				'expected size = %s.'
 				% (rsp.status, rsp.reason, size, originalSize))
 			return
 		else:

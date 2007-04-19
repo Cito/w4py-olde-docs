@@ -1,5 +1,6 @@
-from KidKit.Examples.KidExamplePage import KidExamplePage
 import os
+from KidKit.Examples.KidExamplePage import KidExamplePage
+
 
 class View(KidExamplePage):
 	"""View the source of a Kid template.

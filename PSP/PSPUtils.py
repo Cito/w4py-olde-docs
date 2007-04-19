@@ -90,7 +90,7 @@ def normalizeIndentation(pySource, tab='\t'):
 	crlf = ''
 	line0 = lines.pop(0)
 	while line0 and line0[-1] in '\r\n':
-		crlf = crlf + line0[-1]
+		crlf += line0[-1]
 		line0 = line0[:-1]
 	# The first line may be stripped completely:
 	strippedLines = []
@@ -110,7 +110,7 @@ def normalizeIndentation(pySource, tab='\t'):
 	if charsToStrip is not None:
 		# If there is code on the first line, strip one column less:
 		if line0 and line0[0] != '#' and charsToStrip != 0:
-			charsToStrip = charsToStrip - 1
+			charsToStrip -= 1
 		# Strip off the first indent characters from each line:
 		if charsToStrip != 0:
 			lines = []

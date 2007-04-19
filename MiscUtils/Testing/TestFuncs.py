@@ -8,12 +8,12 @@ except:
 	sys.path.insert(1, '..')
 	from Funcs import *
 
-# Used in testSafeDescription() below.
-class Foo:
+
+class Foo: # used in testSafeDescription() below
 	pass
 
-class TestFuncs( unittest.TestCase ):
 
+class TestFuncs(unittest.TestCase):
 
 	def testCommas(self):
 		testSpec = '''
@@ -47,11 +47,10 @@ class TestFuncs( unittest.TestCase ):
 			# Now try the source as a string instead of a number:
 			source = eval("'%s'" % tests[i])
 			#print '%r yields %r' % (source, result)
-			assert commas(source)==result, \
+			assert commas(source) == result, \
 				'%r %r' % (commas(source), result)
 
 			i += 2
-
 
 	def testLocalIP(self):
 		ip = localIP()
@@ -61,7 +60,6 @@ class TestFuncs( unittest.TestCase ):
 			'See if this works: localIP(remote=None). If this fails, dont worry.'
 		assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80), useCache=None) == ip
 
-
 	def testHostName(self):
 		# About all we can do is invoke hostName() to see that no
 		# exceptions are thrown, and do a little type checking on the
@@ -69,7 +67,6 @@ class TestFuncs( unittest.TestCase ):
 		host = hostName()
 		assert host is None  or  type(host) is type(''), \
 			'host type = %s, host = %s' % (type(host), repr(host))
-
 
 	def testSafeDescription(self):
 		sd = safeDescription
@@ -111,7 +108,6 @@ class TestFuncs( unittest.TestCase ):
 			s = 'failure: should not get exception'
 		assert s.find("(exception from repr(x): exceptions.KeyError: bogus)") != -1, s
 
-
 	def testUniqueId(self):
 		lastResult = None
 		for x in range(5):
@@ -124,7 +120,6 @@ class TestFuncs( unittest.TestCase ):
 			assert type(result) is type('')
 			assert len(result) == 32
 			assert result != lastResult
-
 
 	def testValueForString(self):
 		evalCases = '''
@@ -160,7 +155,6 @@ class TestFuncs( unittest.TestCase ):
 			assert valueForString(case) == case, \
 				'case=%r, valueForString()=%r' \
 					% (case, valueForString(case))
-
 
 	def testWordWrap(self):
 		# an example with some spaces and newlines

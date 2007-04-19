@@ -109,8 +109,8 @@ class AutoReloadingAppServer(AppServer):
 				target = self.fileMonitorThreadLoopFAM
 			else:
 				self._pollInterval = self.setting('AutoReloadPollInterval')
-				print 'AutoReload Monitor started,' \
-					' polling every %d seconds.' % self._pollInterval
+				print 'AutoReload Monitor started, ' \
+					'polling every %d seconds.' % self._pollInterval
 				target = self.fileMonitorThreadLoop
 			self._fileMonitorThread = t = Thread(target=target)
 			self._autoReload = True

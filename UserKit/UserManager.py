@@ -77,6 +77,7 @@ class UserManager:
 	Please read the method doc strings and other class documentation to fully understand UserKit.
 	"""
 
+
 	## Init ##
 
 	def __init__(self, userClass=None):

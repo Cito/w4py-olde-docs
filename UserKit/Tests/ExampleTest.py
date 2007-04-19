@@ -21,40 +21,40 @@ class SimpleExampleTest(unittest.TestCase):
 	def setUpDataDir(self, userManager):
 		"""Make a folder for UserManager data."""
 
-		self.userDataDir = os.path.join(TEST_CODE_DIR, 'Users')
+		self._userDataDir = os.path.join(TEST_CODE_DIR, 'Users')
 
-		if os.path.exists(self.userDataDir):
-			shutil.rmtree(self.userDataDir, ignore_errors=1)
-		os.mkdir(self.userDataDir)
+		if os.path.exists(self._userDataDir):
+			shutil.rmtree(self._userDataDir, ignore_errors=1)
+		os.mkdir(self._userDataDir)
 
-		userManager.setUserDir(self.userDataDir)
+		userManager.setUserDir(self._userDataDir)
 
 	def tearDown(self):
 
 		# Remove our test folder for UserManager data
-		if os.path.exists(self.userDataDir):
-			shutil.rmtree(self.userDataDir, ignore_errors=1)
-		self.mgr = None
+		if os.path.exists(self._userDataDir):
+			shutil.rmtree(self._userDataDir, ignore_errors=1)
+		self._mgr = None
 
 
 	def testUsersNoRoles(self):
 		from UserKit.UserManagerToFile import UserManagerToFile
 		from UserKit.HierRole import HierRole
 
-		self.mgr = UserManagerToFile()
-		self.setUpDataDir(self.mgr)
+		self._mgr = UserManagerToFile()
+		self.setUpDataDir(self._mgr)
 
 		# Create a user, add to 'staff' role
-		fooUser = self.mgr.createUser('foo', 'bar')
+		fooUser = self._mgr.createUser('foo', 'bar')
 
 		# bad login
-		theUser = self.mgr.loginName('foo', 'badpass')
+		theUser = self._mgr.loginName('foo', 'badpass')
 		assert theUser is None, 'loginName() returns null if login failed.'
 		assert not fooUser.isActive(), \
 			'User should NOT be logged in since password was incorrect.'
 
 		# good login
-		theUser = self.mgr.loginName('foo', 'bar')
+		theUser = self._mgr.loginName('foo', 'bar')
 		assert theUser.isActive(), 'User should be logged in now'
 		assert theUser == fooUser, \
 			'Should be the same user object, since it is the same user "foo"'
@@ -62,7 +62,7 @@ class SimpleExampleTest(unittest.TestCase):
 		# logout
 		theUser.logout()
 		assert not theUser.isActive(), 'User should no longer be active.'
-		assert self.mgr.numActiveUsers() == 0
+		assert self._mgr.numActiveUsers() == 0
 
 
 	def testUsersAndRoles(self):
@@ -70,8 +70,8 @@ class SimpleExampleTest(unittest.TestCase):
 		from UserKit.HierRole import HierRole
 		from sha import sha
 
-		self.mgr = RoleUserManagerToFile()
-		self.setUpDataDir(self.mgr)
+		self._mgr = RoleUserManagerToFile()
+		self.setUpDataDir(self._mgr)
 
 		# Setup our roles
 		customersRole = HierRole('customers', 'Customers of ACME Industries')
@@ -82,14 +82,14 @@ class SimpleExampleTest(unittest.TestCase):
 		# Create a user, add to 'staff' role
 		# Note that I encrypt my passwords here so they don't appear
 		# in plaintext in the storage file.
-		johnUser = self.mgr.createUser('john', sha('doe').hexdigest())
+		johnUser = self._mgr.createUser('john', sha('doe').hexdigest())
 		johnUser.setRoles([customersRole])
 
-		fooUser = self.mgr.createUser('foo', sha('bar').hexdigest())
+		fooUser = self._mgr.createUser('foo', sha('bar').hexdigest())
 		fooUser.setRoles([staffRole])
 
 		# Check user "foo"
-		theUser = self.mgr.loginName('foo', sha('bar').hexdigest())
+		theUser = self._mgr.loginName('foo', sha('bar').hexdigest())
 		assert theUser.isActive(), 'User should be logged in now'
 		assert theUser == fooUser, \
 			'Should be the same user object, since it is the same user "foo"'
@@ -99,7 +99,7 @@ class SimpleExampleTest(unittest.TestCase):
 			' also be in customer role, since staff includes customers.'
 
 		# Check user "John"
-		theUser = self.mgr.loginName('john', sha('doe').hexdigest())
+		theUser = self._mgr.loginName('john', sha('doe').hexdigest())
 		assert theUser.isActive(), 'User should be logged in now.'
 		assert theUser == johnUser, \
 			'Should be the same user object, since it is the same user "John".'

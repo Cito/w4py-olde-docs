@@ -58,7 +58,7 @@ class ListAttr:
 			self._%(name)s = self._mk_store.fetchObjectsOfClass(%(targetClassName)s, clauses='where %(backRefAttrName)s%(classIdSuffix)s=%%i and %(backRefAttrName)s%(objIdSuffix)s=%%i' %% (self.klass().id(), self.serialNum()))
 		return self._%(name)s
 ''' % names)
-		if self.setting('AccessorStyle', 'methods')=='properties':
+		if self.setting('AccessorStyle', 'methods') == 'properties':
 			out.write('''
 	%(name)s = property(%(pyGetName)s)
 ''' % names)

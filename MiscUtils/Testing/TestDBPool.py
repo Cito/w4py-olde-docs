@@ -32,5 +32,5 @@ def Test(iterations=15):
 		print 'You need the pgdb adapter and a test database for this example.'
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	Test()

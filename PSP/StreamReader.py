@@ -35,14 +35,14 @@ class Mark:
 
 	def __init__(self, reader, fileid=None, stream=None, inBaseDir=None, encoding=None):
 
-		if isinstance(reader,StreamReader):
+		if isinstance(reader, StreamReader):
 			self.reader = reader
 			self.fileid = fileid
 			self.includeStack = []
 			self.cursor = 0
 			self.stream = stream
-			self.baseDir=inBaseDir
-			self.encoding=encoding
+			self.baseDir = inBaseDir
+			self.encoding = encoding
 		else:
 			self = copy.copy(reader)
 		# I think the includeStack will be copied correctly,
@@ -61,11 +61,11 @@ class Mark:
 
 	def pushStream(self, infileid, inStream, inBaseDir, inEncoding):
 		self.includeStack.append((self.cursor, self.fileid, self.baseDir, self.encoding, self.stream))
-		self.cursor=0
-		self.fileid=infileid
-		self.baseDir=inBaseDir
-		self.encoding=inEncoding
-		self.stream=inStream
+		self.cursor = 0
+		self.fileid = infileid
+		self.baseDir = inBaseDir
+		self.encoding = inEncoding
+		self.stream = inStream
 
 	def popStream(self):
 		if len(self.includeStack) == 0:
@@ -79,6 +79,7 @@ class Mark:
 		self.stream = list[4]
 		return 1 # true
 
+
 class StreamReader:
 	"""This class handles the PSP source file.
 
@@ -87,14 +88,14 @@ class StreamReader:
 
 	"""
 
-	def __init__(self,filename,ctxt):
+	def __init__(self, filename, ctxt):
 		self._pspfile = filename
 		self._ctxt = ctxt
 		self._filehandle = None
 		self.sourcefiles = []
 		self.current = None
 		self.size = 0
-		self.master=None
+		self.master = None
 
 	def init(self):
 		self.pushFile(self._ctxt.getFullPspFileName())
@@ -112,12 +113,12 @@ class StreamReader:
 		# Oh, it's the original file.
 		if self.master == None:
 			parent = None
-			self.master=file
+			self.master = file
 		else:
 			parent = os.path.split(self.master)[0]
 		isAbsolute = os.path.isabs(file)
 		if parent != None and not isAbsolute:
-			file = os.path.join(parent,file)
+			file = os.path.join(parent, file)
 		fileid = self.registerSourceFile(file)
 		handle = open(file, 'r')
 		stream = handle.read()
@@ -146,7 +147,7 @@ class StreamReader:
 	def getFile(self, i):
 		return self.sourcefiles[i]
 
-	def newSourceFile(self,filename):
+	def newSourceFile(self, filename):
 		if filename in self.sourcefiles:
 			return None
 		sourcefiles.append(filename)
@@ -178,13 +179,13 @@ class StreamReader:
 	def reset(self, mark):
 		self.current = mark
 
-	def Matches(self,st):
+	def Matches(self, st):
 		if st == self.current.stream[
 				self.current.cursor:self.current.cursor+len(st)]:
 			return 1
 		return 0
 
-	def Advance(self,length):
+	def Advance(self, length):
 		"""Advance length characters"""
 		if length + self.current.cursor <= len(self.current.stream):
 			self.current.cursor += length
@@ -228,7 +229,7 @@ class StreamReader:
 		else:
 			return 1
 
-	def peekChar(self,cnt=1):
+	def peekChar(self, cnt=1):
 		if self.hasMoreInput():
 			return self.current.stream[self.current.cursor:self.current.cursor+cnt]
 		raise "EndofStream"
@@ -240,7 +241,7 @@ class StreamReader:
 			i += 1
 		return i
 
-	def getChars(self,start,stop):
+	def getChars(self, start, stop):
 		oldcurr = self.Mark()
 		self.reset(start)
 		chars = self.current.stream[start.cursor:stop.cursor]
@@ -312,11 +313,11 @@ class StreamReader:
 
 	def parseToken(self, quoted):
 		# This may not be quite right:
-		buffer=[]
+		buffer = []
 		self.skipSpaces()
 		ch = self.peekChar()
 		if quoted:
-			if (ch == '\"' or ch == "\'"):
+			if ch == '\"' or ch == "\'":
 				endquote = ch
 				ch = self.nextChar()
 				ch = self.peekChar()

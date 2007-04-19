@@ -1,9 +1,10 @@
-from WebKit.Page import Page
-from MiscUtils.Configurable import Configurable
 import os
 
+from MiscUtils.Configurable import Configurable
+from WebKit.Page import Page
 
 debug = 0
+
 
 class SitePage(Page, Configurable):
 

@@ -125,7 +125,7 @@ class Klasses(ModelObject, UserDict):
 
 		for klass in self._klasses:
 			supername = klass.supername()
-			if supername!='MiddleObject':
+			if supername != 'MiddleObject':
 				klass.setSuperklass(self.model().klass(supername))
 
 		for klass in self._klasses:

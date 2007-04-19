@@ -71,6 +71,7 @@ and get random words starting with these characters suggested:</p>''')
 		e.g. using json-py's (sourceforge.net/projects/json-py/) JsonWriter.
 
 		"""
-		s = filter(lambda w,prefix=prefix: w.startswith(prefix), suggestions) or ['none']
+		s = filter(lambda w, prefix=prefix:
+			w.startswith(prefix), suggestions) or ['none']
 		return "handleSuggestions([%s]);" % ",".join(
 			map(lambda w: "'%s'" % w, s[:max_suggestions]))

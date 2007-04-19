@@ -121,7 +121,7 @@ class ServletFactory(Object):
 			fullmodname = remainder.replace(
 				'\\', '_').replace('/', '_').replace('.', '_')
 			if debug:
-				print __file__, "fullmodname=", fullmodname
+				print __file__, ", fullmodname =", fullmodname
 			modname = os.path.splitext(os.path.basename(
 				serverSidePathToImport))[0]
 			fp, pathname, stuff = self._imp.find_module(modname,
@@ -336,7 +336,7 @@ class PythonServletFactory(ServletFactory):
 		# become a security hole (though the standard configuration ignores
 		# the .pyc and .pyo files). If you use all of them, make sure .py
 		# comes before .pyc and .pyo in the ExtensionCascadeOrder.
-		return ['.py','.pyc','.pyo']
+		return ['.py', '.pyc', '.pyo']
 
 
 	## Import ##

@@ -73,7 +73,7 @@ class ExamplePage(SidebarPage):
 
 		# WebKit
 		self.menuItem('WebKit', '%s/Examples/' % servletPath)
-		if self.request().contextName()=='Examples':
+		if self.request().contextName() == 'Examples':
 			self.writeExamplePagesItems()
 
 		# Plug-ins
@@ -82,7 +82,7 @@ class ExamplePage(SidebarPage):
 				title = plugIn.name()
 				link = '%s/%s/' % (servletPath, plugIn.examplePagesContext())
 				self.menuItem(title, link)
-				if plugIn.name()==self.request().contextName()[:-8]:
+				if plugIn.name() == self.request().contextName()[:-8]:
 					self.writeExamplePagesItems()
 
 	def writeExamplePagesItems(self):

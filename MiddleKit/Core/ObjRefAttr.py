@@ -3,7 +3,7 @@ from Attr import Attr
 
 def objRefJoin(klassId, serialNum):
 	""" Given a klass id and object serial number, returns a 64-bit obj ref value (e.g., a long). """
-	return (long(klassId)<<32) | long(serialNum)
+	return (long(klassId) << 32) | long(serialNum)
 
 def objRefSplit(objRef):
 	""" Returns a tuple with (klassId, serialNum) given the 64-bit (e.g., long type) objRef. """

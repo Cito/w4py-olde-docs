@@ -46,7 +46,8 @@ class TestThreads(Test):
 			self._store.addObject(t)
 		self._store.saveChanges()
 		things = self._store.fetchObjectsOfClass('Thing')
-		assert len(things)==self._numObjects, '%i, %i' % (len(things), self._numObjects)
+		assert len(things) == self._numObjects, \
+			'%i, %i' % (len(things), self._numObjects)
 
 	def testConcurrentReads(self):
 		for numThreads in self._numThreads:
@@ -87,7 +88,7 @@ class TestThreads(Test):
 		pass
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	import sys
 	sys.setcheckinterval(100)
 	TestThreads().timedMain()

@@ -2,13 +2,13 @@ name = 'KidKit'
 
 version = ('X', 'Y', 0)
 
-docs = [ {'name': "User's Guide", 'file': 'UsersGuide.html'} ]
+docs = [{'name': "User's Guide", 'file': 'UsersGuide.html'}]
 
 status = 'beta'
 
 requiredPyVersion = (2, 3, 0)
 
-requiredSoftware = [ { 'name': 'kid', 'version': (0, 6, 0) } ]
+requiredSoftware = [{'name': 'kid', 'version': (0, 6, 0)}]
 
 synopsis = """KidKit is a Webware plug-in that allows Kid templates
 to be automatically compiled and run as servlets by the WebKit application server.

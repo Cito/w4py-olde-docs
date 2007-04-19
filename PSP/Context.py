@@ -81,7 +81,7 @@ class PSPContext:
 		"""Set the name of the .py file to generate."""
 		raise NotImplementedError
 
-#I'll implement this as I need it:
+
 class PSPCLContext(PSPContext):
 	"""A context for command line compilation.
 
@@ -92,7 +92,7 @@ class PSPCLContext(PSPContext):
 	"""
 
 	def __init__(self, pspfile, trans=None):
-		#self._transactrion = trans # I don't think I need this
+		# self._transactrion = trans # I don't think I need this
 		self._baseUri, self._pspfile = os.path.split(pspfile)
 		self._fullpath = pspfile
 
@@ -147,7 +147,7 @@ class PSPCLContext(PSPContext):
 		"""Set the ServletWriter instance for this context."""
 		self._servletWriter = writer
 
-	def setPythonFileName(self,name):
+	def setPythonFileName(self, name):
 		"""Sets the name of the .py file to generate."""
 		self._pyFileName = name
 

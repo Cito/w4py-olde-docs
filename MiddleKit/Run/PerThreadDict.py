@@ -1,15 +1,21 @@
 import thread
 
-class PerThreadDict:
-	""" 
-	PerThreadDict behaves like a normal dict, but changes to it are kept track of on a 
-	per-thread basis.  So if thread A adds a key/value pair to the dict, only thread A sees that 
-	item.  There are a few non-standard methods (clear, isEmpty), too.
 
-	This is implementated by keeping a dictionary of dictionaries; one for each thread.  
-	The implementation is not a complete dict wrapper; only some methods are implemented.
-	If more methods are needed, see UserDict (in the standard python lib) for inspiration.
+class PerThreadDict:
+	"""Per-thread dictionary.
+
+	PerThreadDict behaves like a normal dict, but changes to it are kept
+	track of on a per-thread basis.  So if thread A adds a key/value pair
+	to the dict, only thread A sees that item.  There are a few non-standard
+	methods (clear, isEmpty), too.
+
+	This is implementated by keeping a dictionary of dictionaries; one for
+	each thread. The implementation is not a complete dict wrapper; only
+	some methods are implemented. If more methods are needed, see UserDict
+	(in the standard Python lib) for inspiration.
+
 	"""
+
 	def __init__(self):
 		self.data = {}
 
@@ -39,7 +45,7 @@ class PerThreadDict:
 				return 0
 		return 1
 
-	def values(self, allThreads=0, gettid=thread.get_ident): 
+	def values(self, allThreads=0, gettid=thread.get_ident):
 		if allThreads:
 			r = []
 			for l in self.data.values():
@@ -52,31 +58,46 @@ class PerThreadDict:
 			except:
 				return []
 
-	def __len__(self, gettid=thread.get_ident): 
+	def __len__(self, gettid=thread.get_ident):
 		threadid = gettid()
 		try:
 			return len(self.data[threadid])
 		except KeyError:
 			return 0
 
+
 class NonThreadedDict:
-	""" 
-	NonThreadedDict behaves like a normal dict.  It's only purpose is to provide a 
-	compatible interface to PerThreadDict, so that they can be used interchangeably.
+	"""Non-threaded dictionary.
+
+	NonThreadedDict behaves like a normal dict.  It's only purpose is
+	to provide a compatible interface to PerThreadDict, so that they
+	can be used interchangeably.
+
 	"""
 
 	def __init__(self):
 		self.data = {}
 
-	def __repr__(self): return repr(self.data)
-	def __setitem__(self, key, item): self.data[key] = item
-	def clear(self, allThreads=0): self.data.clear()
-	def isEmpty(self): return len(self.data) == 0
-	def values(self, allThreads=0): return self.data.values()
-	def __len__(self): return len(self.data)
+	def __repr__(self):
+		return repr(self.data)
+
+	def __setitem__(self, key, item):
+		self.data[key] = item
+
+	def clear(self, allThreads=0):
+		self.data.clear()
+
+	def isEmpty(self):
+		return len(self.data) == 0
+
+	def values(self, allThreads=0):
+		return self.data.values()
+
+	def __len__(self):
+		return len(self.data)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	# just a few tests used in development
 	def addItems():
 		global d

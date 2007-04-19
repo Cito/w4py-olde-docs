@@ -9,8 +9,8 @@ def test(store):
 	from BarReq import BarReq
 
 	# Since we're the second empty test, double check that the db is really empty
-	assert len(store.fetchObjectsOfClass(Bar))==0
-	assert len(store.fetchObjectsOfClass(Foo))==0
+	assert len(store.fetchObjectsOfClass(Bar)) == 0
+	assert len(store.fetchObjectsOfClass(Foo)) == 0
 
 	bar = Bar()
 	foo = Foo()
@@ -21,7 +21,7 @@ def test(store):
 	store.saveChanges()
 
 	bars = store.fetchObjectsOfClass(Bar)
-	assert len(bars)==1
+	assert len(bars) == 1
 	bar2 = bars[0]
 	assert bar2 is bar
 	assert bar.foo() is not None  # the sign of the bug in question

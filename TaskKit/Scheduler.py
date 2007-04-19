@@ -340,7 +340,7 @@ class Scheduler(Thread):
 	def stopAllTasks(self):
 		"""Terminate all running tasks."""
 		for i in self._running.keys():
-			print "Stopping ",i
+			print "Stopping ", i
 			self.stopTask(i)
 
 	def disableTask(self, name):
@@ -475,7 +475,8 @@ class Scheduler(Thread):
 				if currentTime < nextTime:
 					sleepTime = nextTime - currentTime
 					self.wait(sleepTime)
-				if not self._isRunning: return
+				if not self._isRunning:
+					return
 				currentTime = time()
 				if currentTime >= nextTime:
 					toRun = []

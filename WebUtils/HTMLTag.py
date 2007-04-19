@@ -1,4 +1,5 @@
-"""
+"""HTMLTag.py
+
 HTMLTag defines a class of the same name that represents HTML content. An
 additional HTMLReader class kicks off the process of reading an HTML file into a
 set of tags:
@@ -49,6 +50,7 @@ is broken for empty tags).
 
 * Determined what HTML tags are empty by scanning O'Reilly's HTML Pocket
 Reference.
+
 """
 
 # - report line numbers for errors
@@ -88,7 +90,8 @@ class HTMLTagProcessingInstructionError(HTMLTagError): pass
 class HTMLTagIncompleteError(HTMLTagError): pass
 
 
-DefaultEmptyTags = 'area basefont base bgsound br col colgroup frame hr img input isindex link meta spacer wbr'.split()
+DefaultEmptyTags = 'area basefont base bgsound br col colgroup frame hr' \
+	' img input isindex link meta spacer wbr'.split()
 
 
 class HTMLTag:
@@ -143,6 +146,7 @@ class HTMLTag:
 	  Probably not. SGMLParser probably strips them already unless they really do
 	  have spaces as in "  quoted  ". But that's speculation.
 	"""
+
 
 	## Init and reading ##
 
@@ -297,6 +301,7 @@ class HTMLTag:
 		self._closedBy = name
 		self._closedAt = lineNumber
 
+
 	## Self utility ##
 
 	def _tagWithMatchingAttr(self, name, value):
@@ -386,6 +391,7 @@ class HTMLReader(SGMLParser):
 	* The tagContainmentConfig class var can certainly be expanded for even better
 	  validation.
 	"""
+
 
 	## Init ##
 
@@ -601,7 +607,7 @@ class HTMLReader(SGMLParser):
 		openingTag = self._tagStack.pop()
 		if self._printsStack:
 			print 'END   %s: %r' % (name.ljust(6), self._tagStack)
-		if openingTag.name()!=name:
+		if openingTag.name() != name:
 			raise HTMLTagUnbalancedError('line %i: opening is %r, but closing is <%s>.' % \
 				(self._lineNumber, openingTag, name), line=self._lineNumber, opening=openingTag.name(), closing=name, tagStack=self._tagStack)
 		else:

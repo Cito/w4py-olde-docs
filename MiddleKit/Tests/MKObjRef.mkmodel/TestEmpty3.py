@@ -5,11 +5,11 @@ def test(store):
 	from Bar import Bar
 	from Qux import Qux
 
-#	import sys; store._sqlEcho = sys.stdout
+	# import sys; store._sqlEcho = sys.stdout
 
 	# Since we're the second empty test, double check that the db is really empty
-	assert len(store.fetchObjectsOfClass(Bar))==0
-	assert len(store.fetchObjectsOfClass(Qux))==0
+	assert len(store.fetchObjectsOfClass(Bar)) == 0
+	assert len(store.fetchObjectsOfClass(Qux)) == 0
 
 	qux = Qux()
 	store.addObject(qux)
@@ -19,11 +19,11 @@ def test(store):
 
 	store.saveChanges()
 	quxes = store.fetchObjectsOfClass(Qux)
-	assert len(quxes)==1
+	assert len(quxes) == 1
 	qux2 = quxes[0]
 	assert qux2 is qux
-	assert qux.bar() is not None  # the sign of the bug in question
-	assert qux.bar() is bar  # what we should expect
+	assert qux.bar() is not None # the sign of the bug in question
+	assert qux.bar() is bar # what we should expect
 
 	store.clear()
 	qux = store.fetchObjectsOfClass(Qux)[0]

@@ -20,12 +20,13 @@ class SimpleTask(Task):
 
 
 class LongTask(Task):
+
 	def run(self):
 		while 1:
 			sleep(2)
 			print "proceed for %s=%s, isRunning=%s" % (self.name(), self.proceed(), self._handle._isRunning)
 			if self.proceed():
-				print ">>",self.name(), time()
+				print ">>", self.name(), time()
 			else:
 				print "Should not proceed:", self.name()
 				return
@@ -54,5 +55,5 @@ def main():
 	print "Test Complete"
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main()

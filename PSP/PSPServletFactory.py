@@ -33,7 +33,7 @@ class PSPServletFactory(ServletFactory):
 
 	"""
 
-	def __init__(self,application):
+	def __init__(self, application):
 		ServletFactory.__init__(self, application)
 		self._cacheDir = application.serverSidePath('Cache/PSP')
 		sys.path.append(self._cacheDir)

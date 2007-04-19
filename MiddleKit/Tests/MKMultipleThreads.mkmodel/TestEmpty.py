@@ -4,27 +4,27 @@ import time
 
 # from Python docs on random module
 def create_generators(num, delta, firstseed=None):
-    """Return list of num distinct generators.
-    Each generator has its own unique segment of delta elements
-    from Random.random()'s full period.
-    Seed the first generator with optional arg firstseed (default
-    is None, to seed from current time).
-    """
+	"""Return list of num distinct generators.
+	Each generator has its own unique segment of delta elements
+	from Random.random()'s full period.
+	Seed the first generator with optional arg firstseed (default
+	is None, to seed from current time).
+	"""
 
-    from random import Random
-    g = Random(firstseed)
-    result = [g]
-    for i in range(num - 1):
-        laststate = g.getstate()
-        g = Random()
-        g.setstate(laststate)
-        g.jumpahead(delta)
-        result.append(g)
-    return result
+	from random import Random
+	g = Random(firstseed)
+	result = [g]
+	for i in range(num - 1):
+		laststate = g.getstate()
+		g = Random()
+		g.setstate(laststate)
+		g.jumpahead(delta)
+		result.append(g)
+	return result
 
 
 def test(store):
-	""" 
+	"""
 	This tests that the ObjectStore can track new, changed and deleted objects
 	on a per-thread basis, so that one thread calling store.saveChanges() doesn't
 	commit objects which a different thread added.
@@ -34,6 +34,7 @@ def test(store):
 	# store.saveAllChanges()
 
 	class Worker(Thread):
+
 		def __init__(self, store, random, saveEvent, cycles):
 			Thread.__init__(self)
 			self._store = store
@@ -67,8 +68,8 @@ def test(store):
 			assert p.isInStore()
 			assert not store.hasChangesForCurrentThread()
 			return p
-			
-		def modify(self,p):
+
+		def modify(self, p):
 			""" modify an object, then save the changes to the store """
 			store = self._store
 			p.setFirstName('bobbie')
@@ -80,8 +81,8 @@ def test(store):
 			store.saveChanges()
 			assert not p.isChanged()
 			assert not store.hasChangesForCurrentThread()
-			
-		def delete(self,p):
+
+		def delete(self, p):
 			""" delete an object, then save the changes to the store """
 			store = self._store
 			store.deleteObject(p)
@@ -115,7 +116,7 @@ def test(store):
 	gens = create_generators(numthreads, 1000000)
 	allsaved = Event()
 	for i in range(0, numthreads):
-		t = Worker( store, gens[i], allsaved, 10 )
+		t = Worker(store, gens[i], allsaved, 10)
 		t.start()
 		workers.append(t)
 

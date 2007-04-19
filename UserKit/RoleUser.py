@@ -46,7 +46,7 @@ class RoleUser(User):
 		# Convert names to role objects and update self._rolesByName
 		index = start
 		numRoles = len(self._roles)
-		while index<numRoles:
+		while index < numRoles:
 			role = self._roles[index]
 			if type(role) is types.StringType:
 				role = self._manager.roleForName(role)

@@ -96,6 +96,6 @@ def _getXmlDeclAttr(xml, attName):
 	p = s.find(attName)
 	if p == -1:
 		return None
-	s = s[p+len(attName):] # '= "Cp1251"'
-	s = s[s.find('=')+1:].strip() # '"Cp1251"'
-	return s[1:s.find(s[0],1)] # 'Cp1251'
+	s = s[p + len(attName):] # '= "Cp1251"'
+	s = s[s.find('=') + 1:].strip() # '"Cp1251"'
+	return s[1:s.find(s[0], 1)] # 'Cp1251'

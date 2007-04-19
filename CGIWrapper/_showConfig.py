@@ -1,5 +1,6 @@
 from AdminPage import *
 
+
 class _showConfig(AdminPage):
 
 	def title(self):

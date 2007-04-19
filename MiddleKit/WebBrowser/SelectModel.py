@@ -1,6 +1,6 @@
-from SitePage import SitePage
 import os
 from MiscUtils.Funcs import hostName as HostName
+from SitePage import SitePage
 
 
 class SelectModel(SitePage):

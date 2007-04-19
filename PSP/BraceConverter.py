@@ -36,7 +36,7 @@ class BraceConverter:
 		self.inquote = 0
 		self.dictlevel = 0
 
-	def parseLine(self,line,writer):
+	def parseLine(self, line, writer):
 		"""Parse a line.
 
 		The only public method of this class, call with subsequent lines
@@ -61,10 +61,10 @@ class BraceConverter:
 			else:
 				ch = self.line[0]
 				if ch == "'":
-					self.handleQuote("'",writer)
+					self.handleQuote("'", writer)
 					self.skipquote(writer)
 				elif ch == '"':
-					self.handleQuote('"',writer)
+					self.handleQuote('"', writer)
 					self.skipquote(writer)
 				elif ch == '{':
 					self.openBrace(writer)
@@ -81,7 +81,7 @@ class BraceConverter:
 		else:
 			writer.printChars('\n')
 
-	def openBlock(self,writer):
+	def openBlock(self, writer):
 		"""Open a new block."""
 		match = self.COLONBRACE.match(self.line)
 		if match and not self.dictlevel:
@@ -103,13 +103,13 @@ class BraceConverter:
 			writer.printChars(":")
 			self.line = self.line[1:]
 
-	def openBrace(self,writer):
+	def openBrace(self, writer):
 		"""Open brace encountered."""
 		writer.printChars("{")
 		self.line = self.line[1:]
 		self.dictlevel += 1
 
-	def closeBrace(self,writer):
+	def closeBrace(self, writer):
 		"""Close brace encountered."""
 		if self.dictlevel:
 			writer.printChars("}")
@@ -118,11 +118,11 @@ class BraceConverter:
 		else:
 			writer.popIndent()
 			self.line = self.line[1:].lstrip()
-			if (self.line):
+			if self.line:
 				writer.printChars('\n')
 				writer.printIndent()
 
-	def skipquote(self,writer):
+	def skipquote(self, writer):
 		"""Skip to end of quote.
 
 		Skip over all chars until the line is exhausted
@@ -144,7 +144,7 @@ class BraceConverter:
 			self.line = self.line[pos:]
 			self.inquote = 0
 
-	def handleQuote(self,quote,writer):
+	def handleQuote(self, quote, writer):
 		"Check and handle if current pos is a single or triple quote."""
 		self.inquote = 1
 		triple = quote*3
@@ -157,21 +157,26 @@ class BraceConverter:
 			writer.printChars(quote)
 			self.line = self.line[1:]
 
-### testing
+
+## Testing ##
 
 if __name__ == "__main__":
 	from ServletWriter import ServletWriter
-	# For stand alone testing:
+
+
 	class DummyWriter(ServletWriter):
+		"""For stand alone testing."""
+
 		def __init__(self):
 			self._filehandle = sys.stdout
 			self._tabcnt = 0
-			self._blockcount = 0 # a hack to handle nested blocks of python code
-			self._indentSpaces = ServletWriter.SPACES
+			self._blockcount = 0 # a hack to handle nested blocks of Python code
+			self._indentSpaces = ServletWriter._spaces
 			self._useTabs = 1
 			self._useBraces = 0
 			self._indent = '\t'
-			self._userIndent = ServletWriter.EMPTY_STRING
+			self._userIndent = ServletWriter._emptyString
+
 	test = r'''
 	for x in range(10): { q = {
 	'test': x

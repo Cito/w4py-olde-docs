@@ -74,11 +74,11 @@ class StringAttr:
 		if not self.get('Max', None):
 			return 'varchar(100) /* WARNING: NO LENGTH SPECIFIED */'
 		max = int(self['Max']) # @@ 2000-11-12 ce: won't need int() after using types
-		if max>65535:
+		if max > 65535:
 			return 'longtext'
-		if max>255:
+		if max > 255:
 			return 'text'
-		if self.has_key('Min') and self['Min'] and int(self['Min'])==max:
+		if self.has_key('Min') and self['Min'] and int(self['Min']) == max:
 			return 'char(%s)' % max
 		else:
 			return 'varchar(%s)' % max

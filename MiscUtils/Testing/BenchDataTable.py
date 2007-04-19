@@ -14,7 +14,7 @@ class BenchDataTable:
 		self._iters = 200
 
 	def main(self):
-		if len(sys.argv)>1 and sys.argv[1].lower().startswith('prof'):
+		if len(sys.argv) > 1 and sys.argv[1].lower().startswith('prof'):
 			self._shouldProfile = 1
 		if self._shouldRunTestSuite:
 			from TestDataTable import main
@@ -64,5 +64,5 @@ class BenchDataTable:
 			dt.readString(contents)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	BenchDataTable().main()

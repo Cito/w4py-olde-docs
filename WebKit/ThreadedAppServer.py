@@ -325,11 +325,11 @@ class ThreadedAppServer(AppServer):
 			average += i
 			if i > max:
 				max = i
-		average = average / len(self._threadUseCounter)
+		average /= len(self._threadUseCounter)
 		if debug:
-			print "Average Thread Use: ", avg
+			print "Average Thread Use: ", average
 			print "Max Thread Use: ", max
-			print "ThreadCount: ", self.threadCount
+			print "ThreadCount: ", self._threadCount
 
 		if len(self._threadUseCounter) < self._maxServerThreads:
 			return # not enough samples
@@ -723,6 +723,7 @@ for e in 'EPIPE', 'ECONNABORTED', 'ECONNRESET':
 		silent_errnos.append(getattr(errno, e))
 	except AttributeError:
 		pass
+
 
 class TASStreamOut(ASStreamOut):
 	"""Response stream for ThreadedAppServer.

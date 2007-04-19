@@ -2,7 +2,7 @@ name = 'Python Server Pages'
 
 version = ('X', 'Y', 0)
 
-docs = [ {'name': "User's Guide", 'file': 'UsersGuide.html'} ]
+docs = [{'name': "User's Guide", 'file': 'UsersGuide.html'}]
 
 status = 'beta'
 

@@ -12,7 +12,7 @@ from Middle.Role import Role
 def main():
 
 	# Set up the store
-#	store = MySQLObjectStore(user='user', passwd='password')
+	# store = MySQLObjectStore(user='user', passwd='password')
 	store = MySQLObjectStore()
 	store.readModelFileNamed('../Middle/Videos')
 
@@ -39,5 +39,6 @@ def main():
 
 	store.saveChanges()
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
 	main()

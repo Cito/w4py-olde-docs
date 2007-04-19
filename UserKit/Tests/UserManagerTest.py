@@ -25,10 +25,10 @@ class UserManagerTest(unittest.TestCase):
 
 	def setUp(self):
 		from UserKit.UserManager import UserManager
-		self.mgr = UserManager()
+		self._mgr = UserManager()
 
 	def checkSettings(self):
-		mgr = self.mgr
+		mgr = self._mgr
 		value = 5.1
 		mgr.setModifiedUserTimeout(value)
 		assert mgr.modifiedUserTimeout() == value
@@ -38,21 +38,19 @@ class UserManagerTest(unittest.TestCase):
 		assert mgr.activeUserTimeout() == value
 
 	def checkUserClass(self):
-		mgr = self.mgr
+		mgr = self._mgr
 		from UserKit.User import User
-		class SubUser(User):
-			pass
+		class SubUser(User): pass
 		mgr.setUserClass(SubUser)
 		assert mgr.userClass() == SubUser, \
 			"We should be able to set a custom user class."
-		class Poser:
-			pass
+		class Poser: pass
 		self.assertRaises(Exception, mgr.setUserClass, Poser), \
 			"Setting a customer user class that doesn't extend UserKit.User should fail."
 
 	def tearDown(self):
-		self.mgr.shutDown()
-		self.mgr = None
+		self._mgr.shutDown()
+		self._mgr = None
 
 
 class _UserManagerToSomewhereTest(UserManagerTest):
@@ -66,11 +64,11 @@ class _UserManagerToSomewhereTest(UserManagerTest):
 		pass # nothing for no
 
 	def tearDown(self):
-		self.mgr = None
+		self._mgr = None
 
 	def testBasics(self):
-		mgr = self.mgr
-		user = self.user = mgr.createUser('foo', 'bar')
+		mgr = self._mgr
+		user = self._user = mgr.createUser('foo', 'bar')
 		assert user.manager() == mgr
 		assert user.name() == 'foo'
 		assert user.password() == 'bar'
@@ -123,17 +121,17 @@ class _UserManagerToSomewhereTest(UserManagerTest):
 
 		if 0: # @@ 2001-04-15 ce: doesn't work yet
 			mgr.clearCache()
-			user = self.mgr.userForExternalId(externalId)
+			user = self._mgr.userForExternalId(externalId)
 			assert user
 			assert user.password() == 'bar'
 
 		mgr.clearCache()
-		user = self.mgr.userForName('foo')
+		user = self._mgr.userForName('foo')
 		assert user
 		assert user.password() == 'bar'
 
 	def testUserAccess(self):
-		mgr = self.mgr
+		mgr = self._mgr
 		user = mgr.createUser('foo', 'bar')
 
 		assert mgr.userForSerialNum(user.serialNum()) == user
@@ -149,8 +147,8 @@ class _UserManagerToSomewhereTest(UserManagerTest):
 		assert mgr.userForName('asdf', 1) == 1
 
 	def testDuplicateUser(self):
-		mgr = self.mgr
-		user = self.user = mgr.createUser('foo', 'bar')
+		mgr = self._mgr
+		user = self._user = mgr.createUser('foo', 'bar')
 		self.assertRaises(AssertionError, mgr.createUser, 'foo', 'bar')
 		userClass = mgr.userClass()
 		self.assertRaises(AssertionError, userClass, mgr, 'foo', 'bar')
@@ -161,8 +159,8 @@ class UserManagerToFileTest(_UserManagerToSomewhereTest):
 	def setUp(self):
 		_UserManagerToSomewhereTest.setUp(self)
 		from UserKit.UserManagerToFile import UserManagerToFile
-		self.mgr = UserManagerToFile()
-		self.setUpUserDir(self.mgr)
+		self._mgr = UserManagerToFile()
+		self.setUpUserDir(self._mgr)
 
 	def setUpUserDir(self, mgr):
 		path = 'Users'
@@ -181,13 +179,13 @@ class UserManagerToFileTest(_UserManagerToSomewhereTest):
 class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 
 	def write(self, text):
-		self.output.append(text)
+		self._output.append(text)
 
 	def setUp(self):
 		_UserManagerToSomewhereTest.setUp(self)
 
-		self.output = []
-		self.stdout, self.stderr = sys.stdout, sys.stderr
+		self._output = []
+		self._stdout, self._stderr = sys.stdout, sys.stderr
 		sys.stdout = sys.stderr = self
 		try:
 
@@ -210,24 +208,24 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 
 			assert os.path.exists(create_sql), \
 				'The generation process should create some SQL files.'
-			assert os.path.exists(os.path.join(generationDir,'UserForMKTest.py')), \
+			assert os.path.exists(os.path.join(generationDir, 'UserForMKTest.py')), \
 				'The generation process should create some Python files.'
 
-			self.mysqlTestInfo = AllTests.config().setting('mysqlTestInfo')
-			# _log.info('mysqlTestInfo=%s', self.mysqlTestInfo)
+			self._mysqlTestInfo = AllTests.config().setting('mysqlTestInfo')
+			# _log.info('mysqlTestInfo=%s', self._mysqlTestInfo)
 
 			# Create our test database using info from AllTests.config
 
-			self.mysqlClient = self.mysqlTestInfo['mysqlClient']
-			mysqlClientName = os.path.basename(self.mysqlClient)
+			self._mysqlClient = self._mysqlTestInfo['mysqlClient']
+			mysqlClientName = os.path.basename(self._mysqlClient)
 			assert mysqlClientName == 'mysql' or mysqlClientName == 'mysql.exe'
-			self.mysqlClient = ' '.join([self.mysqlClient] + ['--%s="%s"' % s
-					for s in self.mysqlTestInfo['DatabaseArgs'].items() if s[1]])
-			executeSqlCmd = '%s < %s' % (self.mysqlClient, create_sql)
+			self._mysqlClient = ' '.join([self._mysqlClient] + ['--%s="%s"' % s
+					for s in self._mysqlTestInfo['DatabaseArgs'].items() if s[1]])
+			executeSqlCmd = '%s < %s' % (self._mysqlClient, create_sql)
 
 			# _log.debug('running: %s', executeSqlCmd)
 			f = os.popen(executeSqlCmd)
-			self.output.append(f.read())
+			self._output.append(f.read())
 			if f.close():
 				raise OSError, 'Error running: %s' % executeSqlCmd
 
@@ -235,7 +233,7 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 
 			from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
 
-			store = MySQLObjectStore(**self.mysqlTestInfo['DatabaseArgs'])
+			store = MySQLObjectStore(**self._mysqlTestInfo['DatabaseArgs'])
 			store.readModelFileNamed(modelFileName)
 
 			from MiddleKit.Run.MiddleObject import MiddleObject
@@ -244,7 +242,7 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 			assert issubclass(UserForMKTest, MiddleObject)
 			from UserKit.User import User
 			if User not in UserForMKTest.__bases__:
-				UserForMKTest.__bases__ = UserForMKTest.__bases__ + (User,)
+				UserForMKTest.__bases__ += (User,)
 			assert issubclass(UserForMKTest, MiddleObject)
 
 			def __init__(self, manager, name, password):
@@ -254,15 +252,15 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 				base2.__init__(self, manager=manager, name=name, password=password)
 
 			UserForMKTest.__init__ = __init__
-			self.mgr = self.userManagerClass()(userClass=UserForMKTest, store=store)
+			self._mgr = self.userManagerClass()(userClass=UserForMKTest, store=store)
 
 		except:
-			sys.stdout, sys.stderr = self.stdout, self.stderr
+			sys.stdout, sys.stderr = self._stdout, self._stderr
 			print "Error in %s.SetUp." % self.__class__.__name__
-			print ''.join(self.output)
+			print ''.join(self._output)
 			raise
 		else:
-			sys.stdout, sys.stderr = self.stdout, self.stderr
+			sys.stdout, sys.stderr = self._stdout, self._stderr
 
 	def testUserClass(self):
 		pass
@@ -272,8 +270,8 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 		return UserManagerToMiddleKit
 
 	def tearDown(self):
-		self.output = []
-		self.stdout, self.stderr = sys.stdout, sys.stderr
+		self._output = []
+		self._stdout, self._stderr = sys.stdout, sys.stderr
 		sys.stdout = sys.stderr = self
 
 		try:
@@ -285,23 +283,23 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 			# Drop tables from database
 			sqlDropTables = "drop table UserForMKTest, _MKClassIds"
 
-			db = self.mysqlTestInfo['database']
+			db = self._mysqlTestInfo['database']
 
-			executeSqlCmd = '%s %s -e "%s"' % (self.mysqlClient, db, sqlDropTables)
+			executeSqlCmd = '%s %s -e "%s"' % (self._mysqlClient, db, sqlDropTables)
 
 			# _log.debug('running: %s', executeSqlCmd)
 			f = os.popen(executeSqlCmd)
-			self.output.append(f.read())
+			self._output.append(f.read())
 			if f.close():
 				raise OSError, 'Error running: %s' % executeSqlCmd
 
 		except:
-			sys.stdout, sys.stderr = self.stdout, self.stderr
+			sys.stdout, sys.stderr = self._stdout, self._stderr
 			print "Error in %s.SetUp." % self.__class__.__name__
-			print ''.join(self.output)
+			print ''.join(self._output)
 			raise
 		else:
-			sys.stdout, sys.stderr = self.stdout, self.stderr
+			sys.stdout, sys.stderr = self._stdout, self._stderr
 
 		_UserManagerToSomewhereTest.tearDown(self)
 
@@ -311,8 +309,8 @@ class RoleUserManagerToFileTest(UserManagerToFileTest):
 	def setUp(self):
 		UserManagerToFileTest.setUp(self)
 		from UserKit.RoleUserManagerToFile import RoleUserManagerToFile as umClass
-		self.mgr = umClass()
-		self.setUpUserDir(self.mgr)
+		self._mgr = umClass()
+		self.setUpUserDir(self._mgr)
 
 
 class RoleUserManagerToMiddleKitTest(UserManagerToMiddleKitTest):

@@ -79,7 +79,7 @@ def htCache(factory):
 	paths = []
 	for key in keys:
 		dir, base = os.path.split(key)
-		path = { 'dir': dir, 'base': base, 'full': key }
+		path = {'dir': dir, 'base': base, 'full': key}
 		paths.append(path)
 	paths.sort(sortSplitFilenames)
 	# At this point, paths is a list where each element is a tuple

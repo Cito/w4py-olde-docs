@@ -66,16 +66,19 @@ def DictForArgs(s):
 	if verbose:
 		print '>> DictForArgs(%s)' % repr(s)
 		print '>> sLen:', sLen
-	while start<sLen:
+	while start < sLen:
 		for regEx in REs:
-			if verbose: print '>> try:', regEx
+			if verbose:
+				print '>> try:', regEx
 			match = regEx.match(s, start)
-			if verbose: print '>> match:', match
+			if verbose:
+				print '>> match:', match
 			if match is not None:
 				if match.re is not whiteRE:
 					matches.append(match)
 				start = match.end()
-				if verbose: print '>> new start:', start
+				if verbose:
+					print '>> new start:', start
 				break
 		else:
 			_SyntaxError(s)
@@ -104,9 +107,9 @@ def DictForArgs(s):
 	dict = {}
 	matchesLen = len(matches)
 	i = 0
-	while i<matchesLen:
+	while i < matchesLen:
 		match = matches[i]
-		if i+1<matchesLen:
+		if i+1 < matchesLen:
 			peekMatch = matches[i+1]
 		else:
 			peekMatch = None
@@ -115,28 +118,28 @@ def DictForArgs(s):
 				if peekMatch.re is nameRE:
 					# We have a name without an explicit value
 					dict[match.group()] = '1'
-					i = i + 1
+					i += 1
 					continue
 				if peekMatch.re is equalsRE:
-					if i+2<matchesLen:
+					if i+2 < matchesLen:
 						target = matches[i+2]
-						if target.re is nameRE  or  target.re is stringRE:
+						if target.re is nameRE or target.re is stringRE:
 							value = target.group()
-							if value[0]=="'" or value[0]=='"':
+							if value[0] == "'" or value[0] == '"':
 								value = value[1:-1]
-								#value = "'''%s'''" % value[1:-1]
-								#value = eval(value)
+								# value = "'''%s'''" % value[1:-1]
+								# value = eval(value)
 							dict[match.group()] = value
-							i = i + 3
+							i += 3
 							continue
 			else:
 				dict[match.group()] = '1'
-				i = i + 1
+				i += 1
 				continue
 		_SyntaxError(s)
 
-
-	if verbose:	print
+	if verbose:
+		print
 
 	return dict
 
@@ -174,7 +177,7 @@ def PyDictForArgs(s):
 	# special case: just a name
 	# meaning: name=1
 	# example: isAbstract
-	if s.find(' ')==-1 and s.find('=')==-1 and s[0] in letters:
+	if s.find(' ') == -1 and s.find('=') == -1 and s[0] in letters:
 		s += '=1'
 
 	results = {}

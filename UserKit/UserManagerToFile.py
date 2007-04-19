@@ -16,13 +16,13 @@ class UserManagerToFile(UserManager):
 	the current directory is often a bad practice.
 	"""
 
-	baseOfUserManagerToFile = UserManager
+	_baseOfUserManagerToFile = UserManager
 
 
 	## Init ##
 
 	def __init__(self, userClass=None):
-		self.baseOfUserManagerToFile.__init__(self, userClass=None)
+		self._baseOfUserManagerToFile.__init__(self, userClass=None)
 		try:
 			from cPickle import load, dump
 		except ImportError:
@@ -45,7 +45,7 @@ class UserManagerToFile(UserManager):
 	## WebKit integration ##
 
 	def wasInstalled(self, owner):
-		self.baseOfUserManagerToFile.wasInstalled(self, owner)
+		self._baseOfUserManagerToFile.wasInstalled(self, owner)
 		self.setUserDir(owner.serverSidePath('Users'))
 		self.initNextSerialNum()
 
@@ -98,8 +98,8 @@ class UserManagerToFile(UserManager):
 		# cz: doing so with MiscUtils.Mixin lead to errors later
 		# when pickling the user, so I'm doing it this way now:
 		if UserMixIn not in userClass.__bases__:
-			userClass.__bases__ = userClass.__bases__ + (UserMixIn,)
-		self.baseOfUserManagerToFile.setUserClass(self, userClass)
+			userClass.__bases__ += (UserMixIn,)
+		self._baseOfUserManagerToFile.setUserClass(self, userClass)
 
 
 	## UserManager concrete methods ##
@@ -112,7 +112,7 @@ class UserManagerToFile(UserManager):
 	def addUser(self, user):
 		assert isinstance(user, User)
 		user._serialNum = self.nextSerialNum()
-		self.baseOfUserManagerToFile.addUser(self, user)
+		self._baseOfUserManagerToFile.addUser(self, user)
 		user.save()
 
 	def userForSerialNum(self, serialNum, default=NoDefault):

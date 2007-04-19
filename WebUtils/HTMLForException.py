@@ -49,9 +49,9 @@ def HTMLForException(excInfo=None, options=None):
 				% (opt['row.location'], parts[0])
 			if opt['editlink']:
 				parts[0] = '%s <a href="%s?filename=%s&line=%s">[edit]</a>' \
-					% (parts[0], opt['editlink'],
-					urllib.quote(os.path.join(os.getcwd(), match.group(1))),
-					 match.group(2))
+					% (parts[0], opt['editlink'], urllib.quote(
+						os.path.join(os.getcwd(), match.group(1))),
+						match.group(2))
 			parts[1] = '<span style="%s">%s</span>' \
 				% (opt['row.code'], parts[1])
 			line = '\n'.join(parts)

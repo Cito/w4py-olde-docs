@@ -2,19 +2,19 @@ def test(store):
 	from Thing import Thing
 
 	things = store.fetchObjectsOfClass('Thing')
-	assert len(things)>1  # make sure have at least some data to work with
+	assert len(things) > 1 # make sure have at least some data to work with
 	for thing in things:
-		assert thing.store()==store
+		assert thing.store() == store
 
 	dbArgs = store._dbArgs
 	newStore = store.__class__(**dbArgs)
 	newStore.setModel(store.model())
-	assert newStore!=store  # paranoia
+	assert newStore != store  # paranoia
 
 	things = newStore.fetchObjectsOfClass('Thing')
-	assert len(things)>1
+	assert len(things) > 1
 	for thing in things:
-		assert thing.store()==newStore
+		assert thing.store() == newStore
 
 
 	# and now for an entirely different store
@@ -30,7 +30,7 @@ def test(store):
 		personClass = model.klass('Person').pyClass()
 		person = personClass()
 		person.setFirstName('Chuck')
-		assert person.firstName()=='Chuck'
+		assert person.firstName() == 'Chuck'
 		diffStore.addObject(person)
 		assert person.store() is diffStore, 'store=%r' % person.store()
 		diffStore.saveChanges()

@@ -56,7 +56,7 @@ def test(modelFilename, configFilename, workDir=workDir, toTestDir='../'):
 		os.chdir(curDir)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	try:
 		test(sys.argv[1], sys.argv[2])
 	except:

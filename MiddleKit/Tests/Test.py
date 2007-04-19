@@ -13,7 +13,9 @@ class RunError(Exception):
 	"""
 	pass
 
+
 class Test:
+
 
 	## Init ##
 
@@ -63,7 +65,7 @@ class Test:
 		print '%.0f seconds' % (duration)
 
 	def readArgs(self, args):
-		if len(args)>1:
+		if len(args) > 1:
 			self._modelNames = args[1:]
 		else:
 			self._modelNames = '''
@@ -157,7 +159,8 @@ class Test:
 
 		out = sys.stdout
 		out.write('modules with versions:\n')
-		modules = [m for m in sys.modules.values() if m is not None and m.__name__!='sys']
+		modules = [m for m in sys.modules.values()
+			if m is not None and m.__name__ != 'sys']
 		modules.sort(lambda a, b: cmp(a.__name__, b.__name__))
 		for mod in modules:
 			ver = getattr(mod, 'version', None)
@@ -208,9 +211,9 @@ class Test:
 		if returnCode:
 			raise RunError, returnCode
 
-		#print '>> RETURN CODE =', returnCode
+		# print '>> RETURN CODE =', returnCode
 		return returnCode
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	Test().main()

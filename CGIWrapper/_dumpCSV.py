@@ -14,7 +14,7 @@ def LoadCSV(filename):
 		line = f.readline()
 		if not line:
 			break
-		rows.append(string.split(line, ','))		
+		rows.append(string.split(line, ','))
 	f.close()
 	return rows
 
@@ -24,18 +24,17 @@ class _dumpCSV(AdminPage):
 	def __init__(self, dict):
 		AdminPage.__init__(self, dict)
 		self._filename = self._fields['filename'].value
-			
+
 	def shortFilename(self):
 		return os.path.splitext(os.path.split(self._filename)[1])[0]
 
 	def title(self):
 		return 'View ' + self.shortFilename()
-		
+
 	def writeBody(self):
 		rows = LoadCSV(self._filename)
-		
-		self.writeln('<p><table align=center border=0 cellpadding=2 cellspacing=2 bgcolor=#EEEEEE>')
 
+		self.writeln('<p><table align=center border=0 cellpadding=2 cellspacing=2 bgcolor=#EEEEEE>')
 
 		# Head row gets special formatting
 		self._headings = map(lambda name: string.strip(name), rows[0])
@@ -43,7 +42,7 @@ class _dumpCSV(AdminPage):
 		for value in self._headings:
 			self.writeln('<td><font face="Arial, Helvetica" color=white><b> ', value, ' </b></font></td>')
 		self.writeln('</tr>')
-		
+
 		# Data rows
 		rowIndex = 1
 		for row in rows[1:]:
@@ -51,10 +50,10 @@ class _dumpCSV(AdminPage):
 			colIndex = 0
 			for value in row:
 				self.writeln('<td> ', self.cellContents(rowIndex, colIndex, value), ' </td>')
-				colIndex = colIndex + 1
+				colIndex += 1
 			self.writeln('</tr>')
-			rowIndex = rowIndex + 1
-		
+			rowIndex += 1
+
 		self.writeln('</table>')
 
 	def cellContents(self, rowIndex, colIndex, value):

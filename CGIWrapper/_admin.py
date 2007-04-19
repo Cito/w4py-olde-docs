@@ -1,6 +1,7 @@
 from time import time, localtime, gmtime, asctime
 from AdminPage import *
 
+
 class Page(AdminPage):
 
 	def title(self):

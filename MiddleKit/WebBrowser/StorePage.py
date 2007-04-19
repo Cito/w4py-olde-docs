@@ -1,11 +1,11 @@
 import os, sys
+
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
-
-
 from SitePage import SitePage
 
 
 class StorePage(SitePage):
+
 
 	## Init ##
 

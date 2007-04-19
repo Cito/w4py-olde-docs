@@ -15,11 +15,11 @@ def test(store):
 	store.clear()
 	results = store.fetchObjectsOfClass(Foo)
 	f = results[0]
-	assert f.max100()==a100
-	assert f.max500()==b500
-	assert f.max70000()==c70000
+	assert f.max100() == a100
+	assert f.max500() == b500
+	assert f.max70000() == c70000
 
-	difficultString = ''.join([chr(i) for i in range(1,256)])
+	difficultString = ''.join([chr(i) for i in range(1, 256)])
 	f = Foo()
 	f.setMax500(difficultString)
 	store.addObject(f)

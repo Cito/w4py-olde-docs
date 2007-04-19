@@ -9,7 +9,7 @@ class AppControl(AdminSecurity):
 	def writeContent(self):
 		req = self.request()
 		wr = self.writeln
-		action = self.request().field("action",None)
+		action = self.request().field("action", None)
 
 		if action == None:
 			if not self.application().server().isPersistent():
@@ -69,8 +69,8 @@ class AppControl(AdminSecurity):
 					try:
 						reload(m)
 					except Exception, e:
-						wr('<span style="color:red">Could not reload,'
-							' error was "%s".</span><br>' % e)
+						wr('<span style="color:red">Could not reload, '
+							'error was "%s".</span><br>' % e)
 			wr('</p>')
 			wr('<p style="color:green">The selected modules'
 				' have been reloaded.</p>')

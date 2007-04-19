@@ -9,10 +9,12 @@ methods with a given name. The default prefix for denoting a category is ##.
 
 """
 
-from types import *
+from types import DictType
 import os
 
+
 class PySummary:
+
 
 	## Init ##
 
@@ -179,5 +181,5 @@ def test():
 	print 'Finished.'
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	test()

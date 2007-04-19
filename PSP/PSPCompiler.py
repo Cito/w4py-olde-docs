@@ -31,17 +31,17 @@ from ParseEventHandler import ParseEventHandler
 class Compiler:
 	"""The main compilation class-"""
 
-	def __init__(self,context):
+	def __init__(self, context):
 		self._ctxt = context
 
 	def compile(self):
-		reader = StreamReader(self._ctxt.getPspFileName(),self._ctxt)
+		reader = StreamReader(self._ctxt.getPspFileName(), self._ctxt)
 		reader.init()
 		writer = ServletWriter(self._ctxt)
 		self._ctxt.setPSPReader(reader)
 		self._ctxt.setServletWriter(writer)
 		parser = PSPParser(self._ctxt)
-		handler = ParseEventHandler(self._ctxt,parser)
+		handler = ParseEventHandler(self._ctxt, parser)
 		parser.setEventHandler(handler)
 		handler.beginProcessing()
 		parser.parse()

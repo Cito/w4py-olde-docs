@@ -17,6 +17,7 @@ class Role:
 		* class RoleUser
 	"""
 
+
 	## Init ##
 
 	def __init__(self, name, description=None):

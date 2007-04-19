@@ -4,10 +4,9 @@ from MiscUtils.DictForArgs import *
 
 class TestDictForArgs(unittest.TestCase):
 
-
 	def testPositives(self):
 #		print 'Positive cases:'
-		tests ='''\
+		tests = '''\
 # Basics
 x=1       == {'x': '1'}
 x=1 y=2   == {'x': '1', 'y': '2'}
@@ -41,19 +40,17 @@ x=2 y     == {'x': '2', 'y': '1'}
 				output = eval(output)
 
 				result = DictForArgs(input)
-		
+
 				self._testPositive(input, output)
 
-	
 	def _testPositive(self, input, output):
 # 		print repr(input)
 # 		sys.stdout.flush()
 		result = DictForArgs(input)
-		
-		self.assertEquals( result, output, 
-			'Expecting: %s\nGot: %s\n' % (repr(output), repr(result)) )
-	
-	
+
+		self.assertEquals(result, output,
+			'Expecting: %s\nGot: %s\n' % (repr(output), repr(result)))
+
 	def testNegatives(self):
 #		print 'Negative cases:'
 		cases = '''\
@@ -71,7 +68,7 @@ x=5 'y'=6
 			case = string.strip(case)
 			if case:
 				self._testNegative(case)
-	
+
 	def _testNegative(self, input):
 #		print repr(input)
 #		sys.stdout.flush()
@@ -80,11 +77,10 @@ x=5 'y'=6
 		except DictForArgsError:
 			return # success
 		except:
-			self.fail('Expecting DictForArgError.\nGot: %s.\n' % sys.exc_info() )		
+			self.fail('Expecting DictForArgError.\nGot: %s.\n' % sys.exc_info())
 		else:
-			self.fail('Expecting DictForArgError.\nGot: %s.\n' % repr(result) )
-	
-	
+			self.fail('Expecting DictForArgError.\nGot: %s.\n' % repr(result))
+
 	def testPyDictForArgs(self):
 		cases = '''\
 		x=1 == {'x': 1}
@@ -101,5 +97,4 @@ x=5 'y'=6
 			if case:
 				source, answer = case.split('==')
 				answer = eval(answer)
-				assert PyDictForArgs(source)==answer
-
+				assert PyDictForArgs(source) == answer

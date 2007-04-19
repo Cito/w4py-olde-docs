@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-"""
-Generate.py
+"""Generate.py
 
 > python Generate.py -h
+
 """
 
-
-import os, shutil, string, sys, time, types
+import os, shutil, sys, time, types
+from UserDict import UserDict
 from getopt import getopt
 import FixPath
 import MiddleKit
@@ -185,7 +185,9 @@ class Doc:
 					notes = ' <br> '.join(notes)
 					notes = mystr(notes)
 					values['Notes'] = notes
-#					wr('<tr class=Attr> <td class=%(Prefix)sAttr> &nbsp; </td> <td class=%(Prefix)sAttrNotes colspan=7> %(Notes)s </td> </tr>\n' % values)
+					# wr('<tr class=Attr><td class=%(Prefix)sAttr>&nbsp;</td>'
+					# '<td class=%(Prefix)sAttrNotes colspan=7>%(Notes)s</td>'
+					# '</tr>\n' % values)
 					wr('<td class=%(Prefix)sAttrNotes> %(Notes)s </td>\n' % values)
 				else:
 					wr('<td class=%(Prefix)sAttrNotes> &nbsp; </td>\n' % values)
@@ -241,7 +243,7 @@ class Doc:
 		values = {}
 		for arg in args:
 			parts = arg.split('=', 1)
-			if len(parts)==2:
+			if len(parts) == 2:
 				values[parts[0].lower()] = valueForString(parts[1])
 			else:
 				values[parts[0].lower()] = 1
@@ -269,8 +271,6 @@ Usage:
 		print
 		sys.exit(1)
 
-
-from UserDict import UserDict
 
 class Values(UserDict):
 
@@ -335,5 +335,5 @@ ListAttr.htmlForType = htmlForType
 
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	Doc().main(sys.argv)

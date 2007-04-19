@@ -9,7 +9,7 @@ def test(filename, configFilename, pyFilename, deleteData):
 	try:
 		filename = '../'+filename
 
-		if os.path.splitext(filename)[1]=='':
+		if os.path.splitext(filename)[1] == '':
 			filename += '.mkmodel'
 		pyFilename = os.path.join(filename, pyFilename)
 		if not os.path.exists(pyFilename):
@@ -48,34 +48,34 @@ def usage():
 	sys.exit(1)
 
 def main():
-	if len(sys.argv)<4:
+	if len(sys.argv) < 4:
 		usage()
 
 	modelFilename = sys.argv[1]
 	configFilename = sys.argv[2]
 	pyFilename = sys.argv[3]
 	deleteData = 1
-	if len(sys.argv)>4:
+	if len(sys.argv) > 4:
 		delArg = sys.argv[4]
 		parts = delArg.split('=')
-		if len(parts)!=2 or parts[0]!='delete':
+		if len(parts) != 2 or parts[0] != 'delete':
 			usage()
 		try:
 			deleteData = int(parts[1])
 		except:
 			usage()
-	elif len(sys.argv)>4:
+	elif len(sys.argv) > 4:
 		usage()
 
 	test(modelFilename, configFilename, pyFilename, deleteData)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	try:
 		main()
 	except:
 		import traceback
 		exc_info = sys.exc_info()
 		traceback.print_exception(*exc_info)
-		#print '>> ABOUT TO EXIT WITH CODE 1'
+		# print '>> ABOUT TO EXIT WITH CODE 1'
 		sys.exit(1)

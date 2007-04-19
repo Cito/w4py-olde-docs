@@ -3,6 +3,7 @@
 ClassHierarchy.py
 
 A quick, hacky script to contruct a class hierarchy list from a set of Python files.
+
 """
 
 
@@ -45,19 +46,19 @@ class Klass:
 		self._filename = filename
 
 	def printList(self, file=sys.stdout,
-		indent=0, indentString='    ',
-		prefix='', func=EmptyString, postfix='',
-		multipleBasesMarker='*'):
+			indent=0, indentString='    ',
+			prefix='', func=EmptyString, postfix='',
+			multipleBasesMarker='*'):
 		filename = self._filename
-		if os.path.splitext(filename)[0]==self._name:
+		if os.path.splitext(filename)[0] == self._name:
 			filename = ''
-		if len(self._bases)<2:
+		if len(self._bases) < 2:
 			star = ''
 		else:
 			star = multipleBasesMarker
 		file.write(''.join((prefix, indentString*indent,
 			self._name, star, func(self), postfix)))
-		indent = indent + 1
+		indent += 1
 		for klass in self._derived:
 			klass.printList(file, indent, indentString, prefix, func, postfix)
 
@@ -93,19 +94,19 @@ class ClassList:
 		lines = open(name).readlines()
 		lineNum = 1
 		for line in lines:
-			if len(line)>8 and \
-				line[:5]=='class' and \
+			if len(line) > 8 and \
+				line[:5] == 'class' and \
 				line[5] in ' \t' and \
-				line.find(':')!=-1:
+				line.find(':') != -1:
 				self.readLine(line, name, lineNum)
-			lineNum = lineNum + 1
+			lineNum += 1
 		if self._verbose:
 			print
 
 	def readLine(self, line, filename=None, lineNum=None):
 		# strip comments
 		comment = line.find('#')
-		if comment!=-1:
+		if comment != -1:
 			line = line[:comment]
 		# split into words
 		names = self._splitter.split(line[5:])
@@ -114,7 +115,7 @@ class ClassList:
 		# get rid of empty strings
 		names = filter(None, names)
 		# special case:  class foo(fi): pass
-		if names[-1]=='pass':
+		if names[-1] == 'pass':
 			del names[-1]
 		# check for weirdos
 		for name in names:
@@ -143,7 +144,7 @@ class ClassList:
 	def roots(self):
 		roots = []
 		for klass in self._klasses.values():
-			if len(klass._bases)==0:
+			if len(klass._bases) == 0:
 				roots.append(klass)
 		return roots
 
@@ -246,5 +247,5 @@ def main(args):
 	classlist.printList()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	main(sys.argv[1:])

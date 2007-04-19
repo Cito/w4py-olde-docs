@@ -72,14 +72,14 @@ def dont_use_combineManagerClasses(*classesOrNamesThereof):
 	for curClass in classes:
 		#print '>> curClass = %r, %r' % (curClass, type(curClass))
 		if prevClass:
-			class newClass: pass
-			newClass.__name__ = prevClass.__name__
-			newClass.__dict__.update(prevClass.__dict__)
-			newClass.__bases__ = (curClass,)
-			baseOfName = 'baseOf'+prevClass.__name__
-			setattr(newClass, baseOfName, curClass)
+			class NewClass: pass
+			NewClass.__name__ = prevClass.__name__
+			NewClass.__dict__.update(prevClass.__dict__)
+			NewClass.__bases__ = (curClass,)
+			baseOfName = 'baseOf' + prevClass.__name__
+			setattr(NewClass, baseOfName, curClass)
 			if theClass is None:
-				theClass = newClass
+				theClass = NewClass
 		prevClass = curClass
 
 	assert issubclass(theClass, UserManager)

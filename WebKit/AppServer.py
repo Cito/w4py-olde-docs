@@ -339,7 +339,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 
 	def version(self):
 		"""Return WebKit version."""
-		if not hasattr(self,'_webKitVersionString'):
+		if not hasattr(self, '_webKitVersionString'):
 			from MiscUtils.PropertiesObject import PropertiesObject
 			props = PropertiesObject(os.path.join(self.webKitPath(), 'Properties.py'))
 			self._webKitVersionString = props['versionString']
@@ -457,7 +457,7 @@ def stop(*args, **kw):
 		pidfile = os.path.join(kw['workDir'], "appserverpid.txt")
 	else:
 		# pidfile is in WebKit directory
-		pidfile = os.path.join(os.path.dirname(__file__),"appserverpid.txt")
+		pidfile = os.path.join(os.path.dirname(__file__), "appserverpid.txt")
 	try:
 		pid = int(open(pidfile).read())
 	except:

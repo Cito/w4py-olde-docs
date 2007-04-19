@@ -25,6 +25,7 @@ from PSP import PSPUtils
 
 if 0:
 	import doctest
+
 	def suite():
 		"""Combine our unittest with our doctests."""
 		result = unittest.TestSuite()

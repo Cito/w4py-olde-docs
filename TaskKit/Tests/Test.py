@@ -9,15 +9,15 @@ class TaskKitTest(unittest.TestCase):
 
 	def setUp(self):
 		from TaskKit.Scheduler import Scheduler
-		self.scheduler = Scheduler()
+		self._scheduler = Scheduler()
 
 	def checkBasics(self):
-		sched = self.scheduler
+		sched = self._scheduler
 		sched.start()
 
 	def tearDown(self):
-		self.scheduler.stop()
-		self.scheduler = None
+		self._scheduler.stop()
+		self._scheduler = None
 
 
 def makeTestSuite():
@@ -25,6 +25,6 @@ def makeTestSuite():
 	return unittest.TestSuite((suite1,))
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	runner = unittest.TextTestRunner(stream=sys.stdout)
 	unittest.main(defaultTest='makeTestSuite', testRunner=runner)

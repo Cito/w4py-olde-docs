@@ -434,11 +434,11 @@ class CGIWrapper(NamedValueAccess):
 
 		# @@ 2000-04-16 ce: Does _namespace need to be an ivar?
 		self._namespace = {
-			'headers':	self._headers,
-			'fields':	self._fields,
-			'environ':	self._environ,
-			'wrapper':	self,
-#			'WebUtils':  WebUtils   # @@ 2000-05-01 ce: Resolve.
+			'headers': self._headers,
+			'fields': self._fields,
+			'environ': self._environ,
+			'wrapper': self,
+			# 'WebUtils': WebUtils, # @@ 2000-05-01 ce: Resolve.
 		}
 		info = self._namespace.copy()
 
@@ -475,9 +475,9 @@ class CGIWrapper(NamedValueAccess):
 						print self._namespace[name](info).html()
 						break
 			else:
-				self._headers = { 'Location':
+				self._headers = {'Location':
 					os.path.split(self._environ['SCRIPT_NAME'])[0]
-					+ self._environ['PATH_INFO'] }
+					+ self._environ['PATH_INFO']}
 
 			# Note the end time of the script
 			self._scriptEndTime = time()

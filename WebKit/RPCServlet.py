@@ -12,7 +12,7 @@ class RPCServlet(HTTPServlet):
 
 		"""
 		if methodName in self.exposedMethods():
-			return getattr(self, methodName)( *args, **keywords)
+			return getattr(self, methodName)(*args, **keywords)
 		else:
 			raise NotImplementedError, methodName
 
@@ -36,7 +36,7 @@ class RPCServlet(HTTPServlet):
 		# report exception back to server
 		setting = trans.application().setting('RPCExceptionReturn')
 		assert setting in ('occurred', 'exception', 'traceback'), \
-			'setting=%r' % setting
+			'setting = %r' % setting
 		if setting == 'occurred':
 			result = 'unhandled exception'
 		elif setting == 'exception':

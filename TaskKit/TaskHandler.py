@@ -18,6 +18,7 @@ class TaskHandler:
 
 	"""
 
+
 	## Init ##
 
 	def __init__(self, scheduler, start, period, task, name):
@@ -67,7 +68,7 @@ class TaskHandler:
 				# if the time taken to run the task exceeds the period
 				self._startTime = self._lastTime + self._period
 			else:
-				self._startTime = self._startTime + self._period
+				self._startTime += self._period
 			return True
 
 	def notifyCompletion(self):

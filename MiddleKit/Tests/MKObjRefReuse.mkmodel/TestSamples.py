@@ -8,13 +8,13 @@ def assertBazIsObjRef(bar):
 
 def test(store):
 	foos = store.fetchObjectsOfClass('Foo')
-	assert len(foos)==2
+	assert len(foos) == 2
 	foo1 = foos[0]
 	foo2 = foos[1]
 
 	bar = foo1.bar()
 	baz = foo1.bar().baz()
-	assert baz.x()==5  # just to make sure we got what we expected
+	assert baz.x() == 5 # just to make sure we got what we expected
 	assertBazIsObjRef(bar)
 
 	# Now here's what we're really testing for:

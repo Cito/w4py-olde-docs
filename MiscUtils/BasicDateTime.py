@@ -40,6 +40,7 @@ class DaysInMonth:
 	The calendar.monthrange(year, month) fails in that version.
 
 	"""
+
 	def calculate(self, year, month):
 		return (0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[month] \
 			+ (month == 2 and self.isleap(year))
@@ -282,7 +283,7 @@ class datetime:
 	def _addZeros(self, num, s):
 		"""Private function to add an appropriate number of zeros to s such that len(s) is num."""
 		s = str(s)
-		while (len(s) < num):
+		while len(s) < num:
 			s = '0' + s
 		return s
 

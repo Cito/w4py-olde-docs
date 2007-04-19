@@ -1,4 +1,4 @@
-import os, string, time
+import os
 from stat import *
 
 print '''
@@ -21,7 +21,7 @@ def sizeSorter(a, b):
 # a particular script.
 scripts = []
 for filename in os.listdir(os.curdir):
-	if len(filename)>3  and  filename[-3:]=='.py':
+	if len(filename) > 3 and filename[-3:] == '.py':
 		script = {}
 		script['pathname']  = filename
 		script['size']      = os.stat(script['pathname'])[ST_SIZE]
@@ -32,7 +32,7 @@ scripts.sort(sizeSorter)
 print '<p><table cellspacing=0 align=center>'
 print '<tr> <th align=right>Size</th> <th align=left>Script</th> <th align=left>View</th> </tr>'
 
-for script in scripts:		
+for script in scripts:
 	print '<tr>',
 	print '<td align=right> %d </td>' % script['size'],
 	print '<td> <a href=%s>%s</a> </td>' % (script['shortname'], script['shortname']),

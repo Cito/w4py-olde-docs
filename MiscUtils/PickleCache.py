@@ -47,7 +47,6 @@ These operations do nothing if you don't have Python 2.2 or greater.
 SEE ALSO
 	http://www.python.org/doc/current/lib/module-pickle.html
 
-- wordwrap bar --------------------------------------------------------
 """
 
 verbose = 0
@@ -61,10 +60,11 @@ try:
 except ImportError:
 	from pickle import load, dump
 
-havePython22OrGreater = sys.version_info[0]>2 or (sys.version_info[0]==2 and sys.version_info[1]>=2)
+havePython22OrGreater = sys.version_info[0] > 2 or (
+	sys.version_info[0] == 2 and sys.version_info[1] >= 2)
 
 
-s ="""
+s = """
 def readPickleCache(filename, pickleVersion=1, source=None, verbose=None):
 	return _reader.read(filename, pickleVersion, source, verbose)
 
@@ -78,7 +78,7 @@ class PickleCache:
 	Just a simple abstract base class for PickleCacheReader and
 	PickleCacheWriter.
 	"""
-	verbose = verbose
+	_verbose = verbose
 
 	def picklePath(self, filename):
 		return filename + '.pickle.cache'
@@ -91,18 +91,19 @@ class PickleCacheReader(PickleCache):
 		Returns the data from the pickle cache version of the filename, if it can read. Otherwise returns None which also indicates that writePickleCache() should be subsequently called after the original file is read.
 		"""
 		if verbose is None:
-			v = self.verbose
+			v = self._verbose
 		else:
 			v = verbose
-		if v: print '>> PickleCacheReader.read() - verbose is on'
+		if v:
+			print '>> PickleCacheReader.read() - verbose is on'
 		assert filename
 
 		if not os.path.exists(filename):
-			#if v: print 'cannot find %r' % filename
+			# if v: print 'cannot find %r' % filename
 			open(filename) # to get a properly constructed IOError
 
 		if not havePython22OrGreater:
-			#if v: print 'Python version is too old for this. Returning None.'
+			# if v: print 'Python version is too old for this. Returning None.'
 			return None
 
 		didReadPickle = 0
@@ -112,44 +113,44 @@ class PickleCacheReader(PickleCache):
 
 		picklePath = self.picklePath(filename)
 		if os.path.exists(picklePath):
-			if os.path.getmtime(picklePath)<os.path.getmtime(filename):
-				#if v: print 'cache is out of date'
+			if os.path.getmtime(picklePath) < os.path.getmtime(filename):
+				# if v: print 'cache is out of date'
 				shouldDeletePickle = 1
 			else:
 				try:
-					#if v: print 'about to open for read %r' % picklePath
+					# if v: print 'about to open for read %r' % picklePath
 					file = open(picklePath, 'rb')
 				except IOError, e:
-					#if v: print 'cannot open cache file: %s: %s' % (e.__class__.__name__, e)
+					# if v: print 'cannot open cache file: %s: %s' % (e.__class__.__name__, e)
 					pass
 				else:
 					try:
-						#if v: print 'about to load'
+						# if v: print 'about to load'
 						dict = load(file)
 					except EOFError:
-						#if v: print 'EOFError - not loading'
+						# if v: print 'EOFError - not loading'
 						shouldDeletePickle = 1
 					except Exception, exc:
 						print 'WARNING: %s: %s: %s' % (self.__class__.__name__, exc.__class__, exc)
 						shouldDeletePickle = 1
 					else:
 						file.close()
-						#if v: print 'finished reading'
+						# if v: print 'finished reading'
 						assert isinstance(dict, DictType), 'type=%r dict=%r' % (type(dict), dict)
 						for key in ('source', 'data', 'pickle version', 'python version'):
 							assert dict.has_key(key), key
-						if source and dict['source']!=source:
-							#if v: print 'not from required source (%s): %s' % (source, dict['source'])
+						if source and dict['source'] != source:
+							# if v: print 'not from required source (%s): %s' % (source, dict['source'])
 							shouldDeletePickle = 1
-						elif dict['pickle version']!=pickleVersion:
-							#if v: print 'pickle version (%i) does not match expected (%i)' % (dict['pickle version'], pickleVersion)
+						elif dict['pickle version'] != pickleVersion:
+							# if v: print 'pickle version (%i) does not match expected (%i)' % (dict['pickle version'], pickleVersion)
 							shouldDeletePickle = 1
-						elif dict['python version']!=sys.version_info:
-							#if v: print 'python version %s does not match current %s' % (dict['python version'], sys.version_info)
+						elif dict['python version'] != sys.version_info:
+							# if v: print 'python version %s does not match current %s' % (dict['python version'], sys.version_info)
 							shouldDeletePickle = 1
 						else:
-							#if v: print 'all tests pass. accepting data'
-							if v>1:
+							# if v: print 'all tests pass. accepting data'
+							if v > 1:
 								print 'display full dict:'
 								pprint(dict)
 							data = dict['data']
@@ -158,32 +159,37 @@ class PickleCacheReader(PickleCache):
 		# delete the pickle file if suggested by previous conditions
 		if shouldDeletePickle:
 			try:
-				#if v: print 'attempting to remove pickle cache file'
+				# if v: print 'attempting to remove pickle cache file'
 				os.remove(picklePath)
 			except OSError, e:
-				if v: print 'failed to remove: %s: %s' % (e.__class__.__name__, e)
+				if v:
+					print 'failed to remove: %s: %s' % (
+						e.__class__.__name__, e)
 				pass
 
-		if v: print 'done reading data'; print
+		if v:
+			print 'done reading data'
+			print
 
 		return data
 
 
 class PickleCacheWriter(PickleCache):
 
-	writeSleepInterval = 0.1
+	_writeSleepInterval = 0.1
 
 	def write(self, data, filename, pickleVersion=1, source=None, verbose=None):
 		if verbose is None:
-			v = self.verbose
+			v = self._verbose
 		else:
 			v = verbose
-		if v: print '>> PickleCacheWriter.write() - verbose is on'
+		if v:
+			print '>> PickleCacheWriter.write() - verbose is on'
 		assert filename
 		sourceTimestamp = os.path.getmtime(filename)
 
 		if not havePython22OrGreater:
-			#if v: print 'Python version is too old for this. Returning None.'
+			# if v: print 'Python version is too old for this. Returning None.'
 			return None
 
 		picklePath = self.picklePath(filename)
@@ -193,31 +199,39 @@ class PickleCacheWriter(PickleCache):
 			'pickle version': pickleVersion,
 			'data': data,
 		}
-		if v>1:
+		if v > 1:
 			print 'display full dict:'
 			pprint(dict)
 		try:
-			if v: print 'about to open for write %r' % picklePath
+			if v:
+				print 'about to open for write %r' % picklePath
 			file = open(picklePath, 'wb')
 		except IOError, e:
-			if v: print 'error. not writing. %s: %s' % (e.__class__.__name__, e)
+			if v:
+				print 'error. not writing. %s: %s' % (
+					e.__class__.__name__, e)
 		else:
 			while 1:
-				dump(dict, file, 1)   # 1 = binary format
+				dump(dict, file, 1) # 1 = binary format
 				file.close()
-				# make sure the cache has a newer timestamp, otherwise the cache will
-				# just get ignored and rewritten next time.
-				if os.path.getmtime(picklePath)==sourceTimestamp:
-					if v: print 'timestamps are identical. sleeping %0.2f seconds' % self.writeSleepInterval
-					time.sleep(self.writeSleepInterval)
+				# make sure the cache has a newer timestamp, otherwise the cache
+				# will just get ignored and rewritten next time.
+				if os.path.getmtime(picklePath) == sourceTimestamp:
+					if v:
+						print 'timestamps are identical.' \
+							' sleeping %0.2f seconds' % self._writeSleepInterval
+					time.sleep(self._writeSleepInterval)
 					file = open(picklePath, 'w')
 				else:
 					break
 
-		if v: print 'done writing data'; print
+		if v:
+			print 'done writing data'
+			print
 
 
-# define module level convenience functions, readPickleCache and writePickleCache:
-
-_reader = PickleCacheReader(); readPickleCache  = _reader.read
-_writer = PickleCacheWriter(); writePickleCache = _writer.write
+# define module level convenience functions:
+_reader = PickleCacheReader()
+readPickleCache  = _reader.read
+_writer = PickleCacheWriter()
+writePickleCache = _writer.write

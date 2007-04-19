@@ -25,7 +25,7 @@ class DumpCSV(AdminSecurity):
 			self.writeln('<p>File does not exist.</p>')
 			return
 		table = DataTable(self._filename)
-		if len(table)==1:
+		if len(table) == 1:
 			plural = ''
 		else:
 			plural = 's'
@@ -47,9 +47,9 @@ class DumpCSV(AdminSecurity):
 				if colIndex < self._numCols: # for those cases where a row has more columns that the header row.
 					self.writeln('<td>',
 						self.cellContents(rowIndex, colIndex, value), '</td>')
-				colIndex = colIndex + 1
+				colIndex += 1
 			self.writeln('</tr>')
-			rowIndex = rowIndex + 1
+			rowIndex += 1
 		self.writeln('</table>')
 
 	def cellContents(self, rowIndex, colIndex, value):

@@ -87,11 +87,12 @@ from MiscUtils.PropertiesObject import PropertiesObject
 
 class Replacer:
 	"""Class to handle substitutions in a file."""
+
 	def __init__(self, *args):
 		self._subs = list(args)
 
 	def add(self, search, replace):
-		self._subs.append((re.compile(search,re.M), replace))
+		self._subs.append((re.compile(search, re.M), replace))
 
 	def replaceInStr(self, data):
 		for search, replace in self._subs:

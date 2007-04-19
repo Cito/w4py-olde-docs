@@ -30,19 +30,19 @@ class HTMLTagTest(unittest.TestCase):
 	def checkBasics(self):
 		reader = HTMLReader()
 		tag = reader.readString('<html> </html>')
-		assert tag.name()=='html'
-		assert reader.rootTag()==tag
-		assert reader.filename()==None
+		assert tag.name() == 'html'
+		assert reader.rootTag() == tag
+		assert reader.filename() is None
 		out = StringIO()
 		tag.pprint(out)
-		assert out.getvalue()=='<html>\n</html>\n'
+		assert out.getvalue() == '<html>\n</html>\n'
 
 	def checkReuseReader(self):
 		reader = HTMLReader()
 		reader.readString('<html> </html>')
 		tag = reader.readString('<html> <body> </body> </html>')
 		assert reader.rootTag() is not None
-		assert reader.rootTag()==tag
+		assert reader.rootTag() == tag
 
 		tag = reader.readString('<html> </html>', retainRootTag=0)
 		assert tag is not None
@@ -52,10 +52,10 @@ class HTMLTagTest(unittest.TestCase):
 		html = HTMLReader().readString(self._html)
 
 		# Name
-		assert html.name()=='html'
+		assert html.name() == 'html'
 
 		# Attrs
-		assert html.numAttrs()==0
+		assert html.numAttrs() == 0
 		assert not html.hasAttr('foo')
 		self.assertRaises(KeyError, html.attr, 'foo')
 		assert html.attr('foo', None) is None
@@ -64,23 +64,23 @@ class HTMLTagTest(unittest.TestCase):
 		for numFoos, fooAt, foos in [
 				[html.numChildren, html.childAt, html.children],
 				[html.numSubtags, html.subtagAt, html.subtags]]:
-			assert numFoos()==2
-			assert len(foos())==2
-			assert fooAt(0).name()=='head'
-			assert fooAt(1).name()=='body'
+			assert numFoos() == 2
+			assert len(foos()) == 2
+			assert fooAt(0).name() == 'head'
+			assert fooAt(1).name() == 'body'
 
 		# Children and subtags when they're different
 		body = html.subtagAt(1)
 		p = body.subtagAt(0)
-		assert p.name()=='p'
-		assert p.numChildren()==3
-		assert p.numSubtags()==1
+		assert p.name() == 'p'
+		assert p.numChildren() == 3
+		assert p.numSubtags() == 1
 
 	def checkMatchingAttr(self):
 		html = HTMLReader().readString(self._html)
-		assert html.tagWithMatchingAttr('color', 'white').name()=='body'
-		assert html.tagWithMatchingAttr('id', 'dataTable').name()=='table'
-		assert html.tagWithId('dataTable').name()=='table'
+		assert html.tagWithMatchingAttr('color', 'white').name() == 'body'
+		assert html.tagWithMatchingAttr('id', 'dataTable').name() == 'table'
+		assert html.tagWithId('dataTable').name() == 'table'
 
 	def checkInvalidHTML(self):
 		from WebUtils.HTMLTag import HTMLTagUnbalancedError, HTMLTagIncompleteError
@@ -103,6 +103,6 @@ def makeTestSuite():
 	return unittest.TestSuite(tests)
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	runner = unittest.TextTestRunner(stream=sys.stdout)
 	unittest.main(defaultTest='makeTestSuite', testRunner=runner)

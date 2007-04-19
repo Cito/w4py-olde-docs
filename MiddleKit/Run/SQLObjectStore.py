@@ -22,7 +22,7 @@ class ObjRefZeroSerialNumError(ObjRefError): pass
 class ObjRefDanglesError(ObjRefError): pass
 
 
-aggressiveGC = 0
+aggressiveGC = False
 
 
 class UnknownSerialNumberError(SQLObjectStoreError):
@@ -32,6 +32,7 @@ class UnknownSerialNumberError(SQLObjectStoreError):
 	Sometimes an obj ref cannot be immediately resolved on INSERT because
 	the target has not yet been inserted and therefore, given a serial number.
 	"""
+
 	def __init__(self, info):
 		self.info = info
 
@@ -78,6 +79,7 @@ class SQLObjectStore(ObjectStore):
 		http://www.python.org/topics/database/DatabaseAPI-2.0.html
 	"""
 
+
 	## Init ##
 
 	def __init__(self, **kwargs):
@@ -85,8 +87,8 @@ class SQLObjectStore(ObjectStore):
 
 		ObjectStore.__init__(self)
 		self._dbArgs = kwargs
-		self._connected = 0
-		self._commited = 0
+		self._connected = False
+		self._commited = False
 		self._sqlEcho   = None
 		self._sqlCount  = 0
 		self._pool = None   # an optional DBPool
@@ -103,7 +105,7 @@ class SQLObjectStore(ObjectStore):
 		# Check thread safety
 		self._threadSafety = self.threadSafety()
 		if self._threaded and self._threadSafety == 0:
-			raise SQLObjectStoreThreadingError, 'Threaded is 1, but the DB API threadsafety is 0.'
+			raise SQLObjectStoreThreadingError, 'Threaded is True, but the DB API threadsafety is 0.'
 
 		# Cache some settings
 		self._markDeletes = self.setting('DeleteBehavior', 'delete') == 'mark'
@@ -122,7 +124,7 @@ class SQLObjectStore(ObjectStore):
 		# use dbargs from settings file as defaults
 		# (args passed to __init__ take precedence)
 		args = self._dbArgs
-		self._dbArgs = self.setting('DatabaseArgs',{})
+		self._dbArgs = self.setting('DatabaseArgs', {})
 		self._dbArgs.update(args)
 		# print 'dbArgs = %s' % self._dbArgs
 
@@ -170,7 +172,7 @@ class SQLObjectStore(ObjectStore):
 		assert self._model, 'Cannot connect: No model has been attached to this store yet.'
 		if not self._connected:
 			self._connection = self.newConnection()
-			self._connected = 1
+			self._connected = True
 			self.readKlassIds()
 			poolSize = self.setting('SQLConnectionPoolSize', 0)
 			if poolSize:
@@ -225,7 +227,7 @@ class SQLObjectStore(ObjectStore):
 
 	## Changes ##
 
-	def commitInserts(self, allThreads=0):
+	def commitInserts(self, allThreads=False):
 		unknownSerialNums = []
 		# @@ ... sort here for dependency order
 		for object in self._newObjects.items(allThreads):
@@ -263,7 +265,7 @@ class SQLObjectStore(ObjectStore):
 			# Update object
 			object.setSerialNum(idNum)
 			object.setKey(ObjectKey().initFromObject(object))
-			object.setChanged(0)
+			object.setChanged(False)
 
 			# Update our object pool
 			self._objects[object.key()] = object
@@ -281,18 +283,18 @@ class SQLObjectStore(ObjectStore):
 		Subclass responsibility. """
 		raise AbstractError, self.__class__
 
-	def commitUpdates(self, allThreads=0):
+	def commitUpdates(self, allThreads=False):
 		conn = None
 		try:
 			for object in self._changedObjects.values(allThreads):
 				sql = object.sqlUpdateStmt()
 				conn, cur = self.executeSQL(sql, conn)
-				object.setChanged(0)
+				object.setChanged(False)
 		finally:
 			self.doneWithConnection(conn)
 		self._changedObjects.clear(allThreads)
 
-	def commitDeletions(self, allThreads=0):
+	def commitDeletions(self, allThreads=False):
 		conn = None
 		try:
 			for object in self._deletedObjects.items(allThreads):
@@ -310,7 +312,7 @@ class SQLObjectStore(ObjectStore):
 		Raises an exception if theClass parameter is invalid, or the object cannot be located.
 		"""
 		klass = self._klassForClass(aClass)
-		objects = self.fetchObjectsOfClass(klass, serialNum=serialNum, isDeep=0)
+		objects = self.fetchObjectsOfClass(klass, serialNum=serialNum, isDeep=False)
 		count = len(objects)
 		if count == 0:
 			if default is NoDefault:
@@ -321,7 +323,7 @@ class SQLObjectStore(ObjectStore):
 			assert count == 1
 			return objects[0]
 
-	def fetchObjectsOfClass(self, aClass, clauses='', isDeep=1, refreshAttrs=1, serialNum=None):
+	def fetchObjectsOfClass(self, aClass, clauses='', isDeep=True, refreshAttrs=True, serialNum=None):
 		"""
 		Fetches a list of objects of a specific class. The list may be empty if no objects are found.
 		aClass can be a Klass object (from the MiddleKit object model), the name of the class (e.g., a string) or a Python class.
@@ -439,7 +441,7 @@ class SQLObjectStore(ObjectStore):
 		elif self._threaded:
 			if self._pool:
 				conn = self._pool.connection()
-			elif self._threadSafety is 1:
+			elif self._threadSafety == 1:
 				conn = self.newConnection()
 			else: # safety = 2, 3
 				if not self._connected:
@@ -510,7 +512,7 @@ class SQLObjectStore(ObjectStore):
 				return obj
 
 			clauses = 'where %s=%d' % (klass.sqlSerialColumnName(), serialNum)
-			objs = self.fetchObjectsOfClass(klass, clauses, isDeep=0)
+			objs = self.fetchObjectsOfClass(klass, clauses, isDeep=False)
 			if len(objs) == 1:
 				return objs[0]
 			elif len(objs) > 1:
@@ -607,20 +609,20 @@ class SQLObjectStore(ObjectStore):
 			out.write('%25s %2i\n' % (klass.name(), klass.id()))
 		out.write('\n')
 
-	def dumpObjectStore(self, out=None, progress=0):
+	def dumpObjectStore(self, out=None, progress=False):
 		if out is None:
 			out = sys.stdout
 		for klass in self.model().klasses().values():
 			if progress:
 				sys.stderr.write(".")
 			out.write('%s objects\n' % (klass.name()))
-			attrs = [ attr for attr in klass.allAttrs() if attr.hasSQLColumn() ]
-			colNames = [ attr.name() for attr in attrs ]
+			attrs = [attr for attr in klass.allAttrs() if attr.hasSQLColumn()]
+			colNames = [attr.name() for attr in attrs]
 			colNames.insert(0, klass.sqlSerialColumnName())
 			out.write(CSVJoiner.joinCSVFields(colNames) + "\n")
 
 			# write out a line for each object in this class
-			objlist = self.fetchObjectsOfClass(klass.name(),isDeep=0)
+			objlist = self.fetchObjectsOfClass(klass.name(), isDeep=False)
 			for obj in objlist:
 				fields = []
 				fields.append(str(obj.serialNum()))
@@ -629,20 +631,21 @@ class SQLObjectStore(ObjectStore):
 					# will be None.  This means that dangling references will _not_ be remembered
 					# across dump/generate/create/insert procedures.
 					method = getattr(obj, attr.pyGetName())
-					value = apply(method,())
+					value = apply(method, ())
 					if value is None:
 						fields.append('')
 					elif isinstance(value, MiddleObject):
 						fields.append(value.klass().name() + "." + str(value.serialNum()))
 					else:
 						fields.append(str(value))
-				out.write(CSVJoiner.joinCSVFields(fields).replace('\r','\\r'))
+				out.write(CSVJoiner.joinCSVFields(fields).replace('\r', '\\r'))
 
 				out.write('\n')
 			out.write('\n')
 		out.write('\n')
 		if progress:
 			sys.stderr.write("\n")
+
 
 class Model:
 
@@ -733,13 +736,13 @@ class MiddleObjectMixIn:
 	def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
 		if self.store().setting('UseBigIntObjRefColumns'):
 			return {
-				'refreshAttrs': 1,
+				'refreshAttrs': True,
 				'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(), self.sqlObjRef())
 			}
 		else:
 			classIdName, objIdName = backObjRefAttr.sqlColumnNames()
 			return {
-				'refreshAttrs': 1,
+				'refreshAttrs': True,
 				'clauses': 'WHERE (%s=%s AND %s=%s)' % (classIdName, self.klass().id(), objIdName, self.serialNum())
 			}
 
@@ -801,7 +804,7 @@ class Attr:
 
 	def hasSQLColumn(self):
 		""" Returns true if the attribute has a direct correlating SQL column in it's class' SQL table definition. Most attributes do. Those of type list do not. """
-		return not self.get('isDerived', 0)
+		return not self.get('isDerived', False)
 
 	def sqlColumnName(self):
 		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
@@ -870,13 +873,13 @@ class LongAttr:
 class DecimalAttr:
 
 	def sqlForNonNone(self, value):
-		return str(value)  # repr() can give Decimal("3.4") in Python 2.4
+		return str(value) # repr() can give Decimal("3.4") in Python 2.4
 
 
 class BoolAttr:
 
 	def sqlForNonNone(self, value):
-		return value and '1' or '0'  # MySQL and MS SQL will take 1 and 0 for bools
+		return value and '1' or '0' # MySQL and MS SQL will take 1 and 0 for bools
 
 
 class ObjRefAttr:
@@ -954,7 +957,7 @@ class ObjRefAttr:
 class ListAttr:
 
 	def hasSQLColumn(self):
-		return 0
+		return False
 
 	def readStoreDataRow(self, obj, row, i):
 		return i

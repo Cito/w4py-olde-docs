@@ -1,6 +1,7 @@
-from WebKit.Examples.ExamplePage import ExamplePage
 import os
 from glob import glob
+from WebKit.Examples.ExamplePage import ExamplePage
+
 
 class PSPExamplePage(ExamplePage):
 

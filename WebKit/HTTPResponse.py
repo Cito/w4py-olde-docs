@@ -29,7 +29,7 @@ class HTTPResponse(Response):
 
 		if headers is None:
 			self._headers = {}
-			self.setHeader('Content-type','text/html')
+			self.setHeader('Content-type', 'text/html')
 		else:
 			self._headers = headers
 
@@ -358,7 +358,7 @@ class HTTPResponse(Response):
 		"""Reset the response (such as headers, cookies and contents)."""
 		assert not self._committed, "Cannot reset the response; it has already been sent."
 		self._headers = {}
-		self.setHeader('Content-type','text/html')
+		self.setHeader('Content-type', 'text/html')
 		self._cookies = {}
 		self._strmOut.clear()
 

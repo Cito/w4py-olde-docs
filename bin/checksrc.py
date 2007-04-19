@@ -112,6 +112,8 @@ Consider (optionally) displaying the source line.
 Maybe: Experiment with including the name of the last seen method/function
 with the error messages to help guide the user to where the error occurred.
 
+Consider using the parser or tokenize modules of the standard library.
+
 """
 
 
@@ -125,7 +127,10 @@ class NoDefault:
 
 class CheckSrc:
 
-	errors = {
+
+	## Init ##
+
+	_errors = {
 		'UncapFN':
 			'Uncapitalized filename.',
 		'CarRet':
@@ -136,32 +141,42 @@ class CheckSrc:
 		'SpaceIndent':
 			'Found space as part of indentation. Use only tabs.',
 		'NoBlankLines':
-			'%(what)s must be preceded by %(separator)s.',
+			'%(what)s should be preceded by %(separator)s.',
 		'ClassNotCap':
 			'Class names should start with capital letters.',
 		'MethCap':
 			'Method name "%(name)s" should start with a lower case letter.',
-		'GetMeth': 'Method name "%(name)s" should not start with "get".',
-		'NoUnderAttr': 'Data attributes should start with an underscore:'
-			' %(attribute)s.',
-		'NoLowerAttr': 'Data attributes should start with an underscore and'
-			' then a lower case letter: %(attribute)s.',
-		'ExtraUnder': 'Attributes and methods should not have underscores'
-			' past the first character: %(attribute)s.',
-		'ExtraParens': 'No outer parenthesees should be used for %(keyword)s.',
+		'GetMeth':
+			'Method name "%(name)s" should not start with "get".',
+		'NoUnderAttr':
+			'Data attributes should start with an underscore: %(attribute)s.',
+		'NoLowerAttr':
+			'Data attributes should start with an underscore and then'
+			' a lower case letter: %(attribute)s.',
+		'ExtraUnder':
+			'Attributes and methods should not have underscores past'
+			' the first character: %(attribute)s.',
+		'ExtraParens':
+			'No outer parenthesees should be used for "%(keyword)s".',
+		'ObsExpr':
+			'"%(old)s" is obsolescent, use "%(new)s" instead.',
+		'OpNoSpace':
+			'Operator "%(op)s" should be padded with one blank.',
+		'CommaNoSpace':
+			'Commas and semicolons should be followed by a blank.',
+		'PaddedParens':
+			'Parentheses should not be padded with blanks.',
+		'NoCompStmts':
+			'Compound statements are generally discouraged.',
+		'AugmStmts':
+			'Consider using augmented assignment "%(op)s."',
 	}
-
-	# This RE matches any kind of access of self (see checkAttrNames):
-	_accessRE = re.compile(r'self\.(\w+)\s*(\(?)')
-
-
-	## Init ##
 
 	def __init__(self):
 		# Grab our own copy of errors with lower case keys
 		self._errors = {}
 		self._errorCodes = []
-		for (key, value) in self.__class__.errors.items():
+		for key, value in self.__class__._errors.items():
 			self._errorCodes.append(key)
 			self._errors[key.lower()] = value
 
@@ -287,7 +302,7 @@ Error codes and their messages:
 		wr('\n')
 
 		wr('.checksrc.config options include SkipDirs, SkipFiles and DisableErrors.\n'
-		   'See the checksrc.py doc string for more info.\n')
+			'See the checksrc.py doc string for more info.\n')
 
 
 	## Printing, errors, etc. ##
@@ -302,7 +317,7 @@ Error codes and their messages:
 		for arg in args:
 			write(str(arg))
 
-	def error(self, msgCode, args):
+	def error(self, msgCode, args=NoDefault):
 		"""Invoked by self when a source code error is detected.
 
 		Prints the error message and it's location.
@@ -311,11 +326,14 @@ Error codes and their messages:
 		"""
 		# Implement the DisableErrors option
 		disableNames = self.setting('DisableErrors', {}).get(msgCode, [])
-		if '*' in disableNames or self._fileName in disableNames:
+		if '*' in disableNames or self._fileName in disableNames \
+				or os.path.splitext(self._fileName)[0] in disableNames:
 			return
 		if not self._printedDir:
 			self.printDir()
-		msg = self._errors[msgCode.lower()] % args
+		msg = self._errors[msgCode.lower()]
+		if args is not NoDefault:
+			msg %= args
 		self.write(self.location(), msg, '\n')
 
 	def fatalError(self, msg):
@@ -375,7 +393,7 @@ Error codes and their messages:
 		self._config = dict
 
 	def setting(self, name, default=NoDefault):
-		if default == NoDefault:
+		if default is NoDefault:
 			return self._config[name]
 		else:
 			return self._config.get(name, default)
@@ -423,7 +441,9 @@ Error codes and their messages:
 
 		skipFiles = self.setting('SkipFiles', [])
 		for name in names:
-			if len(name) > 2 and name[-3:] == '.py' and name not in skipFiles:
+			if len(name) > 2 and name[-3:] == '.py' \
+					and name not in skipFiles \
+					and os.path.splitext(name)[0] not in skipFiles:
 				try:
 					self.checkFile(dirName, name)
 				except CheckSrcError:
@@ -445,12 +465,12 @@ Error codes and their messages:
 
 	def checkFilename(self, filename):
 		if filename[0] != filename[0].upper():
-			self.error('UncapFN', locals())
+			self.error('UncapFN')
 
 	def checkFileContents(self, contents):
 		if os.name == 'posix':
 			if '\r' in contents:
-				self.error('CarRet', locals())
+				self.error('CarRet')
 
 	def checkFileLines(self, lines):
 		self._lineNum = 1
@@ -460,49 +480,77 @@ Error codes and their messages:
 			self.checkFileLine(line)
 
 	def checkFileLine(self, line):
-		lineleft = line.lstrip()
-		if lineleft:
-			if not self.inMLS(lineleft):
+		line = line.rstrip()
+		if line:
+			line = self.clearStrings(line)
+			if line:
 				self.checkTabsAndSpaces(line)
-				self.checkBlankLines(lineleft)
-				if lineleft[0] != '#':
-					parts = line.split()
-					self.checkClassName(parts)
-					self.checkMethodName(parts, line)
-					self.checkExtraParens(parts, lineleft)
-					self.checkAttrNames(lineleft)
+				lineleft = line.lstrip()
+				indent = line[:len(line) - len(lineleft)]
+				line = lineleft
+				parts = line.split()
+				self.checkBlankLines(line)
+				self.checkCompStmts(parts, line)
+				self.checkAugmStmts(parts)
+				self.checkClassName(parts)
+				self.checkMethodName(parts, indent)
+				self.checkExtraParens(parts, line)
+				self.checkPaddedParens(line)
+				self.checkAttrNames(line)
+				self.checkOperators(line)
+				self.checkCommas(line)
 				self._blankLines = 0
+			else:
+				self._blankLines = 1
 		else:
 			self._blankLines += 1
 		self._lineNum += 1
 
-	def inMLS(self, line):
-		inMLS = self._inMLS
-		wholeLineInMLS = inMLS
+	def clearStrings(self, line):
+		"""Return line with all quoted strings cleared."""
 		index = 0
+		quote = self._inMLS
 		while index != -1:
-			if inMLS:
-				index = line.find(inMLS, index)
-				if index != -1:
-					wholeLineInMLS = inMLS = None
+			if quote:
+				index2 = index
+				while 1:
+					index2 = line.find(quote, index2)
+					if index2 > 0 and line[index2 - 1] == '\\':
+						index2 += 1
+						continue
+					break
+				if index2 == -1:
+					if index < len(line):
+						line = line[:index] + '...'
+					break
+				if index < index2:
+					line = line[:index] + '...' + line[index2:]
 					index += 3
-			else:
-				index2 = line.find('"""', index)
-				if index2 != -1:
-					index = line.find("'''", index)
-					if index != -1 and index < index2:
-						inMLS = "'''"
-					else:
-						index = index2
-						inMLS = '"""'
-					index += 3
+				index += len(quote)
+				quote = None
+			index3 = line.find('#', index)
+			index2 = line.find("'", index)
+			index = line.find('"', index)
+			if index2 != -1 and (index == -1 or index2 < index):
+				index = index2
+			if index3 != -1 and (index == -1 or index3 < index):
+				if line[index3+1:index3+2] == '#' \
+						and not line[:index3].rstrip():
+					# keep category comments
+					line = line[:index3+2]
 				else:
-					index = line.find("'''", index)
-					if index != -1:
-						inMLS = "'''"
-						index += 3
-		self._inMLS = inMLS
-		return wholeLineInMLS
+					# remove any other comment
+					line = line[:index3].rstrip()
+				break
+			if index != -1:
+				quote = line[index]
+				if line[index:index+3] == quote*3:
+					quote *= 3
+				index += len(quote)
+		if quote and len(quote) < 3:
+			quote = None
+		self._inMLS = quote
+		return line
 
 	def checkBlankLines(self, line):
 		if line.startswith('##') and self._blankLines < 2:
@@ -510,10 +558,12 @@ Error codes and their messages:
 			separator = 'two blank lines'
 		elif (line.startswith('class ') and self._blankLines < 2
 				and not line.endswith('Exception):')
+				and not line.endswith('Error):')
 				and not line.endswith('pass')):
 			what = 'Class definitions'
 			separator = 'two blank lines'
-		elif line.startswith('def ') and self._blankLines < 1:
+		elif (line.startswith('def ') and self._blankLines < 1
+				and not line.endswith('pass')):
 			what = 'Function definitions'
 			separator = 'one blank line'
 		else:
@@ -526,12 +576,12 @@ Error codes and their messages:
 			if c == '\t':
 				foundTab = 1
 				if foundSpace or foundOther:
-					self.error('StrayTab', locals())
+					self.error('StrayTab')
 					break
 			elif c == ' ':
 				foundSpace = 1
 				if not foundOther:
-					self.error('SpaceIndent', locals())
+					self.error('SpaceIndent')
 					break
 			else:
 				foundOther = 1
@@ -542,12 +592,12 @@ Error codes and their messages:
 			if index == 0: # e.g. if start of the line
 				name = parts[1]
 				if name and name[0] != name[0].upper():
-					self.error('ClassNotCap', locals())
+					self.error('ClassNotCap')
 
-	def checkMethodName(self, parts, line):
+	def checkMethodName(self, parts, indent):
 		if 'def' in parts: # e.g. if 'def' is a standalone word
 			index = parts.index('def')
-			if index == 0 and line[0] == '\t':
+			if index == 0 and indent:
 				# e.g. if start of the line, and indented (indicating method and not function)
 				name = parts[1]
 				name = name[:name.find('(')]
@@ -555,6 +605,33 @@ Error codes and their messages:
 					self.error('MethCap', locals())
 				if len(name) > 3 and name[:3].lower() == 'get':
 					self.error('GetMeth', locals())
+
+	_exprKeywords = dict([(k, None) for k in
+		'if while for with return yield'.split()])
+
+	def checkExtraParens(self, parts, line):
+		if (len(parts) > 1 and self._exprKeywords.has_key(parts[0])
+				and parts[1][0] == '('
+				and parts[-1].replace(':', '').rstrip()[-1:] == ')'
+				and not line.count(')') < line.count('(')):
+			keyword = parts[0]
+			self.error('ExtraParens', locals())
+
+	_blockKeywords = dict([(k, None) for k in
+		'if elif else: try: except: while for with'.split()])
+
+	def checkCompStmts(self, parts, line):
+		if (len(parts) > 1 and self._blockKeywords.has_key(parts[0])
+				and line.find(': ') != -1 and line[-1] != ':'):
+			self.error('NoCompStmts')
+		else:
+			index = line.find(';')
+			if index != -1:
+				if line.find('"') < index and line.find("'") < index:
+					self.error('NoCompStmts')
+
+	# Any kind of access of self
+	_accessRE = re.compile(r'self\.(\w+)\s*(\(?)')
 
 	def checkAttrNames(self, line):
 		for match in self._accessRE.findall(line):
@@ -578,17 +655,55 @@ Error codes and their messages:
 					inner = attribute[1:]
 				else:
 					inner = attribute
-			if inner.find('_') >= 0:
+			if inner.find('_') >= 0 and inner != 'has_key':
 				self.error('ExtraUnder', locals())
 
-	def checkExtraParens(self, parts, line):
-		keywords = ['if', 'while', 'return']
-		msg = ', '.join(keywords[:-1]) + ' and ' + keywords[-1]
-		if (len(parts) > 1 and parts[0] in keywords
-				and parts[1][0] == '('
-				and not line.count(')') < line.count('(')):
-			keyword = parts[0]
-			self.error('ExtraParens', locals())
+	# Assignment operators
+	_assignRE = re.compile(
+		r'^[^\(]*?[^\s=<>!\+\-\*/%&\^\|](\s*)=[^\s=](\s*)')
+	# Strict comparison Operators
+	_compareRE = re.compile(r'(\s*)(<|>)[^\s=<>](\s*)')
+	# Other comparison Operators and augmented assignments
+	_augmentRE = re.compile(
+		r'(\s*)(=|<|>|!|\+|-|\*|/|%|\*\*|>>|<<|&|\^|\|)=(\s*)')
+
+	def checkOperators(self, line):
+		if line.find('<>') != -1:
+			self.error('ObsExpr', {'old': '<>', 'new': '!='})
+		for match in self._assignRE.findall(line):
+			if match[0] != ' ' or match[1] != ' ':
+				if not line.count(')') > line.count('('):
+					self.error('OpNoSpace', {'op': '='})
+		for match in self._compareRE.findall(line):
+			if match[0] != ' ' or match[2] != ' ':
+				self.error('OpNoSpace', {'op': match[1]})
+		for match in self._augmentRE.findall(line):
+			if match[0] != ' ' or match[2] != ' ':
+				self.error('OpNoSpace', {'op': match[1] + '='})
+
+	# Augmented assignment operators
+	_augmOp = dict([(k, None) for k in
+		'+ - * / % ** >> << & ^ |'.split()])
+
+	def checkAugmStmts(self, parts):
+		if len(parts) > 4 and parts[1] == '=' \
+				and parts[0] == parts[2] \
+				and self._augmOp.has_key(parts[3]):
+			self.error('AugmStmts', {'op': parts[3] + '='})
+
+	# Commas and semicolons not followed by a blank
+	_commaRE = re.compile('(,|;)[^\s\)]')
+
+	def checkCommas(self, line):
+		if self._commaRE.search(line):
+			self.error('CommaNoSpace')
+
+	# Parens padded with blanks
+	_parensRE = re.compile('[(\(\{\[]\s+|\s+[\)\}\]]')
+
+	def checkPaddedParens(self, line):
+		if self._parensRE.search(line):
+			self.error('PaddedParens')
 
 
 class CheckSrcError(Exception):

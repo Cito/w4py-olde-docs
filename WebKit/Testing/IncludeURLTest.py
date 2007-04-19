@@ -86,7 +86,7 @@ class IncludeURLTest(Page):
 		w("extraURLPath():          %s" % req.extraURLPath())
 		w("urlPath():               %s" % req.urlPath())
 		w("previousURLPaths():      %s" % ', '.join(req.previousURLPaths()))
-		w("Environment:" )
+		w("Environment:")
 		w("REQUEST_URI:             %s" % env.get('REQUEST_URI', ''))
 		w("PATH_INFO:               %s" % env.get('PATH_INFO', ''))
 		w("SCRIPT_NAME:             %s" % env.get('SCRIPT_NAME', ''))
@@ -101,7 +101,7 @@ class IncludeURLTest(Page):
 		trans = self.transaction()
 		self.writeln('<p>Calling'
 			' <tt>callMethodOfServlet(t, "%s", "%s")</tt>:</p>'
-			'<p>%s</p>' % (url, method, desc) )
+			'<p>%s</p>' % (url, method, desc))
 		self.write('<div style="margin-left:2em">')
 		ret = app.callMethodOfServlet(trans, url, method)
 		self.write('</div>')

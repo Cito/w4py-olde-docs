@@ -75,8 +75,9 @@ class Session(Object):
 					"Can't create valid session id after %d attempts." % attempts
 
 		if app.setting('Debug')['Sessions']:
-			print '>> [session] Created session, timeout=%s, id=%s, self=%s' % (
-				self._timeout, self._identifier, self)
+			print '>> [session] Created session, ' \
+				'timeout = %s, id = %s, self = %s' \
+				% (self._timeout, self._identifier, self)
 
 
 	## Access ##

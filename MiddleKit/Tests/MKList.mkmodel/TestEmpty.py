@@ -21,8 +21,8 @@ def testAddToBars(store):
 	store.clear()
 	f = store.fetchObjectsOfClass(Foo)[0]
 	bars = f.bars()
-	assert len(bars)==1, 'bars=%r' % bars
-	assert bars[0].foo()==f
+	assert len(bars) == 1, 'bars=%r' % bars
+	assert bars[0].foo() == f
 	reset(store)
 
 def test(store):
@@ -48,40 +48,52 @@ def test(store):
 	assert f._mk_inStore
 	bars = f.bars()
 	assert type(bars) is ListType
-	assert len(bars)==1, 'bars=%r' % bars
-	assert bars[0].x()==7
+	assert len(bars) == 1, 'bars=%r' % bars
+	assert bars[0].x() == 7
 
 	# Test addToXYZ() method
 	bar = Bar()
 	bar.setX(7)
 	f.addToBars(bar)
-	assert bar.foo()==f
+	assert bar.foo() == f
 	store.saveChanges()
 	store.clear()
 
 	f = store.fetchObjectsOfClass(Foo)[0]
 	bars = f.bars()
 	assert type(bars) is ListType
-	assert len(bars)==2, 'bars=%r' % bars
-	assert bars[0].x()==7
-	assert bars[1].x()==7
+	assert len(bars) == 2, 'bars=%r' % bars
+	assert bars[0].x() == 7
+	assert bars[1].x() == 7
 
 	# Test the assertion checking in addToXYZ()
-	try:		f.addToBars(None)
-	except:		pass
-	else:		NoException('f.addToBars(None) # None not allowed')
+	try:
+		f.addToBars(None)
+	except:
+		pass
+	else:
+		NoException('f.addToBars(None) # None not allowed')
 
-	try:		f.addToBars(5)
-	except:		pass
-	else:		NoException('f.addToBars(5) # not an object')
+	try:
+		f.addToBars(5)
+	except:
+		pass
+	else:
+		NoException('f.addToBars(5) # not an object')
 
-	try:		f.addToBars(f)
-	except:		pass
-	else:		NoException('f.addToBars(f) # wrong class')
+	try:
+		f.addToBars(f)
+	except:
+		pass
+	else:
+		NoException('f.addToBars(f) # wrong class')
 
-	try:		f.addToBars(bar)
-	except:		pass
-	else:		NoException('f.addToBars(bar) # already added')
+	try:
+		f.addToBars(bar)
+	except:
+		pass
+	else:
+		NoException('f.addToBars(bar) # already added')
 
 
 def NoException(codeString):

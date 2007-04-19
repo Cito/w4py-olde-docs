@@ -1,11 +1,13 @@
 import os, sys
 from types import ClassType, DictType
-from MiscUtils.Configurable import Configurable
-from MiscUtils import NoDefault
+
 try:
 	from cPickle import load, dump
 except ImportError:
 	from pickle import load, dump
+
+from MiscUtils.Configurable import Configurable
+from MiscUtils import NoDefault
 
 try: # for Python < 2.3
 	True, False
@@ -187,7 +189,7 @@ class Model(Configurable):
 				os.path.dirname(self._filename), filename))
 			if self._allModelsByFilename.has_key(filename):
 				model = self._allModelsByFilename[filename]
-				assert model!=self._rootModel
+				assert model != self._rootModel
 			else:
 				model = self.__class__(filename,
 					customCoreClasses=self._coreClasses,
@@ -206,7 +208,7 @@ class Model(Configurable):
 			if i < len(searchOrder):
 				model = searchOrder[i]
 				j = 0
-				while j<i:
+				while j < i:
 					if searchOrder[j] is model:
 						del searchOrder[j]
 						i -= 1
@@ -337,7 +339,7 @@ class Model(Configurable):
 		allKlasses = []
 		visited = {} # better use Set() in Python 2.3 and set() in Python >= 2.4
 		for klass in self._allKlassesInOrder:
-			if not klass.dependents:
+			if not klass._dependents:
 				# print '>>', klass.name()
 				klass.recordDependencyOrder(allKlasses, visited)
 		# The above loop fails to capture classes that are in cycles,

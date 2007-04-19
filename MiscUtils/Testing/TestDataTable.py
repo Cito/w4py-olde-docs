@@ -12,7 +12,7 @@ from MiscUtils.DataTable import *
 # (as opposed to a sequence, dictionary or TableRecord instance).
 
 
-class TestDataTable( unittest.TestCase):
+class TestDataTable(unittest.TestCase):
 
 	def xsetUp(self):
 		# clear any cache files from pickle test
@@ -43,7 +43,7 @@ class TestDataTable( unittest.TestCase):
 		DataTable.usePickleCache = 0
 		self._test01()
 
-	def _test01(self ):
+	def _test01(self):
 		'''Simple tests...'''
 
 		# Create table
@@ -97,7 +97,6 @@ Mary,32,8.3
 		t.append([4, 5, 6])
 		assert t[0]['x'] - t[1]['z'] == -5
 
-
 	def testBasics(self):
 		# Basics
 		src = '''\
@@ -123,7 +122,6 @@ a,b,"c,d"
 			['a', '', '']
 		]
 		self._testSource('Basics', src, headings, data)
-
 
 		# Comments
 		src = '''\
@@ -182,7 +180,7 @@ Class,Attribute,Type,Extras
 		DataTable.usePickleCache = 0
 		self._testExcel()
 
-	def _testExcel( self ):
+	def _testExcel(self):
 		if canReadExcel():
 			import sys
 			sys.stderr = sys.stdout

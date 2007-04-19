@@ -33,17 +33,26 @@ def test(store):
 	typeErrors(f, 1, 'b i l f'.split())
 
 	# ValueErrors and others
-	try: f.setB(5)
-	except ValueError: pass
-	else: raise Exception, 'expecting ValueError for bad bool argument'
+	try:
+		f.setB(5)
+	except ValueError:
+		pass
+	else:
+		raise Exception, 'expecting ValueError for bad bool argument'
 
-	try: f.setI(2L**32)
-	except OverflowError: pass
-	else: raise Exception, 'expecting OverflowError for large int argument'
+	try:
+		f.setI(2L**32)
+	except OverflowError:
+		pass
+	else:
+		raise Exception, 'expecting OverflowError for large int argument'
 
-	try: f.setE('c')
-	except ValueError: pass
-	else: raise Exception, 'expecting ValueError for invalid enum'
+	try:
+		f.setE('c')
+	except ValueError:
+		pass
+	else:
+		raise Exception, 'expecting ValueError for invalid enum'
 
 	# Numerics that pass
 	f.setI(1L)  # ints can take longs that fit in the int range

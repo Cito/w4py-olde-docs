@@ -1,6 +1,9 @@
 from SQLObjectStore import SQLObjectStore
 from mx import ODBC # DR: 07-12-02 The ODBC.Windows module is flawed
-ODBC.Windows.threadsafety = ODBC.Windows.threadlevel # mx.ODBC.Windows has a threadlevel, not a threadsafety, even though DBABI2.0 says its threadsafety (http://www.python.org/topics/database/DatabaseAPI-2.0.html)
+ODBC.Windows.threadsafety = ODBC.Windows.threadlevel
+# mx.ODBC.Windows has a threadlevel, not a threadsafety,
+# even though DBABI2.0 says its threadsafety
+# (http://www.python.org/topics/database/DatabaseAPI-2.0.html)
 
 try: # for Python < 2.3
 	True, False
@@ -61,11 +64,11 @@ class MSSQLObjectStore(SQLObjectStore):
 			# ODBC driver connection keywords are documented here:
 			# http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbcsql/od_odbc_d_4x4k.asp
 			s = args['DriverConnect']
-			if s.find('DATABASE=')==-1:
-				if s[-1]!=';':
+			if s.find('DATABASE=') == -1:
+				if s[-1] != ';':
 					s += ';'
 				s += 'DATABASE=' + self._model.sqlDatabaseName()
-			#print '>> connection string=%r' % s
+			# print '>> connection string=%r' % s
 			conn = self.dbapiModule().DriverConnect(s)
 		else:
 			# extract the database arg if it was provided
@@ -78,11 +81,13 @@ class MSSQLObjectStore(SQLObjectStore):
 			cur = conn.cursor()
 			try:
 				db = database or self._model.sqlDatabaseName()
-				sql = 'use '+db+';'
-				#print '>> use string=%r' % sql
+				sql = 'use ' + db + ';'
+				# print '>> use string=%r' % sql
 				cur.execute(sql)
 			except Exception, e:
-				if e.args[0]!='01000': # ('01000', 5701, "[Microsoft][ODBC SQL Server Driver][SQL Server]Changed database context to 'MKList'.", 4612)
+				if e.args[0] != '01000':
+					# ('01000', 5701, "[Microsoft][ODBC SQL Server Driver]"
+					# "[SQL Server]Changed database context to 'MKList'.", 4612)
 					raise
 		return conn
 
@@ -133,5 +138,5 @@ class StringAttr:
 
 	def sqlForNonNone(self, value):
 		# do the right thing
-		value = value.replace("'","''")
+		value = value.replace("'", "''")
 		return "'" + value + "'"

@@ -27,8 +27,8 @@
 
 """
 
-from Generators import * # ResponseObject, plus all the *Generator functions.
 import time
+from Generators import * # ResponseObject, plus all the *Generator functions.
 
 
 class ParseEventHandler:
@@ -49,7 +49,8 @@ class ParseEventHandler:
 		'instanceSafe': 'yes',
 		'indent': int(4),
 		'gobbleWhitespace': 1,
-		'formatter': 'str' }
+		'formatter': 'str'
+	}
 
 	def __init__(self, ctxt, parser):
 		self._ctxt = ctxt
@@ -207,7 +208,7 @@ class ParseEventHandler:
 			e = attrs.keys()
 			for i in e:
 				if self.directiveHandlers.has_key(i):
-					self.directiveHandlers[i](self,attrs[i],start,stop)
+					self.directiveHandlers[i](self, attrs[i], start, stop)
 				else:
 					print i
 					raise 'No Page Directive Handler'
@@ -391,7 +392,7 @@ class ParseEventHandler:
 		# Write the output method that the user requested in with
 		# <%@ page method="WriteHTML"%>
 		self._writer.printIndent()
-		self._writer.printChars('def %s(self, transaction=None):\n' % self._baseMethod )
+		self._writer.printChars('def %s(self, transaction=None):\n' % self._baseMethod)
 		self._writer.pushIndent()
 		self._writer.println('"""I take a WebKit.Transaction object."""')
 		self._writer.println('trans = self._transaction')

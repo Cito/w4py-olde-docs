@@ -38,6 +38,7 @@ class Configurable:
 
 	"""
 
+
 	## Init ##
 
 	def __init__(self):
@@ -145,7 +146,7 @@ class Configurable:
 		replacements = self.configReplacementValues()
 		if replacements and isDict:
 			try:
-				contents = contents % replacements
+				contents %= replacements
 			except:
 				raise ConfigurationError, \
 					'Unable to embed replacement text in %s.' % filename
@@ -206,6 +207,7 @@ class Configurable:
 ## Command line settings ##
 
 _settings = {}
+
 def addCommandLineSetting(name, value):
 	"""Override the configuration with a command-line setting.
 

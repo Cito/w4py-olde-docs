@@ -1,11 +1,14 @@
-"""
+"""FieldStorage.py
+
 This module defines a subclass of the standard Python cgi.FieldStorage class
 with an extra method that will allow a FieldStorage to parse a query string
 even in a POST request.
+
 """
 
 
 import cgi, os, urllib
+
 
 class FieldStorage(cgi.FieldStorage):
 

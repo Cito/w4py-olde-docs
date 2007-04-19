@@ -39,7 +39,7 @@ def validateHTML(html):
 
 	result = StringIO()
 	result.write('<table style="background-color: #ffffff"><tr><td colspan="2">\n')
-	result.write("<pre>%s</pre>" % "".join(out) )
+	result.write("<pre>%s</pre>" % "".join(out))
 	result.write('</td></tr>\n')
 
 	goodColors = ['#d0d0d0', '#e0e0e0']

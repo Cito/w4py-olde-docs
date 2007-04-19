@@ -22,9 +22,9 @@
 
 """
 
-from Context import *
-from MiscUtils.Funcs import mkstemp
 import os, sys, tempfile
+from MiscUtils.Funcs import mkstemp
+from Context import *
 
 
 class ServletWriter:
@@ -34,23 +34,23 @@ class ServletWriter:
 
 	"""
 
-	TAB = '\t'
-	SPACES = '    ' # 4 spaces
-	EMPTY_STRING=''
+	_tab = '\t'
+	_spaces = '    ' # 4 spaces
+	_emptyString = ''
 
-	def __init__(self,ctxt):
+	def __init__(self, ctxt):
 		self._pyfilename = ctxt.getPythonFileName()
 		fd, self._temp = mkstemp('tmp', dir=os.path.dirname(self._pyfilename))
 		self._filehandle = os.fdopen(fd, 'w')
 		self._tabcnt = 0
 		self._blockcount = 0 # a hack to handle nested blocks of python code
-		self._indentSpaces = self.SPACES
+		self._indentSpaces = self._spaces
 		self._useTabs = 1
 		self._useBraces = 0
 		self._indent = '\t'
-		self._userIndent = self.EMPTY_STRING
+		self._userIndent = self._emptyString
 
-	def setIndentSpaces(self,amt):
+	def setIndentSpaces(self, amt):
 		self._indentSpaces = ' '*amt
 		self.setIndention()
 

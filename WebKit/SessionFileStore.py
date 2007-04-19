@@ -74,7 +74,7 @@ class SessionFileStore(SessionStore):
 		# the session, which would block any other servlets from using that session.
 		# Doesn't seem like a great solution to me.
 		if debug:
-			print '>> setitem(%s,%s)' % (key, item)
+			print '>> setitem(%s, %s)' % (key, item)
 		filename = self.filenameForKey(key)
 		self._lock.acquire()
 		try:
@@ -123,7 +123,7 @@ class SessionFileStore(SessionStore):
 		return keys
 
 	def clear(self):
-		for filename in glob(os.path.join(self._sessionDir,'*.ses')):
+		for filename in glob(os.path.join(self._sessionDir, '*.ses')):
 			os.remove(filename)
 
 	def setdefault(self, key, default):
@@ -150,19 +150,20 @@ class SessionFileStore(SessionStore):
 		pass
 
 	# We don't know the timeout without opening the session, so this can't work:
+	#
 	# def cleanStaleSessions(self, task=None):
-	#	"""Clean stale sessions.
+	#     """Clean stale sessions.
 	#
-	#	Called by the Application to tell this store to clean out all
-	#	sessions that have exceeded their lifetime.
-	#	"""
+	#     Called by the Application to tell this store to clean out all
+	#     sessions that have exceeded their lifetime.
 	#
-	#	curTime = time.time()
-	#	for key in self.keys():
-	#		mtime = os.path.getmtime(self.filenameForKey(key))
-	#		if (curTime - mtime) >= sess.timeout() or sess.timeout() == 0:
-	#			sess.expiring()
-	#			del self[key]
+	#     """
+	#     curTime = time.time()
+	#     for key in self.keys():
+	#         mtime = os.path.getmtime(self.filenameForKey(key))
+	#         if (curTime - mtime) >= sess.timeout() or sess.timeout() == 0:
+	#             sess.expiring()
+	#             del self[key]
 
 
 	## Self utility ##

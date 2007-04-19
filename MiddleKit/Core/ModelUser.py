@@ -7,6 +7,7 @@ from MiscUtils import NoDefault
 
 class ModelUser:
 
+
 	## Init ##
 
 	def __init__(self):

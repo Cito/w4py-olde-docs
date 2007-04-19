@@ -15,10 +15,12 @@
 # The recordset function below should go into a base class so it
 # can be shared among many servlets.
 
-from ExamplePage import ExamplePage
 from win32com.client import Dispatch
+from ExamplePage import ExamplePage
+
 
 class ADOSample(ExamplePage):
+
 	def recordset(self, sql):
 		# Open an ADO connection
 		conn = Dispatch('ADODB.Connection')
@@ -35,7 +37,7 @@ class ADOSample(ExamplePage):
 		rs = Dispatch('ADODB.Recordset')
 		rs.Open(sql, conn)
 		return rs
-		
+
 	def writeContent(self):
 		# Grab some data from the database and display it
 		rs = self.recordset('SELECT CustomerName FROM Customers ORDER BY CustomerName')

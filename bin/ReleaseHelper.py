@@ -49,9 +49,9 @@ class ReleaseHelper:
 		self.writeHello()
 		self.checkPlatform()
 		self.readArgs()
-		self.build_release()
+		self.buildRelease()
 
-	def build_release(self):
+	def buildRelease(self):
 		"""Prepare a release by using the SVN export approach.
 
 		This is used when a tag name is specified on the command line, like
@@ -67,9 +67,9 @@ class ReleaseHelper:
 
 		"""
 
-		url = self.args.get('url', ' http://svn.w4py.org/Webware/tags')
+		url = self._args.get('url', ' http://svn.w4py.org/Webware/tags')
 
-		tag = self.args.get('tag', None)
+		tag = self._args.get('tag', None)
 		if tag:
 			print "Creating tarball from tag %s ..." % tag
 		else:
@@ -121,11 +121,11 @@ class ReleaseHelper:
 			if not tag:
 				# timestamp for time of release used to in versioning the file
 				year, month, day = time.localtime(time.time())[:3]
-				datestamp = "%04d%02d%02d" % (year,month,day)
+				datestamp = "%04d%02d%02d" % (year, month, day)
 				# drop leading 2 digits from year. (Ok, itn's not Y2K but it
 				# is short and unique in a narrow time range of 100 years.)
 				datestamp = datestamp[2:]
-				ver = ver + "-" + datestamp
+				ver += "-" + datestamp
 				print "Packaged release will be:", ver
 
 			pkgDir = "Webware-%s" % ver
@@ -195,7 +195,7 @@ class ReleaseHelper:
 			except ValueError:
 				self.error('Invalid argument: %s' % arg)
 			args[name] = value
-		self.args = args
+		self._args = args
 
 	def error(self, msg=''):
 		if msg:
@@ -214,5 +214,5 @@ class ReleaseHelper:
 			print results
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
 	ReleaseHelper().main()

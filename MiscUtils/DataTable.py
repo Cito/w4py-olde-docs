@@ -166,7 +166,7 @@ CACHING
 DataTable uses "pickle caching" so that it can read .csv files faster
 on subsequent loads. You can disable this across the board with:
 	from MiscUtils.DataTable import DataTable
-	DataTable.usePickleCache = False
+	DataTable._usePickleCache = False
 
 Or per instance by passing "usePickleCache=False" to the constructor.
 
@@ -220,15 +220,15 @@ DateTimeType = "<custom-type 'datetime'>"
 ObjectType = "<type 'Object'>"
 
 _types = {
-	'string':	StringType,
-	'int':		IntType,
-	'bool':		IntType,
-	'long':		LongType,
-	'decimal':	FloatType,
-	'float':	FloatType,
-	'datetime':	DateTimeType,
-	'date' : DateTimeType,
-	'object':	ObjectType
+	'string':   StringType,
+	'int':      IntType,
+	'bool':     IntType,
+	'long':     LongType,
+	'decimal':  FloatType,
+	'float':    FloatType,
+	'datetime': DateTimeType,
+	'date':     DateTimeType,
+	'object':   ObjectType
 }
 
 
@@ -349,7 +349,7 @@ class DataTable:
 
 	"""
 
-	usePickleCache = True
+	_usePickleCache = True
 
 
 	## Init ##
@@ -358,9 +358,9 @@ class DataTable:
 			allowComments=True, stripWhite=True,
 			defaultType=None, usePickleCache=None):
 		if usePickleCache is None:
-			self.usePickleCache = self.usePickleCache # grab class-level attr
+			self._usePickleCache = self._usePickleCache # grab class-level attr
 		else:
-			self.usePickleCache = usePickleCache
+			self._usePickleCache = usePickleCache
 		if defaultType and not _types.has_key(defaultType):
 			raise DataTableError, 'Unknown type for default type: %r' % defaultType
 		self._defaultType = defaultType
@@ -380,7 +380,7 @@ class DataTable:
 			allowComments=True, stripWhite=True, worksheet=1, row=1, column=1):
 		self._filename = filename
 		data = None
-		if self.usePickleCache:
+		if self._usePickleCache:
 			from PickleCache import readPickleCache, writePickleCache
 			data = readPickleCache(filename, pickleVersion=1, source='MiscUtils.DataTable')
 		if data is None:
@@ -390,7 +390,7 @@ class DataTable:
 				file = open(self._filename, 'r')
 				self.readFile(file, delimiter, allowComments, stripWhite)
 				file.close()
-			if self.usePickleCache:
+			if self._usePickleCache:
 				writePickleCache(self, filename, pickleVersion=1, source='MiscUtils.DataTable')
 		else:
 			self.__dict__ = data.__dict__
@@ -518,7 +518,7 @@ class DataTable:
 		file.write(','.join(map(str, self._headings)))
 		file.write('\n')
 
-		def ValueWritingMapper(item):
+		def valueWritingMapper(item):
 			# So that None gets written as a blank and everything else as a string
 			if item is None:
 				return ''
@@ -527,7 +527,7 @@ class DataTable:
 
 		# write rows
 		for row in self._rows:
-			file.write(joinCSVFields(map(ValueWritingMapper, row)))
+			file.write(joinCSVFields(map(valueWritingMapper, row)))
 			file.write('\n')
 
 	def commit(self):
@@ -596,7 +596,7 @@ class DataTable:
 		for record in self._rows:
 			matches = True
 			for key in keys:
-				if record[key]!=dict[key]:
+				if record[key] != dict[key]:
 					matches = False
 					break
 			if matches:
@@ -683,6 +683,7 @@ BlankValues = {
 
 class TableRecord:
 	"""Representation of a table record."""
+
 
 	## Init ##
 

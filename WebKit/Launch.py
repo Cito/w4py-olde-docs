@@ -147,7 +147,8 @@ def main(args=None):
 	else:
 		arg2 = None
 	# Accept AppServerOptions that look like StartOptions:
-	args1 = []; args2 = []
+	args1 = []
+	args2 = []
 	while args:
 		arg = args.pop(0)
 		if arg.startswith('--') and \

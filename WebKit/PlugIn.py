@@ -9,7 +9,7 @@ class PlugInError(Exception):
 class PlugIn(Object):
 	"""Template for Webware Plug-ins.
 
-	A plug-in is a software component that is loaded by WebKit in order	to
+	A plug-in is a software component that is loaded by WebKit in order to
 	provide additional WebKit functionality without necessarily having to modify
 	WebKit's source. The most infamous plug-in is PSP (Python Server Pages)
 	which ships with Webware.
@@ -118,8 +118,8 @@ class PlugIn(Object):
 			if self._examplePages is not None:
 				examplesPath = self.serverSidePath('Examples')
 				assert os.path.exists(examplesPath), \
-					'Plug-in %s says it has example pages,' \
-					' but there is no Examples/ subdir.' % self._name
+					'Plug-in %s says it has example pages, ' \
+					'but there is no Examples/ subdir.' % self._name
 				ctxName = self._name + 'Examples'
 				if not app.hasContext(ctxName):
 					app.addContext(ctxName, examplesPath)

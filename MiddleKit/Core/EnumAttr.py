@@ -19,16 +19,14 @@ class EnumAttr(Attr):
 		self._enumSet = set
 
 	def enums(self):
-		"""
-		Returns a sequence of the enum values in their string form.
-		"""
+		"""Return a sequence of the enum values in their string form."""
 		return self._enums
 
 	def hasEnum(self, value):
 		if isinstance(value, StringType):
 			return self._enumSet.has_key(value)
 		else:
-			return value>=0 and value<len(self._enums)
+			return value >= 0 and value < len(self._enums)
 
 	def intValueForString(self, s):
 		return self._enumSet[s]

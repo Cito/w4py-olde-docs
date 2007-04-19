@@ -1,6 +1,6 @@
-from SitePage import SitePage
 from MiscUtils.DataTable import DataTable
 from MiscUtils.Funcs import hostName as HostName
+from SitePage import SitePage
 
 
 class SelectDatabase(SitePage):

@@ -37,6 +37,7 @@ AwakeCreated = 0
 
 class GenericGenerator:
 	""" Base class for the generators """
+
 	def __init__(self, ctxt=None):
 		self._ctxt = ctxt
 		self.phase = 'Service'
@@ -85,7 +86,7 @@ class CharDataGenerator(GenericGenerator):
 		writer.printChars('\n')
 
 	def mergeData(self, cdGen):
-		self.chars = self.chars + cdGen.chars
+		self.chars += cdGen.chars
 
 
 class ScriptGenerator(GenericGenerator):
@@ -118,10 +119,10 @@ class ScriptGenerator(GenericGenerator):
 				count += 1
 			userIndent = lastline[:count]
 		else:
-			userIndent = writer.EMPTY_STRING
+			userIndent = writer._emptyString
 			lastline = lines[-1]
 		# Print out code (moved from above):
-		writer._userIndent = writer.EMPTY_STRING # reset to none
+		writer._userIndent = writer._emptyString # reset to none
 		writer.printList(lines)
 		writer.printChars('\n')
 		# Check for a block:
@@ -153,7 +154,7 @@ class EndBlockGenerator(GenericGenerator):
 			writer.popIndent()
 			writer.println()
 			writer._blockcount -= 1
-		writer._userIndent = writer.EMPTY_STRING
+		writer._userIndent = writer._emptyString
 
 
 class ScriptFileGenerator(GenericGenerator):
@@ -221,6 +222,7 @@ class MethodGenerator(GenericGenerator):
 			writer.println('self.initPSP()\n')
 			writer.popIndent()
 			writer.println()
+
 
 class MethodEndGenerator(GenericGenerator):
 	"""Part of class method generation.

@@ -17,7 +17,7 @@ sublist is not used, hence always None.
 # which was modified by Zachary Roadhouse,
 # then un-Tk'd by Just van Rossum.
 # Many thanks for regular expression debugging & authoring are due to:
-#    Tim (the-incredib-ly y'rs) Peters and Cristian Tismer
+#    Tim (the-incredib-ly y'rs) Peters and Christian Tismer
 # So, who owns the copyright? ;-) How about this:
 # Copyright 1996-1997:
 #    Mitchell S. Chapman,
@@ -94,21 +94,22 @@ def fontify(pytext, searchfrom=0, searchto=None):
 	end = searchfrom
 	while 1:
 		matchObject = matchRE.search(pytext, end)
-		if not matchObject: break
+		if not matchObject:
+			break
 		(start, end) = matchObject.span()
 		match = matchObject.group(0)
 		c = match[0]
 		if c not in "#'\"":
 			# Must have matched a keyword.
-			if start <> searchfrom:
+			if start != searchfrom:
 				# there's still a redundant char before and after it, strip!
 				match = match[1:-1]
-				start = start + 1
+				start += 1
 			else:
 				# this is the first keyword in the text.
 				# Only a space at the end.
 				match = match[:-1]
-			end = end - 1
+			end -= 1
 			tags.append((keywordTag, start, end, None))
 			# If this was a defining keyword, look ahead to the
 			# following identifier.
@@ -117,7 +118,8 @@ def fontify(pytext, searchfrom=0, searchto=None):
 				if idMatchObject:
 					(start, end) = idMatchObject.span()
 					match = idMatchObject.group(0)
-					tags.append(((match=='def') and functionTag or classTag, start, end, None))
+					tags.append(((match == 'def')
+						and functionTag or classTag, start, end, None))
 		elif c == "#":
 			tags.append((commentTag, start, end, None))
 		else:

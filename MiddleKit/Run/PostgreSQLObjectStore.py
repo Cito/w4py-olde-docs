@@ -8,6 +8,7 @@ from psycopg import Warning, DatabaseError
 from SQLObjectStore import UnknownSerialNumberError
 from MiscUtils import NoDefault
 
+
 class PostgreSQLObjectStore(SQLObjectStore):
 	"""
 	PostgresObjectStore does the obvious: it implements an object store backed by a PostgreSQL database.
@@ -79,15 +80,18 @@ class PostgreSQLObjectStore(SQLObjectStore):
 		conn.commit()
 
 	def sqlCaseInsensitiveLike(self, a, b):
-		return "%s ilike %s" % (a,b)
+		return "%s ilike %s" % (a, b)
 
 
 class StringAttr:
+
 	def sqlForNonNone(self, value):
-		""" psycopg provides a quoting function for string -- use it. """
+		"""psycopg provides a quoting function for string -- use it."""
 		return "%s" % dbi.QuotedString(value)
 
+
 class BoolAttr:
+
 	def sqlForNonNone(self, value):
 		if value:
 			return 'TRUE'

@@ -13,14 +13,14 @@ in InstallMixIns().
 
 """
 
-from WebUtils.Funcs import htmlEncode
 from types import LongType
+from WebUtils.Funcs import htmlEncode
 
 
 def splitWords(s):
 	res = []
 	for c in s:
-		if c.upper()==c:
+		if c.upper() == c:
 			res.append(' ')
 			res.append(c.lower())
 		else:
@@ -46,7 +46,7 @@ class ObjectStore:
 		if objs is None:
 			objs = []
 		ht = []
-		suffix = ('s', '')[len(objs)==1]
+		suffix = ('s', '')[len(objs) == 1]
 		ht.append('<span class="TablePrefix">%i %s object%s</span>'
 			% (len(objs), adjective, suffix))
 		ht.append('<table border="1" cellspacing="0" cellpadding="2"'
@@ -56,7 +56,7 @@ class ObjectStore:
 			ht.append(klass.htHeadingsRow())
 			for obj in objs:
 				newKlass = obj.klass()
-				if newKlass!=klass:
+				if newKlass != klass:
 					# If we hit a new class, write new headings
 					klass = newKlass
 					ht.append(klass.htHeadingsRow())
