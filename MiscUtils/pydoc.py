@@ -261,12 +261,12 @@ class Doc:
 		"""Generate documentation for an object."""
 		args = (object, name) + args
 		if inspect.ismodule(object):
-			return apply(self.docmodule, args)
+			return self.docmodule(*args)
 		if inspect.isclass(object):
-			return apply(self.docclass, args)
+			return self.docclass(*args)
 		if inspect.isroutine(object):
-			return apply(self.docroutine, args)
-		return apply(self.docother, args)
+			return self.docroutine(*args)
+		return self.docother(*args)
 
 	def fail(self, object, name=None, *args):
 		"""Raise an exception for unimplemented types."""
@@ -375,7 +375,7 @@ TT { font-family: lucidatypewriter, lucida console, courier }
 	def bigsection(self, title, *args):
 		"""Format a section with a big heading."""
 		title = '<big><strong>%s</strong></big>' % title
-		return apply(self.section, (title,) + args)
+		return self.section(title, *args)
 
 	def preformat(self, text):
 		"""Format literal preformatted text."""

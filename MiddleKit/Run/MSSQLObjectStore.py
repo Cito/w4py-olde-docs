@@ -48,7 +48,7 @@ class MSSQLObjectStore(SQLObjectStore):
 		if you want it off, do not send any arg for clear_auto_commit or set it to 1
 		# self._db = ODBC.Windows.Connect(dsn='myDSN',clear_auto_commit=0)
 		"""
-		return apply(ODBC.Windows.Connect, (), self._dbArgs)
+		return ODBC.Windows.Connect(**self._dbArgs)
 
 	def retrieveLastInsertId(self, conn, cur):
 		conn, cur = self.executeSQL('select @@IDENTITY', conn)

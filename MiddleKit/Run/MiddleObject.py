@@ -516,12 +516,12 @@ class MiddleObject(object, NamedValueAccess):
 			if copymode == 'deep' and isinstance(attr, ObjRefAttr):
 				# clone the value of an attribute from the source object,
 				# and set it in the attribute of the dest object
-				value = apply(getattr(source, attr.pyGetName()), ())
+				value = getattr(source, attr.pyGetName())()
 				if value:
 					clonedvalue = value.clone(memo, depthAttr)
 				else:
 					clonedvalue = None
-				retvalue = apply(getattr(dest, attr.pySetName()), (clonedvalue,))
+				retvalue = getattr(dest, attr.pySetName())(clonedvalue)
 			elif copymode == 'none':
 				# Shouldn't set to attribute to None explicitly since attribute may have
 				# isRequired=1
@@ -531,8 +531,8 @@ class MiddleObject(object, NamedValueAccess):
 				# copy the value of an attribute from the source object
 				# to the dest object
 				# print 'copying value of ' + attr.name()
-				value = apply(getattr(source, attr.pyGetName()), ())
-				retvalue = apply(getattr(dest, attr.pySetName()), (value,))
+				value = getattr(source, attr.pyGetName())()
+				retvalue = getattr(dest, attr.pySetName())(value)
 
 		if memo is None:
 			# print 'Initializing memo'
@@ -551,7 +551,7 @@ class MiddleObject(object, NamedValueAccess):
 		# iterate over our persistent attributes
 		for attr in self.klass().allDataAttrs():
 			if isinstance(attr, ListAttr):
-				valuelist = apply(getattr(self, attr.pyGetName()), ())
+				valuelist = getattr(self, attr.pyGetName())()
 				setmethodname = "addTo" + attr.name()[0].upper() + attr.name()[1:]
 				setmethod = getattr(copy, setmethodname)
 
@@ -570,10 +570,10 @@ class MiddleObject(object, NamedValueAccess):
 						# set the value's back ref to point to self
 						setrefmethod = getattr(valcopy, setrefname)
 						backrefattr = valcopy.klass().lookupAttr(backrefname)
-						apply(setrefmethod, (None,))
+						setrefmethod(None)
 
 						# add the value to the list
-						retval = apply(setmethod, (valcopy,))
+						retval = setmethod(valcopy)
 				elif attr['Copy'] == 'none':
 					# leave the list empty
 					pass

@@ -194,7 +194,7 @@ class ModPythonAdapter(Adapter):
 		apache.log_error('Python exception:\n')
 		traceback.print_exc(file=sys.stderr)
 
-		output = apply(traceback.format_exception, sys.exc_info())
+		output = traceback.format_exception(*sys.exc_info())
 		output = ''.join(output)
 		output = output.replace('&', '&amp;'
 			).replace('<', '&lt;').replace('>', '&gt;')

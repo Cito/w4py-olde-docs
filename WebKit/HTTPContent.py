@@ -310,7 +310,7 @@ class HTTPContent(HTTPServlet):
 		to pass in the transaction as the first argument.
 
 		"""
-		return apply(self.application().callMethodOfServlet, (self.transaction(), URL, method) + args, kwargs)
+		return self.application().callMethodOfServlet(self.transaction(), URL, method, *args, **kwargs)
 
 	def endResponse(self):
 		"""End response.

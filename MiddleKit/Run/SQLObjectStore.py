@@ -631,7 +631,7 @@ class SQLObjectStore(ObjectStore):
 					# will be None.  This means that dangling references will _not_ be remembered
 					# across dump/generate/create/insert procedures.
 					method = getattr(obj, attr.pyGetName())
-					value = apply(method, ())
+					value = method()
 					if value is None:
 						fields.append('')
 					elif isinstance(value, MiddleObject):

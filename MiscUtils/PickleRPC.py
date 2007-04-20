@@ -365,6 +365,8 @@ class Transport(SafeUnpickler):
 
 	def make_connection(self, host):
 		# create a HTTP connection object from a host descriptor
+		# @@ This uses the old httplib interface of Python 1.5.2
+		# @@ We should switch to the newer httplib interface of Python 2.0
 		import httplib
 		return httplib.HTTP(host)
 
@@ -409,6 +411,7 @@ class SafeTransport(Transport):
 	def make_connection(self, host):
 		# create a HTTPS connection object from a host descriptor
 		# host may be a string, or a (host, x509-dict) tuple
+		# @@ see remark in Transport.make_connection
 		import httplib
 		if isinstance(host, types.TupleType):
 			host, x509 = host
@@ -420,7 +423,7 @@ class SafeTransport(Transport):
 			raise NotImplementedError, \
 				"your version of httplib doesn't support HTTPS"
 		else:
-			return apply(HTTPS, (host, None), x509)
+			return HTTPS(host, **x509)
 
 	def send_host(self, connection, host):
 		if isinstance(host, types.TupleType):

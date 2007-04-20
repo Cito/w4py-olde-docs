@@ -100,7 +100,7 @@ class PySummary:
 				res.append(settings[type][0])
 				if span:
 					res.append('<span class="line_%s">' % type)
-				res.append(apply(getattr(line, format))) # e.g., line.format()
+				res.append(getattr(line, format)()) # e.g., line.format()
 				if span:
 					res.append('</span>')
 				res.append('\n')

@@ -623,7 +623,7 @@ def main():
 			asctime(localtime(time()))))
 		sys.stderr.write('Error while executing script\n')
 		traceback.print_exc(file=sys.stderr)
-		output = apply(traceback.format_exception, sys.exc_info())
+		output = traceback.format_exception(*sys.exc_info())
 		output = ''.join(output)
 		output = output.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
 		stdout.write('''Content-type: text/html

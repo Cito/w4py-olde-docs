@@ -40,7 +40,7 @@ def HTMLForException(excInfo=None, options=None):
 	res = ['<table style="%s" width=100%%'
 		' cellpadding="2" cellspacing="2">\n' % opt['table'],
 		'<tr><td><pre style="%s">\n' % opt['default']]
-	out = apply(traceback.format_exception, excInfo)
+	out = traceback.format_exception(*excInfo)
 	for line in out:
 		match = fileRE.search(line)
 		if match:
