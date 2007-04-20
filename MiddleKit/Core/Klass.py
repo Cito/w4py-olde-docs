@@ -406,7 +406,7 @@ class Klass(MiddleDict, ModelObject):
 			# already done
 			pass
 		klass = self.superklass()
-		while klass != None:
+		while klass is not None:
 			self._dependencies.append(klass)
 			klass._dependents.append(self)
 			klass = klass.superklass()

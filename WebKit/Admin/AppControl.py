@@ -11,7 +11,7 @@ class AppControl(AdminSecurity):
 		wr = self.writeln
 		action = self.request().field("action", None)
 
-		if action == None:
+		if action is None:
 			if not self.application().server().isPersistent():
 				wr('<p><b>You are running the <i>OneShot</i> version of WebKit.'
 					' None of the options below are applicable.</b><p>')

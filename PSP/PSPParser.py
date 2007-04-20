@@ -86,7 +86,7 @@ class PSPParser:
 			reader.Advance(len(OPEN_COMMENT))
 			start = reader.Mark()
 			stop = reader.skipUntil(CLOSE_COMMENT)
-			if stop == None:
+			if stop is None:
 				raise 'ParseException'
 			self.flushCharData(self.tmplStart, self.tmplStop)
 			return 1
@@ -103,7 +103,7 @@ class PSPParser:
 		if not reader.Matches(OPEN_EXPR):
 			return 0
 		reader.Advance(len(OPEN_EXPR)) # eat the opening tag
-		if end_open != None:
+		if end_open is not None:
 			attrs = reader.parseTagAttributes()
 			reader.skipSpaces()
 			if not reader.matches(end_open):
@@ -116,7 +116,7 @@ class PSPParser:
 		reader.skipSpaces()
 		start = reader.Mark()
 		stop = reader.skipUntil(CLOSE_EXPR)
-		if stop == None:
+		if stop is None:
 			raise 'ParserException'
 		handler.setTemplateInfo(self.tmplStart, self.tmplStop)
 		handler.handleExpression(start, stop, attrs)
@@ -142,7 +142,7 @@ class PSPParser:
 			if reader.Matches(i):
 				match = i
 				break
-		if match == None:
+		if match is None:
 			raise 'Invalid Directive'
 		reader.Advance(len(match))
 		# parse the directive attr:val pair dictionary
@@ -208,7 +208,7 @@ class PSPParser:
 		else:
 			return 0
 		reader.Advance(len(open))# Matches advances it
-		if end_open != None:
+		if end_open is not None:
 			attrs = reader.parseTagAttributes()
 			reader.skipSpaces()
 			if not reader.Matches(end_open):
@@ -222,7 +222,7 @@ class PSPParser:
 			stop = reader.skipUntil(close)
 		except EOFError:
 			raise EOFError("Reached EOF while looking for ending script tag")
-		if stop == None:
+		if stop is None:
 			raise 'Unterminated Script'
 		handler.setTemplateInfo(self.tmplStart, self.tmplStop)
 		handler.handleScript(start, stop, attrs)
@@ -250,7 +250,7 @@ class PSPParser:
 			start = reader.Mark()
 			try:
 				stop = reader.skipUntil(CLOSE_SCRIPT)
-				if stop == None:
+				if stop is None:
 					raise 'Unterminated Script is %s block' % OPEN_SCRIPT
 			except EOFError:
 				raise EOFError("Reached EOF while looking for ending script tag (%s)" % CLOSE_SCRIPT)
@@ -280,7 +280,7 @@ class PSPParser:
 			start = reader.Mark()
 			try:
 				stop = reader.skipUntil(CLOSE_SCRIPT)
-				if stop == None:
+				if stop is None:
 					raise 'Unterminated Script is %s block' % OPEN_SCRIPT
 			except EOFError:
 				raise EOFError("Reached EOF while looking for ending script tag (%s)" % CLOSE_SCRIPT)

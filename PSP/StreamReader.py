@@ -111,13 +111,13 @@ class StreamReader:
 		# we've got an open file handle - don't think this case exists
 		# Don't know what this master stuff is, but until I do, implement it.
 		# Oh, it's the original file.
-		if self.master == None:
+		if self.master is None:
 			parent = None
 			self.master = file
 		else:
 			parent = os.path.split(self.master)[0]
 		isAbsolute = os.path.isabs(file)
-		if parent != None and not isAbsolute:
+		if parent is not None and not isAbsolute:
 			file = os.path.join(parent, file)
 		fileid = self.registerSourceFile(file)
 		handle = open(file, 'r')
@@ -130,7 +130,7 @@ class StreamReader:
 			z += 1
 		stream = ''.join(lines)
 
-		if self.current == None:
+		if self.current is None:
 			self.current = mark = Mark(self, fileid, stream,
 				self._ctxt.getBaseUri(), encoding)
 		else:
@@ -138,7 +138,7 @@ class StreamReader:
 				self._ctxt.getBaseUri(), encoding) # don't use yet
 
 	def popFile(self):
-		if self.current == None:
+		if self.current is None:
 			return 0
 		self.size -= 1 # @@ what the hell is this?
 		r = self.current.popStream()
@@ -293,7 +293,7 @@ class StreamReader:
 						return values
 				finally:
 					self.reset(mark)
-			if ch == None:
+			if ch is None:
 				break
 			self.parseAttributeValue(values)
 		# EOF
@@ -321,13 +321,13 @@ class StreamReader:
 				endquote = ch
 				ch = self.nextChar()
 				ch = self.peekChar()
-				while ch != None and ch != endquote:
+				while ch is not None and ch != endquote:
 					ch = self.nextChar()
 					if ch == '\\':
 						ch = nextChar()
 					buffer.append(ch)
 					ch = self.peekChar()
-				if ch == None:
+				if ch is None:
 					raise 'Unterminated Attribute Value'
 				self.nextChar()
 		else:

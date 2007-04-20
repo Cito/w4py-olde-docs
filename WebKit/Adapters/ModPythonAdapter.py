@@ -131,7 +131,7 @@ class ModPythonAdapter(Adapter):
 			ot.write("In Type Handler\n")
 			ot.flush()
 
-		if req.filename == None:
+		if req.filename is None:
 			return apache.DECLINED
 		fn = req.filename
 		if debug:

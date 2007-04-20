@@ -286,7 +286,7 @@ class TableColumn:
 		whose types were not specified.
 
 		"""
-		if type == None:
+		if type is None:
 			self._type = None
 		else:
 			try:

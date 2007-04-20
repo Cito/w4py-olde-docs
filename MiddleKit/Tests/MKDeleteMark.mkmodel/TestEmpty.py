@@ -137,7 +137,7 @@ def runTest(store, klass, objectToDelete, expectedResult):
 		foos = store.fetchObjectsOfClass(Foo)
 		if expectedResult == DELETE_FOO:
 			assert len(objects) == 1
-			assert objects[0].foo() == None
+			assert objects[0].foo() is None
 			assert len(foos) == 0
 		elif expectedResult == DELETE_OBJECT:
 			assert len(objects) == 0

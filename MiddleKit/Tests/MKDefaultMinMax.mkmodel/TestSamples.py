@@ -20,10 +20,10 @@ def test(store):
 	# for attributes that have defaults.
 	# We marked these objects with 43.
 	foo = [foo for foo in foos if foo._get('i') == 43][0]
-	assert foo._get('b') == None
-	assert foo._get('l') == None
-	assert foo._get('f') == None
-	assert foo._get('s') == None
+	assert foo._get('b') is None
+	assert foo._get('l') is None
+	assert foo._get('f') is None
+	assert foo._get('s') is None
 
 	foo = [foo for foo in foos if foo._get('s') == '43'][0]
-	assert foo._get('i') == None
+	assert foo._get('i') is None

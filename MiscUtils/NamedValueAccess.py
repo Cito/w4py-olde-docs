@@ -127,7 +127,7 @@ class NamedValueAccess:
 		that there will not be errors caused by retrieving the key.
 
 		"""
-		return self._bindingForGetKey(key) != None
+		return self._bindingForGetKey(key) is not None
 
 	def valueForKey(self, key, default=NoDefault):
 		"""Get value for given key.
@@ -542,7 +542,7 @@ def valueForKey(obj, key, default=NoDefault):
 	if valueForUnknownKey:
 		return valueForUnknownKey(key, default)
 
-	if default != NoDefault:
+	if default is not NoDefault:
 		return default
 	else:
 		raise ValueForKeyError, key

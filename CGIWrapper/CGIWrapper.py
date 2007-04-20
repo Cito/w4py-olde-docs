@@ -493,7 +493,7 @@ class CGIWrapper(NamedValueAccess):
 			excInfo = sys.exc_info()
 			if excInfo[0] == SystemExit:
 				code = excInfo[1].code
-				if code == 0 or code == None:
+				if not code:
 					self._errorOccurred = 0
 
 			# Clean up
@@ -556,7 +556,7 @@ def htDictionary(dict, addSpace=None):
 	html = ['<table width=100% border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>']
 	for key in keys:
 		value = dict[key]
-		if addSpace != None and addSpace.has_key(key):
+		if addSpace is not None and addSpace.has_key(key):
 			target = addSpace[key]
 			value = ('%s ' % target).join(value.split(target))
 		html.append('<tr> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (key, value))

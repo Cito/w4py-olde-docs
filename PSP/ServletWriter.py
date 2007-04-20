@@ -110,7 +110,7 @@ class ServletWriter:
 
 	def quoteString(self, s):
 		"""Escape the string."""
-		if s == None:
+		if s is None:
 			return 'None'
 			# this probably won't work, I'll be back for this
 		return 'r'+s

@@ -236,7 +236,7 @@ class ContextParser(URLParser):
 			result = mod.contextInitialize(application(),
 				os.path.normpath(os.path.join(os.getcwd(), dir)))
 			# @@: funny hack...?
-			if result != None and result.has_key('ContentLocation'):
+			if result is not None and result.has_key('ContentLocation'):
 				dir = result['ContentLocation']
 
 		print 'Loading context: %s at %s' % (name, dir)

@@ -37,7 +37,7 @@ class ModelUser:
 
 	def readModelFileNamed(self, filename, modelClass=None, **keywords):
 		assert self._model is None, 'Cannot re-read a model.'
-		if modelClass == None:
+		if modelClass is None:
 			from MiddleKit.Core.Model import Model as modelClass
 		self._model = modelClass(**keywords)
 		self._model.read(filename)

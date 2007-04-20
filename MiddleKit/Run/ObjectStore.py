@@ -204,7 +204,7 @@ class ObjectStore(ModelUser):
 
 		"""
 		if not object.isInStore():
-			assert object.key() == None
+			assert object.key() is None
 			# Make the store aware of this new object
 			self.willChange()
 			self._newObjects.append(object)

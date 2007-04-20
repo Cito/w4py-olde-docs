@@ -139,11 +139,11 @@ class SQLObjectStore(ObjectStore):
 		modelWasSet().
 		"""
 		setting = self.setting('SQLLog', None)
-		if setting == None or setting == {}:
+		if setting is None or setting == {}:
 			self._sqlEcho = None
 		else:
 			filename = setting['File']
-			if filename == None:
+			if filename is None:
 				self._sqlEcho = None
 			elif filename == 'stdout':
 				self._sqlEcho = sys.stdout

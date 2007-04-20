@@ -35,9 +35,9 @@ def test(store):
 	assert len(results) == 1
 	f = results[0]
 	assert f.ri() == 1
-	assert f.ni() == None
+	assert f.ni() is None
 	assert f.rs() == 'a'
-	assert f.ns() == None
+	assert f.ns() is None
 
 	return
 

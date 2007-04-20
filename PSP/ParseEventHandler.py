@@ -217,7 +217,7 @@ class ParseEventHandler:
 				filenm = attrs['file']
 				encoding = attrs['encoding']
 			except KeyError:
-				if filenm != None:
+				if filenm is not None:
 					encoding = None
 				else:
 					raise KeyError

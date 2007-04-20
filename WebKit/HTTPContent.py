@@ -346,7 +346,7 @@ class HTTPContent(HTTPServlet):
 		will accepts cookies.
 
 		"""
-		if url == None:
+		if url is None:
 			url = self.request().uri()
 		return self.session().sessionEncode(url)
 

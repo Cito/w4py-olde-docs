@@ -269,7 +269,7 @@ self.transaction().application().includeURL(self.transaction(), __pspincludepath
 		self.scriptgen = None
 
 		self.url = attrs.get('path')
-		if self.url == None:
+		if self.url is None:
 			raise "No path attribute in Include"
 
 		self.scriptgen = ScriptGenerator(self._theFunction % self.url, None)
