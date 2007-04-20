@@ -295,7 +295,7 @@ def main(args=None):
 			if pidFile and os.path.exists(pidFile):
 				try:
 					os.remove(pidFile)
-				except:
+				except Exception:
 					print 'The pid file could not be removed.'
 					print
 		sys.exit(errorlevel)
@@ -305,7 +305,7 @@ def main(args=None):
 		# Read the old pid file:
 		try:
 			pid = int(open(pidFile).read())
-		except:
+		except Exception:
 			pid = None
 		if pid is not None:
 			print 'According to the pid file, the server is still running.'
@@ -354,7 +354,7 @@ def main(args=None):
 		# Write a new pid file:
 		try:
 			open(pidFile, 'w').write(str(os.getpid()))
-		except:
+		except Exception:
 			print 'The pid file %r could not be written.' % pidFile
 			sys.exit(1)
 	olduid = oldgid = stdout = stderr = log = None
@@ -370,10 +370,9 @@ def main(args=None):
 						print 'Changed server process group to %r.' % group
 				else:
 					oldgid = None
-			except:
+			except Exception:
 				if group:
 					print 'Could not set server process group to %r.' % group
-					raise
 					oldgid = None
 					sys.exit(1)
 		# Change server process user:
@@ -385,7 +384,7 @@ def main(args=None):
 					print 'Changed server process user to %r.' % user
 				else:
 					olduid = None
-			except:
+			except Exception:
 				print 'Could not change server process user to %r.' % user
 				olduid = None
 				sys.exit(1)
@@ -444,14 +443,14 @@ def main(args=None):
 		if oldgid is not None:
 			try:
 				os.setgid(oldgid)
-			except:
+			except Exception:
 				pass
 			else:
 				oldgid = None
 		if olduid is not None:
 			try:
 				os.setuid(olduid)
-			except:
+			except Exception:
 				pass
 			else:
 				olduid = None
@@ -461,7 +460,7 @@ def main(args=None):
 		if pidFile and os.path.exists(pidFile):
 			try:
 				os.remove(pidFile)
-			except:
+			except Exception:
 				if oldgid is None and olduid is None:
 					print 'The pid file could not be removed.'
 					print

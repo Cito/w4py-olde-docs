@@ -21,7 +21,7 @@ class SessionMemoryStore(SessionStore):
 			for i in keys:
 				try:
 					self[i] = filestore[i]
-				except:
+				except Exception:
 					app.handleException()
 			filestore.clear()
 

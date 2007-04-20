@@ -11,7 +11,6 @@ See also: OneShot.cgi and OneShotAdapter.py.
 
 """
 
-
 from AppServer import AppServer
 from Application import Application
 

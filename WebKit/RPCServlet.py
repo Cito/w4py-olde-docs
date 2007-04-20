@@ -68,7 +68,8 @@ class RPCServlet(HTTPServlet):
 		setting = transaction.application().setting('ReportRPCExceptionsInWebKit')
 		if setting:
 			transaction.response().flush()
-			transaction.application().handleExceptionInTransaction(sys.exc_info(), transaction)
+			transaction.application().handleExceptionInTransaction(
+				sys.exc_info(), transaction)
 
 	def transaction(self):
 		# most uses of RPC will not need this
@@ -81,5 +82,3 @@ class RPCServlet(HTTPServlet):
 	def sleep(self, transaction):
 		self._transaction = None
 		HTTPServlet.sleep(self, transaction)
-
-

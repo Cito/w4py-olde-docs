@@ -6,7 +6,6 @@ from WebUtils import FieldStorage
 from WebKit.Cookie import CookieEngine
 Cookie = CookieEngine.SimpleCookie
 from Request import Request
-from Session import Session, SessionError
 import HTTPResponse
 
 debug = False
@@ -18,7 +17,7 @@ class HTTPRequest(Request):
 
 	## Initialization ##
 
-	def __init__(self, dict={}):
+	def __init__(self, dict=None):
 		Request.__init__(self)
 		self._stack = []
 		if dict:
@@ -38,7 +37,7 @@ class HTTPRequest(Request):
 				# because MSIE cookies sometimes can break the cookie module.
 				try:
 					self._cookies.load(self._environ['HTTP_COOKIE'])
-				except:
+				except Exception:
 					traceback.print_exc(file=sys.stderr)
 		else:
 			# If there's no dictionary, we pretend we're a CGI script
@@ -551,10 +550,6 @@ class HTTPRequest(Request):
 		"""
 		return self._environ.get('SCRIPT_FILENAME', '')
 
-	def rawRequest(self):
-		"""Return the raw request used to initialize this request object."""
-		return self._rawRequest
-
 	def environ(self):
 		"""Get the environment for the request."""
 		return self._environ
@@ -797,7 +792,7 @@ class HTTPRequest(Request):
 		for method in _infoMethods:
 			try:
 				info.append((method.__name__, method(self)))
-			except:
+			except Exception:
 				info.append((method.__name__, None))
 
 		return info
@@ -809,17 +804,6 @@ class HTTPRequest(Request):
 
 		"""
 		return htmlInfo(self.info())
-		info = self.info()
-		res = ['<table border="1">\n']
-		for pair in info:
-			value = pair[1]
-			if hasattr(value, 'items') and (type(value) is type({})
-					or hasattr(value, '__getitem__')):
-				value = _infoForDict(value)
-			res.append('<tr valign="top"><td>%s</td><td>%s&nbsp;</td></tr>\n'
-				% (pair[0], value))
-		res.append('</table>\n')
-		return ''.join(res)
 
 	_exceptionReportAttrNames = Request._exceptionReportAttrNames + (
 		'uri adapterName servletPath serverSidePath'

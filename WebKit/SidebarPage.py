@@ -165,7 +165,8 @@ td#Content {
 
 	def writeWebwareEmailMenu(self):
 		self.menuHeading('E-mail')
-		self.menuItem('webware-discuss', 'mailto:webware-discuss@lists.sourceforge.net')
+		self.menuItem('webware-discuss',
+			'mailto:webware-discuss@lists.sourceforge.net')
 
 	def writeWebwareExitsMenu(self):
 		self.menuHeading('Exits')

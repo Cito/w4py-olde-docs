@@ -65,14 +65,14 @@ class SessionFileStore(SessionStore):
 		return item
 
 	def __setitem__(self, key, item):
-		# @@ 2001-11-12 ce: It's still possible that two threads are updating the same
-		# session as the same time (due to the user having two windows open) in which
-		# case one will clobber the results of the other! Probably need file locking
-		# to solve this.
-		# @@ 2001-11-16 gat: In order to avoid sessions clobering each other, you'd
-		# have to lock the file for the entire time that the servlet is manipulating
-		# the session, which would block any other servlets from using that session.
-		# Doesn't seem like a great solution to me.
+		# @@ 2001-11-12 ce: It's still possible that two threads are updating
+		# the same session as the same time (due to the user having two windows
+		# open) in which case one will clobber the results of the other!
+		# Probably need file locking to solve this.
+		# @@ 2001-11-16 gat: In order to avoid sessions clobering each other,
+		# you'd have to lock the file for the entire time that the servlet is
+		# manipulating the session, which would block any other servlets from
+		# using that session. Doesn't seem like a great solution to me.
 		if debug:
 			print '>> setitem(%s, %s)' % (key, item)
 		filename = self.filenameForKey(key)

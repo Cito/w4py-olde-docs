@@ -2,7 +2,7 @@ import os, sys
 
 try:
 	import MiscUtils
-except:
+except ImportError:
 	# When the Webware tarball unravels,
 	# the components sit next to each other
 	sys.path.append(os.path.abspath(os.pardir))
@@ -54,7 +54,7 @@ class Object(object, NamedValueAccess):
 		try:
 			from traceback import format_stack
 			print format_stack(limit =3)[0]
-		except:
+		except Exception:
 			print 'Could not determine calling function.'
 
 	# 2000-05-21 ce: Sometimes used for debugging:

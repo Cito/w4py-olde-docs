@@ -214,7 +214,7 @@ class ImportManager(Object):
 					return filename # it's a module that needs to be reloaded
 		return False
 
-	def delModules(self, includePythonModules=False, excludePrefixes=[]):
+	def delModules(self, includePythonModules=False, excludePrefixes=None):
 		"""Delete imported modules.
 
 		Deletes all the modules that the ImportSpy has ever imported unless
@@ -232,7 +232,7 @@ class ImportManager(Object):
 			if not includePythonModules:
 				if not filename or filename.startswith(sys.prefix):
 					continue
-			for prefix in excludePrefixes:
+			for prefix in excludePrefixes or []:
 				if modname.startswith(prefix):
 					break
 			else:

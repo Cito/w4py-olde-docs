@@ -97,7 +97,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			assert status == 'Status:'
 			code = int(code)
 			assert 2 <= code/100 < 6
-		except:
+		except Exception:
 			sys.stdout.write('%5i  HTTPServer error: Missing status header\n'
 				% (self._requestID,))
 		else:

@@ -279,7 +279,7 @@ class HTTPContent(HTTPServlet):
 		"""
 		return Funcs.urlDecode(s)
 
-	def forward(self, URL):
+	def forward(self, url):
 		"""Forward request.
 
 		Forwards this request to another servlet.
@@ -288,9 +288,9 @@ class HTTPContent(HTTPServlet):
 		to pass in the transaction as the first argument.
 
 		"""
-		self.application().forward(self.transaction(), URL)
+		self.application().forward(self.transaction(), url)
 
-	def includeURL(self, URL):
+	def includeURL(self, url):
 		"""Include output from other servlet.
 
 		Includes the response of another servlet
@@ -300,9 +300,9 @@ class HTTPContent(HTTPServlet):
 		to pass in the transaction as the first argument.
 
 		"""
-		self.application().includeURL(self.transaction(), URL)
+		self.application().includeURL(self.transaction(), url)
 
-	def callMethodOfServlet(self, URL, method, *args, **kwargs):
+	def callMethodOfServlet(self, url, method, *args, **kwargs):
 		"""Call a method of another servlet.
 
 		See `Application.callMethodOfServlet` for details.
@@ -310,7 +310,8 @@ class HTTPContent(HTTPServlet):
 		to pass in the transaction as the first argument.
 
 		"""
-		return self.application().callMethodOfServlet(self.transaction(), URL, method, *args, **kwargs)
+		return self.application().callMethodOfServlet(
+			self.transaction(), url, method, *args, **kwargs)
 
 	def endResponse(self):
 		"""End response.

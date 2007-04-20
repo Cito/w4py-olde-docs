@@ -83,7 +83,7 @@ for i in range(256):
 
 try:
 	UnicodeDecodeError
-except: # Python < 2.3
+except NameError: # Python < 2.3
 	class UnicodeDecodeError(Exception):
 		pass
 

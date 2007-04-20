@@ -14,7 +14,7 @@ installed, then the need for reloading can be monitored very effectively
 with the use of ImportSpy. Otherwise, ImportSpy will not have much benefit.
 
 Note that ImportSpy is based on the new import hooks of Python 2.3 described in
-PEP 302, falling back to the old ihooks module if the new hooks are not available.
+PEP 302, falling back to the old ihooks module if new hooks are not available.
 In some cases this may become problematic, when other templating systems are
 used with Webware which are also using ihook support to load their templates,
 or if they are using zipimports. Therefore, it is possible to suppress the use
@@ -64,13 +64,13 @@ if path_hooks is not None:
 				mod.__loader__ = self
 			return mod
 
-	def activate(imp_manager):
+	def activate(impManager):
 		"""Activate ImportSpy."""
 		assert not ImportSpy._imp
-		ImportSpy._imp = imp_manager
+		ImportSpy._imp = impManager
 		path_hooks.append(ImportSpy)
 		path_importer_cache.clear()
-		imp_manager.recordModules()
+		impManager.recordModules()
 		return 'new import hooks'
 
 
@@ -108,9 +108,9 @@ else: # Python < 2.3, fall back to using the old ihooks module
 				raise
 			return mod
 
-	def activate(imp_manager):
+	def activate(impManager):
 		"""Activate ImportSpy."""
 		assert not ImportSpy._imp
-		ImportSpy._imp = imp_manager
+		ImportSpy._imp = impManager
 		ImportSpy()
 		return 'ihooks'

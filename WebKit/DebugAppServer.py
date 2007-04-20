@@ -30,6 +30,7 @@ Tested on:
 	- WingIDE on Windows, http://wingware.com/
 	- PythonWin
 	- JEdit with the JPyDbg plugin, on Windows
+
 """
 
 import sys
@@ -117,7 +118,6 @@ class DebugAppServer(OriginalThreadedAppServer):
 
 
 from Application import Application
-from Transaction import Transaction
 
 
 class DebugApplication(Application):
@@ -129,9 +129,9 @@ class DebugApplication(Application):
 	# Don't handle exceptions gracefully because we want
 	# them to rise uncaught so the debugger will kick in.
 
-	# @@ 2005-07-15 CE: This works well for exceptions within responding to a request,
-	# but for problems during importing a servlet, the exception gets printed to
-	# console and the debugger does not kick in.
+	# @@ 2005-07-15 CE: This works well for exceptions within responding to
+	# a request, but for problems during importing a servlet, the exception
+	# gets printed to console and the debugger does not kick in.
 
 	def handleException(self):
 		"""Handle exception.

@@ -49,10 +49,10 @@ class SessionStore(Object):
 		except ImportError:
 			import pickle
 		if hasattr(pickle, 'HIGHEST_PROTOCOL'):
-			def dump_with_highest_protocol(obj, f,
+			def dumpWithHighestProtocol(obj, f,
 					proto=pickle.HIGHEST_PROTOCOL, dump=pickle.dump):
 				return dump(obj, f, proto)
-			self._encoder = dump_with_highest_protocol
+			self._encoder = dumpWithHighestProtocol
 		else:
 			self._encoder = pickle.dump
 		self._decoder = pickle.load

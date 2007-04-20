@@ -48,11 +48,17 @@ def validateHTML(html):
 	i = 1
 	for line in lines:
 		if errorLines.has_key(i):
-			result.write('<tr style="background-color: %s"><td rowspan="2">%d</td><td>%s</td></tr>\n' % (badColor, i, encodeWithIndentation(errorLines[i])))
-			result.write('<tr style="background-color: %s"><td>%s</td></tr>\n' % (badColor, encodeWithIndentation(line)))
+			result.write('<tr style="background-color: %s">'
+				'<td rowspan="2">%d</td><td>%s</td></tr>\n'
+				% (badColor, i, encodeWithIndentation(errorLines[i])))
+			result.write('<tr style="background-color: %s">'
+				'<td>%s</td></tr>\n'
+				% (badColor, encodeWithIndentation(line)))
 		else:
 			color = goodColors[i % 2]
-			result.write('<tr style="background-color: %s"><td>%d</td><td>%s</td></tr>\n' % (color, i, encodeWithIndentation(line)))
+			result.write('<tr style="background-color: %s">'
+				'<td>%d</td><td>%s</td></tr>\n'
+				% (color, i, encodeWithIndentation(line)))
 		i += 1
 	result.write('</table>\n')
 	return result.getvalue()

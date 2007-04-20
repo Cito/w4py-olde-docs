@@ -1,12 +1,10 @@
-from types import DictType, ListType, StringType
+from types import DictType, ListType
 import traceback, random, MimeWriter, smtplib
 
 from Common import *
 from MiscUtils.Funcs import dateForEmail
 from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict, htmlEncode
-from HTTPResponse import HTTPResponse
-
 
 try: # linecache update workaround for Python < 2.4
 	traceback.format_exc # check version
@@ -144,7 +142,7 @@ class ExceptionHandler(Object):
 		"""The full filesystem path for the servlet."""
 		try:
 			return self._tra.request().serverSidePath()
-		except:
+		except Exception:
 			return None
 
 	def basicServletName(self):
@@ -450,12 +448,12 @@ class ExceptionHandler(Object):
 					import ExpansiveHTMLForException
 				self.write(ExpansiveHTMLForException(
 					context=self.setting('FancyTracebackContext')))
-			except:
+			except Exception:
 				self.write('<p>Unable to generate a fancy traceback!'
 					' (uncaught exception)</p>')
 				try:
 					self.write(HTMLForException(sys.exc_info()))
-				except:
+				except Exception:
 					self.write('<p>Unable to even generate a normal traceback'
 						' of the exception in fancy traceback!</p>')
 
@@ -635,7 +633,7 @@ class ExceptionHandler(Object):
 		"""
 		try:
 			key = key.lower()
-		except:
+		except Exception:
 			pass
 		if key in self._hideValuesForFields:
 			return self._hiddenString

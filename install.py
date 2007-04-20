@@ -120,7 +120,8 @@ class Installer:
 			minversion = '.'.join(map(str, minver))
 		except AttributeError: # Python < 2.0
 			from string import split, join
-			ver = tuple(map(int, split(split(sys.version, ' ', 1)[0], '.')[:len(minver)]))
+			ver = tuple(map(int,
+				split(split(sys.version, ' ', 1)[0], '.')[:len(minver)]))
 			version = join(map(str, ver), '.')
 			minversion = join(map(str, minver), '.')
 		if ver < minver:
@@ -276,7 +277,7 @@ class Installer:
 		print
 
 	def createBrowsableSource(self):
-		"""Create HTML documents for class hierarchies, summaries, source files, etc."""
+		"""Create HTML docs for class hierarchies, summaries, sources etc."""
 		print 'Creating html source, summaries and doc files...'
 		maxLen = max(map(lambda comp: len(comp['dirname']), self._comps))
 		column = 0
@@ -363,7 +364,7 @@ class Installer:
 			sys.stdout = StringIO()
 			try:
 				pydoc.writedoc(module)
-			except:
+			except Exception:
 				pass
 			msg = sys.stdout.getvalue()
 			sys.stdout = stdout
@@ -532,10 +533,11 @@ class Installer:
 		print
 
 	def backupConfigs(self):
-		"""Copy *.config to *.config.default, if the .default files don't already exist.
+		"""Copy *.config to *.config.default, if they don't already exist.
 
-		This allows the user to always go back to the default config file if needed
-		(for troubleshooting for example).
+		This allows the user to always go back to the default config file if
+		needed (for troubleshooting for example).
+
 		"""
 		print 'Creating backups of original config files...'
 		self._backupConfigs(os.curdir)
@@ -713,14 +715,15 @@ Installation is finished.''' % ((os.sep,)*2)
 
 
 def printHelp():
-	print 'Usage: install.py [options]'
-	print 'Install WebWare in the local directory.'
+	print "Usage: install.py [options]"
+	print "Install WebWare in the local directory."
 	print
-	print '  -h, --help            Print this help screen.'
-	print '  -v, --verbose         Print extra information messages during install.'
-	print '  --no-password-prompt  Do not prompt for the WebKit password during install.'
-	print '  --set-password=...    Set the WebKit password to the given value.'
-	print '  --keep-templates      Keep the templates for creating the docs.'
+	print "  -h, --help            Print this help screen."
+	print "  -v, --verbose         Print extra information messages during install."
+	print "  --no-password-prompt  Don't prompt for WebKit password during install."
+	print "  --set-password=...    Set the WebKit password to the given value."
+	print "  --keep-templates      Keep the templates for creating the docs."
+
 
 if __name__ == '__main__':
 	import getopt

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """Threaded Application Server
 
 The AppServer is the main process of WebKit. It handles requests for
@@ -33,7 +34,7 @@ from WebUtils.Funcs import requestURI
 
 debug = False
 
-DefaultConfig = {
+defaultConfig = {
 	'Host': 'localhost', # same as '127.0.0.1'
 	'EnableAdapter': True, # enable WebKit adapter
 	'AdapterPort': 8086,
@@ -44,7 +45,6 @@ DefaultConfig = {
 	'StartServerThreads': 10, # initial number of server threads
 	'MinServerThreads': 5, # minimum number
 	'MaxServerThreads': 20, # maxium number
-	# @@ the following settings are not yet officially documented
 	'RequestQueueSize': 0, # means twice the maximum number of threads
 	'RequestBufferSize': 8*1024, # 8 kBytes
 	'ResponseBufferSize': 8*1024, # 8 kBytes
@@ -57,7 +57,9 @@ DefaultConfig = {
 # from the AppServer to 2,147,483,647 bytes):
 intLength = len(dumps(int(1)))
 
+# Initialize global variables
 server = None
+exitStatus = 0
 
 
 class NotEnoughDataError(Exception):
@@ -169,27 +171,27 @@ class ThreadedAppServer(AppServer):
 		self._socketHandlers[serverAddress] = handlerClass
 		self._handlerCache[serverAddress] = []
 		self._sockets[serverAddress] = sock
-		adr_str = ':'.join(map(str, serverAddress))
-		print "Listening for %s on %s" % (handlerClass.settingPrefix, adr_str)
+		adrStr = ':'.join(map(str, serverAddress))
+		print "Listening for %s on %s" % (handlerClass.settingPrefix, adrStr)
 		# write text file with server address
-		adr_file = self.addressFileName(handlerClass)
-		if os.path.exists(adr_file):
-			print "Warning: %s already exists" % adr_file
+		adrFile = self.addressFileName(handlerClass)
+		if os.path.exists(adrFile):
+			print "Warning: %s already exists" % adrFile
 			try:
-				os.unlink(adr_file)
+				os.unlink(adrFile)
 			except OSError: # we cannot remove the file
-				if open(adr_file).read() == adr_str:
+				if open(adrFile).read() == adrStr:
 					return # same content, so never mind
 				else:
-					print "Error: Could not remove", adr_file
+					print "Error: Could not remove", adrFile
 					sys.stdout.flush()
 					raise
 		try:
-			f = open(adr_file, 'w')
-			f.write(adr_str)
+			f = open(adrFile, 'w')
+			f.write(adrStr)
 			f.close()
 		except IOError:
-			print "Error: Could not write", adr_file
+			print "Error: Could not write", adrFile
 			sys.stdout.flush()
 			raise
 
@@ -197,9 +199,12 @@ class ThreadedAppServer(AppServer):
 		return True
 
 	def defaultConfig(self):
+		"""The default AppServer.config."""
 		if self._defaultConfig is None:
 			self._defaultConfig = AppServer.defaultConfig(self).copy()
-			self._defaultConfig.update(DefaultConfig)
+			# Update with ThreadedAppServer specific settings
+			# as defined in defaultConfig on the module level:
+			self._defaultConfig.update(defaultConfig)
 		return self._defaultConfig
 
 	def mainloop(self, timeout=1):
@@ -313,9 +318,9 @@ class ThreadedAppServer(AppServer):
 
 		"""
 
-		# @@: This algorithm needs work. The edges (i.e. at
-		# the minserverthreads) are tricky. When working
-		# with this, remember thread creation is *cheap*.
+		# @@: This algorithm needs work. The edges (i.e. at the
+		# minserverthreads) are tricky. When working with this,
+		# remember thread creation is *cheap*.
 
 		average = max = 0
 
@@ -398,7 +403,7 @@ class ThreadedAppServer(AppServer):
 				rv = i.join() # Don't need a timeout, it isn't alive
 				self._threadPool.remove(i)
 				if debug:
-					print "Thread absorbed, real threadCount =", len(self.threadPool)
+					print "Thread absorbed, real threadCount =", len(self._threadPool)
 
 
 	## Worker Threads ##
@@ -435,7 +440,7 @@ class ThreadedAppServer(AppServer):
 					t._processing = True
 					try:
 						handler.handleRequest()
-					except:
+					except Exception:
 						traceback.print_exc(file=sys.stderr)
 					t._processing = False
 					handler.close()
@@ -488,19 +493,19 @@ class ThreadedAppServer(AppServer):
 			sock.close()
 		# Remove the text files with the server addresses:
 		for handler in self._socketHandlers.values():
-			adr_file = self.addressFileName(handler)
-			if os.path.exists(adr_file):
+			adrFile = self.addressFileName(handler)
+			if os.path.exists(adrFile):
 				try:
-					os.unlink(adr_file)
+					os.unlink(adrFile)
 				except OSError:
-					print "Warning: Could not remove", adr_file
+					print "Warning: Could not remove", adrFile
 		# Tell all threads to end:
 		for i in range(self._threadCount):
 			self._requestQueue.put(None)
 		for i in self._threadPool:
 			try:
 				i.join()
-			except:
+			except Exception:
 				pass
 		# Call super's shutdown:
 		AppServer.shutDown(self)
@@ -524,7 +529,7 @@ class ThreadedAppServer(AppServer):
 			try:
 				sock.connect((host, port))
 				sock.close()
-			except:
+			except Exception:
 				pass
 
 
@@ -687,14 +692,14 @@ class MonitorHandler(Handler):
 	and returns a value indicating the status of the server.
 
 	The protocol passes a marshalled dict, much like the Adapter
-	interface, which looks like ``{'format': 'XXX'}``, where XXX
+	interface, which looks like ``{'format': 'CMD'}``, where CMD
 	is a command (``STATUS`` or ``QUIT``). Responds with a simple
 	string, either the number of requests we've received (for
 	``STATUS``) or ``OK`` for ``QUIT`` (which also stops the server).
 
 	"""
 	# @@ 2003-03 ib: we should have a RESTART command, and
-	# perhaps better status indicators (# of threads, etc).
+	# perhaps better status indicators (number of threads, etc).
 
 	protocolName = 'monitor'
 	settingPrefix = 'Monitor'
@@ -717,10 +722,10 @@ class MonitorHandler(Handler):
 			self._server.shutDown()
 
 
-silent_errnos = [] # silently ignore these errors:
+silentErrnos = [] # silently ignore these errors:
 for e in 'EPIPE', 'ECONNABORTED', 'ECONNRESET':
 	try:
-		silent_errnos.append(getattr(errno, e))
+		silentErrnos.append(getattr(errno, e))
 	except AttributeError:
 		pass
 
@@ -763,7 +768,7 @@ class TASStreamOut(ASStreamOut):
 					sent += self._socket.send(
 						self._buffer[sent:sent+bufferSize])
 				except socket.error, e:
-					if debug or e[0] not in silent_errnos:
+					if debug or e[0] not in silentErrnos:
 						print "StreamOut Error:", e
 					self._closed = True
 					raise ConnectionAbortedError
@@ -824,7 +829,7 @@ class AdapterHandler(Handler):
 		try:
 			self._sock.shutdown(1)
 			self._sock.close()
-		except:
+		except Exception:
 			pass
 
 		if verbose:
@@ -858,14 +863,14 @@ class RestartAppServerError(Exception):
 	pass
 
 
-os_chdir = os.chdir
+_chdir = os.chdir
 
 def chdir(path, force=False):
 	"""Execute os.chdir() with safety provision."""
 	assert force, \
 		"You cannot reliably use os.chdir() in a threaded environment.\n" \
 		+ 16*" " + "Set force=True if you want to do it anway (using a lock)."
-	os_chdir(path)
+	_chdir(path)
 
 
 ## Script usage ##
@@ -908,7 +913,7 @@ def run(workDir=None):
 						while server._running > 1:
 							try:
 								time.sleep(1) # wait for interrupt
-							except:
+							except Exception:
 								if server._running < 3:
 									raise # shutdown
 					finally:
@@ -938,7 +943,6 @@ def run(workDir=None):
 					exitStatus = 0
 				else:
 					if doesRunHandleExceptions:
-						import traceback
 						print
 						traceback.print_exc(file=sys.stderr)
 						print "Exiting AppServer due to above exception."
@@ -954,7 +958,7 @@ def run(workDir=None):
 			AppServerModule.globalAppServer = None
 	sys.stdout.flush()
 	sys.stderr.flush()
-	os.chdir = os_chdir # allow use of os.chdir() again
+	os.chdir = _chdir # allow use of os.chdir() again
 	return exitStatus
 
 # Signal handlers
@@ -994,9 +998,9 @@ try:
 		print
 		print "-" * 79
 		print
-		for thread_id, frame in items:
+		for threadId, frame in items:
 			print "Thread ID: %d (reference count = %d)" % (
-				thread_id, sys.getrefcount(frame))
+				threadId, sys.getrefcount(frame))
 			print ''.join(traceback.format_list(traceback.extract_stack(frame)))
 		items.sort()
 		print "-" * 79

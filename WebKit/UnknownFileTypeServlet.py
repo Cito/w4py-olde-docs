@@ -1,4 +1,4 @@
-import os, time, mimetypes
+import os, mimetypes
 
 from ServletFactory import ServletFactory
 import HTTPExceptions
@@ -190,8 +190,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 	def serveContent(self, trans):
 		response = trans.response()
 
-		MaxCacheContentSize = self.setting('MaxCacheContentSize')
-		ReadBufferSize = self.setting('ReadBufferSize')
+		maxCacheContentSize = self.setting('MaxCacheContentSize')
+		readBufferSize = self.setting('ReadBufferSize')
 
 		# start sending automatically
 		response.streamOut().setAutoCommit()
@@ -201,7 +201,6 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 			f = open(filename, 'rb')
 		except IOError:
 			raise HTTPExceptions.HTTPNotFound
-			return
 
 		stat = os.fstat(f.fileno())
 		fileSize, mtime = stat[6], stat[8]
@@ -236,7 +235,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 			return
 		if file is None and self.setting('ReuseServlets') \
 				and self.shouldCacheContent() \
-				and fileSize < MaxCacheContentSize:
+				and fileSize < maxCacheContentSize:
 			if debug:
 				print '>> caching'
 			file = {
@@ -257,7 +256,7 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 				print '>> sending directly'
 			numBytesSent = 0
 			while numBytesSent < fileSize:
-				data = f.read(min(fileSize-numBytesSent, ReadBufferSize))
+				data = f.read(min(fileSize-numBytesSent, readBufferSize))
 				if data == '':
 					break # unlikely, but safety first
 				response.write(data)

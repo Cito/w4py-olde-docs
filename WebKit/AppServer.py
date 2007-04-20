@@ -6,6 +6,11 @@ The `AppServer` singleton is the controlling object/process/thread.
 `AppServer` receives requests and dispatches them to `Application`
 (via `Application.dispatchRawRequest`).
 
+There is only one instance of AppServer, `globalAppServer` contains
+that instance. Use it like:
+
+    from WebKit.AppServer import globalAppServer
+
 `ThreadedAppServer` completes the implementation, dispatching
 these requests to separate threads. `AppServer`, at least in the
 abstract, could support different execution models and environments,
@@ -28,17 +33,7 @@ from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 import Profiler
 import PidFile
 
-"""
-There is only one instance of AppServer, `globalAppServer` contains
-that instance. Use it like::
-
-    from WebKit.AppServer import globalAppServer
-"""
-
-# This actually gets set inside AppServer.__init__
-globalAppServer = None
-
-DefaultConfig = {
+defaultConfig = {
 	'PrintConfigAtStartUp': True,
 	'Verbose': True,
 	'PlugIns': [],
@@ -47,13 +42,14 @@ DefaultConfig = {
 	'PidFile': 'appserverpid.txt',
 }
 
+# This actually gets set inside AppServer.__init__
+globalAppServer = None
+
 
 class AppServer(ConfigurableForServerSidePath, Object):
 	"""The AppServer singleton.
 
-	The `AppServer` singleton is the controlling object/process/thread.
-	`AppServer` receives requests and dispatches them to `Application`
-	(via `Application.dispatchRawRequest`).
+	Purpose and usage are explained in the module docstring.
 
 	"""
 
@@ -210,8 +206,8 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	## Configuration ##
 
 	def defaultConfig(self):
-		"""Return the default configuration."""
-		return DefaultConfig
+		"""The default AppServer.config."""
+		return defaultConfig # defined on the module level
 
 	def configFilename(self):
 		"""Return the name of the AppServer configuration file."""
@@ -267,9 +263,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		""" Return the plug-in with the given name. """
 		# @@ 2001-04-25 ce: linear search. yuck.
 		# Plus we should guarantee plug-in name uniqueness anyway
-		for pi in self._plugIns:
-			if pi.name() == name:
-				return pi
+		for plugin in self._plugIns:
+			if plugin.name() == name:
+				return plugin
 		if default is NoDefault:
 			raise KeyError, name
 		else:
@@ -460,12 +456,12 @@ def stop(*args, **kw):
 		pidfile = os.path.join(os.path.dirname(__file__), "appserverpid.txt")
 	try:
 		pid = int(open(pidfile).read())
-	except:
+	except Exception:
 		print "Cannot read process id from pidfile."
 	else:
 		try:
 			kill(pid)
-		except:
+		except Exception:
 			from traceback import print_exc
 			print_exc(1)
 			print "WebKit cannot terminate the running process."

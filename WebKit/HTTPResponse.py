@@ -2,8 +2,8 @@ from types import FloatType, IntType, LongType, StringType, TupleType
 
 from Common import *
 
-# time.gmtime() no longer returns a tuple, and there is no globally defined type
-# for this at the moment.
+# time.gmtime() no longer returns a tuple, and there is no globally defined
+# type for this at the moment.
 TimeTupleType = type(time.gmtime(0))
 
 from Response import Response
@@ -72,7 +72,12 @@ class HTTPResponse(Response):
 		self.setHeader(name, value)
 
 	def headers(self, name=None):
-		"""Return a dictionary-style object of all header objects contained by this request."""
+		"""Return all the headers.
+
+		Returns a dictionary-style object of all header objects contained by
+		this request.
+
+		"""
 		return self._headers
 
 	def clearHeaders(self):
@@ -356,7 +361,8 @@ class HTTPResponse(Response):
 
 	def reset(self):
 		"""Reset the response (such as headers, cookies and contents)."""
-		assert not self._committed, "Cannot reset the response; it has already been sent."
+		assert not self._committed, \
+			"Cannot reset the response; it has already been sent."
 		self._headers = {}
 		self.setHeader('Content-type', 'text/html')
 		self._cookies = {}

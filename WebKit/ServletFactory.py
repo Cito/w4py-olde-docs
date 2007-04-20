@@ -151,7 +151,7 @@ class ServletFactory(Object):
 		# package or subpackage, even though it may be located somewhere else.
 		moduleFileName = os.path.basename(serverSidePathToImport)
 		moduleDir = os.path.dirname(serverSidePathToImport)
-		name, ext = os.path.splitext(moduleFileName)
+		name = os.path.splitext(moduleFileName)[0]
 		fullname = '%s.%s' % (fullname, name)
 		module = self._importModuleFromDirectory(fullname, name,
 			moduleDir, forceReload=True)

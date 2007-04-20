@@ -1,6 +1,6 @@
 from Common import *
-from HTTPContent import HTTPContent, HTTPContentError
 from WebUtils import Funcs
+from HTTPContent import HTTPContent, HTTPContentError
 from Application import EndResponse
 
 

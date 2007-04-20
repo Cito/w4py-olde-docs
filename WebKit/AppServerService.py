@@ -250,7 +250,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
 						import traceback
 						traceback.print_exc(file=sys.stderr)
 						print 'Service stopped due to above exception.'
-					except:
+					except Exception:
 						print 'ERROR:', e
 						print 'Cannot print traceback.'
 					print

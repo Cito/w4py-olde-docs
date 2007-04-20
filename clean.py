@@ -5,6 +5,7 @@ clean.py - Clean up Webware installation directory.
 
 Removes all derived and temporary files.
 This will work on all operating systems.
+
 """
 
 # The files that shall be removed:

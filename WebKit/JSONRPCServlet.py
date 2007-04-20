@@ -58,7 +58,7 @@ class JSONRPCServlet(HTTPContent):
 			try:
 				method = getattr(self, call)
 			except AttributeError:
-				cmd = self.error('%s, although an approved method, '
+				self.error('%s, although an approved method, '
 					'was not found' % call)
 			else:
 				try:
@@ -70,7 +70,7 @@ class JSONRPCServlet(HTTPContent):
 					err = StringIO()
 					traceback.print_exc(file=err)
 					e = err.getvalue()
-					cmd = self.error('%s was called, '
+					self.error('%s was called, '
 						'but encountered an error: %s' % (call, e))
 					err.close()
 		else:

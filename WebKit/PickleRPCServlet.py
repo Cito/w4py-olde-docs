@@ -135,7 +135,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 				self.handleException(trans)
 			else:
 				self.sendResponse(trans, response)
-		except:
+		except Exception:
 			# internal error, report as HTTP server error
 			print 'PickleRPCServlet internal error'
 			print ''.join(traceback.format_exception(*sys.exc_info()))
@@ -155,19 +155,19 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 
 		# Get list of accepted encodings
 		try:
-			accept_encoding = trans.request().environ()["HTTP_ACCEPT_ENCODING"]
-			if accept_encoding:
-				accept_encoding = [enc.strip()
-					for enc in accept_encoding.split(',')]
+			acceptEncoding = trans.request().environ()["HTTP_ACCEPT_ENCODING"]
+			if acceptEncoding:
+				acceptEncoding = [enc.strip()
+					for enc in acceptEncoding.split(',')]
 			else:
-				accept_encoding = []
+				acceptEncoding = []
 		except KeyError:
-			accept_encoding = []
+			acceptEncoding = []
 
 		# Compress the output if we are allowed to.
 		# We'll avoid compressing short responses and
 		# we'll use the fastest possible compression -- level 1.
-		if zlib is not None and "gzip" in accept_encoding \
+		if zlib is not None and "gzip" in acceptEncoding \
 				and len(response) > 1000:
 			contentEncoding = 'x-gzip'
 			response = zlib.compress(response, 1)

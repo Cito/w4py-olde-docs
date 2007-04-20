@@ -60,7 +60,7 @@ except NameError: # Python < 2.3
 import sys, os, site
 from MiscUtils.Configurable import Configurable
 
-_alltest_config = None
+_alltestConfig = None
 _log = logging.getLogger(__name__)
 
 
@@ -74,7 +74,7 @@ class _AllTestsConfig(Configurable):
 
 	"""
 
-	_DEFAULT_CONFIG = '''
+	_defaultConfig = '''
 {	# Edit this file to activate more tests
 
 	# Turn on tests that use MySQL?
@@ -109,28 +109,25 @@ class _AllTestsConfig(Configurable):
 
 	def configFilename(self):
 		theFilename = os.path.join(os.path.dirname(__file__), 'AllTests.config')
-
 		# The first time we are run, write a new configuration file.
 		if not os.path.exists(theFilename):
 			_log.info(' Creating new configuration file at "%s".'
 				' You can customize it to run more tests.', theFilename)
 			fp = open(theFilename, 'w')
-			fp.write(_AllTestsConfig._DEFAULT_CONFIG)
+			fp.write(_AllTestsConfig._defaultConfig)
 			fp.close()
-
 		return theFilename
 
 	def defaultConfig(self):
-		default = eval(_AllTestsConfig._DEFAULT_CONFIG)
+		default = eval(_AllTestsConfig._defaultConfig)
 		return default
 
 def config():
 	"""Return singleton of configuration file."""
-	global _alltest_config
-	if _alltest_config is None:
-		_alltest_config = _AllTestsConfig()
-
-	return _alltest_config
+	global _alltestConfig
+	if _alltestConfig is None:
+		_alltestConfig = _AllTestsConfig()
+	return _alltestConfig
 
 
 def checkAndAddPaths(listOfPaths):
@@ -142,17 +139,15 @@ def checkAndAddPaths(listOfPaths):
 
 	"""
 	numBadPaths = 0
-
 	for p in listOfPaths:
-		ap = os.path.abspath(p)
-		if os.path.exists(ap):
-			site.addsitedir(ap)
+		p = os.path.abspath(p)
+		if os.path.exists(p):
+			site.addsitedir(p)
 		else:
 			numBadPaths += 1
 			print 'WARNING: Trying to add paths to sys.path,'
-			print '  but could not find "%s".' % ap
-
-	return numBadPaths	# 0 = all were found
+			print '  but could not find "%s".' % p
+	return numBadPaths # 0 = all were found
 
 
 if __name__ == '__main__':
@@ -181,11 +176,11 @@ if __name__ == '__main__':
 	for t in testnames:
 		try:
 			tests.addTest(unittest.defaultTestLoader.loadTestsFromName(t))
-		except:
+		except Exception:
 			print 'ERROR: Skipping tests from "%s".' % t
 			try:
 				__import__(t) # just try to import the test after loadig failed
-			except:
+			except ImportError:
 				print 'Could not import the test module.'
 			else:
 				print 'Could not load the test suite.'

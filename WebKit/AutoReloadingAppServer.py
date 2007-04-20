@@ -28,7 +28,7 @@ except ImportError:
 	_fam = None
 
 
-DefaultConfig = {
+defaultConfig = {
 	'AutoReload': False,
 	'AutoReloadPollInterval': 1, # in seconds
 	'UseImportSpy': True,
@@ -66,7 +66,9 @@ class AutoReloadingAppServer(AppServer):
 	def defaultConfig(self):
 		"""Return the default configuration."""
 		conf = AppServer.defaultConfig(self)
-		conf.update(DefaultConfig)
+		# Update with AutoReloadingAppServer specific settings
+		# as defined in defaultConfig on the module level:
+		conf.update(defaultConfig)
 		return conf
 
 	def shutDown(self):
@@ -131,7 +133,7 @@ class AutoReloadingAppServer(AppServer):
 			self._pipe[1].flush()
 		try:
 			self._fileMonitorThread.join()
-		except:
+		except Exception:
 			pass
 
 

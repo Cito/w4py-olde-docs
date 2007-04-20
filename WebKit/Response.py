@@ -7,14 +7,16 @@ class Response(Message):
 
 	Response is a type of Message that offers the following:
 
-		* @@ 20000-04-17 ce
-		*
+		* @@ 2000-04-17 ce
+		* ...
 
 	Response is an abstract class; developers typically use HTTPResponse.
 
 	FUTURE
-		* Consider implementing the buffer/flush logic here including buffer size.
-		* Also, consider then having a method that doesn't allow committment until the end.
+		* Consider implementing the buffer/flush logic here
+		  including buffer size.
+		* Also, consider then having a method that doesn't allow
+		  committment until the end.
 
 	"""
 

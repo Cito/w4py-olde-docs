@@ -1,7 +1,27 @@
 #!/usr/bin/env python
 
-from UserDict import UserDict
+"""The Application singleton.
+
+`Application` and `AppServer` work together to setup up and dispatch requests.
+The distinction between the two is largely historical, but AppServer
+communicates directly with Adapters (or speaks protocols like HTTP), and
+Application receives the (slightly) processed input from AppServer and turns
+it into `Transaction`, `HTTPRequest`, `HTTPResponse`, and `Session`.
+
+Application is a singleton, which belongs to the AppServer. You can get access
+through the Transaction object (``transaction.application()``), or you can do::
+
+	from AppServer import globalAppServer
+	application = globalAppServer.application()
+
+Settings for Application are taken from ``Configs/Application.config``,
+and it is used for many global settings, even if they aren't closely tied
+to the Application object itself.
+
+"""
+
 from types import FloatType, ClassType
+from UserDict import UserDict
 
 from Common import *
 from Object import Object
@@ -10,11 +30,86 @@ from ExceptionHandler import ExceptionHandler
 from HTTPRequest import HTTPRequest
 from HTTPExceptions import HTTPException, HTTPSessionExpired
 from Transaction import Transaction
-from Session import Session
 from ASStreamOut import ConnectionAbortedError
 import URLParser
 
 debug = False
+
+defaultConfig = {
+	'PrintConfigAtStartUp': True,
+	'LogActivity': True,
+	'ActivityLogFilename': 'Logs/Activity.csv',
+	'ActivityLogColumns': [
+		'request.remoteAddress', 'request.method',
+		'request.uri', 'response.size',
+		'servlet.name', 'request.timeStamp',
+		'transaction.duration',
+		'transaction.errorOccurred'
+		],
+	'SessionModule': 'Session',
+	'SessionStore': 'Dynamic',
+	'SessionTimeout': 60,
+	'SessionPrefix': '',
+	'SessionName': '_SID_',
+	'IgnoreInvalidSession': True,
+	'UseAutomaticPathSessions': False,
+	'ShowDebugInfoOnErrors': True,
+	'IncludeFancyTraceback': False,
+	'FancyTracebackContext': 5,
+	'UserErrorMessage': 'The site is having technical difficulties'
+		' with this page. An error has been logged, and the problem'
+		' will be fixed as soon as possible. Sorry!',
+	'LogErrors': True,
+	'ErrorLogFilename': 'Logs/Errors.csv',
+	'SaveErrorMessages': True,
+	'ErrorMessagesDir': 'ErrorMsgs',
+	'EmailErrors': False,
+	'EmailErrorReportAsAttachment': False,
+	'ErrorEmailServer': 'localhost',
+	'ErrorEmailHeaders': {
+		'From': 'webware@mydomain',
+		'To': ['webware@mydomain'],
+		'Reply-to': 'webware@mydomain',
+		'content-type': 'text/html',
+		'Subject': 'Error'
+		},
+	'ErrorPage': None,
+	'MaxValueLengthInExceptionReport': 500,
+	'RPCExceptionReturn': 'traceback',
+	'ReportRPCExceptionsInWebKit': True,
+	'Contexts': {
+		'default': 'Examples',
+		'Admin': 'Admin',
+		'Examples': 'Examples',
+		'Testing': 'Testing',
+		'Docs': 'Docs',
+		},
+	'Debug': {
+		'Sessions': False,
+		},
+	'EnterDebuggerOnException': False,
+	'DirectoryFile': ['index', 'Index', 'main', 'Main'],
+	'UseCascadingExtensions': True,
+	'ExtensionCascadeOrder': ['.py', '.psp', '.kid', '.html'],
+	'ExtraPathInfo': True,
+	'ExtensionsToIgnore': [
+		'.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
+		'.py~', '.psp~', '.kid~', '.html~', '.tmpl~'
+		],
+	'ExtensionsToServe': [],
+	'FilesToHide': [
+		'.*', '*~', '*.bak', '*.py_bak', '*.tmpl',
+		'*.pyc', '*.pyo', '__init__.*', '*.config'
+		],
+	'FilesToServe': [],
+	'UnknownFileTypes': {
+		'ReuseServlets': True,
+		'Technique': 'serveContent', # or redirectSansAdapter
+		'CacheContent': False,
+		'MaxCacheContentSize': 128*1024,
+		'ReadBufferSize': 32*1024
+		},
+}
 
 
 class EndResponse(Exception):
@@ -33,23 +128,7 @@ class EndResponse(Exception):
 class Application(ConfigurableForServerSidePath, Object):
 	"""The Application singleton.
 
-	`Application` and `AppServer` work together to setup up and dispatch
-	requests. The distinction between the two is largely historical, but
-	AppServer communicates directly with Adapters (or speaks protocols like
-	HTTP), and Application receives the (slightly) processed input from
-	AppServer and turns it into `Transaction`, `HTTPRequest`, `HTTPResponse`,
-	and `Session`.
-
-	Application is a singleton, which belongs to the AppServer. You can get
-	access through the Transaction object (``transaction.application()``),
-	or you can do::
-
-	    from AppServer import globalAppServer
-	    application = globalAppServer.application()
-
-	Settings for Application are taken from ``Configs/Application.config``,
-	and it is used for many global settings, even if they aren't closely tied
-	to the Application object itself.
+	Purpose and usage are explained in the module docstring.
 
 	"""
 
@@ -251,81 +330,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	def defaultConfig(self):
 		"""The default Application.config."""
-		return {
-			'PrintConfigAtStartUp': True,
-			'LogActivity': True,
-			'ActivityLogFilename': 'Logs/Activity.csv',
-			'ActivityLogColumns': [
-				'request.remoteAddress', 'request.method',
-				'request.uri', 'response.size',
-				'servlet.name', 'request.timeStamp',
-				'transaction.duration',
-				'transaction.errorOccurred'
-				],
-			'SessionModule': 'Session',
-			'SessionStore': 'Dynamic',
-			'SessionTimeout': 60,
-			'SessionPrefix': '',
-			'SessionName': '_SID_',
-			'IgnoreInvalidSession': True,
-			'UseAutomaticPathSessions': False,
-			'ShowDebugInfoOnErrors': True,
-			'IncludeFancyTraceback': False,
-			'FancyTracebackContext': 5,
-			'UserErrorMessage': 'The site is having technical difficulties'
-				' with this page. An error has been logged, and the problem'
-				' will be fixed as soon as possible. Sorry!',
-			'LogErrors': True,
-			'ErrorLogFilename': 'Logs/Errors.csv',
-			'SaveErrorMessages': True,
-			'ErrorMessagesDir': 'ErrorMsgs',
-			'EmailErrors': False,
-			'EmailErrorReportAsAttachment': False,
-			'ErrorEmailServer': 'localhost',
-			'ErrorEmailHeaders': {
-				'From': 'webware@mydomain',
-				'To': ['webware@mydomain'],
-				'Reply-to': 'webware@mydomain',
-				'content-type': 'text/html',
-				'Subject': 'Error'
-				},
-			'ErrorPage': None,
-			'MaxValueLengthInExceptionReport': 500,
-			'RPCExceptionReturn': 'traceback',
-			'ReportRPCExceptionsInWebKit': True,
-			'Contexts': {
-				'default': 'Examples',
-				'Admin': 'Admin',
-				'Examples': 'Examples',
-				'Testing': 'Testing',
-				'Docs': 'Docs',
-				},
-			'Debug': {
-				'Sessions': False,
-				},
-			'EnterDebuggerOnException': False,
-			'DirectoryFile': ['index', 'Index', 'main', 'Main'],
-			'UseCascadingExtensions': True,
-			'ExtensionCascadeOrder': ['.py', '.psp', '.kid', '.html'],
-			'ExtraPathInfo': True,
-			'ExtensionsToIgnore': [
-				'.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
-				'.py~', '.psp~', '.kid~', '.html~', '.tmpl~'
-				],
-			'ExtensionsToServe': [],
-			'FilesToHide': [
-				'.*', '*~', '*.bak', '*.py_bak', '*.tmpl',
-				'*.pyc', '*.pyo', '__init__.*', '*.config'
-				],
-			'FilesToServe': [],
-			'UnknownFileTypes': {
-				'ReuseServlets': True,
-				'Technique': 'serveContent', # or redirectSansAdapter
-				'CacheContent': False,
-				'MaxCacheContentSize': 128*1024,
-				'ReadBufferSize': 32*1024
-				},
-		}
+		return defaultConfig # defined on the module level
 
 	def configFilename(self):
 		return self.serverSidePath('Configs/Application.config')

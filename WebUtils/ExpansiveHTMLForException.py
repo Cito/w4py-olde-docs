@@ -1,4 +1,4 @@
-import string, sys, traceback
+import sys, traceback
 from Funcs import htmlEncode
 
 

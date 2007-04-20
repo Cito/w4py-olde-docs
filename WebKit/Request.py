@@ -26,7 +26,12 @@ class Request(Message):
 	## Init ##
 
 	def __init__(self):
-		"""Subclasses are responsible for invoking super and initializing self._time."""
+		"""Initialize the request.
+
+		Subclasses are responsible for invoking super
+		and initializing self._time.
+
+		"""
 		Message.__init__(self)
 		self._transaction = None
 

@@ -1,7 +1,5 @@
 """This module defines a class for handling writing reponses."""
 
-import exceptions
-
 try: # for Python < 2.3
 	True, False
 except NameError:
@@ -10,7 +8,7 @@ except NameError:
 
 debug = False
 
-class InvalidCommandSequence(exceptions.Exception):
+class InvalidCommandSequence(Exception):
 	pass
 
 class ConnectionAbortedError(Exception):
@@ -192,4 +190,3 @@ class ASStreamOut:
 			if debug:
 				print ">>> ASStreamOut.write flushing"
 			self.flush()
-

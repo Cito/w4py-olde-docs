@@ -1,7 +1,6 @@
 import traceback
 
 from Common import *
-from WebUtils.Funcs import htmlEncode
 
 
 class Transaction(Object):
@@ -202,7 +201,7 @@ class Transaction(Object):
 			if obj:
 				try:
 					obj.writeExceptionReport(handler)
-				except Exception, e:
+				except Exception:
 					handler.writeln('<p>Uncaught exception while asking'
 						' <b>%s</b> to write report:</p>\n<pre>' % name)
 					traceback.print_exc(file=handler)

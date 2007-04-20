@@ -79,7 +79,7 @@ class XMLRPCServlet(RPCServlet):
 				response = xmlrpclib.dumps(response, methodresponse=1,
 					encoding=encoding, allow_none=self.allow_none)
 				self.sendOK('text/xml', response, transaction)
-		except:
+		except Exception:
 			# internal error, report as HTTP server error
 			print 'XMLRPCServlet internal error'
 			print ''.join(traceback.format_exception(

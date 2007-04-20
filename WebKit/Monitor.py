@@ -39,8 +39,12 @@ To stop the processes, run ``Monitor.py stop``.
 
 # Combining these with a timer lends itself to load balancing of some kind.
 
-"""
-Module global:
+defaultServer = "ThreadedAppServer"
+monitorInterval = 10 # add to config if this implementation is adopted
+maxStartTime = 120
+
+"""Module global:
+
 `defaultServer`:
     default ``"ThreadedAppServer"``. The type of AppServer to start up
     (as listed in ``Launch.py``)
@@ -49,30 +53,25 @@ Module global:
 `maxStartTime`:
     default 120. Seconds to wait for AppServer to start before killing
     it and trying again.
-"""
 
-defaultServer = "ThreadedAppServer"
-monitorInterval = 10 # add to config if this implementation is adopted
-maxStartTime = 120
+"""
 
 import os, sys, time, socket, signal
 from marshal import dumps
 
-global serverName
-serverName = defaultServer
-global srvpid
-srvpid = 0
+# Initialize some more global variables
 
-global addr
-global running
+serverName = defaultServer
+srvpid = 0
+addr = None
 running = 0
+
+debug = 1
 
 statstr = dumps({'format': 'STATUS'})
 statstr = dumps(len(statstr)) + statstr
 quitstr = dumps({'format': 'QUIT'})
 quitstr = dumps(len(quitstr)) + quitstr
-
-debug = 1
 
 
 ## Start ##
@@ -88,7 +87,6 @@ def createServer(setupPath=0):
 
 def startupCheck():
 	"""Make sure the AppServer starts up correctly."""
-	global debug
 	count = 0
 	print "Waiting for start..."
 	time.sleep(monitorInterval/2) # give the server a chance to start
@@ -111,16 +109,15 @@ def startServer(killcurrent=1):
 
 	"""
 	global srvpid
-	global debug
 	if os.name == 'posix':
 		if killcurrent:
 			try:
 				os.kill(srvpid, signal.SIGTERM)
-			except:
+			except Exception:
 				pass
 			try:
 				os.waitpid(srvpid, 0)
-			except:
+			except Exception:
 				pass
 		srvpid = os.fork()
 		if srvpid == 0:
@@ -138,8 +135,6 @@ def checkServer(restart=1):
 	standard port.
 
 	"""
-	global addr
-	global running
 	try:
 		sts = time.time()
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -152,7 +147,7 @@ def checkServer(restart=1):
 			print "Processed %s Requests." % resp
 			print "Delay %s." % monwait
 		return 1
-	except:
+	except Exception:
 		print "No Response from AppServer."
 		if running and restart:
 			startServer()
@@ -168,10 +163,7 @@ def main(args):
 	loop checking the server (`checkServer`).
 
 	"""
-	global debug
-	global serverName
 	global running
-
 	running = 1
 
 	file = open("monitorpid.txt", "w")
@@ -189,7 +181,7 @@ def main(args):
 			print "Exiting monitor..."
 		try:
 			os.kill(srvpid, signal.SIGTERM)
-		except:
+		except Exception:
 			pass
 		sys.exit()
 
@@ -207,11 +199,11 @@ def main(args):
 			print "Exiting Monitor..."
 			try:
 				os.kill(srvpid, signal.SIGTERM)
-			except:
+			except Exception:
 				sys.exit(0)
 			try:
 				os.waitpid(srvpid, 0) # prevent zombies
-			except:
+			except Exception:
 				sys.exit(0)
 
 
@@ -225,7 +217,6 @@ def shutDown(signum, frame):
 	print "Monitor Shutdown Called."
 	sys.stdout.flush()
 	running = 0
-	global addr
 	try:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect(addr)
@@ -289,7 +280,6 @@ servernames = ["AsyncThreadedAppServer", "ThreadedAppServer"]
 optionalargs = ["daemon"]
 
 if __name__ == '__main__':
-	global addr
 
 	if os.name != 'posix':
 		print "This service can only be run on Posix machines (UNIX)."
@@ -319,7 +309,7 @@ if __name__ == '__main__':
 		sys.path.remove('')
 		try:
 			sys.path.remove('.')
-		except:
+		except Exception:
 			pass
 
 	cfgfile = open(os.path.join(wwdir, "WebKit",

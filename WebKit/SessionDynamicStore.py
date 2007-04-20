@@ -147,7 +147,6 @@ class SessionDynamicStore(SessionStore):
 	def moveToMemory(self, key):
 		self._lock.acquire()
 		try:
-			global debug
 			if debug:
 				print ">> Moving %s to Memory" % key
 			self._memoryStore[key] = self._fileStore[key]
@@ -158,7 +157,6 @@ class SessionDynamicStore(SessionStore):
 	def moveToFile(self, key):
 		self._lock.acquire()
 		try:
-			global debug
 			if debug:
 				print ">> Moving %s to File" % key
 			self._fileStore[key] = self._memoryStore[key]
@@ -215,10 +213,10 @@ class SessionDynamicStore(SessionStore):
 			self._fileSweepCount = 0
 		# Now move sessions from memory to file as necessary:
 		self.intervalSweep()
-
-# It's OK for a session to moved from memory to file or vice versa in between
-# the time we get the keys and the time we actually ask for the session's
-# access time. It may take a while for the fileStore sweep to get completed.
+		# It's OK for a session to be moved from memory to file or vice versa
+		# in between the time we get the keys and the time we actually ask
+		# for the session's access time. It may take a while for the fileStore
+		# sweep to get completed.
 
 	def intervalSweep(self):
 		"""The session sweeper interval function.
@@ -227,7 +225,6 @@ class SessionDynamicStore(SessionStore):
 		and can be run more often than the full cleanStaleSessions function.
 
 		"""
-		global debug
 		if debug:
 			print "Starting interval Sweep at %s" % time.ctime(time.time())
 			print "Memory Sessions: %s   FileSessions: %s" % (
@@ -265,18 +262,15 @@ class SessionDynamicStore(SessionStore):
 			print "Memory Sessions: %s   FileSessions: %s" % (
 				len(self._memoryStore), len(self._fileStore))
 
-
 	def memoryKeysInAccessTimeOrder(self):
 		"""Return memory store's keys in ascending order of last access time."""
 		# This sorting technique is faster than using a comparison function.
 		accessTimeAndKeys = []
 		for key in self._memoryStore.keys():
 			try:
-				accessTimeAndKeys.append((self._memoryStore[key].lastAccessTime(), key))
+				accessTimeAndKeys.append(
+					(self._memoryStore[key].lastAccessTime(), key))
 			except KeyError:
 				pass
 		accessTimeAndKeys.sort()
-		keys = []
-		for accessTime, key in accessTimeAndKeys:
-			keys.append(key)
-		return keys
+		return [key for accessTime, key in accessTimeAndKeys]

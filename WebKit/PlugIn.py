@@ -135,7 +135,7 @@ class PlugIn(Object):
 		return self._examplePages
 
 	def install(self):
-		"""Installs the plug-in by invoking it's required InstallInWebKit() function."""
+		"""Install plug-in by invoking its required InstallInWebKit function."""
 		self._module.InstallInWebKit(self._appServer)
 
 
