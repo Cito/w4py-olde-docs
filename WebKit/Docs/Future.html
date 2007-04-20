@@ -50,12 +50,14 @@ so feel free to jump in!</p>
 <div class="section">
 <h3><a id="major-items" name="major-items">Major Items</a></h3>
 <ul class="simple">
-<li>Drop backward compatibility down to Python 2.0 and require Python 2.3
-or Python 2.4 instead. Make use of the new Python features like new-style
-classes, properties, sets, decorators etc. and get rid of old garbage and
-workarounds for old Python versions.</li>
+<li>Drop backward compatibility down to Python 2.0; require Python 2.3 or
+Python 2.4 instead. Make use of the new Python features like new-style
+classes, properties, sets, decorators etc. and get rid of old garbage
+and workarounds for old Python versions. Use isinstance() for type checking.</li>
 <li>Use distutils instead of our own installer, use Python eggs instead of
 our own plug-in concept.</li>
+<li>Make use the logging module (so far it is only used with unit testing)
+instead of conditional print statements with &quot;debug&quot; and &quot;verbose&quot; flags.</li>
 <li>CheckSource.py: A program to check the source code conventions.</li>
 <li>Role-based security and user-authentication. Goal is to eliminate,
 as much as possible, developer-written security logic.
@@ -103,7 +105,7 @@ including version numbers, etc.</li>
 <li>Provide higher level automation of testing. For example, a testing script
 should be able to launch various app servers multiple times.</li>
 <li>Provide highly automated benchmarking so we can track changes in performance.</li>
-<li>Expand the regression test suite.</li>
+<li>Add more unit tests, expand the regression test suite.</li>
 </ul>
 </div>
 <div class="section">
