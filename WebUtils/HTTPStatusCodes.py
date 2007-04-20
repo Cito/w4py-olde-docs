@@ -65,7 +65,9 @@ HTTPStatusCodeListColumnNames = ('Code', 'Identifier', 'Description')
 
 
 HTTPStatusCodes = {}
-	""" HTTPStatusCodes can be indexed by either their status code number of textual identifier. The result is a dictionary with keys code, identifier, asciiMessage and htmlMessage. """
+# HTTPStatusCodes can be indexed by either their status code number
+# of textual identifier. The result is a dictionary with keys code,
+# identifier, asciiMessage and htmlMessage.
 
 
 # Construct HTTPStatusCodes dictionary
