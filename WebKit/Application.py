@@ -113,7 +113,7 @@ class Application(ConfigurableForServerSidePath, Object):
 					if page != pages[0]:
 						print 'Deprecation warning: ' \
 							'Please use %s instead of %s' % pages
-				except:
+				except Exception:
 					continue
 				else:
 					break
@@ -520,7 +520,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		for column in self.setting('ActivityLogColumns'):
 			try:
 				value = objects.valueForName(column)
-			except:
+			except Exception:
 				value = '(unknown)'
 			if type(value) is FloatType:
 				# probably need more flexibility in the future
@@ -711,16 +711,11 @@ class Application(ConfigurableForServerSidePath, Object):
 		You can change the request in place to control the servlet you are
 		forwarding to -- using methods like `HTTPRequest.setField`.
 
-		@@ 2003-03 ib: how does the forwarded servlet knows that it's not
-		the original servlet?
-
 		"""
 		# Reset the response to a "blank slate"
 		trans.response().reset()
-
 		# Include the other servlet
 		self.includeURL(trans, url)
-
 		# Raise an exception to end processing of this request
 		raise EndResponse
 
@@ -978,23 +973,3 @@ class Application(ConfigurableForServerSidePath, Object):
 				'redirecting to", url
 		trans.response().sendRedirect(url)
 		raise EndResponse
-
-
-## Main ##
-
-"""
-You can run Application as a main script, in which case it expects a
-single argument which is a file containing a dictionary representing
-a request. This technique isn't very popular as Application itself
-could raise exceptions that aren't caught. See `CGIAdapter` and
-`AppServer` for a better example of how things should be done.
-
-Largely historical.
-"""
-
-if __name__ == '__main__':
-	if len(sys.argv) != 2:
-		sys.stderr.write('WebKit: Application:'
-			' Expecting one filename argument.\n')
-	requestDict = eval(open(sys.argv[1]).read())
-	main(requestDict)
