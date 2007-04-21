@@ -1,3 +1,8 @@
+from math import sin, pi
+
+from WebKit.Common import *
+from ExamplePage import ExamplePage
+
 try:
 	import gd # GD module
 except ImportError:
@@ -20,8 +25,71 @@ def image_lib_link(lib=None):
 			'www.pythonware.com/products/pil/')}[lib]
 	return '<a href="http://%s">%s</a>' % (src, name)
 
-from MiscUtils import StringIO
-from ExamplePage import ExamplePage
+X, Y = 500, 200 # the image size
+
+def t(p):
+	"""Map coordinates: (x=0..2pi, y=-1.25..1.25) => (0..X, Y..0)"""
+	return round(0.5*X*p[0]/pi), round(0.4*Y*(1.25- p[1]))
+
+colors = (255, 255, 255), (0, 0, 0), (0, 0, 255), (255, 0, 0)
+white, black, blue, red = range(4)
+
+
+class Drawing:
+	"""Simple wrapper class for drawing the example image."""
+
+	if gd:
+
+		def __init__(self):
+			global white, black, blue, red
+			self._image = gd.image((X, Y))
+			self._color = map(self._image.colorAllocate, colors)
+			self._font = gd.gdFontLarge
+
+		def text(self, pos, string, color):
+			color = self._color[color]
+			self._image.string(self._font, t(pos), string, color)
+
+		def lines(self, points, color):
+			color = self._color[color]
+			self._image.lines(map(t, points), color)
+
+		def png(self):
+			s = StringIO()
+			self._image.writePng(s)
+			return s.getvalue()
+
+	else:
+
+		def __init__(self):
+			self._image = pil.Image.new('RGB', (X, Y), colors[white])
+			self._draw = pil.ImageDraw.Draw(self._image)
+			for font in 'Tahoma Verdana Arial Helvetica'.split():
+				try:
+					font = pil.ImageFont.truetype(font + '.ttf', 12)
+				except (AttributeError, IOError):
+					font = None
+				if font:
+					break
+			else:
+				try:
+					font = pil.ImageFont.load_default()
+				except (AttributeError, IOError):
+					font = None
+			self._font = font
+
+		def text(self, pos, string, color):
+			color = colors[color]
+			self._draw.text(t(pos), string, color, font=self._font)
+
+		def lines(self, points, color):
+			color = colors[color]
+			self._draw.line(map(t, points), color)
+
+		def png(self):
+			s = StringIO()
+			self._image.save(s, 'png')
+			return s.getvalue()
 
 
 class Image(ExamplePage):
@@ -37,14 +105,14 @@ class Image(ExamplePage):
 	"""
 
 	def defaultAction(self):
-		if self.request().field('typ', None) == '.png' and (gd or pil):
+		if self.request().field('fmt', None) == '.png' and (gd or pil):
 			image = self.generatePNGImage()
 			res = self.response()
 			res.setHeader("Content-Type", "image/png")
 			res.setHeader("Content-Length", str(len(image)))
-			# Uncomment the following to suggest to the client that the
+			# Uncomment the following line to suggest to the client that the
 			# result should be saved to a file, rather than displayed in-line:
-			# res.setHeader('Content-Disposition', 'attachment; filename=foo.png')
+			# res.setHeader("Content-Disposition", "attachment; filename=foo.png")
 			self.write(image)
 		else:
 			self.writeHTML()
@@ -53,7 +121,8 @@ class Image(ExamplePage):
 		wr = self.writeln
 		wr('<h2>WebKit Image Generation Demo</h2>')
 		if gd or pil:
-			wr('<img src="Image?typ=.png">')
+			wr('<img src="Image?fmt=.png" alt="Generated example image"'
+				' width="%d" height="%d">' % (X, Y))
 			wr('<p>This image has just been generated using the %s.</p>' %
 				image_lib_link())
 		else:
@@ -62,41 +131,13 @@ class Image(ExamplePage):
 				map(image_lib_link, ('gd', 'pil'))))
 
 	def generatePNGImage(self):
-		"""Generate and return a PNG image using gdmodule."""
-		from math import sin, pi
-		X, Y = (320, 160)
-		def t(p):
-			# map coordinates: (x=0..2pi, y=-1..1) => (0..X, Y..0)
-			return (int((p[0]/(2*pi))*X), int(Y - ((p[1]+1)/2.0)*Y))
-		white, black, blue = (255, 255, 255), (0, 0, 0), (0, 0, 255)
-		if gd:
-			im = gd.image((X, Y))
-			white, black, blue = map(im.colorAllocate, (white, black, blue))
-			font = gd.gdFontLarge
-		else:
-			im = pil.Image.new('RGB', (X, Y), white)
-			draw = pil.ImageDraw.Draw(im)
-		def text(pos, string, color):
-			pos = t(pos)
-			if gd:
-				im.string(font, pos, string, color)
-			else:
-				draw.text(pos, string, color)
-		text((2.7, 0.8), 'y=sin(x)', black)
-		def lines(points, color):
-			points = map(T, points)
-			if gd:
-				im.lines(points, color)
-			else:
-				draw.line(points, color)
-		lines(((0, 0), (2*pi, 0)), black) # x-axis
-		lines(((0, -1), (0, 1)), black) # y-axis
-		def f(x): # sin function
-			return (x, sin(x))
-		lines(map(f, map(lambda x: x*2*pi/X, xrange(X+1))), blue)
-		f = StringIO()
-		if gd:
-			im.writePng(f)
-		else:
-			im.save(f, 'png')
-		return f.getvalue()
+		"""Generate and return a PNG example image."""
+		def f(x):
+			return x, sin(x)
+		draw = Drawing()
+		draw.text((2.7, 0.8), 'y=sin(x)', black)
+		draw.text((0.2, -0.8), 'created: ' + asclocaltime(), red)
+		draw.lines(((0, 0), (2*pi, 0)), black) # x-axis
+		draw.lines(((0, -1), (0, 1)), black) # y-axis
+		draw.lines(map(f, map(lambda x: x*2*pi/X, xrange(X+1))), blue)
+		return draw.png()
