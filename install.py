@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 
-"""
-install.py
-Webware for Python
+"""install.py
+
+Webware for Python installer
 
 FUTURE
 	* Look for an install.py in each component directory and run it
 	  (there's not a strong need right now).
+	* Use distutils or setuptools instead of our own plugin concept.
+
 """
 
 
@@ -116,21 +118,14 @@ class Installer:
 		"""Check for minimum required Python version."""
 		try:
 			ver = sys.version_info[:len(minver)]
-			version = '.'.join(map(str, ver))
-			minversion = '.'.join(map(str, minver))
-		except AttributeError: # Python < 2.0
-			from string import split, join
-			ver = tuple(map(int,
-				split(split(sys.version, ' ', 1)[0], '.')[:len(minver)]))
-			version = join(map(str, ver), '.')
-			minversion = join(map(str, minver), '.')
+		except AttributeError:
+			ver = (1,)
 		if ver < minver:
-			print 'This Release of Webware requires Python %s.' % minversion
-			print 'Your currently used version is Python %s.' % version
-			print 'Please go to http://www.python.org for the latest version of Python.'
-			if ver[0] <= 1: # require at least Python 2.0 for installation
-				return 0 # otherwise stop here
-			response = raw_input('\nYou may continue to install, '
+			print ('This Release of Webware requires Python %s.\n'
+				'Your currently used version is Python %s.\n'
+				'You can download a newer version at: http://www.python.org\n'
+				% ('.'.join(map(str, minver)), '.'.join(map(str, ver))))
+			response = raw_input('You may continue to install, '
 				'but Webware may not perform as expected.\n'
 				'Do you wish to continue with the installation?  [yes/no] ')
 			return response[:1].upper() == "Y"
@@ -140,11 +135,11 @@ class Installer:
 		try:
 			import threading
 		except ImportError:
-			print '!!! Webware requires that Python be compiled with threading support.'
-			print 'This version of Python does not appear to support threading.'
-			response = raw_input('\nYou may continue, '
+			print ('Webware requires that Python be compiled with threading support.\n'
+				'This version of Python does not appear to support threading.\n')
+			response = raw_input('You may continue, '
 				'but you will have to run the AppServer with a Python\n'
-				'interpreter that has threading enabled.'
+				'interpreter that has threading enabled.\n'
 				'Do you wish to continue with the installation? [yes/no] ')
 			return response[:1].upper() == "Y"
 		return 1
@@ -172,7 +167,7 @@ class Installer:
 				print 'no ',
 			if column < 2 and not self._verbose:
 				print '   ',
-				column = column + 1
+				column += 1
 			else:
 				print
 				column = 0
@@ -309,7 +304,7 @@ class Installer:
 				print "ok",
 				if column < 2:
 					print '   ',
-					column = column + 1
+					column += 1
 				else:
 					print
 					column = 0
