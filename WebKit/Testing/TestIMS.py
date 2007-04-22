@@ -29,7 +29,7 @@ class TestIMS(SidebarPage):
 		servletPath = self.request().servletPath()
 		self.write('<h2>Test If-Modified-Since support in Webware</h2>')
 		# pick a static file which is served up by Webwares UnknownFileHandler
-		self.runTest('%s/PSPExamples/psplogo.png' % servletPath)
+		self.runTest('%s/PSP/Examples/psplogo.png' % servletPath)
 
 	def runTest(self, path):
 		import time

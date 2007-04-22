@@ -311,7 +311,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		# a "dontload" file) then add them to the plugs in list.
 		for plugInDir in self.setting('PlugInDirs'):
 			plugInDir = self.serverSidePath(plugInDir)
-			for filename in os.listdir(plugInDir):
+			fileNames = os.listdir(plugInDir)
+			fileNames.sort()
+			for filename in fileNames:
 				filename = os.path.normpath(os.path.join(plugInDir, filename))
 				if (os.path.isdir(filename)
 					and os.path.exists(os.path.join(filename, '__init__.py'))

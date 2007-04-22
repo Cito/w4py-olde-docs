@@ -145,21 +145,21 @@ class Installer:
 
 	def detectComponents(self):
 		print 'Scanning for components...'
-		dirnames = filter(lambda dir: not dir.startswith('.')
+		dirNames = filter(lambda dir: not dir.startswith('.')
 				and os.path.isdir(dir), os.listdir(os.curdir))
-		dirnames.sort()
-		self._maxCompLen = max(map(len, dirnames))
+		dirNames.sort()
+		self._maxCompLen = max(map(len, dirNames))
 		oldPyVersion = 0
 		column = 0
-		for dirname in dirnames:
-			propName = os.path.join(dirname, 'Properties.py')
+		for dirName in dirNames:
+			propName = dirName + '/Properties.py'
 			try:
-				print dirname.ljust(self._maxCompLen, '.'),
+				print dirName.ljust(self._maxCompLen, '.'),
 			except TypeError:
-				print dirname.ljust(self._maxCompLen),
+				print dirName.ljust(self._maxCompLen),
 			if os.path.exists(propName):
 				comp = PropertiesObject(propName)
-				comp['dirname'] = dirname
+				comp['dirname'] = dirName
 				for key in self._props.keys():
 					if not comp.has_key(key):
 						comp[key] = self._props[key]
@@ -204,7 +204,8 @@ class Installer:
 				print 'A password was specified on the command-line.'
 			password = None
 		print 'You can check the password after installation at:'
-		print 'WebKit/Configs/Application.config'
+		appConfig = 'WebKit/Configs/Application.config'
+		print os.path.normpath(appConfig)
 		if not password:
 			if defpass is None:
 				from string import letters, digits
@@ -213,7 +214,7 @@ class Installer:
 			else:
 				password = defpass
 		try: # read config file
-			data = open('WebKit/Configs/Application.config').read()
+			data = open(appConfig).read()
 		except IOError:
 			print 'Error reading Application.config file.'
 			print 'Password not replaced, make sure to edit it by hand.'
@@ -237,7 +238,7 @@ class Installer:
 				print "'AdminPassword' not found in config file."
 			return
 		try: # write back config file
-			open('WebKit/Configs/Application.config', 'w').write(data)
+			open(appConfig, 'w').write(data)
 		except IOError:
 			print 'Error writing Application.config (probably no permission).'
 			print 'Password not replaced, make sure to edit it by hand.'
@@ -292,7 +293,7 @@ class Installer:
 					print dir.ljust(self._maxCompLen, '.'),
 				except TypeError:
 					print dir.ljust(self._maxCompLen),
-			sourceDir = '%s/Docs/Source' % dir
+			sourceDir = dir + '/Docs/Source'
 			self.makeDir(sourceDir)
 			filesDir = sourceDir + '/Files'
 			self.makeDir(filesDir)
@@ -300,7 +301,7 @@ class Installer:
 			self.makeDir(summariesDir)
 			docsDir = sourceDir + '/Docs'
 			self.makeDir(docsDir)
-			for pyFilename in glob('%s/*.py' % dir):
+			for pyFilename in glob(dir + '/*.py'):
 				self.createHighlightedSource(pyFilename, filesDir)
 				self.createPySummary(pyFilename, summariesDir)
 				self.createPyDocs(pyFilename, docsDir)
@@ -461,8 +462,7 @@ class Installer:
 			comp['htDocs'] = ht
 			# Set up release notes
 			ht = []
-			files = glob(os.path.join(comp['dirname'],
-				'Docs', 'RelNotes-*.html'))
+			files = glob(comp['dirname'] + '/Docs/RelNotes-*.html')
 			if files:
 				releaseNotes = []
 				for filename in files:
@@ -488,7 +488,7 @@ class Installer:
 			ht = '\n'.join(ht)
 			comp['htReleaseNotes'] = ht
 			# Write file
-			filename = os.path.join(comp['dirname'], 'Docs', 'index.html')
+			filename = comp['dirname'] + '/Docs/index.html'
 			ht = self.processPyTemplate(index, comp)
 			open(filename, 'w').write(ht)
 		if not keep:
@@ -498,38 +498,19 @@ class Installer:
 	def createDocContexts(self):
 		"""Create a WebKit context for every Docs directory."""
 		print 'Making all Docs directories browsable via WebKit...'
+		# Place an __init__.py file in every Docs directory
 		docsDirs = ['Docs']
 		for comp in self._comps:
-			docsDirs.append(comp['dirname'] + '/Docs')
-		config = []
+			if comp.get('docs', None):
+				docsDir = comp['dirname'] + '/Docs'
+				if os.path.isdir(docsDir):
+					docsDirs.append(docsDir)
 		for docsDir in docsDirs:
-			if os.path.exists(docsDir):
-				open(docsDir + '/__init__.py', 'w').write(
-					'# Allows this directory to be used as a WebKit context.\n')
-			config.append("Contexts['%s'] = WebwarePath + '/%s'" % ((docsDir,)*2))
-		config = '\n'.join(config)
-		try: # read config file
-			data = open('WebKit/Configs/Application.config').read()
-		except IOError:
-			print 'Error reading Application.config file.'
-			print 'Docs cannot be made browsable via WebKit.'
-			data = ''
-		if data.find(config) < 0:
-			insertMark = "# Installer will insert Contexts['Docs'] here."
-			insertPos = data.find(insertMark)
-			if insertPos < 0:
-				print 'Configuration has already been changed.'
-				print 'Docs directories will not be added as context.'
-			else:
-				data = data[:insertPos] + config + data[insertPos+len(insertMark):]
-			try: # write back config file
-				open('WebKit/Configs/Application.config', 'w').write(data)
-			except IOError:
-				print 'Error writing Application.config (probably no permission).'
-				print 'Docs cannot be made browsable via WebKit.'
-		else:
-			print 'Docs directories are already registered with WebKit.'
-		# Copy favicon to the default context:
+			initFile = docsDir + '/__init__.py'
+			if not os.path.exists(initFile) or 1:
+				open(initFile, 'w').write(
+					'# this can be browsed as a Webware context\n')
+		# Copy favicon to the default context
 		open('WebKit/Examples/favicon.ico', 'wb').write(
 			open('Docs/favicon.ico', 'rb').read())
 		print

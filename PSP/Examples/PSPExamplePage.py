@@ -22,10 +22,10 @@ class PSPExamplePage(ExamplePage):
 
 	def writeOtherMenu(self):
 		self.menuHeading('Other')
-		viewPath = self.request().uriWebKitRoot() + "PSPExamples/View"
+		viewPath = self.request().uriWebKitRoot() + "PSP/Examples/View"
 		self.menuItem(
 			'View source of<br/>%s' % self.title(),
-			self.request().uriWebKitRoot() + 'PSPExamples/View?filename=%s' \
+			self.request().uriWebKitRoot() + 'PSP/Examples/View?filename=%s' \
 				% os.path.basename(self.request().serverSidePath()))
 		if self.application().hasContext('Documentation'):
 			filename = 'Documentation/WebKit.html'

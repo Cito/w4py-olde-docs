@@ -20,9 +20,9 @@ class PlugIn(Object):
 
 	Instances of this class represent plug-ins which are ultimately Python
 	packages (see the Python Tutorial, 6.4: "Packages" at
-	http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000).
+	http://docs.python.org/tut/node8.html#SECTION008400000000000000000).
 
-	A plug-in must also be a Webware component which at means that it will have
+	A plug-in must also be a Webware component which means that it will have
 	a Properties.py file advertising its name, version, requirements, etc.
 	You can ask a plug-in for its properties().
 
@@ -67,7 +67,8 @@ class PlugIn(Object):
 		self._path = path
 		self._dir, self._name = os.path.split(path)
 		self._ver = '(unknown)'
-		self._examplePages = None
+		self._docs = self._docContext = None
+		self._examplePages = self._examplePagesContext = None
 
 	def load(self):
 		"""Loads the plug-in into memory, but does not yet install it.
@@ -107,32 +108,57 @@ class PlugIn(Object):
 		if not os.path.exists(cacheDir):
 			os.mkdir(cacheDir)
 
+		self.setUpDocContext()
 		self.setUpExamplePages()
 
+	def setUpDocContext(self):
+		"""Add a context for the documentation."""
+		app = self._appServer.application()
+		if app.hasContext('Docs'):
+			self._docs = self._properties.get('docs', None) or None
+			if self.hasDocs():
+				docsPath = self.serverSidePath('Docs')
+				assert os.path.exists(docsPath), \
+					'Plug-in %s says it has documentation, ' \
+					'but there is no Docs/ subdir.' % self._name
+				ctxName = self._name + '/Docs'
+				if not app.hasContext(ctxName):
+					app.addContext(ctxName, docsPath)
+				self._docContext = ctxName
+
 	def setUpExamplePages(self):
-		# Add a context for the examples
+		"""Add a context for the examples."""
 		app = self._appServer.application()
 		if app.hasContext('Examples'):
 			config = self._properties.get('WebKitConfig', {})
-			self._examplePages = config.get('examplePages', None)
-			if self._examplePages is not None:
+			self._examplePages = config.get('examplePages', None) or None
+			if self.hasExamplePages():
 				examplesPath = self.serverSidePath('Examples')
 				assert os.path.exists(examplesPath), \
 					'Plug-in %s says it has example pages, ' \
 					'but there is no Examples/ subdir.' % self._name
-				ctxName = self._name + 'Examples'
+				ctxName = self._name + '/Examples'
 				if not app.hasContext(ctxName):
 					app.addContext(ctxName, examplesPath)
 				self._examplePagesContext = ctxName
+
+	def docs(self):
+		return self._docs
+
+	def hasDocs(self):
+		return self._docs is not None
+
+	def docsContext(self):
+		return self._docsContext
+
+	def examplePages(self):
+		return self._examplePages
 
 	def hasExamplePages(self):
 		return self._examplePages is not None
 
 	def examplePagesContext(self):
 		return self._examplePagesContext
-
-	def examplePages(self):
-		return self._examplePages
 
 	def install(self):
 		"""Install plug-in by invoking its required InstallInWebKit function."""

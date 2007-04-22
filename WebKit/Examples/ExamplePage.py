@@ -42,7 +42,7 @@ class ExamplePage(SidebarPage):
 	def isDebugging(self):
 		return 0
 
-	def examplePages(self):
+	def examplePages(self, plugInName=None):
 		"""Get a list of all example pages.
 
 		Returns a list of all the example pages for our particular plug-in.
@@ -50,15 +50,12 @@ class ExamplePage(SidebarPage):
 		give easy access to the other example pages.
 
 		"""
-		ctxName = self.request().contextName()
-		if ctxName == 'Examples':
+		if plugInName is None:
 			# Special case: We're in WebKit examples
 			from WebKit.Properties import WebKitConfig
 			return WebKitConfig['examplePages']
 		else:
 			# Any other plug-in:
-			assert ctxName[-8:] == 'Examples'
-			plugInName = ctxName[:-8]
 			plugIn = self.application().server().plugIn(plugInName)
 			return plugIn.examplePages()
 
@@ -70,23 +67,24 @@ class ExamplePage(SidebarPage):
 	def writeExamplesMenu(self):
 		servletPath = self.request().servletPath()
 		self.menuHeading('Examples')
-
+		ctx = self.request().contextName().split('/', 2)
+		plugIns = self.application().server().plugIns()
+		plugInName = len(ctx) > 1 and ctx[1] == 'Examples' and ctx[0]
 		# WebKit
 		self.menuItem('WebKit', '%s/Examples/' % servletPath)
-		if self.request().contextName() == 'Examples':
+		if not plugInName:
 			self.writeExamplePagesItems()
-
-		# Plug-ins
-		for plugIn in self.application().server().plugIns():
+		# Other plug-ins
+		for plugIn in plugIns:
 			if plugIn.hasExamplePages():
-				title = plugIn.name()
+				name = plugIn.name()
 				link = '%s/%s/' % (servletPath, plugIn.examplePagesContext())
-				self.menuItem(title, link)
-				if plugIn.name() == self.request().contextName()[:-8]:
-					self.writeExamplePagesItems()
+				self.menuItem(name, link)
+				if name == plugInName:
+					self.writeExamplePagesItems(name)
 
-	def writeExamplePagesItems(self):
-		for page in self.examplePages():
+	def writeExamplePagesItems(self, pluginName=None):
+		for page in self.examplePages(pluginName):
 			self.menuItem(page, page, indentLevel=2)
 
 	def writeOtherMenu(self):

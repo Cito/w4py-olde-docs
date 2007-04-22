@@ -23,7 +23,7 @@ class Welcome(ExamplePage):
 		<p>The <a href="%(path)s/Docs/">Docs</a> contexts allow you to browse
 		the documentation of <a href="%(path)s/WebKit/Docs/">WebKit</a>
 		and <a href="%(path)s/Docs/ComponentIndex.html">all other components</a>
-		of <a href="%(path)s/Docs/">Webware for Python</a>.</p>''' % locals())
+		of Webware for Python.</p>''' % locals())
 		from os.path import join
 		wr('<p>The location of the documentation on the server:</p>')
 		wr('<ul>')
