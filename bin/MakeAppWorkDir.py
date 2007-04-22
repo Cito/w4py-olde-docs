@@ -203,7 +203,9 @@ class MakeAppWorkDir:
 			import grp
 			group = grp.getgrgid(gid)[0]
 		executable = sys.executable
-		for name in launcherScripts:
+		scriptNames = launcherScripts.keys()
+		scriptNames.sort()
+		for name in scriptNames:
 			if name.endswith('Service.py') and self._osType != 'nt':
 				continue
 			newname = os.path.join(workDir, name)
@@ -252,9 +254,8 @@ class MakeAppWorkDir:
 			self._contextDir or self._contextName)
 		if contextDir.startswith(self._workDir):
 			configDir = contextDir[len(self._workDir):]
-			configDir = configDir.lstrip(os.sep)
-			if os.altsep:
-				configDir =  configDir.lstrip(os.altsep)
+			while configDir[:1] in (os.sep, os.altsep):
+				configDir = configDir[1:]
 		else:
 			configDir = contextDir
 		if os.path.exists(contextDir):
@@ -262,7 +263,9 @@ class MakeAppWorkDir:
 		else:
 			self.msg("\t%s" % contextDir)
 			os.makedirs(contextDir)
-		for name in exampleContext:
+		contextNames = exampleContext.keys()
+		contextNames.sort()
+		for name in contextNames:
 			filename = os.path.join(contextDir, name)
 			if os.path.exists(filename):
 				self.msg("\t%s already exists." % filename)
@@ -552,7 +555,7 @@ def main(args=None):
 				print 'Error: Group %r does not exist.' % gid
 				sys.exit(2)
 			except ImportError:
-				print 'Error: Group names are not supported.'
+				print 'Error: Group names are supported under Unix only.'
 				sys.exit(2)
 			gid = entry[2]
 	# Figure out the user id:
@@ -568,7 +571,7 @@ def main(args=None):
 				print 'Error: User %r does not exist.' % uid
 				sys.exit(2)
 			except ImportError:
-				print 'Error: User names are not supported.'
+				print 'Error: User names are supported under Unix only.'
 				sys.exit(2)
 			if not gid:
 				gid = entry[3]
