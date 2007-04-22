@@ -1,9 +1,11 @@
 """
 FUTURE
 
-* Parameterize the database and everything else. Currently hard coded to pgdb template1 database.
+* Parameterize the database and everything else.
+  Currently hard coded to pgdb template1 database.
 
-* We don't really test performance here. e.g., we don't do benchmarks to see if DBPool actually helps or not.
+* We don't really test performance here.
+  E.g., we don't do benchmarks to see if DBPool actually helps or not.
 
 """
 

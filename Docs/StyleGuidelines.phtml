@@ -80,7 +80,7 @@
 
 <p>Some styles prefix the retrieval method with <code>get</code>, but Webware does not for the sake of brevity and because there are methods for which it is not always clear if a <code>get</code> prefix would make sense.</p>
 
-<p>Methods that return a Boolean are prefixed with <code>is</code> to make their semantics more obvious. Examples include <code>app.isRunning()</code>, <code>user.isActive()</code> and <code>appServer.isPersistent()</code>.</p>
+<p>Methods that return a Boolean are prefixed with <code>is</code> or <code>has</code> to make their semantics more obvious. Examples include <code>request.isSecure()</code>, <code>user.isActive()</code> and <code>response.hasHeader()</code>.</p>
 
 
 <a name="SynNaming_MethodCategories"></a><h3>Method Categories</h3>
@@ -149,9 +149,9 @@ numRequests
 'why': 'For consistency and to match the capitalization convention used for classes.',
 'examples': 'Servlet.py WebKit.cgi HTTPServlet.py',
 'negatives': 'myClass.py session.py',
-'exceptions': 'Files located in Webware/bin/ that are intended solely for command line use are left in all lower case similar to other command line programs such as grep and find.'})%>
+'exceptions': 'Files located in <code>Webware/bin/</code> that are intended solely for command line use are left in all lower case similar to other command line programs such as grep and find.'})%>
 <%= convention({'what': 'Files do not contain <code>\\r</code> (on POSIX systems).',
-'why': "To avoid problems with POSIX tools that don't like <code>\\r</code> and confusion in the SVN repository which is hosted on Unix.<br>This problem typically happens when a Windows file is FTPed in binary mode to a Unix machine from which it is then checked in.<br>Note that the SVN client on Windows will properly translate back and forth between <code>\\r\\n</code> and <code>\\n</code> upon check out and check in, since we have set the <code>svn:eol-style</code> property to <code> native</code>."})%>
+'why': "To avoid problems with POSIX tools that don't like <code>\\r</code> and confusion in the SVN repository which is hosted on Unix.<br>This problem typically happens when a Windows file is FTPed in binary mode to a Unix machine from which it is then checked in. Note that the SVN client on Windows properly translates back and forth between <code>\\r\\n</code> and <code>\\n</code> upon check out and check in, since we have set the <code>svn:eol-style</code> property to <code> native</code>."})%>
 <%= convention({'what': 'Spaces are not used for indentation.',
 'why': "The real problem is mixing tabs and spaces for indentation as people have their tabs set to different widths (commonly 4 or 8). Tabs have been chosen because they're convenient, efficient and fast to cursor through."}) %>
 <%= convention({'what': 'Tabs are not used past initial indentation.',
@@ -163,7 +163,7 @@ numRequests
 <%= convention({'what': 'Method names start with a lower case letter.',
 'why': 'For consistency and ease of typing. This convention is also used in almost every object-oriented language.',
 'examples': 'respond() isSecure() setTimeout() htForDict()',
-'negatives': 'Respond() IsSecure()'}) %>
+'negatives': 'Respond() IsSecure() SetTimeout() HtForDict()'}) %>
 <%= convention({'what': 'Method names do not start with <b>get</b>.',
 'why': 'See <a href="#SynNaming_MethodsAndAttrs">Methods and Attributes</a> above.',
 'examples': 'status() numRequests()',
@@ -193,7 +193,7 @@ def transaction(self):
 def hasValue(self, name):
 	return self._fields.has_key(name) or self._cookies.has_key(name)''',
 'exceptions': 'No category comment is added when the class implementation is <code>pass</code>.'}) %>
-<%= convention({'what': 'Use docstrings and the <a href="http://www.python.org/peps/pep-0257.html">PEP 257</a> conventions.',
+<%= convention({'what': 'Use docstrings and the <a href="http://www.python.org/dev/peps/pep-0257.html">PEP 257</a> conventions.',
 'why': 'This allows for creating appropriate code documentation automatically. Please note that in the past, this has not been heeded very well. But as the project matures and grows, the docstrings should be improved.',
 'examples': '''def function(a, b):
 	"""Do X and return a list."""''',
@@ -203,6 +203,10 @@ def hasValue(self, name):
 'why': 'These things are easier to track if they are dated and marked in a consistent way.',
 'examples': '# @@ 2000-05-03 ce: This is bogus. Disregard for now.',
 'negatives': '# I think this is bogus !!'}) %>
+<%= convention({'what': 'Limit all lines to a maximum of 100 characters if possible.',
+'why': 'This has been settled as a compromise between the people wanting to utilize their huge monitors with line sizes of 130 characters and those wanting to follow the stricter Python style guide recommendation of only 80 characters.'}) %>
+<%= convention({'what': 'If not specified otherwise, follow the <a href="http://www.python.org/dev/peps/pep-008.html">PEP 008</a> conventions.',
+'why': "For historical and opinionated reasons of Webware's BDFL, Webware follows its own style guidelines which overrule the standard guidelines for Python. :-)"}) %>
 
 <a name="Structure"></a><h2>Structure and Patterns</h2>
 
@@ -254,7 +258,7 @@ class Foo(SuperFoo):
 
 <a name="Structure_NamedObjs"></a><h3>Accessing Named Objects</h3>
 
-<p>Several classes in Webware store dictionaries of objects keyed by their name. HTTPRequest is one such class which stores a dictionary of form fields. The convention for providing an interface to this information is as follows:</p>
+<p>Several classes in Webware store dictionaries of objects keyed by their name. <code>HTTPRequest</code> is one such class which stores a dictionary of form fields. The convention for providing an interface to this information is as follows:</p>
 
 <pre class="py">
 ## Fields ##
@@ -313,6 +317,10 @@ req['city']
 
 <a name="MiscNotes"></a><h2>Miscellaneous Notes</h2>
 
+<a name="Misc_Limitations"></a><h3>Limitations</h3>
+
+<p>Some features that have been introduced in newer Python versions, like properties or decorators, could be used to create more readable code. However, since we want Webware to be backward compatible, these newer features should currently not be used. In future versions of Webware we may certainly lift these restrictions and adapt the style guidelines accordingly.</p>
+
 
 <a name="Misc_Permissions"></a><h3>Permissions</h3>
 
@@ -321,7 +329,7 @@ req['city']
 
 <a name="Misc_SendingUpdates"></a><h3>Sending Updates</h3>
 
-<p>Those who actually develop Webware should send messages to <a href="mailto:webware-discuss@lists.sourceforge.net">webware-discuss@lists.sourceforge.net</a> when they update the repository.</p>
+<p>Those who actually develop Webware should send messages to <a href="mailto:webware-devel@lists.sourceforge.net">webware-devel@lists.sourceforge.net</a> when they update the repository.</p>
 
 <p>The subject should contain the word "update" so that release notes can be easily compiled.</p>
 
@@ -337,9 +345,9 @@ req['city']
 
 <a name="Misc_checksrc"></a><h3>checksrc.py</h3>
 
-<p><code>checksrc.py</code> is a program located in Webware/bin used to check the syntax and naming conventions in the actual Webware source code. You can invoke the program with <code>-h</code> or <code>--help</code> to get information on how to use it and there is a good doc string at the top of file if you're interested in more details.</p>
+<p><code>checksrc.py</code> is a program located in <code>Webware/bin</code> used to check the syntax and naming conventions in the actual Webware source code. You can invoke the program with <code>-h</code> or <code>--help</code> to get information on how to use it and there is a good doc string at the top of file if you're interested in more details. <code>checksrc.py</code> should be run periodically and especially before each release of Webware.</p>
 
-<p><code>checksrc.py</code> should be run periodically and especially before each release of Webware.</p>
+<p>You can also use <code>pylint</code> (available from <a href="http://www.logilab.org">Logilab.org</a>) for this purpose, which can be easily integrated in most IDEs. A suitable rcfile <code>.pylintrc</code> has been placed in the Webware root directory.</p>
 
 
 <a name="Misc_Future"></a><h3>Future Work</h3>
@@ -347,7 +355,8 @@ req['city']
 <p>A list of future work for this document:</p>
 
 <ul>
-	<li> Document the conventions for Webware components.</li>
+	<li>Document the conventions for Webware components.</li>
+    <li>Adapt the document regarding modern Python features.</li>
 </ul>
 
 <% footer() %>

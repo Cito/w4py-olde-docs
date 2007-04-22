@@ -130,6 +130,8 @@ class CheckSrc:
 
 	## Init ##
 
+	_maxLineSize = 100
+
 	_errors = {
 		'UncapFN':
 			'Uncapitalized filename.',
@@ -138,6 +140,8 @@ class CheckSrc:
 		'StrayTab':
 			'Stray tab after other characters.'
 			' No tabs allowed other than initial indentation.',
+		'LineSize':
+			'Limit line to a maximum of %d characters.' % _maxLineSize,
 		'SpaceIndent':
 			'Found space as part of indentation. Use only tabs.',
 		'NoBlankLines':
@@ -482,6 +486,7 @@ Error codes and their messages:
 	def checkFileLine(self, line):
 		line = line.rstrip()
 		if line:
+			self.checkLineSize(line)
 			line = self.clearStrings(line)
 			if line:
 				self.checkTabsAndSpaces(line)
@@ -505,6 +510,10 @@ Error codes and their messages:
 		else:
 			self._blankLines += 1
 		self._lineNum += 1
+
+	def checkLineSize(self, line):
+		if len(line) > self._maxLineSize:
+			self.error('LineSize')
 
 	def clearStrings(self, line):
 		"""Return line with all quoted strings cleared."""
@@ -606,8 +615,9 @@ Error codes and their messages:
 				if len(name) > 3 and name[:3].lower() == 'get':
 					self.error('GetMeth', locals())
 
-	_exprKeywords = dict([(k, None) for k in
-		'if while for with return yield'.split()])
+	_exprKeywords = {}
+	for k in 'if while for with return yield'.split():
+		_exprKeywords[k] = None
 
 	def checkExtraParens(self, parts, line):
 		if (len(parts) > 1 and self._exprKeywords.has_key(parts[0])
@@ -617,8 +627,9 @@ Error codes and their messages:
 			keyword = parts[0]
 			self.error('ExtraParens', locals())
 
-	_blockKeywords = dict([(k, None) for k in
-		'if elif else: try: except: while for with'.split()])
+	_blockKeywords = {}
+	for k in 'if elif else: try: except: while for with'.split():
+		_blockKeywords[k] = None
 
 	def checkCompStmts(self, parts, line):
 		if (len(parts) > 1 and self._blockKeywords.has_key(parts[0])
@@ -632,6 +643,10 @@ Error codes and their messages:
 
 	# Any kind of access of self
 	_accessRE = re.compile(r'self\.(\w+)\s*(\(?)')
+	# Irregular but allowed attribute names
+	_allowedAttrNames = {}
+	for k in 'assert_ has_key'.split():
+		_allowedAttrNames[k] = None
 
 	def checkAttrNames(self, line):
 		for match in self._accessRE.findall(line):
@@ -655,7 +670,8 @@ Error codes and their messages:
 					inner = attribute[1:]
 				else:
 					inner = attribute
-			if inner.find('_') >= 0 and inner != 'has_key':
+			if inner.find('_') >= 0 \
+					and not self._allowedAttrNames.has_key(inner):
 				self.error('ExtraUnder', locals())
 
 	# Assignment operators
@@ -682,8 +698,9 @@ Error codes and their messages:
 				self.error('OpNoSpace', {'op': match[1] + '='})
 
 	# Augmented assignment operators
-	_augmOp = dict([(k, None) for k in
-		'+ - * / % ** >> << & ^ |'.split()])
+	_augmOp = {}
+	for k in '+ - * / % ** >> << & ^ |'.split():
+		_augmOp[k] = None
 
 	def checkAugmStmts(self, parts):
 		if len(parts) > 4 and parts[1] == '=' \
