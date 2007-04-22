@@ -7,10 +7,9 @@
 # AppServer.config file; you'll have to create a database with a table
 # called Customers that has a CustomerName field; and you'll
 # have to create a System DSN called MyDataSource that points to
-# that database.  Then, install this file in the Examples
+# that database.  Then, install this file in the WebKit/Examples
 # directory and try it out.  It ought to work with any database
-# accessible through ODBC and/or ADO, but I've only tested it with
-# SQL Server.
+# accessible through ODBC and/or ADO.
 #
 # The recordset function below should go into a base class so it
 # can be shared among many servlets.
@@ -41,6 +40,10 @@ class ADOSample(ExamplePage):
 	def writeContent(self):
 		# Grab some data from the database and display it
 		rs = self.recordset('SELECT CustomerName FROM Customers ORDER BY CustomerName')
+		self.writeln('<h1>ADO Sample</h1>')
+		self.writeln('<h3>Your Customers are:</h3>')
+		self.writeln('<ul>')
 		while not rs.EOF:
-			self.writeln('<p>%s' % rs.Fields('CustomerName').Value)
+			self.writeln('<li>%s</li>' % rs.Fields('CustomerName').Value)
 			rs.MoveNext()
+		self.writeln('</ul>')
