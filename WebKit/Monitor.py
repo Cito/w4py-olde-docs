@@ -268,15 +268,14 @@ stop:  Stops the currently running Monitor process and the AppServer
 
 Optional arguments:
 
-"AppServer": The AppServer class to use
-             (AsyncThreadedAppServer or ThreadedAppServer)
+"AppServer": The AppServer class to use (currently only ThreadedAppServer)
 daemon:      If "daemon" is specified, the Monitor will run
              as a background process.
 
 """
 
 arguments = ["start", "stop"]
-servernames = ["AsyncThreadedAppServer", "ThreadedAppServer"]
+servernames = ["ThreadedAppServer"]
 optionalargs = ["daemon"]
 
 if __name__ == '__main__':
