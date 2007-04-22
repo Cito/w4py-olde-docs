@@ -103,12 +103,11 @@ class Installer:
 
 	def printHello(self):
 		from time import time, localtime, asctime
-		from string import replace
 		print '%(name)s %(versionString)s' % self._props
 		print 'Installer'
 		print
 		self.printKeyValue('Cur Date', asctime(localtime(time())))
-		self.printKeyValue('Python', replace(sys.version, ') [', ')\n['))
+		self.printKeyValue('Python', sys.version.replace(') [', ')\n['))
 		self.printKeyValue('Op Sys', os.name)
 		self.printKeyValue('Platform', sys.platform)
 		self.printKeyValue('Cur Dir', os.getcwd())
@@ -148,21 +147,28 @@ class Installer:
 		print 'Scanning for components...'
 		dirnames = filter(lambda dir: not dir.startswith('.')
 				and os.path.isdir(dir), os.listdir(os.curdir))
-		maxLen = max(map(len, dirnames))
+		dirnames.sort()
+		self._maxCompLen = max(map(len, dirnames))
+		oldPyVersion = 0
 		column = 0
 		for dirname in dirnames:
 			propName = os.path.join(dirname, 'Properties.py')
 			try:
-				print dirname.ljust(maxLen, '.'),
+				print dirname.ljust(self._maxCompLen, '.'),
 			except TypeError:
-				print dirname.ljust(maxLen),
+				print dirname.ljust(self._maxCompLen),
 			if os.path.exists(propName):
 				comp = PropertiesObject(propName)
 				comp['dirname'] = dirname
-				if not comp.has_key('releaseDate'):
-					comp['releaseDate'] = self._props['releaseDate']
-				self._comps.append(comp)
-				print 'yes',
+				for key in self._props.keys():
+					if not comp.has_key(key):
+						comp[key] = self._props[key]
+				if sys.version_info[:3] < comp['requiredPyVersion']:
+					oldPyVersion += 1
+					print 'no*',
+				else:
+					self._comps.append(comp)
+					print 'yes',
 			else:
 				print 'no ',
 			if column < 2 and not self._verbose:
@@ -173,6 +179,8 @@ class Installer:
 				column = 0
 		if column:
 			print
+		if oldPyVersion:
+			print "* some components require a newer Python version"
 		self._comps.sort(lambda a, b: cmp(a['name'], b['name']))
 		print
 
@@ -187,8 +195,8 @@ class Installer:
 				print 'a password will be automatically generated.'
 			else:
 				print 'the password specified on the command-line will be used.'
-			import getpass
-			password = getpass.getpass()
+			from getpass import getpass
+			password = getpass()
 		else:
 			if defpass is None:
 				print 'A password will be automatically generated.'
@@ -274,7 +282,6 @@ class Installer:
 	def createBrowsableSource(self):
 		"""Create HTML docs for class hierarchies, summaries, sources etc."""
 		print 'Creating html source, summaries and doc files...'
-		maxLen = max(map(lambda comp: len(comp['dirname']), self._comps))
 		column = 0
 		for comp in self._comps:
 			dir = comp['dirname']
@@ -282,9 +289,9 @@ class Installer:
 				print dir, '...'
 			else:
 				try:
-					print dir.ljust(maxLen, '.'),
+					print dir.ljust(self._maxCompLen, '.'),
 				except TypeError:
-					print dir.ljust(maxLen),
+					print dir.ljust(self._maxCompLen),
 			sourceDir = '%s/Docs/Source' % dir
 			self.makeDir(sourceDir)
 			filesDir = sourceDir + '/Files'
@@ -303,7 +310,7 @@ class Installer:
 			if not self._verbose:
 				print "ok",
 				if column < 2:
-					print '   ',
+					print '    ',
 					column += 1
 				else:
 					print
@@ -575,16 +582,19 @@ class Installer:
 			open(t, 'wb').write(open(s, 'rb').read())
 			print
 
-	def compileModules(self):
-		import compileall
+	def compileModules(self, force=0):
+		"""Compile modules in all installed componentes."""
+		from compileall import compile_dir
 		print 'Byte compiling all modules...'
-		try:
-			compileall.compile_dir(os.curdir, 10, None, 1, None, 1)
-		except TypeError: # workaround for Python < 2.3
-			stdout = sys.stdout
-			sys.stdout = StringIO()
-			compileall.compile_dir(os.curdir, 10, None, 1)
-			sys.stdout = stdout
+		for comp in self._comps:
+			dir = comp['dirname']
+			try:
+				compile_dir(dir, force=force, quiet=1)
+			except TypeError: # workaround for Python < 2.3
+				stdout = sys.stdout
+				sys.stdout = StringIO()
+				compile_dir(dir, force=force)
+				sys.stdout = stdout
 		print
 
 	def fixPermissions(self):
