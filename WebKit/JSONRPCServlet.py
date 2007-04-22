@@ -23,23 +23,26 @@ class JSONRPCServlet(HTTPContent):
 	are able to be called by an JSON-RPC-enabled web page. This is very similar
 	in functionality to Webware's actions.
 
+	Some basic security measures against JavaScript hijacking are taken	by
+	default which can be deactivated if you're not dealing with sensitive data.
+	You can further increase security by adding shared secret mechanisms.
+
 	"""
 
 	# Class level variables that can be overridden by servlet instances:
 	_debug = 0 # set to True if you want to see debugging output
+	# The following variables control security precautions concerning
+	# a vulnerability known as "JavaScript hijacking". See also:
+	# http://www.fortifysoftware.com/servlet/downloads/public/JavaScript_Hijacking.pdf
+	# http://ajaxian.com/archives/protecting-a-javascript-service
 	_allowGet = 0 # set to True if you want to allow GET requests
+	_allowEval = 0 # set to True to allow direct evaluation of the response
 
 	def __init__(self):
 		HTTPContent.__init__(self)
 
 	def respondToGet(self, transaction):
-		"""Deny GET requests with JSON by returning an error.
-
-		This forces clients to use POST requests only, since GET requests
-		with JSON are vulnerable to "JavaScript hijacking".
-
-		"""
-		if not self._allowGet:
+		if self._allowGet:
 			self.error("GET method not allowed")
 		HTTPContent.respondToGet(self, transaction)
 
@@ -54,6 +57,16 @@ class JSONRPCServlet(HTTPContent):
 	def json_methods(self):
 		return []
 
+	def json_error(self, msg):
+		self.write(simplejson.dumps({'id': self._id, 'code': -1, 'error': msg}))
+
+	def json_result(self, data):
+		data = simplejson.dumps({'id': self._id, 'result': data})
+		if not self._allowEval:
+			data = 'throw new Error' \
+				'("Direct evaluation not allowed");\n/*%s*/' % (data,)
+		self.write(data)
+
 	def json_call(self):
 		"""Execute method with arguments on the server side.
 
@@ -62,32 +75,26 @@ class JSONRPCServlet(HTTPContent):
 		"""
 		request = self.request()
 		data = simplejson.loads(request.rawInput().read())
-		id, call, params = data["id"], data["method"], data["params"]
-		self._id = id
+		self._id, call, params = data["id"], data["method"], data["params"]
 		if call == 'system.listMethods':
-			result = self.json_methods()
-			self.write(simplejson.dumps({'id': id, 'result': result}))
+			self.json_result(self.json_methods())
 		elif call in self.json_methods():
 			try:
 				method = getattr(self, call)
 			except AttributeError:
-				self.error('%s, although an approved method, '
+				self.json_error('%s, although an approved method, '
 					'was not found' % call)
 			else:
 				try:
 					if self._debug:
 						self.log("json call %s(%s)" % (call, params))
-					result = method(*params)
-					self.write(simplejson.dumps({'id': id, 'result': result}))
+					self.json_result(method(*params))
 				except Exception:
 					err = StringIO()
 					traceback.print_exc(file=err)
 					e = err.getvalue()
-					self.error('%s was called, '
+					self.json_error('%s was called, '
 						'but encountered an error: %s' % (call, e))
 					err.close()
 		else:
-			self.error('%s is not an approved method' % call)
-
-	def error(self, msg):
-		self.write(simplejson.dumps({'id': self._id, 'code': -1, 'error': msg}))
+			self.json_error('%s is not an approved method' % call)
