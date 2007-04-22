@@ -12,8 +12,6 @@ except ImportError:
 
 from HTTPContent import HTTPContent
 
-debug = 0
-
 
 class JSONRPCServlet(HTTPContent):
 	"""A superclass for Webware servlets using JSON-RPC techniques.
@@ -27,8 +25,23 @@ class JSONRPCServlet(HTTPContent):
 
 	"""
 
+	# Class level variables that can be overridden by servlet instances:
+	_debug = 0 # set to True if you want to see debugging output
+	_allowGet = 0 # set to True if you want to allow GET requests
+
 	def __init__(self):
 		HTTPContent.__init__(self)
+
+	def respondToGet(self, transaction):
+		"""Deny GET requests with JSON by returning an error.
+
+		This forces clients to use POST requests only, since GET requests
+		with JSON are vulnerable to "JavaScript hijacking".
+
+		"""
+		if not self._allowGet:
+			self.error("GET method not allowed")
+		HTTPContent.respondToGet(self, transaction)
 
 	def defaultAction(self):
 		self.json_call()
@@ -62,7 +75,7 @@ class JSONRPCServlet(HTTPContent):
 					'was not found' % call)
 			else:
 				try:
-					if debug:
+					if self._debug:
 						self.log("json call %s(%s)" % (call, params))
 					result = method(*params)
 					self.write(simplejson.dumps({'id': id, 'result': result}))
