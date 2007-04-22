@@ -82,7 +82,7 @@ class ServletWriter:
 			# The operation may fail on some Unix flavors
 			# if the files are on different filesystems.
 			# In this case, we try to move the files manually:
-			f = file(self._pyfilename, 'wb')
+			f = open(self._pyfilename, 'wb')
 			try:
 				f.write(open(self._temp, 'rb').read())
 			finally:
