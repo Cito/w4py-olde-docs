@@ -23,7 +23,7 @@ class PushServlet(Page):
 		self.response().streamOut().setAutoCommit()
 		# send the initial header:
 		self.initialHeader()
-		# push new content 6 times:
+		# push new content 4 times:
 		for i in range(4):
 			self.sendBoundary()
 			self.sendLF()
@@ -63,12 +63,13 @@ class PushServlet(Page):
 				' <strong>in 15 seconds</strong>.</p>')
 		if not count or count == 3:
 			wr('<h4>Note:</h4>')
-			if count == 5:
+			if count == 3:
 				wr("<p>If you didn't get output for the last 30 seconds, "
 					"pushing contents is not supported.</p>")
 			wr('<p>The Browser needs to support the <tt>x-mixed-replace</tt>'
 				' content type. Current versions of the Microsoft Internet'
 				' Explorer and other browsers may not have this functionality.'
-				' Also, the adapter on the server side must support this.'
-				' It will not work with a CGI adapter.</p>')
+				' It will work with Firefox and Opera, though. Also, the'
+				' adapter on the server side must support this. It will not'
+				' work with the CGI adapter or the built-in HTTP server.</p>')
 		self.writeln("</body></html>")
