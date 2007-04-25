@@ -13,7 +13,17 @@ class Errors(DumpCSV):
 
 		"""
 		if self._headings[colIndex] in ('pathname', 'error report filename'):
-			return '<a href="file:///%s">%s</a>' % (value, value)
+			path = self.application().serverSidePath()
+			if value.startswith(path):
+				value = value[len(path):]
+				if value.startswith('/'):
+					value = value[1:]
+				link = self.request().uriWebKitRoot() + value
+				value = value.replace('/', '/<wbr>')
+				value = '<a href="%s">%s</a>' % (link, value)
+			else:
+				value = value.replace('/', '/<wbr>')
+			return value
 		elif self._headings[colIndex] == 'time':
 			return '<span style="white-space:nowrap">%s</span>' % (value)
 		else:

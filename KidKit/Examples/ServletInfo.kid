@@ -3,6 +3,8 @@
 from KidKit.Examples.KidExamplePage import KidExamplePage
 hook = KidExamplePage.writeContent
 import os
+def show(s):
+	return repr(s).replace(r'\\', '\\').replace(';', '; ').replace(':/', ': /')
 ?>
 <body py:strip="" xmlns:py="http://purl.org/kid/ns#">
 <h1>Kid Servlet Info</h1>
@@ -37,12 +39,12 @@ vars.sort()
 ?>
 <div py:for="var in vars">
 <h4 py:content="var" />
-<p style="font-size:smaller" py:content="repr(eval(var)).replace(';', '; ')" />
+<p style="font-size:small" py:content="show(eval(var))" />
 <p py:content="variables[var]" />
 </div>
 <h2>Environment</h2>
 <div py:for="key, value in os.environ.items()">
 <h5 py:content="key" />
-<p style="font-size:smaller" py:content="repr(value).replace(';', '; ')" />
+<p style="font-size:small" py:content="show(value)" />
 </div>
 </body>

@@ -6,15 +6,18 @@ class RequestInformation(ExamplePage):
 
 	def writeContent(self):
 		self.writeln('<h3>Request Variables</h3>')
-		self.writeln('<p>The following table shows the values for various request variables.</p>')
-		self.writeln('<table style="background-color:#EEEEFF;width:100%"'
-			' border="0" cellpadding="2" cellspacing="4" width="100%">')
-		self.dict('HTTPRequest.fields()', self.request().fields())
-		self.dict('HTTPRequest._environ', self.request()._environ)
-		self.dict('Cookies', self.request().cookies())
+		self.writeln('<p>The following table'
+			' shows the values for various request variables.</p>')
+		self.writeln('<table style="font-size:small;width:100%"'
+			' border="0" cellpadding="2" cellspacing="2" width="100%">')
+		request = self.request()
+		self.dict('fields()', request.fields())
+		self.dict('environ()', request.environ())
+		self.dict('cookies()', request.cookies())
 		self.writeln('</table>')
-		self.response().setCookie('TestCookieName', 'CookieValue')
-		self.response().setCookie('TestExpire1', 'Expires in 1 minutes', expires='+1m')
+		setCookie = self.response().setCookie
+		setCookie('TestCookieName', 'CookieValue')
+		setCookie('TestExpire1', 'expires in 1 minute', expires='+1m')
 
 	def pair(self, key, value):
 		valueType = type(value)
@@ -30,11 +33,12 @@ class RequestInformation(ExamplePage):
 
 	def dict(self, name, dict):
 		self.writeln('<tr valign="top">'
-			'<td style="background-color:#CCCCFF" colspan="2">%s</td>'
+			'<td style="background-color:#CCF" colspan="2">%s</td>'
 			'</tr>' % (name))
 		keys = dict.keys()
 		keys.sort()
 		for name in keys:
-			self.writeln('<tr valign="top"><td>%s</td><td>%s</td></tr>' % (name,
-				self.htmlEncode(str(dict[name])).replace(
-					'\n', '<br>').replace(',', ', ').replace(';', '; ')))
+			self.writeln('<tr valign="top" style="background-color:#EEF">'
+				'<td>%s</td><td>%s</td></tr>' % (name, self.htmlEncode(
+				str(dict[name])).replace('\n', '<br>').replace(
+				',', ',<wbr>').replace(';', ';<wbr>').replace(':/', ':<wbr>/')))

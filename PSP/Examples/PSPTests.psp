@@ -91,7 +91,8 @@ else:
 <table><% for i in self.request()._environ.keys():
 	res.write('<tr valign="top"><td style="color:red;font-size:small">'
 		+str(i)+'&nbsp;</td><td style="color:blue;font-size:small">'
-		+self.request()._environ[i].replace(',', ', ').replace(';', '; ').replace(':', ': ')
+		+self.request()._environ[i].replace(
+			',', ',<wbr>').replace(';', ';<wbr>').replace(':/', ':<wbr>/')
 		+'</td></tr>') %></table>
 
 <hr>
