@@ -21,9 +21,9 @@ function getSuggestions() {
 function handleSuggestions(res) {
 	if (res.length > 0) {
 		var e = document.getElementById('suggestions');
-		e.innerHTML = '<div onmouseover="suggestOver(this)" onmouseout="suggestOut(this)" onclick="clearSuggestions()" class="suggest_link red">close</div>';
-		for (i=0; i < res.length; i++) {
-            e.innerHTML += '<div onmouseover="suggestOver(this)" onmouseout="suggestOut(this)" onclick="setQuery(this.innerHTML)" class="suggest_link">' + res[i] + '</div>';
+		e.innerHTML = '<div onmouseover="suggestOver(this)" onmouseout="suggestOut(this)" onclick="clearSuggestions()" class="suggest_button_normal">close</div>';
+		for (i=0; i<res.length; i++) {
+            e.innerHTML += '<div onmouseover="suggestOver(this)" onmouseout="suggestOut(this)" onclick="setQuery(this.innerHTML)" class="suggest_link_normal">' + res[i] + '</div>';
 		}
 		e.className = 'show';
 	} else {
@@ -32,11 +32,11 @@ function handleSuggestions(res) {
 }
 
 function suggestOver(div_node) {
-	div_node.className = div_node.className.replace('suggest_link', 'suggest_link_over');
+	div_node.className = div_node.className.replace('_normal', '_over');
 }
 
 function suggestOut(div_node) {
-	div_node.className = div_node.className.replace('suggest_link_over', 'suggest_link');
+	div_node.className = div_node.className.replace('_over', '_normal');
 }
 
 function clearSuggestions() {

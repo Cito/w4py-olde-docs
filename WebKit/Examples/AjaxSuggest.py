@@ -10,22 +10,22 @@ from random import randint
 
 from AjaxPage import AjaxPage
 
-max_suggestions = 10
-max_words = 5000
-max_letters = 5
+maxSuggestions = 10
+maxWords = 5000
+maxLetters = 5
 
 # Create some random "words":
 suggestions = []
-for i in range(max_words):
+for i in range(maxWords):
 	word = []
-	for j in range(max_letters):
+	for j in range(maxLetters):
 		word.append(chr(randint(97, 122)))
 	suggestions.append(''.join(word))
 
 
 class AjaxSuggest(AjaxPage):
 
-	clientPolling = None # we have no long-running queries
+	_clientPolling = None # we have no long-running queries
 
 	def writeJavaScript(self):
 		AjaxPage.writeJavaScript(self)
@@ -39,10 +39,10 @@ class AjaxSuggest(AjaxPage):
 		return AjaxPage.htBodyArgs(self) + ' onload="initPage();"'
 
 	def writeContent(self):
-		self.writeln('<h2>Ajax &quot;Suggest&quot; Example</h2>')
+		self.writeln('<h2>Ajax "Suggest" Example</h2>')
 		if self.request().hasField('query'):
 			self.writeln('''
-<p>You have just entered the word <q class="red">%s</q>.</p>
+<p>You have just entered the word <b class="in_red">"%s"</b>.</p>
 <p>If you like, you can try again:</p>'''
 				% self.htmlEncode(self.request().field('query')))
 		else:
@@ -57,7 +57,7 @@ and get random words starting with these characters suggested:</p>''')
 <input type="text" name="query" id="query" onkeyup="getSuggestions();" autocomplete="off">
 <input type="submit" value="Submit"></div><div class="hide" id="suggestions"></div></form>''')
 
-	def ajax_methods(self):
+	def exposedMethods(self):
 		"""Register the suggest method for use with Ajax."""
 		return ['suggest']
 
@@ -74,4 +74,4 @@ and get random words starting with these characters suggested:</p>''')
 		s = filter(lambda w, prefix=prefix:
 			w.startswith(prefix), suggestions) or ['none']
 		return "handleSuggestions([%s]);" % ",".join(
-			map(lambda w: "'%s'" % w, s[:max_suggestions]))
+			map(lambda w: "'%s'" % w, s[:maxSuggestions]))

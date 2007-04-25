@@ -1,10 +1,10 @@
-#
-# AjaxPage.py
-#
-# Written by John Dickinson based on ideas from
-# Apple Developer Connection and DivMod Nevow.
-# Some changes by Robert Forkel and Christoph Zwerschke.
-#
+"""AJAX page template class
+
+Written by John Dickinson based on ideas from
+Apple Developer Connection and DivMod Nevow.
+Some changes by Robert Forkel and Christoph Zwerschke.
+
+"""
 
 import traceback, time, random
 from MiscUtils import StringIO
@@ -19,19 +19,19 @@ try:
 	object
 except NameError: # fallback for Python < 2.2
 	class object: pass
-	std_isinstance = isinstance
+	_isinstance = isinstance
 	def isinstance(obj, cinf):
 		if type(cinf) == type(()):
-			for ci in cinf:
+			for i in cinf:
 				if type(obj) == type(object):
-					if std_isinstance(obj, ci):
+					if _isinstance(obj, i):
 						return 1
 				else:
-					if type(obj) == type(ci):
+					if type(obj) == type(i):
 						return 1
 			return 0
 		else:
-			return std_isinstance(obj, cinf)
+			return _isinstance(obj, cinf)
 
 
 def quoteJs(what):
@@ -57,16 +57,16 @@ class PyJs(object):
 	def __str__(self):
 		return self._name
 
-	def __call__(self, *a, **kw):
-		args = ','.join([quoteJs(i) for i in a])
-		kw_args = ','.join(['%s=%s' % (k, quoteJs(v)) for k, v in kw.items()])
-		if args and kw_args:
-			all_args = '%s,%s' % (args, kw_args)
-		elif not kw_args:
-			all_args = args
+	def __call__(self, *args, **kw):
+		args = ','.join([quoteJs(i) for i in args])
+		kwArgs = ','.join(['%s=%s' % (k, quoteJs(v)) for k, v in kw.items()])
+		if args and kwArgs:
+			allArgs = '%s,%s' % (args, kwArgs)
+		elif not kwArgs:
+			allArgs = args
 		elif not args:
-			all_args = kw_args
-		return self.__class__('%s(%s)' % (self, all_args))
+			allArgs = kwArgs
+		return self.__class__('%s(%s)' % (self, allArgs))
 
 	def __getitem__(self, index):
 		return self.__class__('%s[%s]' % (self, quoteJs(index)))
@@ -80,7 +80,7 @@ class AjaxPage(BaseClass):
 
 	AjaxPage can be used to make coding XMLHttpRequest() applications easier.
 
-	Subclasses should override the method ajax_methods() which returns a list
+	Subclasses should override the method exposedMethods() which returns a list
 	of method names. These method names refer to Webware Servlet methods that
 	are able to be called by an Ajax-enabled web page. This is very similar
 	in functionality to Webware's actions.
@@ -102,7 +102,7 @@ class AjaxPage(BaseClass):
 		'window document alert this'.split())
 	setTag, setClass, setID, setValue, setReadonly = map(PyJs,
 		'setTag setClass setID setValue setReadonly'.split())
-	call, call_form = map(PyJs, ('ajax_call', 'ajax_call_form'))
+	call, callForm = map(PyJs, ('ajax_call', 'ajax_call_form'))
 
 	# Response Queue for timed out queries:
 	_responseQueue = {}
@@ -115,16 +115,16 @@ class AjaxPage(BaseClass):
 			self.writeln(s % 'poll')
 
 	def actions(self):
-		a = BaseClass.actions(self)
-		a.append('ajax_call')
+		actions = BaseClass.actions(self)
+		actions.append('ajaxCall')
 		if self._clientPolling:
-			a.append('ajax_poll')
-		return a
+			actions.append('ajaxPoll')
+		return actions
 
-	def ajax_methods(self):
+	def exposedMethods(self):
 		return []
 
-	def ajax_clientPollingInterval(self):
+	def clientPollingInterval(self):
 		"""Set the interval for the client polling.
 
 		You should always make it a little random to avoid synchronization.
@@ -132,7 +132,7 @@ class AjaxPage(BaseClass):
 		"""
 		return random.choice(range(3, 8))
 
-	def ajax_call(self):
+	def ajaxCall(self):
 		"""Execute method with arguments on the server side.
 
 		The method name is passed in the field _call_,
@@ -149,8 +149,8 @@ class AjaxPage(BaseClass):
 			if type(args) != type([]):
 				args = [args]
 			if self._clientPolling and self._responseTimeout:
-				start_time = time.time()
-			if call in self.ajax_methods():
+				startTime = time.time()
+			if call in self.exposedMethods():
 				try:
 					method = getattr(self, call)
 				except AttributeError:
@@ -173,10 +173,10 @@ class AjaxPage(BaseClass):
 		else:
 			cmd = self.alert('Ajax call missing call parameter.')
 		if self._clientPolling and self._responseTimeout:
-			in_time = time.time() - start_time < self._responseTimeout
+			inTime = time.time() - startTime < self._responseTimeout
 		else:
-			in_time = 1
-		if in_time:
+			inTime = 1
+		if inTime:
 			# If the computation of the method did not last very long,
 			# deliver it immediately back to the client with this response:
 			if self._debug:
@@ -190,7 +190,7 @@ class AjaxPage(BaseClass):
 			sid = self.session().identifier()
 			self._responseQueue.setdefault(sid, []).append(cmd)
 
-	def ajax_poll(self):
+	def ajaxPoll(self):
 		"""Return queued Javascript functions to be executed on the client side.
 
 		This is polled by the client in random intervals in order to get
@@ -201,7 +201,7 @@ class AjaxPage(BaseClass):
 			sid = self.session().identifier()
 			# Set the timeout until the next time this method is called
 			# by the client, using the Javascript wait variable:
-			cmd = ['wait=%s' % self.ajax_clientPollingInterval()]
+			cmd = ['wait=%s' % self.clientPollingInterval()]
 			if self._responseQueue.has_key(sid): # add in other commands
 				cmd.extend(map(str, self._responseQueue[sid]))
 				self._responseQueue[sid] = []
@@ -214,7 +214,7 @@ class AjaxPage(BaseClass):
 			cmd = 'dying=true;'
 		self.write(cmd) # write out at least the wait variable
 
-	def ajax_push(self, cmd):
+	def ajaxPush(self, cmd):
 		"""Push Javascript commands to be executed on the client side.
 
 		Client polling must be activitated if you want to use this.
@@ -226,14 +226,10 @@ class AjaxPage(BaseClass):
 			sid = self.session().identifier()
 			self._responseQueue.setdefault(sid, []).append(cmd)
 
-	def preAction(self, action_name):
-		if action_name.startswith('ajax_'):
-			pass
-		else:
-			BaseClass.preAction(self, action_name)
+	def preAction(self, actionName):
+		if actionName not in ('ajaxCall', 'ajaxPoll'):
+			BaseClass.preAction(self, actionName)
 
-	def postAction(self, action_name):
-		if action_name.startswith('ajax_'):
-			pass
-		else:
-			BaseClass.postAction(self, action_name)
+	def postAction(self, actionName):
+		if actionName not in ('ajaxCall', 'ajaxPoll'):
+			BaseClass.postAction(self, actionName)

@@ -1,15 +1,35 @@
 /* Style sheet for the AjaxSuggest example. */
 
-.red {
-	color: #f00;
+.in_red {
+	color: #a33;
 }
 
-.suggest_link {
+.suggest_button_normal {
+	color: #000;
+	background-color: #ddd;
+	text-align: center;
+	font-size: smaller;
+	padding: 1px 4px;
+	border: 2px outset #666;
+}
+
+.suggest_button_over {
+	color: #ddd;
+	background-color: #36c;
+	text-align: center;
+	font-size: smaller;
+	padding: 1px 4px;
+	border: 2px outset #666;
+}
+
+.suggest_link_normal {
+	color: #000;
 	background-color: #fff;
 	padding: 2px 4px;
 }
 
 .suggest_link_over {
+	color: #fff;
 	background-color: #36c;
 	padding: 2px 4px;
 }
@@ -22,7 +42,6 @@
 #suggestions {
 	cursor: pointer;
 	position: absolute;
-	background-color: #fff;
 	text-align: left;
 	border: 1px solid #666;
 }

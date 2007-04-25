@@ -10,7 +10,7 @@ var request_url = document.location.toString();
 if (request_url.indexOf('?') >= 0) {
 	request_url = request_url.substr(0, request_url.indexOf('?'));
 }
-request_url += "?_action_=ajax_"
+request_url += "?_action_=ajax"
 var request_id = 0;
 
 function getRequester() {
@@ -66,7 +66,7 @@ function ajax_call(pre_action, call) {
 	}
 	req = getRequester();
 	if (req) {
-		openConnection(req, request_url + "call&_call_=" + call + args);
+		openConnection(req, request_url + "Call&_call_=" + call + args);
 	}
 }
 
@@ -89,7 +89,7 @@ function ajax_call_form(call, form, dest, val) {
 	}
 	req = getRequester();
 	if (req) {
-		openConnection(req, request_url + "call&_call_=" + call + args);
+		openConnection(req, request_url + "Call&_call_=" + call + args);
 	}
 }
 

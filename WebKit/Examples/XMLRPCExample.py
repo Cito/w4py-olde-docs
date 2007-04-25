@@ -7,7 +7,7 @@ class XMLRPCExample(XMLRPCServlet):
 	To try it out, use something like the following:
 
 	>>> import xmlrpclib
-	>>> server = xmlrpclib.Server('http://localhost/cgi-bin/WebKit.cgi/Examples/XMLRPCExample')
+	>>> server = xmlrpclib.Server('http://localhost:8080/Examples/XMLRPCExample')
 	>>> server.multiply(10,20)
 	200
 	>>> server.add(10,20)

@@ -1,6 +1,8 @@
-#
-# JSON-RPC servlet class written by Jean-Francois Pieronne
-#
+"""JSON-RPC servlet base class
+
+Written by Jean-Francois Pieronne
+
+"""
 
 import traceback
 from MiscUtils import StringIO
@@ -43,31 +45,31 @@ class JSONRPCServlet(HTTPContent):
 
 	def respondToGet(self, transaction):
 		if self._allowGet:
-			self.error("GET method not allowed")
+			self.writeError("GET method not allowed")
 		HTTPContent.respondToGet(self, transaction)
 
 	def defaultAction(self):
-		self.json_call()
+		self.jsonCall()
 
 	def actions(self):
 		actions = HTTPContent.actions(self)
-		actions.append('json_call')
+		actions.append('jsonCall')
 		return actions
 
-	def json_methods(self):
+	def exposedMethods(self):
 		return []
 
-	def json_error(self, msg):
+	def writeError(self, msg):
 		self.write(simplejson.dumps({'id': self._id, 'code': -1, 'error': msg}))
 
-	def json_result(self, data):
+	def writeResult(self, data):
 		data = simplejson.dumps({'id': self._id, 'result': data})
 		if not self._allowEval:
 			data = 'throw new Error' \
 				'("Direct evaluation not allowed");\n/*%s*/' % (data,)
 		self.write(data)
 
-	def json_call(self):
+	def jsonCall(self):
 		"""Execute method with arguments on the server side.
 
 		Returns Javascript function to be executed by the client immediately.
@@ -77,24 +79,24 @@ class JSONRPCServlet(HTTPContent):
 		data = simplejson.loads(request.rawInput().read())
 		self._id, call, params = data["id"], data["method"], data["params"]
 		if call == 'system.listMethods':
-			self.json_result(self.json_methods())
-		elif call in self.json_methods():
+			self.writeResult(self.exposedMethods())
+		elif call in self.exposedMethods():
 			try:
 				method = getattr(self, call)
 			except AttributeError:
-				self.json_error('%s, although an approved method, '
+				self.writeError('%s, although an approved method, '
 					'was not found' % call)
 			else:
 				try:
 					if self._debug:
 						self.log("json call %s(%s)" % (call, params))
-					self.json_result(method(*params))
+					self.writeResult(method(*params))
 				except Exception:
 					err = StringIO()
 					traceback.print_exc(file=err)
 					e = err.getvalue()
-					self.json_error('%s was called, '
+					self.writeError('%s was called, '
 						'but encountered an error: %s' % (call, e))
 					err.close()
 		else:
-			self.json_error('%s is not an approved method' % call)
+			self.writeError('%s is not an approved method' % call)

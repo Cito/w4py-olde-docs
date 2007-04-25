@@ -1,12 +1,17 @@
-# This requires the free xml-rpc library available from
-# http://www.pythonware.com/products/xmlrpc/
-#
-# See Examples/XMLRPCExample.py for sample usage.
-#
+"""XML-RPC servlet base class
 
-# Sometimes xmlrpclib is installed as a package, sometimes not.
-# So we'll make sure it works either way.
+Written by Geoffrey Talvola
+
+This requires the xml-rpc library available from
+http://www.pythonware.com/products/xmlrpc/
+which was was added to the standard Python library in Python 2.2.
+
+See Examples/XMLRPCExample.py for sample usage.
+
+"""
+
 try:
+	# may be a part of a package in Python < 2.2, check this first
 	from xmlrpclib import xmlrpclib
 except ImportError:
 	import xmlrpclib

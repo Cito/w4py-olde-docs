@@ -34,7 +34,7 @@ function openPollConnection()
 				}
 			}
 		}
-		var url = request_url + 'poll&_req_=' + ++request_id;
+		var url = request_url + 'Poll&_req_=' + ++request_id;
 		req.open("GET", url, true);
 		req.send(null);
 	}
