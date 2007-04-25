@@ -20,8 +20,6 @@
 /*                                                                        */
 /**************************************************************************/
 
-/* $Id$ */
-
 #ifndef PARSECFG_H_INCLUDED
 #define PARSECFG_H_INCLUDED
 

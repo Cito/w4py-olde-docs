@@ -74,7 +74,7 @@ Licensed under the Open Software License version 2.1.
 """
 
 __version__ = '0.1'
-__revision__ = "$Rev: ... $"
+__revision__ = "$Revision$"
 __date__ = "$Date$"
 
 
