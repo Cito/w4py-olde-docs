@@ -166,7 +166,7 @@ def main(args):
 	global running
 	running = 1
 
-	file = open("monitorpid.txt", "w")
+	file = open("monitor.pid", "w")
 	if os.name == 'posix':
 		file.write(str(os.getpid()))
 	file.flush()
@@ -245,10 +245,10 @@ def stop():
 	"""Stop the monitor.
 
 	This kills the other monitor process that has been opened
-	(from the PID file ``monitorpid.txt``).
+	(from the PID file ``monitor.pid``).
 
 	"""
-	pid = int(open("monitorpid.txt", "r").read())
+	pid = int(open("monitor.pid", "r").read())
 	# this goes to the other running instance of this module
 	os.kill(pid, signal.SIGINT)
 

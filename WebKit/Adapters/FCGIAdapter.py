@@ -66,7 +66,7 @@ CHANGES
 
 * 2000-05-08 ce:
 	* Fixed bug in exception handler to send first message to stderr, instead of stdout
-	* Uncommented the line for reading 'address.text'
+	* Uncommented the line for reading 'adapter.address'
 	* Switched from eval() encoding to marshal.dumps() encoding in accordance with AppServer
 	* Increased rec buffer size from 8KB to 32KB
 	* Removed use of pr() for feeding app server results back to webserver. Figure that's slightly more efficient.
@@ -172,7 +172,7 @@ sys.path.insert(1, webwareDir)
 webKitDir = os.path.join(webwareDir, 'WebKit')
 os.chdir(webKitDir)
 
-host, port = open(os.path.join(webKitDir, 'address.text')).read().split(':', 1)
+host, port = open(os.path.join(webKitDir, 'adapter.address')).read().split(':', 1)
 port = int(port)
 
 fcgiloop = FCGIAdapter(webKitDir)

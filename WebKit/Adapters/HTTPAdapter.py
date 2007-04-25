@@ -25,7 +25,7 @@ try:
 	else:
 		sys.path.insert(0, workDir)
 	from WebKit.Adapters.Adapter import Adapter
-	host, port = open(os.path.join(webKitDir, 'address.text')).read().split(':')
+	host, port = open(os.path.join(webKitDir, 'adapter.address')).read().split(':')
 	if os.name == 'nt' and host == '':
 		# MS Windows doesn't like a blank host name
 		host = 'localhost'

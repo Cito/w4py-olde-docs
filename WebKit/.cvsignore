@@ -1,6 +1,5 @@
 *.pyc
 *.pyo
-address.text
-appserverpid.txt
-http.text
-profile.pstats
+*.pid
+*.address
+*.pstats

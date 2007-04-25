@@ -9,7 +9,7 @@ Add the following lines to your httpd.conf file:
 SnakeModuleDir   /path/to/Webware
 SnakeModuleDir   /path/to/Webware/WebKit
 SnakeModule      ModSnakeAdapter.ModSnakeAdapter
-WebwareAddress   /path/to/Webware/WebKit/address.text
+WebwareAddress   /path/to/Webware/WebKit/adapter.address
 AddHandler       webware .psp
 
 <Location /wpy>

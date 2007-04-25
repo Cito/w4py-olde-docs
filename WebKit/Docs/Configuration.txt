@@ -403,7 +403,7 @@ AppServer.config
     When the AppServer starts up, the process ID will be written into this file.
     The path will be relative to the working directory (or WebKit path, if
     you're not using a working directory), or you can specify an absolute path.
-    Default: ``WORKDIR/appserverpid.txt``.
+    Default: ``WORKDIR/appserver.pid``.
 ``PluginDirs``:
     When the application server starts up, it looks in these locations for
     plugins.  Each plugin is a subdirectory of its own.  By default WebKit looks

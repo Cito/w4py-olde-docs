@@ -14,7 +14,7 @@ Here's how I set up my Apache conf:
    SetHandler python-program
    # add the directory that contains ModPythonAdapter.py
    PythonPath "sys.path+['/path/to/WebKit']"
-   PythonOption AppWorkDir /path/to/dir/with/address.text
+   PythonOption AppWorkDir /path/to/dir/with/adapter.address
    PythonHandler WebKit.Adapters.ModPythonAdapter
    PythonDebug On
 </Location>
@@ -22,7 +22,7 @@ Here's how I set up my Apache conf:
 If you used the MakeAppWorkDir.py script to make a seperate
 application working directory, specify that path for the AppWorkDir
 option, otherwise it should be in your WebKit directory in which case
-you should use /path/to/WebKit/address.text
+you should use /path/to/WebKit/adapter.address
 
 http://localhost/WK/Welcome
 
@@ -33,7 +33,7 @@ of any location or directory.
 AddHandler python-program .psp
 PythonPath "sys.path+['/path/to/WebKit']"
 PythonHandler modpHandler::pspHandler
-PythonOption AppWorkDir /path/to/dir/with/address.text
+PythonOption AppWorkDir /path/to/dir/with/adapter.address
 """
 
 # Fix the current working directory -- this gets initialized incorrectly
@@ -271,8 +271,8 @@ def _adapter(req):
 	global __adapter
 	if __adapter is None:
 		appWorkDir = req.get_options()['AppWorkDir']
-		WEBWARE_ADDRESS_FILE = os.path.join(appWorkDir, 'address.text')
-		(host, port) = open(WEBWARE_ADDRESS_FILE).read().split(':')
+		WEBWARE_ADDRESS_FILE = os.path.join(appWorkDir, 'adapter.address')
+		host, port = open(WEBWARE_ADDRESS_FILE).read().split(':')
 		port = int(port)
 		__adapter = ModPythonAdapter(host, port, appWorkDir)
 	return __adapter

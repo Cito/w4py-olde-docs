@@ -8,7 +8,7 @@ This CGI script collects information about the request, puts it into a
 package, and then sends it to the WebKit application server over TCP/IP.
 
 This script expects to find a file in its directory called
-'address.text' that specifies the address of the app server.
+'adapter.address' that specifies the address of the app server.
 The file is written by the app server upon successful startup
 and contains nothing but:
 
@@ -54,7 +54,7 @@ class CGIAdapter(Adapter):
 			#open('counter.text', 'w').write(str(counter))
 			#open('rr-%02d.rr' % counter, 'w').write(str(dict))
 
-			host, port = open(os.path.join(self._webKitDir, 'address.text')).read().split(':', 1)
+			host, port = open(os.path.join(self._webKitDir, 'adapter.address')).read().split(':', 1)
 			if os.name == 'nt' and host == '': # MS Windows doesn't like a blank host name
 				host = 'localhost'
 			port = int(port)

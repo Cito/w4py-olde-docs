@@ -1030,7 +1030,7 @@ to the working directory, so you have to unset ``LAUNCH_AS_WEBWARE`` if you
 want to use the standard system locations for the files instead.
 
 Note that the application server maintains its own pid file, usually called
-``appserverpid.txt``. You should use a different pid file for the start script,
+``appserver.pid``. You should use a different pid file for the start script,
 although it actually records the same pid, i.e. the pid of Webware's Python
 application server, not the pid of the wrapper script ``AppServer`` which is
 responsible for the AutoReload mechanism.

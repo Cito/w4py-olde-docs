@@ -39,7 +39,7 @@ defaultConfig = {
 	'PlugIns': [],
 	'PlugInDirs': [],
 	'CheckInterval': 100,
-	'PidFile': 'appserverpid.txt',
+	'PidFile': 'appserver.pid',
 }
 
 # This actually gets set inside AppServer.__init__
@@ -452,10 +452,10 @@ def stop(*args, **kw):
 	print "Stopping the AppServer..."
 	if kw.has_key('workDir'):
 		# app directory
-		pidfile = os.path.join(kw['workDir'], "appserverpid.txt")
+		pidfile = os.path.join(kw['workDir'], "appserver.pid")
 	else:
 		# pidfile is in WebKit directory
-		pidfile = os.path.join(os.path.dirname(__file__), "appserverpid.txt")
+		pidfile = os.path.join(os.path.dirname(__file__), "appserver.pid")
 	try:
 		pid = int(open(pidfile).read())
 	except Exception:

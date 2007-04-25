@@ -43,7 +43,7 @@ class LRWPAdapter(Adapter):
 			msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)
 			msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 		# Get Host and Port information for WebKit AppServer
-		(self.host, self.port) = open(os.path.join(self._webKitDir, 'address.text')).read().split(':')
+		(self.host, self.port) = open(os.path.join(self._webKitDir, 'adapter.address')).read().split(':')
 		self.port = int(self.port)
 
 	def lrwpConnect(self, LRWPappName, LRWPhost, LRWPport):

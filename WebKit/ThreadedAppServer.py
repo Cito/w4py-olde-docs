@@ -18,7 +18,7 @@ stop: stop the currently running Apperver
 daemon: run as a daemon
 ClassName.SettingName=value: change configuration settings
 
-When started, the app server records its pid in appserverpid.txt.
+When started, the app server records its pid in appserver.pid.
 
 """
 
@@ -568,7 +568,7 @@ class ThreadedAppServer(AppServer):
 
 	def addressFileName(self, handlerClass):
 		"""Get the name of the text file with the server address."""
-		return '%s.text' % handlerClass.protocolName
+		return '%s.address' % handlerClass.protocolName
 
 
 class Handler:
@@ -791,7 +791,7 @@ class AdapterHandler(Handler):
 	to handle that data.
 
 	"""
-	protocolName = 'address'
+	protocolName = 'adapter'
 	settingPrefix = 'Adapter'
 
 	def handleRequest(self):

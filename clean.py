@@ -18,11 +18,8 @@ files = '''
 CGIWrapper/Errors.csv
 CGIWrapper/Scripts.csv
 CGIWrapper/ErrorMsgs/*.html
-WebKit/appserverpid.txt
-WebKit/monitorpid.txt
-WebKit/address.text
-WebKit/http.text
-WebKit/monitor.text
+WebKit/*.pid
+WebKit/*.address
 WebKit/Logs/*.csv
 WebKit/ErrorMsgs/*.html
 '''

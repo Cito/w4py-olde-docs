@@ -13,7 +13,7 @@ start: start the AppServer (default argument)
 stop: stop the currently running Apperver
 ClassName.SettingName=value: change configuration settings
 
-When started, the app server records its pid in appserverpid.txt.
+When started, the app server records its pid in appserver.pid.
 
 """
 
