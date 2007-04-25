@@ -21,7 +21,7 @@ class SecureCountVisits(SecurePage):
 			' will see the counter go back to 1 on your next visit.</p>')
 		self.writeln('<p>Try hitting <a href="javascript:location.reload()">'
 			'reload</a> now.</p>')
-		user = self.getLoggedInUser()
+		user = self.loggedInUser()
 		if user:
 			self.writeln('<p>Authenticated user is <strong>%s</strong>.</p>' % user)
 		self.writeln('<p><a href="SecureCountVisits">Revisit this page</a> | '
