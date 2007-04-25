@@ -10,7 +10,7 @@ cookieValues = [
 	('oneWeek', '+1w'),
 	('oneHourAndHalf', '+ 1h 30m'),
 	('timeIntTenSec', time.time() + 10),
-	('tupleOneYear', (time.localtime()[0] + 1,) + time.localtime()[1:]),
+	('tupleOneYear', (time.localtime(time.time())[0] + 1,) + time.localtime(time.time())[1:]),
 	]
 
 if DateTime:
@@ -34,7 +34,7 @@ class SetCookie(SidebarPage):
 		req = self.request()
 		self.writeln('<h4>The time right now is:</h4>')
 		self.writeln('<p>%s</p>'
-			% time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime()))
+			% time.strftime('%a, %d-%b-%Y %H:%M:%S GMT', time.gmtime(time.time())))
 		self.writeln('<h2>Cookies received:</h2>\n')
 		self.writeln('<ul>')
 		for name, value in req.cookies().items():

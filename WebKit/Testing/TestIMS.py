@@ -1,3 +1,4 @@
+import time
 from WebKit.SidebarPage import SidebarPage
 
 
@@ -32,7 +33,6 @@ class TestIMS(SidebarPage):
 		self.runTest('%s/PSP/Examples/psplogo.png' % servletPath)
 
 	def runTest(self, path):
-		import time
 		self.writeTest('Opening <tt>%s</tt>' % path)
 		rsp = self.getDoc(path)
 		originalSize = size = len(rsp.read())
@@ -65,7 +65,11 @@ class TestIMS(SidebarPage):
 			self.writeMsg('Received %s %s, document size = %s (as expected).'
 				% (rsp.status, rsp.reason, size))
 		arpaformat = '%a, %d %b %Y %H:%M:%S GMT'
-		t = list(time.strptime(lm, arpaformat))
+		try:
+			t = list(time.strptime(lm, arpaformat))
+		except AttributeError: # this can happen for Python < 2.3 on Windows
+			self.error('Python version does not support time.strptime, sorry.')
+			return
 		t[0] -= 1 # last year
 		newlm = time.strftime(arpaformat, time.gmtime(time.mktime(t)))
 		self.writeTest('Opening <tt>%s</tt><br>with If-Modified-Since: %s'
