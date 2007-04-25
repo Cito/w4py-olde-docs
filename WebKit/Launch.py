@@ -121,8 +121,9 @@ def launchWebKit(appServer=appServer, workDir=None, args=None):
 	# Import the app server's main() function:
 	try:
 		appServerMain = __import__('WebKit.' + appServer, None, None, 'main').main
-	except ImportError:
-		print 'Error: Cannot import the app server module.'
+	except ImportError, e:
+		print 'Error: Cannot import the AppServer module.'
+		print 'Reason:', str(e)
 		sys.exit(1)
 	# Set Profiler.startTime if this has not been done already:
 	from WebKit import Profiler

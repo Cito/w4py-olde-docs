@@ -27,6 +27,7 @@ import threading, Queue, select, socket, errno, traceback
 
 from Common import *
 import AppServer as AppServerModule
+from PidFile import ProcessRunning
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 from ASStreamOut import ASStreamOut, ConnectionAbortedError
 from MiscUtils.Funcs import timestamp
@@ -943,9 +944,13 @@ def run(workDir=None):
 					exitStatus = 0
 				else:
 					if doesRunHandleExceptions:
-						print
-						traceback.print_exc(file=sys.stderr)
-						print "Exiting AppServer due to above exception."
+						if not server and isinstance(e, ProcessRunning):
+							print "Error:", str(e)
+						else:
+							print
+							traceback.print_exc()
+							print
+							print "Exiting AppServer due to above exception."
 						exitStatus = 1
 					else:
 						raise

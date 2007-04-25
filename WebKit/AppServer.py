@@ -29,9 +29,9 @@ from Object import Object
 from Application import Application
 from ImportManager import ImportManager
 from PlugIn import PlugIn
+from PidFile import PidFile, ProcessRunning
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 import Profiler
-import PidFile
 
 defaultConfig = {
 	'PrintConfigAtStartUp': True,
@@ -70,8 +70,9 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		self._startTime = time.time()
 
 		global globalAppServer
-		assert globalAppServer is None, \
-			'More than one app server; or __init__() invoked more than once.'
+		if globalAppServer:
+			raise ProcessRunning('More than one AppServer'
+				' or __init__() invoked more than once.')
 		globalAppServer = self
 
 		# Set up the import manager:
@@ -166,12 +167,12 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			return
 		pidpath = self.serverSidePath(self.setting('PidFile'))
 		try:
-			self._pidFile = PidFile.PidFile(pidpath)
-		except PidFile.ProcessRunning:
-			assert 0, '\n%s exists and contains a process id corresponding' \
-				' to a running process.\nThis indicates that there is an' \
-				' AppServer already running.\nIf this is not the case,' \
-				' please delete this file and restart the AppServer.' % pidpath
+			self._pidFile = PidFile(pidpath)
+		except ProcessRunning:
+			raise ProcessRunning('The file ' + pidpath + ' exists\n'
+				'and contains a process id corresponding to a running process.\n'
+				'This indicates that there is an AppServer already running.\n'
+				'If this is not the case, delete this file and restart the AppServer.')
 
 	def shutDown(self):
 		"""Shut down the AppServer.
@@ -183,24 +184,25 @@ class AppServer(ConfigurableForServerSidePath, Object):
 			4. set self._running = 0 (server is completely down)
 
 		"""
-		print "AppServer is shutting down..."
-		sys.stdout.flush()
-		self._running = 1
-		self._app.shutDown()
-		del self._plugIns
-		del self._app
-		if self._pidFile:
-			self._pidFile.remove() # remove the pid file
-		if Profiler.profiler:
-			# The profile stats will be dumped by Launch.py.
-			# You might also considering having a page/servlet
-			# that lets you dump the stats on demand.
-			print 'AppServer ran for %0.2f seconds.' % (
-				time.time() - Profiler.startTime)
-		print "AppServer has been shutdown."
-		sys.stdout.flush()
-		sys.stderr.flush()
-		self._running = 0
+		if self._running:
+			print "AppServer is shutting down..."
+			sys.stdout.flush()
+			self._running = 1
+			self._app.shutDown()
+			del self._plugIns
+			del self._app
+			if self._pidFile:
+				self._pidFile.remove() # remove the pid file
+			if Profiler.profiler:
+				# The profile stats will be dumped by Launch.py.
+				# You might also considering having a page/servlet
+				# that lets you dump the stats on demand.
+				print 'AppServer ran for %0.2f seconds.' % (
+					time.time() - Profiler.startTime)
+			print "AppServer has been shutdown."
+			sys.stdout.flush()
+			sys.stderr.flush()
+			self._running = 0
 
 
 	## Configuration ##
@@ -288,10 +290,10 @@ class AppServer(ConfigurableForServerSidePath, Object):
 					'    %s' % (path, willNotLoadReason)
 				return None
 			plugIn.install()
-		except:
-			from traceback import print_exc
-			print_exc(file=sys.stderr)
-			self.error('Plug-in %s raised exception.' % path)
+		except Exception:
+			print
+			print 'Plug-in', path, 'raised exception.'
+			raise
 		return plugIn
 
 	def loadPlugIns(self):
@@ -394,27 +396,6 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		return self._webKitPath
 
 
-	## Warnings and Errors ##
-
-	def warning(self, msg):
-		"""Output a warning (not yet implemented)."""
-		# @@ 2000-04-25 ce: would this be useful?
-		raise NotImplementedError
-
-	def error(self, msg):
-		"""Output an error.
-
-		Flushes stdout and stderr, prints the message to stderr
-		and exits with code 1.
-
-		"""
-		sys.stdout.flush()
-		sys.stderr.flush()
-		sys.stderr.write('ERROR: %s\n' % msg)
-		sys.stderr.flush()
-		sys.exit(1) # @@ 2000-05-29 ce: Doesn't work. Perhaps because of threads
-
-
 ## Main ##
 
 def main():
@@ -439,7 +420,7 @@ def kill(pid):
 	try:
 		from signal import SIGTERM
 		os.kill(pid, SIGTERM)
-	except:
+	except Exception:
 		if os.name == 'nt':
 			import win32api
 			handle = win32api.OpenProcess(1, 0, pid)
