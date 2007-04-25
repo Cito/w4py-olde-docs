@@ -29,7 +29,7 @@ X, Y = 500, 200 # the image size
 
 def t(p):
 	"""Map coordinates: (x=0..2pi, y=-1.25..1.25) => (0..X, Y..0)"""
-	return round(0.5*X*p[0]/pi), round(0.4*Y*(1.25- p[1]))
+	return int(.5*X*p[0]/pi+.5), int(.4*Y*(1.25- p[1])+.5)
 
 colors = (255, 255, 255), (0, 0, 0), (0, 0, 255), (255, 0, 0)
 white, black, blue, red = range(4)
