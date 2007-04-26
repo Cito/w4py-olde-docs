@@ -46,12 +46,12 @@ class PushServlet(Page):
 	def writeHTML(self, count):
 		self.write("Content-type: text/html\r\n\r\n")
 		wr = self.writeln
-		wr('<html><body style="background-color:#EEEEFF;padding:16pt;'
-			'border:2px solid blue">')
+		wr('<html><body style="margin:8pt;"><div style='
+			'"background-color:#EEF;padding:8pt 16pt;border:2px solid blue">')
 		wr('<h1>Pushing Content Demo</h1>')
 		if count:
 			wr('<h3>This page has been replaced'
-				' <strong style="color:#333399">%d</strong> time%s.</h3>'
+				' <strong style="color:#339">%d</strong> time%s.</h3>'
 				% (count, count > 1 and 's' or ''))
 			if count == 3:
 				wr('<p>Stopped pushing contents.</p>')
@@ -72,4 +72,4 @@ class PushServlet(Page):
 				' It will work with Firefox and Opera, though. Also, the'
 				' adapter on the server side must support this. It will not'
 				' work with the CGI adapter or the built-in HTTP server.</p>')
-		self.writeln("</body></html>")
+		wr('</div></body></html>')
