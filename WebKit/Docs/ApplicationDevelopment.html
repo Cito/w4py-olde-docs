@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -39,11 +38,11 @@
 </ul>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id3" id="synopsis" name="synopsis">Synopsis</a></h1>
+<h1><a id="synopsis" name="synopsis">Synopsis</a></h1>
 <p>Here we describe best practices for developing a web application using Webware.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id4" id="setting-up-your-application" name="setting-up-your-application">Setting up your application</a></h1>
+<h1><a id="setting-up-your-application" name="setting-up-your-application">Setting up your application</a></h1>
 <p>The first task in developing an application is to set up the file structure in
 which you will be working.</p>
 <p>It is possible to put your application in a subdirectory under <tt class="docutils literal"><span class="pre">WebKit/</span></tt> and
@@ -52,7 +51,7 @@ But <em>do not do this</em>.  Your application will be entwined with the Webware
 installation, making it difficult to upgrade Webware, and difficult to identify
 your own files from Webware files.</p>
 <div class="section">
-<h2><a class="toc-backref" href="#id5" id="creating-a-working-directory" name="creating-a-working-directory">Creating a Working Directory</a></h2>
+<h2><a id="creating-a-working-directory" name="creating-a-working-directory">Creating a Working Directory</a></h2>
 <p>Instead you should use the script <tt class="docutils literal"><span class="pre">bin/MakeAppWorkDir.py</span></tt>.
 You should run it like:</p>
 <pre class="literal-block">
@@ -135,7 +134,7 @@ individual applications. I still recommend <tt class="docutils literal"><span cl
 </dl>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id6" id="using-a-version-control-system-for-your-application" name="using-a-version-control-system-for-your-application">Using a version control system for your application</a></h2>
+<h2><a id="using-a-version-control-system-for-your-application" name="using-a-version-control-system-for-your-application">Using a version control system for your application</a></h2>
 <p>A version control system is a useful tool for managing your application. Popular
 Open Source version control systems are are the Concurrent Versions System (CVS)
 and, increasingly, Subversion (SVN). I recommend using SVN because it has a few
@@ -178,7 +177,7 @@ under version control. To start working, you first need to explicitely check it
 out from the repository using <tt class="docutils literal"><span class="pre">cvs</span> <span class="pre">checkout</span></tt> or <tt class="docutils literal"><span class="pre">svn</span> <span class="pre">checkout</span></tt>.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id7" id="using-the-working-directory-from-multiple-accounts" name="using-the-working-directory-from-multiple-accounts">Using the working directory from multiple accounts</a></h2>
+<h2><a id="using-the-working-directory-from-multiple-accounts" name="using-the-working-directory-from-multiple-accounts">Using the working directory from multiple accounts</a></h2>
 <p>If you are using a version control system or if you are otherwise distributing
 your application code, you may find that it is difficult to manage the
 differences between accounts. For instance, in different accounts on different
@@ -238,13 +237,13 @@ during development.</dd>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id8" id="structuring-your-code" name="structuring-your-code">Structuring your Code</a></h1>
+<h1><a id="structuring-your-code" name="structuring-your-code">Structuring your Code</a></h1>
 <p>Once you've got the basic files and directories in place, you're ready to go in
 and write some code. Don't let this document get in the way of developing the
 application how you choose, but here are some common patterns that have proven
 useful for Webware applications.</p>
 <div class="section">
-<h2><a class="toc-backref" href="#id9" id="sitepage" name="sitepage">SitePage</a></h2>
+<h2><a id="sitepage" name="sitepage">SitePage</a></h2>
 <p>Subclass a <tt class="docutils literal"><span class="pre">SitePage</span></tt> from <tt class="docutils literal"><span class="pre">WebKit.Page</span></tt> for your application. This subclass
 will change some methods and add some new methods. It serves as the basis and
 as a template for all the pages that follow.</p>

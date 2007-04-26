@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -54,9 +53,11 @@ so feel free to jump in!</p>
 Python 2.4 instead. Make use of the new Python features like new-style
 classes, properties, sets, decorators etc. and get rid of old garbage
 and workarounds for old Python versions. Use isinstance() for type checking.</li>
-<li>Use distutils instead of our own installer, use Python eggs instead of
-our own plug-in concept.</li>
-<li>Make use the logging module (so far it is only used with unit testing)
+<li>Use distutils/setuptools instead of our own installer, use Python eggs
+instead of our own plug-in concept.</li>
+<li>Separate more clearly and systematically which messages are printed to
+stdout and which to stderr.</li>
+<li>Make use of the logging module (so far it is only used with unit testing)
 instead of conditional print statements with &quot;debug&quot; and &quot;verbose&quot; flags.</li>
 <li>CheckSource.py: A program to check the source code conventions.</li>
 <li>Role-based security and user-authentication. Goal is to eliminate,

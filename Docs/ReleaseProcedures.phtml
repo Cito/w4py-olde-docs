@@ -1,11 +1,5 @@
 <% header('%s - Release Procedures' % name) %>
 
-<!--
-Word wrap to this:
-123456789 123456789 123456789 123456789 123456789 123456789 123456789X
--->
-
-
 <h2>Preface</h2>
 
 <pre>
@@ -30,6 +24,9 @@ finished before the release:
 [ ] Search for @@ (to do) markers in the code and docs.
 
 [ ] Browse through WebKit/Docs/Future.html
+
+[ ] Check for compliance with Docs/StyleGuidelines.html by running
+    bin/checksrc.py or using pylint with PYLINTRC=/path/to/Webware/.pylintrc
 </pre>
 
 
@@ -49,12 +46,12 @@ Test the current version before releasing it:
 
 [ ] Run the WebKit AppServer and check that the default contexts
     (Admin, Examples, Docs etc.) are working. Also check the various
-    tests in the Testing context.
+    tests in the Testing context and run WebKit/Testing/stress.py.
 
-[ ] Make sure that mod_webkit, mod_webkit2 and all other important components
-    can be compiled, linked and used without problems. If mod_webkit or
-    mod_webkit2 have changed, provide a new mod_webkit.dll for Windows users
-    and adjust the version number in mod_webkit.c to the Webware version.
+[ ] Make sure that wkcgi, mod_webkit1, mod_webkit2, and all other important
+    adapters can be compiled, linked and used without problems. If there have
+    been changes, provide binaries for Windows users and adjust the version
+    number in mod_webkit.c to the Webware version.
 </pre>
 
 
@@ -73,12 +70,12 @@ Test the current version before releasing it:
 
 [ ] Update the HTML pages that are created from reStructuredText
     (currently these exist only in the folder WebKit/Docs).
-    * Docutils (0.4) must be installed
-      (that's why this is not done in the Webware installer)
-    * Copy buildhtml.py from the Docutils tools directory
-      somewhere to the PATH
-    > cd WebKit/Docs
-    > buildhtml.py --stylesheet=../../Docs/Doc.css --link-stylesheet
+    * Docutils 0.4 must be installed (since we don't want to depend on
+      this, the HTML pages are included in the Webware package instead
+      of creating them with the Webware installer).
+    * Run the following commands:
+      cd WebKit/Docs
+      python ../../DocSupport/buildhtml.py
     * check the produced HTML pages
     The installer will modify these HTML pages later to display the
     same header and footer as the other HTML pages.

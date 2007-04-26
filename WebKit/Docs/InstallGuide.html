@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
@@ -82,7 +81,7 @@
 </ul>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id15" id="introduction" name="introduction">Introduction</a></h1>
+<h1><a id="introduction" name="introduction">Introduction</a></h1>
 <p>WebKit provides an application server that runs on both Unix and
 Windows as a persistent application (i.e., an application that stays
 running over the span of multiple requests).</p>
@@ -107,7 +106,7 @@ during development, and security and performance during deployment.</p>
 feedback, discuss features and get help using WebKit.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id16" id="quick-start" name="quick-start">Quick Start</a></h1>
+<h1><a id="quick-start" name="quick-start">Quick Start</a></h1>
 <p>If you just want to get to a working configuration fast,
 install python,
 unpack your Webware distribution,
@@ -134,9 +133,9 @@ you are working in.  (There are scripts to run it
 automatically at boot up, see <a class="reference" href="#webkit-init-script">webkit init script</a>).</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id17" id="prerequisites" name="prerequisites">Prerequisites</a></h1>
+<h1><a id="prerequisites" name="prerequisites">Prerequisites</a></h1>
 <div class="section">
-<h2><a class="toc-backref" href="#id18" id="python" name="python">Python</a></h2>
+<h2><a id="python" name="python">Python</a></h2>
 <p>Webware of course requires Python.  It has been tested with Python
 version ranging from 2.0 to 2.5.  Python 1.5.2 isn't supported anymore.
 If you get an error message about the version, you're probably unwittingly
@@ -156,7 +155,7 @@ from the command line and enter <tt class="docutils literal"><span class="pre">i
 exception, all is well.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id19" id="web-server" name="web-server">Web Server</a></h2>
+<h2><a id="web-server" name="web-server">Web Server</a></h2>
 <p>Webware's built-in web server is adequate for development and casual use.
 Beyond that, you will want to use Webware in concert with another web server.</p>
 <p>Any web server that supports CGI should be usable with Webware.
@@ -164,7 +163,7 @@ Apache is the best supported platform, both on Posix and Windows systems.
 There is some experimental support for Xitami.  For all other web servers
 (IIS included) you should expect to use CGI to interface with the AppServer.</p>
 <div class="section">
-<h3><a class="toc-backref" href="#id20" id="apache" name="apache">Apache</a></h3>
+<h3><a id="apache" name="apache">Apache</a></h3>
 <p>Apache is the best supported web server, both on Posix and Windows
 systems.  The <a class="reference" href="#mod-webkit">mod_webkit</a> adapter is the fastest way to connect to
 Webware, and is only supported for Apache.  CGI is also available to
@@ -174,7 +173,7 @@ There are also other adapter options, see <a class="reference" href="#adapters">
 <p>Most of the Webware developers use Apache.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id21" id="iis" name="iis">IIS</a></h3>
+<h3><a id="iis" name="iis">IIS</a></h3>
 <p>Microsoft's Internet Information Server, or IIS, requires some special
 configuration due to its default non-standard CGI behavior. You have
 to do two things:</p>
@@ -202,26 +201,26 @@ that needs to be compiled before use.  However, there have been
 problems with memory leaks in this adapter.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id22" id="aolserver" name="aolserver">AOLserver</a></h3>
+<h3><a id="aolserver" name="aolserver">AOLserver</a></h3>
 <p>The <a class="reference" href="http://pywx.idyll.org">PyWX</a> project aims to meld Python and AOLserver and as part of
 that, they created an AOLserver &quot;stay resident&quot; WebKit adapter for
 tighter integration. If you find that this adapter does not work
 with the latest release of Webware, please notify the PyWX project.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id23" id="xitami" name="xitami">Xitami</a></h3>
+<h3><a id="xitami" name="xitami">Xitami</a></h3>
 <p>The <a class="reference" href="http://www.xitami.com">Xitami</a> web server purports to be smaller, and potentially easier
 to install than some of the other web servers.  It can run the CGI
 adapters, but for more speed the <a class="reference" href="#lrwp-adapter">LRWP adapter</a> uses a persistent
 process for greater performance.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id24" id="other-servers" name="other-servers">Other Servers</a></h3>
+<h3><a id="other-servers" name="other-servers">Other Servers</a></h3>
 <p>Other servers should work using a <a class="reference" href="#cgi-adapter">CGI adapter</a>.</p>
 </div>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id25" id="webware-version" name="webware-version">Webware Version</a></h2>
+<h2><a id="webware-version" name="webware-version">Webware Version</a></h2>
 <p>Unless you just downloaded Webware (and therefore WebKit), you should
 check to see if you have the latest version. This is:</p>
 <p>Webware for Python</p>
@@ -243,7 +242,7 @@ general in the <a class="reference" href="http://svnbook.red-bean.com">Subversio
 generally fairly stable.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id26" id="operating-systems" name="operating-systems">Operating Systems</a></h2>
+<h2><a id="operating-systems" name="operating-systems">Operating Systems</a></h2>
 <p>WebKit actively supports Posix (Linux, BSD, Mac OS X, Solaris, etc)
 and Windows (95/98/NT/2K/XP), and their various flavors.</p>
 <p>Note that you don't have to develop and deploy on the same
@@ -287,7 +286,7 @@ your file paths.</p>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id27" id="installing-webware" name="installing-webware">Installing Webware</a></h1>
+<h1><a id="installing-webware" name="installing-webware">Installing Webware</a></h1>
 <p>Webware's main directory contains an <tt class="docutils literal"><span class="pre">install.py</span></tt> script that
 should always be run first.</p>
 <p>Note that the install program doesn't actually copy the Webware files
@@ -299,13 +298,13 @@ feel free to do so again.  If you're debugging a problem with the
 installation, you can run <tt class="docutils literal"><span class="pre">install.py</span> <span class="pre">-v</span></tt> for verbose output.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id28" id="updating-webware" name="updating-webware">Updating Webware</a></h1>
+<h1><a id="updating-webware" name="updating-webware">Updating Webware</a></h1>
 <p>When updating to a new major or minor version of Webware, check whether
 the Webware release notes recommend updating or recreating the working
 directories of your Webware applications.</p>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id29" id="architecture" name="architecture">Architecture</a></h1>
+<h1><a id="architecture" name="architecture">Architecture</a></h1>
 <p>The WebKit architecture involves three main entities at the top level:</p>
 <ul class="simple">
 <li>The web browser</li>
@@ -333,7 +332,7 @@ activate the WebKit app server listener for adapters with the
 with the setting <tt class="docutils literal"><span class="pre">AdapterPort</span></tt> and will be <tt class="docutils literal"><span class="pre">8086</span></tt> by default.
 You can use several app servers listenting on different ports.</p>
 <div class="section">
-<h2><a class="toc-backref" href="#id30" id="permissions" name="permissions">Permissions</a></h2>
+<h2><a id="permissions" name="permissions">Permissions</a></h2>
 <p>Webware runs as whatever user you run the AppServer as.  So, while
 Apache might be running as nobody, if you start the AppServer as
 root then your application will be run as root.  You may wish to set
@@ -358,7 +357,7 @@ all (on Unix, that would be <tt class="docutils literal"><span class="pre">cd</s
 permissions and create a new user later.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id31" id="adapters" name="adapters"><span id="adapter"></span>Adapters</a></h2>
+<h2><a id="adapters" name="adapters"><span id="adapter"></span>Adapters</a></h2>
 <p>A WebKit adapter takes an HTTP request from a web server and, as
 quickly as possible, packs it up and ships it to the app server which
 subsequently sends the response back to the adapter for delivery to
@@ -388,7 +387,7 @@ still very fast.</p>
 </ul>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id32" id="cgi-based-adapters" name="cgi-based-adapters"><span id="cgi-adapter"></span>CGI-based Adapters</a></h2>
+<h2><a id="cgi-based-adapters" name="cgi-based-adapters"><span id="cgi-adapter"></span>CGI-based Adapters</a></h2>
 <p>CGI-based adapters are the easiest to set up, and outside of Apache,
 Xitami, and AOLServer they are pretty much the only option.</p>
 <p>Though these are CGI-based adapters, WebKit still runs as a persistent
@@ -400,7 +399,7 @@ makes CGI slow.  Because the adapter is small, this should still be
 faster than a all-CGI application, because most of the work is done in
 the persistent AppServer.</p>
 <div class="section">
-<h3><a class="toc-backref" href="#id33" id="id6" name="id6"><span id="wkcgi"></span>wkcgi</a></h3>
+<h3><a id="id6" name="id6"><span id="wkcgi"></span>wkcgi</a></h3>
 <p>wkcgi is a CGI-based adapter written in C.  It's very small and is
 good at it's one and only job of connecting to the AppServer.  While a
 CGI-based adapter is the only option for some configurations, wkcgi is
@@ -439,7 +438,7 @@ ConnectRetryDelay = 1
 </pre>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id34" id="python-cgi-adapter" name="python-cgi-adapter">Python CGI Adapter</a></h3>
+<h3><a id="python-cgi-adapter" name="python-cgi-adapter">Python CGI Adapter</a></h3>
 <p>Though it's not recommended, there is an equivalent CGI script written
 in Python.  This script is substantially slower, as it requires a
 Python interpreter to be started for each request.  It is located in
@@ -449,10 +448,9 @@ interpreter (e.g., <tt class="docutils literal"><span class="pre">#!/usr/local/b
 <p>Otherwise, follow the instructions for <a class="reference" href="#wkcgi">wkcgi</a>.  Particularly, make sure
 that the script is executable. There is no configuration, and <tt class="docutils literal"><span class="pre">WebKit.cgi</span></tt>
 should be able to find the host and port of the AppServer automatically.</p>
-<!-- Note: If you get Internal Error, always check the AppServer is running. -->
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id35" id="mod-webkit" name="mod-webkit">mod_webkit</a></h3>
+<h3><a id="mod-webkit" name="mod-webkit">mod_webkit</a></h3>
 <p>This is a native Apache module designed solely to communicate with
 WebKit.  It is written in C, and has been tested on Linux and Windows.
 It can only be used with Apache.</p>
@@ -464,7 +462,7 @@ install mod_webkit as a DSO module for Apache 2.2 are located in the <tt class="
 older version for Apache 1.3 in <tt class="docutils literal"><span class="pre">Webware/WebKit/Adapters/mod_webkit1</span></tt>,
 but in the following we are assuming you are using Apache 2.2.</p>
 <div class="section">
-<h4><a class="toc-backref" href="#id36" id="posix-installation" name="posix-installation">Posix Installation</a></h4>
+<h4><a id="posix-installation" name="posix-installation">Posix Installation</a></h4>
 <p>To install:</p>
 <pre class="literal-block">
 $ cd /path/to/Webware/WebKit/Adapters/mod_webkit2
@@ -497,7 +495,7 @@ location and add a line to your httpd.conf file to load the module
 (but not activate it, see <a class="reference" href="#apache-configuration">Apache Configuration</a> below).</p>
 </div>
 <div class="section">
-<h4><a class="toc-backref" href="#id37" id="windows-installation" name="windows-installation">Windows Installation</a></h4>
+<h4><a id="windows-installation" name="windows-installation">Windows Installation</a></h4>
 <p>Copy <tt class="docutils literal"><span class="pre">WebKit/Adapters/mod_webkit2/mod_webkit.dll</span></tt> into your Apache 2.2
 module directory (usually located at <tt class="docutils literal"><span class="pre">C:\Program</span> <span class="pre">Files\Apache</span> <span class="pre">Software</span> <span class="pre">Foundation\Apache2.2\modules\mod_webkit.so</span></tt>). You should also change
 the extension of the file to <tt class="docutils literal"><span class="pre">.so</span></tt> according to the Apache convention.</p>
@@ -508,7 +506,7 @@ LoadModule webkit_module modules/mod_webkit.so
 <p>Then, add the configuration below to activate the module.</p>
 </div>
 <div class="section">
-<h4><a class="toc-backref" href="#id38" id="apache-configuration" name="apache-configuration">Apache Configuration</a></h4>
+<h4><a id="apache-configuration" name="apache-configuration">Apache Configuration</a></h4>
 <p>You must also add something like this to your httpd.conf:</p>
 <pre class="literal-block">
 &lt;Location /WK&gt;
@@ -546,18 +544,18 @@ the above code will set <tt class="docutils literal"><span class="pre">lang</spa
 </div>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id39" id="id9" name="id9"><span id="id8"></span>AOLServer</a></h3>
+<h3><a id="id9" name="id9"><span id="id8"></span>AOLServer</a></h3>
 <p>This adapter comes with the Python-enhanced AOLserver created by the
 <a class="reference" href="http://pywx.idyll.org">PyWX project</a> and is described there.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id40" id="lrwp-adapter-for-xitami" name="lrwp-adapter-for-xitami"><span id="lrwp-adapter"></span><span id="lrwp"></span>LRWP Adapter (for Xitami)</a></h3>
+<h3><a id="lrwp-adapter-for-xitami" name="lrwp-adapter-for-xitami"><span id="lrwp-adapter"></span><span id="lrwp"></span>LRWP Adapter (for Xitami)</a></h3>
 <p>The LRWP Adapter is meant to be used with the <a class="reference" href="http://www.xitami.com">Xitami web server</a>.
 It requires the LRWP Python library to be loaded.  We don't know
 a great deal more than that.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id41" id="fastcgi" name="fastcgi">FastCGI</a></h3>
+<h3><a id="fastcgi" name="fastcgi">FastCGI</a></h3>
 <p>In most cases FastCGI will not be significantly faster than <a class="reference" href="#wkcgi">wkcgi</a>
 (and may be slower!), and FastCGI is considerably slower than
 <a class="reference" href="#mod-webkit">mod_webkit</a>.  At the same time it is also much more difficult to
@@ -570,7 +568,7 @@ explaining its setup.</p>
 <p>Note that to date, we have only gotten this to work on Unix.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id42" id="mod-python" name="mod-python">mod_python</a></h3>
+<h3><a id="mod-python" name="mod-python">mod_python</a></h3>
 <p>In most cases the mod_python adapter will not be significantly faster
 than <a class="reference" href="#wkcgi">wkcgi</a> (and may be slower!), and the mod_python adapter is
 considerably slower than <a class="reference" href="#mod-webkit">mod_webkit</a>.  At the same time it is also
@@ -585,7 +583,7 @@ return incorrect responses under heavy load.</p>
 <a class="reference" href="http://www.modpython.org">http://www.modpython.org</a>.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id43" id="mod-snake" name="mod-snake">mod_snake</a></h3>
+<h3><a id="mod-snake" name="mod-snake">mod_snake</a></h3>
 <p>In most cases the mod_snake adapter will not be significantly faster
 than <a class="reference" href="#wkcgi">wkcgi</a> (and may be slower!), and the mod_snake adapter is
 considerably slower than <a class="reference" href="#mod-webkit">mod_webkit</a>.  At the same time it is also
@@ -598,7 +596,7 @@ interpreter into Apache.</p>
 configuration steps to use this adapter.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id44" id="oneshot" name="oneshot">OneShot</a></h3>
+<h3><a id="oneshot" name="oneshot">OneShot</a></h3>
 <p>The OneShot adapter is another CGI based adapter, but unlike wkcgi and
 WebKit.cgi, the AppServer launches, serves a response and shuts down
 for every single request via OneShot.cgi.</p>
@@ -614,7 +612,7 @@ warned that OneShot is <em>very</em> slow.</p>
 <p>If you use OneShot, do not launch the AppServer separately.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id45" id="isapi" name="isapi">ISAPI</a></h3>
+<h3><a id="isapi" name="isapi">ISAPI</a></h3>
 <p>The ISAPI module is located in <tt class="docutils literal"><span class="pre">WebKit/Adapters/wkISAPI</span></tt>.
 It currently has some memory leaks and is not well tested.  It is
 looking for a maintainer.  There's no documentation for it, and you
@@ -622,7 +620,7 @@ must compile it yourself.</p>
 </div>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id46" id="renaming-adapters" name="renaming-adapters">Renaming Adapters</a></h2>
+<h2><a id="renaming-adapters" name="renaming-adapters">Renaming Adapters</a></h2>
 <p>Adapters such as WebKit.cgi and OneShot.cgi do not rely on their
 name. Consequently, when you deploy your web site, you can rename the
 adapter to something like <tt class="docutils literal"><span class="pre">serve.cgi</span></tt>. This allows you to switch
@@ -633,7 +631,7 @@ redirecting the root of a site to a specific context, or other URL
 manipulations.  Mod_rewrite is extremely general.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id47" id="adapter-problems-not-cgi" name="adapter-problems-not-cgi">Adapter Problems (not CGI)</a></h2>
+<h2><a id="adapter-problems-not-cgi" name="adapter-problems-not-cgi">Adapter Problems (not CGI)</a></h2>
 <p>There is one gotcha in setting up the adapters that don't rely on CGI.
 For mod_webkit, ModPython and ModSnake, the name that you give to the
 adapter location in your Apache configuration file must not actually
@@ -644,14 +642,14 @@ document root.</p>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id48" id="configuration" name="configuration">Configuration</a></h1>
+<h1><a id="configuration" name="configuration">Configuration</a></h1>
 <p>In this section, we'll briefly touch on some of the configuration
 options related to installing and running WebKit. A full reference to
 these options can be found in the <a class="reference" href="UsersGuide.html#Configuration">User's Guide</a>.</p>
 <p>The settings referenced below are found in the configuration file,
 <tt class="docutils literal"><span class="pre">WebKit/Configs/Application.config</span></tt>.</p>
 <div class="section">
-<h2><a class="toc-backref" href="#id49" id="sessions" name="sessions">Sessions</a></h2>
+<h2><a id="sessions" name="sessions">Sessions</a></h2>
 <p>WebKit provides a Session utility class for storing data on the server
 side that relates to an individual user's session with your site. The
 <tt class="docutils literal"><span class="pre">SessionStore</span></tt> setting determines where the data is stored and can
@@ -699,7 +697,7 @@ deploying a web site.</p>
 <p>See <a class="reference" href="UsersGuide.html#Configuration">Configuration</a> in the User's Guide for more information.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id50" id="contexts" name="contexts">Contexts</a></h2>
+<h2><a id="contexts" name="contexts">Contexts</a></h2>
 <p>WebKit divides the world into <em>contexts</em>, each of which is a directory
 with its own files and servlets. WebKit will only serve files out of
 its list of known contexts.</p>
@@ -739,7 +737,7 @@ executed when the context is loaded at app server startup. You can put
 any kind of initialization code you deem appropriate there.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id51" id="creating-a-working-directory" name="creating-a-working-directory"><span id="makeappworkdir"></span>Creating a Working Directory</a></h2>
+<h2><a id="creating-a-working-directory" name="creating-a-working-directory"><span id="makeappworkdir"></span>Creating a Working Directory</a></h2>
 <p>You can create a working directory for your applications that is
 separate from the Webware installation.  To do this you will use the
 script <tt class="docutils literal"><span class="pre">bin/MakeAppWorkDir.py</span></tt>.  You should run it like:</p>
@@ -811,13 +809,13 @@ individual applications. I still recommend <tt class="docutils literal"><span cl
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id52" id="appserver-notes" name="appserver-notes">AppServer Notes</a></h1>
+<h1><a id="appserver-notes" name="appserver-notes">AppServer Notes</a></h1>
 <p>WebKit uses a process called an AppServer to handle requests.  The
 AppServer is responsible for receiving a request from the adapter, and
 then running it through the Application, and then sending the response
 back to the adapter.</p>
 <div class="section">
-<h2><a class="toc-backref" href="#id53" id="stopping-the-app-server" name="stopping-the-app-server">Stopping the App Server</a></h2>
+<h2><a id="stopping-the-app-server" name="stopping-the-app-server">Stopping the App Server</a></h2>
 <p>The recommended method of stopping the AppServer is through the
 Application Control interface.  This is a servlet located in the Admin
 context.  A username and password are required -- the username is
@@ -842,7 +840,7 @@ access the machine), and &quot;AppServer stop&quot; doesn't work, you can use
 effect a Control-C.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id54" id="reloading-servlets" name="reloading-servlets">Reloading Servlets</a></h2>
+<h2><a id="reloading-servlets" name="reloading-servlets">Reloading Servlets</a></h2>
 <p>As you develop your web application, you will change the code of your
 various Python classes, including your servlets. The WebKit app server
 will detect a change in the timestamp of a servlet's source file and
@@ -874,7 +872,7 @@ definitions can still exist.  AutoReload is generally the best
 solution.</p>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id55" id="launching-the-appserver-at-unix-boot-up" name="launching-the-appserver-at-unix-boot-up"><span id="webkit-init-script"></span>Launching the AppServer at Unix boot up</a></h2>
+<h2><a id="launching-the-appserver-at-unix-boot-up" name="launching-the-appserver-at-unix-boot-up"><span id="webkit-init-script"></span>Launching the AppServer at Unix boot up</a></h2>
 <p>The script <tt class="docutils literal"><span class="pre">WebKit/webkit</span></tt> is a Unix shell script launching WebKit
 at boot time through the standard &quot;init&quot; mechanisms.</p>
 <p>There are several variants of this script for various flavors of Unix
@@ -894,7 +892,7 @@ If you do this, the script will be able to determine the location of the
 working directory from the symbolic link and you do not have to set the
 location in the script itself.</p>
 <div class="section">
-<h3><a class="toc-backref" href="#id56" id="start-script-configuration" name="start-script-configuration">Start script configuration</a></h3>
+<h3><a id="start-script-configuration" name="start-script-configuration">Start script configuration</a></h3>
 <p>At the top of the start script, you will find a configuration section where
 you can change several variables that influence the start-up process.
 The main configuration parameters are the following:</p>
@@ -928,7 +926,7 @@ Webware will immediately launch and write both files as the Webware user.</p>
 to the working directory, so you have to unset <tt class="docutils literal"><span class="pre">LAUNCH_AS_WEBWARE</span></tt> if you
 want to use the standard system locations for the files instead.</p>
 <p>Note that the application server maintains its own pid file, usually called
-<tt class="docutils literal"><span class="pre">appserverpid.txt</span></tt>. You should use a different pid file for the start script,
+<tt class="docutils literal"><span class="pre">appserver.pid</span></tt>. You should use a different pid file for the start script,
 although it actually records the same pid, i.e. the pid of Webware's Python
 application server, not the pid of the wrapper script <tt class="docutils literal"><span class="pre">AppServer</span></tt> which is
 responsible for the AutoReload mechanism.</p>
@@ -938,7 +936,7 @@ or <tt class="docutils literal"><span class="pre">-O</span></tt> if you want to 
 of <tt class="docutils literal"><span class="pre">.pyc</span></tt>). You can also add additional Python libraries with <tt class="docutils literal"><span class="pre">PYTHONPATH</span></tt>.</p>
 </div>
 <div class="section">
-<h3><a class="toc-backref" href="#id57" id="activating-the-start-script" name="activating-the-start-script">Activating the start script</a></h3>
+<h3><a id="activating-the-start-script" name="activating-the-start-script">Activating the start script</a></h3>
 <p>First try whether your start script works:</p>
 <pre class="literal-block">
 &gt; ./webkit start
@@ -974,7 +972,7 @@ system for the details of installing start scripts.</p>
 </div>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id58" id="running-threadedappserver-as-a-windows-nt-2k-xp-service" name="running-threadedappserver-as-a-windows-nt-2k-xp-service">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></h2>
+<h2><a id="running-threadedappserver-as-a-windows-nt-2k-xp-service" name="running-threadedappserver-as-a-windows-nt-2k-xp-service">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></h2>
 <p><tt class="docutils literal"><span class="pre">AppServerService</span></tt> is a script that runs the <tt class="docutils literal"><span class="pre">ThreadedAppServer</span></tt>
 as a Windows NT Service.  This means it can be started and stopped
 from the Control Panel or from the command line using <tt class="docutils literal"><span class="pre">net</span> <span class="pre">start</span></tt>
@@ -1012,15 +1010,15 @@ the following commands:</p>
 </pre>
 </div>
 <div class="section">
-<h2><a class="toc-backref" href="#id59" id="other-notes" name="other-notes">Other Notes</a></h2>
+<h2><a id="other-notes" name="other-notes">Other Notes</a></h2>
 <p>See <a class="reference" href="#stopping-the-app-server">Stopping the App Server</a> and <a class="reference" href="#reloading-servlets">Reloading Servlets</a> above in
 <a class="reference" href="#adapters">Adapters</a>.</p>
 </div>
 </div>
 <div class="section">
-<h1><a class="toc-backref" href="#id60" id="troubleshooting" name="troubleshooting">Troubleshooting</a></h1>
+<h1><a id="troubleshooting" name="troubleshooting">Troubleshooting</a></h1>
 <div class="section">
-<h2><a class="toc-backref" href="#id61" id="bad-marshal-data" name="bad-marshal-data">Bad Marshal Data</a></h2>
+<h2><a id="bad-marshal-data" name="bad-marshal-data">Bad Marshal Data</a></h2>
 <p>The most common installation problem is a Python exception appearing
 in your browser that says &quot;bad marshal data&quot;. This is always caused by
 pointing the web browser to the app server:</p>
