@@ -71,7 +71,7 @@ class HTTPRequest(Request):
 		if env.has_key('REQUEST_URI'):
 			self._uri = env['REQUEST_URI']
 			# correct servletPath if there was a redirection
-			if not self._uri.startswith(self._servletPath + '/'):
+			if not (self._uri + '/').startswith(self._servletPath + '/'):
 				i = self._uri.find(self._pathInfo)
 				if i >= 0:
 					self._servletPath = self._uri[:i]
@@ -81,7 +81,7 @@ class HTTPRequest(Request):
 			if env.has_key('SCRIPT_URL'):
 				self._uri = self._environ['SCRIPT_URL']
 				# correct servletPath if there was a redirection
-				if not self._uri.startswith(self._servletPath + '/'):
+				if not (self._uri + '/').startswith(self._servletPath + '/'):
 					i = self._uri.find(self._pathInfo)
 					if i >= 0:
 						self._servletPath = self._uri[:i]
