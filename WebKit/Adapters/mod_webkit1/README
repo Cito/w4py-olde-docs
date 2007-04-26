@@ -9,12 +9,10 @@ AppServer (you can find a module for Apache 2.2 in the mod_webkit2 directory).
 ATTENTION: The Makefile included here is for a standard built from source
 Apache1 install. You may need to make some modifications to get it running
 on some Linux distributions with prepackaged Apache packages.
-
 This is a DSO only module at this time. Not because it must be so, but
 because I haven't adjusted the Makefile for static building. If you
 prefer static Apache modules, just follow the Apache directions for building.
-Note that you must have apxs intalled (usually contained in apache2-devel)
-and that on some Linux distributions this is called apxs2.
+Note that you must have apxs installed (usually contained in apache-devel).
 
 There are two source files, mod_webkit.c and marshal.c.
 
