@@ -111,7 +111,7 @@ Test the current version before releasing it:
 [ ] Switch your working copy to the newly created tag:
     > svn switch http://svn.w4py.org/Webware/tags/Release-VER
 
-[ ] Update all version numbers using bin/serversion.py:
+[ ] Update all version numbers using bin/setversion.py:
     * Edit bin/setversion.py and set the following parameters:
       - version = the version number of this release
       - releaseDate = the release date
@@ -184,16 +184,19 @@ Test the released tarball, preferably under Unix and also under Windows.
     * Log into <a href="http://sf.net">sf.net</a>.
     * Go to the <a href="https://sourceforge.net/projects/webware/">Webware Project Page</a>
       at SourceForge.
-    * Click 'Admin' in the top menu bar.
-    * Click 'File Releases' in the second menu bar.
+    * Select 'File Releases' from the 'Admin' tab menu.
+    * Click on 'Manage Packages/Releases'
+    * Choose the 'Webware' package for releases only, and use
+      use the 'Webware-devel' package for betas and release candidates
     * Proceed to completion, but don't send users notification of
       release until final test is performed and the web site is updated.
+    * Make this the primary file for download with 'Edit Download Page'.
+    * Hide older releases and candidates that aren't of interest any more.
     * Reference for the above: <a href="http://sf.net/docman/display_doc.php?docid=6445&group_id=1">"Guide to the SourceForge FRS"</a>
-    * Download the release from SourceForge and test again.
-    * Review the trove categorization and update if necessary
-      - Click 'Admin' in the top menu bar.
-      - Click 'Public Info' in the second menu bar.
+    * Review the trove categorization and update if necessary:
+      - Select 'Public Info' from the 'Admin' tab menu.
       - Click 'Edit Trove Categorization'.
+    * Download the release from SourceForge and test again.
 
 [ ] Publish for download from the www.w4py.org web server:
 
@@ -247,13 +250,13 @@ Test the released tarball, preferably under Unix and also under Windows.
       > tar -xzf ~/Webware-VER.tar.gz
       > ln -s Webware-VER Webware
       > cd Webware
-      > ./install.py
+      > ./install.py --set-password=""
       > chmod -R g+w .
 
     * Since you probably did not make changes to the home page
       through CVS, you can skip the following step again:
 
-    * Update the HomePage on SourceForge from CVS.
+    * Update the HomePage on SourceForge from CVS:
       > cvs -q up -dP
 
     * Verify that the home page changes are correct by browsing to
@@ -315,7 +318,7 @@ Announce on mailing lists:
 
 Update:
     [ ] <a href="http://wiki.python.org/moin/WebProgramming">Web Programming in Python</a>
-    [ ] <a href="http://www.python.org/pypi/Webware%20for%20Python/0.9.1">PyPI</a> (aka "Cheese Shop")
+    [ ] <a href="http://www.python.org/pypi/Webware%20for%20Python/">PyPI</a> (aka "Cheese Shop")
     [ ] <a href="http://py.vaults.ca">Vaults of Parnassus</a> (currently out of order)
     [ ] <a href="http://freshmeat.net">freshmeat.net</a>
 

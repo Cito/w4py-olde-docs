@@ -28,8 +28,8 @@ in various files as follows:
 
 	The version in ReleaseNotes-X.Y.phtml is not set (this will be
 	done by the installer), but they are renamed to the current version.
-	If possible, this is done with "svn move". Exception: If no release
-	have been written (ReleaseNotes-X.Y same as ReleaseNotesTemplate)
+	If possible, this is done with "svn move". Exception: If no new notes
+	have been written (i.e. ReleaseNotes-X.Y same as ReleaseNotesTemplate),
 	they will not be saved, but deleted, if possible, using "svn delete."
 
 If newRelease is True, then a new relase is prepared as follows:
