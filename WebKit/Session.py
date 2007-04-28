@@ -47,7 +47,7 @@ class Session(Object):
 		Object.__init__(self)
 
 		self._lastAccessTime = self._creationTime = time.time()
-		self._isExpired = 0
+		self._isExpired = False
 		self._numTrans = 0
 		self._values = {}
 		app = trans.application()
@@ -110,7 +110,7 @@ class Session(Object):
 		See also: expiring()
 
 		"""
-		return getattr(self, '_isExpired', 0) or self._timeout == 0
+		return getattr(self, '_isExpired', False) or self._timeout == 0
 
 	def isNew(self):
 		"""Check whether the session is new."""
@@ -212,7 +212,7 @@ class Session(Object):
 		Session store __delitem__()s should invoke if not isExpired().
 
 		"""
-		self._isExpired = 1
+		self._isExpired = True
 
 
 	## Utility ##
