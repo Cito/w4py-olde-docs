@@ -615,17 +615,33 @@ class HTTPRequest(Request):
 	def originalURI(self):
 		"""Get URI of the original servlet before any forwarding."""
 		if self._stack:
-			return self._stack[0][2]
+			return self._servletPath + self._stack[0][1]
 		else:
 			return self.uri()
 
 	def previousURI(self):
 		"""Get the previous URI, if any."""
 		if self._stack:
-			return self._stack[-1][2]
+			return self._servletPath + self._stack[-1][1]
 
 	def previousURIs(self):
 		"""Get the list of all previous URIs."""
+		return [self._servletPath + s[1] for s in self._stack]
+
+	def originalContextName(self):
+		"""Return the name of the original context before any forwarding."""
+		if self._stack:
+			return self._stack[0][2]
+		else:
+			return self._contextName
+
+	def previousContextName(self):
+		"""Get the previous context name, if any."""
+		if self._stack:
+			return self._stack[-1][2]
+
+	def previousContextNames(self):
+		"""Get the list of all previous context names."""
 		return [s[2] for s in self._stack]
 
 	def rawInput(self, rewind=False):
