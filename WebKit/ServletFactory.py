@@ -252,6 +252,7 @@ class ServletFactory(Object):
 					break
 				else:
 					if servlet.__class__ is theClass:
+						servlet.open()
 						return servlet
 
 		# Use a lock to prevent multiple simultaneous imports of the same
@@ -281,6 +282,7 @@ class ServletFactory(Object):
 				self._threadsafeServletCache[path] = servlet
 			else:
 				self._servletPool[path] = []
+				servlet.open()
 		return servlet
 
 	def returnServlet(self, servlet):

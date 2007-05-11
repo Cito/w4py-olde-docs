@@ -37,6 +37,7 @@ class Servlet(Object):
 		Object.__init__(self)
 		self._serverSidePath = None
 		self._factory = None
+		self._busy = False
 
 
 	## Access ##
@@ -154,10 +155,13 @@ class Servlet(Object):
 
 	## Private ##
 
+	def open(self):
+		self._busy = True
+
 	def close(self):
-		if self._factory:
+		if self._busy and self._factory:
+			self._busy = False
 			self._factory.returnServlet(self)
-			self._factory = None
 
 	def setFactory(self, factory):
 		self._factory = factory
