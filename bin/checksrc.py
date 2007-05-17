@@ -161,7 +161,7 @@ class CheckSrc:
 			'Attributes and methods should not have underscores past'
 			' the first character: %(attribute)s.',
 		'ExtraParens':
-			'No outer parenthesees should be used for "%(keyword)s".',
+			'No outer parentheses should be used for "%(keyword)s".',
 		'ObsExpr':
 			'"%(old)s" is obsolescent, use "%(new)s" instead.',
 		'OpNoSpace':
@@ -616,7 +616,7 @@ Error codes and their messages:
 					self.error('GetMeth', locals())
 
 	_exprKeywords = {}
-	for k in 'if while for with return yield'.split():
+	for k in 'assert for if return while with yield'.split():
 		_exprKeywords[k] = None
 
 	def checkExtraParens(self, parts, line):
