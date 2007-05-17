@@ -136,6 +136,13 @@ class HTTPRequest(Request):
 			print "Done setting up request, found keys %r" % self._fields.keys()
 
 
+	## Security ##
+
+	def isSecure(self):
+		"""Check whether this is a HTTPS connection."""
+		return self._environ.get('HTTPS', '').lower() == 'on'
+
+
 	## Transactions ##
 
 	def responseClass(self):
@@ -400,22 +407,21 @@ class HTTPRequest(Request):
 			fspath = os.path.join(docroot, fspath)
 		return fspath
 
-	def serverURL(self):
+	def serverURL(self, canonical=False):
 		"""Return the full internet path to this request.
 
 		This is the URL that was actually received by the webserver
-		before any rewriting took place.
+		before any rewriting took place. If canonical is set to true,
+		then the canonical hostname of the server is used if possible.
 
 		The path is returned without any extra path info or query strings,
 		i.e. http://www.my.own.host.com:8080/WebKit/TestPage.py
 
 		"""
-		if self._environ.has_key('SCRIPT_URI'):
+		if canonical and self._environ.has_key('SCRIPT_URI'):
 			return self._environ['SCRIPT_URI']
 		else:
-			scheme = 'http'
-			if self._environ.get('HTTPS', '').lower() == 'on':
-				scheme += 's'
+			scheme = self.isSecure() and 'https' or 'http'
 			host = self._environ['HTTP_HOST'] # includes port
 			return scheme + '://' + host + self.serverPath()
 

@@ -121,7 +121,7 @@ class Request(Message):
 		since secure channels are not yet supported.
 
 		"""
-		return 0
+		return False
 
 
 	## Transactions ##
