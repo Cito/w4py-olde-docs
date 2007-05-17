@@ -1,4 +1,4 @@
-#!/usr/local/bin/python -u
+#!/usr/bin/env python -u
 
 """Python Highlighter                                    Version: 0.8
 
