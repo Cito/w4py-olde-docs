@@ -157,18 +157,18 @@ class Cookie(Object):
 	## Misc ##
 
 	def delete(self):
-		"""
+		"""Delete a cookie.
+
 		When sent, this should delete the cookie from the user's
 		browser, by making it empty, expiring it in the past,
 		and setting its max-age to 0. One of these will delete
 		the cookie for any browser (which one actually works
 		depends on the browser).
+
 		"""
 		self._value = ''
 		self._cookie['expires'] = "Mon, 01-Jan-1900 00:00:00 GMT"
 		self._cookie['max-age'] = 0
-		self._cookie['path'] = '/'
-
 
 	def headerValue(self):
 		"""Return header value.
@@ -178,5 +178,5 @@ class Cookie(Object):
 
 		"""
 		items = self._cookies.items()
-		assert(len(items) == 1)
+		assert len(items) == 1
 		return items[0][1].OutputString()
