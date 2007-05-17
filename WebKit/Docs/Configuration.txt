@@ -136,7 +136,15 @@ which files are hidden, and some of how those files get chosen.
     is useful for situations where you want to use sessions, but it
     has to work even if the users can't use cookies.  If you use
     relative paths in your URLs, then you can ignore the presence of
-    these sessions variables.  Default: ``False``.
+    these sessions variables.  The name of the field can be configured
+    with the setting ``SessionName``.  Default: ``False``.
+``UseCookieSessions``:
+    If True, then the app server will store the session ID in a cookie
+    with the name set in ``SessionName``, which is usually ``_SID_``.
+    Default: ``True``.
+``SecureSessionCookie``:
+    If True, then the app server will use a secure cookie for the session
+    ID if the request was using an HTTPS connection.  Default: ``True``.
 ``MaxDynamicMemorySessions``:
     The maximum number of dynamic memory sessions that will be
     retained in memory.  When this number is exceeded, the least
@@ -156,7 +164,7 @@ which files are hidden, and some of how those files get chosen.
     as the prefix).  You can use this for load balancing, where each
     Webware server uses a different prefix.  You can then use mod_rewrite_
     or other software for load-balancing to redirect each user back to the
-    computer they first accessed.  This way the backend servers do not
+    server they first accessed.  This way the backend servers do not
     have to share session data.  Default: ``None``.
 
     .. _mod_rewrite: http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html

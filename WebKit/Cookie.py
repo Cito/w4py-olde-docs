@@ -143,8 +143,8 @@ class Cookie(Object):
 	def setPath(self, path):
 		self._cookie['path'] = path
 
-	def setSecure(self, bool):
-		self._cookie['secure'] = bool
+	def setSecure(self, secure=True):
+		self._cookie['secure'] = secure
 
 	def setValue(self, value):
 		self._value = value

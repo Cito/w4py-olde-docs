@@ -53,6 +53,8 @@ defaultConfig = {
 	'SessionName': '_SID_',
 	'IgnoreInvalidSession': True,
 	'UseAutomaticPathSessions': False,
+	'UseCookieSessions': True,
+	'SecureSessionCookie': True,
 	'ShowDebugInfoOnErrors': True,
 	'IncludeFancyTraceback': False,
 	'FancyTracebackContext': 5,

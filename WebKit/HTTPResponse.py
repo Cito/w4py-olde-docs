@@ -343,15 +343,16 @@ class HTTPResponse(Response):
 		"""
 		trans = self._transaction
 		app = trans.application()
-		if not app.setting('UseCookieSessions', True):
+		if not app.setting('UseCookieSessions'):
 			return
 		sess = trans.session()
 		if sess:
 			cookie = Cookie(app.sessionName(trans), sess.identifier())
 			cookie.setPath(app.sessionCookiePath(trans))
+			if trans.request().isSecure():
+				cookie.setSecure(app.setting('SecureSessionCookie'))
 			if sess.isExpired() or sess.timeout() == 0:
-				# Invalid -- tell client to forget the cookie.
-				cookie.delete()
+				cookie.delete() # invalid -- tell client to forget the cookie
 			self.addCookie(cookie)
 			if debug:
 				print '>> recordSession: Setting SID =', sess.identifier()
