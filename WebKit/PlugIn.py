@@ -121,10 +121,14 @@ class PlugIn(Object):
 				assert os.path.exists(docsPath), \
 					'Plug-in %s says it has documentation, ' \
 					'but there is no Docs/ subdir.' % self._name
-				ctxName = self._name + '/Docs'
-				if not app.hasContext(ctxName):
-					app.addContext(ctxName, docsPath)
-				self._docContext = ctxName
+				if os.path.exists(os.path.join(docsPath, '__init__.py')):
+					ctxName = self._name + '/Docs'
+					if not app.hasContext(ctxName):
+						app.addContext(ctxName, docsPath)
+					self._docContext = ctxName
+				else:
+					print 'Cannot create Docs context for plug-in %s' \
+						' (no __init__.py found).' % self._name
 
 	def setUpExamplePages(self):
 		"""Add a context for the examples."""
@@ -137,10 +141,14 @@ class PlugIn(Object):
 				assert os.path.exists(examplesPath), \
 					'Plug-in %s says it has example pages, ' \
 					'but there is no Examples/ subdir.' % self._name
-				ctxName = self._name + '/Examples'
-				if not app.hasContext(ctxName):
-					app.addContext(ctxName, examplesPath)
-				self._examplePagesContext = ctxName
+				if os.path.exists(os.path.join(examplesPath, '__init__.py')):
+					ctxName = self._name + '/Examples'
+					if not app.hasContext(ctxName):
+						app.addContext(ctxName, examplesPath)
+					self._examplePagesContext = ctxName
+				else:
+					print 'Cannot create Examples context for plug-in %s' \
+						' (no __init__.py found).' % self._name
 
 	def docs(self):
 		return self._docs
