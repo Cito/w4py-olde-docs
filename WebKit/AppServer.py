@@ -325,7 +325,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 					and filename not in plugIns):
 					plugIns.append(filename)
 
-		print 'Plug-ins list:', ', '.join(plugIns)
+		print 'Plug-ins list:', ', '.join(plugIns) or 'empty'
 
 		# Now that we have our plug-in list, load them...
 		for plugInPath in plugIns:
