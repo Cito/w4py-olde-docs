@@ -142,6 +142,13 @@ which files are hidden, and some of how those files get chosen.
     If True, then the app server will store the session ID in a cookie
     with the name set in ``SessionName``, which is usually ``_SID_``.
     Default: ``True``.
+``SessionCookiePath``:
+    You can specify a path for the session cookie here. ``None`` means
+    that the servlet path will be used, which is normally the best choice.
+    If you rewrite the URL using different prefixes, you may have to
+    specify a fixed prefix for all your URLs. Using the root path '/'
+    will always work, but may have security issues if you are running less
+    secure applications on the same server. Default: ``None``.
 ``SecureSessionCookie``:
     If True, then the app server will use a secure cookie for the session
     ID if the request was using an HTTPS connection.  Default: ``True``.

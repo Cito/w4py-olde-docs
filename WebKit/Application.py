@@ -54,6 +54,7 @@ defaultConfig = {
 	'IgnoreInvalidSession': True,
 	'UseAutomaticPathSessions': False,
 	'UseCookieSessions': True,
+	'SessionCookiePath': None,
 	'SecureSessionCookie': True,
 	'ShowDebugInfoOnErrors': True,
 	'IncludeFancyTraceback': False,
@@ -456,11 +457,13 @@ class Application(ConfigurableForServerSidePath, Object):
 	def sessionCookiePath(self, trans):
 		"""Get the cookie path for this transaction.
 
-		The servlet path is used for security reasons, see:
+		If not path is specified in the configuration setting,
+		the servlet path is used for security reasons, see:
 		http://www.net-security.org/dl/articles/cookie_path.pdf
 
 		"""
-		return trans.request().servletPath() + '/'
+		return self.setting('SessionCookiePath') or (
+			trans.request().servletPath() + '/')
 
 
 	## Misc Access ##
