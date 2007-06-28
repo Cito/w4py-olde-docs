@@ -106,7 +106,8 @@ class ExamplePage(SidebarPage):
 	def writeContent(self):
 		wr = self.writeln
 		wr('<div style="padding-left:2em"><table>')
-		for page in self.examplePages():
+		for page in self.examplePages(
+				self.request().contextName().split('/', 1)[0]):
 			wr('<tr><td bgcolor="#E8E8F0"><a href=%s>%s</a>'
 				'</td></tr>' % (page, page))
 		wr('</table></div>')
