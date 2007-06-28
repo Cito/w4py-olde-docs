@@ -29,7 +29,7 @@ class SessionFileStore(SessionStore):
 
 	def __init__(self, app):
 		SessionStore.__init__(self, app)
-		self._sessionDir = app.serverSidePath('Sessions')
+		self._sessionDir = app._sessionDir
 		self._lock = threading.RLock()
 
 

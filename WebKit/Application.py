@@ -48,6 +48,7 @@ defaultConfig = {
 		],
 	'SessionModule': 'Session',
 	'SessionStore': 'Dynamic',
+	'SessionStoreDir': 'Sessions',
 	'SessionTimeout': 60,
 	'SessionPrefix': '',
 	'SessionName': '_SID_',
@@ -244,6 +245,19 @@ class Application(ConfigurableForServerSidePath, Object):
 		moduleName = self.setting('SessionStore')
 		if moduleName in ('Dynamic', 'File', 'Memory'):
 			moduleName = 'Session%sStore' % moduleName
+		if moduleName == 'SessionMemoryStore':
+			sessionDir = None
+		else:
+			sessionDir = self.setting('SessionStoreDir') or 'Sessions'
+			sessionDir = self.serverSidePath(sessionDir)
+			if not os.path.exists(sessionDir):
+				try:
+					os.makedirs(sessionDir)
+				except (TypeError, OSError):
+					print "ERROR: SessionStoreDir does not exist" \
+						" and cannot be created."
+					sessionDir = None
+		self._sessionDir = sessionDir
 		className = moduleName.split('.')[-1]
 		try:
 			exec 'from %s import %s' % (moduleName, className)
