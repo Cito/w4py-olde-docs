@@ -430,9 +430,16 @@ AppServer.config
     to this port.  Default: ``8080``.
 ``PidFile``:
     When the AppServer starts up, the process ID will be written into this file.
-    The path will be relative to the working directory (or WebKit path, if
-    you're not using a working directory), or you can specify an absolute path.
-    Default: ``WORKDIR/appserver.pid``.
+    The location is relative to the working directory (or WebKit path, if you're
+    not using a working directory), or you can specify an absolute path.
+    Default: ``appserver.pid``.
+``AddressFile``:
+    When the AppServer starts up, the server address (IP address and port)
+    of the adapter handler and other handlers will be written into a file with
+    this file name, where ``%s`` will be replaced by the name of the handler.
+    The location is relative to the working directory (or WebKit path, if you're
+    not using a working directory), or you can specify an absolute path.
+    Default: ``%s.address``.
 ``PluginDirs``:
     When the application server starts up, it looks in these locations for
     plugins.  Each plugin is a subdirectory of its own.  By default WebKit looks

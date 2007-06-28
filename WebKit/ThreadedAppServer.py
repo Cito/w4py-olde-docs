@@ -49,6 +49,7 @@ defaultConfig = {
 	'RequestQueueSize': 0, # means twice the maximum number of threads
 	'RequestBufferSize': 8*1024, # 8 kBytes
 	'ResponseBufferSize': 8*1024, # 8 kBytes
+	'AddressFile': '%s.address', # %s stands for the protocol name
 	# @@ the following setting is not yet implemented
 	# 'SocketType': 'inet', # inet, inet6, unix
 }
@@ -569,7 +570,8 @@ class ThreadedAppServer(AppServer):
 
 	def addressFileName(self, handlerClass):
 		"""Get the name of the text file with the server address."""
-		return '%s.address' % handlerClass.protocolName
+		return self.serverSidePath(
+			self.setting('AddressFile') % handlerClass.protocolName)
 
 
 class Handler:
