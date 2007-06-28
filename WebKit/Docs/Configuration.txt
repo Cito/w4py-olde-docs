@@ -433,10 +433,10 @@ AppServer.config
     The location is relative to the working directory (or WebKit path, if you're
     not using a working directory), or you can specify an absolute path.
     Default: ``appserver.pid``.
-``AddressFile``:
+``AddressFiles``:
     When the AppServer starts up, the server address (IP address and port)
-    of the adapter handler and other handlers will be written into a file with
-    this file name, where ``%s`` will be replaced by the name of the handler.
+    of the adapter handler and other handlers will be written into files with
+    this name, ``%s`` being replaced by the name of the respective handler.
     The location is relative to the working directory (or WebKit path, if you're
     not using a working directory), or you can specify an absolute path.
     Default: ``%s.address``.
