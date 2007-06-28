@@ -81,6 +81,7 @@ defaultConfig = {
 	'MaxValueLengthInExceptionReport': 500,
 	'RPCExceptionReturn': 'traceback',
 	'ReportRPCExceptionsInWebKit': True,
+	'CacheDir': 'Cache',
 	'Contexts': {
 		'default': 'Examples',
 		'Admin': 'Admin',
@@ -175,6 +176,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		self._exceptionHandlerClass = ExceptionHandler
 
 		self.initSessions()
+		self.makeDirs()
 
 		URLParser.initApp(self)
 		self._rootURLParser = URLParser.ContextParser(self)
@@ -245,19 +247,9 @@ class Application(ConfigurableForServerSidePath, Object):
 		moduleName = self.setting('SessionStore')
 		if moduleName in ('Dynamic', 'File', 'Memory'):
 			moduleName = 'Session%sStore' % moduleName
-		if moduleName == 'SessionMemoryStore':
-			sessionDir = None
-		else:
-			sessionDir = self.setting('SessionStoreDir') or 'Sessions'
-			sessionDir = self.serverSidePath(sessionDir)
-			if not os.path.exists(sessionDir):
-				try:
-					os.makedirs(sessionDir)
-				except (TypeError, OSError):
-					print "ERROR: SessionStoreDir does not exist" \
-						" and cannot be created."
-					sessionDir = None
-		self._sessionDir = sessionDir
+		self._sessionDir = moduleName != 'SessionMemoryStore' \
+			and self.serverSidePath(
+				self.setting('SessionStoreDir') or 'Sessions') or None
 		className = moduleName.split('.')[-1]
 		try:
 			exec 'from %s import %s' % (moduleName, className)
@@ -270,6 +262,17 @@ class Application(ConfigurableForServerSidePath, Object):
 			print "ERROR: Could not import SessionStore class '%s'" \
 				" from module '%s'" % (className, moduleName)
 			self._sessions = None
+
+	def makeDirs(self):
+		"""Make sure some standard directories are always available."""
+		self._cacheDir = self.serverSidePath(
+			self.setting('CacheDir') or 'Cache')
+		self._errorMessagesDir = self.serverSidePath(
+			self.setting('ErrorMessagesDir') or 'ErrorMsgs')
+		for dir in (self.serverSidePath('Logs'),
+				self._cacheDir, self._errorMessagesDir, self._sessionDir):
+			if dir and not os.path.exists(dir):
+				os.makedirs(dir)
 
 	def initVersions(self):
 		"""Get and store versions.

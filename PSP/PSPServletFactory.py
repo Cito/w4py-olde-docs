@@ -35,7 +35,7 @@ class PSPServletFactory(ServletFactory):
 
 	def __init__(self, application):
 		ServletFactory.__init__(self, application)
-		self._cacheDir = application.serverSidePath('Cache/PSP')
+		self._cacheDir = os.path.join(application._cacheDir, 'PSP')
 		sys.path.append(self._cacheDir)
 		self._cacheClassFiles = self._cacheClasses
 		t = ['_'] * 256

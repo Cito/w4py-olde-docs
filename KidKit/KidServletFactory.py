@@ -2,7 +2,7 @@
 
 This allows you to run Kid template files directly from within Webware.
 Compiled templates are cached either along with the templates or in the
-Cache/KidKit subdirectory of the WebKit working directory.
+KidKit subdirectory of the WebKit Cache directory.
 
 Note that the Kid package itself is not part of Webware; you need to install
 it separately (see http://www.kid-templating.org for more information).
@@ -98,7 +98,7 @@ class KidServletFactory(ServletFactory):
 		if self._useCache:
 			self._cacheSource = setting('CacheKidSource', True)
 			self._clearCache = setting('ClearKidCacheOnStart', False)
-			self._cacheDir = application.serverSidePath('Cache/KidKit')
+			self._cacheDir = os.path.join(application._cacheDir, 'KidKit')
 			if self._clearCache:
 				self.clearFileCache()
 		else:

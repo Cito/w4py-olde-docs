@@ -66,6 +66,8 @@ class PlugIn(Object):
 		self._appServer = appServer
 		self._path = path
 		self._dir, self._name = os.path.split(path)
+		self._cacheDir = os.path.join(
+			self._appServer.application()._cacheDir, self._name)
 		self._ver = '(unknown)'
 		self._docs = self._docContext = None
 		self._examplePages = self._examplePagesContext = None
@@ -103,10 +105,8 @@ class PlugIn(Object):
 		setattr(self._module, 'plugIn', self)
 
 		# Make a subdirectory for it in the Cache directory:
-		cacheDir = os.path.join(self._appServer.serverSidePath(),
-			'Cache', self._name)
-		if not os.path.exists(cacheDir):
-			os.mkdir(cacheDir)
+		if not os.path.exists(self._cacheDir):
+			os.mkdir(self._cacheDir)
 
 		self.setUpDocContext()
 		self.setUpExamplePages()

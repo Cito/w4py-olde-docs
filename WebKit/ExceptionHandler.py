@@ -464,8 +464,8 @@ class ExceptionHandler(Object):
 		the developer, and returns the filename used.
 
 		"""
-		filename = self._app.serverSidePath(os.path.join(
-			self.setting('ErrorMessagesDir'), self.errorPageFilename()))
+		filename = os.path.join(self._app._errorMessagesDir,
+			self.errorPageFilename())
 		f = open(filename, 'w')
 		f.write(html)
 		f.close()

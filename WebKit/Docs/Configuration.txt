@@ -233,6 +233,12 @@ Caching
     You usually do not need this, as servlet modules are reloaded and
     cached instances purged when the servlet file changes.
     Default: ``True`` (caching on).
+``CacheDir``:
+    This is the name of the directory where things like compiled PSP
+    or Kid templates are cached.  Webware creates a subdirectory for
+    every plug-in in this directory.  The path is interpreted as relative
+    to the working directory (or WebKit path, if you're not using a working
+    directory), or you can specify an absolute path.  Default: ``Cache``.
 ``ClearPSPCacheOnStart``:
     When set to False, the app server will allow PSP instances to
     persist from one AppServer run to the next.  If you have PSPs that
@@ -285,7 +291,9 @@ Errors
     surprising amount of space.  Default: ``True`` (do save).
 ``ErrorMessagesDir``:
     This is the name of the directory where HTML error messages get
-    stored.  Default: ``ErrorMsgs``.
+    stored.  The path is interpreted as relative to the working directory
+    (or WebKit path, if you're not using a working directory), or you
+    can specify an absolute path.Default: ``ErrorMsgs``.
 ``EmailErrors``:
     If True, error messages are e-mailed out according to the
     ErrorEmailServer and ErrorEmailHeaders settings.  You must also set
