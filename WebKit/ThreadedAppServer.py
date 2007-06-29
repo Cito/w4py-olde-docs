@@ -97,50 +97,54 @@ class ThreadedAppServer(AppServer):
 		handlers (Adapter, HTTP, Monitor).
 
 		"""
-		self._defaultConfig = None
-		AppServer.__init__(self, path)
-
-		threadCount = self.setting('StartServerThreads')
-		self._maxServerThreads = self.setting('MaxServerThreads')
-		self._minServerThreads = self.setting('MinServerThreads')
-		self._requestQueueSize = self.setting('RequestQueueSize')
-		if not self._requestQueueSize:
-			# if not set, make queue size twice the max number of threads
-			self._requestQueueSize = 2 * self._maxServerThreads
-		elif self._requestQueueSize < self._maxServerThreads:
-			# otherwise do not make it smaller than the max number of threads
-			self._requestQueueSize = self._maxServerThreads
-		self._requestBufferSize = self.setting('RequestBufferSize')
-		self._responseBufferSize = self.setting('ResponseBufferSize')
-
 		self._threadPool = []
 		self._threadCount = 0
 		self._threadUseCounter = []
-		self._requestQueue = Queue.Queue(self._requestQueueSize)
 		self._addr = {}
 		self._requestID = 0
-
-		out = sys.stdout
-		out.write('Creating %d threads' % threadCount)
-		for i in range(threadCount):
-			self.spawnThread()
-			out.write(".")
-			out.flush()
-		out.write("\n")
-
 		self._socketHandlers = {}
 		self._handlerCache = {}
 		self._sockets = {}
 
-		if self.setting('EnableAdapter'):
-			self.addSocketHandler(AdapterHandler)
-		if self.setting('EnableMonitor'):
-			self.addSocketHandler(MonitorHandler)
-		if self.setting('EnableHTTP'):
-			from HTTPServer import HTTPAppServerHandler
-			self.addSocketHandler(HTTPAppServerHandler)
+		self._defaultConfig = None
+		AppServer.__init__(self, path)
 
-		self.readyForRequests()
+		try:
+			threadCount = self.setting('StartServerThreads')
+			self._maxServerThreads = self.setting('MaxServerThreads')
+			self._minServerThreads = self.setting('MinServerThreads')
+			self._requestQueueSize = self.setting('RequestQueueSize')
+			if not self._requestQueueSize:
+				# if not set, make queue size twice the max number of threads
+				self._requestQueueSize = 2 * self._maxServerThreads
+			elif self._requestQueueSize < self._maxServerThreads:
+				# otherwise do not make it smaller than the max number of threads
+				self._requestQueueSize = self._maxServerThreads
+			self._requestBufferSize = self.setting('RequestBufferSize')
+			self._responseBufferSize = self.setting('ResponseBufferSize')
+
+			self._requestQueue = Queue.Queue(self._requestQueueSize)
+
+			out = sys.stdout
+			out.write('Creating %d threads' % threadCount)
+			for i in range(threadCount):
+				self.spawnThread()
+				out.write(".")
+				out.flush()
+			out.write("\n")
+
+			if self.setting('EnableAdapter'):
+				self.addSocketHandler(AdapterHandler)
+			if self.setting('EnableMonitor'):
+				self.addSocketHandler(MonitorHandler)
+			if self.setting('EnableHTTP'):
+				from HTTPServer import HTTPAppServerHandler
+				self.addSocketHandler(HTTPAppServerHandler)
+
+			self.readyForRequests()
+		except:
+			AppServer.initiateShutdown(self)
+			raise
 
 	def addSocketHandler(self, handlerClass, serverAddress=None):
 		"""Add socket handler.
@@ -481,26 +485,28 @@ class ThreadedAppServer(AppServer):
 		and tells all the threads to die.
 
 		"""
+		print "ThreadedAppServer is shutting down..."
 		if self._running > 2:
 			self._running = 2 # ask main loop to finish
-		print "ThreadedAppServer is shutting down..."
-		sys.stdout.flush()
-		self.awakeSelect() # unblock select call in mainloop()
-		for i in range(30): # wait at most 3 seconds for shutdown
-			if self._running < 2:
-				break
-			time.sleep(0.1)
-		# Close all sockets now:
-		for sock in self._sockets.values():
-			sock.close()
-		# Remove the text files with the server addresses:
-		for handler in self._socketHandlers.values():
-			adrFile = self.addressFileName(handler)
-			if os.path.exists(adrFile):
-				try:
-					os.unlink(adrFile)
-				except OSError:
-					print "Warning: Could not remove", adrFile
+			self.awakeSelect() # unblock select call in mainloop()
+			sys.stdout.flush()
+			for i in range(30): # wait at most 3 seconds for shutdown
+				if self._running < 2:
+					break
+				time.sleep(0.1)
+		if self._sockets:
+			# Close all sockets now:
+			for sock in self._sockets.values():
+				sock.close()
+		if self._socketHandlers:
+			# Remove the text files with the server addresses:
+			for handler in self._socketHandlers.values():
+				adrFile = self.addressFileName(handler)
+				if os.path.exists(adrFile):
+					try:
+						os.unlink(adrFile)
+					except OSError:
+						print "Warning: Could not remove", adrFile
 		# Tell all threads to end:
 		for i in range(self._threadCount):
 			self._requestQueue.put(None)
@@ -511,16 +517,13 @@ class ThreadedAppServer(AppServer):
 				pass
 		# Call super's shutdown:
 		AppServer.shutDown(self)
-		sys.stdout.flush()
-		sys.stderr.flush()
-		self._running = 0
 
 	def awakeSelect(self):
 		"""Awake the select() call.
 
 		The ``select()`` in `mainloop()` is blocking, so when
 		we shut down we have to make a connect to unblock it.
-		Here's where we do that, called `shutDown`.
+		Here's where we do that.
 
 		"""
 		for host, port in self._sockets.keys():
