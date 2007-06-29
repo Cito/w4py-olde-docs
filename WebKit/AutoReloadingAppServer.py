@@ -13,7 +13,7 @@ in seconds can be set with `AutoReloadPollInterval` in AppServer.config.
 
 """
 
-import select
+import select, errno
 from threading import Thread
 
 from Common import *
@@ -351,13 +351,12 @@ class AutoReloadingAppServer(AppServer):
 			try:
 				# We block here until a file has been changed, or until
 				# we receive word that we should shutdown (via the pipe).
-				ri, ro, re = select.select([fd, r], [], [])
-			except select.error, er:
-				errnumber, strerr = er
-				if errnumber == errno.EINTR:
+				select.select([fd, r], [], [])
+			except select.error, e:
+				if e[0] == errno.EINTR:
 					continue
 				else:
-					print strerr
+					print e[1]
 					sys.exit(1)
 			while fam.pending():
 				c, f = fam.nextFile()
