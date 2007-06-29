@@ -214,7 +214,7 @@ class AutoReloadingAppServer(AppServer):
 				except Exception, e:
 					print "Error loading FAM:", str(e)
 					self._fam = None
-				if self._fam:
+				if not self._fam:
 					print 'FAM not available, fall back to polling.'
 			print 'AutoReload Monitor started,',
 			if self._fam:
