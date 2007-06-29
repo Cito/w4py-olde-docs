@@ -498,10 +498,15 @@ AppServer.config
     or changes to the Webware source files, and reload the server as
     necessary to pick up the changes.
 
-    This uses python-fam (fam = file alteration monitor) if available.
-    Otherwise, or when ImportSpy has been disabled by setting
-    ``UseImportSpy`` to False, it resorts to polling.  The polling interval
-    in seconds can be set with the ``AutoReloadPollInterval`` setting which
-    defaults to 1 second.
+    This uses the FAM (File Alteration Monitor) module specified in the setting
+    ``UseFAMModules`` if available.  You can also specify several modules to
+    check them in the given order (the default is ``gamin _fam`` for using
+    python-gamin__ or python-fam__).  Otherwise, if no FAM module is specified
+    or installed, or when ImportSpy has been disabled by setting ``UseImportSpy``
+    to False, it resorts to polling.  The polling interval in seconds can be set
+    with the ``AutoReloadPollInterval`` setting which defaults to 1 second.
 
     By default, ``AutoReload`` is set to ``False``.
+
+    __ http://www.gnome.org/~veillard/gamin/
+    __ http://python-fam.sourceforge.net

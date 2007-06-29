@@ -3,7 +3,7 @@
 """AutoReloadingAppServer
 
 This module defines `AutoReloadingAppServer`, a replacement for `AppServer`
-that adds a file-monitoring and restarting to the AppServer. Used mostly like::
+that adds a file-monitoring and restarting to the AppServer. Used mostly like:
 
     from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 
@@ -19,20 +19,126 @@ from threading import Thread
 from Common import *
 from AppServer import AppServer
 
-# Attempt to use python-fam (FAM = File Alteration Monitor) instead of polling
-# to see if files have changed. Get it from http://python-fam.sourceforge.net.
-# If FAM is not available or ImportSpy is not used, we fall back to polling.
-try:
-	import _fam
-except ImportError:
-	_fam = None
-
 
 defaultConfig = {
 	'AutoReload': False,
 	'AutoReloadPollInterval': 1, # in seconds
 	'UseImportSpy': True,
+	'UseFAMModules': 'gamin _fam',
 }
+
+
+def fam(modules):
+	"""Get FAM object based on the modules specified.
+
+	Currently supported are
+	python-gamin (gamin): http://www.gnome.org/~veillard/gamin/
+	python-fam (_fam): http://python-fam.sourceforge.net
+
+	"""
+	for module in modules:
+		try:
+			fam = __import__(module)
+		except ImportError:
+			fam = None
+		if not fam:
+			continue
+		if hasattr(fam, 'GAM_CONNECT') and hasattr(
+				fam, 'WatchMonitor') and hasattr(fam, 'GAMChanged'):
+
+
+			class FAM:
+				"""Simple File Alteration Monitor based on python-gamin"""
+
+				def name(self):
+					return "python-gamin"
+
+				def __init__(self):
+					"""Initialize and start monitoring."""
+					self._mon = fam.WatchMonitor()
+					self._watchlist = []
+
+				def close(self):
+					"""Stop monitoring and close."""
+					for filepath in self._watchlist:
+						self._mon.stop_watch(filepath)
+					del self._mon
+
+				def fd(self):
+					"""Get file descriptor for monitor."""
+					return self._mon.get_fd()
+
+				def monitorFile(self, filepath):
+					"""Monitor one file."""
+					self._mon.watch_file(filepath, self.callback)
+					self._watchlist.append(filepath)
+
+				def pending(self):
+					"""Check whether an event is pending."""
+					return self._mon.event_pending()
+
+				def nextFile(self):
+					"""Get next file and return whether it has changed."""
+					self._mon.handle_one_event()
+					return self._changed, self._filepath
+
+				def callback(self, filepath, event):
+					"""Callback function for WatchMonitor."""
+					self._filepath = filepath
+					self._changed = {fam.GAMChanged: 'changed',
+						fam.GAMCreated: 'created', fam.GAMMoved: 'moved',
+						fam.GAMDeleted: 'deleted'}.get(event)
+
+			break
+		elif hasattr(fam, 'FAMConnection') and hasattr(
+				fam, 'open') and hasattr(fam, 'Changed'):
+
+
+			class FAM:
+				"""Simple File Alteration Monitor based on python-fam"""
+
+				def name(self):
+					return "python-fam"
+
+				def __init__(self):
+					"""Initialize and start monitoring."""
+					self._fc = fam.open()
+					self._requests = []
+
+				def close(self):
+					"""Stop monitoring and close."""
+					for request in self._requests:
+						request.cancelMonitor()
+					self._fc.close()
+					del self._fc
+
+				def fd(self):
+					"""Get file descriptor for monitor."""
+					return self._fc
+
+				def monitorFile(self, filepath):
+					"""Monitor one file."""
+					self._requests.append(self._fc.monitorFile(filepath, None))
+
+				def pending(self):
+					"""Check whether an event is pending."""
+					return self._fc.pending()
+
+				def nextFile(self):
+					"""Get next file and return whether it has changed."""
+					event = self._fc.nextEvent()
+					# we can also use event.code2str() here,
+					# but then we need to filter the events
+					changed = {fam.Changed: 'changed',
+						fam.Created: 'created', fam.Moved: 'moved',
+						fam.Deleted: 'deleted'}.get(event.code)
+					return changed, event.filename
+
+			break
+	else:
+		FAM = None
+	if FAM:
+		return FAM()
 
 
 class AutoReloadingAppServer(AppServer):
@@ -58,7 +164,11 @@ class AutoReloadingAppServer(AppServer):
 		AppServer.__init__(self, path)
 		self._autoReload = False
 		self._shouldRestart = False
-		self._useFAM = False
+		self._famModules = self.setting('UseFAMModules')
+		try:
+			self._famModules = self._famModules.split()
+		except AttributeError:
+			pass
 		if self.isPersistent():
 			if self.setting('AutoReload'):
 				self.activateAutoReload()
@@ -94,25 +204,25 @@ class AutoReloadingAppServer(AppServer):
 		if self.setting('UseImportSpy'):
 			s = self._imp.activateImportSpy()
 			print 'ImportSpy activated (using %s).' % s
-		self._useFAM = False
 		if not self._autoReload:
-			if _fam and self._imp._spy:
+			if self._famModules and self._imp._spy:
 				# FAM will be only used when ImportSpy has been activated,
 				# since otherwise we need to poll the modules anyway.
+				self._pipe = None
 				try:
-					self._fc = _fam.open()
-					self._pipe = None
-					self._useFAM = True
-				except IOError:
+					self._fam = fam(self._famModules)
+				except Exception, e:
+					print "Error loading FAM:", str(e)
+					self._fam = None
+				if self._fam:
 					print 'FAM not available, fall back to polling.'
-					self._fc = None
-			if self._useFAM:
-				print 'AutoReload Monitor started, using FAM.'
+			print 'AutoReload Monitor started,',
+			if self._fam:
+				print 'using %s.' % self._fam.name()
 				target = self.fileMonitorThreadLoopFAM
 			else:
 				self._pollInterval = self.setting('AutoReloadPollInterval')
-				print 'AutoReload Monitor started, ' \
-					'polling every %d seconds.' % self._pollInterval
+				print 'polling every %d seconds.' % self._pollInterval
 				target = self.fileMonitorThreadLoop
 			self._fileMonitorThread = t = Thread(target=target)
 			self._autoReload = True
@@ -126,7 +236,7 @@ class AutoReloadingAppServer(AppServer):
 
 		"""
 		self._autoReload = False
-		if self._useFAM and self._pipe:
+		if self._fam and self._pipe:
 			# Send a message down the pipe to wake up the monitor thread
 			# and tell him to quit.
 			self._pipe[1].write('close')
@@ -184,14 +294,15 @@ class AutoReloadingAppServer(AppServer):
 		to monitor. This is only used when we are using FAM.
 
 		"""
-		filepath = os.path.abspath(filepath)
-		self._requests.append(self._fc.monitorFile(filepath, filepath))
+		self._fam.monitorFile(os.path.abspath(filepath))
 
 
 	## Internal methods ##
 
 	def shouldRestart(self):
 		"""Tell the main thread to restart the server."""
+		if self._fam:
+			self._fam.close()
 		self._autoReload = False
 		self._shouldRestart = True
 
@@ -217,7 +328,7 @@ class AutoReloadingAppServer(AppServer):
 
 	def fileMonitorThreadLoopFAM(self, getmtime=os.path.getmtime):
 		"""Monitoring thread loop, but using the FAM library."""
-		self._pipe = self._requests = None
+		self._pipe = None
 		# For all of the modules which have _already_ been loaded,
 		# we check to see if they've already been modified:
 		f = self._imp.updatedFile()
@@ -226,7 +337,6 @@ class AutoReloadingAppServer(AppServer):
 			print 'The app server is restarting now...'
 			self.shouldRestart()
 			return
-		self._requests = []
 		for f in self._imp.fileList():
 			self.monitorNewModule(f)
 		self._imp.notifyOfNewFiles(self.monitorNewModule)
@@ -234,14 +344,14 @@ class AutoReloadingAppServer(AppServer):
 		# server is shutdown. We use a pipe because it needs to be an object
 		# which will wake up the call to 'select':
 		r, w = os.pipe()
-		r, w = os.fdopen(r, 'r'), os.fdopen(w, 'w')
-		self._pipe = pipe = (r, w)
-		fc = self._fc
+		self._pipe = r, w = os.fdopen(r, 'r'), os.fdopen(w, 'w')
+		fam = self._fam
+		fd = fam.fd()
 		while self._autoReload:
 			try:
 				# We block here until a file has been changed, or until
 				# we receive word that we should shutdown (via the pipe).
-				ri, ro, re = select.select([fc, pipe[0]], [], [])
+				ri, ro, re = select.select([fd, r], [], [])
 			except select.error, er:
 				errnumber, strerr = er
 				if errnumber == errno.EINTR:
@@ -249,20 +359,15 @@ class AutoReloadingAppServer(AppServer):
 				else:
 					print strerr
 					sys.exit(1)
-			while fc.pending():
-				fe = fc.nextEvent()
-				c, f = fe.code2str(), fe.userData
-				if c in ('changed', 'deleted', 'created') \
-						and self._imp.fileUpdated(f):
+			while fam.pending():
+				c, f = fam.nextFile()
+				if c and self._imp.fileUpdated(f):
 					print '*** The file %s has been %s.' % (f, c)
 					print 'The app server is restarting now...'
 					self.shouldRestart()
 					return
 		self._imp.notifyOfNewFiles(None)
 		self._pipe = None
-		for req in self._requests:
-			req.cancelMonitor()
-		self._requests = None
-		fc.close()
+		fam.close()
 		print 'Autoreload Monitor stopped'
 		sys.stdout.flush()
