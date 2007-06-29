@@ -2,27 +2,26 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.4: http://docutils.sourceforge.net/" />
 <title>Configuration Guide</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="configuration-guide">
 <h1 class="title">Configuration Guide</h1>
-
 <div class="contents topic">
 <p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
 <ul class="simple">
-<li><a class="reference" href="#command-line-configuration" id="id3" name="id3">Command Line Configuration</a></li>
-<li><a class="reference" href="#application-config" id="id4" name="id4">Application.config</a><ul>
-<li><a class="reference" href="#general-settings" id="id5" name="id5">General Settings</a></li>
-<li><a class="reference" href="#path-handling" id="id6" name="id6">Path Handling</a></li>
-<li><a class="reference" href="#caching" id="id7" name="id7">Caching</a></li>
-<li><a class="reference" href="#errors" id="id8" name="id8">Errors</a></li>
-<li><a class="reference" href="#logging" id="id9" name="id9">Logging</a></li>
+<li><a class="reference" href="#command-line-configuration" id="id5" name="id5">Command Line Configuration</a></li>
+<li><a class="reference" href="#application-config" id="id6" name="id6">Application.config</a><ul>
+<li><a class="reference" href="#general-settings" id="id7" name="id7">General Settings</a></li>
+<li><a class="reference" href="#path-handling" id="id8" name="id8">Path Handling</a></li>
+<li><a class="reference" href="#caching" id="id9" name="id9">Caching</a></li>
+<li><a class="reference" href="#errors" id="id10" name="id10">Errors</a></li>
+<li><a class="reference" href="#logging" id="id11" name="id11">Logging</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#appserver-config" id="id10" name="id10">AppServer.config</a></li>
+<li><a class="reference" href="#appserver-config" id="id12" name="id12">AppServer.config</a></li>
 </ul>
 </div>
 <div class="section">
@@ -140,6 +139,12 @@ but will periodically back them up to disk.  <tt class="docutils literal"><span 
 cross between the two, which pushes excessive or inactive sessions
 out to disk.  You can choose your own session store module as well.
 Default: <tt class="docutils literal"><span class="pre">Dynamic</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">SessionStoreDir</span></tt>:</dt>
+<dd>If <tt class="docutils literal"><span class="pre">SessionStore</span></tt> is set to <tt class="docutils literal"><span class="pre">File</span></tt> or <tt class="docutils literal"><span class="pre">Dynamic</span></tt>, then this
+setting determines the directory where the files for the individual
+sessions will be stored.  The path is interpreted as relative to the
+working directory (or WebKit path, if you're not using a working
+directory), or you can specify an absolute path.  Default: <tt class="docutils literal"><span class="pre">Sessions</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">SessionTimeout</span></tt>:</dt>
 <dd>Determines the amount of time (expressed in minutes) that passes
 before a user's session will timeout.  When a session times out,
@@ -155,7 +160,22 @@ the URL, and will parse the URL to determine the session ID.  This
 is useful for situations where you want to use sessions, but it
 has to work even if the users can't use cookies.  If you use
 relative paths in your URLs, then you can ignore the presence of
-these sessions variables.  Default: <tt class="docutils literal"><span class="pre">False</span></tt>.</dd>
+these sessions variables.  The name of the field can be configured
+with the setting <tt class="docutils literal"><span class="pre">SessionName</span></tt>.  Default: <tt class="docutils literal"><span class="pre">False</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">UseCookieSessions</span></tt>:</dt>
+<dd>If True, then the app server will store the session ID in a cookie
+with the name set in <tt class="docutils literal"><span class="pre">SessionName</span></tt>, which is usually <tt class="docutils literal"><span class="pre">_SID_</span></tt>.
+Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">SessionCookiePath</span></tt>:</dt>
+<dd>You can specify a path for the session cookie here. <tt class="docutils literal"><span class="pre">None</span></tt> means
+that the servlet path will be used, which is normally the best choice.
+If you rewrite the URL using different prefixes, you may have to
+specify a fixed prefix for all your URLs. Using the root path '/'
+will always work, but may have security issues if you are running less
+secure applications on the same server. Default: <tt class="docutils literal"><span class="pre">None</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">SecureSessionCookie</span></tt>:</dt>
+<dd>If True, then the app server will use a secure cookie for the session
+ID if the request was using an HTTPS connection.  Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">MaxDynamicMemorySessions</span></tt>:</dt>
 <dd>The maximum number of dynamic memory sessions that will be
 retained in memory.  When this number is exceeded, the least
@@ -175,7 +195,7 @@ Possible values are <tt class="docutils literal"><span class="pre">None</span></
 as the prefix).  You can use this for load balancing, where each
 Webware server uses a different prefix.  You can then use <a class="reference" href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html">mod_rewrite</a>
 or other software for load-balancing to redirect each user back to the
-computer they first accessed.  This way the backend servers do not
+server they first accessed.  This way the backend servers do not
 have to share session data.  Default: <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
 </dd>
 <dt><tt class="docutils literal"><span class="pre">SessionName</span></tt>:</dt>
@@ -229,6 +249,12 @@ are created for servlets.  This is for development and debugging.
 You usually do not need this, as servlet modules are reloaded and
 cached instances purged when the servlet file changes.
 Default: <tt class="docutils literal"><span class="pre">True</span></tt> (caching on).</dd>
+<dt><tt class="docutils literal"><span class="pre">CacheDir</span></tt>:</dt>
+<dd>This is the name of the directory where things like compiled PSP
+or Kid templates are cached.  Webware creates a subdirectory for
+every plug-in in this directory.  The path is interpreted as relative
+to the working directory (or WebKit path, if you're not using a working
+directory), or you can specify an absolute path.  Default: <tt class="docutils literal"><span class="pre">Cache</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">ClearPSPCacheOnStart</span></tt>:</dt>
 <dd>When set to False, the app server will allow PSP instances to
 persist from one AppServer run to the next.  If you have PSPs that
@@ -280,7 +306,9 @@ the details of what went wrong.  These error messages can take a
 surprising amount of space.  Default: <tt class="docutils literal"><span class="pre">True</span></tt> (do save).</dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorMessagesDir</span></tt>:</dt>
 <dd>This is the name of the directory where HTML error messages get
-stored.  Default: <tt class="docutils literal"><span class="pre">ErrorMsgs</span></tt>.</dd>
+stored.  The path is interpreted as relative to the working directory
+(or WebKit path, if you're not using a working directory), or you
+can specify an absolute path.Default: <tt class="docutils literal"><span class="pre">ErrorMsgs</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">EmailErrors</span></tt>:</dt>
 <dd>If True, error messages are e-mailed out according to the
 ErrorEmailServer and ErrorEmailHeaders settings.  You must also set
@@ -423,9 +451,16 @@ on the port specified by the <tt class="docutils literal"><span class="pre">HTTP
 to this port.  Default: <tt class="docutils literal"><span class="pre">8080</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">PidFile</span></tt>:</dt>
 <dd>When the AppServer starts up, the process ID will be written into this file.
-The path will be relative to the working directory (or WebKit path, if
-you're not using a working directory), or you can specify an absolute path.
-Default: <tt class="docutils literal"><span class="pre">WORKDIR/appserver.pid</span></tt>.</dd>
+The location is relative to the working directory (or WebKit path, if you're
+not using a working directory), or you can specify an absolute path.
+Default: <tt class="docutils literal"><span class="pre">appserver.pid</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">AddressFiles</span></tt>:</dt>
+<dd>When the AppServer starts up, the server address (IP address and port)
+of the adapter handler and other handlers will be written into files with
+this name, <tt class="docutils literal"><span class="pre">%s</span></tt> being replaced by the name of the respective handler.
+The location is relative to the working directory (or WebKit path, if you're
+not using a working directory), or you can specify an absolute path.
+Default: <tt class="docutils literal"><span class="pre">%s.address</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">PluginDirs</span></tt>:</dt>
 <dd><p class="first">When the application server starts up, it looks in these locations for
 plugins.  Each plugin is a subdirectory of its own.  By default WebKit looks
@@ -481,11 +516,13 @@ shot when the servlet is done.  Default: <tt class="docutils literal"><span clas
 to notice changes to source files, including servlets, PSP's templates,
 or changes to the Webware source files, and reload the server as
 necessary to pick up the changes.</p>
-<p>This uses python-fam (fam = file alteration monitor) if available.
-Otherwise, or when ImportSpy has been disabled by setting
-<tt class="docutils literal"><span class="pre">UseImportSpy</span></tt> to False, it resorts to polling.  The polling interval
-in seconds can be set with the <tt class="docutils literal"><span class="pre">AutoReloadPollInterval</span></tt> setting which
-defaults to 1 second.</p>
+<p>This uses the FAM (File Alteration Monitor) module specified in the setting
+<tt class="docutils literal"><span class="pre">UseFAMModules</span></tt> if available.  You can also specify several modules to
+check them in the given order (the default is <tt class="docutils literal"><span class="pre">gamin</span> <span class="pre">_fam</span></tt> for using
+<a class="reference" href="http://www.gnome.org/~veillard/gamin/">python-gamin</a> or <a class="reference" href="http://python-fam.sourceforge.net">python-fam</a>).  Otherwise, if no FAM module is specified
+or installed, or when ImportSpy has been disabled by setting <tt class="docutils literal"><span class="pre">UseImportSpy</span></tt>
+to False, it resorts to polling.  The polling interval in seconds can be set
+with the <tt class="docutils literal"><span class="pre">AutoReloadPollInterval</span></tt> setting which defaults to 1 second.</p>
 <p class="last">By default, <tt class="docutils literal"><span class="pre">AutoReload</span></tt> is set to <tt class="docutils literal"><span class="pre">False</span></tt>.</p>
 </dd>
 </dl>
