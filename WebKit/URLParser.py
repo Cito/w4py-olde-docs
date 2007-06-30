@@ -104,12 +104,10 @@ class ContextParser(URLParser):
 		# which AppServer.globalAppServer.application() doesn't yet exist:
 		self._app = app
 		self._imp = app._imp
-		# self._context will be a dictionary of context
-		# names and context directories.  It is set by
-		# `addContext`.
+		# self._context will be a dictionary of context names and context
+		# directories.  It is set by `addContext`.
 		self._contexts = {}
-		# add all contexts except the default, which we save until
-		# the end
+		# add all contexts except the default, which we save until the end
 		contexts = app.setting('Contexts')
 		defaultContext = ''
 		for name, dir in contexts.items():
@@ -120,14 +118,24 @@ class ContextParser(URLParser):
 				name = '/'.join(filter(lambda x: x, name.split('/')))
 				self.addContext(name, dir)
 		if not defaultContext:
-			# Examples is a last-case default context, otherwise
-			# use a context that isn't built into Webware as
-			# the default
-			defaultContext = 'Examples'
+			# If no default context has been specified, and there is a unique
+			# context not built into Webware, use it as the default context.
 			for name in contexts.keys():
-				if name not in ('Admin', 'Examples', 'Docs', 'Testing'):
-					defaultContext = name
+				if name.endswith('/Docs') or name in (
+					'Admin', 'Docs', 'Examples',  'MKBrowser', 'Testing'):
+					continue
+				if defaultContext:
+					defaultContext = None
 					break
+				else:
+					defaultContext = name
+			if not defaultContext:
+				# otherwise, try using the following contexts if available
+				for defaultContext in ('Default', 'Examples', 'Docs'):
+					if contexts.has_key(defaultContext):
+						break
+				else: # if not available, refuse the tempatation to guess
+					raise KeyError, "No default context has been specified."
 		if self._contexts.has_key(defaultContext):
 			self._defaultContext = defaultContext
 		else:
