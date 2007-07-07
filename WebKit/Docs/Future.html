@@ -69,6 +69,12 @@ This should be provided by the WebKit and be configurable.</li>
 clearing logs, displaying a maximum of information at a time, etc.
 Consider using module 'resource'.</li>
 <li>Investigate case insensitive URLs, especially for the Windows platform.</li>
+<li>Support unicode strings and different encodings. HTTPContent should get an
+encoding attribute with 'utf-8' as the default (set in Application.config).
+This could be output in Page.writeMetaData() and used as the default for
+an optional encoding parameter in HTTPContent.write(), so you can write
+unicode strings to output. So far, Webware works best if you use ordinary
+strings with a consistent encoding throughout the whole application.</li>
 <li>Plug-ins:<ul>
 <li>In ExamplePage, automatically support examples of any plug-in</li>
 <li>Better docs</li>
