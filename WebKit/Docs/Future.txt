@@ -81,6 +81,13 @@ Major Items
 
 * Investigate case insensitive URLs, especially for the Windows platform.
 
+* Support unicode strings and different encodings. HTTPContent should get an
+  encoding attribute with 'utf-8' as the default (set in Application.config).
+  This could be output in Page.writeMetaData() and used as the default for
+  an optional encoding parameter in HTTPContent.write(), so you can write
+  unicode strings to output. So far, Webware works best if you use ordinary
+  strings with a consistent encoding throughout the whole application.
+
 * Plug-ins:
 
   * In ExamplePage, automatically support examples of any plug-in

@@ -165,6 +165,7 @@ class HTTPContent(HTTPServlet):
 
 		Writes the arguments, which are turned to strings (with `str`)
 		and concatenated before being written to the response.
+		Unicode strings must be encoded before they can be written.
 
 		"""
 		for arg in args:
@@ -174,6 +175,7 @@ class HTTPContent(HTTPServlet):
 		"""Write to output with newline.
 
 		Writes the arguments (like `write`), adding a newline after.
+		Unicode strings must be encoded before they can be written.
 
 		"""
 		for arg in args:
