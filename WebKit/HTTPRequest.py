@@ -73,7 +73,7 @@ class HTTPRequest(Request):
 			# correct servletPath if there was a redirection
 			if not (self._uri + '/').startswith(self._servletPath + '/'):
 				i = self._uri.find(self._pathInfo)
-				self._servletPath = i >= 0 and self._uri[:i] or '/'
+				self._servletPath = i >= 0 and self._uri[:i] or ''
 		else:
 			# REQUEST_URI isn't actually part of the CGI standard and some
 			# web servers like IIS don't set it (as of 8/22/2000).
@@ -82,7 +82,7 @@ class HTTPRequest(Request):
 				# correct servletPath if there was a redirection
 				if not (self._uri + '/').startswith(self._servletPath + '/'):
 					i = self._uri.find(self._pathInfo)
-					self._servletPath = i >= 0 and self._uri[:i] or '/'
+					self._servletPath = i >= 0 and self._uri[:i] or ''
 			else:
 				self._uri = self._servletPath + self._pathInfo
 			if self._queryString:
