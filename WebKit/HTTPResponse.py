@@ -168,7 +168,7 @@ class HTTPResponse(Response):
 		assert isinstance(cookie, Cookie)
 		self._cookies[cookie.name()] = cookie
 
-	def delCookie(self, name):
+	def delCookie(self, name, path='/', secure=False):
 		"""Delete a cookie at the browser.
 
 		To do so, one has to create and send to the browser a cookie with
@@ -179,6 +179,10 @@ class HTTPResponse(Response):
 			self._cookies[name].delete()
 		else:
 			cookie = Cookie(name, None)
+			if path:
+				cookie.setPath(path)
+			if secure:
+				cookie.setSecure(secure)
 			cookie.delete()
 			self.addCookie(cookie)
 
