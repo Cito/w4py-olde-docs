@@ -247,9 +247,8 @@ class Application(ConfigurableForServerSidePath, Object):
 		moduleName = self.setting('SessionStore')
 		if moduleName in ('Dynamic', 'File', 'Memory'):
 			moduleName = 'Session%sStore' % moduleName
-		self._sessionDir = moduleName != 'SessionMemoryStore' \
-			and self.serverSidePath(
-				self.setting('SessionStoreDir') or 'Sessions') or None
+		self._sessionDir = self.serverSidePath(
+				self.setting('SessionStoreDir') or 'Sessions')
 		className = moduleName.split('.')[-1]
 		try:
 			exec 'from %s import %s' % (moduleName, className)
