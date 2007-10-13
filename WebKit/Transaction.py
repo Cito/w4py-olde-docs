@@ -61,7 +61,7 @@ class Transaction(Object):
 		self._response = response
 
 	def hasSession(self):
-		""" Returns true if the transaction has a session. """
+		"""Return true if the transaction has a session."""
 		id = self._request.sessionId()
 		return id and self._application.hasSession(id)
 
@@ -70,7 +70,7 @@ class Transaction(Object):
 
 		A new transaction is created if necessary. Therefore, this method
 		never returns None. Use hasSession() if you want to find out if
-		there one already exists.
+		a session already exists.
 
 		"""
 		if not self._session:

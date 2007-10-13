@@ -349,7 +349,7 @@ class HTTPResponse(Response):
 		app = trans.application()
 		if not app.setting('UseCookieSessions'):
 			return
-		sess = trans.session()
+		sess = trans._session
 		if sess:
 			cookie = Cookie(app.sessionName(trans), sess.identifier())
 			cookie.setPath(app.sessionCookiePath(trans))
