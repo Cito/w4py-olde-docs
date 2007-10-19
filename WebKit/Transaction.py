@@ -123,7 +123,7 @@ class Transaction(Object):
 	## Transaction stages ##
 
 	def awake(self):
-		"""Sends awake() to the session (if there is one) and the servlet.
+		"""Send awake() to the session (if there is one) and the servlet.
 
 		Currently, the request and response do not partake in the
 		awake()-respond()-sleep() cycle. This could definitely be added
@@ -140,7 +140,7 @@ class Transaction(Object):
 		self._servlet.respond(self)
 
 	def sleep(self):
-		"""Sends sleep() to the session and the servlet.
+		"""Send sleep() to the session and the servlet.
 
 		Note that sleep() is sent in reverse order as awake()
 		(which is typical for shutdown/cleanup methods).
@@ -155,7 +155,7 @@ class Transaction(Object):
 	## Debugging ##
 
 	def dump(self, file=None):
-		"""Dumps debugging info to stdout."""
+		"""Dump debugging info to stdout."""
 		if file is None:
 			file = sys.stdout
 		wr = file.write
@@ -168,7 +168,7 @@ class Transaction(Object):
 	## Die ##
 
 	def die(self):
-		"""End of transaction.
+		"""End transaction.
 
 		This method should be invoked when the entire transaction is
 		finished with. Currently, this is invoked by AppServer. This method
