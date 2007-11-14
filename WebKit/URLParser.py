@@ -683,7 +683,7 @@ class _FileParser(URLParser):
 				redirPath = restPath
 			elif mod.urlRedirect.has_key(''):
 				redirTo = mod.urlRedirect['']
-				redirPath = requestPath
+				redirPath = restPath
 			else:
 				redirTo = None
 			if redirTo:
