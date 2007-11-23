@@ -76,6 +76,11 @@ class TaskHandler:
 		self._lastTime = time()
 		self._scheduler.notifyCompletion(self)
 
+	def notifyFailure(self):
+		self._isRunning = False
+		self._lastTime = time()
+		self._scheduler.notifyFailure(self)
+
 
 	## Attributes ##
 

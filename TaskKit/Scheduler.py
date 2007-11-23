@@ -39,7 +39,7 @@ class Scheduler(Thread):
 
 	## Init ##
 
-	def __init__(self, daemon=True):
+	def __init__(self, daemon=True, exceptionHandler=None):
 		Thread.__init__(self)
 		self._notifyEvent = Event()
 		self._nextTime = None
@@ -47,6 +47,7 @@ class Scheduler(Thread):
 		self._running = {}
 		self._onDemand = {}
 		self._isRunning = False
+		self._exceptionHandler = exceptionHandler
 		if daemon:
 			self.setDaemon(True)
 
@@ -433,6 +434,17 @@ class Scheduler(Thread):
 					if handle.runAgain():
 						self.runTask(handle)
 
+	def notifyFailure(self, handle):
+		"""Notify failure of a task.
+
+		Used by instances of TaskHandler to let the Scheduler thread know
+		if an exception has occurred within the task thread.
+
+		"""
+		self.notifyCompletion(handle)
+		if self._exceptionHandler is not None:
+			self._exceptionHandler()
+	
 	def notify(self):
 		self._notifyEvent.set()
 

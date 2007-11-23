@@ -165,7 +165,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		# Initialize TaskManager:
 		if self._server.isPersistent():
 			from TaskKit.Scheduler import Scheduler
-			self._taskManager = Scheduler(1)
+			self._taskManager = Scheduler(1, exceptionHandler=self.handleException)
 			self._taskManager.start()
 		else:
 			self._taskManager = None

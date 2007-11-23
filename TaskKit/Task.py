@@ -1,6 +1,5 @@
 from MiscUtils import AbstractError
 
-
 class Task:
 	"""Abstract base class from which you have to derive your own tasks."""
 
@@ -61,5 +60,8 @@ class Task:
 		"""
 		self._name = handle.name()
 		self._handle = handle
-		self.run()
+		try:
+			self.run()
+		except:
+			handle.notifyFailure()
 		handle.notifyCompletion()
