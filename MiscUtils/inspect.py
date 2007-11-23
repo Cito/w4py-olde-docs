@@ -219,10 +219,11 @@ def getsourcefile(object):
 		if 'b' in mode and filename[-len(suffix):].lower() == suffix:
 			# Looks like a binary file.  We want to only return a text file.
 			return None
-	for path in sys.path:
-		if os.path.exists(os.path.join(path, filename)):
-			return os.path.join(path, filename)
-	return None  # file was not found.
+	if os.path.exists(filename):
+		return filename
+	# only return a non-existent filename if the module has a PEP 302 loader
+	if hasattr(getmodule(object, filename), '__loader__'):
+		return filename
 
 def getabsfile(object):
 	"""Return an absolute path to the source or compiled file for an object.

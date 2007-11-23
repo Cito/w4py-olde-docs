@@ -37,7 +37,7 @@ def HTMLForException(excInfo=None, options=None):
 		opt = HTMLForExceptionOptions
 
 	# Create the HTML:
-	res = ['<table style="%s" width=100%%'
+	res = ['<table style="%s" width="100%%"'
 		' cellpadding="2" cellspacing="2">\n' % opt['table'],
 		'<tr><td><pre style="%s">\n' % opt['default']]
 	out = traceback.format_exception(*excInfo)
@@ -48,7 +48,7 @@ def HTMLForException(excInfo=None, options=None):
 			parts[0] = '<span style="%s">%s</span>' \
 				% (opt['row.location'], parts[0])
 			if opt['editlink']:
-				parts[0] = '%s <a href="%s?filename=%s&line=%s">[edit]</a>' \
+				parts[0] = '%s <a href="%s?filename=%s&amp;line=%s">[edit]</a>' \
 					% (parts[0], opt['editlink'], urllib.quote(
 						os.path.join(os.getcwd(), match.group(1))),
 						match.group(2))

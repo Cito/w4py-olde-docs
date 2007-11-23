@@ -16,7 +16,7 @@ class Main(AdminSecurity):
 	def writeGeneralInfo(self):
 		app = self.application()
 		curTime = time()
-		info = [
+		info = (
 			('Webware Version', app.webwareVersionString()),
 			('WebKit Version',  app.webKitVersionString()),
 			('Local Time',      asctime(localtime(curTime))),
@@ -24,15 +24,14 @@ class Main(AdminSecurity):
 			('Num Requests',    app.server().numRequests()),
 			('Working Dir',     os.getcwd()),
 			('Active Sessions', len(app.sessions()))
-			]
-		self.writeln('<h2 style="text-align:center">'
-			'WebKit Administration Pages</h2>')
-		self.writeln('<table cellspacing="2" cellpadding="4" align="center"'
-			' style="margin-left:auto;margin-right:auto">')
+		)
+		self.writeln('''
+<h2 style="text-align:center">WebKit Administration Pages</h2>
+<table cellspacing="2" cellpadding="4" align="center"
+style="margin-left:auto;margin-right:auto" class="NiceTable">
+<tr class="TopHeading"><th colspan="2">Application Info</th></tr>''')
 		for label, value in info:
-			self.writeln('<tr">'
-				'<th style="background-color:#DDD">%s:</th>'
-				'<td style="background-color:#EEE">%s</td></tr>'
+			self.writeln('<tr><th align="left">%s:</th><td>%s</td></tr>'
 				% (label, value))
 		self.writeln('</table>')
 
@@ -43,10 +42,9 @@ class Main(AdminSecurity):
 <!--
 begin-parse
 {
-	'Version': %s,
-	'LocalTime': %s,
-	'GlobalTime': %s
+	'Version': %r,
+	'LocalTime': %r,
+	'GlobalTime': %r
 }
 end-parse
--->''' % (repr(app.webKitVersion()),
-		repr(localtime(curTime)), repr(gmtime(curTime))))
+-->''' % (app.webKitVersion(), localtime(curTime), gmtime(curTime)))

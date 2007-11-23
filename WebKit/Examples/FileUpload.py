@@ -28,7 +28,7 @@ class FileUpload(ExamplePage):
 			contents = f.file.read()
 		except:
 			output = '''<p>%s</p>
-<form method="post" enctype="multipart/form-data">
+<form action="FileUpload" method="post" enctype="multipart/form-data">
 <input type="file" name="filename">
 <input type="submit" value="Upload File">
 </form>''' % Funcs.htmlEncode(self.__doc__)

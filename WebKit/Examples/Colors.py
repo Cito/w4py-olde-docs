@@ -81,7 +81,7 @@ class Colors(ExamplePage):
 		self.write('''
 			<div style="text-align:center;color:%s">
 			<h3>Color Table Demo</h3>
-			<form>
+			<form action="Colors" method="post">
 				Background color: <input type="text" name="bgcolor" value="%s">
 				<input type="submit" value="Go">
 			</form>

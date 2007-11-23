@@ -1,8 +1,9 @@
 import os, time
 from Queue import Queue
 
-from AdminSecurity import AdminSecurity
+from WebKit.URLParser import ServletFactoryManager
 from WebUtils.Funcs import htmlEncode
+from AdminSecurity import AdminSecurity
 
 
 class ServletCache(AdminSecurity):
@@ -20,7 +21,6 @@ class ServletCache(AdminSecurity):
 		return 'Servlet Cache'
 
 	def writeContent(self):
-		from WebKit.URLParser import ServletFactoryManager
 		factories = filter(lambda f: f._classCache,
 			ServletFactoryManager._factories)
 		req = self.request()
@@ -33,7 +33,7 @@ class ServletCache(AdminSecurity):
 				wr('<tr><td><a href="#%s">%s</a></td></tr>'
 					% ((factory.name(),)*2))
 			wr('</table>')
-		wr('<form method="post">')
+		wr('<form action="ServletCache" method="post">')
 		for factory in factories:
 			name = factory.name()
 			wr('<a name="%s"></a><h4>%s</h4>' % ((name,)*2))
@@ -73,9 +73,8 @@ def htCache(factory):
 		% (len(keys), factory.name()))
 	wr('<p>Click any link to jump to the details for that path.</p>')
 	wr('<h5>Filenames:</h5>')
-	wr('<table cellspacing="2" cellpadding="2">')
-	wr('<tr><th style="background-color:#DDD">File</th>'
-		'<th style="background-color:#DDD">Directory</th></tr>')
+	wr('<table cellspacing="2" cellpadding="2" class="NiceTable">')
+	wr('<tr><th>File</th><th>Directory</th></tr>')
 	paths = []
 	for key in keys:
 		dir, base = os.path.split(key)
@@ -86,22 +85,20 @@ def htCache(factory):
 	# of (basename, dirname, fullPathname) sorted first by basename
 	# and second by dirname
 	for path in paths:
-		wr('<tr><td style="background-color:#EEE">'
-			'<a href="#%s">%s</a></td>'
-			'<td style="background-color:#EEE">%s</td></tr>'
+		wr('<tr><td><a href="#id%s">%s</a></td><td>%s</td></tr>'
 			% (id(path['full']), path['base'], path['dir']))
 	wr('</table>')
 	wr('<h5>Full paths:</h5>')
-	wr('<table cellspacing="2" cellpadding="2">')
+	wr('<table cellspacing="2" cellpadding="2" class="NiceTable">')
+	wr('<tr><th>Servlet path</th></tr>')
 	for key in keys:
-		wr('<tr><td style="background-color:#EEE">'
-			'<a href="#%s">%s</a></td></tr>' % (id(key), key))
+		wr('<tr><td><a href="#%s">%s</a></td></tr>' % (id(key), key))
 	wr('</table>')
 	wr('<h5>Details:</h5>')
-	wr('<table cellpadding="2" cellspacing="2">')
+	wr('<table cellpadding="2" cellspacing="2" class="NiceTable">')
 	for path in paths:
-		wr('<tr><td colspan="2" style="background-color:#EEF">'
-			'<a name="%s"></a><p><strong>%s</strong> - %s</a></p></td></tr>'
+		wr('<tr class="NoTable"><td colspan="2">'
+			'<a name="id%s"></a><strong>%s</strong> - %s</td></tr>'
 			% (id(path['full']), path['base'], path['dir']))
 		record = cache[path['full']].copy()
 		record['path'] = path['full']
@@ -133,7 +130,5 @@ def htRecord(record):
 		# the general case:
 		if not htValue:
 			htValue = htmlEncode(str(value))
-		wr('<tr><th style="background-color:#DDD">%s</th>'
-			'<td style="background-color:#EEE">%s</td></tr>'
-			% (htKey, htValue))
+		wr('<tr><th>%s</th><td>%s</td></tr>' % (htKey, htValue))
 	return '\n'.join(html)

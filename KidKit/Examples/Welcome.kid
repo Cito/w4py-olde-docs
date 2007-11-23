@@ -6,9 +6,11 @@ hook = KidExamplePage.writeContent ?>
 
 <body py:strip="" xmlns:py="http://purl.org/kid/ns#">
 
-<h1 style="text-align:center;color:navy">Hello from <tt style="padding:4pt">Kid</tt>!</h1>
+<h1 style="text-align:center;color:navy">
+Hello from <tt style="padding:4pt">Kid</tt>!</h1>
 
-<p style="text-align:center"><img src="kidlogo.png" /><!-- This image is served by WebKit --></p>
+<!-- This image is served by WebKit -->
+<p style="text-align:center"><img src="kidlogo.png" alt="Kid Templates"/></p>
 
 <p>This is the <strong>KidKit</strong> plug-in that allows you
 to automatically compile and run <strong>Kid</strong> templates

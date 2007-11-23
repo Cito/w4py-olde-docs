@@ -17,7 +17,7 @@ def color(x,y):
 <body bgcolor="black" text="white">
 <table width="100%" height="100%">
     <tr>
-        <td align="center" valign="center">
+        <td align="center" valign="middle">
             <h1 py:content="title" />
             <table cellspacing="1" cellpadding="2">
                 <tr py:for="y  in range(-150, 150, 5)">

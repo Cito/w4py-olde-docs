@@ -1,3 +1,4 @@
+from os import pathsep
 from types import DictType, ListType
 import traceback, random, MimeWriter, smtplib
 
@@ -44,7 +45,6 @@ class ExceptionHandler(Object):
         * write
         * writeTitle
         * writeDict
-        * writeTable
         * writeAttrs
 
 	Derived classes must not assume that the error occured in a
@@ -76,10 +76,16 @@ class ExceptionHandler(Object):
 	# keep these lower case to support case insensitivity:
 	_hideValuesForFields = ['password', 'passwd', 'pwd',
 		'creditcard', 'credit card', 'cc', 'pin', 'tan']
-	if 0: # for testing
+	if False: # for testing
 		_hideValuesForFields.extend(['application', 'uri',
 			'http_accept', 'userid'])
 	_hiddenString = '*** hidden ***'
+	_addSpace = { 'PATH': pathsep, 'CLASSPATH': pathsep,
+		'HTTP_ACCEPT': ',', 'HTTP_ACCEPT_CHARSET': ',',
+		'HTTP_ACCEPT_ENCODING': ',', 'HTTP_ACCEPT_LANGUAGE': ','}
+	_docType = ('<!DOCTYPE HTML PUBLIC'
+			' "-//W3C//DTD HTML 4.01 Transitional//EN"'
+			' "http://www.w3.org/TR/html4/loose.dtd">')
 
 
 	## Init ##
@@ -189,7 +195,7 @@ class ExceptionHandler(Object):
 
 			# Add a large block comment; this prevents IE from overriding the
 			# page with its own generic error 500 page
-			self._res.write('<!-- --------------------------------- -->\n' * 100)
+			self._res.write('<!-- - - - - - - - - - - - - - - - - - -->\n' * 100)
 
 		privateErrorPage = None
 		if self.setting('SaveErrorMessages'):
@@ -229,7 +235,7 @@ class ExceptionHandler(Object):
 		Body of the message comes from ``UserErrorMessage`` setting.
 
 		"""
-		return '\n'.join(('<html>', '<head>', '<title>Error</title>',
+		return '\n'.join((docType(), '<html>', '<head>', '<title>Error</title>',
 			htStyle(), '</head>', '<body text="black" bgcolor="white">',
 			htTitle('Error'), '<p>%s</p>' % self.setting('UserErrorMessage'),
 			'</body>', '</html>\n'))
@@ -243,13 +249,12 @@ class ExceptionHandler(Object):
 		Most of the contents are generated in `htmlDebugInfo`.
 
 		"""
-		html = ['<html>', '<head>', '<title>Error</title>',
+		html = [docType(), '<html>', '<head>', '<title>Error</title>',
 			htStyle(), '</head>', '<body text="black" bgcolor="white">',
 			htTitle('Error'), '<p>%s</p>' % self.setting('UserErrorMessage')]
 		html.append(self.htmlDebugInfo())
 		html.extend(['</body>', '</html>\n'])
 		return '\n'.join(html)
-
 
 	def htmlDebugInfo(self):
 		"""Return the debug info.
@@ -299,48 +304,12 @@ class ExceptionHandler(Object):
 		"""Output the sub-heading to define a section."""
 		self.writeln(htTitle(s))
 
-	def writeDict(self, d):
+	def writeDict(self, d, heading=None, encoded=None):
 		"""Output a table-formated dictionary."""
-		self.writeln(htmlForDict(d, filterValueCallBack=self.filterDictValue,
-			maxValueLength=self._maxValueLength))
-
-	def writeTable(self, listOfDicts, keys=None):
-		"""Output a table from dictionaries.
-
-		Writes a table whose contents are given by `listOfDicts`.
-		The keys of each dictionary are expected to be the same.
-		If the `keys` arg is None, the headings are taken in alphabetical order
-		from the first dictionary. If listOfDicts is false, nothing	happens.
-
-		The keys and values are already considered to be HTML,
-		and no quoting is applied.
-
-		Caveat: There's no way to influence the formatting or to use
-		column titles that are different than the keys.
-
-		Used by `writeAttrs`.
-
-		"""
-		if not listOfDicts:
-			return
-		if keys is None:
-			keys = listOfDicts[0].keys()
-			keys.sort()
-		wr = self.writeln
-		wr('<table border="0" cellpadding="2" cellspacing="2"'
-			' style="background-color:#FFFFFF;font-size:10pt">')
-		wr('<tr>')
-		for key in keys:
-			wr('<td style="background-color:#F0F0F0;'
-				'font-weight:bold">%s</td>' % key)
-		wr('</tr>')
-		for row in listOfDicts:
-			wr('<tr>')
-			for key in keys:
-				wr('<td style="background-color:#F0F0F0">%s</td>'
-					% self.filterTableValue(row[key], key, row, listOfDicts))
-			wr('</tr>')
-		wr('</table>')
+		self.writeln(htmlForDict(d, addSpace=self._addSpace,
+			filterValueCallBack=self.filterDictValue,
+			maxValueLength=self._maxValueLength,
+			topHeading=heading, isEncoded=encoded))
 
 	def writeAttrs(self, obj, attrNames):
 		"""Output object attributes.
@@ -351,7 +320,7 @@ class ExceptionHandler(Object):
 		exception report.
 
 		"""
-		rows = []
+		attrs = {}
 		for name in attrNames:
 			value = getattr(obj, '_' + name, Singleton) # go for data attribute
 			try:
@@ -363,17 +332,17 @@ class ExceptionHandler(Object):
 						try:
 							if callable(value):
 								value = value()
+							value = self.repr(value)
 						except Exception, e:
 							value = '(exception during method call: %s: %s)' \
 								% (e.__class__.__name__, e)
-						value = self.repr(value)
 				else:
 					value = self.repr(value)
 			except Exception, e:
 				value = '(exception during value processing: %s: %s)' \
 					% (e.__class__.__name__, e)
-			rows.append({'attr': name, 'value': value})
-		self.writeTable(rows, ('attr', 'value'))
+			attrs[name] = value
+		self.writeDict(attrs, ('Attribute', 'Value'), True)
 
 
 	## Traceback sections ##
@@ -392,8 +361,7 @@ class ExceptionHandler(Object):
 	def writeMiscInfo(self):
 		"""Output misc info.
 
-		Write a couple little pieces of information about
-		the environment.
+		Write a couple little pieces of information about the environment.
 
 		"""
 		self.writeTitle('MiscInfo')
@@ -436,8 +404,8 @@ class ExceptionHandler(Object):
 		Prints some values from the OS (like processor ID).
 
 		"""
-		self.writeTitle('Ids')
-		self.writeTable(osIdTable(), ['name', 'value'])
+		self.writeTitle('OS Ids')
+		self.writeDict(osIdDict(), ('Name', 'Value'))
 
 	def writeFancyTraceback(self):
 		"""Output a fancy traceback, using cgitb."""
@@ -449,8 +417,8 @@ class ExceptionHandler(Object):
 				self.write(ExpansiveHTMLForException(
 					context=self.setting('FancyTracebackContext')))
 			except Exception:
-				self.write('<p>Unable to generate a fancy traceback!'
-					' (uncaught exception)</p>')
+				self.write('<p>Unable to generate a fancy traceback'
+					' (uncaught exception)!</p>')
 				try:
 					self.write(HTMLForException(sys.exc_info()))
 				except Exception:
@@ -496,12 +464,9 @@ class ExceptionHandler(Object):
 		"""
 		if not self.setting('LogErrors'):
 			return
-		logline = (
-			asclocaltime(self._time),
-			self.basicServletName(),
-			self.servletPathname(),
-			str(self._exc[0]),
-			str(self._exc[1]),
+		logline = (asclocaltime(self._time),
+			self.basicServletName(), self.servletPathname(),
+			self._exc[0].__name__, str(self._exc[1]),
 			errorMsgFilename)
 		filename = self._app.serverSidePath(self.setting('ErrorLogFilename'))
 		if os.path.exists(filename):
@@ -609,19 +574,6 @@ class ExceptionHandler(Object):
 		"""
 		return self.filterValue(value, key)
 
-	def filterTableValue(self, value, key, row, table):
-		"""Filter table values.
-
-		Invoked by writeTable() to afford the opportunity to filter the values
-		written in tables. These values are already HTML when they arrive here.
-		Use the extra key, row and table args as necessary.
-
-		"""
-		if row.has_key('attr') and key != 'attr':
-			return self.filterValue(value, row['attr'])
-		else:
-			return self.filterValue(value, key)
-
 	def filterValue(self, value, key):
 		"""Filter values.
 
@@ -643,20 +595,21 @@ class ExceptionHandler(Object):
 
 	## Utility ##
 
-	def repr(self, x):
+	def repr(self, value):
 		"""Get HTML encoded representation.
 
-		Returns the repr() of x already HTML encoded. As a special case,
+		Returns the repr() of value already HTML encoded. As a special case,
 		dictionaries are nicely formatted in table.
 
 		This is a utility method for `writeAttrs`.
 
 		"""
-		if type(x) is DictType:
-			return htmlForDict(x, filterValueCallBack=self.filterDictValue,
+		if type(value) is DictType:
+			return htmlForDict(value, addSpace=self._addSpace,
+				filterValueCallBack=self.filterDictValue,
 				maxValueLength=self._maxValueLength)
 		else:
-			rep = repr(x)
+			rep = repr(value)
 			if self._maxValueLength and len(rep) > self._maxValueLength:
 				rep = rep[:self._maxValueLength] + '...'
 			return htmlEncode(rep)
@@ -664,42 +617,78 @@ class ExceptionHandler(Object):
 
 ## Misc functions ##
 
+def docType():
+	"""Returns the document type for the page."""
+	return ('<!DOCTYPE HTML PUBLIC'
+		' "-//W3C//DTD HTML 4.01 Transitional//EN"'
+		' "http://www.w3.org/TR/html4/loose.dtd">')
+
 def htStyle():
 	"""Defines the page style."""
 	return ('''<style type="text/css">
 <!--
 body {
-	color: #080810;
 	background-color: white;
+	color: #080810;
 	font-size: 11pt;
 	font-family: Tahoma,Verdana,Arial,Helvetica,sans-serif;
 	margin: 0pt;
 	padding: 8pt;
 }
-h2 { font-size: 14pt; }
+h2.section {
+	font-size: 14pt;
+	background-color:#933;
+	color:white;
+	text-align:center;
+}
+table.NiceTable {
+	font-size: 10pt;
+}
+table.NiceTable td {
+	background-color: #EEE;
+	color: #111;
+}
+table.NiceTable th {
+	background-color: #BBB;
+	color: black;
+}
+table.NiceTable tr.TopHeading th {
+	background-color: #555;
+	color: white;
+}
+table.NiceTable table.NiceTable td {
+	background-color: #DDD;
+	color: #222;
+}
+table.NiceTable table.NiceTable th {
+	background-color: #CCC;
+	color: black;
+	font-weight: normal;
+}
 -->
 </style>''')
 
 
 def htTitle(name):
 	"""Formats a `name` as a section title."""
-	return ('<h2 style="text-align:center;'
-		'color:white;background-color:#993333">%s</h2>' % name)
+	return ('<h2 class="section">%s</h2>' % name)
 
-def osIdTable():
+def osIdDict():
 	"""Get all OS id information.
 
-	Returns a list of dictionaries contained id information such as
+	Returns a dictionary containing id information such as
 	uid, gid, etc., all obtained from the os module.
-	Dictionary keys are ``"name"`` and ``"value"``.
 
 	"""
 
-	funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp',
-		'getpid', 'getppid', 'getuid']
-	table = []
-	for funcName in funcs:
-		if hasattr(os, funcName):
-			value = getattr(os, funcName)()
-			table.append({'name': funcName, 'value': value})
-	return table
+	ids = ['egid', 'euid', 'gid', 'pgid', 'groups', 'pgrp',
+		'pid', 'ppid', 'uid']
+	attrs = {}
+	for id in ids:
+		getter = 'get' + id
+		try:
+			value = getattr(os, getter)()
+			attrs[id] = value
+		except AttributeError:
+			pass
+	return attrs

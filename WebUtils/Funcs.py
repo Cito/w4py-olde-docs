@@ -108,27 +108,36 @@ def urlDecode(s):
 			s[i] = unichr(int(t[:2], 16)) + t[2:]
 	return ''.join(s)
 
-def htmlForDict(dict, addSpace=None, filterValueCallBack=None, maxValueLength=None):
-	"""Return an HTML string with a <table> where each row is a key-value pair."""
+def htmlForDict(dict, addSpace=None, filterValueCallBack=None,
+		maxValueLength=None, topHeading=None, isEncoded=None):
+	"""Return an HTML string with a table where each row is a key-value pair."""
+	if not dict:
+		return ''
 	keys = dict.keys()
 	keys.sort()
 	# A really great (er, bad) example of hardcoding.  :-)
-	html = ['<table width="100%" border="0" cellpadding="2" cellspacing="2"'
-		' style="background-color:#FFFFFF;font-size:10pt">']
+	html = ['<table class="NiceTable">\n']
+	if topHeading:
+		html.append('<tr class="TopHeading"><th')
+		html.append((type(topHeading) is type(())
+			and '>%s</th><th>%s' or ' colspan="2">%s') % topHeading)
+		html.append('</th></tr>\n')
 	for key in keys:
 		value = dict[key]
-		if addSpace is not None and addSpace.has_key(key):
+		if addSpace and addSpace.has_key(key):
 			target = addSpace[key]
-			value = target.join(value.split(target))
+			value = (target + ' ').join(value.split(target))
 		if filterValueCallBack:
 			value = filterValueCallBack(value, key, dict)
-		value = str(value)
-		if maxValueLength and len(value) > maxValueLength:
-			value = value[:maxValueLength] + '...'
-		html.append('<tr>'
-			'<td style="background-color:#F0F0F0">%s</td>'
-			'<td style="background-color:#F0F0F0">%s &nbsp;</td></tr>\n'
-			% (htmlEncode(str(key)), htmlEncode(value)))
+		if maxValueLength and not isEncoded:
+			value = str(value)
+			if len(value) > maxValueLength:
+				value = value[:maxValueLength] + '...'
+		key = htmlEncode(key)
+		if not isEncoded:
+			value = htmlEncode(value)
+		html.append('<tr><th align="left">%s</th><td>%s</td></tr>\n'
+			% (key, value))
 	html.append('</table>')
 	return ''.join(html)
 

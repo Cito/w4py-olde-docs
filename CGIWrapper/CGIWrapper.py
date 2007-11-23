@@ -185,7 +185,7 @@ class CGIWrapper(NamedValueAccess):
 		if badNames:
 			print 'Content-type: text/html\n'
 			print '<html><body>'
-			print '<p>ERROR: Missing', ', '.join(badNames)
+			print '<p>', 'ERROR: Missing', ', '.join(badNames), '</p>'
 			print '</body></html>'
 			sys.exit(0)
 
@@ -197,20 +197,21 @@ class CGIWrapper(NamedValueAccess):
 		Wrapper and are typically CGI Wrapper support
 		scripts.
 		"""
-		pathname = os.path.split(self._environ['SCRIPT_FILENAME'])[0] # This removes the CGI Wrapper's filename part
+		pathname = os.path.split(self._environ['SCRIPT_FILENAME'])[0] # remove the CGI Wrapper's filename part
 		filename = self._environ['PATH_INFO'][1:]
-		ext      = os.path.splitext(filename)[1]
+		ext = os.path.splitext(filename)[1]
 		if ext == '':
-			# No extension - we assume a Python CGI script
+			# No extension - we assume a Python CGI script.
 			if filename[0] == '_':
-				# underscores denote private scripts packaged with CGI Wrapper, such as '_admin.py'
+				# Underscores denote private scripts packaged with CGI Wrapper, such as '_admin.py'.
 				filename = os.path.join(pathname, filename + '.py')
 			else:
-				# all other scripts are based in the directory named by the 'ScriptsHomeDir' setting
+				# all other scripts are based in the directory named by the 'ScriptsHomeDir' setting.
 				filename = os.path.join(pathname, self.setting('ScriptsHomeDir'), filename + '.py')
 			self._servingScript = 1
 		else:
-			# Hmmm, some kind of extension like maybe '.html'. Leave out the 'ScriptsHomeDir' and leave the extension alone
+			# Hmmm, some kind of extension like maybe '.html'.
+			# Leave out the 'ScriptsHomeDir' and leave the extension alone.
 			filename = os.path.join(pathname, filename)
 			self._servingScript = 0
 		return filename
@@ -304,7 +305,8 @@ class CGIWrapper(NamedValueAccess):
 	<title>Error</title>
 	<body fgcolor=black bgcolor=white>
 %s
-<p> %s''' % (htTitle('Error'), self.setting('UserErrorMessage'))]
+<p>%s</p>
+''' % (htTitle('Error'), self.setting('UserErrorMessage'))]
 
 		if self.setting('ShowDebugInfoOnErrors'):
 			html.append(self.htmlDebugInfo())
@@ -319,7 +321,7 @@ class CGIWrapper(NamedValueAccess):
 		"""
 		html = ['''
 %s
-<p> <i>%s</i>
+<p><i>%s</i></p>
 ''' % (htTitle('Traceback'), self._scriptPathname)]
 
 		html.append(HTMLForException())
@@ -409,7 +411,6 @@ class CGIWrapper(NamedValueAccess):
 		server.quit()
 
 
-
 	## Serve ##
 
 	def serve(self, environ=os.environ):
@@ -471,7 +472,7 @@ class CGIWrapper(NamedValueAccess):
 				for name in self.setting('ClassNames'):
 					if name == '':
 						name = os.path.splitext(self._scriptName)[0]
-					if self._namespace.has_key(name):         # our hook for class-oriented scripts
+					if self._namespace.has_key(name): # our hook for class-oriented scripts
 						print self._namespace[name](info).html()
 						break
 			else:
@@ -545,23 +546,26 @@ class CGIWrapper(NamedValueAccess):
 # Some misc functions
 def htTitle(name):
 	return '''
-<p> <br> <table border=0 cellpadding=4 cellspacing=0 bgcolor=#A00000> <tr> <td>
-	<font face="Tahoma, Arial, Helvetica" color=white> <b> %s </b> </font>
-</td> </tr> </table>''' % name
+<p>&nbsp;</p>
+<table border="0" cellpadding="4" cellspacing="0" bgcolor="#A00000">
+<tr><td>
+<font face="Tahoma, Arial, Helvetica" color=white><b>%s</b></font>
+</td></tr></table>
+''' % name
 
 def htDictionary(dict, addSpace=None):
 	"""Returns an HTML string with a <table> where each row is a key-value pair."""
 	keys = dict.keys()
 	keys.sort()
-	html = ['<table width=100% border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>']
+	html = ['<table width="100%" border="0" cellpadding="2" cellspacing="2" bgcolor="#F0F0F0">']
 	for key in keys:
 		value = dict[key]
 		if addSpace is not None and addSpace.has_key(key):
 			target = addSpace[key]
-			value = ('%s ' % target).join(value.split(target))
-		html.append('<tr> <td> %s </td> <td> %s &nbsp;</td> </tr>\n' % (key, value))
+			value = (target + ' ').join(value.split(target))
+		html.append('<tr><td>%s</td><td>%s&nbsp;</td></tr>\n' % (key, value))
 	html.append('</table>')
-	return ''.join(html)
+	return '\n'.join(html)
 
 def osIdTable():
 	"""
@@ -595,17 +599,18 @@ def htTable(listOfDicts, keys=None):
 	if keys is None:
 		keys = listOfDicts[0].keys()
 		keys.sort()
-	s = '<table border=0 cellpadding=2 cellspacing=2 bgcolor=#F0F0F0>\n<tr>'
+	html = ['<table border="0" cellpadding="2" cellspacing="2" bgcolor="#F0F0F0">']
+	html.append('<tr>')
 	for key in keys:
-		s = '%s<td><b>%s</b></td>' % (s, key)
-	s += '</tr>\n'
+		html.append('<th>%s</th>' % key)
+	html.append('</tr>')
 	for row in listOfDicts:
-		s += '<tr>'
+		html.append('<tr>')
 		for key in keys:
-			s = '%s<td>%s</td>' % (s, row[key])
-		s += '</tr>\n'
-	s += '</table>'
-	return s
+			html.append('<td>%s</td>' % row[key])
+		html.append('</tr>')
+	html.append('</table>')
+	return '\n'.join(html)
 
 
 def main():
@@ -629,9 +634,10 @@ def main():
 		stdout.write('''Content-type: text/html
 
 <html><body>
-<p>ERROR
-<p><pre>%s</pre>
-</body></html>\n''' % output)
+<p>ERROR</p>
+<pre>%s</pre>
+</body></html>
+''' % output)
 
 
 if __name__ == '__main__':

@@ -1,6 +1,5 @@
 import sys
 
-from AdminPage import AdminPage
 from AdminSecurity import AdminSecurity
 
 
@@ -15,7 +14,7 @@ class AppControl(AdminSecurity):
 			if not self.application().server().isPersistent():
 				wr('<p><b>You are running the <i>OneShot</i> version of WebKit.'
 					' None of the options below are applicable.</b><p>')
-			wr('''<form method="post">
+			wr('''<form action="AppControl" method="post">
 <table cellspacing="4" cellpadding="4">
 <tr><td><input type="submit" name="action" value="Shutdown"></td>
 <td>Shut down the AppServer. You need to restart it manually afterwards.</td>

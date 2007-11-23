@@ -40,21 +40,24 @@ class ListBox(ExamplePage):
 			wr('<p>fields = %s</p>' % enc(str(self.request().fields())))
 			wr('<p>vars = %s</p>' % enc(str(self._vars)))
 		# Intro text is provided by our class' doc string:
-		intro = self.__class__.__doc__.split('\n\n')
+		intro = self.__class__.__doc__.strip().split('\n\n')
 		wr('<h2>%s</h2>' % intro.pop(0))
 		for s in intro:
-			wr('<p>%s</p>' % s.replace('\n', '<br>'))
+			wr('<p>%s</p>' % '<br>'.join(
+				map(lambda s: s.strip(), s.split('\n'))))
 		wr('<p style="color:red">%s</p>' % (self._error or '&nbsp;'))
 		wr('''
-<form method="post">
+<form action="ListBox" method="post">
 <input name="formCount" type="hidden" value="%(formCount)d">
-<select multiple="yes" name="list" size="%(height)d"
+<select multiple name="list" size="%(height)d"
 style="width:%(width)dpt;text-align:center">
 ''' % self._vars)
 		index = 0
 		for item in self._vars['list']:
 			wr('<option value="%d">%s</option>' % (index, enc(item['name'])))
 			index += 1
+		if not index:
+			wr('<option value="" disabled>--- empty ---</option>')
 		wr('''
 </select>
 <p>
@@ -95,7 +98,10 @@ style="width:%(width)dpt;text-align:center">
 			indices = req.field('list')
 			if type(indices) is not ListType:
 				indices = [indices]
-			indices = map(int, indices) # convert strings to ints
+			try:
+				indices = map(int, indices) # convert strings to ints
+			except ValueError:
+				indices = []
 			indices.sort() # sort...
 			indices.reverse() # in reverse order
 			# remove the objects:

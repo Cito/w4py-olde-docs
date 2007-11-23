@@ -312,7 +312,7 @@ if __name__ == '__main__':
 			pass
 
 	cfgfile = open(os.path.join(wwdir, "WebKit",
-		"Configs/AppServer.config")).read()
+		"Configs/AppServer.config"), 'rU').read()
 	cfg = {'True': 1 == 1, 'False': 1 == 0, 'WebwarePath': wwdir}
 	if cfgfile.lstrip().startswith('{'):
 		cfg = eval(cfgfile, cfg)

@@ -22,9 +22,9 @@ stored in the <tt>Application.config</tt> file in the <tt>WebKit/Configs</tt> di
 <form method="post">
 <table cellpadding="4" cellspacing="4" style="background-color:#CCCCEE;border:1px solid #3333CC;width:20em">
 <tr><td align="right"><label for="username">Username:</label></td>
-<td><input type="text" name="username" value="admin"></td></tr>
+<td><input type="text" id="username" name="username" value="admin"></td></tr>
 <tr><td align="right"><label for="password">Password:</label></td>
-<td><input type="password" name="password" value=""></td></tr>
+<td><input type="password" id="password" name="password" value=""></td></tr>
 <tr><td colspan="2" align="right"><input type="submit" name="login" value="Login"></td></tr>
 </table>''')
 		for name, value in self.request().fields().items():

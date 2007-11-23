@@ -27,7 +27,7 @@ class SelectModel(SitePage):
 		self.writeln('''
 <form %(method)s %(action)s>
 	<!-- Model filename: -->
-	<input type="text" name="modelFilename" size="50" %(value)s>
+	<input type="text" name="modelFilename" size="50" value="%(value)s">
 	&nbsp;
 	<input type="submit" value="OK">
 </form>

@@ -11,12 +11,13 @@ try:
 	import pydoc
 except ImportError:
 	from MiscUtils import pydoc
+pyhtml = pydoc.html
+escape = pyhtml.escape
 # But we need to use a fixed version of inspect
 # so we won't use the one that comes with Python 2.1.
 from MiscUtils import inspect
 
 DefaultOptions = {
-
 	'table': 'background-color:#F0F0F0',
 	'default': 'color:#000000',
 	'row.location': 'color:#000099',
@@ -40,22 +41,35 @@ def html(context=5, options=None):
 		opt = DefaultOptions
 
 	etype, evalue = sys.exc_info()[:2]
-	if type(etype) is types.ClassType:
+	try:
 		etype = etype.__name__
+	except AttributeError:
+		pass
 	inspect_trace = inspect.trace(context)
 	inspect_trace.reverse()
 
 	pyver = 'Python ' + sys.version.split()[0] + '<br>' + sys.executable
 	javascript = """
-	<script language="JavaScript"><!--
+	<script type="text/javascript" language="JavaScript"><!--
+	function tag(s) { return '<'+s+'>'; }
 	function popup_repr(title, value) {
-		var w = window.open('', '_blank',
-			'directories=no,height=200,width=400,location=no,menubar=yes,scrollbars=yes,status=no,toolbar=no');
-		w.document.write('<html><head><title>' + title + '</title></head><body bgcolor="#ffffff">');
-		w.document.write(value);
-		w.document.write('<form><input type="button" onClick="window.close()" value="Close"></form></body></html>');
+		w = window.open('', '_blank',
+			'directories=no,height=240,width=480,location=no,menubar=yes,'
+			+'resizable=yes,scrollbars=yes,status=no,toolbar=no');
+		if (!w) return true;
+		w.document.open();
+		w.document.write(tag('html')+tag('head')
+			+tag('title')+title+tag('/title')+tag('/head')
+			+tag('body bgcolor="#ffffff"')+tag('h3')+title+':'+tag('/h3')
+			+tag('p')+tag('code')+value+tag('/code')+tag('/p')+tag('form')+
+			tag('input type="button" onClick="window.close()" value="Close"')
+			+tag('/form')+tag('/body')+tag('/html'));
+		w.document.close();
+		return false;
 	}
-	// --></script>"""
+	// -->
+	</script>
+	"""
 
 	traceback_summary = []
 
@@ -63,10 +77,10 @@ def html(context=5, options=None):
 		if file:
 			file = os.path.abspath(file)
 		else:
-			file = "not found"
-		traceback_summary.append('<a href="#%s%i" style="%s">%s</a>:'
+			file = 'not found'
+		traceback_summary.append('<a href="#%s:%d" style="%s">%s</a>:'
 			'<tt style="font-family:Courier,sans-serif">%s</tt>'
-			% (file.replace('/', '_').replace('\\', '_'), lnum,
+			% (file.replace('/', '-').replace('\\', '-'), lnum,
 				opt['header'], os.path.splitext(os.path.basename(file))[0],
 				("%5i" % lnum).replace(' ', '&nbsp;')))
 
@@ -79,7 +93,7 @@ def html(context=5, options=None):
 		'<p style="%s">Here is the sequence of function calls leading up to'
 		' the error, with the most recent (innermost) call first.</p>\n'
 		'</td></tr></table>\n'
-		% (opt['header'], str(etype), pydoc.html.escape(str(evalue)),
+		% (opt['header'], etype, escape(str(evalue)),
 		'<br>\n'.join(traceback_summary), opt['default'], opt['default']))
 
 	indent = '<tt><small>%s</small>&nbsp;</tt>' % ('&nbsp;' * 5)
@@ -88,18 +102,18 @@ def html(context=5, options=None):
 		if file:
 			file = os.path.abspath(file)
 		else:
-			file = "not found"
+			file = 'not found'
 		try:
 			file_list = file.split('/')
 			display_file = '/'.join(
-				file_list[file_list.index("Webware") + 1:])
+				file_list[file_list.index('Webware') + 1:])
 		except ValueError:
 			display_file = file
-		if display_file[-3:] == ".py":
+		if display_file[-3:] == '.py':
 			display_file = display_file[:-3]
-		link = '<a name="%s%i"></a><a href="file:%s">%s</a>' % (
-			file.replace('/', '_').replace('\\', '_'),
-			lnum, file, pydoc.html.escape(display_file))
+		link = '<a name="%s:%d"></a><a href="file:%s">%s</a>' % (
+			file.replace('/', '-').replace('\\', '-'),
+			lnum, file.replace('\\', '/'), escape(display_file))
 		args, varargs, varkw, locals = inspect.getargvalues(frame)
 		if func == '?':
 			call = ''
@@ -111,7 +125,7 @@ def html(context=5, options=None):
 		names = []
 		dotted = [0, []]
 		def tokeneater(type, token, start, end, line, names=names, dotted=dotted):
-			if type == tokenize.OP and token == ".":
+			if type == tokenize.OP and token == '.':
 				dotted[0] = 1
 			if type == tokenize.NAME and token not in keyword.kwlist:
 				if dotted[0]:
@@ -120,36 +134,39 @@ def html(context=5, options=None):
 					if token not in names:
 						names.append(dotted[1][:])
 				elif token not in names:
-					if token != "self": names.append(token)
+					if token != 'self':
+						names.append(token)
 					dotted[1] = [token]
-			if type == tokenize.NEWLINE: raise IndexError
+			if type == tokenize.NEWLINE:
+				raise IndexError
 		def linereader(file=file, lnum=[lnum]):
 			line = linecache.getline(file, lnum[0])
-			lnum[0] = lnum[0] + 1
+			lnum[0] += 1
 			return line
 
 		try:
 			tokenize.tokenize(linereader, tokeneater)
-		except IndexError: pass
+		except IndexError:
+			pass
 		lvals = []
 		for name in names:
-			if type(name) is type([]):
+			if isinstance(name, types.ListType):
 				if locals.has_key(name[0]) or frame.f_globals.has_key(name[0]):
 					name_list, name = name, name[0]
 					if locals.has_key(name_list[0]):
 						value = locals[name_list[0]]
 					else:
 						value = frame.f_globals[name_list[0]]
-						name = "<em>global</em> %s" % name
+						name = '<em>global</em> %s' % name
 					for subname in name_list[1:]:
 						if hasattr(value, subname):
 							value = getattr(value, subname)
-							name = name + "." + subname
+							name += '.' + subname
 						else:
-							name = name + "." + "(unknown: %s)" % subname
+							name += '.' + '(unknown: %s)' % subname
 							break
 					name = '<strong>%s</strong>' % name
-					if type(value) is types.MethodType and 1:
+					if isinstance(value, types.MethodType):
 						value = None
 					else:
 						value = html_repr(value)
@@ -189,7 +206,7 @@ def html(context=5, options=None):
 			number = '<span style="%s">%s</span>' % (
 				opt['code.unaccent'], number)
 			line = '<tt>%s&nbsp;%s</tt>' % (
-				number, pydoc.html.preformat(line))
+				number, pyhtml.preformat(line))
 			if i == lnum:
 				line = ('<table width="100%%" style="%s"'
 					' cellspacing="0" cellpadding="0" border="0">'
@@ -198,13 +215,15 @@ def html(context=5, options=None):
 			excerpt.append('\n' + line)
 			if i == lnum:
 				excerpt.append(lvals)
-			i = i + 1
+			i += 1
 		traceback.append(level + '\n'.join(excerpt))
 
-	exception = '<p><strong>%s</strong>: %s\n' % (str(etype), str(evalue))
+	exception = '<p><strong>%s</strong>: %s\n' % (etype, escape(str(evalue)))
 	attribs = []
-	if type(evalue) is types.InstanceType:
+	if evalue is not None:
 		for name in dir(evalue):
+			if name.startswith('__'):
+				continue
 			value = html_repr(getattr(evalue, name))
 			attribs.append('<br>%s%s&nbsp;= %s\n' % (indent, name, value))
 	return javascript + head + ''.join(traceback) \
@@ -215,15 +234,14 @@ def handler():
 	print html()
 
 def html_repr(value):
-	html_repr_instance = pydoc.html._repr_instance
-	enc_value = pydoc.html.repr(value)
+	html_repr_instance = pyhtml._repr_instance
+	enc_value = pyhtml.repr(value)
 	if len(enc_value) > html_repr_instance.maxstring:
-		plain_value = pydoc.html.escape(repr(value))
-		return ('%s <a href="#" onClick="popup_repr(\'Long repr\','
-			' \'Full representation:&lt;br&gt;\\n%s\');'
-			' return false">(complete)</a>'
-			% (enc_value, pydoc.html.escape(plain_value).replace(
-				"'", "\\'").replace('"', '&quot;')))
+		plain_value = escape(repr(value))
+		return ('%s <a href="#" onClick="return popup_repr('
+			"'Full representation','%s')"
+			'" title="Full representation">(complete)</a>' % (enc_value,
+			escape(plain_value).replace("'", "\\'").replace('"', '&quot;')))
 	else:
 		return enc_value
 

@@ -3,21 +3,21 @@ from math import sin, pi
 from WebKit.Common import *
 from ExamplePage import ExamplePage
 
-try:
-	import gd # GD module
+try: # GD module
+	from gd import image as gdImage, gdFontLarge
 except ImportError:
-	gd = None
-	try:
-		import PIL # Python Imaging Library
-		import PIL.Image
-		import PIL.ImageDraw
-		pil = PIL
+	gdImage = None
+	try: # Python Imaging Library
+		import Image as pilImage, ImageDraw, ImageFont
 	except ImportError:
-		pil = None
+		try:
+			from PIL import Image as pilImage, ImageDraw, ImageFont
+		except ImportError:
+			pilImage = None
 
 def image_lib_link(lib=None):
 	if not lib:
-		lib = gd and 'gd' or 'pil'
+		lib = gdImage and 'gd' or 'pil'
 	name, src = {
 		'gd': ('GD module',
 			'newcenturycomputers.net/projects/gdmodule.html'),
@@ -38,13 +38,13 @@ white, black, blue, red = range(4)
 class Drawing:
 	"""Simple wrapper class for drawing the example image."""
 
-	if gd:
+	if gdImage:
 
 		def __init__(self):
 			global white, black, blue, red
-			self._image = gd.image((X, Y))
+			self._image = gdImage((X, Y))
 			self._color = map(self._image.colorAllocate, colors)
-			self._font = gd.gdFontLarge
+			self._font = gdFontLarge
 
 		def text(self, pos, string, color):
 			color = self._color[color]
@@ -62,18 +62,18 @@ class Drawing:
 	else:
 
 		def __init__(self):
-			self._image = pil.Image.new('RGB', (X, Y), colors[white])
-			self._draw = pil.ImageDraw.Draw(self._image)
+			self._image = pilImage.new('RGB', (X, Y), colors[white])
+			self._draw = ImageDraw.Draw(self._image)
 			for font in 'Tahoma Verdana Arial Helvetica'.split():
 				try:
-					font = pil.ImageFont.truetype(font + '.ttf', 12)
+					font = ImageFont.truetype(font + '.ttf', 12)
 				except (AttributeError, IOError):
 					font = None
 				if font:
 					break
 			else:
 				try:
-					font = pil.ImageFont.load_default()
+					font = ImageFont.load_default()
 				except (AttributeError, IOError):
 					font = None
 			self._font = font
@@ -92,7 +92,7 @@ class Drawing:
 			return s.getvalue()
 
 
-class Image(ExamplePage):
+class ImageDemo(ExamplePage):
 	"""Dynamic image generation example.
 
 	This example creates an image of a sinusoid.
@@ -105,7 +105,7 @@ class Image(ExamplePage):
 	"""
 
 	def defaultAction(self):
-		if self.request().field('fmt', None) == '.png' and (gd or pil):
+		if self.request().field('fmt', None) == '.png' and (gdImage or pilImage):
 			image = self.generatePNGImage()
 			res = self.response()
 			res.setHeader("Content-Type", "image/png")
@@ -120,8 +120,8 @@ class Image(ExamplePage):
 	def writeContent(self):
 		wr = self.writeln
 		wr('<h2>WebKit Image Generation Demo</h2>')
-		if gd or pil:
-			wr('<img src="Image?fmt=.png" alt="Generated example image"'
+		if gdImage or pilImage:
+			wr('<img src="ImageDemo?fmt=.png" alt="Generated example image"'
 				' width="%d" height="%d">' % (X, Y))
 			wr('<p>This image has just been generated using the %s.</p>' %
 				image_lib_link())

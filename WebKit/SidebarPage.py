@@ -30,13 +30,14 @@ class SidebarPage(Page):
 	_styleSheet = '''
 <!--
 body {
-	color: #080810;
 	background-color: white;
+	color: #080810;
 	font-size: 11pt;
 	font-family: Tahoma,Verdana,Arial,Helvetica,sans-serif;
 	margin: 0pt;
 	padding: 0pt;
 }
+
 h1 { font-size: 18pt; }
 h2 { font-size: 16pt; }
 h3 { font-size: 14pt; }
@@ -84,6 +85,28 @@ td#Content {
 	padding: 8pt;
 	vertical-align: top;
 	width: 100%;
+}
+table.NiceTable {
+	margin-bottom: 4pt;
+}
+table.NiceTable td, .Data {
+	background-color: #EEE;
+	color: #111;
+}
+table tr th, .SubHeading {
+	background-color: #CCC;
+	color: black;
+}
+table tr.TopHeading th, .TopHeading {
+background-color: #555;
+color: white;
+}
+td#Content table tr.NoTable td {
+	background-color: white;
+	color: #080810;
+}
+table.NiceTable th a:link, table.NiceTable th a:visited {
+	color: #101040;
 }
 -->
 '''

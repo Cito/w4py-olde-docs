@@ -30,18 +30,18 @@ class DumpCSV(AdminSecurity):
 		else:
 			plural = 's'
 		self.writeln('<p>%d row%s</p>' % (len(table), plural))
-		self.writeln('<table cellpadding="2" cellspacing="2">')
+		self.writeln('<table class="NiceTable" cellpadding="2" cellspacing="2">')
 		# Head row gets special formatting
 		self._headings = map(lambda col: col.name().strip(), table.headings())
 		self._numCols = len(self._headings)
-		self.writeln('<tr style="background-color:#555">')
+		self.writeln('<tr>')
 		for value in self._headings:
-			self.writeln('<th style="color:white">', value, '</th>')
+			self.writeln('<th>', value, '</th>')
 		self.writeln('</tr>')
 		# Data rows
 		rowIndex = 1
 		for row in table:
-			self.writeln('<tr style="background-color:#EEE">')
+			self.writeln('<tr>')
 			colIndex = 0
 			for value in row:
 				if colIndex < self._numCols: # for those cases where a row has more columns that the header row.

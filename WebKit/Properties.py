@@ -33,7 +33,7 @@ WebKitConfig = {
 		'FileUpload',
 		'PushServlet',
 		'RequestInformation',
-		'Image',
+		'ImageDemo',
 		'AjaxSuggest',
 		'JSONRPCClient',
 	]
