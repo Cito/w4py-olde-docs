@@ -25,12 +25,24 @@ When started, the app server records its pid in appserver.pid.
 from marshal import dumps, loads
 import threading, Queue, select, socket, errno, traceback
 
+try:
+	from ctypes import pythonapi, py_object
+except ImportError:
+	py_object = pythonapi = None
+try:
+	PyThreadState_SetAsyncExc = pythonapi.PyThreadState_SetAsyncExc
+except (TypeError, AttributeError):
+	PyThreadState_SetAsyncExc = None
+try: # for Python < 2.5
+	BaseException
+except NameError:
+	BaseException = Exception
+
 from Common import *
 import AppServer as AppServerModule
 from PidFile import ProcessRunning
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 from ASStreamOut import ASStreamOut, ConnectionAbortedError
-from MiscUtils.Funcs import timestamp
 from WebUtils.Funcs import requestURI
 
 debug = False
@@ -416,7 +428,7 @@ class ThreadedAppServer(AppServer):
 			self._requestQueue.put(None)
 			# _threadCount is an estimate, just because we
 			# put None in the queue, the threads don't immediately
-			# disapear, but they will eventually.
+			# disappear, but they will eventually.
 			self._threadCount -= 1
 		for i in self._threadPool:
 			# There may still be a None in the queue, and some
@@ -427,6 +439,56 @@ class ThreadedAppServer(AppServer):
 				self._threadPool.remove(i)
 				if debug:
 					print "Thread absorbed, real threadCount =", len(self._threadPool)
+
+	if PyThreadState_SetAsyncExc:
+
+		def abortRequest(self, requestID,
+				exceptionClass=ConnectionAbortedError):
+			"""Abort a request by raising an exception in its worker thread.
+
+			A return value of one means the thread was successfully aborted,
+			a value of zero means the thread could not be found,
+			any other value indicates that an error has occurred.
+
+			(Idea taken from: http://sebulba.wikispaces.com/recipe+thread2)
+
+			"""
+			verbose = debug or self._verbose
+			if verbose:
+				print "Aborting request", requestID
+			for threadID, t in threading._active.items():
+				try:
+					threadRequestID = t._processing._requestID
+				except Exception:
+					continue
+				if requestID != threadRequestID:
+					continue
+				if verbose:
+					print "Aborting thread", threadID
+				try:
+					ret = PyThreadState_SetAsyncExc(threadID,
+						py_object(exceptionClass))
+				except Exception:
+					ret = -1
+				if ret == 0:
+					if verbose:
+						print "Error: Could not find thread", threadID
+				elif ret != 1:
+					# If it returns a number greater than one, we're in trouble,
+					# and should call it again with exc=NULL to revert the effect
+					if ret != -1:
+						try:
+							PyThreadState_SetAsyncExc(threadID, 0)
+						except Exception:
+							pass
+					if verbose:
+						print "Error: Could not abort thread", threadID
+				break
+			else:
+				ret = 0
+				if verbose:
+					print "Error: No thread for request", requestID
+			return ret
 
 
 	## Worker Threads ##
@@ -446,33 +508,28 @@ class ThreadedAppServer(AppServer):
 		(future use as a hook).
 
 		"""
-
 		self.initThread()
-
 		t = threading.currentThread()
-		t._processing = False
-
+		t._processing = None
 		try:
 			while 1:
 				try:
 					handler = self._requestQueue.get()
 					if handler is None: # None means time to quit
-						if debug:
-							print "Thread retrieved None, quitting."
 						break
-					t._processing = True
+					t._processing = handler
 					try:
 						handler.handleRequest()
 					except Exception:
 						traceback.print_exc(file=sys.stderr)
-					t._processing = False
+					t._processing = None
 					handler.close()
 				except Queue.Empty:
 					pass
 		finally:
 			self.delThread()
 		if debug:
-			print threading.currentThread(), "Quitting."
+			print "Quitting", t
 
 	def initThread(self):
 		"""Initialize thread.
@@ -619,6 +676,7 @@ class Handler:
 		"""
 		self._server = server
 		self._serverAddress = serverAddress
+		self._verbose = server._verbose
 
 	def activate(self, sock, requestID):
 		"""Activate the handler for processing the request.
@@ -643,18 +701,11 @@ class Handler:
 		self._sock = None
 		self._server._handlerCache[self._serverAddress].append(self)
 
-	def handleRequest(self):
-		"""
-		Subclasses should override this -- this is where
-		work gets done.
-		"""
-		pass
-
 	def receiveDict(self):
 		"""Receive a dictionary from the socket.
 
-		Utility function to receive a marshalled dictionary from
-		the socket. Returns None if the request was empty.
+		Utility function to receive a marshalled dictionary from the socket.
+		Returns None if the request was empty.
 
 		"""
 		chunk = ''
@@ -707,6 +758,50 @@ See the Troubleshooting section of the WebKit Install Guide.\r
 			missing = dictLength - len(chunk)
 		return loads(chunk)
 
+	def handleRequest(self):
+		"""Handle a raw request.
+
+		This is where the work gets done. Subclasses should override.
+
+		"""
+		pass
+
+	def startRequest(self, requestDict=None):
+		"""Track start of a raw request.
+
+		Subclasses can use and override this method.
+
+		"""
+		requestDict = requestDict or {}
+		requestID = self._requestID
+		requestTime = requestDict.get('time') or time.time()
+		requestDict['requestID'] = requestID
+		requestDict['time'] = requestTime
+		# The request object is stored for tracking/debugging purposes.
+		self._requestDict = requestDict
+		if self._verbose:
+			requestTime = time.localtime(requestTime)[:6]
+			env = requestDict.get('environ')
+			uri = env and requestURI(env) or '-'
+			print '%5d  %4d-%02d-%02d %02d:%02d:%02d  %s' % (
+				(requestID,) + requestTime + (uri,))
+
+	def endRequest(self, error=None):
+		"""Track end of a raw request.
+
+		Subclasses can use and override this method.
+
+		"""
+		if self._verbose:
+			requestDict = self._requestDict
+			requestID = requestDict['requestID']
+			duration = round((time.time() - requestDict['time'])*1000)
+			env = requestDict.get('environ')
+			if not error:
+				error = env and requestURI(env) or '-'
+			print '%5d  %14.0f msec  %s\n' % (
+				requestID, duration, error)
+
 
 class MonitorHandler(Handler):
 	"""Monitor server status.
@@ -728,15 +823,15 @@ class MonitorHandler(Handler):
 	settingPrefix = 'Monitor'
 
 	def handleRequest(self):
-		verbose = self._server._verbose
-		startTime = time.time()
-		if verbose:
-			print "BEGIN REQUEST"
-			print asclocaltime(startTime)
-		conn = self._sock
-		if verbose:
-			print "receiving request from", conn
 		requestDict = self.receiveDict()
+		if not requestDict:
+			return
+
+		requestDict['environ'] = { 'REQUEST_URI': '*%s %s*'
+			% (self.settingPrefix, requestDict['format'])}
+		self.startRequest(requestDict)
+
+		conn = self._sock
 		if requestDict['format'] == "STATUS":
 			conn.send(str(self._server._requestID))
 		elif requestDict['format'] == 'QUIT':
@@ -824,21 +919,12 @@ class AdapterHandler(Handler):
 		does the rest of the work (here we just clean up after).
 
 		"""
-		verbose = self._server._verbose
-		self._startTime = time.time()
-
 		requestDict = self.receiveDict()
 		if not requestDict:
 			return
 
-		if verbose:
-			uri = requestDict.has_key('environ') \
-				and requestURI(requestDict['environ']) or '-'
-			sys.stdout.write('%5i  %s  %s\n'
-				% (self._requestID, timestamp()['pretty'], uri))
-
+		self.startRequest(requestDict)
 		requestDict['input'] = self.makeInput()
-		requestDict['requestID'] = self._requestID
 
 		streamOut = TASStreamOut(self._sock, bufferSize=self._server._responseBufferSize)
 		transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
@@ -854,10 +940,7 @@ class AdapterHandler(Handler):
 		except Exception:
 			pass
 
-		if verbose:
-			duration = ('%0.2f secs' % (time.time() - self._startTime)).ljust(19)
-			sys.stdout.write('%5i  %s  %s\n\n' % (self._requestID, duration,
-				aborted and '*connection aborted*' or uri))
+		self.endRequest(aborted and '*connection aborted*')
 
 		transaction._application = None
 		transaction.die()

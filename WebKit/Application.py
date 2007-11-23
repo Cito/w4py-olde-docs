@@ -455,7 +455,6 @@ class Application(ConfigurableForServerSidePath, Object):
 	def sessionPrefix(self, trans):
 		"""Get the prefix string for the session ID.
 
-
 		Overwrite to make this transaction dependent.
 
 		"""
@@ -463,7 +462,6 @@ class Application(ConfigurableForServerSidePath, Object):
 
 	def sessionName(self, trans):
 		"""Get the name of the field holding the session ID.
-
 
 		Overwrite to make this transaction dependent.
 
@@ -489,7 +487,7 @@ class Application(ConfigurableForServerSidePath, Object):
 		return self._server
 
 	def serverSidePath(self, path=None):
-		"""Get the serve-side-path.
+		"""Get the server-side path.
 
 		Returns the absolute server-side path of the WebKit application.
 		If the optional path is passed in, then it is joined with the
@@ -619,11 +617,13 @@ class Application(ConfigurableForServerSidePath, Object):
 
 		"""
 		format = requestDict['format']
-		# Maybe an EmailAdapter would make a request with a
-		# format of Email, and an EmailRequest would be
-		# generated.  For now just CGI/HTTPRequest.
+		# Maybe an EmailAdapter would make a request with a format of Email,
+		# and an EmailRequest would be generated. For now just CGI/HTTPRequest.
 		assert format == 'CGI'
-		return HTTPRequest(requestDict)
+		request = HTTPRequest(requestDict)
+		# The request object is stored for tracking/debugging purposes.
+		requestDict['requestObject'] = request
+		return request
 
 	def runTransaction(self, trans):
 		"""Run transation.
@@ -649,7 +649,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			self.runTransactionViaServlet(servlet, trans)
 		except EndResponse:
 			pass
-		except ConnectionAbortedError, err:
+		except (KeyboardInterrupt, ConnectionAbortedError), err:
 			trans.setError(err)
 		except Exception, err:
 			urls = {}

@@ -17,16 +17,16 @@ class HTTPRequest(Request):
 
 	## Initialization ##
 
-	def __init__(self, dict=None):
+	def __init__(self, requestDict=None):
 		Request.__init__(self)
 		self._stack = []
-		if dict:
+		if requestDict:
 			# Dictionaries come in from web server adapters like the CGIAdapter
-			assert dict['format'] == 'CGI'
-			self._time = dict['time']
-			self._environ = dict['environ']
-			self._input = dict['input']
-			self._requestID = dict['requestID']
+			assert requestDict['format'] == 'CGI'
+			self._time = requestDict['time']
+			self._environ = requestDict['environ']
+			self._input = requestDict['input']
+			self._requestID = requestDict['requestID']
 			self._fields = FieldStorage.FieldStorage(
 				self._input, environ=self._environ,
 				keep_blank_values=True, strict_parsing=False)

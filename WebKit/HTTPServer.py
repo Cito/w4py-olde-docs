@@ -1,10 +1,8 @@
-import sys, os, socket, time, errno
+import os, socket, time, errno
 import BaseHTTPServer
 
 from ThreadedAppServer import Handler
 from ASStreamOut import ASStreamOut
-from MiscUtils.Funcs import timestamp
-from WebUtils.Funcs import requestURI
 
 
 class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
@@ -54,18 +52,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 		env['SERVER_SOFTWARE'] = self.server_version
 		env['SERVER_PROTOCOL'] = self.protocol_version
 		env['GATEWAY_INTERFACE'] = 'CGI/1.1'
-		if self._server._verbose:
-			uri = requestURI(env)
-			startTime = time.time()
-			sys.stdout.write('%5i  %s  %s\n'
-				% (self._requestID, timestamp()['pretty'], uri))
-
 		self.doTransaction(env, self.rfile)
-
-		if self._server._verbose:
-			duration = ('%0.2f secs' % (time.time() - startTime)).ljust(19)
-			sys.stdout.write('%5i  %s  %s\n\n'
-				% (self._requestID, duration, uri))
 
 	do_GET = do_POST = do_HEAD = handleRequest
 	# These methods are used in WebDAV requests:
@@ -98,8 +85,8 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 			code = int(code)
 			assert 2 <= code/100 < 6
 		except Exception:
-			sys.stdout.write('%5i  HTTPServer error: Missing status header\n'
-				% (self._requestID,))
+			print '%5d  HTTPServer error: Missing status header' % (
+				self._requestID,)
 		else:
 			self.send_response(code, message)
 			self.wfile.write(data)
@@ -128,14 +115,13 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 
 	def doTransaction(self, env, input):
 		"""Process transaction."""
-		streamOut = ASStreamOut()
 		requestDict = {
 			'format': 'CGI',
-			'time': time.time(),
 			'environ': env,
 			'input': input,
-			'requestID': self._requestID,
 			}
+		self.startRequest(requestDict)
+		streamOut = ASStreamOut()
 		self.dispatchRawRequest(requestDict, streamOut)
 		try:
 			self.processResponse(streamOut._buffer)
@@ -143,8 +129,9 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 		except socket.error, e:
 			if e[0] == errno.EPIPE: # broken pipe
 				return
-			sys.stdout.write('%5i  HTTPServer output error: %s\n'
-				% (self._requestID, e))
+			print '%5d  HTTPServer output error: %s' % (
+				self._requestID, e)
+		self.endRequest()
 
 	def dispatchRawRequest(self, requestDict, streamOut):
 		"""Dispatch the request."""
