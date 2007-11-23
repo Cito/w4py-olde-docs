@@ -221,9 +221,6 @@ def getsourcefile(object):
 			return None
 	if os.path.exists(filename):
 		return filename
-	# only return a non-existent filename if the module has a PEP 302 loader
-	if hasattr(getmodule(object, filename), '__loader__'):
-		return filename
 
 def getabsfile(object):
 	"""Return an absolute path to the source or compiled file for an object.
