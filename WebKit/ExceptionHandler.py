@@ -680,8 +680,7 @@ def osIdDict():
 	uid, gid, etc., all obtained from the os module.
 
 	"""
-
-	ids = ['egid', 'euid', 'gid', 'pgid', 'groups', 'pgrp',
+	ids = ['egid', 'euid', 'gid', 'groups', 'pgrp',
 		'pid', 'ppid', 'uid']
 	attrs = {}
 	for id in ids:
