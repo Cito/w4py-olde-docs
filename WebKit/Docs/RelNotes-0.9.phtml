@@ -54,17 +54,18 @@ improvements and bugfixes that have been made.</p>
  	<li>Added <code>DebugAppServer</code>, a single-threaded app server
 	that makes it possible to debug servlets using a standard Python
 	debugger. Tested on Windows only, using both PythonWin and JEdit with
-    the JPyDbg plugin. See
-    <span class="filename">WebKit/DebugAppServer.py</span> for details.</li>
+	the JPyDbg plugin. See
+	<span class="filename">WebKit/DebugAppServer.py</span> for details.</li>
 	<li>New debugging feature: by turning on the configuration variable
-	<code>IncludeErrorLink</code> in
+	<code>IncludeEditLink</code> in
 	<span class="filename">Application.config</span>, an <a href="#">[edit]</a>
 	link will be put next to each line in tracebacks. That link will point
 	to a file of type <tt>application/x-webkit-edit-file</tt>, which you
 	should configure your browser to run with
-	<span class="filename">Webware/bin/editfile.py</span> (and edit
-	<span class="filename">editfile.py</span> so that it opens your
-	editor).</li>
+	<span class="filename">Webware/bin/editfile.py</span>.
+	If you configure <span class="filename">editfile.py</span> correctly,
+	then it will automatically open the respective Python module with your
+	favorite Python editor and put the cursor on the erroneous line.</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>

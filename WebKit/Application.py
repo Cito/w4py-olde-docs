@@ -58,6 +58,8 @@ defaultConfig = {
 	'SessionCookiePath': None,
 	'SecureSessionCookie': True,
 	'ShowDebugInfoOnErrors': True,
+	'EnterDebuggerOnException': False,
+	'IncludeEditLink': True,
 	'IncludeFancyTraceback': False,
 	'FancyTracebackContext': 5,
 	'UserErrorMessage': 'The site is having technical difficulties'
@@ -92,7 +94,6 @@ defaultConfig = {
 	'Debug': {
 		'Sessions': False,
 		},
-	'EnterDebuggerOnException': False,
 	'DirectoryFile': ['index', 'Index', 'main', 'Main'],
 	'UseCascadingExtensions': True,
 	'ExtensionCascadeOrder': ['.py', '.psp', '.kid', '.html'],

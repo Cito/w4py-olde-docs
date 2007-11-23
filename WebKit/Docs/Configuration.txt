@@ -254,15 +254,6 @@ Errors
     well.  This includes the traceback, HTTP headers, form fields,
     environment and process ids.  You will most likely want to turn
     this off when deploying the site for users.  Default: ``True``.
-``IncludeFancyTraceback``:
-    If True, then display a fancy, detailed traceback at the end of
-    the error page.  It will include the values of local variables in
-    the traceback.  This makes use of a modified version of
-    ``cgitb.py`` which is included with Webware.  The `original
-    version`__ was written by Ka-Ping Yee.  Default: ``False`` (off).
-
-    __ http://web.lfw.org/python/
-
 ``EnterDebuggerOnException``:
     If True, and if the AppServer is running from an interactive
     terminal, an uncaught exception will cause the AppServer to
@@ -270,6 +261,23 @@ Errors
     investigate variables, etc.  See python debugger (pdb) docs for
     more information.  You will certainly want to turn this off when
     deploying the site.  Default: ``False`` (off).
+``IncludeEditLink``:
+    If True, an "[edit]" link will be put next to each line in tracebacks.
+    That link will point to a file of type
+    ``application/x-webkit-edit-file``, which you should configure your
+    browser to run with ``Webware/bin/editfile.py``. If you configure
+    ``editfile.py`` correctly, then it will automatically open the
+    respective Python module with your favorite Python editor and put
+    the cursor on the erroneous line.  Default: ``True``.
+``IncludeFancyTraceback``:
+    If True, then display a fancy, detailed traceback at the end of
+    the error page.  It will include the values of local variables in
+    the traceback.  This makes use of a modified version of ``cgitb.py``
+    which is included with Webware.  The `original version`__ was
+    written by Ka-Ping Yee.  Default: ``False`` (off).
+
+    __ http://web.lfw.org/python/
+
 ``FancyTracebackContext``:
     The number of lines of source code context to show if
     IncludeFancyTraceback is turned on.  Default: ``5``.
