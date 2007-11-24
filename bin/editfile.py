@@ -19,8 +19,6 @@ editorCommands = {
 		'kate -u -l %(line)s "%(filename)s"',
 	'KWrite':
 		'kwrite --line %(line)s "%(filename)s"',
-	'Pico':
-		'pico +%(line)s "%(filename)s"',
 	'PSPad (Windows)':
 		r'start %%ProgramFiles%%\PSPad\PSPad.exe -%(line)s "%(filename)s"',
 	'SciTE':
