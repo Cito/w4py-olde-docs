@@ -2,13 +2,25 @@ from WebKit.Page import Page
 
 
 class EditFile(Page):
+	"""Helper servlet for the feature provided by the IncludeEditLink setting."""
+
+	def writeInfo(self, key, value):
+		self.writeln('%s: %s' % (key, value))
 
 	def writeHTML(self):
-		res = self.response()
-		res.setHeader('Content-type', 'application/x-webkit-edit-file')
+		header = self.response().setHeader
+		info = self.writeInfo
 		field = self.request().field
-		# @@ ib 3/03: more information should be added about this Webware
-		# installation, so that the client program could handle multiple
-		# installations with different file locations.
-		res.write('Filename: %s\n' % field('filename'))
-		res.write('Line: %s\n' % field('line'))
+		app = self.application()
+
+		header('Content-type', 'application/x-webkit-edit-file')
+		header('Content-Disposition', 'inline; filename="WebKit.EditFile"')
+
+		# Basic information for editing the file:
+		info('Filename', field('filename'))
+		info('Line', field('line'))
+
+		# Additional information about this Webware installation:
+		info('ServerSidePath', app.serverSidePath())
+		info('WebwarePath', app.webwarePath())
+		info('WebKitPath', app.webKitPath())

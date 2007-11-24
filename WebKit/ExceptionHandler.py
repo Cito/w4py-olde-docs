@@ -13,7 +13,8 @@ except AttributeError: # Python < 2.4
 	from linecache import checkcache
 else: # Python >= 2.4
 	# the linecache module updates the cache automatically
-	def checkcache(): pass
+	def checkcache():
+		pass
 
 
 class Singleton:

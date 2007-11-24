@@ -22,9 +22,6 @@ def HTMLForException(excInfo=None, options=None):
 	sys.exc_info() which is in fact, invoked if the tuple isn't provided.
 
 	"""
-	# @@ 2000-04-17 ce: Maybe excInfo should default to None and get set
-	# to sys.excInfo() if not specified. If so, then clean up other code.
-
 	# Get the excInfo if needed:
 	if excInfo is None:
 		excInfo = sys.exc_info()
@@ -48,10 +45,9 @@ def HTMLForException(excInfo=None, options=None):
 			parts[0] = '<span style="%s">%s</span>' \
 				% (opt['row.location'], parts[0])
 			if opt['editlink']:
-				parts[0] = '%s <a href="%s?filename=%s&amp;line=%s">[edit]</a>' \
+				parts[0] = ('%s <a href="%s?filename=%s&amp;line=%s">[edit]</a>'
 					% (parts[0], opt['editlink'], urllib.quote(
-						os.path.join(os.getcwd(), match.group(1))),
-						match.group(2))
+						os.path.abspath(match.group(1))), match.group(2)))
 			parts[1] = '<span style="%s">%s</span>' \
 				% (opt['row.code'], parts[1])
 			line = '\n'.join(parts)

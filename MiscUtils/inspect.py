@@ -188,6 +188,8 @@ def getfile(object):
 	if istraceback(object):
 		object = object.tb_frame
 	if isframe(object):
+		if object.f_globals.has_key('__file__'):
+			return object.f_globals['__file__']
 		object = object.f_code
 	if iscode(object):
 		return object.co_filename
@@ -220,7 +222,7 @@ def getsourcefile(object):
 			# Looks like a binary file.  We want to only return a text file.
 			return None
 	if os.path.exists(filename):
-		return filename
+		return os.path.abspath(filename)
 
 def getabsfile(object):
 	"""Return an absolute path to the source or compiled file for an object.
