@@ -149,22 +149,6 @@ class SessionFileStore(SessionStore):
 	def storeAllSessions(self):
 		pass
 
-	# We don't know the timeout without opening the session, so this can't work:
-	#
-	# def cleanStaleSessions(self, task=None):
-	#     """Clean stale sessions.
-	#
-	#     Called by the Application to tell this store to clean out all
-	#     sessions that have exceeded their lifetime.
-	#
-	#     """
-	#     curTime = time.time()
-	#     for key in self.keys():
-	#         mtime = os.path.getmtime(self.filenameForKey(key))
-	#         if (curTime - mtime) >= sess.timeout() or sess.timeout() == 0:
-	#             sess.expiring()
-	#             del self[key]
-
 
 	## Self utility ##
 
