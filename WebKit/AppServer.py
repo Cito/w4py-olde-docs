@@ -172,7 +172,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 		Subclasses may override and normally follow this sequence:
 			1. set self._running = 1 (request to shut down)
 			2. class specific statements for shutting down
-			3. Invoke super's shutDown() e.g., ``AppServer.shutDown(self)``
+			3. Invoke super's shutDown() e.g., `AppServer.shutDown(self)`
 			4. set self._running = 0 (server is completely down)
 
 		"""
@@ -361,7 +361,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
 	def isPersistent(self):
 		"""Check whether the AppServer is persistent.
 
-		When using ``OneShot``, the AppServer will exist only for a single
+		When using `OneShot`, the AppServer will exist only for a single
 		request, otherwise it will stay around indefinitely.
 
 		"""

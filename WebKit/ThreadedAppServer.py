@@ -22,8 +22,9 @@ When started, the app server records its pid in appserver.pid.
 
 """
 
-from marshal import dumps, loads
 import threading, Queue, select, socket, errno, traceback
+from threading import Thread, currentThread
+from marshal import dumps, loads
 
 try:
 	from ctypes import pythonapi, py_object
@@ -58,6 +59,7 @@ defaultConfig = {
 	'StartServerThreads': 10, # initial number of server threads
 	'MinServerThreads': 5, # minimum number
 	'MaxServerThreads': 20, # maxium number
+	'MaxRequestTime': 300, # maximum request execution time in seconds
 	'RequestQueueSize': 0, # means twice the maximum number of threads
 	'RequestBufferSize': 8*1024, # 8 kBytes
 	'ResponseBufferSize': 8*1024, # 8 kBytes
@@ -83,6 +85,69 @@ class ProtocolError(Exception):
 	pass
 
 
+class WorkerThread(Thread):
+	"""Base class for Webware worker threads that can be aborted.
+
+	(Idea taken from: http://sebulba.wikispaces.com/recipe+thread2)
+
+	"""
+
+	_canAbort = PyThreadState_SetAsyncExc is not None
+
+	def threadID(self):
+		"""Return the thread's internal id."""
+		try:
+			return self._threadID
+		except AttributeError:
+			for threadID, t in threading._active.items():
+				if t is self:
+					self._threadID = threadID
+					return threadID
+
+	def abort(self, exception=ConnectionAbortedError):
+		"""Abort the current thread by raising an exception in its context.
+
+		A return value of one means the thread was successfully aborted,
+		a value of zero means the thread could not be found,
+		any other value indicates that an error has occurred.
+
+		"""
+		if not self._canAbort:
+			if debug:
+				print "Error: Aborting threads is not possible"
+			return -1
+		if debug:
+			print "Aborting worker thread..."
+		try:
+			processing = self.isAlive() and self._processing
+		except AttributeError:
+			processing = False
+		if not processing:
+			if debug:
+				print "Error: Thread is not working."
+		threadID = self.threadID()
+		if threadID is None:
+			if debug:
+				print "Error: Worker thread id not found"
+			return 0
+		if debug:
+			print "Worker thread id is", threadID
+		try:
+			ret = PyThreadState_SetAsyncExc(threadID, py_object(exception))
+			# If it returns a number greater than one, we're in trouble,
+			# and should call it again with exc=NULL to revert the effect
+			if ret > 1:
+				PyThreadState_SetAsyncExc(threadID, 0)
+		except Exception:
+			ret = -1
+		if debug:
+			if ret == 0:
+				print "Error: Could not find thread", threadID
+			elif ret != 1:
+				print "Error: Could not abort thread", threadID
+		return ret
+
+
 class ThreadedAppServer(AppServer):
 	"""Threaded Application Server.
 
@@ -93,7 +158,7 @@ class ThreadedAppServer(AppServer):
 
 	The transaction is connected directly to the socket, so that the
 	response is sent directly (if streaming is used, like if you call
-	``response.flush()``). Thus the ThreadedAppServer packages the
+	`response.flush()`). Thus the ThreadedAppServer packages the
 	socket/response, rather than value being returned up the call chain.
 
 	"""
@@ -116,6 +181,7 @@ class ThreadedAppServer(AppServer):
 		self._requestID = 0
 		self._socketHandlers = {}
 		self._handlerCache = {}
+		self._threadHandler = {}
 		self._sockets = {}
 
 		self._defaultConfig = None
@@ -137,11 +203,20 @@ class ThreadedAppServer(AppServer):
 
 			self._requestQueue = Queue.Queue(self._requestQueueSize)
 
+			maxRequestTime = self.setting('MaxRequestTime') or None
+			if maxRequestTime and not self._canAbortRequest:
+				print "Warning: MaxRequestTime setting ineffective" \
+					" (cannot abort requests)"
+				maxRequestTime = None
+			self._maxRequestTime = maxRequestTime
+			self._checkRequestTime = None
+
 			out = sys.stdout
 			out.write('Creating %d threads' % threadCount)
 			for i in range(threadCount):
 				self.spawnThread()
-				out.write(".")
+				if not debug:
+					out.write(".")
 				out.flush()
 			out.write("\n")
 
@@ -154,6 +229,9 @@ class ThreadedAppServer(AppServer):
 				self.addSocketHandler(HTTPAppServerHandler)
 
 			self.readyForRequests()
+
+			if maxRequestTime:
+				self._checkRequestTime = time.time() + maxRequestTime
 		except:
 			AppServer.initiateShutdown(self)
 			raise
@@ -162,9 +240,9 @@ class ThreadedAppServer(AppServer):
 		"""Add socket handler.
 
 		Adds a socket handler for `serverAddress` -- `serverAddress`
-		is a tuple (*host*, *port*), where *host* is the interface
+		is a tuple ``(host, port)``, where ``host`` is the interface
 		to connect to (for instance, the IP address on a machine with
-		multiple IP numbers), and *port* is the port (e.g. HTTP is on
+		multiple IP numbers), and ``port`` is the port (e.g. HTTP is on
 		80 by default, and Webware adapters use 8086 by default).
 
 		The `handlerClass` is a subclass of `Handler`, and is used to
@@ -253,7 +331,7 @@ class ThreadedAppServer(AppServer):
 
 		Every so often (every 5 loops) it updates thread usage
 		information (`updateThreadUsage`), and every
-		``MaxServerThreads`` * 2 loops it it will manage
+		``MaxServerThreads * 2`` loops it it will manage
 		threads (killing or spawning new ones, in `manageThreadCount`).
 
 		"""
@@ -308,6 +386,7 @@ class ThreadedAppServer(AppServer):
 				else:
 					threadCheck += 1
 
+				self.abortLongRequests()
 				self.restartIfNecessary()
 
 		finally:
@@ -339,8 +418,8 @@ class ThreadedAppServer(AppServer):
 
 		"""
 		count = 0
-		for i in self._threadPool:
-			if i._processing:
+		for t in self._threadPool:
+			if t._processing:
 				count += 1
 		return count
 
@@ -404,7 +483,7 @@ class ThreadedAppServer(AppServer):
 		"""
 		if debug:
 			print "Spawning new thread"
-		t = threading.Thread(target=self.threadloop)
+		t = WorkerThread(target=self.threadloop)
 		t._processing = False
 		t.start()
 		self._threadPool.append(t)
@@ -430,65 +509,81 @@ class ThreadedAppServer(AppServer):
 			# put None in the queue, the threads don't immediately
 			# disappear, but they will eventually.
 			self._threadCount -= 1
-		for i in self._threadPool:
+		for t in self._threadPool:
 			# There may still be a None in the queue, and some
 			# of the threads we want gone may not yet be gone.
-			# But we'll pick them up later -- they'll wait,.
-			if not i.isAlive():
-				rv = i.join() # Don't need a timeout, it isn't alive
-				self._threadPool.remove(i)
+			# But we'll pick them up later -- they'll wait.
+			if not t.isAlive():
+				rv = t.join() # Don't need a timeout, it isn't alive
+				self._threadPool.remove(t)
 				if debug:
 					print "Thread absorbed, real threadCount =", len(self._threadPool)
 
-	if PyThreadState_SetAsyncExc:
+	_canAbortRequest = WorkerThread._canAbort
 
-		def abortRequest(self, requestID,
-				exceptionClass=ConnectionAbortedError):
-			"""Abort a request by raising an exception in its worker thread.
+	def abortRequest(self, requestID, exception=ConnectionAbortedError):
+		"""Abort a request by raising an exception in its worker thread.
 
-			A return value of one means the thread was successfully aborted,
-			a value of zero means the thread could not be found,
-			any other value indicates that an error has occurred.
+		A return value of one means the thread was successfully aborted,
+		a value of zero means the thread could not be found,
+		any other value indicates that an error has occurred.
 
-			(Idea taken from: http://sebulba.wikispaces.com/recipe+thread2)
-
-			"""
-			verbose = debug or self._verbose
+		"""
+		verbose = self._verbose
+		if verbose:
+			print "Aborting request", requestID
+		if not self._canAbortRequest:
 			if verbose:
-				print "Aborting request", requestID
-			for threadID, t in threading._active.items():
-				try:
-					threadRequestID = t._processing._requestID
-				except Exception:
-					continue
-				if requestID != threadRequestID:
-					continue
-				if verbose:
-					print "Aborting thread", threadID
-				try:
-					ret = PyThreadState_SetAsyncExc(threadID,
-						py_object(exceptionClass))
-				except Exception:
-					ret = -1
-				if ret == 0:
-					if verbose:
-						print "Error: Could not find thread", threadID
-				elif ret != 1:
-					# If it returns a number greater than one, we're in trouble,
-					# and should call it again with exc=NULL to revert the effect
-					if ret != -1:
-						try:
-							PyThreadState_SetAsyncExc(threadID, 0)
-						except Exception:
-							pass
-					if verbose:
-						print "Error: Could not abort thread", threadID
+				print "Error: Cannot abort requests"
+			return -1
+		for t, h in self._threadHandler.items():
+			try:
+				handlerRequestID = h._requestID
+			except AttributeError:
+				handlerRequestID = None
+			if requestID == handlerRequestID:
+				ret = t.abort(exception)
 				break
+		else:
+			ret = 0
+		if verbose:
+			if ret == 0:
+				print "Error: Could not find thread for this request"
+			elif ret == 1:
+				print "The worker thread for this request has been aborted"
 			else:
-				ret = 0
-				if verbose:
-					print "Error: No thread for request", requestID
-			return ret
+				print "Error: Could not abort thread for this request"
+		return ret
+
+	def abortLongRequests(self):
+		"""Check for long-running requests and cancel these.
+
+		The longest allowed execution time for requests is controlled
+		by the MaxRequestTime setting.
+
+		"""
+		if self._checkRequestTime is None:
+			return
+		currentTime = time.time()
+		if currentTime > self._checkRequestTime:
+			if debug:
+				print "Checking for long-running requests"
+			verbose = self._verbose
+			minRequestTime = currentTime - self._maxRequestTime
+			for t, h in self._threadHandler.items():
+				try:
+					requestDict = h._requestDict
+					requestID = requestDict['requestID']
+					requestTime = requestDict['time']
+				except (AttributeError, KeyError):
+					continue
+				if requestTime < minRequestTime:
+					if verbose:
+						print "Aborting long-running request", requestID
+					t.abort()
+				elif requestTime < currentTime:
+					currentTime = requestTime
+			self._checkRequestTime = currentTime + self._maxRequestTime
 
 
 	## Worker Threads ##
@@ -496,7 +591,7 @@ class ThreadedAppServer(AppServer):
 	def threadloop(self):
 		"""The main loop for worker threads.
 
-		Worker threads poll the ``_requestQueue`` to find a request handler
+		Worker threads poll the `_requestQueue` to find a request handler
 		waiting to run. If they find a None in the queue, this thread has
 		been selected to die, which is the way the loop ends.
 
@@ -509,24 +604,36 @@ class ThreadedAppServer(AppServer):
 
 		"""
 		self.initThread()
-		t = threading.currentThread()
-		t._processing = None
+		t = currentThread()
+		t._processing = False
 		try:
 			while 1:
 				try:
 					handler = self._requestQueue.get()
-					if handler is None: # None means time to quit
-						break
-					t._processing = handler
+				except Queue.Empty:
+					continue
+				if handler is None:
+					# None means time to quit
+					break
+				try:
+					t._processing = True
+					self._threadHandler[t] = handler
 					try:
 						handler.handleRequest()
+					except ConnectionAbortedError:
+						print "Worker thread has been aborted"
 					except Exception:
 						traceback.print_exc(file=sys.stderr)
-					t._processing = None
+					del self._threadHandler[t]
+					t._processing = False
+				finally:
 					handler.close()
-				except Queue.Empty:
-					pass
 		finally:
+			try:
+				del self._threadHandler[t]
+				t._processing = False
+			except KeyError:
+				pass
 			self.delThread()
 		if debug:
 			print "Quitting", t
@@ -584,9 +691,12 @@ class ThreadedAppServer(AppServer):
 		# Tell all threads to end:
 		for i in range(self._threadCount):
 			self._requestQueue.put(None)
-		for i in self._threadPool:
+		if self._canAbortRequest:
+			for t in self._threadHandler.keys():
+				t.abort()
+		for t in self._threadPool:
 			try:
-				i.join()
+				t.join()
 			except Exception:
 				pass
 		# Call super's shutdown:
@@ -595,7 +705,7 @@ class ThreadedAppServer(AppServer):
 	def awakeSelect(self):
 		"""Awake the select() call.
 
-		The ``select()`` in `mainloop()` is blocking, so when
+		The `select()` in `mainloop()` is blocking, so when
 		we shut down we have to make a connect to unblock it.
 		Here's where we do that.
 
@@ -1011,8 +1121,7 @@ def run(workDir=None):
 						except SystemExit, e:
 							exitStatus = e[0]
 					# Run the server thread
-					t = threading.Thread(
-						target=_windowsmainloop)
+					t = Thread(target=_windowsmainloop)
 					t.start()
 					try:
 						while server._running > 1:
@@ -1107,9 +1216,9 @@ try:
 		print
 		print "-" * 79
 		print
-		for threadId, frame in items:
+		for threadID, frame in items:
 			print "Thread ID: %d (reference count = %d)" % (
-				threadId, sys.getrefcount(frame))
+				threadID, sys.getrefcount(frame))
 			print ''.join(traceback.format_list(traceback.extract_stack(frame)))
 		items.sort()
 		print "-" * 79
@@ -1173,20 +1282,20 @@ def main(args):
 	function = run
 	daemon = False
 	workDir = None
-	for i in args[:]:
-		if settingRE.match(i):
-			match = settingRE.match(i)
+	for a in args[:]:
+		if settingRE.match(a):
+			match = settingRE.match(a)
 			name = match.group(1)
 			value = i[match.end():]
 			Configurable.addCommandLineSetting(name, value)
-		elif i == "stop":
+		elif a == "stop":
 			function = AppServerModule.stop
-		elif i == "daemon":
+		elif a == "daemon":
 			daemon = True
-		elif i == "start":
+		elif a == "start":
 			pass
-		elif i[:8] == "workdir=":
-			workDir = i[8:]
+		elif a[:8] == "workdir=":
+			workDir = a[8:]
 		else:
 			print usage
 			return

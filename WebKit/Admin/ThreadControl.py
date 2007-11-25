@@ -21,30 +21,55 @@ class ThreadControl(AdminSecurity):
 		myRequestID = request.requestID()
 		wr = self.writeln
 
-		abortRequest = getattr(server, 'abortRequest', None)
-		threadPool = getattr(server, '_threadPool', [])
+		try:
+			threadHandler = server._threadHandler
+			abortRequest = server._canAbortRequest and server.abortRequest
+		except AttributeError:
+			threadHandler = {}
+			abortRequest = None
+
+		maxRequestTime = server.setting('MaxRequestTime', 0) or 0
 
 		try:
 			max_duration = int(field('duration'))
 		except (KeyError, ValueError):
-			max_duration = 30
+			max_duration = int(maxRequestTime/2) or 60
 
-		wr('<h2>Current thread status</h2>')
-		if abortRequest:
-			wr('''<form action="ThreadControl" method="post">
-<p><input name="cancel_all" type="submit" value="Cancel all requests below">
-<input name="cancel_selected" type="submit" value="Cancel all selected requests">
-<input name="refresh_view" type="submit" value="Refresh view"></p>
-<p><input name="cancel_long" type="submit" value="Cancel all long-running requests">
-(longer than <input type="text" name="duration" value="%d"
-size="6" maxlength="12" style="text-align: right"> seconds)</p>
-<p>You can <a href="Sleep" target="_blank">create a long-running request</a>
-in a separate browser window for testing.</p>
-<p>(Your web browser may get stuck if you create more than one of these.)</p>
-''' % max_duration)
+		wr('<h2>Current thread status</h2>',
+			'<p>Automatic cancelation of long-running requests is controlled by'
+			' the <tt>AppServer.config</tt> setting <tt>MaxRequestTime</tt>.</p>')
+
+		if maxRequestTime:
+			if abortRequest:
+				wr('<p>Currently, this is set to <b>%d</b> seconds.</p>'
+					% maxRequestTime)
+			else:
+				wr('<p>Currently, this is set to %d seconds, but inactive.</p>'
+					% maxRequestTime)
 		else:
-			wr('<p>(You need Python 2.3 with <code>ctypes</code>'
-				' or a newer Python version to enable cancellation of threads.)</p>')
+			wr('<p>Currently, this setting is disabled.</p>')
+
+		wr('<form action="ThreadControl" method="post">', '<p>')
+		if abortRequest:
+			wr('<input name="cancel_all" type="submit"'
+				' value="Cancel all requests below">')
+			wr('<input name="cancel_selected" type="submit"'
+				' value="Cancel all selected requests">')
+		else:
+			wr('<p>You need Python 2.3 with <code>ctypes</code> or a'
+				' newer Python version to enable cancelation of threads.</p>')
+		wr('<input name="refresh_view" type="submit"'
+			' value="Refresh view">', '</p>')
+		if abortRequest:
+			wr('<p><input name="cancel_long" type="submit"'
+				' value="Cancel all long-running requests">'
+				' (longer than <input type="text" name="duration" value="%d"'
+				' size="6" maxlength="12" style="text-align: right">'
+				' seconds)</p>' % max_duration)
+		wr('<p>You can <a href="Sleep" target="_blank">create a long-running'
+			' request</a> in a separate browser window for testing.</p>'
+			'<p>(Your web browser may get stuck if it is waiting for more'
+			' than one of these.)</p>')
 
 		if field('cancel_selected', None):
 			killIDs = field('selectedIDs', None) or []
@@ -62,17 +87,15 @@ in a separate browser window for testing.</p>
 			killIDs = []
 		killedIDs = []
 		errorIDs = []
-		activeThreads = []
-		for thread in threadPool:
+		activeIDs = []
+		for h in threadHandler.values():
 			try:
-				handler = thread._processing
-				if handler:
-					activeThreads.append(handler._requestID)
-			except Exception:
+				activeIDs.append(h._requestID)
+			except AttributeError:
 				continue
 		for requestID in killIDs:
 			if (not requestID or requestID == myRequestID
-					or requestID not in activeThreads):
+					or requestID not in activeIDs):
 				continue
 			if abortRequest:
 				try:
@@ -87,21 +110,19 @@ in a separate browser window for testing.</p>
 				errorIDs.append(requestID)
 		if killedIDs:
 			msg = (len(killedIDs) > 1 and
-				'The following requests have been cancelled: %s'
+				'The following requests have been canceled: %s'
 					% ', '.join(map(str, killedIDs)) or
-				'Request %d has been cancelled.' % killedIDs[0])
+				'Request %d has been canceled.' % killedIDs[0])
 			wr('<p style="color:green">%s</p>' % msg)
 			tries = 100
 			while tries:
 				pendingIDs = []
-				for thread in threadPool:
+				for h in threadHandler.values():
 					try:
-						handler = thread._processing
-						if handler:
-							requestID = handler._requestID
-							if requestID in killedIDs:
-								pendingIDs.append(requestID)
-					except Exception:
+						requestID = h._requestID
+						if requestID in killedIDs:
+							pendingIDs.append(requestID)
+					except AttributeError:
 						continue
 				if pendingIDs:
 					sleep(0.125)
@@ -116,35 +137,35 @@ in a separate browser window for testing.</p>
 					'The request is still pending.')
 				wr('<p>%s</p><p>You can'
 					' <a href="ThreadControl">refresh the view<a>'
-					' to verify cancellation.</p>' % msg)
+					' to verify cancelation.</p>' % msg)
 		if errorIDs:
 			msg = (len(errorIDs) > 1 and
-				'The following requests could not be cancelled: %s'
+				'The following requests could not be canceled: %s'
 					% ', '.join(map(str, errorIDs)) or
-				'Request %d could not be cancelled.' % errorIDs[0])
+				'Request %d could not be canceled.' % errorIDs[0])
 			wr('<p style="color:red">%s</p>' % msg)
-
-		threadCount = getattr(server, '_threadCount', 0)
 
 		curTime = time()
 		activeThreads = []
-		for thread in threadPool:
+		try:
+			threadCount = server._threadCount
+		except AttributeError:
+			threadCount = 0
+		for t, h in threadHandler.items():
 			try:
-				handler = thread._processing
-				if handler:
-					name = thread.getName()
-					requestID = handler._requestID
-					requestDict = handler._requestDict
-					if requestID != requestDict['requestID']:
-						raise ValueError
-					startTime = requestDict.get('time')
-					env = requestDict.get('environ')
-					client = env and (env.get('REMOTE_NAME')
-						or env.get('REMOTE_ADDR')) or None
-					uri = env and requestURI(env) or None
-					activeThreads.append((name, requestID,
-						startTime, curTime - startTime, client, uri))
-			except Exception:
+				name = t.getName()
+				requestID = h._requestID
+				requestDict = h._requestDict
+				if requestID != requestDict['requestID']:
+					raise AttributeError
+				startTime = requestDict.get('time')
+				env = requestDict.get('environ')
+				client = env and (env.get('REMOTE_NAME')
+					or env.get('REMOTE_ADDR')) or None
+				uri = env and requestURI(env) or None
+				activeThreads.append((name, requestID,
+					startTime, curTime - startTime, client, uri))
+			except AttributeError:
 				continue
 
 		if activeThreads:
@@ -162,7 +183,9 @@ in a separate browser window for testing.</p>
 				wr('<th><a href="ThreadControl?sort=%s">%s</a></th>'
 					% (sort_key, heading))
 				column += 1
-			wr('<th>Cancel</th></tr>')
+			if abortRequest:
+				wr('<th>Cancel</th>')
+			wr('</tr>')
 			def sort_threads(t1, t2, i=sort_column):
 				v1, v2 = t1[i], t2[i]
 				if v1 == v2:
@@ -213,12 +236,15 @@ in a separate browser window for testing.</p>
 			wr('<tr><td align="right">', name,
 				'</td><td align="right">', requestID,
 				'</td><td>', startTime, '</td><td align="right">', duration,
-				'</td><td>', client, '</td><td>', uri,
-				'</td><td align="center">', checkbox, '</td></tr>')
+				'</td><td>', client, '</td><td>', uri, '</td>')
+			if abortRequest:
+				wr('<td align="center">', checkbox, '</td>')
+			wr('</tr>')
 		if activeThreads:
 			wr('</table>')
-		longIDs = ','.join(map(str, longIDs))
-		wr('<input type="hidden" name="longIDs" value="%s">' % longIDs)
+		if abortRequest:
+			longIDs = ','.join(map(str, longIDs))
+			wr('<input type="hidden" name="longIDs" value="%s">' % longIDs)
 		wr('</form>')
 
 		if threadCount > len(activeThreads):

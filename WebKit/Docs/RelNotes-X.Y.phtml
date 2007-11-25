@@ -14,7 +14,15 @@
 
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
-	<li>...</li>
+	<li>The ThreadedAppServer has got a new method abortRequest() allowing
+	the abortion of the worker thread processing a request specified by
+	its request id. This feature needs a recent version of <code>ctypes</code>
+	and Python (2.3 or higher). The <code>_canAbortRequest</code> attribute
+	tells you whether this feature is available.</li>
+	<li>The new AppServer.config setting 'MaxRequestTime' allows monitoring
+	long-running requests. All requests with an execution time longer than
+	'MaxRequestTime' seconds will be automatically aborted. This feature is
+	disabled by setting 'MaxRequestTime' to 0 or None.</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
