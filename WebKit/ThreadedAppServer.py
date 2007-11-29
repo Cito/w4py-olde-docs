@@ -542,7 +542,15 @@ class ThreadedAppServer(AppServer):
 			except AttributeError:
 				handlerRequestID = None
 			if requestID == handlerRequestID:
-				ret = t.abort(exception)
+				t._abortHandler = h
+				try:
+					if self._threadHandler[t] is not h:
+						# request already finished in the meantime
+						raise KeyError
+					ret = t.abort(exception)
+				except Exception:
+					ret = 0
+				t._abortHandler = None
 				break
 		else:
 			ret = 0
@@ -578,9 +586,17 @@ class ThreadedAppServer(AppServer):
 				except (AttributeError, KeyError):
 					continue
 				if requestTime < minRequestTime:
-					if verbose:
-						print "Aborting long-running request", requestID
-					t.abort()
+					t._abortHandler = h
+					try:
+						if self._threadHandler[t] is not h:
+							# request already finished in the meantime
+							raise KeyError
+						if verbose:
+							print "Aborting long-running request", requestID
+						t.abort()
+					except Exception:
+						pass
+					t._abortHandler = None
 				elif requestTime < currentTime:
 					currentTime = requestTime
 			self._checkRequestTime = currentTime + self._maxRequestTime
@@ -606,6 +622,7 @@ class ThreadedAppServer(AppServer):
 		self.initThread()
 		t = currentThread()
 		t._processing = False
+		t._abortHandler = None
 		try:
 			while 1:
 				try:
@@ -628,6 +645,10 @@ class ThreadedAppServer(AppServer):
 					t._processing = False
 				finally:
 					handler.close()
+				while t._abortHandler is handler:
+					# this handler is to be aborted,
+					# so don't handle another request now
+					time.sleep(0.1)
 		finally:
 			try:
 				del self._threadHandler[t]
