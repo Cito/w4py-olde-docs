@@ -182,8 +182,11 @@ class ServletFactory(Object):
 			# check if __init__.py is in the directory
 			packageDir = os.path.join(directory, moduleName)
 			initPy = os.path.join(packageDir, '__init__.py')
-			if not os.path.exists(initPy):
-				# if it does not exist, make an empty one
+			for ext in ('', 'c', 'o'):
+				# the __init__.py file may only exist in compiled form
+				if os.path.exists(initPy + ext):
+					break
+			else: # if it does not exist, make an empty one
 				file = open(initPy, 'w')
 				file.write('#')
 				file.close()
