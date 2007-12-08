@@ -354,6 +354,18 @@ class HTTPNotImplemented(HTTPException):
 	_description = "The method given is not yet implemented by this application"
 
 
+class HTTPServiceUnavailable(HTTPException):
+	"""HTTPExcecption "service unavailable" subclass.
+
+	The server is currently unable to handle the request due to a temporary
+	overloading or maintenance of the server. The implication is that this
+	is a temporary condition which will be alleviated after some delay.
+
+	"""
+	_code = 503, "Service Unavailable"
+	_description = "The server is currently unable to handle the request"
+
+
 class HTTPInsufficientStorage(HTTPException):
 	"""HTTPExcecption "insufficient storage" subclass.
 

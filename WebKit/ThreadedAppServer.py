@@ -44,6 +44,7 @@ import AppServer as AppServerModule
 from PidFile import ProcessRunning
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 from ASStreamOut import ASStreamOut, ConnectionAbortedError
+from HTTPExceptions import HTTPServiceUnavailable
 from WebUtils.Funcs import requestURI
 
 debug = False
@@ -84,7 +85,7 @@ class NotEnoughDataError(Exception):
 class ProtocolError(Exception):
 	pass
 
-class ThreadAbortedError(Exception):
+class ThreadAbortedError(HTTPServiceUnavailable):
 	pass
 
 class RequestAbortedError(ThreadAbortedError):
@@ -652,6 +653,7 @@ class ThreadedAppServer(AppServer):
 					except ThreadAbortedError:
 						print "Worker thread has been aborted"
 					except Exception:
+						print "Exception in worker thread"
 						traceback.print_exc(file=sys.stderr)
 					del self._threadHandler[t]
 					t._processing = False

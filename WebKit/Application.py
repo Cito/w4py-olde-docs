@@ -659,10 +659,14 @@ class Application(ConfigurableForServerSidePath, Object):
 				isHTTPException = isinstance(err, HTTPException)
 				if isHTTPException:
 					err.setTransaction(trans)
-				# Get custom error page corresponding to the exception,
-				# but do not use custom page if response is already committed:
-				if not self._errorPage or trans.response().isCommitted():
+				if trans.response().isCommitted():
+					# response already committed, cannot display error
+					isHTTPException = False
 					break
+				if not self._errorPage:
+					# no custom error page configured
+					break
+				# get custom error page for this exception
 				url = self.errorPage(err.__class__)
 				if isHTTPException and not url:
 					# get custom error page for status code
