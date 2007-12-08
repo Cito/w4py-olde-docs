@@ -1,6 +1,7 @@
+import traceback, MimeWriter, smtplib
 from os import pathsep
 from types import DictType, ListType
-import traceback, random, MimeWriter, smtplib
+from random import randint
 
 from Common import *
 from MiscUtils.Funcs import dateForEmail
@@ -203,7 +204,7 @@ class ExceptionHandler(Object):
 			privateErrorPage = self.privateErrorPage()
 			filename = self.saveErrorPage(privateErrorPage)
 		else:
-			filename = ''
+			filename = None
 
 		self.logExceptionToDisk(errorMsgFilename=filename)
 
@@ -435,26 +436,32 @@ class ExceptionHandler(Object):
 		"""
 		filename = os.path.join(self._app._errorMessagesDir,
 			self.errorPageFilename())
-		f = open(filename, 'w')
-		f.write(html)
-		f.close()
-		return filename
+		try:
+			f = open(filename, 'w')
+			try:
+				f.write(html)
+			finally:
+				f.close()
+		except IOError:
+			sys.stderr.write('[%s] [error] WebKit: Cannot save error page (%s)\n'
+				% (asclocaltime(self._time), filename))
+		else:
+			return filename
 
 	def errorPageFilename(self):
 		"""Create filename for error page.
 
 		Construct a filename for an HTML error page, not including the
-		``ErrorMessagesDir`` setting (which `saveError` adds on)
+		``ErrorMessagesDir`` setting (which `saveError` adds on).
 
 		"""
-		return 'Error-%s-%s-%d.html' % (self.basicServletName(),
+		# Note: Using the timestamp and a random number is a poor technique
+		# for filename uniqueness, but it is fast and good enough in practice.
+		return 'Error-%s-%s-%06d.html' % (self.basicServletName(),
 			'-'.join(map(lambda x: '%02d' % x, time.localtime(self._time)[:6])),
-				random.randint(10000, 99999))
-			# @@ 2000-04-21 ce: Using the timestamp & a
-			# random number is a poor technique for
-			# filename uniqueness, but this works for now
+			randint(0, 999999))
 
-	def logExceptionToDisk(self, errorMsgFilename=''):
+	def logExceptionToDisk(self, errorMsgFilename=None):
 		"""Log the exception to disk.
 
 		Writes a tuple containing (date-time, filename,
@@ -468,14 +475,7 @@ class ExceptionHandler(Object):
 		logline = (asclocaltime(self._time),
 			self.basicServletName(), self.servletPathname(),
 			self._exc[0].__name__, str(self._exc[1]),
-			errorMsgFilename)
-		filename = self._app.serverSidePath(self.setting('ErrorLogFilename'))
-		if os.path.exists(filename):
-			f = open(filename, 'a')
-		else:
-			f = open(filename, 'w')
-			f.write('time,filename,pathname,exception name,'
-				'exception data,error report filename\n')
+			errorMsgFilename or '')
 		def fixElement(element):
 			element = str(element)
 			if element.find(',') >= 0 or element.find('"') >= 0:
@@ -483,6 +483,13 @@ class ExceptionHandler(Object):
 				element = '"%s"' % element
 			return element
 		logline = map(fixElement, logline)
+		filename = self._app.serverSidePath(self.setting('ErrorLogFilename'))
+		if os.path.exists(filename):
+			f = open(filename, 'a')
+		else:
+			f = open(filename, 'w')
+			f.write('time,filename,pathname,exception name,'
+				'exception data,error report filename\n')
 		f.write(','.join(logline) + '\n')
 		f.close()
 
@@ -605,7 +612,7 @@ class ExceptionHandler(Object):
 		This is a utility method for `writeAttrs`.
 
 		"""
-		if type(value) is DictType:
+		if isinstance(value, DictType):
 			return htmlForDict(value, addSpace=self._addSpace,
 				filterValueCallBack=self.filterDictValue,
 				maxValueLength=self._maxValueLength)
@@ -619,13 +626,13 @@ class ExceptionHandler(Object):
 ## Misc functions ##
 
 def docType():
-	"""Returns the document type for the page."""
+	"""Return the document type for the page."""
 	return ('<!DOCTYPE HTML PUBLIC'
 		' "-//W3C//DTD HTML 4.01 Transitional//EN"'
 		' "http://www.w3.org/TR/html4/loose.dtd">')
 
 def htStyle():
-	"""Defines the page style."""
+	"""Return the page style."""
 	return ('''<style type="text/css">
 <!--
 body {
@@ -671,7 +678,7 @@ table.NiceTable table.NiceTable th {
 
 
 def htTitle(name):
-	"""Formats a `name` as a section title."""
+	"""Format a `name` as a section title."""
 	return ('<h2 class="section">%s</h2>' % name)
 
 def osIdDict():
