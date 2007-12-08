@@ -650,7 +650,7 @@ class Application(ConfigurableForServerSidePath, Object):
 			self.runTransactionViaServlet(servlet, trans)
 		except EndResponse:
 			pass
-		except (KeyboardInterrupt, ConnectionAbortedError), err:
+		except ConnectionAbortedError, err:
 			trans.setError(err)
 		except Exception, err:
 			urls = {}

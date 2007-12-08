@@ -485,9 +485,9 @@ AppServer.config
 ``MaxRequestTime``:
     This setting controls automatic cancelation of long-running requests.
     All worker threads executing requests longer than ``MaxRequestTime``
-    seconds will be automatically aborted. The monitoring of long-running
-    requests can be disabled by setting this to ``0`` or ``None``.
-    Default: ``300``.
+    seconds will be automatically aborted with a ``RequestTooLongError``
+    exception. The monitoring of long-running requests can be disabled
+    by setting this to ``0`` or ``None``.  Default: ``300``.
 ``CheckInterval``:
     The number of virtual instructions after which Python will check
     for thread switches, signal handlers, etc.  This is passed directly

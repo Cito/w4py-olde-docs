@@ -84,6 +84,18 @@ class NotEnoughDataError(Exception):
 class ProtocolError(Exception):
 	pass
 
+class ThreadAbortedError(Exception):
+	pass
+
+class RequestAbortedError(ThreadAbortedError):
+	pass
+
+class RequestTooLongError(RequestAbortedError):
+	pass
+
+class ServerShutDownError(ThreadAbortedError):
+	pass
+
 
 class WorkerThread(Thread):
 	"""Base class for Webware worker threads that can be aborted.
@@ -104,7 +116,7 @@ class WorkerThread(Thread):
 					self._threadID = threadID
 					return threadID
 
-	def abort(self, exception=ConnectionAbortedError):
+	def abort(self, exception=ThreadAbortedError):
 		"""Abort the current thread by raising an exception in its context.
 
 		A return value of one means the thread was successfully aborted,
@@ -521,7 +533,7 @@ class ThreadedAppServer(AppServer):
 
 	_canAbortRequest = WorkerThread._canAbort
 
-	def abortRequest(self, requestID, exception=ConnectionAbortedError):
+	def abortRequest(self, requestID, exception=RequestAbortedError):
 		"""Abort a request by raising an exception in its worker thread.
 
 		A return value of one means the thread was successfully aborted,
@@ -593,7 +605,7 @@ class ThreadedAppServer(AppServer):
 							raise KeyError
 						if verbose:
 							print "Aborting long-running request", requestID
-						t.abort()
+						t.abort(RequestTooLongError)
 					except Exception:
 						pass
 					t._abortHandler = None
@@ -637,7 +649,7 @@ class ThreadedAppServer(AppServer):
 					self._threadHandler[t] = handler
 					try:
 						handler.handleRequest()
-					except ConnectionAbortedError:
+					except ThreadAbortedError:
 						print "Worker thread has been aborted"
 					except Exception:
 						traceback.print_exc(file=sys.stderr)
@@ -714,7 +726,7 @@ class ThreadedAppServer(AppServer):
 			self._requestQueue.put(None)
 		if self._canAbortRequest:
 			for t in self._threadHandler.keys():
-				t.abort()
+				t.abort(ServerShutDownError)
 		for t in self._threadPool:
 			try:
 				t.join()

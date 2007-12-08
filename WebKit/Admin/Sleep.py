@@ -1,7 +1,7 @@
 import os
 from time import sleep
 
-from WebKit.Application import ConnectionAbortedError
+from WebKit.ThreadedAppServer import ThreadAbortedError
 from AdminSecurity import AdminSecurity
 
 
@@ -35,9 +35,9 @@ size="6" maxlength="12" style="text-align: right"> seconds
 					sleep(0.125)
 					count += 1
 				wr('<p>Time over, woke up!</p>')
-			except ConnectionAbortedError:
+			except ThreadAbortedError, e:
 				duration = int((count+4)/8)
-				wr('<p style="color:red">Sleep aborted after %d seconds!</p>'
-					% duration)
+				wr('<p style="color:red">Sleep aborted with %s after %d seconds!</p>'
+					% (e.__class__.__name__, duration))
 			wr('<p>Request %d has been processed.</p>'
 				% self.request().requestID())
