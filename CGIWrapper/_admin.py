@@ -1,8 +1,13 @@
+"""CGIWrapper main admin script."""
+
 from time import time, localtime, gmtime, asctime
-from AdminPage import *
+
+from WebUtils.Funcs import urlEncode
+from AdminPage import AdminPage
 
 
 class Page(AdminPage):
+	"""CGIWrapper main administration page."""
 
 	def title(self):
 		return 'Admin'
@@ -10,20 +15,17 @@ class Page(AdminPage):
 	def writeBody(self):
 		curTime = time()
 		self.writeln('''
-	<table align=center cellspacing=0 cellpadding=0 borde=0>
-		<tr> <td><b>Version:</b></td> <td>%s</td> </tr>
-		<tr> <td><b>Local time:</b></td> <td>%s</td> </tr>
-		<tr> <td><b>Global time:</b></td> <td>%s</td> </tr>
-	</table>
-	''' % (self._wrapper.version(),
+		<table align="center" cellspacing="2" cellpadding="2" border="0">
+			<tr><th>Version:</th><td>%s</td></tr>
+			<tr><th>Local time:</th><td>%s</td></tr>
+			<tr><th>Global time:</th><td>%s</td></tr>
+		</table>''' % (self._wrapper.version(),
 		asctime(localtime(curTime)), asctime(gmtime(curTime))))
-
 		self.startMenu()
-		# @@ 2000-04-21 ce: use URLEncode() here.
 		self.menuItem('Script log contents', '_dumpCSV?filename=%s'
-			% self._wrapper.setting('ScriptLogFilename'))
+			% urlEncode(self._wrapper.setting('ScriptLogFilename')))
 		self.menuItem('Error log contents', '_dumpErrors?filename=%s'
-			% self._wrapper.setting('ErrorLogFilename'))
+			% urlEncode(self._wrapper.setting('ErrorLogFilename')))
 		self.menuItem('Show config', '_showConfig')
 		self.endMenu()
 
@@ -31,23 +33,26 @@ class Page(AdminPage):
 <!--
 begin-parse
 {
-	'Version': %s,
-	'LocalTime': %s,
-	'GlobalTime': %s
+	'Version': %r,
+	'LocalTime': %r,
+	'GlobalTime': %r
 }
 end-parse
--->''' % (repr(self._wrapper.version()),
-	repr(localtime(curTime)), repr(gmtime(curTime))))
+-->''' % (self._wrapper.version(), localtime(curTime), gmtime(curTime)))
 
 	def startMenu(self):
-		self.writeln('''<p>&nbsp;</p><table align="center" border="0"'
-			' cellspacing="2" cellpadding="2" bgcolor="#FFFFDD">'
-			'<tr bgcolor="black"><td align="center">'
-			'<b style="color:white;font-family:Arial,Helvetica,sans-serif">Menu</b>'
-			'</td></tr>''')
+		self.write('''
+		<div style="font-size:12pt;font-family:Arial,Helvetica,sans-serif">
+		<table align="center" border="0" cellspacing="2" cellpadding="2" bgcolor="#E8E8F0">
+			<tr bgcolor="#101040"><th align="center" style="color:white">Menu</th></tr>
+			<tr><td>''')
 
 	def menuItem(self, title, url):
-		self.writeln('<tr><td><a href="%s">%s</a></td></tr>' % (url, title))
+		self.write('''
+			<tr><td align="center"><a href="%s">%s</a></td></tr>'''
+			% (url, title))
 
 	def endMenu(self):
-		self.writeln('</table>')
+		self.writeln('''
+		</table>
+		</div>''')

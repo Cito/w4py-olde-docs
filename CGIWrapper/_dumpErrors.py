@@ -1,15 +1,18 @@
+"""CGIWrapper dump errors admin script."""
+
+from WebUtils.Funcs import htmlEncode
 from _dumpCSV import _dumpCSV
 
 
 class _dumpErrors(_dumpCSV):
 
 	def cellContents(self, rowIndex, colIndex, value):
-		"""
-		This is a hook for subclasses to customize the
-		contents of a cell based on any criteria (including
-		location).
+		"""Return cell contents of CSV file.
+
+		This subclass adds a link to error files.
+
 		"""
 		if self._headings[colIndex] == 'error report filename':
-			return '<a href="%s">%s</a>' % (value, value)
+			return '<a href="_viewError?filename=%s">%s</a>' % (value, value)
 		else:
-			return value
+			return htmlEncode(value)

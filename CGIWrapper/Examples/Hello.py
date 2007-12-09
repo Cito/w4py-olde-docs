@@ -1,10 +1,11 @@
 
-print '''
+print '''%s
 <html>
 	<head>
-		<title>Hello</title>
+		<title>Hello, word!</title>
 	</head>
 	<body>
-		<p>Hello
+		<h1 align="center">Hello, World!</h1>
+		<p align="center">This is CGI Wrapper %s speaking...</p>
 	</body>
-</html>'''
+</html>''' % (wrapper.docType(), wrapper.version())

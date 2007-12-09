@@ -1,29 +1,32 @@
+import os
 
-print '''
+print '''%s
 <html>
 	<head>
 		<title>Webware View CGI Source</title>
 	</head>
 	<body>
-		<p><font size=+1><b>Webware View CGI Source</b></font>
-'''
+		<h1>Webware View CGI Source</h1>
+''' % wrapper.docType()
 
 if not fields.has_key('filename'):
-	print '<p>No filename specified.'
+	print '<p>No filename specified.</p>'
 else:
 	if fields.has_key('tabSize'):
 		tabSize = int(fields['tabSize'].value)
 	else:
 		tabSize = 4
-	filename = fields['filename'].value
-	filename += '.py'
-	contents = open(filename).read()
+	filename = os.path.basename(fields['filename'].value) + '.py'
+	try:
+		contents = open(filename).read()
+	except IOError:
+		contents = '(cannot view file)'
 	if tabSize > 0:
 		contents = contents.expandtabs(tabSize)
 	contents = contents.replace('&', '&amp;')
 	contents = contents.replace('<', '&lt;')
 	contents = contents.replace('>', '&gt;')
-	print '<br><i>%s</i><hr><pre>%s</pre>' % (filename, contents)
+	print '<h2>%s</h2><hr><pre>%s</pre>' % (filename, contents)
 
 print '''
 	</body>

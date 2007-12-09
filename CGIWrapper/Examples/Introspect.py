@@ -1,13 +1,12 @@
 
-print '''
+print '''%s
 <html>
 	<head>
 		<title>Python Introspection</title>
 	</head>
 	<body>
-		<p><font size=+1>Basic Python Introspection</font>
-		<p>&nbsp;
-'''
+		<h2>Basic Python Introspection</h2>
+''' % wrapper.docType()
 
 def printKeys(name, obj):
 	keys = obj.keys()
@@ -21,9 +20,9 @@ printKeys('fields', fields)
 printKeys('headers', headers)
 printKeys('wrapper.__dict__', wrapper.__dict__)
 
-
-
 print '''
-		<p> <hr> <p> Note that the <a href=Error>Error</a> script results in a much better display of introspection.
+		<hr>
+		<p>Note that the <a href="Error">Error</a> script
+		results in a much better display of introspection.</p>
 	</body>
 </html>'''

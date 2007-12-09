@@ -1,21 +1,15 @@
 
-print '''
-
+print '''%s
 <html>
+<head><title>FormTest</title></head>
 <body>
-
-<form>
-
-<input type=text name=a>
-
-<p>
-
-<input name=button type=submit value=Hello>
-
+<h1>Form Test</h1>
+<form action="FormTest">
+<input type="text" name="text">
+<input name="button" type="submit" value="Submit">
 </form>
-
 <p>
 fields = %s
-
+</p>
 </html>
-''' % fields
+''' % (wrapper.docType(), fields)

@@ -1,4 +1,5 @@
-from AdminPage import *
+from CGIWrapper import htDictionary
+from AdminPage import AdminPage
 
 
 class _showConfig(AdminPage):
@@ -7,5 +8,4 @@ class _showConfig(AdminPage):
 		return 'Config'
 
 	def writeBody(self):
-		import CGIWrapper
-		self.writeln(CGIWrapper.htDictionary(self._wrapper.config()))
+		self.writeln(htDictionary(self._wrapper.config()))
