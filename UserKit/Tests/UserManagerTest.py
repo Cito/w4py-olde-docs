@@ -219,8 +219,9 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 			self._mysqlClient = self._mysqlTestInfo['mysqlClient']
 			mysqlClientName = os.path.basename(self._mysqlClient)
 			assert mysqlClientName == 'mysql' or mysqlClientName == 'mysql.exe'
-			self._mysqlClient = ' '.join([self._mysqlClient] + ['--%s="%s"' % s
-					for s in self._mysqlTestInfo['DatabaseArgs'].items() if s[1]])
+			self._mysqlClient = ' '.join([self._mysqlClient] + ['--%s="%s"'
+				% (p.replace('passwd', 'password'), v) for (p ,v)
+					in self._mysqlTestInfo['DatabaseArgs'].items() if v])
 			executeSqlCmd = '%s < %s' % (self._mysqlClient, create_sql)
 
 			# _log.debug('running: %s', executeSqlCmd)
