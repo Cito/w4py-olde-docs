@@ -36,13 +36,14 @@ class Transaction(Object):
 		self._error = None
 		self._nested = 0
 
-	_attrNames = 'application request response session servlet' \
-		' errorOccurred error'.split()
-
 	def __repr__(self):
+		names = self.__dict__.keys()
+		names.sort()
 		s = []
-		for name in self._attrNames:
-			s.append('%s=%r' % (name, getattr(self, '_' + name, '(no attr)')))
+		for name in names:
+			attr = getattr(self, name)
+			if isinstance(attr, Object) or isinstance(attr, Exception):
+				s.append('%s=%r' % (name, attr))
 		s = ' '.join(s)
 		return '<%s %s>' % (self.__class__.__name__, s)
 
@@ -180,14 +181,11 @@ class Transaction(Object):
 		of Python to collect garbage, or newer versions to collect it faster.
 
 		"""
-		from types import InstanceType
-		for attrName in self.__dict__.keys():
-			# @@ 2000-05-21 ce: there's got to be a better way!
-			attr = getattr(self, attrName)
-			if type(attr) is InstanceType and hasattr(attr, 'resetKeyBindings'):
-				#print '>> resetting'
+		for name in self.__dict__.keys():
+			attr = getattr(self,  name)
+			if isinstance(attr, Object) and not name.startswith('_app'):
 				attr.resetKeyBindings()
-			delattr(self, attrName)
+			delattr(self, name)
 
 
 	## Exception handling ##

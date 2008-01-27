@@ -50,6 +50,8 @@
 	<li>In the case of nested transactions (when you use forwarding),
 	the session is now only awakened and put to sleep once by the outmost
 	transaction (as suggested by Ben Parker).</li>
+	<li>Made <code>Transaction.die()</code> work properly with Python 2.2
+	and higher, where <code>WebKit.Object</code> is a new-style class.</li>
 </ul>
 
 <% footer() %>
