@@ -34,6 +34,7 @@ class Transaction(Object):
 		self._session = None
 		self._servlet = None
 		self._error = None
+		self._nested = 0
 
 	_attrNames = 'application request response session servlet' \
 		' errorOccurred error'.split()
@@ -130,9 +131,10 @@ class Transaction(Object):
 		in the future if any use was demonstrated for it.
 
 		"""
-		if self._session:
+		if not self._nested and self._session:
 			self._session.awake(self)
 		self._servlet.awake(self)
+		self._nested += 1
 
 	def respond(self):
 		if self._session:
@@ -146,8 +148,9 @@ class Transaction(Object):
 		(which is typical for shutdown/cleanup methods).
 
 		"""
+		self._nested -= 1
 		self._servlet.sleep(self)
-		if self._session:
+		if not self._nested and self._session:
 			self._session.sleep(self)
 			self._application.sessions().storeSession(self._session)
 

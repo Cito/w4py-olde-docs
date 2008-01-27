@@ -47,7 +47,9 @@
 
 <a name="Bugfixes"></a><h2>Bugfixes</h2>
 <ul>
-	<li>...</li>
+	<li>In the case of nested transactions (when you use forwarding),
+	the session is now only awakened and put to sleep once by the outmost
+	transaction (as suggested by Ben Parker).</li>
 </ul>
 
 <% footer() %>
