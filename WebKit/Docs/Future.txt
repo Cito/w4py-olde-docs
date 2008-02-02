@@ -49,10 +49,11 @@ To Do
 Major Items
 ~~~~~~~~~~~
 
-* Drop backward compatibility down to Python 2.0; require Python 2.3 or
-  Python 2.4 instead. Make use of the new Python features like new-style
-  classes, properties, sets, decorators etc. and get rid of old garbage
-  and workarounds for old Python versions. Use isinstance() for type checking.
+* Drop backward compatibility down to Python 2.0; require at least 2.4.
+  Make use of the new Python features like new-style classes, properties,
+  sets, decorators, generator expressions, isinstace(tuple) etc. and get
+  rid of old garbage and workarounds for old Python versions. Think about
+  a migration path towards Pyhon 3.0.
 
 * Use distutils/setuptools instead of our own installer, use Python eggs
   instead of our own plug-in concept.
