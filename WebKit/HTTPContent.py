@@ -89,20 +89,22 @@ class HTTPContent(HTTPServlet):
 
 		"""
 		req = transaction.request()
-		# First check whether there is an _action_ field:
-		if req.hasField('_action_'):
-			action = self.methodNameForAction(req.field('_action_'))
-			if action in self.actions():
-				self.handleAction(action)
-				return
-		# Next, check whether there is an _acion_name field:
-		for action in self.actions():
-			if req.hasField('_action_%s' % action) or (
-					req.hasField('_action_%s.x' % action) and
-					req.hasField('_action_%s.y' % action)):
-				self.handleAction(action)
-				return
-		# If no action was found, run the default:
+		prefix = self._actionPrefix
+		if prefix:
+			# First check whether there is an _action_ field:
+			if req.hasField(prefix):
+				action = self.methodNameForAction(req.field(prefix))
+				if action in self.actions():
+					self.handleAction(action)
+					return
+			# Next, check whether there is an _acion_name field:
+			for action in self.actions():
+				name = prefix + action
+				if req.hasField(name) or (req.hasField(name + '.x')
+						and req.hasField(name + '.y')):
+					self.handleAction(action)
+					return
+			# If no action was found, run the default:
 		self.defaultAction()
 
 	def defaultAction(self):
@@ -194,6 +196,8 @@ class HTTPContent(HTTPServlet):
 
 
 	## Actions ##
+
+	_actionPrefix = '_action_'
 
 	def handleAction(self, action):
 		"""Handle action.

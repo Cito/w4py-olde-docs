@@ -31,8 +31,10 @@
 	Application TaskManager (obtained from application.taskManager()),
 	the exception will be handled by the Application's exception handler
 	(i.e. the exception will be logged and emailed if the appropriate
-	 settings have been enabled within Application.config).
-	</li>
+	settings have been enabled within Application.config).</li>
+	<li>The <code>_action_</code> prefix for Webware actions can now be
+	changed by overriding <code>HTTPContent._actionPrefix</code>, or setting
+	this to None if you don't want to use actions at all.</li>
 </ul>
 
 <a name="Security"></a><h2>Security</h2>
