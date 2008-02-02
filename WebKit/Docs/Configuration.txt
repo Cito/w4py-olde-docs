@@ -314,6 +314,8 @@ Errors
 ``ErrorEmailServer``:
     The SMTP server to use for sending e-mail error messages, and, if
     required, the port, username and password, all separated by colons.
+    For authentication via "SMTP after POP", you can furthermor append the#
+    name of a POP3 server, the port to be used and an ``SSL`` flag.
     Default: ``'localhost'``.
 ``ErrorEmailHeaders``:
     The e-mail headers used for e-mailing error messages.  Be sure to

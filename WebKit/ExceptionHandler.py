@@ -1,4 +1,4 @@
-import traceback, MimeWriter, smtplib
+import traceback, MimeWriter, poplib, smtplib
 from os import pathsep
 from types import DictType, ListType
 from random import randint
@@ -543,32 +543,70 @@ class ExceptionHandler(Object):
 
 		# Send the message
 		server = self.setting('ErrorEmailServer')
-		# this setting can be: server, server:port, server:port:user:password
-		parts = server.split(':', 3)
-		server = parts[0]
+		# This setting can be: server, server:port, server:port:user:password
+		# or server:port:user:password:popserver:popport for "smtp after pop".
+		parts = server.split(':', 5)
+		server = port = user = passwd = None
+		popserver = popssl = popport = None
 		try:
-			port = int(parts[1])
-		except (IndexError, ValueError):
-			port = None
+			server = parts[0]
+			try:
+				port = int(parts[1])
+			except ValueError:
+				pass
+			user = parts[2]
+			passwd = parts[3]
+			popserver = parts[4]
+			try:
+				popport = int(parts[5])
+			except ValueError:
+				popport = None
+			if parts[6].lower() == 'ssl':
+				popssl = True
+		except IndexError:
+			pass
+		if user and passwd and popserver:
+			# SMTP after POP
+			if popssl is None and popport == 995:
+				popssl = True
+			if popssl:
+				if popport:
+					popserver = poplib.POP3_SSL(popserver, popport)
+				else:
+					popserver = poplib.POP3_SSL(popserver)
+			else:
+				if popport:
+					popserver = poplib.POP3(popserver, popport)
+				else:
+					popserver = poplib.POP3(popserver)
+			popserver.set_debuglevel(0)
+			popserver.user(user)
+			popserver.pass_(passwd)
+			try:
+				popserver.quit()
+			except Exception:
+				pass
 		if port:
 			server = smtplib.SMTP(server, port)
 		else:
 			server = smtplib.SMTP(server)
 		server.set_debuglevel(0)
-		try:
-			user = parts[2]
+		if user and passwd and not popserver:
+			# SMTP-AUTH
 			try:
-				passwd = parts[3]
-			except IndexError:
-				passwd = ''
-			server.login(user, passwd)
-		except AttributeError: # Python < 2.2
-			raise smtplib.SMTPException, \
-				"Python version doesn't support SMTP authentication"
-		except IndexError:
-			pass
+				server.ehlo()
+				if server.has_extn('starttls'):
+					server.starttls()
+					server.ehlo()
+				server.login(user, passwd)
+			except AttributeError: # Python < 2.2
+				raise smtplib.SMTPException, \
+					"Python version doesn't support SMTP authentication"
 		server.sendmail(headers['From'], headers['To'], message.getvalue())
-		server.quit()
+		try:
+			server.quit()
+		except Exception:
+			pass
 
 
 	## Filtering ##

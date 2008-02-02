@@ -23,6 +23,9 @@
 	long-running requests. All requests with an execution time longer than
 	'MaxRequestTime' seconds will be automatically aborted. This feature is
 	disabled by setting 'MaxRequestTime' to 0 or None.</li>
+	<li>The SMTP authentication when sending error emails has been improved,
+	and it is now possible to use SMTP after POP by adding the name of the POP
+	server to the ``ErrorEmailServer`` setting (Roger Haase).</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
@@ -35,6 +38,7 @@
 	<li>The <code>_action_</code> prefix for Webware actions can now be
 	changed by overriding <code>HTTPContent._actionPrefix</code>, or setting
 	this to None if you don't want to use actions at all.</li>
+	<li>The
 </ul>
 
 <a name="Security"></a><h2>Security</h2>
