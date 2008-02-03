@@ -25,7 +25,7 @@ char* expand_memory(WFILE* p, long add) {
 		newptr = calloc(newsize, 1);
 		// if !newptr  //need a check here
 
-		memcpy( newptr, p->str, currsize);
+		memcpy(newptr, p->str, currsize);
 		p->end = newptr + newsize;
 		p->ptr = newptr + (p->ptr - p->str);
 		free(p->str);
@@ -87,11 +87,11 @@ void w_long64(long x, WFILE *p)
 }
 #endif
 
-void write_string( char* s, long len, WFILE* p) {
+void write_string(char* s, long len, WFILE* p) {
 	w_byte(TYPE_STRING, p);
 	w_long(len, p);
 	if (len > 0)
-			w_string( s, len, p);
+			w_string(s, len, p);
 }
 
 void write_integer(int number, WFILE* wf) {

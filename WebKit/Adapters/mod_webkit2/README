@@ -34,11 +34,11 @@ directive right. If you would rather be safe than sorry, run 'make', then
 copy the resulting mod_webkit.so to your Apache2 module directory. Then modify
 httpd.conf to load the module.
 
-To build and install on Windows, you can use the make.bat batch file with the
-free Microsoft Visual C++ 2005 Express Edition and Server 2003 Platform SDK.
-For your convenience, a pre-compiled mod_webkit.dll for 32bit Windows XP
-is already included in this directory which you can just place it into your
-Apache modules directory under the name mod_webkit.so.
+To build and install on Microsoft Windows, you can use the make.bat batch file
+with the free Microsoft Visual C++ 2008 Express Edition. For your convenience,
+a pre-compiled mod_webkit.dll for 32bit Windows XP is already included in
+this directory, so you can just place it into your Apache modules directory
+under the name mod_webkit.so.
 
 To enable this module for serving WebKit content, just set the handler for
 a directory to 'webkit-handler'. Then inform the module where the appserver

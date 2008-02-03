@@ -4,9 +4,16 @@
 * Author: Jay Love (jsliv@jslove.org)                         *
 **************************************************************/
 
-#define VERSION_COMPONENT "mod_webkit1/0.9.3"
+#define VERSION_COMPONENT "mod_webkit1/1.0"
 
 #include "mod_webkit.h"
+#include "http_config.h"
+#include "http_core.h"
+#include "http_log.h"
+#include "http_main.h"
+#include "http_protocol.h"
+#include "http_request.h"
+#include "util_script.h"
 
 /*
  * Configuration record. Used for both per-directory and per-server
@@ -50,13 +57,13 @@ typedef struct wkcfg {
 module MODULE_VAR_EXPORT webkit_module;
 
 /* A quick debug logging function, only prints if LogLevel=debug */
-#if 0   /* 1 to enable */
+#if 0 /* 1 to enable */
 int log_debug(char* msg, request_rec* r) {
     ap_log_error(APLOG_MARK, APLOG_DEBUG, r->server, msg);
     return 0;
 }
 #else
-# define log_debug(msg, r) /* nothing */
+#define log_debug(msg, r) /* nothing */
 #endif
 
 
@@ -85,7 +92,6 @@ static unsigned long resolve_host(char *value) {
         /* If we found only digits we use inet_addr() */
         return inet_addr(value);
     }
-    return 0;
 }
 
 /* ====================================================================
@@ -97,7 +103,7 @@ static const char *handle_wkserver(cmd_parms *cmd, void *mconfig,
 {
     wkcfg* cfg;
 
-    cfg = (wkcfg *) mconfig;
+    cfg = (wkcfg *)mconfig;
 
     if (word1 != NULL) cfg->host = word1;
     if (word2 != NULL) cfg->port = atoi(word2);
@@ -117,7 +123,7 @@ static const char *handle_maxconnectattempts(cmd_parms *cmd, void *mconfig,
 {
     wkcfg* cfg;
 
-    cfg = (wkcfg *) mconfig;
+    cfg = (wkcfg *)mconfig;
 
     if (word1 != NULL) cfg->retryattempts = atoi(word1);
     return NULL;
@@ -133,7 +139,7 @@ static const char *handle_connectretrydelay(cmd_parms *cmd, void *mconfig,
 {
     wkcfg* cfg;
 
-    cfg = (wkcfg *) mconfig;
+    cfg = (wkcfg *)mconfig;
 
     if (word1 != NULL) cfg->retrydelay = atoi(word1);
     return NULL;
@@ -148,7 +154,7 @@ static const char *handle_passheader(cmd_parms *cmd, void *mconfig, char *word1)
 {
     wkcfg* cfg;
 
-    cfg = (wkcfg *) mconfig;
+    cfg = (wkcfg *)mconfig;
 
     if (word1 != NULL) {
         char **header = (char **)ap_push_array(cfg->passheaders);
@@ -176,7 +182,7 @@ static void *wk_create_dir_config(pool *p, char *dirspec)
     /*
      * Allocate the space for our record from the pool supplied.
      */
-    cfg = (wkcfg *) ap_pcalloc(p, sizeof(wkcfg));
+    cfg = (wkcfg *)ap_pcalloc(p, sizeof(wkcfg));
     /*
      * Now fill in the defaults.  If there are any `parent' configuration
      * records, they'll get merged as part of a separate callback.
@@ -194,7 +200,7 @@ static void *wk_create_dir_config(pool *p, char *dirspec)
      */
     header = (char **)ap_push_array(cfg->passheaders);
     *header = "If-Modified-Since";
-    return (void *) cfg;
+    return (void *)cfg;
 }
 
 /* ====================================================================
@@ -206,7 +212,7 @@ static WFILE* setup_WFILE(request_rec* r)
     WFILE* wf = NULL;
     wf = ap_pcalloc(r->pool, sizeof(WFILE));
     if (wf == NULL) {
-        log_error("Failed to get WFILE structure\n", r->server);
+        log_error("Failed to get WFILE structure", r->server);
         return wf;
     }
     wf->str = NULL; wf->ptr = NULL; wf->end = NULL;
@@ -240,7 +246,7 @@ static int wksock_open(request_rec *r, unsigned long address, int port, wkcfg* c
 
     memset(&addr, 0, sizeof addr);
     addr.sin_addr.s_addr = address;
-    addr.sin_port = htons(port);
+    addr.sin_port = htons((u_short)port);
     addr.sin_family = AF_INET;
 
     /* Open the socket */
@@ -415,11 +421,10 @@ static int content_handler(request_rec *r)
     array_header *hdr_arr;
     table_entry *elts;
 
-    cfg = NULL;
-    cfg =  ap_get_module_config(r->per_dir_config, &webkit_module);
+    cfg = ap_get_module_config(r->per_dir_config, &webkit_module);
     if (cfg == NULL) {
         log_debug("No cfg", r);
-        cfg = (wkcfg*) wk_create_dir_config(r->pool, "/");
+        cfg = (wkcfg*)wk_create_dir_config(r->pool, "/");
     }
 
     env_dict = setup_WFILE(r);
@@ -437,7 +442,7 @@ static int content_handler(request_rec *r)
     /* Build the environment dictionary */
 
     hdr_arr = ap_table_elts(r->subprocess_env);
-    elts = (table_entry *) hdr_arr->elts;
+    elts = (table_entry *)hdr_arr->elts;
 
     /* start dictionary */
     w_byte(TYPE_DICT, env_dict);
@@ -551,7 +556,7 @@ static void wk_init(server_rec *s, pool *p) {
  * All of the routines have been declared now. Here's the list of
  * directives specific to our module, and information about where they
  * may appear and how the command parser should pass them to us for
- * processing.	Note that care must be taken to ensure that there are NO
+ * processing. Note that care must be taken to ensure that there are NO
  * collisions of directive names between modules.
  */
 

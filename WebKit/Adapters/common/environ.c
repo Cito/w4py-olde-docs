@@ -20,7 +20,7 @@ EnvItem* splitEnviron(char* envstr) {
 	item = calloc(sizeof(EnvItem),1);
 
 	while (index < fullLen) {
-		if ( envstr[index] == delim) break;
+		if (envstr[index] == delim) break;
 		else index ++;
 	}
 
@@ -58,7 +58,7 @@ EnvItem** extractEnviron() {
 	return itemList;
 }
 
-int freeEnviron( EnvItem** env) {
+int freeEnviron(EnvItem** env) {
 	int i;
 	// char msg[400];
 
@@ -90,7 +90,7 @@ int main(char argc, char* argv[]) {
 
 	list = extractEnviron();
 	while (list[count] != NULL) {
-		printf( "Key: %s Val: %s\n", list[count]->key, list[count]->val);
+		printf("Key: %s Val: %s\n", list[count]->key, list[count]->val);
 		count++;
 		}
 	freeEnviron(list);

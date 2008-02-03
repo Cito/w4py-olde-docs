@@ -15,9 +15,8 @@ Just run make. For Solaris and some other Unix variants, you may have to
 adapt the LIBS setting in the Makefile before.
 
 On Windows:
-If you have the free Microsoft Visual C++ 2005 Express Edition and the
-Microsoft Platform SDK installed, use the 'make.bat' batch file.
-You will be able to get prebuilt binaries from webware.sourceforge.net.
-If you don't see any there, ask on the webware-discuss mailing list.
+Install the free Microsoft Visual C++ 2008 Express Edition and run the
+'make.bat' batch file. For your convenience, a pre-compiled mod_webkit.dll
+for 32bit Windows XP is already included in this directory.
 
 Enjoy!

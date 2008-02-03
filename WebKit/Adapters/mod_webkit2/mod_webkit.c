@@ -4,7 +4,7 @@
 * Author: Jay Love (jsliv@jslove.org)                         *
 **************************************************************/
 
-#define VERSION_COMPONENT "mod_webkit2/0.9.3"
+#define VERSION_COMPONENT "mod_webkit2/1.0"
 
 #include "mod_webkit.h"
 #include "http_config.h"
@@ -61,13 +61,13 @@ typedef struct wkcfg {
 module AP_MODULE_DECLARE_DATA webkit_module;
 
 /* A quick debug logging function, only prints if LogLevel=debug */
-#if 0	/* 1 to enable */
+#if 0 /* 1 to enable */
 int log_debug(char* msg, request_rec* r) {
     ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, msg);
     return 0;
 }
 #else
-# define log_debug(msg, r) /* nothing */
+#define log_debug(msg, r) /* nothing */
 #endif
 
 /* ====================================================================
@@ -81,10 +81,10 @@ static const char *handle_wkserver(cmd_parms *cmd, void *mconfig,
     apr_sockaddr_t *apraddr;
     apr_status_t err;
 
-    cfg = (wkcfg *) mconfig;
+    cfg = (wkcfg *)mconfig;
 
     if (word1 != NULL) cfg->host = (char*)word1;
-    if (word2 != NULL) cfg->port = atoi(word2);
+    if (word2 != NULL) cfg->port = (apr_port_t)atoi(word2);
     err = apr_sockaddr_info_get(&apraddr,
         (char*)apr_pstrdup(cmd->server->process->pool, cfg->host),
         APR_UNSPEC, cfg->port, 0, cmd->server->process->pool);
@@ -104,7 +104,7 @@ static const char *handle_maxconnectattempts(cmd_parms *cmd, void *mconfig,
 {
     wkcfg* cfg;
 
-    cfg = (wkcfg *) mconfig;
+    cfg = (wkcfg *)mconfig;
 
     if (word1 != NULL) cfg->retryattempts = atoi(word1);
     return NULL;
@@ -120,7 +120,7 @@ static const char *handle_connectretrydelay(cmd_parms *cmd, void *mconfig,
 {
     wkcfg* cfg;
 
-    cfg = (wkcfg *) mconfig;
+    cfg = (wkcfg *)mconfig;
 
     if (word1 != NULL) cfg->retrydelay = atoi(word1);
     return NULL;
@@ -136,7 +136,7 @@ static const char *handle_passheader(cmd_parms *cmd, void *mconfig,
 {
     wkcfg* cfg;
 
-    cfg = (wkcfg *) mconfig;
+    cfg = (wkcfg *)mconfig;
 
     if (word1 != NULL) {
         const char **header = (const char **)apr_array_push(cfg->passheaders);
@@ -167,7 +167,7 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
     /*
      * Allocate the space for our record from the pool supplied.
      */
-    cfg = (wkcfg *) apr_pcalloc(p, sizeof(wkcfg));
+    cfg = (wkcfg *)apr_pcalloc(p, sizeof(wkcfg));
 
     cfg->port = 8086;
     cfg->host = "localhost";
@@ -183,8 +183,6 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
     header = (char **)apr_array_push(cfg->passheaders);
     *header = "If-Modified-Since";
 
-    //cfg->addr = resolve_host(cfg->host);
-
     rv = apr_sockaddr_info_get(&apraddr, cfg->host, APR_UNSPEC, cfg->port, 0, p);
     /*
      * Now fill in the defaults.  If there are any `parent' configuration
@@ -196,7 +194,7 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
     }
 
     cfg->apraddr = apraddr;
-    return (void *) cfg;
+    return (void *)cfg;
 }
 
 /* ====================================================================
@@ -482,11 +480,10 @@ static int webkit_handler(request_rec *r)
 
     log_debug("In webkit_handler", r);
 
-    cfg = NULL;
     cfg =  ap_get_module_config(r->per_dir_config, &webkit_module);
     if (cfg == NULL) {
         log_debug("No cfg", r);
-        cfg = (wkcfg*) webkit_create_dir_config(r->pool, "/");
+        cfg = (wkcfg*)webkit_create_dir_config(r->pool, "/");
     }
 
     env_dict = setup_WFILE(r);
@@ -505,7 +502,7 @@ static int webkit_handler(request_rec *r)
 
     //hdr_arr = ap_table_elts(r->subprocess_env);
     array_header = (apr_array_header_t*)apr_table_elts(r->subprocess_env);
-    //elts = (table_entry *) hdr_arr->elts;
+    //elts = (table_entry *)hdr_arr->elts;
     tentry = (apr_table_entry_t*)array_header->elts;
 
     /* start dictionary */
@@ -629,7 +626,7 @@ static int webkit_post_config(apr_pool_t *pconf, apr_pool_t *plog,
  * All of the routines have been declared now. Here's the list of
  * directives specific to our module, and information about where they
  * may appear and how the command parser should pass them to us for
- * processing.	Note that care must be taken to ensure that there are NO
+ * processing. Note that care must be taken to ensure that there are NO
  * collisions of directive names between modules.
  */
 

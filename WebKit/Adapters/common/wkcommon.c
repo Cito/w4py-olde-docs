@@ -109,15 +109,13 @@ int wksock_open(unsigned long address, int port) {
 	addr.sin_family = AF_INET;
 
 	/* Open the socket */
-	sock = socket( AF_INET, SOCK_STREAM, 0);
+	sock = socket(AF_INET, SOCK_STREAM, 0);
 	if (sock==-1) {
-#ifndef WIN32
-		return -1;
-#else
-		int err = WSAGetLastError();
-		return -1;
+#ifdef WIN32
+		errno = WSAGetLastError()-WSABASEERR;
 #endif
-    }
+		return -1;
+	}
 
 	/* Tries to connect to appserver (continues trying while error is EINTR) */
 	do {
@@ -158,14 +156,12 @@ unsigned long resolve_host(char *value) {
 		/* If we found also characters we use gethostbyname()*/
 		struct hostent *host;
 
-		host=gethostbyname(value);
+		host = gethostbyname(value);
 		if (host==NULL) return 0;
 		return ((struct in_addr *)host->h_addr_list[0])->s_addr;
-	} else {
+	} else
 		/* If we found only digits we use inet_addr() */
 		return inet_addr(value);
-	}
-	return 0;
 }
 
 /* ====================================================== */
@@ -205,7 +201,7 @@ Configuration* GetConfiguration(Configuration* config, char* configFile) {
 	// int size;
 	// char* host;
 	// char* portstr;
-	int mark=0;
+	// int mark=0;
 	// int port;
 	// char c;
 	// Configuration* config;
@@ -232,7 +228,7 @@ Configuration* GetConfiguration(Configuration* config, char* configFile) {
 
 	log_message("Got config");
 
-	if(rv == -1) {
+	if (rv == -1) {
 		log_message("Whoops, Couldn't get config info");
 	}
 

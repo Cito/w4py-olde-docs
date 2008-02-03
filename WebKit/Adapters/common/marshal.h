@@ -32,7 +32,7 @@ void w_byte(char c, WFILE* p);
 void w_string(char* s, int n, WFILE* p);
 void w_short(int x, WFILE* p);
 void w_long(long x, WFILE* p);
-void write_string( char* s, long len, WFILE* p);
+void write_string(char* s, long len, WFILE* p);
 void write_integer(int number, WFILE* wf);
 
 #endif
