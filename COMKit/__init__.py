@@ -1,13 +1,13 @@
 """COMKit
 
-This plug-in for WebKit for Python allows COM objects such as ADO to be
-used in free-threading mode in a threaded app server.  See Appendix D of
+This plug-in for Webware for Python allows COM objects such as ADO to be
+used in free-threading mode in a threaded app server. See Appendix D of
 the fine book Python Programming on Win32 by Mark Hammond and Andy
 Robinson for details.
 
 To use COM, simply set EnableCOM to 1 in your AppServer.config file.
 This causes the app server threads to be configured properly for
-COM free-threading.  Then go ahead and use win32com inside your servlets.
+COM free-threading. Then go ahead and use win32com inside your servlets.
 
 """
 
@@ -31,6 +31,8 @@ def InstallInWebKit(appServer):
 		appServer.initCOM  = pythoncom.CoInitializeEx
 		appServer.closeCOM  = pythoncom.CoUninitialize
 
+		# Monkey-patch this instance of the appServer
+
 		# Grab references to the original initThread and delThread bound
 		# methods, which we will replace
 		appServer.originalInitThread = appServer.initThread
@@ -51,8 +53,7 @@ def InstallInWebKit(appServer):
 			# Uninitialize COM
 			self.closeCOM()
 
-		# Replace the initThread and delThread with our new versions, for
-		# this instance of the appserver only
+		# Replace the initThread and delThread methods with our new versions
 		import new
 		appServer.initThread = new.instancemethod(newInitThread, appServer, appServer.__class__)
 		appServer.delThread = new.instancemethod(newDelThread, appServer, appServer.__class__)
