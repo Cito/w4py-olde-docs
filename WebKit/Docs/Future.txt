@@ -58,6 +58,9 @@ Major Items
 * Use distutils/setuptools instead of our own installer, use Python eggs
   instead of our own plug-in concept.
 
+* The installer could try building and/or installing mod_webkit and wkcgi
+  automatically.
+
 * Separate more clearly and systematically which messages are printed to
   stdout and which to stderr.
 
