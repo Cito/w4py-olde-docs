@@ -311,6 +311,8 @@ with the setting ``AdapterPort`` and will be ``8086`` by default.
 You can use several app servers listenting on different ports.
 
 
+.. _permissions:
+
 Permissions
 -----------
 
@@ -650,7 +652,9 @@ You may want to use OneShot on a commercial host where persistent
 processes (like the AppServer process) are not allowed.  However, be
 warned that OneShot is *very* slow.
 
-If you use OneShot, do not launch the AppServer separately.
+If you use OneShot, do not launch the AppServer separately. Note that
+in this case, the instructions on setting the permissions_ apply to
+the user running the web server.
 
 ISAPI
 ~~~~~
