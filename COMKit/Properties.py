@@ -6,7 +6,7 @@ docs = [
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
 ]
 
-status = 'alpha'
+status = 'beta'
 
 synopsis = """COMKit allows COM objects to be used in the multi-threaded versions of WebKit. Especially useful for data access using ActiveX Data Objects. Requires Windows and Python win32 extensions."""
 

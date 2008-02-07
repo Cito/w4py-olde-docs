@@ -7,7 +7,7 @@ docs = [
 	{'name': 'To Do',        'file': 'TODO.text'},
 ]
 
-status = 'alpha'
+status = 'beta'
 
 requiredPyVersion = (2, 0, 0)
 
