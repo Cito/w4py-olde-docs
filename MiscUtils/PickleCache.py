@@ -111,9 +111,7 @@ class PickleCacheReader(PickleCache):
 				print 'Python version is too old for this. Returning None.'
 			return None
 
-		didReadPickle = 0
 		shouldDeletePickle = 0
-
 		data = None
 
 		picklePath = self.picklePath(filename)
@@ -131,7 +129,6 @@ class PickleCacheReader(PickleCache):
 					if v:
 						print 'Cannot open cache file: %s: %s.' % (
 							e.__class__.__name__, e)
-					pass
 				else:
 					try:
 						if v:
@@ -175,7 +172,6 @@ class PickleCacheReader(PickleCache):
 									print 'Display full dict:'
 									pprint(dict)
 							data = dict['data']
-							didReadPickle = 1
 
 		# Delete the pickle file if suggested by previous conditions
 		if shouldDeletePickle:
@@ -187,7 +183,6 @@ class PickleCacheReader(PickleCache):
 				if v:
 					print 'Failed to remove: %s: %s' % (
 						e.__class__.__name__, e)
-				pass
 
 		if v:
 			print 'Done reading data.'

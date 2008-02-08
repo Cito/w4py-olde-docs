@@ -64,8 +64,8 @@ class DaysInMonth:
 
 	def weekday(self, year, month, day):
 		"""Return weekday (0-6 ~ Mon-Sun) for year (1970-...), month (1-12), day (1-31)."""
-		secs = mktime((year, month, day, 0, 0, 0, 0, 0, 0))
-		tuple = localtime(secs)
+		secs = t.mktime((year, month, day, 0, 0, 0, 0, 0, 0))
+		tuple = t.localtime(secs)
 		return tuple[6]
 
 daysInMonth = DaysInMonth()

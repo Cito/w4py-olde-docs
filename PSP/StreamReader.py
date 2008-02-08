@@ -25,7 +25,6 @@
 
 from Context import *
 
-import types
 import copy
 import os
 
@@ -102,7 +101,7 @@ class StreamReader:
 
 	def registerSourceFile(self, file):
 		self.sourcefiles.append(file)
-		self.size += 1 # what is size for?
+		self.size += 1 # @@ what is size for?
 		return len(self.sourcefiles) - 1
 
 	def pushFile(self, file, encoding=None):
@@ -131,7 +130,7 @@ class StreamReader:
 		stream = ''.join(lines)
 
 		if self.current is None:
-			self.current = mark = Mark(self, fileid, stream,
+			self.current = Mark(self, fileid, stream,
 				self._ctxt.getBaseUri(), encoding)
 		else:
 			self.current.pushStream(fileid, stream,
@@ -150,7 +149,7 @@ class StreamReader:
 	def newSourceFile(self, filename):
 		if filename in self.sourcefiles:
 			return None
-		sourcefiles.append(filename)
+		self.sourcefiles.append(filename)
 		return len(self.sourcefiles)
 
 	def Mark(self):
@@ -169,7 +168,7 @@ class StreamReader:
 				self.popFile() # @@ Should I do this here? 6/1/00
 				self.skipUntil(st)
 			else:
-				raise "EndofInputError"
+				raise EOFError
 		else:
 			self.current.cursor = pt
 			ret = self.Mark()
@@ -232,7 +231,7 @@ class StreamReader:
 	def peekChar(self, cnt=1):
 		if self.hasMoreInput():
 			return self.current.stream[self.current.cursor:self.current.cursor+cnt]
-		raise "EndofStream"
+		raise EOFError
 
 	def skipSpaces(self):
 		i = 0
@@ -296,16 +295,15 @@ class StreamReader:
 			if ch is None:
 				break
 			self.parseAttributeValue(values)
-		# EOF
-		raise 'Unterminated Attribute'
+		raise ValueError, 'PSP Error - unterminated attribute'
 
 	def parseAttributeValue(self, valuedict):
 		self.skipSpaces()
 		name = self.parseToken(0)
 		self.skipSpaces()
 		if self.peekChar() != '=':
-			raise 'PSP Error - no attribute value'
-		ch = self.nextChar()
+			raise ValueError, 'PSP Error - no attribute value'
+		self.nextChar()
 		self.skipSpaces()
 		value = self.parseToken(1)
 		self.skipSpaces()
@@ -324,11 +322,11 @@ class StreamReader:
 				while ch is not None and ch != endquote:
 					ch = self.nextChar()
 					if ch == '\\':
-						ch = nextChar()
+						ch = self.nextChar()
 					buffer.append(ch)
 					ch = self.peekChar()
 				if ch is None:
-					raise 'Unterminated Attribute Value'
+					raise ValueError, 'PSP Error - unterminated attribute value'
 				self.nextChar()
 		else:
 			if not self.isDelimiter():

@@ -25,8 +25,8 @@
 
 """
 
-from ParseEventHandler import *
 import os
+from ParseEventHandler import *
 
 
 class PSPContext:

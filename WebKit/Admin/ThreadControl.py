@@ -1,4 +1,3 @@
-import os
 from time import time, localtime, sleep
 
 from WebUtils.Funcs import requestURI

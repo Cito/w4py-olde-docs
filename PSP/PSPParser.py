@@ -29,8 +29,12 @@ from Generators import *
 
 try:
 	from cStringIO import StringIO
-except:
+except ImportError:
 	from StringIO import StringIO
+
+
+class PSPParserException(Exception):
+	pass
 
 
 class PSPParser:
@@ -84,10 +88,8 @@ class PSPParser:
 		CLOSE_COMMENT = '--%>'
 		if reader.Matches(OPEN_COMMENT):
 			reader.Advance(len(OPEN_COMMENT))
-			start = reader.Mark()
-			stop = reader.skipUntil(CLOSE_COMMENT)
-			if stop is None:
-				raise 'ParseException'
+			if reader.skipUntil(CLOSE_COMMENT) is None:
+				raise PSPParserException, 'Comment not terminated'
 			self.flushCharData(self.tmplStart, self.tmplStop)
 			return 1
 		return 0
@@ -107,17 +109,17 @@ class PSPParser:
 			attrs = reader.parseTagAttributes()
 			reader.skipSpaces()
 			if not reader.matches(end_open):
-				raise 'ParseException'
+				raise PSPParserException, 'Expression not terminated'
 			reader.Advance(len(end_open))
 			reader.skipSpaces()
 		# below not implemented
-		# PSPUtil.checkAttrs('Expression',attrs,validAttrs)
+		# PSPUtil.checkAttrs('Expression', attrs, validAttrs)
 		reader.peekChar()
 		reader.skipSpaces()
 		start = reader.Mark()
 		stop = reader.skipUntil(CLOSE_EXPR)
 		if stop is None:
-			raise 'ParserException'
+			raise PSPParserException, 'Expression not terminated'
 		handler.setTemplateInfo(self.tmplStart, self.tmplStop)
 		handler.handleExpression(start, stop, attrs)
 		return 1
@@ -129,10 +131,7 @@ class PSPParser:
 		validDirectives = ['page', 'include']
 		OPEN_DIRECTIVE = r'<%@'
 		CLOSE_DIRECTIVE = r'%>'
-		if reader.Matches(OPEN_DIRECTIVE):
-			opening = OPEN_DIRECTIVE
-			close = CLOSE_DIRECTIVE
-		else:
+		if not reader.Matches(OPEN_DIRECTIVE):
 			return 0
 		start = reader.Mark()
 		reader.Advance(len(OPEN_DIRECTIVE))
@@ -143,7 +142,7 @@ class PSPParser:
 				match = i
 				break
 		if match is None:
-			raise 'Invalid Directive'
+			raise PSPParserException, 'Invalid Directive'
 		reader.Advance(len(match))
 		# parse the directive attr:val pair dictionary
 		attrs = reader.parseTagAttributes()
@@ -155,9 +154,10 @@ class PSPParser:
 		# elif match == 'taglib':
 		# 	raise 'Not Implemented Error'
 		# match close
-		reader.skipSpaces() #skip to where we expect a close tag
+		reader.skipSpaces() # skip to where we expect a close tag
+		close = CLOSE_DIRECTIVE
 		if not reader.Matches(close):
-			raise 'Unterminated directive error'
+			raise PSPParserException, 'Directive not terminated'
 		else:
 			reader.Advance(len(close)) #advance past it
 		stop = reader.Mark()
@@ -202,20 +202,20 @@ class PSPParser:
 		CLOSE_SCRIPT = '%>'
 		attrs = None
 		end_open = None
-		if reader.Matches(OPEN_SCRIPT):
-			open = OPEN_SCRIPT
-			close = CLOSE_SCRIPT
-		else:
+		if not reader.Matches(OPEN_SCRIPT):
 			return 0
-		reader.Advance(len(open))# Matches advances it
+		open = OPEN_SCRIPT
+		close = CLOSE_SCRIPT
+		validAttributes = ('name', 'params')
+		reader.Advance(len(open)) # matches advances it
 		if end_open is not None:
 			attrs = reader.parseTagAttributes()
 			reader.skipSpaces()
 			if not reader.Matches(end_open):
-				raise 'Unterminated script'
+				raise PSPParserException, 'Script not terminated'
 			reader.Advance(len(end_open))
 			reader.skipSpaces()
-			PSPUtils.checkAttributes('Script', attrs, ValidAttributes)
+			PSPUtils.checkAttributes('Script', attrs, validAttributes)
 		# reader.skipSpaces() # don't skip as spaces may be significant, leave this for the generator
 		start = reader.Mark()
 		try:
@@ -223,7 +223,7 @@ class PSPParser:
 		except EOFError:
 			raise EOFError("Reached EOF while looking for ending script tag")
 		if stop is None:
-			raise 'Unterminated Script'
+			raise PSPParserException, 'Script not terminated'
 		handler.setTemplateInfo(self.tmplStart, self.tmplStop)
 		handler.handleScript(start, stop, attrs)
 		return 1
@@ -251,7 +251,7 @@ class PSPParser:
 			try:
 				stop = reader.skipUntil(CLOSE_SCRIPT)
 				if stop is None:
-					raise 'Unterminated Script is %s block' % OPEN_SCRIPT
+					raise PSPParserException, 'Script not terminated in %s block' % OPEN_SCRIPT
 			except EOFError:
 				raise EOFError("Reached EOF while looking for ending script tag (%s)" % CLOSE_SCRIPT)
 			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
@@ -281,7 +281,7 @@ class PSPParser:
 			try:
 				stop = reader.skipUntil(CLOSE_SCRIPT)
 				if stop is None:
-					raise 'Unterminated Script is %s block' % OPEN_SCRIPT
+					raise PSPParserException, 'Script not terminated in %s block' % OPEN_SCRIPT
 			except EOFError:
 				raise EOFError("Reached EOF while looking for ending script tag (%s)" % CLOSE_SCRIPT)
 			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
@@ -300,19 +300,19 @@ class PSPParser:
 
 		"""
 		OPEN_METHOD = '<psp:method'
-		CLOSE_METHOD = '/>'
+		# CLOSE_METHOD = '/>'
 		CLOSE_METHOD_2 = '</psp:method>'
 		CLOSE_METHOD_3 = '>'
 		attrs = None
-		validAttributes = ('name', 'params')
+		# validAttributes = ('name', 'params')
 		if reader.Matches(OPEN_METHOD):
 			start = reader.Mark()
 			reader.Advance(len(OPEN_METHOD))
 			attrs = reader.parseTagAttributes()
-			# PSPUtils.checkAttributes('method',attrs,validAttributes)
+			# PSPUtils.checkAttributes('method', attrs, validAttributes)
 			reader.skipSpaces()
 			if not reader.Matches(CLOSE_METHOD_3):
-				raise 'Expected method declaration close'
+				raise PSPParserException, 'Expected method declaration close'
 			reader.Advance(len(CLOSE_METHOD_3))
 			stop = reader.Mark()
 			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
@@ -329,23 +329,21 @@ class PSPParser:
 	def checkInclude(self, handler, reader):
 		"""Check for inserting another pages output in this spot."""
 		OPEN_INCLUDE = '<psp:include'
-		CLOSE_INCLUDE_NO_BODY = "/>"
+		# CLOSE_INCLUDE_NO_BODY = "/>"
 		CLOSE_INCLUDE_BODY = ">"
-		CLOSE_INCLUDE = "</psp:include>"
-		OPEN_INDIVIDUAL_PARAM = "<psp:param"
-		CLOSE_INDIVIDUAL_PARAM = "/>"
+		# CLOSE_INCLUDE = "</psp:include>"
+		# OPEN_INDIVIDUAL_PARAM = "<psp:param"
+		# CLOSE_INDIVIDUAL_PARAM = "/>"
 		if reader.Matches(OPEN_INCLUDE):
 			param = {}
-			start = reader.Mark()
 			reader.Advance(len(OPEN_INCLUDE))
 			reader.skipSpaces()
 			attrs = reader.parseTagAttributes()
 			#PSPUtils.checkTagAttributes()....
 			reader.skipSpaces()
 			if not reader.Matches(CLOSE_INCLUDE_BODY):
-				raise "Include bodies not implemented"
+				raise PSPParserException, 'Include bodies not implemented'
 			reader.Advance(len(CLOSE_INCLUDE_BODY))
-			stop = reader.Mark()
 			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
 			handler.handleInclude(attrs, param)
 			return 1
@@ -362,23 +360,21 @@ class PSPParser:
 
 		"""
 		OPEN_INSERT = '<psp:insert'
-		CLOSE_INSERT_NO_BODY = "/>"
+		# CLOSE_INSERT_NO_BODY = "/>"
 		CLOSE_INSERT_BODY = ">"
-		CLOSE_INSERT = "</psp:insert>"
-		OPEN_INDIVIDUAL_PARAM = "<psp:param"
-		CLOSE_INDIVIDUAL_PARAM = "/>"
+		# CLOSE_INSERT = "</psp:insert>"
+		# OPEN_INDIVIDUAL_PARAM = "<psp:param"
+		# CLOSE_INDIVIDUAL_PARAM = "/>"
 		if reader.Matches(OPEN_INSERT):
 			param = {}
-			start = reader.Mark()
 			reader.Advance(len(OPEN_INSERT))
 			reader.skipSpaces()
 			attrs = reader.parseTagAttributes()
 			# PSPUtils.checkTagAttributes()....
 			reader.skipSpaces()
 			if not reader.Matches(CLOSE_INSERT_BODY):
-				raise "Insert bodies not implemented"
+				raise PSPParserException, 'Insert bodies not implemented'
 			reader.Advance(len(CLOSE_INSERT_BODY))
-			stop = reader.Mark()
 			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
 			handler.handleInsert(attrs, param)
 			return 1
@@ -417,5 +413,5 @@ class PSPParser:
 					noPspElement = 1
 				st = reader.nextContent() #skip till the next possible tag
 				self.tmplStop = reader.Mark() #mark the end of HTML data
-				self.cout.write(st) #write out the raw HTML data
+				self.cout.write(st) # write out the raw HTML data
 			self.flushCharData(self.tmplStart, self.tmplStop) #dump remaining raw HTML

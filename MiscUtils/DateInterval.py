@@ -66,7 +66,6 @@ def allMatches(source, regex):
 	# @@-sgd 2002-12-23 - this function does not belong in this module,
 	# find a better place.
 	pos = 0
-	end = len(source)
 	rv = []
 	match = regex.search(source, pos)
 	while match:

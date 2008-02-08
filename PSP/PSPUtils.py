@@ -23,7 +23,7 @@
 """
 
 
-"""Various utility functions"""
+# Various utility functions
 
 def removeQuotes(st):
 	return st.replace("%\\\\>", "%>")
@@ -70,7 +70,7 @@ def startsNewBlock(line):
 		try:
 			compile(line + '\n\tpass', '<string>', 'exec')
 			return 1
-		except:
+		except Exception:
 			pass
 	else:
 		pass

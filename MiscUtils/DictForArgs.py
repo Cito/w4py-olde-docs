@@ -7,7 +7,7 @@ Also, there is a test suite in Testing/TestDictForArgs.py
 """
 
 
-import re, string
+import re
 
 
 class DictForArgsError(Exception):
@@ -47,7 +47,7 @@ def DictForArgs(s):
 
 	"""
 
-	s = string.strip(s)
+	s = s.strip()
 
 	# Tokenize
 

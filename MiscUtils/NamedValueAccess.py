@@ -171,7 +171,7 @@ class NamedValueAccess:
 	def hasValueForName(self, keysString):
 		"""Check whether name is available."""
 		try:
-			value = self.valueForName(keysString)
+			self.valueForName(keysString)
 		except NamedValueAccessError:
 			return 0
 		return 1
@@ -361,7 +361,7 @@ class NamedValueAccessWrapper(NamedValueAccess):
 
 	def hasValueForKey(self, key):
 		try:
-			value = self.valueForKey(ley)
+			self.valueForKey(key)
 		except NamedValueAccessError:
 			return 0
 		else:
@@ -493,7 +493,6 @@ def valueForKey(obj, key, default=NoDefault):
 
 	attr   = None
 	method = None
-	value  = None
 	unknown = 0
 	if type(obj) is types.DictType:
 		if default is NoDefault:
@@ -504,7 +503,6 @@ def valueForKey(obj, key, default=NoDefault):
 		else:
 			return obj.get(key, default)
 	else:
-
 		try:
 			klass = obj.__class__
 		except AttributeError:
@@ -512,7 +510,7 @@ def valueForKey(obj, key, default=NoDefault):
 			klass = None
 			method = None
 		else:
-			method   = getattr(klass, key, None)
+			method = getattr(klass, key, None)
 		if not method:
 			underKey = '_' + key
 			method = klass and getattr(klass, underKey, None) or None
@@ -525,12 +523,10 @@ def valueForKey(obj, key, default=NoDefault):
 							getitem = getattr(klass, '__getitem__', None)
 							if getitem:
 								try:
-									value = getitem(obj, key)
+									getitem(obj, key)
 								except KeyError:
 									unknown = 1
 
-#	if value is not NoDefault:
-#		return value
 	if not unknown:
 		if method:
 			return method(obj)

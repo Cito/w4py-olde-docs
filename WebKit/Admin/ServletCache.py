@@ -1,5 +1,4 @@
 import os, time
-from Queue import Queue
 
 from WebKit.URLParser import ServletFactoryManager
 from WebUtils.Funcs import htmlEncode

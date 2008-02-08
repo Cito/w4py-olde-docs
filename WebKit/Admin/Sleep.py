@@ -1,4 +1,3 @@
-import os
 from time import sleep
 
 from WebKit.ThreadedAppServer import ThreadAbortedError

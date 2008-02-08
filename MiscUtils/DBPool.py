@@ -1,5 +1,4 @@
-"""
-DBPool.py
+"""DBPool.py
 
 Implements a pool of cached connections to a database for any DB-API 2
 compliant database module. This should result in a speedup for persistent
@@ -41,10 +40,8 @@ CREDIT
 * Fix unthreadsafe functions which were leaking, Jay Love.
 * Eli Green's webware-discuss comments were lifted for additional docs.
 * Coding and comment clean-up by Christoph Zwerschke.
+
 """
-
-
-import threading
 
 
 class DBPoolError(Exception): pass

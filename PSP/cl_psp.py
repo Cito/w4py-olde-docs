@@ -6,7 +6,7 @@ from PSPCompiler import *
 
 import os, sys
 
-#move this to a class like JPS?
+# Move this to a class like JPS?
 
 def PSPCompile(*args):
 	pspfilename = args[0]

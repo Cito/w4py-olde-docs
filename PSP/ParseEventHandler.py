@@ -170,7 +170,7 @@ class ParseEventHandler:
 		type = type.lower()
 
 		if type != "tabs" and type != "spaces" and type != "braces":
-			raise "Invalid Indentation Type"
+			raise TypeError, 'Invalid Indentation Type'
 		self._writer.setIndentType(type)
 
 	def indentSpacesHandler(self, amount, start, stop):
@@ -211,7 +211,7 @@ class ParseEventHandler:
 					self.directiveHandlers[i](self, attrs[i], start, stop)
 				else:
 					print i
-					raise 'No Page Directive Handler'
+					raise ValueError, 'No page directive handler'
 		elif directive == 'include':
 			try:
 				filenm = attrs['file']
@@ -223,11 +223,11 @@ class ParseEventHandler:
 					raise KeyError
 			try:
 				self._reader.pushFile(filenm, encoding)
-			except 'File Not Found':
-				raise 'PSP Error: Include File not Found'
+			except IOError:
+				raise IOError, 'PSP include file not found'
 		else:
 			print directive
-			raise "Invalid Directive"
+			raise ValueError, 'Invalid directive'
 
 	def handleScript(self, start, stop, attrs):
 		"""Handle scripting elements"""

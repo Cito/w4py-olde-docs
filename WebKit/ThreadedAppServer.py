@@ -527,7 +527,7 @@ class ThreadedAppServer(AppServer):
 			# of the threads we want gone may not yet be gone.
 			# But we'll pick them up later -- they'll wait.
 			if not t.isAlive():
-				rv = t.join() # Don't need a timeout, it isn't alive
+				t.join() # Don't need a timeout, it isn't alive
 				self._threadPool.remove(t)
 				if debug:
 					print "Thread absorbed, real threadCount =", len(self._threadPool)
@@ -1321,7 +1321,7 @@ def main(args):
 		if settingRE.match(a):
 			match = settingRE.match(a)
 			name = match.group(1)
-			value = i[match.end():]
+			value = a[match.end():]
 			Configurable.addCommandLineSetting(name, value)
 		elif a == "stop":
 			function = AppServerModule.stop

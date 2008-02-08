@@ -25,8 +25,8 @@ class View(AdminSecurity):
 				self.writeError('File cannot be viewed!')
 
 	def writeError(self, message):
-			self.writeln('<h3 style="color:red">Error</h3>'
-				'<p>%s</p>' % message)
+		self.writeln('<h3 style="color:red">Error</h3>'
+			'<p>%s</p>' % message)
 
 	def writeContent(self):
 		fn = self.request().field('filename', None)

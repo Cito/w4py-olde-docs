@@ -30,7 +30,6 @@ class KidExamplePage(ExamplePage):
 
 	def writeOtherMenu(self):
 		self.menuHeading('Other')
-		viewPath = self.request().uriWebKitRoot() + "KidKit/Examples/View"
 		self.menuItem('View source of<br/>%s' % self.title(),
 			self.request().uriWebKitRoot() +
 				'KidKit/Examples/View?filename=%s'

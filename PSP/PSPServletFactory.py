@@ -20,7 +20,7 @@
 
 """
 
-import os, sys, time
+import os, sys
 from glob import glob
 from WebKit.ServletFactory import ServletFactory
 from PSP import Context, PSPCompiler

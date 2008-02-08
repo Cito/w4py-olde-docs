@@ -1,5 +1,4 @@
 from types import MethodType
-import sys
 
 
 def MixIn(pyClass, mixInClass, makeAncestor=0, mixInSuperMethods=0):

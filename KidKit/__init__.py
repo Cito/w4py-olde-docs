@@ -34,7 +34,7 @@ def InstallInWebKit(appServer):
 		try:
 			from KidServletFactory import KidServletFactory
 			app.addServletFactory(KidServletFactory(app))
-		except:
+		except Exception:
 			from traceback import print_exc
 			print_exc()
 			raise PlugInError, 'Cannot install Kid servlet factory.'

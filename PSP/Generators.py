@@ -29,7 +29,7 @@
 
 """
 
-import os, re
+import os
 import PSPUtils, BraceConverter
 
 # These are global so that the ParseEventHandler and this module agree:
@@ -218,6 +218,7 @@ class MethodGenerator(GenericGenerator):
 		if self.attrs['name'] == 'awake':
 			# This is hacky, need better method, but it works.
 			# @@ Maybe I should require a standard parent and do the intPSP call in that awake?
+			global AwakeCreated
 			AwakeCreated = 1
 			# Below indented on 6/1/00, was outside if block:
 			writer.pushIndent()
@@ -272,7 +273,7 @@ self.transaction().application().includeURL(self.transaction(), __pspincludepath
 
 		self.url = attrs.get('path')
 		if self.url is None:
-			raise "No path attribute in Include"
+			raise AttributeError, 'No path attribute in include'
 
 		self.scriptgen = ScriptGenerator(self._theFunction % self.url, None)
 
@@ -298,11 +299,11 @@ class InsertGenerator(GenericGenerator):
 
 		self.page = attrs.get('file')
 		if not self.page:
-			raise "No file attribute in include"
+			raise AttributeError, 'No file attribute in include'
 		thepath = self._ctxt.resolveRelativeURI(self.page)
 		if not os.path.exists(thepath):
 			print self.page
-			raise "Invalid included file", thepath
+			raise IOError, 'Invalid included file %r' % thepath
 		self.page = thepath
 
 		self.static = str(attrs.get('static')).lower() in ('true', 'yes', '1')

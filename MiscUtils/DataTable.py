@@ -238,7 +238,7 @@ def canReadExcel():
 	try:
 		from win32com.client import Dispatch
 		Dispatch("Excel.Application")
-	except:
+	except Exception:
 		return False
 	else:
 		return True
@@ -452,7 +452,7 @@ class DataTable:
 			def strip(x):
 				try:
 					return x.strip()
-				except:
+				except Exception:
 					return x
 
 			# read rows of data
@@ -539,8 +539,8 @@ class DataTable:
 	## Headings ##
 
 	def heading(self, index):
-		if type(key) is StringType:
-			key = self._nameToIndexMap[key]
+		if type(index) is StringType:
+			index = self._nameToIndexMap[index]
 		return self._headings[index]
 
 	def hasHeading(self, name):
@@ -711,7 +711,7 @@ class TableRecord:
 			elif valuesType is DictType:
 				self.initFromDict(values)
 			elif valuesType is InstanceType:
-				self.initFromObject(value)
+				self.initFromObject(values)
 			else:
 				raise DataTableError, 'Unknown type for values %s.' % valuesType
 

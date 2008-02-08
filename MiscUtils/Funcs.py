@@ -281,7 +281,7 @@ def _descExc(reprOfWhat, e):
 	"""
 	try:
 		return '(exception from repr(%s): %s: %s)' % (reprOfWhat, e.__class__, e)
-	except:
+	except Exception:
 		return '(exception from repr(%s))' % reprOfWhat
 
 def safeDescription(x, what='what'):

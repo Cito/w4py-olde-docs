@@ -18,7 +18,7 @@ CREDITS:
 
 """
 
-import os, sys, time
+import os
 from glob import glob
 from WebKit.ServletFactory import ServletFactory
 from WebKit.Servlet import Servlet
@@ -30,7 +30,7 @@ defaultFormat = 'default' # the default Kid output format
 from kid import load_template, output_methods
 try: # output formatting exists in newer Kid versions only
 	from kid.format import output_formats
-except:
+except ImportError:
 	output_formats = None
 from kid.compiler import KidFile
 
@@ -48,7 +48,7 @@ def kidClass(module):
 	writeMethod = hook.__name__
 	try:
 		output = module.output
-	except:
+	except AttributeError:
 		output = defaultOutput
 	assert output in output_methods
 	if output_formats is None:
@@ -56,7 +56,7 @@ def kidClass(module):
 	else:
 		try:
 			format = module.format
-		except:
+		except AttributeError:
 			format = defaultFormat
 		assert format in output_formats
 

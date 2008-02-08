@@ -22,7 +22,7 @@
 
 """
 
-import os, sys, tempfile
+import os
 from MiscUtils.Funcs import mkstemp
 from Context import *
 
@@ -77,7 +77,7 @@ class ServletWriter:
 		if os.path.exists(self._pyfilename):
 			os.remove(self._pyfilename)
 		try:
-				os.rename(self._temp, self._pyfilename)
+			os.rename(self._temp, self._pyfilename)
 		except OSError:
 			# The operation may fail on some Unix flavors
 			# if the files are on different filesystems.
@@ -136,7 +136,7 @@ class ServletWriter:
 		self._filehandle.write(st)
 
 	def printMultiLn(self, st):
-		raise 'NotImplemented Error'
+		raise NotImplementedError
 
 	def printList(self, strlist):
 		"""Prints a list of strings with indentation and a newline."""
