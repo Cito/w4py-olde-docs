@@ -311,7 +311,7 @@ class Transport(SafeUnpickler):
 	"""Handle an HTTP transaction to a Pickle-RPC server."""
 
 	# client identifier (may be overridden)
-	user_agent = "PickleRPC/%s (by http://webware.sf.net/)" % __version__
+	user_agent = "PickleRPC/%s (by http://www.webwareforpython.org)" % __version__
 
 	def request(self, host, handler, request_body, verbose=0, binary=0, compressed=0,
 				acceptCompressedResponse=0):
