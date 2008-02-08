@@ -11,6 +11,7 @@ The tuple contents are always like this:
 	(tag, startindex, endindex, sublist)
 tag is one of ('comment', 'string', 'keyword', 'function', 'class')
 sublist is not used, hence always None.
+
 """
 
 # Based on FontText.py by Mitchell S. Chapman,

@@ -1,5 +1,6 @@
 from MiscUtils import AbstractError
 
+
 class Task:
 	"""Abstract base class from which you have to derive your own tasks."""
 

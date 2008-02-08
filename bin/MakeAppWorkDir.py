@@ -335,7 +335,7 @@ class MakeAppWorkDir:
 		except:
 			self.msg("\tWarning: The ownership could not be changed.")
 		else:
-			for (dir, dirs, files) in os.walk(self._workDir):
+			for dir, dirs, files in os.walk(self._workDir):
 				for file in dirs + files:
 					path = os.path.join(dir, file)
 					os.chown(path, uid, gid)

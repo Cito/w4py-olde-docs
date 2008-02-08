@@ -402,7 +402,7 @@ class date(datetime):
 		"""
 		sql = self.isoformat()
 		wday = calendar.weekday(int(sql[0:4]), int(sql[5:7]), int(sql[8:10]))
-		return (int(sql[0:4]), int(sql[5:7]), int(sql[8:10]), 0, 0, 0, wday, 0, -1)
+		return int(sql[0:4]), int(sql[5:7]), int(sql[8:10]), 0, 0, 0, wday, 0, -1
 
 	def now(self):
 		"""Return the current date and time as a datetime."""

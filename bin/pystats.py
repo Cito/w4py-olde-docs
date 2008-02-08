@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-"""
-pystats.py
+"""pystats.py
+
 
 Reports stats for various aspects of Python source including:
 
@@ -11,7 +11,8 @@ Reports stats for various aspects of Python source including:
 	# of methods/functions
 	# of classes
 
-You can think of this as a UNIX "wc" on steroids (that also works on any Python platform).
+You can think of this as a UNIX "wc" on steroids (that also works on any
+Python platform).
 
 
 USAGE
@@ -26,9 +27,12 @@ From the command line:
 
 CAVEATS
 
-PyStats doesn't count classes, functions and methods perfectly. It can be fooled by multiline strings and such. But it's close enough to get an idea and the odd ball cases don't happen frequently.
+PyStats doesn't count classes, functions and methods perfectly. It can be
+fooled by multiline strings and such. But it's close enough to get an idea
+and the odd ball cases don't happen frequently.
 
-Webware includes some third party Python files, which you may or may not believe should be counted as part of the stats.
+Webware includes some third party Python files, which you may or may not
+believe should be counted as part of the stats.
 
 Number of bytes is a little low on Windows where \r\n is counted just as \n.
 
@@ -48,13 +52,16 @@ Output numbers with commas.
 
 Option for writing HTML results.
 
-Both this utility and checksrc.py are in need of a ReadPyLines() function that would be like readlines() but would bastardize the contents of multiline strings to avoid misunderstandings concerning tabs, spaces, def's, class's etc. See tabnanny in Py 2.0, it might have the answer or even reusable code.
+Both this utility and checksrc.py are in need of a ReadPyLines() function that
+would be like readlines() but would bastardize the contents of multiline strings
+to avoid misunderstandings concerning tabs, spaces, def's, class's etc.
+See tabnanny in Py 2.0, it might have the answer or even reusable code.
 
-Some of our code is in common with checksrc.py. One more similar program and it might be time for an abstract class for these guys.
+Some of our code is in common with checksrc.py. One more similar program and it
+might be time for an abstract class for these guys.
 
 Provide command line option to change extensions.
 
-Py 2.0: Use dict.setdefault() & +=
 """
 
 
@@ -64,17 +71,17 @@ from UserDict import UserDict
 
 class Stats(UserDict):
 
-	statNames = 'files bytes lines funcs classes'.split()
+	_statNames = 'files bytes lines funcs classes'.split()
 
 	def __init__(self, dict=None):
 		UserDict.__init__(self, dict)
 		if dict is None:
-			for name in self.statNames:
+			for name in self._statNames:
 				self[name] = 0
 
 	def __add__(self, stats):
 		result = self.__class__()
-		for name in self.statNames:
+		for name in self._statNames:
 			result[name] = self[name] + stats[name]
 		return result
 
@@ -88,15 +95,15 @@ class Stats(UserDict):
 		return self.__class__(self.data)
 
 	def write(self, file=sys.stdout):
-		for name in self.statNames:
+		for name in self._statNames:
 			file.write('%8d' % self[name])
 
-def Stats_writeHeaders(nameWidth, file=sys.stdout):
-	# This would be a class method in Python >= 2.2: Stats.writeHeaders().
-	file.write(' '*nameWidth)
-	for name in Stats._statNames:
-		file.write('%8s' % name)
-	file.write('\n')
+	def writeHeaders(self, nameWidth, file=sys.stdout):
+		# this would be a class method in Python >= 2.2
+		file.write(' ' * nameWidth)
+		for name in self._statNames:
+			file.write('%8s' % name)
+		file.write('\n')
 
 
 class StatsNode:
@@ -106,9 +113,9 @@ class StatsNode:
 
 	def __init__(self, name):
 		self._name       = name
-		self._subNodes   = {}       # map directory names to StatsNodes
-		self._stats      = Stats()  # stats for files just in this dir (no subdirs)
-		self._totalStats = None     # stats for all files, recursively in subdirs
+		self._subNodes   = {}      # map directory names to StatsNodes
+		self._stats      = Stats() # stats for files just in this dir (no subdirs)
+		self._totalStats = None    # stats for all files, recursively in subdirs
 
 	def name(self):
 		return self._name
@@ -150,7 +157,7 @@ class StatsNode:
 
 	def write(self, file=sys.stdout, recurse=1, indent=0, indenter='  '):
 		if indent == 0:
-			Stats_writeHeaders(25, file)
+			self._stats.writeHeaders(25, file)
 		spacer = indenter * indent
 		name = self._name.ljust(25-len(spacer))
 		file.write(spacer+name)
@@ -178,7 +185,6 @@ class PyStats:
 		self.setExtensions(['.py', '.psp', '.cgi'])
 		self.setRecurse(1)
 		self.setShowSummary(0)
-		self.setVerbose(0)
 
 
 	## Options ##
@@ -187,7 +193,7 @@ class PyStats:
 		return self._directory
 
 	def setDirectory(self, dir):
-		""" Sets the directory that checking starts in. """
+		"""Set the directory that checking starts in."""
 		self._directory = dir
 
 	def extensions(self):
@@ -200,7 +206,7 @@ class PyStats:
 		return self._recurse
 
 	def setRecurse(self, flag):
-		""" Sets whether or not to recurse into subdirectories. """
+		"""Set whether or not to recurse into subdirectories."""
 		self._recurse = flag
 
 	def showSummary(self):
@@ -208,13 +214,6 @@ class PyStats:
 
 	def setShowSummary(self, flag):
 		self._showSummary = flag
-
-	def verbose(self):
-		return self._verbose
-
-	def setVerbose(self, flag):
-		""" Sets whether or not to print extra information during check (such as every directory and file name scanned). """
-		self._verbose = flag
 
 
 	## Command line use ##
@@ -249,11 +248,6 @@ Examples:
 				self.setShowSummary(1)
 			elif arg == '-S':
 				self.setShowSummary(0)
-			# We don't have any use for a verbose option right now.
-			# elif arg == '-v':
-			#     self.setVerbose(1)
-			# elif arg == '-V':
-			#     self.setVerbose(0)
 			elif arg[0] == '-':
 				self.usage()
 				return 0

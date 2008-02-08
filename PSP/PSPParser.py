@@ -318,7 +318,8 @@ class PSPParser:
 			handler.setTemplateInfo(self.tmplStart, self.tmplStop)
 			handler.handleMethod(start, stop, attrs)
 			start = stop
-			stop = reader.skipUntil(CLOSE_METHOD_2) #skip past the close marker, return the point before the close marker
+			# skip past the close marker, return the point before the close marker
+			stop = reader.skipUntil(CLOSE_METHOD_2)
 			handler.handleMethodEnd(start, stop, attrs)
 			return 1
 		return 0

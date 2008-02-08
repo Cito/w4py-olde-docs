@@ -368,7 +368,7 @@ class ObjRefAttr:
 			preSql = str('declare %s as int; set %s = %s;\n' % (
 				refVarName, refVarName, objId))
 			sqlForValue = classId + ',' + refVarName
-			return (preSql, sqlForValue)
+			return preSql, sqlForValue
 		else:
 			return sql
 

@@ -8,8 +8,7 @@
 
 # Copied from the Docutils 0.4 tools directory
 
-"""
-Generates .html from all the .txt files in a directory.
+"""Generate .html from all the .txt files in a directory.
 
 Ordinary .txt files are understood to be standalone reStructuredText.
 Files named ``pep-*.txt`` are interpreted as reStructuredText PEPs.

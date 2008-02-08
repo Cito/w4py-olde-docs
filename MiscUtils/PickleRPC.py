@@ -119,17 +119,15 @@ try:
 	from xmlrpclib.xmlrpclib import ProtocolError as _PE
 except ImportError:
 	from xmlrpclib import ProtocolError as _PE
-# @@ 2002-01-31 ce: should this be caught somewhere for special handling? Perhaps in XMLRPCServlet?
+# @@ 2002-01-31 ce: should this be caught somewhere for special handling?
+# Perhaps in XMLRPCServlet?
 
 class ProtocolError(ResponseError, _PE):
 	pass
 
 
 class RequestError(Error):
-	"""
-	These are errors originally raised by the server complaining about
-	malformed requests.
-	"""
+	"""Errors originally raised by the server complaining about malformed requests."""
 	pass
 
 
@@ -142,39 +140,44 @@ class InvalidContentTypeError(ResponseError):
 
 	def __repr__(self):
 		content = self.content
-		return '%s: Content type is not text/x-python-pickled-dict\nheaders = %s\ncontent =\n%s' % (
-			self.__class__.__name__, self.headers, content)
+		return '%s: Content type is not text/x-python-pickled-dict\n' \
+			' headers = %s\ncontent =\n%s' % (
+				self.__class__.__name__, self.headers, content)
 
 	__str__ = __repr__
 
 
 class SafeUnpickler:
-	"""
+	"""Safe unpickler.
+
 	For security reasons, we don't want to allow just anyone to unpickle
 	anything.  That can cause arbitrary code to be executed.
-	So this SafeUnpickler base class is used to control
-	what can be unpickled.  By default it doesn't let you unpickle
-	any class instances at all, but you can create subclass that
-	overrides allowedGlobals().
+	So this SafeUnpickler base class is used to control what can be unpickled.
+	By default it doesn't let you unpickle any class instances at all,
+	but you can create subclass that overrides allowedGlobals().
 
 	Note that the PickleRPCServlet class in WebKit is derived from this class
 	and uses its load() and loads() methods to do all unpickling.
+
 	"""
 
 	def allowedGlobals(self):
-		"""
+		"""Allowed class names.
+
 		Must return a list of (moduleName, klassName) tuples for all
 		classes that you want to allow to be unpickled.
 
 		Example:
 			return [('mx.DateTime', '_DT')]
 		allows mx.DateTime instances to be unpickled.
+
 		"""
 		return []
 
 	def findGlobal(self, module, klass):
 		if (module, klass) not in self.allowedGlobals():
-			raise UnpicklingError, 'For security reasons, you can\'t unpickle objects from module %s with type %s' % (module, klass)
+			raise UnpicklingError, 'For security reasons, you can\'t unpickle' \
+				' objects from module %s with type %s.' % (module, klass)
 		globals = {}
 		exec 'from %s import %s as theClass' % (module, klass) in globals
 		return globals['theClass']
@@ -199,19 +202,19 @@ class Server:
 	uri is the connection point on the server, given as
 	scheme://host/target.
 
-	The standard implementation always supports the "http" scheme.  If
-	SSL socket support is available (Python 2.0), it also supports
-	"https".
+	The standard implementation always supports the "http" scheme.
+	If SSL socket support is available (Py 2.0), it also supports "https".
 
 	If the target part and the slash preceding it are both omitted,
 	"/PickleRPC" is assumed.
 
 	See the module doc string for more information.
+
 	"""
 
-	def __init__(self, uri, transport=None, verbose=0, binary=1, compressRequest=1, acceptCompressedResponse=1):
-		# establish a "logical" server connection
-
+	def __init__(self, uri, transport=None, verbose=0, binary=1,
+			compressRequest=1, acceptCompressedResponse=1):
+		"""Establish a "logical" server connection."""
 		# get the url
 		import urllib
 		type, uri = urllib.splittype(uri)
@@ -234,9 +237,7 @@ class Server:
 		self._acceptCompressedResponse = acceptCompressedResponse
 
 	def _request(self, methodName, args, keywords):
-		"""
-		Call a method on the remote server.
-		"""
+		"""Call a method on the remote server."""
 		request = {
 			'version':    1,
 			'action':     'call',
@@ -254,15 +255,9 @@ class Server:
 		else:
 			compressed = 0
 
-		response = self._transport.request(
-			self._host,
-			self._handler,
-			request,
-			verbose=self._verbose,
-			binary=self._binary,
-			compressed=compressed,
-			acceptCompressedResponse=self._acceptCompressedResponse
-			)
+		response = self._transport.request(self._host, self._handler, request,
+			verbose=self._verbose, binary=self._binary, compressed=compressed,
+			acceptCompressedResponse=self._acceptCompressedResponse)
 
 		return response
 
@@ -286,8 +281,8 @@ class Server:
 		# magic method dispatcher
 		return _Method(self._requestValue, name)
 
-	# note: to call a remote object with an non-standard name, use
-	# result getattr(server, "strange-python-name")(args)
+	# note: to call a remote object with an non-standard name,
+	# use result getattr(server, "strange-python-name")(args)
 
 
 ServerProxy = Server # be like xmlrpclib for those who might guess or expect it
@@ -295,9 +290,10 @@ ServerProxy = Server # be like xmlrpclib for those who might guess or expect it
 
 
 class _Method:
-	"""
-	Some magic to bind a Pickle-RPC method to an RPC server.
+	"""Some magic to bind a Pickle-RPC method to an RPC server.
+
 	Supports "nested" methods (e.g. examples.getStateName).
+
 	"""
 
 	def __init__(self, send, name):
@@ -312,9 +308,7 @@ class _Method:
 
 
 class Transport(SafeUnpickler):
-	"""
-	Handles an HTTP transaction to a Pickle-RPC server.
-	"""
+	"""Handle an HTTP transaction to a Pickle-RPC server."""
 
 	# client identifier (may be overridden)
 	user_agent = "PickleRPC/%s (by http://webware.sf.net/)" % __version__
@@ -343,7 +337,8 @@ class Transport(SafeUnpickler):
 
 		self.verbose = verbose
 
-		if h.headers['content-type'] not in ['text/x-python-pickled-dict', 'application/x-python-binary-pickled-dict']:
+		if h.headers['content-type'] not in ['text/x-python-pickled-dict',
+				'application/x-python-binary-pickled-dict']:
 			headers = h.headers.headers
 			content = h.getfile().read()
 			raise InvalidContentTypeError(headers, content)
@@ -404,9 +399,7 @@ class Transport(SafeUnpickler):
 
 
 class SafeTransport(Transport):
-	"""
-	Handles an HTTPS transaction to a Pickle-RPC server.
-	"""
+	"""Handle an HTTPS transaction to a Pickle-RPC server."""
 
 	def make_connection(self, host):
 		# create a HTTPS connection object from a host descriptor

@@ -9,7 +9,7 @@ A quick, hacky script to contruct a class hierarchy list from a set of Python fi
 
 import os, re, sys, time
 from glob import glob
-from types import *
+from types import StringType
 
 
 def EmptyString(klass):

@@ -34,7 +34,7 @@ TO DO
 
 * Benchmarking: Set this up in a new file:
 	Testing/BenchNamedValueAccess.py
-   so we can experiment with caching vs. not and other techniques.
+	so we can experiment with caching vs. not and other techniques.
 
 
 PAST DESIGN DECISIONS
@@ -390,7 +390,7 @@ def _valueForKeySequence(obj, listOfKeys, default=None):
 	if type(obj) is types.DictType:
 		try:
 			value = obj[listOfKeys[0]]
-		except: # @@ 2000-03-03 ce: this exception should be more specific. probably nameerror or indexerror
+		except KeyError:
 			if default is None:
 				raise NamedValueAccessError, \
 					'Unknown key (%s) in dictionary.' % listOfKeys[0]

@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-"""
-FileList.py
+
+"""FileList.py
 
 A quick, hacky script to contruct a file list from a set of Python files.
+
 """
 
 
 import os, re, sys
 from glob import glob
-from types import *
+from types import StringType
 
 
 class FileList:

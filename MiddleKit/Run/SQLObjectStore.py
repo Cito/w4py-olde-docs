@@ -210,7 +210,7 @@ class SQLObjectStore(ObjectStore):
 		conn, cur = self.executeSQL('select id, name from _MKClassIds;')
 		try:
 			klassesById = {}
-			for (id, name) in cur.fetchall():
+			for id, name in cur.fetchall():
 				assert id, "Id must be a non-zero int. id=%r, name=%r" % (id, name)
 				try:
 					klass = self._model.klass(name)

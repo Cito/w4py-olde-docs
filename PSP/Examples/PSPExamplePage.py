@@ -9,7 +9,12 @@ class PSPExamplePage(ExamplePage):
 		return "PSP Examples"
 
 	def scripts(self):
-		"""Create a list of dictionaries, where each dictionary stores information about a particular script."""
+		"""Get list of PSP scripts.
+
+		Creates a list of dictionaries, where each dictionary stores
+		information about a particular script.
+
+		"""
 		examples = []
 		filesyspath = self.request().serverSidePath()
 		files = glob(os.path.join(os.path.dirname(filesyspath), "*.psp"))
@@ -30,4 +35,5 @@ class PSPExamplePage(ExamplePage):
 		if self.application().hasContext('Documentation'):
 			filename = 'Documentation/WebKit.html'
 			if os.path.exists(filename):
-				self.menuItem('Local WebKit docs', self.request().servletPath() + '/' + filename)
+				self.menuItem('Local WebKit docs',
+					self.request().servletPath() + '/' + filename)
