@@ -1,14 +1,14 @@
 import os, sys
-sys.path.insert(1, os.path.abspath(os.path.join(os.pardir, os.pardir)))
-import TaskKit
-# from MiscUtils import unittest
 import unittest
+
+sys.path.insert(1, os.path.abspath(os.path.join(os.pardir, os.pardir)))
+
+from TaskKit.Scheduler import Scheduler
 
 
 class TaskKitTest(unittest.TestCase):
 
 	def setUp(self):
-		from TaskKit.Scheduler import Scheduler
 		self._scheduler = Scheduler()
 
 	def checkBasics(self):

@@ -63,6 +63,6 @@ class Task:
 		self._handle = handle
 		try:
 			self.run()
-		except:
+		except Exception:
 			handle.notifyFailure()
 		handle.notifyCompletion()

@@ -165,7 +165,7 @@ class Line:
 		return self._html
 
 	def __str__(self):
-		return self.contents()
+		return self.text()
 
 
 ## Auxiliary functions ##

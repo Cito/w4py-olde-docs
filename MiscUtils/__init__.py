@@ -1,4 +1,4 @@
-# MiscUtils component
+# MiscUtils
 # Webware for Python
 # See Docs/index.html
 

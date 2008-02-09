@@ -48,7 +48,7 @@ py2html -stdout -format:ansi -mode:color $* | less -r
 
 History:
 
-2005-09-09: Expand tabs patch reimplemented by Christoph Zwerschke
+Clean-up and modified expand tabs patch by Christoph Zwerschke.
 
 0.8: Added patch by Patrick Lynch to have py2html.py use style
      sheets for markup
@@ -74,29 +74,31 @@ __cgifooter__ = ('\n<pre># code highlighted using <a href='
 	'"http://www.lemburg.com/files/python/">py2html.py</a> '
 	'version %s</pre>\n' % __version__)
 
-import sys,string,re
+import sys, re
 
 # Adjust path so that PyFontify is found...
 if '.' not in sys.path:
 	sys.path.append('.')
+
 
 ### Constants
 
 # URL of the input form the user is redirected to in case no script=xxx
 # form field is given. The URL *must* be absolute. Leave blank to
 # have the script issue an error instead.
-INPUT_FORM = 'http://www.lemburg.com/files/python/SoftwareDescriptions.html#py2html.py'
+INPUT_FORM = None
 
 # HTML DOCTYPE and XML namespace
-HTML_DOCTYPE = '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
+HTML_DOCTYPE = ('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"'
+	' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">')
 HTML_XMLNS = ' xmlns="http://www.w3.org/1999/xhtml"'
+
 
 ### Helpers
 
 def fileio(file, mode='rb', data=None, close=0):
-
 	if type(file) == type(''):
-		f = open(file,mode)
+		f = open(file, mode)
 		close = 1
 	else:
 		f = file
@@ -104,13 +106,14 @@ def fileio(file, mode='rb', data=None, close=0):
 		f.write(data)
 	else:
 		data = f.read()
-	if close: f.close()
+	if close:
+		f.close()
 	return data
+
 
 ### Converter class
 
 class PrettyPrint:
-
 	""" generic Pretty Printer class
 
 		* supports tagging Python scripts in the following ways:
@@ -151,19 +154,17 @@ class PrettyPrint:
 	# formats to be used
 	formats = {}
 
-	def __init__(self,tagfct=None,format='html',mode='color'):
-
+	def __init__(self, tagfct=None, format='html', mode='color'):
 		self.tag = tagfct
 		self.set_mode = getattr(self,'set_mode_%s_%s' % (format, mode))
 		self.filter = getattr(self,'filter_%s' % format)
 
-	def file_filter(self,infile,outfile):
-
+	def file_filter(self, infile, outfile):
 		self.set_mode()
-		text = fileio(infile,'r')
+		text = fileio(infile, 'r')
 		if type(infile) == type('') and self.title == '':
 			self.title = infile
-		fileio(outfile,'w',self.filter(text))
+		fileio(outfile, 'w', self.filter(text))
 
 	### Set pre- and postfixes for formats & modes
 	#
@@ -178,7 +179,6 @@ class PrettyPrint:
 	# is inserted right after the tag.
 
 	def set_mode_html_color(self):
-
 		self.css = """
 <style type="text/css">
 <!--
@@ -193,22 +193,20 @@ padding: 3pt; }
 .PY_STRING{ color: #080; }
 -->
 </style>""" % self.bgcolor
-
 		self.formats = {
-			'all':('<pre>','</pre>'),
-			'comment':('<span class="PY_COMMENT">','</span>'),
-			'keyword':('<span class="PY_KEYWORD">','</span>'),
-			'parameter':('<span class="PY_PARAMETER">','</span>'),
-			'identifier':( lambda x,strip=string.strip:
-						   '<a name="%s"><span class="PY_IDENTIFIER">' % (strip(x)),
-						   '</span></a>'),
-			'string':('<span class="PY_STRING">','</span>')
+			'all': ('<pre>', '</pre>'),
+			'comment': ('<span class="PY_COMMENT">', '</span>'),
+			'keyword': ('<span class="PY_KEYWORD">', '</span>'),
+			'parameter': ('<span class="PY_PARAMETER">', '</span>'),
+			'identifier': (lambda x:
+				'<a name="%s"><span class="PY_IDENTIFIER">' % x.strip(),
+				'</span></a>'),
+			'string': ('<span class="PY_STRING">', '</span>')
 			}
 
 	set_mode_rawhtml_color = set_mode_html_color
 
 	def set_mode_html_mono(self):
-
 		self.css = """
 <style type="text/css">
 <!--
@@ -223,61 +221,56 @@ padding: 3pt; }
 .PY_STRING{ font-style: italic}
 -->
 </style> """ % self.bgcolor
-
 		self.formats = {
-			'all':('<pre>','</pre>'),
-			'comment':('<span class="PY_COMMENT">','</span>'),
-			'keyword':( '<span class="PY_KEYWORD">','</span>'),
-			'parameter':('<span class="PY_PARAMETER">','</span>'),
-			'identifier':( lambda x,strip=string.strip:
-						   '<a name="%s"><span class="PY_IDENTIFIER">' % (strip(x)),
-						   '</span></a>'),
-			'string':('<span class="PY_STRING">','</span>')
+			'all': ('<pre>', '</pre>'),
+			'comment': ('<span class="PY_COMMENT">', '</span>'),
+			'keyword': ('<span class="PY_KEYWORD">', '</span>'),
+			'parameter': ('<span class="PY_PARAMETER">', '</span>'),
+			'identifier': (lambda x:
+				'<a name="%s"><span class="PY_IDENTIFIER">' % x.strip(),
+				'</span></a>'),
+			'string': ('<span class="PY_STRING">', '</span>')
 			}
 
 	set_mode_rawhtml_mono = set_mode_html_mono
 
 	def set_mode_ansi_mono(self):
-
 		self.formats = {
-			'all':('',''),
-			'comment':('\033[2m','\033[m'),
-			'keyword':('\033[4m','\033[m'),
-			'parameter':('',''),
-			'identifier':('\033[1m','\033[m'),
-			'string':('','')
+			'all': ('', ''),
+			'comment': ('\033[2m', '\033[m'),
+			'keyword': ('\033[4m', '\033[m'),
+			'parameter': ('', ''),
+			'identifier': ('\033[1m', '\033[m'),
+			'string': ('', '')
 			}
 
 	def set_mode_ansi_color(self):
-
 		self.formats = {
-			'all':('',''),
-			'comment':('\033[34;2m','\033[m'),
-			'keyword':('\033[1;34m','\033[m'),
-			'parameter':('',''),
-			'identifier':('\033[1;31m','\033[m'),
-			'string':('\033[32;2m','\033[m')
+			'all': ('', ''),
+			'comment': ('\033[34;2m', '\033[m'),
+			'keyword': ('\033[1;34m', '\033[m'),
+			'parameter': ('', ''),
+			'identifier': ('\033[1;31m', '\033[m'),
+			'string': ('\033[32;2m', '\033[m')
 			}
 
-    ### Filters for Python scripts given as string
+	### Filters for Python scripts given as string
 
-	def escape_html(self,text):
-
-		t = (('&','&amp;'),('<','&lt;'),('>','&gt;'))
-		for x,y in t:
-			text = string.join(string.split(text,x),y)
+	def escape_html(self, text):
+		t = (('&','&amp;'), ('<','&lt;'), ('>','&gt;'))
+		for x, y in t:
+			text = y.join(text.split(x))
 		return text
 
 	def expand_tabs(self, s):
 		# 2005-09-09 cz: convert tabs to spaces
 		return s.expandtabs(4)
 
-	def filter_html(self,text):
-
+	def filter_html(self, text):
 		output = self.fontify(self.escape_html(self.expand_tabs(text)))
 		if self.replace_URLs:
 			output = re.sub('URL:([ \t]+)([^ \n\r<]+)',
-							'URL:\\1<a href="\\2">\\2</a>',output)
+							'URL:\\1<a href="\\2">\\2</a>', output)
 		html = """%s
 <html%s>
 <head>
@@ -293,81 +286,80 @@ padding: 3pt; }
 <!--footer-->
 %s
 </body>
-</html>\n""" %(HTML_DOCTYPE, HTML_XMLNS,
+</html>\n""" % (HTML_DOCTYPE, HTML_XMLNS,
 			self.title, self.css,
 			self.header, output, self.footer)
 		return html
 
-	def filter_rawhtml(self,text):
-
+	def filter_rawhtml(self, text):
 		output = self.fontify(self.escape_html(self.expand_tabs(text)))
 		if self.replace_URLs:
 			output = re.sub('URL:([ \t]+)([^ \n\r<]+)',
-							'URL:\\1<a href="\\2">\\2</a>',output)
+							'URL:\\1<a href="\\2">\\2</a>', output)
 		return self.header + output + self.footer
 
-	def filter_ansi(self,text):
-
+	def filter_ansi(self, text):
 		output = self.fontify(self.expand_tabs(text))
 		return self.header + output + self.footer
 
 	### Fontify engine
 
-	def fontify(self,pytext):
-
+	def fontify(self, pytext):
 		# parse
 		taglist = self.tag(pytext)
 
 		# prepend special 'all' tag:
-		taglist[:0] = [('all',0,len(pytext),None)]
+		taglist[:0] = [('all', 0, len(pytext), None)]
 
 		# prepare splitting
 		splits = []
-		addsplits(splits,pytext,self.formats,taglist)
+		addsplits(splits, pytext, self.formats, taglist)
 
 		# do splitting & inserting
 		splits.sort()
-		l = []
+		s = []
 		li = 0
-		for ri,dummy,insert in splits:
-			if ri > li: l.append(pytext[li:ri])
-			l.append(insert)
+		for ri, dummy, insert in splits:
+			if ri > li:
+				s.append(pytext[li:ri])
+			s.append(insert)
 			li = ri
-		if li < len(pytext): l.append(pytext[li:])
+		if li < len(pytext):
+			s.append(pytext[li:])
 
-		return string.join(l,'')
+		return ''.join(s)
 
-def addsplits(splits,text,formats,taglist):
 
+### Auxiliary
+
+def addsplits(splits, text, formats, taglist):
 	"""Helper for .fontify()"""
-	for id,left,right,sublist in taglist:
+	for id, left, right, sublist in taglist:
 		try:
-			pre,post = formats[id]
+			pre, post = formats[id]
 		except KeyError:
-			# sys.stderr.write('Warning: no format for %s specified\n'%repr(id))
-			pre,post = '',''
+			# print >>sys.stderr, 'No format for %s specified\n' % repr(id)
+			pre, post = '',''
 		if type(pre) != type(''):
 			pre = pre(text[left:right])
 		if type(post) != type(''):
 			post = post(text[left:right])
 		# len(splits) is a dummy used to make sorting stable
-		splits.append((left,len(splits),pre))
+		splits.append((left, len(splits), pre))
 		if sublist:
-			addsplits(splits,text,formats,sublist)
-		splits.append((right,len(splits),post))
+			addsplits(splits, text, formats, sublist)
+		splits.append((right, len(splits), post))
 
-def write_html_error(titel,text):
-
+def write_html_error(titel, text):
 	print """\
 %s<html%s><head><title>%s</title></head>
 <body>
 <h2>%s</h2>
 %s
 </body></html>
-""" % (HTML_DOCTYPE,HTML_XMLNS,titel,titel,text)
+""" % (HTML_DOCTYPE, HTML_XMLNS, titel, titel, text)
 
 def redirect_to(url):
-
 	sys.stdout.write('Content-Type: text/html\r\n')
 	sys.stdout.write('Status: 302\r\n')
 	sys.stdout.write('Location: %s\r\n\r\n' % url)
@@ -378,50 +370,55 @@ def redirect_to(url):
 <h1>302 Moved Temporarily</h1>
 The document has moved to <a href="%s">%s</a>.<p></p>
 </body></html>
-""" % (HTML_DOCTYPE,HTML_XMLNS,url,url)
+""" % (HTML_DOCTYPE, HTML_XMLNS, url, url)
+
+
+### Main
 
 def main(cmdline):
-
 	"""main(cmdline) -- process cmdline as if it were sys.argv"""
+
 	# parse options/files
 	options = []
 	optvalues = {}
-	for o in cmdline[1:]:
-		if o[0] == '-':
-			if ':' in o:
-				k,v = tuple(string.split(o,':'))
+	for opt in cmdline[1:]:
+		if opt[0] == '-':
+			if ':' in opt:
+				k, v = tuple(opt.split(':', 1))
 				optvalues[k] = v
 				options.append(k)
 			else:
-				options.append(o)
+				options.append(opt)
 		else:
 			break
 	files = cmdline[len(options)+1:]
 
 	### create converting object
 
+	verbose = ('-v' in options)
+
 	# load fontifier
 	if '-marcs' in options:
 		# use mxTextTool's tagging engine as fontifier
 		from mx.TextTools import tag
 		from mx.TextTools.Examples.Python import python_script
-		tagfct = lambda text,tag=tag,pytable=python_script: \
-				 tag(text,pytable)[1]
+		tagfct = lambda text, tag=tag, pytable=python_script: \
+			tag(text, pytable)[1]
 		print "Py2HTML: using Marc's tagging engine"
 	else:
 		# load Just's fontifier
 		try:
 			import PyFontify
-			if PyFontify.__version__ < '0.3': raise ValueError
+			if PyFontify.__version__ < '0.3':
+				raise ImportError
 			tagfct = PyFontify.fontify
-		except:
+		except ImportError:
 			print """
 Sorry, but this script needs the PyFontify.py module version 0.3;
 You can download it from Just's homepage at
 URL: http://starship.python.net/~just/
 	"""
 			sys.exit()
-
 
 	if '-format' in options:
 		format = optvalues['-format']
@@ -435,7 +432,7 @@ URL: http://starship.python.net/~just/
 		# use default
 		mode = 'color'
 
-	c = PrettyPrint(tagfct,format,mode)
+	c = PrettyPrint(tagfct, format, mode)
 	convert = c.file_filter
 
 	### start working
@@ -452,7 +449,8 @@ URL: http://starship.python.net/~just/
 			c.header = f.read()
 			f.close()
 		except IOError:
-			if verbose: print 'IOError: header file not found'
+			if verbose:
+				print 'IOError: header file not found'
 
 	if '-footer' in options:
 		try:
@@ -460,13 +458,14 @@ URL: http://starship.python.net/~just/
 			c.footer = f.read()
 			f.close()
 		except IOError:
-			if verbose: print 'IOError: footer file not found'
+			if verbose:
+				print 'IOError: footer file not found'
 
 	if '-URL' in options:
 		c.replace_URLs = 1
 
 	if '-' in options:
-		convert(sys.stdin,sys.stdout)
+		convert(sys.stdin, sys.stdout)
 		sys.exit()
 
 	if '-h' in options:
@@ -477,7 +476,7 @@ URL: http://starship.python.net/~just/
 		# Turn URL processing on
 		c.replace_URLs = 1
 		# Try CGI processing...
-		import cgi,urllib,urlparse,os
+		import cgi, urllib, urlparse, os
 		form = cgi.FieldStorage()
 		if not form.has_key('script'):
 			# Ok, then try pathinfo
@@ -487,7 +486,7 @@ URL: http://starship.python.net/~just/
 				else:
 					sys.stdout.write('Content-Type: text/html\r\n\r\n')
 					write_html_error('Missing Parameter',
-									 'Missing script=URL field in request')
+						'Missing script=URL field in request')
 				sys.exit(1)
 			url = os.environ['PATH_INFO'][1:] # skip the leading slash
 		else:
@@ -504,16 +503,15 @@ URL: http://starship.python.net/~just/
 		#print url; sys.exit()
 		network = urllib.URLopener()
 		try:
-			tempfile,headers = network.retrieve(url)
-		except IOError,reason:
+			tempfile, headers = network.retrieve(url)
+		except IOError, reason:
 			write_html_error('Error opening "%s"' % url,
-							 'The given URL could not be opened. Reason: %s' %\
-							 str(reason))
+				'The given URL could not be opened. Reason: %s' % str(reason))
 			sys.exit(1)
 		f = open(tempfile,'rb')
 		c.title = url
 		c.footer = __cgifooter__
-		convert(f,sys.stdout)
+		convert(f, sys.stdout)
 		f.close()
 		network.close()
 		sys.exit()
@@ -524,26 +522,26 @@ URL: http://starship.python.net/~just/
 			try:
 				if len(files) > 1:
 					print filebreak
-					print 'File:',f
+					print 'File:', f
 					print filebreak
-				convert(f,sys.stdout)
+				convert(f, sys.stdout)
 			except IOError:
 				pass
 	else:
-		verbose = ('-v' in options)
 		if verbose:
 			print 'Py2HTML: working on',
 		for f in files:
 			try:
-				if verbose: print f,
-				convert(f,f+'.html')
+				if verbose:
+					print f,
+				convert(f, f+'.html')
 			except IOError:
-				if verbose: print '(IOError!)',
+				if verbose:
+					print '(IOError!)',
 		if verbose:
 			print
 			print 'Done.'
 
-if __name__=='__main__':
+
+if __name__ == '__main__':
 	main(sys.argv)
-
-

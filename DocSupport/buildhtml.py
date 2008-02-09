@@ -23,13 +23,12 @@ __docformat__ = 'reStructuredText'
 try:
 	import locale
 	locale.setlocale(locale.LC_ALL, '')
-except:
+except Exception:
 	pass
 
 import sys
 import os
 import os.path
-import copy
 import docutils
 from docutils import ApplicationError
 from docutils import core, frontend
@@ -119,7 +118,6 @@ class Builder:
 		"""Publisher-specific settings.  Key '' is for the front-end script
 		itself.  ``self.publishers[''].components`` must contain a superset of
 		all components used by individual publishers."""
-
 		self.setup_publishers()
 
 	def setup_publishers(self):
@@ -132,18 +130,18 @@ class Builder:
 		config file settings and command-line options by
 		`self.get_settings()`.
 		"""
-		for name, publisher in self.publishers.items():
+		for publisher in self.publishers.values():
 			option_parser = OptionParser(
 				components=publisher.components, read_config_files=1,
 				usage=usage, description=description)
 			publisher.option_parser = option_parser
 			publisher.setting_defaults = option_parser.get_default_values()
 			frontend.make_paths_absolute(publisher.setting_defaults.__dict__,
-										 option_parser.relative_path_settings)
+				option_parser.relative_path_settings)
 			publisher.config_settings = (
 				option_parser.get_standard_config_settings())
 		self.settings_spec = self.publishers[''].option_parser.parse_args(
-			values=frontend.Values())   # no defaults; just the cmdline opts
+			values=frontend.Values()) # no defaults; just the cmdline opts
 		self.initial_settings = self.get_settings('')
 
 	def get_settings(self, publisher_name, directory=None):

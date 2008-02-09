@@ -17,7 +17,7 @@ tasks to be run.
 
 from threading import Thread, Event
 from TaskHandler import TaskHandler
-from time import time, sleep
+from time import time
 from exceptions import IOError
 
 try: # for Python < 2.3
@@ -63,7 +63,7 @@ class Scheduler(Thread):
 		"""
 		try:
 			self._notifyEvent.wait(seconds)
-		except IOError, e:
+		except IOError:
 			pass
 		self._notifyEvent.clear()
 
@@ -104,7 +104,7 @@ class Scheduler(Thread):
 			handle = self._running[name]
 			del self._running[name]
 			return handle
-		except:
+		except Exception:
 			return None
 
 	def scheduledTasks(self):
@@ -128,7 +128,7 @@ class Scheduler(Thread):
 			handle = self._scheduled[name]
 			del self._scheduled[name]
 			return handle
-		except:
+		except Exception:
 			return None
 
 	def onDemandTasks(self):
@@ -152,7 +152,7 @@ class Scheduler(Thread):
 			handle = self._onDemand[name]
 			del self._onDemand[name]
 			return handle
-		except:
+		except Exception:
 			return None
 
 	def nextTime(self):
@@ -444,7 +444,7 @@ class Scheduler(Thread):
 		self.notifyCompletion(handle)
 		if self._exceptionHandler is not None:
 			self._exceptionHandler()
-	
+
 	def notify(self):
 		self._notifyEvent.set()
 

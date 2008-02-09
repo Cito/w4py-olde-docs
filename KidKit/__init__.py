@@ -1,5 +1,6 @@
 # KidKit
 # Webware for Python
+# See Docs/index.html
 
 def InstallInWebKit(appServer):
 	app = appServer.application()

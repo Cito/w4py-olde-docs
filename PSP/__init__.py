@@ -1,5 +1,6 @@
 # PSP
 # Webware for Python
+# See Docs/index.html
 
 from PSPServletFactory import PSPServletFactory
 

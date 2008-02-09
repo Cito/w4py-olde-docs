@@ -1,10 +1,9 @@
 # UserKit
 # Webware for Python
-
+# See Docs/index.html
 
 def InstallInWebKit(appServer):
 	pass
-
 
 def dont_use_combineManagerClasses(*classesOrNamesThereof):
 	"""
@@ -70,7 +69,7 @@ def dont_use_combineManagerClasses(*classesOrNamesThereof):
 	theClass = None
 	prevClass = None
 	for curClass in classes:
-		#print '>> curClass = %r, %r' % (curClass, type(curClass))
+		# print '>> curClass = %r, %r' % (curClass, type(curClass))
 		if prevClass:
 			class NewClass: pass
 			NewClass.__name__ = prevClass.__name__
@@ -85,8 +84,7 @@ def dont_use_combineManagerClasses(*classesOrNamesThereof):
 	assert issubclass(theClass, UserManager)
 	theClass.__name__ = '_'.join([c.__name__ for c in classes])
 
-	if 0:
-		# For debugging
+	if 0: # for debugging
 		print
 		print '>> UserKit.combineUserManagers()'
 		c = theClass
@@ -104,6 +102,5 @@ def dont_use_combineManagerClasses(*classesOrNamesThereof):
 			num += 1
 		print
 		print
-
 
 	return theClass

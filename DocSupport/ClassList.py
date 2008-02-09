@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-"""
-ClassHierarchy.py
+
+"""ClassHierarchy.py
 
 A quick, hacky script to contruct a class hierarchy list from a set of Python files.
 
 """
 
 
-import os, re, sys, time
+import os, re, sys
 from glob import glob
 from types import StringType
 
@@ -19,7 +19,7 @@ def EmptyString(klass):
 class Klass:
 	"""Represents a Python class for our purposes."""
 
-	def __init__(self, name, filename=''):
+	def __init__(self, name='Webware', filename=''):
 		self._name = name
 		self._bases = []
 		self._derived = []
@@ -57,7 +57,7 @@ class Klass:
 		else:
 			star = multipleBasesMarker
 		file.write(''.join((prefix, indentString*indent,
-			self._name, star, func(self), postfix)))
+			self._name, star, func(self), postfix)) + '\n')
 		indent += 1
 		for klass in self._derived:
 			klass.printList(file, indent, indentString, prefix, func, postfix)
@@ -69,7 +69,7 @@ class Klass:
 class ClassList:
 	"""Builds a class list for a package of Python modules."""
 
-	def __init__(self, name):
+	def __init__(self, name='Webware'):
 		self._name = name
 		self._splitter = re.compile(r"[(,):]")
 		self._klasses = {}
@@ -213,13 +213,14 @@ td { background-color: #EEF; }
 		"""In support of printForWeb()"""
 		name = self._name
 		filename = klass.filename()
-		module = os.path.splitext(filename)[0]
 		links = []
 		# souce file
 		if os.path.exists(filename):
 			links.append('<a href="../../%s">%s</a>' % (filename, filename))
 		else:
 			links.append('&nbsp;')
+		filename = os.path.basename(filename)
+		module = os.path.splitext(filename)[0]
 		# highlighted source file
 		if os.path.exists('Docs/Source/Files/%s.html' % module):
 			links.append('<a href="Files/%s.html">source</a>' % module)

@@ -1,6 +1,6 @@
 
-from time import time, sleep
-from threading import Event, Thread
+from time import time
+from threading import Thread
 
 try: # for Python < 2.3
 	True, False

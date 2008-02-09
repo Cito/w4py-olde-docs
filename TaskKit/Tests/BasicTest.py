@@ -1,10 +1,10 @@
 import os, sys
+from time import time, localtime, sleep
+
 sys.path.insert(1, os.path.abspath(os.path.join(os.pardir, os.pardir)))
-import TaskKit
 
 from TaskKit.Scheduler import Scheduler
 from TaskKit.Task import Task
-from time import time, sleep
 
 
 class SimpleTask(Task):
@@ -32,7 +32,6 @@ class LongTask(Task):
 				return
 
 def main():
-	from time import localtime
 	scheduler = Scheduler()
 	scheduler.start()
 	scheduler.addPeriodicAction(time(), 1, SimpleTask(), 'SimpleTask1')

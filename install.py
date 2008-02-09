@@ -97,12 +97,13 @@ class Installer:
 		very end of the installation, provided there are no errors.
 		"""
 		if os.path.exists('install.log'):
+			print
 			print 'Removing log from last installation...'
 			os.remove('install.log')
-			print
 
 	def printHello(self):
 		from time import time, localtime, asctime
+		print
 		print '%(name)s %(versionString)s' % self._props
 		print 'Installer'
 		print
@@ -111,7 +112,6 @@ class Installer:
 		self.printKeyValue('Op Sys', os.name)
 		self.printKeyValue('Platform', sys.platform)
 		self.printKeyValue('Cur Dir', os.getcwd())
-		print
 
 	def checkPyVersion(self, minver=(2, 0)):
 		"""Check for minimum required Python version."""
@@ -144,6 +144,7 @@ class Installer:
 		return 1
 
 	def detectComponents(self):
+		print
 		print 'Scanning for components...'
 		dirNames = filter(lambda dir: not dir.startswith('.')
 				and os.path.isdir(dir), os.listdir(os.curdir))
@@ -182,7 +183,6 @@ class Installer:
 		if oldPyVersion:
 			print "* some components require a newer Python version"
 		self._comps.sort(lambda a, b: cmp(a['name'], b['name']))
-		print
 
 	def setupWebKitPassword(self, prompt, defpass):
 		"""Setup a password for WebKit Application server."""
@@ -218,7 +218,6 @@ class Installer:
 		except IOError:
 			print 'Error reading Application.config file.'
 			print 'Password not replaced, make sure to edit it by hand.'
-			print
 			return
 		# This will search for the construct "'AdminPassword': '...'"
 		# and replace '...' with the content of the 'password' variable:
@@ -242,10 +241,8 @@ class Installer:
 		except IOError:
 			print 'Error writing Application.config (probably no permission).'
 			print 'Password not replaced, make sure to edit it by hand.'
-			print
 			return
 		print 'Password replaced successfully.'
-		print
 
 	def installDocs(self, keep):
 		self.processHtmlDocFiles()
@@ -256,6 +253,7 @@ class Installer:
 		self.createDocContexts()
 
 	def processHtmlDocFiles(self):
+		print
 		print 'Processing html doc files...'
 		for htmlFile in glob('Docs/*.html'):
 			self.processHtmlDocFile(htmlFile)
@@ -263,9 +261,9 @@ class Installer:
 			dir = comp['dirname']
 			for htmlFile in glob(dir + '/Docs/*.html'):
 				self.processHtmlDocFile(htmlFile)
-		print
 
 	def processPyTemplateFiles(self, keep):
+		print
 		print 'Processing phtml doc files...'
 		if keep:
 			print 'The templates will not be removed.'
@@ -278,10 +276,10 @@ class Installer:
 			dir = comp['dirname']
 			for inFile in glob(dir + '/Docs/*.phtml'):
 				self.processPyTemplateFile(inFile, comp, keep)
-		print
 
 	def createBrowsableSource(self):
 		"""Create HTML docs for class hierarchies, summaries, sources etc."""
+		print
 		print 'Creating html source, summaries and doc files...'
 		column = 0
 		for comp in self._comps:
@@ -301,6 +299,8 @@ class Installer:
 			self.makeDir(summariesDir)
 			docsDir = sourceDir + '/Docs'
 			self.makeDir(docsDir)
+			if dir == 'MiddleKit':
+				dir += '/Core'
 			for pyFilename in glob(dir + '/*.py'):
 				self.createHighlightedSource(pyFilename, filesDir)
 				self.createPySummary(pyFilename, summariesDir)
@@ -318,7 +318,6 @@ class Installer:
 					column = 0
 		if column:
 			print
-		print
 
 	def createHighlightedSource(self, filename, dir):
 		"""Create highlighted HTML source code using py2html."""
@@ -327,8 +326,8 @@ class Installer:
 		targetName = '%s/%s.html' % (dir, module)
 		self.printMsg('Creating %s...' % targetName)
 		stdout = sys.stdout
+		sys.stdout = StringIO()
 		try:
-			sys.stdout = StringIO()
 			py2html.main((None, '-stdout', '-files', filename))
 			result = sys.stdout.getvalue()
 		finally:
@@ -356,58 +355,61 @@ class Installer:
 		package, module = os.path.split(filename)
 		module = os.path.splitext(module)[0]
 		if package:
-			module = package + '.' + module
+			module = package.replace('/', '.') + '.' + module
 		targetName = '%s/%s.html' % (dir, module)
 		self.printMsg('Creating %s...' % targetName)
 		saveDir = os.getcwd()
+		os.chdir(dir)
 		try:
-			os.chdir(dir)
-			targetName = '../' + targetName
 			stdout = sys.stdout
 			sys.stdout = StringIO()
 			try:
-				pydoc.writedoc(module)
-			except Exception:
-				pass
-			msg = sys.stdout.getvalue()
-			sys.stdout = stdout
-			if msg:
-				self.printMsg(msg)
+				try:
+					pydoc.writedoc(module)
+				except Exception:
+					pass
+				msg = sys.stdout.getvalue()
+			finally:
+				sys.stdout = stdout
 		finally:
 			os.chdir(saveDir)
+		if msg:
+			self.printMsg(msg)
 
 	def createFileList(self, filesDir, docsDir):
 		"""Create a HTML list of the source files."""
 		from DocSupport.FileList import FileList
-		name = os.path.basename(filesDir)
+		name = filesDir.replace('/', '.')
 		self.printMsg('Creating file list of %s...' % name)
 		filelist = FileList(name)
+		filesDir, subDir = (filesDir + '/').split('/', 1)
 		saveDir = os.getcwd()
 		os.chdir(filesDir)
 		try:
-			filelist.readFiles('*.py')
-			targetName = '../' + docsDir + '/FileList.html'
+			filelist.readFiles(subDir + '*.py')
+			targetName = docsDir + '/FileList.html'
 			self.printMsg('Creating %s...' % targetName)
-			filelist.printForWeb(targetName)
+			filelist.printForWeb('../' + targetName)
 		finally:
 			os.chdir(saveDir)
 
 	def createClassList(self, filesDir, docsDir):
 		"""Create a HTML class hierarchy listing of the source files."""
 		from DocSupport.ClassList import ClassList
-		name = os.path.basename(filesDir)
+		name = filesDir.replace('/', '.')
 		self.printMsg('Creating class list of %s...' % name)
 		classlist = ClassList(name)
+		filesDir, subDir = (filesDir + '/').split('/', 1)
 		saveDir = os.getcwd()
 		os.chdir(filesDir)
 		try:
-			classlist.readFiles('*.py')
-			targetName = '../' + docsDir + '/ClassList.html'
+			classlist.readFiles(subDir + '*.py')
+			targetName = docsDir + '/ClassList.html'
 			self.printMsg('Creating %s...' % targetName)
-			classlist.printForWeb(0, targetName)
-			targetName = '../' + docsDir + '/ClassHierarchy.html'
+			classlist.printForWeb(0, '../' + targetName)
+			targetName = docsDir + '/ClassHierarchy.html'
 			self.printMsg('Creating %s...' % targetName)
-			classlist.printForWeb(1, targetName)
+			classlist.printForWeb(1, '../' + targetName)
 		finally:
 			os.chdir(saveDir)
 
@@ -448,6 +450,7 @@ class Installer:
 		indexfile = 'Docs/indexOfComponent.phtml'
 		if not os.path.exists(indexfile):
 			return
+		print
 		print "Creating index.html for all components..."
 		index = open(indexfile).read()
 		link = '<p><a href="%s">%s</a></p>'
@@ -493,10 +496,10 @@ class Installer:
 			open(filename, 'w').write(ht)
 		if not keep:
 			os.remove(indexfile)
-		print
 
 	def createDocContexts(self):
 		"""Create a WebKit context for every Docs directory."""
+		print
 		print 'Making all Docs directories browsable via WebKit...'
 		# Place an __init__.py file in every Docs directory
 		docsDirs = ['Docs']
@@ -513,7 +516,6 @@ class Installer:
 		# Copy favicon to the default context
 		open('WebKit/Examples/favicon.ico', 'wb').write(
 			open('Docs/favicon.ico', 'rb').read())
-		print
 
 	def backupConfigs(self):
 		"""Copy *.config to *.config.default, if they don't already exist.
@@ -522,9 +524,9 @@ class Installer:
 		needed (for troubleshooting for example).
 
 		"""
+		print
 		print 'Creating backups of original config files...'
 		self._backupConfigs(os.curdir)
-		print
 
 	def _backupConfigs(self, dir):
 		for filename in os.listdir(dir):
@@ -541,6 +543,7 @@ class Installer:
 	def copyStartScript(self):
 		"""Copy the most appropriate start script to WebKit/webkit."""
 		if os.name == 'posix':
+			print
 			print 'Copying start script...',
 			ex = os.path.exists
 			if ex('/etc/rc.status') and \
@@ -561,11 +564,11 @@ class Installer:
 			s = 'WebKit/StartScripts/' + s
 			t = 'WebKit/webkit'
 			open(t, 'wb').write(open(s, 'rb').read())
-			print
 
 	def compileModules(self, force=0):
 		"""Compile modules in all installed componentes."""
 		from compileall import compile_dir
+		print
 		print 'Byte compiling all modules...'
 		for comp in self._comps:
 			dir = comp['dirname']
@@ -574,12 +577,14 @@ class Installer:
 			except TypeError: # workaround for Python < 2.3
 				stdout = sys.stdout
 				sys.stdout = StringIO()
-				compile_dir(dir, force=force)
-				sys.stdout = stdout
-		print
+				try:
+					compile_dir(dir, force=force)
+				finally:
+					sys.stdout = stdout
 
 	def fixPermissions(self):
 		if os.name == 'posix':
+			print
 			print 'Setting permissions on CGI scripts...'
 			for comp in self._comps:
 				for filename in glob(comp['dirname'] + '/*.cgi'):
@@ -590,7 +595,6 @@ class Installer:
 			cmd = 'chmod a+rx WebKit/webkit'
 			self.printMsg(cmd)
 			os.system(cmd)
-			print
 
 	def printGoodbye(self):
 		print '''

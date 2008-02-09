@@ -7,7 +7,7 @@ A quick, hacky script to contruct a file list from a set of Python files.
 """
 
 
-import os, re, sys
+import os, sys
 from glob import glob
 from types import StringType
 
@@ -15,7 +15,7 @@ from types import StringType
 class FileList:
 	"""Builds a file list for a package of Python modules."""
 
-	def __init__(self, name):
+	def __init__(self, name='Webware'):
 		self._name = name
 		self._files = []
 		self._verbose = 0
@@ -37,6 +37,23 @@ class FileList:
 		if self._verbose:
 			print 'Reading %s...' % name
 		self._files.append(name)
+
+	def printList(self, file=sys.stdout):
+		if type(file) is StringType:
+			file = open(file, 'w')
+			close = 1
+		else:
+			close = 0
+		name = self._name
+		title = 'File list of %s' % name
+		file.write('%s\n%s\n\n' % (title, '='*len(title)))
+		files = self._files
+		files.sort(lambda a, b: cmp(a.lower(), b.lower()))
+		for filename in files:
+			file.write(filename + '\n')
+		file.write('\n')
+		if close:
+			file.close()
 
 	def printForWeb(self, file=sys.stdout):
 		if type(file) is StringType:
@@ -85,13 +102,14 @@ td { background-color: #EEF; }
 	def links(self, filename):
 		"""In support of printForWeb()"""
 		name = self._name
-		module = os.path.splitext(filename)[0]
 		links = []
 		# souce file
 		if os.path.exists(filename):
 			links.append('<a href="../../%s">%s</a>' % (filename, filename))
 		else:
 			links.append('&nbsp;')
+		filename = os.path.basename(filename)
+		module = os.path.splitext(filename)[0]
 		# highlighted source file
 		if os.path.exists('Docs/Source/Files/%s.html' % module):
 			links.append('<a href="Files/%s.html">source</a>' % module)
