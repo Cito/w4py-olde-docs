@@ -1,6 +1,3 @@
-import sys, traceback
-from Funcs import htmlEncode
-
 
 HTMLForExceptionOptions = {
 	'table': 'background-color:#F0F0F0;font-size:10pt',
