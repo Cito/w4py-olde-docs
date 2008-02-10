@@ -677,7 +677,7 @@ class TagConfig:
 		self.tags = dict
 
 	def encounteredTag(self, tag, lineNum):
-		raise SubclassResponsiblityError, self.__class__
+		raise AbstractError, self.__class__
 
 
 class TagCanOnlyHaveConfig(TagConfig):
