@@ -48,12 +48,15 @@ so feel free to jump in!</p>
 <div class="section">
 <h3><a id="major-items" name="major-items">Major Items</a></h3>
 <ul class="simple">
-<li>Drop backward compatibility down to Python 2.0; require Python 2.3 or
-Python 2.4 instead. Make use of the new Python features like new-style
-classes, properties, sets, decorators etc. and get rid of old garbage
-and workarounds for old Python versions. Use isinstance() for type checking.</li>
+<li>Drop backward compatibility down to Python 2.0; require at least 2.4.
+Make use of the new Python features like new-style classes, properties,
+sets, decorators, generator expressions, isinstace(tuple) etc. and get
+rid of old garbage and workarounds for old Python versions. Think about
+a migration path towards Pyhon 3.0.</li>
 <li>Use distutils/setuptools instead of our own installer, use Python eggs
 instead of our own plug-in concept.</li>
+<li>The installer could try building and/or installing mod_webkit and wkcgi
+automatically.</li>
 <li>Separate more clearly and systematically which messages are printed to
 stdout and which to stderr.</li>
 <li>Make use of the logging module (so far it is only used with unit testing)

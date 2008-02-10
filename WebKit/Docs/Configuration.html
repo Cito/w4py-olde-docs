@@ -271,13 +271,6 @@ for the user, but debugging information for the developer as
 well.  This includes the traceback, HTTP headers, form fields,
 environment and process ids.  You will most likely want to turn
 this off when deploying the site for users.  Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>
-<dt><tt class="docutils literal"><span class="pre">IncludeFancyTraceback</span></tt>:</dt>
-<dd><p class="first last">If True, then display a fancy, detailed traceback at the end of
-the error page.  It will include the values of local variables in
-the traceback.  This makes use of a modified version of
-<tt class="docutils literal"><span class="pre">cgitb.py</span></tt> which is included with Webware.  The <a class="reference" href="http://web.lfw.org/python/">original
-version</a> was written by Ka-Ping Yee.  Default: <tt class="docutils literal"><span class="pre">False</span></tt> (off).</p>
-</dd>
 <dt><tt class="docutils literal"><span class="pre">EnterDebuggerOnException</span></tt>:</dt>
 <dd>If True, and if the AppServer is running from an interactive
 terminal, an uncaught exception will cause the AppServer to
@@ -285,6 +278,21 @@ enter the debugger, allowing the developer to call functions,
 investigate variables, etc.  See python debugger (pdb) docs for
 more information.  You will certainly want to turn this off when
 deploying the site.  Default: <tt class="docutils literal"><span class="pre">False</span></tt> (off).</dd>
+<dt><tt class="docutils literal"><span class="pre">IncludeEditLink</span></tt>:</dt>
+<dd>If True, an &quot;[edit]&quot; link will be put next to each line in tracebacks.
+That link will point to a file of type
+<tt class="docutils literal"><span class="pre">application/x-webkit-edit-file</span></tt>, which you should configure your
+browser to run with <tt class="docutils literal"><span class="pre">Webware/bin/editfile.py</span></tt>. If you configure
+<tt class="docutils literal"><span class="pre">editfile.py</span></tt> correctly, then it will automatically open the
+respective Python module with your favorite Python editor and put
+the cursor on the erroneous line.  Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">IncludeFancyTraceback</span></tt>:</dt>
+<dd><p class="first last">If True, then display a fancy, detailed traceback at the end of
+the error page.  It will include the values of local variables in
+the traceback.  This makes use of a modified version of <tt class="docutils literal"><span class="pre">cgitb.py</span></tt>
+which is included with Webware.  The <a class="reference" href="http://web.lfw.org/python/">original version</a> was
+written by Ka-Ping Yee.  Default: <tt class="docutils literal"><span class="pre">False</span></tt> (off).</p>
+</dd>
 <dt><tt class="docutils literal"><span class="pre">FancyTracebackContext</span></tt>:</dt>
 <dd>The number of lines of source code context to show if
 IncludeFancyTraceback is turned on.  Default: <tt class="docutils literal"><span class="pre">5</span></tt>.</dd>
@@ -321,6 +329,8 @@ Default: <tt class="docutils literal"><span class="pre">False</span></tt> (html 
 <dt><tt class="docutils literal"><span class="pre">ErrorEmailServer</span></tt>:</dt>
 <dd>The SMTP server to use for sending e-mail error messages, and, if
 required, the port, username and password, all separated by colons.
+For authentication via &quot;SMTP after POP&quot;, you can furthermore append the
+name of a POP3 server, the port to be used and an <tt class="docutils literal"><span class="pre">SSL</span></tt> flag.
 Default: <tt class="docutils literal"><span class="pre">'localhost'</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorEmailHeaders</span></tt>:</dt>
 <dd><p class="first">The e-mail headers used for e-mailing error messages.  Be sure to
@@ -493,6 +503,12 @@ even when there had been no activity for a long time.  Default: <tt class="docut
 and therefore, the maximum number of concurrent requests that can
 be served.  Unless you have a serious load on a high end machine,
 the default is generally sufficient.  Default: <tt class="docutils literal"><span class="pre">20</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">MaxRequestTime</span></tt>:</dt>
+<dd>This setting controls automatic cancelation of long-running requests.
+All worker threads executing requests longer than <tt class="docutils literal"><span class="pre">MaxRequestTime</span></tt>
+seconds will be automatically aborted with a <tt class="docutils literal"><span class="pre">RequestTooLongError</span></tt>
+exception. The monitoring of long-running requests can be disabled
+by setting this to <tt class="docutils literal"><span class="pre">0</span></tt> or <tt class="docutils literal"><span class="pre">None</span></tt>.  Default: <tt class="docutils literal"><span class="pre">300</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">CheckInterval</span></tt>:</dt>
 <dd>The number of virtual instructions after which Python will check
 for thread switches, signal handlers, etc.  This is passed directly

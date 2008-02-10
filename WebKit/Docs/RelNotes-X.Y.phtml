@@ -3,19 +3,13 @@
 <p><% name %> version <% versionString %> released on <% releaseDate %></p>
 
 <a name="Introduction"></a><h2>Introduction</h2>
-<ul>
-	<li>...</li>
-</ul>
-
-<a name="MajorChanges"></a><h2>Major Changes</h2>
-<ul>
-	<li>...</li>
-</ul>
+<p>This release contains a few improvements and bugfixes, and it allows better
+monitoring and handling of long-running threads in the ThreadedAppServer.</p>
 
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
-	<li>The ThreadedAppServer has got a new method abortRequest() allowing
-	the abortion of the worker thread processing a request specified by
+	<li>The ThreadedAppServer has got a new method <code>abortRequest()</code>
+    allowing the abortion of the worker thread processing a request specified by
 	its request id. This feature needs a recent version of <code>ctypes</code>
 	and Python (2.3 or higher). The <code>_canAbortRequest</code> attribute
 	tells you whether this feature is available.</li>
@@ -39,16 +33,6 @@
 	changed by overriding <code>HTTPContent._actionPrefix</code>, or setting
 	this to None if you don't want to use actions at all.</li>
 	<li>The
-</ul>
-
-<a name="Security"></a><h2>Security</h2>
-<ul>
-	<li>...</li>
-</ul>
-
-<a name="MinorChanges"></a><h2>Minor API Changes</h2>
-<ul>
-	<li>...</li>
 </ul>
 
 <a name="Bugfixes"></a><h2>Bugfixes</h2>

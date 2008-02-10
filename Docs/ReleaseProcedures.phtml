@@ -52,6 +52,9 @@ Test the current version before releasing it:
     adapters can be compiled, linked and used without problems. If there have
     been changes, provide binaries for Windows users and adjust the version
     number in mod_webkit.c to the Webware version.
+
+[ ] Run the above tests on all supported Python versions (currently 2.0-2.5)
+    and different platforms (e.g. various flavors of Linux, MacOS, Windows).
 </pre>
 
 
@@ -70,15 +73,15 @@ Test the current version before releasing it:
 
 [ ] Update the HTML pages that are created from reStructuredText
     (currently these exist only in the folder WebKit/Docs).
-    * Docutils 0.4 must be installed (since we don't want to depend on
-      this, the HTML pages are included in the Webware package instead
-      of creating them with the Webware installer).
+    * Docutils 0.4 must be installed. (Since we don't want Webware to depend
+      on Docutils, the HTML pages come shipped with the Webware package, and
+      are not created by the Webware installer.)
     * Run the following commands:
       cd WebKit/Docs
       python ../../DocSupport/buildhtml.py
     * check the produced HTML pages
-    The installer will modify these HTML pages later to display the
-    same header and footer as the other HTML pages.
+    The installer will later modify these HTML pages to display the same
+    header and footer as the other HTML pages.
 
 [ ] Make sure there are no empty directories or zero length files
     (such as __init__.py). Old unarchivers often ignore these, leading
