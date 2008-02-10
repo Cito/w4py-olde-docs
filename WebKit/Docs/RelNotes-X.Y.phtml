@@ -24,15 +24,14 @@ monitoring and handling of long-running threads in the ThreadedAppServer.</p>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
 <ul>
-	<li>If an exception occurs within a Task scheduled by the
-	Application TaskManager (obtained from application.taskManager()),
+	<li>If an exception occurs within a Task scheduled by the Application
+	TaskManager (obtained from <code>application.taskManager()</code>),
 	the exception will be handled by the Application's exception handler
 	(i.e. the exception will be logged and emailed if the appropriate
 	settings have been enabled within Application.config).</li>
 	<li>The <code>_action_</code> prefix for Webware actions can now be
 	changed by overriding <code>HTTPContent._actionPrefix</code>, or setting
 	this to None if you don't want to use actions at all.</li>
-	<li>The
 </ul>
 
 <a name="Bugfixes"></a><h2>Bugfixes</h2>
