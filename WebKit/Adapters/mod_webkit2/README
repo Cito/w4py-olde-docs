@@ -34,6 +34,9 @@ directive right. If you would rather be safe than sorry, run 'make', then
 copy the resulting mod_webkit.so to your Apache2 module directory. Then modify
 httpd.conf to load the module.
 
+To build a Universal Binary on Mac OS X, you need to uncomment two lines
+in the Makefile as indicated.
+
 To build and install on Microsoft Windows, you can use the make.bat batch file
 with the free Microsoft Visual C++ 2008 Express Edition. For your convenience,
 a pre-compiled mod_webkit.dll for 32bit Windows XP is already included in

@@ -16,10 +16,14 @@ APACHECTL=apachectl
 #APACHECTL=apache2ctl
 #APACHECTL=/usr/sbin/apache2ctl
 
-# CC=`$(APXS) -q CC`
-# CFLAGS=`$(APXS) -q CFLAGS`
-# INC=-I`$(APXS) -q INCLUDEDIR`
-# LD_SHLIB=`$(APXS) -q LDFLAGS_SHLIB`
+#CC=`$(APXS) -q CC`
+#INC=`$(APXS) -q INCLUDEDIR`
+#CFLAGS=`$(APXS) -q CFLAGS CFLAGS_SHLIB`
+#LDFLAGS=`$(APXS) -q LDFLAGS LDFLAGS_SHLIB`
+
+#   If you want to build a Universal Binary on Mac OS X:
+#CFLAGS=-arch x86_64 -arch ppc -arch i386
+#LDLAGS=$(CFLAGS)
 
 #   You can pass authorization information (passwords)
 #   from Apache to WebKit, even if Apache has not been
@@ -33,7 +37,7 @@ all: mod_webkit.la
 
 #   compile the DSO file
 mod_webkit.la: $(SRC)
-	$(APXS) -c -o mod_webkit.la $(DEF) $(SRC)
+	$(APXS) -c -Wc,"$(CFLAGS)" -o mod_webkit.la $(DEF) $(SRC) $(LDFLAGS)
 
 #   install the DSO file into the Apache installation
 #   and activate it in the Apache configuration
