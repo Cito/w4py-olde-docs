@@ -23,7 +23,7 @@ APACHECTL=apachectl
 
 #   If you want to build a Universal Binary on Mac OS X:
 #CFLAGS=-arch x86_64 -arch ppc -arch i386
-#LDLAGS=$(CFLAGS)
+#LDFLAGS=$(CFLAGS)
 
 #   You can pass authorization information (passwords)
 #   from Apache to WebKit, even if Apache has not been
