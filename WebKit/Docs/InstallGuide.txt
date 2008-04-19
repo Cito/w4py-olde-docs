@@ -177,7 +177,7 @@ __ http://www.xitami.com
 Other Servers
 ~~~~~~~~~~~~~
 
-Other servers should work using a `CGI adapter`_.
+Other servers should work using a `CGI adapter`_ or the `SCGI connector`_.
 
 
 Webware Version
@@ -374,6 +374,23 @@ These adapters are not really recommended:
 * mod_snake_
 * ISAPI_ (*alpha*, for IIS)
 * OneShot_ (unusual to use, sometimes buggy)
+
+
+.. _`SCGI Connector`:
+
+SCGI-based Adapters
+-------------------
+
+Instead of using the standard WebKit adapter, you can also use any
+SCGI__ adapter such as mod_scgi (not part of Webware for Python).
+You can activate the SCGI connector, i.e. an WebKit app server listener
+for SCGI connections, with the ``AppServer.config`` setting ``EnableSCGI``.
+The port can be specified with the setting ``SCGIPort`` and will be ``8084``
+by default (SCGI often uses port 4000 or 9999, you may want to change that).
+Support for SCGI has been built into Webware only recently and may not be
+so sophisticated as the standard WebKit adapter.
+
+__ http://www.mems-exchange.org/software/scgi/
 
 
 .. _`CGI Adapter`:
@@ -1155,4 +1172,4 @@ would be:
   http://localhost/WebKit.cgi/
 
 That requires that web server and app server are set up to talk to
-each other. And that's what the next section is all about...
+each other. And that's what the Adapters_ section is all about...

@@ -12,69 +12,70 @@
 <div class="contents topic">
 <p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
 <ul class="simple">
-<li><a class="reference" href="#introduction" id="id16" name="id16">Introduction</a></li>
-<li><a class="reference" href="#quick-start" id="id17" name="id17">Quick Start</a></li>
-<li><a class="reference" href="#prerequisites" id="id18" name="id18">Prerequisites</a><ul>
-<li><a class="reference" href="#python" id="id19" name="id19">Python</a></li>
-<li><a class="reference" href="#web-server" id="id20" name="id20">Web Server</a><ul>
-<li><a class="reference" href="#apache" id="id21" name="id21">Apache</a></li>
-<li><a class="reference" href="#iis" id="id22" name="id22">IIS</a></li>
-<li><a class="reference" href="#aolserver" id="id23" name="id23">AOLserver</a></li>
-<li><a class="reference" href="#xitami" id="id24" name="id24">Xitami</a></li>
-<li><a class="reference" href="#other-servers" id="id25" name="id25">Other Servers</a></li>
+<li><a class="reference" href="#introduction" id="id17" name="id17">Introduction</a></li>
+<li><a class="reference" href="#quick-start" id="id18" name="id18">Quick Start</a></li>
+<li><a class="reference" href="#prerequisites" id="id19" name="id19">Prerequisites</a><ul>
+<li><a class="reference" href="#python" id="id20" name="id20">Python</a></li>
+<li><a class="reference" href="#web-server" id="id21" name="id21">Web Server</a><ul>
+<li><a class="reference" href="#apache" id="id22" name="id22">Apache</a></li>
+<li><a class="reference" href="#iis" id="id23" name="id23">IIS</a></li>
+<li><a class="reference" href="#aolserver" id="id24" name="id24">AOLserver</a></li>
+<li><a class="reference" href="#xitami" id="id25" name="id25">Xitami</a></li>
+<li><a class="reference" href="#other-servers" id="id26" name="id26">Other Servers</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#webware-version" id="id26" name="id26">Webware Version</a></li>
-<li><a class="reference" href="#operating-systems" id="id27" name="id27">Operating Systems</a></li>
+<li><a class="reference" href="#webware-version" id="id27" name="id27">Webware Version</a></li>
+<li><a class="reference" href="#operating-systems" id="id28" name="id28">Operating Systems</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#installing-webware" id="id28" name="id28">Installing Webware</a></li>
-<li><a class="reference" href="#updating-webware" id="id29" name="id29">Updating Webware</a></li>
-<li><a class="reference" href="#architecture" id="id30" name="id30">Architecture</a><ul>
-<li><a class="reference" href="#id6" id="id31" name="id31">Permissions</a></li>
-<li><a class="reference" href="#adapters" id="id32" name="id32">Adapters</a></li>
-<li><a class="reference" href="#cgi-based-adapters" id="id33" name="id33">CGI-based Adapters</a><ul>
-<li><a class="reference" href="#id7" id="id34" name="id34">wkcgi</a></li>
-<li><a class="reference" href="#python-cgi-adapter" id="id35" name="id35">Python CGI Adapter</a></li>
-<li><a class="reference" href="#mod-webkit" id="id36" name="id36">mod_webkit</a><ul>
-<li><a class="reference" href="#posix-installation" id="id37" name="id37">Posix Installation</a></li>
-<li><a class="reference" href="#windows-installation" id="id38" name="id38">Windows Installation</a></li>
-<li><a class="reference" href="#apache-configuration" id="id39" name="id39">Apache Configuration</a></li>
+<li><a class="reference" href="#installing-webware" id="id29" name="id29">Installing Webware</a></li>
+<li><a class="reference" href="#updating-webware" id="id30" name="id30">Updating Webware</a></li>
+<li><a class="reference" href="#architecture" id="id31" name="id31">Architecture</a><ul>
+<li><a class="reference" href="#id6" id="id32" name="id32">Permissions</a></li>
+<li><a class="reference" href="#adapters" id="id33" name="id33">Adapters</a></li>
+<li><a class="reference" href="#scgi-based-adapters" id="id34" name="id34">SCGI-based Adapters</a></li>
+<li><a class="reference" href="#cgi-based-adapters" id="id35" name="id35">CGI-based Adapters</a><ul>
+<li><a class="reference" href="#id8" id="id36" name="id36">wkcgi</a></li>
+<li><a class="reference" href="#python-cgi-adapter" id="id37" name="id37">Python CGI Adapter</a></li>
+<li><a class="reference" href="#mod-webkit" id="id38" name="id38">mod_webkit</a><ul>
+<li><a class="reference" href="#posix-installation" id="id39" name="id39">Posix Installation</a></li>
+<li><a class="reference" href="#windows-installation" id="id40" name="id40">Windows Installation</a></li>
+<li><a class="reference" href="#apache-configuration" id="id41" name="id41">Apache Configuration</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#id10" id="id40" name="id40">AOLServer</a></li>
-<li><a class="reference" href="#lrwp-adapter-for-xitami" id="id41" name="id41">LRWP Adapter (for Xitami)</a></li>
-<li><a class="reference" href="#fastcgi" id="id42" name="id42">FastCGI</a></li>
-<li><a class="reference" href="#mod-python" id="id43" name="id43">mod_python</a></li>
-<li><a class="reference" href="#mod-snake" id="id44" name="id44">mod_snake</a></li>
-<li><a class="reference" href="#oneshot" id="id45" name="id45">OneShot</a></li>
-<li><a class="reference" href="#isapi" id="id46" name="id46">ISAPI</a></li>
+<li><a class="reference" href="#id11" id="id42" name="id42">AOLServer</a></li>
+<li><a class="reference" href="#lrwp-adapter-for-xitami" id="id43" name="id43">LRWP Adapter (for Xitami)</a></li>
+<li><a class="reference" href="#fastcgi" id="id44" name="id44">FastCGI</a></li>
+<li><a class="reference" href="#mod-python" id="id45" name="id45">mod_python</a></li>
+<li><a class="reference" href="#mod-snake" id="id46" name="id46">mod_snake</a></li>
+<li><a class="reference" href="#oneshot" id="id47" name="id47">OneShot</a></li>
+<li><a class="reference" href="#isapi" id="id48" name="id48">ISAPI</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#renaming-adapters" id="id47" name="id47">Renaming Adapters</a></li>
-<li><a class="reference" href="#adapter-problems-not-cgi" id="id48" name="id48">Adapter Problems (not CGI)</a></li>
+<li><a class="reference" href="#renaming-adapters" id="id49" name="id49">Renaming Adapters</a></li>
+<li><a class="reference" href="#adapter-problems-not-cgi" id="id50" name="id50">Adapter Problems (not CGI)</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#configuration" id="id49" name="id49">Configuration</a><ul>
-<li><a class="reference" href="#sessions" id="id50" name="id50">Sessions</a></li>
-<li><a class="reference" href="#contexts" id="id51" name="id51">Contexts</a></li>
-<li><a class="reference" href="#creating-a-working-directory" id="id52" name="id52">Creating a Working Directory</a></li>
+<li><a class="reference" href="#configuration" id="id51" name="id51">Configuration</a><ul>
+<li><a class="reference" href="#sessions" id="id52" name="id52">Sessions</a></li>
+<li><a class="reference" href="#contexts" id="id53" name="id53">Contexts</a></li>
+<li><a class="reference" href="#creating-a-working-directory" id="id54" name="id54">Creating a Working Directory</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#appserver-notes" id="id53" name="id53">AppServer Notes</a><ul>
-<li><a class="reference" href="#stopping-the-app-server" id="id54" name="id54">Stopping the App Server</a></li>
-<li><a class="reference" href="#reloading-servlets" id="id55" name="id55">Reloading Servlets</a></li>
-<li><a class="reference" href="#launching-the-appserver-at-unix-boot-up" id="id56" name="id56">Launching the AppServer at Unix boot up</a><ul>
-<li><a class="reference" href="#start-script-configuration" id="id57" name="id57">Start script configuration</a></li>
-<li><a class="reference" href="#activating-the-start-script" id="id58" name="id58">Activating the start script</a></li>
+<li><a class="reference" href="#appserver-notes" id="id55" name="id55">AppServer Notes</a><ul>
+<li><a class="reference" href="#stopping-the-app-server" id="id56" name="id56">Stopping the App Server</a></li>
+<li><a class="reference" href="#reloading-servlets" id="id57" name="id57">Reloading Servlets</a></li>
+<li><a class="reference" href="#launching-the-appserver-at-unix-boot-up" id="id58" name="id58">Launching the AppServer at Unix boot up</a><ul>
+<li><a class="reference" href="#start-script-configuration" id="id59" name="id59">Start script configuration</a></li>
+<li><a class="reference" href="#activating-the-start-script" id="id60" name="id60">Activating the start script</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#running-threadedappserver-as-a-windows-nt-2k-xp-service" id="id59" name="id59">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></li>
-<li><a class="reference" href="#other-notes" id="id60" name="id60">Other Notes</a></li>
+<li><a class="reference" href="#running-threadedappserver-as-a-windows-nt-2k-xp-service" id="id61" name="id61">Running ThreadedAppServer as a Windows NT/2K/XP Service</a></li>
+<li><a class="reference" href="#other-notes" id="id62" name="id62">Other Notes</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#troubleshooting" id="id61" name="id61">Troubleshooting</a><ul>
-<li><a class="reference" href="#bad-marshal-data" id="id62" name="id62">Bad Marshal Data</a></li>
+<li><a class="reference" href="#troubleshooting" id="id63" name="id63">Troubleshooting</a><ul>
+<li><a class="reference" href="#bad-marshal-data" id="id64" name="id64">Bad Marshal Data</a></li>
 </ul>
 </li>
 </ul>
@@ -215,7 +216,7 @@ process for greater performance.</p>
 </div>
 <div class="section">
 <h3><a id="other-servers" name="other-servers">Other Servers</a></h3>
-<p>Other servers should work using a <a class="reference" href="#cgi-adapter">CGI adapter</a>.</p>
+<p>Other servers should work using a <a class="reference" href="#cgi-adapter">CGI adapter</a> or the <a class="reference" href="#scgi-connector">SCGI connector</a>.</p>
 </div>
 </div>
 <div class="section">
@@ -372,7 +373,7 @@ still very fast.</p>
 <ul class="simple">
 <li><a class="reference" href="#wkcgi">wkcgi</a>, C-based CGI script</li>
 <li><a class="reference" href="#mod-webkit">mod_webkit</a> (fastest!)</li>
-<li><a class="reference" href="#id9">AOLServer</a></li>
+<li><a class="reference" href="#id10">AOLServer</a></li>
 <li><a class="reference" href="#lrwp">LRWP</a> (Xitami)</li>
 </ul>
 <p>These adapters are not really recommended:</p>
@@ -384,6 +385,17 @@ still very fast.</p>
 <li><a class="reference" href="#isapi">ISAPI</a> (<em>alpha</em>, for IIS)</li>
 <li><a class="reference" href="#oneshot">OneShot</a> (unusual to use, sometimes buggy)</li>
 </ul>
+</div>
+<div class="section">
+<h2><a id="scgi-based-adapters" name="scgi-based-adapters"><span id="scgi-connector"></span>SCGI-based Adapters</a></h2>
+<p>Instead of using the standard WebKit adapter, you can also use any
+<a class="reference" href="http://www.mems-exchange.org/software/scgi/">SCGI</a> adapter such as mod_scgi (not part of Webware for Python).
+You can activate the SCGI connector, i.e. an WebKit app server listener
+for SCGI connections, with the <tt class="docutils literal"><span class="pre">AppServer.config</span></tt> setting <tt class="docutils literal"><span class="pre">EnableSCGI</span></tt>.
+The port can be specified with the setting <tt class="docutils literal"><span class="pre">SCGIPort</span></tt> and will be <tt class="docutils literal"><span class="pre">8084</span></tt>
+by default (SCGI often uses port 4000 or 9999, you may want to change that).
+Support for SCGI has been built into Webware only recently and may not be
+so sophisticated as the standard WebKit adapter.</p>
 </div>
 <div class="section">
 <h2><a id="cgi-based-adapters" name="cgi-based-adapters"><span id="cgi-adapter"></span>CGI-based Adapters</a></h2>
@@ -398,7 +410,7 @@ makes CGI slow.  Because the adapter is small, this should still be
 faster than a all-CGI application, because most of the work is done in
 the persistent AppServer.</p>
 <div class="section">
-<h3><a id="id7" name="id7"><span id="wkcgi"></span>wkcgi</a></h3>
+<h3><a id="id8" name="id8"><span id="wkcgi"></span>wkcgi</a></h3>
 <p>wkcgi is a CGI-based adapter written in C.  It's very small and is
 good at it's one and only job of connecting to the AppServer.  While a
 CGI-based adapter is the only option for some configurations, wkcgi is
@@ -543,7 +555,7 @@ the above code will set <tt class="docutils literal"><span class="pre">lang</spa
 </div>
 </div>
 <div class="section">
-<h3><a id="id10" name="id10"><span id="id9"></span>AOLServer</a></h3>
+<h3><a id="id11" name="id11"><span id="id10"></span>AOLServer</a></h3>
 <p>This adapter comes with the Python-enhanced AOLserver created by the
 <a class="reference" href="http://pywx.idyll.org">PyWX project</a> and is described there.</p>
 </div>
@@ -1030,7 +1042,7 @@ would be:</p>
 <blockquote>
 <a class="reference" href="http://localhost/WebKit.cgi/">http://localhost/WebKit.cgi/</a></blockquote>
 <p>That requires that web server and app server are set up to talk to
-each other. And that's what the next section is all about...</p>
+each other. And that's what the <a class="reference" href="#adapters">Adapters</a> section is all about...</p>
 </div>
 </div>
 </div>

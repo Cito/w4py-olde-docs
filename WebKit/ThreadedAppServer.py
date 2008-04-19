@@ -54,6 +54,8 @@ defaultConfig = {
 	'EnableAdapter': True, # enable WebKit adapter
 	'AdapterPort': 8086,
 	'EnableMonitor': False, # disable status monitoring
+	'SCGIPort': 8084,
+	'EnableSCGI': False, # disable SCGI adapter
 	'MonitorPort': 8085,
 	'EnableHTTP': True, # enable built-in HTTP server
 	'HTTPPort': 8080,
@@ -237,6 +239,8 @@ class ThreadedAppServer(AppServer):
 				self.addSocketHandler(AdapterHandler)
 			if self.setting('EnableMonitor'):
 				self.addSocketHandler(MonitorHandler)
+			if self.setting('EnableSCGI'):
+				self.addSocketHandler(SCGIHandler)
 			if self.setting('EnableHTTP'):
 				from HTTPServer import HTTPAppServerHandler
 				self.addSocketHandler(HTTPAppServerHandler)
@@ -871,23 +875,31 @@ class Handler:
 		try:
 			dictLength = loads(chunk)
 		except ValueError, msg:
-			# Common error: client is speaking HTTP.
 			if chunk[:3] == 'GET':
+				# Common error: client is speaking HTTP.
+				while msg and len(chunk) < 8192:
+					block = self._sock.recv(1)
+					if not block:
+						break
+					chunk += block
+					if chunk.endswith('\r\r') or chunk.endswith('\n\n') \
+							or chunk.endswith('\r\n\r\n'):
+						msg = None
+			if msg:
+				print "ERROR:", msg
+			else:
+				print "ERROR: HTTP GET from WebKit adapter port."
 				self._sock.sendall('''\
 HTTP/1.0 505 HTTP Version Not Supported\r
 Content-type: text/plain\r
 \r
-Error: Invalid AppServer protocol: %s.\r
-Sorry, I don't speak HTTP.  You must connect via an adapter.\r
-See the Troubleshooting section of the WebKit Install Guide.\r
-''' % msg)
-				self._sock.close()
-				return None
-			print "ERROR:", msg
-			print "ERROR: you can only connect to", self._serverAddress[1], \
-				"via an adapter,"
-			print "       like mod_webkit or wkcgi, not with a browser."
-			raise
+Error: Invalid AppServer protocol.\r
+Sorry, I don't speak HTTP. You must connect via an adapter.\r
+See the Troubleshooting section of the WebKit Install Guide.\r''')
+			self._sock.close()
+			print "       You can only connect to", self._serverAddress[1], \
+				"via an adapter like mod_webkit or wkcgi."
+			return None
 		if type(dictLength) != type(1):
 			self._sock.close()
 			raise ProtocolError, "Invalid AppServer protocol"
@@ -900,7 +912,7 @@ See the Troubleshooting section of the WebKit Install Guide.\r
 				raise NotEnoughDataError, 'received only %d of %d bytes' \
 					' when receiving dict' % (len(chunk), dictLength)
 			chunk += block
-			missing = dictLength - len(chunk)
+			missing -= len(chunk)
 		return loads(chunk)
 
 	def handleRequest(self):
@@ -1094,6 +1106,87 @@ class AdapterHandler(Handler):
 	def makeInput(self):
 		"""Create a file-like object from the socket."""
 		return self._sock.makefile("rb", self._server._requestBufferSize)
+
+
+class SCGIHandler(AdapterHandler):
+	"""SCGI handler.
+
+	Modified Adapter handler speaking the SCGI protocol.
+
+	"""
+	protocolName = 'scgi'
+	settingPrefix = 'SCGI'
+
+	def receiveDict(self):
+		"""Receive a dictionary from the socket.
+
+		Utility function to receive the SCGI headers from the socket.
+		Returns None if the request was empty.
+
+		"""
+		chunk = ''
+		while 1:
+			c = self._sock.recv(1)
+			if not c and not chunk:
+				self._sock.close()
+				return None
+			if c == ':':
+				break
+			else:
+				chunk += c
+			if len(chunk) > 12:
+				break
+		try:
+			if len(chunk) > 12 or not chunk.isdigit():
+				raise ValueError, 'Malformed SCGI netstring'
+			dictLength = long(chunk)
+		except ValueError, msg:
+			if chunk[:3] == 'GET':
+				# Common error: client is speaking HTTP.
+				while msg and len(chunk) < 8192:
+					block = self._sock.recv(1)
+					if not block:
+						break
+					chunk += block
+					if chunk.endswith('\r\r') or chunk.endswith('\n\n') \
+							or chunk.endswith('\r\n\r\n'):
+						msg = None
+			if msg:
+				print "ERROR:", msg
+			else:
+				print "ERROR: HTTP GET from SCGI adapter port."
+				self._sock.sendall('''\
+HTTP/1.0 505 HTTP Version Not Supported\r
+Content-type: text/plain\r
+\r
+Error: Invalid AppServer protocol.\r
+Sorry, I don't speak HTTP. You must connect via an SCGI adapter.\r
+See the Troubleshooting section of the WebKit Install Guide.\r''')
+			self._sock.close()
+			print "       You can only connect to", self._serverAddress[1], \
+				"via an adapter like mod_scgi or pyscgi."
+			return None
+		chunk = ''
+		missing = dictLength
+		while missing > 0:
+			block = self._sock.recv(missing)
+			if not block:
+				self._sock.close()
+				raise NotEnoughDataError, 'received only %d of %d bytes' \
+					' when receiving netstring' % (len(chunk), dictLength)
+			chunk += block
+			missing -= len(chunk)
+		if self._sock.recv(1) != ',':
+			self._sock.close()
+			raise ProtocolError, 'Missing SCGI netstring terminator'
+		items = chunk.split('\0')[:-1]
+		environ = {}
+		try:
+			for i in range(0, len(items), 2):
+				environ[items[i]] = items[i+1]
+		except IndexError:
+			raise ProtocolError, 'Malformed SCGI headers'
+		return { 'format': 'CGI', 'time': time.time(), 'environ': environ }
 
 
 # Determines whether the main look should run in another thread.

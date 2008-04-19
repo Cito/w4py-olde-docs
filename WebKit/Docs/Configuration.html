@@ -440,12 +440,12 @@ Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>
 <dd>The port the application server listens to for requests from the adapter.
 You cannot point a browser to this port.  You may wish to change this if
 you have another application running at this port, or if you are running
-more than one AppServer they must each be listening at a different port.
+more than one AppServer, they must each be listening at a different port.
 Default: <tt class="docutils literal"><span class="pre">8086</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">EnableMonitor</span></tt>:</dt>
 <dd>Whether the application server should listen for monitor service requests.
 Monitor is a minimal service that accepts a simple protocol and returns a
-value indicating the status of the server. If you enable this, a separate
+value indicating the status of the server.  If you enable this, a separate
 monitoring program such as <tt class="docutils literal"><span class="pre">Monitor.py</span></tt> can provide additional assurance
 that the application server continues running at all times.
 Default: <tt class="docutils literal"><span class="pre">False</span></tt>.</dd>
@@ -453,6 +453,16 @@ Default: <tt class="docutils literal"><span class="pre">False</span></tt>.</dd>
 <dd>The port for the monitor service.  You cannot point a browser to this port.
 You may wish to change this if you have another application running at this
 port, or if you are running more than one AppServer.  Default: <tt class="docutils literal"><span class="pre">8085</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">EnableSCGI</span></tt>:</dt>
+<dd>Whether the application server should provide an SCGI connector.
+This allows you to connect via SCGI instead of using the standard adapter.
+Default: <tt class="docutils literal"><span class="pre">False</span></tt>.</dd>
+<dt><tt class="docutils literal"><span class="pre">SCGIPort</span></tt>:</dt>
+<dd>The port the application server listens to for SCGI connections.
+You cannot point a browser to this port.  You may wish to change this if
+you have another application running at this port, or if you are running
+more than one AppServer, they must each be listening at a different port.
+Default: <tt class="docutils literal"><span class="pre">8084</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">EnableHTTP</span></tt>:</dt>
 <dd>Whether the built-in HTTP server shall be activated.  The server will listen
 on the port specified by the <tt class="docutils literal"><span class="pre">HTTPPort</span></tt> setting.  Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>

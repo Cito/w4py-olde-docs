@@ -419,12 +419,12 @@ AppServer.config
     The port the application server listens to for requests from the adapter.
     You cannot point a browser to this port.  You may wish to change this if
     you have another application running at this port, or if you are running
-    more than one AppServer they must each be listening at a different port.
+    more than one AppServer, they must each be listening at a different port.
     Default: ``8086``.
 ``EnableMonitor``:
     Whether the application server should listen for monitor service requests.
     Monitor is a minimal service that accepts a simple protocol and returns a
-    value indicating the status of the server. If you enable this, a separate
+    value indicating the status of the server.  If you enable this, a separate
     monitoring program such as ``Monitor.py`` can provide additional assurance
     that the application server continues running at all times.
     Default: ``False``.
@@ -432,6 +432,16 @@ AppServer.config
     The port for the monitor service.  You cannot point a browser to this port.
     You may wish to change this if you have another application running at this
     port, or if you are running more than one AppServer.  Default: ``8085``.
+``EnableSCGI``:
+    Whether the application server should provide an SCGI connector.
+    This allows you to connect via SCGI instead of using the standard adapter.
+    Default: ``False``.
+``SCGIPort``:
+    The port the application server listens to for SCGI connections.
+    You cannot point a browser to this port.  You may wish to change this if
+    you have another application running at this port, or if you are running
+    more than one AppServer, they must each be listening at a different port.
+    Default: ``8084``.
 ``EnableHTTP``:
     Whether the built-in HTTP server shall be activated.  The server will listen
     on the port specified by the ``HTTPPort`` setting.  Default: ``True``.
