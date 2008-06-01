@@ -1,7 +1,16 @@
-import traceback, MimeWriter, poplib, smtplib
+import traceback, poplib, smtplib
 from os import pathsep
 from types import DictType, ListType
 from random import randint
+
+try:
+	from email.message import Message
+except ImportError: # Python < 2.5
+	try:
+		from email.Message import Message
+	except ImportError: # Python < 2.2
+		Message = None
+		from MimeWriter import MimeWriter
 
 from Common import *
 from MiscUtils.Funcs import dateForEmail
@@ -500,8 +509,11 @@ class ExceptionHandler(Object):
 		or in the body of the mail.
 
 		"""
-		message = StringIO()
-		writer = MimeWriter.MimeWriter(message)
+		if Message:
+			message = Message()
+		else:
+			message = StringIO()
+			writer = MimeWriter(message)
 
 		# Construct the message headers
 		headers = self.setting('ErrorEmailHeaders').copy()
@@ -509,37 +521,63 @@ class ExceptionHandler(Object):
 		headers['Mime-Version'] = '1.0'
 		headers['Subject'] = headers.get('Subject', '[WebKit Error]') \
 			+ ' %s: %s' % sys.exc_info()[:2]
+		add_header = Message and message.add_header or writer.addheader
 		for h, v in headers.items():
 			if isinstance(v, ListType):
 				v = ','.join(v)
-			writer.addheader(h, v)
+			add_header(h, v)
 
 		# Construct the message body
 		if self.setting('EmailErrorReportAsAttachment'):
-			writer.startmultipartbody('mixed')
 			# start off with a text/plain part
-			part = writer.nextpart()
-			body = part.startbody('text/plain')
-			body.write('WebKit caught an exception while processing'
+			text = ('WebKit caught an exception while processing'
 				' a request for "%s" at %s (timestamp: %s).'
 				' The plain text traceback from Python is printed below and'
 				' the full HTML error report from WebKit is attached.\n\n'
 					% (self.servletPathname(),
-					asclocaltime(self._time), self._time))
-			traceback.print_exc(file=body)
+						asclocaltime(self._time), self._time))
+			if Message:
+				message.set_type('multipart/mixed')
+				part = Message()
+				part.set_type('text/plain')
+				body = StringIO()
+				body.write(text)
+				traceback.print_exc(file=body)
+				part.set_payload(body.getvalue())
+				body.close()
+				message.attach(part)
+				part = Message()
+				add_header = part.add_header
+			else:
+				writer.startmultipartbody('mixed')
+				part = writer.nextpart()
+				body = part.startbody('text/plain')
+				body.write(text)
+				traceback.print_exc(file=body)
+				part = writer.nextpart()
+				add_header = part.addheader
 			# now add htmlErrMsg
-			part = writer.nextpart()
-			part.addheader('Content-Transfer-Encoding', '7bit')
-			part.addheader('Content-Description',
+			add_header('Content-Transfer-Encoding', '7bit')
+			add_header('Content-Description',
 				'HTML version of WebKit error message')
-			body = part.startbody('text/html; name=WebKitErrorMsg.html')
-			body.write(htmlErrMsg)
-			# finish off
-			writer.lastpart()
+			if Message:
+				add_header('Content-Disposition',
+					'attachment', filename='WebKitErrorMsg.html')
+				part.set_type('text/html')
+				part.set_payload(htmlErrMsg)
+				message.attach(part)
+			else:
+				body = part.startbody('text/html; name=WebKitErrorMsg.html')
+				body.write(htmlErrMsg)
+				writer.lastpart()
 		else:
-			writer.addheader('Content-Type', 'text/html; charset=us-ascii')
-			body = writer.startbody('text/html')
-			body.write(htmlErrMsg)
+			if Message:
+				message.set_type('text/html')
+				message.set_payload(htmlErrMsg, 'us-ascii')
+			else:
+				writer.addheader('Content-Type', 'text/html; charset=us-ascii')
+				body = writer.startbody('text/html')
+				body.write(htmlErrMsg)
 
 		# Send the message
 		server = self.setting('ErrorEmailServer')
@@ -597,7 +635,12 @@ class ExceptionHandler(Object):
 			except AttributeError: # Python < 2.2
 				raise smtplib.SMTPException, \
 					"Python version doesn't support SMTP authentication"
-		server.sendmail(headers['From'], headers['To'], message.getvalue())
+		if Message:
+			body = message.as_string()
+		else:
+			body = message.getvalue()
+			message.close()
+		server.sendmail(headers['From'], headers['To'], body)
 		try:
 			server.quit()
 		except Exception:
