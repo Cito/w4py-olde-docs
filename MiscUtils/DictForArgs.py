@@ -18,6 +18,14 @@ def _SyntaxError(s):
 	raise DictForArgsError, 'Syntax error: %s' % repr(s)
 
 
+_nameRE   = re.compile(r'\w+')
+_equalsRE = re.compile(r'\=')
+_stringRE = re.compile(r'''"[^"]+"|'[^']+'|\S+''')
+_whiteRE  = re.compile(r'\s+')
+
+_REs = [_nameRE, _equalsRE, _stringRE, _whiteRE]
+
+
 def DictForArgs(s):
 	"""Build dictionary from arguments.
 
@@ -51,16 +59,6 @@ def DictForArgs(s):
 
 	# Tokenize
 
-	# @@ 2001-09-29 ce: push these outside for better performance
-	nameRE   = re.compile(r'\w+')
-	equalsRE = re.compile(r'\=')
-	stringRE = re.compile(r'''
-					"[^"]+"|
-					'[^']+'|
-					\S+''', re.VERBOSE)    #'
-	whiteRE  = re.compile(r'\s+')
-	REs = [nameRE, equalsRE, stringRE, whiteRE]
-
 	verbose = 0
 	matches = []
 	start   = 0
@@ -70,14 +68,14 @@ def DictForArgs(s):
 		print '>> DictForArgs(%s)' % repr(s)
 		print '>> sLen:', sLen
 	while start < sLen:
-		for regEx in REs:
+		for regEx in _REs:
 			if verbose:
 				print '>> try:', regEx
 			match = regEx.match(s, start)
 			if verbose:
 				print '>> match:', match
 			if match is not None:
-				if match.re is not whiteRE:
+				if match.re is not _whiteRE:
 					matches.append(match)
 				start = match.end()
 				if verbose:
@@ -89,13 +87,13 @@ def DictForArgs(s):
 	if verbose:
 		names = []
 		for match in matches:
-			if match.re is nameRE:
+			if match.re is _nameRE:
 				name = 'name'
-			elif match.re is equalsRE:
+			elif match.re is _equalsRE:
 				name = 'equals'
-			elif match.re is stringRE:
+			elif match.re is _stringRE:
 				name = 'string'
-			elif match.re is whiteRE:
+			elif match.re is _whiteRE:
 				name = 'white'
 			names.append(name)
 			#print '>> match =', name, match
@@ -116,17 +114,17 @@ def DictForArgs(s):
 			peekMatch = matches[i+1]
 		else:
 			peekMatch = None
-		if match.re is nameRE:
+		if match.re is _nameRE:
 			if peekMatch is not None:
-				if peekMatch.re is nameRE:
+				if peekMatch.re is _nameRE:
 					# We have a name without an explicit value
 					dict[match.group()] = '1'
 					i += 1
 					continue
-				if peekMatch.re is equalsRE:
+				if peekMatch.re is _equalsRE:
 					if i + 2 < matchesLen:
 						target = matches[i+2]
-						if target.re is nameRE or target.re is stringRE:
+						if target.re is _nameRE or target.re is _stringRE:
 							value = target.group()
 							if value[0] == "'" or value[0] == '"':
 								value = value[1:-1]
