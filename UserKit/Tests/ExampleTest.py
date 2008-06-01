@@ -68,7 +68,10 @@ class SimpleExampleTest(unittest.TestCase):
 	def testUsersAndRoles(self):
 		from UserKit.RoleUserManagerToFile import RoleUserManagerToFile
 		from UserKit.HierRole import HierRole
-		from sha import sha
+		try:
+			from hashlib import sha1 as sha
+		except ImportError: # Python < 2.5
+			from sha import new as sha
 
 		self._mgr = RoleUserManagerToFile()
 		self.setUpDataDir(self._mgr)
