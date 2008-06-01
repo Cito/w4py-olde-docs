@@ -4,7 +4,7 @@ PickleRPC provides a Server object for connection to Pickle-RPC servers
 for the purpose of making requests and receiving the responses.
 
 	>>> from MiscUtils.PickleRPC import Server
-	>>> server = Server('http://localhost/cgi-bin/WebKit.cgi/Examples/PickleRPCExample')
+	>>> server = Server('http://localhost:8080/Examples/PickleRPCExample')
 	>>> server.multiply(10,20)
 	200
 	>>> server.add(10,20)
@@ -96,25 +96,24 @@ from MiscUtils import StringIO
 
 
 class Error(Exception):
-	"""
-	The abstract exception/error class for all PickleRPC errors.
-	"""
+	"""The abstract exception/error class for all PickleRPC errors."""
 	pass
 
 
 class ResponseError(Error):
-	"""
-	These are unhandled exceptions raised when the server was computing
-	a response. These will indicate errors such as:
+	"""Unhandled exceptions raised when the server was computing a response.
+
+	These will indicate errors such as:
 		* exception in the actual target method on the server
 		* malformed responses
 		* non "200 OK" status code responses
+
 	"""
 	pass
 
 
-# Sometimes xmlrpclib is installed as a package, sometimes not.  So we'll
-# make sure it works either way.
+# Sometimes xmlrpclib is installed as a package, sometimes not.
+# So we'll make sure it works either way.
 try:
 	from xmlrpclib.xmlrpclib import ProtocolError as _PE
 except ImportError:
@@ -203,7 +202,7 @@ class Server:
 	scheme://host/target.
 
 	The standard implementation always supports the "http" scheme.
-	If SSL socket support is available (Py 2.0), it also supports "https".
+	If SSL socket support is available, it also supports "https".
 
 	If the target part and the slash preceding it are both omitted,
 	"/PickleRPC" is assumed.
@@ -225,10 +224,7 @@ class Server:
 			self._handler = "/PickleRPC"
 
 		if transport is None:
-			if type == "https":
-				transport = SafeTransport()
-			else:
-				transport = Transport()
+			transport = (type == "https" and SafeTransport or Transport)()
 		self._transport = transport
 
 		self._verbose = verbose
@@ -261,7 +257,7 @@ class Server:
 
 		return response
 
-	def __requestValue(self, methodName, args, keywords):
+	def _requestValue(self, methodName, args, keywords):
 		dict = self._request(methodName, args, keywords)
 		if dict.has_key('value'):
 			return dict['value']
@@ -278,15 +274,15 @@ class Server:
 	__str__ = __repr__
 
 	def __getattr__(self, name):
-		# magic method dispatcher
+		"""Magic method dispatcher.
+
+		Note: to call a remote object with an non-standard name,
+		use result getattr(server, "strange-python-name")(args)
+
+		"""
 		return _Method(self._requestValue, name)
 
-	# note: to call a remote object with an non-standard name,
-	# use result getattr(server, "strange-python-name")(args)
-
-
 ServerProxy = Server # be like xmlrpclib for those who might guess or expect it
-
 
 
 class _Method:
@@ -313,9 +309,9 @@ class Transport(SafeUnpickler):
 	# client identifier (may be overridden)
 	user_agent = "PickleRPC/%s (by http://www.webwareforpython.org)" % __version__
 
-	def request(self, host, handler, request_body, verbose=0, binary=0, compressed=0,
-				acceptCompressedResponse=0):
-		# issue Pickle-RPC request
+	def request(self, host, handler, request_body,
+			verbose=0, binary=0, compressed=0, acceptCompressedResponse=0):
+		"""Issue a Pickle-RPC request."""
 
 		h = self.make_connection(host)
 		if verbose:
@@ -324,46 +320,40 @@ class Transport(SafeUnpickler):
 		self.send_request(h, handler, request_body)
 		self.send_host(h, host)
 		self.send_user_agent(h)
-		self.send_content(h, request_body, binary, compressed, acceptCompressedResponse)
+		self.send_content(h, request_body,
+			binary, compressed, acceptCompressedResponse)
 
-		errcode, errmsg, headers = h.getreply()
+		response = h.getresponse()
+		h.headers, h.file = response.msg, response.fp
 
-		if errcode != 200:
-			raise ProtocolError(
-				host + handler,
-				errcode, errmsg,
-				headers
-				)
+		if response.status != 200:
+			raise ProtocolError(host + handler,
+				response.status, response.reason, h.headers)
 
 		self.verbose = verbose
 
 		if h.headers['content-type'] not in ['text/x-python-pickled-dict',
 				'application/x-python-binary-pickled-dict']:
 			headers = h.headers.headers
-			content = h.getfile().read()
+			content = h.file.read()
 			raise InvalidContentTypeError(headers, content)
 
 		try:
-			content_encoding = headers["content-encoding"]
+			content_encoding = h.headers["content-encoding"]
 			if content_encoding and content_encoding == "x-gzip":
-				return self.parse_response_gzip(h.getfile())
+				return self.parse_response_gzip(h.file)
 			elif content_encoding:
-				raise ProtocolError(host + handler,
-									500,
-									"Unknown encoding type: %s" %
-									content_encoding,
-									headers)
+				raise ProtocolError(host + handler, 500,
+					"Unknown encoding type: %s" % content_encoding, h.headers)
 			else:
-				return self.parse_response(h.getfile())
+				return self.parse_response(h.file)
 		except KeyError:
-			return self.parse_response(h.getfile())
+			return self.parse_response(h.file)
 
-	def make_connection(self, host):
-		# create a HTTP connection object from a host descriptor
-		# @@ This uses the old httplib interface of Python 1.5.2
-		# @@ We should switch to the newer httplib interface of Python 2.0
+	def make_connection(self, host, port=None):
+		"""Create an HTTP connection object from a host descriptor."""
 		import httplib
-		return httplib.HTTP(host)
+		return httplib.HTTPConnection(host, port)
 
 	def send_request(self, connection, handler, request_body):
 		connection.putrequest("POST", handler)
@@ -374,12 +364,11 @@ class Transport(SafeUnpickler):
 	def send_user_agent(self, connection):
 		connection.putheader("User-Agent", self.user_agent)
 
-	def send_content(self, connection, request_body, binary=0, compressed=0,
-			acceptCompressedResponse=0):
-		if binary:
-			connection.putheader("Content-Type", "application/x-python-binary-pickled-dict")
-		else:
-			connection.putheader("Content-Type", "text/x-python-pickled-dict")
+	def send_content(self, connection, request_body,
+			binary=0, compressed=0, acceptCompressedResponse=0):
+		connection.putheader("Content-Type",
+			binary and "application/x-python-binary-pickled-dict"
+					or "text/x-python-pickled-dict")
 		connection.putheader("Content-Length", str(len(request_body)))
 		if compressed:
 			connection.putheader("Content-Encoding", "x-gzip")
@@ -393,32 +382,18 @@ class Transport(SafeUnpickler):
 		return self.load(f)
 
 	def parse_response_gzip(self, f):
-		# read response from input file, decompress it, and parse it
-		# @@ gat: could this be made more memory-efficient?
+		"""Read response from input file, decompress it, and parse it."""
 		return self.loads(zlib.decompress(f.read()))
 
 
 class SafeTransport(Transport):
 	"""Handle an HTTPS transaction to a Pickle-RPC server."""
 
-	def make_connection(self, host):
-		# create a HTTPS connection object from a host descriptor
-		# host may be a string, or a (host, x509-dict) tuple
-		# @@ see remark in Transport.make_connection
+	def make_connection(self, host, port=None, key_file=None, cert_file=None):
+		"""Create an HTTPS connection object from a host descriptor."""
 		import httplib
-		if isinstance(host, types.TupleType):
-			host, x509 = host
-		else:
-			x509 = {}
 		try:
-			HTTPS = httplib.HTTPS
+			return httplib.HTTPSConnection(host, port, key_file, cert_file)
 		except AttributeError:
 			raise NotImplementedError, \
 				"your version of httplib doesn't support HTTPS"
-		else:
-			return HTTPS(host, **x509)
-
-	def send_host(self, connection, host):
-		if isinstance(host, types.TupleType):
-			host, x509 = host
-		connection.putheader("Host", host)

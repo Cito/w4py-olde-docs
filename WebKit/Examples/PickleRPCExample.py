@@ -7,7 +7,7 @@ class PickleRPCExample(PickleRPCServlet):
 	To try it out, use something like the following:
 
 	>>> from MiscUtils.PickleRPC import Server
-	>>> server = Server('http://localhost/cgi-bin/WebKit.cgi/Examples/PickleRPCExample')
+	>>> server = Server('http://localhost:8080/Examples/PickleRPCExample')
 	>>> server.multiply(10,20)
 	200
 	>>> server.add(10,20)
