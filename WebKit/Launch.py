@@ -248,14 +248,15 @@ def main(args=None):
 		webwareDir = os.pardir
 	if libraryDirs:
 		libraryDirs = map(os.path.expanduser, libraryDirs)
-	# Remove the package component in the name of this module,
-	# because otherwise the package path would be used for imports, too:
-	global __name__
+	# If this module is inside a package, make it a standalone module,
+	# because otherwise the package path will be used for imports, too:
+	global __name__, __package__
 	name = __name__.split('.')[-1]
 	if name != __name__:
 		sys.modules[name] = sys.modules[__name__]
 		del sys.modules[__name__]
 		__name__ = name
+		__package__ = None
 	# Check the validity of the Webware directory:
 	sysPath = sys.path # memorize the standard Python search path
 	sys.path = [webwareDir] # now include only the Webware directory

@@ -177,9 +177,10 @@ class AppServerService(win32serviceutil.ServiceFramework):
 				if not webwareDir:
 					webwareDir = os.pardir
 				# Remove the package component in the name of this module,
-				# because otherwise the package path would be used for imports:
-				global __name__
+				# because otherwise the package path will be used for imports:
+				global __name__, __package__
 				__name__ = __name__.split('.')[-1]
+				__package__ = None
 				# Check the validity of the Webware directory:
 				sysPath = sys.path # memorize the standard Python search path
 				sys.path = [webwareDir] # now include only the Webware directory
