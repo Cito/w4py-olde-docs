@@ -1,4 +1,7 @@
-import sys, unittest
+import sys
+import unittest
+
+import FixPath
 from MiscUtils.DictForArgs import *
 
 
@@ -95,3 +98,7 @@ x=5 'y'=6
 				source, answer = case.split('==', 1)
 				answer = eval(answer)
 				assert PyDictForArgs(source) == answer
+
+
+if __name__ == '__main__':
+	unittest.main()

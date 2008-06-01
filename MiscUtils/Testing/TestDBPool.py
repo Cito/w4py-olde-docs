@@ -11,8 +11,9 @@ FUTURE
 
 
 import sys
-sys.path.insert(1, '..')
-from DBPool import DBPool
+
+import FixPath
+from MiscUtils.DBPool import DBPool
 
 
 def Test(iterations=15):

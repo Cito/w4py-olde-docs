@@ -1,12 +1,19 @@
+import sys
 import types
 import unittest
 
-import sys
-try:
-	from MiscUtils.Error import Error
-except:
-	sys.path.insert(1, '..')
-	from Error import Error
+
+import FixPath
+from MiscUtils.Error import Error
+
+
+def check(err):
+	print 'str: ', err
+	print 'repr:', repr(err)
+	assert err.keys() in [['a', 'b'], ['b', 'a']]
+	assert type(err['a']) is types.IntType
+	assert type(err['b']) is types.StringType
+	print
 
 def test():
 	err = Error(None, None)
@@ -28,14 +35,6 @@ def test():
 
 	err = Error(None, '', {'a': 5}, b='.')
 	check(err)
-
-def check(err):
-	print 'str: ', err
-	print 'repr:', repr(err)
-	assert err.keys() in [['a', 'b'], ['b', 'a']]
-	assert type(err['a']) is types.IntType
-	assert type(err['b']) is types.StringType
-	print
 
 
 class TestError(unittest.TestCase):
@@ -73,3 +72,4 @@ class TestError(unittest.TestCase):
 
 if __name__ == '__main__':
 	test()
+	unittest.main()

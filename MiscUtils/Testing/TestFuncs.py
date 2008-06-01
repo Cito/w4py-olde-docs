@@ -1,12 +1,7 @@
 import unittest
-import sys
-import string
 
-try:
-	from MiscUtils.Funcs import *
-except:
-	sys.path.insert(1, '..')
-	from Funcs import *
+import FixPath
+from MiscUtils.Funcs import *
 
 
 class Foo: # used in testSafeDescription() below
@@ -34,7 +29,7 @@ class TestFuncs(unittest.TestCase):
 			-1111 '-1,111'
 			-11111 '-11,111'
 		'''
-		tests = string.split(testSpec)
+		tests = testSpec.split()
 		count = len(tests)
 		i = 0
 		while i < count:
@@ -80,7 +75,7 @@ class TestFuncs(unittest.TestCase):
 		s = s.replace("<type 'string'>", "<type 'str'>")
 		assert s == "what='x' class=<type 'str'>", s
 		f = Foo()
-		assert sd(f).find('TestFuncs.Foo') != -1, sd(f)
+		assert sd(f).find('%s.Foo' % __name__) != -1, sd(f)
 
 		# new object type:
 		try:
@@ -90,7 +85,7 @@ class TestFuncs(unittest.TestCase):
 		else:
 			class Bar(object): pass
 			b = Bar()
-			assert sd(b).find('TestFuncs.Bar') != -1, sd(b)
+			assert sd(b).find('%s.Bar' % __name__) != -1, sd(b)
 
 		# okay now test that safeDescription eats exceptions from repr():
 		class Baz:
@@ -183,3 +178,7 @@ class TestFuncs(unittest.TestCase):
 			for line in s.split('\n'):
 				assert len(line) <= margin, \
 					'len=%i, margin=%i, line=%r' % (len(line), margin, line)
+
+
+if __name__ == '__main__':
+	unittest.main()

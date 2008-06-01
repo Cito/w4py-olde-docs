@@ -1,8 +1,7 @@
 """DateInterval.py
 
-Convert interval strings (in the form of 1w2d, etc) to
-seconds, and back again.  Is not exactly about months or
-years (leap years in particular).
+Convert interval strings (in the form of 1w2d, etc) to seconds, and back again.
+Is not exactly about months or years (leap years in particular).
 
 Accepts (y)ear, (b)month, (w)eek, (d)ay, (h)our, (m)inute, (s)econd.
 
@@ -11,6 +10,7 @@ Exports only timeEncode and timeDecode functions.
 """
 
 import re
+
 
 second = 1
 minute = second*60
@@ -29,20 +29,20 @@ timeValues = {
 	's': second,
 	}
 timeOrdered = timeValues.items()
-timeOrdered.sort(lambda a, b: -cmp(a[1], b[1]))
+timeOrdered.sort(lambda a, b: cmp(b[1], a[1]))
 
 def timeEncode(seconds):
 	"""Encode a number of seconds (representing a time interval).
 
-	Encode the number into a form like 1h2d3s.
+	Encode the number into a form like 2d1h3s.
 
 	"""
-	s = ''
+	s = []
 	for char, amount in timeOrdered:
 		if seconds >= amount:
 			i, seconds = divmod(seconds, amount)
-			s += '%i%s' % (i, char)
-	return s
+			s.append('%i%s' % (i, char))
+	return ''.join(s)
 
 _timeRE = re.compile(r'[0-9]+[a-zA-Z]')
 
@@ -53,24 +53,12 @@ def timeDecode(s):
 
 	"""
 	time = 0
-	for match in allMatches(s, _timeRE):
-		char = match.group(0)[-1].lower()
-		if not timeValues.has_key(char):
-			# @@: should signal error
-			continue
-		time += int(match.group(0)[:-1]) * timeValues[char]
+	for match in _timeRE.findall(s):
+		char = match[-1].lower()
+		try:
+			time += int(match[:-1]) * timeValues[char]
+		except KeyError:
+			raise ValueError, 'Invalid unit of time: %c' % char
 	return time
 
-def allMatches(source, regex):
-	"""Return a list of matches for regex in source."""
-	# @@-sgd 2002-12-23 - this function does not belong in this module,
-	# find a better place.
-	pos = 0
-	rv = []
-	match = regex.search(source, pos)
-	while match:
-		rv.append(match)
-		match = regex.search(source, match.end())
-	return rv
-
-__all__ = [timeEncode, timeDecode]
+__all__ = ['timeEncode', 'timeDecode']

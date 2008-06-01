@@ -1,18 +1,11 @@
-"""
-def readPickleCache(filename, pickleVersion=1, source=None, verbose=None):
-	PickleCacheReader().read(filename, pickleVersion, source, verbose)
-
-def writePickleCache(data, filename, pickleVersion=1, source=None, verbose=None):
-	PickleCacheWriter().write(data, filename, pickleVersion, source, verbose)
-"""
-
-import unittest
 import os
 import time
+import unittest
+
+import FixPath
 from MiscUtils.PickleCache import *
 
 # the directory that this file is in:
-# from FixPath import progDir
 progPath = os.path.join(os.getcwd(), __file__)
 progDir = os.path.dirname(progPath)
 assert os.path.basename(progDir) == 'Testing' and \
@@ -91,4 +84,4 @@ class TestPickleCache(unittest.TestCase):
 
 
 if __name__ == '__main__':
-	TestPickleCache().test()
+	unittest.main()

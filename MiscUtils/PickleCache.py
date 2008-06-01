@@ -64,15 +64,6 @@ havePython22OrGreater = sys.version_info[0] > 2 or (
 	sys.version_info[0] == 2 and sys.version_info[1] >= 2)
 
 
-s = """
-def readPickleCache(filename, pickleVersion=1, source=None, verbose=None):
-	return _reader.read(filename, pickleVersion, source, verbose)
-
-def writePickleCache(data, filename, pickleVersion=1, source=None, verbose=None):
-	return _writer.write(data, filename, pickleVersion, source, verbose)
-"""
-
-
 class PickleCache:
 	"""Simple abstract base class for PickleCacheReader and	PickleCacheWriter."""
 

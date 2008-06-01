@@ -1,14 +1,16 @@
 #!/usr/bin/env python
-import FixPath
-from glob import glob
-from DataTable import DataTable
-from profile import Profile
+
 import sys, time
+from glob import glob
+from profile import Profile
+
+import FixPath
+from MiscUtils.DataTable import DataTable
 
 
 class BenchDataTable:
 
-	def __init__(self, profile=1, runTestSuite=1):
+	def __init__(self, profile=0, runTestSuite=1):
 		self._shouldProfile = profile
 		self._shouldRunTestSuite = runTestSuite
 		self._iters = 200
@@ -32,34 +34,29 @@ class BenchDataTable:
 		print '%.1f secs' % duration
 
 	def _main(self):
+		print
 		for name in glob('Sample*.csv'):
+			print "Benchmark using", name, "..."
 			self.benchFileNamed(name)
 
 	def benchFileNamed(self, name):
 		contents = open(name).read()
-		for x in xrange(self._iters):
+		for n in xrange(self._iters):
 			# we duplicate lines to reduce the overhead of the loop
 			dt = DataTable()
 			dt.readString(contents)
-
 			dt = DataTable()
 			dt.readString(contents)
-
 			dt = DataTable()
 			dt.readString(contents)
-
 			dt = DataTable()
 			dt.readString(contents)
-
 			dt = DataTable()
 			dt.readString(contents)
-
 			dt = DataTable()
 			dt.readString(contents)
-
 			dt = DataTable()
 			dt.readString(contents)
-
 			dt = DataTable()
 			dt.readString(contents)
 

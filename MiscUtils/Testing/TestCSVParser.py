@@ -1,15 +1,16 @@
-import FixPath
-
-
 import unittest
+
+import FixPath
 from MiscUtils.CSVParser import CSVParser, ParseError
 
 
 class CSVParserTests(unittest.TestCase):
-	"""
+	"""CSV parser tests.
+
 	TO DO
 
-	* Test the different options for parser. See CVSParser.__init__
+	* Test the different options for parser, see CVSParser.__init__().
+
 	"""
 
 	def setUp(self):
@@ -101,10 +102,12 @@ class CSVParserTests(unittest.TestCase):
 				assert result == output, '\ninput=%r\nresult=%r\noutput=%r' \
 					% (input, result, output)
 
+
 def main():
 	suite = unittest.makeSuite(CSVParserTests, 'test')
 	runner = unittest.TextTestRunner()
 	runner.run(suite)
+
 
 if __name__ == '__main__':
 	main()

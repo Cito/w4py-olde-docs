@@ -25,6 +25,7 @@ alltestnames = [
 	'MiscUtils.Testing.TestFuncs.TestFuncs',
 	'MiscUtils.Testing.TestPickleCache.TestPickleCache',
 	'MiscUtils.Testing.TestDataTable.TestDataTable',
+	'MiscUtils.Testing.TestDateInterval.TestDateInterval',
 	'MiscUtils.Testing.TestDictForArgs',
 
 	'WebKit.Tests.Basic.Test',

@@ -1,8 +1,7 @@
-import unittest
 import os
-from glob import glob
+import unittest
 
-#import FixPath
+import FixPath
 from MiscUtils import StringIO
 from MiscUtils.DataTable import *
 
@@ -13,12 +12,6 @@ from MiscUtils.DataTable import *
 
 
 class TestDataTable(unittest.TestCase):
-
-	def xsetUp(self):
-		# clear any cache files from pickle test
-		for name in glob('*.cache'):
-			print 'Removing', name
-			os.remove(name)
 
 	def _testSource(self, name, src, headings, data):
 		# print name
@@ -188,3 +181,13 @@ Class,Attribute,Type,Extras
 			xlsfile = os.path.join(os.path.dirname(__file__), 'Sample3.xls')
 			t = DataTable(xlsfile)
 			assert t[0][0] == 1.0, t[0]
+
+
+def main():
+	suite = unittest.makeSuite(TestDataTable, 'test')
+	runner = unittest.TextTestRunner()
+	runner.run(suite)
+
+
+if __name__ == '__main__':
+	main()

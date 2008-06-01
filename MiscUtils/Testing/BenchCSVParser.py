@@ -1,9 +1,11 @@
 #!/usr/bin/env python
-import FixPath
-from glob import glob
-from CSVParser import CSVParser
-from profile import Profile
+
 import sys, time
+from glob import glob
+from profile import Profile
+
+import FixPath
+from MiscUtils.CSVParser import CSVParser
 
 
 class BenchCSVParser:
@@ -33,13 +35,15 @@ class BenchCSVParser:
 		print '%.1f secs' % duration
 
 	def _main(self):
+		print
 		for name in glob('Sample*.csv'):
+			print "Benchmark using", name, "..."
 			self.benchFileNamed(name)
 
 	def benchFileNamed(self, name):
 		lines = open(name).readlines()
 		for line in lines:
-			for x in xrange(self._iters):
+			for n in xrange(self._iters):
 				# we duplicate lines to reduce the overhead of the loop
 				self.parse(line)
 				self.parse(line)

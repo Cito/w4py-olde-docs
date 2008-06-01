@@ -1,15 +1,12 @@
-import os, sys
-newPath = os.path.abspath(os.path.join(os.pardir, os.pardir))
-if newPath not in sys.path:
-	sys.path.insert(1, newPath)
+import sys
+import unittest
+import types
+from UserDict import UserDict
 
+import FixPath
 from MiscUtils.NamedValueAccess import \
 	NamedValueAccessError, valueForKey, valueForName, NamedValueAccess
-
 from MiscUtils import AbstractError, NoDefault
-import unittest
-from UserDict import UserDict
-import types
 
 
 class T:
