@@ -8,8 +8,11 @@ monitoring and handling of long-running threads in the ThreadedAppServer.</p>
 
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
+	<li>Instead of using the standard WebKit adapter mod_webkit, you can also
+	use any SCGI adapter such as mod_scgi (not part of Webware for Python).
+	For details, see the installation and configuration guides.</li>
 	<li>The ThreadedAppServer has got a new method <code>abortRequest()</code>
-    allowing the abortion of the worker thread processing a request specified by
+	allowing the abortion of the worker thread processing a request specified by
 	its request id. This feature needs a recent version of <code>ctypes</code>
 	and Python (2.3 or higher). The <code>_canAbortRequest</code> attribute
 	tells you whether this feature is available.</li>
