@@ -1,5 +1,4 @@
-"""
-DataTable.py
+"""DataTable.py
 
 
 INTRODUCTION
@@ -553,8 +552,12 @@ class DataTable:
 		return self._headings
 
 	def setHeadings(self, headings):
-		"""Headings can be a list of strings (like ['name', 'age:int'])
-		or a list of TableColumns or None. """
+		"""Set table headings.
+
+		Headings can be a list of strings (like ['name', 'age:int'])
+		or a list of TableColumns or None.
+
+		"""
 		if not headings:
 			self._headings = []
 		elif type(headings[0]) in StringTypes:
@@ -576,7 +579,9 @@ class DataTable:
 		return self._rows[index]
 
 	def append(self, object):
-		"""If object is not a TableRecord, then one is created,
+		"""Append an object to the table.
+
+		If object is not a TableRecord, then one is created,
 		passing the object to initialize the TableRecord.
 		Therefore, object can be a TableRecord, list, dictionary or object.
 		See TableRecord for details.
@@ -744,11 +749,10 @@ class TableRecord:
 		"""Initialize from object.
 
 		The object is expected to response to hasValueForKey(name) and
-		valueForKey(name) for each of the headings in the table. It's
-		alright if the object returns False for hasValueForKey(). In that
-		case, a "blank" value is assumed (such as zero or an empty
-		string). If hasValueForKey() returns True, then valueForKey() must
-		return a value.
+		valueForKey(name) for each of the headings in the table. It's alright
+		if the object returns False for hasValueForKey(). In that case, a
+		"blank" value is assumed (such as zero or an empty string). If
+		hasValueForKey() returns True, then valueForKey() must return a value.
 
 		"""
 		self._values = []

@@ -1,3 +1,9 @@
+"""CSVParser.py
+
+A parser for CSV files.
+
+"""
+
 import types
 
 # The states of the parser
@@ -18,7 +24,8 @@ class ParseError(Exception):
 
 
 class CSVParser:
-	"""
+	"""Parser for CSV files.
+
 	Parses CSV files including all subtleties such as:
 		* commas in fields
 		* double quotes in fields
@@ -47,11 +54,22 @@ class CSVParser:
 	substantially faster. Before that can be done, it needs to support
 	allowComments and stripWhitespace, and pass the TestCSVParser.py
 	test suite.
+
 	"""
 
-	def __init__(self, allowComments=1, stripWhitespace=1, fieldSep=',', autoReset=1, doubleQuote=1):
-		"""
-		@@ document
+	def __init__(self, allowComments=1, stripWhitespace=1, fieldSep=',',
+			autoReset=1, doubleQuote=1):
+		"""Create a new CSV parser.
+
+		allowComments: If true (the default), then comment lines using
+			the Python comment marker are allowed.
+		stripWhitespace: If true (the default), then left and right whitespace
+			is stripped off from all fields.
+		fieldSep: Defines the field separator string (a comma by default).
+		autoReset: If true (the default), recover from errors automatically.
+		doubleQuote: If true (the default), assume quotes in fields are
+			escaped by appearing doubled.
+
 		"""
 		# settings
 		self._allowComments = allowComments
@@ -82,10 +100,11 @@ class CSVParser:
 	## Parse ##
 
 	def parse(self, line):
-		"""
-		Parse the single line and return a list or string fields, or
-		None if the CSV record contains embedded newlines and the
-		record is not yet complete.
+		"""Parse a single line and return a list of string fields.
+
+		Returns None if the CSV record contains embedded newlines and
+		the record is not yet complete.
+
 		"""
 		if self._autoReset and self._hadParseError:
 			self.reset()
@@ -137,10 +156,12 @@ class CSVParser:
 	## Reset ##
 
 	def reset(self):
-		"""
+		"""Reset the parser.
+
 		Resets the parser to a fresh state in order to recover from
 		exceptions. But if autoReset is true (the default), this is
 		done automatically.
+
 		"""
 		self._fields = []
 		self._state = StartRecord
@@ -247,11 +268,11 @@ parse = _parser.parse
 
 
 def joinCSVFields(fields):
-	"""
-	Returns a CSV record (eg a string) from a sequence of fields.
-	Fields containing commands (,) or double quotes (") are quoted
-	and double quotes are escaped (""). The terminating newline is
-	NOT included.
+	"""Return a CSV record (e.g. a string) from a sequence of fields.
+
+	Fields containing commands (,) or double quotes (") are quoted and
+	double quotes are escaped (""). The terminating newline is NOT included.
+
 	"""
 	newFields = []
 	for field in fields:
