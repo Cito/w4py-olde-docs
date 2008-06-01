@@ -109,17 +109,27 @@ class TestFuncs(unittest.TestCase):
 		assert s.find("(exception from repr(x): exceptions.KeyError: bogus)") != -1, s
 
 	def testUniqueId(self):
-		lastResult = None
-		for x in range(5):
-			result = uniqueId()
-			assert type(result) is type('')
-			assert len(result) == 32
-			assert result != lastResult
 
-			result = uniqueId(self.testUniqueId)
-			assert type(result) is type('')
-			assert len(result) == 32
-			assert result != lastResult
+		def checkId(i, sha, past):
+			assert type(i) is type('')
+			assert len(i) == (sha and 40 or 32)
+			for c in i:
+				assert c in '0123456789abcdef'
+			assert not past.has_key(i)
+			past[i] = i
+
+		for sha in (0, 1):
+			past = {}
+			for n in range(10):
+				if sha:
+					checkId(uniqueId(None, 1), 1, past)
+					checkId(uniqueId(n, 1), 1, past)
+				else:
+					checkId(uniqueId(None, 0), 0, past)
+					checkId(uniqueId(n, 0), 0, past)
+				checkId(uniqueId(sha=sha), sha, past)
+				checkId(uniqueId(n, sha=sha), sha, past)
+				checkId(uniqueId(forObject=checkId, sha=sha), sha, past)
 
 	def testValueForString(self):
 		evalCases = '''

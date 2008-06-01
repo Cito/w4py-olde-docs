@@ -1,11 +1,17 @@
-"""
-Funcs.py
+"""Funcs.py
 
 Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else.
+
 """
 
-import md5, os, random, time, sys, tempfile
+import os, random, time, sys, tempfile
 from struct import calcsize
+
+try:
+	from hashlib import md5, sha1
+except ImportError: # Python < 2.5
+	from md5 import new as md5
+	from sha import new as sha1
 
 try: # for Python < 2.3
 	True, False
@@ -345,29 +351,22 @@ def timestamp(numSecs=None):
 	return locals()
 
 
-def uniqueId(forObject=None):
+def uniqueId(forObject=None, sha=False):
 	"""Generate an opaque, identifier string.
 
 	The string is practically guaranteed to be unique
 	If an object is passed, then its id() is incorporated into the generation.
-	Relies on md5 and returns a 32 character long string.
+	Returns a 32 character long string relying on md5 or,
+	if sha is True, a 40 character long string relying on sha-1.
 
 	"""
-	if hasattr(os, 'urandom'): # prefer os.urandom(), if available
+	try: # prefer os.urandom(), if available
 		r = [os.urandom(8)]
-	else:
+	except AttributeError:
 		r = [time.time(), random.random(), os.times()]
 	if forObject is not None:
 		r.append(id(forObject))
-	md5object = md5.new(str(r))
-	try:
-		return md5object.hexdigest()
-	except AttributeError:
-		# Older versions of Python didn't have hexdigest, so we'll do it manually
-		hexdigest = []
-		for char in md5object.digest():
-			hexdigest.append('%02x' % ord(char))
-		return ''.join(hexdigest)
+	return (sha and sha1 or md5)(str(r)).hexdigest()
 
 
 def valueForString(s):
