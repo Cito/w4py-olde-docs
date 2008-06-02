@@ -93,7 +93,6 @@ class StreamReader:
 		self._filehandle = None
 		self.sourcefiles = []
 		self.current = None
-		self.size = 0
 		self.master = None
 
 	def init(self):
@@ -101,7 +100,6 @@ class StreamReader:
 
 	def registerSourceFile(self, file):
 		self.sourcefiles.append(file)
-		self.size += 1 # @@ what is size for?
 		return len(self.sourcefiles) - 1
 
 	def pushFile(self, file, encoding=None):
@@ -139,9 +137,7 @@ class StreamReader:
 	def popFile(self):
 		if self.current is None:
 			return 0
-		self.size -= 1 # @@ what the hell is this?
-		r = self.current.popStream()
-		return r
+		return self.current.popStream()
 
 	def getFile(self, i):
 		return self.sourcefiles[i]

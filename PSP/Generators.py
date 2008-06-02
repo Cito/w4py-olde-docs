@@ -313,7 +313,7 @@ class InsertGenerator(GenericGenerator):
 
 	def generate(self, writer, phase=None):
 		# JSP does this in the servlet. I'm doing it here because
-		# I have triple quotes. # Note: res.write statements inflate
+		# I have triple quotes. Note: res.write statements inflate
 		# the size of the resulting classfile when it is cached.
 		# Cut down on those by using a single res.write on the whole
 		# file, after escaping any triple-double quotes."""
