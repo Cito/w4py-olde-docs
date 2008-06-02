@@ -555,19 +555,24 @@ class BaseCookie(UserDict):
 
     def value_decode(self, val):
         """real_value, coded_value = value_decode(STRING)
+
         Called prior to setting a cookie's value from the network
         representation.  The VALUE is the value read from HTTP
         header.
+
         Override this function to modify the behavior of cookies.
+
         """
         return val, val
     # end value_encode
 
     def value_encode(self, val):
         """real_value, coded_value = value_encode(VALUE)
+
         Called prior to setting a cookie's value from the dictionary
         representation.  The VALUE is the value being assigned.
         Override this function to modify the behavior of cookies.
+
         """
         strval = str(val)
         return strval, strval
@@ -622,10 +627,13 @@ class BaseCookie(UserDict):
     # end js_output
 
     def load(self, rawdata):
-        """Load cookies from a string (presumably HTTP_COOKIE) or
+        """Load cookies frmo raw data.
+
+        Load cookies from a string (presumably HTTP_COOKIE) or
         from a dictionary.  Loading cookies from a dictionary 'd'
         is equivalent to calling:
             map(Cookie.__setitem__, d.keys(), d.values())
+
         """
         if type(rawdata) == type(""):
             self.__ParseString(rawdata)
@@ -666,10 +674,12 @@ class BaseCookie(UserDict):
 
 class SimpleCookie(BaseCookie):
     """SimpleCookie
+
     SimpleCookie supports strings as cookie values.  When setting
     the value using the dictionary assignment notation, SimpleCookie
     calls the builtin str() to convert the value to a string.  Values
     received from HTTP are kept as strings.
+
     """
     def value_decode(self, val):
         return _unquote( val ), val
@@ -680,6 +690,7 @@ class SimpleCookie(BaseCookie):
 
 class SerialCookie(BaseCookie):
     """SerialCookie
+
     SerialCookie supports arbitrary objects as cookie values. All
     values are serialized (using cPickle) before being sent to the
     client.  All incoming values are assumed to be valid Pickle
@@ -691,6 +702,7 @@ class SerialCookie(BaseCookie):
 
     Note: HTTP has a 2k limit on the size of a cookie.  This class
     does not check for this limit, so be careful!!!
+
     """
     def value_decode(self, val):
         # This could raise an exception!
@@ -701,6 +713,7 @@ class SerialCookie(BaseCookie):
 
 class SmartCookie(BaseCookie):
     """SmartCookie
+
     SmartCookie supports arbitrary objects as cookie values.  If the
     object is a string, then it is quoted.  If the object is not a
     string, however, then SmartCookie will use cPickle to serialize
@@ -711,6 +724,7 @@ class SmartCookie(BaseCookie):
 
     Note: HTTP has a 2k limit on the size of a cookie.  This class
     does not check for this limit, so be careful!!!
+
     """
     def value_decode(self, val):
         strval = _unquote(val)

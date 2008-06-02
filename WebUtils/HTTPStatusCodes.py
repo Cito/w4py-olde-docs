@@ -1,20 +1,8 @@
-"""
-HTTPStatusCodes.py
+"""HTTPStatusCodes.py
 
-
-TO DO
-
-	@@ document
-	@@ 2000-04-17 ce: Is there an RFC for this?
-
-
-DONE
-
-	* 2000-05-08 ce: Incorporated Matt Schinkel's (matt@null.net) re.sub()
-	  for stripping HTML tags in the ASCII version of the HTTP msg.
+Dictionary of HTTP status codes (see RFC2616, section 10).
 
 """
-
 
 import re
 
@@ -79,19 +67,28 @@ for record in HTTPStatusCodeList:
 		'htmlMsg':    htmlMsg
 	}
 	dict['asciiMsg'] = re.sub('<.*?>', '', htmlMsg)
-
 	HTTPStatusCodes[code] = dict
 	HTTPStatusCodes[identifier] = dict
 
 
-def HTMLTableOfHTTPStatusCodes(codes=HTTPStatusCodeList, tableArgs='align=center border=2', rowArgs='valign=top', colArgs='', headingTag='th', headingArgs=''):
-	""" Returns an HTML string containing all the status code information as provided by this module. It's highly recommended that if pass arguments to this function, that you do so by keyword. FUTURE: Allow font specs. """
+def HTMLTableOfHTTPStatusCodes(codes=HTTPStatusCodeList,
+		tableArgs='align=center border=2', rowArgs='valign=top', colArgs='',
+		headingTag='th', headingArgs=''):
+	"""Return an HTML table with HTTP status codes.
+
+	Returns an HTML string containing all the status code information
+	as provided by this module. It's highly recommended that if you
+	pass arguments to this function, that you do so by keyword.
+
+	"""
 	res = ['<table %s>\n' % tableArgs]
 	th = '<%s %s>' % (headingTag, headingArgs)
-	res.append('<tr> %s Code </th>  %s Identifier </th>  %s Description </th> </tr>\n' % (th, th, th))
+	res.append('<tr>%sCode</th>%sIdentifier</th>%sDescription</th></tr>\n' % (
+		th, th, th))
 	for code, identifier, htmlMsg in HTTPStatusCodeList:
 		td = '<td %s>' % colArgs
-		res.append('<tr %s> %s %s </td>  %s %s </td>  %s %s </td> </tr>\n' % (rowArgs, td, code, td, identifier, td, htmlMsg))
+		res.append('<tr %s>%s%s</td>%s%s</td>%s%s</td></tr>\n' % (
+			rowArgs, td, code, td, identifier, td, htmlMsg))
 	res.append('</table>\n')
 	return ''.join(res)
 
