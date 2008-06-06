@@ -35,6 +35,7 @@ which are not in SVN from showing up in the release.
 
 This script only works on Posix. Releases are not created on Windows
 because permissions and EOLs can be problematic for other platforms.
+Use the option pgk=zip to create a zip archive instead of a tarball.
 
 For more information, see the Release Procedures in the Webware docs.
 
@@ -68,12 +69,13 @@ class ReleaseHelper:
 		"""
 
 		url = self._args.get('url', ' http://svn.w4py.org/Webware/tags')
-
 		tag = self._args.get('tag', None)
+		pkg = self._args.get('pkg', None)
+		pkgType = pkg == 'zip' and 'zip archive' or 'tarball'
 		if tag:
-			print "Creating tarball from tag %s ..." % tag
+			print "Creating %s from tag %s ..." % (pkgType, tag)
 		else:
-			print "Creating tarball from current workspace..."
+			print "Creating %s from current workspace..." % pkgType
 
 		# the location of this script:
 		progPath = os.path.join(os.getcwd(), sys.argv[0])
@@ -139,7 +141,8 @@ class ReleaseHelper:
 
 			cleanup.append(pkgDir)
 
-			pkgName = os.path.join(pkgDir + ".tar.gz")
+			pkgExt = pkg == 'zip' and '.zip' or '.tar.gz'
+			pkgName = os.path.join(pkgDir + pkgExt)
 
 			# cleanup .cvs files
 			self.run("find %s -name '.cvs*' -exec rm {} \;" % pkgDir)
@@ -156,10 +159,11 @@ class ReleaseHelper:
 			if os.path.exists(pkgPath):
 				self.error("%s is in the way, please remove it." % pkgPath)
 
-			self.run('tar -czf %s %s' % (pkgPath, pkgDir))
+			tarCmd = pkg == 'zip' and 'zip -qrK' or 'tar -czf'
+			self.run('%s %s %s' % (tarCmd, pkgPath, pkgDir))
 
 			if not os.path.exists(pkgPath):
-				self.error('Could not create tarball.')
+				self.error('Could not create %s.' % pkgType)
 
 		finally: # Clean up
 			for path in cleanup:
@@ -183,7 +187,7 @@ class ReleaseHelper:
 	def checkPlatform(self):
 		if os.name != 'posix':
 			print 'This script only runs on Posix. Your op sys is %s.' % os.name
-			print 'Webware release are always created on Posix machines.'
+			print 'Webware releases are always created on Posix machines.'
 			print 'These releases work on both Posix and MS Windows.'
 			self.error()
 

@@ -159,6 +159,9 @@ lost and you may get problems with wrong EOL characters.
 
     Following these procedures assures that the SVN tagged version
     is what is actually in the released tarball.
+
+    Using the option pkg=zip, you can also build a zip archive instead
+    of the tarball that will make the MS Windows users happy.
 </pre>
 
 
@@ -181,12 +184,11 @@ Test the released tarball, preferably under Unix and also under Windows.
 
 <pre>
 [ ] Publish for download from the SourceForge files section:
-
-    > ncftpput -V upload.sf.net /incoming Webware-VER.tar.gz
-
+    * Upload Webware-VER.tar.gz to SourceForge.
+      - Note that FTP upload is not supported any more.
+      - You can use the <a href="https://frs.sourceforge.net/webupload">Web upload page</a>, for example.
     * Log into <a href="http://sf.net">sf.net</a>.
-    * Go to the <a href="https://sourceforge.net/projects/webware/">Webware Project Page</a>
-      at SourceForge.
+    * Go to the <a href="https://sourceforge.net/projects/webware/">Webware Project Page</a> at SourceForge.
     * Select 'File Releases' from the 'Admin' tab menu.
     * Click on 'Manage Packages/Releases'.
     * Choose the 'Webware' package for releases only, and use the
