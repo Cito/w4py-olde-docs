@@ -120,10 +120,12 @@ should be able to launch various app servers multiple times.</li>
 <div class="section">
 <h3><a id="docs" name="docs">Docs</a></h3>
 <ul class="simple">
-<li>Add a Getting Started Guide and a Screencast.</li>
+<li>Add a Getting Started Guide and a screencast.</li>
 <li>Beef up the User's Guide and Tutorial.</li>
 <li>User's Guide: Create a caching section to discuss the virtues of doing so
 (the Color example became 12 X faster on the server side).</li>
+<li>Use better tools such as DocUtils, Epydoc or Sphinx for creating the
+documentation, instead of our tools in the DocSupport folder.</li>
 </ul>
 </div>
 <div class="section">
@@ -150,6 +152,8 @@ where you will have both a query string and posted data.</li>
 the same directory as the Servlet. We'd prefer a more sophisticated technique
 which does not modify sys.path and does not affect other servlets. (Or maybe
 this would go away with a new one-process-per-application architecture.)</li>
+<li>The ThreadedAppServer is not optimal for multiprocessor systems and modern
+multi-core CPUs, due to the Python GIL.</li>
 </ul>
 </div>
 <div class="section">

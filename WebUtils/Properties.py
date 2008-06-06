@@ -6,7 +6,7 @@ docs = [
 	{'name': "User's Guide", 'file': 'UsersGuide.html'},
 ]
 
-status = 'beta'
+status = 'stable'
 
 requiredPyVersion = (2, 0, 0)
 

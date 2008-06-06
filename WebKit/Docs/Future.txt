@@ -142,12 +142,15 @@ Testing
 Docs
 ~~~~
 
-* Add a Getting Started Guide and a Screencast.
+* Add a Getting Started Guide and a screencast.
 
 * Beef up the User's Guide and Tutorial.
 
 * User's Guide: Create a caching section to discuss the virtues of doing so
   (the Color example became 12 X faster on the server side).
+
+* Use better tools such as DocUtils, Epydoc or Sphinx for creating the
+  documentation, instead of our tools in the DocSupport folder.
 
 
 Food for thought, considerations, reviews
@@ -180,6 +183,9 @@ Food for thought, considerations, reviews
   the same directory as the Servlet. We'd prefer a more sophisticated technique
   which does not modify sys.path and does not affect other servlets. (Or maybe
   this would go away with a new one-process-per-application architecture.)
+
+* The ThreadedAppServer is not optimal for multiprocessor systems and modern
+  multi-core CPUs, due to the Python GIL.
 
 
 Check out

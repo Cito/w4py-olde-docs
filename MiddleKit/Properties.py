@@ -9,7 +9,7 @@ docs = [
 	{'name': 'To Do',        'file': 'TODO.text'},
 ]
 
-status = 'beta'
+status = 'stable'
 
 requiredPyVersion = (2, 0, 0)
 

@@ -2,7 +2,7 @@ name = 'Webware for Python'
 
 version = ('X', 'Y', 0)
 
-status = 'beta'
+status = 'stable'
 
 releaseDate = '@@/@@/@@'
 

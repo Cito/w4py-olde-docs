@@ -12,7 +12,7 @@ docs = [
 	{'name': 'Future Work', 'file': 'Future.html'},
 ]
 
-status = 'beta'
+status = 'stable'
 
 requiredPyVersion = (2, 0, 0)
 

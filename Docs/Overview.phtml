@@ -10,19 +10,19 @@
 <ul>
 	<li>An application server that is <strong>fast, multi-threaded, easy to use</strong>.</li>
 	<li><strong>Good error handling</strong>. A crash of one page will not crash the application server. Exception reports are logged and easy to read when developing.</li>
-	<li><strong>Servlets</strong>. Similar to Java servlets, they provide a familiar basis for construction web applications</li>
-	<li><strong>Python Server Pages</strong> (PSP, similar to ASP, PHP and JSP)</li>
+	<li><strong>Servlets</strong>. Similar to Java servlets, they provide a familiar basis for construction web applications.</li>
+	<li><strong>Python Server Pages</strong> (PSP, similar to ASP, PHP and JSP).</li>
 	<li><strong>MiddleKit, an object-relational mapper</strong>. MiddleKit facilitates storing objects in an SQL. It is one of the strongest and components in Webware.</li>
 	<li><strong>Simplicity</strong>. Webware's code is quite simple and easy to understand if you feel the need to extend it.</li>
-	<li>Task scheduling</li>
-	<li>User management and authentication</li>
-	<li>A CGI wrapper</li>
+	<li>Task scheduling.</li>
+	<li>User management and authentication.</li>
+	<li>A simple built-in web-server and a CGI wrapper.</li>
 </ul>
 
 <p>Key goals of the project include:</p>
 
 <ul>
-	<li>Python- and object-oriented.</li>
+	<li>Python- and object-oriented ("Pythonic") approach.</li>
 	<li>An expansive suite of components and features to cover common needs of web developers.</li>
 	<li>Modular architecture where components can be used together or independently.</li>
 	<li>Excellent documentation and numerous examples.</li>
@@ -51,16 +51,16 @@
 
 <p>The components are summarized in the <a href="ComponentIndex.html">Component Index</a>.</p>
 
-<p>Most people start with <a href="../WebKit/Docs/index.html">WebKit</a>, which is the Webware application server.</p>
+<p>The core component is <a href="../WebKit/Docs/index.html">WebKit</a>, which is the Webware application server.</p>
 
 
 <a name="Status"></a><h2>Status</h2>
 
-<p>Webware is already being used for real work by a variety of people in different environments. With support from the <a href="http://lists.sourceforge.net/mailman/listinfo/webware-discuss">webware-discuss</a> mailing list, you should feel comfortable developing with Webware.</p>
+<p>Webware is a pretty mature and stable software that has been used in production for a long time by a variety of people in different environments. With support from the <a href="http://lists.sourceforge.net/mailman/listinfo/webware-discuss">webware-discuss</a> mailing list, you should feel comfortable developing with Webware.</p>
 
 <p>In the <a href="ComponentIndex.html">Component Index</a> you will see the status of each component such as <span class="name">alpha</span> and <span class="name">beta</span>. For beta components we are successfully striving for backwards compatibility of the API as the components mature.</p>
 
-<p>You can keep up on new releases through the <i>very low traffic</i> <a href="http://lists.sourceforge.net/mailman/listinfo/webware-announce">announcement list</a> and the home page at <a href="http://www.webwareforpython.org">http://www.webwareforpython.org</a>.</p>
+<p>You can keep up on new releases through the <em>very low traffic</em> <a href="http://lists.sourceforge.net/mailman/listinfo/webware-announce">announcement list</a> and the home page at <a href="http://www.webwareforpython.org">http://www.webwareforpython.org</a>.</p>
 
 
 <a name="Contributing"></a><h2>Contributing</h2>
@@ -72,7 +72,8 @@
 	<li>Write an article about using Webware. (middleweight)</li>
 	<li>Write a tutorial. (middleweight)</li>
 	<li>Build up regression test suites to help with testing and ensure future stability. (middleweight)</li>
-	<li>Contribute to the implementation of components such as WebKit and PSP. (heavyweight)</li>
+	<li>Contribute to the implementation of components such as WebKit, MiddleKit and PSP. (heavyweight)</li>
+	<li>For morea ideas, see also the <a href="../WebKit/Docs/Future.html">Future Work</a> document and the comments below.</li>
 	<li>Contribute something else you might think of that we haven't.</li>
 </ul>
 
@@ -86,23 +87,27 @@
 <tr><td valign="top">Version:</td><td><% versionString %></td></tr>
 <tr><td valign="top">Requirements:</td><td> Python <% requiredPyVersionString %>
 <br>Tested on UNIX (FreeBSD, Linux, et al) and
-<br>Windows (XP, 2K, NT, Me, et al).</td></tr>
+Windows (XP, 2K, NT, Me, et al).</td></tr>
 <tr><td valign="top">Status:</td><td><% status %></td></tr>
 <tr><td valign="top">Announcements:</td><td>join: <a href="http://lists.sourceforge.net/mailman/listinfo/webware-announce">http://lists.sourceforge.net/mailman/listinfo/webware-announce</a> (very low traffic)</td></tr>
 <tr><td valign="top">Discussion:</td><td>e-mail: <a href="mailto:webware-discuss@lists.sourceforge.net">webware-discuss@lists.sourceforge.net</a>
 <br>join: <a href="http://lists.sourceforge.net/mailman/listinfo/webware-discuss">http://lists.sourceforge.net/mailman/listinfo/webware-discuss</a> </td></tr>
-<tr><td valign="top">Copyright:</td><td>See the <a href="Copyright.html">Copyright, License and Disclaimer</a>.</td></tr>
+<tr><td valign="top">Copyright:</td><td>See <a href="Copyright.html">Copyright, License and Disclaimer</a>.</td></tr>
 <tr><td valign="top">Primary Authors:</td><td>
 Chuck Esterbrook, <a href="mailto:chuckesterbrook@yahoo.com">chuckesterbrook@yahoo.com</a>
 <br>Jay Love, <a href="mailto:jsliv@jslove.org">jsliv@jslove.org</a>
 <br>Geoff Talvola, <a href="mailto:gtalvola@nameconnector.com">gtalvola@nameconnector.com</a>
+</td></tr>
 <tr><td valign="top">Other Contributors:</td><td>
 Ian Bicking, <a href="mailto:ianb@colorstudy.com">ianb@colorstudy.com</a>
 <br>Tom Schwaller, <a href="mailto:tom.schwaller@linux-community.de">tom.schwaller@linux-community.de</a>
 <br>Stuart Donaldson, <a href="mailto:stu@asyn.com">stu@asyn.com</a>
 <br>Jason Hildebrand, <a href="jason@opensky.ca">jason@opensky.ca</a>
 <br>Christoph Zwerschke, <a href="mailto:cito@online.de">cito@online.de</a>
-<br>and others
+<br>and many others
+</td></tr>
+<tr><td valign="top">Current Maintainer:</td><td>
+Christoph Zwerschke, <a href="mailto:cito@online.de">cito@online.de</a>
 </td></tr>
 </table>
 
@@ -121,6 +126,15 @@ Ian Bicking, <a href="mailto:ianb@colorstudy.com">ianb@colorstudy.com</a>
 </ul>
 
 
+<a name="Future"></a><h2>Future</h2>
+
+<p>Webware for Python has been created in the year 2000 (even before Python&nbsp;2.0 was released) and stood the test of time. However, this also brings some problems. A lot of things could be realized in simpler ways today, using new Python features and other recent developments such as setuptools. Some Python standards such as WSGI or PEP8 did not exist when Webware has been designed, and thus things have been implemented in Webware's own ways, some of which may look quirky today. Also, many other great web frameworks for Python and components for such frameworks (e.g. templating systems, object-relational mapping) have emerged in recent years.</p>
+
+<p>There are ideas to radically modernize, streamline and refactor Webware for Python after version 1.0, heeding and utilizing all currently available Python standards and components, maybe even requiring Python&nbsp;3.0. Ian Bicking has already made an experiment in this direction with <a href="http://pythonpaste.org/wareweb/">Wareweb</a>. However, such a radical rewrite is a lot of work and does not seem to be possible without breaking backward compatibility and removing non-essential Webware components to a great extend. The question is whether this effort is justifiable in view of the plethora of already existing modern Python web frameworks.</p>
+
+<p>So probably the next Webware for Python versions will see only gradual adaptations to newer Python versions and clean-ups. The current stable Webware for Python version 1.0 will still support the old Python versions and will continue to be maintained with bug fix releases in the foreseeable future.</p>
+
+
 <a name="ReleaseNotes"></a><h2>Release Notes</h2>
 
 <p>See the global <a href="RelNotes.html">Webware release notes</a>
@@ -128,42 +142,12 @@ and the release notes for the various
 <a href="ComponentIndex.html">components</a>, particularly
 <a href="../WebKit/Docs/index.html">WebKit</a>.</p>
 
-<!--
-<a name="Copyright"></a><h2>Copyright, License and Disclaimer</h2>
-
-<p>Webware for Python is open source. The Webware for Python source is copyrighted, but you can freely use and copy it as long as you don't change or remove this copyright notice. The license is a clone of the <a href=http://www.opensource.org/licenses/>OSI-approved</a> <a href=http://www.python.org/docs/Copyright.html>Python license</a>.
-
-<p>Copyright &copy; 1999-2008 by Chuck Esterbrook.</p>
-
-<p class="center">All Rights Reserved</p>
-
-<p>Permission to use, copy, modify, and distribute this software and its
-documentation for any purpose and without fee is hereby granted,
-provided that the above copyright notice appear in all copies and that
-both that copyright notice and this permission notice appear in
-supporting documentation, and that the name of Chuck Esterbrook
-not be used in advertising or publicity pertaining to distribution of
-the software without specific, written prior permission.</p>
-
-<p>CHUCK ESTERBROOK DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE,
-INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS. IN NO
-EVENT SHALL CHUCK ESTERBROOK BE LIABLE FOR ANY SPECIAL, INDIRECT OR
-CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF
-USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
-OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
-PERFORMANCE OF THIS SOFTWARE.</p>
-
-<h2>Trademarks</h2>
-
-<p>All trademarks are reserved by their respective owners.</p>
--->
-
 
 <a name="Thanks"></a><h2>Thanks to...</h2>
 
 <p>Members of <a href="http://lists.sourceforge.net/mailman/listinfo/webware-discuss">webware-discuss</a> and <a href="http://www.egroups.com/group/python-web-modules">python-web-modules</a> for discussion and feedback.</p>
 
-<p><a href="http://www.sourceforge.net">SourceForge</a> for hosting <a href="http://webware.sourceforge.net">Webware for Python</a></p>
+<p><a href="http://www.sourceforge.net">SourceForge</a> and <a href="http://www.tummy.com">tummy.com</a> for hosting <a href="http://webware.sourceforge.net">Webware for Python</a></p>
 
 <p><a href="http://www.python.org/~guido/">Guido van Rossum</a> for <a href="http://www.python.org">Python</a></p>
 
