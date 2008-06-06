@@ -250,7 +250,7 @@ def localIP(remote=('www.yahoo.com', 80), useCache=1):
 
 	addresses = socket.gethostbyname_ex(socket.gethostname())[2]
 	for address in addresses:
-		if address != '127.0.0.1':
+		if address not in ('127.0.0.1', '127.0.0.2'):
 			if useCache:
 				_localIP = address
 			return address
