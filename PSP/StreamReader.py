@@ -45,7 +45,7 @@ class Mark:
 		else:
 			self = copy.copy(reader)
 		# I think the includeStack will be copied correctly,
-		# but check here for problems: raise 'clone include stack'
+		# but check here for problems: raise Error('clone include stack')
 		# JSP has an equals function, but I don't think I need that,
 		# because of using copy, but maybe I do.
 

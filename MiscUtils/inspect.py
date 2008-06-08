@@ -678,8 +678,8 @@ def getinnerframes(tb, context=1):
 def currentframe():
 	"""Return the frame object for the caller's stack frame."""
 	try:
-		raise 'catch me'
-	except:
+		raise Exception('catch me')
+	except Exception:
 		return sys.exc_info()[2].tb_frame.f_back
 
 if hasattr(sys, '_getframe'):

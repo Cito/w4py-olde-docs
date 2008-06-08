@@ -1,8 +1,7 @@
-import os, sys, time, socket
+import os, time, socket
 from marshal import dumps
 from WebKit.Object import Object
 from MiscUtils.Configurable import Configurable
-import struct
 
 
 class Adapter(Configurable, Object):
@@ -54,7 +53,7 @@ class Adapter(Configurable, Object):
 					retries += 1
 					time.sleep(self.setting('SecondsBetweenRetries'))
 				else:
-					raise 'timed out waiting for connection to app server'
+					raise socket.error('timed out waiting for connection to app server')
 
 		data = dumps(dict)
 		s.send(dumps(int(len(data))))

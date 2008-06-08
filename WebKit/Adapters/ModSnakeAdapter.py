@@ -1,6 +1,13 @@
-"""
-WebWare adapter for mod_snake.
--  Gifted to the WebWare project by Jon Travis (jtravis@covalent.net)
+"""WebWare adapter for mod_snake.
+
+Gifted to the WebWare project by Jon Travis (jtravis@covalent.net).
+
+mod_snake is a plugin for Apache which allows modules to be written
+in Python, and have the same power as C modules. In addition it
+accelerates Python written CGI, similar to Py_Apache and mod_python
+and includes support for HTML with embedded Python.
+
+You can download mod_snake at: http://sourceforge.net/projects/modsnake
 
 Usage:
 
@@ -18,7 +25,7 @@ SetHandler webware
 -- Snip here --
 
 Using the above configuration will tag all .psp files for processing
-by the webware handler.  All files in the /wpy location will also be
+by the Webware handler.  All files in the /wpy location will also be
 given the same handler.
 
 To change the chunk size that the mod_snake adaptor uses for reading
@@ -27,16 +34,14 @@ and writing data, simply add the directive:
 WebwareChunkSize  69
 
 (or whatever your new chunksize is)
+
 """
 
 import mod_snake
-import time
 import os
-from marshal import dumps, loads
-from socket  import *
 try:
 	from cStringIO import StringIO
-except:
+except ImportError:
 	from StringIO import StringIO
 
 # Keys into the server-config dictionary
@@ -49,7 +54,9 @@ DEFAULT_CHUNKSIZE = 32 * 1024
 
 from WebKit.Adapters.Adapter import Adapter
 
+
 class ModSnakeAdapter(Adapter):
+
 	def __init__(self, module):
 		hooks = {
 			'create_svr_config' : self.create_svr_config,
@@ -82,11 +89,10 @@ class ModSnakeAdapter(Adapter):
 		chunksize = int(chunksize)
 		if chunksize <= 0:
 			return "chunksize must be > 0"
-
 		per_svr[PER_SVR_CHUNKSIZE] = int(chunksize)
 
 	def cmd_WebwareAddress(self, per_dir, per_svr, file):
-		(host, port) = open(file).read().split(':')
+		host, port = open(file).read().split(':')
 		per_svr[PER_SVR_PORT]    = int(port)
 		per_svr[PER_SVR_ADDRESS] = host
 		self._webKitDir = os.path.dirname(file)
@@ -97,7 +103,7 @@ class ModSnakeAdapter(Adapter):
 
 		res = request.setup_client_block(mod_snake.REQUEST_CHUNKED_ERROR)
 		if res:
-			raise "Failed to setup client blocking method"
+			raise IOError("Failed to setup client blocking method")
 
 		request.should_client_block()
 		strdata = StringIO()
@@ -106,9 +112,7 @@ class ModSnakeAdapter(Adapter):
 			data, err = request.get_client_block(per_svr[PER_SVR_CHUNKSIZE])
 			if err <= 0:
 				break
-
 			strdata.write(data)
-
 
 		# Setup the subprocess environment, because os.environ suxx0r3z
 		request.add_common_vars()
@@ -132,10 +136,12 @@ class ModSnakeAdapter(Adapter):
 		headers = respdict[:headerend]
 		for header in headers.split("\n"):
 			header = header.split(":")
-			req.headers_out[header[0]] = ":".join(header[1:])
-			if header[0].lower() == 'content-type':
+			field = header[0]
+			req.headers_out[field] = ":".join(header[1:])
+			field = field.lower()
+			if field == 'content-type':
 				req.content_type = header[1]
-			if header[0].lower() == 'status':
+			elif field == 'status':
 				req.status = int(header[1].lstrip().split(' ', 1)[0])
 		req.send_http_header()
 		req.rwrite(respdict[headerend+2:])
