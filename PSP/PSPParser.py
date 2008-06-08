@@ -152,7 +152,7 @@ class PSPParser:
 		# elif match == 'include':
 		# 	PSPUtils.checkAttributes('Include Directive', attrs, includeDvalidAttrs)
 		# elif match == 'taglib':
-		# 	raise Not Implemented Error
+		# 	raise NotImplementedError
 		# match close
 		reader.skipSpaces() # skip to where we expect a close tag
 		close = CLOSE_DIRECTIVE
