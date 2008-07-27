@@ -45,15 +45,17 @@ find "<h2>Credit</h2>"
 back
 back
 
-follow COMKit
-title "COMKit Documentation"
-follow "User's Guide"
-find '<h1 class="header">COMKit User\'s Guide</h1>'
-find "COMKit version ${version}"
-find "<h2>Synopsis</h2>"
-find "<h2>Credit</h2>"
-back
-back
+# if win32
+#follow COMKit
+#title "COMKit Documentation"
+#follow "User's Guide"
+#find '<h1 class="header">COMKit User\'s Guide</h1>'
+#find "COMKit version ${version}"
+#find "<h2>Synopsis</h2>"
+#find "<h2>Credit</h2>"
+#back
+#back
+# end if
 
 follow KidKit
 title "KidKit Documentation"
