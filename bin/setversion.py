@@ -145,6 +145,13 @@ phtmlReplace.add(r"(<%.*)' \+ versionString \+ '(.*%>)",
 phtmlReplace.add(r"<% versionString %>", po['versionString'])
 phtmlReplace.add(r"<% releaseDate %>", po['releaseDate'])
 
+twillReplace = Replacer()
+twillReplace.add(r"^setglobal version .*$",
+		r"setglobal version %s" % po['versionString'])
+twillReplace.add(r"^setglobal date .*$",
+		r"setglobal date %s" % po['releaseDate'])
+twillReplace.add(r"^# if release ", '')
+
 if setVersion:
 
 	# Replace in Properties files:
@@ -162,6 +169,9 @@ if setVersion:
 
 	# Replace in global README file:
 	rstReplace.replaceGlob('_README')
+
+	# Replace in twill test scripts:
+	twillReplace.replaceGlob('WebKit/Tests/twill/*.twill')
 
 # Process release notes:
 
