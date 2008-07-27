@@ -62,7 +62,7 @@ class FileList:
 		else:
 			close = 0
 		name = self._name
-		title = 'File list of %s' % name
+		title = 'File List of %s' % name
 		other = ('<a href="ClassList.html">alphabetical class list<a>'
 			' and <a href="ClassHierarchy.html">class hierarchy</a>'
 			' of %s' % name)
