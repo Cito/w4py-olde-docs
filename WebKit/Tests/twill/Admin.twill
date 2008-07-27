@@ -52,7 +52,7 @@ code 200
 title "Servlet Cache"
 find "PythonServletFactory"
 find "Details:"
-submit
+submit flush_PythonServletFactory
 find "The servlet cache has been flushed."
 submit reload
 code 200
