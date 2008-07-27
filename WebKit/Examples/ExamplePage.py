@@ -100,9 +100,6 @@ class ExamplePage(SidebarPage):
 				self.menuItem('Local WebKit docs',
 					self.request().servletPath() + '/' + filename)
 
-	def title(self):
-		return self.request().contextName()
-
 	def writeContent(self):
 		wr = self.writeln
 		wr('<div style="padding-left:2em"><table>')
