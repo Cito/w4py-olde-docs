@@ -29,7 +29,7 @@ class AdminPage(SidebarPage):
 			self.fileSize('ErrorLogFilename'))
 		self.menuItem('Config', 'Config')
 		self.menuItem('Plug-ins', 'PlugIns')
-		self.menuItem('Servlet cache', 'ServletCache')
+		self.menuItem('Servlet Cache', 'ServletCache')
 		self.menuItem('Application Control', 'AppControl')
 		self.menuItem('Thread Control', 'ThreadControl')
 		self.menuItem('Logout', 'Main?logout=yes')
