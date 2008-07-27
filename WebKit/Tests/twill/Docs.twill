@@ -57,15 +57,17 @@ back
 #back
 # end if
 
-follow KidKit
-title "KidKit Documentation"
-follow "User's Guide"
-find '<h1 class="header">KidKit User\'s Guide</h1>'
-find "KidKit version ${version}"
-find "<h2>Synopsis</h2>"
-find "<h2>Credits</h2>"
-back
-back
+# if kid
+#follow KidKit
+#title "KidKit Documentation"
+#follow "User's Guide"
+#find '<h1 class="header">KidKit User\'s Guide</h1>'
+#find "KidKit version ${version}"
+#find "<h2>Synopsis</h2>"
+#find "<h2>Credits</h2>"
+#back
+#back
+# end if
 
 follow MiddleKit
 title "MiddleKit Documentation"

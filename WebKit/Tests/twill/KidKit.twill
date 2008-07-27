@@ -63,3 +63,12 @@ follow MandelbrotSet
 title "The Mandelbrot Set"
 find "<h1>The Mandelbrot Set</h1>"
 find '<table cellpadding="2" cellspacing="1">'
+back
+
+go ../../KidKit/Docs
+title "KidKit Documentation"
+follow "User's Guide"
+find '<h1 class="header">KidKit User\'s Guide</h1>'
+find "KidKit version ${version}"
+find "<h2>Synopsis</h2>"
+find "<h2>Credits</h2>"
