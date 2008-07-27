@@ -4,7 +4,8 @@ starts/stops the appserver in a separate process, and allows the test case
 to check whether certain output produced by the appserver.
 
 Test cases will probably want to use a client-side web testing framework
-(possibly webunit @ http://mechanicalcat.net/tech/webunit) for making requests and testing responses.
+(e.g. http://mechanicalcat.net/tech/webunit or http://twill.idyll.org)
+for making requests and testing responses.
 
 
 To run all tests:
