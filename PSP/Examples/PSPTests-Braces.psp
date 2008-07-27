@@ -46,7 +46,7 @@ See the <a href="View.py?filename=<%=os.path.basename(self.request().serverSideP
 
 <p>Loops are the trickiest part of PSP due to Python indentation for blocks syntax.</p>
 
-<p style="color:navy">The uses of braces, while not good for normal Python, does make things easier here where we are dealing with HTML.</p>
+<p style="color:navy">The use of braces, while not good for normal Python, does make things easier here where we are dealing with HTML.</p>
 
 <%-- I still use indentation to make it easier to read. It just doesn't get passed through to Python. --%>
 <ul><% for i in range(2): { # loop #1, an automatic loop
