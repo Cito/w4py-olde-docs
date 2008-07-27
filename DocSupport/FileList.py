@@ -45,7 +45,7 @@ class FileList:
 		else:
 			close = 0
 		name = self._name
-		title = 'File list of %s' % name
+		title = 'File List of %s' % name
 		file.write('%s\n%s\n\n' % (title, '='*len(title)))
 		files = self._files
 		files.sort(lambda a, b: cmp(a.lower(), b.lower()))
