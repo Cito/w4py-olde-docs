@@ -1,8 +1,7 @@
-This is a framework for testing WebKit end-to-end by using the built-in http 
-server.  The module AppServerTest contains a TestCase base class which 
+This is a framework for testing WebKit end-to-end by using the built-in http
+server.  The module AppServerTest contains a TestCase base class which
 starts/stops the appserver in a separate process, and allows the test case
-to check whether certain output produced by the appserver (currently this has 
-not been tweaked/tested to run under Win32, but this should be straightforward).
+to check whether certain output produced by the appserver.
 
 Test cases will probably want to use a client-side web testing framework
 (possibly webunit @ http://mechanicalcat.net/tech/webunit) for making requests and testing responses.
