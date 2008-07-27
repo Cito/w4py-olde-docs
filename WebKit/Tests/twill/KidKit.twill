@@ -35,7 +35,7 @@ follow Time2
 title "A Kid Template"
 find "Time Example 2"
 find 'This page is a stand-alone page\.'
-find "The current time is\s+\d{2}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}"
+find "The current time is\s+\d{2}/\d{2}/\d{2} \d{2}:\d{2}:\d{2}\."
 notfind "Examples"
 back
 

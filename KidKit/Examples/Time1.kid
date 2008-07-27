@@ -9,7 +9,7 @@ import time
 <h2>Time Example 1</h2>
 <p><i>This page is embedded as a KidExamplePage.</i></p>
 <p>The current time is
-<span py:content="time.strftime('%C %c')" style="color:#339">
+<span py:content="time.ctime()" style="color:#339">
 Locale Specific Date/Time
 </span>.</p>
 </div>

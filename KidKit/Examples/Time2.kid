@@ -21,7 +21,7 @@ title = "A Kid Template"
 				</i>
 			</p>
 			<p>
-				The current time is ${time.strftime('%C %c')}.
+				The current time is ${time.ctime()}.
 			</p>
 		</div>
 	</body>
