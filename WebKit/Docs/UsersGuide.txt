@@ -435,6 +435,7 @@ Known bugs and future work in general are documented in Future__.
 __ Future.html
 
 Credit
+======
 
 Authors: Chuck Esterbrook, Jay Love, Geoff Talvola, Ian Bicking
 and others (improvements and additions).
