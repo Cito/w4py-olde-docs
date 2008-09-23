@@ -10,9 +10,9 @@ the Control Panel or from the command line using ``net start`` and
 ``net stop``, and it can be configured in the Control Panel to
 auto-start when the machine boots.
 
-This requires the win32all__ package to have been installed.
+This requires the pywin32__ package to have been installed.
 
-__ http://www.python.org/windows/win32all/
+__ http://starship.python.net/crew/mhammond/win32/Downloads.html
 
 To see the options for installing, removing, starting, and stopping
 the service, just run this program with no arguments.  Typical usage is
