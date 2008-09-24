@@ -1,12 +1,17 @@
-from UserDict import UserDict
 import os, sys, types
+from UserDict import UserDict
 
 class WillNotRunError(Exception): pass
 
 
 class PropertiesObject(UserDict):
-	"""
-	A PropertiesObject represents, in a dictionary-like fashion, the values found in a Properties.py file. That file is always included with a Webware component to advertise its name, version, status, etc. Note that a Webware component is a Python package that follows additional conventions. Also, the top level Webware directory contains a Properties.py.
+	"""A Properties Object.
+
+	A PropertiesObject represents, in a dictionary-like fashion, the values
+	found in a Properties.py file. That file is always included with a Webware
+	component to advertise its name, version, status, etc. Note that a Webware
+	component is a Python package that follows additional conventions.
+	Also, the top level Webware directory contains a Properties.py.
 
 	Component properties are often used for:
 		* generation of documentation
@@ -15,11 +20,16 @@ class PropertiesObject(UserDict):
 	PropertiesObject provides additional keys:
 		* filename - the filename from which the properties were read
 		* versionString - a nicely printable string of the version
-		* requiredPyVersionString - like versionString but for requiredPyVersion instead
-		* willRun - 1 if the component will run. So far that means having the right Python version.
-		* willNotRunReason - defined only if willRun is 0. contains a readable error message
+		* requiredPyVersionString - like versionString,
+		  but for requiredPyVersion instead
+		* willRun - 1 if the component will run.
+		  So far that means having the right Python version.
+		* willNotRunReason - defined only if willRun is 0,
+		  contains a readable error message
 
-	Using a PropertiesObject is better than investigating the Properties.py file directly, because the rules for determining derived keys and any future convenience methods will all be provided here.
+	Using a PropertiesObject is better than investigating the Properties.py
+	file directly, because the rules for determining derived keys and any
+	future convenience methods will all be provided here.
 
 	Usage example:
 		from MiscUtils.PropertiesObject import PropertiesObject
@@ -27,7 +37,10 @@ class PropertiesObject(UserDict):
 		for item in props.items():
 			print '%s: %s' % item
 
-	Note: We don't normally suffix a class name with "Object" as we have with this class, however, the name Properties.py is already used in our containing package and all other packages.
+	Note: We don't normally suffix a class name with "Object" as we have
+	with this class, however, the name Properties.py is already used in
+	our containing package and all other packages.
+
 	"""
 
 
@@ -56,7 +69,7 @@ class PropertiesObject(UserDict):
 	## Self utility ##
 
 	def cleanPrivateItems(self):
-		""" Removes items whose keys start with a double underscore, such as __builtins__. """
+		"""Remove items whose keys start with a double underscore, such as __builtins__."""
 		for key in self.keys():
 			if key[:2] == '__':
 				del self[key]
@@ -67,19 +80,16 @@ class PropertiesObject(UserDict):
 		self.createWillRun()
 
 	def _versionString(self, version):
-		""" For a sequence containing version information such as (2, 0, 0, 'pre'), this returns a printable string such as '2.0-pre'. The micro version number is only excluded from the string if it is zero. """
+		"""Return the version number as a string.
+
+		For a sequence containing version information such as (2, 0, 0, 'pre'),
+		this returns a printable string such as '2.0pre'.
+		The micro version number is only excluded from the string if it is zero.
+
+		"""
 		ver = map(str, version)
-		if ver[2] == '0': # e.g., if minor version is 0
-			numbers = ver[:2]
-		else:
-			numbers = ver[:3]
-		rest = ver[3:]
-		numbers = '.'.join(numbers)
-		rest = '-'.join(rest)
-		if rest:
-			return numbers + rest
-		else:
-			return numbers
+		numbers, rest = ver[:ver[2] == '0' and 2 or 3], ver[3:]
+		return '.'.join(numbers) + '-'.join(rest)
 
 	def createVersionString(self):
 		self['versionString'] = self._versionString(self['version'])
@@ -101,7 +111,12 @@ class PropertiesObject(UserDict):
 		self['willRun'] = 1 # we passed all the tests
 
 	def willRunKeys(self):
-		""" Returns a list of keys whose values should be examined in order to determine if the component will run. Used by createWillRun(). """
+		"""Return keys to be examined before running the component.
+
+		This returns a list of all keys whose values should be examined in
+		order to determine if the component will run. Used by createWillRun().
+
+		"""
 		return ['requiredPyVersion', 'requiredOpSys', 'deniedOpSys', 'willRunFunc']
 
 	def checkRequiredPyVersion(self):
@@ -113,14 +128,13 @@ class PropertiesObject(UserDict):
 			pyVer = map(int, pyVer)
 		if tuple(pyVer) < tuple(self['requiredPyVersion']):
 			raise WillNotRunError, 'Required Python ver is %s, but actual ver is %s.' % (
-				'.'.join(map(str, self['requiredPyVersion'])),
-				'.'.join(map(str, pyVer)))
+				'.'.join(map(str, self['requiredPyVersion'])), '.'.join(map(str, pyVer)))
 
 	def checkRequiredOpSys(self):
 		requiredOpSys = self.get('requiredOpSys', None)
 		if requiredOpSys:
 			# We accept a string or list of strings
-			if type(requiredOpSys) == types.StringType:
+			if type(requiredOpSys) is types.StringType:
 				requiredOpSys = [requiredOpSys]
 			if not os.name in requiredOpSys:
 				raise WillNotRunError, 'Required op sys is %s, but actual op sys is %s.' % (
@@ -130,14 +144,14 @@ class PropertiesObject(UserDict):
 		deniedOpSys = self.get('deniedOpSys', None)
 		if deniedOpSys:
 			# We accept a string or list of strings
-			if type(deniedOpSys) == types.StringType:
+			if type(deniedOpSys) is types.StringType:
 				deniedOpSys = [deniedOpSys]
 			if os.name in deniedOpSys:
 				raise WillNotRunError, 'Will not run on op sys %s and actual op sys is %s.' % (
 					'/'.join(deniedOpSys), os.name)
 
 	def checkRequiredSoftware(self):
-		""" Not implemented. No op right now. """
+		"""Not implemented. No op right now."""
 		# Check required software
 		# @@ 2001-01-24 ce: TBD
 		# Issues include:
