@@ -222,6 +222,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
 					Profiler.runCall(self._server.mainloop)
 				else:
 					self._server.mainloop()
+				sys.stdout = sys.stderr = log # in case this has been reset
 				print
 				sys.stdout.flush()
 				if self._server._running:
