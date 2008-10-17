@@ -171,7 +171,7 @@ class HTTPContent(HTTPServlet):
 
 		"""
 		for arg in args:
-			self._response.write(str(arg))
+			self._response.write(arg)
 
 	def writeln(self, *args):
 		"""Write to output with newline.
@@ -181,7 +181,7 @@ class HTTPContent(HTTPServlet):
 
 		"""
 		for arg in args:
-			self._response.write(str(arg))
+			self._response.write(arg)
 		self._response.write('\n')
 
 

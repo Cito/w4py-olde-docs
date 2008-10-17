@@ -239,9 +239,15 @@ class HTTPResponse(Response):
 	## Output ##
 
 	def write(self, charstr=None):
-		"""Write charstr to the response stream."""
+		"""Write charstr to the response stream.
+
+		charstr must be convertible into an ordinary string.
+		Unicode strings with special characters must therefore
+		be encoded before they can be written.
+
+		"""
 		if charstr:
-			self._strmOut.write(charstr)
+			self._strmOut.write(str(charstr))
 		if not self._committed and self._strmOut._needCommit:
 			self.commit()
 
