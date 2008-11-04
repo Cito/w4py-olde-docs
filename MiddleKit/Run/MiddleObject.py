@@ -57,10 +57,14 @@ class MiddleObject(object, NamedValueAccess):
 		self._mk_changed         = False
 		self._mk_initing         = False
 		self._mk_inStore         = False
-		# get a reentrant lock for accessing the persistent store
-		self._mk_cacheLock       = threading.RLock()
 
-	_mk_setCache = {} # cache the various setFoo methods first by qualified class name
+	 # cache the various setFoo methods first by qualified class name
+	_mk_setCache = {}
+	# get a reentrant lock for accessing the persistent store
+	_mk_cacheLock = threading.RLock()
+
+
+	## Read Store ##
 
 	def readStoreData(self, store, row):
 		"""Read data from the persistent store.
