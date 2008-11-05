@@ -45,7 +45,7 @@ td.dataTable2 {
 
 <ul>
 	<li>Python 2.0 or greater, found at <a href="http://www.python.org">python.org</a></li>
-	<li>mx.DateTime as found in <a href="http://www.lemburg.com/files/python/eGenix-mx-Extensions.html#Download-mxBASE">egenix-mx-base</a></li>
+	<li>for Python &lt; 2.3, mx.DateTime as found in <a href="http://www.egenix.com/products/python/mxBase/">egenix-mx-base</a></li>
 	<li>and MiddleKit, of course.</li>
 </ul>
 
@@ -281,7 +281,7 @@ mysql &lt; GeneratedSQL\InsertSamples.sql
 import os, sys
 sys.path.insert(1, os.path.abspath(os.pardir))
 
-from mx.DateTime import DateFrom
+from datetime import date
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
 # For MSSQL:
 # from MiddleKit.Run.MSSQLObjectStore import MSSQLObjectStore
@@ -297,6 +297,8 @@ def main():
 if __name__=='__main__':
     main()
 </pre>
+
+<p>If you get an error that datetime cannot be imported (when you're running Python &lt; 2.3), replace datetime with mx.DateTime in the following.</p>
 
 <p>If you get an error that MiddleKit cannot be imported, make sure that <span class="filename">Webware/</span> is in your path. You can do this temporarily for your command line session by setting PYTHONPATH:</p>
 
@@ -322,7 +324,7 @@ if __name__=='__main__':
 import os, sys
 sys.path.insert(1, os.path.abspath(os.pardir))
 
-from mx.DateTime import DateFrom
+from datetime import date
 from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
 <b>from Middle.Movie import Movie</b>
 
@@ -365,12 +367,12 @@ from Middle.Role import Role
 
     james = Person()
     james.setName('James Cameron')
-    james.setBirthDate('8/16/1954')
+    james.setBirthDate(date(1954, 8, 16))
     movie.addToDirectors(james)
 
     ahnuld = Person()
     ahnuld.setName('Arnold Schwarzenegger')
-    ahnuld.setBirthDate('7/30/1947')
+    ahnuld.setBirthDate(date(1947, 7, 30))
     store.addObject(ahnuld)
 
     terminator = Role()
