@@ -141,7 +141,7 @@ span.bigPoint {
 	<td class="description">Periodically invoke store.saveChanges() in order to commit changes in memory that have not yet been persisted.</td></tr>
 </table>
 
-<p>There is a notable exception concerning SQL driven by the fact that  queries are typically faster on the SQL server side, than on the client side. When fetching objects through a MiddleKit object store that is connected to a database, you can pass SELECT clauses such as WHERE and ORDER BY. The User's Guide has more information on this topic under @@.</p>
+<p>There is a notable exception concerning SQL driven by the fact that  queries are typically faster on the SQL server side, than on the client side. When fetching objects through a MiddleKit object store that is connected to a database, you can pass SELECT clauses such as WHERE and ORDER BY. See the Quick Start Guide for an <a href="QuickStart.html#FetchObjs">example</a>.</p>
 
 <p>MiddleKit could also be extended to persist to other storage facilities such as the file system or the OODB. Switching storage facilities, whether it's a particular database, or a different type of storage altogether should require nothing more than configuration. (Again the notable exception: if you have used SELECT clauses for server side queries, your new storage facility must support those, or your store must translate them to something supported, or you must translate them in your application.)</p>
 
