@@ -1,15 +1,19 @@
 #!/usr/bin/env python
-import time
-startTime = time.time()
 
-import os, sys
-from TestCommon import *
+import os, sys, time
 from glob import glob
+
+from TestCommon import *
+
+startTime = time.time()
 
 
 class RunError(Exception):
-	"""
-	Raised by Test.run() if the process exits with a non-zero status, which indicates an error.
+	"""Test Run Error.
+
+	Raised by Test.run() if the process exits with a non-zero status,
+	which indicates an error.
+
 	"""
 	pass
 
@@ -32,7 +36,8 @@ class Test:
 	## Testing ##
 
 	def main(self, args=sys.argv):
-		# The tests are listed explicitly rather than scanning for them (via glob) in order to perform them in a certain order (simplest to most complex)
+		# The tests are listed explicitly rather than scanning for them (via glob)
+		# in order to perform them in a certain order (simplest to most complex)
 		self.readArgs(args)
 		results = []
 		for self._modelName in self.modelNames():
@@ -43,7 +48,8 @@ class Test:
 			try:
 				if self.canRun():
 					# support multiple config files for testing
-					configFilenames = glob(os.path.join(self._modelName, 'Settings*.config'))
+					configFilenames = glob(os.path.join(
+						self._modelName, 'Settings*.config'))
 					if configFilenames:
 						configFilenames = [os.path.basename(p) for p in configFilenames]
 					else:
@@ -98,9 +104,7 @@ class Test:
 		print '\n'
 
 	def testEmpty(self):
-		"""
-		Run all TestEmpty*.py files in the model, in alphabetical order by name.
-		"""
+		"""Run all TestEmpty*.py files in the model, in alphabetical order."""
 		names = glob(os.path.join(self._modelName, 'TestEmpty*.py'))
 		if names:
 			names.sort()
@@ -116,12 +120,14 @@ class Test:
 	def testRun(self, pyFile, deleteData):
 		if os.path.exists(os.path.join(self._modelName, pyFile)):
 			print '%s:' % pyFile
-			self.run('python TestRun.py %s %s %s delete=%i' % (self._modelName, self._configFilename, pyFile, deleteData))
+			self.run('python TestRun.py %s %s %s delete=%i' % (
+				self._modelName, self._configFilename, pyFile, deleteData))
 		else:
 			print 'NO %s TO TEST.' % pyFile
 
 	def testDesign(self):
-		self.run('python TestDesign.py %s %s' % (self._modelName, self._configFilename))
+		self.run('python TestDesign.py %s %s' % (
+			self._modelName, self._configFilename))
 
 	def createDatabase(self):
 		filename = workDir + '/GeneratedSQL/Create.sql'
@@ -151,8 +157,9 @@ class Test:
 		if sqlVersionCommand:
 			self.run(sqlVersionCommand)
 
-		# Since Test.py runs things via os.system() it won't actually have the DB API module loaded.
-		# But that's really desireable so its version number can be printed out, so import the store:
+		# Since Test.py runs things via os.system() it won't actually have
+		# the DB API module loaded. But that's really desireable so its
+		# version number can be printed out, so import the store:
 		objStoreName = dbName + 'ObjectStore'
 		values = {}
 		exec 'import MiddleKit.Run.'+objStoreName in values
@@ -190,16 +197,16 @@ class Test:
 	## Self utility ##
 
 	def run(self, cmd):
-		"""
-		Self utility method to run a system command. If the command
-		has a non-zero exit status, raises RunError. Otherwise,
-		returns 0.
+		"""Self utility method to run a system command.
 
-		Note that on Windows ME, os.system() always returns 0 even if
-		the program was a Python program that exited via sys.exit(1) or
-		an uncaught exception. On Windows XP Pro SP 1, this problem
-		does not occur. Windows ME has plenty of other problems as
-		well; avoid it.
+		If the command has a non-zero exit status, raises RunError.
+		Otherwise, returns 0.
+
+		Note that on Windows ME, os.system() always returns 0 even if the
+		program was a Python program that exited via sys.exit(1) or an
+		uncaught exception. On Windows XP Pro SP 1, this problem does not
+		occur. Windows ME has plenty of other problems as well; avoid it.
+
 		"""
 		print '<cmd>', cmd
 		sys.stdout.flush()
