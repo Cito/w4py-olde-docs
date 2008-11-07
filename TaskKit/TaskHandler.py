@@ -96,7 +96,7 @@ class TaskHandler:
 
 	def isOnDemand(self):
 		"""Return True if this task is not scheduled for periodic execution."""
-		return self._period == 1
+		return self._period != 0
 
 	def runOnCompletion(self):
 		"""Request that this task be re-run after its current completion.
