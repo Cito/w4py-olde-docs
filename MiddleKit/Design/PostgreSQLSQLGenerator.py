@@ -1,13 +1,29 @@
+try: # psycopg2 version 2
+	from psycopg2 import Warning, DatabaseError
+	from psycopg2.extensions import QuotedString
+except ImportError: # psycopg version 1
+	try:
+		from psycopg import Warning, DatabaseError
+		from psycopg.extensions import QuotedString
+	except ImportError: # PyGreSQL
+		from pgdb import Warning, DatabaseError
+		from pgdb import _quote as QuotedString
+
+from MiscUtils.MixIn import MixIn
+
 from SQLGenerator import SQLGenerator
 from SQLGenerator import PrimaryKey as PrimaryKeyBase
-from MiscUtils.MixIn import MixIn
-import psycopg as dbi  # psycopg adapter; apt-get install python2.2-psycopg
+
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 class PostgreSQLSQLGenerator(SQLGenerator):
 
 	def sqlSupportsDefaultValues(self):
-		return 1
+		return True
 
 
 class Model:
@@ -108,7 +124,7 @@ class StringAttr:
 			return 'varchar(%s)' % max
 
 	def sqlForNonNoneSampleInput(self, value):
-		return "%s" % dbi.QuotedString(value)
+		return "%s" % QuotedString(value)
 
 
 class BoolAttr:
@@ -137,7 +153,11 @@ class BoolAttr:
 class DateTimeAttr:
 
 	def sqlType(self):
-		return 'timestamptz'
+		# In accord with newer PostgreSQL versions,
+		# we use timestamps *without* time zone by default.
+		# This also makes DateTime more compatible with the MySQL variant.
+		# It is recommended to simply store all DateTimes as UTC.
+		return 'timestamp'
 
 
 class ObjRefAttr:

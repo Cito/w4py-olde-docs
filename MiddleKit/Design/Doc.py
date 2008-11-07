@@ -206,10 +206,11 @@ class Doc:
 
 
 	def dump(self):
-		"""
-		Dumps the class and attribute definitions in order.
-		This is a simple example that you could expand to generate your
-		own brand of HTML or some other output format.
+		"""Dump the class and attribute definitions in order.
+
+		This is a simple example that you could expand to generate your own
+		brand of HTML or some other output format.
+
 		"""
 		for klass in self.model.allKlassesInOrder():
 			print klass
@@ -292,9 +293,7 @@ class Values(UserDict):
 
 
 def mystr(s):
-	"""
-	Convert a Unicode string to a basic string.
-	"""
+	"""Convert a Unicode string to a basic string."""
 	try:
 		UnicodeError
 	except NameError:

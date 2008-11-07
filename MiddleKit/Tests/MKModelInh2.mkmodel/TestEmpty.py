@@ -54,4 +54,4 @@ b:int,i:int,l:long,f:float,s:string,x:int
 
 		# Reset
 		store.clear()
-		store.executeSQL('delete from Foo;')
+		store.executeSQLTransaction('delete from Foo;')

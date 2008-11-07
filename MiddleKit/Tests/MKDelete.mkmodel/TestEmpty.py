@@ -40,10 +40,12 @@ DELETE_REFERENCED_ERROR = 4
 DELETE_OBJECT_WITH_REFERENCES_ERROR = 5
 
 def testOther(store, klass, expectedResult):
-	"""
-	Test creating an instance of a specified class, that points to an instance of Foo,
-	which itself points to an instance of Bar.  Then try to delete the Foo, and
-	make sure that the expected result happens.
+	"""Test "other".
+
+	Test creating an instance of a specified class, that points to an instance
+	of Foo, which itself points to an instance of Bar.
+	Then try to delete the Foo, and make sure that the expected result happens.
+
 	"""
 	# Run the test, deleting the specified object and verifying the expected result
 	object, foo, bar = setupTest(store, klass)
@@ -53,10 +55,12 @@ def testOther(store, klass, expectedResult):
 		cleanupTest(store, klass)
 
 def testSelf(store, klass, expectedResult):
-	"""
-	Test creating an instance of a specified class, that points to an instance of Foo,
-	which itself points to an instance of Bar.  Then try to delete the object of
-	the specified class, and make sure that the expected result happens.
+	"""Test "self".
+
+	Test creating an instance of a specified class, that points to an instance
+	of Foo, which itself points to an instance of Bar. Then try to delete the
+	object of the specified class, and make sure that the expected result happens.
+
 	"""
 	# Run the test, deleting the specified object and verifying the expected result
 	object, foo, bar = setupTest(store, klass)
@@ -66,10 +70,12 @@ def testSelf(store, klass, expectedResult):
 		cleanupTest(store, klass)
 
 def testSelfList(store, klass, expectedResult):
-	"""
-	Test creating an instance of a specified class, pointed to by the list attribute in
-	an instance of Foo, which itself points to an instance of Bar.  Then try to delete the Foo,
-	and make sure that the expected result happens.
+	"""Test list of "self".
+
+	Test creating an instance of a specified class, pointed to by the list
+	attribute in an instance of Foo, which itself points to an instance of Bar.
+	Then try to delete the Foo, and make sure that the expected result happens.
+
 	"""
 	# Run the test, deleting the specified object and verifying the expected result
 	object, foo, bar = setupListTest(store, klass)
@@ -79,10 +85,13 @@ def testSelfList(store, klass, expectedResult):
 		cleanupTest(store, klass)
 
 def testListUpdate(store, klass, expectedResult):
-	"""
-	Test creating an instance of a specified class, pointed to by the list attribute in
-	an instance of Foo, which itself points to an instance of Bar.  Then try to delete the specified class,
-	and make sure that Foo's list attribute is updated automatically.
+	"""Test list update.
+
+	Test creating an instance of a specified class, pointed to by the list
+	attribute in an instance of Foo, which itself points to an instance of Bar.
+	Then try to delete the specified class, and make sure that Foo's list
+	attribute is updated automatically.
+
 	"""
 	# Run the test, deleting the specified object and verifying the expected result
 	object, foo, bar = setupListTest(store, klass)
@@ -95,9 +104,11 @@ def testListUpdate(store, klass, expectedResult):
 
 
 def setupTest(store, klass):
-	"""
-	Setup 3 objects: one of the specified klass, pointing to a Foo, pointing to a Bar.
-	Returns tuple (object of specified klass, foo, bar).
+	"""Setup test.
+
+	Setup 3 objects: one of the specified klass, pointing to a Foo,
+	pointing to a Bar. Returns tuple (object of specified klass, foo, bar).
+
 	"""
 	# Create a Foo and a Bar, with the Foo pointing to the Bar
 	bar = Bar()
@@ -171,18 +182,19 @@ def runTest(store, klass, objectToDelete, expectedResult):
 def cleanupTest(store, klass):
 	# Clean out all leftover objects
 	store.clear()
-	store.executeSQL('delete from Foo;')
-	store.executeSQL('delete from Bar;')
-	store.executeSQL('delete from %s;' % klass.__name__)
+	store.executeSQLTransaction(['delete from Foo;', 'delete from Bar;',
+		'delete from %s;' % klass.__name__])
 	print
 
 
 def testCascadeWithRequiredBackRef(store):
-	"""
-	See also: Classes.csv Engine & Engine Part
-	The deal is that deleting an Engine should delete all its EngineParts via the cascade set on
-	the parts list attribute. Previously, there was a bug with this if the back ref attr
-	(EnginePart.engine in this case) was required (isRequired=True).
+	"""See also: Classes.csv Engine & Engine Part
+
+	The deal is that deleting an Engine should delete all its EngineParts
+	via the cascade set on the parts list attribute. Previously, there was
+	a bug with this if the back ref attr (EnginePart.engine in this case)
+	was required (isRequired=True).
+
 	"""
 	from Engine import Engine
 	from EnginePart import EnginePart

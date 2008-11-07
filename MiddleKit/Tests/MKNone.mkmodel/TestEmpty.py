@@ -88,5 +88,5 @@ b:int,i:int,l:long,f:float,s:string
 
 		# Reset
 		store.clear()
-		store.executeSQL('delete from Thing;')
+		store.executeSQLTransaction('delete from Thing;')
 		del t

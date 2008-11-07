@@ -17,10 +17,7 @@ class ModelUser:
 	## Settings ##
 
 	def setting(self, name, default=NoDefault):
-		"""
-		Returns the given setting which is actually just taken from
-		the model.
-		"""
+		"""Return the given setting which is actually just taken from the model."""
 		return self._model.setting(name, default)
 
 
@@ -44,7 +41,12 @@ class ModelUser:
 		self.modelWasSet()
 
 	def modelWasSet(self):
-		""" Invoked by setModel() or readModelFileNamed() as a hook for taking action on this event. Invokes installMixIns(). """
+		"""Perform additional set up of the store after the model is set.
+
+		Invoked by setModel() or readModelFileNamed() as a hook for taking
+		action on this event. Invokes installMixIns().
+
+		"""
 		self.installMixIns()
 
 
@@ -96,16 +98,16 @@ class ModelUser:
 	## Warning ##
 
 	def warning(self, msg):
-		"""
-		Invoked by self for any kind of appropriate warning
-		that doesn't warrant an exception being
-		thrown. Preferably, this should be invoked from a
-		method that is invoked when the "bad event"
-		occurs. This allows subclasses to override that method
-		and potentially customize the behavior, including
-		providing more debugging information.
+		"""Output a warning.
+
+		Invoked by self for any kind of appropriate warning that doesn't
+		warrant an exception being thrown. Preferably, this should be invoked
+		from a method that is invoked when the "bad event" occurs. This allows
+		subclasses to override that method and potentially customize the
+		behavior, including providing more debugging information.
 
 		This implementation writes the msg to stdout.
+
 		"""
 		print 'WARNING:', msg
 
@@ -113,10 +115,11 @@ class ModelUser:
 	## Self utility ##
 
 	def modulesForClass(self, pyClass, modules=None):
-		"""
-		Returns a list of modules for pyClass, going up the
-		chain of ancestor classes, stopping short before
-		ModelUser. Utility method for installMixIns.
+		"""Return the modules for the class.
+
+		Returns a list of modules for pyClass, going up the chain of ancestor
+		classes, stopping short before ModelUser. Utility method for installMixIns.
+
 		"""
 		if modules is None:
 			modules = []

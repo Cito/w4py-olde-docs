@@ -178,10 +178,7 @@ class Klass:
 			self.sqlSerialColumnName().ljust(self.maxNameWidth()), constraintName)
 
 	def sqlTableName(self):
-		"""
-		Returns "[name]" so that table names do not conflict with SQL
-		reserved words.
-		"""
+		"""Return "[name]" so that table names do not conflict with SQL reserved words."""
 		return '[%s]' % self.name()
 
 	def writeIndexSQLDefsAfterTable(self, wr):
@@ -224,15 +221,13 @@ class Attr:
 		return '[' + self.name() + ']'
 
 	def sqlColumnName(self):
-		""" Returns the SQL column name corresponding to this attribute, consisting of self.name() + self.sqlTypeSuffix(). """
+		"""Return the SQL column name corresponding to this attribute."""
 		if not hasattr(self, '_sqlColumnName'):
 			self._sqlColumnName = self.name() # + self.sqlTypeSuffix()
 		return '[' + self._sqlColumnName + ']'
 
 	def uniqueSQL(self):
-		"""
-		Returns the SQL to use within a column definition to make it unique.
-		"""
+		"""Return the SQL to use within a column definition to make it unique."""
 		if not self.boolForKey('isUnique'):
 			return ''
 		return ' constraint [UQ__%s__%s] unique' % (

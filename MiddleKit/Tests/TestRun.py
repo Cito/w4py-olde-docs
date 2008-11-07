@@ -25,14 +25,16 @@ def test(filename, configFilename, pyFilename, deleteData):
 		objectStoreClass = names['c']
 		store = objectStoreClass(**storeArgs)
 		store.readModelFileNamed(filename, configFilename=configFilename)
-		assert store.model()._havePythonClasses # @@@@@@
+		assert store.model()._havePythonClasses # @@
 
 		# Clear the database
 		if deleteData:
 			print 'Deleting all database records for test...'
+			transaction = []
 			for klass in store.model().klasses().values():
 				if not klass.isAbstract():
-					ObjectStore.Store.executeSQL('delete from %s;' % klass.name())
+					transaction.append('delete from %s;' % klass.name())
+			ObjectStore.Store.executeSQLTransaction(transaction)
 
 		# Run the test
 		results = {}

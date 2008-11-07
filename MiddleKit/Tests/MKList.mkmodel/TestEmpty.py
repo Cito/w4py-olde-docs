@@ -9,8 +9,7 @@ def NoException(codeString):
 
 def reset(store):
 	store.clear()
-	store.executeSQL('delete from Foo;')
-	store.executeSQL('delete from Bar;')
+	store.executeSQLTransaction(['delete from Foo;', 'delete from Bar;'])
 
 
 def testAddToBars(store):

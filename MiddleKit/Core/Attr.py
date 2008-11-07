@@ -13,8 +13,10 @@ nameRE = re.compile(r'^([A-Za-z_][A-Za-z_0-9]*)$')
 
 
 class Attr(MiddleDict, ModelObject):
-	"""
-	An Attr represents an attribute of a Klass mostly be being a dictionary-like object.
+	"""An Attr represents an attribute of a Klass.
+
+	The Attr objects behave like dictionaries.
+
 	"""
 
 	def __init__(self, dict):
@@ -36,28 +38,24 @@ class Attr(MiddleDict, ModelObject):
 		return self.data['Name']
 
 	def isRequired(self):
-		"""
-		Returns true if a value is required for this attribute. In Python, that means the
-		value cannot be None. In relational theory terms, that means the value cannot be
-		NULL.
+		"""Return true if a value is required for this attribute.
+
+		In Python, that means the value cannot be None. In relational theory
+		terms, that means the value cannot be NULL.
+
 		"""
 		return self.boolForKey('isRequired')
 
 	def setKlass(self, klass):
-		""" Sets the klass that the attribute belongs to. """
+		"""Set the klass that the attribute belongs to."""
 		self._klass = klass
 
 	def klass(self):
-		"""
-		Returns the klass that this attribute is declared in and, therefore, belongs to.
-		"""
+		"""Return the klass that this attribute is declared in and, therefore, belongs to."""
 		return self._klass
 
 	def pyGetName(self):
-		"""
-		Returns the name that should be used for the Python "get" accessor method for this
-		attribute.
-		"""
+		"""Return the name that should be used for the Python "get" accessor method for this attribute."""
 		if self._getPrefix is None:
 			self._computePrefixes()
 		name = self.name()
@@ -67,10 +65,7 @@ class Attr(MiddleDict, ModelObject):
 			return self._getPrefix + name
 
 	def pySetName(self):
-		"""
-		Returns the name that should be used for the Python "set" accessor method for this
-		attribute.
-		"""
+		"""Return the name that should be used for the Python "set" accessor method for this attribute."""
 		if self._setPrefix is None:
 			self._computePrefixes()
 		name = self.name()
@@ -80,12 +75,10 @@ class Attr(MiddleDict, ModelObject):
 			return self._setPrefix + name
 
 	def setting(self, name, default=NoDefault):
-		"""
-		Returns the value of a particular configuration setting taken
-		from the model.
+		"""Return the value of a particular configuration setting taken from the model.
 
-		Implementation note: Perhaps a future version should ask the
-		klass and so on up the chain.
+		Implementation note: Perhaps a future version should ask the klass and so on up the chain.
+
 		"""
 		return self.model().setting(name, default)
 

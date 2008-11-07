@@ -1,3 +1,4 @@
+
 def test(store):
 	from Foo import Foo
 
@@ -19,7 +20,8 @@ def test(store):
 	assert f.max500() == b500
 	assert f.max70000() == c70000
 
-	difficultString = ''.join([chr(i) for i in range(1, 256)])
+	# use only ascii so this should work with all db encodings
+	difficultString = ''.join([chr(i) for i in range(1, 128)])
 	f = Foo()
 	f.setMax500(difficultString)
 	store.addObject(f)
@@ -28,4 +30,3 @@ def test(store):
 	store.clear()
 	result = store.fetchObject(Foo, serialNum)
 	assert result.max500() == difficultString
-

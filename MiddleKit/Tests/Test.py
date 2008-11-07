@@ -182,9 +182,7 @@ class Test:
 				out.write('\n')
 
 	def printResults(self, results):
-		"""
-		Summarize the results of each test.
-		"""
+		"""Summarize the results of each test."""
 		print
 		print 'RESULTS'
 		print '-------'

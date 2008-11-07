@@ -101,16 +101,16 @@ def storeFoo(store, f):
 	store.clear()
 
 	results = store.fetchObjectsOfClass(Foo)
-	assert len(results) == 1
-#	results[0].dumpAttrs()
+	assert len(results) == 1, len(results)
+	# results[0].dumpAttrs()
 
-	store.executeSQL('delete from Foo;')
+	store.executeSQLTransaction('delete from Foo;')
 
 
 def testNone(store):
 	print 'Testing None.'
 
-	store.executeSQL('delete from Foo;')
+	store.executeSQLTransaction('delete from Foo;')
 
 	f = Foo()
 	f.setD(None)

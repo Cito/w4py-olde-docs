@@ -1,5 +1,7 @@
-from SQLObjectStore import SQLObjectStore
 from mx import ODBC # DR: 07-12-02 The ODBC.Windows module is flawed
+
+from SQLObjectStore import SQLObjectStore
+
 ODBC.Windows.threadsafety = ODBC.Windows.threadlevel
 # mx.ODBC.Windows has a threadlevel, not a threadsafety,
 # even though DBABI2.0 says its threadsafety
@@ -13,8 +15,7 @@ except NameError:
 
 class MSSQLObjectStore(SQLObjectStore):
 	_threadSafety = ODBC.Windows.threadsafety
-	"""
-	MSSQLObjectStore does the obvious: it implements an object store backed by a MSSQL database.
+	"""MSSQLObjectStore implements an object store backed by a MSSQL database.
 
 	mx.ODBC is required, which in turn requires mx BASE:
 	http://egenix.com/files/python/
@@ -37,16 +38,21 @@ class MSSQLObjectStore(SQLObjectStore):
 	connection option SQL.CURSOR_TYPE to e.g. SQL.CURSOR_DYNAMIC:
 
 		dbc.setconnectoption(SQL.CURSOR_TYPE, SQL.CURSOR_DYNAMIC)
+
 	- - -
 	"""
 
 	def dbapiConnect(self):
-		"""
-		Returns a DB API 2.0 connection. This is a utility method invoked by connect(). Subclasses should implement this, making use of self._dbArgs (a dictionary specifying host, username, etc.).
-		Subclass responsibility.
+		"""Return a DB API 2.0 connection.
+
+		This is a utility method invoked by connect(). Subclasses should
+		implement this, making use of self._dbArgs (a dictionary specifying
+		host, username, etc.). Subclass responsibility.
+
 		MSSQL 2000 defaults to autocommit ON (at least mine does)
-		if you want it off, do not send any arg for clear_auto_commit or set it to 1
+		If you want it off, do not send any arg for clear_auto_commit or set it to 1
 		# self._db = ODBC.Windows.Connect(dsn='myDSN',clear_auto_commit=0)
+
 		"""
 		return ODBC.Windows.Connect(**self._dbArgs)
 
@@ -107,10 +113,7 @@ class MSSQLObjectStore(SQLObjectStore):
 class Klass:
 
 	def sqlTableName(self):
-		"""
-		Returns "[name]" so that table names do not conflict with SQL
-		reserved words.
-		"""
+		"""Return "[name]" so that table names do not conflict with SQL reserved words."""
 		return '[%s]' % self.name()
 
 
@@ -127,7 +130,7 @@ class ObjRefAttr:
 	def sqlColumnName(self):
 		if not self._sqlColumnName:
 			if self.setting('UseBigIntObjRefColumns', False):
-				self._sqlColumnName = '[' + self.name() + 'Id' + ']'  # old way: one 64 bit column
+				self._sqlColumnName = '[' + self.name() + 'Id' + ']' # old way: one 64 bit column
 			else:
 				# new way: 2 int columns for class id and obj id
 				self._sqlColumnName = '[%s],[%s]' % self.sqlColumnNames()

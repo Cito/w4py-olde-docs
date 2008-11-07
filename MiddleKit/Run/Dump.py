@@ -11,9 +11,13 @@ from getopt import getopt
 
 
 def FixPathForMiddleKit(verbose=0):
-	"""
-	Enhances sys.path so that Dump.py can import MiddleKit.whatever.
-	We *always* enhance the sys.path so that Dump.py is using the MiddleKit that contains him, as opposed to whatever happens to be found first in the Python path. That's an subtle but important feature for those of us who sometimes have more than one MiddleKit on our systems.
+	"""Enhance sys.path so that Dump.py can import MiddleKit.whatever.
+
+	We *always* enhance the sys.path so that Dump.py is using the MiddleKit
+	that contains him, as opposed to whatever happens to be found first
+	in the Python path. That's an subtle but important feature for those of us
+	who sometimes have more than one MiddleKit on our systems.
+	
 	"""
 	v = verbose
 	import os, sys

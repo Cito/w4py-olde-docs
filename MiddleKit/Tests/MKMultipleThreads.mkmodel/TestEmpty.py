@@ -5,10 +5,12 @@ import time
 # from Python docs on random module
 def create_generators(num, delta, firstseed=None):
 	"""Return list of num distinct generators.
+
 	Each generator has its own unique segment of delta elements
 	from Random.random()'s full period.
 	Seed the first generator with optional arg firstseed (default
 	is None, to seed from current time).
+
 	"""
 
 	from random import Random
@@ -24,10 +26,12 @@ def create_generators(num, delta, firstseed=None):
 
 
 def test(store):
-	"""
+	"""Test method.
+
 	This tests that the ObjectStore can track new, changed and deleted objects
-	on a per-thread basis, so that one thread calling store.saveChanges() doesn't
-	commit objects which a different thread added.
+	on a per-thread basis, so that one thread calling store.saveChanges()
+	doesn't commit objects which a different thread added.
+	
 	"""
 
 	# store.hasChangesForCurrentThread()
@@ -44,7 +48,7 @@ def test(store):
 			self._finished = Semaphore(0)
 
 		def waitUntilFinished(self):
-			""" Called by a different thread to wait until this thread is finished. """
+			"""Called by a different thread to wait until this thread is finished."""
 			self._finished.acquire()
 
 		def waitRandom(self):
@@ -56,7 +60,7 @@ def test(store):
 			print '%s: %s' % (self.getName(), msg)
 
 		def create(self):
-			""" create and add an object to the store """
+			"""Create and add an object to the store."""
 			store = self._store
 			p = Person()
 			p.setId('bob')
@@ -70,7 +74,7 @@ def test(store):
 			return p
 
 		def modify(self, p):
-			""" modify an object, then save the changes to the store """
+			"""Modify an object, then save the changes to the store."""
 			store = self._store
 			p.setFirstName('bobbie')
 			p.setFirstName('Roberta')
@@ -83,7 +87,7 @@ def test(store):
 			assert not store.hasChangesForCurrentThread()
 
 		def delete(self, p):
-			""" delete an object, then save the changes to the store """
+			"""Delete an object, then save the changes to the store."""
 			store = self._store
 			store.deleteObject(p)
 			self.waitRandom()

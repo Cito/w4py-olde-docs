@@ -176,11 +176,11 @@ class Model(Configurable):
 
 
 	def readParents(self, parentFilenames=None):
-		"""
-		Reads the parent models of the current model, as
-		specified in the 'Inherit' setting.
+		"""Read parent models.
 
-		The attributes _parents and _searchOrder are set.
+		Reads the parent models of the current model, as specified in the
+		'Inherit' setting. The attributes _parents and _searchOrder are set.
+
 		"""
 		if parentFilenames is None:
 			parentFilenames = self.setting('Inherit', [])

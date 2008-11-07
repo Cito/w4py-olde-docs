@@ -1,17 +1,31 @@
 import sys
-from SQLObjectStore import SQLObjectStore
+
+connectionPool = 1
+try:
+	import psycopg2 as dbi  # psycopg2 version 2
+	from psycopg2 import Warning, DatabaseError
+	from psycopg2.extensions import QuotedString
+except ImportError:
+	try:
+		import psycopg as dbi  # psycopg version 1
+		from psycopg import Warning, DatabaseError
+		from psycopg.extensions import QuotedString
+	except ImportError:
+		connectionPool = 0
+		import pgdb as dbi  # PyGreSQL
+		from pgdb import Warning, DatabaseError
+		from pgdb import _quote as QuotedString
+
+from MiscUtils import NoDefault
+from MiscUtils.MixIn import MixIn
 from MiddleKit.Run.ObjectKey import ObjectKey
 from MiddleObject import MiddleObject
-from MiscUtils.MixIn import MixIn
-import psycopg as dbi  # psycopg adapter; apt-get install python2.2-psycopg
-from psycopg import Warning, DatabaseError
-from SQLObjectStore import UnknownSerialNumberError
-from MiscUtils import NoDefault
+
+from SQLObjectStore import SQLObjectStore, UnknownSerialNumberError
 
 
 class PostgreSQLObjectStore(SQLObjectStore):
-	"""
-	PostgresObjectStore does the obvious: it implements an object store backed by a PostgreSQL database.
+	"""PostgresObjectStore implements an object store backed by a PostgreSQL database.
 
 	The connection arguments passed to __init__ are:
 		- host
@@ -22,24 +36,28 @@ class PostgreSQLObjectStore(SQLObjectStore):
 		- client_flag
 
 	You wouldn't use the 'db' argument, since that is determined by the model.
-	"""
 
-	def setting(self, name, default=NoDefault):
-		# jdh: psycopg doesn't seem to work well with DBPool -- I've experienced
-		# requests blocking indefinitely (deadlock?).  Besides, it does its
-		# own connection pooling internally, so DBPool is unnecessary.
-		if name == 'SQLConnectionPoolSize':
-			return 0
-		return SQLObjectStore.setting(self, name, default)
+	"""
 
 	def newConnection(self):
 		args = self._dbArgs.copy()
 		self.augmentDatabaseArgs(args)
 		return self.dbapiModule().connect(**args)
 
-	def doneWithConnection(self, conn):
-		# psycopg doesn't like connections to be closed presumably because of pooling
-		pass
+	if connectionPool:
+
+		# psycopg doesn't seem to work well with DBPool. Besides, it does
+		# its own connection pooling internally, so DBPool is unnecessary.
+
+		def setting(self, name, default=NoDefault):
+			if connectionPool and name == 'SQLConnectionPoolSize':
+				return 0
+			return SQLObjectStore.setting(self, name, default)
+
+		# psycopg doesn't like connections to be closed because of pooling
+
+		def doneWithConnection(self, conn):
+				pass
 
 	def augmentDatabaseArgs(self, args, pool=0):
 		if not args.get('database'):
@@ -87,7 +105,7 @@ class StringAttr:
 
 	def sqlForNonNone(self, value):
 		"""psycopg provides a quoting function for string -- use it."""
-		return "%s" % dbi.QuotedString(value)
+		return "%s" % QuotedString(value)
 
 
 class BoolAttr:

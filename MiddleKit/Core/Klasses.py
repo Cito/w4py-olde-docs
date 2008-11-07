@@ -14,10 +14,10 @@ except NameError:
 
 
 class Klasses(ModelObject, UserDict):
-	"""
-	A Klasses object can read a list of class specifications in a spreadsheet (.csv).
+	"""A Klasses object can read a list of class specifications in a spreadsheet (.csv).
 
 	Note that Klasses inherits UserDict, allowing you to access class specifications by name.
+
 	"""
 
 
@@ -37,9 +37,13 @@ class Klasses(ModelObject, UserDict):
 		return ['ModelObject', 'Klasses', 'Klass', 'Attr', 'BasicTypeAttr', 'ObjRefAttr', 'EnumAttr', 'DateTimeAttr']
 
 	def initTypeMap(self):
-		"""
-		Initializes self._typeNamesToAttrClassNames which maps MiddleKit type names (like int and enum) to the name of the attribute class that would implement them.
-		Mapping to class names rather than actual classes is key, because in __init__, a different set of attribute classes can be passed in.
+		"""Initialize the type map.
+
+		Initializes self._typeNamesToAttrClassNames which maps MiddleKit type
+		names (like int and enum) to the name of the attribute class that would
+		implement them. Mapping to class names rather than actual classes is key,
+		because in __init__, a different set of attribute classes can be passed in.
+
 		"""
 		map = {}
 		names = 'bool int long float string enum date time list ObjRef decimal'
@@ -76,7 +80,11 @@ class Klasses(ModelObject, UserDict):
 		return self._filename
 
 	def klassesInOrder(self):
-		""" Returns a list of all the Klasses in the order they were declared. Do not modify the list. """
+		"""Return a list of all the Klasses in the order they were declared.
+
+		Do not modify the list.
+
+		"""
 		return self._klasses
 
 
@@ -117,9 +125,10 @@ class Klasses(ModelObject, UserDict):
 			raise
 
 	def awakeFromRead(self, model):
-		"""
-		Performs further initialization.
+		"""Perform further initialization.
+
 		Expected to be invoked by the model.
+
 		"""
 		assert self._model is model
 
@@ -132,9 +141,7 @@ class Klasses(ModelObject, UserDict):
 			klass.awakeFromRead(self)
 
 	def __getstate__(self):
-		"""
-		For pickling purposes, the back reference to the model that owns self is removed.
-		"""
+		"""For pickling purposes, the back reference to the model that owns self is removed."""
 		assert self._model
 		attrs = self.__dict__.copy()
 		del attrs['_model']
@@ -144,7 +151,11 @@ class Klasses(ModelObject, UserDict):
 	## Adding classes ##
 
 	def addKlass(self, klass):
-		""" Restrictions: Cannot add two classes with the same name. """
+		"""Add a class definition.
+
+		Restrictions: Cannot add two classes with the same name.
+
+		"""
 		name = klass.name()
 		assert not self.has_key(name), 'Already have %s.' % name
 		self._klasses.append(klass)
@@ -155,10 +166,12 @@ class Klasses(ModelObject, UserDict):
 	## Self utility ##
 
 	def pyClassNameForAttrDict(self, dict):
-		"""
-		Given a raw attribute definition (in the form of a dictionary), this method
-		returns the name of the Python class that should be instantiated for it.
-		This method relies primarily on dict['Type'].
+		"""Return class for attribute definition.
+
+		Given a raw attribute definition (in the form of a dictionary),
+		this method returns the name of the Python class that should be
+		instantiated for it. This method relies primarily on dict['Type'].
+
 		"""
 		typeName = dict['Type']
 		if not typeName:
@@ -177,17 +190,14 @@ class Klasses(ModelObject, UserDict):
 			return 'ObjRefAttr'
 
 	def setting(self, name, default=NoDefault):
-		"""
-		Returns the value of a particular configuration setting taken
-		from the model.
-		"""
+		"""Return the value of a particular configuration setting taken from the model."""
 		return self._model.setting(name, default)
 
 
 	## Debugging ##
 
 	def dump(self):
-		""" Prints each class. """
+		"""Print each class."""
 		for klass in self._klasses:
 			print klass
 

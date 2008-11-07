@@ -19,15 +19,23 @@ except NameError: # fallback for Python < 2.4
 
 
 class Klass(MiddleDict, ModelObject):
-	"""
-	A Klass represents a class specification consisting primarily of a name and a list of attributes.
+	"""A Klass represents a class specification.
+
+	It is consisting primarily of a name and a list of attributes.
+	
 	"""
 
 
 	## Init ##
 
 	def __init__(self, klassContainer, dict=None):
-		""" Initializes a Klass definition with a raw dictionary, typically read from a file. The 'Class' field contains the name and can also contain the name of the superclass (like "Name : SuperName"). Multiple inheritance is not yet supported. """
+		"""Initialize a Klass definition with a raw dictionary.
+
+		This is typically read from a file. The 'Class' field contains the name
+		and can also contain the name of the superclass (like "Name : SuperName").
+		Multiple inheritance is not yet supported.
+
+		"""
 		MiddleDict.__init__(self, {})
 		self._klassContainer = klassContainer
 		self._attrsList = []
@@ -74,9 +82,10 @@ class Klass(MiddleDict, ModelObject):
 
 
 	def awakeFromRead(self, klasses):
-		"""
-		Performs further initialization. Invoked by Klasses after all
-		basic Klass definitions have been read.
+		"""Perform further initialization.
+
+		Invoked by Klasses after all basic Klass definitions have been read.
+
 		"""
 		assert self._klasses is klasses
 
@@ -89,7 +98,8 @@ class Klass(MiddleDict, ModelObject):
 			attr.awakeFromRead()
 
 	def _makeAllAttrs(self):
-		"""
+		"""Make all attributes.
+
 		Makes list attributes accessible via methods for the following:
 			allAttrs - every attr of the klass including inherited and derived attributes
 			allDataAttrs - every attr of the klass including inherited, but NOT derived
@@ -98,6 +108,7 @@ class Klass(MiddleDict, ModelObject):
 		...and a dictionary attribute used by lookupAttr().
 
 		Does nothing if called extra times.
+
 		"""
 		if self._allAttrs is not None:
 			return
@@ -145,7 +156,12 @@ class Klass(MiddleDict, ModelObject):
 	## Id ##
 
 	def id(self):
-		""" Returns the id of the class, which is an integer. Ids can be fundamental to storing object references in concrete object stores. This method will throw an exception if setId() was not previously invoked. """
+		"""Return the id of the class, which is an integer.
+
+		Ids can be fundamental to storing object references in concrete object stores.
+		This method will throw an exception if setId() was not previously invoked.
+
+		"""
 		return self._id
 
 	def setId(self, id):
@@ -181,10 +197,11 @@ class Klass(MiddleDict, ModelObject):
 	## Ancestors ##
 
 	def lookupAncestorKlass(self, name, default=NoDefault):
-		"""
-		Searches for and returns the ancestor klass with the given
-		name. Raises an exception if no such klass exists, unless a
-		default is specified (in which case it is returned).
+		"""Search for and return the ancestor klass with the given name.
+
+		Raises an exception if no such klass exists, unless a default
+		is specified (in which case it is returned).
+
 		"""
 		if self._superklass:
 			if self._superklass.name() == name:
@@ -198,9 +215,11 @@ class Klass(MiddleDict, ModelObject):
 				return default
 
 	def isKindOfKlassNamed(self, name):
-		"""
+		"""Check whether the klass is from the given kind.
+
 		Returns true if the klass is the same as, or inherits from,
 		the klass with the given name.
+
 		"""
 		if self.name() == name:
 			return True
@@ -217,7 +236,7 @@ class Klass(MiddleDict, ModelObject):
 		self._subklasses.append(klass)
 
 	def descendants(self, init=1, memo=None):
-		""" Return all descendant klasses of this klass.  """
+		"""Return all descendant klasses of this klass."""
 		if memo is None:
 			memo = {}
 		if memo.has_key(self):
@@ -238,14 +257,19 @@ class Klass(MiddleDict, ModelObject):
 		attr.setKlass(self)
 
 	def attrs(self):
-		""" Returns a list of all the klass' attributes not including inheritance. """
+		"""Return a list of all the klass' attributes not including inheritance."""
 		return self._attrsList
 
 	def hasAttr(self, name):
 		return self._attrsByName.has_key(name)
 
 	def attr(self, name, default=NoDefault):
-		""" Returns the attribute with the given name. If no such attribute exists, an exception is raised unless a default was provided (which is then returned). """
+		"""Return the attribute with the given name.
+
+		If no such attribute exists, an exception is raised unless a default
+		was provided (which is then returned).
+
+		"""
 		if default is NoDefault:
 			return self._attrsByName[name]
 		else:
@@ -261,26 +285,30 @@ class Klass(MiddleDict, ModelObject):
 			return self._allAttrsByName.get(name, default)
 
 	def allAttrs(self):
-		"""
-		Returns a list of all attributes, including those that are
-		inherited and derived. The order is top down; that is,
-		ancestor attributes come first.
+		"""Returns a list of all attributes.
+
+		This includes those attributes that are inherited and derived.
+		The order is top down; that is, ancestor attributes come first.
+
 		"""
 		return self._allAttrs
 
 	def allDataAttrs(self):
-		"""
-		Returns a list of all data attributes, including those that
-		are inherited. The order is top down; that is, ancestor
-		attributes come first. Derived attributes are not included
-		in the list.
+		"""Return a list of all data attributes.
+
+		This includes those attributes that are inherited.
+		The order is top down; that is, ancestor attributes come first.
+		Derived attributes are not included in the list.
+
 		"""
 		return self._allDataAttrs
 
 	def allDataRefAttrs(self):
-		"""
-		Returns a list of all data attributes that are obj refs or
-		lists, including those that are inherited.
+		"""Return a list of all data referencing attributes.
+
+		Returns a list of all data attributes that are obj refs or lists,
+		including those that are inherited.
+
 		"""
 		return self._allDataRefAttrs
 
@@ -291,9 +319,7 @@ class Klass(MiddleDict, ModelObject):
 		return self._klasses
 
 	def setKlasses(self, klasses):
-		"""
-		Sets the klasses object of the klass. This is the klass' owner.
-		"""
+		"""Set the klasses object of the klass. This is the klass' owner."""
 		self._klasses = klasses
 
 	def model(self):
@@ -306,9 +332,9 @@ class Klass(MiddleDict, ModelObject):
 		return self._isAbstract
 
 	def pyClass(self):
-		"""
-		Returns the Python class that corresponds to this class. This
-		request will even result in the Python class' module being
+		"""Return the Python class that corresponds to this class.
+
+		This request will even result in the Python class' module being
 		imported if necessary. It will also set the Python class
 		attribute _mk_klass which is used by MiddleKit.Run.MiddleObject.
 
@@ -323,10 +349,12 @@ class Klass(MiddleDict, ModelObject):
 		return self._pyClass
 
 	def backObjRefAttrs(self):
-		"""
+		"""Return a list of all potentially referencing attributes.
+
 		Returns a list of all ObjRefAttrs in the given object model that can
-		potentially refer to this object.  The list does NOT include attributes
+		potentially refer to this object. The list does NOT include attributes
 		inherited from superclasses.
+
 		"""
 		if self._backObjRefAttrs is None:
 			backObjRefAttrs = []
@@ -347,10 +375,7 @@ class Klass(MiddleDict, ModelObject):
 		return self._backObjRefAttrs
 
 	def setting(self, name, default=NoDefault):
-		"""
-		Returns the value of a particular configuration setting taken
-		from the model.
-		"""
+		"""Return the value of a particular configuration setting taken from the model."""
 		return self._klassContainer.setting(name, default)
 
 
@@ -391,16 +416,17 @@ class Klass(MiddleDict, ModelObject):
 	## Model support ##
 
 	def willBuildDependencies(self):
-		"""
-		Preps the klass for buildDependencies().
-		"""
+		"""Preps the klass for buildDependencies()."""
 		self._dependencies = []  # who self depends on
 		self._dependents = []  # who depends on self
 
 	def buildDependencies(self):
-		"""
-		A klass' immediate dependencies are its ancestor classes (which may have auxilliary tables
-		such as enums), the target klasses of all its obj ref attrs and their descendant classes.
+		"""Build dependencies of the klass.
+
+		A klass' immediate dependencies are its ancestor classes (which may
+		have auxilliary tables such as enums), the target klasses of all its
+		obj ref attrs and their descendant classes.
+
 		"""
 		if self._dependents is not None:
 			# already done

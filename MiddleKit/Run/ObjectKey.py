@@ -1,17 +1,24 @@
 
 class ObjectKey:
-	"""
-	An ObjectKey is used by ObjectStore for keeping track of objects in memory.
+	"""An ObjectKey is used by ObjectStore for keeping track of objects in memory.
 
-	Currently a key is equal to the class name of the object combined with the object's serial number, although as a user of object keys, you don't normally need to know what's inside them.
-	"""
+	Currently a key is equal to the class name of the object combined
+	with the object's serial number, although as a user of object keys,
+	you don't normally need to know what's inside them.
 
+	"""
 
 	def __init__(self):
 		pass
 
 	def initFromObject(self, object):
-		""" Initializes the key and potentially invokes object.setSerialNum() if the object does not have one. The key does not maintain a reference to either the object or the store. """
+		"""Initialize from object.
+
+		Initializes the key and potentially invokes object.setSerialNum()
+		if the object does not have one. The key does not maintain a reference
+		to either the object or the store.
+
+		"""
 		self._className = object.__class__.__name__
 		self._serialNum = object.serialNum()
 		if self._serialNum is 0:

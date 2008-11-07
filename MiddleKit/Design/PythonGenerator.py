@@ -41,7 +41,11 @@ class Model:
 class ModelObject:
 
 	def writePy(self, generator, out=sys.stdout):
-		""" Writes the Python code to define a table for the class. The target can be a file or a filename. """
+		"""Write the Python code to define a table for the class.
+
+		The target can be a file or a filename.
+
+		"""
 		if type(out) in StringTypes:
 			out = open(out, 'w')
 			close = 1
@@ -175,7 +179,7 @@ del sys.path[0]
 			wr('\t\t%s.readStoreData(self, store, row)\n\n' % self.supername())
 
 	def writePyAccessors(self):
-		""" Write Python accessors for attributes simply by asking each one to do so. """
+		"""Write Python accessors for attributes simply by asking each one to do so."""
 		out = self._pyOut
 		for attr in self.attrs():
 			attr.writePyAccessors(out)
@@ -184,7 +188,7 @@ del sys.path[0]
 class Attr:
 
 	def defaultValue(self):
-		""" Returns the default value as a legal Pythonic value. """
+		"""Return the default value as a legal Pythonic value."""
 		if self.has_key('Default'):
 			default = self['Default']
 			if type(default) in StringTypes:
@@ -199,10 +203,11 @@ class Attr:
 	def stringToValue(self, string):
 		# @@ 2000-11-25 ce: consider moving this to Core
 		# @@ 2000-11-25 ce: also, this might be usable in the store
-		"""
-		Returns a bona fide Python value given a string. Invokers should never pass None or blank strings.
-		Used by at least defaultValue().
-		Subclass responsibility.
+		"""Return a bona fide Python value given a string.
+
+		Invokers should never pass None or blank strings.
+		Used by at least defaultValue(). Subclass responsibility.
+
 		"""
 		raise AbstractError, self.__class__
 
@@ -555,9 +560,9 @@ class TimeAttr:
 		return 'DateTimeDeltaType'
 
 	def writePySetChecks(self, out):
-		# additional check to also allow DateTime instances.  This is what
-		# comes back from the database for 'time' columns using PostgresSQL
-		# and the psycopg adapter.
+		# additional check to also allow DateTime instances.
+		# This is what comes back from the database for 'time' columns
+		# using PostgresSQL and the psycopg adapter.
 		if mxDateTime:
 			out.write('''\
 		if isinstance(value, mxDateTime.DateTimeType):
@@ -620,7 +625,7 @@ class ObjRefAttr:
 class ListAttr:
 
 	def defaultValue(self):
-		""" Returns the default value as a legal Pythonic value. """
+		"""Return the default value as a legal Pythonic value."""
 		assert not self.get('Default', 0), 'Cannot have default values for lists.'
 		return []
 
@@ -650,11 +655,11 @@ class ListAttr:
 		self.writePyDelFrom(out, names)
 
 	def writePyGet(self, out, names):
-		""" Subclass responsibility. """
+		"""Subclass responsibility."""
 		raise AbstractError
 
 	def writePySet(self, out, names=None):
-		""" Raises an exception in order to ensure that our inherited "PySet" code generation is used. """
+		"""Raise an exception in order to ensure that our inherited "PySet" code generation is used."""
 		raise AssertionError, 'Lists do not have a set method.'
 
 	def writePyAddTo(self, out, names):

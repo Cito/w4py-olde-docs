@@ -1,9 +1,14 @@
 import os, sys, types
 from glob import glob
 from time import asctime, localtime, time
-from CodeGenerator import *
 from MiddleKit.Core.ObjRefAttr import objRefJoin
 from MiscUtils import AbstractError, StringTypes, CSVParser
+from CodeGenerator import *
+
+try: # for Python < 2.3
+	True, False
+except NameError:
+	True, False = 1, 0
 
 
 class SampleError:
@@ -17,7 +22,8 @@ class SampleError:
 
 
 class SQLGenerator(CodeGenerator):
-	"""
+	"""The MiddleKit SQL Generator class.
+	
 	This class and its associated mix-ins are responsible for generating:
 		- Create.sql
 		- InsertSample.sql
@@ -47,10 +53,7 @@ class SQLGenerator(CodeGenerator):
 	"""
 
 	def sqlDatabaseName(self):
-		"""
-		Returns the name of the database by asking the generator's
-		model.
-		"""
+		"""Return the name of the database by asking the generator's model."""
 		return self.model().sqlDatabaseName()
 
 	def generate(self, dirname):
@@ -60,10 +63,12 @@ class SQLGenerator(CodeGenerator):
 		self._model.writeInsertSamplesSQL(self, dirname)
 
 	def sqlSupportsDefaultValues(self):
-		"""
-		Subclasses must override to return 1 or 0,
-		indicating their SQL variant supports DEFAULT <value> in the CREATE statement.
+		"""Return whether SQL default values are supported.
+
+		Subclasses must override to return True or False, indicating their
+		SQL variant supports DEFAULT <value> in the CREATE statement.
 		Subclass responsibility.
+
 		"""
 		raise AbstractError
 
@@ -75,9 +80,11 @@ class ModelObject:
 class Model:
 
 	def writeCreateSQL(self, generator, dirname):
-		"""
-		Creates the directory if necessary, sets the klasses' generator,
-		and tells klasses to writeCreateSQL().
+		"""Write SQL create statements.
+
+		Creates the directory if necessary, sets the klasses' generator, and
+		tells klasses to writeCreateSQL().
+
 		"""
 		if not os.path.exists(dirname):
 			os.mkdir(dirname)
@@ -86,9 +93,10 @@ class Model:
 		self._klasses.writeCreateSQL(generator, os.path.join(dirname, 'Create.sql'))
 
 	def sqlDatabaseName(self):
-		"""
-		Returns the name of the database (which is either the 'Database'
-		setting or self.name()).
+		"""Return the name of the database.
+
+		This is either the 'Database' setting or self.name().
+
 		"""
 		name = self.setting('Database', None)
 		if name is None:
@@ -157,7 +165,7 @@ class Model:
 		pass
 
 	def writeInsertSamplesSQLForLines(self, lines, generator, file, filename):
-		readColumns = 1
+		readColumns = True
 		parse = CSVParser.CSVParser().parse
 		linenum = 0
 		klass = None
@@ -190,7 +198,7 @@ class Model:
 							samples.append('\n\n/* %s */\n\n' % klass.name())
 						tableName = klass.sqlTableName()
 						# print '>> table:', tableName
-						readColumns = 1
+						readColumns = True
 						for attr in attrs:
 							attr.refByAttrName = None
 						attrs = []
@@ -251,11 +259,11 @@ class Model:
 
 							# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
 							for attr in attrs:
-								assert not attr.get('isDerived', 0)
+								assert not attr.get('isDerived', False)
 							colNames = [attr.sqlName() for attr in attrs]
 							# print '>> cols:', columns
 							colSql = ','.join(colNames)
-							readColumns = 0
+							readColumns = False
 					else:
 						if klass is None:
 							raise SampleError(linenum,
@@ -311,13 +319,13 @@ class Model:
 				attr.refByAttr = None
 
 	def areFieldsBlank(self, fields):
-		""" Utility method for writeInsertSamplesSQLForLines(). """
+		"""Utility method for writeInsertSamplesSQLForLines()."""
 		if len(fields) == 0:
-			return 1
+			return True
 		for field in fields:
 			if field:
-				return 0
-		return 1
+				return False
+		return True
 
 	def writePostSamplesSQL(self, generator, output):
 		pass
@@ -352,9 +360,9 @@ class Klasses:
 		"""
 		if type(out) in StringTypes:
 			out = open(out, 'w')
-			close = 1
+			close = True
 		else:
-			close = 0
+			close = False
 		self.willWriteCreateSQL(generator, out)
 		self._writeCreateSQL(generator, out)
 		self.didWriteCreateSQL(generator, out)
@@ -491,7 +499,7 @@ class Klass:
 		if generator.model().setting('DeleteBehavior', 'delete') == 'mark':
 			self.writeDeletedSQLDef(generator, out)
 			wr(',\n')
-		first = 1
+		first = True
 		sqlAttrs = []
 		nonSQLAttrs = []
 		for attr in self.allAttrs():
@@ -502,7 +510,7 @@ class Klass:
 				nonSQLAttrs.append(attr)
 		for attr in sqlAttrs:
 			if first:
-				first = 0
+				first = False
 			else:
 				wr(',\n')
 			attr.writeCreateSQL(generator, out)
@@ -591,7 +599,7 @@ class Attr:
 		Those of type list do not.
 
 		"""
-		return not self.get('isDerived', 0)
+		return not self.get('isDerived', False)
 
 	def sqlForSampleInput(self, input):
 		"""Return SQL for sample input.
@@ -783,7 +791,7 @@ class DecimalAttr:
 		precision = self.get('Precision', None)
 		if precision is None:
 			# the following setting is for backwards compatibility
-			if self.klass().klasses()._model.setting('UseMaxForDecimalPrecision', 0):
+			if self.klass().klasses()._model.setting('UseMaxForDecimalPrecision', False):
 				precision = self.get('Max', None)
 				if not precision:
 					precision = None
@@ -966,7 +974,7 @@ class ListAttr:
 		raise Exception, 'Lists do not have a SQL type.'
 
 	def hasSQLColumn(self):
-		return 0
+		return False
 
 	def sqlForSampleInput(self, input):
 		raise Exception, 'Lists are implicit. They cannot have sample values.'
@@ -999,7 +1007,6 @@ class EnumAttr:
 			out.write('\t%s int not null primary key,\n' % valueColName)
 			out.write('\t%s varchar(255)\n' % nameColName)
 			out.write(');\n')
-
 			i = 0
 			sep = ''
 			for enum in self.enums():
@@ -1018,9 +1025,10 @@ class EnumAttr:
 		return flag
 
 	def externalEnumsSQLNames(self):
-		"""
-		Returns the tuple (tableName, valueColName, nameColName)
-		derived from the model setting ExternalEnumsSQLNames.
+		"""Return the tuple (tableName, valueColName, nameColName).
+
+		This is derived from the model setting ExternalEnumsSQLNames.
+
 		"""
 		names = getattr(self, '_externalEnumsSQLNames', None)
 		if names is None:
@@ -1051,7 +1059,7 @@ class PrimaryKey:
 	def __init__(self, name, klass):
 		self._name = name
 		self._klassid = klass.id()
-		self._props = {'isDerived': 0}
+		self._props = {'isDerived': False}
 
 		# this is for PostgreSQLSQLGenerator, but it's awkward to keep it there
 		self._klass = klass

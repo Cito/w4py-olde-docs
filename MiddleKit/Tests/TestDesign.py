@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-"""
-TestDesign.py
-"""
+
+"""TestDesign.py"""
 
 from TestCommon import *
 from MiddleKit.Design.Generate import Generate
@@ -20,7 +19,8 @@ def importPyClasses(klasses):
 
 
 def test(modelFilename, configFilename, workDir=workDir, toTestDir='../'):
-	"""
+	"""Test method.
+
 	modelFilename: the correct filename to the existing model
 	workDir:       the directory to remove and create and then put the
 	               generated files in
@@ -30,6 +30,7 @@ def test(modelFilename, configFilename, workDir=workDir, toTestDir='../'):
 	In most cases, the defaults for workDir and toTestDir are
 	sufficient.	In funkalicious cases, like the MKMultipleStores test,
 	overriding these defaults comes in handy.
+
 	"""
 	rmdir(workDir)     # get rid of files from previous runs
 	os.mkdir(workDir)  # make a space for the files from this run

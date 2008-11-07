@@ -36,7 +36,11 @@ except NameError:
 class CodeGenerator(ModelUser):
 
 	def name(self):
-		""" Returns the name of the generator for informational purposes. The name the is the class name. """
+		"""Return the name of the generator for informational purposes.
+
+		The name the is the class name.
+
+		"""
 		return self.__class__.__name__
 
 	def requireDir(self, dirname):

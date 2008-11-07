@@ -2,9 +2,11 @@ from Attr import Attr
 
 
 class ListAttr(Attr):
-	"""
-	This is an attribute that refers to a set of other user-defined objects.
-	It cannot include basic data types or instances of classes that are not part of the object model.
+	"""This is an attribute that refers to a set of other user-defined objects.
+
+	It cannot include basic data types or instances of classes that are not part
+	of the object model.
+
 	"""
 
 	def __init__(self, dict):
@@ -17,24 +19,22 @@ class ListAttr(Attr):
 			self['Max'] = int(self['Max'])
 
 	def className(self):
-		""" Returns the name of the base class that this obj ref attribute points to. """
+		"""Return the name of the base class that this obj ref attribute points to."""
 		return self._className
 
 	def backRefAttrName(self):
-		"""
-		Returns the name of the back-reference attribute in the referenced
-		class.  It is necessary to be able to override the default back ref
-		to create data structures like trees, in which a Middle object might
-		reference a parent and multiple children, all of the same class as
-		itself.
+		"""Return the name of the back-reference attribute in the referenced class.
+
+		It is necessary to be able to override the default back ref	to create
+		data structures like trees, in which a Middle object might reference
+		a parent and multiple children, all of the same class as itself.
+
 		"""
 		assert self._backRefAttr is not None
 		return self._backRefAttr
 
 	def awakeFromRead(self):
-		"""
-		Check that the target class and backRefAttr actually exist.
-		"""
+		"""Check that the target class and backRefAttr actually exist."""
 		# Check that for "list of Foo", Foo actually exists. And,
 		# Compute self._targetKlass.
 		from Model import ModelError

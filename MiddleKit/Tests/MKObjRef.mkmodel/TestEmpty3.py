@@ -1,7 +1,5 @@
 def test(store):
-	"""
-	Bug discovered by Chuck Esterbrook on 2002-10-29.
-	"""
+	"""Bug discovered by Chuck Esterbrook on 2002-10-29."""
 	from Bar import Bar
 	from Qux import Qux
 
