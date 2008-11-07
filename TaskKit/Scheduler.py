@@ -170,10 +170,10 @@ class Scheduler(Thread):
 	def addTimedAction(self, time, task, name):
 		"""Add a task to be run once, at a specific time."""
 		handle = self.unregisterTask(name)
-		if not handle:
-			handle = TaskHandler(self, time, 0, task, name)
-		else:
+		if handle:
 			handle.reset(time, 0, task, True)
+		else:
+			handle = TaskHandler(self, time, 0, task, name)
 		self.scheduleTask(handle)
 
 	def addActionOnDemand(self, task, name):
@@ -184,10 +184,10 @@ class Scheduler(Thread):
 
 		"""
 		handle = self.unregisterTask(name)
-		if not handle:
-			handle = TaskHandler(self, time(), 0, task, name)
-		else:
+		if handle:
 			handle.reset(time(), 0, task, True)
+		else:
+			handle = TaskHandler(self, time(), 0, task, name)
 		self.setOnDemand(handle)
 
 	def addDailyAction(self, hour, minute, task, name):
@@ -254,12 +254,11 @@ class Scheduler(Thread):
 		queue and registered anew as a periodic task.
 
 		"""
-
 		handle = self.unregisterTask(name)
-		if not handle:
-			handle = TaskHandler(self, start, period, task, name)
-		else:
+		if handle:
 			handle.reset(start, period, task, True)
+		else:
+			handle = TaskHandler(self, start, period, task, name)
 		self.scheduleTask(handle)
 
 
@@ -312,9 +311,7 @@ class Scheduler(Thread):
 		or currently running lists.
 
 		"""
-		if not self.hasRunning(name) and not self.hasOnDemand(name):
-			return False
-		else:
+		if self.hasRunning(name) or self.hasOnDemand(name):
 			handle = self.running(name)
 			if handle:
 				handle.runOnCompletion()
@@ -324,6 +321,8 @@ class Scheduler(Thread):
 				return False
 			self.runTask(handle)
 			return True
+		else:
+			return False
 
 	def stopTask(self, name):
 		"""Put an immediate halt to a running background task.
