@@ -12,7 +12,9 @@ TO DO
 
 	[ ] Test WebKit with the new changes
 
-	[ ] Task.proceed() questionable name.  run() runs and  proceed() proceeds, er, no, it inquires? Maybe shouldProceed()?
+	[ ] Task.proceed() questionable name.
+		run() runs and  proceed() proceeds, er, no, it inquires?
+		Maybe shouldProceed()?
 
 	[ ] Does a Task's run() really always have to invoke self.proceed()?
 
@@ -28,11 +30,6 @@ TO DO
 
 
 <docs>
-
-	[ ] Put this somewhere:
-		# Based on code from Jonathan Abbey, jonabbey@arlut.utexas.edu
-		# from the Ganymede Directory Management System
-		# Python port and enhancements by Tom.Schwaller@linux-community.de
 
 	[ ] Doc strings for all the major methods.
 
