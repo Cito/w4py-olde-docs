@@ -9,7 +9,8 @@ try: # for Python < 2.3
 except NameError:
 	True, False = 1, 0
 
-nameRE = re.compile(r'^([A-Za-z_][A-Za-z_0-9]*)$')
+nameRE = re.compile('^([A-Za-z_][A-Za-z_0-9]*)$')
+reservedRE = re.compile('changed|key|serialnum|store|valueforattr|valueforkey', re.I)
 
 
 class Attr(MiddleDict, ModelObject):
@@ -24,13 +25,16 @@ class Attr(MiddleDict, ModelObject):
 		for key, value in dict.items():
 			if key == 'Attribute':
 				key = 'Name'
-			# @@ 2001-02-21 ce: should we always strip string fields? Probably.
-			if type(value) in StringTypes and value.strip() == '':
+			if type(value) in StringTypes and not value.strip():
 				value = None
 			self[key] = value
-		match = nameRE.match(self['Name'])
+		name = self['Name']
+		match = nameRE.match(name)
 		if match is None or len(match.groups()) != 1:
-			raise ValueError, 'Bad name (%r) for attribute: %r.' % (self['Name'], dict)
+			raise ValueError, 'Bad name (%r) for attribute: %r.' % (name, dict)
+		match = reservedRE.match(name)
+		if match is not None:
+			raise ValueError, 'Reserved name (%r) for attribute: %r.' % (name, dict)
 		self._getPrefix = None
 		self._setPrefix = None
 
