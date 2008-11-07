@@ -39,7 +39,11 @@ class MySQLObjectStore(SQLObjectStore):
 	"""
 
 	def __init__(self, **kwargs):
-		self._autocommit = kwargs.pop('autocommit', False)
+		try:
+			self._autocommit = kwargs['autocommit']
+			del kwargs['autocommit']
+		except KeyError:
+			self._autocommit = False
 		SQLObjectStore.__init__(self, **kwargs)
 
 	def newConnection(self):
