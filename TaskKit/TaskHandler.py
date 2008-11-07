@@ -61,7 +61,7 @@ class TaskHandler:
 		a periodically executed task.
 
 		"""
-		if self._period == 0:
+		if self._period == 0 or not self._reregister:
 			return False
 		else:
 			if self._lastTime - self._startTime > self._period:

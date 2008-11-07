@@ -139,7 +139,7 @@ class Scheduler(Thread):
 		return self._onDemand.get(name, default)
 
 	def hasOnDemand(self, name):
-		"""Checks whether task with given name is in the onDemand list?"""
+		"""Checks whether task with given name is in the onDemand list."""
 		return self._onDemand.has_key(name)
 
 	def setOnDemand(self, handle):
@@ -271,11 +271,9 @@ class Scheduler(Thread):
 		or simply removed.
 
 		"""
-		handle = None
-		if self.hasScheduled(name):
-			handle = self.delScheduled(name)
-		if self.hasOnDemand(name):
-			handle = self.delOnDemand(name)
+
+		handle = (self.delRunning(name)
+			or self.delScheduled(name) or self.delOnDemand(name))
 		if handle:
 			handle.unregister()
 		return handle
@@ -427,7 +425,7 @@ class Scheduler(Thread):
 			else:
 				if handle.reschedule():
 					self.scheduleTask(handle)
-				elif not handle.startTime():
+				elif handle.isOnDemand():
 					self.setOnDemand(handle)
 					if handle.runAgain():
 						self.runTask(handle)
