@@ -10,7 +10,8 @@ except NameError:
 	True, False = 1, 0
 
 nameRE = re.compile('^([A-Za-z_][A-Za-z_0-9]*)$')
-reservedRE = re.compile('changed|key|serialnum|store|valueforattr|valueforkey', re.I)
+reservedRE = re.compile('allAttrs|changed|clone|debugStr|dumpAttrs|key|klass'
+	'|serialnum|store|valueforattr|valueforkey', re.I)
 
 
 class Attr(MiddleDict, ModelObject):
