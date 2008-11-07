@@ -340,7 +340,6 @@ class Scheduler(Thread):
 	def stopAllTasks(self):
 		"""Terminate all running tasks."""
 		for i in self._running.keys():
-			print "Stopping ", i
 			self.stopTask(i)
 
 	def disableTask(self, name):
