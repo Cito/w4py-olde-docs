@@ -92,13 +92,13 @@ class TaskHandler:
 
 		This method lets the Scheduler check to see whether this task should be
 		re-run when it terminates.
-		
+
 		"""
 		return self._rerun
 
 	def isOnDemand(self):
 		"""Return True if this task is not scheduled for periodic execution."""
-		return self._period != 0
+		return self._period == 0
 
 	def runOnCompletion(self):
 		"""Request that this task be re-run after its current completion.
