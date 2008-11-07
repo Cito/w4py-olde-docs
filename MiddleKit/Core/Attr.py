@@ -10,7 +10,7 @@ except NameError:
 	True, False = 1, 0
 
 nameRE = re.compile('^([A-Za-z_][A-Za-z_0-9]*)$')
-reservedRE = re.compile('allAttrs|changed|clone|debugStr|dumpAttrs|key|klass'
+reservedRE = re.compile('allattrs|changed|clone|debugstr|dumpattrs|key|klass'
 	'|serialnum|store|valueforattr|valueforkey', re.I)
 
 
