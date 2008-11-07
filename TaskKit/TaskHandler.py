@@ -88,9 +88,11 @@ class TaskHandler:
 		return self._isRunning
 
 	def runAgain(self):
-		"""
+		"""Determine whether this task should be run again.
+
 		This method lets the Scheduler check to see whether this task should be
-		re-run when it terminates
+		re-run when it terminates.
+		
 		"""
 		return self._rerun
 
