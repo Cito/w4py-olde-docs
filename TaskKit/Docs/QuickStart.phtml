@@ -24,7 +24,7 @@ react to a failed job, has access to internal data structures, which otherwise w
 to be exposed to the outside world and last but not least it needs scheduling capabilities
 anyway (e.g. for session sweeping and other memory cleaning operations).</p>
 
-<p>Webware is developped with the object oriented scripting language Python so it seemed natural
+<p>Webware is developed with the object oriented scripting language Python so it seemed natural
 to write a general purpose Python based scheduling framework. One could think that this
 problem is already solved (remember the Python slogan: batteries included), but strange
 enough there has not much work been done in this area. The two standard Python modules
@@ -84,7 +84,7 @@ by WebKit itself is found in <code>WebKit/Tasks/SessionTask.py</code>.</p>
 
 <p>Here you see the <code>proceed()</code> method in action. It can be used by long running tasks
 to check if they should terminate. This is the case when the scheduler or the task itself has been
-stoped. The latter is achieved with a <code>stopTask()</code> call which is not recommented though.
+stopped. The latter is achieved with a <code>stopTask()</code> call which is not recommented though.
 It's generally better to let the task finish and use the <code>unregister()</code>  and
 <code>disable()</code> methods. The first really deletes the task after termination while
 the second only disables its rescheduling. You can still use it afterwards. Right now the implementation
