@@ -1,12 +1,17 @@
+from types import ListType
 from Foo import Foo
 from Bar import Bar
-from types import *
+
+
+def NoException(codeString):
+	raise Exception, 'Failed to raise exception for: ' + codeString
 
 
 def reset(store):
 	store.clear()
 	store.executeSQL('delete from Foo;')
 	store.executeSQL('delete from Bar;')
+
 
 def testAddToBars(store):
 	# Test 1: Use addToBars()
@@ -25,6 +30,7 @@ def testAddToBars(store):
 	assert bars[0].foo() == f
 	reset(store)
 
+
 def test(store):
 	# We invoke testAddToBars twice on purpose, just to see that
 	# the second time around, things are stable enough to pass again
@@ -32,9 +38,7 @@ def test(store):
 	testAddToBars(store)
 
 	# Test 2: do not use addToBars()
-	# @@ 2001-02-11 ce: this is probably not a valid test in the long run
 	f = Foo()
-	f.setX(0) # @@ 2000-11-25 ce: take out after fixing default value bug in gen py code
 	store.addObject(f)
 	b = Bar()
 	b.setFoo(f)
@@ -53,7 +57,7 @@ def test(store):
 
 	# Test addToXYZ() method
 	bar = Bar()
-	bar.setX(7)
+	bar.setX(42)
 	f.addToBars(bar)
 	assert bar.foo() == f
 	store.saveChanges()
@@ -64,37 +68,76 @@ def test(store):
 	assert type(bars) is ListType
 	assert len(bars) == 2, 'bars=%r' % bars
 	assert bars[0].x() == 7
-	assert bars[1].x() == 7
+	assert bars[1].x() == 42
 
 	# Test the assertion checking in addToXYZ()
 	try:
 		f.addToBars(None)
-	except:
+	except Exception:
 		pass
 	else:
 		NoException('f.addToBars(None) # None not allowed')
 
 	try:
 		f.addToBars(5)
-	except:
+	except Exception:
 		pass
 	else:
 		NoException('f.addToBars(5) # not an object')
 
 	try:
 		f.addToBars(f)
-	except:
+	except Exception:
 		pass
 	else:
 		NoException('f.addToBars(f) # wrong class')
 
 	try:
 		f.addToBars(bar)
-	except:
+	except Exception:
 		pass
 	else:
 		NoException('f.addToBars(bar) # already added')
 
+	# Test delFromXYZ() method
+	bar = bars[1]
+	f.delFromBars(bar)
+	assert len(bars) == 1
+	assert bar.foo() is None
+	store.saveChanges()
+	store.clear()
 
-def NoException(codeString):
-	raise Exception, 'Failed to raise exception for: ' + codeString
+	f = store.fetchObjectsOfClass(Foo)[0]
+	bars = f.bars()
+	assert type(bars) is ListType
+	assert len(bars) == 1, 'bars=%r' % bars
+	assert bars[0].x() == 7
+
+	# Test the assertion checking in delFromXYZ()
+	try:
+		f.delFromBars(None)
+	except Exception:
+		pass
+	else:
+		NoException('f.delFromBars(None) # None not allowed')
+
+	try:
+		f.delFromBars(5)
+	except Exception:
+		pass
+	else:
+		NoException('f.delFromBars(5) # not an object')
+
+	try:
+		f.delFromBars(f)
+	except Exception:
+		pass
+	else:
+		NoException('f.delFromBars(f) # wrong class')
+
+	try:
+		f.delFromBars(bar)
+	except Exception:
+		pass
+	else:
+		NoException('f.delFromBars(bar) # already deleted')

@@ -647,6 +647,7 @@ class ListAttr:
 		# Invoke various code gen methods with the names
 		self.writePyGet(out, names)
 		self.writePyAddTo(out, names)
+		self.writePyDelFrom(out, names)
 
 	def writePyGet(self, out, names):
 		""" Subclass responsibility. """
@@ -669,5 +670,22 @@ class ListAttr:
 		store = self.store()
 		if value.serialNum() == 0 and self.isInStore():
 			store.addObject(value)
+''' % names)
+		del names['getParens']
+
+	def writePyDelFrom(self, out, names):
+		names['getParens'] = self.setting('AccessorStyle', 'methods') == 'methods' and '()' or ''
+		out.write('''
+	def delFrom%(capName)s(self, value):
+		assert value is not None
+		from %(package)s%(targetClassName)s import %(targetClassName)s
+		assert isinstance(value, %(targetClassName)s)
+		assert value.%(backRefAttrName)s%(getParens)s is self
+		assert value in self.%(pyGetName)s()
+		self.%(pyGetName)s().remove(value)
+		value._set('%(backRefAttrName)s', None)
+		store = self.store()
+		if self.isInStore() and value.isInStore():
+			store.deleteObject(value)
 ''' % names)
 		del names['getParens']
