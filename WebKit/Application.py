@@ -966,7 +966,7 @@ class Application(ConfigurableForServerSidePath, Object):
 	def handleMissingPathSession(self, trans):
 		"""Redirect requests without session info in the path.
 
-		if UseAutomaticPathSessions is enabled in Application.config
+		If UseAutomaticPathSessions is enabled in Application.config
 		we redirect the browser to a url with SID in path
 		http://gandalf/a/_SID_=2001080221301877755/Examples/
 		_SID_ is extracted and removed from path in HTTPRequest.py
