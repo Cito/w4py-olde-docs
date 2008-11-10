@@ -222,10 +222,10 @@ class HTTPResponse(Response):
 		This method sets the headers and content for the redirect, but does
 		NOT change the cookies. Use clearCookies() as appropriate.
 
-        See http://www.ietf.org/rfc/rfc2616 (section 10.3.3),
-        http://www.ietf.org/rfc/rfc3875 (section 6.2.3) and
-        http://support.microsoft.com/kb/176113
-        (removing cookies by IIS is considered a bug).
+		See http://www.ietf.org/rfc/rfc2616 (section 10.3.3),
+		http://www.ietf.org/rfc/rfc3875 (section 6.2.3) and
+		http://support.microsoft.com/kb/176113
+		(removing cookies by IIS is considered a bug).
 
 		"""
 		assert not self._committed, "Headers have already been sent."
