@@ -7,7 +7,8 @@ Command Line Configuration
 ==========================
 
 Each of these can be set in the ``.config`` files, but they can be overridden
-with the command line.  Run ``AppServer`` with switches in the form ``ClassName.SettingName=value``, e.g. ``AppServer.AdapterPort=8087``.
+with the command line.  Run ``AppServer`` with switches in the form
+``ClassName.SettingName=value``, e.g. ``AppServer.AdapterPort=8087``.
 
 The ``value`` is coerced into a Python type: if it starts with one of the
 characters ``({["'`` -- i.e., parenthesis (expression), dictionary, list,
@@ -87,7 +88,7 @@ which files are hidden, and some of how those files get chosen.
     from serving such a file if it is named explicitly in a URL.  If
     no extensions are given all extensions will be served (usually
     anything but ``.py`` and ``.psp`` will be served as a static
-    file). Default: ``[]``.
+    file).  Default: ``[]``.
 ``UseCascadingExtensions``:
     If False, WebKit will give a ``404 Not Found`` result if there is
     more than one file that could potentially match.  If True, then
@@ -149,20 +150,20 @@ which files are hidden, and some of how those files get chosen.
     with the name set in ``SessionName``, which is usually ``_SID_``.
     Default: ``True``.
 ``SessionCookiePath``:
-    You can specify a path for the session cookie here. ``None`` means
+    You can specify a path for the session cookie here.  ``None`` means
     that the servlet path will be used, which is normally the best choice.
     If you rewrite the URL using different prefixes, you may have to
-    specify a fixed prefix for all your URLs. Using the root path '/'
+    specify a fixed prefix for all your URLs.  Using the root path '/'
     will always work, but may have security issues if you are running less
-    secure applications on the same server. Default: ``None``.
+    secure applications on the same server.  Default: ``None``.
 ``SecureSessionCookie``:
     If True, then the app server will use a secure cookie for the session
     ID if the request was using an HTTPS connection.  Default: ``True``.
 ``MaxDynamicMemorySessions``:
     The maximum number of dynamic memory sessions that will be
     retained in memory.  When this number is exceeded, the least
-    recently used, excess sessions will be pushed out to disk. This
-    setting can be used to help control memory requirements,
+    recently used, excess sessions will be pushed out to disk.
+    This setting can be used to help control memory requirements,
     especially for busy sites.  This is used only if the
     ``SessionStore`` is set to ``Dynamic``.  Default: ``10000``.
 ``DynamicSessionTimeout``:
@@ -265,7 +266,7 @@ Errors
     If True, an "[edit]" link will be put next to each line in tracebacks.
     That link will point to a file of type
     ``application/x-webkit-edit-file``, which you should configure your
-    browser to run with ``Webware/bin/editfile.py``. If you configure
+    browser to run with ``Webware/bin/editfile.py``.  If you configure
     ``editfile.py`` correctly, then it will automatically open the
     respective Python module with your favorite Python editor and put
     the cursor on the erroneous line.  Default: ``True``.
@@ -388,7 +389,7 @@ Logging
     occurred.  Default: ``True``.
 ``ActivityLogFilenames``:
     This is the name of the file that servlet executions are logged to.
-    This setting has no effect if ``LogActivity`` is False. The path can
+    This setting has no effect if ``LogActivity`` is False.  The path can
     be relative to the WebKit location, or an absolute path.
     Default: ``"Logs/Activity.csv"``.
 ``ActivityLogColumns``:
@@ -498,7 +499,7 @@ AppServer.config
     This setting controls automatic cancelation of long-running requests.
     All worker threads executing requests longer than ``MaxRequestTime``
     seconds will be automatically aborted with a ``RequestTooLongError``
-    exception. The monitoring of long-running requests can be disabled
+    exception.  The monitoring of long-running requests can be disabled
     by setting this to ``0`` or ``None``.  Default: ``300``.
 ``CheckInterval``:
     The number of virtual instructions after which Python will check

@@ -14,11 +14,11 @@ running over the span of multiple requests).
 
 This install guide takes you through the installation process while
 showing you what options are available and how you would use
-them. There are notes for specific operating systems and web servers
+them.  There are notes for specific operating systems and web servers
 preceded with tags such as **Unix**, **WinNT**, **IIS**, etc.
 
 WebKit is fairly easy to install, but there are some important things
-to know. You will be doing yourself a favor by reading through this
+to know.  You will be doing yourself a favor by reading through this
 guide from top to bottom (skipping sections that don't apply to you).
 
 We recommend that you get a simple configuration working first,
@@ -27,10 +27,10 @@ gotten to that point, the remaining customization of the environment
 is fairly simple.
 
 We use the term *deploy* to mean installing your web application/site
-in a well known location for access by your users. You first *develop*
-your web application and then *deploy* it. You will see deployment
+in a well known location for access by your users.  You first *develop*
+your web application and then *deploy* it.  You will see deployment
 specific notes throughout the guide since the issues for these two
-situations can be different. In a nutshell, you want convenience
+situations can be different.  In a nutshell, you want convenience
 during development, and security and performance during deployment.
 
 You can always e-mail webware-discuss@lists.sourceforge.net to give
@@ -85,17 +85,17 @@ Python interpreter.
 Your installation of Python must be multi-threaded.  It's not entirely
 uncommon for third party web host providers to leave this disabled in
 Python because they don't expect that it's needed or for compatibility
-with some software. If your Python installation is not multi-threaded
+with some software.  If your Python installation is not multi-threaded
 you will have to reinstall it.  If you're using a third party host
 provider in this situation, you may be able to install it yourself
-into your home directory via a telnet or ssh account. See the
+into your home directory via a telnet or ssh account.  See the
 `Python site`__ for instructions.
 
 __ http://www.python.org/download/
 
 To determine if threading is enabled, start the Python interpreter
-from the command line and enter ``import thread``. If you don't get an
-exception, all is well.
+from the command line and enter ``import thread``.  If you don't get
+an exception, all is well.
 
 
 Web Server
@@ -125,32 +125,31 @@ IIS
 ~~~
 
 Microsoft's Internet Information Server, or IIS, requires some special
-configuration due to its default non-standard CGI behavior. You have
+configuration due to its default non-standard CGI behavior.  You have
 to do two things:
 
-For IIS 4.0, configure it to handle PATH_INFO and PATH_TRANSLATED
+For IIS 4.0 to 6.0, configure it to handle PATH_INFO and PATH_TRANSLATED
 according to the CGI specification, by running the following command::
 
   > cscript adsutil.vbs SET W3SVC/1/AllowPathInfoForScriptMappings 1
 
 This is lightly documented in
-http://support.microsoft.com/support/kb/articles/Q184/3/20.ASP
+http://msdn.microsoft.com/en-us/library/ms525840.aspx
 
-`CGI adapter`_, written in C, is available in
-``WebKit/Adapters/wkcgi/wkcgi.exe``.  The standard `Python CGI
-adapter`_ also works, but you must either configure IIS to run Python
-CGI scripts, or you must use Gordon McMillan's Standalone utility
-(part of his Installer package) or some other program to create an
-executable from the Python.
+A `CGI adapter`_, written in C, is available in
+``WebKit/Adapters/wkcgi/wkcgi.exe``.  The standard `Python CGI adapter`_
+also works, but you must either configure IIS to run Python CGI scripts,
+or you must use PyInstaller or some other program to create an
+executable from the Python script.
 
-In order to convert WebKit.cgi into WebKit.exe using the Standalone
-utility, you first have to rename it to WebKit.py, and add ``import
-socket`` to the top of the file (you could use a configuration file
-instead, but this is easier). After creating the ``.exe`` file, delete
-``WebKit.pyc`` and rename ``WebKit.py`` to ``_WebKit.py``. This will
+In order to convert WebKit.cgi into WebKit.exe using PyInstaller,
+you first have to rename it to WebKit.py, and add ``import socket``
+to the top of the file (you could use a configuration file
+instead, but this is easier).  After creating the ``.exe`` file, delete
+``WebKit.pyc`` and rename ``WebKit.py`` to ``_WebKit.py``.  This will
 avoid conflicts with ``WebKit.exe``.
 
-There is an ISAPI module for Webware in ``WebKit/Adapters/wkISAPI``
+There is also an ISAPI module for Webware in ``WebKit/Adapters/wkISAPI``
 that needs to be compiled before use.  However, there have been
 problems with memory leaks in this adapter.
 
@@ -159,7 +158,7 @@ AOLserver
 
 The PyWX__ project aims to meld Python and AOLserver and as part of
 that, they created an AOLserver "stay resident" WebKit adapter for
-tighter integration. If you find that this adapter does not work
+tighter integration.  If you find that this adapter does not work
 with the latest release of Webware, please notify the PyWX project.
 
 __ http://pywx.idyll.org
@@ -184,7 +183,7 @@ Webware Version
 ---------------
 
 Unless you just downloaded Webware (and therefore WebKit), you should
-check to see if you have the latest version. This is:
+check to see if you have the latest version.  This is:
 
 Webware for Python
 
@@ -194,9 +193,9 @@ Webware for Python
 You can check for the latest version at http://www.webwareforpython.org.
 
 If you're feeling adventurous, you can get the latest in-development
-source code from the public repository. Instructions are located at
-the `Webware SVN page`__. You can find more information about SVN in
-general in the `Subversion Book`__. The SVN version of Webware is
+source code from the public repository.  Instructions are located at
+the `Webware SVN page`__.  You can find more information about SVN in
+general in the `Subversion Book`__.  The SVN version of Webware is
 generally fairly stable.
 
 __ http://www.webwareforpython.org/Wiki/subversionrepositoryaccess
@@ -210,7 +209,7 @@ WebKit actively supports Posix (Linux, BSD, Mac OS X, Solaris, etc)
 and Windows (95/98/NT/2K/XP), and their various flavors.
 
 Note that you don't have to develop and deploy on the same
-platform. One of the WebKit developers develops everything on Windows
+platform.  One of the WebKit developers develops everything on Windows
 98 2nd edition and deploys his web sites on BSD.  Some of the web
 server setup is different, but in most cases the application itself
 will require no porting (unless you specifically use non-portable
@@ -219,7 +218,7 @@ Python code in your application).
 What follows are some OS specific notes:
 
 Posix/Unix:
-  Nothing special to report. Both Linux and BSD have been used
+  Nothing special to report.  Both Linux and BSD have been used
   with WebKit.
 
 Windows 9x:
@@ -231,16 +230,16 @@ Windows 9x:
 
 Windows:
   Some Windows users are surprised that URLs passed to WebKit are case
-  sensitive. While it's true that the various Windows file systems are
+  sensitive.  While it's true that the various Windows file systems are
   case insensitive, the data structures that WebKit uses internally
   are not.
 
   When editing path names in configuration files, keep in mind that
   you are editing a Python dictionary populated with Python
-  strings. Therefore your paths must either use double backslashes
+  strings.  Therefore your paths must either use double backslashes
   (\\) (since the backslash is a special character), use forward
-  slashes or use "r-strings". An example of a bad string is
-  ``'C:\All\Web\'``. Good examples include:
+  slashes or use "r-strings".  An example of a bad string is
+  ``'C:\All\Web\'``.  Good examples include:
 
   * ``'/All/Web'``
   * ``'C:/All/Web'``
@@ -258,7 +257,7 @@ Webware's main directory contains an ``install.py`` script that
 should always be run first.
 
 Note that the install program doesn't actually copy the Webware files
-to any separate directory. It copies files within the Webware
+to any separate directory.  It copies files within the Webware
 directory tree, modifies permissions, generates documentation, etc.
 
 Also, you can run the install program as many times as you like with
@@ -285,28 +284,28 @@ The WebKit architecture involves three main entities at the top level:
 * The app server
 
 The browser will be something like Microsoft Internet Explorer or
-Mozilla. The web server will be something like Apache or IIS. And
-finally, the app server will be WebKit, i.e. a Python process running
-the WebKit modules and your custom servlets.
+Mozilla.  The web server will be something like Apache or IIS.
+And finally, the app server will be WebKit, i.e. a Python process
+running the WebKit modules and your custom servlets.
 
 .. image:: Architecture.gif
    :align: center
 
 The chronological order of events goes from top to bottom and then
-back up to top. In other words, the browser makes a request to the web
-server which in turn makes a request to the app server. The response
+back up to top.  In other words, the browser makes a request to the web
+server which in turn makes a request to the app server.  The response
 then goes from the app server to the web server to the browser.
 
 For development and casual use, you can replace Apache with
 the WebKit built-in web server that can be activated with the
-``AppServer.config`` setting ``EnableHTTP``. The port can be specified
+``AppServer.config`` setting ``EnableHTTP``.  The port can be specified
 with the setting ``HTTPPort`` and will be ``8080`` by default.
 
 If you are not using the built-in web server, you will have to
 get your web server and app server talking to each other.
-For this purpose, you must use a WebKit adapter_. You must also
+For this purpose, you must use a WebKit adapter_.  You must also
 activate the WebKit app server listener for adapters with the
-``AppServer.config`` setting ``EnableAdapter``. The port can be specified
+``AppServer.config`` setting ``EnableAdapter``.  The port can be specified
 with the setting ``AdapterPort`` and will be ``8086`` by default.
 You can use several app servers listenting on different ports.
 
@@ -349,7 +348,7 @@ Adapters
 A WebKit adapter takes an HTTP request from a web server and, as
 quickly as possible, packs it up and ships it to the app server which
 subsequently sends the response back to the adapter for delivery to
-the web server and ultimately the web client. More concisely, an
+the web server and ultimately the web client.  More concisely, an
 adapter is the go-between of the web server and the app server.
 
 There are several adapters for Webware.  However, it is **highly**
@@ -468,7 +467,7 @@ Python interpreter to be started for each request.  It is located in
 interpreter (e.g., ``#!/usr/local/bin/python``).
 
 Otherwise, follow the instructions for wkcgi_.  Particularly, make sure
-that the script is executable. There is no configuration, and ``WebKit.cgi``
+that the script is executable.  There is no configuration, and ``WebKit.cgi``
 should be able to find the host and port of the AppServer automatically.
 
 .. Note: If you get Internal Error, always check the AppServer is running.
@@ -485,7 +484,7 @@ It is relatively easy to install, but you probably will need administrator
 or root access to the machine.
 
 The source code and a README file describing how to configure, build and
-install mod_webkit as a DSO module for Apache 2.2 are located in the ``Webware/WebKit/Adapters/mod_webkit2`` directory. You can also find an
+install mod_webkit as a DSO module for Apache 2.2 are located in the ``Webware/WebKit/Adapters/mod_webkit2`` directory.  You can also find an
 older version for Apache 1.3 in ``Webware/WebKit/Adapters/mod_webkit1``,
 but in the following we are assuming you are using Apache 2.2.
 
@@ -528,7 +527,7 @@ Windows Installation
 ^^^^^^^^^^^^^^^^^^^^
 
 Copy ``WebKit/Adapters/mod_webkit2/mod_webkit.dll`` into your Apache 2.2
-module directory (usually located at ``C:\Program Files\Apache Software Foundation\Apache2.2\modules\mod_webkit.so``). You should also change
+module directory (usually located at ``C:\Program Files\Apache Software Foundation\Apache2.2\modules\mod_webkit.so``).  You should also change
 the extension of the file to ``.so`` according to the Apache convention.
 
 Edit ``httpd.conf`` to include the line::
@@ -669,7 +668,7 @@ You may want to use OneShot on a commercial host where persistent
 processes (like the AppServer process) are not allowed.  However, be
 warned that OneShot is *very* slow.
 
-If you use OneShot, do not launch the AppServer separately. Note that
+If you use OneShot, do not launch the AppServer separately.  Note that
 in this case, the instructions on setting the permissions_ apply to
 the user running the web server.
 
@@ -686,8 +685,8 @@ Renaming Adapters
 -----------------
 
 Adapters such as WebKit.cgi and OneShot.cgi do not rely on their
-name. Consequently, when you deploy your web site, you can rename the
-adapter to something like ``serve.cgi``. This allows you to switch
+name.  Consequently, when you deploy your web site, you can rename the
+adapter to something like ``serve.cgi``.  This allows you to switch
 adapters later without affecting the URLs and therefore the bookmarks
 of your users (provided you're still using some form of CGI adapter).
 mod_rewrite_ also offers several possibilities for changing names,
@@ -713,7 +712,7 @@ Configuration
 =============
 
 In this section, we'll briefly touch on some of the configuration
-options related to installing and running WebKit. A full reference to
+options related to installing and running WebKit.  A full reference to
 these options can be found in the `User's Guide`__.
 
 __ UsersGuide.html#Configuration
@@ -726,27 +725,27 @@ Sessions
 --------
 
 WebKit provides a Session utility class for storing data on the server
-side that relates to an individual user's session with your site. The
+side that relates to an individual user's session with your site.  The
 ``SessionStore`` setting determines where the data is stored and can
 currently be set to ``Dynamic`` or ``File``.
 
 Storing to the Dynamic session store is the fastest solution and is
-the default. This session storage method keeps the most recently used
-sessions in memory, and moves older sessions to disk periodocally. All
-sessions will be moved to disk when the server is stopped.  This
-storage mechanism works with both the persistant, long running
+the default.  This session storage method keeps the most recently used
+sessions in memory, and moves older sessions to disk periodocally.
+All sessions will be moved to disk when the server is stopped.
+This storage mechanism works with both the persistant, long running
 AppServers and OneShot_.  There are two settings in
 ``Application.config`` relating to this Session store.
 ``MaxDynamicMemorySessions`` specifies the maximum number of sessions
 that can be in memory at any one time.  ``DynamicSessionTimeout``
 specifies after what period of time sessions will be moved from memory
-to file. ( Note: this setting is unrelated to the ``SessionTimeout``
+to file.  (Note: this setting is unrelated to the ``SessionTimeout``
 setting below.  Sessions which are moved to disk by the Dynamic
 Session store are not deleted).
 
 Storing to files is provided mainly in support of the OneShot
-adapter. It may also prove useful in the future in support of load
-balancing. In this scenario, each individual session is stored in its
+adapter.  It may also prove useful in the future in support of load
+balancing.  In this scenario, each individual session is stored in its
 own file, loaded for every request and saved when delivering the
 corresponding response.
 
@@ -754,7 +753,7 @@ All on-disk session information is located in WebKit/Sessions.
 
 Also, the ``SessionTimeout`` setting lets you set the number of
 minutes of inactivity before a user's session becomes invalid and is
-deleted. The default is 60.  The Session Timeout value can also be
+deleted.  The default is 60.  The Session Timeout value can also be
 changed dynamically on a per session basis.
 
 ``Activity Log``
@@ -775,7 +774,7 @@ E-mail Errors
 
 ``EmailErrors``, ``ErrorEmailServer`` and ``ErrorEmailHeaders`` let
 you configure the app server so that uncaught exceptions land in your
-mailbox in real time. You should definitely set these options when
+mailbox in real time.  You should definitely set these options when
 deploying a web site.
 
 See Configuration__ in the User's Guide for more information.
@@ -787,20 +786,20 @@ Contexts
 --------
 
 WebKit divides the world into *contexts*, each of which is a directory
-with its own files and servlets. WebKit will only serve files out of
+with its own files and servlets.  WebKit will only serve files out of
 its list of known contexts.
 
 Some of the contexts you will find out of the box are ``Examples``,
-``Documentation`` and ``Admin``. When viewing either an example or
+``Documentation`` and ``Admin``.  When viewing either an example or
 admin page, you will see a sidebar that links to all the contexts.
 
 Another way to look at contexts is a means for "directory
-partitioning". If you have two distinct web applications (for example,
+partitioning".  If you have two distinct web applications (for example,
 ``PythonTutor`` and ``DayTrader``), you will likely put each of these
-in their own context. In this configuration, both web applications
-would be served by the same appserver instance. Note that there may
+in their own context.  In this configuration, both web applications
+would be served by the same appserver instance.  Note that there may
 be also reasons to run multiple appserver instances for serving your
-web applications. For instance, this would allow you to start and stop
+web applications.  For instance, this would allow you to start and stop
 them independently, run them under different users to give them
 different permissions, or partition resources like number of threads
 individually among the web applications.
@@ -810,9 +809,9 @@ MakeAppWorkDir_, which will partition your application from the
 Webware installation.
 
 To add a new context, add to the ``Contexts`` dictionary of
-``Application.config``. The key is the name of the context as it
+``Application.config``.  The key is the name of the context as it
 appears in the URL and the value is the path (absolute or relative to
-the WebKit directory). Often the name of the context and the name of
+the WebKit directory).  Often the name of the context and the name of
 the directory will be the same::
 
      'DayTrader': '/All/Web/Apps/DayTrader',
@@ -822,12 +821,12 @@ The URL to access DayTrader would then be something like:
 
 The special name ``default`` is reserved to specify what context is
 served when none is specified (as in
-``http://localhost/WebKit.cgi/``). Upon installation, this is the
+``http://localhost/WebKit.cgi/``).  Upon installation, this is the
 ``Examples`` context, which is convenient during development since it
 provides links to all the other contexts.
 
 Note that a context can contain an ``__init__.py`` which will be
-executed when the context is loaded at app server startup. You can put
+executed when the context is loaded at app server startup.  You can put
 any kind of initialization code you deem appropriate there.
 
 
@@ -843,7 +842,7 @@ script ``bin/MakeAppWorkDir.py``.  You should run it like::
     $ python Webware/bin/MakeAppWorkDir.py WorkDir
 
 This will create a directory *WorkDir* that will contain a
-directory structure for your application. Name if after your
+directory structure for your application.  Name if after your
 application, place it where it is convenient for you --
 it doesn't need to be located close to the Webware installation.
 
@@ -867,41 +866,41 @@ Here's what the files and directories are for:
     instead and additionally, you will find a ``AppServerService.py``
     script that can be used to start the AppServer as a service.
 ``Cache``:
-    A directory containing cache files. You won't need to look in here.
+    A directory containing cache files.  You won't need to look in here.
 ``Configs``:
-    Configuration files for the application. These files are copied from
+    Configuration files for the application.  These files are copied from
     ``WebKit/Configs``, but are specific to this application/AppServer.
 ``error404.html``:
-    The static HTML page to be displayed when a page is not found. You can
+    The static HTML page to be displayed when a page is not found.  You can
     remove this to display a standard error message, modify the page according
     to your preferences, or use a custom error servlet instead by setting
     ``ErrorPage`` in the ``Application.config`` file appropriately.
 ``ErrorMsgs``:
-    HTML pages for any errors that occur. These can pile up and take up
+    HTML pages for any errors that occur.  These can pile up and take up
     considerable size (even just during development), so you'll want to
     purge these every so often.
 ``Launch.py``:
     Called by the ``AppServer`` script to launch the AppServer.
 ``Lib``:
-    An example for an application-specific library package that can be created
-    ``-l`` option (in this case, ``-l Lib``. Import modules from this directory
-    like ``from Lib.SitePage import SitePage``.
+    An example for an application-specific library package that can be
+    created with the ``-l`` option (in this case, ``-l Lib``).  Import
+    modules from this directory like ``from Lib.SitePage import SitePage``.
 ``Logs``:
     Logs of accesses.
 ``MyContext``:
-    The directory for your default context. This is where you put your servlets.
+    The directory for your default context.  This is where you put your servlets.
     you can change its name and location with the ```-c`` and ``-d`` options.
     You can also change this subsequently in the ``Application.config`` file
     in the ``Configs`` directory, where you can also configure more than one
-    context. You may also want to remove the other standard contexts that come
+    context.  You may also want to remove the other standard contexts that come
     with Webware from the config file.
 ``Sessions``:
-    Users sessions. These should be cleaned out automatically, you won't
+    Users sessions.  These should be cleaned out automatically, you won't
     have to look in this directory.
 ``WebKit.cgi``:
-    A CGI script/adapter for accessing the AppServer here. You can still use
+    A CGI script/adapter for accessing the AppServer here.  You can still use
     the other adapters, but most of them don't need to be configured for the
-    individual applications. I still recommend ``mod_webkit`` or ``wkcgi``.
+    individual applications.  I still recommend ``mod_webkit`` or ``wkcgi``.
 ``webkit*``:
     If you are running under Unix, you can use this as a start script
     (see `webkit init script`_).
@@ -928,16 +927,16 @@ file).  This shutdown method is safer than doing a Control-C from a terminal,
 as described below.
 
 On all OSs, stopping the app server may also be accomplished by simply
-going to its terminal/command window and hitting Control-C. The app
+going to its terminal/command window and hitting Control-C.  The app
 server is designed to intercept this interruption and shut down as
-gracefully as possible. This includes saving session data to disk, if
+gracefully as possible.  This includes saving session data to disk, if
 necessary.
 
 On Unix, a running appserver may be stopped from a terminal by typing
 ``./AppServer stop``.
 
 On Windows Control-C normally shuts the app server down *gracefully*,
-where as Control-Break does not. Keep that in mind and use Control-C,
+where as Control-Break does not.  Keep that in mind and use Control-C,
 unless the server is unresponsive to it.
 
 On Unix if you don't have access to the terminal window of the app
@@ -951,15 +950,15 @@ Reloading Servlets
 ------------------
 
 As you develop your web application, you will change the code of your
-various Python classes, including your servlets. The WebKit app server
+various Python classes, including your servlets.  The WebKit app server
 will detect a change in the timestamp of a servlet's source file and
 automatically reload it for you.
 
-However, reloading fails in two areas. The first is that WebKit
-doesn't check ancestor classes of servlets for modifications. So if
-you modify an abstract class (for example, ``SitePage``,
-``AccountPage``, etc.), it won't be reloaded. The second is that
-WebKit can't check non-servlet classes. So if you modify a utility
+However, reloading fails in two areas.  The first is that WebKit
+doesn't check ancestor classes of servlets for modifications.
+So if you modify an abstract class (for example, ``SitePage``,
+``AccountPage``, etc.), it won't be reloaded.  The second is that
+WebKit can't check non-servlet classes.  So if you modify a utility
 class (for example, ``ShoppingCart``, ``Story``, etc.), it won't be
 reloaded.
 
@@ -975,14 +974,13 @@ in ``AppServer.config`` controls a feature where the AppServer stops
 and restarts itself if any loaded modules have been changed.
 
 You can also deal with reloading problems by stopping the app server
-(Control-C in its terminal/command window) and restarting it.  And an
-alternative way of reloading ancestor classes is through the
+(Control-C in its terminal/command window) and restarting it.
+And an alternative way of reloading ancestor classes is through the
 Application Control servlet, in the Admin context, which will provide
 a list of all of the currently loaded modules, and allow you to reload
 selected modules.  Be warned, reloading modules can cause strange
 behavior, because instances of objects attached to the old class
-definitions can still exist.  AutoReload is generally the best
-solution.
+definitions can still exist.  AutoReload is generally the best solution.
 
 
 .. _`webkit init script`:
@@ -994,7 +992,7 @@ The script ``WebKit/webkit`` is a Unix shell script launching WebKit
 at boot time through the standard "init" mechanisms.
 
 There are several variants of this script for various flavors of Unix
-available in the folder ``WebKit/StartScripts``. The ``install.py``
+available in the folder ``WebKit/StartScripts``.  The ``install.py``
 script copies the variant that it thinks is the best fit to ``WebKit/webkit``.
 If the script does not fit to your system, you may want to try out other
 variants or the ``Generic`` script that should fit on most systems.
@@ -1006,7 +1004,7 @@ working directory.
 In order to start WebKit at boot time, copy this script to the system
 folder that is destined for start scripts, which is usually ``/etc/init.d/``
 (e.g. for SuSE or Debian Linux or Solaris) or ``/etc/rc.d/init.d/`` (e.g. for
-RedHat or Mandrake Linux). Instead of copying the script, you can also make
+RedHat or Mandrake Linux).  Instead of copying the script, you can also make
 a symbolic link refering to the script located in your working directory.
 If you do this, the script will be able to determine the location of the
 working directory from the symbolic link and you do not have to set the
@@ -1030,8 +1028,8 @@ The main configuration parameters are the following::
     WEBWARE_USER  the user to run the application server
 
 For security reasons, you shouldn't use ``root`` as the Webware user, but
-a user with the least possible permissions, maybe even ``nobody``. By
-default, the start script uses the owner of the ``AppServer`` script.
+a user with the least possible permissions, maybe even ``nobody``.
+By default, the start script uses the owner of the ``AppServer`` script.
 
 For the log file and the pid file, you may either use the standard locations
 on your system, usually something like ``/var/log/webkit.log`` and
@@ -1051,15 +1049,15 @@ to the working directory, so you have to unset ``LAUNCH_AS_WEBWARE`` if you
 want to use the standard system locations for the files instead.
 
 Note that the application server maintains its own pid file, usually called
-``appserver.pid``. You should use a different pid file for the start script,
+``appserver.pid``.  You should use a different pid file for the start script,
 although it actually records the same pid, i.e. the pid of Webware's Python
 application server, not the pid of the wrapper script ``AppServer`` which is
 responsible for the AutoReload mechanism.
 
 The start script also passes the variable ``PYTHONOPTS`` to the ``AppServer``
-script. You can add options ``-U`` for unbuffered output (to the log file)
+script.  You can add options ``-U`` for unbuffered output (to the log file)
 or ``-O`` if you want to use optimized Python files (i.e. ``.pyo`` instead
-of ``.pyc``). You can also add additional Python libraries with ``PYTHONPATH``.
+of ``.pyc``).  You can also add additional Python libraries with ``PYTHONPATH``.
 
 Activating the start script
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1077,7 +1075,7 @@ Also try to stop WebKit by typing::
 
 To activate the script for future boots, you still have to put symbolic links
 to the runlevel directories in which you want to launch WebKit.
-On some systems, you have to do this manually. For example, if the start script
+On some systems, you have to do this manually.  For example, if the start script
 is ``/etc/init.d/webkit``, you would create the symbolic links like that::
 
     > cd /etc/rc0.d
@@ -1089,12 +1087,12 @@ is ``/etc/init.d/webkit``, you would create the symbolic links like that::
 
 
 Some systems also provide a command line tool for this purpose, which will
-depend on the flavor of Unix you are using. For instance, you will use
+depend on the flavor of Unix you are using.  For instance, you will use
 ``insserv`` on SuSE Linux, ``chkconfig`` for RedHat (Fedora),
 ``update-rc.d`` for Debian (Ubuntu) or ``rc-update`` for Gentoo.
 
 Take care to launch the script after your web server and database and other
-services you are using. You can do this by using appropriate numbers for the
+services you are using.  You can do this by using appropriate numbers for the
 symbolic links or setting approriate hints for the command line tools at
 the top of the script.
 
@@ -1161,7 +1159,7 @@ Bad Marshal Data
 ----------------
 
 The most common installation problem is a Python exception appearing
-in your browser that says "bad marshal data". This is always caused by
+in your browser that says "bad marshal data".  This is always caused by
 pointing the web browser to the app server:
 
   http://localhost:8086/WebKit.cgi/
@@ -1172,4 +1170,4 @@ would be:
   http://localhost/WebKit.cgi/
 
 That requires that web server and app server are set up to talk to
-each other. And that's what the Adapters_ section is all about...
+each other.  And that's what the Adapters_ section is all about...

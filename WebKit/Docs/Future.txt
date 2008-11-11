@@ -26,13 +26,13 @@ Future Work/Limitations
 =======================
 
 Sprinkled throughout the code are comments tagged with ``@@`` which are
-hopefully accompanied by a date and someone's initials. These comments
-represent things to be done. The double at-sign (``@@``) convention was
+hopefully accompanied by a date and someone's initials.  These comments
+represent things to be done.  The double at-sign (``@@``) convention was
 chosen because it doesn't appear to be used for anything else.
 
 In addition to the inline comments, some significant items have been
-recorded below. These are future ideas, with no commitments or timelines
-as to when/if they'll be realized. The Python WebKit is open source,
+recorded below.  These are future ideas, with no commitments or timelines
+as to when/if they'll be realized.  The Python WebKit is open source,
 so feel free to jump in!
 
 
@@ -52,7 +52,7 @@ Major Items
 * Drop backward compatibility down to Python 2.0; require at least 2.4.
   Make use of the new Python features like new-style classes, properties,
   sets, decorators, generator expressions, isinstace(tuple) etc. and get
-  rid of old garbage and workarounds for old Python versions. Think about
+  rid of old garbage and workarounds for old Python versions.  Think about
   a migration path towards Pyhon 3.0.
 
 * Use distutils/setuptools instead of our own installer, use Python eggs
@@ -69,7 +69,7 @@ Major Items
 
 * CheckSource.py: A program to check the source code conventions.
 
-* Role-based security and user-authentication. Goal is to eliminate,
+* Role-based security and user-authentication.  Goal is to eliminate,
   as much as possible, developer-written security logic.
   This should be provided by the WebKit and be configurable.
 
@@ -85,11 +85,11 @@ Major Items
 
 * Investigate case insensitive URLs, especially for the Windows platform.
 
-* Support unicode strings and different encodings. HTTPContent should get an
+* Support unicode strings and different encodings.  HTTPContent should get an
   encoding attribute with 'utf-8' as the default (set in Application.config).
   This could be output in Page.writeMetaData() and used as the default for
   an optional encoding parameter in HTTPContent.write(), so you can write
-  unicode strings to output. So far, Webware works best if you use ordinary
+  unicode strings to output.  So far, Webware works best if you use ordinary
   strings with a consistent encoding throughout the whole application.
 
 * Plug-ins:
@@ -108,7 +108,7 @@ General
 * Code clean up.
 
 * Right now, if the Application itself (as opposed to Servlets) throws
-  an exception, it doesn't get captured nicely. However, it is displayed
+  an exception, it doesn't get captured nicely.  However, it is displayed
   in the app server's console.
 
 * The exception handler is pretty nice and has features like logging,
@@ -131,7 +131,7 @@ Testing
 * Provide testing web page where people can report their testing results
   including version numbers, etc.
 
-* Provide higher level automation of testing. For example, a testing script
+* Provide higher level automation of testing.  For example, a testing script
   should be able to launch various app servers multiple times.
 
 * Provide highly automated benchmarking so we can track changes in performance.
@@ -180,8 +180,8 @@ Food for thought, considerations, reviews
 
 * Application modifies sys.path so that servlets can say
   ``from SuperServlet import SuperServlet`` where SuperServlet is located in
-  the same directory as the Servlet. We'd prefer a more sophisticated technique
-  which does not modify sys.path and does not affect other servlets. (Or maybe
+  the same directory as the Servlet.  We'd prefer a more sophisticated technique
+  which does not modify sys.path and does not affect other servlets.  (Or maybe
   this would go away with a new one-process-per-application architecture.)
 
 * The ThreadedAppServer is not optimal for multiprocessor systems and modern
@@ -214,7 +214,7 @@ Down the road
   in their preferred written language)
 
 * Consider CORBA standard RMI-IIOP and it's potential interaction with WebKit.
-  This technology has been marked for inclusion in J2EE. I imagine the idea
+  This technology has been marked for inclusion in J2EE.  I imagine the idea
   might be that an app server could be used by more than just web browsers.
   e.g., it could be used programmatically
   (in a more natural way than simulating a web client).
