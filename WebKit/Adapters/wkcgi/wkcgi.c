@@ -15,7 +15,7 @@ int sendCgiRequest(int sock, DictHolder* alldicts) {
 	int totalsent = 0;
 	int content_length = 0;
 	char *buffer;
-	int buflen = 8092;
+	int buflen = 8192;
 	char *len_str;
 
 	bs = send(sock, alldicts->int_dict->str,
@@ -45,11 +45,11 @@ int sendCgiRequest(int sock, DictHolder* alldicts) {
 		int amount_to_send = 0;
 		content_length = atoi(getenv("CONTENT_LENGTH"));
 		log_message("There is post data");
-		buffer = (char*)calloc(8092, 1);
+		buffer = (char*)calloc(8192, 1);
 		while (read < content_length) {
 			amount_to_read = content_length - read;
-			if (amount_to_read > 8092) {
-				amount_to_read = 8092;
+			if (amount_to_read > 8192) {
+				amount_to_read = 8192;
 			}
 			read_this_time = fread(buffer, 1, amount_to_read, stdin);
 			if (read_this_time <= 0) {
@@ -86,7 +86,7 @@ int sendCgiRequest(int sock, DictHolder* alldicts) {
 
 int processCgiResponse(int sock) {
 	char* buff;
-	int buflen = 8092;
+	int buflen = 8192;
 	int br;
 
 	buff = calloc(buflen,1);
@@ -138,9 +138,9 @@ int main(char* argc, char* argv[]) {
 	config = malloc(sizeof(Configuration));
 
 #ifdef WIN32
-	/* IIS runs CGI's in a different directory than they live in.  So */
-	/* we need to construct the full path to the config file by */
-	/* doing some string manipulation. */
+	/* IIS runs CGI's in a different directory than they live in. */
+	/* So we need to construct the full path to the config file */
+	/* by doing some string manipulation. */
 	strcpy(configFile, argv[0]);
 	p = strrchr(configFile, '\\');
 	if (!p) {
@@ -174,7 +174,7 @@ int main(char* argc, char* argv[]) {
 		if (sock > 0 || (retrycount > config->retry_attempts))
 			break;
 		// if (errno != EAGAIN) break;
-		sprintf(msgbuf, "Couldn't connect to AppServer,attempt %i of %i",
+		sprintf(msgbuf, "Couldn't connect to AppServer, attempt %i of %i",
 			retrycount, config->retry_attempts);
 		log_message(msgbuf);
 		retrycount++;

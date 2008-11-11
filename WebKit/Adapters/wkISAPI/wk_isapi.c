@@ -14,42 +14,42 @@ static LPEXTENSION_CONTROL_BLOCK staticecb;
 
 
 static char* HEADERS[37]= {
-"AUTH_PASSWORD",// Specifies the value entered in the client's authentication dialog. This variable is only available if Basic authentication is used.  
-"AUTH_TYPE", // Specifies the type of authentication used. If the string is empty, then no authentication is used. Possible values are Kerberos, user, SSL/PCT, Basic, and integrated Windows authentication. 
-"AUTH_USER", // Specifies the value entered in the client's authentication dialog box. 
-"CERT_COOKIE", // Specifies a unique ID for a client certificate. Returned as a string. Can be used as a signature for the whole client certificate. 
-"CERT_FLAGS", // If bit0 is set to 1, a client certificate is present. If bit1 is set to 1, the certification authority (CA) of the client certificate is invalid (that is, it is not on this server's list of recognized CAs). 
-"CERT_ISSUER", // Specifies the issuer field of the client certificate. For example, the following codes might be O=MS, OU=IAS, CN=user name, C=USA, and so on. 
-"CERT_KEYSIZE", // Specifies the number of bits in the Secure Sockets Layer (SSL) connection key size. 
-"CERT_SECRETKEYSIZE", // Specifies the number of bits in the server certificate private key. 
-"CERT_SERIALNUMBER", // Specifies the serial-number field of the client certificate. 
-"CERT_SERVER_ISSUER", // Specifies the issuer field of the server certificate. 
-"CERT_SERVER_SUBJECT", // Specifies the subject field of the server certificate. 
-"CERT_SUBJECT", // Specifies the subject field of the client certificate. 
-"CONTENT_LENGTH", // Specifies the number of bytes of data that the script or extension can expect to receive from the client. This total does not include headers. 
-"CONTENT_TYPE", // Specifies the content type of the information supplied in the body of a POST request. 
-"LOGON_USER", // The Windows account that the user is logged into. 
-"HTTPS", // Returns on if the request came in through secure channel (with SSL encryption), or off if the request is for an unsecure channel.  
-"HTTPS_KEYSIZE", // Specifies the number of bits in the SSL connection key size. 
-"HTTPS_SECRETKEYSIZE", // Specifies the number of bits in server certificate private key. 
-"HTTPS_SERVER_ISSUER", // Specifies the issuer field of the server certificate. 
-"HTTPS_SERVER_SUBJECT", // Specifies the subject field of the server certificate. 
-"INSTANCE_ID", // Specifies the ID for the server instance in textual format. If the instance ID is 1, it appears as a string. This value can be used to retrieve the ID of the Web-server instance, in the metabase, to which the request belongs. 
-"INSTANCE_META_PATH", // Specifies the metabase path for the instance to which the request belongs.  
-"PATH_INFO", // Specifies the additional path information, as given by the client. This consists of the trailing part of the URL after the script or ISAPI DLL name, but before the query string, if any. 
-"PATH_TRANSLATED", // Specifies this is the value of PATH_INFO, but with any virtual path expanded into a directory specification. 
-"QUERY_STRING", // Specifies the information that follows the first question mark in the URL that referenced this script. 
-"REMOTE_ADDR", // Specifies the IP address of the client or agent of the client (for example gateway, proxy, or firewall) that sent the request. 
-"REMOTE_HOST", // Specifies the host name of the client or agent of the client (for example, gateway, proxy or firewall) that sent the request if reverse DNS is enabled. Otherwise, this value is set to the IP address specified by REMOTE_ADDR. 
-"REMOTE_USER", // Specifies the user name supplied by the client and authenticated by the server. This comes back as an empty string when the user is anonymous. 
-"REQUEST_METHOD", // Specifies the HTTP request method verb. 
-"SCRIPT_NAME", // Specifies the name of the script program being executed. 
-"SERVER_NAME", // Specifies the server"s host name, or IP address, as it should appear in self-referencing URLs. 
-"SERVER_PORT", // Specifies the TCP/IP port on which the request was received. 
-"SERVER_PORT_SECURE", // Specifies a string of either 0 or 1. If the request is being handled on the secure port, then this will be 1. Otherwise, it will be 0. 
-"SERVER_PROTOCOL", // Specifies the name and version of the information retrieval protocol relating to this request.  
-"SERVER_SOFTWARE", // Specifies the name and version of the Web server under which the ISAPI extension DLL program is running. 
-"URL", //Specifies the base portion of the URL. Parameter values will not be included. The value is determined when IIS parses the URL from the header. 
+"AUTH_PASSWORD",// Specifies the value entered in the client's authentication dialog. This variable is only available if Basic authentication is used.
+"AUTH_TYPE", // Specifies the type of authentication used. If the string is empty, then no authentication is used. Possible values are Kerberos, user, SSL/PCT, Basic, and integrated Windows authentication.
+"AUTH_USER", // Specifies the value entered in the client's authentication dialog box.
+"CERT_COOKIE", // Specifies a unique ID for a client certificate. Returned as a string. Can be used as a signature for the whole client certificate.
+"CERT_FLAGS", // If bit0 is set to 1, a client certificate is present. If bit1 is set to 1, the certification authority (CA) of the client certificate is invalid (that is, it is not on this server's list of recognized CAs).
+"CERT_ISSUER", // Specifies the issuer field of the client certificate. For example, the following codes might be O=MS, OU=IAS, CN=user name, C=USA, and so on.
+"CERT_KEYSIZE", // Specifies the number of bits in the Secure Sockets Layer (SSL) connection key size.
+"CERT_SECRETKEYSIZE", // Specifies the number of bits in the server certificate private key.
+"CERT_SERIALNUMBER", // Specifies the serial-number field of the client certificate.
+"CERT_SERVER_ISSUER", // Specifies the issuer field of the server certificate.
+"CERT_SERVER_SUBJECT", // Specifies the subject field of the server certificate.
+"CERT_SUBJECT", // Specifies the subject field of the client certificate.
+"CONTENT_LENGTH", // Specifies the number of bytes of data that the script or extension can expect to receive from the client. This total does not include headers.
+"CONTENT_TYPE", // Specifies the content type of the information supplied in the body of a POST request.
+"LOGON_USER", // The Windows account that the user is logged into.
+"HTTPS", // Returns on if the request came in through secure channel (with SSL encryption), or off if the request is for an unsecure channel.
+"HTTPS_KEYSIZE", // Specifies the number of bits in the SSL connection key size.
+"HTTPS_SECRETKEYSIZE", // Specifies the number of bits in server certificate private key.
+"HTTPS_SERVER_ISSUER", // Specifies the issuer field of the server certificate.
+"HTTPS_SERVER_SUBJECT", // Specifies the subject field of the server certificate.
+"INSTANCE_ID", // Specifies the ID for the server instance in textual format. If the instance ID is 1, it appears as a string. This value can be used to retrieve the ID of the Web-server instance, in the metabase, to which the request belongs.
+"INSTANCE_META_PATH", // Specifies the metabase path for the instance to which the request belongs.
+"PATH_INFO", // Specifies the additional path information, as given by the client. This consists of the trailing part of the URL after the script or ISAPI DLL name, but before the query string, if any.
+"PATH_TRANSLATED", // Specifies this is the value of PATH_INFO, but with any virtual path expanded into a directory specification.
+"QUERY_STRING", // Specifies the information that follows the first question mark in the URL that referenced this script.
+"REMOTE_ADDR", // Specifies the IP address of the client or agent of the client (for example gateway, proxy, or firewall) that sent the request.
+"REMOTE_HOST", // Specifies the host name of the client or agent of the client (for example, gateway, proxy or firewall) that sent the request if reverse DNS is enabled. Otherwise, this value is set to the IP address specified by REMOTE_ADDR.
+"REMOTE_USER", // Specifies the user name supplied by the client and authenticated by the server. This comes back as an empty string when the user is anonymous.
+"REQUEST_METHOD", // Specifies the HTTP request method verb.
+"SCRIPT_NAME", // Specifies the name of the script program being executed.
+"SERVER_NAME", // Specifies the server"s host name, or IP address, as it should appear in self-referencing URLs.
+"SERVER_PORT", // Specifies the TCP/IP port on which the request was received.
+"SERVER_PORT_SECURE", // Specifies a string of either 0 or 1. If the request is being handled on the secure port, then this will be 1. Otherwise, it will be 0.
+"SERVER_PROTOCOL", // Specifies the name and version of the information retrieval protocol relating to this request.
+"SERVER_SOFTWARE", // Specifies the name and version of the Web server under which the ISAPI extension DLL program is running.
+"URL", //Specifies the base portion of the URL. Parameter values will not be included. The value is determined when IIS parses the URL from the header.
 NULL, //end
 };
 
@@ -59,7 +59,7 @@ NULL, //end
 int log_message(char* msg) {
 	if(DEBUG) {
 		int msglen = strlen(msg);
-//		staticecb->WriteClient(staticecb->ConnID, msg, &msglen, HSE_IO_SYNC);	
+//		staticecb->WriteClient(staticecb->ConnID, msg, &msglen, HSE_IO_SYNC);
 		FILE* debugfile;
 		debugfile = fopen("C:\\temp\\wkisapi_debug.txt","a+b");
 		fwrite( msg, msglen, 1, debugfile);
@@ -82,7 +82,7 @@ int sendISAPIRequest(int sock, DictHolder* alldicts, LPEXTENSION_CONTROL_BLOCK e
 	unsigned long totalsent=0;  //size of data sent
 	int content_length=0;  //
 	char *buff;  //buffer
-	int buflen=8092;  //size of buff
+	int buflen=8192;  //size of buff
 	char msg[500];   //for debug messages
 
 
@@ -101,8 +101,8 @@ int sendISAPIRequest(int sock, DictHolder* alldicts, LPEXTENSION_CONTROL_BLOCK e
 	bs = 0;
 	totalsent=0;
 	length = alldicts->whole_dict->ptr - alldicts->whole_dict->str;
-	
-	while (totalsent < length) {	  
+
+	while (totalsent < length) {
 		bs = send( sock, alldicts->whole_dict->str + totalsent, buflen>(length-totalsent)?length-totalsent:buflen, 0);
 		if (bs < 0) return 0;
 		totalsent = totalsent + bs;
@@ -125,11 +125,11 @@ int sendISAPIRequest(int sock, DictHolder* alldicts, LPEXTENSION_CONTROL_BLOCK e
 		dwSize = buflen;
 
 		sent = 0;
-		buff = (char*) calloc(8092,1);
+		buff = (char*) calloc(8192,1);
 
 		while (sent < (length - ecb->cbAvailable)) {
 			lpdwSize = &dwSize;
-			if( ecb->ReadClient(ecb->ConnID, buff, lpdwSize)) 
+			if( ecb->ReadClient(ecb->ConnID, buff, lpdwSize))
 				sent = sent + send(sock, buff, *lpdwSize, 0);
 			else {
 				free(buff);
@@ -148,7 +148,7 @@ int sendISAPIRequest(int sock, DictHolder* alldicts, LPEXTENSION_CONTROL_BLOCK e
 
 	//Let the AppServer know we're done
 	shutdown(sock, 1);
-	
+
 	return 1;
 };
 
@@ -184,14 +184,14 @@ EnvItem** generateEnvItems(LPEXTENSION_CONTROL_BLOCK ecb) {
 	buff = calloc(itemlen, 1);
 	if( ! ecb->GetServerVariable(ecb->ConnID, "ALL_HTTP", buff, pitemlen))
 	{	//we didn't have a big enough buffer, but pitemlen now has the correct size
-		free(buff); 
+		free(buff);
 		buff = NULL;
 		buff = calloc(*pitemlen,1);
 		if( ! ecb->GetServerVariable(ecb->ConnID, "ALL_HTTP", buff, pitemlen)) {
 			free(buff);
 			return NULL;
 		}
-	}	
+	}
 	ptr=buff;
 	//count how many HTTP headers there are by looking for \n's
 	while( (ptr = strchr(ptr, newline)) != NULL) {
@@ -234,7 +234,7 @@ EnvItem** generateEnvItems(LPEXTENSION_CONTROL_BLOCK ecb) {
 	pitemlen = &itemlen;
 	while (HEADERS[item] != NULL ) {
 		buff = calloc(*pitemlen, 1);
-		if (buff == NULL) return NULL; 
+		if (buff == NULL) return NULL;
 		if( ! ecb->GetServerVariable(ecb->ConnID, HEADERS[item], buff, pitemlen)) {
 
 			switch (GetLastError())
@@ -319,7 +319,7 @@ char* parseHeaders( char* data, LPEXTENSION_CONTROL_BLOCK ecb) {
 	long headerlength=0;
 	int otherheadersindex=0;
 	HSE_SEND_HEADER_EX_INFO   SendHeaderExInfo;
-	char STATUS_OK[] = " 200 OK";    
+	char STATUS_OK[] = " 200 OK";
 
 
 	if( (endptr = strstr(data, dosdblend)) == NULL) {
@@ -330,7 +330,7 @@ char* parseHeaders( char* data, LPEXTENSION_CONTROL_BLOCK ecb) {
 
 	endindex = endptr + strlen(dos?dosdblend:unixdblend) - data;  //the index of the last valid character
 
-//from here on out, we ignore any carriage returns	
+//from here on out, we ignore any carriage returns
 
 	otherheaders = calloc(sizeof(char), endindex+4);
 
@@ -343,11 +343,11 @@ char* parseHeaders( char* data, LPEXTENSION_CONTROL_BLOCK ecb) {
 			//found status
 			log_message("Status text->");
 			log_message(data+ptrindex);
-			status = data+ptrindex+strlen(txtstatus); // ptr to start of status number (may include a space)	
+			status = data+ptrindex+strlen(txtstatus); // ptr to start of status number (may include a space)
 		}
 		else {
  	 		strncat(otherheaders, data+ptrindex, lineendindex + strlen(unixend));
-			
+
 		}
 		ptrindex = ptrindex + lineendindex + strlen(unixend);
 	}
@@ -380,7 +380,7 @@ char* parseHeaders( char* data, LPEXTENSION_CONTROL_BLOCK ecb) {
 	SendHeaderExInfo.cchHeader = lstrlen(SendHeaderExInfo.pszHeader);
 
 	ecb->ServerSupportFunction(ecb->ConnID, HSE_REQ_SEND_RESPONSE_HEADER_EX, &SendHeaderExInfo,NULL,NULL);
-        
+
 
 //	headerlength = strlen(otherheaders);
 //	ecb->ServerSupportFunction(ecb->ConnID, HSE_REQ_SEND_RESPONSE_HEADER, status, &headerlength, (unsigned long*)otherheaders);
@@ -397,7 +397,7 @@ Note: The header must be less than buflen bytes long
 ********************************************************************/
 int processISAPIResponse(int sock, LPEXTENSION_CONTROL_BLOCK ecb) {
   char *buff, *ptr;
-  unsigned int buflen = 8092;
+  unsigned int buflen = 8192;
   unsigned int br, bs;
   int headersDone = 0;
   char msg[500];
@@ -407,7 +407,7 @@ int processISAPIResponse(int sock, LPEXTENSION_CONTROL_BLOCK ecb) {
 	br = -1;
 	ptr = NULL;
 	br = recv(sock, buff, buflen, 0);
-	
+
 	log_message( buff );
 
 	if (headersDone==0) {
@@ -436,7 +436,7 @@ int processISAPIResponse(int sock, LPEXTENSION_CONTROL_BLOCK ecb) {
 
 
 BOOL WINAPI GetExtensionVersion( HSE_VERSION_INFO* info) {
-	
+
 	info->dwExtensionVersion = MAKELONG(HSE_VERSION_MINOR, HSE_VERSION_MAJOR);
 
 	strcpy(info->lpszExtensionDesc, isa_desc);
