@@ -23,6 +23,8 @@ monitoring and handling of long-running threads in the ThreadedAppServer.</p>
 	<li>The SMTP authentication when sending error emails has been improved,
 	and it is now possible to use SMTP after POP by adding the name of the POP
 	server to the ``ErrorEmailServer`` setting (Roger Haase).</li>
+	<li>HTTPRequests have got two new methods <code>scheme()</code> and
+	<code>hostAndPort()</code> returning the respective URL parts.</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
@@ -56,6 +58,8 @@ monitoring and handling of long-running threads in the ThreadedAppServer.</p>
 	the <code>urlRedirect</code> dictionary has an empty string as key.</li>
 	<li><span class="filename">__init__.py</span> is not created any more if
 	<span class="filename">__init__.pyc</span> exists (Andrew Gaul).</li>
+	<li>The <code>UseAutomaticPathSessions</code> did not works with
+	Microsoft IIS (bug #494764 reported by Geoff Talvola).</li>
 </ul>
 
 <% footer() %>

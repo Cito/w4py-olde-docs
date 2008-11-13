@@ -407,6 +407,25 @@ class HTTPRequest(Request):
 			fspath = os.path.join(docroot, fspath)
 		return fspath
 
+	def scheme(self):
+		"""Return the URI scheme of the request (http or https)."""
+		return self.isSecure() and 'https' or 'http'
+
+	def hostAndPort(self):
+		"""Return hostname and port of this request."""
+		env = self._environ
+		if env.has_key('HTTP_HOST'):
+			return env['HTTP_HOST']
+		elif env.has_key('SERVER_NAME'):
+			return env['SERVER_NAME']
+		else:
+			host = env.get('SERVER_ADDR', '') or 'localhost'
+			port = env.get('SERVER_PORT', '')
+			defaultPort = self.isSecure() and '443' or '80'
+			if port and port != defaultPort:
+				host += ':' + port
+			return host
+
 	def serverURL(self, canonical=False):
 		"""Return the full internet path to this request.
 
@@ -421,9 +440,8 @@ class HTTPRequest(Request):
 		if canonical and self._environ.has_key('SCRIPT_URI'):
 			return self._environ['SCRIPT_URI']
 		else:
-			scheme = self.isSecure() and 'https' or 'http'
-			host = self._environ['HTTP_HOST'] # includes port
-			return scheme + '://' + host + self.serverPath()
+			return '%s://%s%s' % (
+				self.scheme(), self.hostAndPort(), self.serverPath())
 
 	def serverURLDir(self):
 		"""Return the directory of the URL in full internet form.

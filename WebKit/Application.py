@@ -967,18 +967,21 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""Redirect requests without session info in the path.
 
 		If UseAutomaticPathSessions is enabled in Application.config
-		we redirect the browser to a url with SID in path
+		we redirect the browser to an absolute url with SID in path
 		http://gandalf/a/_SID_=2001080221301877755/Examples/
 		_SID_ is extracted and removed from path in HTTPRequest.py
 
 		This is for convinient building of webapps that must not
 		depend on cookie support.
 
+		Note that we create an absolute URL with scheme and hostname
+		because otherwise IIS will only cause an internal redirect.
+
 		"""
-		newSid = trans.session().identifier()
 		request = trans.request()
-		url = '%s/%s=%s%s%s%s' % (request.servletPath(),
-			self.sessionName(trans), newSid,
+		url = '%s://%s%s/%s=%s%s%s%s' % (request.scheme(),
+			request.hostAndPort(), request.servletPath(),
+			self.sessionName(trans), trans.session().identifier(),
 			request.pathInfo(), request.extraURLPath() or '',
 			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:
@@ -991,12 +994,13 @@ class Application(ConfigurableForServerSidePath, Object):
 		"""Redirect request with unnecessary session info in the path.
 
 		This is called if it has been determined that the request has a path
-		session, but also cookies. In that case we redirect	to eliminate the
+		session, but also cookies. In that case we redirect to eliminate the
 		unnecessary path session.
 
 		"""
 		request = trans.request()
-		url = '%s%s%s%s' % (request.servletPath(),
+		url = '%s://%s%s%s%s%s' % (request.scheme(),
+			request.hostAndPort(), request.servletPath(),
 			request.pathInfo(), request.extraURLPath() or '',
 			request.queryString() and '?' + request.queryString() or '')
 		if self.setting('Debug')['Sessions']:
