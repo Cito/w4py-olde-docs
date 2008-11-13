@@ -1,6 +1,7 @@
 import time
-from WebKit.SidebarPage import SidebarPage
 from MiscUtils import mxDateTime as DateTime
+from WebKit.SidebarPage import SidebarPage
+
 
 cookieValues = [
 	('onclose', 'ONCLOSE'),

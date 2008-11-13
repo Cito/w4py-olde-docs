@@ -125,32 +125,30 @@ class HTTPResponse(Response):
 
 		"""
 		cookie = Cookie(name, value)
-		if expires == 'ONCLOSE' or not expires:
-			pass # this is already default behavior
-		elif expires == 'NOW':
-			cookie.delete()
-			return
-		elif expires == 'NEVER':
-			t = time.gmtime(time.time())
-			if expires == 'NEVER':
+		t = expires
+		if type(t) is StringType:
+			if t == 'ONCLOSE':
+				t = None
+			elif t == 'NOW':
+				cookie.delete()
+				return
+			elif t == 'NEVER':
+				t = time.gmtime(time.time())
 				t = (t[0] + 10,) + t[1:]
-			t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
-			cookie.setExpires(t)
-		else:
-			t = expires
-			if type(t) is StringType and t and t[0] == '+':
-				interval = timeDecode(t[1:])
-				t = time.time() + interval
+			elif t[0] == '+':
+				t = time.time() + timeDecode(t[1:])
+		if t:
 			if type(t) in (IntType, LongType, FloatType):
 				t = time.gmtime(t)
 			if type(t) in (TupleType, TimeTupleType):
 				t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
-			if DateTime and \
-					(type(t) is DateTime.DateTimeDeltaType
-				or isinstance(t, DateTime.RelativeDateTime)):
-				t = DateTime.now() + t
-			if DateTime and type(t) is DateTime.DateTimeType:
-				t = (t - t.gmtoffset()).strftime("%a, %d-%b-%Y %H:%M:%S GMT")
+			if DateTime:
+				if type(t) is DateTime.DateTimeDeltaType or isinstance(
+						t, DateTime.RelativeDateTime):
+					t = DateTime.now() + t
+				if type(t) is DateTime.DateTimeType:
+					t -= t.gmtoffset()
+					t = t.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
 			cookie.setExpires(t)
 		if path:
 			cookie.setPath(path)
