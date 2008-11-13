@@ -133,14 +133,14 @@ class PyTP:
 					self._errmsg('expression syntax', line, pi)
 					raise
 				out = None
-			except:
+			except Exception:
 				line = input[:m.start()].count('\n') + 1
 				self._errmsg('expression', line, pi)
 				raise
 			if out:
 				try:
 					out = self._output(out)
-				except:
+				except Exception:
 					line = input[:m.start()].count('\n') + 1
 					self._errmsg('expression output', line, pi)
 					raise
@@ -155,7 +155,7 @@ class PyTP:
 					finally:
 						sys.stdout = stdout
 						tempout.close()
-				except:
+				except Exception:
 					line = input[:m.start()].count('\n') + 1
 					self._errmsg('statement', line, pi)
 					raise
@@ -230,9 +230,9 @@ class PyTP:
 					# try again to compile the whole block:
 					compile(block2, '<string>', 'exec')
 					block = block2 # if it works, keep the indentation
-				except:
+				except Exception:
 					pass # leave it as it is
-			except:
+			except Exception:
 				pass # leave it as it is
 		return block
 

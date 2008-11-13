@@ -23,7 +23,7 @@ class SampleError:
 
 class SQLGenerator(CodeGenerator):
 	"""The MiddleKit SQL Generator class.
-	
+
 	This class and its associated mix-ins are responsible for generating:
 		- Create.sql
 		- InsertSample.sql
@@ -304,13 +304,13 @@ class Model:
 						stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
 						# print '>>', stmt
 						samples.append(stmt)
-				except:
+				except Exception:
 					print
 					print 'Samples error:'
 					try:
 						print '%s:%s' % (filename, linenum)
 						print line
-					except:
+					except Exception:
 						pass
 					print
 					raise
@@ -637,7 +637,7 @@ class Attr:
 				self.writeRealCreateSQLColumn(generator, out)
 			else:
 				out.write('\t/* %(Name)s %(Type)s - not a SQL column */' % self)
-		except:
+		except Exception:
 			bar = '*'*78
 			print
 			print bar
@@ -647,7 +647,7 @@ class Attr:
 			try:
 				from pprint import pprint
 				pprint(self.data)
-			except:
+			except Exception:
 				pass
 			print bar
 			print
@@ -732,7 +732,7 @@ class BoolAttr:
 	def sqlForNonNoneSampleInput(self, input):
 		try:
 			input = input.upper()
-		except:
+		except Exception:
 			pass
 		if input in (False, 'FALSE', 'NO', '0', '0.0', 0, 0.0):
 			value = 0

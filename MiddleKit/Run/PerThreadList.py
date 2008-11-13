@@ -49,7 +49,7 @@ class PerThreadList:
 			threadid = gettid()
 			try:
 				self.data[threadid] = []
-			except:
+			except Exception:
 				pass
 
 	def items(self, allThreads=0, gettid=thread.get_ident):
@@ -156,4 +156,3 @@ if __name__ == '__main__':
 	assert len(l.items(allThreads=1)) == 2
 	l.clear(allThreads=1)
 	assert len(l.items(allThreads=1)) == 0
-

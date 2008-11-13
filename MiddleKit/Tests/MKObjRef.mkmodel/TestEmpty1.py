@@ -43,21 +43,21 @@ def test(store):
 	b = BarReq()
 	try:
 		b.setFoo(None)
-	except:
+	except Exception:
 		pass
 	else:
 		NoException('b.setFoo(None) # None not allowed')
 
 	try:
 		b.setFoo('x')
-	except:
+	except Exception:
 		pass
 	else:
 		NoException('b.setFoo("x") # wrong type not allowed')
 
 	try:
 		b.setFoo(Bar())
-	except:
+	except Exception:
 		pass
 	else:
 		NoException('b.setFoo(Bar()) # wrong class not allowed')

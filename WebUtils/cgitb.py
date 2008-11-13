@@ -248,5 +248,5 @@ def html_repr(value):
 if __name__ == '__main__':
 	try:
 		import tester
-	except:
+	except ImportError:
 		handler()

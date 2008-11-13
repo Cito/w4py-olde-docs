@@ -64,7 +64,7 @@ def main():
 			usage()
 		try:
 			deleteData = int(parts[1])
-		except:
+		except Exception:
 			usage()
 	elif len(sys.argv) > 4:
 		usage()

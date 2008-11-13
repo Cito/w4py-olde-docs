@@ -26,7 +26,7 @@ class FileUpload(ExamplePage):
 		try:
 			f = self.request().field('filename')
 			contents = f.file.read()
-		except:
+		except Exception:
 			output = '''<p>%s</p>
 <form action="FileUpload" method="post" enctype="multipart/form-data">
 <input type="file" name="filename">

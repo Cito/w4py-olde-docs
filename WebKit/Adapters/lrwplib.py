@@ -25,7 +25,7 @@ import sys, socket
 import os, cgi
 try:
 	from cStringIO import StringIO
-except:
+except ImportError:
 	from StringIO import StringIO
 
 

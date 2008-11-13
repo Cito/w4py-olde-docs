@@ -41,7 +41,7 @@ PythonOption AppWorkDir /path/to/dir/with/adapter.address
 import os
 try:
 	os.chdir(os.path.abspath(os.path.dirname(__file__)))
-except:
+except Exception:
 	pass
 
 from mod_python import apache
@@ -70,7 +70,7 @@ class ModPythonAdapter(Adapter):
 			myInput = self.input(req)
 
 			# get the apache module to do the grunt work of
-			#   building the environment
+			# building the environment
 			env=apache.build_cgi_env(req)
 
 			#make sure env is a dictionary (may not be for Apache2)
@@ -83,7 +83,7 @@ class ModPythonAdapter(Adapter):
 			respdict = self.transactWithAppServer(env, myInput, self.host, self.port)
 
 			# Respond back to Apache
-			#self.respond(req, respdict)
+			# self.respond(req, respdict)
 
 		except:
 			self.handleException(req)

@@ -49,10 +49,10 @@ class CGIAdapter(Adapter):
 
 			# 2000-05-20 ce: For use in collecting raw request dictionaries for use in Testing/stress.py
 			# Leave this code here in case it's needed again:
-			#counter = int(open('counter.text').read())
-			#counter += 1
-			#open('counter.text', 'w').write(str(counter))
-			#open('rr-%02d.rr' % counter, 'w').write(str(dict))
+			# counter = int(open('counter.text').read())
+			# counter += 1
+			# open('counter.text', 'w').write(str(counter))
+			# open('rr-%02d.rr' % counter, 'w').write(str(dict))
 
 			host, port = open(os.path.join(self._webKitDir, 'adapter.address')).read().split(':', 1)
 			if os.name == 'nt' and host == '': # MS Windows doesn't like a blank host name

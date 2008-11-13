@@ -71,7 +71,7 @@ class Colors(ExamplePage):
 		try:
 			r, g, b = HTMLColorToRGB(self._bgcolor)
 			self._color = textcolor(r, g, b)
-		except:
+		except Exception:
 			self._color = 'black'
 		return 'text="black" bgcolor="%s" style="background-color:%s"' \
 			% ((self._bgcolor,)*2)

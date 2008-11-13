@@ -34,7 +34,7 @@
 import os, sys, socket, errno
 try:
 	from cStringIO import StringIO
-except:
+except ImportError:
 	from StringIO import StringIO
 import cgi
 

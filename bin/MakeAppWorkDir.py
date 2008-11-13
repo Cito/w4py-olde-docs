@@ -332,7 +332,7 @@ class MakeAppWorkDir:
 			gid = os.getgid()
 		try:
 			os.chown(self._workDir, uid, gid)
-		except:
+		except Exception:
 			self.msg("\tWarning: The ownership could not be changed.")
 		else:
 			for dir, dirs, files in os.walk(self._workDir):

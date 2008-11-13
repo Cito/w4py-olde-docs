@@ -383,7 +383,7 @@ Error codes and their messages:
 			return
 		try:
 			dict = eval(contents)
-		except:
+		except Exception:
 			self.fatalError('Invalid config file at %s.' % filename)
 		# For DisableErrors, we expect a dictionary keyed by error codes.
 		# For each code, we allow a value that is either a string or a list.

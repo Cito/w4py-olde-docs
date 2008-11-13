@@ -95,7 +95,7 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
 			else:
 				status = data.split('\n', 1)[0]
 				code = int(status.split()[1])
-		except:
+		except Exception:
 			status = 'no status'
 			code = 0
 		if code not in (200,): # accepted status codes
@@ -113,7 +113,7 @@ def stress(maxRequests,
 	# taken from CGIAdapter:
 	try:
 		host, port = open('../adapter.address').read().split(':')
-	except:
+	except Exception:
 		print "Please start the application server first."
 		return
 	if os.name == 'nt' and host == '':

@@ -30,7 +30,7 @@ try:
 		# MS Windows doesn't like a blank host name
 		host = 'localhost'
 	port = int(port)
-except:
+except Exception:
 	# @@: Is there something we should do with exceptions here?
 	# I'm apt to just let them print to stderr and quit like normal,
 	# but I'm not sure.
@@ -79,7 +79,7 @@ class ThreadedHTTPServer(BaseHTTPServer.HTTPServer):
 		if self.verify_request(request, client_address):
 			try:
 				self.process_request(request, client_address)
-			except:
+			except Exception:
 				self.handle_error(request, client_address)
 		self.close_request(request)
 		del self._threads[threadID]

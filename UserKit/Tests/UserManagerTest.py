@@ -255,7 +255,7 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 			UserForMKTest.__init__ = __init__
 			self._mgr = self.userManagerClass()(userClass=UserForMKTest, store=store)
 
-		except:
+		except Exception:
 			sys.stdout, sys.stderr = self._stdout, self._stderr
 			print "Error in %s.SetUp." % self.__class__.__name__
 			print ''.join(self._output)
@@ -294,7 +294,7 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 			if f.close():
 				raise OSError, 'Error running: %s' % executeSqlCmd
 
-		except:
+		except Exception:
 			sys.stdout, sys.stderr = self._stdout, self._stderr
 			print "Error in %s.SetUp." % self.__class__.__name__
 			print ''.join(self._output)

@@ -142,7 +142,7 @@ class BoolAttr:
 					value = 'FALSE'
 				elif value == 1:
 					value = 'TRUE'
-			except:
+			except Exception:
 				pass
 		assert value in ['TRUE', 'FALSE'], \
 			"'%s' is not a valid default for boolean column '%s'" \

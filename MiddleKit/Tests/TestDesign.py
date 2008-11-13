@@ -60,7 +60,7 @@ def test(modelFilename, configFilename, workDir=workDir, toTestDir='../'):
 if __name__ == '__main__':
 	try:
 		test(sys.argv[1], sys.argv[2])
-	except:
+	except Exception:
 		import traceback
 		exc_info = sys.exc_info()
 		traceback.print_exception(*exc_info)

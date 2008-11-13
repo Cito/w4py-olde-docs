@@ -55,7 +55,7 @@ class PerThreadDict:
 			threadid = gettid()
 			try:
 				return self.data[threadid].values()
-			except:
+			except Exception:
 				return []
 
 	def __len__(self, gettid=thread.get_ident):

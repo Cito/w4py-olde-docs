@@ -29,7 +29,7 @@ def Test(iterations=15):
 			r = ', '.join(map(lambda s: s[0], r))
 			print i, r
 			db.close()
-	except:
+	except Exception:
 		import traceback
 		traceback.print_exc()
 		print 'You need the pgdb adapter and a test database for this example.'

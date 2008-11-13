@@ -87,7 +87,7 @@ class DBPool:
 		"""
 		try:
 			threadsafety = dbapi.threadsafety
-		except:
+		except Exception:
 			threadsafety = None
 		if threadsafety == 0:
 			raise NotSupportedError, \

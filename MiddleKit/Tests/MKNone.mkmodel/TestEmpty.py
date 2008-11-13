@@ -15,14 +15,14 @@ def test(store):
 	errMsg = 'Set None for required attribute, but no exception was raised.'
 	try:
 		f.setRi(None)
-	except:
+	except Exception:
 		pass
 	else:
 		raise Exception, errMsg
 
 	try:
 		f.setRs(None)
-	except:
+	except Exception:
 		pass
 	else:
 		raise Exception, errMsg

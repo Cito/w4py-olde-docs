@@ -275,7 +275,7 @@ class ThreadedAppServer(AppServer):
 		try:
 			sock.bind(serverAddress)
 			sock.listen(1024)
-		except:
+		except Exception:
 			print "Error: Can not listen for %s on %s" % (
 				handlerClass.settingPrefix, str(serverAddress))
 			sys.stdout.flush()

@@ -284,7 +284,7 @@ class BoolAttr:
 	def stringToValue(self, string):
 		try:
 			string = string.upper()
-		except:
+		except Exception:
 			pass
 		if string in (True, 'TRUE', 'YES', '1', '1.0', 1, 1.0):
 			value = 1

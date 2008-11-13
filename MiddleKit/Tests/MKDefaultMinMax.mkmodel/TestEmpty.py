@@ -31,7 +31,7 @@ def test(store):
 		for x in [-1, 11]:
 			try:
 				f.setI(int(x))
-			except:
+			except Exception:
 				pass
 			else:
 				raise NoException

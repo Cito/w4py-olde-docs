@@ -99,7 +99,7 @@ class TestFuncs(unittest.TestCase):
 				'exceptions.KeyError')
 			s = s.replace("<type 'exceptions.KeyError'>", # even newer style
 				'exceptions.KeyError')
-		except:
+		except Exception:
 			s = 'failure: should not get exception'
 		assert s.find("(exception from repr(x): exceptions.KeyError: bogus)") != -1, s
 

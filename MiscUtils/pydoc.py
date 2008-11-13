@@ -145,7 +145,7 @@ def synopsis(filename, cache={}):
 		if info and 'b' in info[2]: # binary modules have to be imported
 			try:
 				module = imp.load_module('__temp__', file, filename, info[1:])
-			except:
+			except Exception:
 				return None
 			result = (module.__doc__ or '').split('\n')[0]
 			del sys.modules['__temp__']
@@ -202,7 +202,7 @@ def importfile(path):
 	file = open(path, 'r')
 	try:
 		module = imp.load_module(name, file, path, (ext, 'r', kind))
-	except:
+	except Exception:
 		raise ErrorDuringImport(path, sys.exc_info())
 	file.close()
 	return module
@@ -230,7 +230,7 @@ def safeimport(path, forceload=0, cache={}):
 				del sys.modules[path]
 	try:
 		module = __import__(path)
-	except:
+	except Exception:
 		# Did the error occur before or after the module was found?
 		(exc, value, tb) = info = sys.exc_info()
 		if sys.modules.has_key(path):
@@ -314,7 +314,7 @@ class HTMLRepr(Repr):
 	def repr_instance(self, x, level):
 		try:
 			return self.escape(cram(stripid(repr(x)), self.maxstring))
-		except:
+		except Exception:
 			return self.escape('<%s instance>' % x.__class__.__name__)
 
 	repr_unicode = repr_string
@@ -764,7 +764,7 @@ class TextRepr(Repr):
 	def repr_instance(self, x, level):
 		try:
 			return cram(stripid(repr(x)), self.maxstring)
-		except:
+		except Exception:
 			return '<%s instance>' % x.__class__.__name__
 
 class TextDoc(Doc):
@@ -1431,7 +1431,7 @@ please set the environment variable PYTHONDOCS to indicate their location.
 		filename = self.docdir + '/' + filename + '.html'
 		try:
 			file = open(filename)
-		except:
+		except Exception:
 			self.output.write('could not read docs from %s\n' % filename)
 			return
 

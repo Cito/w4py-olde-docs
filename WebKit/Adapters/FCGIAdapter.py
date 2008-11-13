@@ -130,7 +130,7 @@ class FCGIAdapter(Adapter):
 			req=self.req
 			req.out.write(''.join(map(str, args)) + '\n')
 			req.out.flush()
-		except:
+		except Exception:
 			pass
 
 

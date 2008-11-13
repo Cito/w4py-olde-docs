@@ -258,7 +258,7 @@ class ParseEventHandler:
 		self.addGenerator(gen)
 
 	def handleMethodEnd(self, start, stop, attrs):
-		#self._parser.flushCharData(self.tmplStart, self.tmplStop)
+		# self._parser.flushCharData(self.tmplStart, self.tmplStop)
 		gen = MethodEndGenerator(self._reader.getChars(start, stop), attrs)
 		self.addGenerator(gen)
 
@@ -297,14 +297,14 @@ class ParseEventHandler:
 			self._writer.println(i)
 		# self._writer.println('try:\n')
 		# self._writer.pushIndent()
-		# self._writer.println('from ' +self._baseClass+ ' import ' +self._baseClass +'\n')
+		# self._writer.println('from ' + self._baseClass + ' import ' + self._baseClass + '\n')
 		self._writer.println('import WebKit')
 		self._writer.println('from WebKit import Page')
 		for baseClass in self._baseClasses:
 			if baseClass.find('.') < 0 and baseClass not in self._importedSymbols:
 				self._writer.println('import ' + baseClass)
 		# self._writer.popIndent()
-		# self._writer.println('except:\n')
+		# self._writer.println('except ImportError:\n')
 		# self._writer.pushIndent()
 		# self._writer.println('pass\n')
 		# self._writer.popIndent()
@@ -340,7 +340,7 @@ class ParseEventHandler:
 				self._writer.printChars(',')
 			self._writer.printChars('_baseClasses[%d]' % i)
 		self._writer.printChars('):')
-		#self._writer.printChars('('+self._baseClass+'):')
+		# self._writer.printChars('(' + self._baseClass + '):')
 		self._writer.printChars('\n')
 		self._writer.pushIndent()
 		self._writer.println('def canBeThreaded(self):') # I Hope to take this out soon!

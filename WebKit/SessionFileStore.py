@@ -55,7 +55,7 @@ class SessionFileStore(SessionStore):
 					item = self.decoder()(file)
 				finally:
 					file.close()
-			except: # session can't be unpickled
+			except Exception: # session can't be unpickled
 				os.remove(filename) # remove session file
 				print "Error loading session from disk:", key
 				self.application().handleException()
@@ -85,10 +85,10 @@ class SessionFileStore(SessionStore):
 						self.encoder()(item, file)
 					finally:
 						file.close()
-				except:
+				except Exception:
 					os.remove(filename) # remove file because it is corrupt
 					raise
-			except: # error pickling the session
+			except Exception: # error pickling the session
 				print "Error saving session to disk:", key
 				self.application().handleException()
 		finally:
@@ -107,7 +107,7 @@ class SessionFileStore(SessionStore):
 		filename = self.filenameForKey(key)
 		try:
 			os.remove(filename)
-		except:
+		except Exception:
 			pass
 
 	def has_key(self, key):

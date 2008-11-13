@@ -48,14 +48,13 @@ class LRWPAdapter(Adapter):
 
 	def lrwpConnect(self, LRWPappName, LRWPhost, LRWPport):
 		try:
-			#Make connection to Xitami
+			# Make connection to Xitami
 			self.lrwp = LRWP(LRWPappName, LRWPhost, LRWPport)
 			self.lrwp.connect()
 			print ('\r\n Connected to Xitami -- Listening for ' + LRWPappName + '\r\n')
 			self.LRWPappName = LRWPappName
-		except:
+		except Exception:
 			sys.exit('Could not make proper connection to Xitami')
-
 
 	def handler(self):
 		while 1:

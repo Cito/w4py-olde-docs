@@ -14,7 +14,7 @@ from PerThreadDict import PerThreadDict, NonThreadedDict
 import thread
 try:
 	from weakref import WeakValueDictionary
-except: # fallback for Python < 2.1
+except ImportError: # fallback for Python < 2.1
 	from UserDict import UserDict as WeakValueDictionary
 
 try: # for Python < 2.3

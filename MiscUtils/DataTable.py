@@ -290,7 +290,7 @@ class TableColumn:
 		else:
 			try:
 				self._type = _types[type.lower()]
-			except:
+			except Exception:
 				raise DataTableError, 'Unknown type %r. types=%r' % (type, _types.keys())
 
 	def __repr__(self):

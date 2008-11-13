@@ -147,7 +147,7 @@ class Configurable:
 		if replacements and isDict:
 			try:
 				contents %= replacements
-			except:
+			except Exception:
 				raise ConfigurationError, \
 					'Unable to embed replacement text in %s.' % filename
 		evalContext = replacements.copy()

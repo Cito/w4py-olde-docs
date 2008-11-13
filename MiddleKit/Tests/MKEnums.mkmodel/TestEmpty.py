@@ -33,7 +33,7 @@ def test(store):
 		f.setE('wrong')
 	except ValueError:
 		pass
-	except:
+	except Exception:
 		assert 0, 'expecting a ValueError for invalid enums'
 	else:
 		assert 0, 'expecting a ValueError for invalid enums'

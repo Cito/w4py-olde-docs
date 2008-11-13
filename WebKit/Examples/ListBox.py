@@ -137,7 +137,7 @@ style="width:%(width)dpt;text-align:center">
 		# check whether form is valid (no repeated execution)
 		try:
 			formCount = int(self.request().field('formCount'))
-		except:
+		except Exception:
 			formCount = 0
 		if formCount == self._vars['formCount']:
 			acts.extend(['new', 'delete',

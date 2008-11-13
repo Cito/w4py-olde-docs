@@ -253,7 +253,7 @@ class SQLObjectStore(ObjectStore):
 		if object.serialNum() > 0:
 			try:
 				rep = repr(object)
-			except:
+			except Exception:
 				rep = '(repr exception)'
 			assert object.serialNum() < 1, 'object=%s' % rep
 
