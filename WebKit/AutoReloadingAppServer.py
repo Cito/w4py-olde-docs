@@ -28,7 +28,7 @@ defaultConfig = {
 }
 
 
-def fam(modules):
+def getFAM(modules):
 	"""Get FAM object based on the modules specified.
 
 	Currently supported are
@@ -37,6 +37,7 @@ def fam(modules):
 
 	"""
 	for module in modules:
+		global fam # for Python < 2.2
 		try:
 			fam = __import__(module)
 		except ImportError:
@@ -206,7 +207,7 @@ class AutoReloadingAppServer(AppServer):
 				# FAM will be only used when ImportSpy has been activated,
 				# since otherwise we need to poll the modules anyway.
 				try:
-					self._fam = fam(famModules)
+					self._fam = getFAM(famModules)
 					self._pipe = None
 				except Exception, e:
 					print "Error loading FAM:", str(e)
