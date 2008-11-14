@@ -45,15 +45,12 @@ class Klasses:
 	def writeClassIdsSQL(self, generator, out):
 		# pgsql 7.3.4 doesn't seem to drop the _MKClassIDs table when the database
 		# is dropped.  very strange.  Anyways, we drop it here just to make sure.
-		wr = out.write
-		wr('''\
-drop table _MKClassIds;
-		''')
+		out.write('\ndrop table _MKClassIds cascade;\n')
 		Klasses.mixInSuperWriteClassIdsSQL(self, generator, out)
 
 	def dropDatabaseSQL(self, dbName):
 		# errors are ignored
-		return 'DROP DATABASE "%s";\n' % dbName
+		return 'drop database "%s";\n' % dbName
 
 	def dropTablesSQL(self):
 		sql = []
