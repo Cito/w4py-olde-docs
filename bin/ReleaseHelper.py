@@ -159,7 +159,7 @@ class ReleaseHelper:
 			if os.path.exists(pkgPath):
 				self.error("%s is in the way, please remove it." % pkgPath)
 
-			tarCmd = pkg == 'zip' and 'zip -qrK' or 'tar -czf'
+			tarCmd = pkg == 'zip' and 'zip -qr' or 'tar -czf'
 			self.run('%s %s %s' % (tarCmd, pkgPath, pkgDir))
 
 			if not os.path.exists(pkgPath):
