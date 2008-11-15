@@ -112,7 +112,7 @@ def stress(maxRequests,
 	"""Execute stress test on the AppServer according to the arguments."""
 	# taken from CGIAdapter:
 	try:
-		host, port = open('../adapter.address').read().split(':')
+		host, port = open('../../adapter.address').read().split(':')
 	except Exception:
 		print "Please start the application server first."
 		return
