@@ -2,13 +2,14 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.4: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
 <title>Beginner Tutorial</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="beginner-tutorial">
 <h1 class="title">Beginner Tutorial</h1>
+
 <p>Webware for Python</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -20,41 +21,41 @@
 </tr>
 </tbody>
 </table>
-<div class="contents topic">
-<p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference" href="#synopsis" id="id6" name="id6">Synopsis</a></li>
-<li><a class="reference" href="#installation" id="id7" name="id7">Installation</a></li>
-<li><a class="reference" href="#setting-up-your-environment" id="id8" name="id8">Setting Up Your Environment</a><ul>
-<li><a class="reference" href="#creating-a-working-directory" id="id9" name="id9">Creating a Working Directory</a></li>
-<li><a class="reference" href="#changing-webware-configuration" id="id10" name="id10">Changing Webware Configuration</a></li>
+<li><a class="reference internal" href="#synopsis" id="id6">Synopsis</a></li>
+<li><a class="reference internal" href="#installation" id="id7">Installation</a></li>
+<li><a class="reference internal" href="#setting-up-your-environment" id="id8">Setting Up Your Environment</a><ul>
+<li><a class="reference internal" href="#creating-a-working-directory" id="id9">Creating a Working Directory</a></li>
+<li><a class="reference internal" href="#changing-webware-configuration" id="id10">Changing Webware Configuration</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#creating-and-understanding-the-servlet" id="id11" name="id11">Creating and Understanding the Servlet</a></li>
-<li><a class="reference" href="#a-brief-introduction-to-the-servlet" id="id12" name="id12">A Brief Introduction to the Servlet</a></li>
-<li><a class="reference" href="#a-photo-album" id="id13" name="id13">A Photo Album</a><ul>
-<li><a class="reference" href="#iteration-1-displaying-files" id="id14" name="id14">Iteration 1: Displaying Files</a></li>
-<li><a class="reference" href="#iteration-2-uploading-files" id="id15" name="id15">Iteration 2: Uploading Files</a></li>
+<li><a class="reference internal" href="#creating-and-understanding-the-servlet" id="id11">Creating and Understanding the Servlet</a></li>
+<li><a class="reference internal" href="#a-brief-introduction-to-the-servlet" id="id12">A Brief Introduction to the Servlet</a></li>
+<li><a class="reference internal" href="#a-photo-album" id="id13">A Photo Album</a><ul>
+<li><a class="reference internal" href="#iteration-1-displaying-files" id="id14">Iteration 1: Displaying Files</a></li>
+<li><a class="reference internal" href="#iteration-2-uploading-files" id="id15">Iteration 2: Uploading Files</a></li>
 </ul>
 </li>
 </ul>
 </div>
-<div class="section">
-<h1><a id="synopsis" name="synopsis">Synopsis</a></h1>
+<div class="section" id="synopsis">
+<h1>Synopsis</h1>
 <p>We present a tutorial on making a Webware script, and some guidance on turning
 that into a web application.</p>
 </div>
-<div class="section">
-<h1><a id="installation" name="installation">Installation</a></h1>
-<p>This document does not cover the basic installation. See the <a class="reference" href="InstallGuide.html">Install Guide</a>
+<div class="section" id="installation">
+<h1>Installation</h1>
+<p>This document does not cover the basic installation. See the <a class="reference external" href="InstallGuide.html">Install Guide</a>
 -- you should be able to open up the WebKit Examples context in you browser
 before you continue. For the beginning, you can use the built-in HTTP server,
 but in a production environment you should use a real web server like Apache.</p>
 </div>
-<div class="section">
-<h1><a id="setting-up-your-environment" name="setting-up-your-environment">Setting Up Your Environment</a></h1>
-<div class="section">
-<h2><a id="creating-a-working-directory" name="creating-a-working-directory">Creating a Working Directory</a></h2>
+<div class="section" id="setting-up-your-environment">
+<h1>Setting Up Your Environment</h1>
+<div class="section" id="creating-a-working-directory">
+<h2>Creating a Working Directory</h2>
 <p>We'll first set up a directory dedicated to your application. Run this command:</p>
 <pre class="literal-block">
 $ cd ~
@@ -69,13 +70,13 @@ interest are <tt class="docutils literal"><span class="pre">Context</span></tt> 
 be putting your servlets; <tt class="docutils literal"><span class="pre">Configs</span></tt> that holds some configuration files;
 and <tt class="docutils literal"><span class="pre">Lib</span></tt> where you can put your non-servlet code.</p>
 <p>For more information about the working directory and setting up the file
-structure for your application, see <a class="reference" href="ApplicationDevelopment.html">Application Development</a>.</p>
+structure for your application, see <a class="reference external" href="ApplicationDevelopment.html">Application Development</a>.</p>
 </div>
-<div class="section">
-<h2><a id="changing-webware-configuration" name="changing-webware-configuration">Changing Webware Configuration</a></h2>
+<div class="section" id="changing-webware-configuration">
+<h2>Changing Webware Configuration</h2>
 <p>For the most part the configuration is fine, but we'll make a couple changes to
 make it easier to develop. For more information on configuration see the
-<a class="reference" href="Configuration.html">Configuration Guide</a>.</p>
+<a class="reference external" href="Configuration.html">Configuration Guide</a>.</p>
 <p>In the file <tt class="docutils literal"><span class="pre">AppServer.config</span></tt>, change this line:</p>
 <pre class="literal-block">
 # Original (default setting):
@@ -99,8 +100,8 @@ In Application.config:</p>
 application in a production environment).</p>
 </div>
 </div>
-<div class="section">
-<h1><a id="creating-and-understanding-the-servlet" name="creating-and-understanding-the-servlet">Creating and Understanding the Servlet</a></h1>
+<div class="section" id="creating-and-understanding-the-servlet">
+<h1>Creating and Understanding the Servlet</h1>
 <p>Webware's core concept for serving pages is the <em>servlet</em>. This is a class that
 creates a response given a request.</p>
 <p>The core classes to understanding the servlet are <tt class="docutils literal"><span class="pre">Servlet</span></tt>, <tt class="docutils literal"><span class="pre">HTTPServlet</span></tt>,
@@ -115,10 +116,10 @@ This class defines a more high-level interface, appropriate for generating HTML
 (though it can be used with any content type). It also provides a number of
 convenience methods.</p>
 </div>
-<div class="section">
-<h1><a id="a-brief-introduction-to-the-servlet" name="a-brief-introduction-to-the-servlet">A Brief Introduction to the Servlet</a></h1>
+<div class="section" id="a-brief-introduction-to-the-servlet">
+<h1>A Brief Introduction to the Servlet</h1>
 <p>Each servlet is a plain Python class. There is no Webware magic (except perhaps
-for the level one <em>import module based on URL</em> spell). <a class="reference" href="../../PSP/Docs/index.html">PSP</a> has more magic,
+for the level one <em>import module based on URL</em> spell). <a class="reference external" href="../../PSP/Docs/index.html">PSP</a> has more magic,
 but that's a topic for another day.</p>
 <p>An extremely simple servlet might look like:</p>
 <pre class="literal-block">
@@ -179,16 +180,16 @@ You can look at it for a place to start experimenting, but here we'll work on
 developing an entire (small) application, introducing the other concepts as we
 go along.</p>
 </div>
-<div class="section">
-<h1><a id="a-photo-album" name="a-photo-album">A Photo Album</a></h1>
+<div class="section" id="a-photo-album">
+<h1>A Photo Album</h1>
 <p>If you look online, you'll see a huge number of web applications available for
 an online photo album. The world needs one more!</p>
-<p>You will need the <a class="reference" href="http://www.pythonware.com/products/pil/">Python Imaging Library</a> (PIL) installed for this example.
+<p>You will need the <a class="reference external" href="http://www.pythonware.com/products/pil/">Python Imaging Library</a> (PIL) installed for this example.
 First we'll use it to find the sizes of the images, and later we will use it to
 create thumbnails.</p>
 <p>We'll develop the application in two iterations.</p>
-<div class="section">
-<h2><a id="iteration-1-displaying-files" name="iteration-1-displaying-files">Iteration 1: Displaying Files</a></h2>
+<div class="section" id="iteration-1-displaying-files">
+<h2>Iteration 1: Displaying Files</h2>
 <p>For simplicity, we will store image files in a subdirectory <tt class="docutils literal"><span class="pre">Pics</span></tt> of the
 default context directory <tt class="docutils literal"><span class="pre">WebwareTest/Context</span></tt> and let the AppServer deliver
 the files. In a production environment, you would place the <tt class="docutils literal"><span class="pre">Pics</span></tt> directory
@@ -268,8 +269,8 @@ class View(Page):
         self.writeln('&lt;/div&gt;')
 </pre>
 </div>
-<div class="section">
-<h2><a id="iteration-2-uploading-files" name="iteration-2-uploading-files">Iteration 2: Uploading Files</a></h2>
+<div class="section" id="iteration-2-uploading-files">
+<h2>Iteration 2: Uploading Files</h2>
 <p>That was fairly simple -- but usually you want to upload files, potentially
 through a web interface. Along the way we'll add thumbnail generation using
 PIL, and slighly improve the image index.</p>

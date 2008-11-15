@@ -2,32 +2,34 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.4: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
 <title>Configuration Guide</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="configuration-guide">
 <h1 class="title">Configuration Guide</h1>
-<div class="contents topic">
-<p class="topic-title first"><a id="contents" name="contents">Contents</a></p>
+
+<div class="contents topic" id="contents">
+<p class="topic-title first">Contents</p>
 <ul class="simple">
-<li><a class="reference" href="#command-line-configuration" id="id5" name="id5">Command Line Configuration</a></li>
-<li><a class="reference" href="#application-config" id="id6" name="id6">Application.config</a><ul>
-<li><a class="reference" href="#general-settings" id="id7" name="id7">General Settings</a></li>
-<li><a class="reference" href="#path-handling" id="id8" name="id8">Path Handling</a></li>
-<li><a class="reference" href="#caching" id="id9" name="id9">Caching</a></li>
-<li><a class="reference" href="#errors" id="id10" name="id10">Errors</a></li>
-<li><a class="reference" href="#logging" id="id11" name="id11">Logging</a></li>
+<li><a class="reference internal" href="#command-line-configuration" id="id5">Command Line Configuration</a></li>
+<li><a class="reference internal" href="#application-config" id="id6">Application.config</a><ul>
+<li><a class="reference internal" href="#general-settings" id="id7">General Settings</a></li>
+<li><a class="reference internal" href="#path-handling" id="id8">Path Handling</a></li>
+<li><a class="reference internal" href="#caching" id="id9">Caching</a></li>
+<li><a class="reference internal" href="#errors" id="id10">Errors</a></li>
+<li><a class="reference internal" href="#logging" id="id11">Logging</a></li>
 </ul>
 </li>
-<li><a class="reference" href="#appserver-config" id="id12" name="id12">AppServer.config</a></li>
+<li><a class="reference internal" href="#appserver-config" id="id12">AppServer.config</a></li>
 </ul>
 </div>
-<div class="section">
-<h1><a id="command-line-configuration" name="command-line-configuration">Command Line Configuration</a></h1>
+<div class="section" id="command-line-configuration">
+<h1>Command Line Configuration</h1>
 <p>Each of these can be set in the <tt class="docutils literal"><span class="pre">.config</span></tt> files, but they can be overridden
-with the command line.  Run <tt class="docutils literal"><span class="pre">AppServer</span></tt> with switches in the form <tt class="docutils literal"><span class="pre">ClassName.SettingName=value</span></tt>, e.g. <tt class="docutils literal"><span class="pre">AppServer.AdapterPort=8087</span></tt>.</p>
+with the command line.  Run <tt class="docutils literal"><span class="pre">AppServer</span></tt> with switches in the form
+<tt class="docutils literal"><span class="pre">ClassName.SettingName=value</span></tt>, e.g. <tt class="docutils literal"><span class="pre">AppServer.AdapterPort=8087</span></tt>.</p>
 <p>The <tt class="docutils literal"><span class="pre">value</span></tt> is coerced into a Python type: if it starts with one of the
 characters <tt class="docutils literal"><span class="pre">({[&quot;'</span></tt> -- i.e., parenthesis (expression), dictionary, list,
 or string -- then the value with be eval'ed.  If it can be turned into a
@@ -47,12 +49,12 @@ be left as a string.  Some examples:</p>
 <tt class="docutils literal"><span class="pre">()</span> <span class="pre">[]</span> <span class="pre">'</span> <span class="pre">&quot;</span></tt> are special, and need to be quoted (with <tt class="docutils literal"><span class="pre">\</span></tt> or with single
 or double quotation marks).</p>
 </div>
-<div class="section">
-<h1><a id="application-config" name="application-config">Application.config</a></h1>
+<div class="section" id="application-config">
+<h1>Application.config</h1>
 <p><tt class="docutils literal"><span class="pre">Application.config</span></tt> covers not only the application, but a number
 of components that use it as a central point of configuration.</p>
-<div class="section">
-<h2><a id="general-settings" name="general-settings">General Settings</a></h2>
+<div class="section" id="general-settings">
+<h2>General Settings</h2>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">Contexts</span></tt>:</dt>
 <dd><p class="first">This dictionary maps context names to the directory holding the
@@ -84,8 +86,8 @@ interactively when <tt class="docutils literal"><span class="pre">install.py</sp
 Default: <tt class="docutils literal"><span class="pre">True</span></tt> (on).</dd>
 </dl>
 </div>
-<div class="section">
-<h2><a id="path-handling" name="path-handling">Path Handling</a></h2>
+<div class="section" id="path-handling">
+<h2>Path Handling</h2>
 <p>These configuration settings control which files are exposed to users,
 which files are hidden, and some of how those files get chosen.</p>
 <dl class="docutils">
@@ -105,7 +107,7 @@ autodetecting extensions.  Note that this does not prevent WebKit
 from serving such a file if it is named explicitly in a URL.  If
 no extensions are given all extensions will be served (usually
 anything but <tt class="docutils literal"><span class="pre">.py</span></tt> and <tt class="docutils literal"><span class="pre">.psp</span></tt> will be served as a static
-file). Default: <tt class="docutils literal"><span class="pre">[]</span></tt>.</dd>
+file).  Default: <tt class="docutils literal"><span class="pre">[]</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">UseCascadingExtensions</span></tt>:</dt>
 <dd>If False, WebKit will give a <tt class="docutils literal"><span class="pre">404</span> <span class="pre">Not</span> <span class="pre">Found</span></tt> result if there is
 more than one file that could potentially match.  If True, then
@@ -167,20 +169,20 @@ with the setting <tt class="docutils literal"><span class="pre">SessionName</spa
 with the name set in <tt class="docutils literal"><span class="pre">SessionName</span></tt>, which is usually <tt class="docutils literal"><span class="pre">_SID_</span></tt>.
 Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">SessionCookiePath</span></tt>:</dt>
-<dd>You can specify a path for the session cookie here. <tt class="docutils literal"><span class="pre">None</span></tt> means
+<dd>You can specify a path for the session cookie here.  <tt class="docutils literal"><span class="pre">None</span></tt> means
 that the servlet path will be used, which is normally the best choice.
 If you rewrite the URL using different prefixes, you may have to
-specify a fixed prefix for all your URLs. Using the root path '/'
+specify a fixed prefix for all your URLs.  Using the root path '/'
 will always work, but may have security issues if you are running less
-secure applications on the same server. Default: <tt class="docutils literal"><span class="pre">None</span></tt>.</dd>
+secure applications on the same server.  Default: <tt class="docutils literal"><span class="pre">None</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">SecureSessionCookie</span></tt>:</dt>
 <dd>If True, then the app server will use a secure cookie for the session
 ID if the request was using an HTTPS connection.  Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">MaxDynamicMemorySessions</span></tt>:</dt>
 <dd>The maximum number of dynamic memory sessions that will be
 retained in memory.  When this number is exceeded, the least
-recently used, excess sessions will be pushed out to disk. This
-setting can be used to help control memory requirements,
+recently used, excess sessions will be pushed out to disk.
+This setting can be used to help control memory requirements,
 especially for busy sites.  This is used only if the
 <tt class="docutils literal"><span class="pre">SessionStore</span></tt> is set to <tt class="docutils literal"><span class="pre">Dynamic</span></tt>.  Default: <tt class="docutils literal"><span class="pre">10000</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">DynamicSessionTimeout</span></tt>:</dt>
@@ -189,15 +191,14 @@ pushed out to disk.  This setting can be used to help control
 memory requirements, especially for busy sites.  This is used only
 if the <tt class="docutils literal"><span class="pre">SessionStore</span></tt> is set to <tt class="docutils literal"><span class="pre">Dynamic</span></tt>.  Default: <tt class="docutils literal"><span class="pre">15</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">SessionPrefix</span></tt>:</dt>
-<dd><p class="first last">This setting can be used to prefix the session IDs with a string.
+<dd>This setting can be used to prefix the session IDs with a string.
 Possible values are <tt class="docutils literal"><span class="pre">None</span></tt> (don't use a prefix), <tt class="docutils literal"><span class="pre">&quot;hostname&quot;</span></tt>
 (use the hostname as the prefix), or any other string (use that string
 as the prefix).  You can use this for load balancing, where each
-Webware server uses a different prefix.  You can then use <a class="reference" href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html">mod_rewrite</a>
+Webware server uses a different prefix.  You can then use <a class="reference external" href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html">mod_rewrite</a>
 or other software for load-balancing to redirect each user back to the
 server they first accessed.  This way the backend servers do not
-have to share session data.  Default: <tt class="docutils literal"><span class="pre">None</span></tt>.</p>
-</dd>
+have to share session data.  Default: <tt class="docutils literal"><span class="pre">None</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">SessionName</span></tt>:</dt>
 <dd>This setting can be used to change the name of the field holding
 the session ID.  When the session ID is stored in a cookie and there
@@ -217,7 +218,7 @@ extensions&quot; such as .html, .css, .js, .gif, .jpeg etc.  The default
 setting specifies that the servlet matching the file is cached in memory.
 You may also specify that the contents of the files shall be cached
 in memory if they are not too large.</p>
-<p>If you are concerned about performance, use <a class="reference" href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html">mod_rewrite</a> to avoid
+<p>If you are concerned about performance, use <a class="reference external" href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html">mod_rewrite</a> to avoid
 accessing WebKit for static content.</p>
 <p>The <tt class="docutils literal"><span class="pre">Technique</span></tt> setting can be switched to <tt class="docutils literal"><span class="pre">&quot;redirectSansAdapter&quot;</span></tt>,
 but this is an experimental setting with some known problems.</p>
@@ -235,8 +236,8 @@ but this is an experimental setting with some known problems.</p>
 </dd>
 </dl>
 </div>
-<div class="section">
-<h2><a id="caching" name="caching">Caching</a></h2>
+<div class="section" id="caching">
+<h2>Caching</h2>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">CacheServletClasses</span></tt>:</dt>
 <dd>When set to False, the AppServer will not cache the classes that
@@ -262,8 +263,8 @@ take a long time to compile, this can give a speedup.  Default:
 <tt class="docutils literal"><span class="pre">False</span></tt> (cache will persist).</dd>
 </dl>
 </div>
-<div class="section">
-<h2><a id="errors" name="errors">Errors</a></h2>
+<div class="section" id="errors">
+<h2>Errors</h2>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">ShowDebugInfoOnErrors</span></tt>:</dt>
 <dd>If True, then uncaught exceptions will not only display a message
@@ -282,17 +283,16 @@ deploying the site.  Default: <tt class="docutils literal"><span class="pre">Fal
 <dd>If True, an &quot;[edit]&quot; link will be put next to each line in tracebacks.
 That link will point to a file of type
 <tt class="docutils literal"><span class="pre">application/x-webkit-edit-file</span></tt>, which you should configure your
-browser to run with <tt class="docutils literal"><span class="pre">Webware/bin/editfile.py</span></tt>. If you configure
+browser to run with <tt class="docutils literal"><span class="pre">Webware/bin/editfile.py</span></tt>.  If you configure
 <tt class="docutils literal"><span class="pre">editfile.py</span></tt> correctly, then it will automatically open the
 respective Python module with your favorite Python editor and put
 the cursor on the erroneous line.  Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">IncludeFancyTraceback</span></tt>:</dt>
-<dd><p class="first last">If True, then display a fancy, detailed traceback at the end of
+<dd>If True, then display a fancy, detailed traceback at the end of
 the error page.  It will include the values of local variables in
 the traceback.  This makes use of a modified version of <tt class="docutils literal"><span class="pre">cgitb.py</span></tt>
-which is included with Webware.  The <a class="reference" href="http://web.lfw.org/python/">original version</a> was
-written by Ka-Ping Yee.  Default: <tt class="docutils literal"><span class="pre">False</span></tt> (off).</p>
-</dd>
+which is included with Webware.  The <a class="reference external" href="http://web.lfw.org/python/">original version</a> was
+written by Ka-Ping Yee.  Default: <tt class="docutils literal"><span class="pre">False</span></tt> (off).</dd>
 <dt><tt class="docutils literal"><span class="pre">FancyTracebackContext</span></tt>:</dt>
 <dd>The number of lines of source code context to show if
 IncludeFancyTraceback is turned on.  Default: <tt class="docutils literal"><span class="pre">5</span></tt>.</dd>
@@ -398,8 +398,8 @@ raising exceptions by design and you don't want to be notified.
 Default: <tt class="docutils literal"><span class="pre">True</span></tt> (do report exceptions).</dd>
 </dl>
 </div>
-<div class="section">
-<h2><a id="logging" name="logging">Logging</a></h2>
+<div class="section" id="logging">
+<h2>Logging</h2>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">LogActivity</span></tt>:</dt>
 <dd>If True, then the execution of each servlet is logged with useful
@@ -407,7 +407,7 @@ information such as time, duration and whether or not an error
 occurred.  Default: <tt class="docutils literal"><span class="pre">True</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">ActivityLogFilenames</span></tt>:</dt>
 <dd>This is the name of the file that servlet executions are logged to.
-This setting has no effect if <tt class="docutils literal"><span class="pre">LogActivity</span></tt> is False. The path can
+This setting has no effect if <tt class="docutils literal"><span class="pre">LogActivity</span></tt> is False.  The path can
 be relative to the WebKit location, or an absolute path.
 Default: <tt class="docutils literal"><span class="pre">&quot;Logs/Activity.csv&quot;</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">ActivityLogColumns</span></tt>:</dt>
@@ -423,8 +423,8 @@ qualified arbitrarily deep.  Default: <tt class="docutils literal"><span class="
 </dl>
 </div>
 </div>
-<div class="section">
-<h1><a id="appserver-config" name="appserver-config">AppServer.config</a></h1>
+<div class="section" id="appserver-config">
+<h1>AppServer.config</h1>
 <dl class="docutils">
 <dt><tt class="docutils literal"><span class="pre">Host</span></tt>:</dt>
 <dd>The IP address at which the application server will listen for requests.
@@ -486,7 +486,7 @@ Default: <tt class="docutils literal"><span class="pre">%s.address</span></tt>.<
 plugins.  Each plugin is a subdirectory of its own.  By default WebKit looks
 in the <tt class="docutils literal"><span class="pre">Webware/</span></tt> directory (<tt class="docutils literal"><span class="pre">..</span></tt>) for plugins -- several of which are
 shipped with Webware.  Default: <tt class="docutils literal"><span class="pre">[&quot;..&quot;]</span></tt>.
-See <a class="reference" href="Developing.html#creatingplugins">Creating Plugins</a> for information on creating your own plug-ins.</p>
+See <a class="reference external" href="Developing.html#creatingplugins">Creating Plugins</a> for information on creating your own plug-ins.</p>
 <p class="last">The advantage of a plug-in directory is that you can add new plug-ins to
 the app server simply by dropping them into the  directory; no additional
 configuration is necessary.</p>
@@ -517,7 +517,7 @@ the default is generally sufficient.  Default: <tt class="docutils literal"><spa
 <dd>This setting controls automatic cancelation of long-running requests.
 All worker threads executing requests longer than <tt class="docutils literal"><span class="pre">MaxRequestTime</span></tt>
 seconds will be automatically aborted with a <tt class="docutils literal"><span class="pre">RequestTooLongError</span></tt>
-exception. The monitoring of long-running requests can be disabled
+exception.  The monitoring of long-running requests can be disabled
 by setting this to <tt class="docutils literal"><span class="pre">0</span></tt> or <tt class="docutils literal"><span class="pre">None</span></tt>.  Default: <tt class="docutils literal"><span class="pre">300</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">CheckInterval</span></tt>:</dt>
 <dd>The number of virtual instructions after which Python will check
@@ -545,7 +545,7 @@ necessary to pick up the changes.</p>
 <p>This uses the FAM (File Alteration Monitor) module specified in the setting
 <tt class="docutils literal"><span class="pre">UseFAMModules</span></tt> if available.  You can also specify several modules to
 check them in the given order (the default is <tt class="docutils literal"><span class="pre">gamin</span> <span class="pre">_fam</span></tt> for using
-<a class="reference" href="http://www.gnome.org/~veillard/gamin/">python-gamin</a> or <a class="reference" href="http://python-fam.sourceforge.net">python-fam</a>).  Otherwise, if no FAM module is specified
+<a class="reference external" href="http://www.gnome.org/~veillard/gamin/">python-gamin</a> or <a class="reference external" href="http://python-fam.sourceforge.net">python-fam</a>).  Otherwise, if no FAM module is specified
 or installed, or when ImportSpy has been disabled by setting <tt class="docutils literal"><span class="pre">UseImportSpy</span></tt>
 to False, it resorts to polling.  The polling interval in seconds can be set
 with the <tt class="docutils literal"><span class="pre">AutoReloadPollInterval</span></tt> setting which defaults to 1 second.</p>

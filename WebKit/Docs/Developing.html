@@ -2,28 +2,29 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.4: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
 <title>Developing Webware</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="developing-webware">
 <h1 class="title">Developing Webware</h1>
+
 <p>This document should outline the details you need to understand
 Webware and WebKit internals, and assist in becoming a more advanced
 Webware programmer.</p>
-<div class="section">
-<h1><a id="style-guidelines" name="style-guidelines">Style Guidelines</a></h1>
+<div class="section" id="style-guidelines">
+<h1>Style Guidelines</h1>
 <p>Webware developers are requested to observe the rules defined
-in the <a class="reference" href="../../Docs/StyleGuidelines.html">Webware Style Guidelines</a>.</p>
+in the <a class="reference external" href="../../Docs/StyleGuidelines.html">Webware Style Guidelines</a>.</p>
 </div>
-<div class="section">
-<h1><a id="creating-plugins" name="creating-plugins">Creating Plugins</a></h1>
+<div class="section" id="creating-plugins">
+<h1>Creating Plugins</h1>
 <p>Each plugin is a Python Package.  WebKit finds plugins using the
-<tt class="docutils literal"><span class="pre">PlugIns</span></tt> and <tt class="docutils literal"><span class="pre">PluginDirs</span></tt> -- see <a class="reference" href="Configuration.html#appserver-config">Configuration</a>.  See also the
-<a class="reference" href="http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000">Python tutorial on packages</a> and the <tt class="docutils literal"><span class="pre">PlugIn.py</span></tt> doc string.</p>
-<p>A plug-in must have <tt class="docutils literal"><span class="pre">__init__.py</span></tt> and <tt class="docutils literal"><span class="pre">Properties.py</span></tt> files. You
-can disable a specific plug-in by placing a <tt class="docutils literal"><span class="pre">dontload</span></tt> file in it.</p>
+<tt class="docutils literal"><span class="pre">PlugIns</span></tt> and <tt class="docutils literal"><span class="pre">PluginDirs</span></tt> -- see <a class="reference external" href="Configuration.html#appserver-config">Configuration</a>.  See also the
+<a class="reference external" href="http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000">Python tutorial on packages</a> and the <tt class="docutils literal"><span class="pre">PlugIn.py</span></tt> doc string.</p>
+<p>A plug-in must have <tt class="docutils literal"><span class="pre">__init__.py</span></tt> and <tt class="docutils literal"><span class="pre">Properties.py</span></tt> files.
+You can disable a specific plug-in by placing a <tt class="docutils literal"><span class="pre">dontload</span></tt> file in it.</p>
 <p><tt class="docutils literal"><span class="pre">__init.py__</span></tt> must contain a function like:</p>
 <pre class="literal-block">
 def InstallInWebKit(appServer):
@@ -56,11 +57,11 @@ def willRunFunc():
         return None
 </pre>
 <p>The documents (e.g. <tt class="docutils literal"><span class="pre">QuickStart.html</span></tt>) should be located in a <tt class="docutils literal"><span class="pre">Docs/</span></tt>
-subdirectory. The example pages go in an <tt class="docutils literal"><span class="pre">Examples/</span></tt> subdirectory.</p>
+subdirectory.  The example pages go in an <tt class="docutils literal"><span class="pre">Examples/</span></tt> subdirectory.</p>
 <p>A plugin who's <tt class="docutils literal"><span class="pre">requiredPyVersion</span></tt> or <tt class="docutils literal"><span class="pre">requiredOpSys</span></tt> aren't satisfied will
-simply be ignored. <tt class="docutils literal"><span class="pre">requiredOpSys</span></tt> should be something returned by
-<tt class="docutils literal"><span class="pre">os.name</span></tt>, like <tt class="docutils literal"><span class="pre">posix</span></tt> or <tt class="docutils literal"><span class="pre">nt</span></tt>. Or you can define a function
-<tt class="docutils literal"><span class="pre">willRunFunc</span></tt> to test. If there aren't requirements you can leave these
+simply be ignored.  <tt class="docutils literal"><span class="pre">requiredOpSys</span></tt> should be something returned by
+<tt class="docutils literal"><span class="pre">os.name</span></tt>, like <tt class="docutils literal"><span class="pre">posix</span></tt> or <tt class="docutils literal"><span class="pre">nt</span></tt>.  Or you can define a function
+<tt class="docutils literal"><span class="pre">willRunFunc</span></tt> to test.  If there aren't requirements you can leave these
 variables and functions out.</p>
 </div>
 </div>
