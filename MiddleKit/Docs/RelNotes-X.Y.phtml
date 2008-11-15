@@ -2,16 +2,6 @@
 
 <p><% name %> version <% versionString %> released on <% releaseDate %></p>
 
-<a name="Introduction"></a><h2>Introduction</h2>
-<ul>
-	<li>...</li>
-</ul>
-
-<a name="MajorChanges"></a><h2>Major Changes</h2>
-<ul>
-	<li>...</li>
-</ul>
-
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
 	<li>Given an attribute of type list with the name "bars", MK will now
@@ -39,22 +29,12 @@
 	lead to confusing error messages later (bug report #925481).</li>
 </ul>
 
-<a name="Security"></a><h2>Security</h2>
-<ul>
-	<li>...</li>
-</ul>
-
 <a name="MinorChanges"></a><h2>Minor Changes</h2>
 <ul>
 	<li>The PostgreSQL SQL generator now generates DateTime attributes as
 	timestamps <em>without</em> time zone. This is also the default in newer
 	PostgreSQL versions and in MySQL. It is recommended to simply store all
 	DateTimes as UTC.</li>
-</ul>
-
-<a name="Bugfixes"></a><h2>Bugfixes</h2>
-<ul>
-	<li>...</li>
 </ul>
 
 <% footer() %>
