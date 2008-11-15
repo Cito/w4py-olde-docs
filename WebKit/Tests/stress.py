@@ -26,7 +26,7 @@ Programmatically, you could could also import this file and use the
 stress() function.
 
 To capture additional '.rr' files, which contain raw request
-dictionaries, make use of the CGIAdaptor and uncomment the lines therein
+dictionaries, make use of the CGIAdapter and uncomment the lines therein
 that save the raw requests.
 
 Caveat: HTTP cookies are blown away from the raw requests. Mostly due to
