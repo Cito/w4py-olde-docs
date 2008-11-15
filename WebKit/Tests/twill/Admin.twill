@@ -5,6 +5,7 @@
 # Admin context
 
 setglobal version X.Y
+setglobal password WebKit
 
 config use_tidy 0
 config use_BeautifulSoup 0
@@ -21,8 +22,9 @@ fv 1 password alice
 submit
 find "Login failed. Please try again."
 #fv 1 username admin
-fv 1 password WebKit
+fv 1 password ${password}
 submit
+echo "The WebKit password must be set to '${password}' for this test."
 code 200
 find "WebKit Administration Pages"
 find "<tr><th.*>Webware Version:</th><td>${version}</td></tr>"
