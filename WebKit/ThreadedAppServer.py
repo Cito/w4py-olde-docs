@@ -863,15 +863,14 @@ class Handler:
 			block = self._sock.recv(missing)
 			if not block:
 				self._sock.close()
-				if len(chunk) == 0:
+				if not chunk:
 					# We probably awakened due to awakeSelect being called.
 					return None
-				else:
-					# We got a partial request -- something went wrong.
-					raise NotEnoughDataError, 'received only %d of %d bytes' \
-						' when receiving dictLength' % (len(chunk), intLength)
+				# We got a partial request -- something went wrong.
+				raise NotEnoughDataError, 'received only %d of %d bytes' \
+					' when receiving dictLength' % (len(chunk), intLength)
 			chunk += block
-			missing = intLength - len(chunk)
+			missing -= len(block)
 		try:
 			dictLength = loads(chunk)
 		except ValueError, msg:
@@ -912,7 +911,7 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
 				raise NotEnoughDataError, 'received only %d of %d bytes' \
 					' when receiving dict' % (len(chunk), dictLength)
 			chunk += block
-			missing -= len(chunk)
+			missing -= len(block)
 		return loads(chunk)
 
 	def handleRequest(self):
@@ -1175,7 +1174,7 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
 				raise NotEnoughDataError, 'received only %d of %d bytes' \
 					' when receiving netstring' % (len(chunk), dictLength)
 			chunk += block
-			missing -= len(chunk)
+			missing -= len(block)
 		if self._sock.recv(1) != ',':
 			self._sock.close()
 			raise ProtocolError, 'Missing SCGI netstring terminator'
