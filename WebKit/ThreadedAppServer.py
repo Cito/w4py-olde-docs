@@ -873,7 +873,7 @@ class Handler:
 			missing -= len(block)
 		try:
 			dictLength = loads(chunk)
-		except ValueError, msg:
+		except (ValueError, EOFError), msg:
 			if chunk[:3] == 'GET':
 				# Common error: client is speaking HTTP.
 				while msg and len(chunk) < 8192:

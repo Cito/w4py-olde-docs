@@ -48,12 +48,13 @@ def usage():
 	sys.stdout = sys.stderr
 	name = sys.argv[0]
 	print '%s usage:' % name
-	print '  %s numRequests [minParallelRequests [maxParallelRequests [delay]]]' % name
+	print '  %s numRequests [minParallelRequests [maxParallelRequests [delay [slowconn]]]]' % name
 	print 'Examples:'
 	print '  %s 100            # run 100 sequential requests' % name
 	print '  %s 100 5          # run 100 requests, 5 at a time' % name
 	print '  %s 100 5 10       # run 100 requests, 5-10 at a time' % name
-	print '  %s 100 10 10 0.01 # run 100 requests, 10 at a time, with a delay between each set' % name
+	print '  %s 100 10 10 0.01 # run 100 requests, 10 at a time, with delay between each set' % name
+	print '  %s 5 1 1 0.1 1    # run 5 sequential requests, simulating a very bad connection' % name
 	print
 	sys.exit(1)
 
@@ -74,10 +75,14 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect((host, port))
 		data = dumps(dicts[i])
-		s.send(dumps(len(data)))
-		s.send(data)
-		if delay and slowconn:
-			sleep(delay)
+		data = dumps(len(data)) + data
+		if slowconn:
+			for d in data:
+				s.send(d)
+			if delay:
+				sleep(delay)
+		else:
+			s.send(data)
 		s.shutdown(1)
 		data = []
 		while 1:
@@ -92,15 +97,16 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
 		try:
 			if not data.startswith('Status: '):
 				raise ValueError
-			else:
-				status = data.split('\n', 1)[0]
-				code = int(status.split()[1])
+			status = data.split('\n', 1)[0]
+			code = int(status.split()[1])
 		except Exception:
 			status = 'no status'
 			code = 0
 		if code not in (200,): # accepted status codes
 			status = dicts[i]['environ']['PATH_INFO'] + ' ' + status
 			raise Exception, status
+		if data.rstrip()[-7:].lower() != '</html>':
+			raise Exception, 'response is not a complete html page'
 		if delay:
 			sleep(delay)
 		complete += 1
@@ -146,6 +152,7 @@ def stress(maxRequests,
 	print 'minParallelRequests =', minParallelRequests
 	print 'maxParallelRequests =', maxParallelRequests
 	print 'delay               = %g' % delay
+	print 'slowconn            =', slowconn
 	print 'sequential          =', sequential
 	print 'Running...'
 	threads = []
