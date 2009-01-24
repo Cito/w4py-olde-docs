@@ -250,17 +250,17 @@ follow "Copyright et al"
 title "Webware Copyright et al"
 find '<h1 class="titlebar">Webware Copyright et al</h1>'
 find "<h2>Copyright</h2>"
-find 'Copyright &copy; 1999-2008 by Chuck Esterbrook.'
+find 'Copyright &copy; 1999-2009 by Chuck Esterbrook.'
 find "<h2>License</h2>"
 back
 
 follow "Release Notes"
 title "Webware for Python Release Notes"
 find '<h1 class="header">Webware for Python Release Notes</h1>'
-follow "0\.9\.4"
-title "Webware for Python 0\.9\.4 Release Notes"
-find '<h1 class="header">Webware for Python 0\.9\.4 Release Notes</h1>'
-find "Webware for Python version 0\.9\.4 released on 07/07/07"
+follow "1\.0"
+title "Webware for Python 1\.0 Release Notes"
+find '<h1 class="header">Webware for Python 1\.0 Release Notes</h1>'
+find "Webware for Python version 1\.0 released on 11/29/08"
 back
 back
 
