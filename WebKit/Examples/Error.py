@@ -18,8 +18,7 @@ class Error(ExamplePage):
 				error = StandardError(msg)
 			self.writeln('<p>About to raise an error...</p>')
 			raise error
-		self.writeln("""
-<h1>Error Test</h1>
+		self.writeln('''<h1>Error Test</h1>
 <form action="Error">
 <p><select name="error" size="1">
 <option selected>StandardError</option>
@@ -27,5 +26,4 @@ class Error(ExamplePage):
 <option>String error (old)</option>
 </select>
 <input type="submit" value="Don't click this button!"></p>
-</form>
-""")
+</form>''')
