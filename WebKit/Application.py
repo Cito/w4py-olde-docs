@@ -652,7 +652,15 @@ class Application(ConfigurableForServerSidePath, Object):
 			pass
 		except ConnectionAbortedError, err:
 			trans.setError(err)
-		except Exception, err:
+		except (KeyboardInterrupt, SystemExit):
+			raise # do not catch these here
+		except:
+			# for once, we use a bare except here in order to catch
+			# string and non standard exceptions from legacy code
+			# (starting with Python 2.5 you can simply catch Exception;
+			# KeyboardInterrupt, SystemExit will be excluded already
+			# and string exceptions will output deprecation warnings)
+			err = sys.exc_info()[0]
 			urls = {}
 			while 1:
 				trans.setError(err)

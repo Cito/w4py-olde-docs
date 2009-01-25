@@ -1,6 +1,6 @@
 import traceback, poplib, smtplib
 from os import pathsep
-from types import DictType, ListType
+from types import ClassType, DictType, ListType
 from random import randint
 
 try:
@@ -481,10 +481,14 @@ class ExceptionHandler(Object):
 		"""
 		if not self.setting('LogErrors'):
 			return
+		err, msg = self._exc[:2]
+		if isinstance(err, ClassType):
+			err, msg = err.__name__, str(msg)
+		else: # string exception
+			err, msg = '', str(msg or err)
 		logline = (asclocaltime(self._time),
 			self.basicServletName(), self.servletPathname(),
-			self._exc[0].__name__, str(self._exc[1]),
-			errorMsgFilename or '')
+			err, msg, errorMsgFilename or '')
 		def fixElement(element):
 			element = str(element)
 			if element.find(',') >= 0 or element.find('"') >= 0:

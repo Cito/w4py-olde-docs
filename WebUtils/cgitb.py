@@ -41,10 +41,8 @@ def html(context=5, options=None):
 		opt = DefaultOptions
 
 	etype, evalue = sys.exc_info()[:2]
-	try:
+	if isinstance(etype, types.ClassType):
 		etype = etype.__name__
-	except AttributeError:
-		pass
 	inspect_trace = inspect.trace(context)
 	inspect_trace.reverse()
 

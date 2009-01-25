@@ -14,7 +14,7 @@ serverStartTime  = time()
 
 # Some imports
 import cgi, os, sys, traceback
-from types import DictType, FloatType
+from types import ClassType, DictType, FloatType
 from random import randint
 try:
 	from cStringIO import StringIO
@@ -384,9 +384,14 @@ class CGIWrapper(NamedValueAccess):
 		"""
 		if not excInfo:
 			excInfo = sys.exc_info()
+		err, msg = excInfo[:2]
+		if isinstance(err, ClassType):
+			err, msg = err.__name__, str(msg)
+		else: # string exception
+			err, msg = '', str(msg or err)
 		logline = (asctime(localtime(self._scriptEndTime)),
 			os.path.split(self._scriptPathname)[1], self._scriptPathname,
-			excInfo[0].__name__, str(excInfo[1]), errorMsgFilename or '')
+			err, msg, errorMsgFilename or '')
 		def fixElement(element):
 			element = str(element)
 			if element.find(',') >= 0 or element.find('"') >= 0:
