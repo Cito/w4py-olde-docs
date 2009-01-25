@@ -34,10 +34,6 @@ try:
 	PyThreadState_SetAsyncExc = pythonapi.PyThreadState_SetAsyncExc
 except (TypeError, AttributeError):
 	PyThreadState_SetAsyncExc = None
-try: # for Python < 2.5
-	BaseException
-except NameError:
-	BaseException = Exception
 
 from Common import *
 import AppServer as AppServerModule
