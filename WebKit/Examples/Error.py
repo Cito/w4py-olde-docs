@@ -19,7 +19,7 @@ class Error(ExamplePage):
 			self.writeln('<p>About to raise an error...</p>')
 			raise error
 		self.writeln('''<h1>Error Test</h1>
-<form action="Error">
+<form action="Error" method="post">
 <p><select name="error" size="1">
 <option selected>StandardError</option>
 <option>SystemError</option>
