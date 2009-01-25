@@ -29,7 +29,7 @@ To stop the processes, run ``Monitor.py stop``.
 
 # Future:
 # Add ability to limit number of requests served. When some count is reached,
-# send a message to the server to save it's sessions, then exit. Then start
+# send a message to the server to save its sessions, then exit. Then start
 # a new AppServer that will pick up those sessions.
 
 # It should be possible on both Unix and Windows to monitor the AppServer

@@ -202,7 +202,7 @@ class NamedValueAccess:
 		forgive and includeNames are flags.
 
 		If default is not None, then it is substituted when a key is not found.
-		Otherwise, if defaults is not None, then it's corresponding/parallel
+		Otherwise, if defaults is not None, then its corresponding/parallel
 		value for the current key is substituted when a key is not found.
 		Otherwise, if forgive is true, then unknown keys simply don't produce
 		any values.

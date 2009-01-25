@@ -17,7 +17,7 @@
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
 <ul>
 	<li>Servlets/pages now have a new hook to participate in the building exception reports: writeExceptionReport(self, handler). See Page.writeExceptionReport() and the doc string for ExceptionHandler.py for more info.</li>
-	<li>Exception reports now include the Session object and it's values.</li>
+	<li>Exception reports now include the Session object and its values.</li>
 	<li>The session code is more robust to exceptions that may happen while unpickling.</li>
 	<li>WebKit now properly handles files that are deleted while the app server is running, and also refuses to attempt to serve non-regular files.</li>
 	<li>WebKit now tries to convince the browser to delete its session cookie when the session expires.</li>

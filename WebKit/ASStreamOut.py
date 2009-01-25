@@ -161,7 +161,7 @@ class ASStreamOut:
 
 		Called by the `HTTPResponse` instance that is using this instance
 		to ask if the response needs to be prepared to be delivered.
-		The response should then commit it's headers, etc.
+		The response should then commit its headers, etc.
 
 		"""
 		return self._needCommit

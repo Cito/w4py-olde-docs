@@ -16,7 +16,7 @@ class Page051(Page):
 	def writeHTML(self):
 		"""
 		Subclasses may override this method, which is invoked by
-		respondToGet() and respondToPost()) or it's constituent methods,
+		respondToGet() and respondToPost()) or its constituent methods,
 		writeHeader(), writeBody() and writeFooter().
 		"""
 		self.writeln('<html>')
@@ -32,7 +32,7 @@ class Page051(Page):
 <body %s>''' % (self.title(), self.htBodyArgs()))
 
 	def writeBody(self):
-		self.writeln("<p>This page has not yet customized it's body.</p>")
+		self.writeln("<p>This page has not yet customized its body.</p>")
 
 	def writeFooter(self):
 		self.writeln('</body>')

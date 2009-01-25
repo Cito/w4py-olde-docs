@@ -595,7 +595,7 @@ class Attr:
 		"""Return whether attribute corresponds to table column.
 
 		Returns true if the attribute has a direct correlating SQL column
-		in it's class' SQL table definition. Most attributes do.
+		in its class' SQL table definition. Most attributes do.
 		Those of type list do not.
 
 		"""

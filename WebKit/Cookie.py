@@ -45,7 +45,7 @@ class Cookie(Object):
 	beyond their value.
 
 	Note that web browsers don't typically send any information with
-	the cookie other than it's value. Therefore `HTTPRequest.cookie`
+	the cookie other than its value. Therefore `HTTPRequest.cookie`
 	simply returns a value such as an integer or a string.
 
 	When the server sends cookies back to the browser, it can send

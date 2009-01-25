@@ -213,7 +213,7 @@ Down the road
 * Multi-language support/localization (e.g., vend data to clients
   in their preferred written language)
 
-* Consider CORBA standard RMI-IIOP and it's potential interaction with WebKit.
+* Consider CORBA standard RMI-IIOP and its potential interaction with WebKit.
   This technology has been marked for inclusion in J2EE.  I imagine the idea
   might be that an app server could be used by more than just web browsers.
   e.g., it could be used programmatically

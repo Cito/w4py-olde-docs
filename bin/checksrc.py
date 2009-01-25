@@ -324,7 +324,7 @@ Error codes and their messages:
 	def error(self, msgCode, args=NoDefault):
 		"""Invoked by self when a source code error is detected.
 
-		Prints the error message and it's location.
+		Prints the error message and its location.
 		Does not raise exceptions or halt the program.
 
 		"""
@@ -416,7 +416,7 @@ Error codes and their messages:
 	def checkDir(self, arg, dirName, names):
 		"""Invoked by os.path.walk() which is kicked off by check().
 
-		Recursively checks the given directory and all it's subdirectories.
+		Recursively checks the given directory and all its subdirectories.
 
 		"""
 		# Initialize location attributes.

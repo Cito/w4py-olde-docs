@@ -109,7 +109,7 @@ class HTTPRequest(Request):
 						print "Uploaded File Found"
 				else: # i.e., if we don't have a list,
 					# we have one of those cgi.MiniFieldStorage objects.
-					value = value.value # get it's value.
+					value = value.value # get its value.
 			else:
 				value = map(lambda miniFieldStorage: miniFieldStorage.value,
 					value) # extract those value's

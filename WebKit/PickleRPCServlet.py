@@ -53,7 +53,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 	MiscUtils.PickleRPC.RequestError is raised. If an unhandled
 	exception is raised by the server, or the server response is
 	malformed, then	MiscUtils.PickleRPC.ResponseError (or one of
-	it's subclasses) is raised.
+	its subclasses) is raised.
 
 	Tip: If you want callers of the RPC servlets to be able to
 	introspect what methods are available, then include

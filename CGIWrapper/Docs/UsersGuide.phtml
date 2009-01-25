@@ -155,7 +155,7 @@ Specifies the columns that will be stored in the script log. Each column is the 
 <dt><b>ClassNames</b>
 &nbsp; <code> = ['', 'Page']</code></dt>
 <dd>
-This is the list of class names that CGI Wrapper looks for after executing a script. An empty string signifies a class whose name is the same as it's script (e.g., <code>_admin</code> in <code>admin.py</code>). See <a href="#ClassBasedCGIs">Class-based CGIs</a> below.
+This is the list of class names that CGI Wrapper looks for after executing a script. An empty string signifies a class whose name is the same as its script (e.g., <code>_admin</code> in <code>admin.py</code>). See <a href="#ClassBasedCGIs">Class-based CGIs</a> below.
 </dd>
 </dl>
 
@@ -313,7 +313,7 @@ A list of IP addresses or networks from which admin scripts can be accessed.
 
 <p>For example your base class could have methods <code>header()</code>, <code>body()</code> and <code>footer()</code> with the header and footer being fully implemented. Subclasses would then only need to override <code>body()</code> and would therefore inherit their look and feel from one source. You could take this much farther by providing several utility methods in the base class that are available to subclasses for use or customization.</p>
 
-<p>CGI Wrapper provides a hook to support such class-based CGI scripts by checking for certain classes in the target script. The <code>ClassNames</code> setting, whose default value is <code>['', 'Page']</code>, controls this behavior. After a script executes, CGI Wrapper checks these classes. The empty string is a special case which specifies a class whose name is the same name as it's containing script (e.g., the class <code>_admin</code> in the script <code>_admin.py</code>).</p>
+<p>CGI Wrapper provides a hook to support such class-based CGI scripts by checking for certain classes in the target script. The <code>ClassNames</code> setting, whose default value is <code>['', 'Page']</code>, controls this behavior. After a script executes, CGI Wrapper checks these classes. The empty string is a special case which specifies a class whose name is the same name as its containing script (e.g., the class <code>_admin</code> in the script <code>_admin.py</code>).</p>
 
 <p>If a matching class is found, it is automatically instantiated so that you don't have to do so in every script. The instantiation is basically:</p>
 

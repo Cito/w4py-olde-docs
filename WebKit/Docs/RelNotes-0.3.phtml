@@ -20,7 +20,7 @@
 		<li>WebKit on Windows can now serve binary files such as images.</li>
 		<li><i>Note:</i> You still have to do one special thing on Windows, which is fix the first line in WebKit.cgi. Unfortunately, we cannot find a line that works on both platforms. See <a href="UsersGuide.html#Running">Running and Testing</a> for more info.</li>
 		</ul></li>
-	<li>HTTPResonse.write() can now take any kind of object as parameter (e.g., it invokes <code>str()</code> on it's argument).</li>
+	<li>HTTPResonse.write() can now take any kind of object as parameter (e.g., it invokes <code>str()</code> on its argument).</li>
 	<li>Added various convenience methods including Session.hasValue(), HTTPResponse.hasHeader() and HTTPResponse.hasCookie().</li>
 	<li>Testing/stress.py - This new program can be used to stress out the app server with multiple</li>
 	<li>AppServer can now handle concurrent requests correctly.</li>
@@ -28,7 +28,7 @@
 	<li>Fixed several memory leaks. Some leaks remain, notably when the app server receives multiple simultaneous requests.</li>
 	<li>Added request forwarding function to Application.  You can forward a request from one Servlet to another by calling application.forwardRequest(transaction). See ExamplePage.py for example.</li>
 	<li>Added mutiple source directories through the "Context" configuration dictionary.  See Application.default in the Configs/ directory for more info.</li>
-	<li>There is a new Webware component named Python Server Pages (PSP) that is a plug-in to WebKit. You'll find a PSP link on the WebKit examples page, and as a separate component it has it's own <a href="../../PSP/Documentation/PSP.html">documentation</a>. (Future release notes will be found there, not here.)</li>
+	<li>There is a new Webware component named Python Server Pages (PSP) that is a plug-in to WebKit. You'll find a PSP link on the WebKit examples page, and as a separate component it has its own <a href="../../PSP/Documentation/PSP.html">documentation</a>. (Future release notes will be found there, not here.)</li>
 	<li>Added an inital Java Bean-like interface called Cans. See PSP examples for an example of its use.</li>
 </ul>
 

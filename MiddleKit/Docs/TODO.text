@@ -102,7 +102,7 @@ I'll be happy to support anyone's efforts by answering questions, discussing ide
 
 		Also see the comment in MiddleObject.referencingObjectsAndAttrs().
 
-		@@jdh: This issue is mitigated by new assertion checking which ensures 
+		@@jdh: This issue is mitigated by new assertion checking which ensures
 		that changed objects are not refreshed.  See release notes for more details.
 
 	[ ] fetchObject*() refreshes the attributes of the objects in question, even if they were modified. eg, you could lose your changes
@@ -130,7 +130,7 @@ I'll be happy to support anyone's efforts by answering questions, discussing ide
 
 	[ ] Investigate dbinfo.py: http://www.lemburg.com/files/python/dbinfo.py
 
-	*** [ ] Prior to inserting or updating an object in the store, validate the requirements on it's attributes.
+	*** [ ] Prior to inserting or updating an object in the store, validate the requirements on its attributes.
 		- review EOF's validation policies
 			- EOValidation protocol
 			"For more discussion of this subject, see the chapter “Designing Enterprise Objects” in the
@@ -334,7 +334,7 @@ they are None, but it still complains if the klass ID is invalid.  MK should
 
 	[ ] attributes can be commented out with #
 
-	[ ] Add this: MiddleKit could performs it's special functions (such as automatic fetches) by special use of __getattr__ rather than generating Python source code for the accessor methods. The reason why the latter technique was chosen, was so that "raw attributes" could be examined and manipulated if needed. A good example of this use is in the MiddleKit web browser, which does not unpack obj refs until you click on them, but still needs to display their value.
+	[ ] Add this: MiddleKit could performs its special functions (such as automatic fetches) by special use of __getattr__ rather than generating Python source code for the accessor methods. The reason why the latter technique was chosen, was so that "raw attributes" could be examined and manipulated if needed. A good example of this use is in the MiddleKit web browser, which does not unpack obj refs until you click on them, but still needs to display their value.
 
 	Document assertions for setFoo() where foo is an obj ref.
 

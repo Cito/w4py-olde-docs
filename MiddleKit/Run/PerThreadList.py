@@ -90,7 +90,7 @@ class PerThreadList:
 class NonThreadedList:
 	"""Non-threaded list.
 
-	NonThreadedList behaves like a normal list.  It's only purpose is
+	NonThreadedList behaves like a normal list.  Its only purpose is
 	to provide a compatible interface to PerThreadList, so that they
 	can be used interchangeably.
 

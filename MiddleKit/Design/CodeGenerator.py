@@ -7,7 +7,7 @@ This module defines the basic machinery for a code generator, but cannot be used
 Terminology: "the standard classes" = ModelObject, Klasses, Klass and Attr
 
 Modules that wish to do code generation must:
-	* Define a class that inherits CodeGenerator (even if it's implementation is 'pass').
+	* Define a class that inherits CodeGenerator (even if its implementation is 'pass').
 	* Define various mix-in classes such as ModelObject, Klasses, Klass and Attr for the purpose of defining methods to aid in code generation.
 
 What happens: When the generator is initialized, mixes in the methods of various classes found in the module with the ones found in the model (typically these come from MiddleKit.Core).

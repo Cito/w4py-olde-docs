@@ -142,7 +142,7 @@ COMMON USES
 
 * Programs can keep configuration and other data in simple comma-
 separated text files and use DataTable to access them. For example, a
-web site could read it's sidebar links from such a file, thereby
+web site could read its sidebar links from such a file, thereby
 allowing people who don't know Python (or even HTML) to edit these
 links without having to understand other implementation parts of the
 site.

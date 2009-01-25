@@ -178,7 +178,7 @@ class ObjectStore(ModelUser):
 		return self.objectForKey(key, default)
 
 	def objectForKey(self, key, default=NoDefault):
-		"""Return an object from the store by it's given key.
+		"""Return an object from the store by its given key.
 
 		If no default is given and the object is not in the store,
 		then an exception is raised.  Note: This method doesn't currently

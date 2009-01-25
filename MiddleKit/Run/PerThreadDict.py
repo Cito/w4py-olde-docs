@@ -69,7 +69,7 @@ class PerThreadDict:
 class NonThreadedDict:
 	"""Non-threaded dictionary.
 
-	NonThreadedDict behaves like a normal dict.  It's only purpose is
+	NonThreadedDict behaves like a normal dict.  Its only purpose is
 	to provide a compatible interface to PerThreadDict, so that they
 	can be used interchangeably.
 
