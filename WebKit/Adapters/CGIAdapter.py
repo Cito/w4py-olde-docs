@@ -47,7 +47,7 @@ class CGIAdapter(Adapter):
 				length = int(os.environ['CONTENT_LENGTH'])
 				myInput += sys.stdin.read(length)
 
-			# 2000-05-20 ce: For use in collecting raw request dictionaries for use in Testing/stress.py
+			# 2000-05-20 ce: For use in collecting raw request dictionaries for use in Tests/stress.py
 			# Leave this code here in case it's needed again:
 			# counter = int(open('counter.text').read())
 			# counter += 1

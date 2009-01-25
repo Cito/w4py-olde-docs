@@ -33,7 +33,7 @@ TO DO
 * Rename? class NamedValueAccess+ible:
 
 * Benchmarking: Set this up in a new file:
-	Testing/BenchNamedValueAccess.py
+	Tests/BenchNamedValueAccess.py
 	so we can experiment with caching vs. not and other techniques.
 
 

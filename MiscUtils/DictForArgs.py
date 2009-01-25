@@ -2,7 +2,7 @@
 
 See the doc string for the DictForArgs() function.
 
-Also, there is a test suite in Testing/TestDictForArgs.py
+Also, there is a test suite in Tests/TestDictForArgs.py
 
 """
 
