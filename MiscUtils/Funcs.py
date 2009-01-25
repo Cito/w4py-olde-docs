@@ -228,7 +228,7 @@ def localIP(remote=('www.yahoo.com', 80), useCache=1):
 	import socket
 	if remote:
 		# code from Donn Cave on comp.lang.python
-
+		#
 		# My notes:
 		# Q: Why not use this? socket.gethostbyname(socket.gethostname())
 		# A: On some machines, it returns '127.0.0.1' - not what we had in mind.
@@ -236,21 +236,21 @@ def localIP(remote=('www.yahoo.com', 80), useCache=1):
 		# Q: Why not use this? socket.gethostbyname_ex(socket.gethostname())[2]
 		# A: Because some machines have more than one IP (think "VPN", etc.) and
 		#    there is no easy way to tell which one is the externally visible IP.
-
 		try:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			s.connect(remote)
-			ip, port = s.getsockname()
+			address, port = s.getsockname()
 			s.close()
-			_localIP = ip
-			return _localIP
+			if address and not address.startswith('127.'):
+				if useCache:
+					_localIP = address
+				return address
 		except socket.error:
 			# oh, well. we'll use the local method
 			pass
-
 	addresses = socket.gethostbyname_ex(socket.gethostname())[2]
 	for address in addresses:
-		if address not in ('127.0.0.1', '127.0.0.2'):
+		if address and not address.startswith('127.'):
 			if useCache:
 				_localIP = address
 			return address
@@ -289,6 +289,7 @@ def _descExc(reprOfWhat, e):
 		return '(exception from repr(%s): %s: %s)' % (reprOfWhat, e.__class__, e)
 	except Exception:
 		return '(exception from repr(%s))' % reprOfWhat
+
 
 def safeDescription(x, what='what'):
 	"""Return the repr() of x and its class (or type) for help in debugging.

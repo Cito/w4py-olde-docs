@@ -38,22 +38,22 @@ class TestFuncs(unittest.TestCase):
 			#print '%r yields %r' % (source, result)
 			assert commas(source) == result, \
 				'%r %r' % (commas(source), result)
-
 			# Now try the source as a string instead of a number:
 			source = eval("'%s'" % tests[i])
 			#print '%r yields %r' % (source, result)
 			assert commas(source) == result, \
 				'%r %r' % (commas(source), result)
-
 			i += 2
 
 	def testLocalIP(self):
 		ip = localIP()
+		assert ip and not ip.startswith('127.')
 		assert localIP() == ip  # second invocation
 		assert localIP(useCache=None) == ip
 		assert localIP(remote=None, useCache=None) == ip, \
 			'See if this works: localIP(remote=None). If this fails, dont worry.'
-		assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80), useCache=None) == ip
+		assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80),
+			useCache=None) == ip # not existing remote address
 
 	def testHostName(self):
 		# About all we can do is invoke hostName() to see that no
