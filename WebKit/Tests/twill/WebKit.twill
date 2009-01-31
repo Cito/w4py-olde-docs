@@ -59,12 +59,22 @@ follow revisit
 find "<p>You've been here <strong.*>&nbsp;2&nbsp;</strong> times.</p>"
 
 follow Error
+code 200
+title "Error raising Example"
+submit
 code 500
 title Error
 find '<h2 class="section">Error</h2>'
 find "The site is having technical difficulties with this page."
 find '<h2 class="section">Traceback</h2>'
-find "ImportError: No module named UnknownModule"
+find "StandardError: You clicked that button!"
+back
+fv 1 error "String error (old)"
+submit
+code 500
+title Error
+find "You clicked that button!"
+notfind "StandardError"
 back
 
 follow View
