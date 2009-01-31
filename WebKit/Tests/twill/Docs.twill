@@ -154,8 +154,8 @@ find '<h1 class="titlebar">WebKit Documentation</h1>'
 follow "Install Guide"
 find '<h1 class="header">WebKit Install Guide</h1>'
 find "python install\.py"
-find '<h1><a id="quick-start" name="quick-start">Quick Start</a></h1>'
-find '<h1><a id="introduction" name="introduction">Introduction</a></h1>'
+find '<h1>Quick Start</h1>'
+find '<h1>Introduction</h1>'
 find '<div class="footer">'
 back
 follow "User's Guide"
@@ -163,20 +163,20 @@ find '<h1 class="header">WebKit User\'s Guide</h1>'
 find "<p>Webware for Python</p>"
 find "<th.*>Version:</th><td.*>${version}</td>"
 # if release find "<th.*>Released:</th><td.*>${date}</td>"
-find '<h1><a id="synopsis" name="synopsis">Synopsis</a></h1>'
-find '<h1><a id="credit" name="credit">Credit</a></h1>'
+find '<h1>Synopsis</h1>'
+find '<h1>Credit</h1>'
 find '<div class="footer">'
 back
 follow "Configuration Guide"
 find '<h1 class="header">Configuration Guide</h1>'
-find '<h1><a.*>Command Line Configuration</a></h1>'
+find '<h1>Command Line Configuration</h1>'
 back
 follow "Beginner Tutorial"
 find '<h1 class="header">Beginner Tutorial</h1>'
 find "<p>Webware for Python</p>"
 find "<th.*>Version:</th><td.*>${version}</td>"
 # if release find "<th.*>Released:</th><td.*>${date}</td>"
-find '<h1><a id="synopsis" name="synopsis">Synopsis</a></h1>'
+find '<h1>Synopsis</h1>'
 find '<div class="footer">'
 back
 follow "Application Development"
@@ -184,12 +184,12 @@ find '<h1 class="header">Application Development With Webware</h1>'
 find "<p>Webware for Python</p>"
 find "<th.*>Version:</th><td.*>${version}</td>"
 # if release find "<th.*>Released:</th><td.*>${date}</td>"
-find '<h1><a id="synopsis" name="synopsis">Synopsis</a></h1>'
+find '<h1>Synopsis</h1>'
 find '<div class="footer">'
 back
 follow "Developing Webware"
 find '<h1 class="header">Developing Webware</h1>'
-find '<h1><a.*>Style Guidelines</a></h1>'
+find '<h1>Style Guidelines</h1>'
 back
 follow "Future Work"
 find '<h1 class="header">Future Work</h1>'
