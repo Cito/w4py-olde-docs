@@ -93,5 +93,5 @@ class PidFile:
 		if self._createdPID:
 			try:
 				os.unlink(self._path)
-			except OSError:
+			except (AttributeError, OSError):
 				pass
