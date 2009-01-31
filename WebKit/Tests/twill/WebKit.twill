@@ -67,13 +67,28 @@ title Error
 find '<h2 class="section">Error</h2>'
 find "The site is having technical difficulties with this page."
 find '<h2 class="section">Traceback</h2>'
+find "self.defaultAction()"
+find "raise error"
 find "StandardError: You clicked that button!"
 back
-fv 1 error "String error (old)"
+fv 1 error "System Error"
 submit
 code 500
 title Error
-find "You clicked that button!"
+find "SystemError: You clicked that button!"
+back
+fv 1 error "Custom Class (old)"
+submit
+code 500
+title Error
+find "CustomError: You clicked that button!"
+back
+fv 1 error "String (deprecated)"
+submit
+code 500
+title Error
+find "raise error"
+find "You clicked that button!|TypeError: exceptions .* not str"
 notfind "StandardError"
 back
 
