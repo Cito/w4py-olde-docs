@@ -660,7 +660,9 @@ class Application(ConfigurableForServerSidePath, Object):
 			# (starting with Python 2.5 you can simply catch Exception;
 			# KeyboardInterrupt, SystemExit will be excluded already
 			# and string exceptions will output deprecation warnings).
-			err = sys.exc_info()[0]
+			errClass, err = sys.exc_info()[:2]
+			if not err: # string exception
+				err, errClass = errClass, None
 			urls = {}
 			while 1:
 				trans.setError(err)
@@ -675,7 +677,7 @@ class Application(ConfigurableForServerSidePath, Object):
 					# no custom error page configured
 					break
 				# get custom error page for this exception
-				url = self.errorPage(err.__class__)
+				url = errClass and self.errorPage(errClass)
 				if isHTTPException and not url:
 					# get custom error page for status code
 					code = err.code()
@@ -701,7 +703,9 @@ class Application(ConfigurableForServerSidePath, Object):
 					# If the custom error page itself throws an exception,
 					# display the new exception instead of the original one,
 					# so we notice that something is broken here.
-					err = sys.exc_info()[0]
+					errClass, err = sys.exc_info()[:2]
+					if not err: # string exception
+						err, errClass = errClass, None
 					url = None
 				if url:
 					return # error has already been handled
