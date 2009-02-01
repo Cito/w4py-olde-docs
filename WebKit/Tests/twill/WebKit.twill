@@ -12,7 +12,7 @@ config allow_parse_errors 0
 
 # Start page
 
-go http://localhost:8080
+go http://127.0.0.1:8080
 code 200
 title Welcome
 find '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"'
