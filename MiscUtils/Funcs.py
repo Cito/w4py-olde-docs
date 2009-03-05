@@ -167,18 +167,24 @@ def wordWrap(s, width=78):
 
 def dateForEmail(now=None):
 	"""Return a properly formatted date/time string for email messages."""
+	# Note: Python >= 2.4 has this function as email.utils.formatdate
 	if now is None:
 		now = time.localtime(time.time())
-	if now[8] == 1:
-		offset = -time.altzone / 60
+	if time.daylight and now[-1]:
+		offset = time.altzone
 	else:
-		offset = -time.timezone / 60
-	if offset < 0:
-		plusminus = '-'
-	else:
-		plusminus = '+'
-	return time.strftime('%a, %d %b %Y %H:%M:%S ', now) \
-		+ plusminus + '%02d%02d' % (abs(offset/60), abs(offset%60))
+		offset = time.timezone
+	sign = offset > 0 and '-' or '+'
+	offset = divmod(abs(offset)/60, 60)
+	# Note: We don't use time.strftime() because it's locale dependent,
+	# while RFC 5322 requires the exact English abbreviations as below.
+	return '%s, %02d %s %04d %02d:%02d:%02d %c%02d%02d' % (
+		['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][now[6]],
+		now[2],
+		['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+		 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now[1] - 1],
+		now[0], now[3], now[4], now[5],
+		sign, offset[0], offset[1])
 
 
 def hostName():
