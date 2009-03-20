@@ -43,6 +43,8 @@ class PSPServletFactory(ServletFactory):
 		for c in digits + letters:
 			t[ord(c)] = c
 		self._classNameTrans = ''.join(t)
+		self._extensions = application.setting(
+			'ExtensionsForPSP', ['.psp'])
 		if application.setting('ClearPSPCacheOnStart', 0):
 			self.clearFileCache()
 
@@ -50,7 +52,7 @@ class PSPServletFactory(ServletFactory):
 		return 'file'
 
 	def extensions(self):
-		return ['.psp']
+		return self._extensions
 
 	def flushCache(self):
 		"""Clean out the cache of classes in memory and on disk."""

@@ -77,6 +77,12 @@ which files are hidden, and some of how those files get chosen.
     up a directory.  Note that the extensions are absent since WebKit
     will look for a file with any appropriate extension (``.py``.,
     ``.html``, ``.psp``, etc).  Default: ``["index", "Main"]``.
+``ExtensionsForKid``:
+    This is the list of extensions for files to be parsed Kid templates.
+    Default: ``['.kid']``.
+``ExtensionsForPSP``:
+    This is the list of extensions for files to be parsed as PSP.
+    Default: ``['.psp']``.
 ``ExtensionsToIgnore``:
     This is a list of extensions that WebKit will ignore when
     autodetecting extensions.  Note that this does not prevent WebKit

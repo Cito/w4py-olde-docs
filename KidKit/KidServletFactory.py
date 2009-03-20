@@ -23,9 +23,11 @@ from glob import glob
 from WebKit.ServletFactory import ServletFactory
 from WebKit.Servlet import Servlet
 from WebKit.Page import Page
+
 defaultHook = Page.respond # the default hook for Kid servlets
 defaultOutput = 'html' # the default Kid output method
 defaultFormat = 'default' # the default Kid output format
+defaultExtensions = ['.kid'] # the default extensions for Kid templates
 
 from kid import load_template, output_methods
 try: # output formatting exists in newer Kid versions only
@@ -89,10 +91,13 @@ class KidServletFactory(ServletFactory):
 	def __init__(self, application):
 		ServletFactory.__init__(self, application)
 		setting = application.setting
-		global defaultOutput # the default output method
+		global defaultOutput # the default Kid output method
 		defaultOutput = setting('KidOutputMethod', defaultOutput)
-		global defaultFormat # the default output format
+		global defaultFormat # the default Kid output format
 		defaultFormat = setting('KidOutputFormat', defaultFormat)
+		global defaultExtensions # the default Kid template extensions
+		self._extensions = setting('ExtensionsForKid', defaultExtensions)
+		defaultExtensions = self._extensions
 		self._cacheTemplates = setting('CacheKidTemplates', True)
 		self._useCache = setting('UseKidKitCache', False)
 		if self._useCache:
@@ -114,7 +119,7 @@ class KidServletFactory(ServletFactory):
 		return 'file'
 
 	def extensions(self):
-		return ['.kid']
+		return self._extensions
 
 	def flushCache(self):
 		"""Clean out the cache of classes in memory and on disk."""
