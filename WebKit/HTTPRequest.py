@@ -73,14 +73,13 @@ class HTTPRequest(Request):
 			# this is set when the servlet is a webserver file that shall
 			# be handled without context (e.g. when the psp-handler is used)
 			self._fsPath = self.fsPath()
-			# strip the servlet name from servletPath in this case
-			i = self._servletPath.rfind('/')
-			self._servletPath = i >= 0 and self._servletPath[:i+1] or ''
+			# treat this lie a context at the webserver document root
+			self._pathInfo = self._servletPath + self._pathInfo
+			self._servletPath = ''
 		if env.has_key('REQUEST_URI'):
 			self._uri = env['REQUEST_URI']
 			# correct servletPath if there was a redirection
 			if not (self._uri + '/').startswith(self._servletPath + '/'):
-				print "CORRECT",self._uri, self._servletPath
 				i = self._uri.find(self._pathInfo)
 				self._servletPath = i >= 0 and self._uri[:i] or ''
 		else:
@@ -408,7 +407,7 @@ class HTTPRequest(Request):
 		"""The filesystem path of the request according to the webserver."""
 		fspath = self.adapterFileName()
 		if not fspath:
-			fspath = self.servletPath()
+			fspath = self.adapterName()
 			docroot = self._environ['DOCUMENT_ROOT']
 			fspath = os.path.join(docroot, fspath)
 		return fspath
