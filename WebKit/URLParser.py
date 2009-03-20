@@ -374,7 +374,7 @@ class _FileParser(URLParser):
 
 		if req._absolutepath:
 			name = req._fsPath
-			restPart = req._pathInfo
+			restPart = req._extraURLPath
 
 		else:
 			# First decode the URL, since we are dealing with filenames here:
@@ -390,12 +390,8 @@ class _FileParser(URLParser):
 				return self.parseIndex(trans, requestPath)
 
 			parts = requestPath[1:].split('/', 1)
-
 			nextPart = parts[0]
-			if len(parts) > 1:
-				restPart = '/' + parts[1]
-			else:
-				restPart = ''
+			restPart = len(parts) > 1 and '/' + parts[1] or ''
 
 			baseName = os.path.join(self._path, nextPart)
 			if restPart and not self._extraPathInfo:
@@ -406,7 +402,7 @@ class _FileParser(URLParser):
 			if len(names) > 1:
 				warn("More than one file matches %s in %s: %s"
 					% (requestPath, self._path, names))
-				raise HTTPNotFound # @@: add info
+				raise HTTPNotFound("Page is ambiguous")
 			elif not names:
 				return self.parseIndex(trans, requestPath)
 
@@ -417,11 +413,13 @@ class _FileParser(URLParser):
 				fpp = FileParser(name)
 				return fpp.parse(trans, restPart)
 
-			if restPart and not self._extraPathInfo:
-				raise HTTPNotFound
+			req._extraURLPath = restPart
+
+		if not self._extraPathInfo and req._extraURLPath:
+			raise HTTPNotFound("Invalid extra path info: %s")
 
 		req._serverSidePath = name
-		req._extraURLPath = restPart
+
 		return ServletFactoryManager.servletForFile(trans, name)
 
 	def filenamesForBaseName(self, baseName):
@@ -560,14 +558,14 @@ class _FileParser(URLParser):
 			if len(names) > 1:
 				warn("More than one file matches the index file %s in %s: %s"
 					% (directoryFile, self._path, names))
-				raise HTTPNotFound
+				raise HTTPNotFound("Index page is ambiguous")
 			if names:
 				if requestPath and not self._extraPathInfo:
 					raise HTTPNotFound
 				req._serverSidePath = names[0]
 				req._extraURLPath = requestPath
 				return ServletFactoryManager.servletForFile(trans, names[0])
-		raise HTTPNotFound # @@: add correct information here
+		raise HTTPNotFound("Index page not found")
 
 	def initModule(self):
 		"""Get the __init__ module object for this FileParser's directory."""

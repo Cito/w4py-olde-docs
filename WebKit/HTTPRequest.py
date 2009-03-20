@@ -65,17 +65,18 @@ class HTTPRequest(Request):
 			f.close()
 
 		# Get adapter, servlet path and query string
-		self._servletPath = env.get('SCRIPT_NAME', '')
-		self._pathInfo = env.get('PATH_INFO', '')
-		self._queryString = env.get('QUERY_STRING', '')
 		self._absolutepath = env.has_key('WK_ABSOLUTE') # set by adapter
 		if self._absolutepath:
 			# this is set when the servlet is a webserver file that shall
 			# be handled without context (e.g. when the psp-handler is used)
+			self._servletPath = '' # make it look like the normal handler
+			self._extraURLPath = env.get('PATH_INFO', '')
+			self._pathInfo = env.get('SCRIPT_NAME', '') + self._extraURLPath
 			self._fsPath = self.fsPath()
-			# treat this lie a context at the webserver document root
-			self._pathInfo = self._servletPath + self._pathInfo
-			self._servletPath = ''
+		else:
+			self._servletPath = env.get('SCRIPT_NAME', '')
+			self._pathInfo = env.get('PATH_INFO', '')
+			self._extraURLPath = '' # will be determined later
 		if env.has_key('REQUEST_URI'):
 			self._uri = env['REQUEST_URI']
 			# correct servletPath if there was a redirection
@@ -132,7 +133,7 @@ class HTTPRequest(Request):
 
 		self._contextName = None
 		self._serverSidePath = self._serverSideContextPath = None
-		self._serverRootPath = self._extraURLPath = ''
+		self._serverRootPath = ''
 		self._sessionExpired = False
 
 		self._pathInfo = self.pathInfo()
@@ -169,9 +170,16 @@ class HTTPRequest(Request):
 			return self.cookie(name, default)
 
 	def hasValue(self, name):
+		"""Check whether there is a value with the given name."""
 		return self._fields.has_key(name) or self._cookies.has_key(name)
 
 	def extraURLPath(self):
+		"""Return additional path components in the URL.
+
+		Only works if the Application.config setting "ExtraPathInfo"
+		is set to true; otherwise you will get a page not found error.
+
+		"""
 		return self._extraURLPath
 
 
