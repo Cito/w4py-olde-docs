@@ -77,6 +77,7 @@ class HTTPRequest(Request):
 			self._servletPath = env.get('SCRIPT_NAME', '')
 			self._pathInfo = env.get('PATH_INFO', '')
 			self._extraURLPath = '' # will be determined later
+		self._queryString = env.get('QUERY_STRING', '')
 		if env.has_key('REQUEST_URI'):
 			self._uri = env['REQUEST_URI']
 			# correct servletPath if there was a redirection
