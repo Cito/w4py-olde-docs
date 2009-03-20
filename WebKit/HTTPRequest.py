@@ -412,7 +412,7 @@ class HTTPRequest(Request):
 		return self.isSecure() and 'https' or 'http'
 
 	def hostAndPort(self):
-		"""Return hostname and port of this request."""
+		"""Return the hostname and port part from the URL of this request."""
 		env = self._environ
 		if env.has_key('HTTP_HOST'):
 			return env['HTTP_HOST']
