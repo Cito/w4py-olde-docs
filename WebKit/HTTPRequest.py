@@ -68,10 +68,19 @@ class HTTPRequest(Request):
 		self._servletPath = env.get('SCRIPT_NAME', '')
 		self._pathInfo = env.get('PATH_INFO', '')
 		self._queryString = env.get('QUERY_STRING', '')
+		self._absolutepath = env.has_key('WK_ABSOLUTE') # set by adapter
+		if self._absolutepath:
+			# this is set when the servlet is a webserver file that shall
+			# be handled without context (e.g. when the psp-handler is used)
+			self._fsPath = self.fsPath()
+			# strip the servlet name from servletPath in this case
+			i = self._servletPath.rfind('/')
+			self._servletPath = i >= 0 and self._servletPath[:i+1] or ''
 		if env.has_key('REQUEST_URI'):
 			self._uri = env['REQUEST_URI']
 			# correct servletPath if there was a redirection
 			if not (self._uri + '/').startswith(self._servletPath + '/'):
+				print "CORRECT",self._uri, self._servletPath
 				i = self._uri.find(self._pathInfo)
 				self._servletPath = i >= 0 and self._uri[:i] or ''
 		else:
@@ -87,9 +96,6 @@ class HTTPRequest(Request):
 				self._uri = self._servletPath + self._pathInfo
 			if self._queryString:
 				self._uri += '?' + self._queryString
-		self._absolutepath = env.has_key('WK_ABSOLUTE') # set by adapter
-		if self._absolutepath:
-			self._fsPath = self.fsPath()
 
 		# We use the cgi module to get the fields,
 		# but then change them into an ordinary dictionary of values:
