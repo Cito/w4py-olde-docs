@@ -556,12 +556,7 @@ AppServer on port 8086.  You can also use::
 
 to run PSP files that are found anywhere (similar to how PHP would
 work, for example).  You still need the ``/WK`` portion to tell
-mod_webkit where to find the AppServer.  This also works::
-
-    Action py-serverpages /WK/
-    AddType py-serverpages .py
-
-which will run Python servlets from any location.
+mod_webkit where to find the AppServer.
 
 To pass additional client HTTP headers through to the AppServer,
 use the ``PassHeader`` Apache directive.
