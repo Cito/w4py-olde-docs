@@ -534,12 +534,7 @@ AddHandler psp-handler .psp
 </pre>
 <p>to run PSP files that are found anywhere (similar to how PHP would
 work, for example).  You still need the <tt class="docutils literal"><span class="pre">/WK</span></tt> portion to tell
-mod_webkit where to find the AppServer.  This also works:</p>
-<pre class="literal-block">
-Action py-serverpages /WK/
-AddType py-serverpages .py
-</pre>
-<p>which will run Python servlets from any location.</p>
+mod_webkit where to find the AppServer.</p>
 <p>To pass additional client HTTP headers through to the AppServer,
 use the <tt class="docutils literal"><span class="pre">PassHeader</span></tt> Apache directive.
 For example:</p>
