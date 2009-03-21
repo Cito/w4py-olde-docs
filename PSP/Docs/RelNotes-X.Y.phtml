@@ -34,7 +34,13 @@
 
 <a name="Bugfixes"></a><h2>Bugfixes</h2>
 <ul>
-	<li>...</li>
+	<li>When using the psp-handler of mod_webkit, request methods like
+	<code>servletPath()</code> and others returned values which were different
+	from what you get when using the ordinary webkit-handler. This could
+	cause various problems, for instance because the default cookie path
+	is set to the servlet path (reported by Fionn Behrens). To avoid such
+	problems, requests made via the psp-handler now will look much more
+	similar to a request made via the ordinary webkit-handler.</li>
 </ul>
 
 <% footer() %>
