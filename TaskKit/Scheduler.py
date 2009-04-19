@@ -464,7 +464,7 @@ class Scheduler(Thread):
 	## Main Method ##
 
 	def run(self):
-		"""Run task in a background thread.
+		"""The main method of the scheduler running as a background thread.
 
 		This method is responsible for carrying out the scheduling work of
 		this class on a background thread. The basic logic is to wait until
