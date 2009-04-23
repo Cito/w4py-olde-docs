@@ -21,8 +21,10 @@ editorCommands = {
 		'kate -u -l %(line)s "%(filename)s"',
 	'Komodo':
 		'komodo -l %(line)s "%(filename)s"',
-	'Komodo (Windows)':
-		r'start %%ProgramFiles%%\"ActiveState Komodo IDE 4.2"\komodo.exe -l %(line)s "%(filename)s"',
+	'Komodo Edit 5 (Windows)':
+		r'start %%ProgramFiles%%\"ActiveState Komodo Edit 5"\komodo.exe -l %(line)s "%(filename)s"',
+	'Komodo IDE 5 (Windows)':
+		r'start %%ProgramFiles%%\"ActiveState Komodo IDE 5"\komodo.exe -l %(line)s "%(filename)s"',
 	'KWrite':
 		'kwrite --line %(line)s "%(filename)s"',
 	'Notepad++ (Windows)':
