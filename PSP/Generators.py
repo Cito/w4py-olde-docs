@@ -111,6 +111,8 @@ class ScriptGenerator(GenericGenerator):
 		if self.chars[:1] == ' ' and self.chars[:2] != '  ':
 			self.chars = self.chars.lstrip()
 		lines = PSPUtils.splitLines(PSPUtils.removeQuotes(self.chars))
+		if not lines:
+			return # ignore empty tag
 		# userIndent check
 		if len(lines[-1]) > 0 and lines[-1][-1] == '$':
 			lastline = lines[-1] = lines[-1][:-1]
