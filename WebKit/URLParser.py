@@ -584,7 +584,7 @@ class _FileParser(URLParser):
 			pass
 
 	def parseInit(self, trans, requestPath):
-		"""Parse the __init_ file.
+		"""Parse the __init__ file.
 
 		Returns the resulting servlet, or None if no __init__ hooks were found.
 
