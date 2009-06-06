@@ -353,20 +353,32 @@ class HTTPResponse(Response):
 		app = trans.application()
 		if not app.setting('UseCookieSessions'):
 			return
-		sess = trans._session
-		if sess:
-			cookie = Cookie(app.sessionName(trans), sess.identifier())
-			cookie.setPath(app.sessionCookiePath(trans))
-			if trans.request().isSecure():
-				cookie.setSecure(app.setting('SecureSessionCookie'))
-			if sess.isExpired() or sess.timeout() == 0:
-				cookie.delete() # invalid -- tell client to forget the cookie
-			self.addCookie(cookie)
-			if debug:
-				print '>> recordSession: Setting SID =', sess.identifier()
-		else:
+		session = trans._session
+		if not session:
 			if debug:
 				print '>> recordSession: Did not set SID.'
+			return
+		request = trans.request()
+		sessionName = app.sessionName(trans)
+		identifier = session.identifier()
+		if session.isExpired() or session.timeout() == 0:
+			self.delCookie(sessionName, app.sessionCookiePath(trans),
+				request.isSecure() and app.setting('SecureSessionCookie'))
+			if debug:
+				print '>> recordSession: Removing SID', identifier
+			return
+		if request.hasCookie(sessionName):
+			if request.cookie(sessionName) == identifier:
+				if debug:
+					print '>> recordSession: Using SID', identifier
+				return
+		cookie = Cookie(app.sessionName(trans), identifier)
+		cookie.setPath(app.sessionCookiePath(trans))
+		if trans.request().isSecure():
+			cookie.setSecure(app.setting('SecureSessionCookie'))
+		self.addCookie(cookie)
+		if debug:
+			print '>> recordSession: Setting SID', identifier
 
 	def reset(self):
 		"""Reset the response (such as headers, cookies and contents)."""

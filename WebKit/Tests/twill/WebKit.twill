@@ -54,9 +54,16 @@ follow CountVisits
 code 200
 title CountVisits
 find "Counting Visits"
-find "<p>You've been here <strong.*>&nbsp;1&nbsp;</strong> time.</p>"
+find "<p>You've been here\n<strong.*>&nbsp;1&nbsp;</strong> time\.</p>"
 follow revisit
-find "<p>You've been here <strong.*>&nbsp;2&nbsp;</strong> times.</p>"
+find "<p>You've been here\n<strong.*>&nbsp;2&nbsp;</strong> times\.</p>"
+follow revisit
+find "<p>You've been here\n<strong.*>&nbsp;3&nbsp;</strong> times\.</p>"
+follow expire
+find "Counting Visits"
+find "<p>You've been here\n<strong.*>&nbsp;1&nbsp;</strong> time\.</p>"
+follow revisit
+find "<p>You've been here\n<strong.*>&nbsp;2&nbsp;</strong> times\.</p>"
 
 follow Error
 code 200
@@ -67,7 +74,8 @@ title Error
 find '<h2 class="section">Error</h2>'
 find "The site is having technical difficulties with this page."
 find '<h2 class="section">Traceback</h2>'
-find "self.defaultAction()"
+find "self.runTransactionViaServlet"
+find "raise error"
 find "StandardError: You clicked that button!"
 back
 fv 1 error "System Error"
