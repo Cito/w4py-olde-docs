@@ -43,9 +43,10 @@ class PSPServletFactory(ServletFactory):
 		for c in digits + letters:
 			t[ord(c)] = c
 		self._classNameTrans = ''.join(t)
-		self._extensions = application.setting(
-			'ExtensionsForPSP', ['.psp'])
-		if application.setting('ClearPSPCacheOnStart', 0):
+		setting = application.setting
+		self._extensions = setting('ExtensionsForPSP', ['.psp'])
+		self._fileEncoding = setting('PSPFileEncoding', None)
+		if setting('ClearPSPCacheOnStart', 0):
 			self.clearFileCache()
 
 	def uniqueness(self):
@@ -53,6 +54,10 @@ class PSPServletFactory(ServletFactory):
 
 	def extensions(self):
 		return self._extensions
+
+	def fileEncoding(self):
+		"""Return the file encoding used in PSP files."""
+		return self._fileEncoding
 
 	def flushCache(self):
 		"""Clean out the cache of classes in memory and on disk."""
@@ -98,6 +103,7 @@ class PSPServletFactory(ServletFactory):
 			context = Context.PSPCLContext(path, transaction)
 			context.setClassName(classname)
 			context.setPythonFileName(classfile)
+			context.setPythonFileEncoding(self._fileEncoding)
 			clc = PSPCompiler.Compiler(context)
 			clc.compile()
 			# Set the modification time of the compiled file

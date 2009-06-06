@@ -44,7 +44,7 @@ class ParseEventHandler:
 	defaults = {
 		'BASE_CLASS':' WebKit.Page',
 		'BASE_METHOD': 'writeHTML',
-		'imports': {'filename':'classes'},
+		'imports': {'filename': 'classes'},
 		'threadSafe': 'no',
 		'instanceSafe': 'yes',
 		'indent': int(4),
@@ -270,8 +270,12 @@ class ParseEventHandler:
 		pass
 
 	def endProcessing(self):
-		self._writer.println('# Generated automatically by PSP compiler on %s\n'
+		self._writer.println('# Generated automatically by PSP compiler on %s'
 			% time.asctime(time.localtime(time.time())))
+		enc = self._ctxt.getPythonFileEncoding()
+		if enc:
+			self._writer.println('# -*- coding: %s -*-' % enc)
+		self._writer.println()
 		self.generateHeader()
 		self.generateAll('psp:file')
 		self.generateDeclarations() # I'll overwrite this later when I can handle extends
@@ -468,6 +472,7 @@ class ParseEventHandler:
 					gens.remove(gens[count])
 					gencount -= 1
 			count += 1
+
 
 def checkForTextHavingOnlyGivenChars(text, ws=None):
 	"""Checks whether text contains only whitespace (or other chars).

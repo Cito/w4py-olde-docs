@@ -2,10 +2,10 @@
 """Generate Python code from PSP templates.
 
 	This module holds the classes that generate the Python code resulting
-	from the PSP template file.	As the parser encounters PSP elements,
+	from the PSP template file. As the parser encounters PSP elements,
 	it creates a new Generator object for that type of element.
 	Each of these elements is put into a list maintained by the
-	ParseEventHandler object. When it comes	time to output the source code,
+	ParseEventHandler object. When it comes time to output the source code,
 	each generator is called in turn to create its source.
 
 	(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)

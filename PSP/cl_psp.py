@@ -1,10 +1,9 @@
 
-from ServletWriter import ServletWriter
-# from PSPReader import PSPReader
-from Context import *
-from PSPCompiler import *
-
 import os, sys
+
+from Context import PSPCLContext
+from PSPCompiler import Compiler
+from ServletWriter import ServletWriter
 
 # Move this to a class like JPS?
 
@@ -16,8 +15,10 @@ def PSPCompile(*args):
 	context = PSPCLContext(pspfilename)
 	context.setClassName(classname)
 	context.setPythonFileName(pythonfilename)
+	context.setPythonFileEncoding('utf-8')
 	clc = Compiler(context)
 	clc.compile()
+
 
 if __name__ == '__main__':
 	PSPCompile(sys.argv[1])

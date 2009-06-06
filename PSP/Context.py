@@ -59,14 +59,18 @@ class PSPContext:
 		raise NotImplementedError
 
 	def getFullClassName(self):
-		"""Return class name including package prefixes.
+		"""Return the class name including package prefixes.
 
 		Won't use this for now.
 		"""
 		raise NotImplementedError
 
 	def getPythonFileName(self):
-		"""the filename that we are generating to"""
+		"""Return the filename that we are generating to."""
+		raise NotImplementedError
+
+	def getPythonFileEncoding(self):
+		"""Return the encoding of the file that we are generating."""
 		raise NotImplementedError
 
 	def setPSPReader(self):
@@ -79,6 +83,10 @@ class PSPContext:
 
 	def setPythonFileName(self):
 		"""Set the name of the .py file to generate."""
+		raise NotImplementedError
+
+	def setPythonFileEncoding(self):
+		"""Set the encoding of the .py file to generate."""
 		raise NotImplementedError
 
 
@@ -95,6 +103,7 @@ class PSPCLContext(PSPContext):
 		# self._transactrion = trans # I don't think I need this
 		self._baseUri, self._pspfile = os.path.split(pspfile)
 		self._fullpath = pspfile
+		self._pyFileEncoding = None
 
 	def getClassPath(self):
 		raise NotImplementedError
@@ -104,7 +113,7 @@ class PSPCLContext(PSPContext):
 		return self._pspReader
 
 	def getServletWriter(self):
-		"""Return the ServletWriter object assigned to this context"""
+		"""Return the ServletWriter object assigned to this context."""
 		return self._servletWriter
 
 	def getOutputDirectory(self):
@@ -123,20 +132,27 @@ class PSPCLContext(PSPContext):
 		return self._className
 
 	def getFullClassName(self):
-		"""Return class name including package prefixes.
+		"""Return the class name including package prefixes.
 
 		Won't use this for now.
+
 		"""
 		raise NotImplementedError
 
 	def getPythonFileName(self):
-		"""The filename that we are generating to."""
+		"""Return the filename that we are generating to."""
 		return self._pyFileName
 
+	def getPythonFileEncoding(self):
+		"""Return the encoding of the file that we are generating."""
+		return self._pyFileEncoding
+
 	def getPspFileName(self):
+		"""Return the name of the PSP file from which we are generating."""
 		return self._pspfile
 
 	def getFullPspFileName(self):
+		"""Return the name of the PSP file including its file path."""
 		return self._fullpath
 
 	def setPSPReader(self, reader):
@@ -148,8 +164,12 @@ class PSPCLContext(PSPContext):
 		self._servletWriter = writer
 
 	def setPythonFileName(self, name):
-		"""Sets the name of the .py file to generate."""
+		"""Set the name of the .py file to generate."""
 		self._pyFileName = name
+
+	def setPythonFileEncoding(self, encoding):
+		"""Set the encoding of the .py file to generate."""
+		self._pyFileEncoding = encoding
 
 	def setClassName(self , name):
 		"""Set the class name to create."""
@@ -169,4 +189,5 @@ class PSPCLContext(PSPContext):
 			return os.path.join(self._baseUri, uri)
 
 	def getBaseUri(self):
+		"""Return the base URI for the servlet."""
 		return self._baseUri
