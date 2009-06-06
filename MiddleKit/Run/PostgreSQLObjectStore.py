@@ -1,20 +1,20 @@
-import sys
 
 connectionPool = 1
 try:
-	import psycopg2 as dbi  # psycopg2 version 2
+	import psycopg2 as dbi # psycopg2 version 2
 	from psycopg2 import Warning, DatabaseError
 	from psycopg2.extensions import QuotedString
 except ImportError:
 	try:
-		import psycopg as dbi  # psycopg version 1
+		import psycopg as dbi # psycopg version 1
 		from psycopg import Warning, DatabaseError
 		from psycopg.extensions import QuotedString
 	except ImportError:
 		connectionPool = 0
-		import pgdb as dbi  # PyGreSQL
+		import pgdb as dbi # PyGreSQL
 		from pgdb import Warning, DatabaseError
-		from pgdb import _quote as QuotedString
+		def QuotedString(s):
+			return s.replace("\\", "\\\\").replace("'", "''")
 
 from MiscUtils import NoDefault
 from MiscUtils.MixIn import MixIn
@@ -57,7 +57,7 @@ class PostgreSQLObjectStore(SQLObjectStore):
 		# psycopg doesn't like connections to be closed because of pooling
 
 		def doneWithConnection(self, conn):
-				pass
+			pass
 
 	def augmentDatabaseArgs(self, args, pool=0):
 		if not args.get('database'):
@@ -79,7 +79,7 @@ class PostgreSQLObjectStore(SQLObjectStore):
 	def _executeSQL(self, cur, sql):
 		try:
 			cur.execute(sql)
-		except Warning, e:
+		except Warning:
 			if not self.setting('IgnoreSQLWarnings', 0):
 				raise
 
