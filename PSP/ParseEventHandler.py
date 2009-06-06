@@ -40,7 +40,7 @@ class ParseEventHandler:
 
 	"""
 
-	aspace= ' '
+	aspace = ' '
 	defaults = {
 		'BASE_CLASS':' WebKit.Page',
 		'BASE_METHOD': 'writeHTML',

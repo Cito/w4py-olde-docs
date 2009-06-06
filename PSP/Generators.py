@@ -321,7 +321,7 @@ class InsertGenerator(GenericGenerator):
 		# file, after escaping any triple-double quotes."""
 		if self.static:
 			data = open(self.page).read()
-			data= data.replace('"""', r'\"""')
+			data = data.replace('"""', r'\"""')
 			writer.println('res.write("""'+data+'""")')
 			writer.println()
 		else:

@@ -1,3 +1,4 @@
+
 try: # psycopg2 version 2
 	from psycopg2 import Warning, DatabaseError
 	from psycopg2.extensions import QuotedString

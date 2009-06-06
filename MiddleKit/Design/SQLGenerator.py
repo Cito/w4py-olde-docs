@@ -11,7 +11,7 @@ except NameError:
 	True, False = 1, 0
 
 
-class SampleError:
+class SampleError(Exception):
 
 	def __init__(self, line, error):
 		self._line = line
@@ -203,60 +203,59 @@ class Model:
 							attr.refByAttrName = None
 						attrs = []
 					elif readColumns:
-							if klass is None:
-								raise SampleError(linenum,
-									"Have not yet seen an 'objects' declaration.")
-							names = [name for name in fields if name]
-							for name in names:
-								if name == klass.sqlSerialColumnName():
-									attrs.append(PrimaryKey(name, klass))
+						if klass is None:
+							raise SampleError(linenum,
+								"Have not yet seen an 'objects' declaration.")
+						names = [name for name in fields if name]
+						for name in names:
+							if name == klass.sqlSerialColumnName():
+								attrs.append(PrimaryKey(name, klass))
+							else:
+								# support "foo by bar"
+								name = name.strip()
+								parts = name.split(' ')
+								if len(parts) == 1:
+									refByAttrName = None
 								else:
-									# support "foo by bar"
-									name = name.strip()
-									parts = name.split(' ')
-									if len(parts) == 1:
-										refByAttrName = None
-									else:
-										parts = [p.strip() for p in parts]
-										if len(parts) != 3 \
-												or parts[1].lower() != 'by' \
-												or len(parts[2]) == 0:
-											raise SampleError(linenum,
-												"Attribute '%s' of class '%s'"
-												" is not in format 'foo' or 'foo-by-bar'"
-												% (name, klass.name()))
-										name = parts[0]
-										refByAttrName = parts[2]
-										# print '>> refByAttrName:', name, refByAttrName
-									# locate the attr definiton
+									parts = [p.strip() for p in parts]
+									if len(parts) != 3 \
+											or parts[1].lower() != 'by' \
+											or len(parts[2]) == 0:
+										raise SampleError(linenum,
+											"Attribute '%s' of class '%s'"
+											" is not in format 'foo' or 'foo-by-bar'"
+											% (name, klass.name()))
+									name = parts[0]
+									refByAttrName = parts[2]
+									# print '>> refByAttrName:', name, refByAttrName
+								# locate the attr definiton
+								try:
+									attr = klass.lookupAttr(name)
+									attrs.append(attr)
+								except KeyError:
+									raise SampleError(linenum,
+										"Class '%s' has no attribute '%s'"
+										% (klass.name(), name))
+								# error checking for "foo by bar" and set refByAttre
+								if refByAttrName:
+									from MiddleKit.Core.ObjRefAttr \
+										import ObjRefAttr as ObjRefAttrClass
+									if not isinstance(attr, ObjRefAttrClass):
+										raise SampleError(linenum,
+											"Cannot use 'by' feature with non-obj ref attributes."
+											" Attr %r of class %r is a %r."
+											% (name, klass.name(), attr.__class__.__name__))
 									try:
-										attr = klass.lookupAttr(name)
-										attrs.append(attr)
+										refByAttr = attr.targetKlass().lookupAttr(refByAttrName)
 									except KeyError:
 										raise SampleError(linenum,
-											"Class '%s' has no attribute '%s'"
-											% (klass.name(), name))
-									# error checking for "foo by bar" and set refByAttre
-									if refByAttrName:
-										from MiddleKit.Core.ObjRefAttr \
-											import ObjRefAttr as ObjRefAttrClass
-										if not isinstance(attr, ObjRefAttrClass):
-											raise SampleError(linenum,
-												"Cannot use 'by' feature with non-obj ref attributes."
-												" Attr %r of class %r is a %r."
-												% (name, klass.name(), attr.__class__.__name__))
-										try:
-											refByAttr = attr.targetKlass().lookupAttr(refByAttrName)
-										except KeyError:
-											raise SampleError(linenum,
-												"Attribute %r of class %r has a 'by' of %r,"
-												" but no such attribute can be found in target class %r."
-												% (name, klass.name(),
-													refByAttrName, attr.targetKlass().name()))
-										attr.refByAttr = refByAttr
-									else:
-										attr.refByAttr = None
-
+											"Attribute %r of class %r has a 'by' of %r,"
+											" but no such attribute can be found in target class %r."
+											% (name, klass.name(),
+												refByAttrName, attr.targetKlass().name()))
+									attr.refByAttr = refByAttr
+								else:
+									attr.refByAttr = None
 							# @@ 2000-10-29 ce: check that each attr.hasSQLColumn()
 							for attr in attrs:
 								assert not attr.get('isDerived', False)
@@ -460,7 +459,6 @@ create table _MKClassIds (
 	name varchar(100)
 );
 ''')
-		values = []
 		for klass in self._model._allKlassesInOrder:
 			wr('insert into _MKClassIds (id, name) values ')
 			wr("\t(%s, '%s');\n" % (klass.id(), klass.name()))
@@ -933,7 +931,8 @@ class ObjRefAttr:
 			refByAttr = self.refByAttr
 			assert targetKlass is refByAttr.klass()
 			sql = '(select %s from %s where %s=%s)' % (
-				targetKlass.sqlSerialColumnName(), targetKlass.sqlTableName(), refByAttr.sqlColumnName(), refByAttr.sqlForSampleInput(input))
+				targetKlass.sqlSerialColumnName(), targetKlass.sqlTableName(),
+				refByAttr.sqlColumnName(), refByAttr.sqlForSampleInput(input))
 			sql = str(targetKlass.id()) + ',' + sql
 			# print '>> sql =', sql
 			return sql
@@ -1008,7 +1007,6 @@ class EnumAttr:
 			out.write('\t%s varchar(255)\n' % nameColName)
 			out.write(');\n')
 			i = 0
-			sep = ''
 			for enum in self.enums():
 				out.write("insert into %(tableName)s values (%(i)i, '%(enum)s');\n" % locals())
 				i += 1
@@ -1033,11 +1031,11 @@ class EnumAttr:
 		names = getattr(self, '_externalEnumsSQLNames', None)
 		if names is None:
 			_ClassName = self.klass().name()
-			ClassName  = _ClassName[0].upper() + _ClassName[1:]
-			className  = _ClassName[0].lower() + _ClassName[1:]
-			_AttrName  = self.name()
-			AttrName   = _AttrName[0].upper()  + _AttrName[1:]
-			attrName   = _AttrName[0].lower()  + _AttrName[1:]
+			ClassName = _ClassName[0].upper() + _ClassName[1:]
+			className = _ClassName[0].lower() + _ClassName[1:]
+			_AttrName = self.name()
+			AttrName = _AttrName[0].upper() + _AttrName[1:]
+			attrName = _AttrName[0].lower() + _AttrName[1:]
 			values = locals()
 			names = self.setting('ExternalEnumsSQLNames')
 			names = [names['TableName'], names['ValueColName'], names['NameColName']]

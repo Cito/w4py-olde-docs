@@ -391,8 +391,8 @@ class PSPParser:
 			# This is for XML style blocks, which I'm not handling yet
 			if until is not None and reader.Matches(until):
 				return
-			#If the file the reader is working on has changed due to a push or pop,
-			#flush any char data from the old file
+			# If the file the reader is working on has changed due to a push or pop,
+			# flush any char data from the old file
 			if not reader.Mark().getFile() == self.currentFile:
 				self.flushCharData(self.tmplStart, self.tmplStop)
 				self.currentFile = reader.Mark().getFile()
@@ -411,7 +411,7 @@ class PSPParser:
 				if not noPspElement:
 					self.tmplStart = reader.Mark()
 					noPspElement = 1
-				st = reader.nextContent() #skip till the next possible tag
-				self.tmplStop = reader.Mark() #mark the end of HTML data
+				st = reader.nextContent() # skip till the next possible tag
+				self.tmplStop = reader.Mark() # mark the end of HTML data
 				self.cout.write(st) # write out the raw HTML data
 			self.flushCharData(self.tmplStart, self.tmplStop) #dump remaining raw HTML

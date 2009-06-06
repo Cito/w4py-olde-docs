@@ -1,4 +1,4 @@
-import sys, time, types
+import sys, types
 
 
 from MiddleObject import MiddleObject
@@ -15,11 +15,21 @@ try: # for Python < 2.3
 except NameError:
 	True, False = 1, 0
 
-class SQLObjectStoreError(Exception): pass
-class SQLObjectStoreThreadingError(SQLObjectStoreError): pass
-class ObjRefError(SQLObjectStoreError): pass
-class ObjRefZeroSerialNumError(ObjRefError): pass
-class ObjRefDanglesError(ObjRefError): pass
+
+class SQLObjectStoreError(Exception):
+	pass
+
+class SQLObjectStoreThreadingError(SQLObjectStoreError):
+	pass
+
+class ObjRefError(SQLObjectStoreError):
+	pass
+
+class ObjRefZeroSerialNumError(ObjRefError):
+	pass
+
+class ObjRefDanglesError(ObjRefError):
+	pass
 
 
 aggressiveGC = False
@@ -61,7 +71,8 @@ class UnknownSerialNumInfo:
 		sourceTableName = sourceKlass.sqlTableName()
 		sourceSqlSerialName = sourceKlass.sqlSerialColumnName()
 		return 'update %s set %s where %s=%s;' % (
-			sourceTableName, self.sourceAttr.sqlUpdateExpr(self.targetObject), sourceSqlSerialName, self.sourceObject.serialNum())
+			sourceTableName, self.sourceAttr.sqlUpdateExpr(self.targetObject),
+			sourceSqlSerialName, self.sourceObject.serialNum())
 
 	def __repr__(self):
 		s = []
@@ -87,8 +98,9 @@ class SQLObjectStore(ObjectStore):
 	## Init ##
 
 	def __init__(self, **kwargs):
-		# @@ 2001-02-12 ce: We probably need a dictionary before kwargs for subclasses to pass to us in case they override __init__() and end up collecting kwargs themselves
-
+		# @@ 2001-02-12 ce: We probably need a dictionary before kwargs
+		# for subclasses to pass to us in case they override __init__()
+		# and end up collecting kwargs themselves
 		ObjectStore.__init__(self)
 		self._dbArgs = kwargs
 		self._connected = False
@@ -222,7 +234,9 @@ class SQLObjectStore(ObjectStore):
 					klass = self._model.klass(name)
 				except KeyError:
 					filename = self._model.filename()
-					msg = '%s  The database has a class id for %r in the _MKClassIds table, but no such class exists in the model %s. The model and the db are not in sync.' % (name, name, filename)
+					msg = ('%s  The database has a class id for %r in the _MKClassIds table,'
+						' but no such class exists in the model %s.'
+						' The model and the db are not in sync.' % (name, name, filename))
 					raise KeyError, msg
 				klassesById[id] = klass
 				klass.setId(id)
@@ -395,7 +409,9 @@ class SQLObjectStore(ObjectStore):
 					if obj is None:
 						pyClass = klass.pyClass()
 						obj = pyClass()
-						assert isinstance(obj, MiddleObject), 'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r' % (obj, type(obj), MiddleObject)
+						assert isinstance(obj, MiddleObject), (
+							'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r'
+								% (obj, type(obj), MiddleObject))
 						obj.readStoreData(self, row)
 						obj.setKey(key)
 						self._objects[key] = obj
@@ -518,10 +534,6 @@ class SQLObjectStore(ObjectStore):
 			conn = self._connection
 		cursor = conn.cursor()
 		return conn, cursor
-
-	def newConnection(self):
-		"""Subclasses must override to return a newly created database connection."""
-		raise AbstractError, self.__class__
 
 	def threadSafety(self):
 		return self.dbapiModule().threadsafety
@@ -794,7 +806,8 @@ class MiddleObjectMixIn:
 		for attr in self._mk_changedAttrs.values():
 			res.append(attr.sqlUpdateExpr(self.valueForAttr(attr)))
 		res = ','.join(res)
-		res = ('update ', klass.sqlTableName(), ' set ', res, ' where ', klass.sqlSerialColumnName(), '=', str(self.serialNum()))
+		res = ('update ', klass.sqlTableName(), ' set ', res, ' where ',
+			klass.sqlSerialColumnName(), '=', str(self.serialNum()))
 		return ''.join(res)
 
 	def sqlDeleteStmt(self):
@@ -810,21 +823,26 @@ class MiddleObjectMixIn:
 		klass = self.klass()
 		assert klass is not None
 		if self.store().model().setting('DeleteBehavior', 'delete') == 'mark':
-			return 'update %s set deleted=%s where %s=%d;' % (klass.sqlTableName(), self.store().sqlNowCall(), klass.sqlSerialColumnName(), self.serialNum())
+			return 'update %s set deleted=%s where %s=%d;' % (
+				klass.sqlTableName(), self.store().sqlNowCall(),
+				klass.sqlSerialColumnName(), self.serialNum())
 		else:
-			return 'delete from %s where %s=%d;' % (klass.sqlTableName(), klass.sqlSerialColumnName(), self.serialNum())
+			return 'delete from %s where %s=%d;' % (klass.sqlTableName(),
+				klass.sqlSerialColumnName(), self.serialNum())
 
 	def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
 		if self.store().setting('UseBigIntObjRefColumns'):
 			return {
 				'refreshAttrs': True,
-				'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(), self.sqlObjRef())
+				'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(),
+					self.sqlObjRef())
 			}
 		else:
 			classIdName, objIdName = backObjRefAttr.sqlColumnNames()
 			return {
 				'refreshAttrs': True,
-				'clauses': 'WHERE (%s=%s AND %s=%s)' % (classIdName, self.klass().id(), objIdName, self.serialNum())
+				'clauses': 'WHERE (%s=%s AND %s=%s)' % (classIdName,
+					self.klass().id(), objIdName, self.serialNum())
 			}
 
 MixIn(MiddleObject, MiddleObjectMixIn)
@@ -838,8 +856,8 @@ import MiddleKit.Design.KlassSQLSerialColumnName
 
 class Klass:
 
-	_fetchSQLStart = None  # help out the caching mechanism in fetchSQLStart()
-	_insertSQLStart = None  # help out the caching mechanism in insertSQLStart()
+	_fetchSQLStart = None # help out the caching mechanism in fetchSQLStart()
+	_insertSQLStart = None # help out the caching mechanism in insertSQLStart()
 
 	def sqlTableName(self):
 		"""Return the name of the SQL table for this class.
@@ -1040,13 +1058,15 @@ class ObjRefAttr:
 			return '%s=%s,%s=%s' % (classIdName, classId, objIdName, objId)
 
 	def readStoreDataRow(self, obj, row, i):
-		# this does *not* get called under the old approach of single obj ref columns. see MiddleObject.readStoreData
+		# This does *not* get called under the old approach of single obj ref columns.
+		# See MiddleObject.readStoreData.
 		classId, objId = row[i], row[i+1]
 		if objId is None:
 			value = None
 		else:
 			value = objRefJoin(classId, objId)
-			# @@ 2004-20-02 ce ^ that's wasteful to join them just so they can be split later, but it works well with the legacy code
+			# @@ 2004-20-02 ce ^ that's wasteful to join them just so they can be split later,
+			# but it works well with the legacy code
 		obj.setValueForAttr(self, value)
 		return i + 2
 

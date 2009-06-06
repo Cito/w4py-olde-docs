@@ -1,5 +1,4 @@
-import os, sys, types
-from time import asctime, localtime, time
+import os, sys
 
 from CodeGenerator import CodeGenerator
 from MiscUtils import AbstractError, StringTypes, mxDateTime, nativeDateTime
@@ -229,9 +228,7 @@ class Attr:
 	def writePySet(self, out):
 		name = self.name()
 		pySetName = self.pySetName()
-		capName = name[0].upper() + name[1:]
-		values = locals()
-		out.write('\n\tdef %(pySetName)s(self, value):\n' % values)
+		out.write('\n\tdef %(pySetName)s(self, value):\n' % locals())
 		self.writePySetChecks(out)
 		self.writePySetAssignment(out.write, name)
 
@@ -409,7 +406,8 @@ class EnumAttr:
 		return _%(name)sAttr.enums()[self._%(name)s]
 ''' % locals())
 			if self.setting('AccessorStyle', 'methods') == 'properties':
-				out.write('\n\n\t%(name)sString = property(%(getName)sString, "Returns the string form of %(name)s (instead of the integer value).")\n\n' % locals())
+				out.write('\n\n\t%(name)sString = property(%(getName)sString,'
+					' "Returns the string form of %(name)s (instead of the integer value).")\n\n' % locals())
 
 	def writePySetChecks(self, out):
 		Attr.writePySetChecks.im_func(self, out)
@@ -463,7 +461,8 @@ class EnumAttr:
 	## Settings ##
 
 	def usesExternalSQLEnums(self):
-		# @@ 2004-02-25 ce: seems like this method and its use should be pushed down to SQLPythonGenerator.py
+		# @@ 2004-02-25 ce: seems like this method and its use
+		# should be pushed down to SQLPythonGenerator.py
 		flag = getattr(self, '_usesExternalSQLEnums', None)
 		if flag is None:
 			flag = self.model().usesExternalSQLEnums()
