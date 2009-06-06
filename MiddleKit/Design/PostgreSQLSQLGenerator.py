@@ -9,7 +9,7 @@ except ImportError: # psycopg version 1
 	except ImportError: # PyGreSQL
 		from pgdb import Warning, DatabaseError
 		def QuotedString(s):
-			return s.replace("\\", "\\\\").replace("'", "''")
+			return "'%s'" % s.replace("\\", "\\\\").replace("'", "''")
 
 from MiscUtils.MixIn import MixIn
 

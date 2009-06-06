@@ -14,7 +14,7 @@ except ImportError:
 		import pgdb as dbi # PyGreSQL
 		from pgdb import Warning, DatabaseError
 		def QuotedString(s):
-			return s.replace("\\", "\\\\").replace("'", "''")
+			return "'%s'" % s.replace("\\", "\\\\").replace("'", "''")
 
 from MiscUtils import NoDefault
 from MiscUtils.MixIn import MixIn
