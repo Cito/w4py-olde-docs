@@ -212,6 +212,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
 						'See docstring in Profiler.py for more info.'
 					print
 				self._server = getattr(appServerModule, appServer)(workDir)
+				sys.stdout = sys.stderr = log # in case this has been reset
 				print
 				sys.stdout.flush()
 				if self._runProfile:
