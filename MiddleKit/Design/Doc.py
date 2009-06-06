@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-"""Generate.py
 
-> python Generate.py -h
+"""Doc.py
+
+> python Doc.py -h
 
 """
 
-import os, shutil, sys, time, types
+import os, shutil, sys, time
 from UserDict import UserDict
-from getopt import getopt
 import FixPath
 import MiddleKit
 from MiscUtils import StringTypes
@@ -67,29 +67,30 @@ class Doc:
 <html>
 
 <head>
-	<link rel=stylesheet type=text/css href=%s>
+	<link rel="stylesheet" type="text/css" href="%s">
 </head>
 
 <body>
 <a name=#top></a>
 ''' % self.destStyleSheetFilename)
 
-		wr('<div class=head1>%s Model (MiddleKit)</div>\n' % self.model.name())
+		wr('<div class="head1">%s Model (MiddleKit)</div>\n' % self.model.name())
 		wr('Generated on %s <br>\n' % time.asctime())
 		wr('From %s <br>\n' % self.model.filename())
 
 		wr('<br>\n')
 
-		wr('<table border=0 cellpadding=2 cellspacing=2>\n')
-		wr('<tr class=Class> <td class=ClassName colspan=3> Classes </td> </tr>\n')
-		wr('<tr class=AttrTitles> <td class=AttrTitles> In Alpha Order </td> <td class=AttrTitles> In Inheritance Order </td> </tr>\n')
-		wr('<tr> <td valign=top>\n')
+		wr('<table border="0" cellpadding="2" cellspacing="2">\n')
+		wr('<tr class="Class"><td class="ClassName" colspan="3">Classes</td></tr>\n')
+		wr('<tr class="AttrTitles"><td class=AttrTitles>In Alpha Order</td>'
+		   '<td class="AttrTitles">In Inheritance Order</td></tr>\n')
+		wr('<tr><td valign=top>\n')
 		klasses = self.model.allKlassesInOrder()[:]
 		klasses.sort(lambda a, b: cmp(a.name().lower(), b.name().lower()))
 		for klass in klasses:
 			name = klass.name()
-			wr('<a href=#%s>%s</a> <br>\n' % (name, name))
-		wr('<td valign=top>')
+			wr('<a href="#%s">%s</a><br>\n' % (name, name))
+		wr('<td valign="top">')
 		for klass in self.model.allKlassesInOrder():
 			if not klass.superklass():
 				self.writeKlassLinkAndRecurse(wr, klass)
@@ -99,68 +100,68 @@ class Doc:
 			name = klass.name()
 			wr('''
 <a name="%(name)s"></a>
-<table class=Class cellspacing=2 cellpadding=2>
-	<tr class=ClassName>
-		<td class=ClassName colspan=7>
-			<table border=0 cellpadding=0 cellspacing=0 width=100%%>
+<table class="Class" cellspacing="2" cellpadding="2">
+	<tr class="ClassName">
+		<td class="ClassName" colspan="7">
+			<table border="0" cellpadding="0" cellspacing="0" width="100%%">
 				<tr>
-					<td class=ClassName> %(name)s </td>
-					<td class=Top align=right> <a href=#top>top</a> </td>
+					<td class="ClassName">%(name)s</td>
+					<td class="Top" align="right"><a href="#top">top</a></td>
 				</tr>
 			</table>
 		</td>
 	</tr>
 			''' % locals())
 
-			wr('<tr class=ClassInfo> <td class=ClassInfo colspan=7>\n')
+			wr('<tr class="ClassInfo"><td class="ClassInfo" colspan="7">\n')
 
 			# ancestor classes
-			wr('<table border=0 cellpadding=3 cellspacing=0>\n')
+			wr('<table border="0" cellpadding="3" cellspacing="0">\n')
 			if klass.get('isAbstract'):
-				wr('<tr> <td valign=top> abstract: </td> <td valign=top> yes </td> </tr>\n')
-			wr('<tr> <td valign=top> ancestors: </td> <td valign=top> ')
+				wr('<tr><td valign="top">abstract:</td><td valign="top">yes</td></tr>\n')
+			wr('<tr><td valign="top">ancestors:</td><td valign="top">')
 			ancestor = klass.superklass()
 			if ancestor:
 				while ancestor:
 					name = ancestor.name()
-					wr(' <a href=#%s>%s</a>&nbsp; ' % (name, name))
+					wr(' <a href="#%s">%s</a>&nbsp;' % (name, name))
 					ancestor = ancestor.superklass()
 			else:
-				wr(' none ')
-			wr('</td> </tr>\n')
+				wr('none')
+			wr('</td></tr>\n')
 
 			# subclasses
-			wr('<tr> <td valign=top> subclasses: </td> <td valign=top>\n')
+			wr('<tr><td valign="top">subclasses:</td><td valign="top">\n')
 			if klass.subklasses():
 				for subklass in klass.subklasses():
 					name = subklass.name()
-					wr(' <a href=#%s>%s</a>&nbsp; ' % (name, name))
+					wr('<a href="#%s">%s</a>&nbsp;' % (name, name))
 			else:
 				wr('none')
-			wr('</td> </tr>\n')
+			wr('</td></tr>\n')
 
 			# notes
-			wr('<tr> <td valign=top> notes: </td> <td valign=top> ')
+			wr('<tr> <td valign="top">notes:</td><td valign="top">')
 			if klass.get('Notes'):
 				wr(htmlEncode(klass['Notes']))
 			else:
 				wr('none')
-			wr('</td> </tr>\n')
+			wr('</td></tr>\n')
 
 			wr('</table>\n')
 
 			wr('''
-<tr class=AttrTitles>
-	<td class=AttrTitles> Name </td>
-	<td class=AttrTitles> Type </td>
-	<td class=AttrTitles> IsRequired </td>
-	<td class=AttrTitles> Default </td>
-	<td class=AttrTitles> Notes </td>
+<tr class="AttrTitles">
+	<td class="AttrTitles">Name</td>
+	<td class="AttrTitles">Type</td>
+	<td class="AttrTitles">IsRequired</td>
+	<td class="AttrTitles">Default</td>
+	<td class="AttrTitles">Notes</td>
 </tr>
 ''')
 
 			for attr in klass.allAttrs():
-				#print attr
+				# print attr
 				values = Values(attr)
 				if attr.klass() is klass:
 					values['Prefix'] = ''
@@ -168,11 +169,11 @@ class Doc:
 					values['Prefix'] = 'Inh'
 				values['Type'] = attr.htmlForType()
 				wr('''
-<tr class=Attr>
-	<td class=%(Prefix)sAttrName> %(Name)s </td>
-	<td class=%(Prefix)sAttr> %(Type)s </td>
-	<td class=%(Prefix)sAttr> %(isRequired)s </td>
-	<td class=%(Prefix)sAttr> %(Default)s </td>
+<tr class="Attr">
+	<td class="%(Prefix)sAttrName">%(Name)s</td>
+	<td class="%(Prefix)sAttr">%(Type)s</td>
+	<td class="%(Prefix)sAttr">%(isRequired)s</td>
+	<td class="%(Prefix)sAttr">%(Default)s</td>
 ''' % values)
 				notes = []
 				if attr.get('Notes'):
@@ -182,24 +183,24 @@ class Doc:
 						notes.append('%s = %s' % (key, attr[key]))
 
 				if notes:
-					notes = ' <br> '.join(notes)
+					notes = '<br>'.join(notes)
 					notes = mystr(notes)
 					values['Notes'] = notes
 					# wr('<tr class=Attr><td class=%(Prefix)sAttr>&nbsp;</td>'
 					# '<td class=%(Prefix)sAttrNotes colspan=7>%(Notes)s</td>'
 					# '</tr>\n' % values)
-					wr('<td class=%(Prefix)sAttrNotes> %(Notes)s </td>\n' % values)
+					wr('<td class="%(Prefix)sAttrNotes">%(Notes)s</td>\n' % values)
 				else:
-					wr('<td class=%(Prefix)sAttrNotes> &nbsp; </td>\n' % values)
+					wr('<td class="%(Prefix)sAttrNotes">&nbsp;</td>\n' % values)
 				wr('</tr>')
 			wr('</table>\n')
-		wr('</body> </html>\n')
+		wr('</body></html>\n')
 
 
 	def writeKlassLinkAndRecurse(self, wr, klass, level=0):
 		wr('&nbsp;'*level*4)
 		name = klass.name()
-		wr('<a href=#%s>%s</a> <br>\n' % (name, name))
+		wr('<a href="#%s">%s</a><br>\n' % (name, name))
 		level += 1
 		for klass in klass.subklasses():
 			self.writeKlassLinkAndRecurse(wr, klass, level)
@@ -323,15 +324,14 @@ from MiddleKit.Core.Attr import Attr
 Attr.htmlForType = htmlForType
 
 def htmlForType(self):
-	return '<a href=#%s class=ClassRef>%s</a>' % (self['Type'], self['Type'])
+	return '<a href="#%s" class="ClassRef">%s</a>' % (self['Type'], self['Type'])
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 ObjRefAttr.htmlForType = htmlForType
 
 def htmlForType(self):
-	return 'list of <a href=#%s class=ClassRef>%s</a>' % (self.className(), self.className())
+	return 'list of <a href="#%s" class="ClassRef">%s</a>' % (self.className(), self.className())
 from MiddleKit.Core.ListAttr import ListAttr
 ListAttr.htmlForType = htmlForType
-
 
 
 if __name__ == '__main__':

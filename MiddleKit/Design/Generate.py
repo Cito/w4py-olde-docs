@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-"""
-Generate.py
+
+"""Generate.py
 
 > python Generate.py -h
+
 """
 
 
-import os, string, sys, types
+import os, sys
 from getopt import getopt
 import FixPath
 import MiddleKit
@@ -71,7 +72,8 @@ class Generate:
 		# Command line dissection
 		if type(args) == type(''):
 			args = args.split()
-		optPairs, files = getopt(args[1:], 'h', ['help', 'db=', 'model=', 'sql', 'py', 'config=', 'outdir='])
+		optPairs, files = getopt(args[1:], 'h',
+			['help', 'db=', 'model=', 'sql', 'py', 'config=', 'outdir='])
 		if len(optPairs) < 1:
 			self.usage('Missing options.')
 		if len(files) > 0:

@@ -1,16 +1,18 @@
-"""
-CodeGenerator.py
+"""CodeGenerator.py
 
 
-This module defines the basic machinery for a code generator, but cannot be used directly. Instead, use concrete generators like MySQLPythonGeneratory and MySQLSQLGenerator.
+This module defines the basic machinery for a code generator, but cannot be used directly.
+Instead, use concrete generators like MySQLPythonGeneratory and MySQLSQLGenerator.
 
 Terminology: "the standard classes" = ModelObject, Klasses, Klass and Attr
 
 Modules that wish to do code generation must:
 	* Define a class that inherits CodeGenerator (even if its implementation is 'pass').
-	* Define various mix-in classes such as ModelObject, Klasses, Klass and Attr for the purpose of defining methods to aid in code generation.
+	* Define various mix-in classes such as ModelObject, Klasses, Klass and Attr for
+	  the purpose of defining methods to aid in code generation.
 
-What happens: When the generator is initialized, mixes in the methods of various classes found in the module with the ones found in the model (typically these come from MiddleKit.Core).
+What happens: When the generator is initialized, mixes in the methods of various classes
+found in the module with the ones found in the model (typically these come from MiddleKit.Core).
 
 TO DO
 -----
@@ -18,13 +20,15 @@ Make sure all three goals are met:
 	* User-defined classes can be used in place of the standard classes
 	* Inheritance of generators is supported
 	* Class inheritance (like Klasses inheriting ModelObject works)
+
 """
 
 
 import os, sys
-
-from MiscUtils.Configurable import Configurable
 from time import asctime, localtime, time
+
+from MiscUtils import AbstractError
+from MiscUtils.Configurable import Configurable
 from MiddleKit.Core.ModelUser import ModelUser
 
 try: # for Python < 2.3
