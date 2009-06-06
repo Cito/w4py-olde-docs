@@ -214,7 +214,7 @@ class HTTPResponse(Response):
 		assert not self._committed, "Response already partially sent."
 		self.setStatus(code, msg)
 
-	def sendRedirect(self, url):
+	def sendRedirect(self, url, status=None):
 		"""Redirect to another url.
 
 		This method sets the headers and content for the redirect, but does
@@ -227,11 +227,28 @@ class HTTPResponse(Response):
 
 		"""
 		assert not self._committed, "Headers have already been sent."
-		self.setHeader('Status', '302 Redirect')
+		self.setHeader('Status', status or '302 Found')
 		self.setHeader('Location', url)
 		self.setHeader('Content-type', 'text/html')
 		self.write('<html><body>This page has been redirected'
-			' to <a href="%s">%s</a>.</body> </html>' % (url, url))
+			' to <a href="%s">%s</a>.</body></html>' % (url, url))
+
+	def sendRedirectPermanent(self, url):
+		"""Redirect permanently to another URL."""
+		self.sendRedirect(url, status='301 Moved Permanently')
+
+	def sendRedirectSeeOther(self, url):
+		"""Redirect to a URL that shall be retrieved with GET.
+
+		This method exists primarily to allow for the PRG pattern.
+		See http://en.wikipedia.org/wiki/Post/Redirect/Get
+
+		"""
+		self.sendRedirect(url, status='303 See Other')
+
+	def sendRedirectTemporary(self, url):
+		"""Redirect temporarily to another URL."""
+		self.sendRedirect(url, status='307 Temporary Redirect')
 
 
 	## Output ##
@@ -318,7 +335,7 @@ class HTTPResponse(Response):
 		else:
 			# invent meaningful status
 			status = self._headers.has_key('Location') \
-				and '302 Redirect' or '200 OK'
+				and '302 Found' or '200 OK'
 		head = ['Status: %s' % status]
 		head.extend(map(lambda h: '%s: %s' % h, self._headers.items()))
 		self._headers['Status'] = status # restore status

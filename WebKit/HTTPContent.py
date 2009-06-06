@@ -332,14 +332,33 @@ class HTTPContent(HTTPServlet):
 		"""
 		raise EndResponse
 
-	def sendRedirectAndEnd(self, url):
+	def sendRedirectAndEnd(self, url, status=None):
 		"""Send redirect and end.
 
-		Sends a redirect back to the client and ends the
-		response. This is a very popular pattern.
+		Sends a redirect back to the client and ends the response.
+		This is a very popular pattern.
 
 		"""
-		self.response().sendRedirect(url)
+		self.response().sendRedirect(url, status)
+		self.endResponse()
+
+	def sendRedirectPermanentAndEnd(self, url):
+		"""Send permanent redirect and end."""
+		self.response().sendRedirectPermanent(url)
+		self.endResponse()
+
+	def sendRedirectSeeOtherAndEnd(self, url):
+		"""Send redirect to a URL to be retrieved with GET and end.
+
+		This is the proper method for the Post/Redirect/Get pattern.
+
+		"""
+		self.response().sendRedirectSeeOther(url)
+		self.endResponse()
+
+	def sendRedirectTemporaryAndEnd(self, url):
+		"""Send temporary redirect and end."""
+		self.response().sendRedirectTemporary(url)
 		self.endResponse()
 
 
