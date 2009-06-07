@@ -28,14 +28,14 @@ title "Time1"
 find "<h2>Time Example 1</h2>"
 find "<p><i>This page is embedded as a KidExamplePage\.</i></p>"
 find "The current time is"
-find "\w{3} \w{3} \d{2} \d{2}:\d{2}:\d{2} \d{4}"
+find "\w{3} \w{3} ( |\d)\d \d{2}:\d{2}:\d{2} \d{4}"
 find '<td id="CornerTitle">Kid Examples</td>'
 
 follow Time2
 title "A Kid Template"
 find "Time Example 2"
 find 'This page is a stand-alone page\.'
-find "The current time is \w{3} \w{3} \d{2} \d{2}:\d{2}:\d{2} \d{4}\."
+find "The current time is \w{3} \w{3} ( |\d)\d \d{2}:\d{2}:\d{2} \d{4}\."
 notfind "Examples"
 back
 

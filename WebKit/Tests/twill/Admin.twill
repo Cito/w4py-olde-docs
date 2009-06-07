@@ -29,7 +29,7 @@ code 200
 find "WebKit Administration Pages"
 find "<tr><th.*>Webware Version:</th><td>${version}</td></tr>"
 find "<tr><th.*>WebKit Version:</th><td>${version}</td></tr>"
-find "<th.*>Local Time:</th><td>\w{3} \w{3} \d{2} \d{2}:\d{2}:\d{2} \d{4}</td>"
+find "<th.*>Local Time:</th><td>\w{3} \w{3} ( |\d)\d \d{2}:\d{2}:\d{2} \d{4}</td>"
 find "<tr><th.*>Working Dir:</th><td>.*WebKit</td></tr>"
 
 follow "Activity log"

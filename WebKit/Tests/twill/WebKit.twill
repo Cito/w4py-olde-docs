@@ -48,7 +48,7 @@ follow ShowTime
 code 200
 title ShowTime
 find "The current time is:"
-find "\w{3} \w{3} \d{2} \d{2}:\d{2}:\d{2} \d{4}"
+find "\w{3} \w{3} ( |\d)\d \d{2}:\d{2}:\d{2} \d{4}"
 
 follow CountVisits
 code 200
