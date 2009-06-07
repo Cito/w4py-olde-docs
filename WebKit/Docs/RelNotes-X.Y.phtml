@@ -15,18 +15,20 @@
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
 	<li><code>HTTPResponse</code> and <code>HTTPContent</code> have got new
-    methods allowing different kinds of redirect, besides the default redirect
-    with status code 302. The <code>sendRedirectSeeOtherAndEnd()</code> method
-    is particularly interesting, since it is the proper way to implement the
-    Post/Redirect/Get pattern.</li>
+	methods allowing different kinds of redirect, besides the default redirect
+	with status code 302. The <code>sendRedirectSeeOtherAndEnd()</code> method
+	is particularly interesting, since it is the proper way to implement the
+	Post/Redirect/Get pattern.</li>
+	<li>The file extensions of the files that shall be parsed as PSP files
+	or Kid templates can now be configured using the settings
+	<code>ExtensionsForPSP</code> and <code>ExtensionsForKid</code>. By default
+	(as before), only files with the extension <code>.psp</code> are
+	regarded as PSP files, and only files with the extension <code>.kid</code>
+	are regarded as Kid templates.</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
 <ul>
-	<li>The file extensions of the files that shall be parsed as PSP
-	can now be configured using the setting <code>ExtensionsForPSP</code>
-	(suggested by Tobias Franz). By default (as before), only files with
-	the extension <code>.psp</code> are regarded as PSP files.</li>
 	<li>The session cookie has been set in every response until now.
 	As Fionn Behrens pointed out, this is bad practice, since the browser
 	may be configured to ask the user whenever a cookie is set, and some
