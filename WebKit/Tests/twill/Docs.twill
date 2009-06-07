@@ -229,8 +229,8 @@ find '<pre>'
 find 'class <span class="name_class">HTTPException</span>\(Exception\):'
 find '<span class="line_category">    ## Error codes ##</span>'
 back
-follow "0\.9\.4"
-find '<h1 class="header">WebKit 0\.9\.4 Release Notes</h1>'
+follow "1\.0\.1"
+find '<h1 class="header">WebKit 1\.0\.1 Release Notes</h1>'
 find '<h2>Bugfixes</h2>'
 back
 back
