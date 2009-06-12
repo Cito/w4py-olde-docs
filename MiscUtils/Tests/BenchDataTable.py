@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import sys, time
+import sys
+import time
 from glob import glob
 from profile import Profile
 
@@ -10,14 +11,14 @@ from MiscUtils.DataTable import DataTable
 
 class BenchDataTable:
 
-    def __init__(self, profile=0, runTestSuite=1):
+    def __init__(self, profile=False, runTestSuite=True):
         self._shouldProfile = profile
         self._shouldRunTestSuite = runTestSuite
         self._iters = 200
 
     def main(self):
         if len(sys.argv) > 1 and sys.argv[1].lower().startswith('prof'):
-            self._shouldProfile = 1
+            self._shouldProfile = True
         if self._shouldRunTestSuite:
             from TestDataTable import main
             main()

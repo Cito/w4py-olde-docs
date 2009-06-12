@@ -11,11 +11,11 @@ import re
 
 
 class DictForArgsError(Exception):
-    pass
+    """Error when building dictionary from arguments."""
 
 
 def _SyntaxError(s):
-    raise DictForArgsError, 'Syntax error: %s' % repr(s)
+    raise DictForArgsError('Syntax error: %r' % s)
 
 
 _nameRE   = re.compile(r'\w+')
@@ -30,10 +30,10 @@ def DictForArgs(s):
     """Build dictionary from arguments.
 
     Takes an input such as:
-                    x=3
-                    name="foo"
-                    first='john' last='doe'
-                    required border=3
+        x=3
+        name="foo"
+        first='john' last='doe'
+        required border=3
 
     And returns a dictionary representing the same. For keys that aren't
     given an explicit value (such as 'required' above), the value is '1'.
@@ -47,7 +47,7 @@ def DictForArgs(s):
     Returns {} for an empty string.
 
     The informal grammar is:
-            (NAME [=NAME|STRING])*
+        (NAME [=NAME|STRING])*
 
     Will raise DictForArgsError if the string is invalid.
 
@@ -59,7 +59,7 @@ def DictForArgs(s):
 
     # Tokenize
 
-    verbose = 0
+    verbose = False
     matches = []
     start   = 0
     sLen    = len(s)
@@ -105,7 +105,7 @@ def DictForArgs(s):
     # At this point we have a list of all the tokens (as re.Match objects)
     # We need to process these into a dictionary.
 
-    dict = {}
+    d = {}
     matchesLen = len(matches)
     i = 0
     while i < matchesLen:
@@ -118,7 +118,7 @@ def DictForArgs(s):
             if peekMatch is not None:
                 if peekMatch.re is _nameRE:
                     # We have a name without an explicit value
-                    dict[match.group()] = '1'
+                    d[match.group()] = '1'
                     i += 1
                     continue
                 if peekMatch.re is _equalsRE:
@@ -130,11 +130,11 @@ def DictForArgs(s):
                                 value = value[1:-1]
                                 # value = "'''%s'''" % value[1:-1]
                                 # value = eval(value)
-                            dict[match.group()] = value
+                            d[match.group()] = value
                             i += 3
                             continue
             else:
-                dict[match.group()] = '1'
+                d[match.group()] = '1'
                 i += 1
                 continue
         _SyntaxError(s)
@@ -142,10 +142,8 @@ def DictForArgs(s):
     if verbose:
         print
 
-    return dict
+    return d
 
-
-from string import letters
 
 def PyDictForArgs(s):
     """Build dictionary from arguments.
@@ -180,7 +178,7 @@ def PyDictForArgs(s):
     # special case: just a name
     # meaning: name=1
     # example: isAbstract
-    if s.find(' ') == -1 and s.find('=') == -1 and s[0] in letters:
+    if ' ' not in s and '=' not in s and s[0].isalpha():
         s += '=1'
 
     results = {}
@@ -190,7 +188,7 @@ def PyDictForArgs(s):
     return results
 
 
-def ExpandDictWithExtras(dict, key='Extras', delKey=1, dictForArgs=DictForArgs):
+def ExpandDictWithExtras(d, key='Extras', delKey=True, dictForArgs=DictForArgs):
     """Return a dictionary with the 'Extras' column expanded by DictForArgs().
 
     For example, given:
@@ -207,15 +205,11 @@ def ExpandDictWithExtras(dict, key='Extras', delKey=1, dictForArgs=DictForArgs):
     to specify attributes that occur infrequently.
 
     """
-    if dict.has_key(key):
-        newDict = {}
-        # We use the following for loop rather than newDict.update()
-        # so that the dict arg can be dictionary-like.
-        for k, v in dict.items():
-            newDict[k] = v
+    if key in d:
+        newDict = dict(d)
         if delKey:
             del newDict[key]
-        newDict.update(dictForArgs(dict[key]))
+        newDict.update(dictForArgs(d[key]))
         return newDict
     else:
-        return dict
+        return d

@@ -8,6 +8,7 @@ Copyright (c) 1999-2002 Ng Pheng Siong. All rights reserved.
 """
 
 import sys
+
 from MiscUtils import StringIO
 from PickleRPC import Transport
 from M2Crypto import SSL, httpslib, m2urllib

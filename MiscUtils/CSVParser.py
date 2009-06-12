@@ -4,8 +4,6 @@ A parser for CSV files.
 
 """
 
-import types
-
 # The states of the parser
 StartRecord        = 0
 StartField         = 1
@@ -20,35 +18,35 @@ Finished           = 10
 
 
 class ParseError(Exception):
-    pass
+    """CSV file parse error."""
 
 
 class CSVParser:
     """Parser for CSV files.
 
     Parses CSV files including all subtleties such as:
-            * commas in fields
-            * double quotes in fields
-            * embedded newlines in fields
-                    - Examples of programs that produce such beasts include
-                      MySQL and Excel
+        * commas in fields
+        * double quotes in fields
+        * embedded newlines in fields
+            - Examples of programs that produce such beasts include
+              MySQL and Excel
 
     For a higher-level, friendlier CSV class with many conveniences,
     see DataTable (which uses this class for its parsing).
 
     Example:
-            records = []
-            parse = CSVParser().parse
-            for line in lines:
-                    results = parse(line)
-                    if results is not None:
-                            records.append(results)
+        records = []
+        parse = CSVParser().parse
+        for line in lines:
+            results = parse(line)
+            if results is not None:
+                records.append(results)
 
     CREDIT
 
     The algorithm was taken directly from the open source Python
     C-extension, csv:
-            http://www.object-craft.com.au/projects/csv/
+        http://www.object-craft.com.au/projects/csv/
 
     It would be nice to use the csv module when present, since it is
     substantially faster. Before that can be done, it needs to support
@@ -57,8 +55,8 @@ class CSVParser:
 
     """
 
-    def __init__(self, allowComments=1, stripWhitespace=1, fieldSep=',',
-                    autoReset=1, doubleQuote=1):
+    def __init__(self, allowComments=True, stripWhitespace=True, fieldSep=',',
+                    autoReset=True, doubleQuote=True):
         """Create a new CSV parser.
 
         allowComments: If true (the default), then comment lines using
@@ -81,19 +79,19 @@ class CSVParser:
         # Other
         self._state = StartRecord
         self._fields = []
-        self._hadParseError = 0
+        self._hadParseError = False
         self._field = [] # a list of chars for the cur field
         self.addChar = self._field.append
 
         # The handlers for the various states
         self._handlers = [
-                self.startRecord,
-                self.startField,
-                self.inField,
-                self.quoteInField,
-                self.inQuotedField,
-                self.quoteInQuotedField,
-                self.endQuotedField,
+            self.startRecord,
+            self.startField,
+            self.inField,
+            self.quoteInField,
+            self.inQuotedField,
+            self.quoteInQuotedField,
+            self.endQuotedField,
         ]
 
 
@@ -124,7 +122,7 @@ class CSVParser:
                     if i == lineLen:
                         break # Win end of line
 
-                self._hadParseError = 1
+                self._hadParseError = True
                 raise ParseError('Newline inside string')
 
             elif c == '\n':
@@ -132,7 +130,7 @@ class CSVParser:
                 if i == lineLen:
                     break # unix end of line
 
-                self._hadParseError = 1
+                self._hadParseError = True
                 raise ParseError('Newline inside string')
 
             else:
@@ -165,7 +163,7 @@ class CSVParser:
         """
         self._fields = []
         self._state = StartRecord
-        self._hadParseError = 0
+        self._hadParseError = False
 
 
     ## State Handlers ##
@@ -244,7 +242,7 @@ class CSVParser:
             self.saveField() # end of line
             self._state = StartRecord
         else:
-            self._hadParseError = 1 # illegal
+            self._hadParseError = True # illegal
             raise ParseError, '%s expected after "' % self._fieldSep
 
     def endQuotedField(self, c):
@@ -253,7 +251,7 @@ class CSVParser:
         elif c == '\0':
             self._state = StartRecord # end of line
         else:
-            self._hadParseError = 1
+            self._hadParseError = True
             raise ParseError, '%s expected after "' % self._fieldSep
 
     def saveField(self):
@@ -265,23 +263,3 @@ class CSVParser:
 # Call the global function parse() if you like the default settings of the CSVParser
 _parser = CSVParser()
 parse = _parser.parse
-
-
-def joinCSVFields(fields):
-    """Return a CSV record (e.g. a string) from a sequence of fields.
-
-    Fields containing commands (,) or double quotes (") are quoted and
-    double quotes are escaped (""). The terminating newline is NOT included.
-
-    """
-    newFields = []
-    for field in fields:
-        assert type(field) is types.StringType
-        if field.find('"') != -1:
-            newField = '"' + field.replace('"', '""') + '"'
-        elif field.find(',') != -1:
-            newField = '"' + field + '"'
-        else:
-            newField = field
-        newFields.append(newField)
-    return ','.join(newFields)

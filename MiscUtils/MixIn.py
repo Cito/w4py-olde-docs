@@ -48,7 +48,7 @@ def MixIn(pyClass, mixInClass, makeAncestor=0, mixInSuperMethods=0):
 
     """
     assert mixInClass is not pyClass, \
-            'mixInClass = %r, pyClass = %r' % (mixInClass, pyClass)
+        'mixInClass = %r, pyClass = %r' % (mixInClass, pyClass)
     if makeAncestor:
         if mixInClass not in pyClass.__bases__:
             pyClass.__bases__ = (mixInClass,) + pyClass.__bases__
@@ -80,15 +80,15 @@ def MixIn(pyClass, mixInClass, makeAncestor=0, mixInSuperMethods=0):
         for name in dir(mixInClass):
             # skip private members, but not __repr__ et al:
             if not (name.startswith('__') and not name.endswith('__')
-                            ) and name not in readOnlyNames:
+                    ) and name not in readOnlyNames:
                 member = getattr(mixInClass, name)
 
-                if type(member) is MethodType and mixInSuperMethods:
+                if isinstance(member, MethodType) and mixInSuperMethods:
                     if hasattr(pyClass, name):
                         origmember = getattr(pyClass, name)
                         setattr(mixInClass, 'mixInSuper'
-                                + name[0].upper() + name[1:], origmember)
-                if type(member) is MethodType:
+                            + name[0].upper() + name[1:], origmember)
+                if isinstance(member, MethodType):
                     member = member.im_func
                 setattr(pyClass, name, member)
 

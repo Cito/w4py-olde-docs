@@ -4,12 +4,12 @@ import types
 from UserDict import UserDict
 
 import FixPath
-from MiscUtils.NamedValueAccess import \
-        NamedValueAccessError, valueForKey, valueForName, NamedValueAccess
+from MiscUtils.NamedValueAccess import (
+    NamedValueAccessError, valueForKey, valueForName, NamedValueAccess)
 from MiscUtils import AbstractError, NoDefault
 
 
-class T:
+class T(object):
     pass
 
 
@@ -68,7 +68,7 @@ class T7(T):
             return getattr(self, 'nextObject')
         else:
             if default is NoDefault:
-                raise NamedValueAccessError, key
+                raise NamedValueAccessError(key)
             else:
                 return default
 
@@ -93,17 +93,15 @@ for name in dir():
 
 
 class NamedValueAccessTest(unittest.TestCase):
-    """
-    This is the abstract root ancestor for all test case classes in this file.
-    """
-    pass
+    """Abstract root ancestor for all test case classes in this file."""
 
 
 class LookupTest(NamedValueAccessTest):
-    """
-    This is an abstract super class for the test cases that cover the
-    functions. Subclasses must implement self.lookup() and can make use
-    of self.classes and self.objs.
+    """Abstract super class for the test cases covering the functions.
+
+    Subclasses must implement self.lookup() and can make use of
+    self.classes and self.objs.
+
     """
 
     def setUp(self):
@@ -120,7 +118,8 @@ class LookupTest(NamedValueAccessTest):
         raise AbstractError, self.__class__
 
     def checkBasicAccess(self):
-        """
+        """Check the basic access functionality.
+
         Invoke the look up function with key 'foo', expecting 1 in return.
         Invoke the look up with 'bar', expected an exception.
         Invoke the look up with 'bar' and default 2, expecting 2.
@@ -137,13 +136,10 @@ class LookupTest(NamedValueAccessTest):
             assert value == 2, 'value = %r, obj = %r' % (value, obj)
 
     def checkBasicAccessRepeated(self):
-        """
-        Just repeat checkBasicAccess multiple times to check stability.
-        """
+        """Just repeat checkBasicAccess multiple times to check stability."""
         for count in xrange(50):
             # Yes, it's safe to invoke this other particular test
-            # multiple times without the usual setUp()/tearDown()
-            # cycle
+            # multiple times without the usual setUp()/tearDown() cycle
             self.checkBasicAccess()
 
 
@@ -172,25 +168,25 @@ class ValueForNameTest(LookupTest):
 
     def checkDicts(self):
         # Basic dicts
-        dict = {'origin': {'x':1, 'y':2},  'size': {'width':3, 'height':4}}
+        d = {'origin': {'x':1, 'y':2},  'size': {'width':3, 'height':4}}
         obj = self.objs[0]
-        obj.rect = dict
-        self._checkDicts(dict, obj)
+        obj.rect = d
+        self._checkDicts(d, obj)
 
         # User dicts
-        dict = UserDict(dict)
-        obj.rect = dict
-        self._checkDicts(dict, obj)
+        d = UserDict(d)
+        obj.rect = d
+        self._checkDicts(d, obj)
 
-    def _checkDicts(self, dict, obj):
+    def _checkDicts(self, d, obj):
         """ Used exclusively by checkDicts(). """
-        assert self.lookup(dict, 'origin.x') == 1
+        assert self.lookup(d, 'origin.x') == 1
         assert self.lookup(obj, 'rect.origin.x')
 
-        self.assertRaises(NamedValueAccessError, self.lookup, dict, 'bar')
+        self.assertRaises(NamedValueAccessError, self.lookup, d, 'bar')
         self.assertRaises(NamedValueAccessError, self.lookup, obj,  'bar')
 
-        assert self.lookup(dict, 'bar', 2) == 2
+        assert self.lookup(d, 'bar', 2) == 2
         assert self.lookup(obj, 'rect.bar', 2) == 2
 
 
@@ -256,20 +252,20 @@ class MixInExtrasTest(MixInTest, NamedValueAccessTest):
         # test valuesForNames()
         notFound = 'notFound'
         assert rect.valuesForNames(['attrs', 'attrs.origin',
-                'attrs.size']) == [attrs, origin, size]
+            'attrs.size']) == [attrs, origin, size]
         assert rect.valuesForNames(['attrs.dontFind', 'attrs',
-                'attrs.origin.dontFind'],
-                default=notFound) == [notFound, attrs, notFound]
+            'attrs.origin.dontFind'],
+            default=notFound) == [notFound, attrs, notFound]
         assert rect.valuesForNames(['attrs.dontFind', 'attrs',
-                'attrs.origin.dontFind'], defaults=[1, 2, 3]) == [1, attrs, 3]
+            'attrs.origin.dontFind'], defaults=[1, 2, 3]) == [1, attrs, 3]
         assert rect.valuesForNames(['attrs.dontFind', 'attrs',
-                'attrs.origin.dontFind'], forgive=1) == [attrs]
+            'attrs.origin.dontFind'], forgive=1) == [attrs]
 
 
 class WrapperTest(NamedValueAccessTest):
     """
     This is a utility class that modifies LookupTest. After running this,
-    run     all the LookupTests (e.g., all subclasses) as usual in order to
+    run all the LookupTests (e.g., all subclasses) as usual in order to
     test wrappers.
     """
 
@@ -282,16 +278,16 @@ class WrapperTest(NamedValueAccessTest):
 
 def makeTestSuite():
     testClasses = [
-            ValueForKeyTest,
-            ValueForNameTest,
-            MixInTest, # utility
-                    MixInKeyTest,
-                    MixInNameTest,
-                    MixInExtrasTest,
-            WrapperTest, # utility
-                    MixInKeyTest,
-                    MixInNameTest,
-                    MixInExtrasTest,
+        ValueForKeyTest,
+        ValueForNameTest,
+        MixInTest, # utility
+            MixInKeyTest,
+            MixInNameTest,
+            MixInExtrasTest,
+        WrapperTest, # utility
+            MixInKeyTest,
+            MixInNameTest,
+            MixInExtrasTest,
     ]
     make = unittest.makeSuite
     suites = [make(klass, 'check') for klass in testClasses]

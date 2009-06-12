@@ -167,8 +167,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
         # Compress the output if we are allowed to.
         # We'll avoid compressing short responses and
         # we'll use the fastest possible compression -- level 1.
-        if zlib is not None and "gzip" in acceptEncoding \
-                        and len(response) > 1000:
+        if zlib is not None and "gzip" in acceptEncoding and len(response) > 1000:
             contentEncoding = 'x-gzip'
             response = zlib.compress(response, 1)
         else:

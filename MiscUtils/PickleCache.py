@@ -1,4 +1,5 @@
-"""
+"""PickleCache.py
+
 PickleCache provides tools for keeping fast-loading cached versions of
 files so that subsequent loads are faster. This is similar to how Python
 silently caches .pyc files next to .py files.
@@ -12,8 +13,8 @@ Two real life cases are MiscUtils.DataTable, which loads and represents
 comma-separated files, and MiddleKit which has an object model file.
 So for examples on using this module, load up the following files and
 search for "Pickle":
-        Webware/MiscUtils/DataTable.py
-        MiddleKit/Core/Model.py
+    Webware/MiscUtils/DataTable.py
+    MiddleKit/Core/Model.py
 
 The cached file is named the same as the original file with
 '.pickle.cache' suffixed. The utility of '.pickle' is to denote the file
@@ -40,12 +41,11 @@ file was rapidly being written and read. I think that's fairly rare.
 
 
 SEE ALSO
-        http://www.python.org/doc/current/lib/module-pickle.html
+    http://www.python.org/doc/current/lib/module-pickle.html
 
 """
 
-verbose = 0
-
+verbose = False
 
 import os
 import sys
@@ -91,7 +91,7 @@ class PickleCacheReader(PickleCache):
                 print 'Cannot find %r.' % filename
             open(filename) # to get a properly constructed IOError
 
-        shouldDeletePickle = 0
+        shouldDeletePickle = False
         data = None
 
         picklePath = self.picklePath(filename)
@@ -99,7 +99,7 @@ class PickleCacheReader(PickleCache):
             if os.path.getmtime(picklePath) < os.path.getmtime(filename):
                 if v:
                     print 'Cache is out of date.'
-                shouldDeletePickle = 1
+                shouldDeletePickle = True
             else:
                 try:
                     if v:
@@ -113,45 +113,44 @@ class PickleCacheReader(PickleCache):
                     try:
                         if v:
                             print 'about to load'
-                        dict = load(file)
+                        d = load(file)
                     except EOFError:
                         if v:
                             print 'EOFError - not loading'
-                        shouldDeletePickle = 1
+                        shouldDeletePickle = True
                     except Exception, exc:
                         print 'WARNING: %s: %s: %s' % (
-                                self.__class__.__name__, exc.__class__, exc)
-                        shouldDeletePickle = 1
+                            self.__class__.__name__, exc.__class__, exc)
+                        shouldDeletePickle = True
                     else:
                         file.close()
                         if v:
                             print 'Finished reading.'
-                        assert isinstance(dict, DictType), 'type=%r dict=%r' % (
-                                type(dict), dict)
+                        assert isinstance(d, dict), 'type=%r dict=%r' % (type(d), d)
                         for key in ('source', 'data', 'pickle version', 'python version'):
-                            assert dict.has_key(key), key
-                        if source and dict['source'] != source:
+                            assert key in d, key
+                        if source and d['source'] != source:
                             if v:
                                 print 'Not from required source (%s): %s.' % (
-                                        source, dict['source'])
-                            shouldDeletePickle = 1
-                        elif dict['pickle version'] != pickleVersion:
+                                    source, d['source'])
+                            shouldDeletePickle = True
+                        elif d['pickle version'] != pickleVersion:
                             if v:
                                 print 'Pickle version (%i) does not match expected (%i).' % (
-                                        dict['pickle version'], pickleVersion)
-                            shouldDeletePickle = 1
-                        elif dict['python version'] != sys.version_info:
+                                    d['pickle version'], pickleVersion)
+                            shouldDeletePickle = True
+                        elif d['python version'] != sys.version_info:
                             if v:
                                 print 'Python version %s does not match current %s.' % (
-                                        dict['python version'], sys.version_info)
-                            shouldDeletePickle = 1
+                                    d['python version'], sys.version_info)
+                            shouldDeletePickle = True
                         else:
                             if v:
                                 print 'All tests pass, accepting data.'
                                 if v > 1:
                                     print 'Display full dict:'
-                                    pprint(dict)
-                            data = dict['data']
+                                    pprint(d)
+                            data = d['data']
 
         # Delete the pickle file if suggested by previous conditions
         if shouldDeletePickle:
@@ -162,7 +161,7 @@ class PickleCacheReader(PickleCache):
             except OSError, e:
                 if v:
                     print 'Failed to remove: %s: %s' % (
-                            e.__class__.__name__, e)
+                        e.__class__.__name__, e)
 
         if v:
             print 'Done reading data.'
@@ -186,15 +185,15 @@ class PickleCacheWriter(PickleCache):
         sourceTimestamp = os.path.getmtime(filename)
 
         picklePath = self.picklePath(filename)
-        dict = {
-                'source': source,
-                'python version': sys.version_info,
-                'pickle version': pickleVersion,
-                'data': data,
+        d = {
+            'source': source,
+            'python version': sys.version_info,
+            'pickle version': pickleVersion,
+            'data': data,
         }
         if v > 1:
             print 'Display full dict:'
-            pprint(dict)
+            pprint(d)
         try:
             if v:
                 print 'About to open for write %r.' % picklePath
@@ -205,14 +204,14 @@ class PickleCacheWriter(PickleCache):
                         e.__class__.__name__, e)
         else:
             while 1:
-                dump(dict, file, 1) # 1 = binary format
+                dump(d, file, 1) # 1 = binary format
                 file.close()
                 # Make sure the cache has a newer timestamp, otherwise the cache
                 # will just get ignored and rewritten next time.
                 if os.path.getmtime(picklePath) == sourceTimestamp:
                     if v:
                         print 'Timestamps are identical,' \
-                                ' sleeping %0.2f seconds.' % self._writeSleepInterval
+                            ' sleeping %0.2f seconds.' % self._writeSleepInterval
                     time.sleep(self._writeSleepInterval)
                     file = open(picklePath, 'w')
                 else:

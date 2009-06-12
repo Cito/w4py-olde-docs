@@ -1,7 +1,5 @@
 import sys
-import types
 import unittest
-
 
 import FixPath
 from MiscUtils.Error import Error
@@ -11,8 +9,8 @@ def check(err):
     print 'str: ', err
     print 'repr:', repr(err)
     assert err.keys() in [['a', 'b'], ['b', 'a']]
-    assert type(err['a']) is types.IntType
-    assert type(err['b']) is types.StringType
+    assert isinstance(err['a'], int)
+    assert isinstance(err['b'], str)
     print
 
 def test():
@@ -55,10 +53,10 @@ class TestError(unittest.TestCase):
         err = Error(None, '', a=5, b='.')
         self.assertEqual('ERROR: ', str(err))
         self.assertEqual("ERROR(object=None; message=''; data={'a': 5, 'b': '.'})",
-                repr(err).replace("{'b': '.', 'a': 5}", "{'a': 5, 'b': '.'}"))
+            repr(err).replace("{'b': '.', 'a': 5}", "{'a': 5, 'b': '.'}"))
         assert err.keys() in [['a', 'b'], ['b', 'a']]
-        assert type(err['a']) is types.IntType
-        assert type(err['b']) is types.StringType
+        assert isinstance(err['a'], int)
+        assert isinstance(err['b'], str)
 
     def testVarArgs(self):
         err = Error(None, '', {'a': 5}, b='.')
@@ -66,8 +64,8 @@ class TestError(unittest.TestCase):
         self.assertEqual("ERROR(object=None; message=''; data={'a': 5, 'b': '.'})",
                 repr(err).replace("{'b': '.', 'a': 5}", "{'a': 5, 'b': '.'}"))
         assert err.keys() in [['a', 'b'], ['b', 'a']]
-        assert type(err['a']) is types.IntType
-        assert type(err['b']) is types.StringType
+        assert isinstance(err['a'], int)
+        assert isinstance(err['b'], str)
 
 
 if __name__ == '__main__':

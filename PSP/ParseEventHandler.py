@@ -187,17 +187,17 @@ class ParseEventHandler:
         self._formatter = value
 
     directiveHandlers = {
-            'imports': importHandler,
-            'import': importHandler,
-            'extends': extendsHandler,
-            'method': mainMethodHandler,
-            'isThreadSafe': threadSafeHandler,
-            'isInstanceSafe': instanceSafeHandler,
-            'BaseClass': extendsHandler,
-            'indentSpaces': indentSpacesHandler,
-            'indentType': indentTypeHandler,
-            'gobbleWhitespace': gobbleWhitespaceHandler,
-            'formatter': formatterHandler}
+        'imports': importHandler,
+        'import': importHandler,
+        'extends': extendsHandler,
+        'method': mainMethodHandler,
+        'isThreadSafe': threadSafeHandler,
+        'isInstanceSafe': instanceSafeHandler,
+        'BaseClass': extendsHandler,
+        'indentSpaces': indentSpacesHandler,
+        'indentType': indentTypeHandler,
+        'gobbleWhitespace': gobbleWhitespaceHandler,
+        'formatter': formatterHandler}
 
     def handleDirective(self, directive, start, stop, attrs):
         """Flush any template data into a CharGen and then create a new DirectiveGen."""

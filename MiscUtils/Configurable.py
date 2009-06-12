@@ -1,33 +1,41 @@
-import sys, os
-from types import DictType
+"""Configurable.py
+
+Provides configuration file functionality.
+
+"""
+
+import os
+import sys
+
 from MiscUtils import AbstractError, NoDefault
+
 from Funcs import valueForString
 
 
 class ConfigurationError(Exception):
-    pass
+    """Error in configuration file."""
 
 
-class Configurable:
+class Configurable(object):
     """Abstract superclass for configuration file functionality.
 
     Subclasses should override:
 
-            * defaultConfig()  to return a dictionary of default settings
-                               such as { 'Frequency': 5 }
+        * defaultConfig()  to return a dictionary of default settings
+                           such as { 'Frequency': 5 }
 
-            * configFilename() to return the filename by which users can
-                               override the configuration such as
-                               'Pinger.config'
+        * configFilename() to return the filename by which users can
+                           override the configuration such as
+                           'Pinger.config'
 
     Subclasses typically use the setting() method, for example:
 
-            time.sleep(self.setting('Frequency'))
+        time.sleep(self.setting('Frequency'))
 
     They might also use the printConfig() method, for example:
 
-            self.printConfig()      # or
-            self.printConfig(file)
+        self.printConfig()      # or
+        self.printConfig(file)
 
     Users of your software can create a file with the same name as
     configFilename() and selectively override settings. The format of
@@ -66,8 +74,8 @@ class Configurable:
             try:
                 return self.config()[name]
             except KeyError:
-                raise KeyError, \
-                        '%s config keys are: %s' % (name, self.config().keys())
+                raise KeyError('%s config keys are: %s'
+                    % (name, self.config().keys()))
         else:
             return self.config().get(name, default)
 
@@ -77,7 +85,7 @@ class Configurable:
 
     def hasSetting(self, name):
         """Check whether a configuration setting has been changed."""
-        return self.config().has_key(name)
+        return name in self.config()
 
     def defaultConfig(self):
         """Return a dictionary with all the default values for the settings.
@@ -96,7 +104,7 @@ class Configurable:
         will be loaded.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def configName(self):
         """Return the name of the configuration file without the extension.
@@ -135,8 +143,8 @@ class Configurable:
             # in case it has been edited on a different platform
             contents = open(filename, 'rU').read()
         except IOError, e:
-            print 'WARNING: Config file', filename
-            print '  not loaded: %s.' % e.strerror
+            print 'WARNING: Config file %s not loaded:'
+            print e.strerror
             print
             return {}
         isDict = contents.lstrip().startswith('{')
@@ -148,8 +156,8 @@ class Configurable:
             try:
                 contents %= replacements
             except Exception:
-                raise ConfigurationError, \
-                        'Unable to embed replacement text in %s.' % filename
+                raise ConfigurationError(
+                    'Unable to embed replacement text in %s.' % filename)
         evalContext = replacements.copy()
         try:
             if isDict:
@@ -161,11 +169,11 @@ class Configurable:
                     if name.startswith('_'):
                         del config[name]
         except Exception, e:
-            raise ConfigurationError, \
-                    'Invalid configuration file, %s (%s).' % (filename, e)
-        if type(config) is not DictType:
-            raise ConfigurationError, 'Invalid type of configuration.' \
-                    ' Expecting dictionary, but got %s.' % type(config)
+            raise ConfigurationError(
+                    'Invalid configuration file, %s (%s).' % (filename, e))
+        if not isinstance(config, dict):
+            raise ConfigurationError('Invalid type of configuration.'
+                    ' Expecting dictionary, but got %s.' % type(config))
         return config
 
     def printConfig(self, dest=None):
@@ -182,7 +190,7 @@ class Configurable:
         width = max(map(len, keys))
         for key in keys:
             dest.write('%s = %s\n'
-                    % (key.ljust(width), str(self.setting(key))))
+                % (key.ljust(width), str(self.setting(key))))
         dest.write('\n')
 
     def commandLineConfig(self):

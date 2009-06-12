@@ -6,11 +6,11 @@ INTRODUCTION
 This class is useful for representing a table of data arranged by named
 columns, where each row in the table can be thought of as a record:
 
-        name   phoneNumber
-        ------ -----------
-        Chuck  893-3498
-        Bill   893-0439
-        John   893-5901
+    name   phoneNumber
+    ------ -----------
+    Chuck  893-3498
+    Bill   893-0439
+    John   893-5901
 
 This data often comes from delimited text files which typically
 have well defined columns or fields with several rows each of which can
@@ -18,32 +18,32 @@ be thought of as a record.
 
 Using a DataTable can be as easy as using lists and dictionaries:
 
-        table = DataTable('users.csv')
-        for row in table:
-                print row['name'], row['phoneNumber']
+    table = DataTable('users.csv')
+    for row in table:
+        print row['name'], row['phoneNumber']
 
 Or even:
 
-        table = DataTable('users.csv')
-        for row in table:
-                print '%(name)s %(phoneNumber)s' % row
+    table = DataTable('users.csv')
+    for row in table:
+        print '%(name)s %(phoneNumber)s' % row
 
 The above print statement relies on the fact that rows can be treated
 like dictionaries, using the column headings as keys.
 
 You can also treat a row like an array:
 
-        table = DataTable('something.tabbed', delimiter='\t')
-        for row in table:
-                for item in row:
-                        print item,
-                print
+    table = DataTable('something.tabbed', delimiter='\t')
+    for row in table:
+        for item in row:
+            print item,
+        print
 
 
 COLUMNS
 
 Column headings can have a type specification like so:
-        name, age:int, zip:int
+    name, age:int, zip:int
 
 Possible types include string, int, float and datetime. However,
 datetime is not well supported right now.
@@ -51,14 +51,14 @@ datetime is not well supported right now.
 String is assumed if no type is specified but you can set that
 assumption when you create the table:
 
-                table = DataTable(headings, defaultType='float')
+    table = DataTable(headings, defaultType='float')
 
 Using types like int and float will cause DataTable to actually
 convert the string values (perhaps read from a file) to these types
 so that you can use them in natural operations. For example:
 
-        if row['age']>120:
-                self.flagData(row, 'age looks high')
+    if row['age']>120:
+        self.flagData(row, 'age looks high')
 
 As you can see, each row can be accessed as a dictionary with keys
 according the column headings. Names are case sensitive.
@@ -86,12 +86,12 @@ Whitespace around field values is stripped.
 You can control all this behavior through the arguments found in the
 initializer and the various readFoo() methods:
 
-        ...delimiter=',', allowComments=True, stripWhite=True
+    ...delimiter=',', allowComments=True, stripWhite=True
 
 For example:
 
-        table = DataTable('foo.tabbed', delimiter='\t',
-                allowComments=False, stripWhite=False)
+    table = DataTable('foo.tabbed', delimiter='\t',
+        allowComments=False, stripWhite=False)
 
 You should access these parameters by their name since additional ones
 could appear in the future, thereby changing the order.
@@ -120,32 +120,31 @@ TABLES FROM SCRATCH
 
 Here's an example that constructs a table from scratch:
 
-        table = DataTable(['name', 'age:int'])
-        table.append(['John', 80])
-        table.append({'name': 'John', 'age': 80})
-        print table
+    table = DataTable(['name', 'age:int'])
+    table.append(['John', 80])
+    table.append({'name': 'John', 'age': 80})
+    print table
 
 
 QUERIES
 
 A simple query mechanism is supported for equality of fields:
 
-        matches = table.recordsEqualTo({'uid': 5})
-        if matches:
-                for match in matches:
-                        print match
-        else:
-                print 'No matches.'
+    matches = table.recordsEqualTo({'uid': 5})
+    if matches:
+        for match in matches:
+            print match
+    else:
+        print 'No matches.'
 
 
 COMMON USES
 
 * Programs can keep configuration and other data in simple comma-
 separated text files and use DataTable to access them. For example, a
-web site could read its sidebar links from such a file, thereby
-allowing people who don't know Python (or even HTML) to edit these
-links without having to understand other implementation parts of the
-site.
+web site could read its sidebar links from such a file, thereby allowing
+people who don't know Python (or even HTML) to edit these links without
+having to understand other implementation parts of the site.
 
 * Servers can use DataTable to read and write log files.
 
@@ -164,8 +163,8 @@ CACHING
 
 DataTable uses "pickle caching" so that it can read .csv files faster
 on subsequent loads. You can disable this across the board with:
-        from MiscUtils.DataTable import DataTable
-        DataTable._usePickleCache = False
+    from MiscUtils.DataTable import DataTable
+    DataTable._usePickleCache = False
 
 Or per instance by passing "usePickleCache=False" to the constructor.
 
@@ -183,15 +182,14 @@ TO DO
 * Allow callback parameter or setting for parsing CSV records.
 * Perhaps TableRecord should inherit UserList and UserDict and override methods as appropriate...?
 * Better support for datetime.
-* _types and BlankValues aren't really packaged, advertised or
+* _types and blankValues aren't really packaged, advertised or
   documented for customization by the user of this module.
 * DataTable:
-        * Parameterize the TextColumn class.
-        * Parameterize the TableRecord class.
-        * More list-like methods such as insert()
-        * writeFileNamed() is flawed: it doesn't write the table column
-          type
-        * Should it inherit from UserList?
+    * Parameterize the TextColumn class.
+    * Parameterize the TableRecord class.
+    * More list-like methods such as insert()
+    * writeFileNamed() is flawed: it doesn't write the table column type
+    * Should it inherit from UserList?
 * Add error checking that a column name is not a number (which could
   cause problems).
 * Look for various @@ tags through out the code.
@@ -199,13 +197,15 @@ TO DO
 """
 
 
-import os, sys
+import os
+import sys
+
 from types import *
 
 from CSVParser import CSVParser
 from CSVJoiner import joinCSVFields
 from Funcs import positive_id
-from MiscUtils import NoDefault, StringTypes, mxDateTime
+from MiscUtils import NoDefault, mxDateTime
 
 
 ## Types ##
@@ -214,15 +214,15 @@ DateTimeType = "<custom-type 'datetime'>"
 ObjectType = "<type 'Object'>"
 
 _types = {
-        'string':   StringType,
-        'int':      IntType,
-        'bool':     IntType,
-        'long':     LongType,
-        'decimal':  FloatType,
-        'float':    FloatType,
-        'datetime': DateTimeType,
-        'date':     DateTimeType,
-        'object':   ObjectType
+    'string':   StringType,
+    'int':      IntType,
+    'bool':     IntType,
+    'long':     LongType,
+    'decimal':  FloatType,
+    'float':    FloatType,
+    'datetime': DateTimeType,
+    'date':     DateTimeType,
+    'object':   ObjectType
 }
 
 
@@ -259,7 +259,7 @@ class TableColumn:
         # spec is a string such as 'name' or 'name:type'
         fields = spec.split(':', 2)
         if len(fields) > 2:
-            raise DataTableError, 'Invalid column spec %r' % spec
+            raise DataTableError('Invalid column spec %r' % spec)
         self._name = fields[0]
 
         if len(fields) == 1:
@@ -286,11 +286,12 @@ class TableColumn:
             try:
                 self._type = _types[type.lower()]
             except Exception:
-                raise DataTableError, 'Unknown type %r. types=%r' % (type, _types.keys())
+                raise DataTableError(
+                    'Unknown type %r. types=%r' % (type, _types.keys()))
 
     def __repr__(self):
-        return '<%s %r with %r at %x>' % (
-                self.__class__.__name__, self._name, self._type, positive_id(self))
+        return '<%s %r with %r at %x>' % (self.__class__.__name__,
+            self._name, self._type, positive_id(self))
 
     def __str__(self):
         return self._name
@@ -349,14 +350,15 @@ class DataTable:
     ## Init ##
 
     def __init__(self, filenameOrHeadings=None, delimiter=',',
-                    allowComments=True, stripWhite=True,
-                    defaultType=None, usePickleCache=None):
+            allowComments=True, stripWhite=True,
+            defaultType=None, usePickleCache=None):
         if usePickleCache is None:
             self._usePickleCache = self._usePickleCache # grab class-level attr
         else:
             self._usePickleCache = usePickleCache
-        if defaultType and not _types.has_key(defaultType):
-            raise DataTableError, 'Unknown type for default type: %r' % defaultType
+        if defaultType and defaultType not in _types:
+            raise DataTableError(
+                'Unknown type for default type: %r' % defaultType)
         self._defaultType = defaultType
         self._filename = None
         self._headings = []
@@ -371,7 +373,7 @@ class DataTable:
     ## File I/O ##
 
     def readFileNamed(self, filename, delimiter=',',
-                    allowComments=True, stripWhite=True, worksheet=1, row=1, column=1):
+            allowComments=True, stripWhite=True, worksheet=1, row=1, column=1):
         self._filename = filename
         data = None
         if self._usePickleCache:
@@ -391,22 +393,22 @@ class DataTable:
         return self
 
     def readFile(self, file, delimiter=',',
-                    allowComments=True, stripWhite=True):
+            allowComments=True, stripWhite=True):
         return self.readLines(file.readlines(), delimiter,
-                allowComments, stripWhite)
+            allowComments, stripWhite)
 
     def readString(self, string, delimiter=',',
-                    allowComments=True, stripWhite=True):
+            allowComments=True, stripWhite=True):
         return self.readLines(string.split('\n'), delimiter,
-                allowComments, stripWhite)
+            allowComments, stripWhite)
 
     def readLines(self, lines, delimiter=',',
-                    allowComments=True, stripWhite=True):
+            allowComments=True, stripWhite=True):
         if self._defaultType is None:
             self._defaultType = 'string'
         haveReadHeadings = False
         parse = CSVParser(fieldSep=delimiter, allowComments=allowComments,
-                stripWhitespace=stripWhite).parse
+            stripWhitespace=stripWhite).parse
         for line in lines:
             # process a row, either headings or data
             values = parse(line)
@@ -462,7 +464,7 @@ class DataTable:
                 except KeyError:
                     # woops. read buffer is out of fresh rows
                     valuesRows = sh.Range('A%i:%s%i' % (rowNum, maxCol,
-                            rowNum+numRowsToReadPerCall-1)).Value
+                        rowNum+numRowsToReadPerCall-1)).Value
                     valuesBuffer.clear()
                     j = rowNum
                     for valuesRow in valuesRows:
@@ -555,8 +557,8 @@ class DataTable:
         """
         if not headings:
             self._headings = []
-        elif type(headings[0]) in StringTypes:
-            self._headings = map(lambda h: TableColumn(h), headings)
+        elif isinstance(headings[0], basestring):
+            self._headings = map(TableColumn, headings)
         elif isinstance(headings[0], TableColumn):
             self._headings = list(headings)
         for heading in self._headings:
@@ -633,10 +635,10 @@ class DataTable:
         (such as a name, serial number, etc.).
 
         """
-        dict = {}
+        d = {}
         for row in self:
-            dict[row[key]] = row
-        return dict
+            d[row[key]] = row
+        return d
 
 
     ## Misc access ##
@@ -672,16 +674,16 @@ class DataTable:
 # @@ 2000-07-20 ce: perhaps for each type we could specify a function
 # to convert from string values to the values of the type.
 
-BlankValues = {
-        StringType:   '',
-        IntType:      0,
-        FloatType:    0.0,
-        DateTimeType: '',
-        None:         None,
+blankValues = {
+    StringType:   '',
+    IntType:      0,
+    FloatType:    0.0,
+    DateTimeType: '',
+    None:         None,
 }
 
 
-class TableRecord:
+class TableRecord(object):
     """Representation of a table record."""
 
 
@@ -727,7 +729,7 @@ class TableRecord:
         for i in range(numHeadings):
             heading = self._headings[i]
             if i >= numValues:
-                self._values.append(BlankValues[heading.type()])
+                self._values.append(blankValues[heading.type()])
             else:
                 self._values.append(heading.valueForRawValue(values[i]))
 
@@ -738,7 +740,7 @@ class TableRecord:
             if dict.has_key(name):
                 self._values.append(heading.valueForRawValue(dict[name]))
             else:
-                self._values.append(BlankValues[heading.type()])
+                self._values.append(blankValues[heading.type()])
 
     def initFromObject(self, object):
         """Initialize from object.
@@ -757,7 +759,7 @@ class TableRecord:
                 self._values.append(heading.valueForRawValue(
                         object.valueForKey(name)))
             else:
-                self._values.append(BlankValues[heading.type()])
+                self._values.append(blankValues[heading.type()])
 
 
     ## Accessing like a sequence or dictionary ##
@@ -766,18 +768,26 @@ class TableRecord:
         return len(self._values)
 
     def __getitem__(self, key):
-        if type(key) in StringTypes:
+        if isinstance(key, basestring):
             key = self._nameToIndexMap[key]
         try:
             return self._values[key]
         except TypeError:
-            raise TypeError, 'key=%r, key type=%r, self._values=%r' % (
-                    key, type(key), self._values)
+            raise TypeError('key=%r, key type=%r, self._values=%r'
+                % (key, type(key), self._values))
 
     def __setitem__(self, key, value):
-        if type(key) is StringType:
+        if isinstance(key, basestring):
             key = self._nameToIndexMap[key]
         self._values[key] = value
+
+    def __delitem__(self, key):
+        if isinstance(key, basestring):
+            key = self._nameToIndexMap[key]
+        del self._values[key]
+
+    def __contains__(self, key):
+        return key in self._nameToIndexMap
 
     def __repr__(self):
         return '%s' % self._values

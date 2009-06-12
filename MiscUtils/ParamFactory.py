@@ -1,7 +1,13 @@
+"""ParamFactory.py
+
+A factory for creating cached, parametrized class instances.
+
+"""
+
 from threading import Lock
 
 
-class ParamFactory:
+class ParamFactory(object):
 
     def __init__(self, klass, **extraMethods):
         self.lock = Lock()
@@ -12,14 +18,13 @@ class ParamFactory:
 
     def __call__(self, *args):
         self.lock.acquire()
-        if not self.cache.has_key(args):
-            value = self.klass(*args)
-            self.cache[args] = value
-            self.lock.release()
-            return value
-        else:
+        if args in self.cache:
             self.lock.release()
             return self.cache[args]
+        value = self.klass(*args)
+        self.cache[args] = value
+        self.lock.release()
+        return value
 
     def allInstances(self):
         return self.cache.values()

@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import sys, time
+import sys
+import time
 from glob import glob
 from profile import Profile
 
@@ -18,7 +19,7 @@ class BenchCSVParser:
 
     def main(self):
         if len(sys.argv) > 1 and sys.argv[1].lower().startswith('prof'):
-            self._shouldProfile = 1
+            self._shouldProfile = True
         if self._shouldRunTestSuite:
             from TestCSVParser import main
             main()

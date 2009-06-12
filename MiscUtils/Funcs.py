@@ -40,7 +40,7 @@ def commas(number):
         i -= 3
         if i <= 0 or number[i-1] == '-':
             break
-        number[i:i] = [',']
+        number.insert(i, ',')
     return ''.join(number)
 
 
@@ -103,36 +103,9 @@ def wordWrap(s, width=78):
     http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/148061
 
     """
-    return reduce(
-            lambda line, word, width=width: "%s%s%s" % (
-                    line,
-                    ' \n'[(len(line[line.rfind('\n')+1:]) + len(word) >= width)],
-                    word
-            ),
-            s.split(' ')
-    )
-
-
-def dateForEmail(now=None):
-    """Return a properly formatted date/time string for email messages."""
-    # Note: Python >= 2.4 has this function as email.utils.formatdate
-    if now is None:
-        now = time.localtime(time.time())
-    if time.daylight and now[-1]:
-        offset = time.altzone
-    else:
-        offset = time.timezone
-    sign = offset > 0 and '-' or '+'
-    offset = divmod(abs(offset)/60, 60)
-    # Note: We don't use time.strftime() because it's locale dependent,
-    # while RFC 5322 requires the exact English abbreviations as below.
-    return '%s, %02d %s %04d %02d:%02d:%02d %c%02d%02d' % (
-            ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][now[6]],
-            now[2],
-            ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][now[1] - 1],
-            now[0], now[3], now[4], now[5],
-            sign, offset[0], offset[1])
+    return reduce(lambda line, word, width=width: "%s%s%s" % (
+        line, ' \n'[(len(line[line.rfind('\n')+1:]) + len(word) >= width)],
+        word), s.split(' '))
 
 
 def hostName():
@@ -159,7 +132,7 @@ def hostName():
 
 _localIP = None
 
-def localIP(remote=('www.yahoo.com', 80), useCache=1):
+def localIP(remote=('www.yahoo.com', 80), useCache=True):
     """Get the "public" address of the local machine.
 
     This is the address which is connected to the general Internet.
@@ -283,11 +256,11 @@ def timestamp(numSecs=None):
     """Return a dictionary whose keys give different versions of the timestamp.
 
     The dictionary will contain the following timestamp versions:
-            'numSecs': the number of seconds
-            'tuple': (year, month, day, hour, min, sec)
-            'pretty': 'YYYY-MM-DD HH:MM:SS'
-            'condensed': 'YYYYMMDDHHMMSS'
-            'dashed': 'YYYY-MM-DD-HH-MM-SS'
+        'numSecs': the number of seconds
+        'tuple': (year, month, day, hour, min, sec)
+        'pretty': 'YYYY-MM-DD HH:MM:SS'
+        'condensed': 'YYYYMMDDHHMMSS'
+        'dashed': 'YYYY-MM-DD-HH-MM-SS'
 
     The focus is on the year, month, day, hour and second, with no additional
     information such as timezone or day of year. This form of timestamp is
@@ -317,7 +290,7 @@ def uniqueId(forObject=None, sha=False):
     """
     try: # prefer os.urandom(), if available
         r = [os.urandom(8)]
-    except AttributeError:
+    except (AttributeError, NotImplementedError):
         r = [time.time(), random.random(), os.times()]
     if forObject is not None:
         r.append(id(forObject))
@@ -359,14 +332,3 @@ def valueForString(s):
     if s[0] in '[({"\'':
         return eval(s)
     return s
-
-
-## Deprecated ##
-
-def Commas(number):
-    print 'DEPRECATED: MiscUtils.Funcs.Commas() on 02/23/01 in ver 0.5. Use commas() instead.'
-    return commas(number)
-
-def CharWrap(s, width, hanging=0):
-    print 'DEPRECATED: MiscUtils.Funcs.CharWrap() on 02/23/01 in ver 0.5. Use charWrap() instead.'
-    return charWrap(s, width, hanging)

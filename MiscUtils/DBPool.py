@@ -44,11 +44,14 @@ CREDIT
 """
 
 
-class DBPoolError(Exception): pass
-class NotSupportedError(DBPoolError): pass
+class DBPoolError(Exception):
+    """General database pooling error."""
+
+class NotSupportedError(DBPoolError):
+    """Missing support from database module error."""
 
 
-class PooledConnection:
+class PooledConnection(object):
     """A wrapper for database connections to help with DBPool.
 
     You don't normally deal with this class directly,
@@ -75,7 +78,7 @@ class PooledConnection:
         self.close()
 
 
-class DBPool:
+class DBPool(object):
 
     def __init__(self, dbapi, maxconnections, *args, **kwargs):
         """Set up the database connection pool.
@@ -90,8 +93,8 @@ class DBPool:
         except Exception:
             threadsafety = None
         if threadsafety == 0:
-            raise NotSupportedError, \
-                    "Database module does not support any level of threading."
+            raise NotSupportedError(
+                "Database module does not support any level of threading.")
         elif dbapi.threadsafety == 1:
             # If there is no connection level safety, build
             # the pool using the synchronized queue class
@@ -113,8 +116,8 @@ class DBPool:
             self.addConnection = self._threadsafe_add_connection
             self.returnConnection = self._threadsafe_return_connection
         else:
-            raise NotSupportedError, \
-                    "Database module threading support cannot be determined."
+            raise NotSupportedError(
+                "Database module threading support cannot be determined.")
         # Establish all database connections (it would be better to
         # only establish a part of them now, and the rest on demand).
         for i in range(maxconnections):

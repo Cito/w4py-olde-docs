@@ -12,22 +12,22 @@ class TestFuncs(unittest.TestCase):
 
     def testCommas(self):
         testSpec = '''
-                0 '0'
-                0.0 '0.0'
-                1 '1'
-                11 '11'
-                111 '111'
-                1111 '1,111'
-                11111 '11,111'
-                1.0 '1.0'
-                11.0 '11.0'
-                1.15 '1.15'
-                12345.127 '12,345.127'
-                -1 '-1'
-                -11 '-11'
-                -111 '-111'
-                -1111 '-1,111'
-                -11111 '-11,111'
+            0 '0'
+            0.0 '0.0'
+            1 '1'
+            11 '11'
+            111 '111'
+            1111 '1,111'
+            11111 '11,111'
+            1.0 '1.0'
+            11.0 '11.0'
+            1.15 '1.15'
+            12345.127 '12,345.127'
+            -1 '-1'
+            -11 '-11'
+            -111 '-111'
+            -1111 '-1,111'
+            -11111 '-11,111'
         '''
         tests = testSpec.split()
         count = len(tests)
@@ -51,17 +51,17 @@ class TestFuncs(unittest.TestCase):
         assert localIP() == ip  # second invocation
         assert localIP(useCache=None) == ip
         assert localIP(remote=None, useCache=None) == ip, \
-                'See if this works: localIP(remote=None). If this fails, dont worry.'
+            'See if this works: localIP(remote=None). If this fails, dont worry.'
         assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80),
-                useCache=None) == ip # not existing remote address
+            useCache=None) == ip # not existing remote address
 
     def testHostName(self):
         # About all we can do is invoke hostName() to see that no
         # exceptions are thrown, and do a little type checking on the
         # return type.
         host = hostName()
-        assert host is None  or  type(host) is type(''), \
-                'host type = %s, host = %s' % (type(host), repr(host))
+        assert host is None or isinstance(host, str), \
+            'host type = %s, host = %s' % (type(host), repr(host))
 
     def testSafeDescription(self):
         sd = safeDescription
@@ -96,9 +96,9 @@ class TestFuncs(unittest.TestCase):
             s = sd(b)
             s = s.replace("'bogus'", 'bogus') # new style
             s = s.replace("<class 'exceptions.KeyError'>", # new style
-                    'exceptions.KeyError')
+                'exceptions.KeyError')
             s = s.replace("<type 'exceptions.KeyError'>", # even newer style
-                    'exceptions.KeyError')
+                'exceptions.KeyError')
         except Exception:
             s = 'failure: should not get exception'
         assert s.find("(exception from repr(x): exceptions.KeyError: bogus)") != -1, s
@@ -106,60 +106,60 @@ class TestFuncs(unittest.TestCase):
     def testUniqueId(self):
 
         def checkId(i, sha, past):
-            assert type(i) is type('')
+            assert isinstance(i, str)
             assert len(i) == (sha and 40 or 32)
             for c in i:
                 assert c in '0123456789abcdef'
-            assert not past.has_key(i)
+            assert i not in past
             past[i] = i
 
-        for sha in (0, 1):
+        for sha in (False, True):
             past = {}
             for n in range(10):
                 if sha:
-                    checkId(uniqueId(None, 1), 1, past)
-                    checkId(uniqueId(n, 1), 1, past)
+                    checkId(uniqueId(None, True), True, past)
+                    checkId(uniqueId(n, True), True, past)
                 else:
-                    checkId(uniqueId(None, 0), 0, past)
-                    checkId(uniqueId(n, 0), 0, past)
+                    checkId(uniqueId(None, False), False, past)
+                    checkId(uniqueId(n, False), False, past)
                 checkId(uniqueId(sha=sha), sha, past)
                 checkId(uniqueId(n, sha=sha), sha, past)
                 checkId(uniqueId(forObject=checkId, sha=sha), sha, past)
 
     def testValueForString(self):
         evalCases = '''
-                1
-                5L
-                5.5
-                True
-                False
-                None
-                [1]
-                ['a']
-                {'x':1}
-                (1, 2, 3)
-                'a'
-                "z"
-                """1234"""
+            1
+            5L
+            5.5
+            True
+            False
+            None
+            [1]
+            ['a']
+            {'x':1}
+            (1, 2, 3)
+            'a'
+            "z"
+            """1234"""
         '''
 
         stringCases = '''
-                kjasdfkasdf
-                2389234lkdsflkjsdf
-                *09809
+            kjasdfkasdf
+            2389234lkdsflkjsdf
+            *09809
         '''
 
-        evalCases = [s.strip() for s in evalCases.strip().split('\n')]
+        evalCases = [s.strip() for s in evalCases.strip().splitlines()]
         for case in evalCases:
             assert valueForString(case) == eval(case), \
-                    'case=%r, valueForString()=%r, eval()=%r' \
-                            % (case, valueForString(case), eval(case))
+                'case=%r, valueForString()=%r, eval()=%r' \
+                     % (case, valueForString(case), eval(case))
 
-        stringCases = [s.strip() for s in stringCases.strip().split('\n')]
+        stringCases = [s.strip() for s in stringCases.strip().splitlines()]
         for case in stringCases:
             assert valueForString(case) == case, \
-                    'case=%r, valueForString()=%r' \
-                            % (case, valueForString(case))
+                'case=%r, valueForString()=%r' \
+                    % (case, valueForString(case))
 
     def testWordWrap(self):
         # an example with some spaces and newlines
@@ -175,9 +175,9 @@ ceremony!\""""
 
         for margin in range(20, 200, 20):
             s = wordWrap(msg, margin)
-            for line in s.split('\n'):
+            for line in s.splitlines():
                 assert len(line) <= margin, \
-                        'len=%i, margin=%i, line=%r' % (len(line), margin, line)
+                    'len=%i, margin=%i, line=%r' % (len(line), margin, line)
 
 
 if __name__ == '__main__':

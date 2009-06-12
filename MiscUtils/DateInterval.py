@@ -11,6 +11,7 @@ Exports only timeEncode and timeDecode functions.
 
 import re
 
+from operator import itemgetter
 
 second = 1
 minute = second*60
@@ -20,16 +21,16 @@ week = day*7
 month = day*30
 year = day*365
 timeValues = {
-        'y': year,
-        'b': month,
-        'w': week,
-        'd': day,
-        'h': hour,
-        'm': minute,
-        's': second,
-        }
+    'y': year,
+    'b': month,
+    'w': week,
+    'd': day,
+    'h': hour,
+    'm': minute,
+    's': second,
+}
 timeOrdered = timeValues.items()
-timeOrdered.sort(lambda a, b: cmp(b[1], a[1]))
+timeOrdered.sort(key=itemgetter(1), reverse=True)
 
 def timeEncode(seconds):
     """Encode a number of seconds (representing a time interval).
@@ -58,7 +59,7 @@ def timeDecode(s):
         try:
             time += int(match[:-1]) * timeValues[char]
         except KeyError:
-            raise ValueError, 'Invalid unit of time: %c' % char
+            raise ValueError('Invalid unit of time: %c' % char)
     return time
 
 __all__ = ['timeEncode', 'timeDecode']

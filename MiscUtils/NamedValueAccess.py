@@ -1,4 +1,5 @@
-"""
+"""NamedValueAccess.py
+
 NamedValueAccess provides functions, a mix-in class and a wrapper class
 all for accessing Python objects by named attributes. You can use which
 ever of the three approaches best suites your needs and style.
@@ -24,17 +25,17 @@ TO DO
 * hasValueForKey() function? (We already have a method in the mix-in)
 
 * valuesForNames() in the mix-in:
-        * Change parameter 'keys' to 'names'
-        * Use NoDefault instead of None in the parameters
-        * Revisit doc string and test cases
+    * Change parameter 'keys' to 'names'
+    * Use NoDefault instead of None in the parameters
+    * Revisit doc string and test cases
 
 * Testing: increase coverage
 
 * Rename? class NamedValueAccess+ible:
 
 * Benchmarking: Set this up in a new file:
-        Tests/BenchNamedValueAccess.py
-        so we can experiment with caching vs. not and other techniques.
+    Tests/BenchNamedValueAccess.py
+    so we can experiment with caching vs. not and other techniques.
 
 
 PAST DESIGN DECISIONS
@@ -55,28 +56,28 @@ Tavis Rudd <tavis@calrudd.com>
 """
 
 
-import types
+from types import MethodType
+
 from MiscUtils import NoDefault
-
-
-# if technique is zero, use bound methods in the _kvGetBindings cache, otherwise use unbound
-# @@ 2000-05-31 ce: after additional testing we can probably scorge the technique=0 allowance
-technique = 1
 
 
 ## Exceptions ##
 
-class NamedValueAccessError(LookupError): pass
-class ValueForKeyError(NamedValueAccessError): pass
+class NamedValueAccessError(LookupError):
+    """General named value access error."""
+
+
+class ValueForKeyError(NamedValueAccessError):
+    """No value for key found error."""
 
 
 class NamedValueAccess:
     """Mix-in class for accessing Python objects by named attributes.
 
     This class is intended to be ancestor class such that you can say:
-            from NamedValueAccess import *
-            age = someObj.valueForName("age")
-            name = someObj.valueForName("info.fields.name")
+        from NamedValueAccess import *
+        age = someObj.valueForName("age")
+        name = someObj.valueForName("info.fields.name")
 
     This can be useful in setups where you wish to textually refer to the
     objects in a program, such as an HTML template processed in the context
@@ -158,12 +159,8 @@ class NamedValueAccess:
                 return self.valueForUnknownKey(key, default)
             else:
                 return default
-
-        if type(binding) is types.MethodType:
-            if technique:
-                result = binding(self)
-            else:
-                result = binding()
+        if isinstance(binding, MethodType):
+            result = binding(self)
             return result
         else:
             return getattr(self, binding)
@@ -173,8 +170,8 @@ class NamedValueAccess:
         try:
             self.valueForName(keysString)
         except NamedValueAccessError:
-            return 0
-        return 1
+            return False
+        return True
 
     def valueForName(self, keysString, default=None):
         """Get the value for the given keysString.
@@ -191,7 +188,8 @@ class NamedValueAccess:
         """Get the value for the given list of keys."""
         return _valueForKeySequence(self, listOfKeys, default)
 
-    def valuesForNames(self, keys, default=None, defaults=None, forgive=0, includeNames=0):
+    def valuesForNames(self, keys, default=None, defaults=None,
+            forgive=False, includeNames=False):
         """Get all values for given names.
 
         Returns a list of values that match the given keys, each of which is
@@ -214,33 +212,33 @@ class NamedValueAccess:
         If keys is an empty list, then None is returned.
         Often these last four arguments are specified by key.
         Examples:
-                names = ['origin.x', 'origin.y', 'size.width', 'size.height']
-                obj.valuesForNames(names)
-                obj.valuesForNames(names, default=0.0)
-                obj.valuesForNames(names, defaults=[0.0, 0.0, 100.0, 100.0])
-                obj.valuesForNames(names, forgive=0)
-        @@ 2000-03-04 ce: includeNames is only supported when forgive=1.
-                It should be supported for the other cases.
-                It should be documented.
-                It should be included in the test cases.
+            names = ['origin.x', 'origin.y', 'size.width', 'size.height']
+            obj.valuesForNames(names)
+            obj.valuesForNames(names, default=0.0)
+            obj.valuesForNames(names, defaults=[0.0, 0.0, 100.0, 100.0])
+            obj.valuesForNames(names, forgive=False)
+        @@ 2000-03-04 ce: includeNames is only supported when forgive is true
+            It should be supported for the other cases.
+            It should be documented.
+            It should be included in the test cases.
 
         """
         if keys is None:
             return None
-        if len(keys) == 0:
+        if not keys:
             return []
         results = []
 
         if default is not None:
             results = map(lambda key, myself=self,
-                    mydefault=default: myself.valueForName(key, mydefault), keys)
+                mydefault=default: myself.valueForName(key, mydefault), keys)
         elif defaults is not None:
             if len(keys) is not len(defaults):
-                raise NamedValueAccessError, \
-                        'Keys and defaults have mismatching lengths (%d and %d).' \
-                        % (len(keys), len(defaults))
+                raise NamedValueAccessError(
+                    'Keys and defaults have mismatching lengths (%d and %d).'
+                    % (len(keys), len(defaults)))
             results = map(lambda key, default,
-                    myself=self: myself.valueForName(key, default), keys, defaults)
+                myself=self: myself.valueForName(key, default), keys, defaults)
         elif forgive:
             results = []
             uniqueObject = 'uni' + 'que'
@@ -254,7 +252,7 @@ class NamedValueAccess:
         else:
             # no defaults, no forgiveness
             results = map(lambda key,
-                    myself=self: myself.valueForName(key), keys)
+                myself=self: myself.valueForName(key), keys)
         return results
 
     def setValueForKey(self, key, value):
@@ -262,11 +260,11 @@ class NamedValueAccess:
 
         Suppose key is 'foo'.
         This method sets the value with the following precedence:
-                1. Public attributes before private attributes
-                2. Methods before non-methods
+            1. Public attributes before private attributes
+            2. Methods before non-methods
 
         More specifically, this method then uses one of the following:
-                @@ 2000-03-04 ce: fill in
+            @@ 2000-03-04 ce: fill in
 
         ... or invokes handleUnknownSetKey().
 
@@ -282,10 +280,10 @@ class NamedValueAccess:
     ## Errors ##
 
     def valueForUnknownKey(self, key, default):
-        raise NamedValueAccessError, key
+        raise NamedValueAccessError(key)
 
     def handleUnknownSetKey(self, key):
-        raise NamedValueAccessError, key
+        raise NamedValueAccessError(key)
 
 
     ## Private ##
@@ -312,30 +310,26 @@ class NamedValueAccess:
         # Try plain old key
         if hasattr(self, key):
             found = getattr(self, key)
-            if type(found) is not types.MethodType:
-                found = key
-            elif technique:
+            if isinstance(found, MethodType):
                 found = getattr(self.__class__, key)
+            else:
+                found = key
             self._kvGetBindings[key] = found
 
         # Try _key only if we didn't find a method called key
-        if type(found) is not types.MethodType:
+        if not isinstance(found, MethodType):
             underKey = '_' + key
             if hasattr(self, underKey):
                 underAttr = getattr(self, underKey)
                 if found is None:
-                    if type(underAttr) is types.MethodType:
-                        if technique:
-                            value = getattr(self.__class__, underKey)
-                        else:
-                            value = underAttr
+                    if isinstance(underAttr, MethodType):
+                        value = getattr(self.__class__, underKey)
                     else:
                         value = underKey
                     found = self._kvGetBindings[key] = value
                 else:
-                    if type(underAttr) is types.MethodType:
-                        if technique:
-                            underAttr = getattr(self.__class__, underKey)
+                    if isinstance(underAttr, MethodType):
+                        underAttr = getattr(self.__class__, underKey)
                         found = self._kvGetBindings[key] = underAttr
 
         return found
@@ -351,8 +345,8 @@ class NamedValueAccessWrapper(NamedValueAccess):
     the existing class hierarchy with NamedValueAccess.
 
     Example:
-            wrapper = NamedValueAccessWrapper(obj)
-            print wrapper.valueForName('manager.name')
+        wrapper = NamedValueAccessWrapper(obj)
+        print wrapper.valueForName('manager.name')
 
     """
 
@@ -363,9 +357,9 @@ class NamedValueAccessWrapper(NamedValueAccess):
         try:
             self.valueForKey(key)
         except NamedValueAccessError:
-            return 0
+            return False
         else:
-            return 1
+            return True
 
     def valueForKey(self, key, default=NoDefault):
         return valueForKey(self._object)
@@ -385,15 +379,14 @@ def _valueForKeySequence(obj, listOfKeys, default=None):
     supports dictionaries, which is why it's not found in the class.
 
     """
-
     # @@ 2000-02-18: Optimize by specifying index instead of making new list
-    if type(obj) is types.DictType:
+    if isinstance(obj, dict):
         try:
             value = obj[listOfKeys[0]]
         except KeyError:
             if default is None:
-                raise NamedValueAccessError, \
-                        'Unknown key (%s) in dictionary.' % listOfKeys[0]
+                raise NamedValueAccessError(
+                    'Unknown key (%s) in dictionary.' % listOfKeys[0])
             else:
                 return default
     else:
@@ -428,7 +421,7 @@ def _dict_valueForKey(obj, key, default=NoDefault):
     except KeyError, e:
         if e.args[0] == key:
             if default is NoDefault:
-                raise ValueForKeyError, key
+                raise ValueForKeyError(key)
             else:
                 return default
         else:
@@ -444,20 +437,20 @@ def valueForKey(obj, key, default=NoDefault):
 
     Suppose key is 'foo'.
     This method returns the value with the following precedence:
-            1. Methods before non-methods
-            2. Attributes before keys (__getitem__)
-            3. Public things before private things
-               (private being denoted by a preceding underscore)
+        1. Methods before non-methods
+        2. Attributes before keys (__getitem__)
+        3. Public things before private things
+           (private being denoted by a preceding underscore)
 
     More specifically, this method returns one of the following:
-            * obj.valueForKey(key)  # only if the method exists
-            * obj.foo()
-            * obj._foo()
-            * obj.foo
-            * obj._foo
-            * obj['foo']
-            * obj.valueForUnknownKey(key)
-            * default  # only if specified
+        * obj.valueForKey(key)  # only if the method exists
+        * obj.foo()
+        * obj._foo()
+        * obj.foo
+        * obj._foo
+        * obj['foo']
+        * obj.valueForUnknownKey(key)
+        * default  # only if specified
 
     If all of these fail, a ValueForKeyError is raised.
 
@@ -484,7 +477,7 @@ def valueForKey(obj, key, default=NoDefault):
     assert obj is not None
 
     # We only accept strings for keys
-    assert type(key) is types.StringType
+    assert isinstance(key, basestring)
 
     # Use obj.valueForKey() if it is available
     valueForKeyMeth = getattr(obj, 'valueForKey', None)
@@ -493,8 +486,8 @@ def valueForKey(obj, key, default=NoDefault):
 
     attr   = None
     method = None
-    unknown = 0
-    if type(obj) is types.DictType:
+    unknown = False
+    if isinstance(obj, dict):
         if default is NoDefault:
             try:
                 return obj[key]
@@ -525,7 +518,7 @@ def valueForKey(obj, key, default=NoDefault):
                                 try:
                                     getitem(obj, key)
                                 except KeyError:
-                                    unknown = 1
+                                    unknown = True
 
     if not unknown:
         if method:
@@ -541,7 +534,7 @@ def valueForKey(obj, key, default=NoDefault):
     if default is not NoDefault:
         return default
     else:
-        raise ValueForKeyError, key
+        raise ValueForKeyError(key)
 
 
 def valueForName(obj, name, default=NoDefault):
@@ -555,8 +548,7 @@ def valueForName(obj, name, default=NoDefault):
     Example: valueForName(obj, 'department.manager.salary')
 
     """
-    names = name.split('.')
-    for name in names:
+    for name in name.split('.'):
         obj = valueForKey(obj, name, default)
         if obj is default:
             return obj

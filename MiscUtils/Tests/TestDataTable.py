@@ -16,15 +16,15 @@ class TestDataTable(unittest.TestCase):
     def _testSource(self, name, src, headings, data):
         # print name
         dt = DataTable()
-        lines = src.split('\n')
+        lines = src.splitlines()
         dt.readLines(lines)
         assert [col.name() for col in dt.headings()] == headings
         i = 0
         while i < len(dt):
             match = data[i]
             self.assertEquals(dt[i].asList(), match,
-                    'For element %d, I expected "%s" but got "%s"'
-                    % (i, match, dt[i].asList()))
+                'For element %d, I expected "%s" but got "%s"'
+                % (i, match, dt[i].asList()))
             i += 1
 
     def test01_withPickle(self):
@@ -45,7 +45,7 @@ class TestDataTable(unittest.TestCase):
         # Headings 1
         t = DataTable()
         t.setHeadings([TableColumn('name'), TableColumn('age:int'),
-                TableColumn('rating:float')])
+            TableColumn('rating:float')])
 
         # Headings 2
         t = DataTable()
@@ -105,14 +105,14 @@ a,b,"c,d"
 '''
         headings = ['x', 'y,y', 'z']
         data = [
-                ['a', 'b', 'c'],
-                ['a', 'b', 'c,d'],
-                ['a,b', 'c', 'd'],
-                ['a', 'b', 'c'],
-                ['a', 'b', 'c'],
-                ['a,b,c', '', ''],
-                ['', '', ''],
-                ['a', '', '']
+            ['a', 'b', 'c'],
+            ['a', 'b', 'c,d'],
+            ['a,b', 'c', 'd'],
+            ['a', 'b', 'c'],
+            ['a', 'b', 'c'],
+            ['a,b,c', '', ''],
+            ['', '', ''],
+            ['a', '', '']
         ]
         self._testSource('Basics', src, headings, data)
 
@@ -125,8 +125,8 @@ a:int,b:int
 '''
         headings = ['a', 'b']
         data = [
-                [1, 2],
-                [5, 6],
+            [1, 2],
+            [5, 6],
         ]
         self._testSource('Comments', src, headings, data)
 
@@ -138,7 +138,7 @@ there"""
 '''
         headings = ['a']
         data = [
-                ['"Hi\nthere"'],
+            ['"Hi\nthere"'],
         ]
         self._testSource('Multiline records', src, headings, data)
 
@@ -151,8 +151,8 @@ Class,Attribute,Type,Extras
 '''
         headings = 'Class,Attribute,Type,Extras'.split(',')
         data = [
-                ['', 'what', 'enum', 'Enums="foo, bar"'],
-                ['', 'what', 'enum', "Enums='foo, bar'"],
+            ['', 'what', 'enum', 'Enums="foo, bar"'],
+            ['', 'what', 'enum', "Enums='foo, bar'"],
         ]
         self._testSource('MK enums', src, headings, data)
 
@@ -162,15 +162,15 @@ Class,Attribute,Type,Extras
         except DataTableError:
             pass  # just what we were expecting
         else:
-            raise Exception, 'Failed to raise exception for unfinished multiline record'
+            raise Exception('Failed to raise exception for unfinished multiline record')
 
     def testExcel_withPickle(self):
-        DataTable.usePickleCache = 1
+        DataTable.usePickleCache = True
         self._testExcel()
         self._testExcel()
 
     def testExcel_noPickle(self):
-        DataTable.usePickleCache = 0
+        DataTable.usePickleCache = False
         self._testExcel()
 
     def _testExcel(self):
