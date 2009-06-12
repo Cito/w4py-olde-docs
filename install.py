@@ -162,8 +162,8 @@ class Installer:
             if os.path.exists(propName):
                 comp = PropertiesObject(propName)
                 comp['dirname'] = dirName
-                for key in self._props.keys():
-                    if not comp.has_key(key):
+                for key in self._props:
+                    if key not in comp:
                         comp[key] = self._props[key]
                 if sys.version_info[:3] < comp['requiredPyVersion']:
                     oldPyVersion += 1
@@ -686,9 +686,8 @@ Installation is finished.''' % ((os.sep,)*2)
             return scope['htFooter']
 
         scope = props.copy()
-        scope = dict(props)
-        scope.update({'header': header, 'htHeader': self._htHeader,
-                        'footer': footer, 'htFooter': self._htFooter})
+        scope.update(header=header, htHeader=self._htHeader,
+            footer=footer, htFooter=self._htFooter)
         return self._autotoc.process(self._pytp.process(input, scope))
 
 

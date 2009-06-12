@@ -115,7 +115,7 @@ class Replacer:
                 self.replaceInFile(file)
 
 po = PropertiesObject()
-po.loadValues({'version': version, 'releaseDate': releaseDate})
+po.loadValues(version=version, releaseDate=releaseDate)
 po.createVersionString()
 
 if po['versionString'] == 'X.Y':

@@ -3,8 +3,8 @@
 # See Docs/index.html
 
 __all__ = [
-        'Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error',
-        'Funcs', 'MixIn', 'NamedValueAccess', 'PropertiesObject', 'unittest']
+    'Configurable', 'DBPool', 'DataTable', 'DictForArgs', 'Error',
+    'Funcs', 'MixIn', 'NamedValueAccess', 'PropertiesObject', 'unittest']
 
 try:
     from cStringIO import StringIO
@@ -20,46 +20,44 @@ import datetime as nativeDateTime
 
 from types import StringTypes
 
-try:
-    AbstractError # Python might build this in some day.
-except NameError:
-    class AbstractError(NotImplementedError):
-        """
-        This exception is raised by abstract methods in abstract classes. It
-        is a special case of NotImplementedError, that indicates that the
-        implementation won't ever be provided at that location in the future
-        --instead the subclass should provide it.
 
-        Typical usage:
+class AbstractError(NotImplementedError):
+    """Abstract method error.
 
-                from MiscUtils import AbstractError
+    This exception is raised by abstract methods in abstract classes.
+    It is a special case of NotImplementedError, that indicates that the
+    implementation won't ever be provided at that location in the future
+    -- instead the subclass should provide it.
 
-                class Foo:
-                        def bar(self):
-                                raise AbstractError, self.__class__
+    Typical usage:
 
-        Note that added the self.__class__ makes the resulting exception
-        *much* more useful.
-        """
-        pass
+        from MiscUtils import AbstractError
 
-# @@ 2002-11-10 ce: SubclassResponsibilityError is is now deprecated (post 0.7)
-# @@ (will be removed after 1.0)
-SubclassResponsibilityError = AbstractError
+        class Foo:
+            def bar(self):
+                raise AbstractError(self.__class__)
 
+    Note that adding the self.__class__ makes the resulting exception
+    *much* more useful.
 
-class NoDefault:
     """
-    This provides a singleton "thing" which can be used to initialize
-    the "default=" arguments for different retrieval methods. For
-    example:
+    pass
 
-            from MiscUtils import NoDefault
-            def bar(self, name, default=NoDefault):
-                    if default is NoDefault:
-                            return self._bars[name]  # will raise exception for invalid key
-                    else:
-                            return self._bars.get(name, default)
+
+class NoDefault(object):
+    """Singleton for parameters with no default.
+
+    This provides a singleton "thing" which can be used to initialize
+    the "default=" arguments for different retrieval methods.
+
+    For example:
+
+        from MiscUtils import NoDefault
+        def bar(self, name, default=NoDefault):
+            if default is NoDefault:
+                return self._bars[name]  # will raise exception for invalid key
+            else:
+                return self._bars.get(name, default)
 
     The value None does not suffice for "default=" because it does not
     indicate whether or not a value was passed.
@@ -67,21 +65,18 @@ class NoDefault:
     Consistently using this singleton is valuable due to subclassing
     situations:
 
-            def bar(self, name, default=NoDefault):
-                    if someCondition:
-                            return self.specialBar(name)
-                    else:
-                            return SuperClass.bar(name, default)
+        def bar(self, name, default=NoDefault):
+            if someCondition:
+                return self.specialBar(name)
+            else:
+                return SuperClass.bar(name, default)
 
     It's also useful if one method that uses "default=NoDefault" relies
     on another object and method to which it must pass the default.
     (This is similar to the subclassing situation.)
+
     """
     pass
-
-# @@ 2002-11-10 ce: Tombstone is now deprecated (post 0.7)
-# @@ (will be removed after 1.0)
-Tombstone = NoDefault
 
 
 def InstallInWebKit(appServer):
