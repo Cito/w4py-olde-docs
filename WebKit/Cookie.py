@@ -2,40 +2,26 @@ from Common import *
 
 from MiscUtils.Funcs import positive_id
 
-# If this is Python 2.2 or greater, import the standard Cookie module
-# as CookieEngine. Otherwise, import WebUtils.Cookie as CookieEngine.
-# This is because there is a nasty bug in the Cookie.py module
-# included in Python 2.1 and earlier.
-
-pyVer = getattr(sys, 'version_info', None)
-if pyVer and pyVer[:2] >= (2, 2):
-    # Get Python's Cookie module. We have to do some work since
-    # it has the same name as we do. So we'll strip out anything
-    # from the path that might cause us to import from the WebKit
-    # directory, then import Cookie using that restricted path --
-    # that ought to ensure that we're using Python's module.
-    import imp
-    path = []
-    thisDir = os.path.abspath(os.path.dirname(__file__))
-    for dir in sys.path:
-        if not dir or dir == '.':
-            continue
-        if os.path.abspath(dir) == thisDir:
-            continue
-        path.append(dir)
-    file, pathname, description = imp.find_module('Cookie', path)
-    try:
-        CookieEngine = imp.load_module('Cookie', file, pathname, description)
-    finally:
-        if file:
-            file.close()
-else:
-    # For Python versions < 2.2, we are including a copy of the
-    # standard Cookie.py module from Python 2.2, but modified to
-    # work with Python 1.5.2 and up.
-    from WebUtils import Cookie
-    CookieEngine = Cookie
-    del Cookie
+# Import Python's standard Cookie module as as CookieEngine.
+# We have to do some work since it has the same name as we do.
+# So we'll strip out anything from the path that might cause us to import
+# from the WebKit directory, then import Cookie using that restricted path
+# -- that ought to ensure that we're using Python's module.
+import imp
+path = []
+thisDir = os.path.abspath(os.path.dirname(__file__))
+for dir in sys.path:
+    if not dir or dir == '.':
+        continue
+    if os.path.abspath(dir) == thisDir:
+        continue
+    path.append(dir)
+file, pathname, description = imp.find_module('Cookie', path)
+try:
+    CookieEngine = imp.load_module('Cookie', file, pathname, description)
+finally:
+    if file:
+        file.close()
 
 
 class Cookie(Object):

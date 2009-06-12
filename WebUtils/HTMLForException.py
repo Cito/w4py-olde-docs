@@ -1,14 +1,20 @@
+"""HTMLForException.py
+
+Create HTML for exceptions.
+
+"""
+
 import os, re, sys, traceback, urllib
 
 from Funcs import htmlEncode
 
 
 HTMLForExceptionOptions = {
-        'table': 'background-color:#F0F0F0',
-        'default': 'color:#000000',
-        'row.location': 'color:#000099',
-        'row.code': 'color:#990000',
-        'editlink': None,
+    'table': 'background-color:#F0F0F0',
+    'default': 'color:#000000',
+    'row.location': 'color:#000099',
+    'row.code': 'color:#990000',
+    'editlink': None,
 }
 
 
@@ -26,18 +32,18 @@ def HTMLForLines(lines, options=None):
 
     # Create the HTML:
     res = ['<table style="%s" width="100%%"'
-            ' cellpadding="2" cellspacing="2">\n' % opt['table'],
-            '<tr><td><pre style="%s">\n' % opt['default']]
+        ' cellpadding="2" cellspacing="2">\n' % opt['table'],
+        '<tr><td><pre style="%s">\n' % opt['default']]
     for line in lines:
         match = fileRE.search(line)
         if match:
             parts = map(htmlEncode, line.split('\n'))
             parts[0] = '<span style="%s">%s</span>' \
-                    % (opt['row.location'], parts[0])
+                % (opt['row.location'], parts[0])
             if opt['editlink']:
                 parts[0] = ('%s <a href="%s?filename=%s&amp;line=%s">[edit]</a>'
-                        % (parts[0], opt['editlink'], urllib.quote(
-                                os.path.abspath(match.group(1))), match.group(2)))
+                    % (parts[0], opt['editlink'], urllib.quote(
+                        os.path.abspath(match.group(1))), match.group(2)))
             parts[1] = '<span style="%s">%s</span>' \
                     % (opt['row.code'], parts[1])
             line = '\n'.join(parts)

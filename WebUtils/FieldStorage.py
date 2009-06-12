@@ -13,35 +13,31 @@ import cgi, os, urllib
 class FieldStorage(cgi.FieldStorage):
 
     def __init__(self, fp=None, headers=None, outerboundary="",
-                    environ=os.environ, keep_blank_values=0, strict_parsing=0):
+            environ=os.environ, keep_blank_values=0, strict_parsing=0):
         self._environ = environ
-        self._strict_parsing = strict_parsing
-        self._keep_blank_values = keep_blank_values
         cgi.FieldStorage.__init__(self, fp, headers, outerboundary,
-                environ, keep_blank_values, strict_parsing)
+            environ, keep_blank_values, strict_parsing)
 
     def parse_qs(self):
         """Explicitly parse the query string, even if it's a POST request."""
-        self._method = self._environ.get('REQUEST_METHOD', '').upper()
-        if self._method == "GET" or self._method == "HEAD":
-            # print __file__, "bailing on GET or HEAD request"
+        method = self._environ.get('REQUEST_METHOD', '').upper()
+        if method in ('GET', 'HEAD'):
             return # bail because cgi.FieldStorage already did this
-        self._qs = self._environ.get('QUERY_STRING', None)
-        if not self._qs:
-            # print __file__, "bailing on no query_string"
+        qs = self._environ.get('QUERY_STRING', None)
+        if not qs:
             return # bail if no query string
 
         r = {}
-        for name_value in self._qs.split('&'):
+        for name_value in qs.split('&'):
             nv = name_value.split('=', 2)
             if len(nv) != 2:
-                if self._strict_parsing:
-                    raise ValueError, "bad query field: %r" % (name_value,)
+                if self.strict_parsing:
+                    raise ValueError('bad query field: %r' % (name_value,))
                 continue
             name = urllib.unquote(nv[0].replace('+', ' '))
             value = urllib.unquote(nv[1].replace('+', ' '))
-            if len(value) or self._keep_blank_values:
-                if r.has_key(name):
+            if len(value) or self.keep_blank_values:
+                if name in r:
                     r[name].append(value)
                 else:
                     r[name] = [value]
@@ -52,7 +48,7 @@ class FieldStorage(cgi.FieldStorage):
             # This makes sure self.keys() are available, even
             # when valid POST data wasn't encountered.
             self.list = []
-        for key, values in r.items():
-            if not self.has_key(key):
-                for value in values:
+        for key in r:
+            if key not in self:
+                for value in r[key]:
                     self.list.append(cgi.MiniFieldStorage(key, value))

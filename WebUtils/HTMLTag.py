@@ -88,42 +88,42 @@ DefaultEmptyTags = 'area basefont base bgsound br col colgroup frame hr' \
 class HTMLTag:
     """
     Tags essentially have 4 major attributes:
-            * name
-            * attributes
-            * children
-            * subtags
+        * name
+        * attributes
+        * children
+        * subtags
 
     Name is simple:
-            print tag.name()
+        print tag.name()
 
     Attributes are dictionary-like in nature:
-            print tag.attr('color')  # throws an exception if no color
-            print tag.attr('bgcolor', None)  # returns none if no bgcolor
-            print tag.attrs()
+        print tag.attr('color')  # throws an exception if no color
+        print tag.attr('bgcolor', None)  # returns none if no bgcolor
+        print tag.attrs()
 
     Children are all the leaf parts of a tag, consisting of other tags and strings
     of character data.
-            print tag.numChildren()
-            print tag.childAt(0)
-            print tag.children()
+        print tag.numChildren()
+        print tag.childAt(0)
+        print tag.children()
 
     Subtags is a convenient list of only the tags in the children:
-            print tag.numSubtags()
-            print tag.subtagAt(0)
-            print tag.subtags()
+        print tag.numSubtags()
+        print tag.subtagAt(0)
+        print tag.subtags()
 
     You can search a tag and all the tags it contains for a tag with a particular
     attribute matching a particular value:
-            print tag.tagWithMatchingAttr('width', '100%')
+        print tag.tagWithMatchingAttr('width', '100%')
 
     An HTMLTagAttrLookupError is raised if no matching tag is found. You can avoid
     this by providing a default value:
-            print tag.tagWithMatchingAttr('width', '100%', None)
+        print tag.tagWithMatchingAttr('width', '100%', None)
 
     Looking for specific 'id' attributes is common in regression testing (it allows
     you to zero in on logical portions of a page), so a convenience method is
     provided:
-            tag = htmlTag.tagWithId('accountTable')
+        tag = htmlTag.tagWithId('accountTable')
 
 
     TO DO
@@ -259,7 +259,7 @@ class HTMLTag:
         Performs a depth-first search for a tag with an attribute that matches the
         given value. If the tag cannot be found, a KeyError will be raised *unless* a
         default value was specified, which is then returned.
-                tag = tag.tagWithMatchingAttr('bgcolor', '#FFFF', None)
+            tag = tag.tagWithMatchingAttr('bgcolor', '#FFFF', None)
         """
         tag = self._tagWithMatchingAttr(name, value)
         if tag is None:
@@ -274,9 +274,9 @@ class HTMLTag:
     def tagWithId(self, id, default=NoDefault):
         """
         Finds and returns the tag with the given id. As in:
-                <td id=foo> bar </td>
+            <td id=foo> bar </td>
         This is just a cover for:
-                tagWithMatchingAttr('id', id, default)
+            tagWithMatchingAttr('id', id, default)
         But searching for id's is so popular (at least in regression testing web
         sites) that this convenience method is provided.
         Why is it so popular? Because by attaching ids to logical portions of your
@@ -318,8 +318,8 @@ class HTMLReader(SGMLParser):
     * Special attention is required regarding tags like <p> and <li> which
       sometimes are closed and sometimes not. HTMLReader can deal with both situations
       (closed and not) provided that:
-            * the file doesn't change conventions for a given tag
-            * the reader knows ahead of time what to expect
+        * the file doesn't change conventions for a given tag
+        * the reader knows ahead of time what to expect
 
     Be default, HTMLReader assumes that <p> and <li> will be closed with </p> and
     </li> as the official HTML spec, as well as upcomer XHTML, encourage or require,
@@ -327,13 +327,13 @@ class HTMLReader(SGMLParser):
 
     But if your files don't close certain tags that are supposed to be required,
     you can do this:
-            HTMLReader(extraEmptyTags=['p', 'li'])
+        HTMLReader(extraEmptyTags=['p', 'li'])
     or:
-            reader.extendEmptyTags(['p', 'li'])
+        reader.extendEmptyTags(['p', 'li'])
 
     Or just set them entirely:
-            HTMLReader(emptyTags=['br', 'hr', 'p'])
-            reader.setEmptyTags(['br', 'hr', 'p'])
+        HTMLReader(emptyTags=['br', 'hr', 'p'])
+        reader.setEmptyTags(['br', 'hr', 'p'])
     Although there are quite a few. Consider the DefaultEmptyTags global list
     (which is used to initialize the reader's tags) which contains about 16 tag
     names.
@@ -381,6 +381,7 @@ class HTMLReader(SGMLParser):
 
     * The tagContainmentConfig class var can certainly be expanded for even better
       validation.
+
     """
 
 
@@ -676,7 +677,7 @@ class TagCanOnlyHaveConfig(TagConfig):
     def encounteredTag(self, tag, lineNum):
         if not self.tags.has_key(tag.lower()):
             raise HTMLNotAllowedError('line %i: the tag %r is not allowed in %r which can only have %r.' % (
-                    lineNum, tag, self.name, self.tags.keys()), line=lineNum, encounteredTag=tag, containingTag=self.name, canOnlyHave=self.tags.keys())
+                lineNum, tag, self.name, self.tags.keys()), line=lineNum, encounteredTag=tag, containingTag=self.name, canOnlyHave=self.tags.keys())
 
 
 class TagCannotHaveConfig(TagConfig):
@@ -684,12 +685,12 @@ class TagCannotHaveConfig(TagConfig):
     def encounteredTag(self, tag, lineNum):
         if self.tags.has_key(tag.lower()):
             raise HTMLNotAllowedError('line %i: The tag %r is not allowed in %r which cannot have %r.' % (
-                    lineNum, tag, self.name, self.tags.keys()), line=lineNum, enounteredTag=tag, containingTag=self.name, cannotHave=self.tags.keys())
+                lineNum, tag, self.name, self.tags.keys()), line=lineNum, enounteredTag=tag, containingTag=self.name, cannotHave=self.tags.keys())
 
 
 configClassForName = {
-        'canOnlyHave':   TagCanOnlyHaveConfig,
-        'cannotHave': TagCannotHaveConfig,
+    'canOnlyHave': TagCanOnlyHaveConfig,
+    'cannotHave': TagCannotHaveConfig,
 }
 
 
