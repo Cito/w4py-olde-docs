@@ -6,7 +6,7 @@
 <%@ page method="writeContent" %><%-- This is the method of the base class that I want to override, writeHTML is the default. --%>
 <%@ page extends="PSP.Examples.PSPExamplePage"%><%--This is the base class for this page. Page is the default. --%>
 <%@ page isInstanceSafe="yes" %><%-- Each instance of this class can be used multiple times. --%>
-<%@ page indentType="tabs" %>
+<%@ page indentType="spaces" %>
 <%@ page gobbleWhitespace="YES" %><%-- Default is Yes, so this line isn't needed. --%>
 
 <%--  Method declaration Test --%>
@@ -64,13 +64,13 @@ See the <a href="View.py?filename=<%=os.path.basename(self.request().serverSideP
 <h4>Unix system info:</h4>
 <table bgcolor="gray"><%
 if os.name == 'posix':
-	for info, value in zip(('OS name', 'Hostname',
-		'OS release', 'OS version', 'Hardware'), os.uname()):
-			res.write('<tr><td>' + info + ':&nbsp;</th>'
-				'<td style="color:white">' + str(value) + '</td></tr>')
+    for info, value in zip(('OS name', 'Hostname',
+        'OS release', 'OS version', 'Hardware'), os.uname()):
+            res.write('<tr><td>' + info + ':&nbsp;</th>'
+                '<td style="color:white">' + str(value) + '</td></tr>')
 else:
-	res.write('<tr><td style="color:white">'
-		'This is not a Unix system.</td></tr>')
+    res.write('<tr><td style="color:white">'
+        'This is not a Unix system.</td></tr>')
 %></table>
 
 <hr>
@@ -90,11 +90,11 @@ else:
 <h4>Request Variables:</h4>
 
 <table><% for i in self.request()._environ.keys():
-	res.write('<tr valign="top"><td style="color:red;font-size:small">'
-		+str(i)+'&nbsp;</td><td style="color:blue;font-size:small">'
-		+self.request()._environ[i].replace(
-			',', ',<wbr>').replace(';', ';<wbr>').replace(':/', ':<wbr>/')
-		+'</td></tr>') %></table>
+    res.write('<tr valign="top"><td style="color:red;font-size:small">'
+        +str(i)+'&nbsp;</td><td style="color:blue;font-size:small">'
+        +self.request()._environ[i].replace(
+            ',', ',<wbr>').replace(';', ';<wbr>').replace(':/', ':<wbr>/')
+        +'</td></tr>') %></table>
 
 <hr>
 

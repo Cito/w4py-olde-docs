@@ -23,7 +23,8 @@
 """
 
 import os
-from MiscUtils.Funcs import mkstemp
+from tempfile import mkstemp
+
 from Context import *
 
 
@@ -61,13 +62,13 @@ class ServletWriter:
             self._indent = self._indentSpaces # ' '*self._indentSpaces
 
     def setIndentType(self, type):
-        if type == "tabs":
+        if type == 'tabs':
             self._useTabs = 1
             self.setIndention()
-        elif type == "spaces":
+        elif type == 'spaces':
             self._useTabs = 0
             self.setIndention()
-        elif type == "braces":
+        elif type == 'braces':
             self._useTabs = 0
             self._useBraces = 1
             self.setIndention()

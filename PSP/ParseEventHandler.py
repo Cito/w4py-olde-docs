@@ -168,9 +168,8 @@ class ParseEventHandler:
     def indentTypeHandler(self, type, start, stop):
         """Declare whether tabs are used to indent source code."""
         type = type.lower()
-
         if type != "tabs" and type != "spaces" and type != "braces":
-            raise TypeError, 'Invalid Indentation Type'
+            raise TypeError('Invalid Indentation Type')
         self._writer.setIndentType(type)
 
     def indentSpacesHandler(self, amount, start, stop):

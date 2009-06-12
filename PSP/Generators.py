@@ -81,7 +81,7 @@ class CharDataGenerator(GenericGenerator):
         self.generateChunk(writer)
 
     def generateChunk(self, writer, start=0, stop=None):
-        writer.printIndent() # gives a tab
+        writer.printIndent() # gives one level of indentation
         writer.printChars(ResponseObject+'.write("""')
         writer.printChars(self.chars)
         writer.printChars('""")')
@@ -99,7 +99,7 @@ class ScriptGenerator(GenericGenerator):
         self.chars = chars
 
     def generate(self, writer, phase=None):
-        self.chars = PSPUtils.normalizeIndentation(self.chars, writer._indent)
+        self.chars = PSPUtils.normalizeIndentation(self.chars)
         if writer._useBraces:
             # Send lines to be output by the braces generator:
             bc = BraceConverter.BraceConverter()
@@ -172,7 +172,7 @@ class ScriptFileGenerator(GenericGenerator):
 
     def generate(self, writer, phase=None):
         writer.println('\n# File level user code')
-        pySrc = PSPUtils.normalizeIndentation(self.chars, writer._indent)
+        pySrc = PSPUtils.normalizeIndentation(self.chars)
         pySrc = PSPUtils.splitLines(PSPUtils.removeQuotes(pySrc))
         writer.printList(pySrc)
 
@@ -188,7 +188,7 @@ class ScriptClassGenerator(GenericGenerator):
 
     def generate(self, writer, phase=None):
         writer.println('# Class level user code\n')
-        pySrc = PSPUtils.normalizeIndentation(self.chars, writer._indent)
+        pySrc = PSPUtils.normalizeIndentation(self.chars)
         pySrc = PSPUtils.splitLines(PSPUtils.removeQuotes(pySrc))
         writer.printList(pySrc)
 

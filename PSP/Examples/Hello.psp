@@ -4,7 +4,7 @@
 <%@ page method="writeContent" %><%-- This is the method of the base class that I want to override, writeHTML is the default. --%>
 <%@ page extends="PSPExamplePage"%><%--This is the base class for this page. Page is the default. --%>
 <%@ page isInstanceSafe="yes" %><%-- Each instance of this class can be used multiple times. --%>
-<%@ page indentType="tabs" %><%-- Use tabs to indent the sourcefile that this template will produce. --%>
+<%@ page indentType="spaces" %><%-- Use spaces to indent the sourcefile that this template will produce. --%>
 
 <%--  Method declaration Test --%>
 <psp:method name="title" params="">
@@ -25,7 +25,7 @@ import glob
 filesyspath = self.request().serverSidePath()
 files = glob.glob(os.path.join(os.path.dirname(filesyspath), "*.psp"))
 for i in files:
-	file = os.path.split(i)[1]$%><%-- Aha! Here's where we need the complex block syntax. Ok. --%>
+    file = os.path.split(i)[1]$%><%-- Aha! Here's where we need the complex block syntax. Ok. --%>
 <li><a href="<%=file%>"> <%= file %></a></li>
 <% end %></ul>
 
