@@ -10,6 +10,6 @@ docs = [
 
 status = 'stable'
 
-requiredPyVersion = (2, 0, 0)
+requiredPyVersion = (2, 4, 0)
 
 synopsis = """TaskKit provides a framework for the scheduling and management of tasks which can be triggered periodically or at specific times."""
