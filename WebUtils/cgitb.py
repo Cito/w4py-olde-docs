@@ -5,11 +5,7 @@ Modified for Webware by Ian Bicking <ianb@colorstudy.com>
 
 """
 
-import keyword, linecache, pydoc, os, sys, tokenize, types
-
-# We need to use a fixed version of inspect
-# so we won't use the one that comes with Python 2.1.
-from MiscUtils import inspect
+import inspect, keyword, linecache, pydoc, os, sys, tokenize, types
 
 pyhtml = pydoc.html
 escape = pyhtml.escape
