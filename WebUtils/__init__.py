@@ -5,4 +5,4 @@
 __all__ = ['Cookie', 'HTMLForException', 'HTTPStatusCodes', 'HTMLTag', 'Funcs']
 
 def InstallInWebKit(appServer):
-	pass
+    pass

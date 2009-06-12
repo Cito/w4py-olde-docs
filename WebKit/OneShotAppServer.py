@@ -17,20 +17,20 @@ from Application import Application
 
 class OneShotAppServer(AppServer):
 
-	def __init__(self, path=None):
-		AppServer.__init__(self, path)
-		self.readyForRequests()
+    def __init__(self, path=None):
+        AppServer.__init__(self, path)
+        self.readyForRequests()
 
-	def recordPID(self):
-		self._pidFile = None
+    def recordPID(self):
+        self._pidFile = None
 
-	def isPersistent(self):
-		return 0
+    def isPersistent(self):
+        return 0
 
-	def createApplication(self):
-		return Application(server=self, useSessionSweeper=0)
+    def createApplication(self):
+        return Application(server=self, useSessionSweeper=0)
 
-	def dispatchRawRequest(self, newRequestDict, strmOut):
-		self._requestID += 1
-		newRequestDict['requestID'] = self._requestID
-		return self._app.dispatchRawRequest(newRequestDict, strmOut)
+    def dispatchRawRequest(self, newRequestDict, strmOut):
+        self._requestID += 1
+        newRequestDict['requestID'] = self._requestID
+        return self._app.dispatchRawRequest(newRequestDict, strmOut)

@@ -1,3 +1,3 @@
 def test(store):
-	from Thing import Thing
-	# nothing more to do here
+    from Thing import Thing
+    # nothing more to do here

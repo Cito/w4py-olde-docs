@@ -6,32 +6,32 @@ appInfo = 0
 
 
 class EditFile(Page):
-	"""Helper servlet for the feature provided by the IncludeEditLink setting."""
+    """Helper servlet for the feature provided by the IncludeEditLink setting."""
 
-	def writeInfo(self, key, value):
-		self.writeln('%s: %s' % (key, value))
+    def writeInfo(self, key, value):
+        self.writeln('%s: %s' % (key, value))
 
-	def writeHTML(self):
-		res = self.response()
-		header = res.setHeader
-		info = self.writeInfo
-		req = self.request()
-		env = req.environ()
-		field = req.field
+    def writeHTML(self):
+        res = self.response()
+        header = res.setHeader
+        info = self.writeInfo
+        req = self.request()
+        env = req.environ()
+        field = req.field
 
-		header('Content-type', 'application/x-webkit-edit-file')
-		header('Content-Disposition', 'inline; filename="WebKit.EditFile"')
+        header('Content-type', 'application/x-webkit-edit-file')
+        header('Content-Disposition', 'inline; filename="WebKit.EditFile"')
 
-		# Basic information for editing the file:
-		info('Filename', field('filename'))
-		info('Line', field('line'))
+        # Basic information for editing the file:
+        info('Filename', field('filename'))
+        info('Line', field('line'))
 
-		# Additional information about the hostname:
-		info('Hostname', env.get('HTTP_HOST', 'localhost'))
+        # Additional information about the hostname:
+        info('Hostname', env.get('HTTP_HOST', 'localhost'))
 
-		if appInfo:
-			# Additional information about this Webware installation:
-			app = self.application()
-			info('ServerSidePath', app.serverSidePath())
-			info('WebwarePath', app.webwarePath())
-			info('WebKitPath', app.webKitPath())
+        if appInfo:
+            # Additional information about this Webware installation:
+            app = self.application()
+            info('ServerSidePath', app.serverSidePath())
+            info('WebwarePath', app.webwarePath())
+            info('WebKitPath', app.webKitPath())

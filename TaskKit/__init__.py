@@ -3,4 +3,4 @@
 # See Docs/index.html
 
 def InstallInWebKit(appserver):
-	pass
+    pass

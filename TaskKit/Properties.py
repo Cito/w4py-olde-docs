@@ -3,9 +3,9 @@ name = 'TaskKit'
 version = ('X', 'Y', 0)
 
 docs = [
-	{'name': "Quick Start",  'file': 'QuickStart.html'},
-	{'name': "User's Guide", 'file': 'UsersGuide.html'},
-	{'name': 'To Do',        'file': 'TODO.text'},
+        {'name': "Quick Start",  'file': 'QuickStart.html'},
+        {'name': "User's Guide", 'file': 'UsersGuide.html'},
+        {'name': 'To Do',        'file': 'TODO.text'},
 ]
 
 status = 'stable'

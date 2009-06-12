@@ -13,4 +13,4 @@ from os.path import abspath, dirname
 
 webwarePath = dirname(dirname(dirname(abspath(__file__))))
 if sys.path[0] != webwarePath:
-	sys.path.insert(0, webwarePath)
+    sys.path.insert(0, webwarePath)

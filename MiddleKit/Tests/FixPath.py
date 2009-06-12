@@ -12,12 +12,12 @@ import os, sys
 
 # this very next fix makes the MK test suite work for me (using Python 2.3.2, Webware CVS post 0.8, Windows XP Pro SP1)
 if sys.path[0] not in ('', '.'):
-	sys.path.insert(0, '')
+    sys.path.insert(0, '')
 
 # now make the fix referenced in the doc string
 if sys.path and sys.path[0] == '':
-	index = 1
+    index = 1
 else:
-	index = 0
+    index = 0
 sys.path.insert(index, os.path.abspath('../..'))
 import MiddleKit

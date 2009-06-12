@@ -3,7 +3,7 @@ name = 'WebUtils'
 version = ('X', 'Y', 0)
 
 docs = [
-	{'name': "User's Guide", 'file': 'UsersGuide.html'},
+        {'name': "User's Guide", 'file': 'UsersGuide.html'},
 ]
 
 status = 'stable'

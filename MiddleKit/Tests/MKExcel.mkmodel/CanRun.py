@@ -1,3 +1,3 @@
 def CanRun():
-	from MiscUtils import DataTable
-	return DataTable.canReadExcel()
+    from MiscUtils import DataTable
+    return DataTable.canReadExcel()

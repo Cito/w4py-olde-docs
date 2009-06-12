@@ -5,7 +5,7 @@ WebKit. It's intended for internal use, not for modules outside the WebKit.
 
 Typically usage is::
 
-	from Common import *
+        from Common import *
 
 The globals provided are:
 * the modules: `os`, `sys`, `time`
@@ -22,20 +22,20 @@ The globals provided are:
 import os, sys, time
 
 try: # for Python < 2.3
-	True, False
+    True, False
 except NameError:
-	True, False = 1, 0
+    True, False = 1, 0
 
 from Object import Object
 import WebUtils
 from MiscUtils import StringIO, AbstractError, NoDefault
 
 def asclocaltime(t = None):
-	"""Return a readable string of the current, local time.
+    """Return a readable string of the current, local time.
 
-	Useful for time stamps in log files.
+    Useful for time stamps in log files.
 
-	"""
-	if t is None:
-		t = time.time()
-	return time.asctime(time.localtime(t))
+    """
+    if t is None:
+        t = time.time()
+    return time.asctime(time.localtime(t))

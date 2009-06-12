@@ -5,5 +5,5 @@
 from PSPServletFactory import PSPServletFactory
 
 def InstallInWebKit(appServer):
-	app = appServer.application()
-	app.addServletFactory(PSPServletFactory(app))
+    app = appServer.application()
+    app.addServletFactory(PSPServletFactory(app))

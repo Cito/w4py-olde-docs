@@ -1,32 +1,32 @@
 
 def test(store):
-	from Foo import Foo
+    from Foo import Foo
 
-	a100 = 'a'*100
-	b500 = 'b'*500
-	c70000 = 'c'*70000
+    a100 = 'a'*100
+    b500 = 'b'*500
+    c70000 = 'c'*70000
 
-	f = Foo()
-	f.setMax100(a100)
-	f.setMax500(b500)
-	f.setMax70000(c70000)
-	store.addObject(f)
-	store.saveChanges()
+    f = Foo()
+    f.setMax100(a100)
+    f.setMax500(b500)
+    f.setMax70000(c70000)
+    store.addObject(f)
+    store.saveChanges()
 
-	store.clear()
-	results = store.fetchObjectsOfClass(Foo)
-	f = results[0]
-	assert f.max100() == a100
-	assert f.max500() == b500
-	assert f.max70000() == c70000
+    store.clear()
+    results = store.fetchObjectsOfClass(Foo)
+    f = results[0]
+    assert f.max100() == a100
+    assert f.max500() == b500
+    assert f.max70000() == c70000
 
-	# use only ascii so this should work with all db encodings
-	difficultString = ''.join([chr(i) for i in range(1, 128)])
-	f = Foo()
-	f.setMax500(difficultString)
-	store.addObject(f)
-	store.saveChanges()
-	serialNum = f.serialNum()
-	store.clear()
-	result = store.fetchObject(Foo, serialNum)
-	assert result.max500() == difficultString
+    # use only ascii so this should work with all db encodings
+    difficultString = ''.join([chr(i) for i in range(1, 128)])
+    f = Foo()
+    f.setMax500(difficultString)
+    store.addObject(f)
+    store.saveChanges()
+    serialNum = f.serialNum()
+    store.clear()
+    result = store.fetchObject(Foo, serialNum)
+    assert result.max500() == difficultString

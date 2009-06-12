@@ -11,12 +11,12 @@ that might have more than one Webware source tree on their file system.
 import os, sys
 
 if sys.path[0] not in ('', '.'):
-	sys.path.insert(0, '')
+    sys.path.insert(0, '')
 
 # now make the fix referenced in the doc string
 if sys.path and sys.path[0] == '':
-	index = 1
+    index = 1
 else:
-	index = 0
+    index = 0
 sys.path.insert(index, os.path.abspath('../..'))
 import WebKit

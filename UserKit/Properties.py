@@ -3,8 +3,8 @@ name = 'UserKit'
 version = ('X', 'Y', 0)
 
 docs = [
-	{'name': "User's Guide", 'file': 'UsersGuide.html'},
-	{'name': 'To Do',        'file': 'TODO.text'},
+        {'name': "User's Guide", 'file': 'UsersGuide.html'},
+        {'name': 'To Do',        'file': 'TODO.text'},
 ]
 
 status = 'beta'

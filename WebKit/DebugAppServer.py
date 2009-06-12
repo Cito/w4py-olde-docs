@@ -27,9 +27,9 @@ a "close thread" is started up by the AppServer base class, but neither
 of these two extra threads should pose any problems debugging servlets.
 
 Tested on:
-	- WingIDE on Windows, http://wingware.com/
-	- PythonWin
-	- JEdit with the JPyDbg plugin, on Windows
+        - WingIDE on Windows, http://wingware.com/
+        - PythonWin
+        - JEdit with the JPyDbg plugin, on Windows
 
 """
 
@@ -47,125 +47,125 @@ ThreadedAppServer.doesRunHandleExceptions = False
 
 
 class DebugAppServer(OriginalThreadedAppServer):
-	"""Single-threaded AppServer for debugging purposes.
+    """Single-threaded AppServer for debugging purposes.
 
-	We are piggybacking on 99% of the code in ThreadedAppServer. Our
-	trick is to replace the request queue with a dummy object that
-	executes requests immediately instead of pushing them onto a queue
-	to be handled by other threads.
+    We are piggybacking on 99% of the code in ThreadedAppServer. Our
+    trick is to replace the request queue with a dummy object that
+    executes requests immediately instead of pushing them onto a queue
+    to be handled by other threads.
 
-	"""
-
-
-	## Init ##
-
-	_excludePrefixes = 'WebKit MiscUtils WebUtils TaskKit'.split()
-
-	def __init__(self, path=None):
-		"""Initialize DebugAppServer."""
-		# Initialize the base class
-		OriginalThreadedAppServer.__init__(self, path)
-		# Replace the request queue with a dummy object that merely
-		# runs request handlers as soon as they are "pushed"
-		self._requestQueue = DummyRequestQueue()
-		print 'You are running the debugging app server.'
-
-	def config(self):
-		"""Return default configuration."""
-		# Force ThreadedAppServer to create an empty thread pool by hacking
-		# the settings to zero. This is not strictly necessary to do.
-		if self._config is None:
-			OriginalThreadedAppServer.config(self)
-			self.setSetting('StartServerThreads', 0)
-			self.setSetting('MaxServerThreads', 0)
-			self.setSetting('MinServerThreads', 0)
-		return self._config
+    """
 
 
-	## Overridden methods ##
+    ## Init ##
 
-	def mainloop(self):
-		"""Main loop for Windows.
+    _excludePrefixes = 'WebKit MiscUtils WebUtils TaskKit'.split()
 
-		This is needed for COM support on Windows, because special thread
-		initialization is required on any thread that runs servlets, in
-		this case the main thread itself.
+    def __init__(self, path=None):
+        """Initialize DebugAppServer."""
+        # Initialize the base class
+        OriginalThreadedAppServer.__init__(self, path)
+        # Replace the request queue with a dummy object that merely
+        # runs request handlers as soon as they are "pushed"
+        self._requestQueue = DummyRequestQueue()
+        print 'You are running the debugging app server.'
 
-		"""
-		self.initThread()
-		try:
-			OriginalThreadedAppServer.mainloop(self)
-		finally:
-			self.delThread()
+    def config(self):
+        """Return default configuration."""
+        # Force ThreadedAppServer to create an empty thread pool by hacking
+        # the settings to zero. This is not strictly necessary to do.
+        if self._config is None:
+            OriginalThreadedAppServer.config(self)
+            self.setSetting('StartServerThreads', 0)
+            self.setSetting('MaxServerThreads', 0)
+            self.setSetting('MinServerThreads', 0)
+        return self._config
 
-	def createApplication(self):
-		"""Create and return an application object. Invoked by __init__."""
-		return DebugApplication(server=self)
 
-	def restart(self):
-		# The normal restart technique is to exit the application
-		# with a special exit code and let an exta-process script
-		# start the app server up again. That works poorly for a
-		# debugging environment which is attached to a particular process.
-		Profiler.reset()
-		self.initiateShutdown()
-		self._closeThread.join()
-		sys.stdout.flush()
-		sys.stderr.flush()
-		self._imp.delModules(includePythonModules=False,
-			excludePrefixes=self._excludePrefixes)
-		raise ThreadedAppServer.RestartAppServerError
+    ## Overridden methods ##
+
+    def mainloop(self):
+        """Main loop for Windows.
+
+        This is needed for COM support on Windows, because special thread
+        initialization is required on any thread that runs servlets, in
+        this case the main thread itself.
+
+        """
+        self.initThread()
+        try:
+            OriginalThreadedAppServer.mainloop(self)
+        finally:
+            self.delThread()
+
+    def createApplication(self):
+        """Create and return an application object. Invoked by __init__."""
+        return DebugApplication(server=self)
+
+    def restart(self):
+        # The normal restart technique is to exit the application
+        # with a special exit code and let an exta-process script
+        # start the app server up again. That works poorly for a
+        # debugging environment which is attached to a particular process.
+        Profiler.reset()
+        self.initiateShutdown()
+        self._closeThread.join()
+        sys.stdout.flush()
+        sys.stderr.flush()
+        self._imp.delModules(includePythonModules=False,
+                excludePrefixes=self._excludePrefixes)
+        raise ThreadedAppServer.RestartAppServerError
 
 
 from Application import Application
 
 
 class DebugApplication(Application):
-	"""This is a modified Application class for debugging."""
+    """This is a modified Application class for debugging."""
 
 
-	## Overridden methods ##
+    ## Overridden methods ##
 
-	# Don't handle exceptions gracefully because we want
-	# them to rise uncaught so the debugger will kick in.
+    # Don't handle exceptions gracefully because we want
+    # them to rise uncaught so the debugger will kick in.
 
-	# @@ 2005-07-15 CE: This works well for exceptions within responding to
-	# a request, but for problems during importing a servlet, the exception
-	# gets printed to console and the debugger does not kick in.
+    # @@ 2005-07-15 CE: This works well for exceptions within responding to
+    # a request, but for problems during importing a servlet, the exception
+    # gets printed to console and the debugger does not kick in.
 
-	def handleException(self):
-		"""Handle exception.
+    def handleException(self):
+        """Handle exception.
 
-		This should only be used in cases where there is no transaction object,
-		for example if an exception occurs when attempting to save a session
-		to disk.
+        This should only be used in cases where there is no transaction object,
+        for example if an exception occurs when attempting to save a session
+        to disk.
 
-		"""
-		raise
+        """
+        raise
 
-	def handleExceptionInTransaction(self, excInfo, transaction):
-		"""Handle exception with info.
+    def handleExceptionInTransaction(self, excInfo, transaction):
+        """Handle exception with info.
 
-		Raises exception `excInfo` (as returned by ``sys.exc_info()``)
-		that was generated by `transaction`.
+        Raises exception `excInfo` (as returned by ``sys.exc_info()``)
+        that was generated by `transaction`.
 
-		"""
-		raise
+        """
+        raise
 
 
 class DummyRequestQueue:
-	"""This is a dummy replacement for the request queue.
+    """This is a dummy replacement for the request queue.
 
-	It merely executes handlers as soon as they are "pushed".
+    It merely executes handlers as soon as they are "pushed".
 
-	"""
+    """
 
 
-	## Overridden methods ##
+    ## Overridden methods ##
 
-	def put(self, handler):
-		handler.handleRequest()
-		handler.close()
+    def put(self, handler):
+        handler.handleRequest()
+        handler.close()
 
 
 ## Globals ##
@@ -182,5 +182,5 @@ main = ThreadedAppServer.main
 
 # Tweak ThreadedAppServer so that it never runs the main loop in a thread:
 def runMainLoopInThread():
-	return 0
+    return 0
 ThreadedAppServer.runMainLoopInThread = runMainLoopInThread

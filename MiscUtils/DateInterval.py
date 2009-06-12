@@ -20,45 +20,45 @@ week = day*7
 month = day*30
 year = day*365
 timeValues = {
-	'y': year,
-	'b': month,
-	'w': week,
-	'd': day,
-	'h': hour,
-	'm': minute,
-	's': second,
-	}
+        'y': year,
+        'b': month,
+        'w': week,
+        'd': day,
+        'h': hour,
+        'm': minute,
+        's': second,
+        }
 timeOrdered = timeValues.items()
 timeOrdered.sort(lambda a, b: cmp(b[1], a[1]))
 
 def timeEncode(seconds):
-	"""Encode a number of seconds (representing a time interval).
+    """Encode a number of seconds (representing a time interval).
 
-	Encode the number into a form like 2d1h3s.
+    Encode the number into a form like 2d1h3s.
 
-	"""
-	s = []
-	for char, amount in timeOrdered:
-		if seconds >= amount:
-			i, seconds = divmod(seconds, amount)
-			s.append('%i%s' % (i, char))
-	return ''.join(s)
+    """
+    s = []
+    for char, amount in timeOrdered:
+        if seconds >= amount:
+            i, seconds = divmod(seconds, amount)
+            s.append('%i%s' % (i, char))
+    return ''.join(s)
 
 _timeRE = re.compile(r'[0-9]+[a-zA-Z]')
 
 def timeDecode(s):
-	"""Decode a number in the format 1h4d3m (1 hour, 3 days, 3 minutes).
+    """Decode a number in the format 1h4d3m (1 hour, 3 days, 3 minutes).
 
-	Decode the format into a number of seconds.
+    Decode the format into a number of seconds.
 
-	"""
-	time = 0
-	for match in _timeRE.findall(s):
-		char = match[-1].lower()
-		try:
-			time += int(match[:-1]) * timeValues[char]
-		except KeyError:
-			raise ValueError, 'Invalid unit of time: %c' % char
-	return time
+    """
+    time = 0
+    for match in _timeRE.findall(s):
+        char = match[-1].lower()
+        try:
+            time += int(match[:-1]) * timeValues[char]
+        except KeyError:
+            raise ValueError, 'Invalid unit of time: %c' % char
+    return time
 
 __all__ = ['timeEncode', 'timeDecode']

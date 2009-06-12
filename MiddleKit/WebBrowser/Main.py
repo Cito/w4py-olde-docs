@@ -4,5 +4,5 @@ import os, sys
 
 class Main(SitePage):
 
-	def writeHTML(self):
-		self.response().sendRedirect('SelectModel')
+    def writeHTML(self):
+        self.response().sendRedirect('SelectModel')

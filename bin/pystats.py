@@ -5,11 +5,11 @@
 
 Reports stats for various aspects of Python source including:
 
-	# of files
-	# of bytes
-	# of lines
-	# of methods/functions
-	# of classes
+        # of files
+        # of bytes
+        # of lines
+        # of methods/functions
+        # of classes
 
 You can think of this as a UNIX "wc" on steroids (that also works on any
 Python platform).
@@ -19,10 +19,10 @@ USAGE
 
 From the command line:
 
-	> cd Webware
-	> python bin/pystats.py
-	> python bin/pystats.py -h
-	> python bin/pystats.py -s
+        > cd Webware
+        > python bin/pystats.py
+        > python bin/pystats.py -h
+        > python bin/pystats.py -s
 
 
 CAVEATS
@@ -42,8 +42,8 @@ The extensions accepted are hard coded to .py .psp and .cgi.
 MISC
 
 To check the results of pystats, you can use these UNIX commands for comparison:
-	> rm -rf WebKit/Cache
-	> wc *.py */*.py */*/*.py */*/*.psp */*.cgi
+        > rm -rf WebKit/Cache
+        > wc *.py */*.py */*/*.py */*/*.psp */*.cgi
 
 
 FUTURE
@@ -71,205 +71,205 @@ from UserDict import UserDict
 
 class Stats(UserDict):
 
-	_statNames = 'files bytes lines funcs classes'.split()
+    _statNames = 'files bytes lines funcs classes'.split()
 
-	def __init__(self, dict=None):
-		UserDict.__init__(self, dict)
-		if dict is None:
-			for name in self._statNames:
-				self[name] = 0
+    def __init__(self, dict=None):
+        UserDict.__init__(self, dict)
+        if dict is None:
+            for name in self._statNames:
+                self[name] = 0
 
-	def __add__(self, stats):
-		result = self.__class__()
-		for name in self._statNames:
-			result[name] = self[name] + stats[name]
-		return result
+    def __add__(self, stats):
+        result = self.__class__()
+        for name in self._statNames:
+            result[name] = self[name] + stats[name]
+        return result
 
-	def copy(self):
-		"""Return a real copy/duplicate of the receiver.
+    def copy(self):
+        """Return a real copy/duplicate of the receiver.
 
-		Note that userDict.copy() will do so,
-		but subclassOfUserDict.copy() does not.
+        Note that userDict.copy() will do so,
+        but subclassOfUserDict.copy() does not.
 
-		"""
-		return self.__class__(self.data)
+        """
+        return self.__class__(self.data)
 
-	def write(self, file=sys.stdout):
-		for name in self._statNames:
-			file.write('%8d' % self[name])
+    def write(self, file=sys.stdout):
+        for name in self._statNames:
+            file.write('%8d' % self[name])
 
-	def writeHeaders(self, nameWidth, file=sys.stdout):
-		# this would be a class method in Python >= 2.2
-		file.write(' ' * nameWidth)
-		for name in self._statNames:
-			file.write('%8s' % name)
-		file.write('\n')
+    def writeHeaders(self, nameWidth, file=sys.stdout):
+        # this would be a class method in Python >= 2.2
+        file.write(' ' * nameWidth)
+        for name in self._statNames:
+            file.write('%8s' % name)
+        file.write('\n')
 
 
 class StatsNode:
 
-	classDefRE = re.compile(r'^[\t ]*class[\t ]+[\w]+[\t ]*[(:]{1,1}', re.MULTILINE)
-	funcDefRE  = re.compile(r'^[\t ]*def[\t ]+[\w]+[\t ]*\(', re.MULTILINE)
+    classDefRE = re.compile(r'^[\t ]*class[\t ]+[\w]+[\t ]*[(:]{1,1}', re.MULTILINE)
+    funcDefRE  = re.compile(r'^[\t ]*def[\t ]+[\w]+[\t ]*\(', re.MULTILINE)
 
-	def __init__(self, name):
-		self._name       = name
-		self._subNodes   = {}      # map directory names to StatsNodes
-		self._stats      = Stats() # stats for files just in this dir (no subdirs)
-		self._totalStats = None    # stats for all files, recursively in subdirs
+    def __init__(self, name):
+        self._name       = name
+        self._subNodes   = {}      # map directory names to StatsNodes
+        self._stats      = Stats() # stats for files just in this dir (no subdirs)
+        self._totalStats = None    # stats for all files, recursively in subdirs
 
-	def name(self):
-		return self._name
+    def name(self):
+        return self._name
 
-	def computeTotal(self):
-		self._totalStats = self._stats.copy()
-		for node in self._subNodes.values():
-			node.computeTotal()
-			self._totalStats += node._totalStats
+    def computeTotal(self):
+        self._totalStats = self._stats.copy()
+        for node in self._subNodes.values():
+            node.computeTotal()
+            self._totalStats += node._totalStats
 
-	def processDir(self, dirName, extensions, recurse=1):
-		exceptions = (os.curdir, os.pardir, 'CVS', '.svn')
-		names = os.listdir(dirName)
-		for name in names:
-			if not os.path.isdir(name):
-				ext = os.path.splitext(name)[1]
-				if ext in extensions:
-					self.processFile(os.path.join(dirName, name), ext)
-		if recurse:
-			for name in names:
-				if name not in exceptions:
-					fullname = os.path.join(dirName, name)
-					if os.path.isdir(fullname):
-						node = self._subNodes[name] = StatsNode(name)
-						node.processDir(fullname, extensions)
+    def processDir(self, dirName, extensions, recurse=1):
+        exceptions = (os.curdir, os.pardir, 'CVS', '.svn')
+        names = os.listdir(dirName)
+        for name in names:
+            if not os.path.isdir(name):
+                ext = os.path.splitext(name)[1]
+                if ext in extensions:
+                    self.processFile(os.path.join(dirName, name), ext)
+        if recurse:
+            for name in names:
+                if name not in exceptions:
+                    fullname = os.path.join(dirName, name)
+                    if os.path.isdir(fullname):
+                        node = self._subNodes[name] = StatsNode(name)
+                        node.processDir(fullname, extensions)
 
-	def processFile(self, pathname, ext=None):
-		if ext is None:
-			ext = os.path.splitext(pathname)[1]
+    def processFile(self, pathname, ext=None):
+        if ext is None:
+            ext = os.path.splitext(pathname)[1]
 
-		contents = open(pathname).read()
+        contents = open(pathname).read()
 
-		stats = self._stats
-		stats['bytes'] += len(contents)
-		stats['lines'] += contents.count('\n')
-		stats['funcs'] += len(self.funcDefRE.findall(contents))
-		stats['classes'] += len(self.classDefRE.findall(contents))
-		stats['files'] += 1
+        stats = self._stats
+        stats['bytes'] += len(contents)
+        stats['lines'] += contents.count('\n')
+        stats['funcs'] += len(self.funcDefRE.findall(contents))
+        stats['classes'] += len(self.classDefRE.findall(contents))
+        stats['files'] += 1
 
-	def write(self, file=sys.stdout, recurse=1, indent=0, indenter='  '):
-		if indent == 0:
-			self._stats.writeHeaders(25, file)
-		spacer = indenter * indent
-		name = self._name.ljust(25-len(spacer))
-		file.write(spacer+name)
-		self._totalStats.write(file)
-		file.write('\n')
-		if recurse:
-			indent += 1
-			keys = self._subNodes.keys()
-			keys.sort()
-			for key in keys:
-				self._subNodes[key].write(file, recurse, indent, indenter)
+    def write(self, file=sys.stdout, recurse=1, indent=0, indenter='  '):
+        if indent == 0:
+            self._stats.writeHeaders(25, file)
+        spacer = indenter * indent
+        name = self._name.ljust(25-len(spacer))
+        file.write(spacer+name)
+        self._totalStats.write(file)
+        file.write('\n')
+        if recurse:
+            indent += 1
+            keys = self._subNodes.keys()
+            keys.sort()
+            for key in keys:
+                self._subNodes[key].write(file, recurse, indent, indenter)
 
 
 class PyStats:
 
 
-	## Init ##
+    ## Init ##
 
-	def __init__(self):
-		# Init some attrs
-		self._rootNode = StatsNode('.')
+    def __init__(self):
+        # Init some attrs
+        self._rootNode = StatsNode('.')
 
-		# Set default options
-		self.setDirectory('.')
-		self.setExtensions(['.py', '.psp', '.cgi'])
-		self.setRecurse(1)
-		self.setShowSummary(0)
-
-
-	## Options ##
-
-	def directory(self):
-		return self._directory
-
-	def setDirectory(self, dir):
-		"""Set the directory that checking starts in."""
-		self._directory = dir
-
-	def extensions(self):
-		return self._extensions
-
-	def setExtensions(self, exts):
-		self._extensions = exts
-
-	def recurse(self):
-		return self._recurse
-
-	def setRecurse(self, flag):
-		"""Set whether or not to recurse into subdirectories."""
-		self._recurse = flag
-
-	def showSummary(self):
-		return self._showSummary
-
-	def setShowSummary(self, flag):
-		self._showSummary = flag
+        # Set default options
+        self.setDirectory('.')
+        self.setExtensions(['.py', '.psp', '.cgi'])
+        self.setRecurse(1)
+        self.setShowSummary(0)
 
 
-	## Command line use ##
+    ## Options ##
 
-	def usage(self):
-		progName = sys.argv[0]
-		wr = sys.stdout.write
-		wr('Usage: %s [options] [startingDir]\n' % progName)
-		wr('''       -h --help = help
-       -r -R = recurse, do not recurse. default -r
-       -s -S = show summary, do not show summary. default -S
+    def directory(self):
+        return self._directory
+
+    def setDirectory(self, dir):
+        """Set the directory that checking starts in."""
+        self._directory = dir
+
+    def extensions(self):
+        return self._extensions
+
+    def setExtensions(self, exts):
+        self._extensions = exts
+
+    def recurse(self):
+        return self._recurse
+
+    def setRecurse(self, flag):
+        """Set whether or not to recurse into subdirectories."""
+        self._recurse = flag
+
+    def showSummary(self):
+        return self._showSummary
+
+    def setShowSummary(self, flag):
+        self._showSummary = flag
+
+
+    ## Command line use ##
+
+    def usage(self):
+        progName = sys.argv[0]
+        wr = sys.stdout.write
+        wr('Usage: %s [options] [startingDir]\n' % progName)
+        wr('''       -h --help = help
+-r -R = recurse, do not recurse. default -r
+-s -S = show summary, do not show summary. default -S
 Examples:
-    > python pystats.py
-    > python pystats.py SomeDir
-    > python pystats.py -R SomeDir
+> python pystats.py
+> python pystats.py SomeDir
+> python pystats.py -R SomeDir
 ''')
 
-	def main(self, args=sys.argv):
-		if self.readArgs(args):
-			self.run()
+    def main(self, args=sys.argv):
+        if self.readArgs(args):
+            self.run()
 
-	def readArgs(self, args=sys.argv):
-		for arg in args[1:]:
-			if arg == '-h' or arg == '--help':
-				self.usage()
-				return 0
-			elif arg == '-r':
-				self.setRecurse(1)
-			elif arg == '-R':
-				self.setRecurse(0)
-			elif arg == '-s':
-				self.setShowSummary(1)
-			elif arg == '-S':
-				self.setShowSummary(0)
-			elif arg[0] == '-':
-				self.usage()
-				return 0
-			else:
-				self.setDirectory(arg)
-		return 1
-
-
-	## Running ##
-
-	def run(self, file=sys.stdout):
-		self._rootNode.processDir(self._directory, self._extensions, self._recurse)
-		self._rootNode.computeTotal()
-		self.write(file)
+    def readArgs(self, args=sys.argv):
+        for arg in args[1:]:
+            if arg == '-h' or arg == '--help':
+                self.usage()
+                return 0
+            elif arg == '-r':
+                self.setRecurse(1)
+            elif arg == '-R':
+                self.setRecurse(0)
+            elif arg == '-s':
+                self.setShowSummary(1)
+            elif arg == '-S':
+                self.setShowSummary(0)
+            elif arg[0] == '-':
+                self.usage()
+                return 0
+            else:
+                self.setDirectory(arg)
+        return 1
 
 
-	## Writing ##
+    ## Running ##
 
-	def write(self, file=sys.stdout):
-		recurse = not self._showSummary
-		self._rootNode.write(file, recurse)
+    def run(self, file=sys.stdout):
+        self._rootNode.processDir(self._directory, self._extensions, self._recurse)
+        self._rootNode.computeTotal()
+        self.write(file)
+
+
+    ## Writing ##
+
+    def write(self, file=sys.stdout):
+        recurse = not self._showSummary
+        self._rootNode.write(file, recurse)
 
 
 if __name__ == '__main__':
-	PyStats().main()
+    PyStats().main()

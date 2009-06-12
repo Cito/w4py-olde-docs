@@ -4,19 +4,19 @@ import sys
 cutoff = 15
 
 def heading(s):
-	print
-	print s
-	print '-'*40
+    print
+    print s
+    print '-'*40
 
 def error(s):
-	print 'ERROR:', s
-	sys.exit(1)
+    print 'ERROR:', s
+    sys.exit(1)
 
 for arg in sys.argv[1:]:
-	try:
-		cutoff = int(arg)
-	except ValueError:
-		filename = arg
+    try:
+        cutoff = int(arg)
+    except ValueError:
+        filename = arg
 
 import pstats
 stats = pstats.Stats(filename)
