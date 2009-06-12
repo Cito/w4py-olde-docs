@@ -349,10 +349,7 @@ class Installer:
 
     def createPyDocs(self, filename, dir):
         """Create a HTML module documentation using pydoc."""
-        try:
-            import pydoc
-        except ImportError:
-            from MiscUtils import pydoc
+        import pydoc
         package, module = os.path.split(filename)
         module = os.path.splitext(module)[0]
         if package:

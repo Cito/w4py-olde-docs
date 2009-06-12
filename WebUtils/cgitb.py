@@ -1,31 +1,28 @@
-"""
-cgitb.py
-  By Ka-Ping Yee <ping@lfw.org> http://web.lfw.org/python/
-  Modified for Webware by Ian Bicking <ianb@colorstudy.com>
+"""More comprehensive traceback formatting for Python scripts.
+
+By Ka-Ping Yee <ping@lfw.org> http://web.lfw.org/python/
+Modified for Webware by Ian Bicking <ianb@colorstudy.com>
+
 """
 
-import sys, os, types, keyword, linecache, tokenize
-# We include a copy of pydoc but since it's in the Python 2.1
-# standard library, we'll try to import it there first.
-try:
-    import pydoc
-except ImportError:
-    from MiscUtils import pydoc
-pyhtml = pydoc.html
-escape = pyhtml.escape
-# But we need to use a fixed version of inspect
+import keyword, linecache, pydoc, os, sys, tokenize, types
+
+# We need to use a fixed version of inspect
 # so we won't use the one that comes with Python 2.1.
 from MiscUtils import inspect
 
+pyhtml = pydoc.html
+escape = pyhtml.escape
+
 DefaultOptions = {
-        'table': 'background-color:#F0F0F0',
-        'default': 'color:#000000',
-        'row.location': 'color:#000099',
-        'row.code': 'color:#990000',
-        'header': 'color:#FFFFFF;background-color:#999999',
-        'subheader': 'color:#000000;background-color:#F0F0F0;font-size:10pt',
-        'code.accent': 'background-color:#FFFFCC',
-        'code.unaccent': 'color:#999999;font-size:10pt',
+    'table': 'background-color:#F0F0F0',
+    'default': 'color:#000000',
+    'row.location': 'color:#000099',
+    'row.code': 'color:#990000',
+    'header': 'color:#FFFFFF;background-color:#999999',
+    'subheader': 'color:#000000;background-color:#F0F0F0;font-size:10pt',
+    'code.accent': 'background-color:#FFFFCC',
+    'code.unaccent': 'color:#999999;font-size:10pt',
 }
 
 def breaker():

@@ -1,5 +1,7 @@
 """Get useful information from live Python objects.
 
+Improved version for Webware for Python.
+
 This module encapsulates the interface provided by the internal special
 attributes (func_*, co_*, im_*, tb_*, etc.) in a friendlier fashion.
 It also provides some help for examining source code and class layout.
