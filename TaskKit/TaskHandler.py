@@ -2,11 +2,6 @@
 from time import time
 from threading import Thread
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class TaskHandler:
     """The task handler.

@@ -1,11 +1,6 @@
 from UserDict import UserDict
 from MiscUtils import StringTypes
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class MiddleDict(UserDict):
     """A MiddleKit UserDict.

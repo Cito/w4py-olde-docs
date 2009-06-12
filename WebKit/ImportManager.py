@@ -38,14 +38,8 @@ class ImportLock:
         or to acquire and release our own RLock.
 
         """
-        if hasattr(imp, 'acquire_lock'):
-            self.acquire = imp.acquire_lock
-            self.release = imp.release_lock
-        else: # fallback for Python < 2.3
-            from threading import RLock
-            self._lock = RLock()
-            self.acquire = self._lock.acquire
-            self.release = self._lock.release
+        self.acquire = imp.acquire_lock
+        self.release = imp.release_lock
 
 
 class ImportManager(Object):

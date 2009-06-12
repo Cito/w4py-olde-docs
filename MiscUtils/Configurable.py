@@ -152,11 +152,6 @@ class Configurable:
                         'Unable to embed replacement text in %s.' % filename
         evalContext = replacements.copy()
         try:
-            True, False
-        except NameError: # Python < 2.3
-            evalContext['True'] = 1
-            evalContext['False'] = 0
-        try:
             if isDict:
                 config = eval(contents, evalContext)
             else:
@@ -171,11 +166,6 @@ class Configurable:
         if type(config) is not DictType:
             raise ConfigurationError, 'Invalid type of configuration.' \
                     ' Expecting dictionary, but got %s.' % type(config)
-        try:
-            True, False
-        except NameError: # Python < 2.3
-            del evalContext['True']
-            del evalContext['False']
         return config
 
     def printConfig(self, dest=None):

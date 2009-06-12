@@ -1,21 +1,13 @@
-import os, mimetypes
+import os
 
-from ServletFactory import ServletFactory
+from mimetypes import guess_type
+
 import HTTPExceptions
 from HTTPServlet import HTTPServlet
 from MiscUtils.Configurable import Configurable
+from ServletFactory import ServletFactory
 
 debug = 0
-
-try:
-    mimetypes.common_types
-except AttributeError: # fallback for Python < 2.2
-    if not mimetypes.types_map.has_key('.css'):
-        mimetypes.types_map['.css'] = 'text/css'
-    def guess_type(url, strict=1):
-        return mimetypes.guess_type(url)
-else:
-    guess_type = mimetypes.guess_type
 
 
 class UnknownFileTypeServletFactory(ServletFactory):

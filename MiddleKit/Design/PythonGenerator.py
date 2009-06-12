@@ -101,15 +101,8 @@ class Klass:
         wr = self._pyOut.write
         wr('''
 import types
-try:
 from types import StringTypes
-except ImportError: # fallback for Python < 2.2
-from types import StringType, UnicodeType
-StringTypes = (StringType, UnicodeType)
-try:
 from decimal import Decimal
-except ImportError: # fallback for Python < 2.4
-Decimal = float
 ''')
         if nativeDateTime:
             if nativeDateTime.__name__ == 'datetime':
@@ -156,12 +149,12 @@ del sys.path[0]
 
     def writePyInit(self):
         wr = self._pyOut.write
-        wr('\n\tdef __init__(self):\n')
-        wr('\t\t%s.__init__(self)\n' % self.supername())
+        wr('\n    def __init__(self):\n')
+        wr('        %s.__init__(self)\n' % self.supername())
         maxLen = self.maxAttrNameLen()
         for attr in self.attrs():
             name = attr.name().ljust(maxLen)
-            wr('\t\tself._%s = %r\n' % (name, attr.defaultValue()))
+            wr('        self._%s = %r\n' % (name, attr.defaultValue()))
         wr('\n')
 
     def writePyReadStoreData(self):
@@ -170,12 +163,12 @@ del sys.path[0]
         statements = [s for s in statements if s]
         if statements:
             wr('''
-def readStoreData(self, store, row):
-    if not self._mk_inStore:
+    def readStoreData(self, store, row):
+        if not self._mk_inStore:
 ''')
             for s in statements:
                 wr(s)
-            wr('\t\t%s.readStoreData(self, store, row)\n\n' % self.supername())
+            wr('        %s.readStoreData(self, store, row)\n\n' % self.supername())
 
     def writePyAccessors(self):
         """Write Python accessors for attributes simply by asking each one to do so."""
@@ -217,18 +210,18 @@ class Attr:
         self.writePyGet(out)
         self.writePySet(out)
         if self.setting('AccessorStyle', 'methods') == 'properties':
-            out.write('\n\n\t%s = property(%s, %s)\n\n' % (self.name(), self.pyGetName(), self.pySetName()))
+            out.write('\n\n    %s = property(%s, %s)\n\n' % (self.name(), self.pyGetName(), self.pySetName()))
 
     def writePyGet(self, out):
         out.write('''
-def %s(self):
+    def %s(self):
         return self._%s
 ''' % (self.pyGetName(), self.name()))
 
     def writePySet(self, out):
         name = self.name()
         pySetName = self.pySetName()
-        out.write('\n\tdef %(pySetName)s(self, value):\n' % locals())
+        out.write('\n    def %(pySetName)s(self, value):\n' % locals())
         self.writePySetChecks(out)
         self.writePySetAssignment(out.write, name)
 
@@ -240,24 +233,24 @@ def %s(self):
 
         # MiddleKit machinery
         if not self._mk_initing and self._mk_serialNum>0 and value is not origValue:
-                global _%(name)sAttr
-                if _%(name)sAttr is None:
-                        _%(name)sAttr = self.klass().lookupAttr('%(name)s')
-                        if not _%(name)sAttr.shouldRegisterChanges():
-                                _%(name)sAttr = 0
-                if _%(name)sAttr:
-                        # Record that it has been changed
-                        self._mk_changed = 1
-                        if self._mk_changedAttrs is None:
-                                self._mk_changedAttrs = {} # maps name to attribute
-                        self._mk_changedAttrs['%(name)s'] = _%(name)sAttr  # changedAttrs is a set
-                        # Tell ObjectStore it happened
-                        self._mk_store.objectChanged(self)
+            global _%(name)sAttr
+            if _%(name)sAttr is None:
+                _%(name)sAttr = self.klass().lookupAttr('%(name)s')
+                if not _%(name)sAttr.shouldRegisterChanges():
+                    _%(name)sAttr = 0
+            if _%(name)sAttr:
+                # Record that it has been changed
+                self._mk_changed = 1
+                if self._mk_changedAttrs is None:
+                    self._mk_changedAttrs = {} # maps name to attribute
+                self._mk_changedAttrs['%(name)s'] = _%(name)sAttr  # changedAttrs is a set
+                # Tell ObjectStore it happened
+                self._mk_store.objectChanged(self)
 ''' % {'name': name})
 
     def writePySetChecks(self, out):
         if self.isRequired():
-            out.write('\t\tassert value is not None\n')
+            out.write('        assert value is not None\n')
 
 
 PyStubTemplate = """\
@@ -271,8 +264,8 @@ from %(superclassModule)s import %(superclassName)s
 
 class %(name)s(%(superclassName)s):
 
-        def __init__(self):
-                %(superclassName)s.__init__(self)
+    def __init__(self):
+        %(superclassName)s.__init__(self)
 """
 
 
@@ -296,10 +289,10 @@ class BoolAttr:
         Attr.writePySetChecks.im_func(self, out)
         out.write('''\
         if value is not None:
-                if not isinstance(value, types.IntType):
-                        raise TypeError, 'expecting bool or int for bool, but got value %r of type %r instead' % (value, type(value))
-                if value not in (True, False, 1, 0):
-                        raise ValueError, 'expecting True, False, 1 or 0 for bool, but got %s instead' % value
+            if not isinstance(value, types.IntType):
+                raise TypeError('expecting bool or int for bool, but got value %r of type %r instead' % (value, type(value)))
+            if value not in (True, False, 1, 0):
+                raise ValueError('expecting True, False, 1 or 0 for bool, but got %s instead' % value)
 ''')
 
 
@@ -312,12 +305,12 @@ class IntAttr:
         Attr.writePySetChecks.im_func(self, out)
         out.write('''\
         if value is not None:
+            if isinstance(value, types.LongType):
+                value = int(value)
                 if isinstance(value, types.LongType):
-                        value = int(value)
-                        if isinstance(value, types.LongType): # happens in Python 2.3
-                                raise OverflowError, value
-                elif not isinstance(value, types.IntType):
-                        raise TypeError, 'expecting int type, but got value %r of type %r instead' % (value, type(value))
+                    raise OverflowError(value)
+            elif not isinstance(value, types.IntType):
+                raise TypeError('expecting int type, but got value %r of type %r instead' % (value, type(value))
 ''')
 
 
@@ -330,10 +323,10 @@ class LongAttr:
         Attr.writePySetChecks.im_func(self, out)
         out.write('''\
         if value is not None:
-                if isinstance(value, types.IntType):
-                        value = long(value)
-                elif not isinstance(value, types.LongType):
-                        raise TypeError, 'expecting long type, but got value %r of type %r instead' % (value, type(value))
+            if isinstance(value, types.IntType):
+                value = long(value)
+            elif not isinstance(value, types.LongType):
+                raise TypeError('expecting long type, but got value %r of type %r instead' % (value, type(value)))
 ''')
 
 
@@ -346,10 +339,10 @@ class FloatAttr:
         Attr.writePySetChecks.im_func(self, out)
         out.write('''\
         if value is not None:
-                if isinstance(value, (types.IntType, types.LongType)):
-                        value = float(value)
-                elif not isinstance(value, types.FloatType):
-                        raise TypeError, 'expecting float type, but got value %r of type %r instead' % (value, type(value))
+            if isinstance(value, (types.IntType, types.LongType)):
+                value = float(value)
+            elif not isinstance(value, types.FloatType):
+                raise TypeError('expecting float type, but got value %r of type %r instead' % (value, type(value)))
 ''')
 
 
@@ -362,12 +355,12 @@ class DecimalAttr:
         Attr.writePySetChecks.im_func(self, out)
         out.write('''\
         if value is not None:
-                if isinstance(value, (types.IntType, types.LongType)):
-                        value = float(value)
-                elif isinstance(value, types.FloatType):
-                        value = Decimal(str(value))
-                elif not isinstance(value, Decimal):
-                        raise TypeError, 'expecting decimal type, but got value %r of type %r instead' % (value, type(value))
+            if isinstance(value, (types.IntType, types.LongType)):
+                value = float(value)
+            elif isinstance(value, types.FloatType):
+                value = Decimal(str(value))
+            elif not isinstance(value, Decimal):
+                raise TypeError('expecting decimal type, but got value %r of type %r instead' % (value, type(value)))
 ''')
 
 
@@ -380,8 +373,8 @@ class StringAttr:
         Attr.writePySetChecks.im_func(self, out)
         out.write('''\
         if value is not None:
-                if not isinstance(value, types.StringType):
-                        raise TypeError, 'expecting string type, but got value %r of type %r instead' % (value, type(value))
+            if not isinstance(value, types.StringType):
+                raise TypeError('expecting string type, but got value %r of type %r instead' % (value, type(value)))
 ''')
 
 
@@ -399,14 +392,14 @@ class EnumAttr:
             name = self.name()
             getName = self.pyGetName()
             out.write('''
-def %(getName)sString(self):
-    global _%(name)sAttr
-    if _%(name)sAttr is None:
+    def %(getName)sString(self):
+        global _%(name)sAttr
+        if _%(name)sAttr is None:
             _%(name)sAttr = self.klass().lookupAttr('%(name)s')
-    return _%(name)sAttr.enums()[self._%(name)s]
+        return _%(name)sAttr.enums()[self._%(name)s]
 ''' % locals())
             if self.setting('AccessorStyle', 'methods') == 'properties':
-                out.write('\n\n\t%(name)sString = property(%(getName)sString,'
+                out.write('\n\n    %(name)sString = property(%(getName)sString,'
                         ' "Returns the string form of %(name)s (instead of the integer value).")\n\n' % locals())
 
     def writePySetChecks(self, out):
@@ -418,25 +411,25 @@ def %(getName)sString(self):
 ''' % {'name': self.name()})
         if self.usesExternalSQLEnums():
             out.write('''
-    if value is not None:
+        if value is not None:
             if isinstance(value, types.StringType):
-                    try:
-                            value = _%(name)sAttr.intValueForString(value)
-                    except KeyError:
-                            raise ValueError, 'expecting one of %%r, but got %%r instead' %% (_%(name)sAttr.enums(), value)
+                try:
+                    value = _%(name)sAttr.intValueForString(value)
+                except KeyError:
+                    raise ValueError('expecting one of %%r, but got %%r instead' %% (_%(name)sAttr.enums(), value))
             elif not isinstance(value, (types.IntType, types.LongType)):
-                    raise TypeError, 'expecting int type for enum, but got value %%r of type %%r instead' %% (value, type(value))
+                raise TypeError('expecting int type for enum, but got value %%r of type %%r instead' %% (value, type(value)))
             if not _%(name)sAttr.hasEnum(value):
-                    raise ValueError, 'expecting one of %%r, but got %%r instead' %% (_%(name)sAttr.enums(), value)
+                raise ValueError('expecting one of %%r, but got %%r instead' %% (_%(name)sAttr.enums(), value))
 ''' % {'name': self.name()})
         else:
             out.write('''
-    if value is not None:
+        if value is not None:
             if not isinstance(value, types.StringType):
-                    raise TypeError, 'expecting string type for enum, but got value %%r of type %%r instead' %% (value, type(value))
+                raise TypeError('expecting string type for enum, but got value %%r of type %%r instead' %% (value, type(value)))
             attr = self.klass().lookupAttr('%s')
             if not attr.hasEnum(value):
-                    raise ValueError, 'expecting one of %%r, but got %%r instead' %% (attr.enums(), value)
+                raise ValueError('expecting one of %%r, but got %%r instead' %% (attr.enums(), value))
 ''' % self.name())
             # @@ 2001-07-11 ce: could optimize above code
 
@@ -448,13 +441,13 @@ def %(getName)sString(self):
 
         # MiddleKit machinery
         if not self._mk_initing and self._mk_serialNum>0 and value is not origValue:
-                # Record that it has been changed
-                self._mk_changed = 1
-                if self._mk_changedAttrs is None:
-                        self._mk_changedAttrs = {} # maps name to attribute
-                self._mk_changedAttrs['%(name)s'] = _%(name)sAttr  # changedAttrs is a set
-                # Tell ObjectStore it happened
-                self._mk_store.objectChanged(self)
+            # Record that it has been changed
+            self._mk_changed = 1
+            if self._mk_changedAttrs is None:
+                self._mk_changedAttrs = {} # maps name to attribute
+            self._mk_changedAttrs['%(name)s'] = _%(name)sAttr  # changedAttrs is a set
+            # Tell ObjectStore it happened
+            self._mk_store.objectChanged(self)
 ''' % {'name': name})
 
 
@@ -489,7 +482,7 @@ class AnyDateTimeAttr:
             # for years):
             out.write('''\
             if type(value) in StringTypes:
-                    value = mxDateTime.%s(value)
+                value = mxDateTime.%s(value)
 ''' % self.mxDateTimeTypeName().replace('Type', 'From'))
         dateTimeTypes = []
         if nativeDateTime:
@@ -512,8 +505,8 @@ class AnyDateTimeAttr:
         else:
             dateTimeTypes = dateTimeTypes[0]
         out.write('''
-                if not isinstance(value, %s):
-                        raise TypeError, 'expecting %s type (e.g., %s), but got value %%r of type %%r instead' %% (value, type(value))
+            if not isinstance(value, %s):
+                raise TypeError('expecting %s type (e.g., %s), but got value %%r of type %%r instead' %% (value, type(value)))
 ''' % (dateTimeTypes, self['Type'], dateTimeTypes))
 
     def writePyGetAsMXDateTime(self, out):
@@ -526,15 +519,15 @@ class AnyDateTimeAttr:
                 dateTimeTypes.append('datetime.' + typeName)
             dateTimeTypes = '(' + ', '.join(dateTimeTypes) + ')'
             out.write('''
-def %s(self):
-    if isinstance(self._%s, %s):
+    def %s(self):
+        if isinstance(self._%s, %s):
             self._%s = mxDateTime.mktime(self._%s.timetuple())
-    return self._%s
+        return self._%s
 ''' % (self.pyGetName(), self.name(), dateTimeTypes, self.name(), self.name(), self.name()))
         else:
             out.write('''
-def %s(self):
-    return self._%s
+    def %s(self):
+        return self._%s
 ''' % (self.pyGetName(), self.name()))
 
 
@@ -564,7 +557,7 @@ class TimeAttr:
         # using PostgresSQL and the psycopg adapter.
         if mxDateTime:
             out.write('''\
-    if isinstance(value, mxDateTime.DateTimeType):
+        if isinstance(value, mxDateTime.DateTimeType):
             value = mxDateTime.DateTimeDeltaFrom(value.time)
 ''')
         TimeAttr.mixInSuperWritePySetChecks(self, out)
@@ -609,14 +602,14 @@ class ObjRefAttr:
         else:
             reqAssert = ''
         out.write('''
-def %(pySetName)s(self, value):
+    def %(pySetName)s(self, value):
         %(reqAssert)s
         if value is not None and not isinstance(value, types.LongType):
-                if not isinstance(value, MiddleObject):
-                        raise TypeError, 'expecting a MiddleObject, but got value %%r of type %%r instead' %% (value, type(value))
-                from %(package)s%(targetClassName)s import %(targetClassName)s
-                if not isinstance(value, %(targetClassName)s):
-                        raise TypeError, 'expecting %(targetClassName)s, but got value %%r of type %%r instead' %% (value, type(value))
+            if not isinstance(value, MiddleObject):
+                raise TypeError('expecting a MiddleObject, but got value %%r of type %%r instead' %% (value, type(value)))
+            from %(package)s%(targetClassName)s import %(targetClassName)s
+            if not isinstance(value, %(targetClassName)s):
+                raise TypeError('expecting %(targetClassName)s, but got value %%r of type %%r instead' %% (value, type(value)))
 ''' % locals())
         self.writePySetAssignment(out.write, name)
 
@@ -631,7 +624,7 @@ class ListAttr:
     def pyReadStoreDataStatement(self):
         # Set the lists to None on the very first read from the store
         # so the list get methods will fetch the lists from the store.
-        return '\t\t\tself._%s = None\n' % self.name()
+        return '        self._%s = None\n' % self.name()
 
     def writePyAccessors(self, out):
         # Create various name values that are needed in code generation
@@ -664,7 +657,7 @@ class ListAttr:
     def writePyAddTo(self, out, names):
         names['getParens'] = self.setting('AccessorStyle', 'methods') == 'methods' and '()' or ''
         out.write('''
-def addTo%(capName)s(self, value):
+    def addTo%(capName)s(self, value):
         assert value is not None
         from %(package)s%(targetClassName)s import %(targetClassName)s
         assert isinstance(value, %(targetClassName)s)
@@ -673,14 +666,14 @@ def addTo%(capName)s(self, value):
         value._set('%(backRefAttrName)s', self)
         store = self.store()
         if value.serialNum() == 0 and self.isInStore():
-                store.addObject(value)
+            store.addObject(value)
 ''' % names)
         del names['getParens']
 
     def writePyDelFrom(self, out, names):
         names['getParens'] = self.setting('AccessorStyle', 'methods') == 'methods' and '()' or ''
         out.write('''
-def delFrom%(capName)s(self, value):
+    def delFrom%(capName)s(self, value):
         assert value is not None
         from %(package)s%(targetClassName)s import %(targetClassName)s
         assert isinstance(value, %(targetClassName)s)
@@ -690,6 +683,6 @@ def delFrom%(capName)s(self, value):
         value._set('%(backRefAttrName)s', None)
         store = self.store()
         if self.isInStore() and value.isInStore():
-                store.deleteObject(value)
+            store.deleteObject(value)
 ''' % names)
         del names['getParens']

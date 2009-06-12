@@ -65,11 +65,7 @@ class TestIMS(SidebarPage):
             self.writeMsg('Received %s %s, document size = %s (as expected).'
                     % (rsp.status, rsp.reason, size))
         arpaformat = '%a, %d %b %Y %H:%M:%S GMT'
-        try:
-            t = list(time.strptime(lm, arpaformat))
-        except AttributeError: # this can happen for Python < 2.3 on Windows
-            self.error('Python version does not support time.strptime, sorry.')
-            return
+        t = list(time.strptime(lm, arpaformat))
         t[0] -= 1 # last year
         newlm = time.strftime(arpaformat, time.gmtime(time.mktime(t)))
         self.writeTest('Opening <tt>%s</tt><br>with If-Modified-Since: %s'

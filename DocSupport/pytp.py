@@ -196,7 +196,7 @@ class PyTP:
         print 'PyTP %s error in line %d:' % (error, line)
         print code
 
-    def _adjust_block(self, block, tab='\t'):
+    def _adjust_block(self, block, tab='    '):
         """Adjust the indentation of a Python block."""
         lines = block.splitlines()
         lines = [lines[0].strip()] + [line.rstrip() for line in lines[1:]]

@@ -12,7 +12,8 @@ FUTURE
 """
 
 
-import os, sys
+import os
+import sys
 from glob import glob
 
 from MiscUtils import StringIO
@@ -113,7 +114,7 @@ class Installer:
         self.printKeyValue('Platform', sys.platform)
         self.printKeyValue('Cur Dir', os.getcwd())
 
-    def checkPyVersion(self, minver=(2, 0)):
+    def checkPyVersion(self, minver=(2, 4)):
         """Check for minimum required Python version."""
         try:
             ver = sys.version_info[:len(minver)]
@@ -572,15 +573,7 @@ class Installer:
         print 'Byte compiling all modules...'
         for comp in self._comps:
             dir = comp['dirname']
-            try:
-                compile_dir(dir, force=force, quiet=1)
-            except TypeError: # workaround for Python < 2.3
-                stdout = sys.stdout
-                sys.stdout = StringIO()
-                try:
-                    compile_dir(dir, force=force)
-                finally:
-                    sys.stdout = stdout
+            compile_dir(dir, force=force, quiet=1)
 
     def fixPermissions(self):
         if os.name == 'posix':
@@ -693,12 +686,7 @@ Installation is finished.''' % ((os.sep,)*2)
             return scope['htFooter']
 
         scope = props.copy()
-        try:
-            scope = dict(props)
-        except NameError: # workaround for Python < 2.2
-            scope = {}
-            for k in props.keys():
-                scope[k] = props[k]
+        scope = dict(props)
         scope.update({'header': header, 'htHeader': self._htHeader,
                         'footer': footer, 'htFooter': self._htFooter})
         return self._autotoc.process(self._pytp.process(input, scope))

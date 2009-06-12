@@ -1,11 +1,6 @@
 from PythonGenerator import PythonGenerator
 from PythonGenerator import Klass as SuperKlass
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class SQLPythonGenerator(PythonGenerator):
     pass

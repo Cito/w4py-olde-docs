@@ -6,16 +6,6 @@ from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleKit.Core.ListAttr import ListAttr
 import ObjectStore
 
-try: # for Python < 2.2
-    object
-except NameError:
-    class object:
-        pass
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class MiddleObject(object, NamedValueAccess):
     """Superclass for the MiddleKit objects.

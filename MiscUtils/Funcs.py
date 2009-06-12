@@ -4,7 +4,11 @@ Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else
 
 """
 
-import os, random, time, sys, tempfile
+import os
+import random
+import sys
+import time
+
 from struct import calcsize
 
 try:
@@ -12,11 +16,6 @@ try:
 except ImportError: # Python < 2.5
     from md5 import new as md5
     from sha import new as sha1
-
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
 
 
 def commas(number):
@@ -93,57 +92,6 @@ def excstr(e):
     if e is None:
         return None
     return '%s: %s' % (e.__class__.__name__, e)
-
-
-# Python 2.3 contains mktemp and mkstemp, both of which accept a
-# directory argument.  Earlier versions of Python only contained
-# mktemp which didn't accept a directory argument.  So we have to
-# implement our own versions here.
-if sys.version_info >= (2, 3, None, None):
-    # Just use the Python 2.3 built-in versions.
-    from tempfile import mktemp, mkstemp
-else:
-    try:
-        from tempfile import _counter
-    except ImportError:
-        class _Counter:
-            def __init__(self):
-                self._counter = 0
-            def get_next(self):
-                self._counter += 1
-                return self._counter
-        _counter = _Counter()
-
-    def mktemp(suffix="", dir=None):
-        """User-callable function to return a unique temporary file name.
-
-        Duplicated from Python's own tempfile with the optional "dir"
-        argument added. This allows customization of the directory, without
-        having to take over the module level variable, tempdir.
-
-        """
-        if not dir:
-            dir = tempfile.gettempdir()
-        pre = tempfile.gettempprefix()
-        while 1:
-            i = _counter.get_next()
-            file = os.path.join(dir, pre + str(i) + suffix)
-            if not os.path.exists(file):
-                return file
-
-    def mkstemp(suffix="", dir=None):
-        """User-callable function to return an opened temporary file.
-
-        The tuple will contain:
-        - a os-level file handle for the temp file, open for read/write
-        - the absolute path of that file
-
-        Note that this version of the function is not as secure as the
-        version included in Python 2.3.
-
-        """
-        path = mktemp(suffix, dir)
-        return os.open(path, os.O_RDWR|os.O_CREAT|os.O_EXCL, 0600), path
 
 
 def wordWrap(s, width=78):

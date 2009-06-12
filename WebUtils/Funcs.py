@@ -81,12 +81,6 @@ _urlDecode = {}
 for i in range(256):
     _urlDecode['%02x' % i] = _urlDecode['%02X' % i] = chr(i)
 
-try:
-    UnicodeDecodeError
-except NameError: # Python < 2.3
-    class UnicodeDecodeError(Exception):
-        pass
-
 def urlDecode(s):
     """Return the decoded version of the given string.
 

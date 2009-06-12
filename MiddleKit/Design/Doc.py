@@ -6,18 +6,17 @@
 
 """
 
-import os, shutil, sys, time
+import os
+import shutil
+import sys
+import time
 from UserDict import UserDict
+
 import FixPath
 import MiddleKit
 from MiscUtils import StringTypes
 from MiscUtils.Funcs import valueForString
 from WebUtils.Funcs import htmlEncode
-
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
 
 
 class Doc:

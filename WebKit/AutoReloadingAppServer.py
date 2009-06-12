@@ -37,7 +37,7 @@ def getFAM(modules):
 
     """
     for module in modules:
-        global fam # for Python < 2.2
+        global fam
         try:
             fam = __import__(module)
         except ImportError:

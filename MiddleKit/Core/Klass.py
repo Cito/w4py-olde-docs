@@ -4,19 +4,6 @@ from MiddleKit.Core.ListAttr import ListAttr
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleDict import MiddleDict
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
-try:
-    set
-except NameError: # fallback for Python < 2.4
-    try:
-        from sets import Set as set
-    except ImportError: # fallback for Python < 2.3
-        from UserDict import UserDict as set
-
 
 class Klass(MiddleDict, ModelObject):
     """A Klass represents a class specification.
@@ -449,9 +436,9 @@ class Klass(MiddleDict, ModelObject):
 
     def recordDependencyOrder(self, order, visited, indent=0):
         #print '%srecordDependencyOrder() for %s' % (' '*indent*4, self.name())
-        if visited.has_key(self):
+        if self in visited:
             return
-        visited[self] = None # better use visited.add(self) in Python >= 2.3
+        visited.add(self)
         for klass in self._dependencies:
             klass.recordDependencyOrder(order, visited, indent+1)
         order.append(self)

@@ -45,9 +45,9 @@ class ServletWriter:
         self._tabcnt = 0
         self._blockcount = 0 # a hack to handle nested blocks of python code
         self._indentSpaces = self._spaces
-        self._useTabs = 1
+        self._useTabs = 0
         self._useBraces = 0
-        self._indent = '\t'
+        self._indent = '    '
         self._userIndent = self._emptyString
 
     def setIndentSpaces(self, amt):

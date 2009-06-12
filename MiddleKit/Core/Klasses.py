@@ -7,11 +7,6 @@ from MiscUtils.DataTable import DataTable
 from MiscUtils.DictForArgs import *
 from UserDict import UserDict
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class Klasses(ModelObject, UserDict):
     """A Klasses object can read a list of class specifications in a spreadsheet (.csv).
@@ -60,8 +55,7 @@ class Klasses(ModelObject, UserDict):
             # different sandboxes of your application (development, test and
             # production) would match up even as you add and remove classes.
             # However, renaming classes changes the id!
-            from sets import Set # needs Python >= 2.3
-            allIds = Set()
+            allIds = set()
             for klass in self._model._allKlassesInOrder:
                 klass.setId(allIds)
         else:

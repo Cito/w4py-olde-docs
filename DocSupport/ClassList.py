@@ -94,10 +94,7 @@ class ClassList:
         lines = open(name).readlines()
         lineNum = 1
         for line in lines:
-            if len(line) > 8 and \
-                    line[:5] == 'class' and \
-                    line[5] in ' \t' and \
-                    line.find(':') != -1:
+            if len(line) > 8 and line[:6] == 'class ' and ':' in line:
                 self.readLine(line, name, lineNum)
             lineNum += 1
         if self._verbose:

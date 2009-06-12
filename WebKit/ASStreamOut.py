@@ -1,11 +1,5 @@
 """This module defines a class for handling writing reponses."""
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-    bool = lambda x: x and True or False
-
 debug = False
 
 class InvalidCommandSequence(Exception):

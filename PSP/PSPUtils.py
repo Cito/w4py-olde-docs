@@ -68,7 +68,7 @@ def startsNewBlock(line):
         return 0
     except SyntaxError:
         try:
-            compile(line + '\n\tpass', '<string>', 'exec')
+            compile(line + '\n    pass', '<string>', 'exec')
             return 1
         except Exception:
             pass
@@ -76,7 +76,7 @@ def startsNewBlock(line):
         pass
     return line.endswith(':')
 
-def normalizeIndentation(pySource, tab='\t'):
+def normalizeIndentation(pySource):
     """Take a block of code that may be too indented, and move it all to the left.
 
     See PSPUtilsTest for examples.

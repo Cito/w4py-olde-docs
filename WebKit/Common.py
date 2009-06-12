@@ -19,12 +19,9 @@ The globals provided are:
 
 """
 
-import os, sys, time
-
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
+import os
+import sys
+import time
 
 from Object import Object
 import WebUtils

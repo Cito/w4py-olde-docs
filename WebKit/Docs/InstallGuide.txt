@@ -75,12 +75,12 @@ Prerequisites
 Python
 ------
 
-Webware of course requires Python.  It has been tested with Python
-version ranging from 2.0 to 2.6.  Python 1.5.2 isn't supported anymore.
-If you get an error message about the version, you're probably unwittingly
-running the wrong version of Python.  Change the ``AppServer``
-or ``AppServer.bat`` scripts, giving the full path to the correct
-Python interpreter.
+Webware of course requires Python. It has been tested with Python
+version ranging from 2.4 to 2.6.  For older Python versions, you can
+still use the Webware 1.0 branch.  If you get an error message about
+the version, you're probably unwittingly running the wrong version
+of Python.  Change the ``AppServer`` or ``AppServer.bat`` scripts,
+giving the full path to the correct Python interpreter.
 
 Your installation of Python must be multi-threaded.  It's not entirely
 uncommon for third party web host providers to leave this disabled in

@@ -115,12 +115,7 @@ class CGIWrapper(NamedValueAccess):
             return {}
         else:
             config = f.read()
-            try:
-                dict
-            except NameError: # Python < 2.2
-                config = eval(config)
-            else:
-                config = eval('dict(%s)' % config)
+            config = eval('dict(%s)' % config)
             f.close()
             assert isinstance(config, DictType)
             return config

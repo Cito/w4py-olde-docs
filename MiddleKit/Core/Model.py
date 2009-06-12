@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 from types import ClassType, DictType
 
 try:
@@ -8,11 +9,6 @@ except ImportError:
 
 from MiscUtils.Configurable import Configurable
 from MiscUtils import NoDefault
-
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
 
 
 class ModelError(Exception):
@@ -337,7 +333,7 @@ class Model(Configurable):
         for klass in self._allKlassesInOrder:
             klass.buildDependencies()
         allKlasses = []
-        visited = {} # better use Set() in Python 2.3 and set() in Python >= 2.4
+        visited = set()
         for klass in self._allKlassesInOrder:
             if not klass._dependents:
                 # print '>>', klass.name()

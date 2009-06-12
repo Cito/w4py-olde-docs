@@ -6,32 +6,13 @@ Some changes by Robert Forkel and Christoph Zwerschke.
 
 """
 
-import traceback, time, random
+import time
+import traceback
+import random
+
 from MiscUtils import StringIO
+
 from ExamplePage import ExamplePage as BaseClass
-
-try: # for Python < 2.3
-    bool
-except NameError:
-    bool = lambda x: x and 1 or 0
-
-try:
-    object
-except NameError: # fallback for Python < 2.2
-    class object: pass
-    _isinstance = isinstance
-    def isinstance(obj, cinf):
-        if type(cinf) == type(()):
-            for i in cinf:
-                if type(obj) == type(object):
-                    if _isinstance(obj, i):
-                        return 1
-                else:
-                    if type(obj) == type(i):
-                        return 1
-            return 0
-        else:
-            return _isinstance(obj, cinf)
 
 
 def quoteJs(what):

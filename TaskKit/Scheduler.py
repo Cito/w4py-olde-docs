@@ -16,14 +16,9 @@ tasks to be run.
 
 
 from threading import Thread, Event
-from TaskHandler import TaskHandler
 from time import time
-from exceptions import IOError
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
+from TaskHandler import TaskHandler
 
 
 class Scheduler(Thread):

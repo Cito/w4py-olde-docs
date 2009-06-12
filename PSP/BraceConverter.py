@@ -172,9 +172,9 @@ if __name__ == "__main__":
             self._tabcnt = 0
             self._blockcount = 0 # a hack to handle nested blocks of Python code
             self._indentSpaces = ServletWriter._spaces
-            self._useTabs = 1
+            self._useTabs = 0
             self._useBraces = 0
-            self._indent = '\t'
+            self._indent = '    '
             self._userIndent = ServletWriter._emptyString
 
     test = r'''

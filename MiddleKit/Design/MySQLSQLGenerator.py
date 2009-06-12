@@ -1,10 +1,5 @@
 from SQLGenerator import SQLGenerator
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class MySQLSQLGenerator(SQLGenerator):
 
@@ -54,7 +49,7 @@ class Klass:
         for attr in self.allAttrs():
             if attr.boolForKey('isIndexed') and attr.hasSQLColumn():
                 wr(',\n')
-                wr('\tindex (%s)' % attr.sqlName())
+                wr('    index (%s)' % attr.sqlName())
         wr('\n')
 
 

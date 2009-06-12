@@ -5,11 +5,6 @@ from MySQLdb import Warning
 
 from SQLObjectStore import SQLObjectStore
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class MySQLObjectStore(SQLObjectStore):
     """MySQLObjectStore implements an object store backed by a MySQL database.

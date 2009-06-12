@@ -16,11 +16,6 @@ from MiscUtils.MixIn import MixIn
 from SQLGenerator import SQLGenerator
 from SQLGenerator import PrimaryKey as PrimaryKeyBase
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class PostgreSQLSQLGenerator(SQLGenerator):
 
@@ -104,7 +99,7 @@ class Klass:
 
 
     def primaryKeySQLDef(self, generator):
-        return "\t%s integer not null primary key default nextval('%s'),\n" \
+        return "    %s integer not null primary key default nextval('%s'),\n" \
                 % (self.sqlSerialColumnName(), self.seqName())
 
 

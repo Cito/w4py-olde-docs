@@ -1,4 +1,9 @@
-import sys, types
+import sys
+import thread
+import types
+
+from weakref import WeakValueDictionary
+
 from MiscUtils import NoDefault, StringTypes
 from MiscUtils.Funcs import safeDescription
 from ObjectKey import ObjectKey
@@ -11,16 +16,6 @@ from MiddleKit.Core.ListAttr import ListAttr
         # will try to mix it in.
 from PerThreadList import PerThreadList, NonThreadedList
 from PerThreadDict import PerThreadDict, NonThreadedDict
-import thread
-try:
-    from weakref import WeakValueDictionary
-except ImportError: # fallback for Python < 2.1
-    from UserDict import UserDict as WeakValueDictionary
-
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
 
 
 class UnknownObjectError(LookupError):

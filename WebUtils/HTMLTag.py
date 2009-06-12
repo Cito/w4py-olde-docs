@@ -57,16 +57,7 @@ Reference.
 # - extra checking about what tags are allowed or disallowed inside other tags
 # - minor tweaks
 
-# Check for Python 2.0
 import sys
-pyVer = getattr(sys, 'version_info', None)
-if pyVer is None or pyVer[0] < 2:
-    raise Exception, 'HTMLTag requires Python 2.0 or greater.'
-
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
 
 runFast = True
     # if enabled, overrides some key SGMLParser methods for more speed.

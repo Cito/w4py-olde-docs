@@ -65,7 +65,9 @@ Provide command line option to change extensions.
 """
 
 
-import os, re, sys
+import os
+import re
+import sys
 from UserDict import UserDict
 
 
@@ -98,10 +100,10 @@ class Stats(UserDict):
         for name in self._statNames:
             file.write('%8d' % self[name])
 
-    def writeHeaders(self, nameWidth, file=sys.stdout):
-        # this would be a class method in Python >= 2.2
+    @classmethod
+    def writeHeaders(cls, nameWidth, file=sys.stdout):
         file.write(' ' * nameWidth)
-        for name in self._statNames:
+        for name in cls._statNames:
             file.write('%8s' % name)
         file.write('\n')
 

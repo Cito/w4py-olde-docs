@@ -7,11 +7,6 @@ ODBC.Windows.threadsafety = ODBC.Windows.threadlevel
 # even though DBABI2.0 says its threadsafety
 # (http://www.python.org/topics/database/DatabaseAPI-2.0.html)
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class MSSQLObjectStore(SQLObjectStore):
     _threadSafety = ODBC.Windows.threadsafety

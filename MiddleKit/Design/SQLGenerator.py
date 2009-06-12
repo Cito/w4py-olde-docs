@@ -1,14 +1,13 @@
-import os, sys, types
+import os
+import sys
+import types
+
 from glob import glob
 from time import asctime, localtime, time
+
 from MiddleKit.Core.ObjRefAttr import objRefJoin
 from MiscUtils import AbstractError, StringTypes, CSVParser
 from CodeGenerator import *
-
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
 
 
 class SampleError(Exception):
@@ -381,7 +380,7 @@ class Klasses:
         kv(out, 'Num classes', len(self._klasses))
         wr('\nClasses:\n')
         for klass in self._model.allKlassesInOrder():
-            wr('\t%s\n' % klass.name())
+            wr('    %s\n' % klass.name())
         wr('*/\n\n')
 
         sql = generator.setting('PreSQL', None)
@@ -461,7 +460,7 @@ name varchar(100)
 ''')
         for klass in self._model._allKlassesInOrder:
             wr('insert into _MKClassIds (id, name) values ')
-            wr("\t(%s, '%s');\n" % (klass.id(), klass.name()))
+            wr("    (%s, '%s');\n" % (klass.id(), klass.name()))
         wr('\n')
 
     def listTablesSQL(self):
@@ -634,7 +633,7 @@ class Attr:
             if self.hasSQLColumn():
                 self.writeRealCreateSQLColumn(generator, out)
             else:
-                out.write('\t/* %(Name)s %(Type)s - not a SQL column */' % self)
+                out.write('    /* %(Name)s %(Type)s - not a SQL column */' % self)
         except Exception:
             bar = '*'*78
             print
@@ -663,7 +662,7 @@ class Attr:
                 defaultSQL = ' ' + defaultSQL
         else:
             defaultSQL = ''
-        out.write('\t%s %s%s%s%s' % (name, self.sqlTypeOrOverride(),
+        out.write('    %s %s%s%s%s' % (name, self.sqlTypeOrOverride(),
                 self.uniqueSQL(), notNullSQL, defaultSQL))
 
     def writeAuxiliaryCreateTable(self, generator, out):
@@ -870,7 +869,7 @@ class ObjRefAttr:
                 notNull = ' not null'
             else:
                 notNull = self.sqlNullSpec()
-            out.write('\t%s %s%s%s' % (name, self.sqlTypeOrOverride(), refs, notNull))
+            out.write('    %s %s%s%s' % (name, self.sqlTypeOrOverride(), refs, notNull))
         else:
             # the new technique uses one column for each part of the obj ref: class id and obj id
             classIdName = self.name()+self.setting('ObjRefSuffixes')[0]
@@ -890,10 +889,10 @@ class ObjRefAttr:
                                     and len(self.targetKlass().subklasses()) == 0):
                 if self.get('Ref', None) not in ('0', 0, 0.0, False):
                     objIdRef = self.objIdReferences()
-            out.write('\t%s %s%s%s%s, /* %s */ \n' % (
+            out.write('    %s %s%s%s%s, /* %s */ \n' % (
                     classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault,
                             self.classIdReferences(), self.targetClassName()))
-            out.write('\t%s %s%s%s' % (objIdName, self.sqlTypeOrOverride(),
+            out.write('    %s %s%s%s' % (objIdName, self.sqlTypeOrOverride(),
                     notNull, objIdRef))
 
     def classIdReferences(self):
@@ -1003,8 +1002,8 @@ class EnumAttr:
         if self.usesExternalSQLEnums():
             tableName, valueColName, nameColName = self.externalEnumsSQLNames()
             out.write('create table %s (\n' % tableName)
-            out.write('\t%s int not null primary key,\n' % valueColName)
-            out.write('\t%s varchar(255)\n' % nameColName)
+            out.write('    %s int not null primary key,\n' % valueColName)
+            out.write('    %s varchar(255)\n' % nameColName)
             out.write(');\n')
             i = 0
             for enum in self.enums():

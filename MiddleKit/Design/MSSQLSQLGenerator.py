@@ -1,11 +1,8 @@
-import os, sys
+import os
+import sys
 from time import asctime, localtime, time
-from SQLGenerator import SQLGenerator
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
+from SQLGenerator import SQLGenerator
 
 
 def cleanConstraintName(name):
@@ -142,7 +139,7 @@ name varchar(100)
         kv(out, 'Num classes', len(self._klasses))
         wr('\nClasses:\n')
         for klass in self._klasses:
-            wr('\t%s\n' % klass.name())
+            wr('    %s\n' % klass.name())
         wr('*/\n\n')
 
         sql = generator.setting('PreSQL', None)

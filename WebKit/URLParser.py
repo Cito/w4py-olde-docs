@@ -12,19 +12,17 @@ up by `Application` (accessible through `Application.rootURLParser`).
 
 """
 
-import re, os, sys
+import os
+import re
+import sys
+
+from warnings import warn
 
 from HTTPExceptions import HTTPNotFound, HTTPMovedPermanently
 from MiscUtils.ParamFactory import ParamFactory
 from WebUtils.Funcs import urlDecode
 
 debug = 0
-
-try: # for Python < 2.1
-    from warnings import warn
-except ImportError:
-    def warn(message, **args):
-        print message
 
 # Legal characters for use in a module name -- used when turning
 # an entire path into a module name.

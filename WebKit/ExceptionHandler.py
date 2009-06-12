@@ -5,26 +5,14 @@ from random import randint
 
 try:
     from email.message import Message
+    from email.Utils import formatdate
 except ImportError: # Python < 2.5
-    try:
-        from email.Message import Message
-    except ImportError: # Python < 2.2
-        Message = None
-        from MimeWriter import MimeWriter
+    from email.Message import Message
+    from email.Utils import formatdate
 
 from Common import *
-from MiscUtils.Funcs import dateForEmail
 from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict, htmlEncode
-
-try: # linecache update workaround for Python < 2.4
-    traceback.format_exc # check version
-except AttributeError: # Python < 2.4
-    from linecache import checkcache
-else: # Python >= 2.4
-    # the linecache module updates the cache automatically
-    def checkcache():
-        pass
 
 
 class Singleton:
@@ -187,8 +175,6 @@ class ExceptionHandler(Object):
         if self._res:
             self._res.recordEndTime()
             self._time = self._res.endTime()
-
-        checkcache() # update the linecache
 
         self.logExceptionToConsole()
 
@@ -521,7 +507,7 @@ class ExceptionHandler(Object):
 
         # Construct the message headers
         headers = self.setting('ErrorEmailHeaders').copy()
-        headers['Date'] = dateForEmail()
+        headers['Date'] = formatdate()
         headers['Mime-Version'] = '1.0'
         headers['Subject'] = headers.get('Subject', '[WebKit Error]') \
                 + ' %s: %s' % sys.exc_info()[:2]
@@ -630,15 +616,11 @@ class ExceptionHandler(Object):
         server.set_debuglevel(0)
         if user and passwd and not popserver:
             # SMTP-AUTH
-            try:
+            server.ehlo()
+            if server.has_extn('starttls'):
+                server.starttls()
                 server.ehlo()
-                if server.has_extn('starttls'):
-                    server.starttls()
-                    server.ehlo()
-                server.login(user, passwd)
-            except AttributeError: # Python < 2.2
-                raise smtplib.SMTPException, \
-                        "Python version doesn't support SMTP authentication"
+            server.login(user, passwd)
         if Message:
             body = message.as_string()
         else:

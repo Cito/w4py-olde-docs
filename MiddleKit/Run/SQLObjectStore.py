@@ -10,11 +10,6 @@ from MiscUtils import Funcs as funcs
 from MiscUtils.DBPool import DBPool
 from MiscUtils.MixIn import MixIn
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 class SQLObjectStoreError(Exception):
     pass

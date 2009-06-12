@@ -207,11 +207,6 @@ from CSVJoiner import joinCSVFields
 from Funcs import positive_id
 from MiscUtils import NoDefault, StringTypes, mxDateTime
 
-try: # for Python < 2.3
-    True, False
-except NameError:
-    True, False = 1, 0
-
 
 ## Types ##
 
