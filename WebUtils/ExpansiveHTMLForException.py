@@ -1,15 +1,23 @@
+"""HTMLForException.py
+
+Create expansive HTML for exceptions using the cgitb module.
+
+"""
+
+from WebUtils import cgitb
+
 
 HTMLForExceptionOptions = {
-        'table': 'background-color:#F0F0F0;font-size:10pt',
-        'default': 'color:#000000',
-        'row.location': 'color:#000099',
-        'row.code': 'color:#990000',
-        'editlink': None,
+    'table': 'background-color:#F0F0F0;font-size:10pt',
+    'default': 'color:#000000',
+    'row.location': 'color:#000099',
+    'row.code': 'color:#990000',
+    'editlink': None,
 }
 
 
 def ExpansiveHTMLForException(context=5, options=None):
-    from WebUtils import cgitb
+    """Create expansive HTML for exceptions."""
     if options:
         opt = HTMLForExceptionOptions.copy()
         opt.update(options)

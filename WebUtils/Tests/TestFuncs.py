@@ -16,21 +16,21 @@ import urllib
 allChars = string.join(map(chr, range(256)), '')
 
 URLEncodeTests = [
-        'NothingIsChangedTest',
-        'This test has spaces',
-        'This test      has     tabs',
-        'This:test:has:colons',
-        ' boundary      ',
-        allChars
+    'NothingIsChangedTest',
+    'This test has spaces',
+    'This test      has     tabs',
+    'This:test:has:colons',
+    ' boundary      ',
+    allChars
 ]
 
 URLDecodeTests = [
-        '%3E and %A7',
-        '%3e and %a7',
-        '& and + and -',
-        'illegal %3g?',
-        'illegal %x1?',
-        '1 % 2 %% 3 %%%4 %%20'
+    '%3E and %A7',
+    '%3e and %a7',
+    '& and + and -',
+    'illegal %3g?',
+    'illegal %x1?',
+    '1 % 2 %% 3 %%%4 %%20'
 ]
 
 def TestURLEncode():
@@ -106,11 +106,11 @@ def BenchmarkURLDecode():
     print
 
 HTMLEncodeTests = [
-        'Nothing special.',
-        'Put your HTML tags in <brackets>.',
-        'a & b & c',
-        'A \n newline',
-        'A newline \n x < y < z \n <tag>&<tag>'
+    'Nothing special.',
+    'Put your HTML tags in <brackets>.',
+    'a & b & c',
+    'A \n newline',
+    'A newline \n x < y < z \n <tag>&<tag>'
 ]
 
 def TestHTMLEncodeAndDecode():

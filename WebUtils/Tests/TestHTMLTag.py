@@ -15,15 +15,15 @@ class HTMLTagTest(unittest.TestCase):
         self._html = """\
 <html>
 <head>
-        <title>Example</title>
+    <title>Example</title>
 </head>
-<body color=white bgcolor=#000000>
-        <p> What's up, <i>doc</i>? </p>
-        <hr>
-        <table id=dataTable>
-                <tr> <th> x </th> <th> y </th> </tr>
-                <tr> <td class=datum> 0 </td> <td class=datum> 0 </td> </tr>
-        </table>
+<body color="white" bgcolor="#000000">
+    <p>What's up, <i>doc</i>?</p>
+    <hr>
+    <table id="dataTable">
+        <tr> <th> x </th> <th> y </th> </tr>
+        <tr><td class="datum">0</td><td class="datum">0</td></tr>
+    </table>
 </body>
 </html>"""
 
@@ -62,8 +62,8 @@ class HTMLTagTest(unittest.TestCase):
 
         # Children and subtags, when both are the same.
         for numFoos, fooAt, foos in [
-                        [html.numChildren, html.childAt, html.children],
-                        [html.numSubtags, html.subtagAt, html.subtags]]:
+                    [html.numChildren, html.childAt, html.children],
+                    [html.numSubtags, html.subtagAt, html.subtags]]:
             assert numFoos() == 2
             assert len(foos()) == 2
             assert fooAt(0).name() == 'head'
@@ -83,7 +83,8 @@ class HTMLTagTest(unittest.TestCase):
         assert html.tagWithId('dataTable').name() == 'table'
 
     def checkInvalidHTML(self):
-        from WebUtils.HTMLTag import HTMLTagUnbalancedError, HTMLTagIncompleteError
+        from WebUtils.HTMLTag import (
+            HTMLTagUnbalancedError, HTMLTagIncompleteError)
 
         reader = HTMLReader()
 

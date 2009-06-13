@@ -1,27 +1,27 @@
 """HTMLTag.py
 
-HTMLTag defines a class of the same name that represents HTML content. An
-additional HTMLReader class kicks off the process of reading an HTML file into a
-set of tags:
+HTMLTag defines a class of the same name that represents HTML content.
+An additional HTMLReader class kicks off the process of reading an HTML
+file into a set of tags:
 
     from WebUtils.HTMLTag import HTMLReader
     reader = HTMLReader()
     tag = reader.readFileNamed('foo.html')
     tag.pprint()
 
-Tags have attributes and children, which makes them hierarchical. See HTMLTag
-class docs for more info.
+Tags have attributes and children, which makes them hierarchical.
+See HTMLTag class docs for more info.
 
-Note that you imported HTMLReader instead of HTMLTag. You only need the latter
-if you plan on creating tags directly.
+Note that you imported HTMLReader instead of HTMLTag.
+You only need the latter if you plan on creating tags directly.
 
 You can discard the reader immediately if you like:
 
     tag = HTMLReader().readFileNamed('foo.html')
 
 The point of reading HTML into tag objects is so that you have a concrete,
-Pythonic data structure to work with. The original motiviation for such a beast
-was in building automated regression test suites that wanted granular,
+Pythonic data structure to work with. The original motiviation for such a
+beast was in building automated regression test suites that wanted granular,
 structured access to the HTML output by the web application.
 
 See the doc string for HTMLTag for examples of what you can do with tags.
@@ -30,11 +30,11 @@ See the doc string for HTMLTag for examples of what you can do with tags.
 CAVEATS
 
 * HTMLReader needs special attention with regards to tags like <p> and <li>
-which sometimes are closed (</p> </li>) and sometimes not. See its doc string
-for full information.
+  which sometimes are closed (</p> </li>) and sometimes not.
+  See its doc string for full information.
 
-* HTMLReader is picky about the correctness of the HTML you feed it. Again see
-the class docs for full info.
+* HTMLReader is picky about the correctness of the HTML you feed it.
+  Again see the class docs for full info.
 
 
 TO DO
@@ -44,49 +44,55 @@ TO DO
 
 CREDITS
 
-* I didn't grok how to write an SGMLParser subclass until I read the very small
-example by Sean McGrath at http://www.digitome.com/html2pyx.py (which I believe
-is broken for empty tags).
+* I didn't grok how to write an SGMLParser subclass until I read the very
+  small example by Sean McGrath at http://www.digitome.com/html2pyx.py
+  (which I believe is broken for empty tags).
 
 * Determined what HTML tags are empty by scanning O'Reilly's HTML Pocket
-Reference.
+  Reference.
 
 """
 
-# - report line numbers for errors
-# - extra checking about what tags are allowed or disallowed inside other tags
-# - minor tweaks
-
 import sys
-
-runFast = True
-    # if enabled, overrides some key SGMLParser methods for more speed.
-    # changing this has no effect once the module is imported (unless you reload())
-
 from sgmllib import SGMLParser
+
 from MiscUtils import NoDefault, AbstractError
-from types import StringType
+
+# If enabled, overrides some key SGMLParser methods for more speed.
+# Changing this has no effect once the module is imported (unless you reload()).
+runFast = True
 
 
 class HTMLTagError(Exception):
+    """General HTML tag error"""
 
     def __init__(self, msg, **values):
         Exception.__init__(self, msg)
         self.values = values.copy()
 
-class HTMLTagAttrLookupError(HTMLTagError, LookupError): pass
-class HTMLTagUnbalancedError(HTMLTagError): pass
-class HTMLNotAllowedError(HTMLTagError): pass
-class HTMLTagProcessingInstructionError(HTMLTagError): pass
-class HTMLTagIncompleteError(HTMLTagError): pass
+class HTMLTagAttrLookupError(HTMLTagError, LookupError):
+    """HTML tag attribute lookup error"""
+
+class HTMLTagUnbalancedError(HTMLTagError):
+    """Unbalanced HTML tag error"""
+
+class HTMLNotAllowedError(HTMLTagError):
+    """HTML tag not allowed here error"""
+
+class HTMLTagProcessingInstructionError(HTMLTagError):
+    """HTML tag processing instruction error"""
+
+class HTMLTagIncompleteError(HTMLTagError):
+    """HTML tag incomplete error"""
 
 
-DefaultEmptyTags = 'area basefont base bgsound br col colgroup frame hr' \
-        ' img input isindex link meta spacer wbr'.split()
+DefaultEmptyTags = ('area basefont base bgsound br col colgroup frame hr'
+    ' img input isindex link meta spacer wbr').split()
 
 
-class HTMLTag:
-    """
+class HTMLTag(object):
+    """Container class for representing HTML as tag objects.
+
     Tags essentially have 4 major attributes:
         * name
         * attributes
@@ -98,11 +104,11 @@ class HTMLTag:
 
     Attributes are dictionary-like in nature:
         print tag.attr('color')  # throws an exception if no color
-        print tag.attr('bgcolor', None)  # returns none if no bgcolor
+        print tag.attr('bgcolor', None)  # returns None if no bgcolor
         print tag.attrs()
 
-    Children are all the leaf parts of a tag, consisting of other tags and strings
-    of character data.
+    Children are all the leaf parts of a tag, consisting of other tags
+    and strings of character data.
         print tag.numChildren()
         print tag.childAt(0)
         print tag.children()
@@ -112,17 +118,17 @@ class HTMLTag:
         print tag.subtagAt(0)
         print tag.subtags()
 
-    You can search a tag and all the tags it contains for a tag with a particular
-    attribute matching a particular value:
+    You can search a tag and all the tags it contains for a tag with
+    a particular attribute matching a particular value:
         print tag.tagWithMatchingAttr('width', '100%')
 
-    An HTMLTagAttrLookupError is raised if no matching tag is found. You can avoid
-    this by providing a default value:
+    An HTMLTagAttrLookupError is raised if no matching tag is found.
+    You can avoid this by providing a default value:
         print tag.tagWithMatchingAttr('width', '100%', None)
 
-    Looking for specific 'id' attributes is common in regression testing (it allows
-    you to zero in on logical portions of a page), so a convenience method is
-    provided:
+    Looking for specific 'id' attributes is common in regression testing
+    (it allows you to zero in on logical portions of a page),
+    so a convenience method is provided:
         tag = htmlTag.tagWithId('accountTable')
 
 
@@ -131,11 +137,12 @@ class HTMLTag:
     * A walker() method for traversing the tag tree.
     * Search for a subtag with a given name, recursive or not.
     * Attribute traversal with dotted notation?
-    * Do we need to convert tag names and attribute names to lower case, or does
-      SGMLParser already do that?
+    * Do we need to convert tag names and attribute names to lower case,
+      or does SGMLParser already do that?
     * Should attribute values be strip()ed?
-      Probably not. SGMLParser probably strips them already unless they really do
-      have spaces as in "  quoted  ". But that's speculation.
+      Probably not. SGMLParser probably strips them already unless they
+      really do have spaces as in "  quoted  ". But that's speculation.
+
     """
 
 
@@ -148,23 +155,25 @@ class HTMLTag:
         self._children = []
         self._subtags = []
         self._lineNumber = lineNumber
-        self._isClosed = False  # used by closedBy() and __repr__. helps with HTMLReader error messages
+        # Used by closedBy() and __repr__, helps with HTMLReader error messages:
+        self._isClosed = False
 
     def readAttr(self, name, value):
+        """Set an attribute of the tag with the given name and value.
+
+        An assertion fails if an attribute is set twice.
+
         """
-        Sets an attribute of the tag with the given name and value. An assertion
-        fails if an attribute is set twice.
-        """
-        assert not self._attrs.has_key(name), 'name = %r, attrs = %r' % (name, attrs)
+        assert name not in self._attrs, 'name = %r, attrs = %r' % (name, attrs)
         self._attrs[name] = value
 
     def addChild(self, child):
+        """Add a child to the receiver.
+
+        The child will be another tag or a string (CDATA).
+
         """
-        Adds a child to the receiver. The child will be another tag or a string
-        (CDATA).
-        """
-        assert isinstance(child, HTMLTag) or type(child) is StringType, \
-                'Invalid child: %r' % child
+        assert isinstance(child, (basestring, HTMLTag)), 'Invalid child: %r' % child
         self._children.append(child)
         if isinstance(child, HTMLTag):
             self._subtags.append(child)
@@ -182,7 +191,7 @@ class HTMLTag:
             return self._attrs.get(name, default)
 
     def hasAttr(self, name):
-        return self._attrs.has_key(name)
+        return name in self._attrs
 
     def attrs(self):
         return self._attrs
@@ -226,8 +235,7 @@ class HTMLTag:
             else:
                 wr('%s    %s\n' % (spacer, child))
         wr('%s</%s>\n' % (spacer, self._name))
-        # ^^^
-        # Printing a closing tag for an empty tag (such as <br>)
+        # Note: Printing a closing tag for an empty tag (such as <br>)
         # doesn't make much sense, but then it's a good reminder that
         # certain tags like <p> are closed immediately.
 
@@ -255,11 +263,14 @@ class HTMLTag:
     ## Searching ##
 
     def tagWithMatchingAttr(self, name, value, default=NoDefault):
-        """
-        Performs a depth-first search for a tag with an attribute that matches the
-        given value. If the tag cannot be found, a KeyError will be raised *unless* a
-        default value was specified, which is then returned.
+        """Search for tag with matching attributes.
+
+        Performs a depth-first search for a tag with an attribute that matches
+        the given value. If the tag cannot be found, a KeyError will be raised
+        *unless* a default value was specified, which is then returned.
+
             tag = tag.tagWithMatchingAttr('bgcolor', '#FFFF', None)
+
         """
         tag = self._tagWithMatchingAttr(name, value)
         if tag is None:
@@ -270,17 +281,23 @@ class HTMLTag:
         else:
             return tag
 
-
     def tagWithId(self, id, default=NoDefault):
-        """
+        """Search for tag with a given id.
+
         Finds and returns the tag with the given id. As in:
+
             <td id=foo> bar </td>
+
         This is just a cover for:
+
             tagWithMatchingAttr('id', id, default)
-        But searching for id's is so popular (at least in regression testing web
-        sites) that this convenience method is provided.
-        Why is it so popular? Because by attaching ids to logical portions of your
-        HTML, your regression test suite can quickly zero in on them for examination.
+
+        But searching for id's is so popular (at least in regression testing
+        web sites) that this convenience method is provided.
+        Why is it so popular? Because by attaching ids to logical portions
+        of your HTML, your regression test suite can quickly zero in on them
+        for examination.
+
         """
         return self.tagWithMatchingAttr('id', id, default)
 
@@ -288,6 +305,7 @@ class HTMLTag:
     ## Parsing (HTMLReader) ##
 
     def closedBy(self, name, lineNumber):
+
         self._isClosed = True
         self._closedBy = name
         self._closedAt = lineNumber
@@ -296,11 +314,12 @@ class HTMLTag:
     ## Self utility ##
 
     def _tagWithMatchingAttr(self, name, value):
-        """
-        Performs a depth-first search for a tag with an attribute that matches the
-        given value. Returns None if the tag cannot be found.
-        The method tagWithMatchingAttr() (e.g., sans underscore) is more commonly
-        used.
+        """Search for tag with matching attributes.
+
+        Performs a depth-first search for a tag with an attribute that matches
+        the given value. Returns None if the tag cannot be found. The method
+        tagWithMatchingAttr() (e.g., sans underscore) is more commonly used.
+
         """
         if self._attrs.get(name, None) == value:
             return self
@@ -312,18 +331,19 @@ class HTMLTag:
 
 
 class HTMLReader(SGMLParser):
-    """
+    """Reader class for representing HTML as tag objects.
+
     NOTES
 
     * Special attention is required regarding tags like <p> and <li> which
-      sometimes are closed and sometimes not. HTMLReader can deal with both situations
-      (closed and not) provided that:
+      sometimes are closed and sometimes not. HTMLReader can deal with both
+      situations (closed and not) provided that:
         * the file doesn't change conventions for a given tag
         * the reader knows ahead of time what to expect
 
-    Be default, HTMLReader assumes that <p> and <li> will be closed with </p> and
-    </li> as the official HTML spec, as well as upcomer XHTML, encourage or require,
-    respectively.
+    Be default, HTMLReader assumes that <p> and <li> will be closed with </p>
+    and </li> as the official HTML spec, as well as upcomer XHTML, encourage
+    or require, respectively.
 
     But if your files don't close certain tags that are supposed to be required,
     you can do this:
@@ -334,34 +354,35 @@ class HTMLReader(SGMLParser):
     Or just set them entirely:
         HTMLReader(emptyTags=['br', 'hr', 'p'])
         reader.setEmptyTags(['br', 'hr', 'p'])
-    Although there are quite a few. Consider the DefaultEmptyTags global list
-    (which is used to initialize the reader's tags) which contains about 16 tag
-    names.
 
-    If an HTML file doesn't conform to the reader's expectation, you will get an
-    exception (see more below for details).
+    Although there are quite a few. Consider the DefaultEmptyTags global
+    list (which is used to initialize the reader's tags) which contains
+    about 16 tag names.
+
+    If an HTML file doesn't conform to the reader's expectation, you will get
+    an exception (see more below for details).
 
     If your HTML file doesn't contain root <html> ... </html> tags wrapping
     everything, a fake root tag will be constructed for you, unless you pass
     in fakeRootTagIfNeeded=False.
 
-    Besides fixing your reader manually, you could conceivably loop through the
-    permutations of the various empty tags to see if one of them resulted in a
-    correct read.
+    Besides fixing your reader manually, you could conceivably loop through
+    the permutations of the various empty tags to see if one of them resulted
+    in a correct read.
 
     Or you could fix the HTML.
 
-    * The reader ignores extra preceding and trailing whitespace by stripping it
-      from strings. I suppose this is a little harsher than reducing spans of
-      preceding and trailing whitespace down to one space, which is what really
-      happens in an HTML browser.
+    * The reader ignores extra preceding and trailing whitespace by stripping
+      it from strings. I suppose this is a little harsher than reducing spans
+      of preceding and trailing whitespace down to one space, which is what
+      really happens in an HTML browser.
 
     * The reader will not read past the closing </html> tag.
 
     * The reader is picky about the correctness of the HTML you feed it. If tags
-      are not closed, overlap (instead of nest) or left unfinished, an exception is
-      thrown. These include HTMLTagUnbalancedError, HTMLTagIncompleteError and
-      HTMLNotAllowedError which all inherit HTMLTagError.
+      are not closed, overlap (instead of nest) or left unfinished, an exception
+      is thrown. These include HTMLTagUnbalancedError, HTMLTagIncompleteError
+      and HTMLNotAllowedError which all inherit HTMLTagError.
 
       This pickiness can be quite useful for the validation of the HTML of your
       own applications.
@@ -374,32 +395,34 @@ class HTMLReader(SGMLParser):
     TO DO
 
     * Could the "empty" tag issue be dealt with more sophistication by
-      automatically closing <p> and <li> (e.g., popping them off the _tagStack) when
-      other major tags were encountered such as <p>, <li>, <table>, <center>, etc.?
+      automatically closing <p> and <li> (e.g., popping them off the _tagStack)
+      when other major tags were encountered such as <p>, <li>, <table>,
+      <center>, etc.?
 
     * Readers don't handle processing instructions: <? foobar ?>.
 
-    * The tagContainmentConfig class var can certainly be expanded for even better
-      validation.
+    * The tagContainmentConfig class var can certainly be expanded for even
+      better validation.
 
     """
 
 
     ## Init ##
 
-    def __init__(self, emptyTags=None, extraEmptyTags=None, fakeRootTagIfNeeded=True):
+    def __init__(self, emptyTags=None, extraEmptyTags=None,
+            fakeRootTagIfNeeded=True):
         SGMLParser.__init__(self)
-        self._filename  = None
-        self._rootTag   = None
+        self._filename = None
+        self._rootTag = None
         self._fakeRootTagIfNeeded = fakeRootTagIfNeeded
         self._usedFakeRootTag = False
-        self._tagStack  = []
-        self._finished  = False
+        self._tagStack = []
+        self._finished = False
 
         # Options
         self._printsStack = False
-        self._ignoreWS   = True
-        self._endingTag  = 'html'
+        self._ignoreWS = True
+        self._endingTag = 'html'
 
         # Handle optional args
         if emptyTags is not None:
@@ -413,19 +436,21 @@ class HTMLReader(SGMLParser):
     ## Reading ##
 
     def readFileNamed(self, filename, retainRootTag=True):
-        """
-        Reads the given file. Relies on readString(). See that method for more
-        information.
+        """Read the given file.
+
+        Relies on readString(). See that method for more information.
+
         """
         self._filename = filename
         contents = open(filename).read()
         return self.readString(contents, retainRootTag)
 
     def readString(self, string, retainRootTag=True):
-        """
-        Reads the given string, storing the results and returning the root tag. You
-        could continue to use HTMLReader object or disregard it and simply use the root
-        tag.
+        """Read the given string, store the results and return the root tag.
+
+        You could continue to use HTMLReader object or disregard it and simply
+        use the root tag.
+
         """
         self._rootTag  = None
         self._tagStack = []
@@ -451,10 +476,11 @@ class HTMLReader(SGMLParser):
     ## Printing ##
 
     def pprint(self, out=None):
-        """
-        Pretty prints the tag, its attributes and all its children.
+        """Pretty prints the tag, its attributes and all its children.
+
         Indentation is used for subtags.
         Print 'Empty.' if there is no root tag.
+
         """
         if self._rootTag:
             self._rootTag.pprint(out)
@@ -467,40 +493,41 @@ class HTMLReader(SGMLParser):
     ## Access ##
 
     def rootTag(self):
-        """
-        Returns the root tag. May return None if no HTML has been read yet, or if the
-        last invocation of one of the read methods was passed retainRootTag=False.
+        """Return the root tag.
+
+        May return None if no HTML has been read yet, or if the last
+        invocation of one of the read methods was passed retainRootTag=False.
+
         """
         return self._rootTag
 
     def filename(self):
-        """
-        Returns the filename that was read, or None if no file was processed.
-        """
+        """Return the filename that was read, or None if no file was processed."""
         return self._filename
 
     def emptyTags(self):
-        """
-        Returns a list of empty tags. See also: class docs and setEmptyTags().
+        """Return a list of empty tags.
+
+        See also: class docs and setEmptyTags().
+
         """
         return self._emptyTagList
 
     def setEmptyTags(self, tagList):
-        """
-        Sets the HTML tags that are considered empty such as <br> and <hr>.
-        The default is found in the global, DefaultEmptyTags, and is fairly thorough,
-        but does not include <p>, <li> and some other tags that HTML authors often use
-        as empty tags.
+        """Set the HTML tags that are considered empty such as <br> and <hr>.
+
+        The default is found in the global, DefaultEmptyTags, and is fairly
+        thorough, but does not include <p>, <li> and some other tags that
+        HTML authors often use as empty tags.
+
         """
         self._emptyTagList = list(tagList)
-        self._updateEmptyTagDict()
+        self._updateEmptyTagSet()
 
     def extendEmptyTags(self, tagList):
-        """
-        Extends the current list of empty tags with the given list.
-        """
+        """Extend the current list of empty tags with the given list."""
         self._emptyTagList.extend(tagList)
-        self._updateEmptyTagDict()
+        self._updateEmptyTagSet()
 
 
     ## Debugging ##
@@ -509,10 +536,11 @@ class HTMLReader(SGMLParser):
         return self._printsStack
 
     def setPrintsStack(self, flag):
-        """
-        Sets the boolean value of the "prints stack" option. This is a debugging
-        option which will print the internal tag stack during HTML processing. The
-        default value is False.
+        """Set the boolean value of the "prints stack" option.
+
+        This is a debugging option which will print the internal tag stack
+        during HTML processing. The default value is False.
+
         """
         self._printsStack = flag
 
@@ -520,9 +548,10 @@ class HTMLReader(SGMLParser):
     ## Command line ##
 
     def main(self, args=None):
-        """
-        The command line equivalent of readFileNamed().
+        """The command line equivalent of readFileNamed().
+
         Invoked when HTMLTag is run as a program.
+
         """
         if args is None:
             args = sys.argv
@@ -540,7 +569,7 @@ class HTMLReader(SGMLParser):
     def handle_data(self, data):
         if self._finished:
             return
-        assert type(data) is StringType
+        assert isinstance(data, basestring)
         if self._ignoreWS:
             data = data.strip()
             if not data:
@@ -552,7 +581,8 @@ class HTMLReader(SGMLParser):
 
 
     def handle_pi(self, data):
-        raise HTMLTagProcessingInstructionError, 'Was not expecting a processing instruction: %r' % data
+        raise HTMLTagProcessingInstructionError(
+            'Was not expecting a processing instruction: %r' % data)
 
     def unknown_starttag(self, name, attrs):
         if self._finished:
@@ -560,7 +590,7 @@ class HTMLReader(SGMLParser):
         tag = HTMLTag(name, lineNumber=self._lineNumber)
         for attrName, value in attrs:
             tag.readAttr(attrName, value)
-        if self._emptyTagDict.has_key(name):
+        if name in self._emptyTagSet:
             # We'll never have any children. Boo hoo.
             assert self._rootTag, 'Cannot start HTML with an empty tag: %r' % tag
             self._tagStack[-1].addChild(tag)
@@ -600,25 +630,28 @@ class HTMLReader(SGMLParser):
         if self._printsStack:
             print 'END   %s: %r' % (name.ljust(6), self._tagStack)
         if openingTag.name() != name:
-            raise HTMLTagUnbalancedError('line %i: opening is %r, but closing is <%s>.' % \
-                    (self._lineNumber, openingTag, name), line=self._lineNumber, opening=openingTag.name(), closing=name, tagStack=self._tagStack)
+            raise HTMLTagUnbalancedError(
+                'line %i: opening is %r, but closing is <%s>.'
+                % (self._lineNumber, openingTag, name),
+                line=self._lineNumber, opening=openingTag.name(),
+                closing=name, tagStack=self._tagStack)
         else:
             openingTag.closedBy(name, self._lineNumber)
 
     def close(self):
-        if len(self._tagStack) > 0 and not (len(self._tagStack) == 1 and self._usedFakeRootTag):
-            raise HTMLTagIncompleteError('line %i: tagStack = %r' % (self._lineNumber, self._tagStack), line=self._lineNumber, tagStack=repr(self._tagStack))
+        if len(self._tagStack) > 0 and not (
+                len(self._tagStack) == 1 and self._usedFakeRootTag):
+            raise HTMLTagIncompleteError(
+                'line %i: tagStack = %r' % (self._lineNumber, self._tagStack),
+                line=self._lineNumber, tagStack=repr(self._tagStack))
         SGMLParser.close(self)
 
 
     ## Self utility ##
 
-    def _updateEmptyTagDict(self):
-        """Create a dictionary out of the empty tag list for quick look up."""
-        dict = {}
-        for tag in self._emptyTagList:
-            dict[tag] = None
-        self._emptyTagDict = dict
+    def _updateEmptyTagSet(self):
+        """Create a set out of the empty tag list for quick look up."""
+        self._emptyTagSet = set(self._emptyTagList)
 
     # The following dict defines for various tags either:
     #    + the complete set of tags that can be contained within
@@ -626,25 +659,27 @@ class HTMLReader(SGMLParser):
     # This information helps HTMLReader detect some types of errors
     # earlier and other types of errors, it would never detect.
     tagContainmentConfig = {
-            'html':   'canOnlyHave head body',
-            'head':   'cannotHave  html head body',
-            'body':   'cannotHave  html head body',
-            'table':  'canOnlyHave tr thead tbody tfoot a',
-            # a because in IE you can wrap a row in <a> to make the entire row clickable
-            'tr':     'canOnlyHave th td',
-            'td':     'cannotHave  td tr',
-            'select': 'canOnlyHave option',
+        'html':   'canOnlyHave head body',
+        'head':   'cannotHave  html head body',
+        'body':   'cannotHave  html head body',
+        'table':  'canOnlyHave tr thead tbody tfoot a',
+        # a because in IE you can wrap a row in <a> to make the entire row clickable
+        'tr':     'canOnlyHave th td',
+        'td':     'cannotHave  td tr',
+        'select': 'canOnlyHave option',
     }
 
     def computeTagContainmentConfig(self):
         config = {}
         for key, value in self.tagContainmentConfig.items():
-            if isinstance(value, StringType):
+            if isinstance(value, basestring):
                 value = value.split()
-                configClass = configClassForName.get(value[0])
+                configClass = configClassForName.get(value.pop(0))
                 if configClass is None:
-                    raise KeyError, 'Unknown config name %r for value %r in %s.tagContainmentConfig' % (key, value, self.__class__.__name__)
-                config[key] = configClass(key, value[1:])
+                    raise KeyError('Unknown config name %r for value %r'
+                        ' in %s.tagContainmentConfig'
+                        % (key, value, self.__class__.__name__))
+                config[key] = configClass(key, value)
             else:
                 assert isinstance(value, TagConfig), 'key=%r, value=%r' % (key, value)
                 config[key] = value
@@ -658,40 +693,41 @@ class HTMLReader(SGMLParser):
         finish_endtag = unknown_endtag
 
 
-class TagConfig:
+class TagConfig(object):
 
     def __init__(self, name, tags):
         self.name = name
-        # turn list of tags into a dict/set for fast lookup (avoid linear searches)
-        dict = {}
-        for tag in tags:
-            dict[tag] = None
-        self.tags = dict
+        # turn tag list into a set for fast lookup (avoid linear searches)
+        self.tags = set(tags)
 
     def encounteredTag(self, tag, lineNum):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
 
 class TagCanOnlyHaveConfig(TagConfig):
 
     def encounteredTag(self, tag, lineNum):
-        if not self.tags.has_key(tag.lower()):
-            raise HTMLNotAllowedError('line %i: the tag %r is not allowed in %r which can only have %r.' % (
-                lineNum, tag, self.name, self.tags.keys()), line=lineNum, encounteredTag=tag, containingTag=self.name, canOnlyHave=self.tags.keys())
+        if tag.lower() not in self.tags:
+            raise HTMLNotAllowedError('line %i: the tag %r'
+                ' is not allowed in %r which can only have %r.'
+                % (lineNum, tag, self.name, sorted(self.tags)),
+                line=lineNum, encounteredTag=tag, containingTag=self.name,
+                canOnlyHave=self.tags)
 
 
 class TagCannotHaveConfig(TagConfig):
 
     def encounteredTag(self, tag, lineNum):
-        if self.tags.has_key(tag.lower()):
-            raise HTMLNotAllowedError('line %i: The tag %r is not allowed in %r which cannot have %r.' % (
-                lineNum, tag, self.name, self.tags.keys()), line=lineNum, enounteredTag=tag, containingTag=self.name, cannotHave=self.tags.keys())
+        if tag.lower() in self.tags:
+            raise HTMLNotAllowedError('line %i: The tag %r'
+                ' is not allowed in %r which cannot have %r.'
+                % (lineNum, tag, self.name, sorted(self.tags)),
+                line=lineNum, enounteredTag=tag, containingTag=self.name,
+                cannotHave=self.tags)
 
 
-configClassForName = {
-    'canOnlyHave': TagCanOnlyHaveConfig,
-    'cannotHave': TagCannotHaveConfig,
-}
+configClassForName = dict(
+    canOnlyHave=TagCanOnlyHaveConfig, cannotHave=TagCannotHaveConfig)
 
 
 if __name__ == '__main__':

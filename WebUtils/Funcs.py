@@ -12,18 +12,18 @@ TO DO
 """
 
 
-htmlForNone = '-'  # used by htmlEncode.
+htmlForNone = '-' # used by htmlEncode
 
-htmlCodes = [
-        ['&', '&amp;'],
-        ['<', '&lt;'],
-        ['>', '&gt;'],
-        ['"', '&quot;'],
-        # ['\n', '<br>'],
-]
+htmlCodes = (
+    ('&', '&amp;'),
+    ('<', '&lt;'),
+    ('>', '&gt;'),
+    ('"', '&quot;'),
+    # ['\n', '<br>'],
+)
 
-htmlCodesReversed = htmlCodes[:]
-htmlCodesReversed.reverse()
+htmlCodesReversed = tuple(reversed(htmlCodes))
+
 
 def htmlEncode(what, codes=htmlCodes):
     if what is None:
@@ -38,6 +38,7 @@ def htmlEncode(what, codes=htmlCodes):
     what = str(what)
     return htmlEncodeStr(what, codes)
 
+
 def htmlEncodeStr(s, codes=htmlCodes):
     """Return the HTML encoded version of the given string.
 
@@ -47,6 +48,7 @@ def htmlEncodeStr(s, codes=htmlCodes):
     for code in codes:
         s = s.replace(code[0], code[1])
     return s
+
 
 def htmlDecode(s, codes=htmlCodesReversed):
     """Return the ASCII decoded version of the given HTML string.
@@ -59,12 +61,13 @@ def htmlDecode(s, codes=htmlCodesReversed):
         s = s.replace(code[1], code[0])
     return s
 
+
 _urlEncode = {}
 for i in range(256):
     c = chr(i)
-    _urlEncode[c] = c == ' ' and '+' \
-            or i < 128 and (c.isalnum() or c in '_.-/') and c \
-            or '%%%02X' % i
+    _urlEncode[c] = (c == ' ' and '+'
+        or i < 128 and (c.isalnum() or c in '_.-/') and c
+        or '%%%02X' % i)
 
 def urlEncode(s):
     """Return the encoded version of the given string.
@@ -76,6 +79,7 @@ def urlEncode(s):
 
     """
     return ''.join(map(_urlEncode.get, s))
+
 
 _urlDecode = {}
 for i in range(256):
@@ -102,27 +106,28 @@ def urlDecode(s):
             s[i] = unichr(int(t[:2], 16)) + t[2:]
     return ''.join(s)
 
-def htmlForDict(dict, addSpace=None, filterValueCallBack=None,
-                maxValueLength=None, topHeading=None, isEncoded=None):
+
+def htmlForDict(d, addSpace=None, filterValueCallBack=None,
+        maxValueLength=None, topHeading=None, isEncoded=None):
     """Return an HTML string with a table where each row is a key-value pair."""
-    if not dict:
+    if not d:
         return ''
-    keys = dict.keys()
+    keys = d.keys()
     keys.sort()
     # A really great (er, bad) example of hardcoding.  :-)
     html = ['<table class="NiceTable">\n']
     if topHeading:
         html.append('<tr class="TopHeading"><th')
         html.append((type(topHeading) is type(())
-                and '>%s</th><th>%s' or ' colspan="2">%s') % topHeading)
+            and '>%s</th><th>%s' or ' colspan="2">%s') % topHeading)
         html.append('</th></tr>\n')
     for key in keys:
-        value = dict[key]
+        value = d[key]
         if addSpace and addSpace.has_key(key):
             target = addSpace[key]
             value = (target + ' ').join(value.split(target))
         if filterValueCallBack:
-            value = filterValueCallBack(value, key, dict)
+            value = filterValueCallBack(value, key, d)
         if maxValueLength and not isEncoded:
             value = str(value)
             if len(value) > maxValueLength:
@@ -131,9 +136,10 @@ def htmlForDict(dict, addSpace=None, filterValueCallBack=None,
         if not isEncoded:
             value = htmlEncode(value)
         html.append('<tr><th align="left">%s</th><td>%s</td></tr>\n'
-                % (key, value))
+            % (key, value))
     html.append('</table>')
     return ''.join(html)
+
 
 def requestURI(env):
     """Return the request URI for a given CGI-style dictionary.
@@ -151,6 +157,7 @@ def requestURI(env):
         if query != '':
             uri += '?' + query
     return uri
+
 
 def normURL(path):
     """Normalizes a URL path, like os.path.normpath.
