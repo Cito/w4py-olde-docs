@@ -29,6 +29,6 @@ class MiddleDict(UserDict):
         elif s in (True, 1, '1', 1.0, 'true'):
             return True
         else:
-            raise ValueError, ('%r for attr %r should be a boolean value'
-                    ' (1, 0, True, False) but is %r instead'
-                    % (key, self.get('Name', '(UNNAMED)'), original))
+            raise ValueError('%r for attr %r should be a boolean value'
+                ' (1, 0, True, False) but is %r instead'
+                % (key, self.get('Name', '(UNNAMED)'), original))

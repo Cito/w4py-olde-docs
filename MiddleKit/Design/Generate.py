@@ -6,12 +6,10 @@
 
 """
 
-
 import os, sys
 from getopt import getopt
 import FixPath
 import MiddleKit
-from MiscUtils import StringTypes
 
 if sys.platform == 'win32':
     # without this, I can't see output from uncaught exceptions!
@@ -38,19 +36,19 @@ class Generate:
         if opt.has_key('sql'):
             print 'Generating SQL...'
             self.generate(
-                    pyClass = opt['db'] + 'SQLGenerator',
-                    model = opt['model'],
-                    configFilename = opt.get('config'),
-                    outdir = os.path.join(outdir, 'GeneratedSQL'))
+                pyClass = opt['db'] + 'SQLGenerator',
+                model = opt['model'],
+                configFilename = opt.get('config'),
+                outdir = os.path.join(outdir, 'GeneratedSQL'))
         if opt.has_key('py'):
             print 'Generating Python...'
             self.generate(
-                    pyClass = opt['db'] + 'PythonGenerator',
-                    model = opt['model'],
-                    configFilename = opt.get('config'),
-                    outdir=outdir)
+                pyClass = opt['db'] + 'PythonGenerator',
+                model = opt['model'],
+                configFilename = opt.get('config'),
+                outdir=outdir)
         model = MiddleKit.Core.Model.Model(opt['model'],
-                configFilename=opt.get('config'), havePythonClasses=0)
+            configFilename=opt.get('config'), havePythonClasses=0)
         model.printWarnings()
 
     def usage(self, errorMsg=None):
@@ -70,10 +68,10 @@ class Generate:
 
     def options(self, args):
         # Command line dissection
-        if type(args) == type(''):
+        if isinstance(args, basestring):
             args = args.split()
         optPairs, files = getopt(args[1:], 'h',
-                ['help', 'db=', 'model=', 'sql', 'py', 'config=', 'outdir='])
+            ['help', 'db=', 'model=', 'sql', 'py', 'config=', 'outdir='])
         if len(optPairs) < 1:
             self.usage('Missing options.')
         if len(files) > 0:
@@ -111,13 +109,13 @@ class Generate:
         in which case it is considered a filename of a model.
 
         """
-        if type(pyClass) in StringTypes:
+        if isinstance(pyClass, basestring):
             module = __import__(pyClass, globals())
             pyClass = getattr(module, pyClass)
         generator = pyClass()
-        if type(model) in StringTypes:
+        if isinstance(model, basestring):
             generator.readModelFileNamed(model, configFilename=configFilename,
-                    havePythonClasses=0)
+                havePythonClasses=False)
         else:
             generator.setModel(model)
         generator.generate(outdir)

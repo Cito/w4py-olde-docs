@@ -44,7 +44,7 @@ class Klasses(ModelObject, UserDict):
         names = 'bool int long float string enum date time list ObjRef decimal'
         names = names.split()
         for name in names:
-            map[name] = name.capitalize()+'Attr'
+            map[name] = name.capitalize() + 'Attr'
         map['datetime'] = 'DateTimeAttr'
         self._typeNamesToAttrClassNames = map
 
@@ -87,7 +87,7 @@ class Klasses(ModelObject, UserDict):
     def read(self, filename):
         # @@ 2000-11-24 ce: split into readTable()
         self._filename = filename
-        table = DataTable(filename, usePickleCache=0)  # because PickleCache is used at the Model level
+        table = DataTable(filename, usePickleCache=False) # because PickleCache is used at the Model level
 
         # in case we want to look at these later:
         self._tableHeadings = table.headings()

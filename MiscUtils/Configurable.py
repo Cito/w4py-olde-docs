@@ -22,7 +22,7 @@ class Configurable(object):
     Subclasses should override:
 
         * defaultConfig()  to return a dictionary of default settings
-                           such as { 'Frequency': 5 }
+                           such as {'Frequency': 5}
 
         * configFilename() to return the filename by which users can
                            override the configuration such as
@@ -34,7 +34,7 @@ class Configurable(object):
 
     They might also use the printConfig() method, for example:
 
-        self.printConfig()      # or
+        self.printConfig()     # or
         self.printConfig(file)
 
     Users of your software can create a file with the same name as
@@ -143,8 +143,8 @@ class Configurable(object):
             # in case it has been edited on a different platform
             contents = open(filename, 'rU').read()
         except IOError, e:
-            print 'WARNING: Config file %s not loaded:'
-            print e.strerror
+            print ('WARNING:',
+                'Config file', filename, 'not loaded:', e.strerror)
             print
             return {}
         isDict = contents.lstrip().startswith('{')

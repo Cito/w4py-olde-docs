@@ -34,8 +34,8 @@ class ObjRefAttr(Attr):
         self._targetKlass = self.model().klass(self.targetClassName(), None)
         if not self._targetKlass:
             from Model import ModelError
-            raise ModelError, 'class %s: attr %s: cannot locate target class %s for this obj ref.' % (
-                    self.klass().name(), self.name(), self.targetClassName())
+            raise ModelError('class %s: attr %s: cannot locate target class %s for this obj ref.' % (
+                self.klass().name(), self.name(), self.targetClassName()))
 
     def className(self):
         print 'DEPRECATED: ObjRefAttr.className() on 2004-02-27. Use targetClassName() instead.'

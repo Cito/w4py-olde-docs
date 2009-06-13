@@ -24,31 +24,31 @@ class SQLGenerator(CodeGenerator):
     """The MiddleKit SQL Generator class.
 
     This class and its associated mix-ins are responsible for generating:
-            - Create.sql
-            - InsertSample.sql
-            - Info.text
+        - Create.sql
+        - InsertSample.sql
+        - Info.text
 
     A subclass and further mix-ins are required for specific databases
     (since SQL varies from product to product).
 
     The main method to invoke is generate():
 
-            gen = SomeSQLGenerator()
-            gen.readModelFileNamed(filename)
-            gen.generate(dirname)
+        gen = SomeSQLGenerator()
+        gen.readModelFileNamed(filename)
+        gen.generate(dirname)
 
     For subclassers:
-            - Subclasses should be named <DATABASE>SQLGenerator where <DATABASE>
-              is the name of the particular database product.
-            - A good example of a custom subclass is MySQLSQLGenerator.py.
-              Be sure to take a look at it.
-            - Candidates for customization include:
-                    Klasses
-                            dropDatabaseSQL()
-                            createDatabaseSQL()
-                            useDatabaseSQL()
-                    StringAttr
-                    EnumAttr
+        - Subclasses should be named <DATABASE>SQLGenerator where <DATABASE>
+          is the name of the particular database product.
+        - A good example of a custom subclass is MySQLSQLGenerator.py.
+          Be sure to take a look at it.
+        - Candidates for customization include:
+            Klasses
+                dropDatabaseSQL()
+                createDatabaseSQL()
+                useDatabaseSQL()
+            StringAttr
+            EnumAttr
     """
 
     def sqlDatabaseName(self):
@@ -885,15 +885,15 @@ class ObjRefAttr:
             # (you can often just insert the obj id)
             objIdRef = ''
             if self.get('Ref', None) or (
-                            self.setting('GenerateSQLReferencesForObjRefsToSingleClasses', False)
-                                    and len(self.targetKlass().subklasses()) == 0):
+                    self.setting('GenerateSQLReferencesForObjRefsToSingleClasses', False)
+                        and len(self.targetKlass().subklasses()) == 0):
                 if self.get('Ref', None) not in ('0', 0, 0.0, False):
                     objIdRef = self.objIdReferences()
             out.write('    %s %s%s%s%s, /* %s */ \n' % (
-                    classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault,
-                            self.classIdReferences(), self.targetClassName()))
+                classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault,
+                    self.classIdReferences(), self.targetClassName()))
             out.write('    %s %s%s%s' % (objIdName, self.sqlTypeOrOverride(),
-                    notNull, objIdRef))
+                notNull, objIdRef))
 
     def classIdReferences(self):
         return ' references _MKClassIds'
@@ -930,8 +930,8 @@ class ObjRefAttr:
             refByAttr = self.refByAttr
             assert targetKlass is refByAttr.klass()
             sql = '(select %s from %s where %s=%s)' % (
-                    targetKlass.sqlSerialColumnName(), targetKlass.sqlTableName(),
-                    refByAttr.sqlColumnName(), refByAttr.sqlForSampleInput(input))
+                targetKlass.sqlSerialColumnName(), targetKlass.sqlTableName(),
+                refByAttr.sqlColumnName(), refByAttr.sqlForSampleInput(input))
             sql = str(targetKlass.id()) + ',' + sql
             # print '>> sql =', sql
             return sql
@@ -1056,7 +1056,7 @@ class PrimaryKey:
     def __init__(self, name, klass):
         self._name = name
         self._klassid = klass.id()
-        self._props = {'isDerived': False}
+        self._props = dict(isDerived=False)
 
         # this is for PostgreSQLSQLGenerator, but it's awkward to keep it there
         self._klass = klass

@@ -7,7 +7,7 @@ from MiddleDict import MiddleDict
 
 nameRE = re.compile('^([A-Za-z_][A-Za-z_0-9]*)$')
 reservedRE = re.compile('allattrs|changed|clone|debugstr|dumpattrs|key|klass'
-        '|serialnum|store|valueforattr|valueforkey', re.I)
+    '|serialnum|store|valueforattr|valueforkey', re.I)
 
 
 class Attr(MiddleDict, ModelObject):

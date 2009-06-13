@@ -1,5 +1,5 @@
 import sys
-from types import ModuleType, ClassType
+from types import ModuleType
 
 from MiscUtils.MixIn import MixIn
 from MiscUtils import NoDefault
@@ -82,7 +82,7 @@ class ModelUser:
             print '>>', module
         for name in dir(module):
             generatorThing = getattr(module, name)
-            if type(generatorThing) is ClassType:
+            if isinstance(generatorThing, type):
                 # See if a class with the same name exists in MiddleKit.Core
                 import MiddleKit.Core as Core
                 if name in coreClassNames:
@@ -90,8 +90,8 @@ class ModelUser:
                     if baseClass is not generatorThing:
                         if verbose:
                             print '>> mixing %s into %s' % (generatorThing, baseClass)
-                        assert type(baseClass) is ClassType
-                        assert type(generatorThing) is ClassType
+                        assert isinstance(baseClass, type)
+                        assert isinstance(generatorThing, type)
                         MixIn(baseClass, generatorThing, mixInSuperMethods=1)
 
 

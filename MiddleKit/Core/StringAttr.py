@@ -13,4 +13,4 @@ class StringAttr(BasicTypeAttr):
     def printWarnings(self, out):
         if self.get('Max') in (None, '') and not self.get('SQLType'):
             out.write('warning: model %s: class %s: attr %s: max string length unspecified\n' % (
-                    self.model().name(), self.klass().name(), self.name()))
+                self.model().name(), self.klass().name(), self.name()))

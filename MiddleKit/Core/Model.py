@@ -46,8 +46,8 @@ class Model(Configurable):
         # Klass or Attr
 
     def __init__(self,
-                    filename=None, classesFilename=None, configFilename=None,
-                    customCoreClasses={}, rootModel=None, havePythonClasses=1):
+            filename=None, classesFilename=None, configFilename=None,
+            customCoreClasses={}, rootModel=None, havePythonClasses=True):
         Configurable.__init__(self)
         self._havePythonClasses = havePythonClasses
         self._filename = None
@@ -82,9 +82,7 @@ class Model(Configurable):
     def filename(self):
         return self._filename
 
-    def read(self, filename, isClassesFile=0):
-        import time
-        start = time.time()
+    def read(self, filename, isClassesFile=False):
         assert self._filename is None, 'Cannot read twice.'
         # Assume the .mkmodel extension if none is given
         if os.path.splitext(filename)[1] == '':
@@ -94,21 +92,18 @@ class Model(Configurable):
         if isClassesFile:
             self.dontReadParents()
         else:
-            self.readParents()  # the norm
+            self.readParents() # the norm
         try:
             if isClassesFile:
                 self.readKlassesDirectly(filename)
             else:
-                self.readKlassesInModelDir()  # the norm
+                self.readKlassesInModelDir() # the norm
             self.awakeFromRead()
         except ModelError, e:
             print
             print 'Error while reading model:'
             e.printError(filename)
             raise
-            #sys.exit(1)
-        dur = time.time() - start
-        # print '%.2f seconds\n' % dur
 
     def readKlassesInModelDir(self):
         """Read the Classes.csv or Classes.pickle.cache file as appropriate."""
@@ -127,7 +122,7 @@ class Model(Configurable):
     def readKlassesDirectly(self, path):
         # read the pickled version of Classes if possible
         data = None
-        shouldUseCache = self.setting('UsePickledClassesCache', 0)
+        shouldUseCache = self.setting('UsePickledClassesCache', False)
         if shouldUseCache:
             from MiscUtils.PickleCache import readPickleCache, writePickleCache
             data = readPickleCache(path, pickleVersion=1, source='MiddleKit')
@@ -167,9 +162,7 @@ class Model(Configurable):
             assert klass is self.klass(klass.name())
         self._allKlassesByName = byName
         self._allKlassesInOrder = inOrder
-
         self._klasses.awakeFromRead(self)
-
 
     def readParents(self, parentFilenames=None):
         """Read parent models.
@@ -182,14 +175,14 @@ class Model(Configurable):
             parentFilenames = self.setting('Inherit', [])
         for filename in parentFilenames:
             filename = os.path.abspath(os.path.join(
-                    os.path.dirname(self._filename), filename))
+                os.path.dirname(self._filename), filename))
             if self._allModelsByFilename.has_key(filename):
                 model = self._allModelsByFilename[filename]
                 assert model != self._rootModel
             else:
                 model = self.__class__(filename,
-                        customCoreClasses=self._coreClasses,
-                        rootModel=self, havePythonClasses=self._havePythonClasses)
+                    customCoreClasses=self._coreClasses,
+                    rootModel=self, havePythonClasses=self._havePythonClasses)
                 self._allModelsByFilename[filename] = model
             self._parents.append(model)
 
@@ -251,7 +244,7 @@ class Model(Configurable):
         pyClass = self._coreClasses.get(className, None)
         if pyClass is None:
             results = {}
-            exec 'import MiddleKit.Core.%s as module'%className in results
+            exec 'import MiddleKit.Core.%s as module'% className in results
             pyClass = getattr(results['module'], className)
             assert type(pyClass) is ClassType
             self._coreClasses[className] = pyClass
@@ -342,10 +335,10 @@ class Model(Configurable):
         # but in that case there really is no dependency order.
         if len(allKlasses) < len(self._allKlassesInOrder):
             raise ModelError("Cannot determine a dependency order"
-                    " among the classes due to a cycle. Try setting Ref=0"
-                    " for one of the attributes to break the cycle.")
+                " among the classes due to a cycle. Try setting Ref=0"
+                " for one of the attributes to break the cycle.")
         assert len(allKlasses) == len(self._allKlassesInOrder), \
-                '%r, %r, %r' % (len(allKlasses), len(self._allKlassesInOrder), allKlasses)
+            '%r, %r, %r' % (len(allKlasses), len(self._allKlassesInOrder), allKlasses)
         # print '>> allKlassesInDependencyOrder() =', ' '.join([k.name() for k in allKlasses])
         return allKlasses
 
@@ -369,8 +362,8 @@ class Model(Configurable):
                 exec 'import %s%s as module' % (pkg, name) in results
             except ImportError, exc:
                 raise ModelError("Could not import module for class '%s' due to %r."
-                        " If you've added this class recently,"
-                        " you need to re-generate your model." % (name, exc.args[0]))
+                    " If you've added this class recently,"
+                    " you need to re-generate your model." % (name, exc.args[0]))
             pyClass = getattr(results['module'], 'pyClass', None)
             if pyClass is None:
                 pyClass = getattr(results['module'], name)
@@ -391,25 +384,25 @@ class Model(Configurable):
             return os.path.join(self._filename, self._configFilename)
 
     def defaultConfig(self):
-        return {
-                'Threaded': True,
-                'ObjRefSuffixes': ('ClassId', 'ObjId'),
-                'UseBigIntObjRefColumns': False,
-                # 'SQLLog': { 'File': 'stdout', },
-                'PreSQL': '',
-                'PostSQL': '',
-                'DropStatements': 'database',  # database, tables
-                'SQLSerialColumnName': 'serialNum',  # can use [cC]lassName, _ClassName
-                'AccessorStyle': 'methods',  # can be 'methods' or 'properties'
-                'ExternalEnumsSQLNames': {
-                        'Enable': False,
-                        'TableName': '%(ClassName)s%(AttrName)sEnum',
-                        'ValueColName': 'value',
-                        'NameColName': 'name',
-                },
-                # can use: [cC]lassName, _ClassName, [aA]ttrName, _AttrName.
-                # "_" prefix means "as is", the others control the case of the first character.
-        }
+        return dict(
+            Threaded = True,
+            ObjRefSuffixes = ('ClassId', 'ObjId'),
+            UseBigIntObjRefColumns = False,
+            # SQLLog = {'File': 'stdout'},
+            PreSQL = '',
+            PostSQL = '',
+            DropStatements = 'database', # database, tables
+            SQLSerialColumnName = 'serialNum', # can use [cC]lassName, _ClassName
+            AccessorStyle = 'methods',  # can be 'methods' or 'properties'
+            ExternalEnumsSQLNames = dict(
+                Enable = False,
+                TableName = '%(ClassName)s%(AttrName)sEnum',
+                ValueColName = 'value',
+                NameColName = 'name',
+            ),
+            # can use: [cC]lassName, _ClassName, [aA]ttrName, _AttrName.
+            # "_" prefix means "as is", the others control the case of the first character.
+        )
 
     def usesExternalSQLEnums(self):
         flag = getattr(self, '_usesExternalSQLEnums', None)
@@ -426,6 +419,6 @@ class Model(Configurable):
             out = sys.stdout
         if len(self._klasses.klassesInOrder()) < 1:
             out.write("warning: Model '%s' doesn't contain any class definitions.\n"
-                    % self.name())
+                % self.name())
         for klass in self.klasses().klassesInOrder():
             klass.printWarnings(out)

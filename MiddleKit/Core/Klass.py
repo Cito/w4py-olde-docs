@@ -88,9 +88,9 @@ class Klass(MiddleDict, ModelObject):
         """Make all attributes.
 
         Makes list attributes accessible via methods for the following:
-                allAttrs - every attr of the klass including inherited and derived attributes
-                allDataAttrs - every attr of the klass including inherited, but NOT derived
-                allDataRefAttrs - same as allDataAttrs, but only obj refs and lists
+            allAttrs - every attr of the klass including inherited and derived attributes
+            allDataAttrs - every attr of the klass including inherited, but NOT derived
+            allDataRefAttrs - same as allDataAttrs, but only obj refs and lists
 
         ...and a dictionary attribute used by lookupAttr().
 
