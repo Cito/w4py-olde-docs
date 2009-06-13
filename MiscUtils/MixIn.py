@@ -1,7 +1,7 @@
 from types import MethodType
 
 
-def MixIn(pyClass, mixInClass, makeAncestor=0, mixInSuperMethods=0):
+def MixIn(pyClass, mixInClass, makeAncestor=False, mixInSuperMethods=False):
     """Mixes in the attributes of the mixInClass into the pyClass.
 
     These attributes are typically methods (but don't have to be).
@@ -41,10 +41,10 @@ def MixIn(pyClass, mixInClass, makeAncestor=0, mixInSuperMethods=0):
     be able to call the original or "parent" method from the mixed-in method.
     This is done like so:
 
-            class MyMixInClass:
-            def foo(self):
-                    MyMixInClass.mixInSuperFoo(self)        # call the original method
-                    # now do whatever you want
+        class MyMixInClass:
+        def foo(self):
+            MyMixInClass.mixInSuperFoo(self)        # call the original method
+            # now do whatever you want
 
     """
     assert mixInClass is not pyClass, \
@@ -55,9 +55,7 @@ def MixIn(pyClass, mixInClass, makeAncestor=0, mixInSuperMethods=0):
     else:
         # Recursively traverse the mix-in ancestor classes in order
         # to support inheritance
-        baseClasses = list(mixInClass.__bases__)
-        baseClasses.reverse()
-        for baseClass in baseClasses:
+        for baseClass in reversed(mixInClass.__bases__):
             MixIn(pyClass, baseClass)
 
         # Track the mix-ins made for a particular class
@@ -79,17 +77,19 @@ def MixIn(pyClass, mixInClass, makeAncestor=0, mixInSuperMethods=0):
         # Install the mix-in methods into the class
         for name in dir(mixInClass):
             # skip private members, but not __repr__ et al:
-            if not (name.startswith('__') and not name.endswith('__')
-                    ) and name not in readOnlyNames:
+            if name.startswith('__'):
+                if not name.endswith('__'):
+                    continue # private
                 member = getattr(mixInClass, name)
-
-                if isinstance(member, MethodType) and mixInSuperMethods:
+                if not isinstance(member, MethodType):
+                    continue # built in or descriptor
+            else:
+                member = getattr(mixInClass, name)
+            if isinstance(member, MethodType):
+                if mixInSuperMethods:
                     if hasattr(pyClass, name):
                         origmember = getattr(pyClass, name)
                         setattr(mixInClass, 'mixInSuper'
                             + name[0].upper() + name[1:], origmember)
-                if isinstance(member, MethodType):
-                    member = member.im_func
-                setattr(pyClass, name, member)
-
-readOnlyNames = '__doc__'.split()
+                member = member.im_func
+            setattr(pyClass, name, member)

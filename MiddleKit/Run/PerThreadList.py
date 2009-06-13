@@ -4,7 +4,7 @@
 import thread
 
 
-class PerThreadList:
+class PerThreadList(object):
     """Per-thread list.
 
     PerThreadList behaves like a normal list, but changes to it are kept
@@ -29,14 +29,14 @@ class PerThreadList:
         except KeyError:
             self.data[threadid] = [item]
 
-    def extend(self, list, gettid=thread.get_ident):
+    def extend(self, items, gettid=thread.get_ident):
         threadid = gettid()
         try:
-            self.data[threadid].extend(list)
+            self.data[threadid].extend(items)
         except KeyError:
-            self.data[threadid] = list
+            self.data[threadid] = items
 
-    def clear(self, allThreads=0, gettid=thread.get_ident):
+    def clear(self, allThreads=False, gettid=thread.get_ident):
         """Erases the list, either for the current thread or for all threads.
 
         We need this method, because it obviously won't work for user code
@@ -52,11 +52,11 @@ class PerThreadList:
             except Exception:
                 pass
 
-    def items(self, allThreads=0, gettid=thread.get_ident):
+    def items(self, allThreads=False, gettid=thread.get_ident):
         if allThreads:
             items = []
-            for l in self.data.values():
-                items.extend(l)
+            for v in self.data.values():
+                items.extend(v)
             return items
         else:
             threadid = gettid()
@@ -67,10 +67,10 @@ class PerThreadList:
 
     def isEmpty(self, gettid=thread.get_ident):
         """Test if the list is empty for all threads."""
-        for l in self.data.values():
-            if l:
-                return 0
-        return 1
+        for v in self.data.values():
+            if v:
+                return False
+        return True
 
     def __len__(self, gettid=thread.get_ident):
         threadid = gettid()
@@ -81,13 +81,13 @@ class PerThreadList:
 
     def __getitem__(self,  i, gettid=thread.get_ident):
         threadid = gettid()
-        if self.data.has_key(threadid):
+        if threadid in self.data:
             return self.data[threadid][i]
         else:
             return [][i]
 
 
-class NonThreadedList:
+class NonThreadedList(object):
     """Non-threaded list.
 
     NonThreadedList behaves like a normal list.  Its only purpose is
@@ -102,13 +102,13 @@ class NonThreadedList:
     def append(self, item):
         self.data.append(item)
 
-    def extend(self, list):
-        self.data.extend(list)
+    def extend(self, items):
+        self.data.extend(items)
 
-    def items(self, allThreads=0):
+    def items(self, allThreads=False):
         return self.data
 
-    def clear(self, allThreads=0):
+    def clear(self, allThreads=False):
         """Erases the list.
 
         We need this method, because it obviously won't work for user code
@@ -131,28 +131,28 @@ class NonThreadedList:
 if __name__ == '__main__':
     # just a few tests used in development
     def addItems():
-        global l
-        l.append(1)
-        l.append(2)
-    global l
-    l = PerThreadList()
-    for i in l:
+        global s
+        s.append(1)
+        s.append(2)
+    global i
+    s = PerThreadList()
+    for i in s:
         print i
-    l.append(1)
-    assert len(l) == 1
-    l.append(2)
-    l.append(3)
-    assert len(l) == 3
-    for i in l:
+    s.append(1)
+    assert len(s) == 1
+    s.append(2)
+    s.append(3)
+    assert len(s) == 3
+    for i in s:
         print i
     from threading import Thread
     t = Thread(target=addItems)
     t.start()
     t.join()
-    assert len(l) == 3
-    assert len(l.items()) == 3
-    assert len(l.items(allThreads=1)) == 5
-    l.clear()
-    assert len(l.items(allThreads=1)) == 2
-    l.clear(allThreads=1)
-    assert len(l.items(allThreads=1)) == 0
+    assert len(s) == 3
+    assert len(s.items()) == 3
+    assert len(s.items(allThreads=True)) == 5
+    s.clear()
+    assert len(s.items(allThreads=True)) == 2
+    s.clear(allThreads=1)
+    assert len(s.items(allThreads=True)) == 0

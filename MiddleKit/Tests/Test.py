@@ -15,7 +15,6 @@ class RunError(Exception):
     which indicates an error.
 
     """
-    pass
 
 
 class Test:
@@ -214,7 +213,7 @@ class Test:
         sys.stderr.flush()
 
         if returnCode:
-            raise RunError, returnCode
+            raise RunError(returnCode)
 
         # print '>> RETURN CODE =', returnCode
         return returnCode

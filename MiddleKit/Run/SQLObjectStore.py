@@ -5,26 +5,26 @@ from MiddleObject import MiddleObject
 from ObjectStore import ObjectStore, UnknownObjectError
 from ObjectKey import ObjectKey
 from MiddleKit.Core.ObjRefAttr import objRefJoin, objRefSplit
-from MiscUtils import NoDefault, StringTypes, AbstractError, CSVJoiner
+from MiscUtils import NoDefault, AbstractError, CSVJoiner
 from MiscUtils import Funcs as funcs
 from MiscUtils.DBPool import DBPool
 from MiscUtils.MixIn import MixIn
 
 
 class SQLObjectStoreError(Exception):
-    pass
+    """SQL object store error"""
 
 class SQLObjectStoreThreadingError(SQLObjectStoreError):
-    pass
+    """SQL object store threading error"""
 
 class ObjRefError(SQLObjectStoreError):
-    pass
+    """SQL object store object reference error"""
 
 class ObjRefZeroSerialNumError(ObjRefError):
-    pass
+    """SQL object store serial number zero error"""
 
 class ObjRefDanglesError(ObjRefError):
-    pass
+    """SQL object store object dangles error"""
 
 
 aggressiveGC = False
@@ -48,7 +48,7 @@ class UnknownSerialNumberError(SQLObjectStoreError):
         return str(self.info)
 
 
-class UnknownSerialNumInfo:
+class UnknownSerialNumInfo(object):
     """For internal use when archiving objects.
 
     Attrs assigned externally are:
@@ -59,15 +59,15 @@ class UnknownSerialNumInfo:
     """
 
     def updateStmt(self):
-        assert self.sourceObject.serialNum != 0
+        assert self.sourceObject.serialNum() != 0
         assert self.targetObject.serialNum() != 0
         sourceKlass = self.sourceObject._mk_klass
         assert sourceKlass
         sourceTableName = sourceKlass.sqlTableName()
         sourceSqlSerialName = sourceKlass.sqlSerialColumnName()
         return 'update %s set %s where %s=%s;' % (
-                sourceTableName, self.sourceAttr.sqlUpdateExpr(self.targetObject),
-                sourceSqlSerialName, self.sourceObject.serialNum())
+            sourceTableName, self.sourceAttr.sqlUpdateExpr(self.targetObject),
+            sourceSqlSerialName, self.sourceObject.serialNum())
 
     def __repr__(self):
         s = []
@@ -82,10 +82,11 @@ class SQLObjectStore(ObjectStore):
 
     TO DO:
 
-            * _sqlEcho should be accessible via a config file setting as stdout, stderr or a filename.
+        * _sqlEcho should be accessible via a config file setting
+          as stdout, stderr or a filename.
 
     For details on DB API 2.0, including the thread safety levels see:
-            http://www.python.org/topics/database/DatabaseAPI-2.0.html
+        http://www.python.org/topics/database/DatabaseAPI-2.0.html
 
     """
 
@@ -117,7 +118,8 @@ class SQLObjectStore(ObjectStore):
         # Check thread safety
         self._threadSafety = self.threadSafety()
         if self._threaded and self._threadSafety == 0:
-            raise SQLObjectStoreThreadingError, 'Threaded is True, but the DB API threadsafety is 0.'
+            raise SQLObjectStoreThreadingError('Threaded is True,'
+                ' but the DB API threadsafety is 0.')
 
         # Cache some settings
         self._markDeletes = self.setting('DeleteBehavior', 'delete') == 'mark'
@@ -145,7 +147,9 @@ class SQLObjectStore(ObjectStore):
 
 
     def setUpSQLEcho(self):
-        """Set up the SQL echoing/logging for the store according to the setting 'SQLLog'.
+        """Set up the SQL echoing/logging for the store.
+
+        The logging is set up according to the setting 'SQLLog'.
 
         See the User's Guide for more info. Invoked by modelWasSet().
 
@@ -183,7 +187,8 @@ class SQLObjectStore(ObjectStore):
         that subclasses have implemented newConnection().
 
         """
-        assert self._model, 'Cannot connect: No model has been attached to this store yet.'
+        assert self._model, 'Cannot connect:' \
+            ' No model has been attached to this store yet.'
         if not self._connected:
             self._connection = self.newConnection()
             self._connected = True
@@ -191,7 +196,7 @@ class SQLObjectStore(ObjectStore):
             poolSize = self.setting('SQLConnectionPoolSize', 0)
             if poolSize:
                 args = self._dbArgs.copy()
-                self.augmentDatabaseArgs(args, pool=1)
+                self.augmentDatabaseArgs(args, pool=True)
                 try:
                     self._pool = DBPool(self.dbapiModule(), poolSize, **args)
                 except TypeError:
@@ -201,7 +206,7 @@ class SQLObjectStore(ObjectStore):
                     else:
                         raise
 
-    def augmentDatabaseArgs(self, args, pool=0):
+    def augmentDatabaseArgs(self, args, pool=False):
         # give subclasses the opportunity to add or change
         # database arguments
         pass
@@ -216,7 +221,7 @@ class SQLObjectStore(ObjectStore):
         Subclass responsibility.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def readKlassIds(self):
         """Read the klass ids from the SQL database. Invoked by connect()."""
@@ -224,15 +229,17 @@ class SQLObjectStore(ObjectStore):
         try:
             klassesById = {}
             for id, name in cur.fetchall():
-                assert id, "Id must be a non-zero int. id=%r, name=%r" % (id, name)
+                assert id, 'Id must be a non-zero int.' \
+                    ' id=%r, name=%r' % (id, name)
                 try:
                     klass = self._model.klass(name)
                 except KeyError:
                     filename = self._model.filename()
-                    msg = ('%s  The database has a class id for %r in the _MKClassIds table,'
-                            ' but no such class exists in the model %s.'
-                            ' The model and the db are not in sync.' % (name, name, filename))
-                    raise KeyError, msg
+                    msg = ('%s  The database has a class id for %r in the'
+                        ' _MKClassIds table, but no such class exists in'
+                        ' the model %s. The model and the db are not in sync.'
+                        % (name, name, filename))
+                    raise KeyError(msg)
                 klassesById[id] = klass
                 klass.setId(id)
         finally:
@@ -305,7 +312,7 @@ class SQLObjectStore(ObjectStore):
         Subclass responsibility.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def commitUpdates(self, allThreads=False):
         conn = None
@@ -345,7 +352,8 @@ class SQLObjectStore(ObjectStore):
         count = len(objects)
         if count == 0:
             if default is NoDefault:
-                raise UnknownObjectError, 'aClass = %r, serialNum = %r' % (aClass, serialNum)
+                raise UnknownObjectError('aClass = %r, serialNum = %r'
+                    % (aClass, serialNum))
             else:
                 return default
         else:
@@ -405,8 +413,8 @@ class SQLObjectStore(ObjectStore):
                         pyClass = klass.pyClass()
                         obj = pyClass()
                         assert isinstance(obj, MiddleObject), (
-                                'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r'
-                                        % (obj, type(obj), MiddleObject))
+                            'Not a MiddleObject. obj = %r, type = %r, MiddleObject = %r'
+                                % (obj, type(obj), MiddleObject))
                         obj.readStoreData(self, row)
                         obj.setKey(key)
                         self._objects[key] = obj
@@ -471,7 +479,7 @@ class SQLObjectStore(ObjectStore):
 
     def executeSQLTransaction(self, transaction, connection=None, commit=True):
         """Execute the given sequence of SQL statements and commit as transaction."""
-        if type(transaction) in StringTypes:
+        if isinstance(transaction, basestring):
             transaction = [transaction]
         try:
             for sql in transaction:
@@ -584,7 +592,8 @@ class SQLObjectStore(ObjectStore):
             if len(objs) == 1:
                 return objs[0]
             elif len(objs) > 1:
-                raise ValueError, 'Multiple objects.' # @@ 2000-11-22 ce: expand the msg with more information
+                # @@ 2000-11-22 ce: expand the msg with more information
+                raise ValueError('Multiple objects.')
             else:
                 return self.objRefDangles(objRef)
 
@@ -613,17 +622,26 @@ class SQLObjectStore(ObjectStore):
             return self._objects.get(key, None)
 
     def objRefZeroSerialNum(self, objRef):
-        """Invoked by fetchObjRef() if either the class or object serial number is 0."""
-        raise ObjRefZeroSerialNumError, objRefSplit(objRef)
+        """Raise serial number zero error.
 
-    def objRefDangles(self, objRef):
-        """Invoked by fetchObjRef() if there is no possible target object for the given objRef.
-
-        E.g., this can happen for a dangling reference. This method invokes
-        self.warning() and includes the objRef as decimal, hexadecimal and class:obj numbers.
+        Invoked by fetchObjRef() if either the class or the object serial
+        number is zero.
 
         """
-        raise ObjRefDanglesError, objRefSplit(objRef)
+        raise ObjRefZeroSerialNumError(objRefSplit(objRef))
+
+    def objRefDangles(self, objRef):
+        """Raise dangling reference error.
+
+        Invoked by fetchObjRef() if there is no possible target object
+        for the given objRef.
+
+        E.g., this can happen for a dangling reference. This method invokes
+        self.warning() and includes the objRef as decimal, hexadecimal
+        and class:obj numbers.
+
+        """
+        raise ObjRefDanglesError(objRefSplit(objRef))
 
 
     ## Special Cases ##
@@ -631,9 +649,9 @@ class SQLObjectStore(ObjectStore):
     def filterDateTimeDelta(self, dtd):
         """Adapt DateTimeDeltas.
 
-        Some databases have no TIME type and therefore will not return DateTimeDeltas.
-        This utility method is overridden by subclasses as appropriate and invoked by
-        the test suite.
+        Some databases have no TIME type and therefore will not return
+        DateTimeDeltas. This utility method is overridden by subclasses
+        as appropriate and invoked by the test suite.
 
         """
         return dtd
@@ -674,7 +692,8 @@ class SQLObjectStore(ObjectStore):
         try:
             for klass in self.model().klasses().values():
                 out.write(klass.name() + '\n')
-                conn, cur = self.executeSQL('select * from %s;' % klass.name(), conn)
+                conn, cur = self.executeSQL('select * from %s;'
+                    % klass.name(), conn)
                 out.write(str(self._cursor.fetchall()))
                 out.write('\n')
         finally:
@@ -715,7 +734,8 @@ class SQLObjectStore(ObjectStore):
                     if value is None:
                         fields.append('')
                     elif isinstance(value, MiddleObject):
-                        fields.append(value.klass().name() + "." + str(value.serialNum()))
+                        fields.append('%s.%d' % (value.klass().name(),
+                            value.serialNum()))
                     else:
                         fields.append(str(value))
                 out.write(CSVJoiner.joinCSVFields(fields).replace('\r', '\\r'))
@@ -727,7 +747,7 @@ class SQLObjectStore(ObjectStore):
             sys.stderr.write("\n")
 
 
-class Model:
+class Model(object):
 
     def sqlDatabaseName(self):
         """Return the name of the database.
@@ -741,7 +761,7 @@ class Model:
         return name
 
 
-class MiddleObjectMixIn:
+class MiddleObjectMixIn(object):
 
     def sqlObjRef(self):
         """Return the 64-bit integer value that refers to self in a SQL database.
@@ -755,7 +775,7 @@ class MiddleObjectMixIn:
         """Return SQL insert statements.
 
         Returns the SQL insert statements for MySQL (as a tuple) in the form:
-                insert into table (name, ...) values (value, ...);
+            insert into table (name, ...) values (value, ...);
 
         May add an info object to the unknowns list for obj references that
         are not yet resolved.
@@ -778,7 +798,7 @@ class MiddleObjectMixIn:
                     value = 'NULL'
                 else:
                     value = ('NULL', 'NULL')
-            if type(value) in StringTypes:
+            if isinstance(value, basestring):
                 append(value)
             else:
                 extend(value)  # value could be sequence for attrs that require multiple SQL columns
@@ -827,18 +847,12 @@ class MiddleObjectMixIn:
 
     def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
         if self.store().setting('UseBigIntObjRefColumns'):
-            return {
-                    'refreshAttrs': True,
-                    'clauses': 'WHERE %s=%s' % (backObjRefAttr.sqlColumnName(),
-                            self.sqlObjRef())
-            }
+            return dict(refreshAttrs=True, clauses='WHERE %s=%s'
+                % (backObjRefAttr.sqlColumnName(), self.sqlObjRef()))
         else:
             classIdName, objIdName = backObjRefAttr.sqlColumnNames()
-            return {
-                    'refreshAttrs': True,
-                    'clauses': 'WHERE (%s=%s AND %s=%s)' % (classIdName,
-                            self.klass().id(), objIdName, self.serialNum())
-            }
+            return dict(refreshAttrs=True, clauses='WHERE (%s=%s AND %s=%s)'
+                % (classIdName, self.klass().id(), objIdName, self.serialNum()))
 
 MixIn(MiddleObject, MiddleObjectMixIn)
     # Normally we don't have to invoke MixIn()--it's done automatically.
@@ -849,7 +863,7 @@ MixIn(MiddleObject, MiddleObjectMixIn)
 import MiddleKit.Design.KlassSQLSerialColumnName
 
 
-class Klass:
+class Klass(object):
 
     _fetchSQLStart = None # help out the caching mechanism in fetchSQLStart()
     _insertSQLStart = None # help out the caching mechanism in insertSQLStart()
@@ -889,7 +903,7 @@ class Klass:
         return self._insertSQLStart, self._sqlAttrs
 
 
-class Attr:
+class Attr(object):
 
     def shouldRegisterChanges(self):
         """Return self.hasSQLColumn().
@@ -959,44 +973,42 @@ class Attr:
         return i + 1
 
 
-class BasicTypeAttr:
-
+class BasicTypeAttr(object):
     pass
 
 
-class IntAttr:
+class IntAttr(object):
 
     def sqlForNonNone(self, value):
         return str(value)
-        # it's important to use str() since an int might
-        # point to a long (whose repr() would be suffixed
-        # with an 'L')
+        # it's important to use str() since an int might point
+        # to a long (whose repr() would be suffixed with an 'L')
 
 
-class LongAttr:
+class LongAttr(object):
 
     def sqlForNonNone(self, value):
         return str(value)
 
 
-class DecimalAttr:
+class DecimalAttr(object):
 
     def sqlForNonNone(self, value):
         return str(value) # repr() can give Decimal("3.4") in Python 2.4
 
 
-class BoolAttr:
+class BoolAttr(object):
 
     def sqlForNonNone(self, value):
         return value and '1' or '0' # MySQL and MS SQL will take 1 and 0 for bools
 
 
-class ObjRefAttr:
+class ObjRefAttr(object):
 
     def sqlColumnName(self):
         if not self._sqlColumnName:
             if self.setting('UseBigIntObjRefColumns', False):
-                self._sqlColumnName = self.name() + 'Id'  # old way: one 64 bit column
+                self._sqlColumnName = self.name() + 'Id' # old way: one 64 bit column
             else:
                 # new way: 2 int columns for class id and obj id
                 self._sqlColumnName = '%s,%s' % self.sqlColumnNames()
@@ -1066,7 +1078,7 @@ class ObjRefAttr:
         return i + 2
 
 
-class ListAttr:
+class ListAttr(object):
 
     def hasSQLColumn(self):
         return False
@@ -1075,14 +1087,14 @@ class ListAttr:
         return i
 
 
-class AnyDateTimeAttr:
+class AnyDateTimeAttr(object):
 
     def sqlForNonNone(self, value):
         # Chop off the milliseconds -- SQL databases seem to dislike that.
         return "'%s'" % str(value).split('.')[0]
 
 
-class DateAttr:
+class DateAttr(object):
 
     def sqlForNonNone(self, value):
         # We often get "YYYY-MM-DD HH:MM:SS" from mx's DateTime
@@ -1094,6 +1106,6 @@ class DateAttr:
             print '>> type of value =', type(value)
             print '>> value = %r' % value
             print
-        if not type(value) in StringTypes:
-            value = str(value).split()[0]
+        if not isinstance(value, basestring):
+            value = str(value).split(None, 1)[0]
         return "'%s'" % value

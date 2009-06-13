@@ -17,9 +17,9 @@ class Attr(MiddleDict, ModelObject):
 
     """
 
-    def __init__(self, dict):
+    def __init__(self, attr):
         MiddleDict.__init__(self, {})
-        for key, value in dict.items():
+        for key, value in attr.items():
             if key == 'Attribute':
                 key = 'Name'
             if type(value) in StringTypes and not value.strip():
@@ -28,15 +28,15 @@ class Attr(MiddleDict, ModelObject):
         name = self['Name']
         match = nameRE.match(name)
         if match is None or len(match.groups()) != 1:
-            raise ValueError, 'Bad name (%r) for attribute: %r.' % (name, dict)
+            raise ValueError('Bad name (%r) for attribute: %r.' % (name, attr))
         match = reservedRE.match(name)
         if match is not None:
-            raise ValueError, 'Reserved name (%r) for attribute: %r.' % (name, dict)
+            raise ValueError('Reserved name (%r) for attribute: %r.' % (name, attr))
         self._getPrefix = None
         self._setPrefix = None
 
     def name(self):
-        return self.data['Name']
+        return self['Name']
 
     def isRequired(self):
         """Return true if a value is required for this attribute.

@@ -40,8 +40,9 @@ class ListAttr(Attr):
         from Model import ModelError
         self._targetKlass = self.model().klass(self.className(), None)
         if not self._targetKlass:
-            raise ModelError, 'class %s: attr %s: cannot locate target class %s for this list.' % (
-                    self.klass().name(), self.name(), self.className())
+            raise ModelError('class %s: attr %s:'
+                ' cannot locate target class %s for this list.'
+                % (self.klass().name(), self.name(), self.className()))
 
         # Compute self._backRefAttr.
         if self.has_key('BackRefAttr'):
@@ -57,6 +58,7 @@ class ListAttr(Attr):
         # Check that the backRefAttr, whether explicit or implicit, exists in the target class.
         backRefAttr = self._targetKlass.lookupAttr(self.backRefAttrName(), None)
         if backRefAttr is None:
-            raise ModelError, 'class %s: attr %s: cannot locate backref attr %s.%s for this list.' % (
-                    self.klass().name(), self.name(), self.className(), self.backRefAttrName())
-        backRefAttr['isBackRefAttr'] = 1
+            raise ModelError('class %s: attr %s: cannot locate backref attr'
+                ' %s.%s for this list.' % (self.klass().name(), self.name(),
+                self.className(), self.backRefAttrName()))
+        backRefAttr['isBackRefAttr'] = True

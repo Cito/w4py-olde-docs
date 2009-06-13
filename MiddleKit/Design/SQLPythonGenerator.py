@@ -6,7 +6,7 @@ class SQLPythonGenerator(PythonGenerator):
     pass
 
 
-class Klass:
+class Klass(object):
 
     def writePyImports(self):
         SuperKlass.writePyImports.im_func(self) # invoke our super generator's method
@@ -16,7 +16,7 @@ class Klass:
         self._pyOut.write('from MiddleKit.Run.SQLObjectStore import ObjRefError\n\n')
 
 
-class ObjRefAttr:
+class ObjRefAttr(object):
 
     def writePyGet(self, out):
         name = self.name()
@@ -33,7 +33,7 @@ class ObjRefAttr:
 ''' % locals())
 
 
-class ListAttr:
+class ListAttr(object):
 
     def writePyGet(self, out, names):
         if self.setting('UseBigIntObjRefColumns', False):

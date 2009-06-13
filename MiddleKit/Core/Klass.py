@@ -1,5 +1,5 @@
 from ModelObject import ModelObject
-from MiscUtils import NoDefault, StringTypes
+from MiscUtils import NoDefault
 from MiddleKit.Core.ListAttr import ListAttr
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleDict import MiddleDict
@@ -15,7 +15,7 @@ class Klass(MiddleDict, ModelObject):
 
     ## Init ##
 
-    def __init__(self, klassContainer, dict=None):
+    def __init__(self, klassContainer, rawDict=None):
         """Initialize a Klass definition with a raw dictionary.
 
         This is typically read from a file. The 'Class' field contains the name
@@ -32,15 +32,14 @@ class Klass(MiddleDict, ModelObject):
         self._pyClass = False   # False means never computed. None would mean computed, but not found.
         self._backObjRefAttrs = None
         self._allAttrs = None
-
-        if dict is not None:
-            self.readDict(dict)
+        if rawDict is not None:
+            self.readDict(rawDict)
 
 
     ## Reading ##
 
-    def readDict(self, dict):
-        name = dict['Class']
+    def readDict(self, rawDict):
+        name = rawDict['Class']
         if '(' in name:
             assert ')' in name, 'Invalid class spec. Missing ).'
             self._name, rest = name.split('(')
@@ -53,20 +52,19 @@ class Klass(MiddleDict, ModelObject):
             # instead of a Python-like syntax with parens
             parts = [part.strip() for part in name.split(':')]
             if len(parts) != 2:
-                raise RuntimeError, 'Invalid class spec: %s' % string
+                raise RuntimeError('Invalid class spec: %s' % string)
             self._name, self._supername = parts
         else:
             self._name = name
-            self._supername = dict.get('Super', 'MiddleObject')
-        self._isAbstract = dict.get('isAbstract', False)
+            self._supername = rawDict.get('Super', 'MiddleObject')
+        self._isAbstract = rawDict.get('isAbstract', False)
 
         # fill in dictionary (self) with the contents of the dict argument
-        for key, value in dict.items():
+        for key, value in rawDict.items():
             # @@ 2001-02-21 ce: should we always strip string fields? Probably.
-            if type(value) in StringTypes and value.strip() == '':
+            if isinstance(value, basestring) and not value.strip():
                 value = None
             self[key] = value
-
 
     def awakeFromRead(self, klasses):
         """Perform further initialization.
@@ -197,7 +195,7 @@ class Klass(MiddleDict, ModelObject):
                 return self._superklass.lookupAncestorKlass(name, default)
         else:
             if default is NoDefault:
-                raise KeyError, name
+                raise KeyError(name)
             else:
                 return default
 

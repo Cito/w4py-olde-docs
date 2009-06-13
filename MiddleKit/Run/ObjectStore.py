@@ -411,7 +411,7 @@ class ObjectStore(ModelUser):
         last save. Subclass responsibility.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def commitUpdates(self):
         """Commit updates.
@@ -420,7 +420,7 @@ class ObjectStore(ModelUser):
         changes since the last save.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def commitDeletions(self):
         """Commit deletions.
@@ -429,7 +429,7 @@ class ObjectStore(ModelUser):
         objects deleted since the last save. Subclass responsibility.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def revertChanges(self):
         """Revert changes.
@@ -438,7 +438,7 @@ class ObjectStore(ModelUser):
         to their original values.
 
         """
-        raise NotImplementedError
+        raise AbstractError(self.__class__)
 
 
     ## Fetching ##
@@ -451,7 +451,7 @@ class ObjectStore(ModelUser):
         was passed in, in which case that value should be returned.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def fetchObjectsOfClass(self, className, isDeep=True):
         """Fetch all objects of a given class.
@@ -459,7 +459,7 @@ class ObjectStore(ModelUser):
         If isDeep is True, then all subclasses are also returned.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def fetch(self, *args, **namedArgs):
         """An alias for fetchObjectsOfClass()."""
@@ -561,11 +561,13 @@ class ObjectStore(ModelUser):
             elif isinstance(aClass, types.TypeType):  # new Python classes
                 aClass = self._model.klass(aClass.__name__)
             else:
-                raise ValueError, 'Invalid class parameter. Pass a Klass, a name or a Python class. Type of aClass is %s. aClass is %s.' % (type(aClass), aClass)
+                raise ValueError('Invalid class parameter. Pass a Klass,'
+                    'a name or a Python class. Type of aClass is %s.'
+                    ' aClass is %s.' % (type(aClass), aClass))
         return aClass
 
 
-class Attr:
+class Attr(object):
 
     def shouldRegisterChanges(self):
         """Return whether changes should be registered.

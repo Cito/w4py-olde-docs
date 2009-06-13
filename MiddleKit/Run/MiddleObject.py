@@ -40,13 +40,13 @@ class MiddleObject(object, NamedValueAccess):
 
     def __init__(self):
         self.__dict__['_mk_initing'] = True
-        self._mk_store           = None
-        self._mk_changedAttrs    = None
-        self._mk_serialNum       = 0
-        self._mk_key             = None
-        self._mk_changed         = False
-        self._mk_initing         = False
-        self._mk_inStore         = False
+        self._mk_store = None
+        self._mk_changedAttrs = None
+        self._mk_serialNum = 0
+        self._mk_key = None
+        self._mk_changed = False
+        self._mk_initing = False
+        self._mk_inStore = False
 
  # cache the various setFoo methods first by qualified class name
     _mk_setCache = {}
@@ -71,12 +71,12 @@ class MiddleObject(object, NamedValueAccess):
                         'Cannot refresh data from a different store.'
                 if self._mk_changed and not self._mk_initing:
                     assert store.setting('AllowRefreshOfChangedObject', False), (
-                            "attempted to refresh changed object %s.%d\nchanges=%r\n"
-                            "Your app needs to call store.saveChanges() before doing"
-                            " anything which can cause objects to be refreshed from the"
-                            " database (i.e. calling store.deleteObject()), otherwise"
-                            " your changes will be lost." % (self.klass().name(),
-                                    self.serialNum(), self._mk_changedAttrs))
+                        "attempted to refresh changed object %s.%d\nchanges=%r\n"
+                        "Your app needs to call store.saveChanges() before doing"
+                        " anything which can cause objects to be refreshed from the"
+                        " database (i.e. calling store.deleteObject()), otherwise"
+                        " your changes will be lost." % (self.klass().name(),
+                            self.serialNum(), self._mk_changedAttrs))
             else:
                 self.setStore(store)
             assert not self._mk_isDeleted, 'Cannot refresh a deleted object.'
@@ -432,7 +432,7 @@ class MiddleObject(object, NamedValueAccess):
                     value = value()
                 return value
             if default is NoDefault:
-                raise LookupError, attrName
+                raise LookupError(attrName)
             else:
                 return default
 
@@ -463,8 +463,8 @@ class MiddleObject(object, NamedValueAccess):
             attrs = [a.name() for a in attrs]
             attrs.sort()
             attrs = ','.join(attrs)
-            raise LookupError, \
-                    '%s, class=%s, all attrs=%s' % (attrName, self.__class__, attrs)
+            raise LookupError('%s, class=%s, all attrs=%s'
+                % (attrName, self.__class__, attrs))
         return method(value)
 
     def valueForAttr(self, attr, default=NoDefault):
@@ -479,7 +479,7 @@ class MiddleObject(object, NamedValueAccess):
             return getMethod(self)
         else:
             if default is NoDefault:
-                raise LookupError, attr['Name']
+                raise LookupError(attr['Name'])
             else:
                 return default
 
@@ -510,8 +510,8 @@ class MiddleObject(object, NamedValueAccess):
         sys.stdout.flush()
         sys.stderr.flush()
         print ('WARNING: MiddleKit: In object %(rep)s, attribute'
-                ' %(sourceKlassName)s.%(sourceAttrName)s dangles with value'
-                ' %(klassName)s.%(objSerialNum)s' % locals())
+            ' %(sourceKlassName)s.%(sourceAttrName)s dangles with value'
+            ' %(klassName)s.%(objSerialNum)s' % locals())
         sys.stdout.flush()
         return None
 

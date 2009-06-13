@@ -1,11 +1,8 @@
-from UserDict import UserDict
-from MiscUtils import StringTypes
 
+class MiddleDict(dict):
+    """A MiddleKit dictionary.
 
-class MiddleDict(UserDict):
-    """A MiddleKit UserDict.
-
-    A UserDict for the purposes of MiddleKit, specifically Klass and Attr
+    A dictionary for the purposes of MiddleKit, specifically Klass and Attr
     which are subclasses.
 
     @@ 2004-04-02 CE: Should consider making this case-preserving, but
@@ -22,7 +19,7 @@ class MiddleDict(UserDict):
         """
         original = self.get(key, default)
         s = original
-        if type(s) in StringTypes:
+        if isinstance(s, basestring):
             s = s.lower().strip()
         if s in (False, '', None, 0, 0.0, '0', 'false'):
             return False

@@ -151,7 +151,7 @@ class Klasses(ModelObject, UserDict):
 
         """
         name = klass.name()
-        assert not self.has_key(name), 'Already have %s.' % name
+        assert name not in self, 'Already have %s.' % name
         self._klasses.append(klass)
         self[klass.name()] = klass
         klass.setKlasses(self)

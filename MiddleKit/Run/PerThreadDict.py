@@ -1,7 +1,7 @@
 import thread
 
 
-class PerThreadDict:
+class PerThreadDict(object):
     """Per-thread dictionary.
 
     PerThreadDict behaves like a normal dict, but changes to it are kept
@@ -19,17 +19,18 @@ class PerThreadDict:
     def __init__(self):
         self.data = {}
 
-    def __repr__(self): return repr(self.data)
+    def __repr__(self):
+        return repr(self.data)
 
     def __setitem__(self, key, item, gettid=thread.get_ident):
         threadid = gettid()
         try:
-            dict = self.data[threadid]
+            d = self.data[threadid]
         except KeyError:
-            dict = self.data[threadid] = {}
-        dict[key] = item
+            d = self.data[threadid] = {}
+        d[key] = item
 
-    def clear(self, allThreads=0, gettid=thread.get_ident):
+    def clear(self, allThreads=False, gettid=thread.get_ident):
         if allThreads:
             self.data = {}
         else:
@@ -40,16 +41,16 @@ class PerThreadDict:
                 pass
 
     def isEmpty(self):
-        for l in self.data.values():
-            if l:
-                return 0
-        return 1
+        for v in self.data.values():
+            if v:
+                return False
+        return True
 
-    def values(self, allThreads=0, gettid=thread.get_ident):
+    def values(self, allThreads=False, gettid=thread.get_ident):
         if allThreads:
             r = []
-            for l in self.data.values():
-                r.extend(l.values())
+            for v in self.data.values():
+                r.extend(v.values())
             return r
         else:
             threadid = gettid()
@@ -66,7 +67,7 @@ class PerThreadDict:
             return 0
 
 
-class NonThreadedDict:
+class NonThreadedDict(object):
     """Non-threaded dictionary.
 
     NonThreadedDict behaves like a normal dict.  Its only purpose is
@@ -84,13 +85,13 @@ class NonThreadedDict:
     def __setitem__(self, key, item):
         self.data[key] = item
 
-    def clear(self, allThreads=0):
+    def clear(self, allThreads=False):
         self.data.clear()
 
     def isEmpty(self):
         return len(self.data) == 0
 
-    def values(self, allThreads=0):
+    def values(self, allThreads=False):
         return self.data.values()
 
     def __len__(self):
@@ -120,8 +121,8 @@ if __name__ == '__main__':
     t.join()
     assert len(d) == 3
     assert len(d.values()) == 3
-    assert len(d.values(allThreads=1)) == 5
+    assert len(d.values(allThreads=True)) == 5
     d.clear()
-    assert len(d.values(allThreads=1)) == 2
-    d.clear(allThreads=1)
-    assert len(d.values(allThreads=1)) == 0
+    assert len(d.values(allThreads=True)) == 2
+    d.clear(allThreads=True)
+    assert len(d.values(allThreads=True)) == 0

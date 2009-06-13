@@ -1,5 +1,5 @@
 
-class ObjectKey:
+class ObjectKey(object):
     """An ObjectKey is used by ObjectStore for keeping track of objects in memory.
 
     Currently a key is equal to the class name of the object combined

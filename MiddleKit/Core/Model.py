@@ -1,6 +1,5 @@
 import os
 import sys
-from types import ClassType, DictType
 
 try:
     from cPickle import load, dump
@@ -55,7 +54,7 @@ class Model(Configurable):
         self._coreClasses = customCoreClasses
         self._klasses = None
         self._name = None
-        self._parents = []  # e.g., parent models
+        self._parents = [] # e.g., parent models
         self._pyClassForName = {}
 
         # _allModelsByFilename is used to avoid loading the same parent model twice
@@ -137,7 +136,7 @@ class Model(Configurable):
             self._klasses._model = self
 
     def __getstate__(self):
-        raise Exception, 'Model instances were not designed to be pickled.'
+        raise Exception('Model instances were not designed to be pickled.')
 
     def awakeFromRead(self):
         # create containers for all klasses, uniqued by name
@@ -246,7 +245,7 @@ class Model(Configurable):
             results = {}
             exec 'import MiddleKit.Core.%s as module'% className in results
             pyClass = getattr(results['module'], className)
-            assert type(pyClass) is ClassType
+            assert isinstance(pyClass, type)
             self._coreClasses[className] = pyClass
         return pyClass
 
@@ -282,7 +281,7 @@ class Model(Configurable):
             if klass:
                 return klass
         if default is NoDefault:
-            raise KeyError, name
+            raise KeyError(name)
         else:
             return default
 

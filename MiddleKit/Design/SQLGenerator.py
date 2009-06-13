@@ -11,6 +11,7 @@ from CodeGenerator import *
 
 
 class SampleError(Exception):
+    """Sample value error."""
 
     def __init__(self, line, error):
         self._line = line
@@ -58,6 +59,7 @@ class SQLGenerator(CodeGenerator):
     def generate(self, dirname):
         self.requireDir(dirname)
         self.writeInfoFile(os.path.join(dirname, 'Info.text'))
+        print "MODEL=",self._model
         self._model.writeCreateSQL(self, dirname)
         self._model.writeInsertSamplesSQL(self, dirname)
 
@@ -69,14 +71,14 @@ class SQLGenerator(CodeGenerator):
         Subclass responsibility.
 
         """
-        raise AbstractError
+        raise AbstractError(self.__class__)
 
 
-class ModelObject:
+class ModelObject(object):
     pass
 
 
-class Model:
+class Model(object):
 
     def writeCreateSQL(self, generator, dirname):
         """Write SQL create statements.
@@ -176,7 +178,8 @@ class Model:
                     fields = parse(line)
                 except CSVParser.ParseError, err:
                     raise SampleError(linenum, 'Syntax error: %s' % err)
-                if fields is None:      # parser got embedded newline; continue with next line
+                if fields is None:
+                    # parser got embedded newline; continue with next line
                     continue
 
                 try:
@@ -329,7 +332,7 @@ class Model:
         pass
 
 
-class Klasses:
+class Klasses(object):
 
     def sqlGenerator(self):
         return generator
@@ -397,7 +400,7 @@ class Klasses:
             wr(self.useDatabaseSQL(dbName))
             wr(self.dropTablesSQL())
         else:
-            raise Exception, 'Invalid value for DropStatements setting: %r' % drop
+            raise Exception('Invalid value for DropStatements setting: %r' % drop)
 
     def dropDatabaseSQL(self, dbName):
         """Return SQL code that will remove the database with the given name.
@@ -406,7 +409,7 @@ class Klasses:
         Subclass responsibility.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def dropTablesSQL(self):
         """Return SQL code that will remove each of the tables in the database.
@@ -415,7 +418,7 @@ class Klasses:
         Subclass responsibility.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def createDatabaseSQL(self, dbName):
         """Return SQL code that will create the database with the given name.
@@ -424,7 +427,7 @@ class Klasses:
         Subclass responsibility.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def useDatabaseSQL(self, dbName):
         """Return SQL code that will use the database with the given name.
@@ -433,7 +436,7 @@ class Klasses:
         Subclass responsibility.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def _writeCreateSQL(self, generator, out):
         # assign the class ids up-front, so that we can resolve forward object references
@@ -479,7 +482,7 @@ name varchar(100)
 import KlassSQLSerialColumnName
 
 
-class Klass:
+class Klass(object):
 
     def writeCreateSQL(self, generator, out):
         for attr in self.attrs():
@@ -583,7 +586,7 @@ class Klass:
         return self.name()
 
 
-class Attr:
+class Attr(object):
 
     def sqlName(self):
         return self.name()
@@ -701,7 +704,7 @@ class Attr:
         return self.get('SQLType') or self.sqlType()
 
     def sqlType(self):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def sqlColumnName(self):
         """Return SQL column name.
@@ -720,7 +723,7 @@ class Attr:
         return self.boolForKey('isUnique') and ' unique' or ''
 
 
-class BoolAttr:
+class BoolAttr(object):
 
     def sqlType(self):
         # @@ 2001-02-04 ce: is this ANSI SQL? or at least common SQL?
@@ -736,12 +739,12 @@ class BoolAttr:
         elif input in (True, 'TRUE', 'YES', '1', '1.0', 1, 1.0):
             value = 1
         else:
-            raise ValueError, "invalid bool input: %r" % input
+            raise ValueError('invalid bool input: %r' % input)
         assert value in (0, 1), value
         return str(value)
 
 
-class IntAttr:
+class IntAttr(object):
 
     def sqlType(self):
         return 'int'
@@ -755,11 +758,11 @@ class IntAttr:
             try:
                 int(value) # raises exception if value is invalid
             except ValueError, e:
-                raise ValueError, str(e)+'. attr is '+self.name()
+                raise ValueError('%s (attr is %s)' (e, self.name()))
             return str(value)
 
 
-class LongAttr:
+class LongAttr(object):
 
     def sqlType(self):
         # @@ 2000-10-18 ce: is this ANSI SQL?
@@ -770,7 +773,7 @@ class LongAttr:
         return str(input)
 
 
-class FloatAttr:
+class FloatAttr(object):
 
     def sqlType(self):
         return 'double precision'
@@ -780,7 +783,7 @@ class FloatAttr:
         return str(input)
 
 
-class DecimalAttr:
+class DecimalAttr(object):
 
     def sqlType(self):
         # the keys 'Precision' and 'Scale' are used because all the
@@ -803,7 +806,7 @@ class DecimalAttr:
         return str(input)
 
 
-class StringAttr:
+class StringAttr(object):
 
     def sqlType(self):
         """Return SQL type.
@@ -815,7 +818,7 @@ class StringAttr:
         depending on the length of the string.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def sqlForNonNoneSampleInput(self, input):
         value = input
@@ -835,7 +838,7 @@ class StringAttr:
         return value
 
 
-class AnyDateTimeAttr:
+class AnyDateTimeAttr(object):
 
     def sqlType(self):
         return self['Type'] # e.g., date, time and datetime
@@ -844,7 +847,7 @@ class AnyDateTimeAttr:
         return repr(input)
 
 
-class ObjRefAttr:
+class ObjRefAttr(object):
 
     def sqlName(self):
         if self.setting('UseBigIntObjRefColumns', False):
@@ -966,19 +969,19 @@ class ObjRefAttr:
                 return '%s,%s' % (klassId, objSerialNum)
 
 
-class ListAttr:
+class ListAttr(object):
 
     def sqlType(self):
-        raise Exception, 'Lists do not have a SQL type.'
+        raise Exception('Lists do not have a SQL type.')
 
     def hasSQLColumn(self):
         return False
 
     def sqlForSampleInput(self, input):
-        raise Exception, 'Lists are implicit. They cannot have sample values.'
+        raise Exception('Lists are implicit. They cannot have sample values.')
 
 
-class EnumAttr:
+class EnumAttr(object):
 
     def sqlType(self):
         if self.usesExternalSQLEnums():
@@ -1044,7 +1047,7 @@ class EnumAttr:
         return names
 
 
-class PrimaryKey:
+class PrimaryKey(object):
     """Help class for dealing with primary keys.
 
     This class is not a 'standard' attribute, but just a helper class for the

@@ -14,9 +14,10 @@ def typeErrors(object, value, skipAttrs=[]):
             except TypeError:
                 pass
             except Exception, e:
-                raise Exception, 'no type error for %s. instead got: %r, %s' % (attr.name(), e, e)
+                raise Exception('no type error for %s. instead got: %r, %s'
+                    % (attr.name(), e, e))
             else:
-                raise Exception, 'no type error for %s' % attr.name()
+                raise Exception('no type error for %s' % attr.name())
 
 
 def test(store):
@@ -41,21 +42,21 @@ def test(store):
     except ValueError:
         pass
     else:
-        raise Exception, 'expecting ValueError for bad bool argument'
+        raise Exception('expecting ValueError for bad bool argument')
 
     try:
         f.setI(2L**32)
     except OverflowError:
         pass
     else:
-        raise Exception, 'expecting OverflowError for large int argument'
+        raise Exception('expecting OverflowError for large int argument')
 
     try:
         f.setE('c')
     except ValueError:
         pass
     else:
-        raise Exception, 'expecting ValueError for invalid enum'
+        raise Exception('expecting ValueError for invalid enum')
 
     # Numerics that pass
     f.setI(1L)  # ints can take longs that fit in the int range

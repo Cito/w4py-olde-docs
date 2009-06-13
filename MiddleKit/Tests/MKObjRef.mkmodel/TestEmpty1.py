@@ -64,4 +64,4 @@ def test(store):
 
 
 def NoException(codeString):
-    raise Exception, 'Failed to raise exception for: ' + codeString
+    raise Exception('Failed to raise exception for: ' + codeString)

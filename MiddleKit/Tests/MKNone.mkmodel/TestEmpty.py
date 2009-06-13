@@ -18,14 +18,14 @@ def test(store):
     except Exception:
         pass
     else:
-        raise Exception, errMsg
+        raise Exception(errMsg)
 
     try:
         f.setRs(None)
     except Exception:
         pass
     else:
-        raise Exception, errMsg
+        raise Exception(errMsg)
 
     store.addObject(f)
     store.saveChanges()

@@ -104,7 +104,7 @@ class MySQLObjectStore(SQLObjectStore):
 
 # Mixins
 
-class StringAttr:
+class StringAttr(object):
 
     def sqlForNonNone(self, value):
         """MySQL provides a quoting function for string -- this method uses it."""

@@ -105,14 +105,14 @@ class MSSQLObjectStore(SQLObjectStore):
         return 'GETDATE()'
 
 
-class Klass:
+class Klass(object):
 
     def sqlTableName(self):
         """Return "[name]" so that table names do not conflict with SQL reserved words."""
         return '[%s]' % self.name()
 
 
-class Attr:
+class Attr(object):
 
     def sqlColumnName(self):
         if not self._sqlColumnName:
@@ -120,7 +120,7 @@ class Attr:
         return self._sqlColumnName
 
 
-class ObjRefAttr:
+class ObjRefAttr(object):
 
     def sqlColumnName(self):
         if not self._sqlColumnName:
@@ -132,7 +132,7 @@ class ObjRefAttr:
         return self._sqlColumnName
 
 
-class StringAttr:
+class StringAttr(object):
 
     def sqlForNonNone(self, value):
         # do the right thing

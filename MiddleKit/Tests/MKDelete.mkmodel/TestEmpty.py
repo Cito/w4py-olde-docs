@@ -175,7 +175,7 @@ def runTest(store, klass, objectToDelete, expectedResult):
             assert len(objects) == 0
             assert len(foos) == 0
         else:
-            raise AssertionError, 'unknown expectedResult value'
+            raise AssertionError('unknown expectedResult value')
     bars = store.fetchObjectsOfClass(Bar)
     assert len(bars) == 1
 

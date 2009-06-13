@@ -63,7 +63,7 @@ class PostgreSQLObjectStore(SQLObjectStore):
         if not args.get('database'):
             args['database'] = self._model.sqlDatabaseName()
 
-    def newCursorForConnection(self, conn, dictMode=0):
+    def newCursorForConnection(self, conn, dictMode=False):
         return conn.cursor()
 
     def retrieveNextInsertId(self, klass):
@@ -80,19 +80,18 @@ class PostgreSQLObjectStore(SQLObjectStore):
         try:
             cur.execute(sql)
         except Warning:
-            if not self.setting('IgnoreSQLWarnings', 0):
+            if not self.setting('IgnoreSQLWarnings', False):
                 raise
 
     def saveChanges(self):
         conn, cur = self.connectionAndCursor()
         try:
-
             SQLObjectStore.saveChanges(self)
         except DatabaseError:
             conn.rollback()
             raise
         except Warning:
-            if not self.setting('IgnoreSQLWarnings', 0):
+            if not self.setting('IgnoreSQLWarnings', False):
                 conn.rollback()
                 raise
         conn.commit()
@@ -101,14 +100,14 @@ class PostgreSQLObjectStore(SQLObjectStore):
         return "%s ilike %s" % (a, b)
 
 
-class StringAttr:
+class StringAttr(object):
 
     def sqlForNonNone(self, value):
         """psycopg provides a quoting function for string -- use it."""
         return "%s" % QuotedString(value)
 
 
-class BoolAttr:
+class BoolAttr(object):
 
     def sqlForNonNone(self, value):
         if value:

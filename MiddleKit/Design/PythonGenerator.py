@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 
 from CodeGenerator import CodeGenerator
 from MiscUtils import AbstractError, StringTypes, mxDateTime, nativeDateTime
@@ -16,7 +17,7 @@ class PythonGenerator(CodeGenerator):
         self._model.writePy(self, dirname)
 
 
-class Model:
+class Model(object):
 
     def writePy(self, generator, dirname):
         self._klasses.assignClassIds(generator)
@@ -37,7 +38,7 @@ class Model:
         open(filename, 'w').write('# __init__.py\n')
 
 
-class ModelObject:
+class ModelObject(object):
 
     def writePy(self, generator, out=sys.stdout):
         """Write the Python code to define a table for the class.
@@ -55,7 +56,7 @@ class ModelObject:
             out.close()
 
 
-class Klass:
+class Klass(object):
 
     def writePyStubIfNeeded(self, generator, filename):
         if not os.path.exists(filename):
@@ -177,7 +178,7 @@ del sys.path[0]
             attr.writePyAccessors(out)
 
 
-class Attr:
+class Attr(object):
 
     def defaultValue(self):
         """Return the default value as a legal Pythonic value."""
@@ -201,7 +202,7 @@ class Attr:
         Used by at least defaultValue(). Subclass responsibility.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def pyReadStoreDataStatement(self):
         return None
@@ -240,10 +241,10 @@ class Attr:
                     _%(name)sAttr = 0
             if _%(name)sAttr:
                 # Record that it has been changed
-                self._mk_changed = 1
+                self._mk_changed = True
                 if self._mk_changedAttrs is None:
                     self._mk_changedAttrs = {} # maps name to attribute
-                self._mk_changedAttrs['%(name)s'] = _%(name)sAttr  # changedAttrs is a set
+                self._mk_changedAttrs['%(name)s'] = _%(name)sAttr # changedAttrs is a set
                 # Tell ObjectStore it happened
                 self._mk_store.objectChanged(self)
 ''' % {'name': name})
@@ -269,7 +270,7 @@ class %(name)s(%(superclassName)s):
 """
 
 
-class BoolAttr:
+class BoolAttr(object):
 
     def stringToValue(self, string):
         try:
@@ -296,7 +297,7 @@ class BoolAttr:
 ''')
 
 
-class IntAttr:
+class IntAttr(object):
 
     def stringToValue(self, string):
         return int(string)
@@ -310,11 +311,11 @@ class IntAttr:
                 if isinstance(value, types.LongType):
                     raise OverflowError(value)
             elif not isinstance(value, types.IntType):
-                raise TypeError('expecting int type, but got value %r of type %r instead' % (value, type(value))
+                raise TypeError('expecting int type, but got value %r of type %r instead' % (value, type(value)))
 ''')
 
 
-class LongAttr:
+class LongAttr(object):
 
     def stringToValue(self, string):
         return long(string)
@@ -330,7 +331,7 @@ class LongAttr:
 ''')
 
 
-class FloatAttr:
+class FloatAttr(object):
 
     def stringToValue(self, string):
         return float(string)
@@ -346,7 +347,7 @@ class FloatAttr:
 ''')
 
 
-class DecimalAttr:
+class DecimalAttr(object):
 
     def stringToValue(self, string):
         return float(string)
@@ -364,7 +365,7 @@ class DecimalAttr:
 ''')
 
 
-class StringAttr:
+class StringAttr(object):
 
     def stringToValue(self, string):
         return string
@@ -378,7 +379,7 @@ class StringAttr:
 ''')
 
 
-class EnumAttr:
+class EnumAttr(object):
 
     def stringToValue(self, string):
         if self.usesExternalSQLEnums():
@@ -463,13 +464,13 @@ class EnumAttr:
         return flag
 
 
-class AnyDateTimeAttr:
+class AnyDateTimeAttr(object):
 
     def nativeDateTimeTypeName(self):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def mxDateTimeTypeName(self):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def writePySetChecks(self, out):
         Attr.writePySetChecks.im_func(self, out)
@@ -531,7 +532,7 @@ class AnyDateTimeAttr:
 ''' % (self.pyGetName(), self.name()))
 
 
-class DateAttr:
+class DateAttr(object):
 
     def nativeDateTimeTypeName(self):
         return 'date'
@@ -543,7 +544,7 @@ class DateAttr:
         self.writePyGetAsMXDateTime(out)
 
 
-class TimeAttr:
+class TimeAttr(object):
 
     def nativeDateTimeTypeName(self):
         return ('time', 'timedelta')
@@ -563,7 +564,7 @@ class TimeAttr:
         TimeAttr.mixInSuperWritePySetChecks(self, out)
 
 
-class DateTimeAttr:
+class DateTimeAttr(object):
 
     def nativeDateTimeTypeName(self):
         return 'datetime'
@@ -575,7 +576,7 @@ class DateTimeAttr:
         self.writePyGetAsMXDateTime(out)
 
 
-class ObjRefAttr:
+class ObjRefAttr(object):
 
     def stringToValue(self, string):
         parts = string.split('.')
@@ -614,7 +615,7 @@ class ObjRefAttr:
         self.writePySetAssignment(out.write, name)
 
 
-class ListAttr:
+class ListAttr(object):
 
     def defaultValue(self):
         """Return the default value as a legal Pythonic value."""
@@ -624,7 +625,7 @@ class ListAttr:
     def pyReadStoreDataStatement(self):
         # Set the lists to None on the very first read from the store
         # so the list get methods will fetch the lists from the store.
-        return '        self._%s = None\n' % self.name()
+        return '            self._%s = None\n' % self.name()
 
     def writePyAccessors(self, out):
         # Create various name values that are needed in code generation
@@ -648,11 +649,16 @@ class ListAttr:
 
     def writePyGet(self, out, names):
         """Subclass responsibility."""
-        raise AbstractError
+        raise AbstractError(self.__class__)
 
     def writePySet(self, out, names=None):
-        """Raise an exception in order to ensure that our inherited "PySet" code generation is used."""
-        raise AssertionError, 'Lists do not have a set method.'
+        """Write code for setter.
+
+        Raise an exception in order to ensure that our inherited "PySet"
+        code generation is used.
+        
+        """
+        raise AssertionError('Lists do not have a set method.')
 
     def writePyAddTo(self, out, names):
         names['getParens'] = self.setting('AccessorStyle', 'methods') == 'methods' and '()' or ''

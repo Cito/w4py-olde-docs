@@ -23,7 +23,7 @@ class PostgreSQLSQLGenerator(SQLGenerator):
         return True
 
 
-class Model:
+class Model(object):
 
     def writeConnectToDatabase(self, generator, output, databasename):
         output.write('\c %s;\n\n' % databasename)
@@ -37,7 +37,7 @@ class Model:
                         % (klass.seqName(), klass._maxSerialNum))
 
 
-class Klasses:
+class Klasses(object):
 
     def writeClassIdsSQL(self, generator, out):
         # pgsql 7.3.4 doesn't seem to drop the _MKClassIDs table when the database
@@ -72,7 +72,7 @@ class Klasses:
         return '\d\n\n'
 
 
-class Klass:
+class Klass(object):
 
     def writeCreateSQL(self, generator, out):
         # create the sequences explicitly, just to be sure
@@ -103,7 +103,7 @@ class Klass:
                 % (self.sqlSerialColumnName(), self.seqName())
 
 
-class StringAttr:
+class StringAttr(object):
 
     def sqlType(self):
         # @@ 2000-11-11 ce: cache this
@@ -121,7 +121,7 @@ class StringAttr:
         return "%s" % QuotedString(value)
 
 
-class BoolAttr:
+class BoolAttr(object):
 
     def sqlForNonNoneSampleInput(self, value):
         value = value.upper()
@@ -144,7 +144,7 @@ class BoolAttr:
         return value
 
 
-class DateTimeAttr:
+class DateTimeAttr(object):
 
     def sqlType(self):
         # In accord with newer PostgreSQL versions,
@@ -154,14 +154,14 @@ class DateTimeAttr:
         return 'timestamp'
 
 
-class ObjRefAttr:
+class ObjRefAttr(object):
 
     def sqlType(self):
         # @@ 2001-02-04 ce: Is this standard SQL? If so, it can be moved up.
         return 'bigint /* %s */' % self['Type']
 
 
-class PrimaryKey:
+class PrimaryKey(object):
 
     def sampleValue(self, value):
         # keep track of the highest serial number for each klass,

@@ -1,4 +1,4 @@
-class KlassMixIn:
+class KlassMixIn(object):
 
     def sqlSerialColumnName(self):
         name = getattr(self, '_sqlIdColumnName', None)

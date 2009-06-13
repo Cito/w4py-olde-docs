@@ -7,7 +7,7 @@ class MySQLSQLGenerator(SQLGenerator):
         return True
 
 
-class Klasses:
+class Klasses(object):
 
     def dropDatabaseSQL(self, dbName):
         return 'drop database if exists %s;\n' % dbName
@@ -35,7 +35,7 @@ class Klasses:
         return 'show tables\n\n'
 
 
-class Klass:
+class Klass(object):
 
     def writePostCreateTable(self, generator, out):
         start = self.setting('StartingSerialNum', None)
@@ -53,7 +53,7 @@ class Klass:
         wr('\n')
 
 
-class EnumAttr:
+class EnumAttr(object):
 
     def nativeEnumSQLType(self):
         enums = ['"%s"' % enum for enum in self.enums()]
@@ -62,7 +62,7 @@ class EnumAttr:
         return enums
 
 
-class StringAttr:
+class StringAttr(object):
 
     def sqlType(self):
         # @@ 2000-11-11 ce: cache this
@@ -79,7 +79,7 @@ class StringAttr:
             return 'varchar(%s)' % max
 
 
-class ObjRefAttr:
+class ObjRefAttr(object):
 
     def sqlType(self):
         if self.setting('UseBigIntObjRefColumns', False):

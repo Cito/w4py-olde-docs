@@ -1,7 +1,7 @@
 import sys
 
 
-class ModelObject:
+class ModelObject(object):
 
 
     ## Debugging ##

@@ -5,7 +5,7 @@ from MiscUtils.MixIn import MixIn
 from MiscUtils import NoDefault
 
 
-class ModelUser:
+class ModelUser(object):
 
 
     ## Init ##
@@ -52,7 +52,7 @@ class ModelUser:
 
     ## Mix-ins ##
 
-    def installMixIns(self, verbose=0):
+    def installMixIns(self, verbose=False):
         if verbose:
             print '>> installMixIns()'
             print 'class =', self.__class__
@@ -61,18 +61,16 @@ class ModelUser:
         if verbose:
             print 'modules =', ', '.join(modules)
 
-        modules.reverse()  # so that mix-ins in subclasses override super
-        modules = [sys.modules[m] for m in modules]
-
-        for module in modules:
+        # reverse order so that mix-ins in subclasses override super
+        for module in reversed(modules):
+            module = sys.modules[module]
             assert type(module) is ModuleType
             self.installMixInsForModule(module, verbose)
 
         if verbose:
             print
 
-
-    def installMixInsForModule(self, module, verbose=0):
+    def installMixInsForModule(self, module, verbose=False):
         # @@ 2000-10-18 ce: perhaps MixIns should be applied to the actual
         # MiddleKit.Core class and not the custom one that possibly was
         # passed into model. This would help with "invoking super" which
