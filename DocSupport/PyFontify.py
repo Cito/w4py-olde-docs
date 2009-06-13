@@ -49,17 +49,17 @@ pat = """
 qqq
 [^\\q]*
 (
-        (       \\\\[\000-\377]
-        |       q
-                (       \\\\[\000-\377]
-                |       [^\\q]
-                |       q
-                        (       \\\\[\000-\377]
-                        |       [^\\q]
-                        )
-                )
+    (   \\\\[\000-\377]
+    |   q
+        (   \\\\[\000-\377]
+        |   [^\\q]
+        |   q
+            (   \\\\[\000-\377]
+            |   [^\\q]
+            )
         )
-        [^\\q]*
+    )
+    [^\\q]*
 )*
 qqq
 """
@@ -120,7 +120,7 @@ def fontify(pytext, searchfrom=0, searchto=None):
                     (start, end) = idMatchObject.span()
                     match = idMatchObject.group(0)
                     tags.append(((match == 'def')
-                            and functionTag or classTag, start, end, None))
+                        and functionTag or classTag, start, end, None))
         elif c == "#":
             tags.append((commentTag, start, end, None))
         else:

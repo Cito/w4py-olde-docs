@@ -1,3 +1,5 @@
+"""Content producing HTTP servlet."""
+
 from Common import *
 from HTTPServlet import HTTPServlet
 from WebUtils import Funcs
@@ -5,7 +7,7 @@ from Application import EndResponse
 
 
 class HTTPContentError(Exception):
-    pass
+    """HTTP content error"""
 
 
 class HTTPContent(HTTPServlet):
@@ -22,9 +24,8 @@ class HTTPContent(HTTPServlet):
 
     Subclasses typically override defaultAction().
 
-    In `awake`, the page sets self attributes: `_transaction`,
-    `_response` and `_request` which subclasses should use as
-    appropriate.
+    In `awake`, the page sets self attributes: `_transaction`, `_response`
+    and `_request` which subclasses should use as appropriate.
 
     For the purposes of output, the `write` and `writeln`
     convenience methods are provided.
@@ -48,18 +49,19 @@ class HTTPContent(HTTPServlet):
 
         """
         HTTPServlet.awake(self, transaction)
-        self._response    = transaction.response()
-        self._request     = transaction.request()
-        self._session     = None # don't create unless needed
+        self._response = transaction.response()
+        self._request = transaction.request()
+        self._session = None # don't create unless needed
         assert self._transaction is not None
-        assert self._response    is not None
-        assert self._request     is not None
+        assert self._response is not None
+        assert self._request is not None
 
     def respondToGet(self, transaction):
         """Respond to GET.
 
         Invoked in response to a GET request method. All methods
         are passed to `_respond`.
+
         """
         self._respond(transaction)
 
@@ -123,7 +125,7 @@ class HTTPContent(HTTPServlet):
 
         """
         self._session = None
-        self._request  = None
+        self._request = None
         self._response = None
         self._transaction = None
         HTTPServlet.sleep(self, transaction)
@@ -190,9 +192,10 @@ class HTTPContent(HTTPServlet):
     def canBeThreaded(self):
         """Declares whether servlet can be threaded.
 
-        Returns 0 because of the instance variables we set up in `awake`.
+        Returns False because of the instance variables we set up in `awake`.
+
         """
-        return 0
+        return False
 
 
     ## Actions ##
@@ -269,18 +272,17 @@ class HTTPContent(HTTPServlet):
         return name
 
     def urlEncode(self, s):
-        """Alias for `WebUtils.Funcs.urlEncode`.
+        """Quotes special characters using the % substitutions.
 
-        Quotes special characters using the % substitutions.
+        This method does the same as the `urllib.quote_plus()` function.
 
         """
-        # @@: urllib.quote, or
-        return Funcs.urlEncode(s)
+        return Funcs.urlEncode(s) # we could also use urllib.quote
 
     def urlDecode(self, s):
-        """Alias for `WebUtils.Funcs.urlDecode`.
+        """Turn special % characters into actual characters.
 
-        Turns special % characters into actual characters.
+        This method does the same as the `urllib.unquote_plus()` function.
 
         """
         return Funcs.urlDecode(s)
@@ -322,8 +324,8 @@ class HTTPContent(HTTPServlet):
     def endResponse(self):
         """End response.
 
-        When this method is called during `awake` or
-        `respond`, servlet processing will end immediately,
+        When this method is called during `awake` or `respond`,
+        servlet processing will end immediately,
         and the accumulated response will be sent.
 
         Note that `sleep` will still be called, providing a

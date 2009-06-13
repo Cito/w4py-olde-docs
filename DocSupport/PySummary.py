@@ -1,5 +1,4 @@
-"""
-PySummary
+"""PySummary
 
 A PySummary instance reads a Python file and creates a summary of the file
 which you can access by using it as a (e.g., %s or str()).
@@ -9,7 +8,6 @@ methods with a given name. The default prefix for denoting a category is ##.
 
 """
 
-from types import DictType
 import os
 
 
@@ -30,7 +28,7 @@ class PySummary:
 
     def readConfig(self, filename):
         self._settings = eval(open(filename).read())
-        assert type(self._settings) is DictType
+        assert isinstance(self._settings, dict)
 
 
     ## Reading files ##
@@ -158,7 +156,7 @@ class Line:
                     if end2 >= 0:
                         ht = ht[:end2+1]
                 ht = '%s<span class="name_%s">%s</span>%s' % (
-                        ht[:start], self._type, ht[start:end], ht[end:])
+                    ht[:start], self._type, ht[start:end], ht[end:])
             else:
                 ht = self._text
             self._html = ht

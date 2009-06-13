@@ -15,12 +15,13 @@ class Message(Object):
 
     Messages have:
 
-            * A set of arguments.
-            * A protocol.
-            * A content type and length.
+        * A set of arguments.
+        * A protocol.
+        * A content type and length.
 
     FUTURE
-            * Support for different types of encodings
+        * Support for different types of encodings
+        
     """
 
 

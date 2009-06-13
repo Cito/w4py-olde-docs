@@ -28,10 +28,12 @@ class XMLRPCServlet(RPCServlet):
     allow_none = True
 
     def respondToPost(self, transaction):
-        """
+        """Respond to a Post request.
+
         This is similar to the xmlrpcserver.py example from the xmlrpc
         library distribution, only it's been adapted to work within a
         WebKit servlet.
+
         """
         try:
             # get arguments
@@ -58,24 +60,24 @@ class XMLRPCServlet(RPCServlet):
             except Exception, e:
                 fault = self.resultForException(e, transaction)
                 response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault),
-                        encoding=encoding, allow_none=self.allow_none)
+                    encoding=encoding, allow_none=self.allow_none)
                 self.sendOK('text/xml', response, transaction)
                 self.handleException(transaction)
-            except:  # if it's a string exception, this gets triggered
+            except: # if it's a string exception, this gets triggered
                 fault = self.resultForException(sys.exc_info()[0], transaction)
                 response = xmlrpclib.dumps(xmlrpclib.Fault(1, fault),
-                        encoding=encoding, allow_none=self.allow_none)
+                    encoding=encoding, allow_none=self.allow_none)
                 self.sendOK('text/xml', response, transaction)
                 self.handleException(transaction)
             else:
                 response = xmlrpclib.dumps(response, methodresponse=1,
-                        encoding=encoding, allow_none=self.allow_none)
+                    encoding=encoding, allow_none=self.allow_none)
                 self.sendOK('text/xml', response, transaction)
         except Exception:
             # internal error, report as HTTP server error
             print 'XMLRPCServlet internal error'
             print ''.join(traceback.format_exception(
-                    sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
+                sys.exc_info()[0], sys.exc_info()[1], sys.exc_info()[2]))
             transaction.response().setStatus(500, 'Server Error')
             self.handleException(transaction)
 
@@ -86,7 +88,7 @@ def _getXmlDeclAttr(xml, attName):
     """Get attribute value from xml declaration (<?xml ... ?>)."""
     s = xml[6 : xml.find("?>")] # 'version = "1.0" encoding = "Cp1251"'
     p = s.find(attName)
-    if p == -1:
+    if p < 0:
         return None
     s = s[p + len(attName):] # '= "Cp1251"'
     s = s[s.find('=') + 1:].strip() # '"Cp1251"'

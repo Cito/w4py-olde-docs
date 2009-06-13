@@ -50,7 +50,7 @@ class SessionStore(Object):
             import pickle
         if hasattr(pickle, 'HIGHEST_PROTOCOL'):
             def dumpWithHighestProtocol(obj, f,
-                            proto=pickle.HIGHEST_PROTOCOL, dump=pickle.dump):
+                    proto=pickle.HIGHEST_PROTOCOL, dump=pickle.dump):
                 return dump(obj, f, proto)
             self._encoder = dumpWithHighestProtocol
         else:
@@ -67,46 +67,50 @@ class SessionStore(Object):
     ## Dictionary-style access ##
 
     def __len__(self):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def __getitem__(self, key):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
+
 
     def __setitem__(self, key, item):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def __delitem__(self, key):
         """Delete an item.
 
         Subclasses are responsible for expiring the session as well.
         Something along the lines of:
-                sess = self[key]
-                if not sess.isExpired():
-                        sess.expiring()
+            sess = self[key]
+            if not sess.isExpired():
+                sess.expiring()
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
+
+    def __contains__(self, key):
+        raise AbstractError(self.__class__)
 
     def has_key(self, key):
-        raise AbstractError, self.__class__
+        return key in self
 
     def keys(self):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def clear(self):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def setdefault(self, key, default):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
 
     ## Application support ##
 
     def storeSession(self, session):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def storeAllSessions(self):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def cleanStaleSessions(self, task=None):
         """Clean stale sessions.
@@ -123,7 +127,7 @@ class SessionStore(Object):
                 pass # session was already deleted by some other thread
             else:
                 if curTime - sess.lastAccessTime() >= sess.timeout() \
-                                or sess.timeout() == 0:
+                        or sess.timeout() == 0:
                     try:
                         del self[key]
                     except KeyError:
@@ -175,7 +179,4 @@ class SessionStore(Object):
     ## As a string ##
 
     def __repr__(self):
-        d = {}
-        for key, value in self.items():
-            d[key] = value
-        return repr(d)
+        return repr(dict(self.items()))

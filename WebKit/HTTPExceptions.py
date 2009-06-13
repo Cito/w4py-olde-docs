@@ -1,15 +1,13 @@
-"""HTTPExceptions
+"""HTTP exceptions.
 
-HTTPExceptions are for situations that are predicted by the
-HTTP spec. Where the ``200 OK`` response is typical, a
-``404 Not Found`` or ``301 Moved Temporarily`` response is not
-entirely unexpected.
+HTTPExceptions are for situations that are predicted by the HTTP spec.
+Where the ``200 OK`` response is typical, a ``404 Not Found``
+or ``301 Moved Temporarily`` response is not entirely unexpected.
 
-`Application` catches all `HTTPException` exceptions (and subclasses
-of HTTPException), and instead of being errors these are translated
-into responses. In various places these can also be caught and
-changed, for instance an `HTTPAuthenticationRequired` could be
-turned into a normal login page.
+`Application` catches all `HTTPException` exceptions (and subclasses of
+HTTPException), and instead of being errors these are translated into responses.
+In various places these can also be caught and changed, for instance
+an `HTTPAuthenticationRequired` could be turned into a normal login page.
 
 """
 
@@ -62,12 +60,9 @@ class HTTPException(Exception):
 <body>
 <h1>%(htTitle)s</h1>
 %(body)s
-</body></html>''' % {
-                "htTitle": self.htTitle(),
-                "title": self.title(),
-                "body": self.htBody(),
-                "code": self.code()
-                }
+</body></html>''' % dict(
+            htTitle=self.htTitle(), title=self.title(),
+            body=self.htBody(), code=self.code())
 
     def title(self):
         """The title used in the HTML page."""
@@ -82,7 +77,7 @@ class HTTPException(Exception):
         body = self.htDescription()
         if self.args:
             body += ''.join(['<p>%s</p>\n'
-                    % htmlEncode(str(p)) for p in self.args])
+                % htmlEncode(str(p)) for p in self.args])
         return body
 
     def description(self):
@@ -167,7 +162,7 @@ class HTTPMovedPermanently(HTTPException):
 
     def description(self):
         return 'The resource you are accessing has been moved to' \
-                ' <a href="%s">%s</a>' % ((htmlEncode(self.location()),)*2)
+            ' <a href="%s">%s</a>' % ((htmlEncode(self.location()),)*2)
 
 
 class HTTPTemporaryRedirect(HTTPMovedPermanently):

@@ -20,7 +20,6 @@ to the Application object itself.
 
 """
 
-from types import FloatType, ClassType
 from UserDict import UserDict
 
 from Common import *
@@ -40,12 +39,12 @@ defaultConfig = {
         'LogActivity': True,
         'ActivityLogFilename': 'Logs/Activity.csv',
         'ActivityLogColumns': [
-                'request.remoteAddress', 'request.method',
-                'request.uri', 'response.size',
-                'servlet.name', 'request.timeStamp',
-                'transaction.duration',
-                'transaction.errorOccurred'
-                ],
+            'request.remoteAddress', 'request.method',
+            'request.uri', 'response.size',
+            'servlet.name', 'request.timeStamp',
+            'transaction.duration',
+            'transaction.errorOccurred'
+            ],
         'SessionModule': 'Session',
         'SessionStore': 'Dynamic',
         'SessionStoreDir': 'Sessions',
@@ -63,8 +62,8 @@ defaultConfig = {
         'IncludeFancyTraceback': False,
         'FancyTracebackContext': 5,
         'UserErrorMessage': 'The site is having technical difficulties'
-                ' with this page. An error has been logged, and the problem'
-                ' will be fixed as soon as possible. Sorry!',
+            ' with this page. An error has been logged, and the problem'
+            ' will be fixed as soon as possible. Sorry!',
         'LogErrors': True,
         'ErrorLogFilename': 'Logs/Errors.csv',
         'SaveErrorMessages': True,
@@ -73,48 +72,48 @@ defaultConfig = {
         'EmailErrorReportAsAttachment': False,
         'ErrorEmailServer': 'localhost',
         'ErrorEmailHeaders': {
-                'From': 'webware@mydomain',
-                'To': ['webware@mydomain'],
-                'Reply-to': 'webware@mydomain',
-                'content-type': 'text/html',
-                'Subject': 'Error'
-                },
+            'From': 'webware@mydomain',
+            'To': ['webware@mydomain'],
+            'Reply-to': 'webware@mydomain',
+            'content-type': 'text/html',
+            'Subject': 'Error'
+            },
         'ErrorPage': None,
         'MaxValueLengthInExceptionReport': 500,
         'RPCExceptionReturn': 'traceback',
         'ReportRPCExceptionsInWebKit': True,
         'CacheDir': 'Cache',
         'Contexts': {
-                'default': 'Examples',
-                'Admin': 'Admin',
-                'Examples': 'Examples',
-                'Testing': 'Testing',
-                'Docs': 'Docs',
-                },
+            'default': 'Examples',
+            'Admin': 'Admin',
+            'Examples': 'Examples',
+            'Testing': 'Testing',
+            'Docs': 'Docs',
+            },
         'Debug': {
-                'Sessions': False,
-                },
+            'Sessions': False,
+            },
         'DirectoryFile': ['index', 'Index', 'main', 'Main'],
         'UseCascadingExtensions': True,
         'ExtensionCascadeOrder': ['.py', '.psp', '.kid', '.html'],
         'ExtraPathInfo': True,
         'ExtensionsToIgnore': [
-                '.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
-                '.py~', '.psp~', '.kid~', '.html~', '.tmpl~'
-                ],
+            '.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
+            '.py~', '.psp~', '.kid~', '.html~', '.tmpl~'
+            ],
         'ExtensionsToServe': [],
         'FilesToHide': [
-                '.*', '*~', '*.bak', '*.py_bak', '*.tmpl',
-                '*.pyc', '*.pyo', '__init__.*', '*.config'
-                ],
+            '.*', '*~', '*.bak', '*.py_bak', '*.tmpl',
+            '*.pyc', '*.pyo', '__init__.*', '*.config'
+            ],
         'FilesToServe': [],
         'UnknownFileTypes': {
-                'ReuseServlets': True,
-                'Technique': 'serveContent', # or redirectSansAdapter
-                'CacheContent': False,
-                'MaxCacheContentSize': 128*1024,
-                'ReadBufferSize': 32*1024
-                },
+            'ReuseServlets': True,
+            'Technique': 'serveContent', # or redirectSansAdapter
+            'CacheContent': False,
+            'MaxCacheContentSize': 128*1024,
+            'ReadBufferSize': 32*1024
+            },
 }
 
 
@@ -237,8 +236,7 @@ class Application(ConfigurableForServerSidePath, Object):
         try:
             exec 'from %s import %s' % (moduleName, className)
             klass = locals()[className]
-            if not isinstance(klass, ClassType) \
-                            and not issubclass(klass, Object):
+            if not issubclass(klass, (object, Object)):
                 raise ImportError
             self._sessionClass = klass
         except ImportError:
@@ -254,8 +252,7 @@ class Application(ConfigurableForServerSidePath, Object):
         try:
             exec 'from %s import %s' % (moduleName, className)
             klass = locals()[className]
-            if not isinstance(klass, ClassType) \
-                            and not issubclass(klass, Object):
+            if not isinstance(klass, (object, Object)):
                 raise ImportError
             self._sessions = klass(self)
         except ImportError:
@@ -478,7 +475,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
         """
         return self.setting('SessionCookiePath') or (
-                trans.request().servletPath() + '/')
+            trans.request().servletPath() + '/')
 
 
     ## Misc Access ##
@@ -497,7 +494,7 @@ class Application(ConfigurableForServerSidePath, Object):
         """
         if path:
             return os.path.normpath(
-                    os.path.join(self._serverSidePath, path))
+                os.path.join(self._serverSidePath, path))
         else:
             return self._serverSidePath
 
@@ -535,19 +532,19 @@ class Application(ConfigurableForServerSidePath, Object):
         # We use UserDict on the next line because we know it inherits
         # NamedValueAccess and reponds to valueForName()
         objects = UserDict({
-                'application': self,
-                'transaction': trans,
-                'request': trans.request(),
-                'response': trans.response(),
-                'servlet': trans.servlet(),
-                'session': trans._session, # don't cause creation of session
+            'application': self,
+            'transaction': trans,
+            'request': trans.request(),
+            'response': trans.response(),
+            'servlet': trans.servlet(),
+            'session': trans._session, # don't cause creation of session
         })
         for column in self.setting('ActivityLogColumns'):
             try:
                 value = objects.valueForName(column)
             except Exception:
                 value = '(unknown)'
-            if type(value) is FloatType:
+            if isinstance(value, float):
                 # probably need more flexibility in the future
                 value = '%0.2f' % value
             else:
@@ -996,13 +993,13 @@ class Application(ConfigurableForServerSidePath, Object):
         """
         request = trans.request()
         url = '%s://%s%s/%s=%s%s%s%s' % (request.scheme(),
-                request.hostAndPort(), request.servletPath(),
-                self.sessionName(trans), trans.session().identifier(),
-                request.pathInfo(), request.extraURLPath() or '',
-                request.queryString() and '?' + request.queryString() or '')
+            request.hostAndPort(), request.servletPath(),
+            self.sessionName(trans), trans.session().identifier(),
+            request.pathInfo(), request.extraURLPath() or '',
+            request.queryString() and '?' + request.queryString() or '')
         if self.setting('Debug')['Sessions']:
             print '>> [sessions] handling UseAutomaticPathSessions, ' \
-                    'redirecting to', url
+                'redirecting to', url
         trans.response().sendRedirect(url)
         raise EndResponse
 
@@ -1016,11 +1013,11 @@ class Application(ConfigurableForServerSidePath, Object):
         """
         request = trans.request()
         url = '%s://%s%s%s%s%s' % (request.scheme(),
-                request.hostAndPort(), request.servletPath(),
-                request.pathInfo(), request.extraURLPath() or '',
-                request.queryString() and '?' + request.queryString() or '')
+            request.hostAndPort(), request.servletPath(),
+            request.pathInfo(), request.extraURLPath() or '',
+            request.queryString() and '?' + request.queryString() or '')
         if self.setting('Debug')['Sessions']:
             print ">> [sessions] handling unnecessary path session, ' \
-                    'redirecting to", url
+                'redirecting to", url
         trans.response().sendRedirect(url)
         raise EndResponse

@@ -4,12 +4,13 @@
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
-"""
-Generates .html from all the .txt files in a directory.
+"""Generate .html from all the .txt files in a directory.
 
 Ordinary .txt files are understood to be standalone reStructuredText.
 Files named ``pep-*.txt`` are interpreted as reStructuredText PEPs.
+
 """
+
 # Once PySource is here, build .html from .py as well.
 
 __docformat__ = 'reStructuredText'
@@ -18,7 +19,7 @@ __docformat__ = 'reStructuredText'
 try:
     import locale
     locale.setlocale(locale.LC_ALL, '')
-except:
+except Exception:
     pass
 
 import sys
@@ -26,6 +27,7 @@ import os
 import os.path
 import copy
 from fnmatch import fnmatch
+
 import docutils
 from docutils import ApplicationError
 from docutils import core, frontend, utils
@@ -36,23 +38,20 @@ from docutils.writers import html4css1, pep_html
 
 usage = '%prog [options] [<directory> ...]'
 description = ('Generates .html from all the reStructuredText .txt files '
-               '(including PEPs) in each <directory> '
-               '(default is the current directory).')
+    '(including PEPs) in each <directory> '
+    '(default is the current directory).')
 
 
 class SettingsSpec(docutils.SettingsSpec):
-
-    """
-    Runtime settings & command-line options for the front end.
-    """
+    """Runtime settings and command-line options for the front end."""
 
     # Can't be included in OptionParser below because we don't want to
     # override the base class.
     settings_spec = (
         'Build-HTML Options',
         None,
-        (('Recursively scan subdirectories for files to process.  This is '
-          'the default.',
+        (('Recursively scan subdirectories for files to process. '
+          'This is the default.',
           ['--recurse'],
           {'action': 'store_true', 'default': 1,
            'validator': frontend.validate_boolean}),
@@ -80,10 +79,7 @@ class SettingsSpec(docutils.SettingsSpec):
 
 
 class OptionParser(frontend.OptionParser):
-
-    """
-    Command-line option processing for the ``buildhtml.py`` front end.
-    """
+    """Command-line option processing for the ``buildhtml.py`` front end."""
 
     def check_values(self, values, args):
         frontend.OptionParser.check_values(self, values, args)
@@ -100,42 +96,39 @@ class OptionParser(frontend.OptionParser):
 
 
 class Struct:
-
-    """Stores data attributes for dotted-attribute access."""
+    """Store data attributes for dotted-attribute access."""
 
     def __init__(self, **keywordargs):
         self.__dict__.update(keywordargs)
 
 
 class Builder:
+    """Build HTML files."""
 
     def __init__(self):
+        # Publisher-specific settings.
+        # Key '' is for the front-end script itself.
+        # ``self.publishers[''].components`` must contain a superset
+        # of all components used by individual publishers.
         self.publishers = {
-            '': Struct(components=(pep.Reader, rst.Parser, pep_html.Writer,
-                                   SettingsSpec)),
-            '.txt': Struct(components=(rst.Parser, standalone.Reader,
-                                       html4css1.Writer, SettingsSpec),
-                           reader_name='standalone',
-                           writer_name='html'),
-            'PEPs': Struct(components=(rst.Parser, pep.Reader,
-                                       pep_html.Writer, SettingsSpec),
-                           reader_name='pep',
-                           writer_name='pep_html')}
-        """Publisher-specific settings.  Key '' is for the front-end script
-        itself.  ``self.publishers[''].components`` must contain a superset of
-        all components used by individual publishers."""
-
+            '': Struct(components=(
+                pep.Reader, rst.Parser, pep_html.Writer, SettingsSpec)),
+            '.txt': Struct(components=(
+                rst.Parser, standalone.Reader, html4css1.Writer, SettingsSpec),
+                reader_name='standalone', writer_name='html'),
+            'PEPs': Struct(components=(
+                rst.Parser, pep.Reader, pep_html.Writer, SettingsSpec),
+                reader_name='pep', writer_name='pep_html')}
         self.setup_publishers()
 
     def setup_publishers(self):
-        """
-        Manage configurations for individual publishers.
+        """Manage configurations for individual publishers.
 
         Each publisher (combination of parser, reader, and writer) may have
         its own configuration defaults, which must be kept separate from those
         of the other publishers.  Setting defaults are combined with the
-        config file settings and command-line options by
-        `self.get_settings()`.
+        config file settings and command-line options by `self.get_settings()`.
+
         """
         for name, publisher in self.publishers.items():
             option_parser = OptionParser(
@@ -152,12 +145,12 @@ class Builder:
         self.initial_settings = self.get_settings('')
 
     def get_settings(self, publisher_name, directory=None):
-        """
-        Return a settings object, from multiple sources.
+        """Return a settings object, from multiple sources.
 
         Copy the setting defaults, overlay the startup config file settings,
         then the local config file settings, then the command-line options.
         Assumes the current directory has been set.
+
         """
         publisher = self.publishers[publisher_name]
         settings = frontend.Values(publisher.setting_defaults.__dict__)
@@ -200,7 +193,7 @@ class Builder:
                 if fnmatch(names[i], pattern):
                     # Modify in place!
                     del names[i]
-        prune = 0
+        prune = False
         for name in names:
             if name.endswith('.txt'):
                 prune = self.process_txt(directory, name)
@@ -225,11 +218,11 @@ class Builder:
             sys.stderr.flush()
         try:
             core.publish_file(source_path=settings._source,
-                              destination_path=settings._destination,
-                              reader_name=pub_struct.reader_name,
-                              parser_name='restructuredtext',
-                              writer_name=pub_struct.writer_name,
-                              settings=settings)
+                destination_path=settings._destination,
+                reader_name=pub_struct.reader_name,
+                parser_name='restructuredtext',
+                writer_name=pub_struct.writer_name,
+                settings=settings)
         except ApplicationError, error:
             print >>sys.stderr, ('        Error (%s): %s'
                                  % (error.__class__.__name__, error))

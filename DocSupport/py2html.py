@@ -90,16 +90,16 @@ INPUT_FORM = None
 
 # HTML DOCTYPE and XML namespace
 HTML_DOCTYPE = ('<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"'
-        ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">')
+    ' "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">')
 HTML_XMLNS = ' xmlns="http://www.w3.org/1999/xhtml"'
 
 
 ### Helpers
 
-def fileio(file, mode='rb', data=None, close=0):
+def fileio(file, mode='rb', data=None, close=False):
     if type(file) == type(''):
         f = open(file, mode)
-        close = 1
+        close = True
     else:
         f = file
     if data:
@@ -113,34 +113,34 @@ def fileio(file, mode='rb', data=None, close=0):
 
 ### Converter class
 
-class PrettyPrint:
+class PrettyPrint(object):
     """ generic Pretty Printer class
 
-            * supports tagging Python scripts in the following ways:
+    * supports tagging Python scripts in the following ways:
 
-              # format/mode |  color  mono
-              # --------------------------
-              # rawhtml     |    x     x   (HTML without headers, etc.)
-              # html        |    x     x   (a HTML page with HEAD&BODY:)
-              # ansi        |    x     x   (with Ansi-escape sequences)
+      # format/mode |  color  mono
+      # --------------------------
+      # rawhtml     |    x     x   (HTML without headers, etc.)
+      # html        |    x     x   (a HTML page with HEAD&BODY:)
+      # ansi        |    x     x   (with Ansi-escape sequences)
 
-            * interfaces:
+    * interfaces:
 
-               file_filter -- takes two files: input & output (may be stdin/stdout)
-               filter -- takes a string and returns the highlighted version
+       file_filter -- takes two files: input & output (may be stdin/stdout)
+       filter -- takes a string and returns the highlighted version
 
-            * to create an instance use:
+    * to create an instance use:
 
-              c = PrettyPrint(tagfct,format,mode)
+      c = PrettyPrint(tagfct,format,mode)
 
-              where format and mode must be strings according to the
-              above table if you plan to use PyFontify.fontify as
-              tagfct
+      where format and mode must be strings according to the
+      above table if you plan to use PyFontify.fontify as
+      tagfct
 
-            * the tagfct has to take one argument, text, and return a taglist
-              (format: [(id,left,right,sublist),...], where id is the
-              "name" given to the slice left:right in text and sublist is a
-              taglist for tags inside the slice or None)
+    * the tagfct has to take one argument, text, and return a taglist
+      (format: [(id,left,right,sublist),...], where id is the
+      "name" given to the slice left:right in text and sublist is a
+      taglist for tags inside the slice or None)
 
     """
 
@@ -150,7 +150,7 @@ class PrettyPrint:
     css = ''
     header = ''
     footer = ''
-    replace_URLs = 0
+    replace_URLs = False
     # formats to be used
     formats = {}
 
@@ -194,15 +194,15 @@ padding: 3pt; }
 -->
 </style>""" % self.bgcolor
         self.formats = {
-                'all': ('<pre>', '</pre>'),
-                'comment': ('<span class="PY_COMMENT">', '</span>'),
-                'keyword': ('<span class="PY_KEYWORD">', '</span>'),
-                'parameter': ('<span class="PY_PARAMETER">', '</span>'),
-                'identifier': (lambda x:
-                        '<a name="%s"><span class="PY_IDENTIFIER">' % x.strip(),
-                        '</span></a>'),
-                'string': ('<span class="PY_STRING">', '</span>')
-                }
+            'all': ('<pre>', '</pre>'),
+            'comment': ('<span class="PY_COMMENT">', '</span>'),
+            'keyword': ('<span class="PY_KEYWORD">', '</span>'),
+            'parameter': ('<span class="PY_PARAMETER">', '</span>'),
+            'identifier': (lambda x:
+                '<a name="%s"><span class="PY_IDENTIFIER">' % x.strip(),
+                '</span></a>'),
+            'string': ('<span class="PY_STRING">', '</span>')
+            }
 
     set_mode_rawhtml_color = set_mode_html_color
 
@@ -222,37 +222,37 @@ padding: 3pt; }
 -->
 </style> """ % self.bgcolor
         self.formats = {
-                'all': ('<pre>', '</pre>'),
-                'comment': ('<span class="PY_COMMENT">', '</span>'),
-                'keyword': ('<span class="PY_KEYWORD">', '</span>'),
-                'parameter': ('<span class="PY_PARAMETER">', '</span>'),
-                'identifier': (lambda x:
-                        '<a name="%s"><span class="PY_IDENTIFIER">' % x.strip(),
-                        '</span></a>'),
-                'string': ('<span class="PY_STRING">', '</span>')
-                }
+            'all': ('<pre>', '</pre>'),
+            'comment': ('<span class="PY_COMMENT">', '</span>'),
+            'keyword': ('<span class="PY_KEYWORD">', '</span>'),
+            'parameter': ('<span class="PY_PARAMETER">', '</span>'),
+            'identifier': (lambda x:
+                '<a name="%s"><span class="PY_IDENTIFIER">' % x.strip(),
+                '</span></a>'),
+            'string': ('<span class="PY_STRING">', '</span>')
+            }
 
     set_mode_rawhtml_mono = set_mode_html_mono
 
     def set_mode_ansi_mono(self):
         self.formats = {
-                'all': ('', ''),
-                'comment': ('\033[2m', '\033[m'),
-                'keyword': ('\033[4m', '\033[m'),
-                'parameter': ('', ''),
-                'identifier': ('\033[1m', '\033[m'),
-                'string': ('', '')
-                }
+            'all': ('', ''),
+            'comment': ('\033[2m', '\033[m'),
+            'keyword': ('\033[4m', '\033[m'),
+            'parameter': ('', ''),
+            'identifier': ('\033[1m', '\033[m'),
+            'string': ('', '')
+            }
 
     def set_mode_ansi_color(self):
         self.formats = {
-                'all': ('', ''),
-                'comment': ('\033[34;2m', '\033[m'),
-                'keyword': ('\033[1;34m', '\033[m'),
-                'parameter': ('', ''),
-                'identifier': ('\033[1;31m', '\033[m'),
-                'string': ('\033[32;2m', '\033[m')
-                }
+            'all': ('', ''),
+            'comment': ('\033[34;2m', '\033[m'),
+            'keyword': ('\033[1;34m', '\033[m'),
+            'parameter': ('', ''),
+            'identifier': ('\033[1;31m', '\033[m'),
+            'string': ('\033[32;2m', '\033[m')
+            }
 
     ### Filters for Python scripts given as string
 
@@ -270,7 +270,7 @@ padding: 3pt; }
         output = self.fontify(self.escape_html(self.expand_tabs(text)))
         if self.replace_URLs:
             output = re.sub('URL:([ \t]+)([^ \n\r<]+)',
-                                            'URL:\\1<a href="\\2">\\2</a>', output)
+                'URL:\\1<a href="\\2">\\2</a>', output)
         html = """%s
 <html%s>
 <head>
@@ -287,15 +287,15 @@ padding: 3pt; }
 %s
 </body>
 </html>\n""" % (HTML_DOCTYPE, HTML_XMLNS,
-                self.title, self.css,
-                self.header, output, self.footer)
+            self.title, self.css,
+            self.header, output, self.footer)
         return html
 
     def filter_rawhtml(self, text):
         output = self.fontify(self.escape_html(self.expand_tabs(text)))
         if self.replace_URLs:
             output = re.sub('URL:([ \t]+)([^ \n\r<]+)',
-                                            'URL:\\1<a href="\\2">\\2</a>', output)
+                'URL:\\1<a href="\\2">\\2</a>', output)
         return self.header + output + self.footer
 
     def filter_ansi(self, text):
@@ -402,8 +402,8 @@ def main(cmdline):
         # use mxTextTool's tagging engine as fontifier
         from mx.TextTools import tag
         from mx.TextTools.Examples.Python import python_script
-        tagfct = lambda text, tag=tag, pytable=python_script: \
-                tag(text, pytable)[1]
+        tagfct = lambda text, tag=tag, pytable=python_script: tag(
+            text, pytable)[1]
         print "Py2HTML: using Marc's tagging engine"
     else:
         # load Just's fontifier
@@ -462,7 +462,7 @@ URL: http://starship.python.net/~just/
                 print 'IOError: footer file not found'
 
     if '-URL' in options:
-        c.replace_URLs = 1
+        c.replace_URLs = True
 
     if '-' in options:
         convert(sys.stdin, sys.stdout)
@@ -486,7 +486,7 @@ URL: http://starship.python.net/~just/
                 else:
                     sys.stdout.write('Content-Type: text/html\r\n\r\n')
                     write_html_error('Missing Parameter',
-                            'Missing script=URL field in request')
+                        'Missing script=URL field in request')
                 sys.exit(1)
             url = os.environ['PATH_INFO'][1:] # skip the leading slash
         else:
@@ -506,7 +506,7 @@ URL: http://starship.python.net/~just/
             tempfile, headers = network.retrieve(url)
         except IOError, reason:
             write_html_error('Error opening "%s"' % url,
-                    'The given URL could not be opened. Reason: %s' % str(reason))
+                'The given URL could not be opened. Reason: %s' % str(reason))
             sys.exit(1)
         f = open(tempfile,'rb')
         c.title = url

@@ -1,5 +1,7 @@
+"""HTTP requests"""
+
 import cgi, traceback
-from types import ListType
+from operator import itemgetter
 
 from Common import *
 from WebUtils import FieldStorage
@@ -28,8 +30,8 @@ class HTTPRequest(Request):
             self._input = requestDict['input']
             self._requestID = requestDict['requestID']
             self._fields = FieldStorage.FieldStorage(
-                    self._input, environ=self._environ,
-                    keep_blank_values=True, strict_parsing=False)
+                self._input, environ=self._environ,
+                keep_blank_values=True, strict_parsing=False)
             self._fields.parse_qs()
             self._cookies = Cookie()
             if self._environ.has_key('HTTP_COOKIE'):
@@ -107,10 +109,10 @@ class HTTPRequest(Request):
             # not a regular POST from an HTML form. In that case we just create
             # an empty set of fields.
             keys = []
-        dict = {}
+        d = {}
         for key in keys:
             value = self._fields[key]
-            if type(value) is not ListType:
+            if not isinstance(value, list):
                 if value.filename:
                     if debug:
                         print "Uploaded File Found"
@@ -119,18 +121,18 @@ class HTTPRequest(Request):
                     value = value.value # get its value.
             else:
                 value = map(lambda miniFieldStorage: miniFieldStorage.value,
-                        value) # extract those value's
-            dict[key] = value
+                    value) # extract those value's
+            d[key] = value
 
         self._fieldStorage = self._fields
-        self._fields = dict
+        self._fields = d
 
         # We use Tim O'Malley's Cookie class to get the cookies,
         # but then change them into an ordinary dictionary of values
-        dict = {}
+        d = {}
         for key in self._cookies.keys():
-            dict[key] = self._cookies[key].value
-        self._cookies = dict
+            d[key] = self._cookies[key].value
+        self._cookies = d
 
         self._contextName = None
         self._serverSidePath = self._serverSideContextPath = None
@@ -455,7 +457,7 @@ class HTTPRequest(Request):
             return self._environ['SCRIPT_URI']
         else:
             return '%s://%s%s' % (
-                    self.scheme(), self.hostAndPort(), self.serverPath())
+                self.scheme(), self.hostAndPort(), self.serverPath())
 
     def serverURLDir(self):
         """Return the directory of the URL in full internet form.
@@ -500,9 +502,9 @@ class HTTPRequest(Request):
         from the current location.
 
         Examples:
-                ''
-                '../'
-                '../../'
+            ''
+            '../'
+            '../../'
 
         You can use this as a prefix to a URL that you know is based off
         the home location. Any time you are in a servlet that may have been
@@ -593,8 +595,8 @@ class HTTPRequest(Request):
     def push(self, servlet, url=None):
         """Push servlet and URL path on a stack, setting a new URL."""
         self._stack.append((servlet, self.urlPath(), self._contextName,
-                self._serverSidePath, self._serverSideContextPath,
-                self._serverRootPath, self._extraURLPath))
+            self._serverSidePath, self._serverSideContextPath,
+            self._serverRootPath, self._extraURLPath))
         if url is not None:
             self.setURLPath(url)
 
@@ -602,8 +604,8 @@ class HTTPRequest(Request):
         """Pop URL path and servlet from the stack, returning the servlet."""
         if self._stack:
             (servlet, url, self._contextName,
-                    self._serverSidePath, self._serverSideContextPath,
-                    self._serverRootPath, self._extraURLPath) = self._stack.pop()
+                self._serverSidePath, self._serverSideContextPath,
+                self._serverRootPath, self._extraURLPath) = self._stack.pop()
             if url is not None:
                 self.setURLPath(url)
             return servlet
@@ -833,11 +835,11 @@ class HTTPRequest(Request):
         # @@ 2002-06-08 ib: should this also return the unparsed body
         # of the request?
         info = [
-                ('time', self._time),
-                ('environ', self._environ),
-                ('input', self._input),
-                ('fields', self._fields),
-                ('cookies', self._cookies)
+            ('time', self._time),
+            ('environ', self._environ),
+            ('input', self._input),
+            ('fields', self._fields),
+            ('cookies', self._cookies)
         ]
 
         # Information methods
@@ -858,9 +860,9 @@ class HTTPRequest(Request):
         return htmlInfo(self.info())
 
     _exceptionReportAttrNames = Request._exceptionReportAttrNames + (
-            'uri adapterName servletPath serverSidePath'
-            ' pathInfo pathTranslated queryString method'
-            ' sessionId previousURLPaths fields cookies environ'.split())
+        'uri adapterName servletPath serverSidePath'
+        ' pathInfo pathTranslated queryString method'
+        ' sessionId previousURLPaths fields cookies environ'.split())
 
 
     ## Deprecated ##
@@ -905,15 +907,15 @@ class HTTPRequest(Request):
 ## Info Structure ##
 
 _infoMethods = (
-        HTTPRequest.adapterName,
-        HTTPRequest.servletPath,
-        HTTPRequest.contextPath,
-        HTTPRequest.pathInfo,
-        HTTPRequest.pathTranslated,
-        HTTPRequest.queryString,
-        HTTPRequest.uri,
-        HTTPRequest.method,
-        HTTPRequest.sessionId
+    HTTPRequest.adapterName,
+    HTTPRequest.servletPath,
+    HTTPRequest.contextPath,
+    HTTPRequest.pathInfo,
+    HTTPRequest.pathTranslated,
+    HTTPRequest.queryString,
+    HTTPRequest.uri,
+    HTTPRequest.method,
+    HTTPRequest.sessionId
 )
 
 def htmlInfo(info):
@@ -926,15 +928,13 @@ def htmlInfo(info):
     for pair in info:
         value = pair[1]
         if hasattr(value, 'items') and (type(value) is type({})
-                        or hasattr(value, '__getitem__')):
+                or hasattr(value, '__getitem__')):
             value = htmlInfo(_infoForDict(value))
         res.append('<tr valign="top"><td>%s</td><td>%s&nbsp;</td></tr>\n'
                 % (pair[0], value))
     res.append('</table>\n')
     return ''.join(res)
 
-def _infoForDict(dict):
+def _infoForDict(d):
     """Return an "info" structure for any dictionary-like object."""
-    items = dict.items()
-    items.sort(lambda a, b: cmp(a[0], b[0]))
-    return items
+    return sorted(d.items, key=itemgetter(0))

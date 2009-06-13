@@ -25,10 +25,10 @@ class OneShotAppServer(AppServer):
         self._pidFile = None
 
     def isPersistent(self):
-        return 0
+        return False
 
     def createApplication(self):
-        return Application(server=self, useSessionSweeper=0)
+        return Application(server=self, useSessionSweeper=False)
 
     def dispatchRawRequest(self, newRequestDict, strmOut):
         self._requestID += 1

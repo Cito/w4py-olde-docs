@@ -89,7 +89,8 @@ class ImportManager(Object):
         """Activate ImportSpy to keep track of modules loaded elsewhere."""
         if not self._spy:
             from ImportSpy import activate
-            self._spy = activate(self)
+            activate(self)
+            self._spy = True
         return self._spy
 
     def fileList(self, update=True):
@@ -142,7 +143,7 @@ class ImportManager(Object):
             f = getattr(mod, '__file__', None)
             if f and not fileList.has_key(f):
                 # record the .py file corresponding to each .pyc or .pyo
-                if f[-4:].lower() in ['.pyc', '.pyo']:
+                if f[-4:].lower() in ('.pyc', '.pyo'):
                     f = f[:-1]
                 try:
                     if isfile(f):

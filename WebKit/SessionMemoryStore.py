@@ -1,3 +1,5 @@
+"""Session store in memory."""
+
 from SessionStore import SessionStore
 from SessionFileStore import SessionFileStore
 
@@ -12,10 +14,10 @@ class SessionMemoryStore(SessionStore):
 
     ## Init ##
 
-    def __init__(self, app, restoreFiles=1):
+    def __init__(self, app, restoreFiles=True):
         SessionStore.__init__(self, app)
         self._store = {}
-        if restoreFiles == 1:
+        if restoreFiles:
             filestore = SessionFileStore(app)
             keys = filestore.keys()
             for i in keys:
@@ -43,8 +45,11 @@ class SessionMemoryStore(SessionStore):
             sess.expiring()
         del self._store[key]
 
+    def __contains__(self, key):
+        return key in self._store
+
     def has_key(self, key):
-        return self._store.has_key(key)
+        return key in self
 
     def keys(self):
         return self._store.keys()

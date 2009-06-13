@@ -3,7 +3,7 @@ from MiscUtils.PropertiesObject import PropertiesObject
 
 
 class PlugInError(Exception):
-    pass
+    """Plug-in error."""
 
 
 class PlugIn(Object):
@@ -27,7 +27,7 @@ class PlugIn(Object):
     You can ask a plug-in for its properties().
 
     The plug-in/package must have an __init__.py while must contain a function:
-            def InstallInWebKit(appServer):
+        def InstallInWebKit(appServer):
     This function is invoked to take whatever actions are needed to plug the
     new component into WebKit. See PSP for an example.
 
@@ -44,13 +44,13 @@ class PlugIn(Object):
     case-by-case basis (and so far there is currently no need).
 
     Instructions for invoking:
-            p = PlugIn(self, '../Foo') # 'self' is typically AppServer. It gets passed to InstallInWebKit()
-            willNotLoadReason = plugIn.load()
-            if willNotLoadReason:
-                    print '    Plug-in %s cannot be loaded because:\n    %s' % (path, willNotLoadReason)
-                    return None
-            p.install()
-            # Note that load() and install() could raise exceptions. You should expect this.
+        p = PlugIn(self, '../Foo') # 'self' is typically AppServer. It gets passed to InstallInWebKit()
+        willNotLoadReason = plugIn.load()
+        if willNotLoadReason:
+            print '    Plug-in %s cannot be loaded because:\n    %s' % (path, willNotLoadReason)
+            return None
+        p.install()
+        # Note that load() and install() could raise exceptions. You should expect this.
 
     """
 
@@ -67,7 +67,7 @@ class PlugIn(Object):
         self._path = path
         self._dir, self._name = os.path.split(path)
         self._cacheDir = os.path.join(
-                self._appServer.application()._cacheDir, self._name)
+            self._appServer.application()._cacheDir, self._name)
         self._ver = '(unknown)'
         self._docs = self._docContext = None
         self._examplePages = self._examplePagesContext = None
@@ -97,9 +97,9 @@ class PlugIn(Object):
 
         # Inspect it and verify some required conventions
         if not hasattr(self._module, 'InstallInWebKit'):
-            raise PlugInError, \
-                    "Plug-in '%s' in '%s' has no InstallInWebKit() function." \
-                    % (self._name, self._dir)
+            raise PlugInError(
+                "Plug-in '%s' in '%s' has no InstallInWebKit() function."
+                % (self._name, self._dir))
 
         # Give the module a pointer back to us
         setattr(self._module, 'plugIn', self)
@@ -119,16 +119,16 @@ class PlugIn(Object):
             if self.hasDocs():
                 docsPath = self.serverSidePath('Docs')
                 assert os.path.exists(docsPath), \
-                        'Plug-in %s says it has documentation, ' \
-                        'but there is no Docs/ subdir.' % self._name
+                    'Plug-in %s says it has documentation, ' \
+                    'but there is no Docs/ subdir.' % self._name
                 if os.path.exists(os.path.join(docsPath, '__init__.py')):
                     ctxName = self._name + '/Docs'
                     if not app.hasContext(ctxName):
                         app.addContext(ctxName, docsPath)
                     self._docContext = ctxName
                 else:
-                    print 'Cannot create Docs context for plug-in %s' \
-                            ' (no __init__.py found).' % self._name
+                    print ('Cannot create Docs context for plug-in %s'
+                        ' (no __init__.py found).' % self._name)
 
     def setUpExamplePages(self):
         """Add a context for the examples."""
@@ -139,16 +139,16 @@ class PlugIn(Object):
             if self.hasExamplePages():
                 examplesPath = self.serverSidePath('Examples')
                 assert os.path.exists(examplesPath), \
-                        'Plug-in %s says it has example pages, ' \
-                        'but there is no Examples/ subdir.' % self._name
+                    'Plug-in %s says it has example pages, ' \
+                    'but there is no Examples/ subdir.' % self._name
                 if os.path.exists(os.path.join(examplesPath, '__init__.py')):
                     ctxName = self._name + '/Examples'
                     if not app.hasContext(ctxName):
                         app.addContext(ctxName, examplesPath)
                     self._examplePagesContext = ctxName
                 else:
-                    print 'Cannot create Examples context for plug-in %s' \
-                            ' (no __init__.py found).' % self._name
+                    print ('Cannot create Examples context for plug-in %s'
+                        ' (no __init__.py found).' % self._name)
 
     def docs(self):
         return self._docs

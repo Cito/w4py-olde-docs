@@ -41,10 +41,11 @@ AppServerOptions:
 
 Please note that the default values for the StartOptions and the AppServer
 can be easily changed at the top of the Launch.py script.
+
 """
 
 # FUTURE
-# * This shares a lot of code with ThreadedAppServer.py and Launch.py.
+# * This shares a lot of code with ThreadedAppServer.py and AppServer.py.
 #   Try to consolidate these things. The default settings below in the
 #   global variables could go completely into AppServer.config.
 # CREDITS
@@ -69,9 +70,9 @@ webwareDir = None
 # that you want to include into the search path for modules:
 libraryDirs = []
 
-# To get profiling going, set runProfile = 1 (see also
+# To get profiling going, set runProfile = True (see also
 # the description in the docstring of Profiler.py):
-runProfile = 0
+runProfile = False
 
 # The path to the log file, if you want to redirect the
 # standard output and error to a log file:
@@ -139,7 +140,7 @@ def launchWebKit(appServer=appServer, workDir=None, args=None):
 def main(args=None):
     """Evaluate the command line arguments and call launchWebKit."""
     global workDir, webwareDir, libraryDirs, runProfile, \
-            logFile, pidFile, user, group, appServer
+        logFile, pidFile, user, group, appServer
     if args is None:
         args = sys.argv[1:]
     # Accept AppServer even if placed before StartOptions:
@@ -161,8 +162,8 @@ def main(args=None):
     from getopt import getopt, GetoptError
     try:
         opts, args1 = getopt(args1, 'd:w:l:po:i:u:g:', [
-                'work-dir=', 'webware-dir=', 'library=', 'run-profile',
-                'log-file=', 'pid-file=', 'user=', 'group='])
+            'work-dir=', 'webware-dir=', 'library=', 'run-profile',
+            'log-file=', 'pid-file=', 'user=', 'group='])
     except GetoptError, error:
         print str(error)
         print
@@ -175,7 +176,7 @@ def main(args=None):
         elif opt in ('-l', '--library'):
             libraryDirs.append(arg)
         elif opt in ('-p', '--run-profile'):
-            runProfile = 1
+            runProfile = True
         elif opt in ('-o', '--log-file'):
             logFile = arg
         elif opt in ('-i', '--pid-file'):
@@ -186,8 +187,7 @@ def main(args=None):
             group = arg
     if arg2:
         appServer = arg2
-    elif args1 and not args1[0].startswith('-') \
-            and args1[0].find('=') < 0:
+    elif args1 and not args1[0].startswith('-') and '=' not in args1[0]:
         appServer = args1.pop(0)
     args = args2 + args1
     # Figure out the group id:
@@ -312,7 +312,7 @@ def main(args=None):
         if pid is not None:
             print 'According to the pid file, the server is still running.'
             # Try to kill an already running server:
-            killed = 0
+            killed = False
             try:
                 from signal import SIGTERM, SIGKILL
                 print 'Trying to terminate the server with pid %d...' % pid
@@ -321,7 +321,7 @@ def main(args=None):
                 from errno import ESRCH
                 if error.errno == ESRCH: # no such process
                     print 'The pid file was stale, continuing with startup...'
-                    killed = 1
+                    killed = True
                 else:
                     print 'Cannot terminate server with pid %d.' % pid
                     print error.strerror
@@ -339,7 +339,7 @@ def main(args=None):
                     from errno import ESRCH
                     if error.errno == ESRCH:
                         print 'Server with pid %d has been terminated.' % pid
-                        killed = 1
+                        killed = True
             if not killed:
                 try:
                     for i in range(100):
@@ -349,7 +349,7 @@ def main(args=None):
                     from errno import ESRCH
                     if error.errno == ESRCH:
                         print 'Server with pid %d has been killed by force.' % pid
-                        killed = 1
+                        killed = True
             if not killed:
                 print 'Server with pid %d cannot be terminated.' % pid
                 sys.exit(1)

@@ -27,9 +27,9 @@ a "close thread" is started up by the AppServer base class, but neither
 of these two extra threads should pose any problems debugging servlets.
 
 Tested on:
-        - WingIDE on Windows, http://wingware.com/
-        - PythonWin
-        - JEdit with the JPyDbg plugin, on Windows
+    - WingIDE on Windows, http://wingware.com/
+    - PythonWin
+    - JEdit with the JPyDbg plugin, on Windows
 
 """
 
@@ -113,7 +113,7 @@ class DebugAppServer(OriginalThreadedAppServer):
         sys.stdout.flush()
         sys.stderr.flush()
         self._imp.delModules(includePythonModules=False,
-                excludePrefixes=self._excludePrefixes)
+            excludePrefixes=self._excludePrefixes)
         raise ThreadedAppServer.RestartAppServerError
 
 

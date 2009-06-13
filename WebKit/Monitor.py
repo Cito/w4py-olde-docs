@@ -64,9 +64,9 @@ from marshal import dumps
 serverName = defaultServer
 srvpid = 0
 addr = None
-running = 0
+running = False
 
-debug = 1
+debug = True
 
 statstr = dumps({'format': 'STATUS'})
 statstr = dumps(len(statstr)) + statstr
@@ -91,7 +91,7 @@ def startupCheck():
     print "Waiting for start..."
     time.sleep(monitorInterval/2) # give the server a chance to start
     while 1:
-        if checkServer(0):
+        if checkServer(False):
             break
         count += monitorInterval
         if count > maxStartTime:
@@ -102,7 +102,7 @@ def startupCheck():
         print "Waiting for start..."
         time.sleep(monitorInterval)
 
-def startServer(killcurrent=1):
+def startServer(killcurrent=True):
     """Start the AppServer.
 
     If `killcurrent` is true or not provided, kill the current AppServer.
@@ -124,7 +124,7 @@ def startServer(killcurrent=1):
             createServer(not killcurrent)
             sys.exit()
 
-def checkServer(restart=1):
+def checkServer(restart=True):
     """Send a check request to the AppServer.
 
     If restart is 1, then attempt to restart the server
@@ -146,32 +146,32 @@ def checkServer(restart=1):
         if debug:
             print "Processed %s Requests." % resp
             print "Delay %s." % monwait
-        return 1
+        return True
     except Exception:
         print "No Response from AppServer."
         if running and restart:
             startServer()
             startupCheck()
         else:
-            return 0
+            return False
 
 def main(args):
     """The main loop.
 
-    Starts the server with `startServer(0)`,
+    Starts the server with `startServer(False)`,
     checks it's started up (`startupCheck`), and does a
     loop checking the server (`checkServer`).
 
     """
     global running
-    running = 1
+    running = True
 
     file = open("monitor.pid", "w")
     if os.name == 'posix':
         file.write(str(os.getpid()))
     file.flush()
     file.close()
-    startServer(0)
+    startServer(False)
     try:
         startupCheck()
 
@@ -216,7 +216,7 @@ def shutDown(signum, frame):
     global running
     print "Monitor Shutdown Called."
     sys.stdout.flush()
-    running = 0
+    running = False
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(addr)
@@ -232,7 +232,7 @@ def shutDown(signum, frame):
         os.waitpid(srvpid, 0)
     sys.stdout.flush()
     sys.stderr.flush()
-    return 0
+    return False
 
 import signal
 signal.signal(signal.SIGINT, shutDown)
@@ -293,13 +293,13 @@ if __name__ == '__main__':
         usage()
         sys.exit()
 
-    if 1: # setup path:
+    if True: # setup path:
         if '' not in sys.path:
             sys.path = [''] + sys.path
         try:
             import WebwarePathLocation
             wwdir = os.path.abspath(os.path.join(os.path.dirname(
-                    WebwarePathLocation.__file__), '..'))
+                WebwarePathLocation.__file__), '..'))
         except Exception, e:
             print e
             usage()
@@ -311,9 +311,9 @@ if __name__ == '__main__':
         except Exception:
             pass
 
-    cfgfile = open(os.path.join(wwdir, "WebKit",
-            "Configs/AppServer.config"), 'rU').read()
-    cfg = {'True': 1 == 1, 'False': 1 == 0, 'WebwarePath': wwdir}
+    cfgfile = open(os.path.join(wwdir, 'WebKit',
+        'Configs/AppServer.config'), 'rU').read()
+    cfg = dict(WebwarePath=wwdir)
     if cfgfile.lstrip().startswith('{'):
         cfg = eval(cfgfile, cfg)
     else:

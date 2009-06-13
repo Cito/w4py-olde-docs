@@ -1,4 +1,3 @@
-from types import FloatType, IntType, LongType, StringType, TupleType
 
 from Common import *
 
@@ -46,7 +45,7 @@ class HTTPResponse(Response):
             return self._headers.get(name.capitalize(), default)
 
     def hasHeader(self, name):
-        return self._headers.has_key(name.capitalize())
+        return name.capitalize() in self._headers
 
     def setHeader(self, name, value):
         """Set a specific header by name.
@@ -99,10 +98,10 @@ class HTTPResponse(Response):
 
     def hasCookie(self, name):
         """Return True if the specified cookie is present."""
-        return self._cookies.has_key(name)
+        return name in self._cookies
 
     def setCookie(self, name, value, path='/', expires='ONCLOSE',
-                    secure=False):
+            secure=False):
         """Set a cookie.
 
         You can also set the path (which defaults to /).
@@ -126,27 +125,27 @@ class HTTPResponse(Response):
         """
         cookie = Cookie(name, value)
         t = expires
-        if type(t) is StringType:
+        if isinstance(t, basestring):
             if t == 'ONCLOSE':
                 t = None
             elif t == 'NOW':
                 cookie.delete()
                 return
             elif t == 'NEVER':
-                t = time.gmtime(time.time())
+                t = time.gmtime()
                 t = (t[0] + 10,) + t[1:]
-            elif t[0] == '+':
+            elif t.startswith('+'):
                 t = time.time() + timeDecode(t[1:])
         if t:
-            if type(t) in (IntType, LongType, FloatType):
+            if isinstance(t, (int, long, float)):
                 t = time.gmtime(t)
-            if type(t) in (TupleType, TimeTupleType):
+            if isinstance(t, (tuple, TimeTupleType)):
                 t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
             if DateTime:
-                if type(t) is DateTime.DateTimeDeltaType or isinstance(
-                                t, DateTime.RelativeDateTime):
+                if isinstance(t, (DateTime.DateTimeDeltaType,
+                        DateTime.RelativeDateTime)):
                     t = DateTime.now() + t
-                if type(t) is DateTime.DateTimeType:
+                if isinstance(t, DateTime.DateTimeType):
                     t -= t.gmtoffset()
                     t = t.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
             cookie.setExpires(t)
@@ -173,7 +172,7 @@ class HTTPResponse(Response):
         parameters that will cause the browser to delete it.
 
         """
-        if self._cookies.has_key(name):
+        if name in self._cookies:
             self._cookies[name].delete()
         else:
             cookie = Cookie(name, None)
@@ -231,7 +230,7 @@ class HTTPResponse(Response):
         self.setHeader('Location', url)
         self.setHeader('Content-type', 'text/html')
         self.write('<html><body>This page has been redirected'
-                ' to <a href="%s">%s</a>.</body></html>' % (url, url))
+            ' to <a href="%s">%s</a>.</body></html>' % (url, url))
 
     def sendRedirectPermanent(self, url):
         """Redirect permanently to another URL."""
@@ -328,19 +327,18 @@ class HTTPResponse(Response):
             print "response.writeHeaders called when already committed"
             return
         # make sure the status header comes first
-        if self._headers.has_key('Status'):
+        if 'Status' in self._headers:
             # store and temporarily delete status
             status = self._headers['Status']
             del self._headers['Status']
         else:
             # invent meaningful status
-            status = self._headers.has_key('Location') \
-                    and '302 Found' or '200 OK'
+            status = 'Location' in self._headers and '302 Found' or '200 OK'
         head = ['Status: %s' % status]
         head.extend(map(lambda h: '%s: %s' % h, self._headers.items()))
         self._headers['Status'] = status # restore status
         head.extend(map(lambda c: 'Set-Cookie: %s' % c.headerValue(),
-                self._cookies.values()))
+            self._cookies.values()))
         head.extend(['']*2) # this adds one empy line
         head = '\r\n'.join(head)
         self._strmOut.prepend(head)
@@ -380,7 +378,7 @@ class HTTPResponse(Response):
         identifier = session.identifier()
         if session.isExpired() or session.timeout() == 0:
             self.delCookie(sessionName, app.sessionCookiePath(trans),
-                    request.isSecure() and app.setting('SecureSessionCookie'))
+                request.isSecure() and app.setting('SecureSessionCookie'))
             if debug:
                 print '>> recordSession: Removing SID', identifier
             return
@@ -400,7 +398,7 @@ class HTTPResponse(Response):
     def reset(self):
         """Reset the response (such as headers, cookies and contents)."""
         assert not self._committed, \
-                "Cannot reset the response; it has already been sent."
+            "Cannot reset the response; it has already been sent."
         self._headers = {}
         self.setHeader('Content-type', 'text/html')
         self._cookies = {}
@@ -425,10 +423,7 @@ class HTTPResponse(Response):
             headers.append((key, value))
         for cookie in self._cookies.values():
             headers.append(('Set-Cookie', cookie.headerValue()))
-        return {
-                'headers': headers,
-                'contents': self._strmOut.buffer()
-        }
+        return dict(headers=headers, contents=self._strmOut.buffer())
 
     def size(self):
         """Return the size of the final contents of the response.
@@ -456,7 +451,7 @@ class HTTPResponse(Response):
     ## Exception reporting ##
 
     _exceptionReportAttrNames = Response._exceptionReportAttrNames + [
-            'committed', 'headers', 'cookies']
+        'committed', 'headers', 'cookies']
 
     def setErrorHeaders(self, err):
         """Set error headers for an HTTPException."""

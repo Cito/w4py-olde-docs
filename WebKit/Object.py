@@ -30,25 +30,25 @@ class Object(object, NamedValueAccess):
         This method expects that deprecated methods say so at the beginning of
         their doc string and terminate that msg with @. For example:
 
-                DEPRECATED: Class.foo() on 01/24/01 in ver 0.5. Use Class.bar() instead. @
+            DEPRECATED: Class.foo() on 01/24/01 in ver 0.5. Use Class.bar() instead. @
 
         Putting this information in the doc string is important for accuracy
         in the generated docs.
 
         Example call:
-                self.deprecated(self.foo)
+            self.deprecated(self.foo)
 
         """
         docString = method.__doc__
         if docString:
-            msg = docString.split('@')[0]
+            msg = docString.split('@', 1)[0]
             msg = '\n'.join(map(lambda s: s.strip(), msg.splitlines()))
         else:
             msg = 'DEPRECATED: %s (no doc string)' % method
         print msg
         try:
             from traceback import format_stack
-            print format_stack(limit =3)[0]
+            print format_stack(limit=3)[0]
         except Exception:
             print 'Could not determine calling function.'
 

@@ -1,4 +1,6 @@
-import sys, traceback, types
+"""Dict-RPC servlets."""
+
+import sys, traceback
 from time import time
 
 try:
@@ -36,18 +38,18 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
     To make your own PickleRPCServlet, create a subclass and implement a
     method which is then named in exposedMethods():
 
-            from WebKit.PickleRPCServlet import PickleRPCServlet
-            class Math(PickleRPCServlet):
-                    def multiply(self, x, y):
-                            return x * y
-                    def exposedMethods(self):
-                            return ['multiply']
+        from WebKit.PickleRPCServlet import PickleRPCServlet
+        class Math(PickleRPCServlet):
+            def multiply(self, x, y):
+                return x * y
+            def exposedMethods(self):
+                return ['multiply']
 
     To make a PickleRPC call from another Python program, do this:
-            from MiscUtils.PickleRPC import Server
-            server = Server('http://localhost/WebKit.cgi/Context/Math')
-            print server.multiply(3, 4)    # 12
-            print server.multiply('-', 10) # ----------
+        from MiscUtils.PickleRPC import Server
+        server = Server('http://localhost/WebKit.cgi/Context/Math')
+        print server.multiply(3, 4)    # 12
+        print server.multiply('-', 10) # ----------
 
     If a request error is raised by the server, then
     MiscUtils.PickleRPC.RequestError is raised. If an unhandled
@@ -60,11 +62,11 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
     'exposedMethods' in exposedMethods().
 
     If you wanted the actual response dictionary for some reason:
-            print server._request('multiply', 3, 4)
-                    # { 'value': 12, 'timeReceived': ... }
+        print server._request('multiply', 3, 4)
+            # { 'value': 12, 'timeReceived': ... }
 
     In which case, an exception is not purposefully raised if the
-    dictionary contains     one. Instead, examine the dictionary.
+    dictionary contains one. Instead, examine the dictionary.
 
     For the dictionary formats and more information see the docs
     for MiscUtils.PickleRPC.
@@ -75,9 +77,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
         try:
             request = trans.request()
             data = request.rawInput(rewind=1)
-            response = {
-                    'timeReceived': trans.request().time(),
-            }
+            response = dict(timeReceived=trans.request().time())
             try:
                 try:
                     encoding = request.environ().get('HTTP_CONTENT_ENCODING', None)
@@ -87,39 +87,39 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
                                 rawstring = data.read()
                                 req = self.loads(zlib.decompress(rawstring))
                             except zlib.error:
-                                raise RequestError, \
-                                        'Cannot uncompress compressed dict-rpc request'
+                                raise RequestError(
+                                    'Cannot uncompress compressed dict-rpc request')
                         else:
-                            raise RequestError, \
-                                    'Cannot handle compressed dict-rpc request'
+                            raise RequestError(
+                                'Cannot handle compressed dict-rpc request')
                     elif encoding:
-                        raise RequestError, \
-                                'Cannot handle Content-Encoding of %s' % encoding
+                        raise RequestError(
+                            'Cannot handle Content-Encoding of %s' % encoding)
                     else:
                         req = self.load(data)
                 except PickleError:
-                    raise RequestError, 'Cannot unpickle dict-rpc request.'
-                if not isinstance(req, types.DictType):
-                    raise RequestError, \
-                            'Expecting a dictionary for dict-rpc requests, ' \
-                            'but got %s instead.' % type(dict)
+                    raise RequestError('Cannot unpickle dict-rpc request.')
+                if not isinstance(req, dict):
+                    raise RequestError(
+                        'Expecting a dictionary for dict-rpc requests, '
+                        'but got %s instead.' % type(req))
                 if req.get('version', 1) != 1:
-                    raise RequestError, 'Cannot handle version %s requests.' \
-                            % req['version']
+                    raise RequestError('Cannot handle version %s requests.'
+                        % req['version'])
                 if req.get('action', 'call') != 'call':
-                    raise RequestError, \
-                            'Cannot handle the request action, %r.' % req['action']
+                    raise RequestError(
+                        'Cannot handle the request action, %r.' % req['action'])
                 try:
                     methodName = req['methodName']
                 except KeyError:
-                    raise RequestError, 'Missing method in request'
+                    raise RequestError('Missing method in request')
                 args = req.get('args', ())
                 if methodName == '__methods__.__getitem__':
                     # support PythonWin autoname completion
                     response['value'] = self.exposedMethods()[args[0]]
                 else:
                     response['value'] = self.call(methodName, *args,
-                            **req.get('keywords', {}))
+                        **req.get('keywords', {}))
             except RequestError, e:
                 response['requestError'] = str(e)
                 self.sendResponse(trans, response)
@@ -128,9 +128,9 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
                 response['exception'] = self.resultForException(e, trans)
                 self.sendResponse(trans, response)
                 self.handleException(trans)
-            except:  # if it's a string exception, this gets triggered
+            except: # if it's a string exception, this gets triggered
                 response['exception'] = self.resultForException(
-                        sys.exc_info()[0], trans)
+                    sys.exc_info()[0], trans)
                 self.sendResponse(trans, response)
                 self.handleException(trans)
             else:
@@ -158,7 +158,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
             acceptEncoding = trans.request().environ()["HTTP_ACCEPT_ENCODING"]
             if acceptEncoding:
                 acceptEncoding = [enc.strip()
-                        for enc in acceptEncoding.split(',')]
+                    for enc in acceptEncoding.split(',')]
             else:
                 acceptEncoding = []
         except KeyError:
@@ -167,7 +167,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
         # Compress the output if we are allowed to.
         # We'll avoid compressing short responses and
         # we'll use the fastest possible compression -- level 1.
-        if zlib is not None and "gzip" in acceptEncoding and len(response) > 1000:
+        if zlib is not None and 'gzip' in acceptEncoding and len(response) > 1000:
             contentEncoding = 'x-gzip'
             response = zlib.compress(response, 1)
         else:
@@ -176,4 +176,4 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 
     def useBinaryPickle(self):
         """Override this to return 0 to use the less-efficient text pickling format."""
-        return 1
+        return True

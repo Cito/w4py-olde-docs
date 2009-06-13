@@ -88,12 +88,14 @@ class PyTP:
     """A very simple Python Template Processor.
 
     Provides only one method process().
+
     """
 
     def __init__(self, tags=None):
         """Initialize the Python template processor.
 
         You may define your own start and end tags here.
+
         """
         if tags is None:
             tags = ('<%', '%>')

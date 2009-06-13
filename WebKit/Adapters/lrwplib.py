@@ -108,9 +108,9 @@ class LRWP:
                     % (self.name, self.vhost, self.filter))
             buf = self.sock.recv(1024)
             if buf != 'OK':
-                raise ConnectError, buf
+                raise ConnectError(buf)
         except socket.error, val:
-            raise SocketError, val
+            raise SocketError(val)
 
     #----------------------------------------
     def acceptRequest(self):
@@ -165,7 +165,7 @@ class LRWP:
             return Request(self)
 
         except socket.error, val:
-            raise SocketError, val
+            raise SocketError(val)
 
 
     #----------------------------------------
@@ -196,7 +196,7 @@ class LRWP:
             self.sock.send(size)
             self.sock.send(doc)
         except socket.error, val:
-            raise SocketError, val
+            raise SocketError(val)
 
         if self.useStdio:
             sys.stdin, sys.stdout, sys.stderr, os.environ = self.saveStdio

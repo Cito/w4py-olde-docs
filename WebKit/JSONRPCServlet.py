@@ -5,13 +5,13 @@ Written by Jean-Francois Pieronne
 """
 
 import traceback
-from MiscUtils import StringIO
 try:
     import simplejson
 except ImportError:
     print "ERROR: simplejson is not installed."
     print "Get it from http://cheeseshop.python.org/pypi/simplejson"
 
+from MiscUtils import StringIO
 from HTTPContent import HTTPContent
 
 
@@ -32,13 +32,13 @@ class JSONRPCServlet(HTTPContent):
     """
 
     # Class level variables that can be overridden by servlet instances:
-    _debug = 0 # set to True if you want to see debugging output
+    _debug = False # set to True if you want to see debugging output
     # The following variables control security precautions concerning
     # a vulnerability known as "JavaScript hijacking". See also:
     # http://www.fortifysoftware.com/servlet/downloads/public/JavaScript_Hijacking.pdf
     # http://ajaxian.com/archives/protecting-a-javascript-service
-    _allowGet = 0 # set to True if you want to allow GET requests
-    _allowEval = 0 # set to True to allow direct evaluation of the response
+    _allowGet = False # set to True if you want to allow GET requests
+    _allowEval = False # set to True to allow direct evaluation of the response
 
     def __init__(self):
         HTTPContent.__init__(self)
@@ -60,13 +60,15 @@ class JSONRPCServlet(HTTPContent):
         return []
 
     def writeError(self, msg):
-        self.write(simplejson.dumps({'id': self._id, 'code': -1, 'error': msg}))
+        self.write(simplejson.dumps(
+            {'id': self._id, 'code': -1, 'error': msg}))
 
     def writeResult(self, data):
-        data = simplejson.dumps({'id': self._id, 'result': data})
+        data = simplejson.dumps(
+            {'id': self._id, 'result': data})
         if not self._allowEval:
             data = 'throw new Error' \
-                    '("Direct evaluation not allowed");\n/*%s*/' % (data,)
+                '("Direct evaluation not allowed");\n/*%s*/' % (data,)
         self.write(data)
 
     def jsonCall(self):
@@ -77,7 +79,7 @@ class JSONRPCServlet(HTTPContent):
         """
         request = self.request()
         data = simplejson.loads(request.rawInput().read())
-        self._id, call, params = data["id"], data["method"], data["params"]
+        self._id, call, params = data['id'], data['method'], data['params']
         if call == 'system.listMethods':
             self.writeResult(self.exposedMethods())
         elif call in self.exposedMethods():
@@ -85,7 +87,7 @@ class JSONRPCServlet(HTTPContent):
                 method = getattr(self, call)
             except AttributeError:
                 self.writeError('%s, although an approved method, '
-                        'was not found' % call)
+                    'was not found' % call)
             else:
                 try:
                     if self._debug:
@@ -96,7 +98,7 @@ class JSONRPCServlet(HTTPContent):
                     traceback.print_exc(file=err)
                     e = err.getvalue()
                     self.writeError('%s was called, '
-                            'but encountered an error: %s' % (call, e))
+                        'but encountered an error: %s' % (call, e))
                     err.close()
         else:
             self.writeError('%s is not an approved method' % call)

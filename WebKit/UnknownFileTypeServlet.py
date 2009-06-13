@@ -1,3 +1,5 @@
+"""Servlet factory for unknown file types."""
+
 import os
 
 from mimetypes import guess_type
@@ -54,12 +56,12 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
 
     class Image(UnknownFileTypeServlet):
 
-            imageDir = '/var/images'
+        imageDir = '/var/images'
 
-            def filename(self, trans):
-                    filename = trans.request().field('i')
-                    filename = os.path.join(self.imageDir, filename)
-                    return filename
+        def filename(self, trans):
+            filename = trans.request().field('i')
+            filename = os.path.join(self.imageDir, filename)
+            return filename
 
     """
 
@@ -201,14 +203,14 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
             print '>> UnknownFileType.serveContent()'
             print '>> filename =', filename
             print '>> size=', fileSize
-        file = fileCache.get(filename, None)
-        if file is not None and mtime != file['mtime']:
+        fileDict = fileCache.get(filename, None)
+        if fileDict is not None and mtime != fileDict['mtime']:
             # Cache is out of date; clear it.
             if debug:
                 print '>> changed, clearing cache'
             del fileCache[filename]
-            file = None
-        if file is None:
+            fileDict = None
+        if fileDict is None:
             if debug:
                 print '>> not found in cache'
             fileType = guess_type(filename, 0)
@@ -217,7 +219,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
             if mimeType is None:
                 mimeType = 'application/octet-stream'
         else:
-            mimeType, mimeEncoding = file['mimeType'], file['mimeEncoding']
+            mimeType = fileDict['mimeType']
+            mimeEncoding = fileDict['mimeEncoding']
         response.setHeader('Content-type', mimeType)
         response.setHeader('Content-Length', str(fileSize))
         if mimeEncoding:
@@ -225,24 +228,19 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
         if trans.request().method() == 'HEAD':
             f.close()
             return
-        if file is None and self.setting('ReuseServlets') \
-                        and self.shouldCacheContent() \
-                        and fileSize < maxCacheContentSize:
+        if (fileDict is None and self.setting('ReuseServlets')
+                and self.shouldCacheContent()
+                and fileSize < maxCacheContentSize):
             if debug:
                 print '>> caching'
-            file = {
-                    'content':      f.read(),
-                    'mimeType':     mimeType,
-                    'mimeEncoding': mimeEncoding,
-                    'mtime':        mtime,
-                    'size':         fileSize,
-                    'filename':     filename,
-            }
-            fileCache[filename] = file
-        if file is not None:
+            fileDict = dict(content=f.read(),
+                mimeType=mimeType, mimeEncoding=mimeEncoding,
+                mtime=mtime, size=fileSize, filename=filename)
+            fileCache[filename] = fileDict
+        if fileDict is not None:
             if debug:
                 print '>> sending content from cache'
-            response.write(file['content'])
+            response.write(fileDict['content'])
         else: # too big or not supposed to cache
             if debug:
                 print '>> sending directly'

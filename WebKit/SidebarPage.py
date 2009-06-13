@@ -1,3 +1,5 @@
+"""WebKit page template class for pages with a sidebar."""
+
 from Page import Page
 
 
@@ -137,7 +139,7 @@ table.NiceTable th a:link, table.NiceTable th a:visited {
 
     def writeBanner(self):
         self.writeln('<tr><td id="CornerTitle">%s</td>' % self.cornerTitle(),
-                '<td id="Banner">%s</td></tr>' % self.title())
+            '<td id="Banner">%s</td></tr>' % self.title())
 
     def writeSidebar(self):
         self.writeWebKitSidebarSections()
@@ -159,7 +161,7 @@ table.NiceTable th a:link, table.NiceTable th a:visited {
         if url is not None:
             title = '<a href="%s">%s</a>' % (url, title)
         self.writeln('<div style="margin-left:%dpt">%s%s</div>'
-                % (4*indentLevel, title, suffix))
+            % (4*indentLevel, title, suffix))
 
 
     ## WebKit sidebar sections ##
@@ -180,16 +182,14 @@ table.NiceTable th a:link, table.NiceTable th a:visited {
     def writeContextsMenu(self):
         self.menuHeading('Contexts')
         servletPath = self.request().servletPath()
-        ctxs = self.application().contexts().keys()
-        ctxs = filter(lambda ctx: ctx != 'default' and not '/' in ctx, ctxs)
-        ctxs.sort()
-        for ctx in ctxs:
+        for ctx in sorted(ctx for ctx in self.application().contexts()
+                if ctx != 'default' and not '/' in ctx):
             self.menuItem(ctx, '%s/%s/' % (servletPath, ctx))
 
     def writeWebwareEmailMenu(self):
         self.menuHeading('E-mail')
         self.menuItem('webware-discuss',
-                'mailto:webware-discuss@lists.sourceforge.net')
+            'mailto:webware-discuss@lists.sourceforge.net')
 
     def writeWebwareExitsMenu(self):
         self.menuHeading('Exits')

@@ -77,19 +77,8 @@ FCGI_OVERLOADED       = 2               # New request rejected; too busy
 FCGI_UNKNOWN_ROLE     = 3               # Role value not known
 
 
-error = 'fcgi.error'
-
-
-#---------------------------------------------------------------------------
-
-# The following function is used during debugging; it isn't called
-# anywhere at the moment
-
-def error(msg):
-    "Append a string to /tmp/err"
-    errf = open('/tmp/err', 'a+')
-    errf.write(msg+'\n')
-    errf.close()
+class FCGIError(Exception):
+    """FCGI error."""
 
 #---------------------------------------------------------------------------
 
@@ -260,7 +249,7 @@ class FCGI:
 
         # Check if the connection is from a legal address
         if good_addrs is not None and addr not in good_addrs:
-            raise error, 'Connection from invalid server!'
+            raise FCGIError('Connection from invalid server!')
 
         while remaining:
             r = record()

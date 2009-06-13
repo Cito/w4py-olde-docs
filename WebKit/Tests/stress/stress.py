@@ -104,9 +104,9 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
             code = 0
         if code not in (200,): # accepted status codes
             status = dicts[i]['environ']['PATH_INFO'] + ' ' + status
-            raise Exception, status
+            raise Exception(status)
         if data.rstrip()[-7:].lower() != '</html>':
-            raise Exception, 'response is not a complete html page'
+            raise Exception('response is not a complete html page')
         if delay:
             sleep(delay)
         complete += 1

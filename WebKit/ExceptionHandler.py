@@ -1,3 +1,5 @@
+"""Exception handling."""
+
 import traceback, poplib, smtplib
 from os import pathsep
 from types import ClassType, DictType, ListType
@@ -34,10 +36,10 @@ class ExceptionHandler(Object):
 
     Classes may find it useful to do things like this::
 
-            exceptionReportAttrs = 'foo bar baz'.split()
-            def writeExceptionReport(self, handler):
-                    handler.writeTitle(self.__class__.__name__)
-                    handler.writeAttrs(self, self.exceptionReportAttrs)
+        exceptionReportAttrs = 'foo bar baz'.split()
+        def writeExceptionReport(self, handler):
+                handler.writeTitle(self.__class__.__name__)
+                handler.writeAttrs(self, self.exceptionReportAttrs)
 
     The handler write methods that may be useful are:
 
@@ -54,19 +56,19 @@ class ExceptionHandler(Object):
 
     In the ``__init__.py`` of your context::
 
-            from WebKit.ExceptionHandler import ExceptionHandler as _ExceptionHandler
+        from WebKit.ExceptionHandler import ExceptionHandler as _ExceptionHandler
 
-            class ExceptionHandler(_ExceptionHandler):
+        class ExceptionHandler(_ExceptionHandler):
 
-                    _hideValuesForFields = _ExceptionHandler._hideValuesForFields + ['foo', 'bar']
+            _hideValuesForFields = _ExceptionHandler._hideValuesForFields + ['foo', 'bar']
 
-                    def work(self):
-                            _ExceptionHandler.work(self)
-                            # do whatever
-                            # override other methods if you like
+            def work(self):
+                _ExceptionHandler.work(self)
+                # do whatever
+                # override other methods if you like
 
-            def contextInitialize(app, ctxPath):
-                    app._exceptionHandlerClass = ExceptionHandler
+        def contextInitialize(app, ctxPath):
+            app._exceptionHandlerClass = ExceptionHandler
 
     You can also control the errors with settings in
     ``Application.config``
@@ -74,23 +76,23 @@ class ExceptionHandler(Object):
     """
     # keep these lower case to support case insensitivity:
     _hideValuesForFields = ['password', 'passwd', 'pwd',
-            'creditcard', 'credit card', 'cc', 'pin', 'tan']
+        'creditcard', 'credit card', 'cc', 'pin', 'tan']
     if False: # for testing
         _hideValuesForFields.extend(['application', 'uri',
-                'http_accept', 'userid'])
+            'http_accept', 'userid'])
     _hiddenString = '*** hidden ***'
-    _addSpace = { 'PATH': pathsep, 'CLASSPATH': pathsep,
-            'HTTP_ACCEPT': ',', 'HTTP_ACCEPT_CHARSET': ',',
-            'HTTP_ACCEPT_ENCODING': ',', 'HTTP_ACCEPT_LANGUAGE': ','}
+    _addSpace = {'PATH': pathsep, 'CLASSPATH': pathsep,
+        'HTTP_ACCEPT': ',', 'HTTP_ACCEPT_CHARSET': ',',
+        'HTTP_ACCEPT_ENCODING': ',', 'HTTP_ACCEPT_LANGUAGE': ','}
     _docType = ('<!DOCTYPE HTML PUBLIC'
-                    ' "-//W3C//DTD HTML 4.01 Transitional//EN"'
-                    ' "http://www.w3.org/TR/html4/loose.dtd">')
+        ' "-//W3C//DTD HTML 4.01 Transitional//EN"'
+        ' "http://www.w3.org/TR/html4/loose.dtd">')
 
 
     ## Init ##
 
     def __init__(self, application, transaction, excInfo,
-                    formatOptions=None):
+            formatOptions=None):
         """Create an exception handler instance.
 
         ExceptionHandler instances are created anew for each exception.
@@ -222,7 +224,7 @@ class ExceptionHandler(Object):
         if stderr is None:
             stderr = sys.stderr
         stderr.write('[%s] [error] WebKit: Error while executing script %s\n'
-                % (asclocaltime(self._time), self.servletPathname()))
+            % (asclocaltime(self._time), self.servletPathname()))
         traceback.print_exc(file=stderr)
 
     def publicErrorPage(self):
@@ -233,9 +235,9 @@ class ExceptionHandler(Object):
 
         """
         return '\n'.join((docType(), '<html>', '<head>', '<title>Error</title>',
-                htStyle(), '</head>', '<body text="black" bgcolor="white">',
-                htTitle('Error'), '<p>%s</p>' % self.setting('UserErrorMessage'),
-                '</body>', '</html>\n'))
+            htStyle(), '</head>', '<body text="black" bgcolor="white">',
+            htTitle('Error'), '<p>%s</p>' % self.setting('UserErrorMessage'),
+            '</body>', '</html>\n'))
 
     def privateErrorPage(self):
         """Return a private error page.
@@ -247,8 +249,8 @@ class ExceptionHandler(Object):
 
         """
         html = [docType(), '<html>', '<head>', '<title>Error</title>',
-                htStyle(), '</head>', '<body text="black" bgcolor="white">',
-                htTitle('Error'), '<p>%s</p>' % self.setting('UserErrorMessage')]
+            htStyle(), '</head>', '<body text="black" bgcolor="white">',
+            htTitle('Error'), '<p>%s</p>' % self.setting('UserErrorMessage')]
         html.append(self.htmlDebugInfo())
         html.extend(['</body>', '</html>\n'])
         return '\n'.join(html)
@@ -304,9 +306,9 @@ class ExceptionHandler(Object):
     def writeDict(self, d, heading=None, encoded=None):
         """Output a table-formated dictionary."""
         self.writeln(htmlForDict(d, addSpace=self._addSpace,
-                filterValueCallBack=self.filterDictValue,
-                maxValueLength=self._maxValueLength,
-                topHeading=heading, isEncoded=encoded))
+            filterValueCallBack=self.filterDictValue,
+            maxValueLength=self._maxValueLength,
+            topHeading=heading, isEncoded=encoded))
 
     def writeAttrs(self, obj, attrNames):
         """Output object attributes.
@@ -332,12 +334,12 @@ class ExceptionHandler(Object):
                             value = self.repr(value)
                         except Exception, e:
                             value = '(exception during method call: %s: %s)' \
-                                    % (e.__class__.__name__, e)
+                                % (e.__class__.__name__, e)
                 else:
                     value = self.repr(value)
             except Exception, e:
                 value = '(exception during value processing: %s: %s)' \
-                        % (e.__class__.__name__, e)
+                    % (e.__class__.__name__, e)
             attrs[name] = value
         self.writeDict(attrs, ('Attribute', 'Value'), True)
 
@@ -363,11 +365,11 @@ class ExceptionHandler(Object):
         """
         self.writeTitle('MiscInfo')
         info = {
-                'time':        asclocaltime(self._time),
-                'filename':    self.servletPathname(),
-                'os.getcwd()': os.getcwd(),
-                'sys.path':    sys.path,
-                'sys.version': sys.version,
+            'time':        asclocaltime(self._time),
+            'filename':    self.servletPathname(),
+            'os.getcwd()': os.getcwd(),
+            'sys.path':    sys.path,
+            'sys.version': sys.version,
         }
         self.writeDict(info)
 
@@ -409,18 +411,18 @@ class ExceptionHandler(Object):
         if self.setting('IncludeFancyTraceback'):
             self.writeTitle('Fancy Traceback')
             try:
-                from WebUtils.ExpansiveHTMLForException \
-                        import ExpansiveHTMLForException
+                from WebUtils.ExpansiveHTMLForException import (
+                    ExpansiveHTMLForException)
                 self.write(ExpansiveHTMLForException(
-                        context=self.setting('FancyTracebackContext')))
+                    context=self.setting('FancyTracebackContext')))
             except Exception:
                 self.write('<p>Unable to generate a fancy traceback'
-                        ' (uncaught exception)!</p>')
+                    ' (uncaught exception)!</p>')
                 try:
                     self.write(HTMLForException(sys.exc_info()))
                 except Exception:
                     self.write('<p>Unable to even generate a normal traceback'
-                            ' of the exception in fancy traceback!</p>')
+                        ' of the exception in fancy traceback!</p>')
 
     def saveErrorPage(self, html):
         """Save the error page.
@@ -430,7 +432,7 @@ class ExceptionHandler(Object):
 
         """
         filename = os.path.join(self._app._errorMessagesDir,
-                self.errorPageFilename())
+            self.errorPageFilename())
         try:
             f = open(filename, 'w')
             try:
@@ -439,7 +441,7 @@ class ExceptionHandler(Object):
                 f.close()
         except IOError:
             sys.stderr.write('[%s] [error] WebKit: Cannot save error page (%s)\n'
-                    % (asclocaltime(self._time), filename))
+                % (asclocaltime(self._time), filename))
         else:
             return filename
 
@@ -453,8 +455,8 @@ class ExceptionHandler(Object):
         # Note: Using the timestamp and a random number is a poor technique
         # for filename uniqueness, but it is fast and good enough in practice.
         return 'Error-%s-%s-%06d.html' % (self.basicServletName(),
-                '-'.join(map(lambda x: '%02d' % x, time.localtime(self._time)[:6])),
-                randint(0, 999999))
+            '-'.join(map(lambda x: '%02d' % x, time.localtime(self._time)[:6])),
+            randint(0, 999999))
 
     def logExceptionToDisk(self, errorMsgFilename=None):
         """Log the exception to disk.
@@ -473,8 +475,8 @@ class ExceptionHandler(Object):
         else: # string exception
             err, msg = '', str(msg or err)
         logline = (asclocaltime(self._time),
-                self.basicServletName(), self.servletPathname(),
-                err, msg, errorMsgFilename or '')
+            self.basicServletName(), self.servletPathname(),
+            err, msg, errorMsgFilename or '')
         def fixElement(element):
             element = str(element)
             if element.find(',') >= 0 or element.find('"') >= 0:
@@ -488,7 +490,7 @@ class ExceptionHandler(Object):
         else:
             f = open(filename, 'w')
             f.write('time,filename,pathname,exception name,'
-                    'exception data,error report filename\n')
+                'exception data,error report filename\n')
         f.write(','.join(logline) + '\n')
         f.close()
 
@@ -510,7 +512,7 @@ class ExceptionHandler(Object):
         headers['Date'] = formatdate()
         headers['Mime-Version'] = '1.0'
         headers['Subject'] = headers.get('Subject', '[WebKit Error]') \
-                + ' %s: %s' % sys.exc_info()[:2]
+            + ' %s: %s' % sys.exc_info()[:2]
         add_header = Message and message.add_header or writer.addheader
         for h, v in headers.items():
             if isinstance(v, ListType):
@@ -521,11 +523,11 @@ class ExceptionHandler(Object):
         if self.setting('EmailErrorReportAsAttachment'):
             # start off with a text/plain part
             text = ('WebKit caught an exception while processing'
-                    ' a request for "%s" at %s (timestamp: %s).'
-                    ' The plain text traceback from Python is printed below and'
-                    ' the full HTML error report from WebKit is attached.\n\n'
-                            % (self.servletPathname(),
-                                    asclocaltime(self._time), self._time))
+                ' a request for "%s" at %s (timestamp: %s).'
+                ' The plain text traceback from Python is printed below and'
+                ' the full HTML error report from WebKit is attached.\n\n'
+                    % (self.servletPathname(),
+                        asclocaltime(self._time), self._time))
             if Message:
                 message.set_type('multipart/mixed')
                 part = Message()
@@ -549,10 +551,10 @@ class ExceptionHandler(Object):
             # now add htmlErrMsg
             add_header('Content-Transfer-Encoding', '7bit')
             add_header('Content-Description',
-                    'HTML version of WebKit error message')
+                'HTML version of WebKit error message')
             if Message:
                 add_header('Content-Disposition',
-                        'attachment', filename='WebKitErrorMsg.html')
+                    'attachment', filename='WebKitErrorMsg.html')
                 part.set_type('text/html')
                 part.set_payload(htmlErrMsg)
                 message.attach(part)
@@ -676,8 +678,8 @@ class ExceptionHandler(Object):
         """
         if isinstance(value, DictType):
             return htmlForDict(value, addSpace=self._addSpace,
-                    filterValueCallBack=self.filterDictValue,
-                    maxValueLength=self._maxValueLength)
+                filterValueCallBack=self.filterDictValue,
+                maxValueLength=self._maxValueLength)
         else:
             rep = repr(value)
             if self._maxValueLength and len(rep) > self._maxValueLength:
@@ -690,8 +692,8 @@ class ExceptionHandler(Object):
 def docType():
     """Return the document type for the page."""
     return ('<!DOCTYPE HTML PUBLIC'
-            ' "-//W3C//DTD HTML 4.01 Transitional//EN"'
-            ' "http://www.w3.org/TR/html4/loose.dtd">')
+        ' "-//W3C//DTD HTML 4.01 Transitional//EN"'
+        ' "http://www.w3.org/TR/html4/loose.dtd">')
 
 def htStyle():
     """Return the page style."""
@@ -751,7 +753,7 @@ def osIdDict():
 
     """
     ids = ['egid', 'euid', 'gid', 'groups', 'pgrp',
-            'pid', 'ppid', 'uid']
+        'pid', 'ppid', 'uid']
     attrs = {}
     for id in ids:
         getter = 'get' + id

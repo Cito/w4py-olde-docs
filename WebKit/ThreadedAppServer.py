@@ -45,27 +45,27 @@ from WebUtils.Funcs import requestURI
 
 debug = False
 
-defaultConfig = {
-        'Host': 'localhost', # same as '127.0.0.1'
-        'EnableAdapter': True, # enable WebKit adapter
-        'AdapterPort': 8086,
-        'EnableMonitor': False, # disable status monitoring
-        'SCGIPort': 8084,
-        'EnableSCGI': False, # disable SCGI adapter
-        'MonitorPort': 8085,
-        'EnableHTTP': True, # enable built-in HTTP server
-        'HTTPPort': 8080,
-        'StartServerThreads': 10, # initial number of server threads
-        'MinServerThreads': 5, # minimum number
-        'MaxServerThreads': 20, # maxium number
-        'MaxRequestTime': 300, # maximum request execution time in seconds
-        'RequestQueueSize': 0, # means twice the maximum number of threads
-        'RequestBufferSize': 8*1024, # 8 kBytes
-        'ResponseBufferSize': 8*1024, # 8 kBytes
-        'AddressFiles': '%s.address', # %s stands for the protocol name
-        # @@ the following setting is not yet implemented
-        # 'SocketType': 'inet', # inet, inet6, unix
-}
+defaultConfig = dict(
+    Host = 'localhost', # same as '127.0.0.1'
+    EnableAdapter = True, # enable WebKit adapter
+    AdapterPort = 8086,
+    EnableMonitor = False, # disable status monitoring
+    SCGIPort = 8084,
+    EnableSCGI = False, # disable SCGI adapter
+    MonitorPort = 8085,
+    EnableHTTP = True, # enable built-in HTTP server
+    HTTPPort = 8080,
+    StartServerThreads = 10, # initial number of server threads
+    MinServerThreads = 5, # minimum number
+    MaxServerThreads = 20, # maxium number
+    MaxRequestTime = 300, # maximum request execution time in seconds
+    RequestQueueSize = 0, # means twice the maximum number of threads
+    RequestBufferSize = 8*1024, # 8 kBytes
+    ResponseBufferSize = 8*1024, # 8 kBytes
+    AddressFiles = '%s.address', # %s stands for the protocol name
+    # @@ the following setting is not yet implemented
+    # SocketType = 'inet', # inet, inet6, unix
+)
 
 # Need to know this value for communications
 # (note that this limits the size of the dictionary we receive
@@ -78,22 +78,22 @@ exitStatus = 0
 
 
 class NotEnoughDataError(Exception):
-    pass
+    """Not enough data received error"""
 
 class ProtocolError(Exception):
-    pass
+    """Network protocol error"""
 
 class ThreadAbortedError(HTTPServiceUnavailable):
-    pass
+    """Thread aborted error"""
 
 class RequestAbortedError(ThreadAbortedError):
-    pass
+    """Request aborted error"""
 
 class RequestTooLongError(RequestAbortedError):
-    pass
+    """Request lasts too long error"""
 
 class ServerShutDownError(ThreadAbortedError):
-    pass
+    """Server has been shut down error"""
 
 
 class WorkerThread(Thread):
@@ -217,7 +217,7 @@ class ThreadedAppServer(AppServer):
             maxRequestTime = self.setting('MaxRequestTime') or None
             if maxRequestTime and not self._canAbortRequest:
                 print "Warning: MaxRequestTime setting ineffective" \
-                        " (cannot abort requests)"
+                    " (cannot abort requests)"
                 maxRequestTime = None
             self._maxRequestTime = maxRequestTime
             self._checkRequestTime = None
@@ -273,7 +273,7 @@ class ThreadedAppServer(AppServer):
             sock.listen(1024)
         except Exception:
             print "Error: Can not listen for %s on %s" % (
-                    handlerClass.settingPrefix, str(serverAddress))
+                handlerClass.settingPrefix, str(serverAddress))
             sys.stdout.flush()
             raise
         serverAddress = sock.getsockname() # resolve/normalize
@@ -385,7 +385,7 @@ class ThreadedAppServer(AppServer):
                         handler = self._handlerCache[serverAddress].pop()
                     except IndexError:
                         handler = self._socketHandlers[serverAddress](self,
-                                serverAddress)
+                            serverAddress)
                     self._requestID += 1
                     handler.activate(client, self._requestID)
                     self._requestQueue.put(handler)
@@ -470,8 +470,8 @@ class ThreadedAppServer(AppServer):
         if debug:
             print "Margin:", margin
 
-        if average > self._threadCount - margin and \
-                self._threadCount < self._maxServerThreads:
+        if (average > self._threadCount - margin
+                and self._threadCount < self._maxServerThreads):
             # Running low: double thread count
             n = min(self._threadCount,
                     self._maxServerThreads - self._threadCount)
@@ -479,10 +479,10 @@ class ThreadedAppServer(AppServer):
                 print "Adding %s threads" % n
             for i in range(n):
                 self.spawnThread()
-        elif average < self._threadCount - margin and \
-                self._threadCount > self._minServerThreads:
+        elif (average < self._threadCount - margin
+                and self._threadCount > self._minServerThreads):
             n = min(self._threadCount - self._minServerThreads,
-                    self._threadCount - max)
+                self._threadCount - max)
             self.absorbThread(n)
         else:
             # cleanup any stale threads that we killed but haven't joined
@@ -782,8 +782,8 @@ class ThreadedAppServer(AppServer):
                 if port is None:
                     port = self.setting(settingPrefix + 'Port')
                 else:
-                    print "WARNING:", \
-                            "The 'Port' setting has been renamed to 'AdapterPort'."
+                    print ("WARNING:",
+                        "The 'Port' setting has been renamed to 'AdapterPort'.")
                     print "Please update your AppServer.config file."
             else:
                 port = self.setting(settingPrefix + 'Port')
@@ -793,7 +793,7 @@ class ThreadedAppServer(AppServer):
     def addressFileName(self, handlerClass):
         """Get the name of the text file with the server address."""
         return self.serverSidePath(
-                self.setting('AddressFiles') % handlerClass.protocolName)
+            self.setting('AddressFiles') % handlerClass.protocolName)
 
 
 class Handler:
@@ -863,8 +863,8 @@ class Handler:
                     # We probably awakened due to awakeSelect being called.
                     return None
                 # We got a partial request -- something went wrong.
-                raise NotEnoughDataError, 'received only %d of %d bytes' \
-                        ' when receiving dictLength' % (len(chunk), intLength)
+                raise NotEnoughDataError('received only %d of %d bytes'
+                    ' when receiving dictLength' % (len(chunk), intLength))
             chunk += block
             missing -= len(block)
         try:
@@ -877,8 +877,8 @@ class Handler:
                     if not block:
                         break
                     chunk += block
-                    if chunk.endswith('\r\r') or chunk.endswith('\n\n') \
-                                    or chunk.endswith('\r\n\r\n'):
+                    if (chunk.endswith('\r\r') or chunk.endswith('\n\n')
+                            or chunk.endswith('\r\n\r\n')):
                         msg = None
             if msg:
                 print "ERROR:", msg
@@ -892,20 +892,20 @@ Error: Invalid AppServer protocol.\r
 Sorry, I don't speak HTTP. You must connect via an adapter.\r
 See the Troubleshooting section of the WebKit Install Guide.\r''')
             self._sock.close()
-            print "       You can only connect to", self._serverAddress[1], \
-                    "via an adapter like mod_webkit or wkcgi."
+            print ("       You can only connect to", self._serverAddress[1],
+                "via an adapter like mod_webkit or wkcgi.")
             return None
         if type(dictLength) != type(1):
             self._sock.close()
-            raise ProtocolError, "Invalid AppServer protocol"
+            raise ProtocolError("Invalid AppServer protocol")
         chunk = ''
         missing = dictLength
         while missing > 0:
             block = self._sock.recv(missing)
             if not block:
                 self._sock.close()
-                raise NotEnoughDataError, 'received only %d of %d bytes' \
-                        ' when receiving dict' % (len(chunk), dictLength)
+                raise NotEnoughDataError('received only %d of %d bytes'
+                    ' when receiving dict' % (len(chunk), dictLength))
             chunk += block
             missing -= len(block)
         return loads(chunk)
@@ -936,7 +936,7 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
             env = requestDict.get('environ')
             uri = env and requestURI(env) or '-'
             print '%5d  %4d-%02d-%02d %02d:%02d:%02d  %s' % (
-                    (requestID,) + requestTime + (uri,))
+                (requestID,) + requestTime + (uri,))
 
     def endRequest(self, error=None):
         """Track end of a raw request.
@@ -952,7 +952,7 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
             if not error:
                 error = env and requestURI(env) or '-'
             print '%5d  %14.0f msec  %s\n' % (
-                    requestID, duration, error)
+                requestID, duration, error)
 
 
 class MonitorHandler(Handler):
@@ -979,8 +979,8 @@ class MonitorHandler(Handler):
         if not requestDict:
             return
 
-        requestDict['environ'] = { 'REQUEST_URI': '*%s %s*'
-                % (self.settingPrefix, requestDict['format'])}
+        requestDict['environ'] = {'REQUEST_URI': '*%s %s*'
+            % (self.settingPrefix, requestDict['format'])}
         self.startRequest(requestDict)
 
         conn = self._sock
@@ -1035,7 +1035,7 @@ class TASStreamOut(ASStreamOut):
             while sent < reslen:
                 try:
                     sent += self._socket.send(
-                            self._buffer[sent:sent+bufferSize])
+                         self._buffer[sent:sent+bufferSize])
                 except socket.error, e:
                     if debug or e[0] not in self._ignoreErrnos:
                         print "StreamOut Error:", e
@@ -1078,8 +1078,10 @@ class AdapterHandler(Handler):
         self.startRequest(requestDict)
         requestDict['input'] = self.makeInput()
 
-        streamOut = TASStreamOut(self._sock, bufferSize=self._server._responseBufferSize)
-        transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
+        streamOut = TASStreamOut(self._sock,
+            bufferSize=self._server._responseBufferSize)
+        transaction = self._server._app.dispatchRawRequest(
+            requestDict, streamOut)
         try:
             streamOut.close()
             aborted = False
@@ -1133,7 +1135,7 @@ class SCGIHandler(AdapterHandler):
                 break
         try:
             if len(chunk) > 12 or not chunk.isdigit():
-                raise ValueError, 'Malformed SCGI netstring'
+                raise ValueError('Malformed SCGI netstring')
             dictLength = long(chunk)
         except ValueError, msg:
             if chunk[:3] == 'GET':
@@ -1143,8 +1145,8 @@ class SCGIHandler(AdapterHandler):
                     if not block:
                         break
                     chunk += block
-                    if chunk.endswith('\r\r') or chunk.endswith('\n\n') \
-                                    or chunk.endswith('\r\n\r\n'):
+                    if (chunk.endswith('\r\r') or chunk.endswith('\n\n')
+                            or chunk.endswith('\r\n\r\n')):
                         msg = None
             if msg:
                 print "ERROR:", msg
@@ -1158,8 +1160,8 @@ Error: Invalid AppServer protocol.\r
 Sorry, I don't speak HTTP. You must connect via an SCGI adapter.\r
 See the Troubleshooting section of the WebKit Install Guide.\r''')
             self._sock.close()
-            print "       You can only connect to", self._serverAddress[1], \
-                    "via an adapter like mod_scgi or pyscgi."
+            print ("       You can only connect to", self._serverAddress[1],
+                "via an adapter like mod_scgi or pyscgi.")
             return None
         chunk = ''
         missing = dictLength
@@ -1167,21 +1169,21 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
             block = self._sock.recv(missing)
             if not block:
                 self._sock.close()
-                raise NotEnoughDataError, 'received only %d of %d bytes' \
-                        ' when receiving netstring' % (len(chunk), dictLength)
+                raise NotEnoughDataError('received only %d of %d bytes'
+                    ' when receiving netstring' % (len(chunk), dictLength))
             chunk += block
             missing -= len(block)
         if self._sock.recv(1) != ',':
             self._sock.close()
-            raise ProtocolError, 'Missing SCGI netstring terminator'
+            raise ProtocolError('Missing SCGI netstring terminator')
         items = chunk.split('\0')[:-1]
         environ = {}
         try:
             for i in range(0, len(items), 2):
                 environ[items[i]] = items[i+1]
         except IndexError:
-            raise ProtocolError, 'Malformed SCGI headers'
-        return { 'format': 'CGI', 'time': time.time(), 'environ': environ }
+            raise ProtocolError('Malformed SCGI headers')
+        return dict(format='CGI', time=time.time(), environ=environ)
 
 
 # Determines whether the main look should run in another thread.
@@ -1206,8 +1208,8 @@ _chdir = os.chdir
 def chdir(path, force=False):
     """Execute os.chdir() with safety provision."""
     assert force, \
-            "You cannot reliably use os.chdir() in a threaded environment.\n" \
-            + 16*" " + "Set force=True if you want to do it anway (using a lock)."
+        "You cannot reliably use os.chdir() in a threaded environment.\n" \
+        + 16*" " + "Set force=True if you want to do it anway (using a lock)."
     _chdir(path)
 
 

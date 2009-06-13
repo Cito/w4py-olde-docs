@@ -1,3 +1,5 @@
+"""Implementation of client sessions."""
+
 import re
 
 from Common import *
@@ -5,7 +7,7 @@ from MiscUtils.Funcs import uniqueId
 
 
 class SessionError(Exception):
-    pass
+    """Client session error"""
 
 
 class Session(Object):
@@ -31,13 +33,14 @@ class Session(Object):
 
     FUTURE
 
-            * invalidate()
-            * Sessions don't actually time out and invalidate themselves.
-            * Should this be called 'HTTPSession'?
-            * Should "numTransactions" be exposed as a method? Should it
-              be common to all transaction objects that do the
-              awake()-respond()-sleep() thing? And should there be an
-              abstract super class to codify that?
+        * invalidate()
+        * Sessions don't actually time out and invalidate themselves.
+        * Should this be called 'HTTPSession'?
+        * Should "numTransactions" be exposed as a method? Should it
+          be common to all transaction objects that do the
+          awake()-respond()-sleep() thing? And should there be an
+          abstract super class to codify that?
+
     """
 
 
@@ -57,27 +60,27 @@ class Session(Object):
 
         if identifier:
             if re.search(r'[^\w\.\-]', identifier) is not None:
-                raise SessionError, "Illegal characters in session identifier"
+                raise SessionError("Illegal characters in session identifier")
             if len(identifier) > 80:
-                raise SessionError, "Session identifier too long"
+                raise SessionError("Session identifier too long")
             self._identifier = identifier
         else:
             attempts = 0
             while attempts < 10000:
                 self._identifier = self._prefix + ''.join(
-                        map(lambda x: '%02d' % x,
-                                time.localtime(time.time())[:6])) + '-' + uniqueId(self)
+                    map(lambda x: '%02d' % x,
+                        time.localtime()[:6])) + '-' + uniqueId(self)
                 if not app.hasSession(self._identifier):
                     break
                 attempts += 1
             else:
-                raise SessionError, \
-                        "Can't create valid session id after %d attempts." % attempts
+                raise SessionError(
+                    "Can't create valid session id after %d attempts." % attempts)
 
         if app.setting('Debug')['Sessions']:
-            print '>> [session] Created session, ' \
-                    'timeout = %s, id = %s, self = %s' \
-                    % (self._timeout, self._identifier, self)
+            print ('>> [session] Created session, '
+                'timeout = %s, id = %s, self = %s'
+                % (self._timeout, self._identifier, self))
 
 
     ## Access ##
@@ -147,7 +150,7 @@ class Session(Object):
             return self._values.get(name, default)
 
     def hasValue(self, name):
-        return self._values.has_key(name)
+        return name in self._values
 
     def setValue(self, name, value):
         self._values[name] = value
@@ -231,7 +234,7 @@ class Session(Object):
     ## Exception reports ##
 
     _exceptionReportAttrNames = \
-            'lastAccessTime isExpired numTrans timeout values'.split()
+        'lastAccessTime isExpired numTrans timeout values'.split()
 
     def writeExceptionReport(self, handler):
         handler.writeTitle(self.__class__.__name__)

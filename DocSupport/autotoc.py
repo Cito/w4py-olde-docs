@@ -57,7 +57,7 @@ class ToC:
     """Auxiliary class representing a table of contents."""
 
     def __init__(self,
-                    title='Contents', depth=6, skip=0, classname='contents'):
+            title='Contents', depth=6, skip=0, classname='contents'):
         self._title = title
         if depth not in range(1, 7):
             depth = 6
@@ -137,12 +137,12 @@ class AutoToC:
         self._depth = depth
         self._whitespace_pattern = re.compile('\s+')
         self._toc_directive = re.compile(
-                '(?P<pattern><!-- contents'
-                '(?P<args>\(.*?\))? -->)')
+            '(?P<pattern><!-- contents'
+            '(?P<args>\(.*?\))? -->)')
         self._heading_pattern = re.compile(
-                '(?P<pattern>(?:<a\s+name\s*=\s*["\'](?P<name>.*?)'
-                '["\']\s*>\s*(?:</a>\s*)?)?<h(?P<depth>[1-6])(\s.*?)?>'
-                '\s*(?P<title>.*?)\s*</h(?P=depth)>)', re.IGNORECASE)
+            '(?P<pattern>(?:<a\s+name\s*=\s*["\'](?P<name>.*?)'
+            '["\']\s*>\s*(?:</a>\s*)?)?<h(?P<depth>[1-6])(\s.*?)?>'
+            '\s*(?P<title>.*?)\s*</h(?P=depth)>)', re.IGNORECASE)
 
     def process(self, input):
         """Create table(s) of contents and put them where indicated.

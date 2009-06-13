@@ -9,16 +9,15 @@ A quick, hacky script to contruct a file list from a set of Python files.
 
 import os, sys
 from glob import glob
-from types import StringType
 
 
-class FileList:
+class FileList(object):
     """Builds a file list for a package of Python modules."""
 
     def __init__(self, name='Webware'):
         self._name = name
         self._files = []
-        self._verbose = 0
+        self._verbose = False
         self._filesToIgnore = []
 
     def addFilesToIgnore(self, list):
@@ -39,11 +38,11 @@ class FileList:
         self._files.append(name)
 
     def printList(self, file=sys.stdout):
-        if type(file) is StringType:
+        if isinstance(file, basestring):
             file = open(file, 'w')
-            close = 1
+            closeFile = True
         else:
-            close = 0
+            closeFile = False
         name = self._name
         title = 'File List of %s' % name
         file.write('%s\n%s\n\n' % (title, '='*len(title)))
@@ -52,20 +51,20 @@ class FileList:
         for filename in files:
             file.write(filename + '\n')
         file.write('\n')
-        if close:
+        if closeFile:
             file.close()
 
     def printForWeb(self, file=sys.stdout):
-        if type(file) is StringType:
+        if isinstance(file, basestring):
             file = open(file, 'w')
-            close = 1
+            closeFile = True
         else:
-            close = 0
+            closeFile = False
         name = self._name
         title = 'File List of %s' % name
         other = ('<a href="ClassList.html">alphabetical class list<a>'
-                ' and <a href="ClassHierarchy.html">class hierarchy</a>'
-                ' of %s' % name)
+            ' and <a href="ClassHierarchy.html">class hierarchy</a>'
+            ' of %s' % name)
         file.write('''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <head>
 <title>%s</title>
@@ -88,7 +87,7 @@ td { background-color: #EEF; }
 <table cellpadding="2" cellspacing="2">
 ''' % (title, title, other))
         file.write('<tr><th>Source File</th>'
-                '<th>Source</th><th>Doc</th><th>Summary</th></tr>\n')
+            '<th>Source</th><th>Doc</th><th>Summary</th></tr>\n')
         files = self._files
         files.sort(lambda a, b: cmp(a.lower(), b.lower()))
         for filename in files:
@@ -96,7 +95,7 @@ td { background-color: #EEF; }
         file.write('''</table>
 </div></body>
 </html>''')
-        if close:
+        if closeFile:
             file.close()
 
     def links(self, filename):

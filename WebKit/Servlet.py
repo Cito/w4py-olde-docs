@@ -16,12 +16,12 @@ class Servlet(Object):
     so that reuse can occur.
 
     Objects that participate in a transaction include:
-            * Application
-            * Request
-            * Transaction
-            * Session
-            * Servlet
-            * Response
+        * Application
+        * Request
+        * Transaction
+        * Session
+        * Servlet
+        * Response
 
     The awake(), respond() and sleep() methods form a message sandwich.
     Each is passed an instance of Transaction which gives further access
@@ -68,7 +68,7 @@ class Servlet(Object):
                 # just a result of the first. Then you're stuck scratching your
                 # head wondering what the first might have been.
                 raise Exception('Two exceptions. first=%s; second=%s'
-                        % (excstr(first), excstr(second)))
+                    % (excstr(first), excstr(second)))
             else:
                 raise # no problems with sleep() so raise the one and only exception
         else:
@@ -92,7 +92,7 @@ class Servlet(Object):
 
     def respond(self, trans):
         """Respond to a request."""
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def sleep(self, trans):
         """Send the sleep message."""

@@ -1,3 +1,5 @@
+"""HTTP servlets"""
+
 import os, socket, time, errno
 import BaseHTTPServer
 
@@ -86,7 +88,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
             assert 2 <= code/100 < 6
         except Exception:
             print '%5d  HTTPServer error: Missing status header' % (
-                    self._requestID,)
+                self._requestID,)
         else:
             self.send_response(code, message)
             self.wfile.write(data)
@@ -102,8 +104,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 class HTTPAppServerHandler(Handler, HTTPHandler):
     """AppServer interface.
 
-    Adapters HTTPHandler to fit with ThreadedAppServer's
-    model of an adapter.
+    Adapters HTTPHandler to fit with ThreadedAppServer's model of an adapter.
 
     """
     protocolName = 'http'
@@ -115,11 +116,7 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
 
     def doTransaction(self, env, input):
         """Process transaction."""
-        requestDict = {
-                'format': 'CGI',
-                'environ': env,
-                'input': input,
-                }
+        requestDict = dict(format='CGI', environ=env, input=input)
         self.startRequest(requestDict)
         streamOut = ASStreamOut()
         self.dispatchRawRequest(requestDict, streamOut)
@@ -130,7 +127,7 @@ class HTTPAppServerHandler(Handler, HTTPHandler):
             if e[0] == errno.EPIPE: # broken pipe
                 return
             print '%5d  HTTPServer output error: %s' % (
-                    self._requestID, e)
+                self._requestID, e)
         self.endRequest()
 
     def dispatchRawRequest(self, requestDict, streamOut):

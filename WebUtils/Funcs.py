@@ -62,49 +62,8 @@ def htmlDecode(s, codes=htmlCodesReversed):
     return s
 
 
-_urlEncode = {}
-for i in range(256):
-    c = chr(i)
-    _urlEncode[c] = (c == ' ' and '+'
-        or i < 128 and (c.isalnum() or c in '_.-/') and c
-        or '%%%02X' % i)
-
-def urlEncode(s):
-    """Return the encoded version of the given string.
-
-    The resulting string is safe for using as a URL.
-
-    Identical to urllib.quote_plus(s) in Python 2.4,
-    but faster for older Python versions.
-
-    """
-    return ''.join(map(_urlEncode.get, s))
-
-
-_urlDecode = {}
-for i in range(256):
-    _urlDecode['%02x' % i] = _urlDecode['%02X' % i] = chr(i)
-
-def urlDecode(s):
-    """Return the decoded version of the given string.
-
-    Note that invalid URLs will not throw exceptions.
-    For example, incorrect % codings will be ignored.
-
-    Identical to urllib.unquote_plus(s) in Python 2.4,
-    but faster and more exact for older Python versions.
-
-    """
-    s = s.replace('+', ' ').split('%')
-    for i in xrange(1, len(s)):
-        t = s[i]
-        try:
-            s[i] = _urlDecode[t[:2]] + t[2:]
-        except KeyError:
-            s[i] = '%' + t
-        except UnicodeDecodeError:
-            s[i] = unichr(int(t[:2], 16)) + t[2:]
-    return ''.join(s)
+# Aliases for URL encoding and decoding functions:
+from urllib import quote_plus as urlEncode, unquote_plus as urlDecode
 
 
 def htmlForDict(d, addSpace=None, filterValueCallBack=None,

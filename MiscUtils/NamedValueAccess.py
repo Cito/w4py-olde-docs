@@ -102,9 +102,9 @@ class NamedValueAccess:
     and forget about the 'key'.
 
     @@ 2000-05-21 ce: This class causes problems when used in WebKit for logging.
-            Perhaps circular references?
-            Involving self?
-            Having to do with methods bound to their objects?
+        Perhaps circular references?
+        Involving self?
+        Having to do with methods bound to their objects?
 
     @@ 2000-03-03 ce: document instance variables
 
@@ -135,14 +135,14 @@ class NamedValueAccess:
 
         Suppose key is 'foo'.
         This method returns the value with the following precedence:
-                1. Methods before non-methods
-                2. Public attributes before private attributes
+            1. Methods before non-methods
+            2. Public attributes before private attributes
 
         More specifically, this method then returns one of the following:
-                * self.foo()
-                * self._foo()
-                * self.foo
-                * self._foo
+            * self.foo()
+            * self._foo()
+            * self.foo
+            * self._foo
 
         ... or default, if it was specified,
         otherwise invokes and returns result of valueForUnknownKey().
@@ -180,6 +180,7 @@ class NamedValueAccess:
         handle single names. This method can handle
                 'foo', 'foo1.foo2', 'a.b.c.d', etc.
         It will traverse dictionaries if needed.
+
         """
         keys = keysString.split('.')
         return self.valueForKeySequence(keys, default)
@@ -575,7 +576,7 @@ def _enhanceUserDict():
                 if self.has_key(key):
                     return self[key]
                 else:
-                    raise ValueForKeyError, key
+                    raise ValueForKeyError(key)
             else:
                 return self.get(key, default)
 

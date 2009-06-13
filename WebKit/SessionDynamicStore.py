@@ -1,9 +1,11 @@
+"""Session store using memory and files."""
+
 import time, threading
 
 from SessionStore import SessionStore
 import SessionMemoryStore, SessionFileStore
 
-debug = 0
+debug = False
 
 
 class SessionDynamicStore(SessionStore):
@@ -35,18 +37,18 @@ class SessionDynamicStore(SessionStore):
         SessionStore.__init__(self, app)
         self._fileStore = SessionFileStore.SessionFileStore(app)
         self._memoryStore = SessionMemoryStore.SessionMemoryStore(
-                app, restoreFiles=0)
+            app, restoreFiles=False)
         self._memoryStore.clear()  #fileStore will have the files on disk
 
         # moveToFileInterval specifies after what period of time
         # a session is automatically moved to file
         self._moveToFileInterval = self.application().setting(
-                'DynamicSessionTimeout', 15) * 60
+            'DynamicSessionTimeout', 15) * 60
 
         # maxDynamicMemorySessions is what the user actually sets
         # in Application.config
         self._maxDynamicMemorySessions = self.application().setting(
-                'MaxDynamicMemorySessions', 10000)
+            'MaxDynamicMemorySessions', 10000)
 
         # Used to keep track of sweeping the file store
         self._fileSweepCount = 0
@@ -106,17 +108,20 @@ class SessionDynamicStore(SessionStore):
         finally:
             self._lock.release()
 
-    def has_key(self, key):
+    def __contains__(self, key):
         # First try to find the session in the memory store without locking,
         # for efficiency.  Only if that fails do we acquire the lock and
         # look in the file store.
-        if self._memoryStore.has_key(key):
-            return 1
+        if key in self._memoryStore:
+            return True
         self._lock.acquire()
         try:
-            return self._memoryStore.has_key(key) or self._fileStore.has_key(key)
+            return key in self._memoryStore or key in self._fileStore
         finally:
             self._lock.release()
+
+    def has_key(self, key):
+        return key in self
 
     def keys(self):
         self._lock.acquire()
@@ -228,7 +233,7 @@ class SessionDynamicStore(SessionStore):
         if debug:
             print "Starting interval Sweep at %s" % time.ctime(time.time())
             print "Memory Sessions: %s   FileSessions: %s" % (
-                    len(self._memoryStore), len(self._fileStore))
+                len(self._memoryStore), len(self._fileStore))
             print "maxDynamicMemorySessions = %s" % self._maxDynamicMemorySessions
             print "moveToFileInterval = %s" % self._moveToFileInterval
 
@@ -260,7 +265,7 @@ class SessionDynamicStore(SessionStore):
         if debug:
             print "Finished interval Sweep at %s" % time.ctime(time.time())
             print "Memory Sessions: %s   FileSessions: %s" % (
-                    len(self._memoryStore), len(self._fileStore))
+                len(self._memoryStore), len(self._fileStore))
 
     def memoryKeysInAccessTimeOrder(self):
         """Return memory store's keys in ascending order of last access time."""
@@ -269,7 +274,7 @@ class SessionDynamicStore(SessionStore):
         for key in self._memoryStore.keys():
             try:
                 accessTimeAndKeys.append(
-                        (self._memoryStore[key].lastAccessTime(), key))
+                    (self._memoryStore[key].lastAccessTime(), key))
             except KeyError:
                 pass
         accessTimeAndKeys.sort()

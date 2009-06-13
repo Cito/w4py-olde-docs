@@ -33,14 +33,13 @@ from PidFile import PidFile, ProcessRunning
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 import Profiler
 
-defaultConfig = {
-        'PrintConfigAtStartUp': True,
-        'Verbose': True,
-        'PlugIns': [],
-        'PlugInDirs': [],
-        'CheckInterval': 100,
-        'PidFile': 'appserver.pid',
-}
+defaultConfig = dict(
+    PrintConfigAtStartUp = True,
+    Verbose = True,
+    PlugIns = [],
+    PlugInDirs = [],
+    CheckInterval = 100,
+    PidFile = 'appserver.pid')
 
 # This actually gets set inside AppServer.__init__
 globalAppServer = None
@@ -72,7 +71,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
         global globalAppServer
         if globalAppServer:
             raise ProcessRunning('More than one AppServer'
-                    ' or __init__() invoked more than once.')
+                ' or __init__() invoked more than once.')
         globalAppServer = self
 
         # Set up the import manager:
@@ -103,7 +102,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
         if self.isPersistent():
             self._closeEvent = Event()
             self._closeThread = Thread(target=self.closeThread,
-                    name="CloseThread")
+                name="CloseThread")
             # self._closeThread.setDaemon(1)
             self._closeThread.start()
         self._running = 1
@@ -162,18 +161,18 @@ class AppServer(ConfigurableForServerSidePath, Object):
             self._pidFile = PidFile(pidpath)
         except ProcessRunning:
             raise ProcessRunning('The file ' + pidpath + ' exists\n'
-                    'and contains a process id corresponding to a running process.\n'
-                    'This indicates that there is an AppServer already running.\n'
-                    'If this is not the case, delete this file and restart the AppServer.')
+                'and contains a process id corresponding to a running process.\n'
+                'This indicates that there is an AppServer already running.\n'
+                'If this is not the case, delete this file and restart the AppServer.')
 
     def shutDown(self):
         """Shut down the AppServer.
 
         Subclasses may override and normally follow this sequence:
-                1. set self._running = 1 (request to shut down)
-                2. class specific statements for shutting down
-                3. Invoke super's shutDown() e.g., `AppServer.shutDown(self)`
-                4. set self._running = 0 (server is completely down)
+            1. set self._running = 1 (request to shut down)
+            2. class specific statements for shutting down
+            3. Invoke super's shutDown() e.g., `AppServer.shutDown(self)`
+            4. set self._running = 0 (server is completely down)
 
         """
         if self._running:
@@ -190,7 +189,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
                 # You might also considering having a page/servlet
                 # that lets you dump the stats on demand.
                 print 'AppServer ran for %0.2f seconds.' % (
-                        time.time() - Profiler.startTime)
+                    time.time() - Profiler.startTime)
             print "AppServer has been shutdown."
             sys.stdout.flush()
             sys.stderr.flush()
@@ -214,11 +213,10 @@ class AppServer(ConfigurableForServerSidePath, Object):
         # Note: This is only needed for old style config files.
         # In new style config files, they are note eval'ed, but used
         # directly, so double escaping would be a bad idea here.
-        return {
-                'WebwarePath': self._webwarePath.replace('\\', '/'),
-                'WebKitPath': self._webKitPath.replace('\\', '/'),
-                'serverSidePath': self._serverSidePath.replace('\\', '/'),
-                }
+        return dict(
+            WebwarePath = self._webwarePath.replace('\\', '/'),
+            WebKitPath = self._webKitPath.replace('\\', '/'),
+            serverSidePath = self._serverSidePath.replace('\\', '/'))
 
 
     ## Network Server ##
@@ -261,7 +259,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
             if plugin.name() == name:
                 return plugin
         if default is NoDefault:
-            raise KeyError, name
+            raise KeyError(name)
         else:
             return default
 
@@ -278,8 +276,8 @@ class AppServer(ConfigurableForServerSidePath, Object):
             plugIn = PlugIn(self, path)
             willNotLoadReason = plugIn.load()
             if willNotLoadReason:
-                print '    Plug-in %s cannot be loaded because:\n' \
-                        '    %s' % (path, willNotLoadReason)
+                print ('    Plug-in %s cannot be loaded because:\n'
+                    '    %s' % (path, willNotLoadReason))
                 return None
             plugIn.install()
         except Exception:
@@ -365,7 +363,7 @@ class AppServer(ConfigurableForServerSidePath, Object):
         request, otherwise it will stay around indefinitely.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def serverSidePath(self, path=None):
         """Return the absolute server-side path of the WebKit app server.

@@ -1,3 +1,5 @@
+"""The Transaction container."""
+
 import traceback
 
 from Common import *
@@ -8,12 +10,12 @@ class Transaction(Object):
 
     A transaction serves as:
 
-            * A container for all objects involved in the transaction. The
-              objects include application, request, response, session and
-              servlet.
+        * A container for all objects involved in the transaction. The
+          objects include application, request, response, session and
+          servlet.
 
-            * A message dissemination point. The messages include awake(),
-              respond() and sleep().
+        * A message dissemination point. The messages include awake(),
+          respond() and sleep().
 
     When first created, a transaction has no session. However, it will
     create or retrieve one upon being asked for session().
@@ -37,12 +39,10 @@ class Transaction(Object):
         self._nested = 0
 
     def __repr__(self):
-        names = self.__dict__.keys()
-        names.sort()
         s = []
-        for name in names:
+        for name in sorted(self.__dict__):
             attr = getattr(self, name)
-            if isinstance(attr, Object) or isinstance(attr, Exception):
+            if isinstance(attr, (Object, Exception)):
                 s.append('%s=%r' % (name, attr))
         s = ' '.join(s)
         return '<%s %s>' % (self.__class__.__name__, s)
@@ -181,7 +181,7 @@ class Transaction(Object):
         of Python to collect garbage, or newer versions to collect it faster.
 
         """
-        for name in self.__dict__.keys():
+        for name in self.__dict__.keys(): # needs keys() since dict changes
             attr = getattr(self,  name)
             if isinstance(attr, Object) and not name.startswith('_app'):
                 attr.resetKeyBindings()
@@ -204,6 +204,6 @@ class Transaction(Object):
                     obj.writeExceptionReport(handler)
                 except Exception:
                     handler.writeln('<p>Uncaught exception while asking'
-                            ' <b>%s</b> to write report:</p>\n<pre>' % name)
+                        ' <b>%s</b> to write report:</p>\n<pre>' % name)
                     traceback.print_exc(file=handler)
                     handler.writeln('</pre>')

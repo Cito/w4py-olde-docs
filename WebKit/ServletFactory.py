@@ -1,4 +1,5 @@
-from types import ClassType, BuiltinFunctionType
+"""Servlet factory template."""
+
 from keyword import iskeyword
 import threading
 
@@ -76,7 +77,7 @@ class ServletFactory(Object):
         NOTE: Application only supports 'file' uniqueness at this point in time.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def extensions(self):
         """Return a list of extensions that match this handler.
@@ -86,7 +87,7 @@ class ServletFactory(Object):
         case that is looked for a URL's extension doesn't match anything.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
 
     ## Import ##
@@ -119,13 +120,13 @@ class ServletFactory(Object):
         if not fullname or not path.startswith(contextPath):
             remainder = serverSidePathToImport
             fullmodname = remainder.replace(
-                    '\\', '_').replace('/', '_').replace('.', '_')
+                '\\', '_').replace('/', '_').replace('.', '_')
             if debug:
                 print __file__, ", fullmodname =", fullmodname
             modname = os.path.splitext(os.path.basename(
-                    serverSidePathToImport))[0]
+                serverSidePathToImport))[0]
             fp, pathname, stuff = self._imp.find_module(modname,
-                    [os.path.dirname(serverSidePathToImport)])
+                [os.path.dirname(serverSidePathToImport)])
             module = self._imp.load_module(fullmodname, fp, pathname, stuff)
             module.__donotreload__ = True
             return module
@@ -133,7 +134,7 @@ class ServletFactory(Object):
         # First, we'll import the context's package.
         directory, contextDirName = os.path.split(contextPath)
         self._importModuleFromDirectory(fullname, contextDirName,
-                directory, isPackageDir=True)
+            directory, isPackageDir=True)
         directory = contextPath
 
         # Now we'll break up the rest of the path into components.
@@ -144,7 +145,7 @@ class ServletFactory(Object):
         for name in remainder[:-1]:
             fullname = '%s.%s' % (fullname, name)
             self._importModuleFromDirectory(fullname, name,
-                    directory, isPackageDir=True)
+                directory, isPackageDir=True)
             directory = os.path.join(directory, name)
 
         # Finally, import the module itself as though it was part of the
@@ -154,11 +155,11 @@ class ServletFactory(Object):
         name = os.path.splitext(moduleFileName)[0]
         fullname = '%s.%s' % (fullname, name)
         module = self._importModuleFromDirectory(fullname, name,
-                moduleDir, forceReload=True)
+            moduleDir, forceReload=True)
         return module
 
     def _importModuleFromDirectory(self, fullModuleName, moduleName,
-                    directory, isPackageDir=False, forceReload=False):
+            directory, isPackageDir=False, forceReload=False):
         """Imports the given module from the given directory.
 
         fullModuleName should be the full dotted name that will be given
@@ -203,7 +204,7 @@ class ServletFactory(Object):
         servletForTransaction. This method is not expected to be threadsafe.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
 
     ## Servlet Pool ##
@@ -222,17 +223,17 @@ class ServletFactory(Object):
         # because the file changed on disk or isn't in cache?
         mtime = os.path.getmtime(path)
         if not self._classCache.has_key(path) or \
-                        mtime != self._classCache[path]['mtime']:
+                mtime != self._classCache[path]['mtime']:
             # Use a lock to prevent multiple simultaneous
             # imports of the same module:
             self._importLock.acquire()
             try:
                 if not self._classCache.has_key(path) or \
-                                mtime != self._classCache[path]['mtime']:
+                        mtime != self._classCache[path]['mtime']:
                     theClass = self.loadClass(transaction, path)
                     if self._cacheClasses:
                         self._classCache[path] = {
-                                'mtime': mtime, 'class': theClass}
+                            'mtime': mtime, 'class': theClass}
                 else:
                     theClass = self._classCache[path]['class']
             finally:
@@ -265,12 +266,12 @@ class ServletFactory(Object):
             mtime = os.path.getmtime(path)
             if not self._classCache.has_key(path):
                 self._classCache[path] = {
-                        'mtime': mtime,
-                        'class': self.loadClass(transaction, path)}
+                    'mtime': mtime,
+                    'class': self.loadClass(transaction, path)}
             elif mtime > self._classCache[path]['mtime']:
                 self._classCache[path]['mtime'] = mtime
                 self._classCache[path]['class'] = self.loadClass(
-                        transaction, path)
+                    transaction, path)
             theClass = self._classCache[path]['class']
             if not self._cacheClasses:
                 del self._classCache[path]
@@ -296,7 +297,7 @@ class ServletFactory(Object):
 
         """
         if servlet.canBeReused() and not servlet.canBeThreaded() \
-                        and self._cacheInstances:
+                and self._cacheInstances:
             path = servlet.serverSidePath()
             self._servletPool[path].append(servlet)
 
@@ -364,20 +365,10 @@ class PythonServletFactory(ServletFactory):
                 name += '_'
             # If the mangled name does not exist either, report an error:
             if not hasattr(module, name):
-                raise ValueError, \
-                        'Cannot find expected servlet class %r in %r.' \
-                                % (name, path)
+                raise ValueError('Cannot find expected servlet class %r in %r.'
+                    % (name, path))
         # Pull the servlet class out of the module:
         theClass = getattr(module, name)
-
-        # New-style classes aren't ClassType, but they are okay to use.
-        # They are subclasses of type. But type isn't a class in older
-        # Python versions, it's a builtin function. So we test what type
-        # is first, then use isinstance only for the newer Python versions.
-        if type(type) is BuiltinFunctionType:
-            assert type(theClass) is ClassType
-        else:
-            assert type(theClass) is ClassType \
-                    or isinstance(theClass, type)
+        assert isinstance(theClass, (object, type))
         assert issubclass(theClass, Servlet)
         return theClass

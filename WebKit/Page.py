@@ -1,3 +1,5 @@
+"""The standard web page template."""
+
 from Common import *
 from WebUtils import Funcs
 from HTTPContent import HTTPContent, HTTPContentError
@@ -111,8 +113,8 @@ class Page(HTTPContent):
         # @@ sgd-2003-01-29 - restored the 4.01 transitional as
         # per discussions on the mailing list for the 0.8 release.
         self.writeln('<!DOCTYPE HTML PUBLIC'
-                ' "-//W3C//DTD HTML 4.01 Transitional//EN"'
-                ' "http://www.w3.org/TR/html4/loose.dtd">')
+            ' "-//W3C//DTD HTML 4.01 Transitional//EN"'
+            ' "http://www.w3.org/TR/html4/loose.dtd">')
 
     def writeHead(self):
         """Write the <head> element of the page.

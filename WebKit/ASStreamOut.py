@@ -3,10 +3,10 @@
 debug = False
 
 class InvalidCommandSequence(Exception):
-    pass
+    """Invalid command sequence error"""
 
 class ConnectionAbortedError(Exception):
-    pass
+    """Connection aborted error"""
 
 
 class ASStreamOut:
@@ -142,7 +142,7 @@ class ASStreamOut:
         """Remove count bytes from the front of the buffer."""
         if debug:
             print "AStreamOut popping %s" % count
-        #should we check for an excessive pop length?
+        # should we check for an excessive pop length?
         assert count <= len(self._buffer)
         self._buffer = self._buffer[count:]
 

@@ -20,12 +20,11 @@ from Common import *
 from AppServer import AppServer
 
 
-defaultConfig = {
-        'AutoReload': False,
-        'AutoReloadPollInterval': 1, # in seconds
-        'UseImportSpy': True,
-        'UseFAMModules': 'gamin _fam',
-}
+defaultConfig = dict(
+    AutoReload = False,
+    AutoReloadPollInterval = 1, # in seconds
+    UseImportSpy = True,
+    UseFAMModules = 'gamin _fam')
 
 
 def getFAM(modules):
@@ -45,7 +44,7 @@ def getFAM(modules):
         if not fam:
             continue
         if hasattr(fam, 'GAM_CONNECT') and hasattr(
-                        fam, 'WatchMonitor') and hasattr(fam, 'GAMChanged'):
+                fam, 'WatchMonitor') and hasattr(fam, 'GAMChanged'):
 
 
             class FAM:
@@ -87,12 +86,12 @@ def getFAM(modules):
                     """Callback function for WatchMonitor."""
                     self._filepath = filepath
                     self._changed = {fam.GAMChanged: 'changed',
-                            fam.GAMCreated: 'created', fam.GAMMoved: 'moved',
-                            fam.GAMDeleted: 'deleted'}.get(event)
+                        fam.GAMCreated: 'created', fam.GAMMoved: 'moved',
+                        fam.GAMDeleted: 'deleted'}.get(event)
 
             break
         elif hasattr(fam, 'FAMConnection') and hasattr(
-                        fam, 'open') and hasattr(fam, 'Changed'):
+                fam, 'open') and hasattr(fam, 'Changed'):
 
 
             class FAM:
@@ -130,8 +129,8 @@ def getFAM(modules):
                     # we can also use event.code2str() here,
                     # but then we need to filter the events
                     changed = {fam.Changed: 'changed',
-                            fam.Created: 'created', fam.Moved: 'moved',
-                            fam.Deleted: 'deleted'}.get(event.code)
+                        fam.Created: 'created', fam.Moved: 'moved',
+                        fam.Deleted: 'deleted'}.get(event.code)
                     return changed, event.filename
 
             break
@@ -195,8 +194,8 @@ class AutoReloadingAppServer(AppServer):
     def activateAutoReload(self):
         """Start the monitor thread."""
         if self.setting('UseImportSpy'):
-            s = self._imp.activateImportSpy()
-            print 'ImportSpy activated (using %s).' % s
+            self._imp.activateImportSpy()
+            print 'ImportSpy activated.'
         if not self._fileMonitorThread:
             famModules = self.setting('UseFAMModules')
             try:
@@ -236,8 +235,8 @@ class AutoReloadingAppServer(AppServer):
                 self._runFileMonitor = False
                 if self._fam:
                     if self._pipe:
-                        # Send a message down the pipe to wake up the monitor thread
-                        # and tell him to quit.
+                        # Send a message down the pipe to wake up
+                        # the monitor thread and tell him to quit:
                         os.write(self._pipe[1], 'stop')
                         os.close(self._pipe[1])
             sys.stdout.flush()

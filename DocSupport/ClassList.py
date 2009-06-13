@@ -9,14 +9,13 @@ A quick, hacky script to contruct a class hierarchy list from a set of Python fi
 
 import os, re, sys
 from glob import glob
-from types import StringType
 
 
 def EmptyString(klass):
     return ''
 
 
-class Klass:
+class Klass(object):
     """Represents a Python class for our purposes."""
 
     def __init__(self, name='Webware', filename=''):
@@ -46,9 +45,9 @@ class Klass:
         self._filename = filename
 
     def printList(self, file=sys.stdout,
-                    indent=0, indentString='    ',
-                    prefix='', func=EmptyString, postfix='',
-                    multipleBasesMarker='*'):
+            indent=0, indentString='    ',
+            prefix='', func=EmptyString, postfix='',
+            multipleBasesMarker='*'):
         filename = self._filename
         if os.path.splitext(filename)[0] == self._name:
             filename = ''
@@ -66,14 +65,14 @@ class Klass:
         return '<%s, %s>' % (self.__class__.__name__, self._name)
 
 
-class ClassList:
+class ClassList(object):
     """Builds a class list for a package of Python modules."""
 
     def __init__(self, name='Webware'):
         self._name = name
         self._splitter = re.compile(r"[(,):]")
         self._klasses = {}
-        self._verbose = 0
+        self._verbose = False
         self._filesToIgnore = []
 
     def addFilesToIgnore(self, list):
@@ -152,18 +151,18 @@ class ClassList:
             klass.printList(file=file)
 
     def printForWeb(self, hierarchic=0, file=sys.stdout):
-        if type(file) is StringType:
+        if isinstance(file, basestring):
             file = open(file, 'w')
-            close = 1
+            closeFile = True
         else:
-            close = 0
+            closeFile = False
         name = self._name
         title = 'Class %s of %s' % (
-                hierarchic and 'Hierarchy' or 'List', name)
+            hierarchic and 'Hierarchy' or 'List', name)
         other = ('<a href="Class%s.html">%s class list<a>'
-                ' and the <a href="FileList.html">list of files<a> of %s'
-                % (hierarchic and 'List' or 'Hierarchy',
-                        hierarchic and 'alphabetical' or 'hierarchical', name))
+            ' and the <a href="FileList.html">list of files<a> of %s'
+            % (hierarchic and 'List' or 'Hierarchy',
+                hierarchic and 'alphabetical' or 'hierarchical', name))
         file.write('''<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <head>
 <title>%s</title>
@@ -186,7 +185,7 @@ td { background-color: #EEF; }
 <table cellpadding="2" cellspacing="2">
 ''' % (title, title, other))
         file.write('<tr><th>Class Name</th><th>Source File</th>'
-                '<th>Source</th><th>Doc</th><th>Summary</th></tr>\n')
+            '<th>Source</th><th>Doc</th><th>Summary</th></tr>\n')
         if hierarchic:
             classes = self.roots()
         else:
@@ -195,15 +194,15 @@ td { background-color: #EEF; }
         for klass in classes:
             if hierarchic:
                 klass.printList(file=file, prefix='<tr><td>',
-                        indentString='&nbsp;'*6,
-                        func=self.links, postfix='</tr>\n')
+                    indentString='&nbsp;'*6,
+                    func=self.links, postfix='</tr>\n')
             else:
                 file.write('<tr><td>%s%s</tr>\n'
-                        % (klass.name(), self.links(klass)))
+                    % (klass.name(), self.links(klass)))
         file.write('''</table>
 </div></body>
 </html>''')
-        if close:
+        if closeFile:
             file.close()
 
     def links(self, klass):

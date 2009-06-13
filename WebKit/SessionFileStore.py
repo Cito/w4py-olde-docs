@@ -1,10 +1,12 @@
+"""Session store using files."""
+
 import os
 from glob import glob
 import threading
 
 from SessionStore import SessionStore
 
-debug = 0
+debug = False
 
 
 class SessionFileStore(SessionStore):
@@ -14,11 +16,11 @@ class SessionFileStore(SessionStore):
     one file per session.
 
     This is useful for various situations:
-            1. Using the OneShot adapter
-            2. Doing development (so that restarting the app server won't
-               lose session information).
-            3. Fault tolerance
-            4. Clustering
+        1. Using the OneShot adapter
+        2. Doing development (so that restarting the app server won't
+           lose session information).
+        3. Fault tolerance
+        4. Clustering
 
     Note that the last two are not yet supported by WebKit.
 
@@ -49,7 +51,7 @@ class SessionFileStore(SessionStore):
             try:
                 file = open(filename, 'rb')
             except IOError:
-                raise KeyError, key
+                raise KeyError(key)
             try:
                 try:
                     item = self.decoder()(file)
@@ -59,7 +61,7 @@ class SessionFileStore(SessionStore):
                 os.remove(filename) # remove session file
                 print "Error loading session from disk:", key
                 self.application().handleException()
-                raise KeyError, key
+                raise KeyError(key)
         finally:
             self._lock.release()
         return item
@@ -97,11 +99,14 @@ class SessionFileStore(SessionStore):
     def __delitem__(self, key):
         filename = self.filenameForKey(key)
         if not os.path.exists(filename):
-            raise KeyError, key
+            raise KeyError(key)
         sess = self[key]
         if not sess.isExpired():
             sess.expiring()
         os.remove(filename)
+
+    def __contains__(self, key):
+        return os.path.exists(self.filenameForKey(key))
 
     def removeKey(self, key):
         filename = self.filenameForKey(key)
@@ -111,7 +116,7 @@ class SessionFileStore(SessionStore):
             pass
 
     def has_key(self, key):
-        return os.path.exists(self.filenameForKey(key))
+        return key in self
 
     def keys(self):
         start = len(self._sessionDir) + 1
