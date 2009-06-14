@@ -9,6 +9,6 @@ class Config(AdminSecurity):
 
     def writeContent(self):
         self.writeln(htmlForDict(self.application().server().config(),
-                topHeading='AppServer'))
+            topHeading='AppServer'))
         self.writeln(htmlForDict(self.application().config(),
-                topHeading='Application'))
+            topHeading='Application'))

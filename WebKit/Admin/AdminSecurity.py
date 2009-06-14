@@ -1,8 +1,8 @@
 from AdminPage import AdminPage
 
-# Set this to 0 if you want to allow everyone to access secure pages
+# Set this to False if you want to allow everyone to access secure pages
 # with no login required. This should instead come from a config file.
-requireLogin = 1
+requireLogin = True
 
 if not requireLogin:
 
@@ -30,25 +30,24 @@ else:
             trans = self.transaction()
             app = self.application()
             # Are they logging in?
-            if request.hasField('login') \
-                            and request.hasField('username') \
-                            and request.hasField('password'):
+            if (request.hasField('login') and request.hasField('username')
+                    and request.hasField('password')):
                 # They are logging in. Get login id and clear session:
                 loginid = session.value('loginid', None)
                 session.values().clear()
                 # Check if this is a valid user/password
                 username = request.field('username')
                 password = request.field('password')
-                if self.isValidUserAndPassword(username, password) \
-                                and request.field('loginid', 'nologin') == loginid:
+                if (self.isValidUserAndPassword(username, password)
+                        and request.field('loginid', 'nologin') == loginid):
                     # Success; log them in and send the page:
                     session.setValue('authenticated_user_admin', username)
                     AdminPage.writeHTML(self)
                 else:
                     # Failed login attempt; have them try again:
-                    request.fields()['extra'] = 'Login failed.' \
-                            ' Please try again.' \
-                            ' (And make sure cookies are enabled.)'
+                    request.fields()['extra'] = ('Login failed.'
+                        ' Please try again.'
+                        ' (And make sure cookies are enabled.)')
                     app.forward(trans, 'LoginPage')
                     return
             # Are they logging out?
@@ -71,5 +70,5 @@ else:
             # Replace this with a database lookup, or whatever you're using
             # for authentication...
             adminPassword = self.application().setting('AdminPassword')
-            return username == 'admin' and adminPassword \
-                            and password == adminPassword
+            return (username == 'admin'
+                and adminPassword and password == adminPassword)

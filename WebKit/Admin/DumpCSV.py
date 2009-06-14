@@ -25,10 +25,7 @@ class DumpCSV(AdminSecurity):
             self.writeln('<p>File does not exist.</p>')
             return
         table = DataTable(self._filename)
-        if len(table) == 1:
-            plural = ''
-        else:
-            plural = 's'
+        plural = len(table) != 1 and 's' or ''
         self.writeln('<p>%d row%s</p>' % (len(table), plural))
         self.writeln('<table class="NiceTable" cellpadding="2" cellspacing="2">')
         # Head row gets special formatting
@@ -46,7 +43,7 @@ class DumpCSV(AdminSecurity):
             for value in row:
                 if colIndex < self._numCols: # for those cases where a row has more columns that the header row.
                     self.writeln('<td>',
-                            self.cellContents(rowIndex, colIndex, value), '</td>')
+                        self.cellContents(rowIndex, colIndex, value), '</td>')
                 colIndex += 1
             self.writeln('</tr>')
             rowIndex += 1

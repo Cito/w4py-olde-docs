@@ -24,9 +24,9 @@ class AdminPage(SidebarPage):
         self.menuHeading('Admin')
         self.menuItem('Home', 'Main')
         self.menuItem('Activity log', 'Access',
-                self.fileSize('ActivityLogFilename'))
+            self.fileSize('ActivityLogFilename'))
         self.menuItem('Error log', 'Errors',
-                self.fileSize('ErrorLogFilename'))
+            self.fileSize('ErrorLogFilename'))
         self.menuItem('Config', 'Config')
         self.menuItem('Plug-ins', 'PlugIns')
         self.menuItem('Servlet Cache', 'ServletCache')
@@ -51,5 +51,5 @@ class AdminPage(SidebarPage):
         """Return None if login is enabled, else a message about why not."""
         if self.application().setting('AdminPassword'):
             return None
-        return '<p>Logins to admin pages are disabled until' \
-                ' you supply an AdminPassword in Application.config.</p>'
+        return ('<p>Logins to admin pages are disabled until'
+            ' you supply an AdminPassword in Application.config.</p>')

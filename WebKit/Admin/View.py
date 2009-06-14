@@ -26,7 +26,7 @@ class View(AdminSecurity):
 
     def writeError(self, message):
         self.writeln('<h3 style="color:red">Error</h3>'
-                '<p>%s</p>' % message)
+            '<p>%s</p>' % message)
 
     def writeContent(self):
         fn = self.request().field('filename', None)
@@ -36,10 +36,10 @@ class View(AdminSecurity):
         fn = self.application().serverSidePath(fn)
         if not exists(fn):
             self.writeError('The requested file %r does not exist'
-                    ' in the server side directory.' % fn)
+                ' in the server side directory.' % fn)
             return
         self.type = 'text/%s' % (splitext(fn)[1] in ('.htm', '.html')
-                and 'html' or 'plain')
+            and 'html' or 'plain')
         try:
             self.data = open(fn).read()
         except Exception:

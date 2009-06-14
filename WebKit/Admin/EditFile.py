@@ -1,8 +1,8 @@
 from WebKit.Page import Page
 
-# Set this to 1 if you want to pass additional information.
+# Set this to True if you want to pass additional information.
 # For security reasons, this has been disabled by default.
-appInfo = 0
+appInfo = False
 
 
 class EditFile(Page):

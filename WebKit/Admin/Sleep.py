@@ -17,7 +17,7 @@ class Sleep(AdminSecurity):
         except (KeyError, ValueError):
             duration = 0
         maxRequestTime = self.application().server().setting(
-                'MaxRequestTime', 0) or 0
+            'MaxRequestTime', 0) or 0
         wr('''<form action="Sleep" method="post">
 <input type="submit" name="action" value="Sleep">
 <input type="text" name="duration" value="%d"
@@ -37,6 +37,6 @@ size="6" maxlength="12" style="text-align: right"> seconds
             except ThreadAbortedError, e:
                 duration = int((count+4)/8)
                 wr('<p style="color:red">Sleep aborted with %s after %d seconds!</p>'
-                        % (e.__class__.__name__, duration))
+                    % (e.__class__.__name__, duration))
             wr('<p>Request %d has been processed.</p>'
-                    % self.request().requestID())
+                % self.request().requestID())
