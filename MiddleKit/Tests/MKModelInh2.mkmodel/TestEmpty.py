@@ -18,7 +18,7 @@ b:int,i:int,l:long,f:float,s:string,x:int
 
         t = Foo()
         for attr in list('bilfsx'):
-            t._set(attr, values[attr])
+            t.setValueForKey(attr, values[attr])
 
         store.addObject(t)
         store.saveChanges()
@@ -37,15 +37,15 @@ b:int,i:int,l:long,f:float,s:string,x:int
 
         # Make sure what we got from the store is what we put in
         for attr in list('bilsx'):
-            assert results[0]._get(attr) == values[attr]
+            assert results[0].valueForKey(attr) == values[attr]
 
         different = 0.000001 # @@ 2000-11-25 ce: more work needed on floats
-        assert abs(results[0]._get('f')-values['f']) < different
+        assert abs(results[0].valueForKey('f')-values['f']) < different
 
         # Insert the fetched attributes
         t2 = Foo()
         for attr in list('bilfsx'):
-            t2._set(attr, results[0]._get(attr))
+            t2.setValueForKey(attr, results[0].valueForKey(attr))
         store.addObject(t2)
         store.saveChanges()
         results = store.fetchObjectsOfClass(Foo)

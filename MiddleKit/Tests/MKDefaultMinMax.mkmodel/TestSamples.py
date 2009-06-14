@@ -7,23 +7,23 @@ def test(store):
     # 1, 2, 3, 4.0, '5'.
 
     foos = store.fetchObjectsOfClass('Foo')
-    foo = [foo for foo in foos if foo._get('i') == 42][0]
-    assert foo._get('b') == 1
-    assert foo._get('l') == 3
-    assert foo._get('f') == 4.0
-    assert foo._get('s') == '5'
+    foo = [foo for foo in foos if foo.valueForKey('i') == 42][0]
+    assert foo.valueForKey('b') == 1
+    assert foo.valueForKey('l') == 3
+    assert foo.valueForKey('f') == 4.0
+    assert foo.valueForKey('s') == '5'
 
-    foo = [foo for foo in foos if foo._get('s') == '42'][0]
-    assert foo._get('i') == 2
+    foo = [foo for foo in foos if foo.valueForKey('s') == '42'][0]
+    assert foo.valueForKey('i') == 2
 
     # Next we test if we were able to specify 'none'
     # for attributes that have defaults.
     # We marked these objects with 43.
-    foo = [foo for foo in foos if foo._get('i') == 43][0]
-    assert foo._get('b') is None
-    assert foo._get('l') is None
-    assert foo._get('f') is None
-    assert foo._get('s') is None
+    foo = [foo for foo in foos if foo.valueForKey('i') == 43][0]
+    assert foo.valueForKey('b') is None
+    assert foo.valueForKey('l') is None
+    assert foo.valueForKey('f') is None
+    assert foo.valueForKey('s') is None
 
-    foo = [foo for foo in foos if foo._get('s') == '43'][0]
-    assert foo._get('i') is None
+    foo = [foo for foo in foos if foo.valueForKey('s') == '43'][0]
+    assert foo.valueForKey('i') is None

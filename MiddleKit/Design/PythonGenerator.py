@@ -656,7 +656,7 @@ class ListAttr(object):
 
         Raise an exception in order to ensure that our inherited "PySet"
         code generation is used.
-        
+
         """
         raise AssertionError('Lists do not have a set method.')
 
@@ -669,7 +669,7 @@ class ListAttr(object):
         assert isinstance(value, %(targetClassName)s)
         assert value.%(backRefAttrName)s%(getParens)s is None
         self.%(pyGetName)s().append(value)
-        value._set('%(backRefAttrName)s', self)
+        value.setValueForKey('%(backRefAttrName)s', self)
         store = self.store()
         if value.serialNum() == 0 and self.isInStore():
             store.addObject(value)
@@ -686,7 +686,7 @@ class ListAttr(object):
         assert value.%(backRefAttrName)s%(getParens)s is self
         assert value in self.%(pyGetName)s()
         self.%(pyGetName)s().remove(value)
-        value._set('%(backRefAttrName)s', None)
+        value.setValueForKey('%(backRefAttrName)s', None)
         store = self.store()
         if self.isInStore() and value.isInStore():
             store.deleteObject(value)

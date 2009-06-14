@@ -44,11 +44,11 @@ def test(store):
     if getattr(store, 'executeSQL'):
         store.executeSQLTransaction('insert into Foo (i) values (42);')
         foo = store.fetchObjectsOfClass(Foo, clauses='where i=42')[0]
-        assert foo._get('b') == 1, foo._get('b')
-        assert foo._get('l') == 3, foo._get('l')
-        assert foo._get('f') == 4, foo._get('f')
-        assert foo._get('s') == '5', foo._get('s')
+        assert foo.valueForKey('b') == 1, foo.valueForKey('b')
+        assert foo.valueForKey('l') == 3, foo.valueForKey('l')
+        assert foo.valueForKey('f') == 4, foo.valueForKey('f')
+        assert foo.valueForKey('s') == '5', foo.valueForKey('s')
 
         store.executeSQLTransaction('insert into Foo (s) values (42);')
         foo = store.fetchObjectsOfClass(Foo, clauses="where s='42'")[0]
-        assert foo._get('i') == 2
+        assert foo.valueForKey('i') == 2
