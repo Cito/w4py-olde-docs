@@ -10,7 +10,6 @@ Typically usage is::
 The globals provided are:
 * the modules: `os`, `sys`, `time`
 * the class `StringIO`
-* the root class `Object`
 * the package `WebUtils`
 * the exception class `AbstractError` that methods of abstract classes can raise
 * the singleton `NoDefault`  for initializing default arguments
@@ -23,7 +22,6 @@ import os
 import sys
 import time
 
-from Object import Object
 import WebUtils
 from MiscUtils import StringIO, AbstractError, NoDefault
 from MiscUtils.NamedValueAccess import valueForKey, valueForName

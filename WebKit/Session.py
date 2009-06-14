@@ -10,7 +10,7 @@ class SessionError(Exception):
     """Client session error"""
 
 
-class Session(Object):
+class Session(object):
     """Implementation of client sessions.
 
     All methods that deal with time stamps, such as creationTime(),
@@ -47,8 +47,6 @@ class Session(Object):
     ## Init ##
 
     def __init__(self, trans, identifier=None):
-        Object.__init__(self)
-
         self._lastAccessTime = self._creationTime = time.time()
         self._isExpired = False
         self._numTrans = 0

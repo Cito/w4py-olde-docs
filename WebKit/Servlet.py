@@ -2,7 +2,7 @@ from Common import *
 from MiscUtils.Funcs import excstr
 
 
-class Servlet(Object):
+class Servlet(object):
     """A general servlet.
 
     A servlet is a key portion of a server-based application that implements
@@ -34,7 +34,6 @@ class Servlet(Object):
 
     def __init__(self):
         """Subclasses must invoke super."""
-        Object.__init__(self)
         self._serverSidePath = None
         self._factory = None
         self._busy = False

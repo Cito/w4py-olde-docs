@@ -24,7 +24,7 @@ finally:
         file.close()
 
 
-class Cookie(Object):
+class Cookie(object):
     """Delicious cookies.
 
     Cookie is used to create cookies that have additional attributes

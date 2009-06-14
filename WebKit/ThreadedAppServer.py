@@ -782,8 +782,8 @@ class ThreadedAppServer(AppServer):
                 if port is None:
                     port = self.setting(settingPrefix + 'Port')
                 else:
-                    print ("WARNING:",
-                        "The 'Port' setting has been renamed to 'AdapterPort'.")
+                    print "WARNING:", \
+                        "The 'Port' setting has been renamed to 'AdapterPort'."
                     print "Please update your AppServer.config file."
             else:
                 port = self.setting(settingPrefix + 'Port')
@@ -892,8 +892,8 @@ Error: Invalid AppServer protocol.\r
 Sorry, I don't speak HTTP. You must connect via an adapter.\r
 See the Troubleshooting section of the WebKit Install Guide.\r''')
             self._sock.close()
-            print ("       You can only connect to", self._serverAddress[1],
-                "via an adapter like mod_webkit or wkcgi.")
+            print "       You can only connect to", self._serverAddress[1], \
+                "via an adapter like mod_webkit or wkcgi."
             return None
         if type(dictLength) != type(1):
             self._sock.close()
@@ -1160,8 +1160,8 @@ Error: Invalid AppServer protocol.\r
 Sorry, I don't speak HTTP. You must connect via an SCGI adapter.\r
 See the Troubleshooting section of the WebKit Install Guide.\r''')
             self._sock.close()
-            print ("       You can only connect to", self._serverAddress[1],
-                "via an adapter like mod_scgi or pyscgi.")
+            print "       You can only connect to", self._serverAddress[1], \
+                "via an adapter like mod_scgi or pyscgi."
             return None
         chunk = ''
         missing = dictLength

@@ -1,14 +1,12 @@
 import os, time, socket
 from marshal import dumps
-from WebKit.Object import Object
 from MiscUtils.Configurable import Configurable
 
 
-class Adapter(Configurable, Object):
+class Adapter(Configurable):
 
     def __init__(self, webKitDir):
         Configurable.__init__(self)
-        Object.__init__(self)
         self._webKitDir = webKitDir
         self._respData = []
 

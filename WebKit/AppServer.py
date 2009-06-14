@@ -25,7 +25,6 @@ vague -- both are global singletons and both handle dispatching requests.
 from threading import Thread, Event
 
 from Common import *
-from Object import Object
 from Application import Application
 from ImportManager import ImportManager
 from PlugIn import PlugIn
@@ -45,7 +44,7 @@ defaultConfig = dict(
 globalAppServer = None
 
 
-class AppServer(ConfigurableForServerSidePath, Object):
+class AppServer(ConfigurableForServerSidePath):
     """The AppServer singleton.
 
     Purpose and usage are explained in the module docstring.
@@ -78,7 +77,6 @@ class AppServer(ConfigurableForServerSidePath, Object):
         self._imp = ImportManager()
 
         ConfigurableForServerSidePath.__init__(self)
-        Object.__init__(self)
         if path is None:
             path = os.path.dirname(__file__) # os.getcwd()
         self._serverSidePath = os.path.abspath(path)

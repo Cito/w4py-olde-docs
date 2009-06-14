@@ -42,7 +42,7 @@ class ImportLock:
         self.release = imp.release_lock
 
 
-class ImportManager(Object):
+class ImportManager(object):
     """The import manager.
 
     Keeps track of the Python modules and other system files that have been
@@ -56,7 +56,6 @@ class ImportManager(Object):
         """Create import hook."""
         assert not self._imp, "Only one instance of ImportManager is possible."
         self._imp = True
-        Object.__init__(self)
         self._lock = ImportLock()
         self._fileList = {}
         self._moduleFiles = {}

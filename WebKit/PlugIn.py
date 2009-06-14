@@ -6,7 +6,7 @@ class PlugInError(Exception):
     """Plug-in error."""
 
 
-class PlugIn(Object):
+class PlugIn(object):
     """Template for Webware Plug-ins.
 
     A plug-in is a software component that is loaded by WebKit in order to

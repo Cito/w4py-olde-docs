@@ -7,7 +7,7 @@ A very general (dumb) message class.
 from Common import *
 
 
-class Message(Object):
+class Message(object):
     """A very general message class.
 
     Message is the abstract, parent class for both Request and Response,
@@ -21,14 +21,13 @@ class Message(Object):
 
     FUTURE
         * Support for different types of encodings
-        
+
     """
 
 
     ## Init ##
 
     def __init__(self):
-        Object.__init__(self)
         self._args = {}
 
 

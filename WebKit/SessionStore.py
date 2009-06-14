@@ -1,7 +1,7 @@
 from Common import *
 
 
-class SessionStore(Object):
+class SessionStore(object):
     """A general session store.
 
     SessionStores are dictionary-like objects used by Application to
@@ -41,8 +41,7 @@ class SessionStore(Object):
     ## Init ##
 
     def __init__(self, app):
-        """ Subclasses must invoke super. """
-        Object.__init__(self)
+        """Subclasses must invoke super."""
         self._app = app
         try:
             import cPickle as pickle

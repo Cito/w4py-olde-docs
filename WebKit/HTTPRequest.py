@@ -865,45 +865,6 @@ class HTTPRequest(Request):
         ' sessionId previousURLPaths fields cookies environ'.split())
 
 
-    ## Deprecated ##
-
-    def serverSideDir(self):
-        """deprecated: HTTPRequest.serverSideDir() on 01/24/01 in 0.5.
-
-        Use serverSidePath() instead.@
-
-        Return the servlet directory (as given through __init__()'s path).
-
-        """
-        self.deprecated(self.serverSideDir)
-        if not hasattr(self, '_serverSideDir'):
-            self._serverSideDir = os.path.dirname(self.serverSidePath())
-        return self._serverSideDir
-
-    def relativePath(self, joinPath):
-        """deprecated: HTTPRequest.relativePath() on 01/24/01 in 0.5.
-
-        Use serverSidePath() instead.@
-
-        Return a new path with the servlet's path appended by 'joinPath'.
-        If 'joinPath' is an absolute path, then only 'joinPath' is returned.
-
-        """
-        self.deprecated(self.relativePath)
-        return os.path.join(self.serverSideDir(), joinPath)
-
-    def servletFilePath(self):
-        """deprecated: HTTPRequest.servletFilePath() on 04/12/07 in 0.9.3.
-
-        Use adapterFileName() instead.@
-
-        Equivalent to the CGI variable SCRIPT_FILENAME.
-
-        """
-        self.deprecated(self.servletFilePath)
-        return self.adapterFileName(file)
-
-
 ## Info Structure ##
 
 _infoMethods = (

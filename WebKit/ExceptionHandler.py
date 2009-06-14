@@ -21,7 +21,7 @@ class Singleton:
     pass
 
 
-class ExceptionHandler(Object):
+class ExceptionHandler(object):
     """Exception handling.
 
     ExceptionHandler is a utility class for Application that is created
@@ -38,8 +38,8 @@ class ExceptionHandler(Object):
 
         exceptionReportAttrs = 'foo bar baz'.split()
         def writeExceptionReport(self, handler):
-                handler.writeTitle(self.__class__.__name__)
-                handler.writeAttrs(self, self.exceptionReportAttrs)
+            handler.writeTitle(self.__class__.__name__)
+            handler.writeAttrs(self, self.exceptionReportAttrs)
 
     The handler write methods that may be useful are:
 
@@ -100,8 +100,6 @@ class ExceptionHandler(Object):
         the caller need not     do anything else.
 
         """
-        Object.__init__(self)
-
         # Keep references to the objects
         self._app = application
         self._tra = transaction

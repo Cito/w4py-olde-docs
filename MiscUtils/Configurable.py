@@ -143,8 +143,8 @@ class Configurable(object):
             # in case it has been edited on a different platform
             contents = open(filename, 'rU').read()
         except IOError, e:
-            print ('WARNING:',
-                'Config file', filename, 'not loaded:', e.strerror)
+            print 'WARNING:', \
+                'Config file', filename, 'not loaded:', e.strerror
             print
             return {}
         isDict = contents.lstrip().startswith('{')

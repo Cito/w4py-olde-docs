@@ -5,7 +5,7 @@ import traceback
 from Common import *
 
 
-class Transaction(Object):
+class Transaction(object):
     """The Transaction container.
 
     A transaction serves as:
@@ -29,7 +29,6 @@ class Transaction(Object):
     ## Init ##
 
     def __init__(self, application, request=None):
-        Object.__init__(self)
         self._application = application
         self._request = request
         self._response = None
@@ -42,7 +41,7 @@ class Transaction(Object):
         s = []
         for name in sorted(self.__dict__):
             attr = getattr(self, name)
-            if isinstance(attr, (Object, Exception)):
+            if isinstance(attr, type):
                 s.append('%s=%r' % (name, attr))
         s = ' '.join(s)
         return '<%s %s>' % (self.__class__.__name__, s)

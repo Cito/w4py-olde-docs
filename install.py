@@ -122,12 +122,12 @@ class Installer:
             ver = (1,)
         if ver < minver:
             print ('This Release of Webware requires Python %s.\n'
-                    'Your currently used version is Python %s.\n'
-                    'You can download a newer version at: http://www.python.org\n'
-                    % ('.'.join(map(str, minver)), '.'.join(map(str, ver))))
+                'Your currently used version is Python %s.\n'
+                'You can download a newer version at: http://www.python.org\n'
+                % ('.'.join(map(str, minver)), '.'.join(map(str, ver))))
             response = raw_input('You may continue to install, '
-                    'but Webware may not perform as expected.\n'
-                    'Do you wish to continue with the installation?  [yes/no] ')
+                'but Webware may not perform as expected.\n'
+                'Do you wish to continue with the installation?  [yes/no] ')
             return response[:1].upper() == "Y"
         return 1
 
@@ -136,11 +136,11 @@ class Installer:
             import threading
         except ImportError:
             print ('Webware requires that Python be compiled with threading support.\n'
-                    'This version of Python does not appear to support threading.\n')
+                'This version of Python does not appear to support threading.\n')
             response = raw_input('You may continue, '
-                    'but you will have to run the AppServer with a Python\n'
-                    'interpreter that has threading enabled.\n'
-                    'Do you wish to continue with the installation? [yes/no] ')
+                'but you will have to run the AppServer with a Python\n'
+                'interpreter that has threading enabled.\n'
+                'Do you wish to continue with the installation? [yes/no] ')
             return response[:1].upper() == "Y"
         return 1
 
@@ -148,7 +148,7 @@ class Installer:
         print
         print 'Scanning for components...'
         dirNames = filter(lambda dir: not dir.startswith('.')
-                        and os.path.isdir(dir), os.listdir(os.curdir))
+            and os.path.isdir(dir), os.listdir(os.curdir))
         dirNames.sort()
         self._maxCompLen = max(map(len, dirNames))
         oldPyVersion = 0

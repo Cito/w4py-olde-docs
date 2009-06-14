@@ -51,24 +51,12 @@ class HTTPResponse(Response):
         """Set a specific header by name.
 
         Parameters:
-                name: the header name
-                value: the header value
+            name: the header name
+            value: the header value
 
         """
         assert not self._committed, "Headers have already been sent."
         self._headers[name.capitalize()] = value
-
-    def addHeader(self, name, value):
-        """deprecated: HTTPResponse.addHeader() on 01/02/12 in 0.6.
-
-        Use setHeader() instead.@
-
-        Add a specific header by name.
-
-        """
-        self.deprecated(self.addHeader)
-        assert not self._committed, "Headers have already been sent."
-        self.setHeader(name, value)
 
     def headers(self, name=None):
         """Return all the headers.

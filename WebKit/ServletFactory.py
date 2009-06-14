@@ -9,7 +9,7 @@ from Servlet import Servlet
 debug = False
 
 
-class ServletFactory(Object):
+class ServletFactory(object):
     """Servlet factory template.
 
     ServletFactory is an abstract class that defines the protocol for
@@ -37,7 +37,6 @@ class ServletFactory(Object):
         to do their work.
 
         """
-        Object.__init__(self)
         self._app = application
         self._imp = self._app._imp
         self._cacheClasses = self._app.setting("CacheServletClasses", True)

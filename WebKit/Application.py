@@ -21,7 +21,6 @@ to the Application object itself.
 """
 
 from Common import *
-from Object import Object
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 from ExceptionHandler import ExceptionHandler
 from HTTPRequest import HTTPRequest
@@ -128,7 +127,7 @@ class EndResponse(Exception):
     pass
 
 
-class Application(ConfigurableForServerSidePath, Object):
+class Application(ConfigurableForServerSidePath):
     """The Application singleton.
 
     Purpose and usage are explained in the module docstring.
@@ -138,7 +137,7 @@ class Application(ConfigurableForServerSidePath, Object):
 
     ## Init ##
 
-    def __init__(self, server, useSessionSweeper=1):
+    def __init__(self, server, useSessionSweeper=True):
         """Called only by `AppServer`, sets up the Application."""
 
         self._server = server
@@ -147,7 +146,6 @@ class Application(ConfigurableForServerSidePath, Object):
         self._imp = server._imp # the import manager
 
         ConfigurableForServerSidePath.__init__(self)
-        Object.__init__(self)
 
         print 'Initializing Application...'
         print 'Current directory:', os.getcwd()
@@ -234,12 +232,12 @@ class Application(ConfigurableForServerSidePath, Object):
         try:
             exec 'from %s import %s' % (moduleName, className)
             klass = locals()[className]
-            if not issubclass(klass, (object, Object)):
+            if not isinstance(klass, type):
                 raise ImportError
             self._sessionClass = klass
         except ImportError:
             print "ERROR: Could not import Session class '%s'" \
-                    " from module '%s'" % (className, moduleName)
+                " from module '%s'" % (className, moduleName)
             self._sessionClass = None
         moduleName = self.setting('SessionStore')
         if moduleName in ('Dynamic', 'File', 'Memory'):
@@ -250,12 +248,12 @@ class Application(ConfigurableForServerSidePath, Object):
         try:
             exec 'from %s import %s' % (moduleName, className)
             klass = locals()[className]
-            if not isinstance(klass, (object, Object)):
+            if not isinstance(klass, type):
                 raise ImportError
             self._sessions = klass(self)
         except ImportError:
             print "ERROR: Could not import SessionStore class '%s'" \
-                    " from module '%s'" % (className, moduleName)
+                " from module '%s'" % (className, moduleName)
             self._sessions = None
 
     def makeDirs(self):
