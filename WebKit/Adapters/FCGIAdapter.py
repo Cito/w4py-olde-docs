@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-"""
-FCGIAdapter.py
+"""FCGIAdapter.py
 
 FCGI Adapter for the WebKit application environment.
 
@@ -36,11 +35,11 @@ FastCgiExternalServer ../cgi-bin/FCGIWebKit.py -host localhost:33333 # the path 
 
 You could also take an extension oriented approach in Apache using '.fcgi':
 
-        AddHandler fastcgi-script fcgi
+    AddHandler fastcgi-script fcgi
 
 And then using, in your URLs, 'WebKit.fcgi' which is a link to this file. e.g.,:
 
-        http://localhost/Webware/WebKit/WebKit.fcgi/Introspect
+    http://localhost/Webware/WebKit/WebKit.fcgi/Introspect
 
 
 FUTURE
@@ -65,15 +64,15 @@ JSL- It's twice as fast as straight CGI
 CHANGES
 
 * 2000-05-08 ce:
-        * Fixed bug in exception handler to send first message to stderr, instead of stdout
-        * Uncommented the line for reading 'adapter.address'
-        * Switched from eval() encoding to marshal.dumps() encoding in accordance with AppServer
-        * Increased rec buffer size from 8KB to 32KB
-        * Removed use of pr() for feeding app server results back to webserver. Figure that's slightly more efficient.
-        * Added notes about how I set this up with Apache to what was already there.
+    * Fixed bug in exception handler to send first message to stderr, instead of stdout
+    * Uncommented the line for reading 'adapter.address'
+    * Switched from eval() encoding to marshal.dumps() encoding in accordance with AppServer
+    * Increased rec buffer size from 8KB to 32KB
+    * Removed use of pr() for feeding app server results back to webserver. Figure that's slightly more efficient.
+    * Added notes about how I set this up with Apache to what was already there.
 
 *2001-03-14 jsl:
-        * Fixed problem with post data
+    * Fixed problem with post data
 
 """
 
@@ -109,14 +108,14 @@ class FCGIAdapter(Adapter):
             # Log the problem to stderr
             stderr = req.err
             stderr.write('[%s] [error] WebKit.FCGIAdapter:'
-                    ' Error while responding to request (unknown)\n'
-                    % (time.asctime(time.localtime(time.time()))))
+                ' Error while responding to request (unknown)\n'
+                % (time.asctime(time.localtime(time.time()))))
             stderr.write('Python exception:\n')
             traceback.print_exc(file=stderr)
             # Report the problem to the browser
             output = ''.join(traceback.format_exception(*sys.exc_info()))
-            output = HTMLEncode(output)
-            sys.pr('''Content-type: text/html\n
+            output = htmlEncode(output)
+            sys.pr('''Content-Type: text/html\n
 <html><head><title>WebKit CGI Error</title><body>
 <h3>WebKit CGI Error</h3>
 %s
@@ -134,23 +133,23 @@ class FCGIAdapter(Adapter):
             pass
 
 
-HTMLCodes = [
-        ['&', '&amp;'],
-        ['<', '&lt;'],
-        ['>', '&gt;'],
-        ['"', '&quot;'],
-]
+htmlCodes = (
+    ('&', '&amp;'),
+    ('<', '&lt;'),
+    ('>', '&gt;'),
+    ('"', '&quot;'),
+)
 
-def HTMLEncode(s, codes=HTMLCodes):
-    """Return the HTML encoded version of the given string.
+def htmlEncode(s, codes=htmlCodes):
+    """Returns the HTML encoded version of the given string.
 
     This is useful to display a plain ASCII text string on a web page.
-    (We could get this from WebUtils, but we're keeping CGIAdapter
+    (We could get this from WebUtils, but we're keeping FCGIAdapter
     independent of everything but standard Python.)
 
     """
-    for code in codes:
-        s = s.replace(code[0], code[1])
+    for c, e in codes:
+        s = s.replace(c, e)
     return s
 
 

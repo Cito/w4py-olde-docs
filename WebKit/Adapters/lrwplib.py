@@ -1,4 +1,5 @@
-#!python
+#!/usr/bin/env python
+
 #------------------------------------------------------------------------
 #               Copyright (c) 1997 by Total Control Software
 #                         All Rights Reserved
@@ -37,17 +38,19 @@ LENGTHFMT   = '%09d'
 #---------------------------------------------------------------------------
 # Exception objects
 
-ConnectError        = 'lrwp.ConnectError'
-ConnectionClosed    = 'lrwp.ConnectionClosed'
-SocketError         = 'lrwp.SocketError'
+ConnectError     = 'lrwp.ConnectError'
+ConnectionClosed = 'lrwp.ConnectionClosed'
+SocketError      = 'lrwp.SocketError'
 
 #---------------------------------------------------------------------------
 
-class Request:
-    '''
-    Encapsulates the request/response IO objects and CGI-Environment.
-    An instance of this class is returned
-    '''
+class Request(object):
+    """Request object.
+
+    Encapsulates the request/response I/O objects and CGI-Environment.
+    An instance of this class is returned.
+
+    """
     def __init__(self, lrwp):
         self.inp = lrwp.inp
         self.out = lrwp.out
@@ -63,27 +66,28 @@ class Request:
         if self.env.has_key('REQUEST_METHOD'):
             method = self.env['REQUEST_METHOD'].upper()
         return cgi.FieldStorage(fp=method != 'GET' and self.inp or None,
-                environ=self.env, keep_blank_values=1)
+            environ=self.env, keep_blank_values=1)
 
 
 #---------------------------------------------------------------------------
 
-class LRWP:
+class LRWP(object):
 
-    def __init__(self, name, host, port, vhost='', filter='', useStdio=0):
-        '''
-        Construct an LRWP object.
-                name        The name or alias of this request handler.  Requests
-                                        matching http://host/name will be directed to this
-                                        LRWP object.
-                host        Hostname or IP address to connect to.
-                port        Port number to connect on.
-                vhost       If this handler is to only be available to a specific
-                                        virtual host, name it here.
-                filter      A space separated list of file extenstions that should
-                                        be directed to this handler in filter mode.  (Not yet
-                                        supported.)
-        '''
+    def __init__(self, name, host, port, vhost='', filter='', useStdio=False):
+        """Construct an LRWP object.
+
+            name    The name or alias of this request handler.
+                    Requests matching http://host/name will be directed
+                    to this LRWP object.
+            host    Hostname or IP address to connect to.
+            port    Port number to connect on.
+            vhost   If this handler is to only be available to a specific
+                    virtual host, name it here.
+            filter  A space separated list of file extenstions that should
+                    be directed to this handler in filter mode.
+                    (Not yet supported.)
+
+        """
         self.name = name
         self.host = host
         self.port = port
@@ -97,15 +101,17 @@ class LRWP:
 
     #----------------------------------------
     def connect(self):
-        '''
+        """Connect with the web server.
+
         Establishes the connection to the web server, using the parameters
         given at construction.
-        '''
+
+        """
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.host, self.port))
             self.sock.send("%s\xFF%s\xFF%s"
-                    % (self.name, self.vhost, self.filter))
+                % (self.name, self.vhost, self.filter))
             buf = self.sock.recv(1024)
             if buf != 'OK':
                 raise ConnectError(buf)
@@ -114,11 +120,13 @@ class LRWP:
 
     #----------------------------------------
     def acceptRequest(self):
-        '''
-        Wait for, and accept a new request from the Web Server.  Reads the
+        """Accecpt a request from the web server.
+
+        Wait for, and accept a new request from the web server. Reads the
         name=value pairs that comprise the CGI environment, followed by the
-        post data, if any.  Constructs and returns a Request object.
-        '''
+        post data, if any. Constructs and returns a Request object.
+
+        """
         if self.out:
             self.finish()
         try:
@@ -160,7 +168,7 @@ class LRWP:
             if self.useStdio:
                 self.saveStdio = sys.stdin, sys.stdout, sys.stderr, os.environ
                 sys.stdin, sys.stdout, sys.stderr, os.environ = \
-                        self.inp, self.out, self.out, self.env
+                    self.inp, self.out, self.out, self.env
 
             return Request(self)
 
@@ -170,10 +178,12 @@ class LRWP:
 
     #----------------------------------------
     def recvBlock(self, size):
-        '''
+        """Receive a block from the socket.
+
         Pull an exact number of bytes from the socket, taking into
         account the possibility of multiple packets...
-        '''
+
+        """
         numRead = 0
         data = []
         while numRead < size:
@@ -187,9 +197,7 @@ class LRWP:
 
     #----------------------------------------
     def finish(self):
-        '''
-        Complete the request and send the output back to the webserver.
-        '''
+        """Complete the request and send the output back to the web server."""
         doc = self.out.getvalue()
         size = LENGTHFMT % (len(doc),)
         try:
@@ -207,9 +215,7 @@ class LRWP:
 
     #----------------------------------------
     def close(self):
-        '''
-        Close the LRWP connection to the web server.
-        '''
+        """Close the LRWP connection to the web server."""
         self.sock.close()
         self.sock = None
         self.env = None
@@ -240,11 +246,11 @@ def _test():
     lrwp.connect()
 
     count = 0
-    while count < 5:        # exit after servicing 5 requests
+    while count < 5: # exit after servicing 5 requests
         req = lrwp.acceptRequest()
 
         doc = ['<HTML><HEAD><TITLE>LRWP TestApp (%s)</TITLE></HEAD>\n'
-                '<BODY>\n' % (appname,)]
+            '<BODY>\n' % (appname,)]
         count += 1
         doc.append('<H2>LRWP test app (%s)</H2><P>' % (appname,))
         doc.append('<b>request count</b> = %d<br>' % (count,))
@@ -260,7 +266,7 @@ def _test():
         doc.append('\n</pre><P><HR>\n')
         doc.append('</BODY></HTML>\n')
 
-        req.out.write('Content-type: text/html' + eol)
+        req.out.write('Content-Type: text/html' + eol)
         req.out.write(eol)
         req.out.write(''.join(doc))
 
@@ -270,6 +276,6 @@ def _test():
 
 
 if __name__ == '__main__':
-    #import pdb
-    #pdb.run('_test()')
+    # import pdb
+    # pdb.run('_test()')
     _test()

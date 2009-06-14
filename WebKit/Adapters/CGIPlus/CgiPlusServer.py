@@ -1,5 +1,6 @@
-from Common import *
 import mimetools
+
+from Common import *
 from WebKit.CgiPlusAppServer import Handler, CPASStreamOut
 
 
@@ -17,10 +18,11 @@ class CgiPlusHandler:
         self._discardOutput = False
 
     def handleRequest(self):
-        """
+        """Handle the request.
+
         Actually performs the request, creating the environment and
-        calling self.doTransaction(env, myInput) to perform the
-        response.
+        calling self.doTransaction(env, myInput) to perform the response.
+
         """
         myInput = ''
         self._discardOutput = False
@@ -31,16 +33,24 @@ class CgiPlusHandler:
         self.doTransaction(self.env, myInput)
 
     def processResponse(self, data):
-        """Takes a string (like what a CGI script would print) and
-        sends the actual HTTP response (response code, headers, body)."""
+        """Process the request.
+
+        Takes a string (like what a CGI script would print) and
+        sends the actual HTTP response (response code, headers, body).
+
+        """
         if self._discardOutput:
             return
         self.wfile.write(data)
         self.wfile.flush()
 
     def doLocation(self, headers):
-        """If there's a Location header and no Status header,
-        we need to add a Status header ourselves."""
+        """Set status for location header.
+
+        If there's a Location header and no Status header,
+        we need to add a Status header ourselves.
+
+        """
         if headers.has_key('Location'):
             if not headers.has_key('Status'):
                 headers['Status'] = '301 Moved Temporarily'
@@ -52,7 +62,7 @@ class CgiPlusHandler:
             status = headers['Status']
             del headers['Status']
         pos = status.find(' ')
-        if pos == -1:
+        if pos < 0:
             code = int(status)
             message = ''
         else:
@@ -81,8 +91,12 @@ class CgiPlusHandler:
 
 
 class CgiPlusAppServerHandler(Handler, CgiPlusHandler):
-    """Adapters CgiPlusHandler to fit with CgiPlusAppServer's
-    model of an adapter."""
+    """Handler for CgiPlusAppServer.
+
+    Adapters CgiPlusHandler to fit with CgiPlusAppServer's
+    model of an adapter.
+
+    """
 
     protocolName = 'CgiPlus'
 
@@ -92,13 +106,8 @@ class CgiPlusAppServerHandler(Handler, CgiPlusHandler):
 
     def doTransaction(self, env, myInput):
         streamOut = CPASStreamOut(os.sys.__stdout__)
-        requestDict = {
-                'format': 'CGI',
-                'time': time.time(),
-                'environ': env,
-                'input': StringIO(myInput),
-                'requestID': self._requestID,
-                }
+        requestDict = dict(format='CGI', time=time.time(), environ=env,
+            input=StringIO(myInput), requestID=self._requestID)
         self.dispatchRawRequest(requestDict, streamOut)
         self.processResponse(streamOut._buffer)
 

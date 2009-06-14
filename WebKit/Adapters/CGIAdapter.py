@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-"""
-CGIAdapter.py
+
+"""CGIAdapter.py
 
 This is the CGI Adapter for the WebKit AppServer.
 
@@ -64,12 +64,12 @@ class CGIAdapter(Adapter):
         except:
             import traceback
             sys.stderr.write('[%s] [error] WebKit.CGIAdapter:'
-                    ' Error while responding to request (unknown)\n'
-                    % (time.asctime(time.localtime(time.time()))))
+                ' Error while responding to request (unknown)\n'
+                % (time.asctime(time.localtime(time.time()))))
             sys.stderr.write('Python exception:\n')
             traceback.print_exc(file=sys.stderr)
             output = ''.join(traceback.format_exception(*sys.exc_info()))
-            output = "<pre>%s</pre>" % HTMLEncode(output)
+            output = "<pre>%s</pre>" % htmlEncode(output)
             if response is None:
                 output = "<h4>No response from application server</h4>\n" + output
             sys.stdout.write('''Content-type: text/html\n
@@ -83,14 +83,14 @@ class CGIAdapter(Adapter):
         sys.stdout.flush()
 
 
-HTMLCodes = [
-        ['&', '&amp;'],
-        ['<', '&lt;'],
-        ['>', '&gt;'],
-        ['"', '&quot;'],
-]
+htmlCodes = (
+    ('&', '&amp;'),
+    ('<', '&lt;'),
+    ('>', '&gt;'),
+    ('"', '&quot;'),
+)
 
-def HTMLEncode(s, codes=HTMLCodes):
+def htmlEncode(s, codes=htmlCodes):
     """Returns the HTML encoded version of the given string.
 
     This is useful to display a plain ASCII text string on a web page.
@@ -98,8 +98,8 @@ def HTMLEncode(s, codes=HTMLCodes):
     independent of everything but standard Python.)
 
     """
-    for code in codes:
-        s = s.replace(code[0], code[1])
+    for c, e in codes:
+        s = s.replace(c, e)
     return s
 
 

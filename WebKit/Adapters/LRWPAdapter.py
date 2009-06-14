@@ -79,7 +79,9 @@ class LRWPAdapter(Adapter):
                 self.request.finish()
             # Capture Ctrl-C... Shutdown will occur on next request handled
             except KeyboardInterrupt:
-                print '\r\n Closing connection to Xitami \r\n'
+                print
+                print 'Closing connection to Xitami'
+                print
                 self.lrwp.close()
                 sys.exit(' Clean Exit')
             except:

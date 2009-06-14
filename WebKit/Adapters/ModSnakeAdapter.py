@@ -1,4 +1,6 @@
-"""WebWare adapter for mod_snake.
+#!/usr/bin/env python
+
+"""WebWare for Python adapter for mod_snake.
 
 Gifted to the WebWare project by Jon Travis (jtravis@covalent.net).
 
@@ -12,6 +14,7 @@ You can download mod_snake at: http://sourceforge.net/projects/modsnake
 Usage:
 
 Add the following lines to your httpd.conf file:
+
 -- Snip here --
 SnakeModuleDir   /path/to/Webware
 SnakeModuleDir   /path/to/Webware/WebKit
@@ -58,20 +61,20 @@ from WebKit.Adapters.Adapter import Adapter
 class ModSnakeAdapter(Adapter):
 
     def __init__(self, module):
-        hooks = {
-                'create_svr_config' : self.create_svr_config,
-                'content_handler': self.content_handler,
-                }
+        hooks = dict(
+            create_svr_config = self.create_svr_config,
+            content_handler = self.content_handler,
+        )
 
         for hook in hooks.keys():
             module.add_hook(hook, hooks[hook])
 
-        directives = {
-                'WebwareAddress' : (mod_snake.RSRC_CONF,mod_snake.TAKE1,
-                        self.cmd_WebwareAddress),
-                'WebwareChunkSize': (mod_snake.RSRC_CONF,mod_snake.TAKE1,
-                        self.cmd_WebwareChunkSize)
-                }
+        directives = dict(
+            WebwareAddress = (mod_snake.RSRC_CONF,mod_snake.TAKE1,
+                    self.cmd_WebwareAddress),
+            WebwareChunkSize = (mod_snake.RSRC_CONF,mod_snake.TAKE1,
+                self.cmd_WebwareChunkSize),
+        )
 
         module.add_directives(directives)
 
@@ -79,11 +82,11 @@ class ModSnakeAdapter(Adapter):
 
     def create_svr_config(self, server):
         return {
-                PER_SVR_SERVER: server,
-                PER_SVR_PORT: '8086',
-                PER_SVR_ADDRESS: 'localhost',
-                PER_SVR_CHUNKSIZE: DEFAULT_CHUNKSIZE,
-                }
+            PER_SVR_SERVER: server,
+            PER_SVR_PORT: '8086',
+            PER_SVR_ADDRESS: 'localhost',
+            PER_SVR_CHUNKSIZE: DEFAULT_CHUNKSIZE,
+        }
 
     def cmd_WebwareChunkSize(self, per_dir, per_svr, chunksize):
         chunksize = int(chunksize)
@@ -93,7 +96,7 @@ class ModSnakeAdapter(Adapter):
 
     def cmd_WebwareAddress(self, per_dir, per_svr, file):
         host, port = open(file).read().split(':')
-        per_svr[PER_SVR_PORT]    = int(port)
+        per_svr[PER_SVR_PORT] = int(port)
         per_svr[PER_SVR_ADDRESS] = host
         self._webKitDir = os.path.dirname(file)
 
@@ -125,7 +128,7 @@ class ModSnakeAdapter(Adapter):
         env["GATEWAY_INTERFACE"] = mod_snake.get_version()
 
         response = self.transactWithAppServer(env, strdata.getvalue(), \
-                per_svr[PER_SVR_ADDRESS], per_svr[PER_SVR_PORT])
+            per_svr[PER_SVR_ADDRESS], per_svr[PER_SVR_PORT])
 
         self.respond( request, response)
 

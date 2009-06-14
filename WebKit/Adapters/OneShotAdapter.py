@@ -1,11 +1,10 @@
-"""
-OneShotAdapter.py
+"""OneShotAdapter.py
 
 This is a special version of the CGIAdapter that doesn't require a persistent AppServer process. This is mostly useful during development when repeated changes to classes forces the developer to restart the app server to make the changes take effect.
 
 An example, URL:
 
-        http://127.0.0.1/OneShot.cgi/MyPage
+    http://127.0.0.1/OneShot.cgi/MyPage
 
 """
 
@@ -38,11 +37,11 @@ class OneShotAdapter(Adapter):
 
     def defaultConfig(self):
         config = Adapter.defaultConfig(self)
-        config.update({
-                'ShowConsole':           0,
-                'ConsoleWidth':          80,  # use 0 to turn off
-                'ConsoleHangingIndent':  4,
-        })
+        config.update(
+            ShowConsole = 0,
+            ConsoleWidth = 80, # use 0 to turn off
+            ConsoleHangingIndent = 4,
+        )
         return config
 
     def run(self):
@@ -54,14 +53,11 @@ class OneShotAdapter(Adapter):
                 import msvcrt
                 msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 
-            dict = {
-                    'format':  'CGI',
-                    'time':    _timestamp,
-                    # ce: a little tricky. We use marshal which only works
-                    # on built-in types, so we need environ's dictionary:
-                    'environ': os.environ.data,
-                    'input':   sys.stdin,
-            }
+            requestDict = dict(
+                format='CGI', time=_timestamp,
+                # ce: a little tricky. We use marshal which only works
+                # on built-in types, so we need environ's dictionary:
+                environ=os.environ.data, input=sys.stdin)
 
             from WebKit import Profiler
             Profiler.startTime = time.time()
@@ -75,7 +71,7 @@ class OneShotAdapter(Adapter):
             # just letting it fall out of scope, to avoid circular references
             from WebKit.ASStreamOut import ASStreamOut
             rs = ASStreamOut()
-            transaction = appSvr.dispatchRawRequest(dict, rs)
+            transaction = appSvr.dispatchRawRequest(requestDict, rs)
             rs.close()
             if transaction:
                 transaction.die()
@@ -104,8 +100,8 @@ class OneShotAdapter(Adapter):
 </body></html>\n''')
 
             if self.setting('ShowConsole'):
-                # show the contents of the console, but only if we
-                # are serving up an HTML file
+                # show the contents of the console,
+                # but only if we are serving up an HTML file
                 endheaders = response.find("\r\n\r\n")
                 if endheaders is None:
                     endheaders = response.find("\n\n")
@@ -117,18 +113,18 @@ class OneShotAdapter(Adapter):
                 for header in headers:
                     if header:
                         entries.append(header.split(":", 1))
-                found = 0
+                found = False
                 for name, value in entries:
                     if name.lower() == 'content-type':
-                        found = 1
+                        found = True
                         break
                 if found and value.strip().lower() == 'text/html':
                     self.showConsole(_console.getvalue())
         except:
             import traceback
             sys.stderr.write('[%s] [error] WebKit.OneShotAdapter:'
-                    ' Error while responding to request (unknown)\n'
-                    % (time.asctime(time.localtime(time.time()))))
+                ' Error while responding to request (unknown)\n'
+                % (time.asctime(time.localtime(time.time()))))
             sys.stderr.write('Python exception:\n')
             traceback.print_exc(file=sys.stderr)
             sys.stdout = _real_stdout
@@ -144,7 +140,7 @@ class OneShotAdapter(Adapter):
         width = self.setting('ConsoleWidth')
         if width:
             contents = charWrap(contents, self.setting('ConsoleWidth'),
-                    self.setting('ConsoleHangingIndent'))
+                self.setting('ConsoleHangingIndent'))
         contents = htmlEncode(contents)
         sys.stdout.write('''<br><br><table>
 <tr><td style="background-color: #eee">
@@ -161,8 +157,8 @@ def main(webKitDir=None):
     except:
         import traceback
         sys.stderr.write('[%s] [error] OneShotAdapter:'
-                ' Error while responding to request (unknown)\n'
-                % (time.asctime(time.localtime(time.time()))))
+            ' Error while responding to request (unknown)\n'
+            % (time.asctime(time.localtime(time.time()))))
         sys.stderr.write('Python exception:\n')
         traceback.print_exc(file=sys.stderr)
         output = ''.join(traceback.format_exception(*sys.exc_info()))

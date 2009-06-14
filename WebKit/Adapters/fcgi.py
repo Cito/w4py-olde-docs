@@ -1,4 +1,5 @@
 #!/bin/env python
+
 #------------------------------------------------------------------------
 #               Copyright (c) 1998 by Total Control Software
 #                         All Rights Reserved
@@ -71,10 +72,10 @@ FCGI_KEEP_CONN = 1
 FCGI_RESPONDER = 1 ; FCGI_AUTHORIZER = 2 ; FCGI_FILTER = 3
 
 # Values for protocolStatus component of FCGI_END_REQUEST
-FCGI_REQUEST_COMPLETE = 0               # Request completed nicely
-FCGI_CANT_MPX_CONN    = 1               # This app can't multiplex
-FCGI_OVERLOADED       = 2               # New request rejected; too busy
-FCGI_UNKNOWN_ROLE     = 3               # Role value not known
+FCGI_REQUEST_COMPLETE = 0 # Request completed nicely
+FCGI_CANT_MPX_CONN    = 1 # This app can't multiplex
+FCGI_OVERLOADED       = 2 # New request rejected; too busy
+FCGI_UNKNOWN_ROLE     = 3 # Role value not known
 
 
 class FCGIError(Exception):
@@ -82,7 +83,7 @@ class FCGIError(Exception):
 
 #---------------------------------------------------------------------------
 
-class record:
+class Record(object):
     "Class representing FastCGI records"
     def __init__(self):
         self.version = FCGI_VERSION_1
@@ -127,7 +128,7 @@ class record:
         content = self.content
         if self.recType == FCGI_BEGIN_REQUEST:
             content = chr(self.role>>8) + chr(self.role & 255) \
-                    + chr(self.flags) + 5*'\000'
+                + chr(self.flags) + 5*'\000'
 
         elif self.recType == FCGI_UNKNOWN_TYPE:
             content = chr(self.unknownType) + 7*'\000'
@@ -140,21 +141,23 @@ class record:
         elif self.recType == FCGI_END_REQUEST:
             v = self.appStatus
             content = chr((v>>24)&255) + chr((v>>16)&255) \
-                    + chr((v>>8)&255) + chr(v&255)
+                + chr((v>>8)&255) + chr(v&255)
             content += chr(self.protocolStatus) + 3*'\000'
 
         cLen = len(content)
         eLen = (cLen + 7) & (0xFFFF - 7) # align to an 8-byte boundary
         padLen = eLen - cLen
 
-        hdr = [ self.version,
-                        self.recType,
-                        self.reqId >> 8,
-                        self.reqId & 255,
-                        cLen >> 8,
-                        cLen & 255,
-                        padLen,
-                        0]
+        hdr = [
+            self.version,
+            self.recType,
+            self.reqId >> 8,
+            self.reqId & 255,
+            cLen >> 8,
+            cLen & 255,
+            padLen,
+            0
+        ]
         hdr = ''.join(map(chr, hdr))
 
         sock.send(hdr + content + padLen*'\000')
@@ -185,13 +188,13 @@ def writePair(name, value):
         s = chr(l)
     else:
         s = chr(128|(l>>24)&255) + chr((l>>16)&255) \
-                + chr((l>>8)&255) + chr(l&255)
+            + chr((l>>8)&255) + chr(l&255)
     l = len(value)
     if l < 128:
         s += chr(l)
     else:
         s += chr(128|(l>>24)&255) + chr((l>>16)&255) \
-                + chr((l>>8)&255) + chr(l&255)
+            + chr((l>>8)&255) + chr(l&255)
     return s + name + value
 
 #---------------------------------------------------------------------------
@@ -200,9 +203,11 @@ def HandleManTypes(r, conn):
     if r.recType == FCGI_GET_VALUES:
         r.recType = FCGI_GET_VALUES_RESULT
         v = {}
-        vars = {'FCGI_MAX_CONNS' : FCGI_MAX_CONNS,
-                        'FCGI_MAX_REQS'  : FCGI_MAX_REQS,
-                        'FCGI_MPXS_CONNS': FCGI_MPXS_CONNS}
+        vars = {
+            'FCGI_MAX_CONNS':  FCGI_MAX_CONNS,
+            'FCGI_MAX_REQS':   FCGI_MAX_REQS,
+            'FCGI_MPXS_CONNS': FCGI_MPXS_CONNS
+        }
         for i in r.values.keys():
             if vars.has_key(i):
                 v[i] = vars[i]
@@ -226,13 +231,13 @@ _sock = None
 
 class FCGI:
     def __init__(self):
-        self.haveFinished = 0
+        self.haveFinished = False
         if _init is None:
             _startup()
         if not isFCGI():
-            self.haveFinished = 1
+            self.haveFinished = True
             self.inp, self.out, self.err, self.env = \
-                    sys.stdin, sys.stdout, sys.stderr, os.environ
+                sys.stdin, sys.stdout, sys.stderr, os.environ
             return
 
         if os.environ.has_key('FCGI_WEB_SERVER_ADDRS'):
@@ -252,7 +257,7 @@ class FCGI:
             raise FCGIError('Connection from invalid server!')
 
         while remaining:
-            r = record()
+            r = Record()
             r.readRecord(self.conn)
 
             if r.recType in ManagementTypes:
@@ -261,15 +266,15 @@ class FCGI:
             elif r.reqId == 0:
                 # Oh, poopy. It's a management record of an unknown type.
                 # Signal the error.
-                r2 = record()
+                r2 = Record()
                 r2.recType = FCGI_UNKNOWN_TYPE
                 r2.unknownType = r.recType
                 r2.writeRecord(self.conn)
                 continue # charge onwards
 
             # Ignore requests that aren't active
-            elif r.reqId != self.requestId \
-                            and r.recType != FCGI_BEGIN_REQUEST:
+            elif (r.reqId != self.requestId
+                    and r.recType != FCGI_BEGIN_REQUEST):
                 continue
 
             # If we're already doing a request, ignore further BEGIN_REQUESTs
@@ -321,7 +326,7 @@ class FCGI:
             self.err.seek(0, 0)
             self.out.seek(0, 0)
 
-            r = record()
+            r = Record()
             r.recType = FCGI_STDERR
             r.reqId = self.requestId
             data = self.err.read()
@@ -341,7 +346,7 @@ class FCGI:
             r.content = ""
             r.writeRecord(self.conn) # Terminate stream
 
-            r = record()
+            r = Record()
             r.recType = FCGI_END_REQUEST
             r.reqId = self.requestId
             r.appStatus = status
@@ -354,7 +359,7 @@ class FCGI:
         if self.env.has_key('REQUEST_METHOD'):
             method = self.env['REQUEST_METHOD'].upper()
         return cgi.FieldStorage(fp=method != 'GET' and self.inp or None,
-                environ=self.env, keep_blank_values=1)
+            environ=self.env, keep_blank_values=1)
 
     def getNextChunk(self, data):
         chunk = data[:8192]
@@ -369,13 +374,13 @@ def _startup():
     global _init
     _init = 1
     try:
-        s = socket.fromfd(sys.stdin.fileno(), socket.AF_INET,
-                                                socket.SOCK_STREAM)
+        s = socket.fromfd(sys.stdin.fileno(),
+            socket.AF_INET, socket.SOCK_STREAM)
         s.getpeername()
     except socket.error, (err, errmsg):
-        if err != errno.ENOTCONN:       # must be a non-fastCGI environment
+        if err != errno.ENOTCONN: # must be a non-fastCGI environment
             global _isFCGI
-            _isFCGI = 0
+            _isFCGI = False
             return
 
     global _sock
@@ -413,19 +418,16 @@ def _test():
                     doc.append('</pre>')
 
                 doc.append('<P><HR><P><pre>')
-                keys = req.env.keys()
-                keys.sort()
-                for k in keys:
+                for k in sorted(req.env):
                     doc.append('<b>%-20s :</b>  %s\n' % (k, req.env[k]))
                 doc.append('\n</pre><P><HR>\n')
                 doc.append('</BODY></HTML>\n')
 
             doc = ''.join(doc)
             req.out.write('Content-length: %s\r\n'
-                                    'Content-type: text/html\r\n'
-                                    'Cache-Control: no-cache\r\n'
-                                    '\r\n'
-                                            % len(doc))
+                'Content-type: text/html\r\n'
+                'Cache-Control: no-cache\r\n'
+                '\r\n' % len(doc))
             req.out.write(doc)
 
             req.Finish()
@@ -434,6 +436,7 @@ def _test():
         f = open('traceback', 'w')
         traceback.print_exc(file = f)
         # f.write('%s' % doc)
+
 
 if __name__ == '__main__':
     # import pdb

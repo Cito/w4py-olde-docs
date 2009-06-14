@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 """CGIPlusAppServer
 
 This WebKit app server is a WASD CGIplus server that accepts requests, hands

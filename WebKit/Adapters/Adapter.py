@@ -14,10 +14,10 @@ class Adapter(Configurable):
         return self.__class__.__name__
 
     def defaultConfig(self):
-        return {
-                'NumRetries':            20,
-                'SecondsBetweenRetries': 3
-        }
+        return dict(
+            NumRetries = 20,
+            SecondsBetweenRetries = 3,
+        )
 
     def configFilename(self):
         return os.path.join(self._webKitDir, 'Configs', '%s.config' % self.name())
@@ -29,11 +29,7 @@ class Adapter(Configurable):
         via socket. Returns the unmarshaled response dictionary.
 
         """
-        dict = {
-                        'format': 'CGI',
-                        'time':   time.time(),
-                        'environ': env,
-                        }
+        requestDict = dict(format='CGI', time=time.time(), environ=env)
 
         # @@ gat 2002-03-21: Changed retry strategy.  Now, we'll only retry the initial
         # connection to the appserver.  After that, any failure means the request failed.
@@ -53,7 +49,7 @@ class Adapter(Configurable):
                 else:
                     raise socket.error('timed out waiting for connection to app server')
 
-        data = dumps(dict)
+        data = dumps(requestDict)
         s.send(dumps(int(len(data))))
         s.send(data)
 

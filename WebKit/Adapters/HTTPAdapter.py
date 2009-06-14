@@ -69,7 +69,7 @@ class ThreadedHTTPServer(BaseHTTPServer.HTTPServer):
         except socket.error:
             return
         t = threading.Thread(target=self.handle_request_body,
-                        args=(request, client_address, self._threadID))
+            args=(request, client_address, self._threadID))
         t.start()
         self._threads[self._threadID] = t
         self._threadID += 1
@@ -85,13 +85,13 @@ class ThreadedHTTPServer(BaseHTTPServer.HTTPServer):
         del self._threads[threadID]
 
     def serve_forever(self):
-        self._keepGoing = 1
+        self._keepGoing = True
         while self._keepGoing:
             self.handle_request()
         self.socket.close()
 
     def shutDown(self):
-        self._keepGoing = 0
+        self._keepGoing = False
         for thread in self._threads.values():
             thread.join()
         self.socket.shutdown(2)
@@ -107,19 +107,19 @@ def run(serverAddress, klass=HTTPAdapter):
 
 usage = """HTTPServer - Standalone HTTP server to connect to AppServer
 Usage:
-        python HTTPServer.py [OPTIONS]
+    python HTTPServer.py [OPTIONS]
 Options:
-        -p PORT     Port to connect to (default: 80)
-        -h HOST     Host to server from (for computers with multiple
-                                interfaces, default 127.0.0.1)
-        -d          Run as daemon
+    -p PORT     Port to connect to (default: 80)
+    -h HOST     Host to server from (for computers with multiple
+                            interfaces, default 127.0.0.1)
+    -d          Run as daemon
 """
 
 def main():
     import getopt
     try:
         opts, args = getopt.getopt(sys.argv[1:],
-                'p:h:d', ['port=', 'host=', 'daemon'])
+            'p:h:d', ['port=', 'host=', 'daemon'])
     except getopt.GetoptError:
         print usage
         sys.exit(2)
@@ -136,7 +136,8 @@ def main():
     if daemon:
         if os.fork() or os.fork():
             sys.exit(0)
-    print "PS: This adapter is experimental and should not be used in\na production environment"
+    print "PS: This adapter is experimental and should"
+    print "    not be used in a production environment"
     run((host, port))
 
 def shutDown(arg1, arg2):

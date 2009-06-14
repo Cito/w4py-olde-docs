@@ -27,6 +27,7 @@ Options:
 
 WorkDir:
   The target working directory to be created.
+
 """
 
 # FUTURE
@@ -44,7 +45,7 @@ WorkDir:
 # * Contributed to Webware for Python by Robin Dunn
 # * Improved by Christoph Zwerschke
 
-import sys, os, stat, re, glob, shutil
+import sys, os, stat, glob, shutil
 
 
 class MakeAppWorkDir:
@@ -56,9 +57,9 @@ class MakeAppWorkDir:
     Each step can be overridden in a derived class if needed.
     """
 
-    def __init__(self, webwareDir, workDir, verbose=1, osType=None,
-                    contextName='MyContext', contextDir='', libraryDirs=None,
-                    cvsIgnore=0, uid=None, gid=None):
+    def __init__(self, webwareDir, workDir, verbose=True, osType=None,
+            contextName='MyContext', contextDir='', libraryDirs=None,
+            cvsIgnore=False, uid=None, gid=None):
         """Initializer for MakeAppWorkDir.
 
         Pass in at least the Webware directory and the target working
@@ -104,8 +105,7 @@ class MakeAppWorkDir:
     def makeDirectories(self):
         """Create all the needed directories if they don't already exist."""
         self.msg("Creating the directory tree...")
-        standardDirs = (
-                '', 'Configs')
+        standardDirs = ('', 'Configs')
         for dir in standardDirs:
             dir = os.path.join(self._workDir, dir)
             if os.path.exists(dir):
@@ -125,10 +125,10 @@ class MakeAppWorkDir:
         """Make a copy of the config files in the Configs directory."""
         self.msg("Copying config files...")
         configs = glob.glob(os.path.join(self._webKitDir,
-                "Configs", "*.config"))
+            "Configs", "*.config"))
         for name in configs:
             newname = os.path.join(self._workDir, "Configs",
-                    os.path.basename(name))
+                os.path.basename(name))
             self.msg("\t%s" % newname)
             shutil.copyfile(name, newname)
             mode = os.stat(newname)[stat.ST_MODE]
@@ -144,13 +144,13 @@ class MakeAppWorkDir:
             if name == 'AppServer':
                 if self._osType == 'nt':
                     name += '.bat'
-                chmod = 1
+                chmod = True
             elif name == 'webkit':
                 if self._osType != 'posix':
                     continue
-                chmod = 1
+                chmod = True
             else:
-                chmod = 0
+                chmod = False
             newname = os.path.join(self._workDir, os.path.basename(name))
             if not os.path.exists(newname):
                 oldname = os.path.join(self._webKitDir, name)
@@ -203,8 +203,8 @@ class MakeAppWorkDir:
         """Make a very simple context for the newbie user to play with."""
         self.msg("Creating default context...")
         contextDir = os.path.join(
-                self._workDir,
-                self._contextDir or self._contextName)
+            self._workDir,
+            self._contextDir or self._contextName)
         if contextDir.startswith(self._workDir):
             configDir = contextDir[len(self._workDir):]
             while configDir[:1] in (os.sep, os.altsep):
@@ -222,7 +222,7 @@ class MakeAppWorkDir:
                 open(filename, "w").write(exampleContext[name])
         self.msg("Updating config for default context...")
         filename = os.path.join(self._workDir, "Configs",
-                'Application.config')
+            'Application.config')
         self.msg("\t%s" % filename)
         content = open(filename).readlines()
         output  = open(filename, 'w')
@@ -231,9 +231,9 @@ class MakeAppWorkDir:
         for line in content:
             if line.startswith("Contexts['default'] = "):
                 output.write("Contexts[%r] = %s\n"
-                        % (self._contextName, configDir))
+                    % (self._contextName, configDir))
                 output.write("Contexts['default'] = %r\n"
-                        % self._contextName)
+                    % self._contextName)
                 foundContext += 1
             else:
                 output.write(line)
@@ -244,17 +244,16 @@ class MakeAppWorkDir:
     def addCvsIgnore(self):
         self.msg("Creating .cvsignore files...")
         files = {
-                '.': '*.pyc\n*.pyo\n'
-                                'address.*\nhttpd.*\nappserverpid.*\nprofile.pstats',
-                'Cache': '[a-zA-Z0-9]*',
-                'ErrorMsgs': '[a-zA-Z0-9]*',
-                'Logs': '[a-zA-Z0-9]*',
-                'Sessions': '[a-zA-Z0-9]*',
-                self._contextName: '*.pyc\n*.pyo'
+            '.': '*.pyc\n*.pyo\n'
+                'address.*\nhttpd.*\nappserverpid.*\nprofile.pstats',
+            'Cache': '[a-zA-Z0-9]*',
+            'ErrorMsgs': '[a-zA-Z0-9]*',
+            'Logs': '[a-zA-Z0-9]*',
+            'Sessions': '[a-zA-Z0-9]*',
+            self._contextName: '*.pyc\n*.pyo'
         }
         for dir, contents in files.items():
-            filename = os.path.join(self._workDir,
-                    dir, '.cvsignore')
+            filename = os.path.join(self._workDir, dir, '.cvsignore')
             f = open(filename, 'w')
             f.write(contents)
             f.close()
@@ -282,14 +281,12 @@ class MakeAppWorkDir:
         self.msg()
 
     def printCompleted(self):
-        run = os.path.abspath(os.path.join(self._workDir, 'AppServer'))
         print """
 Congratulations, you've just created a runtime working directory for Webware.
 
 Don't forget to set a correct security profile on this created directory tree.
 The accounts which will execute the application need READ access to this
 directory tree.
-
 
 To finish you must create a CGIPlus script like the following
 $ @WEBWARE092_ROOT:[VMS]CGIPlusLaunchWebKit -
@@ -301,14 +298,12 @@ dev1:[users_directory] is the directory which holds the directory
 created using the procedure WEBWARE092_ROOT:[VMS]add_webware_user.com
 dev2:[app_directory.MyAPP] is the directory created by this procedure
 
-
 You will also need to add some rules to your HTTPD$MAP.CONF file
 set /myapp/* map=once cache=noscript auth=once
 set /myapp/* script=as=WEBWARE_USER
 set /myapp/*  SCRIPT=SYNTAX=UNIX
 set /myapp/* throttle=1/1,,,20,,00:05:00
 script+ /myapp/* /cgi-bin/myapp.com*
-
 
 if cgi-bin:[000000]myapp.com is the script previously mentioned.
 
@@ -333,9 +328,9 @@ exampleContext = { # files copied to example context
 
 '__init__.py': r"""
 def contextInitialize(appServer, path):
-        # You could put initialization code here to be executed
-        # when the context is loaded into WebKit.
-        pass
+    # You could put initialization code here to be executed
+    # when the context is loaded into WebKit.
+    pass
 """,
 
 'Main.py': r"""
@@ -343,31 +338,28 @@ from WebKit.Page import Page
 
 class Main(Page):
 
-        def title(self):
-                return 'My Sample Context'
+    def title(self):
+        return 'My Sample Context'
 
-        def writeContent(self):
-                self.writeln('<h1>Welcome to Webware for Python!</h1>')
-                self.writeln('''
-                <p>This is a sample context generated for you and has purposly been kept
-                very simple to give you something to play with to get yourself started.
-                The code that implements this page is located in <b>%s</b>.</p>
-                ''' % self.request().serverSidePath())
-                self.writeln('''
-                <p>There are more examples and documentation in the Webware distribution,
-                which you can get to from here:</p>
-                <ul>
-                ''')
-                servletPath = self.request().servletPath()
-                contextName = self.request().contextName()
-                ctxs = self.application().contexts().keys()
-                ctxs.sort()
-                for ctx in ctxs:
-                        if ctx in ('default', contextName) or '/' in ctx:
-                                continue
-                        self.writeln('<li><a href="%s/%s/">%s</a></li>'
-                                % (servletPath, ctx, ctx))
-                self.writeln('</ul>')
+    def writeContent(self):
+        self.writeln('<h1>Welcome to Webware for Python!</h1>')
+        self.writeln('''
+<p>This is a sample context generated for you and has purposly been kept
+very simple to give you something to play with to get yourself started.
+The code that implements this page is located in <strong>%s</strong>.</p>
+<p>There are more examples and documentation in the Webware distribution,
+which you can get to from here:</p>
+<ul>''' % self.request().serverSidePath()))
+        servletPath = self.request().servletPath()
+        contextName = self.request().contextName()
+        ctxs = self.application().contexts().keys()
+        ctxs.sort()
+        for ctx in ctxs:
+            if ctx in ('default', contextName) or '/' in ctx:
+                continue
+            self.writeln('<li><a href="%s/%s/">%s</a></li>'
+                % (servletPath, ctx, ctx))
+        self.writeln('</ul>')
 """
 
 } # end of example context files
@@ -387,8 +379,8 @@ def main(args=None):
     from getopt import getopt, GetoptError
     try:
         opts, args = getopt(args, 'c:d:l:iu:g:', [
-                'context-name=', 'context-dir=', 'library=',
-                'cvsignore', 'user=', 'group='])
+            'context-name=', 'context-dir=', 'library=',
+            'cvsignore', 'user=', 'group='])
     except GetoptError, error:
         print str(error)
         usage()
@@ -462,8 +454,9 @@ def main(args=None):
     binDir = os.path.dirname(os.path.abspath(scriptName))
     webwareDir = os.path.abspath(os.path.join(binDir, os.pardir))
     mawd = MakeAppWorkDir(webwareDir, workDir, 1, None,
-            contextName, contextDir, libraryDirs, cvsIgnore, uid, gid)
+        contextName, contextDir, libraryDirs, cvsIgnore, uid, gid)
     mawd.buildWorkDir() # go!
+
 
 if __name__ == '__main__':
     main()
