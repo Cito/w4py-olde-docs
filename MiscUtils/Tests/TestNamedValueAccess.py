@@ -1,11 +1,10 @@
 import sys
 import unittest
 import types
-from UserDict import UserDict
 
 import FixPath
 from MiscUtils.NamedValueAccess import (
-    NamedValueAccessError, valueForKey, valueForName, NamedValueAccess)
+    NamedValueAccessError, valueForKey, valueForName)
 from MiscUtils import AbstractError, NoDefault
 
 
@@ -59,36 +58,10 @@ class T6(T):
         self._foo = 0
 
 
-class T7(T):
-
-    def valueForKey(self, key, default):
-        if key == 'foo':
-            return 1
-        elif key == 'nextObject':
-            return getattr(self, 'nextObject')
-        else:
-            if default is NoDefault:
-                raise NamedValueAccessError(key)
-            else:
-                return default
-
-
-class T8(T):
-
-    def valueForUnknownKey(self, key, default):
-        if key == 'foo':
-            return 1
-        else:
-            if default is NoDefault:
-                raise NamedValueAccessError, key
-            else:
-                return default
-
-
-# Make a list of all the 't' classes which are used in testing
+# Make a list of all the 'T' classes which are used in testing
 tClasses = []
 for name in dir():
-    if len(name) == 2 and name[0] == 'T':
+    if name.startswith('T') and name[1:].isdigit():
         tClasses.append(globals()[name])
 
 
@@ -115,7 +88,7 @@ class LookupTest(NamedValueAccessTest):
         self.objs = map(lambda klass: klass(), self.classes)
 
     def lookup(self, obj, key, default=NoDefault):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
     def checkBasicAccess(self):
         """Check the basic access functionality.
@@ -123,6 +96,7 @@ class LookupTest(NamedValueAccessTest):
         Invoke the look up function with key 'foo', expecting 1 in return.
         Invoke the look up with 'bar', expected an exception.
         Invoke the look up with 'bar' and default 2, expecting 2.
+
         """
         func = self.lookup
         for obj in self.objs:
@@ -167,19 +141,11 @@ class ValueForNameTest(LookupTest):
             assert self.lookup(objs[0], name) == 1
 
     def checkDicts(self):
-        # Basic dicts
-        d = {'origin': {'x':1, 'y':2},  'size': {'width':3, 'height':4}}
+        d = {'origin': {'x': 1, 'y': 2},
+            'size': {'width': 3, 'height': 4}}
         obj = self.objs[0]
         obj.rect = d
-        self._checkDicts(d, obj)
 
-        # User dicts
-        d = UserDict(d)
-        obj.rect = d
-        self._checkDicts(d, obj)
-
-    def _checkDicts(self, d, obj):
-        """ Used exclusively by checkDicts(). """
         assert self.lookup(d, 'origin.x') == 1
         assert self.lookup(obj, 'rect.origin.x')
 
@@ -190,105 +156,8 @@ class ValueForNameTest(LookupTest):
         assert self.lookup(obj, 'rect.bar', 2) == 2
 
 
-class MixInTest(NamedValueAccessTest):
-    """
-    This test case is really just a utility to mix-in the
-    NamedValueAccess so that the test classes (T1, T2, ...) inherit it.
-    Run this test suite after the basic tests, but before the
-    NamedValueAccess mix-in tests.
-    """
-
-    def setUp(self):
-        if NamedValueAccess not in T.__bases__:
-            T.__bases__ += (NamedValueAccess,)
-
-    def checkNothing(self):
-        pass
-
-
-class MixInKeyTest(ValueForKeyTest):
-
-    def lookup(self, obj, key, default=NoDefault):
-        if type(obj) is not types.InstanceType:
-            # just so non-obj cases pass
-            return valueForKey(obj, key, default)
-        else:
-            # What we're really testing, the mix-in method:
-            return obj.valueForKey(key, default)
-
-
-class MixInNameTest(ValueForNameTest):
-
-    def lookup(self, obj, key, default=NoDefault):
-        if type(obj) is not types.InstanceType:
-            # just so non-obj cases pass
-            return valueForName(obj, key, default)
-        else:
-            # What we're really testing, the mix-in method:
-            return obj.valueForName(key, default)
-
-
-class MixInExtrasTest(MixInTest, NamedValueAccessTest):
-
-    def checkValuesForNames(self):
-        # def valuesForNames(self, keys, default=None, defaults=None, forgive=0)
-
-        # set up structure: rect(attrs(origin(x, y), size(width, height)))
-        rect = T1()
-        origin = T1()
-        origin.x = 5
-        origin.y = 6
-        size = T1()
-        size.width = 43
-        size.height = 87
-        attrs = {'origin': origin, 'size': size}
-        rect.attrs = attrs
-
-        # test integrity of structure and validity of valueForName()
-        assert rect.valueForName('attrs') is attrs
-        assert rect.valueForName('attrs.origin') is origin
-        assert rect.valueForName('attrs.size') is size
-
-        # test valuesForNames()
-        notFound = 'notFound'
-        assert rect.valuesForNames(['attrs', 'attrs.origin',
-            'attrs.size']) == [attrs, origin, size]
-        assert rect.valuesForNames(['attrs.dontFind', 'attrs',
-            'attrs.origin.dontFind'],
-            default=notFound) == [notFound, attrs, notFound]
-        assert rect.valuesForNames(['attrs.dontFind', 'attrs',
-            'attrs.origin.dontFind'], defaults=[1, 2, 3]) == [1, attrs, 3]
-        assert rect.valuesForNames(['attrs.dontFind', 'attrs',
-            'attrs.origin.dontFind'], forgive=1) == [attrs]
-
-
-class WrapperTest(NamedValueAccessTest):
-    """
-    This is a utility class that modifies LookupTest. After running this,
-    run all the LookupTests (e.g., all subclasses) as usual in order to
-    test wrappers.
-    """
-
-    def setUp(self):
-        def setUpObjects(self):
-            wrapper = NamedValueAccessWrapper
-            self.objs = map(lambda klass, wrapper=wrapper: wrapper(klass()), self.classes)
-        LookupTest.setUpObjects = setUpObjects
-
-
 def makeTestSuite():
-    testClasses = [
-        ValueForKeyTest,
-        ValueForNameTest,
-        MixInTest, # utility
-            MixInKeyTest,
-            MixInNameTest,
-            MixInExtrasTest,
-        WrapperTest, # utility
-            MixInKeyTest,
-            MixInNameTest,
-            MixInExtrasTest,
-    ]
+    testClasses = [ValueForKeyTest, ValueForNameTest]
     make = unittest.makeSuite
     suites = [make(klass, 'check') for klass in testClasses]
     return unittest.TestSuite(suites)
