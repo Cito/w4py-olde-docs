@@ -1,5 +1,4 @@
-#from UserListimport UserList
-#from UserDict import UserDict
+"""Per-thread list."""
 
 import thread
 

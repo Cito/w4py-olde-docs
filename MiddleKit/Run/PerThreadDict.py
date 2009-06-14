@@ -1,3 +1,5 @@
+"""Per-thread dictionary."""
+
 import thread
 
 

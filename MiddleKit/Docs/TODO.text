@@ -163,8 +163,6 @@ specification."
 
 	[ ] Improve Resources/Template.mkmodel.
 
-	[ ] Test that we can use NamedValueAccess. Reconcile this with _get and _set. Make sure that this all works when the getter and setter methods can be customized.
-
 	[ ] Should MK also cover methods (it already does attributes)? It sort of does with isDerived, but there is no canonical way to specify the arguments.
 
 	[ ] enforce min and max for attributes in generated python
@@ -187,9 +185,7 @@ specification."
 		- attribute names required
 		- type names required
 
-	[ ] MiddleKit already partially handles dangling ObjRefs by just pretending
-they are None, but it still complains if the klass ID is invalid.  MK should
- also handle dangling klass IDs gracefully. [per Geoff T]
+	[ ] MiddleKit already partially handles dangling ObjRefs by just pretending they are None, but it still complains if the klass ID is invalid.  MK should also handle dangling klass IDs gracefully. [per Geoff T]
 
 	[ ] Change Samples*.csv convention to Sample*.csv; also print the names of each sample file as it is being processed so the user realizes that multiple files are picked up
 

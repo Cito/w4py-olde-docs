@@ -757,7 +757,7 @@ class TableRecord(object):
             name = heading.name()
             if object.hasValueForKey(name):
                 self._values.append(heading.valueForRawValue(
-                        object.valueForKey(name)))
+                    object.valueForKey(name)))
             else:
                 self._values.append(blankValues[heading.type()])
 

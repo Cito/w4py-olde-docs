@@ -5,13 +5,13 @@ from Attr import Attr
 from MiscUtils import NoDefault
 from MiscUtils.DataTable import DataTable
 from MiscUtils.DictForArgs import *
-from UserDict import UserDict
 
 
-class Klasses(ModelObject, UserDict):
-    """A Klasses object can read a list of class specifications in a spreadsheet (.csv).
+class Klasses(dict, ModelObject):
+    """Collection of class specifications.
 
-    Note that Klasses inherits UserDict, allowing you to access class specifications by name.
+    A Klasses object can read a list of class specifications that are
+    stored in a spreadsheet (.csv).
 
     """
 
@@ -19,17 +19,18 @@ class Klasses(ModelObject, UserDict):
     ## Init ##
 
     def __init__(self, model):
-        UserDict.__init__(self)
+        dict.__init__(self)
         assert isinstance(model, Model)
-        self._model         = model
-        self._klasses       = []
-        self._filename      = None
-        self._name          = None
+        self._model = model
+        self._klasses = []
+        self._filename = None
+        self._name = None
         self._tableHeadings = None
         self.initTypeMap()
 
     def classNames(self):
-        return ['ModelObject', 'Klasses', 'Klass', 'Attr', 'BasicTypeAttr', 'ObjRefAttr', 'EnumAttr', 'DateTimeAttr']
+        return ['ModelObject', 'Klasses', 'Klass', 'Attr',
+            'BasicTypeAttr', 'ObjRefAttr', 'EnumAttr', 'DateTimeAttr']
 
     def initTypeMap(self):
         """Initialize the type map.
@@ -87,7 +88,8 @@ class Klasses(ModelObject, UserDict):
     def read(self, filename):
         # @@ 2000-11-24 ce: split into readTable()
         self._filename = filename
-        table = DataTable(filename, usePickleCache=False) # because PickleCache is used at the Model level
+        # PickleCache is used at the Model level, so we don't use it here:
+        table = DataTable(filename, usePickleCache=False)
 
         # in case we want to look at these later:
         self._tableHeadings = table.headings()
@@ -97,7 +99,7 @@ class Klasses(ModelObject, UserDict):
             for row in table:
                 row = ExpandDictWithExtras(row, dictForArgs=PyDictForArgs)
                 for key in ['Class', 'Attribute']:
-                    if not row.has_key(key):
+                    if key not in row:
                         print 'ERROR'
                         print 'Required key %s not found in row:' % key
                         print 'row:', row
@@ -135,7 +137,7 @@ class Klasses(ModelObject, UserDict):
             klass.awakeFromRead(self)
 
     def __getstate__(self):
-        """For pickling purposes, the back reference to the model that owns self is removed."""
+        """For pickling, remove the back reference to the model that owns self."""
         assert self._model
         attrs = self.__dict__.copy()
         del attrs['_model']
@@ -159,7 +161,7 @@ class Klasses(ModelObject, UserDict):
 
     ## Self utility ##
 
-    def pyClassNameForAttrDict(self, dict):
+    def pyClassNameForAttrDict(self, attrDict):
         """Return class for attribute definition.
 
         Given a raw attribute definition (in the form of a dictionary),
@@ -167,10 +169,11 @@ class Klasses(ModelObject, UserDict):
         instantiated for it. This method relies primarily on dict['Type'].
 
         """
-        typeName = dict['Type']
+        typeName = attrDict['Type']
         if not typeName:
-            if dict['Attribute']:
-                raise ModelError("no type specified for attribute '%s'" % dict['Attribute'])
+            if attrDict['Attribute']:
+                raise ModelError("no type specified for attribute '%s'"
+                    % attrDict['Attribute'])
             else:
                 raise ModelError('type specifier missing')
 

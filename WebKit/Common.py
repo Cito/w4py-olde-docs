@@ -14,6 +14,7 @@ The globals provided are:
 * the package `WebUtils`
 * the exception class `AbstractError` that methods of abstract classes can raise
 * the singleton `NoDefault`  for initializing default arguments
+* the functions valueForKey, valueForName for accessing named attributes
 * the method `asclocaltime` for building time stamps in log files
 
 """
@@ -25,6 +26,7 @@ import time
 from Object import Object
 import WebUtils
 from MiscUtils import StringIO, AbstractError, NoDefault
+from MiscUtils.NamedValueAccess import valueForKey, valueForName
 
 def asclocaltime(t=None):
     """Return a readable string of the current, local time.

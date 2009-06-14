@@ -7,10 +7,9 @@ except ImportError:
     # the components sit next to each other
     sys.path.append(os.path.abspath(os.pardir))
     import MiscUtils
-from MiscUtils.NamedValueAccess import NamedValueAccess
 
 
-class Object(object, NamedValueAccess):
+class Object(object):
     """Object is the root class for all classes in the WebKit.
 
     This is a placeholder for any future functionality that might be

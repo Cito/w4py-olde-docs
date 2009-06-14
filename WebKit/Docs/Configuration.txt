@@ -326,14 +326,14 @@ Errors
     Default: ``'localhost'``.
 ``ErrorEmailHeaders``:
     The e-mail headers used for e-mailing error messages.  Be sure to
-    configure ``"From"``, ``"To"`` and ``"Reply-to"`` before turning
+    configure ``"From"``, ``"To"`` and ``"Reply-To"`` before turning
     ``EmailErrors`` on.  Default::
 
         {
             'From':         'webware@mydomain,
             'To':           ['webware@mydomain'],
-            'Reply-to':     'webware@mydomain',
-            'Content-type': 'text/html',
+            'Reply-To':     'webware@mydomain',
+            'Content-Type': 'text/html',
             'Subject':      'Error'
         }
 ``ErrorPage``:

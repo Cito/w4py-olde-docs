@@ -562,7 +562,7 @@ store = MySQLObjectStore(db='foobar', user='prog', passwd='asdklfj')
 
 <p>The klass() method seen above, returns the object's MiddleKit Klass, which is the class specification that came from the object model you created. The allAttrs() method returns a klass' list of attributes.</p>
 
-<p>The attributes are instances of MiddleKit.Core.Attr (or one of its subclasses such as ObjRefAttr) which inherits from UserDict and acquires additional methods from mix-ins located in MiddleKit.Design and MiddleKit.Run. Since attributes are essentially dictionaries, you can treat them like so, although if you modify them you are asking for serious trouble.</p>
+<p>The attributes are instances of MiddleKit.Core.Attr (or one of its subclasses such as ObjRefAttr) which inherits from MiddleDict and acquires additional methods from mix-ins located in MiddleKit.Design and MiddleKit.Run. Since attributes are essentially dictionaries, you can treat them like so, although if you modify them you are asking for serious trouble.</p>
 
 <pre class="py">for attr in obj.klass().allAttrs():
 	keys = attr.keys()

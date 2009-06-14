@@ -20,8 +20,6 @@ to the Application object itself.
 
 """
 
-from UserDict import UserDict
-
 from Common import *
 from Object import Object
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
@@ -34,87 +32,87 @@ import URLParser
 
 debug = False
 
-defaultConfig = {
-        'PrintConfigAtStartUp': True,
-        'LogActivity': True,
-        'ActivityLogFilename': 'Logs/Activity.csv',
-        'ActivityLogColumns': [
-            'request.remoteAddress', 'request.method',
-            'request.uri', 'response.size',
-            'servlet.name', 'request.timeStamp',
-            'transaction.duration',
-            'transaction.errorOccurred'
-            ],
-        'SessionModule': 'Session',
-        'SessionStore': 'Dynamic',
-        'SessionStoreDir': 'Sessions',
-        'SessionTimeout': 60,
-        'SessionPrefix': '',
-        'SessionName': '_SID_',
-        'IgnoreInvalidSession': True,
-        'UseAutomaticPathSessions': False,
-        'UseCookieSessions': True,
-        'SessionCookiePath': None,
-        'SecureSessionCookie': True,
-        'ShowDebugInfoOnErrors': True,
-        'EnterDebuggerOnException': False,
-        'IncludeEditLink': True,
-        'IncludeFancyTraceback': False,
-        'FancyTracebackContext': 5,
-        'UserErrorMessage': 'The site is having technical difficulties'
-            ' with this page. An error has been logged, and the problem'
-            ' will be fixed as soon as possible. Sorry!',
-        'LogErrors': True,
-        'ErrorLogFilename': 'Logs/Errors.csv',
-        'SaveErrorMessages': True,
-        'ErrorMessagesDir': 'ErrorMsgs',
-        'EmailErrors': False,
-        'EmailErrorReportAsAttachment': False,
-        'ErrorEmailServer': 'localhost',
-        'ErrorEmailHeaders': {
-            'From': 'webware@mydomain',
-            'To': ['webware@mydomain'],
-            'Reply-to': 'webware@mydomain',
-            'content-type': 'text/html',
-            'Subject': 'Error'
-            },
-        'ErrorPage': None,
-        'MaxValueLengthInExceptionReport': 500,
-        'RPCExceptionReturn': 'traceback',
-        'ReportRPCExceptionsInWebKit': True,
-        'CacheDir': 'Cache',
-        'Contexts': {
-            'default': 'Examples',
-            'Admin': 'Admin',
-            'Examples': 'Examples',
-            'Testing': 'Testing',
-            'Docs': 'Docs',
-            },
-        'Debug': {
-            'Sessions': False,
-            },
-        'DirectoryFile': ['index', 'Index', 'main', 'Main'],
-        'UseCascadingExtensions': True,
-        'ExtensionCascadeOrder': ['.py', '.psp', '.kid', '.html'],
-        'ExtraPathInfo': True,
-        'ExtensionsToIgnore': [
-            '.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
-            '.py~', '.psp~', '.kid~', '.html~', '.tmpl~'
-            ],
-        'ExtensionsToServe': [],
-        'FilesToHide': [
-            '.*', '*~', '*.bak', '*.py_bak', '*.tmpl',
-            '*.pyc', '*.pyo', '__init__.*', '*.config'
-            ],
-        'FilesToServe': [],
-        'UnknownFileTypes': {
-            'ReuseServlets': True,
-            'Technique': 'serveContent', # or redirectSansAdapter
-            'CacheContent': False,
-            'MaxCacheContentSize': 128*1024,
-            'ReadBufferSize': 32*1024
-            },
-}
+defaultConfig = dict(
+    PrintConfigAtStartUp = True,
+    LogActivity = True,
+    ActivityLogFilename = 'Logs/Activity.csv',
+    ActivityLogColumns = [
+        'request.remoteAddress', 'request.method',
+        'request.uri', 'response.size',
+        'servlet.name', 'request.timeStamp',
+        'transaction.duration',
+        'transaction.errorOccurred'
+        ],
+    SessionModule = 'Session',
+    SessionStore = 'Dynamic',
+    SessionStoreDir = 'Sessions',
+    SessionTimeout = 60,
+    SessionPrefix = '',
+    SessionName = '_SID_',
+    IgnoreInvalidSession = True,
+    UseAutomaticPathSessions = False,
+    UseCookieSessions = True,
+    SessionCookiePath = None,
+    SecureSessionCookie = True,
+    ShowDebugInfoOnErrors = True,
+    EnterDebuggerOnException = False,
+    IncludeEditLink = True,
+    IncludeFancyTraceback = False,
+    FancyTracebackContext = 5,
+    UserErrorMessage = 'The site is having technical difficulties'
+        ' with this page. An error has been logged, and the problem'
+        ' will be fixed as soon as possible. Sorry!',
+    LogErrors = True,
+    ErrorLogFilename = 'Logs/Errors.csv',
+    SaveErrorMessages = True,
+    ErrorMessagesDir = 'ErrorMsgs',
+    EmailErrors = False,
+    EmailErrorReportAsAttachment = False,
+    ErrorEmailServer = 'localhost',
+    ErrorEmailHeaders = {
+        'From': 'webware@mydomain',
+        'To': ['webware@mydomain'],
+        'Reply-To': 'webware@mydomain',
+        'Content-Type': 'text/html',
+        'Subject': 'Error'
+        },
+    ErrorPage = None,
+    MaxValueLengthInExceptionReport = 500,
+    RPCExceptionReturn = 'traceback',
+    ReportRPCExceptionsInWebKit = True,
+    CacheDir = 'Cache',
+    Contexts = {
+        'default': 'Examples',
+        'Admin': 'Admin',
+        'Examples': 'Examples',
+        'Testing': 'Testing',
+        'Docs': 'Docs',
+        },
+    Debug = dict(
+        Sessions = False,
+        ),
+    DirectoryFile = ['index', 'Index', 'main', 'Main'],
+    UseCascadingExtensions = True,
+    ExtensionCascadeOrder = ['.py', '.psp', '.kid', '.html'],
+    ExtraPathInfo = True,
+    ExtensionsToIgnore = [
+        '.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
+        '.py~', '.psp~', '.kid~', '.html~', '.tmpl~'
+        ],
+    ExtensionsToServe = [],
+    FilesToHide = [
+        '.*', '*~', '*.bak', '*.py_bak', '*.tmpl',
+        '*.pyc', '*.pyo', '__init__.*', '*.config'
+        ],
+    FilesToServe = [],
+    UnknownFileTypes = dict(
+        ReuseServlets = True,
+        Technique = 'serveContent', # or redirectSansAdapter
+        CacheContent = False,
+        MaxCacheContentSize = 128*1024,
+        ReadBufferSize = 32*1024
+        ),
+)
 
 
 class EndResponse(Exception):
@@ -529,19 +527,13 @@ class Application(ConfigurableForServerSidePath, Object):
             f = open(filename, 'w')
             f.write(','.join(self.setting('ActivityLogColumns')) + '\n')
         values = []
-        # We use UserDict on the next line because we know it inherits
-        # NamedValueAccess and reponds to valueForName()
-        objects = UserDict({
-            'application': self,
-            'transaction': trans,
-            'request': trans.request(),
-            'response': trans.response(),
-            'servlet': trans.servlet(),
-            'session': trans._session, # don't cause creation of session
-        })
+        objects = dict(application=self, transaction=trans,
+            request=trans.request(), response=trans.response(),
+             # don't cause creation of session here:
+            servlet=trans.servlet(), session=trans._session)
         for column in self.setting('ActivityLogColumns'):
             try:
-                value = objects.valueForName(column)
+                value = valueForName(objects, column)
             except Exception:
                 value = '(unknown)'
             if isinstance(value, float):
@@ -590,7 +582,6 @@ class Application(ConfigurableForServerSidePath, Object):
                         if not servlet:
                             break
                         self.returnServlet(servlet)
-                        servlet.resetKeyBindings()
                     # get current servlet (this may have changed)
                     servlet = trans.servlet()
                     if servlet:
@@ -793,8 +784,6 @@ class Application(ConfigurableForServerSidePath, Object):
             servlet.sleep(trans)
         # return new servlet to its pool
         self.returnServlet(servlet)
-        # release bindings of new servlet
-        servlet.resetKeyBindings()
         # restore current request
         trans.setServlet(request.pop())
         return result
@@ -822,8 +811,6 @@ class Application(ConfigurableForServerSidePath, Object):
             pass
         # return new servlet to its pool
         self.returnServlet(servlet)
-        # release bindings of new servlet
-        servlet.resetKeyBindings()
         # restore current request
         trans.setServlet(request.pop())
 

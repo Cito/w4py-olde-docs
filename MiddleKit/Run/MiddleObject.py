@@ -1,13 +1,15 @@
-import sys, threading, types
+import sys
+import threading
+import types
 
-from MiscUtils.NamedValueAccess import NamedValueAccess
 from MiscUtils import NoDefault
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleKit.Core.ListAttr import ListAttr
+
 import ObjectStore
 
 
-class MiddleObject(object, NamedValueAccess):
+class MiddleObject(object):
     """Superclass for the MiddleKit objects.
 
     MiddleObject is the abstract superclass of objects that are manipulated
@@ -48,7 +50,7 @@ class MiddleObject(object, NamedValueAccess):
         self._mk_initing = False
         self._mk_inStore = False
 
- # cache the various setFoo methods first by qualified class name
+    # cache the various setFoo methods first by qualified class name
     _mk_setCache = {}
     # get a reentrant lock for accessing the persistent store
     _mk_cacheLock = threading.RLock()
@@ -221,7 +223,7 @@ class MiddleObject(object, NamedValueAccess):
 
         """
         assert self._mk_serialNum >= 1, \
-                "Cannot make keys for objects that haven't been persisted yet."
+            "Cannot make keys for objects that haven't been persisted yet."
         assert self._mk_key is None
         self._mk_key = key
 
@@ -239,16 +241,16 @@ class MiddleObject(object, NamedValueAccess):
         assert not self.isChanged()
         result = self.store().fetchObject(self.__class__, self.serialNum())
         assert result is self, \
-                'expecting result to be self. self=%r, result=%r' % (self, result)
+            'expecting result to be self. self=%r, result=%r' % (self, result)
 
     def allAttrs(self, includeUnderscoresInKeys=True):
         """Return a dictionary mapping the names of attributes to their values.
 
         Only attributes defined in the MiddleKit object model are included.
         An example return value might be
-                { '_x': 1, '_y': 1 },
+            {'_x': 1, '_y': 1},
         or if includeUnderscoresInKeys is false,
-                { 'x': 1, 'y': 1 }.
+            {'x': 1, 'y': 1}.
 
         """
         allAttrs = {}
@@ -323,7 +325,7 @@ class MiddleObject(object, NamedValueAccess):
         selfSqlObjRef = self.sqlObjRef()
         for backObjRefAttr in self.klass().backObjRefAttrs():
             objects = self.store().fetchObjectsOfClass(backObjRefAttr.klass(),
-                    **self.referencingObjectsAndAttrsFetchKeywordArgs(backObjRefAttr))
+                **self.referencingObjectsAndAttrsFetchKeywordArgs(backObjRefAttr))
             for object in objects:
                 assert object.valueForAttr(backObjRefAttr) is self
                 referencingObjectsAndAttrs.append((object, backObjRefAttr))
@@ -336,7 +338,7 @@ class MiddleObject(object, NamedValueAccess):
         persistent store. Specific object stores replace this as appropriate.
 
         """
-        return {'refreshAttrs': True}
+        return dict(refreshAttrs=True)
 
 
     ## Debugging ##
@@ -372,7 +374,7 @@ class MiddleObject(object, NamedValueAccess):
 
     def setStore(self, store):
         assert not self._mk_store, \
-                'The store was previously set and cannot be set twice.'
+            'The store was previously set and cannot be set twice.'
         self._mk_store = store
         self._mk_inStore = True
 
@@ -506,7 +508,7 @@ class MiddleObject(object, NamedValueAccess):
             klassName = self.store().klassForId(klassId).name()
         except Exception, e:
             klassName = '%i (exception during klassName fetch: %s: %s)' % (
-                    klassId, e.__class__.__name__, e)
+                klassId, e.__class__.__name__, e)
         sys.stdout.flush()
         sys.stderr.flush()
         print ('WARNING: MiddleKit: In object %(rep)s, attribute'
@@ -514,17 +516,6 @@ class MiddleObject(object, NamedValueAccess):
             ' %(klassName)s.%(objSerialNum)s' % locals())
         sys.stdout.flush()
         return None
-
-
-    # @@ 2001-07-10 ce: the old names
-    #attr = valueForKey
-    #setAttr = setValueForKey
-
-    # @@ 2001-04-29 ce: This is for backwards compatibility only:
-    # We can take out after the post 0.5.x version (e.g., 0.6 or 1.0)
-    # or after 4 months, whichever comes later.
-    _get = valueForKey
-    _set = setValueForKey
 
     def clone(self, memo=None, depthAttr=None):
         """Clone middle object(s) generically.
@@ -555,14 +546,14 @@ class MiddleObject(object, NamedValueAccess):
         """
 
         def copyAttrValue(source, dest, attr, memo, depthAttr):
-            if depthAttr and attr.has_key(depthAttr):
+            if depthAttr and depthAttr in attr:
                 copymode = attr[depthAttr]
             else:
                 copymode = attr.get('Copy', 'shallow')
 
             if copymode == 'deep' and isinstance(attr, ObjRefAttr):
-                # clone the value of an attribute from the source object,
-                # and set it in the attribute of the dest object
+                # Clone the value of an attribute from the source object,
+                # and set it in the attribute of the dest object.
                 value = getattr(source, attr.pyGetName())()
                 if value:
                     clonedvalue = value.clone(memo, depthAttr)
@@ -570,13 +561,13 @@ class MiddleObject(object, NamedValueAccess):
                     clonedvalue = None
                 retvalue = getattr(dest, attr.pySetName())(clonedvalue)
             elif copymode == 'none':
-                # Shouldn't set attribute to None explicitly since attribute may have
-                # isRequired=True
-                # besides, the object will initialize all attributes to None anyways
+                # Shouldn't set attribute to None explicitly since attribute
+                # may have isRequired=True. Besides, the object will initialize
+                # all attributes to None anyways.
                 pass
             else:
-                # copy the value of an attribute from the source object
-                # to the dest object
+                # Copy the value of an attribute from the source object
+                # to the dest object.
                 # print 'copying value of ' + attr.name()
                 value = getattr(source, attr.pyGetName())()
                 retvalue = getattr(dest, attr.pySetName())(value)
@@ -586,12 +577,12 @@ class MiddleObject(object, NamedValueAccess):
             memo = {}
 
         # if we've already cloned this object, return the clone
-        if memo.has_key(self):
+        if self in memo:
             return memo[self]
 
         # make an instance of ourselves
         copy = self.__class__()
-        #print 'cloning %s %s as %s' % ( self.klass().name(), str(self), str(copy) )
+        # print 'cloning %s %s as %s' % (self.klass().name(), str(self), str(copy))
 
         memo[self] = copy
 
@@ -602,9 +593,10 @@ class MiddleObject(object, NamedValueAccess):
                 setmethodname = "addTo" + attr.name()[0].upper() + attr.name()[1:]
                 setmethod = getattr(copy, setmethodname)
 
-                # if cloning to create an extension object, we might want to copy fewer subobjects
+                # if cloning to create an extension object,
+                # we might want to copy fewer subobjects
                 copymode = attr['Copy']
-                if depthAttr and attr.has_key(depthAttr):
+                if depthAttr and depthAttr in attr:
                     copymode = attr[depthAttr]
 
                 if copymode == 'deep':

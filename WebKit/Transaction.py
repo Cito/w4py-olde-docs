@@ -10,9 +10,9 @@ class Transaction(Object):
 
     A transaction serves as:
 
-        * A container for all objects involved in the transaction. The
-          objects include application, request, response, session and
-          servlet.
+        * A container for all objects involved in the transaction.
+          The objects include application, request, response, session
+          and servlet.
 
         * A message dissemination point. The messages include awake(),
           respond() and sleep().
@@ -183,15 +183,13 @@ class Transaction(Object):
         """
         for name in self.__dict__.keys(): # needs keys() since dict changes
             attr = getattr(self,  name)
-            if isinstance(attr, Object) and not name.startswith('_app'):
-                attr.resetKeyBindings()
             delattr(self, name)
 
 
     ## Exception handling ##
 
     _exceptionReportAttrNames = \
-            'application request response session servlet'.split()
+        'application request response session servlet'.split()
 
     def writeExceptionReport(self, handler):
         handler.writeTitle(self.__class__.__name__)

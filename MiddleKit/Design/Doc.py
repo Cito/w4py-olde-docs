@@ -10,16 +10,14 @@ import os
 import shutil
 import sys
 import time
-from UserDict import UserDict
 
 import FixPath
 import MiddleKit
-from MiscUtils import StringTypes
 from MiscUtils.Funcs import valueForString
 from WebUtils.Funcs import htmlEncode
 
 
-class Doc:
+class Doc(object):
 
     sourceStyleSheetFilename = 'GenDocStyles.css'   # exists in MiddleKit/Design/
     destStyleSheetFilename = 'Styles.css'
@@ -229,12 +227,12 @@ class Doc:
 
         if args.has_key('otherkeys'):
             self.otherKeys = args['otherkeys']
-            if type(self.otherKeys) in StringTypes:
+            if isinstance(self.otherKeys, basestring):
                 self.otherKeys = self.otherKeys.split()
 
-        if args.has_key('morekeys'):
+        if 'morekeys' in args:
             moreKeys = args['morekeys']
-            if type(moreKeys) in StringTypes:
+            if isinstance(moreKeys, basestring):
                 moreKeys = moreKeys.split()
             self.otherKeys += list(moreKeys)
 
@@ -273,18 +271,16 @@ your model (i.e., user-defined rather than MiddleKit-defined).
         sys.exit(1)
 
 
-class Values(UserDict):
+class Values(dict):
 
     def __init__(self, data):
-        UserDict.__init__(self, data)
-        if self.get('isRequired') not in (False, '0', 0, 0.0, None):
-            self['isRequired'] = 'required'
-        else:
-            self['isRequired'] = ''
+        dict.__init__(self, data)
+        self['isRequired'] = self.get('isRequired') not in (
+            False, '0', 0, 0.0, None) and 'required' or ''
 
     def __getitem__(self, key):
         try:
-            value = self.data[key]
+            value = dict.__getitem__(self, key)
         except KeyError:
             value = None
         if value is None:
@@ -295,16 +291,9 @@ class Values(UserDict):
 def mystr(s):
     """Convert a Unicode string to a basic string."""
     try:
-        UnicodeError
-    except NameError:
-        # older Python. irrelevant
-        return str(s)
-
-    try:
         return str(s)
     except UnicodeError:
-        s = s.replace(u'\u201c', '"')
-        s = s.replace(u'\u201d', '"')
+        s = s.replace(u'\u201c', '"').replace(u'\u201d', '"')
         try:
             return str(s)
         except UnicodeError:
@@ -323,12 +312,14 @@ from MiddleKit.Core.Attr import Attr
 Attr.htmlForType = htmlForType
 
 def htmlForType(self):
-    return '<a href="#%s" class="ClassRef">%s</a>' % (self['Type'], self['Type'])
+    return '<a href="#%s" class="ClassRef">%s</a>' % (
+        self['Type'], self['Type'])
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 ObjRefAttr.htmlForType = htmlForType
 
 def htmlForType(self):
-    return 'list of <a href="#%s" class="ClassRef">%s</a>' % (self.className(), self.className())
+    return 'list of <a href="#%s" class="ClassRef">%s</a>' % (
+        self.className(), self.className())
 from MiddleKit.Core.ListAttr import ListAttr
 ListAttr.htmlForType = htmlForType
 

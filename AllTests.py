@@ -6,8 +6,8 @@ To run specific test cases, pass one or more names of package/module names
 on the command line which contain the test cases to be run.
 
 Usage:
-        python AllTests.py                  - Runs all the unittests
-        python AllTests.py mypackage.MyFile - Runs the tests in 'mypackage/MyFile'
+    python AllTests.py                  - Runs all the unittests
+    python AllTests.py mypackage.MyFile - Runs the tests in 'mypackage/MyFile'
 
 This module also has a test-wide configuration file which can be accessed by
 the function AllTests.config().
@@ -17,27 +17,27 @@ the function AllTests.config().
 
 alltestnames = [
 
-        'WebUtils.Tests.TestHTMLTag.makeTestSuite',
+    'WebUtils.Tests.TestHTMLTag.makeTestSuite',
 
-        'MiscUtils.Tests.TestCSVParser.CSVParserTests',
-        'MiscUtils.Tests.TestNamedValueAccess.makeTestSuite',
-        'MiscUtils.Tests.TestError.TestError',
-        'MiscUtils.Tests.TestFuncs.TestFuncs',
-        'MiscUtils.Tests.TestPickleCache.TestPickleCache',
-        'MiscUtils.Tests.TestDataTable.TestDataTable',
-        'MiscUtils.Tests.TestDateInterval.TestDateInterval',
-        'MiscUtils.Tests.TestDictForArgs',
+    'MiscUtils.Tests.TestCSVParser.CSVParserTests',
+    'MiscUtils.Tests.TestNamedValueAccess.makeTestSuite',
+    'MiscUtils.Tests.TestError.TestError',
+    'MiscUtils.Tests.TestFuncs.TestFuncs',
+    'MiscUtils.Tests.TestPickleCache.TestPickleCache',
+    'MiscUtils.Tests.TestDataTable.TestDataTable',
+    'MiscUtils.Tests.TestDateInterval.TestDateInterval',
+    'MiscUtils.Tests.TestDictForArgs',
 
-        'WebKit.Tests.Basic.Test',
+    'WebKit.Tests.Basic.Test',
 
-        'TaskKit.Tests.Test.makeTestSuite',
+    'TaskKit.Tests.Test.makeTestSuite',
 
-        'PSP.Tests.PSPUtilsTest',
-        'PSP.Tests.CompileTest',
+    'PSP.Tests.PSPUtilsTest',
+    'PSP.Tests.CompileTest',
 
-        'UserKit.Tests.ExampleTest',
-        'UserKit.Tests.Test',
-        'UserKit.Tests.UserManagerTest.makeTestSuite',
+    'UserKit.Tests.ExampleTest',
+    'UserKit.Tests.Test',
+    'UserKit.Tests.UserManagerTest.makeTestSuite',
 
 ]
 
@@ -72,26 +72,26 @@ class _AllTestsConfig(Configurable):
     # If hasMysql is true, then these are used to connect:
     'mysqlTestInfo' : {
 
-            # Where is MySQLdb lib located?
-            # 'extraSysPath': ['/somewhere/MySQL-python-1.2.2/build/lib'],
-            'extraSysPath': [],
+        # Where is MySQLdb lib located?
+        # 'extraSysPath': ['/somewhere/MySQL-python-1.2.2/build/lib'],
+        'extraSysPath': [],
 
-            # Where is the MySQL client located (if not on the path)?
-            # 'mysqlClient': '/usr/local/mysql/bin/mysql',
-            # 'mysqlClient': 'c:/progra~1/mysql/mysqls~1.0/bin/mysql.exe',
-            'mysqlClient': 'mysql',
+        # Where is the MySQL client located (if not on the path)?
+        # 'mysqlClient': '/usr/local/mysql/bin/mysql',
+        # 'mysqlClient': 'c:/progra~1/mysql/mysqls~1.0/bin/mysql.exe',
+        'mysqlClient': 'mysql',
 
-            # The name of the MySQL database to be used:
-            'database': 'test', # Test case uses this,
-            # but UserManagerTest.mkmodel/Settings.config also defines it.
+        # The name of the MySQL database to be used:
+        'database': 'test', # Test case uses this,
+        # but UserManagerTest.mkmodel/Settings.config also defines it.
 
-            # This is passed to MySQLObjectStore():
-            'DatabaseArgs': {
-                    'host': 'localhost',
-                    'port': 3306,
-                    'user': 'test', # should have all database privileges
-                    'passwd': '',
-            },
+        # This is passed to MySQLObjectStore():
+        'DatabaseArgs': {
+            'host': 'localhost',
+            'port': 3306,
+            'user': 'test', # should have all database privileges
+            'passwd': '',
+        },
     }
 }
 '''
@@ -101,7 +101,7 @@ class _AllTestsConfig(Configurable):
         # The first time we are run, write a new configuration file.
         if not os.path.exists(theFilename):
             _log.info(' Creating new configuration file at "%s".'
-                    ' You can customize it to run more tests.', theFilename)
+                ' You can customize it to run more tests.', theFilename)
             fp = open(theFilename, 'w')
             fp.write(_AllTestsConfig._defaultConfig)
             fp.close()

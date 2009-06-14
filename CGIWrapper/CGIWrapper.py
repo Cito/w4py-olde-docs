@@ -90,8 +90,8 @@ class CGIWrapper(NamedValueAccess):
                 'ErrorEmailHeaders': {
                         'From': 'webware@mydomain',
                         'To': ['webware@mydomain'],
-                        'Reply-to': 'webware@mydomain',
-                        'Content-type': 'text/html',
+                        'Reply-To': 'webware@mydomain',
+                        'Content-Type': 'text/html',
                         'Subject': 'Error'
                 },
                 'AdminRemoteAddr': ['127.0.0.1']

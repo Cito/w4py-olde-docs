@@ -340,14 +340,14 @@ name of a POP3 server, the port to be used and an <tt class="docutils literal"><
 Default: <tt class="docutils literal"><span class="pre">'localhost'</span></tt>.</dd>
 <dt><tt class="docutils literal"><span class="pre">ErrorEmailHeaders</span></tt>:</dt>
 <dd><p class="first">The e-mail headers used for e-mailing error messages.  Be sure to
-configure <tt class="docutils literal"><span class="pre">&quot;From&quot;</span></tt>, <tt class="docutils literal"><span class="pre">&quot;To&quot;</span></tt> and <tt class="docutils literal"><span class="pre">&quot;Reply-to&quot;</span></tt> before turning
+configure <tt class="docutils literal"><span class="pre">&quot;From&quot;</span></tt>, <tt class="docutils literal"><span class="pre">&quot;To&quot;</span></tt> and <tt class="docutils literal"><span class="pre">&quot;Reply-To&quot;</span></tt> before turning
 <tt class="docutils literal"><span class="pre">EmailErrors</span></tt> on.  Default:</p>
 <pre class="last literal-block">
 {
     'From':         'webware&#64;mydomain,
     'To':           ['webware&#64;mydomain'],
-    'Reply-to':     'webware&#64;mydomain',
-    'Content-type': 'text/html',
+    'Reply-To':     'webware&#64;mydomain',
+    'Content-Type': 'text/html',
     'Subject':      'Error'
 }
 </pre>
