@@ -16,7 +16,7 @@ class PushServlet(Page):
     """
 
     _boundary = "if-you-see-this-your-browser-does-not-support" \
-            "-multipart/x-mixed-replace"
+        "-multipart/x-mixed-replace"
 
     def respond(self, transaction):
         # this isn't necessary, but it's here as an example:
@@ -35,7 +35,7 @@ class PushServlet(Page):
 
     def initialHeader(self):
         self.response().setHeader("Content-type",
-                "multipart/x-mixed-replace; boundary=" + self._boundary)
+            "multipart/x-mixed-replace; boundary=" + self._boundary)
 
     def sendBoundary(self):
         self.write("--" + self._boundary)
@@ -51,25 +51,25 @@ class PushServlet(Page):
         wr('<h1>Pushing Content Demo</h1>')
         if count:
             wr('<h3>This page has been replaced'
-                    ' <strong style="color:#339">%d</strong> time%s.</h3>'
-                    % (count, count > 1 and 's' or ''))
+                ' <strong style="color:#339">%d</strong> time%s.</h3>'
+                % (count, count > 1 and 's' or ''))
             if count == 3:
                 wr('<p>Stopped pushing contents.</p>')
             else:
                 wr('<p>Next content will be pushed'
-                        ' <strong>in 5</strong> seconds.</p>')
+                    ' <strong>in 5</strong> seconds.</p>')
         else:
             wr('<p>This servlet will try to replace the content'
-                    ' <strong>in 15 seconds</strong>.</p>')
+                ' <strong>in 15 seconds</strong>.</p>')
         if not count or count == 3:
             wr('<h4>Note:</h4>')
             if count == 3:
                 wr("<p>If you didn't get output for the last 30 seconds, "
-                        "pushing contents is not supported.</p>")
+                    "pushing contents is not supported.</p>")
             wr('<p>The Browser needs to support the <tt>x-mixed-replace</tt>'
-                    ' content type. Current versions of the Microsoft Internet'
-                    ' Explorer and other browsers may not have this functionality.'
-                    ' It will work with Firefox and Opera, though. Also, the'
-                    ' adapter on the server side must support this. It will not'
-                    ' work with the CGI adapter or the built-in HTTP server.</p>')
+                ' content type. Current versions of the Microsoft Internet'
+                ' Explorer and other browsers may not have this functionality.'
+                ' It will work with Firefox and Opera, though. Also, the'
+                ' adapter on the server side must support this. It will not'
+                ' work with the CGI adapter or the built-in HTTP server.</p>')
         wr('</div></body></html>')

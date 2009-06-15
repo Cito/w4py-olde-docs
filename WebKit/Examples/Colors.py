@@ -33,18 +33,18 @@ numSteps = 6 # this gives the "web-safe" color palette
 steps = map(lambda x: 255.0*x/(numSteps-1), range(numSteps))
 
 colorTable = [
-        '<p>Click on one of the colors below to set the background color.</p>',
-        '<table cellpadding="4" cellspacing="4"'
-                ' style="margin-left:auto;margin-right:auto">']
+    '<p>Click on one of the colors below to set the background color.</p>',
+    '<table cellpadding="4" cellspacing="4"'
+        ' style="margin-left:auto;margin-right:auto">']
 for r in steps:
     for g in steps:
         colorTable.append('<tr>\n')
         for b in steps:
             color = RGBToHTMLColor(r, g, b)
             colorTable.append('<td style="background-color:%s;color:%s"'
-                    ' onclick="document.forms[0].elements[0].value=\'%s\';'
-                    'document.forms[0].submit()">%s</td>\n'
-                    % (color, textcolor(r, g, b), color, color))
+                ' onclick="document.forms[0].elements[0].value=\'%s\';'
+                'document.forms[0].submit()">%s</td>\n'
+                % (color, textcolor(r, g, b), color, color))
         colorTable.append('</tr>\n')
 colorTable.append('</table>')
 colorTable = ''.join(colorTable)
@@ -74,17 +74,17 @@ class Colors(ExamplePage):
         except Exception:
             self._color = 'black'
         return 'text="black" bgcolor="%s" style="background-color:%s"' \
-                % ((self._bgcolor,)*2)
+            % ((self._bgcolor,)*2)
 
     def writeContent(self):
         """Write the actual content of the page."""
         self.write('''
-                <div style="text-align:center;color:%s">
-                <h3>Color Table Demo</h3>
-                <form action="Colors" method="post">
-                        Background color: <input type="text" name="bgcolor" value="%s">
-                        <input type="submit" value="Go">
-                </form>
-                %s
-                </div>
-                ''' % (self._color, self._bgcolor, colorTable))
+            <div style="text-align:center;color:%s">
+            <h3>Color Table Demo</h3>
+            <form action="Colors" method="post">
+                Background color: <input type="text" name="bgcolor" value="%s">
+                <input type="submit" value="Go">
+            </form>
+            %s
+            </div>
+            ''' % (self._color, self._bgcolor, colorTable))

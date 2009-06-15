@@ -1,5 +1,5 @@
-from ExamplePage import ExamplePage
 from MiscUtils.Funcs import uniqueId
+from ExamplePage import ExamplePage
 
 
 class LoginPage(ExamplePage):
@@ -10,11 +10,11 @@ class LoginPage(ExamplePage):
 
     def htBodyArgs(self):
         return ExamplePage.htBodyArgs(self) + \
-                ' onload="document.loginform.username.focus();"' % locals()
+            ' onload="document.loginform.username.focus();"' % locals()
 
     def writeContent(self):
         self.writeln('<div style="margin-left:auto;margin-right:auto;width:20em">'
-                '<p>&nbsp;</p>')
+            '<p>&nbsp;</p>')
         request = self.request()
         extra = request.field('extra', None)
         if not extra and request.isSessionExpired() and not request.hasField('logout'):
@@ -51,5 +51,5 @@ style="background-color:#CCCCEE;border:1px solid #3333CC;width:20em">
                     value = [value]
                 for v in value:
                     self.writeln('''<input type="hidden" name="%s" value="%s">'''
-                            % (self.htmlEncode(name), self.htmlEncode(v)))
+                        % (self.htmlEncode(name), self.htmlEncode(v)))
         self.writeln('</form>\n<p>&nbsp;</p></div>')

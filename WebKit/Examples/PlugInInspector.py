@@ -16,5 +16,5 @@ class PlugInInspector(ExamplePage):
             wr('<h4>%s</h4>' % self.htmlEncode(repr(pi)))
             for item in dir(pi):
                 wr('<p><b>%s</b> = %s' % (item,
-                        self.htmlEncode(str(getattr(pi, item)))))
+                    self.htmlEncode(str(getattr(pi, item)))))
             self.writeln('<hr>')

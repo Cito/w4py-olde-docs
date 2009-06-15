@@ -74,15 +74,15 @@ class AjaxPage(BaseClass):
     """
 
     # Class level variables that can be overridden by servlet instances:
-    _debug = 0 # set to True if you want to see debugging output
-    _clientPolling = 1 # set to True if you want to use the polling mechanism
+    _debug = False # set to True if you want to see debugging output
+    _clientPolling = True # set to True if you want to use the polling mechanism
     _responseTimeout = 90 # timeout of client waiting for a response in seconds
 
     # Class level variables to help make client code simpler:
     window, document, alert, this = map(PyJs,
-            'window document alert this'.split())
+        'window document alert this'.split())
     setTag, setClass, setID, setValue, setReadonly = map(PyJs,
-            'setTag setClass setID setValue setReadonly'.split())
+        'setTag setClass setID setValue setReadonly'.split())
     call, callForm = map(PyJs, ('ajax_call', 'ajax_call_form'))
 
     # Response Queue for timed out queries:
@@ -136,7 +136,7 @@ class AjaxPage(BaseClass):
                     method = getattr(self, call)
                 except AttributeError:
                     cmd = self.alert('%s, although an approved method, '
-                            'was not found' % call)
+                        'was not found' % call)
                 else:
                     try:
                         if self._debug:
@@ -147,7 +147,7 @@ class AjaxPage(BaseClass):
                         traceback.print_exc(file=err)
                         e = err.getvalue()
                         cmd = self.alert('%s was called, '
-                                'but encountered an error: %s' % (call, e))
+                            'but encountered an error: %s' % (call, e))
                         err.close()
             else:
                 cmd = self.alert('%s is not an approved method' % call)
@@ -161,13 +161,13 @@ class AjaxPage(BaseClass):
             # If the computation of the method did not last very long,
             # deliver it immediately back to the client with this response:
             if self._debug:
-                self.log("Ajax returns immediately: " + str(cmd))
+                self.log("Ajax returns immediately: %s" % cmd)
             self.write(cmd)
         else:
             # If the client request might have already timed out,
             # put the result in the queue and let client poll it:
             if self._debug:
-                self.log("Ajax puts in queue: " + str(cmd))
+                self.log("Ajax puts in queue: %s" % cmd)
             sid = self.session().identifier()
             self._responseQueue.setdefault(sid, []).append(cmd)
 
@@ -188,7 +188,7 @@ class AjaxPage(BaseClass):
                 self._responseQueue[sid] = []
             cmd = ';'.join(cmd) + ';'
             if self._debug:
-                self.log("Ajax returns from queue: " + cmd)
+                self.log("Ajax returns from queue: %s" % cmd)
         else:
             if self._debug:
                 self.log("Ajax tells the client to stop polling.")

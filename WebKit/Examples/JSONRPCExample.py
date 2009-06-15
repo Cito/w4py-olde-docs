@@ -29,4 +29,4 @@ class JSONRPCExample(JSONRPCServlet):
 
     def exposedMethods(self):
         return JSONRPCServlet.exposedMethods(self) + [
-                'echo', 'reverse', 'uppercase', 'lowercase']
+            'echo', 'reverse', 'uppercase', 'lowercase']

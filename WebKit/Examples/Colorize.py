@@ -1,7 +1,8 @@
-import os, sys
+import os
+import sys
 
 from MiscUtils import StringIO
-from WebKit.Page import Page
+from Page import Page
 
 
 class Colorize(Page):
@@ -23,14 +24,14 @@ class Colorize(Page):
         req = self.request()
         if not req.hasField('filename'):
             res.write('<h3 style="color:red">Error</h3><p>'
-                    'No filename given to syntax color!</p>')
+                'No filename given to syntax color!</p>')
             return
         filename = req.field('filename')
         filename = self.request().serverSidePath(os.path.basename(filename))
         if not os.path.exists(filename):
             res.write('<h3 style="color:red">Error</h3><p>'
-                    'The requested file %r does not exist'
-                    ' in the proper directory.</p>' % os.path.basename(filename))
+                'The requested file %r does not exist'
+                ' in the proper directory.</p>' % os.path.basename(filename))
             return
         from DocSupport import py2html
         myout = StringIO()

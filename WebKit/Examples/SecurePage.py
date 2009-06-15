@@ -1,5 +1,5 @@
-from ExamplePage import ExamplePage
 from MiscUtils.Configurable import Configurable
+from ExamplePage import ExamplePage
 
 
 class SecurePage(ExamplePage, Configurable):
@@ -16,7 +16,7 @@ class SecurePage(ExamplePage, Configurable):
     You can turn off security by creating a config file called SecurePage.config
     in the Configs directory with the following contents:
 
-            RequireLogin = 0
+        RequireLogin = False
 
     To do: Integrate this functionality with the upcoming UserKit.
     Make more of the functionality configurable in the config file.
@@ -30,7 +30,8 @@ class SecurePage(ExamplePage, Configurable):
     def awake(self, trans):
         ExamplePage.awake(self, trans) # awaken our superclass
         if self.setting('RequireLogin'):
-            # Handle four cases: login attempt, logout, already logged in, and not already logged in.
+            # Handle four cases:
+            # login attempt, logout, already logged in, and not already logged in.
             session = trans.session()
             request = trans.request()
             app = trans.application()
@@ -39,22 +40,22 @@ class SecurePage(ExamplePage, Configurable):
                 # They are logging out. Clear all session variables:
                 session.values().clear()
                 request.setField('extra', 'You have been logged out.')
-                request.setField('action', request.urlPath().split('/')[-1])
+                request.setField('action', request.urlPath().rsplit('/', 1)[-1])
                 app.forward(trans, 'LoginPage')
             # Is the session expired?
             elif request.isSessionExpired():
                 # Login page with a "logged out" message.
                 session.values().clear()
                 request.setField('extra', 'Your session has expired.')
-                request.setField('action', request.urlPath().split('/')[-1])
+                request.setField('action', request.urlPath().rsplit('/', 1)[-1])
                 app.forward(trans, 'LoginPage')
             # Are they already logged in?
             elif self.loggedInUser():
                 return
             # Are they logging in?
-            elif request.hasField('login') \
-                            and request.hasField('username') \
-                            and request.hasField('password'):
+            elif (request.hasField('login')
+                    and request.hasField('username')
+                    and request.hasField('password')):
                 # They are logging in. Get login id and clear session:
                 loginid = session.value('loginid', None)
                 session.values().clear()
@@ -63,8 +64,8 @@ class SecurePage(ExamplePage, Configurable):
                 password = request.field('password')
                 # Check if they can successfully log in.
                 # The loginid must match what was previously sent.
-                if request.field('loginid', 'nologin') == loginid \
-                        and self.loginUser(username, password):
+                if (request.field('loginid', 'nologin') == loginid
+                        and self.loginUser(username, password)):
                     # Successful login.
                     # Clear out the login parameters:
                     request.delField('username')
@@ -74,13 +75,13 @@ class SecurePage(ExamplePage, Configurable):
                 else:
                     # Failed login attempt; have them try again:
                     request.setField('extra', 'Login failed. Please try again.')
-                    request.setField('action', request.urlPath().split('/')[-1])
+                    request.setField('action', request.urlPath().rsplit('/', 1)[-1])
                     app.forward(trans, 'LoginPage')
             else:
                 # They need to log in.
                 session.values().clear()
                 # Send them to the login page:
-                request.setField('action', request.urlPath().split('/')[-1])
+                request.setField('action', request.urlPath().rsplit('/', 1)[-1])
                 app.forward(trans, 'LoginPage')
         else:
             # No login is required.
@@ -114,10 +115,10 @@ class SecurePage(ExamplePage, Configurable):
         # that information in session variables.
         if self.isValidUserAndPassword(username, password):
             self.session().setValue('authenticated_user', username)
-            return 1
+            return True
         else:
             self.session().setValue('authenticated_user', None)
-            return 0
+            return False
 
     def loggedInUser(self):
         # Gets the name of the logged-in user, or returns None
@@ -125,7 +126,7 @@ class SecurePage(ExamplePage, Configurable):
         return self.session().value('authenticated_user', None)
 
     def defaultConfig(self):
-        return {'RequireLogin': 1}
+        return dict(RequireLogin=True)
 
     def configFilename(self):
         return 'Configs/SecurePage.config'

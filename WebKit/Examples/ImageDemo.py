@@ -18,11 +18,11 @@ except ImportError:
 def image_lib_link(lib=None):
     if not lib:
         lib = gdImage and 'gd' or 'pil'
-    name, src = {
-            'gd': ('GD module',
-                    'newcenturycomputers.net/projects/gdmodule.html'),
-            'pil': ('Python Imaging Library (PIL)',
-                    'www.pythonware.com/products/pil/')}[lib]
+    name, src = dict(
+        gd = ('GD module',
+            'newcenturycomputers.net/projects/gdmodule.html'),
+        pil = ('Python Imaging Library (PIL)',
+            'www.pythonware.com/products/pil/'))[lib]
     return '<a href="http://%s">%s</a>' % (src, name)
 
 X, Y = 500, 200 # the image size
@@ -122,13 +122,13 @@ class ImageDemo(ExamplePage):
         wr('<h2>WebKit Image Generation Demo</h2>')
         if gdImage or pilImage:
             wr('<img src="ImageDemo?fmt=.png" alt="Generated example image"'
-                    ' width="%d" height="%d">' % (X, Y))
+                ' width="%d" height="%d">' % (X, Y))
             wr('<p>This image has just been generated using the %s.</p>' %
-                    image_lib_link())
+                image_lib_link())
         else:
             wr('<h4 style="color:red">Sorry: No image library available.</h4>')
             wr('<p>This example requires the %s.</p>' % ' or the '.join(
-                    map(image_lib_link, ('gd', 'pil'))))
+                map(image_lib_link, ('gd', 'pil'))))
 
     def generatePNGImage(self):
         """Generate and return a PNG example image."""

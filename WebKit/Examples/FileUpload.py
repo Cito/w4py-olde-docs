@@ -1,5 +1,4 @@
 from ExamplePage import ExamplePage
-from WebUtils import Funcs
 
 
 class FileUpload(ExamplePage):
@@ -31,7 +30,7 @@ class FileUpload(ExamplePage):
 <form action="FileUpload" method="post" enctype="multipart/form-data">
 <input type="file" name="filename">
 <input type="submit" value="Upload File">
-</form>''' % Funcs.htmlEncode(self.__doc__)
+</form>''' % self.htmlEncode(self.__doc__)
         else:
             output = '''<h4>Here's the file you submitted:</h4>
 <table border cellspacing="0" cellpadding="6">
@@ -45,8 +44,8 @@ class FileUpload(ExamplePage):
 <tr><th valign="top">contents</th>
 <td><pre style="font-size:small;margin:0pt">%s</pre></td></tr>
 </table>''' % (
-                    f.filename, f.type, f.type_options,
-                    f.disposition, f.disposition_options,
-                    f.headers, len(contents),
-                    Funcs.htmlEncode(contents.strip()))
+                f.filename, f.type, f.type_options,
+                f.disposition, f.disposition_options,
+                f.headers, len(contents),
+                self.htmlEncode(contents.strip()))
         self.writeln(output)

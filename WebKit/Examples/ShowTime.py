@@ -1,5 +1,5 @@
-from ExamplePage import ExamplePage
 from WebKit.Common import asclocaltime
+from ExamplePage import ExamplePage
 
 
 class ShowTime(ExamplePage):

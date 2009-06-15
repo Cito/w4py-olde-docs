@@ -1,8 +1,6 @@
-from types import ListType
-
 from ExamplePage import ExamplePage
 
-debug = 0
+debug = False
 
 
 class ListBox(ExamplePage):
@@ -23,13 +21,9 @@ class ListBox(ExamplePage):
         if sess.hasValue('vars'):
             self._vars = sess.value('vars')
         else:
-            self._vars = {
-                    'list':      [],
-                    'height':    10,
-                    'width':    250,
-                    'newCount':   1,
-                    'formCount':  1,
-            }
+            self._vars = dict(items = [],
+                height = 10, width = 250,
+                newCount = 1, formCount = 1)
             sess.setValue('vars', self._vars)
         self._error = None
 
@@ -44,16 +38,16 @@ class ListBox(ExamplePage):
         wr('<h2>%s</h2>' % intro.pop(0))
         for s in intro:
             wr('<p>%s</p>' % '<br>'.join(
-                    map(lambda s: s.strip(), s.split('\n'))))
+                map(lambda s: s.strip(), s.splitlines())))
         wr('<p style="color:red">%s</p>' % (self._error or '&nbsp;'))
         wr('''
 <form action="ListBox" method="post">
 <input name="formCount" type="hidden" value="%(formCount)d">
-<select multiple name="list" size="%(height)d"
+<select multiple name="items" size="%(height)d"
 style="width:%(width)dpt;text-align:center">
 ''' % self._vars)
         index = 0
-        for item in self._vars['list']:
+        for item in self._vars['items']:
             wr('<option value="%d">%s</option>' % (index, enc(item['name'])))
             index += 1
         if not index:
@@ -86,17 +80,17 @@ style="width:%(width)dpt;text-align:center">
     def new(self):
         """Add a new item to the list box."""
         req = self.request()
-        self._vars['list'].append(
-                {'name': 'New item %d' % self._vars['newCount']})
+        self._vars['items'].append(dict(
+            name = 'New item %d' % self._vars['newCount']))
         self._vars['newCount'] += 1
         self.writeBody()
 
     def delete(self):
         """Delete the selected items in the list box."""
         req = self.request()
-        if req.hasField('list'):
-            indices = req.field('list')
-            if type(indices) is not ListType:
+        if req.hasField('items'):
+            indices = req.field('items')
+            if not isinstance(indices, list):
                 indices = [indices]
             try:
                 indices = map(int, indices) # convert strings to ints
@@ -106,7 +100,7 @@ style="width:%(width)dpt;text-align:center">
             indices.reverse() # in reverse order
             # remove the objects:
             for index in indices:
-                del self._vars['list'][index]
+                del self._vars['items'][index]
         else:
             self._error = 'You must select a row to delete.'
         self.writeBody()
@@ -141,6 +135,6 @@ style="width:%(width)dpt;text-align:center">
             formCount = 0
         if formCount == self._vars['formCount']:
             acts.extend(['new', 'delete',
-                    'taller', 'shorter', 'wider', 'narrower'])
+                'taller', 'shorter', 'wider', 'narrower'])
             self._vars['formCount'] += 1
         return acts

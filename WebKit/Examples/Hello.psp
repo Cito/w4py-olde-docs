@@ -52,14 +52,14 @@ It'll just be output as is in the response stream.</li>
 
 <table cellspacing="4" cellpadding="4">
 <% if hasattr(os, 'uname'):
-	info = os.uname()
+    info = os.uname()
 else:
-	info = (sys.platform, '(node)', '(release)', '(version)', '(machine)')
+    info = (sys.platform, '(node)', '(release)', '(version)', '(machine)')
 for i in info:
-	res.write('<tr><td style="background-color:#CCCCEE;color:#202080">'
-		+ str(i) + '</td></tr>')
+    res.write('<tr><td style="background-color:#CCCCEE;color:#202080">'
+        + str(i) + '</td></tr>')
 res.write('<tr><td style="background-color:#9999CC;color:#EEEEFF">'
-	+ req.pathInfo() + '</td></tr>')
+    + req.pathInfo() + '</td></tr>')
 %>
 </table>
 

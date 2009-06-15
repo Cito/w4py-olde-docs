@@ -38,7 +38,7 @@ class OneShotAdapter(Adapter):
     def defaultConfig(self):
         config = Adapter.defaultConfig(self)
         config.update(
-            ShowConsole = 0,
+            ShowConsole = False,
             ConsoleWidth = 80, # use 0 to turn off
             ConsoleHangingIndent = 4,
         )

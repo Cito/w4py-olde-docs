@@ -44,7 +44,7 @@ class AjaxSuggest(AjaxPage):
             self.writeln('''
 <p>You have just entered the word <b class="in_red">"%s"</b>.</p>
 <p>If you like, you can try again:</p>'''
-                    % self.htmlEncode(self.request().field('query')))
+                % self.htmlEncode(self.request().field('query')))
         else:
             self.writeln('''
 <p>This example uses Ajax techniques to make suggestions
@@ -72,6 +72,6 @@ and get random words starting with these characters suggested:</p>''')
 
         """
         s = filter(lambda w, prefix=prefix:
-                w.startswith(prefix), suggestions) or ['none']
+            w.startswith(prefix), suggestions) or ['none']
         return "handleSuggestions([%s]);" % ",".join(
-                map(lambda w: "'%s'" % w, s[:maxSuggestions]))
+            map(lambda w: "'%s'" % w, s[:maxSuggestions]))

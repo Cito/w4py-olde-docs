@@ -45,8 +45,8 @@ def htmlEncodeStr(s, codes=htmlCodes):
     This is useful to display a plain ASCII text string on a web page.
 
     """
-    for code in codes:
-        s = s.replace(code[0], code[1])
+    for c, e in codes:
+        s = s.replace(c, e)
     return s
 
 
@@ -57,8 +57,8 @@ def htmlDecode(s, codes=htmlCodesReversed):
     It is the inverse of htmlEncode().
 
     """
-    for code in codes:
-        s = s.replace(code[1], code[0])
+    for c, e in codes:
+        s = s.replace(e, c)
     return s
 
 

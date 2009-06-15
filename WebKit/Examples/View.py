@@ -24,7 +24,7 @@ class View(ExamplePage):
             fn = req.field('filename')
             if sep in fn:
                 self.write('<h3 style="color:red">Error</h3><p>'
-                        'Cannot request a file outside of this directory %r</p>' % fn)
+                    'Cannot request a file outside of this directory %r</p>' % fn)
                 return
             fn = self.request().serverSidePath(fn)
             self.request().fields()['filename'] = fn

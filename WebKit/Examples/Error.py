@@ -1,5 +1,6 @@
 from ExamplePage import ExamplePage
 
+
 class CustomError:
     """Custom classic class not based on Exception (for testing)."""
 

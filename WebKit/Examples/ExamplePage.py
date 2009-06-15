@@ -1,32 +1,33 @@
-from WebKit.SidebarPage import SidebarPage
 import os
+
+from WebKit.SidebarPage import SidebarPage
 
 
 class ExamplePage(SidebarPage):
     """WebKit page template class for displaying examples.
 
     The convention for picking up examples from WebKit plug-ins is:
-            * Properties.py must have at least this:
-                    WebKitConfig = {
-                            'examplePages': [],
-                    }
+        * Properties.py must have at least this:
+            WebKitConfig = {
+                    'examplePages': [],
+            }
 
-              But usually specifies various pages:
-                WebKitConfig = {
-                    'examplesPages': [
-                            'foo',
-                            'bar',
-                    ]
-                }
-            * The plug-in must have an Examples/ directory.
-            * That directory must have an index.* or Main.* which
-              inherits from ExamplePage.
-            * The implementation can pass in which case a menu of
-              the pages for that plug-in is written:
-                # Main.py
-                from WebKit.Examples.ExamplePage import ExamplePage
-                class Main(ExamplePage):
-                    pass
+          But usually specifies various pages:
+            WebKitConfig = {
+                'examplesPages': [
+                    'foo',
+                    'bar',
+                ]
+            }
+        * The plug-in must have an Examples/ directory.
+        * That directory must have an index.* or Main.* which
+          inherits from ExamplePage.
+        * The implementation can pass in which case a menu of
+          the pages for that plug-in is written:
+            # Main.py
+            from WebKit.Examples.ExamplePage import ExamplePage
+            class Main(ExamplePage):
+                pass
 
     If WebKitConfig['examplesPages'] is non-existant or None, then
     no examples will be available for the plug-in.
@@ -40,7 +41,7 @@ class ExamplePage(SidebarPage):
         return 'WebKit Examples'
 
     def isDebugging(self):
-        return 0
+        return False
 
     def examplePages(self, plugInName=None):
         """Get a list of all example pages.
@@ -91,20 +92,20 @@ class ExamplePage(SidebarPage):
         self.menuHeading('Other')
         viewPath = self.request().uriWebKitRoot() + "Examples/View"
         self.menuItem(
-                'View source of<br>%s' % self.title(),
-                self.request().uriWebKitRoot() + 'Examples/View?filename=%s' \
-                        % os.path.basename(self.request().serverSidePath()))
+            'View source of<br>%s' % self.title(),
+            self.request().uriWebKitRoot() + 'Examples/View?filename=%s' \
+                % os.path.basename(self.request().serverSidePath()))
         if self.application().hasContext('Documentation'):
             filename = 'Documentation/WebKit.html'
             if os.path.exists(filename):
                 self.menuItem('Local WebKit docs',
-                        self.request().servletPath() + '/' + filename)
+                    self.request().servletPath() + '/' + filename)
 
     def writeContent(self):
         wr = self.writeln
         wr('<div style="padding-left:2em"><table>')
         for page in self.examplePages(
-                        self.request().contextName().split('/', 1)[0]):
+                self.request().contextName().split('/', 1)[0]):
             wr('<tr><td bgcolor="#E8E8F0"><a href=%s>%s</a>'
-                    '</td></tr>' % (page, page))
+                '</td></tr>' % (page, page))
         wr('</table></div>')
