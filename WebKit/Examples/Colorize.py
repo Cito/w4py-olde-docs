@@ -2,7 +2,7 @@ import os
 import sys
 
 from MiscUtils import StringIO
-from Page import Page
+from WebKit.Page import Page
 
 
 class Colorize(Page):

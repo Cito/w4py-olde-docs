@@ -6,7 +6,7 @@ class EmbeddedServlet(Page):
 
     This servlet serves as a test for "extra path info"-style URLs such as:
 
-            http://localhost/WebKit.cgi/Servlet/Extra/Path/Info
+        http://localhost/WebKit.cgi/Servlet/Extra/Path/Info
 
     Where the servlet is embedded in the URL, rather than being the last
     component. This servlet simply prints its fields.
@@ -21,5 +21,5 @@ class EmbeddedServlet(Page):
         self.writeln('<ul>')
         for key, value in fields.items():
             self.writeln('<li>%s = %s</li>'
-                    % (self.htmlEncode(key), self.htmlEncode(value)))
+                % (self.htmlEncode(key), self.htmlEncode(value)))
         self.writeln('</ul>')

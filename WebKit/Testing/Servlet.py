@@ -1,7 +1,4 @@
 from WebKit.Page import Page
-from WebKit.Application import Application
-from string import replace, split, strip
-import os
 
 
 class Servlet(Page):

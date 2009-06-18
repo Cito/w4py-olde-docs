@@ -1,13 +1,11 @@
 from WebKit.SidebarPage import SidebarPage
-from WebKit.Application import Application
-import os
 
 
 class Main(SidebarPage):
     """Testing - read TestCases.data and display them.
 
     TO DO
-            * Reload TestCases.data only load when modified (by checking mod date).
+        * Reload TestCases.data only load when modified (by checking mod date).
 
     """
 
@@ -29,9 +27,9 @@ class Main(SidebarPage):
         filename = self.serverSidePath('TestCases.data')
         self._cases = self.readFileNamed(filename)
         wr('<table align="center" style="margin-left:auto;margin-right:auto"'
-                ' border="0" cellpadding="3" cellspacing="2">')
+            ' border="0" cellpadding="3" cellspacing="2">')
         wr('<tr style="color:white;background-color:#555">'
-                '<td>#</td><td>URL</td><td>Expectation</td></tr>')
+            '<td>#</td><td>URL</td><td>Expectation</td></tr>')
         caseNum = 1
         for case in self._cases:
             # For each URL, fix it up and make a name. Put in urls list.
@@ -46,7 +44,7 @@ class Main(SidebarPage):
             expectation = case['Expectation'] # self.htmlEncode(case['Expectation'])
             bgcolor = ['EEE', 'DDD'][caseNum % 2]
             wr('<tr style="background-color:#%s">'
-                    '<td>%d.</td><td>' % (bgcolor, caseNum))
+                '<td>%d.</td><td>' % (bgcolor, caseNum))
             for url, urlName in urls:
                 wr('<a href="%s">%s</a><br>' % (url, urlName))
             wr('<td>%s</td></tr>' % expectation)
@@ -83,10 +81,8 @@ class Main(SidebarPage):
                     if len(parts) != 2:
                         self.error('Invalid line at %d.' % lineNum)
                     urls.append(parts[0].strip())
-                    cases.append({
-                            'URLs': urls,
-                            'Expectation': parts[1].strip(),
-                    })
+                    cases.append(dict(
+                        URLs=urls, Expectation=parts[1].strip()))
                     urls = [] # reset list of URLs
             lineNum += 1
         return cases

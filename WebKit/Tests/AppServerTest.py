@@ -15,8 +15,8 @@ class AppServerTest(unittest.TestCase):
         dirname = os.path.dirname
         webwaredir = dirname(dirname(dirname(workdir)))
         launch = os.path.join(workdir, 'Launch.py')
-        cmd = "python %s --webware-dir=%s --work-dir=%s" \
-                " ThreadedAppServer" % (launch, webwaredir, workdir)
+        cmd = ("python %s --webware-dir=%s --work-dir=%s"
+            " ThreadedAppServer" % (launch, webwaredir, workdir))
         self._output = os.popen(cmd)
         # Setting the appserver output to non-blocking mode
         # could be done as follows on Unix systems:
@@ -49,6 +49,9 @@ class AppServerTest(unittest.TestCase):
         assert data.find('<h1>Welcome to Webware!</h1>') > 0
         assert data.find('<h2>Test passed.</h2>') > 0
 
+    def workDir(self):
+        raise NotImplementedError("Subclasses must implement this method.")
+
     def assertAppServerSays(self, pattern, wait=5):
         """Check that the appserver output contains the specified pattern.
 
@@ -57,9 +60,9 @@ class AppServerTest(unittest.TestCase):
 
         """
         if not self.waitForAppServer(pattern, wait):
-            assert False, "Expected appserver to say '%s',\n" \
-                    "but after waiting %d seconds it said:\n%s" \
-                    % (pattern, wait, self._actualAppServerOutput)
+            assert False, ("Expected appserver to say '%s',\n"
+                "but after waiting %d seconds it said:\n%s"
+                % (pattern, wait, self._actualAppServerOutput))
 
     def waitForAppServer(self, pattern, wait=5):
         """Check that the appserver output contains the specified pattern.

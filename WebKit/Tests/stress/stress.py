@@ -1,13 +1,14 @@
 #!/usr/bin/env python
+
 """stress.py
 
 By Chuck Esterbrook
 Mods by Jay Love
 
 Purpose: Hit the WebKit AppServer with lots of a requests in order to:
-        * Test for memory leaks
-        * Test concurrency
-        * Investigate performance
+    * Test for memory leaks
+    * Test concurrency
+    * Investigate performance
 
 This stress test skips the web server and the WebKit adapter, so it's not
 useful for measuring absolute performance. However, after making a
@@ -16,11 +17,11 @@ see the relative difference in performance (although still somewhat
 unrealistic).
 
 To run:
-        > stress.py  -OR-
-        > python stress.py
+    > stress.py  -OR-
+    > python stress.py
 
 This will give you the usage (and examples) which is:
-        stress.py numRequests [minParallelRequests [maxParallelRequests [delay]]]
+    stress.py numRequests [minParallelRequests [maxParallelRequests [delay]]]
 
 Programmatically, you could could also import this file and use the
 stress() function.
@@ -35,7 +36,7 @@ the fact that they will contain stale session ids.
 """
 
 
-import sys, os, time, socket
+import sys, os, socket
 from glob import glob
 from marshal import dumps
 from random import randint
@@ -44,7 +45,7 @@ from threading import Thread
 
 
 def usage():
-    """ Prints usage of this program and exits. """
+    """Print usage of this program and exit."""
     sys.stdout = sys.stderr
     name = sys.argv[0]
     print '%s usage:' % name
@@ -131,7 +132,7 @@ def stress(maxRequests,
     # which are expected to contain raw request dictionaries
     requestFilenames = glob('*.rr')
     requestDicts = map(lambda filename:
-            eval(open(filename).read()), requestFilenames)
+        eval(open(filename).read()), requestFilenames)
     # kill the HTTP cookies (which typically have an invalid session id)
     # from when the raw requests were captured
     for dict in requestDicts:
@@ -160,7 +161,7 @@ def stress(maxRequests,
         num = randint(minParallelRequests, maxParallelRequests)
         num = maxRequests/num
         thread = Thread(target=request, args=(
-                requestFilenames, requestDicts, host, port, num, delay, slowconn))
+            requestFilenames, requestDicts, host, port, num, delay, slowconn))
         thread.start()
         threads.append(thread)
         count += num

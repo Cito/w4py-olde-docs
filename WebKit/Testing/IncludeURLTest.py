@@ -29,42 +29,42 @@ class IncludeURLTest(Page):
         fields = self.request().fields()
         self.writeln('<h2>%s</h2>' % self.__class__.__name__)
         self.writeln('<h3>class = <tt>%s</tt>, module= <tt>%s</tt></h3>' %
-                (self.__class__.__name__, self.__module__))
+            (self.__class__.__name__, self.__module__))
         self.writeln('<p>%s</p>' %
-                self.__class__.__doc__.replace('\n\n', '</p><p>'))
+            self.__class__.__doc__.replace('\n\n', '</p><p>'))
         self.writeln('<h4>Number of fields in the request.fields(): %d</h4>'
-                % len(fields))
+            % len(fields))
         self.writeln('<ul>')
         for key, value in fields.items():
             self.writeln('<li>%s = %s</li>'
-                    % (self.htmlEncode(key), self.htmlEncode(value)))
+                % (self.htmlEncode(key), self.htmlEncode(value)))
         self.writeln('</ul>')
         self.writeStatus()
         self.cmos('/Testing/Dir/IncludeURLTest2', 'writeStatus',
-                "Expect to see the status written by IncludeURLTest2"
-                " which is the same format as the above status,"
-                " only relative to /Testing/Dir.")
+            "Expect to see the status written by IncludeURLTest2"
+            " which is the same format as the above status,"
+            " only relative to /Testing/Dir.")
         self.cmos('Dir/IncludeURLTest2', 'serverSidePath',
-                "This returns the serverSide Path of the"
-                " Dir/IncludeURLTest2 servlet. Notice that there is"
-                " no leading '/' which means this test is relative to"
-                " the current directory.")
+            "This returns the serverSide Path of the"
+            " Dir/IncludeURLTest2 servlet. Notice that there is"
+            " no leading '/' which means this test is relative to"
+            " the current directory.")
         self.cmos('/Testing/', 'name',
-                "This returns the name of the module at the top of"
-                " the Testing context which is 'Main'.")
+            "This returns the name of the module at the top of"
+            " the Testing context which is 'Main'.")
         self.cmos('/Testing/Main', 'serverSidePath',
-                "This returns the serverSidePath of the servlet"
-                " accessed at the top of this context.")
+            "This returns the serverSidePath of the servlet"
+            " accessed at the top of this context.")
         self.cmos('Main', 'serverSidePath',
-                "This returns the serverSidePath of the servlet"
-                " accessed 'Main' and should be the same as the"
-                " servlet accessed through the Testing context.")
+            "This returns the serverSidePath of the servlet"
+            " accessed 'Main' and should be the same as the"
+            " servlet accessed through the Testing context.")
         self.writeln('<h4>Including Dir/IncludeURLTest2:</h4>')
         self.write('<div style="margin-left:2em">')
         self.includeURL('Dir/IncludeURLTest2')
         self.write('</div>')
         self.writeln("<h4>Including the Main servlet of the %s context:</h4>"
-                % self.request().contextName())
+            % self.request().contextName())
         self.write('<div style="margin-left:2em">')
         self.includeURL('Main')
         self.write('</div>')
@@ -100,11 +100,11 @@ class IncludeURLTest(Page):
         app = self.application()
         trans = self.transaction()
         self.writeln('<p>Calling'
-                ' <tt>callMethodOfServlet(t, "%s", "%s")</tt>:</p>'
-                '<p>%s</p>' % (url, method, desc))
+            ' <tt>callMethodOfServlet(t, "%s", "%s")</tt>:</p>'
+            '<p>%s</p>' % (url, method, desc))
         self.write('<div style="margin-left:2em">')
         ret = app.callMethodOfServlet(trans, url, method)
         self.write('</div>')
         self.writeln('<p><tt>callMethodOfServlet</tt> returned %s.</p>'
-                % (ret is not None and '<tt>%s</tt>'
-                                % self.htmlEncode(repr(ret)) or 'nothing'))
+            % (ret is not None and '<tt>%s</tt>'
+                % self.htmlEncode(repr(ret)) or 'nothing'))

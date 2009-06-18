@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 import unittest
-import FixPath
 import sys
+
+import FixPath
 
 # list the tests explicitly, so that they can be order from most basic
 # functionality to more complex.

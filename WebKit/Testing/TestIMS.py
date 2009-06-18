@@ -1,10 +1,11 @@
 import time
+
 from WebKit.SidebarPage import SidebarPage
 
 
 class TestIMS(SidebarPage):
 
-    def cornerTitle(Self):
+    def cornerTitle(self):
         return 'Testing'
 
     def error(self, msg):
@@ -25,8 +26,8 @@ class TestIMS(SidebarPage):
         import httplib
         sd = self.request().serverDictionary()
         self._host = sd['HTTP_HOST'] # includes the port
-        self._httpconnection = sd.get('HTTPS', '').lower() == 'on' \
-                and  httplib.HTTPSConnection or httplib.HTTPConnection
+        self._httpconnection = (sd.get('HTTPS', '').lower() == 'on'
+            and httplib.HTTPSConnection or httplib.HTTPConnection)
         servletPath = self.request().servletPath()
         self.write('<h2>Test If-Modified-Since support in Webware</h2>')
         # pick a static file which is served up by Webwares UnknownFileHandler
@@ -41,7 +42,7 @@ class TestIMS(SidebarPage):
             return
         if size > 0:
             self.writeMsg('Received: %s %s, document size = %s (as expected).'
-                    % (rsp.status, rsp.reason, size))
+                % (rsp.status, rsp.reason, size))
         else:
             self.error('Document size is: %d' % size)
             return
@@ -52,7 +53,8 @@ class TestIMS(SidebarPage):
             self.error('No Last-Modified header found.')
             return
         # Retrieve document again with IMS and expect a 304 not modified
-        self.writeTest('Opening <tt>%s</tt><br>with If-Modified-Since: %s' % (path, lm))
+        self.writeTest('Opening <tt>%s</tt><br>with If-Modified-Since: %s'
+            % (path, lm))
         rsp = self.getDoc(path, {'If-Modified-Since': lm})
         size = len(rsp.read())
         if rsp.status != 304:
@@ -63,27 +65,27 @@ class TestIMS(SidebarPage):
             return
         else:
             self.writeMsg('Received %s %s, document size = %s (as expected).'
-                    % (rsp.status, rsp.reason, size))
+                % (rsp.status, rsp.reason, size))
         arpaformat = '%a, %d %b %Y %H:%M:%S GMT'
         t = list(time.strptime(lm, arpaformat))
         t[0] -= 1 # last year
         newlm = time.strftime(arpaformat, time.gmtime(time.mktime(t)))
         self.writeTest('Opening <tt>%s</tt><br>with If-Modified-Since: %s'
-                % (path, newlm))
+            % (path, newlm))
         rsp = self.getDoc(path, {'If-Modified-Since': newlm})
         size = len(rsp.read())
         lm = rsp.getheader('Last-Modified', '')
         self.writeMsg('Last modified: %s' % lm)
         if rsp.status != 200:
             self.error('Expected status of 200, received %s %s.'
-                    % (rsp.status, rsp.reason))
+                % (rsp.status, rsp.reason))
             return
         if size != originalSize:
             self.error('Received: %s %s, document size = %s, '
-                    'expected size = %s.'
-                    % (rsp.status, rsp.reason, size, originalSize))
+                'expected size = %s.'
+                % (rsp.status, rsp.reason, size, originalSize))
             return
         else:
             self.writeMsg('Received: %s %s, document size = %s (as expected).'
-                    % (rsp.status, rsp.reason, size))
+                % (rsp.status, rsp.reason, size))
         self.writeTest('%s passed.' % self.__class__.__name__)

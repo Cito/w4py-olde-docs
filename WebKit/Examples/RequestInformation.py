@@ -11,9 +11,9 @@ class RequestInformation(ExamplePage):
         self.writeln('<table style="font-size:small;width:100%"'
             ' border="0" cellpadding="2" cellspacing="2" width="100%">')
         request = self.request()
-        self.dict('fields()', request.fields())
-        self.dict('environ()', request.environ())
-        self.dict('cookies()', request.cookies())
+        self.showDict('fields()', request.fields())
+        self.showDict('environ()', request.environ())
+        self.showDict('cookies()', request.cookies())
         self.writeln('</table>')
         setCookie = self.response().setCookie
         setCookie('TestCookieName', 'CookieValue')
@@ -25,6 +25,6 @@ class RequestInformation(ExamplePage):
             '</tr>' % name)
         for key in sorted(d):
             self.writeln('<tr valign="top" style="background-color:#EEF">'
-                '<td>%s</td><td>%s</td></tr>' % (name, self.htmlEncode(
+                '<td>%s</td><td>%s</td></tr>' % (key, self.htmlEncode(
                 str(d[key])).replace('\n', '<br>').replace(
                 ',', ',<wbr>').replace(';', ';<wbr>').replace(':/', ':<wbr>/')))

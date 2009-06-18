@@ -1,4 +1,4 @@
 urlRedirect = {
-        'dummy': 'whatever',
-        'test1redir': 'test1',
-        }
+    'dummy': 'whatever',
+    'test1redir': 'test1',
+    }

@@ -154,25 +154,25 @@ find "must select a row to delete"
 find "New item 1"
 find "New item 2"
 find "New item 3"
-fv 1 list 1
+fv 1 items 1
 submit action_delete
 find "New item 1"
 notfind "New item 2"
 find "New item 3"
-fv 1 list 0
-fv 1 list 1
+fv 1 items 0
+fv 1 items 1
 submit action_delete
 find "--- empty ---"
 notfind "New item"
-find 'name="list"\s+size="10"\s+style="width:250pt;'
+find 'name="items"\s+size="10"\s+style="width:250pt;'
 submit action_taller
-find 'name="list"\s+size="11"\s+style="width:250pt;'
+find 'name="items"\s+size="11"\s+style="width:250pt;'
 submit action_shorter
-find 'name="list"\s+size="10"\s+style="width:250pt;'
+find 'name="items"\s+size="10"\s+style="width:250pt;'
 submit action_wider
-find 'name="list"\s+size="10"\s+style="width:280pt;'
+find 'name="items"\s+size="10"\s+style="width:280pt;'
 submit action_narrower
-find 'name="list"\s+size="10"\s+style="width:250pt;'
+find 'name="items"\s+size="10"\s+style="width:250pt;'
 
 follow Forward
 title Forward
