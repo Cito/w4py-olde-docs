@@ -31,12 +31,13 @@ try:
 except ImportError:
     sys.path.append(os.path.abspath('..'))
     import WebUtils
+
 from WebUtils.HTMLForException import HTMLForException
 
-from MiscUtils.NamedValueAccess import NamedValueAccess
+from MiscUtils.NamedValueAccess import valueForName
 
 
-class CGIWrapper(NamedValueAccess):
+class CGIWrapper(object):
     """The CGI Wrapper class.
 
     A CGI wrapper executes a target script and provides various services
@@ -62,40 +63,40 @@ class CGIWrapper(NamedValueAccess):
         or where they're taken from.
 
         """
-        return {
-                'ScriptsHomeDir': 'Examples',
-                'ChangeDir': 1,
-                'ExtraPaths': [],
-                'ExtraPathsIndex': 1,
-                'LogScripts': 1,
-                'ScriptLogFilename': 'Scripts.csv',
-                'ScriptLogColumns': [
-                        'environ.REMOTE_ADDR',
-                        'environ.REQUEST_METHOD', 'environ.REQUEST_URI',
-                        'responseSize', 'scriptName',
-                        'serverStartTimeStamp', 'serverDuration',
-                        'scriptDuration', 'errorOccurred'
-                ],
-                'ClassNames': ['', 'Page'],
-                'ShowDebugInfoOnErrors': 1,
-                'UserErrorMessage': 'The site is having technical difficulties'
-                        ' with this page. An error has been logged, and the problem'
-                        ' will be fixed as soon as possible. Sorry!',
-                'LogErrors': 1,
-                'ErrorLogFilename': 'Errors.csv',
-                'SaveErrorMessages': 1,
-                'ErrorMessagesDir': 'ErrorMsgs',
-                'EmailErrors': 0,
-                'ErrorEmailServer': 'localhost',
-                'ErrorEmailHeaders': {
-                        'From': 'webware@mydomain',
-                        'To': ['webware@mydomain'],
-                        'Reply-To': 'webware@mydomain',
-                        'Content-Type': 'text/html',
-                        'Subject': 'Error'
-                },
-                'AdminRemoteAddr': ['127.0.0.1']
-        }
+        return dict(
+            ScriptsHomeDir = 'Examples',
+            ChangeDir = True,
+            ExtraPaths = [],
+            ExtraPathsIndex = 1,
+            LogScripts = True,
+            ScriptLogFilename = 'Scripts.csv',
+            ScriptLogColumns = [
+                'environ.REMOTE_ADDR',
+                'environ.REQUEST_METHOD', 'environ.REQUEST_URI',
+                'responseSize', 'scriptName',
+                'serverStartTimeStamp', 'serverDuration',
+                'scriptDuration', 'errorOccurred'
+            ],
+            ClassNames = ['', 'Page'],
+            ShowDebugInfoOnErrors = True,
+            UserErrorMessage = 'The site is having technical difficulties'
+                ' with this page. An error has been logged, and the problem'
+                ' will be fixed as soon as possible. Sorry!',
+            LogErrors = True,
+            ErrorLogFilename = 'Errors.csv',
+            SaveErrorMessages = True,
+            ErrorMessagesDir = 'ErrorMsgs',
+            EmailErrors = False,
+            ErrorEmailServer = 'localhost',
+            ErrorEmailHeaders = {
+                'From': 'webware@mydomain',
+                'To': ['webware@mydomain'],
+                'Reply-To': 'webware@mydomain',
+                'Content-Type': 'text/html',
+                'Subject': 'Error'
+            },
+            AdminRemoteAddr = ['127.0.0.1']
+        )
 
     def configFilename(self):
         """Return the filename of the optional configuration file."""
@@ -142,8 +143,8 @@ class CGIWrapper(NamedValueAccess):
         return docType()
 
     def makeHeaders(self):
-        """Return a default header dictionary containing {'Content-type': 'text/html'}."""
-        return {'Content-type': 'text/html'}
+        """Return a default header dictionary with Content-Type entry."""
+        return {'Content-Type': 'text/html'}
 
     def makeFieldStorage(self):
         """Return a default field storage object created from the cgi module."""
@@ -154,22 +155,23 @@ class CGIWrapper(NamedValueAccess):
         extraPathsIndex = self.setting('ExtraPathsIndex')
         sys.path[extraPathsIndex:extraPathsIndex] = self.setting('ExtraPaths')
 
+    def environ(self):
+        """Get the environment for the request."""
+        return self._environ
+
     def requireEnvs(self, names):
         """Check that given environment variable names exist.
 
         If they don't, a basic HTML error message is printed and we exit.
 
         """
-        badNames = []
-        for name in names:
-            if not self._environ.has_key(name):
-                badNames.append(name)
+        badNames = [name for name in names if name not in self._environ]
         if badNames:
             print 'Content-type: text/html'
             print
             print docType()
             print '<html><head><title>Error</title></head><body>'
-            print '<p>', 'ERROR: Missing', ', '.join(badNames), '</p>'
+            print '<p>ERROR: Missing %s</p>' % ', '.join(badNames)
             print '</body></html>'
             sys.exit(0)
 
@@ -185,12 +187,19 @@ class CGIWrapper(NamedValueAccess):
         pathname = os.path.split(self._environ['SCRIPT_FILENAME'])[0]
         filename = self._environ['PATH_INFO'][1:]
         ext = os.path.splitext(filename)[1]
-        if ext == '':
+        if ext:
+            # Hmmm, some kind of extension like maybe '.html'.
+            # Leave out the 'ScriptsHomeDir' and leave the extension alone.
+            filename = os.path.join(pathname, filename)
+            self._servingScript = False
+        else:
             # No extension - we assume a Python CGI script.
-            if filename[0] == '_':
-                # Underscores denote private scripts packaged with CGI Wrapper, such as '_admin.py'.
+            if filename.startswith('_'):
+                # Underscores denote private scripts packaged with CGI Wrapper,
+                # such as '_admin.py'.
                 if self.setting('AdminRemoteAddr'):
-                    # Users with the wrong remote address are redirected to the access denied script.
+                    # Users with the wrong remote address are redirected
+                    # to the access denied script.
                     self.requireEnvs(['REMOTE_ADDR'])
                     remoteAddr = self._environ['REMOTE_ADDR'] + '.'
                     for addr in self.setting('AdminRemoteAddr'):
@@ -200,14 +209,11 @@ class CGIWrapper(NamedValueAccess):
                         filename = '_accessDenied'
                 filename = os.path.join(pathname, filename + '.py')
             else:
-                # All other scripts are based in the directory named by the 'ScriptsHomeDir' setting.
-                filename = os.path.join(pathname, self.setting('ScriptsHomeDir'), filename + '.py')
-            self._servingScript = 1
-        else:
-            # Hmmm, some kind of extension like maybe '.html'.
-            # Leave out the 'ScriptsHomeDir' and leave the extension alone.
-            filename = os.path.join(pathname, filename)
-            self._servingScript = 0
+                # All other scripts are based in the directory named
+                # by the 'ScriptsHomeDir' setting.
+                filename = os.path.join(pathname,
+                    self.setting('ScriptsHomeDir'), filename + '.py')
+            self._servingScript = True
         return filename
 
     def writeScriptLog(self):
@@ -224,7 +230,7 @@ class CGIWrapper(NamedValueAccess):
             f.write(','.join(self.setting('ScriptLogColumns')) + '\n')
         values = []
         for column in self.setting('ScriptLogColumns'):
-            value = self.valueForName(column)
+            value = valueForName(self, column)
             if isinstance(value, FloatType):
                 value = '%0.4f' % value # might need more flexibility in the future
             else:
@@ -274,7 +280,7 @@ class CGIWrapper(NamedValueAccess):
         """
         # stderr logging
         stderr.write('[%s] [error] CGI Wrapper: Error while executing script %s\n' % (
-                asctime(localtime(self._scriptEndTime)), self._scriptPathname))
+            asctime(localtime(self._scriptEndTime)), self._scriptPathname))
         traceback.print_exc(file=stderr)
 
     def reset(self):
@@ -283,14 +289,15 @@ class CGIWrapper(NamedValueAccess):
         Used by handleException() to clear out the current CGI output results
         in preparation of delivering an HTML error message page.
         Currently resets headers and deletes cookies, if present.
+
         """
         # Set headers to basic text/html. We don't want stray headers from a script that failed.
         self._headers = self.makeHeaders()
         # Get rid of cookies, too
-        if self._namespace.has_key('cookies'):
+        if 'cookies' in self._namespace:
             del self._namespace['cookies']
 
-    def htmlErrorPage(self, showDebugInfo=1):
+    def htmlErrorPage(self, showDebugInfo=True):
         """Return an HTML page explaining that there is an error.
 
         There could be more options in the future so using named arguments
@@ -321,17 +328,17 @@ class CGIWrapper(NamedValueAccess):
 ''' % (htTitle('Traceback'), self._scriptPathname)]
         html.append(HTMLForException())
         html.extend([
-                htTitle('Misc Info'),
-                htDictionary({
-                        'time':        asctime(localtime(self._scriptEndTime)),
-                        'filename':    self._scriptPathname,
-                        'os.getcwd()': os.getcwd(),
-                        'sys.path':    sys.path
-                }),
-                htTitle('Fields'),      htDictionary(self._fields),
-                htTitle('Headers'),     htDictionary(self._headers),
-                htTitle('Environment'), htDictionary(self._environ, {'PATH': ';'}),
-                htTitle('Ids'),         htTable(osIdTable(), ['name', 'value'])])
+            htTitle('Misc Info'),
+            htDictionary({
+                'time': asctime(localtime(self._scriptEndTime)),
+                'filename': self._scriptPathname,
+                'os.getcwd()': os.getcwd(),
+                'sys.path': sys.path
+            }),
+            htTitle('Fields'), htDictionary(self._fields),
+            htTitle('Headers'), htDictionary(self._headers),
+            htTitle('Environment'), htDictionary(self._environ, {'PATH': ';'}),
+            htTitle('Ids'), htTable(osIdTable(), ['name', 'value'])])
         return ''.join(html)
 
     def saveHTMLErrorPage(self, html):
@@ -352,7 +359,7 @@ class CGIWrapper(NamedValueAccess):
                 f.close()
         except IOError:
             sys.stderr.write('[%s] [error] CGI Wrapper: Cannot save error page (%s)\n'
-                    % (asctime(localtime(time())), filename))
+                % (asctime(localtime(time())), filename))
         else:
             return filename
 
@@ -365,8 +372,8 @@ class CGIWrapper(NamedValueAccess):
         # Note: Using the timestamp and a random number is a poor technique
         # for filename uniqueness, but it is fast and good enough in practice.
         return 'Error-%s-%s-%06d.html' % (os.path.split(self._scriptPathname)[1],
-                '-'.join(map(lambda x: '%02d' % x, localtime(self._scriptEndTime)[:6])),
-                randint(0, 999999))
+            '-'.join(map(lambda x: '%02d' % x, localtime(self._scriptEndTime)[:6])),
+            randint(0, 999999))
 
     def logExceptionToDisk(self, errorMsgFilename=None, excInfo=None):
         """Write exception info to the log file.
@@ -385,8 +392,8 @@ class CGIWrapper(NamedValueAccess):
         else: # string exception
             err, msg = '', str(msg or err)
         logline = (asctime(localtime(self._scriptEndTime)),
-                os.path.split(self._scriptPathname)[1], self._scriptPathname,
-                err, msg, errorMsgFilename or '')
+            os.path.split(self._scriptPathname)[1], self._scriptPathname,
+            err, msg, errorMsgFilename or '')
         def fixElement(element):
             element = str(element)
             if element.find(',') >= 0 or element.find('"') >= 0:
@@ -400,7 +407,7 @@ class CGIWrapper(NamedValueAccess):
         else:
             f = open(filename, 'w')
             f.write('time,filename,pathname,exception name,'
-                    'exception data,error report filename\n')
+                'exception data,error report filename\n')
         f.write(','.join(logline) + '\n')
         f.close()
 
@@ -448,12 +455,9 @@ class CGIWrapper(NamedValueAccess):
         self._scriptPathname = self.scriptPathname()
         self._scriptName = os.path.split(self._scriptPathname)[1]
 
-        self._namespace = {
-                'headers': self._headers,
-                'fields': self._fields,
-                'environ': self._environ,
-                'wrapper': self,
-        }
+        self._namespace = dict(
+            headers=self._headers, fields=self._fields,
+            environ=self._environ, wrapper=self)
         info = self._namespace.copy()
 
         # Set up sys.stdout to be captured as a string. This allows scripts
@@ -475,7 +479,7 @@ class CGIWrapper(NamedValueAccess):
             origDir = None
 
         # A little more setup
-        self._errorOccurred = 0
+        self._errorOccurred = False
         self._scriptStartTime = time()
 
         # Run the target script
@@ -483,16 +487,16 @@ class CGIWrapper(NamedValueAccess):
             if self._servingScript:
                 execfile(self._scriptPathname, self._namespace)
                 for name in self.setting('ClassNames'):
-                    if name == '':
+                    if not name:
                         name = os.path.splitext(self._scriptName)[0]
-                    if self._namespace.has_key(name):
+                    if name in self._namespace:
                         # our hook for class-oriented scripts
                         print self._namespace[name](info).html()
                         break
             else:
                 self._headers = {'Location':
-                        os.path.split(self._environ['SCRIPT_NAME'])[0]
-                        + self._environ['PATH_INFO']}
+                    os.path.split(self._environ['SCRIPT_NAME'])[0]
+                    + self._environ['PATH_INFO']}
 
             # Note the end time of the script
             self._scriptEndTime = time()
@@ -502,14 +506,14 @@ class CGIWrapper(NamedValueAccess):
             self._scriptEndTime = time()
             self._scriptDuration = self._scriptEndTime - self._scriptStartTime
 
-            self._errorOccurred = 1
+            self._errorOccurred = True
 
             # Not really an error, if it was sys.exit(0)
             excInfo = sys.exc_info()
             if excInfo[0] == SystemExit:
                 code = excInfo[1].code
                 if not code:
-                    self._errorOccurred = 0
+                    self._errorOccurred = False
 
             # Clean up
             if self._errorOccurred:
@@ -550,7 +554,7 @@ class CGIWrapper(NamedValueAccess):
 
         # Get the string buffer values
         headersOut = headers.getvalue()
-        stdoutOut  = sys.stdout.getvalue()
+        stdoutOut = sys.stdout.getvalue()
 
         # Compute size
         self._responseSize = len(headersOut) + len(stdoutOut)
@@ -565,30 +569,28 @@ class CGIWrapper(NamedValueAccess):
 def docType():
     """Return a standard HTML document type"""
     return ('<!DOCTYPE HTML PUBLIC'
-            ' "-//W3C//DTD HTML 4.01 Transitional//EN"'
-            ' "http://www.w3.org/TR/html4/loose.dtd">')
+        ' "-//W3C//DTD HTML 4.01 Transitional//EN"'
+        ' "http://www.w3.org/TR/html4/loose.dtd">')
 
 def htTitle(name):
     """Return an HTML section title."""
     return ('<h2 style="color:white;background-color:#993333;'
-            'font-size:12pt;padding:1pt;font-weight:bold;'
-            'font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif"'
-            ' align="center">%s</h2>\n' % name)
+        'font-size:12pt;padding:1pt;font-weight:bold;'
+        'font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif"'
+        ' align="center">%s</h2>\n' % name)
 
-def htDictionary(dict, addSpace=None):
+def htDictionary(d, addSpace=None):
     """Returns an HTML table where each row is a key-value pair."""
-    if not dict:
+    if not d:
         return '\n'
-    keys = dict.keys()
-    keys.sort()
     html = ['<table border="0" cellpadding="2" cellspacing="2">']
-    for key in keys:
-        value = dict[key]
-        if addSpace is not None and addSpace.has_key(key):
+    for key in sorted(d):
+        value = d[key]
+        if addSpace is not None and key in addSpace:
             target = addSpace[key]
             value = (target + ' ').join(value.split(target))
         html.append('<tr><td bgcolor="#BBBBBB">%s</td>'
-                '<td bgcolor="#EEEEEE">%s&nbsp;</td></tr>\n' % (key, value))
+            '<td bgcolor="#EEEEEE">%s&nbsp;</td></tr>\n' % (key, value))
     html.append('</table>')
     return '\n'.join(html)
 
@@ -610,8 +612,7 @@ def htTable(listOfDicts, keys=None):
     if not listOfDicts:
         return ''
     if keys is None:
-        keys = listOfDicts[0].keys()
-        keys.sort()
+        keys = sorted(listOfDicts[0])
     html = ['<table border="0" cellpadding="2" cellspacing="2">']
     html.append('<tr>')
     for key in keys:
@@ -635,12 +636,12 @@ def osIdTable():
 
     """
     funcs = ['getegid', 'geteuid', 'getgid', 'getpgrp',
-            'getpid', 'getppid', 'getuid']
+        'getpid', 'getppid', 'getuid']
     table = []
     for funcName in funcs:
         if hasattr(os, funcName):
             value = getattr(os, funcName)()
-            table.append({'name': funcName, 'value': value})
+            table.append(dict(name=funcName, value=value))
     return table
 
 
@@ -654,14 +655,15 @@ def main():
         # uncaught exceptions from target scripts. However, we should also
         # catch exceptions here that might come from the wrapper, including
         # ones generated while it's handling exceptions.
-        sys.stderr.write('[%s] [error] CGI Wrapper: Error while executing script (unknown)\n'
-                % asctime(localtime(time())))
+        sys.stderr.write('[%s] [error] CGI Wrapper: Error while executing'
+            ' script (unknown)\n' % asctime(localtime()))
         traceback.print_exc(file=sys.stderr)
         if sys.exc_info()[0] != SystemExit:
             output = traceback.format_exception(*sys.exc_info())
             output = ''.join(output)
-            output = output.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;')
-            stdout.write('''Content-type: text/html
+            output = output.replace('&', '&amp;').replace(
+                '<', '&lt;').replace('>', '&gt;')
+            stdout.write('''Content-Type: text/html
 
 %s
 <html>
@@ -674,5 +676,5 @@ def main():
 
 
 if __name__ == '__main__':
-    isMain = 1
+    isMain = True
     main()

@@ -62,7 +62,7 @@ class _dumpCSV(AdminPage):
             colIndex = 0
             for value in row:
                 self.writeln('<td style="color:#111111" bgcolor="#EEEEEE">',
-                        self.cellContents(rowIndex, colIndex, value), '</td>')
+                    self.cellContents(rowIndex, colIndex, value), '</td>')
                 colIndex += 1
             self.writeln('</tr>')
             rowIndex += 1

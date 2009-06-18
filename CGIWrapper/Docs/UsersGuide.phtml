@@ -102,7 +102,7 @@ This is where the wrapper always looks for the CGI scripts. This location would 
 
 <dl>
 <dt><b>ChangeDir</b>
-&nbsp; <code> = 1</code></dt>
+&nbsp; <code> = True</code></dt>
 <dd>
 If true, the current working directory is changed to the same directory as the target script. Otherwise, the current working directory is left alone and likely to be the same as the CGI Wrapper.
 </dd>
@@ -126,7 +126,7 @@ This is the index into <code>sys.path</code> where the <code>ExtraPath</code> va
 
 <dl>
 <dt><b>LogScripts</b>
-&nbsp; <code> = 1</code></dt>
+&nbsp; <code> = True</code></dt>
 <dd>
 If true, then the execution of each script is logged with useful information such as time, duration and whether or not an error occurred.
 </dd>
@@ -161,7 +161,7 @@ This is the list of class names that CGI Wrapper looks for after executing a scr
 
 <dl>
 <dt><b>ShowDebugInfoOnErrors</b>
-&nbsp; <code> = 1</code></dt>
+&nbsp; <code> = True</code></dt>
 <dd>
 If true, then the uncaught exceptions will not only display a message for the user, but debugging information for the developer as well. This includes the traceback, HTTP headers, CGI form fields, environment and process ids.
 </dd>
@@ -177,7 +177,7 @@ This is the error message that is displayed to the user when an uncaught excepti
 
 <dl>
 <dt><b>LogErrors</b>
-&nbsp; <code> = 1</code></dt>
+&nbsp; <code> = True</code></dt>
 <dd>
 If true, then CGI Wrapper logs exceptions. Each entry contains the date &amp; time, filename, pathname, exception name &amp; data, and the HTML error message filename (assuming there is one).
 </dd>
@@ -193,7 +193,7 @@ This is the name of the file where CGI Wrapper logs exceptions if <code>LogError
 
 <dl>
 <dt><b>SaveErrorMessages</b>
-&nbsp; <code> = 1</code></dt>
+&nbsp; <code> = True</code></dt>
 <dd>
 If true, then errors (e.g., uncaught exceptions) will produce an HTML file with both the user message and debugging information. Developers/administrators can view these files after the fact, to see the details of what went wrong.
 </dd>
@@ -209,7 +209,7 @@ This is the name of the directory where HTML error messages get stored if <code>
 
 <dl>
 <dt><b>EmailErrors</b>
-&nbsp; <code> = 0</code></dt>
+&nbsp; <code> = False</code></dt>
 <dd>
 If true, error messages are e-mail out according to the ErrorEmailServer and ErrorEmailHeaders settings. This setting defaults to false because the other settings need to be configured first.
 </dd>
@@ -273,8 +273,8 @@ A list of IP addresses or networks from which admin scripts can be accessed.
 
 <p>The resulting page will look something like the following. (Note: Those links aren't real!)</p>
 
-<table cellspacing="2" align="center">
-<tr><th align="right">Size</th><th rowspan="8">&nbsp;</th><th align="left">Script</th><th rowspan="8">&nbsp;</th><th align="left">View</th></tr>
+<table cellspacing="0" cellpadding="4" border="1" align="center">
+<tr><th align="right">Size</th><th align="left">Script</th><th align="left">View</th></tr>
 <tr><td align="right">96</td><td><a href="Hello">Hello</a></td><td><a href="View?filename=Hello">view</a></td></tr>
 <tr><td align="right">167</td><td><a href="Time">Time</a></td><td><a href="View?filename=Time">view</a></td></tr>
 <tr><td align="right">210</td><td><a href="Error">Error</a></td><td><a href="View?filename=Error">view</a></td></tr>

@@ -1,5 +1,5 @@
 
-if fields.has_key('bgcolor'):
+if 'bgcolor' in fields:
     bgcolor = fields['bgcolor'].value
     bgcolorArg = 'bgcolor="%s"' % bgcolor
 else:
@@ -8,17 +8,17 @@ else:
 
 print '''<!DOCTYPE HTML SYSTEM>
 <html>
-        <head>
-                <title>Colors</title>
-        </head>
-        <body %s>
-                <h1 align="center">Colors</h1>
-                <center>
-                <form action="Colors">
-                        bgcolor: <input type="text" name="bgcolor" value="%s">
-                        <input type="submit" value="Go">
-                </form>
-                <table cellspacing="2" cellpadding="2">
+    <head>
+        <title>Colors</title>
+    </head>
+    <body %s>
+        <h1 align="center">Colors</h1>
+        <center>
+        <form action="Colors">
+            bgcolor: <input type="text" name="bgcolor" value="%s">
+            <input type="submit" value="Go">
+        </form>
+        <table cellspacing="2" cellpadding="2">
 ''' % (bgcolorArg, bgcolor)
 
 space = '&nbsp;'*10
@@ -35,15 +35,12 @@ for r in range(11):
             # Compute brightness given RGB
             brightness = (0.3*r**gamma + 0.6*g**gamma + 0.1*b**gamma)**(1/gamma)
             # We then use brightness to determine a good font color for high contrast
-            if brightness < 0.5:
-                textcolor = 'white'
-            else:
-                textcolor = 'black'
+            textcolor = brightness < 0.5 and 'white' or 'black'
             print '<td style="color:%s;background-color:%s;">%s</td>' % (textcolor, color, color)
         print '</tr>'
 
 print '''
-                </table>
-                </center>
-        </body>
+        </table>
+        </center>
+    </body>
 </html>'''

@@ -56,7 +56,7 @@ class AdminPage:
         self.writeToolbar()
 
     def writeBody(self):
-        raise NotImplementedError, 'Should be overridden in a subclass'
+        raise NotImplementedError('Should be overridden in a subclass')
 
     def writeFooter(self):
         self.writeln('''
@@ -75,10 +75,10 @@ class AdminPage:
     def writeBanner(self):
         self.writeln('''
         <table align="center" bgcolor="#202080" cellpadding="5" cellspacing="0" width="100%%">
-                <tr><td align="center" style="color:white;font-weight:bold;font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif">
-                        <div style="font-size:14pt">CGI Wrapper</div>
-                        <div style="font-size:16pt">%s</div>
-                </td></tr>
+            <tr><td align="center" style="color:white;font-weight:bold;font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif">
+                <div style="font-size:14pt">CGI Wrapper</div>
+                <div style="font-size:16pt">%s</div>
+            </td></tr>
         </table>''' % self.title())
 
     def writeToolbar(self):

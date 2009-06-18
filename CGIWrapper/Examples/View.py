@@ -2,21 +2,23 @@ import os
 
 print '''%s
 <html>
-        <head>
-                <title>Webware View CGI Source</title>
-        </head>
-        <body>
-                <h1>Webware View CGI Source</h1>
+    <head>
+        <title>Webware View CGI Source</title>
+    </head>
+    <body>
+        <h1>Webware View CGI Source</h1>
 ''' % wrapper.docType()
 
 if not fields.has_key('filename'):
     print '<p>No filename specified.</p>'
 else:
-    if fields.has_key('tabSize'):
+    if 'tabSize' in fields:
         tabSize = int(fields['tabSize'].value)
     else:
         tabSize = 4
-    filename = os.path.basename(fields['filename'].value) + '.py'
+    filename = os.path.basename(fields['filename'].value)
+    if not filename.endswith('.py'):
+        fielname += '.py'
     try:
         contents = open(filename).read()
     except IOError:
