@@ -132,10 +132,6 @@ exceptions. The response to an uncaught exception is:
 
 __ Configuration.html#errors
 
-Here is a `sample error page`__.
-
-__ SampleError.html
-
 Archived error messages can be browsed through the administration_ page.
 
 Error handling behavior can be configured as described in Configuration__.
