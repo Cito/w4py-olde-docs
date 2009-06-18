@@ -399,7 +399,7 @@ class SQLObjectStore(ObjectStore):
             fetchSQLStart = klass.fetchSQLStart()
             className = klass.name()
             if serialNum is not None:
-                serialNum = int(serialNum)  # make sure it's a valid int (suppose it came in as a string: 'foo')
+                serialNum = int(serialNum) # make sure it's a valid int (suppose it came in as a string: 'foo')
                 clauses = 'where %s=%d' % (klass.sqlSerialColumnName(), serialNum)
             if self._markDeletes:
                 clauses = self.addDeletedToClauses(clauses)
@@ -801,7 +801,7 @@ class MiddleObjectMixIn(object):
             if isinstance(value, basestring):
                 append(value)
             else:
-                extend(value)  # value could be sequence for attrs that require multiple SQL columns
+                extend(value) # value could be sequence for attrs that require multiple SQL columns
         if len(values) == 0:
             values = ['0']
         values = ','.join(values)

@@ -15,6 +15,7 @@
 # can be shared among many servlets.
 
 from win32com.client import Dispatch
+
 from ExamplePage import ExamplePage
 
 
@@ -39,11 +40,13 @@ class ADOSample(ExamplePage):
 
     def writeContent(self):
         # Grab some data from the database and display it
-        rs = self.recordset('SELECT CustomerName FROM Customers ORDER BY CustomerName')
-        self.writeln('<h1>ADO Sample</h1>')
-        self.writeln('<h3>Your Customers are:</h3>')
-        self.writeln('<ul>')
+        wr = self.writeln
+        wr('<h1>ADO Sample</h1>')
+        wr('<h3>Your Customers are:</h3>')
+        rs = self.recordset(
+            'SELECT CustomerName FROM Customers ORDER BY CustomerName')
+        wr('<ul>')
         while not rs.EOF:
-            self.writeln('<li>%s</li>' % rs.Fields('CustomerName').Value)
+            wr('<li>%s</li>' % rs.Fields('CustomerName').Value)
             rs.MoveNext()
-        self.writeln('</ul>')
+        wr('</ul>')

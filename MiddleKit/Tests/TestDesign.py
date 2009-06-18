@@ -32,8 +32,8 @@ def test(modelFilename, configFilename, workDir=workDir, toTestDir='../'):
     overriding these defaults comes in handy.
 
     """
-    rmdir(workDir)     # get rid of files from previous runs
-    os.mkdir(workDir)  # make a space for the files from this run
+    rmdir(workDir) # get rid of files from previous runs
+    os.mkdir(workDir) # make a space for the files from this run
 
     # Run generate, load the model, and import some classes
     command = os.path.normpath('../Design/Generate.py')

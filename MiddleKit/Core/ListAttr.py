@@ -12,7 +12,7 @@ class ListAttr(Attr):
     def __init__(self, dict):
         Attr.__init__(self, dict)
         self._className = dict['Type'].split()[-1]
-        self._backRefAttr = None  # init'ed in awakeFromRead()
+        self._backRefAttr = None # init'ed in awakeFromRead()
         if self.get('Min') is not None:
             self['Min'] = int(self['Min'])
         if self.get('Max') is not None:

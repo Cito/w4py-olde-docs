@@ -48,7 +48,7 @@ class TestFuncs(unittest.TestCase):
     def testLocalIP(self):
         ip = localIP()
         assert ip and not ip.startswith('127.')
-        assert localIP() == ip  # second invocation
+        assert localIP() == ip # second invocation
         assert localIP(useCache=None) == ip
         assert localIP(remote=None, useCache=None) == ip, \
             'See if this works: localIP(remote=None). If this fails, dont worry.'
@@ -78,19 +78,15 @@ class TestFuncs(unittest.TestCase):
         assert sd(f).find('%s.Foo' % __name__) != -1, sd(f)
 
         # new object type:
-        try:
-            object  # more recent versions of Python have a builtin object type
-        except NameError:
-            pass  # must be old Python
-        else:
-            class Bar(object): pass
-            b = Bar()
-            assert sd(b).find('%s.Bar' % __name__) != -1, sd(b)
+        class Bar(object):
+            pass
+        b = Bar()
+        assert sd(b).find('%s.Bar' % __name__) != -1, sd(b)
 
         # okay now test that safeDescription eats exceptions from repr():
         class Baz:
             def __repr__(self):
-                raise KeyError, 'bogus'
+                raise KeyError('bogus')
         b = Baz()
         try:
             s = sd(b)

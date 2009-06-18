@@ -1,36 +1,36 @@
 <% header('MiddleKit Quick Start', None,
 '''span.menuCmd {
-	font-size: smaller;
-	font-weight: bolder;
+  font-size: smaller;
+  font-weight: bolder;
 }
 table.cmd {
-	font-size: smaller;
-	background-color: #EEE;
-	margin-left: 2.5em;
+  font-size: smaller;
+  background-color: #EEE;
+  margin-left: 2.5em;
 }
 table.cmd td {
     padding: 2pt;
 }
 table.dataTable {
-	font-size: smaller;
+  font-size: smaller;
 }
 tr.dataTableHeading {
 }
 td.dataTableHeading {
-	color: white;
-	background-color: black;
-	font-weight: bolder;
-	white-space: nowrap;
+  color: white;
+  background-color: black;
+  font-weight: bolder;
+  white-space: nowrap;
 }
 tr.dataTable1, tr.dataTable2 {
 }
 td.dataTable1 {
-	background-color: #EEE;
-	white-space: nowrap;
+  background-color: #EEE;
+  white-space: nowrap;
 }
 td.dataTable2 {
-	background-color: #EEE;
-	white-space: nowrap;
+  background-color: #EEE;
+  white-space: nowrap;
 }''')
 %>
 
@@ -44,8 +44,8 @@ td.dataTable2 {
 <p>To perform the steps in this Quick Start you need:</p>
 
 <ul>
-	<li>Python 2.4 or greater, found at <a href="http://www.python.org">python.org</a></li>
-	<li>and MiddleKit, of course.</li>
+  <li>Python 2.4 or greater, found at <a href="http://www.python.org">python.org</a></li>
+  <li>and MiddleKit, of course.</li>
 </ul>
 
 
@@ -95,7 +95,7 @@ td.dataTable2 {
 
 <pre class="py">{
     'Package': 'Middle',
-    #'SQLLog': { 'File': 'mk-sql.log' },
+    #'SQLLog': {'File': 'mk-sql.log'},
 }</pre>
 
 <p>The <span class="name">Package</span> setting tells MiddleKit that we want the classes for our object model to reside in a package named <span class="filename">Middle</span>. Python packages are useful for putting related modules (and classes) in a logical group. This also prevents name collisions between the package modules and other modules that may be on your Python path. Note that we chose the name of the directory containing the model.</p>
@@ -131,9 +131,9 @@ Generating Python...
 <p>In the current directory, you will find:</p>
 
 <ul>
-	<li>Python files that are stubs for your custom code (<span class="filename">Video.py</span>, <span class="filename">Movie.py</span>, etc.).</li>
-	<li>The directory <span class="filename">GeneratedPy/</span>, containing base classes for each of your classes. These base classes hold any code MK found necessary to generate.</li>
-	<li>The directory <span class="filename">GeneratedSQL/</span>, containing <span class="filename">Create.sql</span>.</li>
+  <li>Python files that are stubs for your custom code (<span class="filename">Video.py</span>, <span class="filename">Movie.py</span>, etc.).</li>
+  <li>The directory <span class="filename">GeneratedPy/</span>, containing base classes for each of your classes. These base classes hold any code MK found necessary to generate.</li>
+  <li>The directory <span class="filename">GeneratedSQL/</span>, containing <span class="filename">Create.sql</span>.</li>
 </ul>
 
 <p>You will find that as you update your object model and its sample data, you often need to re-generate. For this purpose, create a <span class="filename">generate</span> script:</p>

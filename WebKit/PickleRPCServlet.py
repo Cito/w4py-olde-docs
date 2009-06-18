@@ -63,7 +63,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
 
     If you wanted the actual response dictionary for some reason:
         print server._request('multiply', 3, 4)
-            # { 'value': 12, 'timeReceived': ... }
+            # {'value': 12, 'timeReceived': ...}
 
     In which case, an exception is not purposefully raised if the
     dictionary contains one. Instead, examine the dictionary.

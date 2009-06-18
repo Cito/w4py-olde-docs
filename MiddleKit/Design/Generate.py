@@ -20,7 +20,7 @@ if sys.platform == 'win32':
 class Generate:
 
     def databases(self):
-        return ['MSSQL', 'MySQL', 'PostgreSQL']  # @@ 2000-10-19 ce: should build this dynamically
+        return ['MSSQL', 'MySQL', 'PostgreSQL'] # @@ 2000-10-19 ce: should build this dynamically
 
     def main(self, args=sys.argv):
         opt = self.options(args)

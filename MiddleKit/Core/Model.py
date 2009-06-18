@@ -392,7 +392,7 @@ class Model(Configurable):
             PostSQL = '',
             DropStatements = 'database', # database, tables
             SQLSerialColumnName = 'serialNum', # can use [cC]lassName, _ClassName
-            AccessorStyle = 'methods',  # can be 'methods' or 'properties'
+            AccessorStyle = 'methods', # can be 'methods' or 'properties'
             ExternalEnumsSQLNames = dict(
                 Enable = False,
                 TableName = '%(ClassName)s%(AttrName)sEnum',

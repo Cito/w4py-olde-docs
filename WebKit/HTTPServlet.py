@@ -26,7 +26,7 @@ class HTTPServlet(Servlet):
 
     def __init__(self):
         Servlet.__init__(self)
-        self._methodForRequestType = {}  # a cache; see respond()
+        self._methodForRequestType = {} # a cache; see respond()
 
 
     ## Transactions ##

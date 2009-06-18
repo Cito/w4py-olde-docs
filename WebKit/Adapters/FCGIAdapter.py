@@ -28,7 +28,7 @@ put them in another file and include that file in httpd.conf
 # the -host is the port it communicates on
 FastCgiExternalServer ../cgi-bin/FCGIWebKit.py -host localhost:33333 # the path is from the SERVER ROOT
 
-<Location /FCGIWebKit.py>  #or whatever name you chose for the file above
+<Location /FCGIWebKit.py> # or whatever name you chose for the file above
  SetHandler fastcgi-script
  Options ExecCGI FollowSymLinks
 </Location>

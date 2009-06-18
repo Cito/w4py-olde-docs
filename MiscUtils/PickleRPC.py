@@ -19,10 +19,10 @@ UNDER THE HOOD
 Requests look like this:
     {
         'version':    1,  # default
-        'action':     'call',  # default
+        'action':     'call', # default
         'methodName': 'NAME',
         'args':       (A, B, ...), # default = (,)
-        'keywords':   {'A': A, 'B': B, ...}  # default = {}
+        'keywords':   {'A': A, 'B': B, ...} # default = {}
     }
 
 Only 'methodName' is required since that is the only key without a
@@ -294,7 +294,7 @@ class _Method:
     def __getattr__(self, name):
         return _Method(self._send, '%s.%s' % (self._name, name))
 
-    def __call__(self, *args, **keywords):  # note that keywords are supported
+    def __call__(self, *args, **keywords): # note that keywords are supported
         return self._send(self._name, args, keywords)
 
 

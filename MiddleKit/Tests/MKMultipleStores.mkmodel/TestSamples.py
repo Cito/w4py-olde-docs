@@ -9,7 +9,7 @@ def test(store):
     dbArgs = store._dbArgs
     newStore = store.__class__(**dbArgs)
     newStore.setModel(store.model())
-    assert newStore != store  # paranoia
+    assert newStore != store # paranoia
 
     things = newStore.fetchObjectsOfClass('Thing')
     assert len(things) > 1

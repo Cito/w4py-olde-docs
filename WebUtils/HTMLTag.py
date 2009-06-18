@@ -103,8 +103,8 @@ class HTMLTag(object):
         print tag.name()
 
     Attributes are dictionary-like in nature:
-        print tag.attr('color')  # throws an exception if no color
-        print tag.attr('bgcolor', None)  # returns None if no bgcolor
+        print tag.attr('color') # throws an exception if no color
+        print tag.attr('bgcolor', None) # returns None if no bgcolor
         print tag.attrs()
 
     Children are all the leaf parts of a tag, consisting of other tags

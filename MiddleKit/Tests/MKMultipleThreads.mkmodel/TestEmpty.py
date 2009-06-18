@@ -110,7 +110,7 @@ def test(store):
 
             self._finished.release() # signal the main thread that we're done
             self.debug('waiting for main thread to save changes')
-            self._saveEvent.wait()  # wait until the main thread has saved all changes
+            self._saveEvent.wait() # wait until the main thread has saved all changes
             assert not p.isChanged(), "Modifications didn't get saved."
             assert not self._store.hasChangesForCurrentThread()
 

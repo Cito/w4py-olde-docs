@@ -104,7 +104,7 @@ class Klasses(dict, ModelObject):
                         print 'Required key %s not found in row:' % key
                         print 'row:', row
                         print 'keys:', row.keys()
-                        print row[key]  # throws exception
+                        print row[key] # throws exception
                 if row['Class']:
                     pyClass = self._model.coreClass('Klass')
                     klass = pyClass(self, row)

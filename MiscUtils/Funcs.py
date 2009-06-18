@@ -227,7 +227,7 @@ def safeDescription(x, what='what'):
 
     Example use:
     assert isinstance(foo, Foo), safeDescription(foo)
-    print "foo:", safeDescription(foo)  # won't raise exceptions
+    print "foo:", safeDescription(foo) # won't raise exceptions
 
     # better output format:
     assert isinstance(foo, Foo), safeDescription(foo, 'foo')

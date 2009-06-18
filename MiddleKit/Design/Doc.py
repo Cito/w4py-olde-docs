@@ -26,7 +26,7 @@ class Doc(object):
     def main(self, args=None):
         self.progPath = os.path.join(os.getcwd(), sys.argv[0])
 
-        self.otherKeys = self.otherKeys  # pick up class level value
+        self.otherKeys = self.otherKeys # pick up class level value
         self.parseArgs(args)
 
         modelName = self.args.get('model', None)

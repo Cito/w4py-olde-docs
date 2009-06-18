@@ -194,7 +194,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
                 webKitDir = os.path.abspath(os.path.join(webwareDir, 'WebKit'))
                 for p in [workDir, webwareDir] + self._libraryDirs + sysPath:
                     if not p:
-                        continue  # do not include empty ("current") directory
+                        continue # do not include empty ("current") directory
                     p = os.path.abspath(p)
                     if p == webKitDir or p in path or not os.path.exists(p):
                         continue # do not include WebKit and duplicates

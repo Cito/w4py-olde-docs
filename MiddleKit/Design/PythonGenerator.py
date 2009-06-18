@@ -446,7 +446,7 @@ class EnumAttr(object):
             self._mk_changed = 1
             if self._mk_changedAttrs is None:
                 self._mk_changedAttrs = {} # maps name to attribute
-            self._mk_changedAttrs['%(name)s'] = _%(name)sAttr  # changedAttrs is a set
+            self._mk_changedAttrs['%(name)s'] = _%(name)sAttr # changedAttrs is a set
             # Tell ObjectStore it happened
             self._mk_store.objectChanged(self)
 ''' % {'name': name})

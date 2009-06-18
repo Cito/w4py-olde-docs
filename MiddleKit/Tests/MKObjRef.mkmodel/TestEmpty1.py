@@ -23,7 +23,7 @@ def test(store):
     f1 = b.foo()
     f2 = b.foo()
     assert f1 is not None, 'got None instead of a Foo'
-    assert f1 is f2  # test uniqueness
+    assert f1 is f2 # test uniqueness
     assert b.foo().x() == 3
 
     # Fetch in reverse order

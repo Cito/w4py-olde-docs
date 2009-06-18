@@ -1,6 +1,6 @@
 <% header(name + " User's Guide", None,
 '''ul .typed {
-	color: #228;
+  color: #228;
 }''')
 %>
 
@@ -24,11 +24,11 @@ favorably to other server side web scripting languages, such as ASP, PHP and JSP
 <p>Features of PSP include:</p>
 
 <ul>
-	<li>Familiar Syntax (ASP, JSP, PHP)</li>
-	<li>The power of Python as the scripting language</li>
-	<li>Full access to the WebKit Servlet API</li>
-	<li>Flexible PSP Base Class framework</li>
-	<li>Ability to add additional methods to the class produced by PSP</li>
+  <li>Familiar Syntax (ASP, JSP, PHP)</li>
+  <li>The power of Python as the scripting language</li>
+  <li>Full access to the WebKit Servlet API</li>
+  <li>Flexible PSP Base Class framework</li>
+  <li>Ability to add additional methods to the class produced by PSP</li>
 </ul>
 
 <a name="Feedback"></a><h2>Feedback</h2>
@@ -113,7 +113,7 @@ of the block begun within the previous script tag. To end the block, insert a ne
 <h5>Example of Script/HTML block</h5>
 
 <pre class="py">
-&lt;% for i in range(5): %&gt;  #the blocks starts here, no need for indenting the following HTML
+&lt;% for i in range(5): %&gt; # the blocks starts here, no need for indenting the following HTML
 &lt;tr&gt;&lt;td&gt;&lt;%= i%&gt;&lt;/td&gt;&lt;/tr&gt;
 &lt;% end %&gt; The "end" statement ends the block</pre>
 
@@ -133,9 +133,9 @@ To end this level of indentation, just start another script tag. Easy.</p>
 
 <pre class="py">
 &lt;% for i in range(5):
-    icubed = i*i $%&gt; ##The following lines of straight HTML will be included in the same block this line is on
+    icubed = i*i $%&gt; ## The following lines of straight HTML will be included in the same block this line is on
   &lt;tr&gt;&lt;td&gt;&lt;%= icubed%&gt;&lt;/td&gt;&lt;/tr&gt;
- &lt;% pass %&gt;  ##Any new script statement resets the HTML indentation level</pre>
+ &lt;% pass %&gt; ## Any new script statement resets the HTML indentation level</pre>
 
 <p>You could also start a new script block that just continues at the same indentation level that the HTML and the previous scipt block were at.</p>
 

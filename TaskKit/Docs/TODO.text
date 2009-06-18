@@ -10,20 +10,20 @@ TO DO
 
 <misc>
 
-	[ ] Test WebKit with the new changes
+    [ ] Test WebKit with the new changes
 
-	[ ] Task.proceed() questionable name.
-		run() runs and  proceed() proceeds, er, no, it inquires?
-		Maybe shouldProceed()?
+    [ ] Task.proceed() questionable name.
+        run() runs and  proceed() proceeds, er, no, it inquires?
+        Maybe shouldProceed()?
 
-	[ ] Does a Task's run() really always have to invoke self.proceed()?
+    [ ] Does a Task's run() really always have to invoke self.proceed()?
 
 </misc>
 
 
 <tests>
 
-	[ ] make tests that cover all methods and features
+    [ ] make tests that cover all methods and features
 
 </tests>
 
@@ -31,10 +31,10 @@ TO DO
 
 <docs>
 
-	[ ] Doc strings for all the major methods.
+    [ ] Doc strings for all the major methods.
 
-	[ ] User's Guide
+    [ ] User's Guide
 
-	[ ] Properties: Better synopsis
+    [ ] Properties: Better synopsis
 
 </docs>

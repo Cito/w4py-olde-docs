@@ -55,7 +55,7 @@ class NoDefault(object):
         from MiscUtils import NoDefault
         def bar(self, name, default=NoDefault):
             if default is NoDefault:
-                return self._bars[name]  # will raise exception for invalid key
+                return self._bars[name] # will raise exception for invalid key
             else:
                 return self._bars.get(name, default)
 

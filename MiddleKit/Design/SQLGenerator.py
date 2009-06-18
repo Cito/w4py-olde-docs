@@ -683,7 +683,7 @@ class Attr(object):
                 default = self.sqlForSampleInput(str(default))
         if default:
             default = str(default).strip()
-            if default.lower() == 'none':  # kind of redundant
+            if default.lower() == 'none': # kind of redundant
                 default = None
             return 'default ' + default
         else:
@@ -851,7 +851,7 @@ class ObjRefAttr(object):
 
     def sqlName(self):
         if self.setting('UseBigIntObjRefColumns', False):
-            return self.name() + 'Id'  # old way: one 64 bit column
+            return self.name() + 'Id' # old way: one 64 bit column
         else:
             # new way: 2 int columns for class id and obj id
             name = self.name()

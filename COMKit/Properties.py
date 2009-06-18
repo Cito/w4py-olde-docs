@@ -3,7 +3,7 @@ name = 'COMKit'
 version = ('X', 'Y', 0)
 
 docs = [
-        {'name': "User's Guide", 'file': 'UsersGuide.html'},
+    {'name': "User's Guide", 'file': 'UsersGuide.html'},
 ]
 
 status = 'stable'
@@ -15,7 +15,7 @@ requiredPyVersion = (2, 4, 0)
 requiredOpSys = 'nt'
 
 requiredSoftware = [
-        {'name': 'pythoncom'},
+    {'name': 'pythoncom'},
 ]
 
 def willRunFunc():
@@ -28,8 +28,8 @@ def willRunFunc():
         for soft in requiredSoftware:
             imp.find_module(soft['name'])
     except ImportError:
-        success = 0
+        success = False
     else:
-        success = 1
+        success = True
     if not success:
         return 'The pythoncom module (pywin32 library) is required to use COMKit.'

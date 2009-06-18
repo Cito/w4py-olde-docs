@@ -25,8 +25,8 @@ def test(store):
     assert len(bars) == 1
     bar2 = bars[0]
     assert bar2 is bar
-    assert bar.foo() is not None  # the sign of the bug in question
-    assert bar.foo() is foo  # what we should expect
+    assert bar.foo() is not None # the sign of the bug in question
+    assert bar.foo() is foo # what we should expect
 
     store.clear()
     bar = store.fetchObjectsOfClass(Bar)[0]

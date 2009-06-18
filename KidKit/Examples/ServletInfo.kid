@@ -4,40 +4,38 @@ from KidKit.Examples.KidExamplePage import KidExamplePage
 hook = KidExamplePage.writeContent
 import os
 def show(s):
-	return repr(s).replace(r'\\', '\\').replace(';', '; ').replace(':/', ': /')
+    return repr(s).replace(r'\\', '\\').replace(';', '; ').replace(':/', ': /')
 ?>
 <body py:strip="" xmlns:py="http://purl.org/kid/ns#">
 <h1>Kid Servlet Info</h1>
 <h2>Useful Variables</h2>
 <?python
 variables = {
-	'servlet':
-		'The servlet instance',
-	'servlet.request()':
-		'Used to access fields and other info about the request.',
-	'servlet.request().cookies()':
-		'Dictionary of all Cookies the client sent with this request.',
-	'servlet.request().fields()':
-		'Dictionary of all form fields contained by this request.',
-	'servlet.request().serverDictionary()':
-		'Dictionary with the data the web server gave us.',
-	'servlet.request().serverSidePath()':
-		'The absolute server-side path of the request.',
-	'servlet.response()':
-		'Used to set cookies other info as response.',
-	'servlet.response().cookies()':
-		'Dictionary of all cookies that will be sent with this response.',
-	'servlet.response().headers()':
-		'Dictionary of all headers contained by this request.',
-	'__file__':
-		'The file name of this servlet as a Python module.',
-	'__orig_file__':
-		'The file name of the Kid template that produced this Python module.'
-	}
-vars = variables.keys()
-vars.sort()
+    'servlet':
+        'The servlet instance',
+    'servlet.request()':
+        'Used to access fields and other info about the request.',
+    'servlet.request().cookies()':
+        'Dictionary of all Cookies the client sent with this request.',
+    'servlet.request().fields()':
+        'Dictionary of all form fields contained by this request.',
+    'servlet.request().serverDictionary()':
+        'Dictionary with the data the web server gave us.',
+    'servlet.request().serverSidePath()':
+        'The absolute server-side path of the request.',
+    'servlet.response()':
+        'Used to set cookies other info as response.',
+    'servlet.response().cookies()':
+        'Dictionary of all cookies that will be sent with this response.',
+    'servlet.response().headers()':
+        'Dictionary of all headers contained by this request.',
+    '__file__':
+        'The file name of this servlet as a Python module.',
+    '__orig_file__':
+        'The file name of the Kid template that produced this Python module.'
+    }
 ?>
-<div py:for="var in vars">
+<div py:for="var in sorted(variables)">
 <h4 py:content="var" />
 <p style="font-size:small" py:content="show(eval(var))" />
 <p py:content="variables[var]" />

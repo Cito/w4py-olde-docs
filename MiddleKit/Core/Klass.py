@@ -402,8 +402,8 @@ class Klass(MiddleDict, ModelObject):
 
     def willBuildDependencies(self):
         """Preps the klass for buildDependencies()."""
-        self._dependencies = []  # who self depends on
-        self._dependents = []  # who depends on self
+        self._dependencies = [] # who self depends on
+        self._dependents = [] # who depends on self
 
     def buildDependencies(self):
         """Build dependencies of the klass.

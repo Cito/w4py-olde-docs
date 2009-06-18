@@ -28,7 +28,7 @@ def test(store):
 
     class Blarg:
         pass
-    blarg = Blarg()  # a dummy object, incompatible with everything
+    blarg = Blarg() # a dummy object, incompatible with everything
 
     f = Foo()
     typeErrors(f, blarg)
@@ -59,7 +59,7 @@ def test(store):
         raise Exception('expecting ValueError for invalid enum')
 
     # Numerics that pass
-    f.setI(1L)  # ints can take longs that fit in the int range
-    f.setL(1)   # longs can take ints
-    f.setF(1)   # floats can take ints
-    f.setF(1L)  # floats can take longs
+    f.setI(1L) # ints can take longs that fit in the int range
+    f.setL(1) # longs can take ints
+    f.setF(1) # floats can take ints
+    f.setF(1L) # floats can take longs

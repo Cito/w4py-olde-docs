@@ -369,7 +369,7 @@ class ObjRefAttr(object):
             # It will complain:
             # "Subqueries are not allowed in this context. Only scalar expressions are allowed."
             # So we pass back some "pre-statements" to set up the scalar in a temp variable.
-            classId, objId = sql.split(',', 1)  # objId is the '(select...' part
+            classId, objId = sql.split(',', 1) # objId is the '(select...' part
             refVarName = str('@ref_%03i_%s'
                 % (ObjRefAttr.refVarCount, self.targetKlass().name()))
             ObjRefAttr.refVarCount += 1

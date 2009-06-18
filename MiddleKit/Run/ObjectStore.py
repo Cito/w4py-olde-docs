@@ -118,7 +118,7 @@ class ObjectStore(ModelUser):
             self._newObjects     = NonThreadedList()
             self._deletedObjects = NonThreadedList()
             self._changedObjects = NonThreadedDict()
-        self._objects        = self.emptyObjectCache()  # dict; keyed by ObjectKeys
+        self._objects        = self.emptyObjectCache() # dict; keyed by ObjectKeys
 
     def emptyObjectCache(self):
         if self.setting('CacheObjectsForever', False):
@@ -230,7 +230,7 @@ class ObjectStore(ModelUser):
 
         objectsToDel = {}
         detaches = []
-        self._deleteObject(object, objectsToDel, detaches)  # compute objectsToDel and detaches
+        self._deleteObject(object, objectsToDel, detaches) # compute objectsToDel and detaches
         self.willChange()
 
         # detaches
@@ -554,11 +554,11 @@ class ObjectStore(ModelUser):
         import types
         assert aClass is not None
         if not isinstance(aClass, BaseKlass):
-            if isinstance(aClass, types.ClassType):  # old Python classes
+            if isinstance(aClass, types.ClassType): # old Python classes
                 aClass = self._model.klass(aClass.__name__)
             elif type(aClass) in StringTypes:
                 aClass = self._model.klass(aClass)
-            elif isinstance(aClass, types.TypeType):  # new Python classes
+            elif isinstance(aClass, types.TypeType): # new Python classes
                 aClass = self._model.klass(aClass.__name__)
             else:
                 raise ValueError('Invalid class parameter. Pass a Klass,'

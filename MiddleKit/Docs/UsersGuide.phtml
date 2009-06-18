@@ -18,9 +18,9 @@
 
 <p>MiddleKit can use any of the following databases as a back-end:</p>
 <ul>
-    <li><a href="http://www.mysql.com">MySQL</a> using the <a href="http://sourceforge.net/projects/mysql-python">mysqldb</a> database adaptor.</li>
-    <li><a href="http://www.postgresql.org">PostgreSQL</a> using the <a href="http://initd.org/software/initd/psycopg">psycopg</a> database adaptor.</li>
-    <li><a href="http://www.microsoft.com/sql/">Microsoft SQL Server</a> using the <a href="http://www.egenix.com/files/python/mxODBC.html">mxODBC</a> adaptor.</li>
+  <li><a href="http://www.mysql.com">MySQL</a> using the <a href="http://sourceforge.net/projects/mysql-python">mysqldb</a> database adaptor.</li>
+  <li><a href="http://www.postgresql.org">PostgreSQL</a> using the <a href="http://initd.org/software/initd/psycopg">psycopg</a> database adaptor.</li>
+  <li><a href="http://www.microsoft.com/sql/">Microsoft SQL Server</a> using the <a href="http://www.egenix.com/files/python/mxODBC.html">mxODBC</a> adaptor.</li>
 </ul>
 
 
@@ -29,10 +29,10 @@
 <p>All attributes in an object model must be typed. MiddleKit divides types into 4 major categories:</p>
 
 <ol>
-	<li><a href="#DT_Basic">Basic types</a></li>
-	<li><a href="#DT_DateTime">Date and time types</a></li>
-	<li><a href="#DT_Enums">Enumerations</a></li>
-	<li><a href="#DT_ObjRef">Object references</a></li>
+  <li><a href="#DT_Basic">Basic types</a></li>
+  <li><a href="#DT_DateTime">Date and time types</a></li>
+  <li><a href="#DT_Enums">Enumerations</a></li>
+  <li><a href="#DT_ObjRef">Object references</a></li>
 </ol>
 
 
@@ -43,45 +43,45 @@
 <p>While MiddleKit is designed to be generic and therefore, database agnostic, concrete examples pay good dividends. So the following table includes the type equivalents for MySQL.</p>
 
 <table border="1" align="center" cellpadding="2" cellspacing="0">
-	<tr>
-		<th colspan=4 align="center">Basic Types</th>
-	</tr>
-	<tr>
-		<th>MiddleKit</th>
-		<th>Python</th>
-		<th>MySQL</th>
-		<th>Notes</th>
-	</tr>
-	<tr>
-		<td>bool</td>
-		<td>int</td>
-		<td>bool</td>
-		<td>Py int = 0 or 1</td>
-	</tr>
-	<tr>
-		<td>int</td>
-		<td>int</td>
-		<td>int</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>long</td>
-		<td>long</td>
-		<td>bigint</td>
-		<td>64-bit int</td>
-	</tr>
-	<tr>
-		<td>float</td>
-		<td>float</td>
-		<td>double</td>
-		<td>64-bit float</td>
-	</tr>
-	<tr>
-		<td>string</td>
-		<td>string</td>
-		<td>varchar<sup style="font-size:smaller">(*)</sup></td>
-		<td>&nbsp;</td>
-	</tr>
+  <tr>
+    <th colspan=4 align="center">Basic Types</th>
+  </tr>
+  <tr>
+    <th>MiddleKit</th>
+    <th>Python</th>
+    <th>MySQL</th>
+    <th>Notes</th>
+  </tr>
+  <tr>
+    <td>bool</td>
+    <td>int</td>
+    <td>bool</td>
+    <td>Py int = 0 or 1</td>
+  </tr>
+  <tr>
+    <td>int</td>
+    <td>int</td>
+    <td>int</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>long</td>
+    <td>long</td>
+    <td>bigint</td>
+    <td>64-bit int</td>
+  </tr>
+  <tr>
+    <td>float</td>
+    <td>float</td>
+    <td>double</td>
+    <td>64-bit float</td>
+  </tr>
+  <tr>
+    <td>string</td>
+    <td>string</td>
+    <td>varchar<sup style="font-size:smaller">(*)</sup></td>
+    <td>&nbsp;</td>
+  </tr>
 </table>
 
 <p><sup style="font-size:smaller">(*)</sup> The MySQL type is <code>char</code> if the minimum and maximum length are equal.</p>
@@ -94,33 +94,33 @@
 <p>With a default Python installation and MiddleKit, you can pass strings:</p>
 
 <table border="1" align="center" cellpadding="2" cellspacing="0">
-	<tr>
-		<th colspan="4" align="center">Date/Time Types</th>
-	</tr>
-	<tr>
-		<th>MiddleKit</th>
-		<th>Python</th>
-		<th>MySQL</th>
-		<th>Notes</th>
-	</tr>
-	<tr>
-		<td>datetime</td>
-		<td>string/DateTime</td>
-		<td>datetime</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>date</td>
-		<td>string/DateTime</td>
-		<td>datetime</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>time</td>
-		<td>string/DateTimeDelta</td>
-		<td>time</td>
-		<td>&nbsp;</td>
-	</tr>
+  <tr>
+    <th colspan="4" align="center">Date/Time Types</th>
+  </tr>
+  <tr>
+    <th>MiddleKit</th>
+    <th>Python</th>
+    <th>MySQL</th>
+    <th>Notes</th>
+  </tr>
+  <tr>
+    <td>datetime</td>
+    <td>string/DateTime</td>
+    <td>datetime</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>date</td>
+    <td>string/DateTime</td>
+    <td>datetime</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>time</td>
+    <td>string/DateTimeDelta</td>
+    <td>time</td>
+    <td>&nbsp;</td>
+  </tr>
 </table>
 
 
@@ -141,18 +141,18 @@
 <p>The type for a single reference in Python is indicated by simply naming the class of the object that can be referred to. That class must be defined in the object model and will therefore have its own table in the database. User-defined classes are required to be capitalized (while other types are lower case). For example:</p>
 
 <table border="1" align="center" cellpadding="2" cellspacing="0">
-	<tr>
-		<th>Attribute</th>
-		<th>Type</th>
-	</tr>
-	<tr>
-		<td>address</td>
-		<td>Address</td>
-	</tr>
-	<tr>
-		<td>billingInfo</td>
-		<td>BillingInfo</td>
-	</tr>
+  <tr>
+    <th>Attribute</th>
+    <th>Type</th>
+  </tr>
+  <tr>
+    <td>address</td>
+    <td>Address</td>
+  </tr>
+  <tr>
+    <td>billingInfo</td>
+    <td>BillingInfo</td>
+  </tr>
 </table>
 
 <h4>1-to-many references</h4>
@@ -160,46 +160,46 @@
 <p>The type for a list of references is specified by <code>list of <i>ClassName</i></code> and represents the 1-to-many relationship. This will be an ordinary Python list, except that some invisible MiddleKit machinery in the background will perform various services (fetch objects on demand, insert new objects, etc.). For example:</p>
 
 <table border="1" align="center" cellpadding="2" cellspacing="0">
-	<tr>
-		<th>Class</th>
-		<th>Attribute</th>
-		<th>Type</th>
-	</tr>
-	<tr>
-		<td>Contact</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>addresses</td>
-		<td>list of Address</td>
-	</tr>
+  <tr>
+    <th>Class</th>
+    <th>Attribute</th>
+    <th>Type</th>
+  </tr>
+  <tr>
+    <td>Contact</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>addresses</td>
+    <td>list of Address</td>
+  </tr>
 </table>
 
 <p>Note that the the Address class referred to will need a "back reference" attribute which, for each Address instance, refers to the corresponding Contact instance.  By default, MiddleKit assumes that this attribute is named the same as the class containing the list attribute ('Contact' in this example), but with the first letter converted to lowercase to match MiddleKit naming conventions (therefore, 'contact'):</p>
 
 <table border="1" align="center" cellpadding="2" cellspacing="0">
-	<tr>
-		<th>Class</th>
-		<th>Attribute</th>
-		<th>Type</th>
-	</tr>
-	<tr>
-		<td>Address</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>contact</td>
-		<td>Contact</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>name</td>
-		<td>string</td>
-	</tr>
+  <tr>
+    <th>Class</th>
+    <th>Attribute</th>
+    <th>Type</th>
+  </tr>
+  <tr>
+    <td>Address</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>contact</td>
+    <td>Contact</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>name</td>
+    <td>string</td>
+  </tr>
 </table>
 
 <h4>Many-to-many references</h4>
@@ -212,66 +212,66 @@ In many cases it makes sense to name this object using a verb, such as
 "Wrote":</p>
 
 <table border="1" align="center" cellpadding="2" cellspacing="0">
-	<tr>
-		<th>Class</th>
-		<th>Attribute</th>
-		<th>Type</th>
-	</tr>
-	<tr>
-		<td>Author</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>name</td>
-		<td>string</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>books</td>
-		<td>list of Wrote</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>Book</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>title</td>
-		<td>string</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>authors</td>
-		<td>list of Wrote</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>Wrote</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>author</td>
-		<td>Author</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>book</td>
-		<td>Book</td>
-	</tr>
+  <tr>
+    <th>Class</th>
+    <th>Attribute</th>
+    <th>Type</th>
+  </tr>
+  <tr>
+    <td>Author</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>name</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>books</td>
+    <td>list of Wrote</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Book</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>title</td>
+    <td>string</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>authors</td>
+    <td>list of Wrote</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>Wrote</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>author</td>
+    <td>Author</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>book</td>
+    <td>Book</td>
+  </tr>
 </table>
 
 <a name="DT_Recursive"></a><h4>Recursive structures</h4>
@@ -280,30 +280,30 @@ In many cases it makes sense to name this object using a verb, such as
 assumes this attribute will be named according to the name of the referencing.  If you ever want to create recursive structures such as trees you may need to override the default using the "BackRefAttr" attribute.  A tree node can be implemented by having a reference to its parent node, and a list of children nodes like so:</p>
 
 <table border="1" align="center" cellpadding="2" cellspacing="0">
-	<tr>
-		<th>Class</th>
-		<th>Attribute</th>
-		<th>Type</th>
-		<th>Extras</th>
-	</tr>
-	<tr>
-		<td>Node</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>parent</td>
-		<td>Node</td>
-		<td>&nbsp;</td>
-	</tr>
-	<tr>
-		<td>&nbsp;</td>
-		<td>children</td>
-		<td>list of Node</td>
-		<td>BackRefAttr='parent'</td>
-	</tr>
+  <tr>
+    <th>Class</th>
+    <th>Attribute</th>
+    <th>Type</th>
+    <th>Extras</th>
+  </tr>
+  <tr>
+    <td>Node</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>parent</td>
+    <td>Node</td>
+    <td>&nbsp;</td>
+  </tr>
+  <tr>
+    <td>&nbsp;</td>
+    <td>children</td>
+    <td>list of Node</td>
+    <td>BackRefAttr='parent'</td>
+  </tr>
 </table>
 
 <p>By specifying the attribute to use a back reference, you've told MiddleKit that it can fetch children of a
@@ -317,17 +317,17 @@ deleted.</p>
 <p>For the purpose of discussion, the object containing the attribute is <i>self</i> while the objects being referred to are the <i>others</i>. Now then, the <b>onDeleteSelf</b> property specifies what happens to the other object(s) when the self object is deleted:</p>
 
 <ol>
-	<li> deny - do not allow self to be deleted</li>
-	<li> cascade - also delete other when self is deleted</li>
-	<li> detach - allow self to be deleted with no effect on other (this is the default)</li>
+  <li> deny - do not allow self to be deleted</li>
+  <li> cascade - also delete other when self is deleted</li>
+  <li> detach - allow self to be deleted with no effect on other (this is the default)</li>
 </ol>
 
 <p>There is a similar property <b>onDeleteOther</b> which specifies what happens to the self object when the other object(s) is deleted:</p>
 
 <ol>
-	<li> deny - do not allow other to be deleted (this is the default)</li>
-	<li> cascade - also delete self when other is deleted</li>
-	<li> detach - allow other to be deleted, and set the reference attribute in self that referred to other to None</li>
+  <li> deny - do not allow other to be deleted (this is the default)</li>
+  <li> cascade - also delete self when other is deleted</li>
+  <li> detach - allow other to be deleted, and set the reference attribute in self that referred to other to None</li>
 </ol>
 
 <p>The default value of onDeleteSelf is detach, and the default value of onDeleteOther is deny.  In other words, by default, you can delete an object which <i>references</i> other objects, but you can't delete an object which is <i>referenced by</i> other objects.  An example specification would be <code>onDeleteOther=cascade</code>.</p>
@@ -399,15 +399,15 @@ from Middle.Foo import Foo
 <p><a name="Configuration_SQLLog"></a> The <span class="name">SQLLog</span> setting can be used to get MiddleKit to echo all SQL statements to 'stdout', 'stderr' or a filename. For filenames, an optional 'Mode' setting inside SQLLog can be used to write over or append to an existing file. The default is write. Here are some examples:</p>
 
 <pre class="py">{
-    'SQLLog': { 'File': 'stdout' },
+    'SQLLog': {'File': 'stdout'},
 }</pre>
 
 <pre class="py">{
-    'SQLLog': { 'File': 'middlekit.sql' },
+    'SQLLog': {'File': 'middlekit.sql'},
 }</pre>
 
 <pre class="py">{
-    'SQLLog': { 'File': 'middlekit.sql', 'Mode': 'append' },
+    'SQLLog': {'File': 'middlekit.sql', 'Mode': 'append'},
 }</pre>
 
 <p><a name="Configuration_Database"></a> The <span class="name">Database</span> setting overrides the database name, which is otherwise assumed to be same name as the model. This is particularly useful if you are running two instances of the same application on one host.</p>
@@ -434,27 +434,27 @@ This setting has no effect on the visible behavior of MiddleKit; it only changes
 <p><a name="Configuration_SQLConnectionPoolSize"></a> The <span class="name">SQLConnectionPoolSize</span> setting is used to create a <a href="../../MiscUtils/Docs/index.html">MiscUtils</a>.<a href="../../MiscUtils/Docs/Source/Docs/MiscUtils.DBPool.html">DBPool</a> instance for use by the store. For DB-API modules with a threadsafety of only 1 (such as MySQLdb or pgdb), this is particularly useful (in one benchmark, the speed up was 15 - 20%). Simply set the size of the pool in order to have one created and used:</p>
 
 <pre class="py">{
-	'SQLConnectionPoolSize': 20,
+  'SQLConnectionPoolSize': 20,
 }</pre>
 
 <p><a name="Configuration_SQLSerialColumnName"></a> The <span class="name">SQLSerialColumnName</span> controls the name that is used for the serial number of a given database record, which is also the primary key. The default is 'serialNum' which matches MiddleKit naming conventions. You can change this:</p>
 
 <pre class="py">{
-    'SQLSerialColumnName': 'SerialNum',  # capitalized, or
-    'SQLSerialColumnName': '%(className)sId',  # the name used by older MiddleKits
+    'SQLSerialColumnName': 'SerialNum', # capitalized, or
+    'SQLSerialColumnName': '%(className)sId', # the name used by older MiddleKits
         # you can use className for lower, ClassName for upper, or _ClassName for as-is
 }</pre>
 
 <p><a name="Configuration_ObjRefSuffixes"></a> The <span class="name">ObjRefSuffixes</span> controls the suffixes that are appended for the names of the two SQL column that are created for each obj ref attribute. The suffixes must be different from each other.</p>
 
 <pre class="py">{
-    'ObjRefSuffixes': ('ClassId', 'ObjId'),  # the default
+    'ObjRefSuffixes': ('ClassId', 'ObjId'), # the default
 }</pre>
 
 <p><a name="Configuration_UseBigIntObjRefColumns"></a> The <span class="name">UseBigIntObjRefColumns</span> causes MiddleKit to store object references in 64-bit fields, instead of in two fields (one for the class id and one for the obj id). You would only do this for a legacy MiddleKit application. Turning this on obsoletes the ObjRefSuffixes setting.</p>
 
 <pre class="py">{
-    'UseBigIntObjRefColumns': True,  # use single 64-bit obj ref fields
+    'UseBigIntObjRefColumns': True, # use single 64-bit obj ref fields
 }</pre>
 
 <p><a name="Configuration_UsePickledClassesCache"></a> The <span class="name">UsePickledClassesCache</span> setting defaults to False. <span class="warning">This feature has proven to be unreliable which is why it now defaults to False.</span> When True, it causes MiddleKit to cache the <span class="filename">Classes.csv</span> text file as a binary pickle file named <span class="filename">Classes.pickle.cache</span>. This reduces subsequent load times by about 40%. The cache will be ignored if it can't be read, is older than the CSV file, has a different Python version, etc. You don't normally even need to think about this, but if for some reason you would like to turn off the use of the cache, you can do so through this setting.</p>
@@ -462,8 +462,8 @@ This setting has no effect on the visible behavior of MiddleKit; it only changes
 <p><a name="Configuration_DropStatements"></a> The <span class="name">DropStatements</span> setting has these potential values:</p>
 
 <ul>
-	<li> database - This causes a DROP DATABASE to be used in <span class="filename">Create.sql</span>. This is the cleanest way to handle models and also the default.</li>
-	<li> tables - This assumes the database already exists and does a DROP TABLE for each table in the model. There is a small danger here that if you remove a class from a model, then its old SQL table will remain in the database. The main use for this setting is for database servers that are slow creating new databases. One user reported a 1 minute lag for Microsoft SQL Server 2000, which is too much of a lag when running the test suite.</li>
+  <li> database - This causes a DROP DATABASE to be used in <span class="filename">Create.sql</span>. This is the cleanest way to handle models and also the default.</li>
+  <li> tables - This assumes the database already exists and does a DROP TABLE for each table in the model. There is a small danger here that if you remove a class from a model, then its old SQL table will remain in the database. The main use for this setting is for database servers that are slow creating new databases. One user reported a 1 minute lag for Microsoft SQL Server 2000, which is too much of a lag when running the test suite.</li>
 </ul>
 
 <pre class="py">{
@@ -522,12 +522,12 @@ foo.addToBars(newBar)
 <p>This method actually does a lot more for you, ensuring that you're not adding an object of the wrong type, adding the same object twice, etc. Here is a complete list:</p>
 
 <ul>
-	<li> assert newBar is not None</li>
-	<li> assert newBar inherits from Bar</li>
-	<li> assert newBar is not already in bars</li>
-	<li> add newBar to bars</li>
-	<li> add newBar to foo's object store, if needed</li>
-	<li> set newBar's foo-reference to foo</li>
+  <li> assert newBar is not None</li>
+  <li> assert newBar inherits from Bar</li>
+  <li> assert newBar is not already in bars</li>
+  <li> add newBar to bars</li>
+  <li> add newBar to foo's object store, if needed</li>
+  <li> set newBar's foo-reference to foo</li>
 </ul>
 
 <p>You don't have to remember the details since this behavior is both supplied and what you would expect. Just remember to use the various addToBars() methods.</p>
@@ -557,7 +557,7 @@ store = MySQLObjectStore(db='foobar', user='prog', passwd='asdklfj')
 <p>Every once in a while, you might get a hankering for iterating over the attributes of an MK object. You can do so like this:</p>
 
 <pre class="py">for attr in obj.klass().allAttrs():
-	print attr.name()
+  print attr.name()
 </pre>
 
 <p>The klass() method seen above, returns the object's MiddleKit Klass, which is the class specification that came from the object model you created. The allAttrs() method returns a klass' list of attributes.</p>
@@ -565,9 +565,9 @@ store = MySQLObjectStore(db='foobar', user='prog', passwd='asdklfj')
 <p>The attributes are instances of MiddleKit.Core.Attr (or one of its subclasses such as ObjRefAttr) which inherits from MiddleDict and acquires additional methods from mix-ins located in MiddleKit.Design and MiddleKit.Run. Since attributes are essentially dictionaries, you can treat them like so, although if you modify them you are asking for serious trouble.</p>
 
 <pre class="py">for attr in obj.klass().allAttrs():
-	keys = attr.keys()
-	keys.sort()
-	print '%s: %s' % (attr.name(), keys)
+  keys = attr.keys()
+  keys.sort()
+  print '%s: %s' % (attr.name(), keys)
 </pre>
 
 <p>If you had asked the klass for its attrs() instead of allAttrs(), you would have missed out on attributes that were inherited.</p>
@@ -587,8 +587,8 @@ store.deleteObject(object)
 <p>This may raise one of these two exceptions defined in MiddleKit.Run.ObjectStore:</p>
 
 <ul>
-	<li> <b>DeleteReferencedException</b> - This is raised when you try to delete an object that is referenced by other objects.  To avoid this exception, either make sure that there are no other objects referencing an object before you try to delete it, or change the onDeleteOther property of the reference attribute to detach or cascade.</li>
-	<li> <b>DeleteObjectWithReferencesError</b> - This is raised when you try to delete an object that references other objects, with a reference attribute that has the property onDeleteSelf=deny.  To avoid this exception, either set the reference to None before deleting, or switch to a different setting for onDeleteSelf on the reference attribute.</li>
+  <li> <b>DeleteReferencedException</b> - This is raised when you try to delete an object that is referenced by other objects.  To avoid this exception, either make sure that there are no other objects referencing an object before you try to delete it, or change the onDeleteOther property of the reference attribute to detach or cascade.</li>
+  <li> <b>DeleteObjectWithReferencesError</b> - This is raised when you try to delete an object that references other objects, with a reference attribute that has the property onDeleteSelf=deny.  To avoid this exception, either set the reference to None before deleting, or switch to a different setting for onDeleteSelf on the reference attribute.</li>
 </ul>
 
 <p>See <a href="#DT_ObjRef">Object references</a> for the specifications of onDeleteSelf and onDeleteOther.</p>
@@ -676,7 +676,7 @@ addition to the object itself.  You can control this by adding a "Copy" column i
 <p>Caveats:</p>
 
 <ul>
-	<li>Suppose model B inherits model A and that A has a class Base. If B wants to redefine Base and classes that inherit from it, the redefinition should come first:
+  <li>Suppose model B inherits model A and that A has a class Base. If B wants to redefine Base and classes that inherit from it, the redefinition should come first:
 <pre class="py">
     Class Attr Type
     Base
@@ -684,10 +684,10 @@ addition to the object itself.  You can control this by adding a "Copy" column i
     Sub(Base)
           c    int
 </pre>
-	If instead, B declares Sub first, then it will erroneously pick up the Base from A.</li>
-	<li> A model cannot define a class such as "Foo(Foo)" where a given class is overridden, but inherited by the override. This could be useful for adding additional attribute definitions to an existing class.</li>
-	<li> Although the "diamond of inheritance" situation has been accounted for, using ideas from Python 2.2, it is not yet covered by the test suite.</li>
-	<li> "Infinite inheritance", where there is a cycle in inheritance, is not specifically caught.</li>
+  If instead, B declares Sub first, then it will erroneously pick up the Base from A.</li>
+  <li> A model cannot define a class such as "Foo(Foo)" where a given class is overridden, but inherited by the override. This could be useful for adding additional attribute definitions to an existing class.</li>
+  <li> Although the "diamond of inheritance" situation has been accounted for, using ideas from Python 2.2, it is not yet covered by the test suite.</li>
+  <li> "Infinite inheritance", where there is a cycle in inheritance, is not specifically caught.</li>
 </ul>
 
 
@@ -698,15 +698,15 @@ addition to the object itself.  You can control this by adding a "Copy" column i
 <p>Scott Ambler has written some papers on the topic of ORM and also maintains a set of ORM related links:</p>
 
 <ul>
-	<li> <a href="http://www.ambysoft.com/mappingObjects.html">Mapping Objects to Relational Databases</a></li>
-	<li> <a href="http://www.ambysoft.com/persistenceLayer.html">The Design of a Robust Persistence Layer for Relational Databases</a></li>
+  <li> <a href="http://www.ambysoft.com/mappingObjects.html">Mapping Objects to Relational Databases</a></li>
+  <li> <a href="http://www.ambysoft.com/persistenceLayer.html">The Design of a Robust Persistence Layer for Relational Databases</a></li>
 </ul>
 
 <p>Apple has a very mature (and perhaps complex) ORM framework named Enterprise Objects Framework, or EOF, available in both Java and Objective-C. All the docs are online at the WebObjects page:</p>
 
 <ul>
-	<li><a href="http://developer.apple.com/documentation/WebObjects/">WebObjects
-	Developer Documentation</a></li>
+  <li><a href="http://developer.apple.com/documentation/WebObjects/">WebObjects
+  Developer Documentation</a></li>
 </ul>
 
 <p>Other Python ORMs that we're aware of:</p>
@@ -719,7 +719,7 @@ addition to the object itself.  You can control this by adding a "Copy" column i
 <p>Here's a Perl ORM that someone recommended as interesting:</p>
 
 <ul>
-	<li><a href="http://www.soundobjectlogic.com/tangram/fs.html">Tangram</a></li>
+  <li><a href="http://www.soundobjectlogic.com/tangram/fs.html">Tangram</a></li>
 </ul>
 
 

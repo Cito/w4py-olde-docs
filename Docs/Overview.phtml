@@ -8,25 +8,25 @@
 <p>Webware for Python is a suite of software components for developing object-oriented, web-based applications. The suite uses well known design patterns and includes popular features such as:</p>
 
 <ul>
-	<li>An application server that is <strong>fast, multi-threaded, easy to use</strong>.</li>
-	<li><strong>Good error handling</strong>. A crash of one page will not crash the application server. Exception reports are logged and easy to read when developing.</li>
-	<li><strong>Servlets</strong>. Similar to Java servlets, they provide a familiar basis for construction web applications.</li>
-	<li><strong>Python Server Pages</strong> (PSP, similar to ASP, PHP and JSP).</li>
-	<li><strong>MiddleKit, an object-relational mapper</strong>. MiddleKit facilitates storing objects in an SQL. It is one of the strongest and components in Webware.</li>
-	<li><strong>Simplicity</strong>. Webware's code is quite simple and easy to understand if you feel the need to extend it.</li>
-	<li>Task scheduling.</li>
-	<li>User management and authentication.</li>
-	<li>A simple built-in web-server and a CGI wrapper.</li>
+  <li>An application server that is <strong>fast, multi-threaded, easy to use</strong>.</li>
+  <li><strong>Good error handling</strong>. A crash of one page will not crash the application server. Exception reports are logged and easy to read when developing.</li>
+  <li><strong>Servlets</strong>. Similar to Java servlets, they provide a familiar basis for construction web applications.</li>
+  <li><strong>Python Server Pages</strong> (PSP, similar to ASP, PHP and JSP).</li>
+  <li><strong>MiddleKit, an object-relational mapper</strong>. MiddleKit facilitates storing objects in an SQL. It is one of the strongest and components in Webware.</li>
+  <li><strong>Simplicity</strong>. Webware's code is quite simple and easy to understand if you feel the need to extend it.</li>
+  <li>Task scheduling.</li>
+  <li>User management and authentication.</li>
+  <li>A simple built-in web-server and a CGI wrapper.</li>
 </ul>
 
 <p>Key goals of the project include:</p>
 
 <ul>
-	<li>Python- and object-oriented ("Pythonic") approach.</li>
-	<li>An expansive suite of components and features to cover common needs of web developers.</li>
-	<li>Modular architecture where components can be used together or independently.</li>
-	<li>Excellent documentation and numerous examples.</li>
-	<li>Open source development and community.</li>
+  <li>Python- and object-oriented ("Pythonic") approach.</li>
+  <li>An expansive suite of components and features to cover common needs of web developers.</li>
+  <li>Modular architecture where components can be used together or independently.</li>
+  <li>Excellent documentation and numerous examples.</li>
+  <li>Open source development and community.</li>
 </ul>
 
 
@@ -67,14 +67,14 @@
 
 <p>Webware could always use contributors in various areas, some of them lightweight and some of them not. Consider all the fun things you could do:</p>
 <ul>
-	<li>Test pre-releases on your favorite OS, web server and version of Python. (lightweight)</li>
-	<li>Write custom WebKit adapters for your favorite web server for enhanced performance. (fairly lightweight)</li>
-	<li>Write an article about using Webware. (middleweight)</li>
-	<li>Write a tutorial. (middleweight)</li>
-	<li>Build up regression test suites to help with testing and ensure future stability. (middleweight)</li>
-	<li>Contribute to the implementation of components such as WebKit, MiddleKit and PSP. (heavyweight)</li>
-	<li>For morea ideas, see also the <a href="../WebKit/Docs/Future.html">Future Work</a> document and the comments below.</li>
-	<li>Contribute something else you might think of that we haven't.</li>
+  <li>Test pre-releases on your favorite OS, web server and version of Python. (lightweight)</li>
+  <li>Write custom WebKit adapters for your favorite web server for enhanced performance. (fairly lightweight)</li>
+  <li>Write an article about using Webware. (middleweight)</li>
+  <li>Write a tutorial. (middleweight)</li>
+  <li>Build up regression test suites to help with testing and ensure future stability. (middleweight)</li>
+  <li>Contribute to the implementation of components such as WebKit, MiddleKit and PSP. (heavyweight)</li>
+  <li>For morea ideas, see also the <a href="../WebKit/Docs/Future.html">Future Work</a> document and the comments below.</li>
+  <li>Contribute something else you might think of that we haven't.</li>
 </ul>
 
 <p>If you are interested in contributing please contact <a href="mailto:webware-discuss@lists.sourceforge.net">webware-discuss@lists.sourceforge.net</a>.</p>
@@ -115,14 +115,14 @@ Christoph Zwerschke, <a href="mailto:cito@online.de">cito@online.de</a>
 <a name="DesignPoints"></a><h2>Design Points</h2>
 
 <ul>
-	<li>Webware is pro-Python. These software components are not about Java, C++ or any other programming languages.</li>
-	<li>The various software components are meant to be accessible in a stand alone fashion except in those cases where one component builds on another. That doesn't preclude the idea that the components can provide hooks for integration or even automatically integrate other components when their presence is detected.</li>
-	<li>A clean, object-oriented style of development is used as much as possible.</li>
-	<li>However, Webware components don't provide a special class for each type of HTML tag. It's generally easier and more efficient to use strings like '&lt;br&gt;&lt;hr&gt;' than to say something like 'BreakLine() + HorizontalRule()'.</li>
-	<li>Documentation is meant to be of the highest caliber so that users can more quickly get up and running with Webware.</li>
-	<li>All components are accompanied by examples (that also serve as tests).</li>
-	<li>Over time, regression tests are created and expanded upon for each component.</li>
-	<li>Although Webware includes more than one independent component, it's not intended to be a hodge-podge repository of any kind of web component written in Python. New components should fit into the 'feel' of what's there already and provide integration with other components wherever possible. The emphasis is on high-quality, object-oriented components (with the mild exception of the utility collections, MiscUtils and WebUtils).</li>
+  <li>Webware is pro-Python. These software components are not about Java, C++ or any other programming languages.</li>
+  <li>The various software components are meant to be accessible in a stand alone fashion except in those cases where one component builds on another. That doesn't preclude the idea that the components can provide hooks for integration or even automatically integrate other components when their presence is detected.</li>
+  <li>A clean, object-oriented style of development is used as much as possible.</li>
+  <li>However, Webware components don't provide a special class for each type of HTML tag. It's generally easier and more efficient to use strings like '&lt;br&gt;&lt;hr&gt;' than to say something like 'BreakLine() + HorizontalRule()'.</li>
+  <li>Documentation is meant to be of the highest caliber so that users can more quickly get up and running with Webware.</li>
+  <li>All components are accompanied by examples (that also serve as tests).</li>
+  <li>Over time, regression tests are created and expanded upon for each component.</li>
+  <li>Although Webware includes more than one independent component, it's not intended to be a hodge-podge repository of any kind of web component written in Python. New components should fit into the 'feel' of what's there already and provide integration with other components wherever possible. The emphasis is on high-quality, object-oriented components (with the mild exception of the utility collections, MiscUtils and WebUtils).</li>
 </ul>
 
 

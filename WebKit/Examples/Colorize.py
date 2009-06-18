@@ -39,6 +39,6 @@ class Colorize(Page):
         sys.stdout = myout
         py2html.main((None, '-stdout', '-files', filename))
         results = myout.getvalue()
-        results = results.replace('\t', '    ')  # 4 spaces per tab
+        results = results.replace('\t', '    ') # 4 spaces per tab
         res.write(results)
         sys.stdout = stdout

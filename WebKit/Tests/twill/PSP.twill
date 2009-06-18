@@ -38,7 +38,7 @@ find "This is the sample/test page"
 notfind 'test page uses <a href="Braces"><b>braces</b></a>'
 find "<p>Hello from included file!<p>"
 find "<p>\w{3} \w{3} ( |\d)\d \d{2}:\d{2}:\d{2} \d{4}</p>"
-find 'This is A HTML file that is dynamically inserted.'
+find 'This is a HTML file that is dynamically inserted.'
 find '<p style="color:purple">\w{3} \w{3} ( |\d)\d \d{2}:\d{2}:\d{2} \d{4}</p>'
 find "<ul><li>Outer loop: 1"
 find "<li>Inner loop: 2"
@@ -57,7 +57,7 @@ find "This is the sample/test page"
 find 'test page uses <a href="Braces"><b>braces</b></a>'
 find "<p>Hello from included file!<p>"
 find "<p>\w{3} \w{3} ( |\d)\d \d{2}:\d{2}:\d{2} \d{4}</p>"
-find 'This is A HTML file that is dynamically inserted.'
+find 'This is a HTML file that is dynamically inserted.'
 find '<p style="color:purple">\w{3} \w{3} ( |\d)\d \d{2}:\d{2}:\d{2} \d{4}</p>'
 find "<ul><li>Outer loop: 1"
 find "<li>Inner loop: 2"
