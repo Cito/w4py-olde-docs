@@ -16,6 +16,7 @@ Tavis Rudd <tavis@calrudd.com>
 
 
 from types import MethodType
+from UserDict import UserDict
 
 from MiscUtils import NoDefault
 
@@ -68,7 +69,7 @@ def valueForKey(obj, key, default=NoDefault):
 
     attr = method = None
     unknown = False
-    if isinstance(obj, dict):
+    if isinstance(obj, (dict, UserDict)):
         if default is NoDefault:
             try:
                 return obj[key]
