@@ -24,10 +24,10 @@ APP_NAME=`basename "$0"`
 
 # The location of the start sript:
 if [ -h "$0" ]; then
-	# Get the target file if start script is given as a link:
-	START_SCRIPT=`readlink -f "$0"`
+    # Get the target file if start script is given as a link:
+    START_SCRIPT=`readlink -f "$0"`
 else
-	START_SCRIPT="$0"
+    START_SCRIPT="$0"
 fi
 
 # The working directory or path to WebKit:
@@ -82,231 +82,231 @@ export PYTHONPATH
 
 # Source RedHat Linux function library:
 if [ -f /etc/init.d/functions ]; then
-	. /etc/init.d/functions
+    . /etc/init.d/functions
 elif [ -f /etc/rc.d/init.d/functions ]; then
-	. /etc/rc.d/init.d/functions
+    . /etc/rc.d/init.d/functions
 else
-	# Note that we don't really use the function library
-	# since it supports only pid files in /var/run/.
-	# We are only using the following functions here:
-	function success {
-		echo -n $"[ok]"
-	}
-	function failure {
-		echo -n $"[failed]"
-	}
+    # Note that we don't really use the function library
+    # since it supports only pid files in /var/run/.
+    # We are only using the following functions here:
+    function success {
+        echo -n $"[ok]"
+    }
+    function failure {
+        echo -n $"[failed]"
+    }
 fi
 
 start()
 {
-	echo -n $"Starting $APP_NAME: "
-	# Keep backup of last log file:
-	if [ "$LOG_OLD" -a -f "$LOG_FILE" ]; then
-		if [ -s "$LOG_FILE" ]; then
-			mv "$LOG_FILE" "$LOG_FILE$LOG_OLD"
-		else
-			rm "$LOG_FILE"
-		fi
-	fi
-	# Check if the server is already running:
-	if [ -f "$PID_FILE" ] ; then
-		PID=`cat "$PID_FILE"`
-		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null \
-					| grep -q " -i $PID_FILE "; then
-				RETVAL=1
-				echo -n "already running "
-				failure
-				echo
-				return
-			fi
-		fi
-		rm -f "$PID_FILE"
-	fi
-	if [ -z "$WEBWARE_USER" -o "$WEBWARE_USER" = "$USER" ]; then
-		"$APP_SERVER" $PYTHONOPTS -i "$PID_FILE" \
-			-o "$LOG_FILE" -d "$WORK_DIR" >/dev/null &
-	else
-		if [ "$LAUNCH_AS_WEBWARE" ]; then
-			# Switch user first, then create pid and log files:
-			CMD="\"$APP_SERVER\" $PYTHONOPTS"
-			CMD="$CMD -i \"$PID_FILE\" -d \"$WORK_DIR\" -o \"$LOG_FILE\""
-			runuser $WEBWARE_USER -c "$CMD" >/dev/null &
-		else
-			# Create pid and log files first, then switch user:
-			"$APP_SERVER" $PYTHONOPTS -i "$PID_FILE" -d "$WORK_DIR" \
-				-u $WEBWARE_USER >>$LOG_FILE 2>&1 &
-		fi
-	fi
-	if [ "$?" = 0 ]; then
-		t=0
-		tmax=50
-		while ((t<tmax)); do
-			if sleep 0.1 2>/dev/null; then
-				let t++
-			else
-				sleep 1
-				let t+=10
-			fi
-			if [ -s "$PID_FILE" ]; then
-				break
-			fi
-		done
-		if ((t<tmax)); then
-			RETVAL=0
-			success
-			echo
-			sleep 0.5 2>/dev/null || sleep 1
-			return
-		fi
-	fi
-	RETVAL=1
-	failure
-	echo
+    echo -n $"Starting $APP_NAME: "
+    # Keep backup of last log file:
+    if [ "$LOG_OLD" -a -f "$LOG_FILE" ]; then
+        if [ -s "$LOG_FILE" ]; then
+            mv "$LOG_FILE" "$LOG_FILE$LOG_OLD"
+        else
+            rm "$LOG_FILE"
+        fi
+    fi
+    # Check if the server is already running:
+    if [ -f "$PID_FILE" ] ; then
+        PID=`cat "$PID_FILE"`
+        if [ "$PID" ]; then
+            if ps -o command= -p $PID 2>/dev/null \
+                    | grep -q " -i $PID_FILE "; then
+                RETVAL=1
+                echo -n "already running "
+                failure
+                echo
+                return
+            fi
+        fi
+        rm -f "$PID_FILE"
+    fi
+    if [ -z "$WEBWARE_USER" -o "$WEBWARE_USER" = "$USER" ]; then
+        "$APP_SERVER" $PYTHONOPTS -i "$PID_FILE" \
+            -o "$LOG_FILE" -d "$WORK_DIR" >/dev/null &
+    else
+        if [ "$LAUNCH_AS_WEBWARE" ]; then
+            # Switch user first, then create pid and log files:
+            CMD="\"$APP_SERVER\" $PYTHONOPTS"
+            CMD="$CMD -i \"$PID_FILE\" -d \"$WORK_DIR\" -o \"$LOG_FILE\""
+            runuser $WEBWARE_USER -c "$CMD" >/dev/null &
+        else
+            # Create pid and log files first, then switch user:
+            "$APP_SERVER" $PYTHONOPTS -i "$PID_FILE" -d "$WORK_DIR" \
+                -u $WEBWARE_USER >>$LOG_FILE 2>&1 &
+        fi
+    fi
+    if [ "$?" = 0 ]; then
+        t=0
+        tmax=50
+        while ((t<tmax)); do
+            if sleep 0.1 2>/dev/null; then
+                let t++
+            else
+                sleep 1
+                let t+=10
+            fi
+            if [ -s "$PID_FILE" ]; then
+                break
+            fi
+        done
+        if ((t<tmax)); then
+            RETVAL=0
+            success
+            echo
+            sleep 0.5 2>/dev/null || sleep 1
+            return
+        fi
+    fi
+    RETVAL=1
+    failure
+    echo
 }
 
 stop()
 {
-	echo -n $"Stopping $APP_NAME: "
-	if [ -s "$PID_FILE" ]; then
-		PID=`cat "$PID_FILE"`
-		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null \
-					| grep -q " -i $PID_FILE "; then
-				if kill $PID >/dev/null 2>&1; then
-					t=0
-					tmax=100
-					while ((t<tmax)); do
-						if sleep 0.1 2>/dev/null; then
-							let t++
-						else
-							sleep 1
-							let t+=10
-						fi
-						if [ ! -d "/proc/$PID" ]; then
-							break
-						fi
-					done
-					if ((t<tmax)); then
-						rm -f "$PID_FILE"
-						success
-						echo
-						sleep 0.5 2>/dev/null || sleep 1
-						return
-					fi
-				fi
-			else
-				rm -f "$PID_FILE"
-				echo -n "not running (removing stale pid file)"
-			fi
-		else
-			rm -f "$PID_FILE"
-			echo -n "not running (removing empty pid file) "
-		fi
-	else
-		echo -n "not running "
-	fi
-	RETVAL=1
-	failure
-	echo
+    echo -n $"Stopping $APP_NAME: "
+    if [ -s "$PID_FILE" ]; then
+        PID=`cat "$PID_FILE"`
+        if [ "$PID" ]; then
+            if ps -o command= -p $PID 2>/dev/null \
+                    | grep -q " -i $PID_FILE "; then
+                if kill $PID >/dev/null 2>&1; then
+                    t=0
+                    tmax=100
+                    while ((t<tmax)); do
+                        if sleep 0.1 2>/dev/null; then
+                            let t++
+                        else
+                            sleep 1
+                            let t+=10
+                        fi
+                        if [ ! -d "/proc/$PID" ]; then
+                            break
+                        fi
+                    done
+                    if ((t<tmax)); then
+                        rm -f "$PID_FILE"
+                        success
+                        echo
+                        sleep 0.5 2>/dev/null || sleep 1
+                        return
+                    fi
+                fi
+            else
+                rm -f "$PID_FILE"
+                echo -n "not running (removing stale pid file)"
+            fi
+        else
+            rm -f "$PID_FILE"
+            echo -n "not running (removing empty pid file) "
+        fi
+    else
+        echo -n "not running "
+    fi
+    RETVAL=1
+    failure
+    echo
 }
 
 reload()
 {
-	echo -n $"Reloading $APP_NAME: "
-	if [ -s "$PID_FILE" ]; then
-		PID=`cat "$PID_FILE"`
-		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null \
-					| grep -q " -i $PID_FILE "; then
-				if kill -HUP $PID >/dev/null 2>&1; then
-					success
-				else
-					RETVAL=1
-					failure
-				fi
-			else
-				RETVAL=1
-				failure
-			fi
-		else
-			RETVAL=1
-			failure
-		fi
-	else
-		RETVAL=1
-		failure
-	fi
-	echo
-	sleep 0.5 2>/dev/null || sleep 1
+    echo -n $"Reloading $APP_NAME: "
+    if [ -s "$PID_FILE" ]; then
+        PID=`cat "$PID_FILE"`
+        if [ "$PID" ]; then
+            if ps -o command= -p $PID 2>/dev/null \
+                    | grep -q " -i $PID_FILE "; then
+                if kill -HUP $PID >/dev/null 2>&1; then
+                    success
+                else
+                    RETVAL=1
+                    failure
+                fi
+            else
+                RETVAL=1
+                failure
+            fi
+        else
+            RETVAL=1
+            failure
+        fi
+    else
+        RETVAL=1
+        failure
+    fi
+    echo
+    sleep 0.5 2>/dev/null || sleep 1
 }
 
 restart() {
-	stop
-	RETVAL=0
-	start
+    stop
+    RETVAL=0
+    start
 }
 
 condrestart()
 {
-	if [ -s "$PID_FILE" ]; then
-		PID=`cat "$PID_FILE"`
-		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null \
-					| grep -q " -i $PID_FILE "; then
-				restart
-			fi
-		fi
-	fi
+    if [ -s "$PID_FILE" ]; then
+        PID=`cat "$PID_FILE"`
+        if [ "$PID" ]; then
+            if ps -o command= -p $PID 2>/dev/null \
+                    | grep -q " -i $PID_FILE "; then
+                restart
+            fi
+        fi
+    fi
 }
 
 status()
 {
-	if [ -s "$PID_FILE" ]; then
-		PID=`cat "$PID_FILE"`
-		if [ "$PID" ]; then
-			if ps -o command= -p $PID 2>/dev/null \
-					| grep -q " -i $PID_FILE "; then
-				echo $"$APP_NAME (pid $PID) is running..."
-			else
-				RETVAL=1
-				echo $"$APP_NAME dead but pid file exists"
-			fi
-		else
-			RETVAL=1
-			echo $"$APP_NAME dead (empty file)"
-		fi
-	else
-		RETVAL=1
-		echo $"$APP_NAME dead (no pid file)"
-	fi
+    if [ -s "$PID_FILE" ]; then
+        PID=`cat "$PID_FILE"`
+        if [ "$PID" ]; then
+            if ps -o command= -p $PID 2>/dev/null \
+                    | grep -q " -i $PID_FILE "; then
+                echo $"$APP_NAME (pid $PID) is running..."
+            else
+                RETVAL=1
+                echo $"$APP_NAME dead but pid file exists"
+            fi
+        else
+            RETVAL=1
+            echo $"$APP_NAME dead (empty file)"
+        fi
+    else
+        RETVAL=1
+        echo $"$APP_NAME dead (no pid file)"
+    fi
 }
 
 RETVAL=0
 
 case "$1" in
-	start)
-		start
-		;;
-	stop)
-		stop
-		;;
-	restart)
-		restart
-		;;
-	reload)
-		reload
-		;;
-	condrestart)
-		condrestart
-		;;
-	status)
-		status
-		;;
-	*)
-		echo $"Usage: $0 {start|stop|restart|reload|condrestart|status}"
-		RETVAL=1
-		;;
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        restart
+        ;;
+    reload)
+        reload
+        ;;
+    condrestart)
+        condrestart
+        ;;
+    status)
+        status
+        ;;
+    *)
+        echo $"Usage: $0 {start|stop|restart|reload|condrestart|status}"
+        RETVAL=1
+        ;;
 esac
 
 exit $RETVAL

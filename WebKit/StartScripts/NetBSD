@@ -24,10 +24,10 @@ APP_NAME=`basename "$0"`
 
 # The location of the start sript:
 if [ -h "$0" ]; then
-	# Get the target file if start script is given as a link:
-	START_SCRIPT=`readlink -f "$0"`
+    # Get the target file if start script is given as a link:
+    START_SCRIPT=`readlink -f "$0"`
 else
-	START_SCRIPT="$0"
+    START_SCRIPT="$0"
 fi
 
 # The working directory or path to WebKit:
@@ -89,27 +89,27 @@ command="$APP_SERVER"
 procname="python"
 pidfile="$PID_FILE"
 if [ "$LAUNCH_AS_WEBWARE" ]; then
-	if [ "$WEBWARE_USER" ]; then
-		eval ${name}_user=$WEBWARE_USER
-	fi
-	if [ "$WEBWARE_GROUP" ]; then
-		eval ${name}_group=$WEBWARE_GROUP
-	fi
-	eval ${name}_flags=\"$PYTHONOPTS \
-		-d \\\"$WORK_DIR\\\" -o \\\"$LOG_FILE\\\" \
-		-i \\\"$PID_FILE\\\"\"
-	command_args="> /dev/null &"
+    if [ "$WEBWARE_USER" ]; then
+        eval ${name}_user=$WEBWARE_USER
+    fi
+    if [ "$WEBWARE_GROUP" ]; then
+        eval ${name}_group=$WEBWARE_GROUP
+    fi
+    eval ${name}_flags=\"$PYTHONOPTS \
+        -d \\\"$WORK_DIR\\\" -o \\\"$LOG_FILE\\\" \
+        -i \\\"$PID_FILE\\\"\"
+    command_args="> /dev/null &"
 else
-	if [ "$WEBWARE_USER" ]; then
-		WEBWARE_USER="-u $WEBWARE_USER"
-	fi
-	if [ "$WEBWARE_GROUP" ]; then
-		WEBWARE_GROUP="-g $WEBWARE_GROUP"
-	fi
-	eval ${name}_flags=\"$PYTHONOPTS \
-		-d \\\"$WORK_DIR\\\" -i \\\"$PID_FILE\\\" \
-		$WEBWARE_USER $WEBWARE_GROUP\"
-	command_args="> \"$LOG_FILE\" 2>&1 &"
+    if [ "$WEBWARE_USER" ]; then
+        WEBWARE_USER="-u $WEBWARE_USER"
+    fi
+    if [ "$WEBWARE_GROUP" ]; then
+        WEBWARE_GROUP="-g $WEBWARE_GROUP"
+    fi
+    eval ${name}_flags=\"$PYTHONOPTS \
+        -d \\\"$WORK_DIR\\\" -i \\\"$PID_FILE\\\" \
+        $WEBWARE_USER $WEBWARE_GROUP\"
+    command_args="> \"$LOG_FILE\" 2>&1 &"
 fi
 
 load_rc_config "$name"

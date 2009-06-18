@@ -30,10 +30,10 @@ APP_NAME=`basename "$0"`
 
 # The location of the start sript:
 if [ -h "$0" ]; then
-	# Get the target file if start script is given as a link:
-	START_SCRIPT=`readlink -f "$0"`
+    # Get the target file if start script is given as a link:
+    START_SCRIPT=`readlink -f "$0"`
 else
-	START_SCRIPT="$0"
+    START_SCRIPT="$0"
 fi
 
 # The working directory or path to WebKit:
@@ -93,85 +93,85 @@ export PYTHONPATH
 rc_reset
 
 case "$1" in
-	start)
-		echo -n "Starting $APP_NAME "
-		# Keep backup of last log file:
-		if [ "$LOG_OLD" -a -f "$LOG_FILE" ]; then
-			if [ -s "$LOG_FILE" ]; then
-				mv "$LOG_FILE" "$LOG_FILE$LOG_OLD"
-			else
-				rm "$LOG_FILE"
-			fi
-		fi
-		# Prepare options to set user and group
-		if [ "$WEBWARE_USER" ]; then
-			WEBWARE_USER="-u $WEBWARE_USER"
-		fi
-		if [ "$WEBWARE_GROUP" ]; then
-			WEBWARE_GROUP="-g $WEBWARE_GROUP"
-		fi
-		# Note that the pid file does not record the pid of the
-		# wrapper script, but the pid of the Python app server:
-		if [ "$LAUNCH_AS_WEBWARE" ]; then
-			# Switch user first, then create pid and log files:
-			startproc -f -l /dev/null \
-				$WEBWARE_USER $WEBWARE_GROUP \
-				"$APP_SERVER" $PYTHONOPTS \
-				-i "$PID_FILE" -d "$WORK_DIR" -o "$LOG_FILE"
-		else
-			# Create pid and log files first, then switch user:
-			startproc -f -l "$LOG_FILE" \
-				"$APP_SERVER" $PYTHONOPTS \
-				-i "$PID_FILE" -d "$WORK_DIR" \
-				$WEBWARE_USER $WEBWARE_GROUP
-		fi
-		rc_status -v
-		;;
-	stop)
-		echo -n "Shutting down $APP_NAME "
-		# Note that we are terminating the Python app server here;
-		# the app server wrapper script will follow automatically:
-		if [ -f "$PID_FILE" ] ; then
-			killproc -p "$PID_FILE" -TERM python
-		else
-			rc_failed 7
-		fi
-		rc_status -v
-		;;
-	try-restart)
-		"$0" status >/dev/null && "$0" restart
-		rc_status
-		;;
-	restart)
-		"$0" stop
-		"$0" start
-		rc_status
-		;;
-	force-reload|reload)
-		echo -n "Reloading $APP_NAME "
-		if [ -f "$PID_FILE" ] ; then
-			killproc -p "$PID_FILE" -HUP python
-		else
-			rc_failed 7
-		fi
-		rc_status -v
-		;;
-	status)
-		echo -n "Checking for $APP_NAME "
-		if [ -f "$PID_FILE" ] ; then
-			checkproc -p $PID_FILE python
-		else
-			rc_failed 1
-		fi
-		rc_status -v
-		;;
-	probe)
-		test "$APP_SERVER_CONFIG" -nt "$PID_FILE" && echo reload
-		;;
-	*)
-		echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
-		exit 1
-		;;
+    start)
+        echo -n "Starting $APP_NAME "
+        # Keep backup of last log file:
+        if [ "$LOG_OLD" -a -f "$LOG_FILE" ]; then
+            if [ -s "$LOG_FILE" ]; then
+                mv "$LOG_FILE" "$LOG_FILE$LOG_OLD"
+            else
+                rm "$LOG_FILE"
+            fi
+        fi
+        # Prepare options to set user and group
+        if [ "$WEBWARE_USER" ]; then
+            WEBWARE_USER="-u $WEBWARE_USER"
+        fi
+        if [ "$WEBWARE_GROUP" ]; then
+            WEBWARE_GROUP="-g $WEBWARE_GROUP"
+        fi
+        # Note that the pid file does not record the pid of the
+        # wrapper script, but the pid of the Python app server:
+        if [ "$LAUNCH_AS_WEBWARE" ]; then
+            # Switch user first, then create pid and log files:
+            startproc -f -l /dev/null \
+                $WEBWARE_USER $WEBWARE_GROUP \
+                "$APP_SERVER" $PYTHONOPTS \
+                -i "$PID_FILE" -d "$WORK_DIR" -o "$LOG_FILE"
+        else
+            # Create pid and log files first, then switch user:
+            startproc -f -l "$LOG_FILE" \
+                "$APP_SERVER" $PYTHONOPTS \
+                -i "$PID_FILE" -d "$WORK_DIR" \
+                $WEBWARE_USER $WEBWARE_GROUP
+        fi
+        rc_status -v
+        ;;
+    stop)
+        echo -n "Shutting down $APP_NAME "
+        # Note that we are terminating the Python app server here;
+        # the app server wrapper script will follow automatically:
+        if [ -f "$PID_FILE" ] ; then
+            killproc -p "$PID_FILE" -TERM python
+        else
+            rc_failed 7
+        fi
+        rc_status -v
+        ;;
+    try-restart)
+        "$0" status >/dev/null && "$0" restart
+        rc_status
+        ;;
+    restart)
+        "$0" stop
+        "$0" start
+        rc_status
+        ;;
+    force-reload|reload)
+        echo -n "Reloading $APP_NAME "
+        if [ -f "$PID_FILE" ] ; then
+            killproc -p "$PID_FILE" -HUP python
+        else
+            rc_failed 7
+        fi
+        rc_status -v
+        ;;
+    status)
+        echo -n "Checking for $APP_NAME "
+        if [ -f "$PID_FILE" ] ; then
+            checkproc -p $PID_FILE python
+        else
+            rc_failed 1
+        fi
+        rc_status -v
+        ;;
+    probe)
+        test "$APP_SERVER_CONFIG" -nt "$PID_FILE" && echo reload
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
+        exit 1
+        ;;
 esac
 
 rc_exit

@@ -25,10 +25,10 @@ DESC="Webware"
 
 # The location of the start sript:
 if [ -h "$0" ]; then
-	# Get the target file if start script is given as a link:
-	START_SCRIPT=`readlink -f "$0"`
+    # Get the target file if start script is given as a link:
+    START_SCRIPT=`readlink -f "$0"`
 else
-	START_SCRIPT="$0"
+    START_SCRIPT="$0"
 fi
 
 # The working directory or path to WebKit:
@@ -87,85 +87,85 @@ set -e
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 
 d_start() {
-	# Keep backup of last log file:
-	if [ "$LOG_OLD" -a -f "$LOG_FILE" ]; then
-		if [ -s "$LOG_FILE" ]; then
-			mv "$LOG_FILE" "$LOG_FILE$LOG_OLD"
-		else
-			rm "$LOG_FILE"
-		fi
-	fi
-	# Prepare option to set group
-	if [ "$WEBWARE_GROUP" ]; then
-		WEBWARE_GROUP="-g $WEBWARE_GROUP"
-	fi
-	# Note that the pid file does not record the pid of the
-	# wrapper script, but the pid of the Python app server:
-	if [ "$LAUNCH_AS_WEBWARE" ]; then
-		# Prepare option to set user
-		if [ "$WEBWARE_USER" ]; then
-			WEBWARE_USER="-c $WEBWARE_USER"
-		fi
-		# Switch user first, then create pid and log files:
-		start-stop-daemon -S -b -q -p "$PID_FILE" \
-			$WEBWARE_USER $WEBWARE_GROUP -a "$APP_SERVER" \
-			-- $PYTHONOPTS -d "$WORK_DIR" -o "$LOG_FILE" \
-			-i "$PID_FILE" > /dev/null
+    # Keep backup of last log file:
+    if [ "$LOG_OLD" -a -f "$LOG_FILE" ]; then
+        if [ -s "$LOG_FILE" ]; then
+            mv "$LOG_FILE" "$LOG_FILE$LOG_OLD"
+        else
+            rm "$LOG_FILE"
+        fi
+    fi
+    # Prepare option to set group
+    if [ "$WEBWARE_GROUP" ]; then
+        WEBWARE_GROUP="-g $WEBWARE_GROUP"
+    fi
+    # Note that the pid file does not record the pid of the
+    # wrapper script, but the pid of the Python app server:
+    if [ "$LAUNCH_AS_WEBWARE" ]; then
+        # Prepare option to set user
+        if [ "$WEBWARE_USER" ]; then
+            WEBWARE_USER="-c $WEBWARE_USER"
+        fi
+        # Switch user first, then create pid and log files:
+        start-stop-daemon -S -b -q -p "$PID_FILE" \
+            $WEBWARE_USER $WEBWARE_GROUP -a "$APP_SERVER" \
+            -- $PYTHONOPTS -d "$WORK_DIR" -o "$LOG_FILE" \
+            -i "$PID_FILE" > /dev/null
 
-	else
-		# Prepare option to set user
-		if [ "$WEBWARE_USER" ]; then
-			WEBWARE_USER="-u $WEBWARE_USER"
-		fi
-		# Create pid and log files first, then switch user:
-		start-stop-daemon -S -q -p "$PID_FILE" -a "$APP_SERVER" \
-			-- $PYTHONOPTS -d "$WORK_DIR" -i "$PID_FILE" \
-			$WEBWARE_USER $WEBWARE_GROUP >> "$LOG_FILE" 2>&1 &
-	fi
+    else
+        # Prepare option to set user
+        if [ "$WEBWARE_USER" ]; then
+            WEBWARE_USER="-u $WEBWARE_USER"
+        fi
+        # Create pid and log files first, then switch user:
+        start-stop-daemon -S -q -p "$PID_FILE" -a "$APP_SERVER" \
+            -- $PYTHONOPTS -d "$WORK_DIR" -i "$PID_FILE" \
+            $WEBWARE_USER $WEBWARE_GROUP >> "$LOG_FILE" 2>&1 &
+    fi
 }
 
 d_stop() {
-	# Note that we are terminating the Python app server here;
-	# the app server wrapper script will follow automatically:
-	[ -f "$PID_FILE" ] && \
-	start-stop-daemon -K -q -p $PID_FILE \
-		$WEBWARE_USER -n python
-	rm -f "$PID_FILE"
+    # Note that we are terminating the Python app server here;
+    # the app server wrapper script will follow automatically:
+    [ -f "$PID_FILE" ] && \
+    start-stop-daemon -K -q -p $PID_FILE \
+        $WEBWARE_USER -n python
+    rm -f "$PID_FILE"
 }
 
 d_reload() {
-	[ -f "$PID_FILE" ] && \
-	start-stop-daemon -K -q -p $PID_FILE \
-		$WEBWARE_USER -n python -s HUP
+    [ -f "$PID_FILE" ] && \
+    start-stop-daemon -K -q -p $PID_FILE \
+        $WEBWARE_USER -n python -s HUP
 }
 
 case "$1" in
-	start)
-		echo -n "Starting $DESC: $APP_NAME"
-		d_start
-		echo "."
-		;;
-	stop)
-		echo -n "Stopping $DESC: $APP_NAME"
-		d_stop
-		echo "."
-		;;
-	reload|force-reload)
-		echo -n "Reloading $DESC configuration..."
-		d_reload
-		echo "done."
-		;;
-	restart)
-		echo -n "Restarting $DESC: $NAME"
-		d_stop
-		sleep 1
-		d_start
-		echo "."
-		;;
-	*)
-		echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
-		exit 1
-		;;
+    start)
+        echo -n "Starting $DESC: $APP_NAME"
+        d_start
+        echo "."
+        ;;
+    stop)
+        echo -n "Stopping $DESC: $APP_NAME"
+        d_stop
+        echo "."
+        ;;
+    reload|force-reload)
+        echo -n "Reloading $DESC configuration..."
+        d_reload
+        echo "done."
+        ;;
+    restart)
+        echo -n "Restarting $DESC: $NAME"
+        d_stop
+        sleep 1
+        d_start
+        echo "."
+        ;;
+    *)
+        echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
+        exit 1
+        ;;
 esac
 
 exit 0
