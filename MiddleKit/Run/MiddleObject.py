@@ -1,6 +1,6 @@
 import sys
 import threading
-import types
+from types import InstanceType
 
 from MiscUtils import NoDefault
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
@@ -70,7 +70,7 @@ class MiddleObject(object):
         try:
             if self._mk_store:
                 assert self._mk_store is store, \
-                        'Cannot refresh data from a different store.'
+                    'Cannot refresh data from a different store.'
                 if self._mk_changed and not self._mk_initing:
                     assert store.setting('AllowRefreshOfChangedObject', False), (
                         "attempted to refresh changed object %s.%d\nchanges=%r\n"
@@ -103,10 +103,8 @@ class MiddleObject(object):
                 else:
                     assert self._mk_serialNum == row[0]
                 # Set all of our attributes with setFoo() or by assigning to _foo
-                for i in xrange(len(cache)):
-                    value = row[i+1]
-                    setter = cache[i]
-                    setter(self, value)
+                for i, setter in enumerate(cache):
+                    setter(self, row[i+1])
             else:
                 self._mk_initing = True
                 if self._mk_serialNum == 0:
@@ -165,8 +163,8 @@ class MiddleObject(object):
         to the database, it can only be set to a positive value.
 
         """
-        assert type(value) in (type(0), type(0L)), \
-                "Type is: %r, value is: %r" % (type(value), value)
+        assert isinstance(value, (int, long)), \
+            "Type is: %r, value is: %r" % (type(value), value)
         if self._mk_serialNum < 0:
             assert value > 0
         else:
@@ -264,7 +262,7 @@ class MiddleObject(object):
             allAttrs[key] = getattr(self, attrName)
         return allAttrs
 
-    def removeObjectFromListAttrs(self, object):
+    def removeObjectFromListAttrs(self, obj):
         """Remove object from any list attributes that this instance might have.
 
         This is used if the object is deleted, so we don't have dangling references.
@@ -274,7 +272,7 @@ class MiddleObject(object):
             if isinstance(attr, ListAttr):
                 listName = '_' + attr.name()
                 list = getattr(self, listName)
-                if list is not None and object in list:
+                if list is not None and obj in list:
                     delattr(self, listName)
                     setattr(self, listName, None)
 
@@ -289,9 +287,9 @@ class MiddleObject(object):
             if isinstance(attr, ObjRefAttr):
                 value = getattr(self, '_' + attr.name())
                 if value is not None:
-                    if isinstance(value, (types.InstanceType, MiddleObject)):
+                    if isinstance(value, (MiddleObject, InstanceType)):
                         value.removeObjectFromListAttrs(self)
-                    elif type(value) is types.LongType:
+                    elif isinstance(value, long):
                         obj = self.store().objRefInMem(value)
                         if obj:
                             obj.removeObjectFromListAttrs(self)
@@ -326,9 +324,9 @@ class MiddleObject(object):
         for backObjRefAttr in self.klass().backObjRefAttrs():
             objects = self.store().fetchObjectsOfClass(backObjRefAttr.klass(),
                 **self.referencingObjectsAndAttrsFetchKeywordArgs(backObjRefAttr))
-            for object in objects:
-                assert object.valueForAttr(backObjRefAttr) is self
-                referencingObjectsAndAttrs.append((object, backObjRefAttr))
+            for obj in objects:
+                assert obj.valueForAttr(backObjRefAttr) is self
+                referencingObjectsAndAttrs.append((obj, backObjRefAttr))
         return referencingObjectsAndAttrs
 
     def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
@@ -398,7 +396,7 @@ class MiddleObject(object):
         for value in values:
             if isinstance(value, MiddleObject):
                 store.addObject(value)
-            elif isinstance(value, types.ListType):
+            elif isinstance(value, list):
                 for obj in value:
                     if isinstance(obj, MiddleObject):
                         store.addObject(obj)
@@ -461,8 +459,7 @@ class MiddleObject(object):
             pySetName = attr.pySetName()
             method = getattr(self, pySetName, None)
         if method is None:
-            attrs = self.klass().allAttrs()
-            attrs = [a.name() for a in attrs]
+            attrs = [attr.name() for attr in self.klass().allAttrs()]
             attrs.sort()
             attrs = ','.join(attrs)
             raise LookupError('%s, class=%s, all attrs=%s'

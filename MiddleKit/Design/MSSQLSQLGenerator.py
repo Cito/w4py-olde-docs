@@ -12,7 +12,7 @@ def cleanConstraintName(name):
     assert '[' not in name, name
     assert ',' not in name, name
     if len(name) > 128:
-        raise Exception("name is %i chars long, but MS SQL Server only"
+        raise ValueError("name is %i chars long, but MS SQL Server only"
             " supports 128. this case is no currently handled. name=%r"
             % (len(name), name))
     return name
@@ -73,8 +73,7 @@ class Klasses(object):
 
     def dropTablesSQL(self):
         strList = []
-        self._klasses.reverse()
-        for klass in self._klasses:
+        for klass in reversed(self._klasses):
         # If table exists drop.
             strList.append("print 'Dropping table %s'\n" % klass.name())
             strList.append("if exists (select * from dbo.sysobjects"
@@ -83,7 +82,6 @@ class Klasses(object):
                 % klass.name())
             strList.append('drop table [dbo].%s\n' % klass.sqlTableName())
             strList.append('go\n\n')
-        self._klasses.reverse()
         return ''.join(strList)
 
 
@@ -151,8 +149,7 @@ name varchar(100)
         dbName = generator.dbName()
         # wr('Use %s\ngo\n\n' % dbName)\
 
-        # rList = reversed(self._klasses[:])
-        # rList.reverse()
+        # rList = reversed(self._klasses)
         # print str(type(rList))
         # for klass in rList:
         #     # If table exists, then drop it.
@@ -305,10 +302,8 @@ class StringAttr(object):
             if int(self['Max']) > 8000:
                 return 'text'
             else:
-                ref = self.get('Ref', '')
-                if not ref:
-                    ref = '' # for some reason ref was none instead of ''
-                else:
+                ref = self.get('Ref', '') or ''
+                if ref:
                     ref = ' ' + ref
                 return 'varchar(%s)%s' % (int(self['Max']), ref)
 
@@ -316,7 +311,7 @@ class StringAttr(object):
         value = input
         if value == "''":
             value = ''
-        elif value.find('\\') != -1:
+        elif '\\' in value:
             if 1:
                 # add spaces before and after, to prevent
                 # syntax error if value begins or ends with "
@@ -364,7 +359,7 @@ class ObjRefAttr(object):
 
     def sqlForNonNoneSampleInput(self, input):
         sql = ObjRefAttr.mixInSuperSqlForNonNoneSampleInput(self, input)
-        if sql.find('(select') != -1:
+        if '(select' in sql:
             # MS SQL 2000 does not allow a subselect where an INSERT value is expected.
             # It will complain:
             # "Subqueries are not allowed in this context. Only scalar expressions are allowed."
@@ -384,7 +379,7 @@ class ObjRefAttr(object):
 class ListAttr(object):
 
     def sqlType(self):
-        raise Exception('Lists do not have a SQL type.')
+        raise TypeError('Lists do not have a SQL type.')
 
 
 class FloatAttr(object):

@@ -16,10 +16,10 @@ Kid is a simple templating language for XML based vocabularies written in Python
 You need to install the Kid package before you can use the KidKit plug-in."""
 
 WebKitConfig = {
-        'examplePages': [
-                'Welcome', 'Time1', 'Time2', 'Files',
-                'ServletInfo', 'SimpleForm', 'MandelbrotSet',
-        ]
+    'examplePages': [
+        'Welcome', 'Time1', 'Time2', 'Files',
+        'ServletInfo', 'SimpleForm', 'MandelbrotSet',
+    ]
 }
 
 def willRunFunc():
@@ -28,9 +28,9 @@ def willRunFunc():
         for soft in requiredSoftware:
             __import__(soft['name'])
     except ImportError:
-        success = 0
+        success = False
     else:
         # The required version will be checked in __init__.py.
-        success = 1
+        success = True
     if not success:
         return 'The kid package is required to use KidKit.'

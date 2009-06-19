@@ -42,15 +42,15 @@ class Klass(MiddleDict, ModelObject):
         name = rawDict['Class']
         if '(' in name:
             assert ')' in name, 'Invalid class spec. Missing ).'
-            self._name, rest = name.split('(')
-            self._supername, rest = rest.split(')')
+            self._name, rest = name.split('(', 1)
+            self._supername, rest = rest.split(')', 1)
             assert rest.strip() == ''
             self._name = self._name.strip()
             self._supername = self._supername.strip()
         elif ':' in name:
             # deprecated: we used to use a C++-like syntax involving colons
             # instead of a Python-like syntax with parens
-            parts = [part.strip() for part in name.split(':')]
+            parts = [part.strip() for part in name.split(':', 2)]
             if len(parts) != 2:
                 raise RuntimeError('Invalid class spec: %s' % string)
             self._name, self._supername = parts
@@ -223,15 +223,15 @@ class Klass(MiddleDict, ModelObject):
     def descendants(self, init=1, memo=None):
         """Return all descendant klasses of this klass."""
         if memo is None:
-            memo = {}
-        if memo.has_key(self):
+            memo = set()
+        if self in memo:
             return
-        memo[self] = None
+        memo.add(self)
         for k in self.subklasses():
             k.descendants(init=0, memo=memo)
         if init:
-            del memo[self]
-        return memo.keys()
+            memo.remove(self)
+        return memo
 
 
     ## Accessing attributes ##
@@ -327,7 +327,8 @@ class Klass(MiddleDict, ModelObject):
         if self._pyClass == False:
             if self._klassContainer._model._havePythonClasses:
                 self._pyClass = self._klassContainer._model.pyClassForName(self.name())
-                assert self._pyClass.__name__ == self.name(), 'self.name()=%r, self._pyClass=%r' % (self.name(), self._pyClass)
+                assert self._pyClass.__name__ == self.name(), (
+                    'self.name()=%r, self._pyClass=%r' % (self.name(), self._pyClass))
                 self._pyClass._mk_klass = self
             else:
                 self._pyClass = None
@@ -354,7 +355,8 @@ class Klass(MiddleDict, ModelObject):
                 # find all ObjRefAttrs of klass that refer to one of our targetKlasses
                 for attr in klass.attrs():
                     if not attr.get('isDerived', False):
-                        if isinstance(attr, ObjRefAttr) and targetKlasses.has_key(attr.targetClassName()):
+                        if (isinstance(attr, ObjRefAttr)
+                                and attr.targetClassName() in targetKlasses):
                             backObjRefAttrs.append(attr)
             self._backObjRefAttrs = backObjRefAttrs
         return self._backObjRefAttrs
@@ -402,8 +404,8 @@ class Klass(MiddleDict, ModelObject):
 
     def willBuildDependencies(self):
         """Preps the klass for buildDependencies()."""
-        self._dependencies = [] # who self depends on
-        self._dependents = [] # who depends on self
+        self._dependencies = set() # who self depends on
+        self._dependents = set() # who depends on self
 
     def buildDependencies(self):
         """Build dependencies of the klass.
@@ -418,22 +420,22 @@ class Klass(MiddleDict, ModelObject):
             pass
         klass = self.superklass()
         while klass is not None:
-            self._dependencies.append(klass)
-            klass._dependents.append(self)
+            self._dependencies.add(klass)
+            klass._dependents.add(self)
             klass = klass.superklass()
         from MiddleKit.Core.ObjRefAttr import ObjRefAttr
         for attr in self.allAttrs():
             if isinstance(attr, ObjRefAttr):
                 klass = attr.targetKlass()
                 if klass is not self and attr.boolForKey('Ref', True):
-                    self._dependencies.append(klass)
-                    klass._dependents.append(self)
+                    self._dependencies.add(klass)
+                    klass._dependents.add(self)
                     for klass in klass.descendants():
-                        self._dependencies.append(klass)
-                        klass._dependents.append(self)
+                        self._dependencies.add(klass)
+                        klass._dependents.add(self)
 
     def recordDependencyOrder(self, order, visited, indent=0):
-        #print '%srecordDependencyOrder() for %s' % (' '*indent*4, self.name())
+        # print '%srecordDependencyOrder() for %s' % (' '*indent*4, self.name())
         if self in visited:
             return
         visited.add(self)

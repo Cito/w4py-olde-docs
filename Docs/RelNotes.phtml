@@ -15,7 +15,7 @@ for f in glob('Docs/RelNotes-*.*html'):
     if v == 'X.Y':
         continue
     r.add(v)
-for v in sorted(r, key=lambda v: v.split('.')), reverse=True):
+for v in sorted(r, key=lambda v: v.split('.'), reverse=True):
     print '<li><a href="RelNotes-%s.html">%s</a></li>' % (v, v)
 %></ul></div>
 

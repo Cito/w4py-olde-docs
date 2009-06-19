@@ -303,7 +303,7 @@ class Application(ConfigurableForServerSidePath):
                 task = SessionTask.SessionTask(self._sessions)
                 sweepinterval = self._sessionTimeout/10
                 tm.addPeriodicAction(time.time() + sweepinterval,
-                        sweepinterval, task, "SessionSweeper")
+                    sweepinterval, task, "SessionSweeper")
                 print "Session sweeper has started."
 
     def shutDown(self):
@@ -701,11 +701,11 @@ class Application(ConfigurableForServerSidePath):
             else:
                 # standard error handling
                 if self.setting('EnterDebuggerOnException') \
-                                and sys.stdin.isatty():
+                        and sys.stdin.isatty():
                     import pdb
                     pdb.post_mortem(sys.exc_info()[2])
                 self.handleExceptionInTransaction(
-                        sys.exc_info(), trans)
+                    sys.exc_info(), trans)
 
     def runTransactionViaServlet(self, servlet, trans):
         """Execute the transaction using the servlet.

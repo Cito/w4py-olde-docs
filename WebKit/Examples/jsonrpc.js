@@ -212,7 +212,7 @@ JSONRpcClient._getCharsetFromHeaders =
 function JSONRpcClient_getCharsetFromHeaders(http)
 {
     try {
-    var contentType = http.getResponseHeader("Content-type");
+    var contentType = http.getResponseHeader("Content-Type");
     var parts = contentType.split(/\s*;\s*/);
     for(var i=0; i<parts.length; i++) {
         if(parts[i].substring(0,8) == "charset=")
@@ -333,7 +333,7 @@ function JSONRpcClient_sendRequest(req)
     }
 
     /* setRequestHeader is missing in Opera 8 Beta */
-    try { http.setRequestHeader("Content-type", "text/plain"); } catch(e) {}
+    try { http.setRequestHeader("Content-Type", "text/plain"); } catch(e) {}
 
     /* Construct call back if we have one */
     if(req.cb) {

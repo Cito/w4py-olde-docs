@@ -1,4 +1,3 @@
-from types import ListType
 from Foo import Foo
 from Bar import Bar
 
@@ -50,7 +49,7 @@ def test(store):
     assert f._mk_store
     assert f._mk_inStore
     bars = f.bars()
-    assert type(bars) is ListType
+    assert isinstance(bars, list)
     assert len(bars) == 1, 'bars=%r' % bars
     assert bars[0].x() == 7
 
@@ -64,7 +63,7 @@ def test(store):
 
     f = store.fetchObjectsOfClass(Foo)[0]
     bars = f.bars()
-    assert type(bars) is ListType
+    assert isinstance(bars, list)
     assert len(bars) == 2, 'bars=%r' % bars
     assert bars[0].x() == 7
     assert bars[1].x() == 42
@@ -108,7 +107,7 @@ def test(store):
 
     f = store.fetchObjectsOfClass(Foo)[0]
     bars = f.bars()
-    assert type(bars) is ListType
+    assert isinstance(bars, list)
     assert len(bars) == 1, 'bars=%r' % bars
     assert bars[0].x() == 7
 

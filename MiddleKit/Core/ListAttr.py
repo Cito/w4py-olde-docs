@@ -9,9 +9,9 @@ class ListAttr(Attr):
 
     """
 
-    def __init__(self, dict):
-        Attr.__init__(self, dict)
-        self._className = dict['Type'].split()[-1]
+    def __init__(self, attr):
+        Attr.__init__(self, attr)
+        self._className = attr['Type'].rsplit(None, 1)[-1]
         self._backRefAttr = None # init'ed in awakeFromRead()
         if self.get('Min') is not None:
             self['Min'] = int(self['Min'])

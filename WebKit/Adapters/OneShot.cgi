@@ -29,7 +29,7 @@ except:
     output = ''.join(traceback.format_exception(*sys.exc_info()))
     output = output.replace('&', '&amp;').replace(
         '<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
-    sys.stdout.write('''Content-type: text/html\n
+    sys.stdout.write('''Content-Type: text/html\n
 <html><head><title>WebKit CGI Error</title><body>
 <h3>WebKit CGI Error</h3>
 <pre>%s</pre>

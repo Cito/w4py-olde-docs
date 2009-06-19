@@ -93,7 +93,7 @@ class OneShotAdapter(Adapter):
             if response:
                 sys.stdout.write(response)
             else:
-                sys.stdout.write('''Content-type: text/html\n
+                sys.stdout.write('''Content-Type: text/html\n
 <html><head><title>WebKit CGI Error</title><body>
 <h3>WebKit CGI Error</h3>
 <h4>No response from application server</h4>
@@ -130,7 +130,7 @@ class OneShotAdapter(Adapter):
             sys.stdout = _real_stdout
             output = ''.join(traceback.format_exception(*sys.exc_info()))
             output = htmlEncode(output)
-            sys.stdout.write('''Content-type: text/html\n
+            sys.stdout.write('''Content-Type: text/html\n
 <html><head><title>WebKit CGI Error</title><body>
 <h3>WebKit CGI Error</h3>
 <pre>%s</pre>
@@ -163,7 +163,7 @@ def main(webKitDir=None):
         traceback.print_exc(file=sys.stderr)
         output = ''.join(traceback.format_exception(*sys.exc_info()))
         output = htmlEncode(output)
-        sys.stdout.write('''Content-type: text/html\n
+        sys.stdout.write('''Content-Type: text/html\n
 <html><head><title>CGI Error</title><body>
 <h3>CGI Error</h3>
 <pre>%s</pre>

@@ -1,6 +1,6 @@
 import sys
 import thread
-import types
+from types import ClassType
 
 from weakref import WeakValueDictionary
 
@@ -11,9 +11,9 @@ from MiddleKit.Core.ModelUser import ModelUser
 from MiddleKit.Core.Klass import Klass as BaseKlass
 from MiddleKit.Core.ObjRefAttr import ObjRefAttr
 from MiddleKit.Core.ListAttr import ListAttr
-        # ^^^ for use in _klassForClass() below
-        # Can't import as Klass or Core.ModelUser (our superclass)
-        # will try to mix it in.
+    # ^^^ for use in _klassForClass() below
+    # Can't import as Klass or Core.ModelUser (our superclass)
+    # will try to mix it in.
 from PerThreadList import PerThreadList, NonThreadedList
 from PerThreadDict import PerThreadDict, NonThreadedDict
 
@@ -49,9 +49,9 @@ class DeleteReferencedError(DeleteError):
 
     """
 
-    def __init__(self, text, object, referencingObjectsAndAttrs):
+    def __init__(self, text, obj, referencingObjectsAndAttrs):
         Exception.__init__(self, text)
-        self._object = object
+        self._object = obj
         self._referencingObjectsAndAttrs = referencingObjectsAndAttrs
 
     def object(self):
@@ -73,9 +73,9 @@ class DeleteObjectWithReferencesError(DeleteError):
 
     """
 
-    def __init__(self, text, object, attrs):
+    def __init__(self, text, obj, attrs):
         Exception.__init__(self, text)
-        self._object = object
+        self._object = obj
         self._attrs = attrs
 
     def object(self):
@@ -89,10 +89,10 @@ class ObjectStore(ModelUser):
     """The object store.
 
     NOT IMPLEMENTED:
-            * revertChanges()
+        * revertChanges()
 
     FUTURE
-            * expanded fetch
+        * expanded fetch
 
     """
 
@@ -100,25 +100,25 @@ class ObjectStore(ModelUser):
     ## Init ##
 
     def __init__(self):
-        self._model          = None
-        self._newSerialNum   = -1
-        self._verboseDelete  = False
+        self._model = None
+        self._newSerialNum = -1
+        self._verboseDelete = False
 
     def modelWasSet(self):
         """Perform additional set up of the store after the model is set."""
         ModelUser.modelWasSet(self)
         self._threaded = self.setting('Threaded')
         if self._threaded:
-            self._hasChanges     = {} # keep track on a per-thread basis
-            self._newObjects     = PerThreadList()
+            self._hasChanges = {} # keep track on a per-thread basis
+            self._newObjects = PerThreadList()
             self._deletedObjects = PerThreadList()
             self._changedObjects = PerThreadDict()
         else:
-            self._hasChanges     = False
-            self._newObjects     = NonThreadedList()
+            self._hasChanges = False
+            self._newObjects = NonThreadedList()
             self._deletedObjects = NonThreadedList()
             self._changedObjects = NonThreadedDict()
-        self._objects        = self.emptyObjectCache() # dict; keyed by ObjectKeys
+        self._objects = self.emptyObjectCache() # dict; keyed by ObjectKeys
 
     def emptyObjectCache(self):
         if self.setting('CacheObjectsForever', False):
@@ -129,32 +129,32 @@ class ObjectStore(ModelUser):
 
     ## Manipulating the objects in the store ##
 
-    def hasObject(self, object):
+    def hasObject(self, obj):
         """Check if the object is in the store.
 
         Note: this does not check the persistent store.
 
         """
-        key = object.key()
+        key = obj.key()
         if key is None:
             return False
         else:
-            return self._objects.has_key(key)
+            return key in self._objects
 
     def object(self, a, b=NoDefault, c=NoDefault):
         """Return object described by the given arguments, or default value.
 
         store.object(anObjectKey) - return the object with the given key,
-                or raise a KeyError if it does not reside in memory.
+            or raise a KeyError if it does not reside in memory.
         store.object(anObjectKey, defaultValue) - return the object
-                or defaultValue (no exception will be raised)
+            or defaultValue (no exception will be raised)
         store.object(someClass, serialNum) - return the object
-                of the given class and serial num, or raise a KeyError
+            of the given class and serial num, or raise a KeyError
         store.object(someClass, serialNum, defaultValue) - return the object
-                or defaultValue (no exception will be raised)
+            or defaultValue (no exception will be raised)
 
         `someClass` can be a Python class, a string (the name of a class)
-                or a MiddleKit.Core.Klass
+            or a MiddleKit.Core.Klass
 
         """
         if isinstance(a, ObjectKey):
@@ -163,7 +163,7 @@ class ObjectStore(ModelUser):
             return self.objectForClassAndSerial(a, b, c)
 
     def objectForClassAndSerial(self, klass, serialNum, default=NoDefault):
-        if isinstance(klass, (types.ClassType, types.TypeType)):
+        if isinstance(klass, (type, ClassType)):
             klass = klass.__name__
         elif isinstance(klass, BaseKlass):
             klass = klass.name()
@@ -185,10 +185,10 @@ class ObjectStore(ModelUser):
         else:
             return self._objects.get(key, default)
 
-    def add(self, object, noRecurse=False):
-        return self.addObject(object, noRecurse)
+    def add(self, obj, noRecurse=False):
+        return self.addObject(obj, noRecurse)
 
-    def addObject(self, object, noRecurse=False):
+    def addObject(self, obj, noRecurse=False):
         """Add the object and all referenced objects to the store.
 
         You can insert the same object multiple times, and you can insert
@@ -198,26 +198,26 @@ class ObjectStore(ModelUser):
         to the store, not any dependent objects.
 
         """
-        if not object.isInStore():
-            assert object.key() is None
+        if not obj.isInStore():
+            assert obj.key() is None
             # Make the store aware of this new object
             self.willChange()
-            self._newObjects.append(object)
-            object.setStore(self)
+            self._newObjects.append(obj)
+            obj.setStore(self)
             if not noRecurse:
                 # Recursively add referenced objects to the store
-                object.addReferencedObjectsToStore(self)
+                obj.addReferencedObjectsToStore(self)
 
             # 2000-10-07 ce: Decided not to allow keys for non-persisted objects
             # Because the serial num, and therefore the key, will change
             # upon saving.
-            #key = object.key()
-            #if key is None:
-            #       key = ObjectKey(object, self)
-            #       object.setKey(key)
-            #self._objects[key] = object
+            # key = obj.key()
+            # if key is None:
+            #     key = ObjectKey(obj, self)
+            #     obj.setKey(key)
+            # self._objects[key] = obj
 
-    def deleteObject(self, object):
+    def deleteObject(self, obj):
         """Delete object.
 
         Restrictions: The object must be contained in the store and obviously
@@ -230,7 +230,7 @@ class ObjectStore(ModelUser):
 
         objectsToDel = {}
         detaches = []
-        self._deleteObject(object, objectsToDel, detaches) # compute objectsToDel and detaches
+        self._deleteObject(obj, objectsToDel, detaches) # compute objectsToDel and detaches
         self.willChange()
 
         # detaches
@@ -246,21 +246,21 @@ class ObjectStore(ModelUser):
             obj.updateReferencingListAttrs()
             del self._objects[obj.key()]
 
-    def _deleteObject(self, object, objectsToDel, detaches, superobject=None):
+    def _deleteObject(self, obj, objectsToDel, detaches, superobject=None):
         """Compile the list of objects to be deleted.
 
         This is a recursive method since deleting one object might be
         deleting others.
 
-        object       - the object to delete
+        obj          - the object to delete
         objectsToDel - a running dictionary of all objects to delete
         detaches     - a running list of all detaches (eg, obj.attr=None)
         superobject  - the object that was the cause of this invocation
 
         """
         # Some basic assertions
-        assert self.hasObject(object), safeDescription(object)
-        assert object.key() is not None
+        assert self.hasObject(obj), safeDescription(obj)
+        assert obj.key() is not None
 
         v = self._verboseDelete
 
@@ -270,47 +270,45 @@ class ObjectStore(ModelUser):
                 dueTo = ' due to deletion of %s.%i' % (superobject.klass().name(), superobject.serialNum())
             else:
                 cascadeString = dueTo = ''
-            print 'checking %sdelete of %s.%d%s' % (cascadeString, object.klass().name(), object.serialNum(), dueTo)
+            print 'checking %sdelete of %s.%d%s' % (cascadeString, obj.klass().name(), obj.serialNum(), dueTo)
 
-        objectsToDel[id(object)] = object
+        objectsToDel[id(obj)] = obj
 
         # Get the objects/attrs that reference this object
-        referencingObjectsAndAttrs = object.referencingObjectsAndAttrs()
+        referencingObjectsAndAttrs = obj.referencingObjectsAndAttrs()
 
         # cascade-delete objects with onDeleteOther=cascade
         for referencingObject, referencingAttr in referencingObjectsAndAttrs:
             onDeleteOther = referencingAttr.get('onDeleteOther', 'deny')
             if onDeleteOther == 'cascade':
-                self._deleteObject(referencingObject, objectsToDel, detaches, object)
+                self._deleteObject(referencingObject, objectsToDel, detaches, obj)
 
         # Determine all referenced objects, constructing a list of (attr, referencedObject) tuples.
-        referencedAttrsAndObjects = object.referencedAttrsAndObjects()
+        referencedAttrsAndObjects = obj.referencedAttrsAndObjects()
 
         # Check if it's possible to cascade-delete objects with onDeleteSelf=cascade
         for referencedAttr, referencedObject in referencedAttrsAndObjects:
             onDeleteSelf = referencedAttr.get('onDeleteSelf', 'detach')
             if onDeleteSelf == 'cascade':
-                self._deleteObject(referencedObject, objectsToDel, detaches, object)
+                self._deleteObject(referencedObject, objectsToDel, detaches, obj)
 
-        # Deal with all other objects that reference or are referenced by this object.  By default, you are not allowed
-        # to delete an object that has an ObjRef pointing to it.  But if the ObjRef has
-        # onDeleteOther=detach, then that ObjRef attr will be set to None and the delete will be allowed;
-        # and if onDeleteOther=cascade, then that object will itself be deleted and the delete
-        # will be allowed.
+        # Deal with all other objects that reference or are referenced by this object.
+        # By default, you are not allowed to delete an object that has an ObjRef pointing to it.
+        # But if the ObjRef has onDeleteOther=detach, then that ObjRef attr will be set to None
+        # and the delete will be allowed; and if onDeleteOther=cascade, then that object will
+        # itself be deleted and the delete will be allowed.
         #
-        # You _are_ by default allowed to delete an object that points to other objects (by List or ObjRef)
-        # but if onDeleteSelf=deny it will be disallowed, or if onDeleteSelf=cascade the pointed-to
-        # objects will themselves be deleted.
+        # You _are_ by default allowed to delete an object that points to other objects
+        # (by List or ObjRef) but if onDeleteSelf=deny it will be disallowed, or if
+        # onDeleteSelf=cascade the pointed-to objects will themselves be deleted.
 
         # Remove from that list anything in the cascaded list
         referencingObjectsAndAttrs = [(o, a)
-                for o, a in referencingObjectsAndAttrs
-                        if not objectsToDel.has_key(id(o))]
+            for o, a in referencingObjectsAndAttrs if id(o) not in objectsToDel]
 
         # Remove from that list anything in the cascaded list
         referencedAttrsAndObjects = [(a, o)
-                for a, o in referencedAttrsAndObjects
-                        if not objectsToDel.has_key(id(o))]
+            for a, o in referencedAttrsAndObjects if id(o) not in objectsToDel]
 
         # Check for onDeleteOther=deny
         badObjectsAndAttrs = []
@@ -321,10 +319,9 @@ class ObjectStore(ModelUser):
                 badObjectsAndAttrs.append((referencingObject, referencingAttr))
         if badObjectsAndAttrs:
             raise DeleteReferencedError(
-                    'You tried to delete an object (%s.%d) that is referenced by other objects with onDeleteOther unspecified or set to deny'
-                    % (object.klass().name(), object.serialNum()),
-                    object,
-                    badObjectsAndAttrs)
+                'You tried to delete an object (%s.%d) that is referenced'
+                ' by other objects with onDeleteOther unspecified or set to deny'
+                % (obj.klass().name(), obj.serialNum()), obj, badObjectsAndAttrs)
 
         # Check for onDeleteSelf=deny
         badAttrs = []
@@ -335,10 +332,9 @@ class ObjectStore(ModelUser):
                 badAttrs.append(referencedAttr)
         if badAttrs:
             raise DeleteObjectWithReferencesError(
-                    'You tried to delete an object (%s.%d) that references other objects with onDeleteSelf set to deny'
-                    % (object.klass().name(), object.serialNum()),
-                    object,
-                    badAttrs)
+                'You tried to delete an object (%s.%d) that references'
+                ' other objects with onDeleteSelf set to deny'
+                % (obj.klass().name(), obj.serialNum()), obj, badAttrs)
 
         # Detach objects with onDeleteOther=detach
         for referencingObject, referencingAttr in referencingObjectsAndAttrs:
@@ -346,12 +342,12 @@ class ObjectStore(ModelUser):
             if onDeleteOther == 'detach':
                 if v:
                     print 'will set %s.%d.%s to None' % (
-                            referencingObject.klass().name(),
-                            referencingObject.serialNum(), referencingAttr.name())
+                        referencingObject.klass().name(),
+                        referencingObject.serialNum(), referencingAttr.name())
                 detaches.append((referencingObject, referencingAttr))
 
         # Detach objects with onDeleteSelf=detach
-        # This is actually a no-op.  There is nothing that needs to be set to zero.
+        # This is actually a no-op. There is nothing that needs to be set to zero.
 
 
     ## Changes ##
@@ -481,8 +477,8 @@ class ObjectStore(ModelUser):
         assert self._deletedObjects.isEmpty()
         assert self._changedObjects.isEmpty()
 
-        self._objects        = self.emptyObjectCache()
-        self._newSerialNum   = -1
+        self._objects = self.emptyObjectCache()
+        self._newSerialNum = -1
 
     def discardEverything(self):
         """Discard all cached objects.
@@ -495,19 +491,19 @@ class ObjectStore(ModelUser):
 
         """
         if self._threaded:
-            self._hasChanges     = {}
+            self._hasChanges = {}
         else:
-            self._hasChanges     = False
-        self._objects        = self.emptyObjectCache()
+            self._hasChanges = False
+        self._objects = self.emptyObjectCache()
         self._newObjects.clear()
         self._deletedObjects.clear()
         self._changedObjects.clear()
-        self._newSerialNum   = -1
+        self._newSerialNum = -1
 
 
     ## Notifications ##
 
-    def objectChanged(self, object):
+    def objectChanged(self, obj):
         """Mark attributes as changed.
 
         MiddleObjects must send this message when one of their interesting
@@ -518,8 +514,8 @@ class ObjectStore(ModelUser):
 
         """
         self.willChange()
-        self._changedObjects[object] = object
-        # @@ 2000-10-06 ce: Should this be keyed by the object.key()? Does it matter?
+        self._changedObjects[obj] = obj
+        # @@ 2000-10-06 ce: Should this be keyed by the obj.key()? Does it matter?
 
 
     ## Serial numbers ##
@@ -544,22 +540,21 @@ class ObjectStore(ModelUser):
         """Return a Klass object for the given class.
 
         This may be:
-                - the Klass object already
-                - a Python class
-                - a class name (e.g., string)
+            - the Klass object already
+            - a Python class
+            - a class name (e.g., string)
         Users of this method include the various fetchObjectEtc() methods
         which take a "class" parameter.
 
         """
-        import types
         assert aClass is not None
         if not isinstance(aClass, BaseKlass):
-            if isinstance(aClass, types.ClassType): # old Python classes
+            if isinstance(aClass, type): # new Python classes
                 aClass = self._model.klass(aClass.__name__)
-            elif type(aClass) in StringTypes:
+            elif isinstance(aClass, ClassType): # old Python classes
+                aClass = self._model.klass(aClass.__name__)
+            elif isinstance(aClass, basestring):
                 aClass = self._model.klass(aClass)
-            elif isinstance(aClass, types.TypeType): # new Python classes
-                aClass = self._model.klass(aClass.__name__)
             else:
                 raise ValueError('Invalid class parameter. Pass a Klass,'
                     'a name or a Python class. Type of aClass is %s.'

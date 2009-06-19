@@ -1,5 +1,4 @@
-import sys, types
-
+import sys
 
 from MiddleObject import MiddleObject
 from ObjectStore import ObjectStore, UnknownObjectError
@@ -101,8 +100,8 @@ class SQLObjectStore(ObjectStore):
         self._dbArgs = kwargs
         self._connected = False
         self._commited = False
-        self._sqlEcho   = None
-        self._sqlCount  = 0
+        self._sqlEcho = None
+        self._sqlCount = 0
         self._pool = None   # an optional DBPool
 
     def modelWasSet(self):
@@ -200,7 +199,7 @@ class SQLObjectStore(ObjectStore):
                 try:
                     self._pool = DBPool(self.dbapiModule(), poolSize, **args)
                 except TypeError:
-                    if args.has_key('database'):
+                    if 'database' in args:
                         del args['database']
                         self._pool = DBPool(self.dbapiModule(), poolSize, **args)
                     else:
@@ -228,9 +227,9 @@ class SQLObjectStore(ObjectStore):
         conn, cur = self.executeSQL('select id, name from _MKClassIds;')
         try:
             klassesById = {}
-            for id, name in cur.fetchall():
-                assert id, 'Id must be a non-zero int.' \
-                    ' id=%r, name=%r' % (id, name)
+            for klassId, name in cur.fetchall():
+                assert klassId, 'Id must be a non-zero int.' \
+                    ' id=%r, name=%r' % (klassId, name)
                 try:
                     klass = self._model.klass(name)
                 except KeyError:
@@ -240,8 +239,8 @@ class SQLObjectStore(ObjectStore):
                         ' the model %s. The model and the db are not in sync.'
                         % (name, name, filename))
                     raise KeyError(msg)
-                klassesById[id] = klass
-                klass.setId(id)
+                klassesById[klassId] = klass
+                klass.setId(klassId)
         finally:
             self.doneWithConnection(conn)
         self._klassesById = klassesById
@@ -252,8 +251,8 @@ class SQLObjectStore(ObjectStore):
     def commitInserts(self, allThreads=False):
         unknownSerialNums = []
         # @@ ... sort here for dependency order
-        for object in self._newObjects.items(allThreads):
-            self._insertObject(object, unknownSerialNums)
+        for obj in self._newObjects.items(allThreads):
+            self._insertObject(obj, unknownSerialNums)
 
         conn = None
         try:
@@ -264,20 +263,20 @@ class SQLObjectStore(ObjectStore):
             self.doneWithConnection(conn)
         self._newObjects.clear(allThreads)
 
-    def _insertObject(self, object, unknownSerialNums):
+    def _insertObject(self, obj, unknownSerialNums):
         # New objects not in the persistent store have serial numbers less than 1
-        if object.serialNum() > 0:
+        if obj.serialNum() > 0:
             try:
-                rep = repr(object)
+                rep = repr(obj)
             except Exception:
                 rep = '(repr exception)'
-            assert object.serialNum() < 1, 'object=%s' % rep
+            assert obj.serialNum() < 1, 'obj=%s' % rep
 
         # try to get the next ID (if database supports this)
-        idNum = self.retrieveNextInsertId(object.klass())
+        idNum = self.retrieveNextInsertId(obj.klass())
 
         # SQL insert
-        sql = object.sqlInsertStmt(unknownSerialNums, idNum)
+        sql = obj.sqlInsertStmt(unknownSerialNums, idNum)
         conn, cur = self.executeSQL(sql)
         try:
             # Get new id/serial num
@@ -285,12 +284,12 @@ class SQLObjectStore(ObjectStore):
                 idNum = self.retrieveLastInsertId(conn, cur)
 
             # Update object
-            object.setSerialNum(idNum)
-            object.setKey(ObjectKey().initFromObject(object))
-            object.setChanged(False)
+            obj.setSerialNum(idNum)
+            obj.setKey(ObjectKey().initFromObject(obj))
+            obj.setChanged(False)
 
             # Update our object pool
-            self._objects[object.key()] = object
+            self._objects[obj.key()] = obj
         finally:
             self.doneWithConnection(conn)
 
@@ -317,10 +316,10 @@ class SQLObjectStore(ObjectStore):
     def commitUpdates(self, allThreads=False):
         conn = None
         try:
-            for object in self._changedObjects.values(allThreads):
-                sql = object.sqlUpdateStmt()
+            for obj in self._changedObjects.values(allThreads):
+                sql = obj.sqlUpdateStmt()
                 conn, cur = self.executeSQL(sql, conn)
-                object.setChanged(False)
+                obj.setChanged(False)
         finally:
             self.doneWithConnection(conn)
         self._changedObjects.clear(allThreads)
@@ -328,8 +327,8 @@ class SQLObjectStore(ObjectStore):
     def commitDeletions(self, allThreads=False):
         conn = None
         try:
-            for object in self._deletedObjects.items(allThreads):
-                sql = object.sqlDeleteStmt()
+            for obj in self._deletedObjects.items(allThreads):
+                sql = obj.sqlDeleteStmt()
                 conn, cur = self.executeSQL(sql, conn)
         finally:
             self.doneWithConnection(conn)
@@ -545,13 +544,12 @@ class SQLObjectStore(ObjectStore):
         """Modify the given set of clauses so that it filters out records with non-NULL deleted field."""
         clauses = clauses.strip()
         if clauses.lower().startswith('where'):
-            orderByIndex = clauses.lower().find('order by')
-            if orderByIndex == -1:
-                where = clauses[5:]
+            where = clauses[5:]
+            orderByIndex = where.lower().find('order by')
+            if orderByIndex < 0:
                 orderBy = ''
             else:
-                where = clauses[5:orderByIndex]
-                orderBy = clauses[orderByIndex:]
+                where, orderBy = where[:orderByIndex], where[orderByIndex:]
             return 'where deleted is null and (%s) %s' % (where, orderBy)
         else:
             return 'where deleted is null %s' % clauses
@@ -569,7 +567,7 @@ class SQLObjectStore(ObjectStore):
         override that assumption by overriding this method.
 
         """
-        assert isinstance(objRef, types.LongType), 'type=%r, objRef=%r' % (type(objRef), objRef)
+        assert isinstance(objRef, long), 'type=%r, objRef=%r' % (type(objRef), objRef)
         if objRef == 0:
             return None
         else:
@@ -605,7 +603,7 @@ class SQLObjectStore(ObjectStore):
         the database, None is returned.
 
         """
-        assert isinstance(objRef, types.LongType), 'type=%r, objRef=%r' % (type(objRef), objRef)
+        assert isinstance(objRef, long), 'type=%r, objRef=%r' % (type(objRef), objRef)
         if objRef == 0:
             return 0
         else:
@@ -801,8 +799,9 @@ class MiddleObjectMixIn(object):
             if isinstance(value, basestring):
                 append(value)
             else:
-                extend(value) # value could be sequence for attrs that require multiple SQL columns
-        if len(values) == 0:
+                # value could be sequence for attrs requiring multiple SQL columns
+                extend(value)
+        if not values:
             values = ['0']
         values = ','.join(values)
         return insertSQLStart + values + ');'
@@ -822,7 +821,7 @@ class MiddleObjectMixIn(object):
             res.append(attr.sqlUpdateExpr(self.valueForAttr(attr)))
         res = ','.join(res)
         res = ('update ', klass.sqlTableName(), ' set ', res, ' where ',
-                klass.sqlSerialColumnName(), '=', str(self.serialNum()))
+            klass.sqlSerialColumnName(), '=', str(self.serialNum()))
         return ''.join(res)
 
     def sqlDeleteStmt(self):
@@ -839,11 +838,11 @@ class MiddleObjectMixIn(object):
         assert klass is not None
         if self.store().model().setting('DeleteBehavior', 'delete') == 'mark':
             return 'update %s set deleted=%s where %s=%d;' % (
-                    klass.sqlTableName(), self.store().sqlNowCall(),
-                    klass.sqlSerialColumnName(), self.serialNum())
+                klass.sqlTableName(), self.store().sqlNowCall(),
+                klass.sqlSerialColumnName(), self.serialNum())
         else:
             return 'delete from %s where %s=%d;' % (klass.sqlTableName(),
-                    klass.sqlSerialColumnName(), self.serialNum())
+                klass.sqlSerialColumnName(), self.serialNum())
 
     def referencingObjectsAndAttrsFetchKeywordArgs(self, backObjRefAttr):
         if self.store().setting('UseBigIntObjRefColumns'):

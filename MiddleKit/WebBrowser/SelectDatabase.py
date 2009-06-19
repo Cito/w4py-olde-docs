@@ -39,10 +39,10 @@ password,password
         for field in fields:
             field['value'] = req.value(field['name'], '')
             wr('<tr><td>%(name)s:</td><td></td><td>'
-                    '<input type="%(type)s" name="%(name)s" value="%(value)s">'
-                    '</td><td>%(comment)s</td></tr>' % field)
+                '<input type="%(type)s" name="%(name)s" value="%(value)s">'
+                '</td><td>%(comment)s</td></tr>' % field)
         wr('<tr><td colspan="2">&nbsp;</td><td align="right">'
-                '<input type="submit" value="OK"></td><td>&nbsp;</td></tr>')
+            '<input type="submit" value="OK"></td><td>&nbsp;</td></tr>')
         wr('</table></form>')
 
     def writeRecentDatabases(self):
@@ -71,7 +71,7 @@ password,password
         # Build up args for links
         args = []
         for key in self.dbKeys():
-            if db.has_key(key):
+            if key in db:
                 args.append('%s=%s' % (key, db[key]))
         args = '&'.join(args)
 
@@ -81,10 +81,10 @@ password,password
         # the fields filled out so that the user can enter the password.
         if db.get('password', None):
             self.write('<p><a href="BrowseClasses?%s">%s</a>'
-                    ' (password included)' % (args, title))
+                ' (password included)' % (args, title))
         else:
             self.writeln('<p><a href="?%s">%s</a>'
-                    ' (password required)' % (args, title))
+                ' (password required)' % (args, title))
 
     def dbKeys(self):
         """Get keys for database connections.

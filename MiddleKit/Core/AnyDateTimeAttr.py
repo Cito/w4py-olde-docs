@@ -3,5 +3,5 @@ from Attr import Attr
 
 class AnyDateTimeAttr(Attr):
 
-    def __init__(self, dict):
-        Attr.__init__(self, dict)
+    def __init__(self, attr):
+        Attr.__init__(self, attr)

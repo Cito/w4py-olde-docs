@@ -33,14 +33,14 @@ class Generate:
             print 'Error: Output target, %s, is not a directory.' % outdir
 
         # Generate
-        if opt.has_key('sql'):
+        if 'sql' in opt:
             print 'Generating SQL...'
             self.generate(
                 pyClass = opt['db'] + 'SQLGenerator',
                 model = opt['model'],
                 configFilename = opt.get('config'),
                 outdir = os.path.join(outdir, 'GeneratedSQL'))
-        if opt.has_key('py'):
+        if 'py' in opt:
             print 'Generating Python...'
             self.generate(
                 pyClass = opt['db'] + 'PythonGenerator',
@@ -80,23 +80,23 @@ class Generate:
         # Turn the cmd line optPairs into a dictionary
         opt = {}
         for key, value in optPairs:
-            if len(key) >= 2 and key[:2] == '--':
+            if key.startswith('--'):
                 key = key[2:]
-            elif key[0] == '-':
+            elif key.startswith('-'):
                 key = key[1:]
             opt[key] = value
 
         # Check for required opt, set defaults, etc.
-        if opt.has_key('h') or opt.has_key('help'):
+        if 'h' in opt or 'help' in opt:
             self.usage()
-        if not opt.has_key('db'):
+        if 'db' not in opt:
             self.usage('No database specified.')
-        if not opt.has_key('model'):
+        if 'model' not in opt:
             self.usage('No model specified.')
-        if not opt.has_key('sql') and not opt.has_key('py'):
+        if 'sql' not in opt and 'py' not in opt:
             opt['sql'] = ''
             opt['py'] = ''
-        if not opt.has_key('outdir'):
+        if 'outdir' not in opt:
             opt['outdir'] = os.curdir
 
         return opt
@@ -114,8 +114,8 @@ class Generate:
             pyClass = getattr(module, pyClass)
         generator = pyClass()
         if isinstance(model, basestring):
-            generator.readModelFileNamed(model, configFilename=configFilename,
-                havePythonClasses=False)
+            generator.readModelFileNamed(model,
+                configFilename=configFilename, havePythonClasses=False)
         else:
             generator.setModel(model)
         generator.generate(outdir)

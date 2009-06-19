@@ -886,7 +886,7 @@ class Handler:
                 print "ERROR: HTTP GET from WebKit adapter port."
                 self._sock.sendall('''\
 HTTP/1.0 505 HTTP Version Not Supported\r
-Content-type: text/plain\r
+Content-Type: text/plain\r
 \r
 Error: Invalid AppServer protocol.\r
 Sorry, I don't speak HTTP. You must connect via an adapter.\r
@@ -1154,7 +1154,7 @@ class SCGIHandler(AdapterHandler):
                 print "ERROR: HTTP GET from SCGI adapter port."
                 self._sock.sendall('''\
 HTTP/1.0 505 HTTP Version Not Supported\r
-Content-type: text/plain\r
+Content-Type: text/plain\r
 \r
 Error: Invalid AppServer protocol.\r
 Sorry, I don't speak HTTP. You must connect via an SCGI adapter.\r

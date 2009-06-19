@@ -72,7 +72,7 @@ class CGIAdapter(Adapter):
             output = "<pre>%s</pre>" % htmlEncode(output)
             if response is None:
                 output = "<h4>No response from application server</h4>\n" + output
-            sys.stdout.write('''Content-type: text/html\n
+            sys.stdout.write('''Content-Type: text/html\n
 <html><head><title>WebKit CGI Error</title><body>
 <h3>WebKit CGI Error</h3>
 %s

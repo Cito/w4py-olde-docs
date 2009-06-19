@@ -1,5 +1,5 @@
 
-def typeErrors(object, value, skipAttrs=[]):
+def typeErrors(obj, value, skipAttrs=[]):
     """Provoke type errors.
 
     Attempts to set every attribute of object to the given value,
@@ -7,10 +7,10 @@ def typeErrors(object, value, skipAttrs=[]):
     give a list of attribute names to by pass.
 
     """
-    for attr in object.klass().allAttrs():
+    for attr in obj.klass().allAttrs():
         if attr.name() not in skipAttrs:
             try:
-                object.setValueForAttr(attr, value)
+                obj.setValueForAttr(attr, value)
             except TypeError:
                 pass
             except Exception, e:
@@ -21,10 +21,10 @@ def typeErrors(object, value, skipAttrs=[]):
 
 
 def test(store):
+    import sys
+    from MiscUtils.DataTable import DataTable
     from Foo import Foo
     from Bar import Bar
-    from MiscUtils.DataTable import DataTable
-    import sys
 
     class Blarg:
         pass

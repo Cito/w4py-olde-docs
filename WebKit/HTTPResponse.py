@@ -28,7 +28,7 @@ class HTTPResponse(Response):
 
         if headers is None:
             self._headers = {}
-            self.setHeader('Content-type', 'text/html')
+            self.setHeader('Content-Type', 'text/html')
         else:
             self._headers = headers
 
@@ -70,7 +70,7 @@ class HTTPResponse(Response):
     def clearHeaders(self):
         """Clear all the headers.
 
-        You might consider a setHeader('Content-type', 'text/html')
+        You might consider a setHeader('Content-Type', 'text/html')
         or something similar after this.
 
         """
@@ -216,7 +216,7 @@ class HTTPResponse(Response):
         assert not self._committed, "Headers have already been sent."
         self.setHeader('Status', status or '302 Found')
         self.setHeader('Location', url)
-        self.setHeader('Content-type', 'text/html')
+        self.setHeader('Content-Type', 'text/html')
         self.write('<html><body>This page has been redirected'
             ' to <a href="%s">%s</a>.</body></html>' % (url, url))
 
@@ -388,7 +388,7 @@ class HTTPResponse(Response):
         assert not self._committed, \
             "Cannot reset the response; it has already been sent."
         self._headers = {}
-        self.setHeader('Content-type', 'text/html')
+        self.setHeader('Content-Type', 'text/html')
         self._cookies = {}
         self._strmOut.clear()
 
@@ -446,7 +446,7 @@ class HTTPResponse(Response):
         for header, value in err.headers().items():
             self.setHeader(header, value)
         self.setStatus(err.code(), err.codeMessage())
-        self.setHeader('Content-type', 'text/html')
+        self.setHeader('Content-Type', 'text/html')
 
     def displayError(self, err):
         """Display HTTPException errors, with status codes."""

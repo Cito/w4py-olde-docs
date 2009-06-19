@@ -424,8 +424,8 @@ def _test():
                 doc.append('</BODY></HTML>\n')
 
             doc = ''.join(doc)
-            req.out.write('Content-length: %s\r\n'
-                'Content-type: text/html\r\n'
+            req.out.write('Content-Length: %s\r\n'
+                'Content-Type: text/html\r\n'
                 'Cache-Control: no-cache\r\n'
                 '\r\n' % len(doc))
             req.out.write(doc)

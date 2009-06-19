@@ -1,9 +1,7 @@
-import os
-
 from MiscUtils.Configurable import Configurable
 from WebKit.Page import Page
 
-debug = 0
+debug = False
 
 
 class SitePage(Page, Configurable):
@@ -15,8 +13,8 @@ class SitePage(Page, Configurable):
     def configFilename(self):
         return self.request().serverSidePath('Properties.config')
 
-    def printDict(self, dict):
-        for key, value in dict.items():
+    def printDict(self, d):
+        for key, value in d.items():
             print '  %s = %s' % (key, value)
 
     def writeHTML(self):

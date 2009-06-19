@@ -43,7 +43,7 @@ class Test:
             print '*** %s ***\n' % self._modelName
             if not self._modelName.endswith('.mkmodel'):
                 self._modelName += '.mkmodel'
-            didFail = 0
+            didFail = None
             try:
                 if self.canRun():
                     # support multiple config files for testing
@@ -74,12 +74,12 @@ class Test:
             self._modelNames = args[1:]
         else:
             self._modelNames = '''
-                    MKBasic MKNone MKString MKDateTime MKEnums MKDefaultMinMax
-                    MKTypeValueChecking MKInheritance MKInheritanceAbstract
-                    MKList MKObjRef MKObjRefReuse MKDelete MKDeleteMark
-                    MKMultipleStores MKMultipleThreads
-                    MKModelInh1 MKModelInh2 MKModelInh3
-                    MKExcel
+                MKBasic MKNone MKString MKDateTime MKEnums MKDefaultMinMax
+                MKTypeValueChecking MKInheritance MKInheritanceAbstract
+                MKList MKObjRef MKObjRefReuse MKDelete MKDeleteMark
+                MKMultipleStores MKMultipleThreads
+                MKModelInh1 MKModelInh2 MKModelInh3
+                MKExcel
             '''.split()
 
     def canRun(self):
@@ -88,10 +88,10 @@ class Test:
             file = open(path)
             names = {}
             exec file in names
-            assert names.has_key('CanRun'), 'expecting a CanRun() function'
+            assert 'CanRun' in names, 'expecting a CanRun() function'
             return names['CanRun']()
         else:
-            return 1
+            return True
 
     def runCompletePath(self, configFilename='Settings.config'):
         self._configFilename = configFilename
@@ -106,10 +106,9 @@ class Test:
         """Run all TestEmpty*.py files in the model, in alphabetical order."""
         names = glob(os.path.join(self._modelName, 'TestEmpty*.py'))
         if names:
-            names.sort()
-            for name in names:
+            for name in sorted(names):
                 self.createDatabase()
-                self.testRun(os.path.basename(name), deleteData=0)
+                self.testRun(os.path.basename(name), deleteData=False)
         else:
             self.createDatabase()
 
@@ -120,13 +119,13 @@ class Test:
         if os.path.exists(os.path.join(self._modelName, pyFile)):
             print '%s:' % pyFile
             self.run('python TestRun.py %s %s %s delete=%i' % (
-                    self._modelName, self._configFilename, pyFile, deleteData))
+                self._modelName, self._configFilename, pyFile, deleteData))
         else:
             print 'NO %s TO TEST.' % pyFile
 
     def testDesign(self):
         self.run('python TestDesign.py %s %s' % (
-                self._modelName, self._configFilename))
+            self._modelName, self._configFilename))
 
     def createDatabase(self):
         filename = workDir + '/GeneratedSQL/Create.sql'
@@ -161,13 +160,13 @@ class Test:
         # version number can be printed out, so import the store:
         objStoreName = dbName + 'ObjectStore'
         values = {}
-        exec 'import MiddleKit.Run.'+objStoreName in values
+        exec 'import MiddleKit.Run.' + objStoreName in values
 
         out = sys.stdout
         out.write('modules with versions:\n')
-        modules = [m for m in sys.modules.values()
-                if m is not None and m.__name__ != 'sys']
-        modules.sort(lambda a, b: cmp(a.__name__, b.__name__))
+        modules = sorted((m for m in sys.modules.values()
+            if m is not None and m.__name__ != 'sys'),
+            key=lambda m: m.__name__)
         for mod in modules:
             ver = getattr(mod, 'version', None)
             verInfo = getattr(mod, 'version_info', None)

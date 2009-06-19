@@ -57,28 +57,23 @@ class StorePage(SitePage):
     def writeTopBar(self):
         names = os.path.split(self.modelFilename())
         self.writeln('<p><a href="SelectModel" class="SelectLink">SELECT</a>'
-                ' <span class=StatusBar>%s - %s</span></p>' % (names[1], names[0]))
+            ' <span class=StatusBar>%s - %s</span></p>' % (names[1], names[0]))
         req = self.request()
         self.writeln('<p><a href="SelectDatabase" class="SelectLink">SELECT</a>'
-                ' <span class="StatusBar">db=%s, host=%s, user=%s</span></p>'
-                % (req.value('database'), req.value('host'), req.value('user')))
+            ' <span class="StatusBar">db=%s, host=%s, user=%s</span></p>'
+            % (req.value('database'), req.value('host'), req.value('user')))
 
     def writeSideBar(self):
         self.writeKlasses()
 
     def writeKlasses(self):
-        # @@ 2000-11-27 ce: move this to MixIns???
+        # @@ 2000-11-27 ce: move this to MixIns?
         curClassName = self.request().field('class', None)
         klasses = self.store().model().klasses()
-        names = klasses.keys()
-        names.sort()
-        modelFilename = self.urlEncode(self.modelFilename())
+        names = sorted(klasses)
         for name in names:
             urlName = self.urlEncode(name)
-            if name == curClassName:
-                style = 'CurClassLink'
-            else:
-                style = 'ClassLink'
+            style = name == curClassName and 'CurClassLink' or 'ClassLink'
             self.writeln('<p><a href="BrowseObjects?class=%s" class"=%s">'
                     '%s</a></p>' % (name, style, urlName))
 

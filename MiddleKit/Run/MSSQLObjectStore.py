@@ -16,8 +16,8 @@ class MSSQLObjectStore(SQLObjectStore):
     http://egenix.com/files/python/
 
     Example creation:
-            from MiddleKit.Run.MSSQLObjectStore import MSSQLObjectStore
-            store = MSSQLObjectStore(dsn='LocalServer', clear_auto_commit=0)
+        from MiddleKit.Run.MSSQLObjectStore import MSSQLObjectStore
+        store = MSSQLObjectStore(dsn='LocalServer', clear_auto_commit=0)
 
     As usual, the keyword args are passed through to the DB API connect()
     function.
@@ -32,7 +32,7 @@ class MSSQLObjectStore(SQLObjectStore):
     MS SQL Server. According to the article this is done by setting the
     connection option SQL.CURSOR_TYPE to e.g. SQL.CURSOR_DYNAMIC:
 
-            dbc.setconnectoption(SQL.CURSOR_TYPE, SQL.CURSOR_DYNAMIC)
+        dbc.setconnectoption(SQL.CURSOR_TYPE, SQL.CURSOR_DYNAMIC)
 
     - - -
     """
@@ -65,15 +65,15 @@ class MSSQLObjectStore(SQLObjectStore):
             # ODBC driver connection keywords are documented here:
             # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbcsql/od_odbc_d_4x4k.asp
             s = args['DriverConnect']
-            if s.find('DATABASE=') == -1:
-                if s[-1] != ';':
+            if 'DATABASE=' not in s:
+                if not s.endswith(';'):
                     s += ';'
                 s += 'DATABASE=' + self._model.sqlDatabaseName()
             # print '>> connection string=%r' % s
             conn = self.dbapiModule().DriverConnect(s)
         else:
             # extract the database arg if it was provided
-            if args.has_key('database'):
+            if 'database' in args:
                 database = args['database']
                 del args['database']
             else:

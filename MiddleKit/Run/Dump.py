@@ -7,7 +7,8 @@
 """
 
 
-import os, sys
+import os
+import sys
 from getopt import getopt
 
 
@@ -21,8 +22,7 @@ def FixPathForMiddleKit(verbose=0):
 
     """
     v = verbose
-    import os, sys
-    if globals().has_key('__file__'):
+    if '__file__' in globals():
         # We were imported as a module
         location = __file__
         if v:
@@ -78,7 +78,7 @@ class Dump:
     def main(self, args=sys.argv):
         opt = self.options(args)
 
-        if opt.has_key('outfile'):
+        if 'outfile' in opt:
             out = open(opt['outfile'], 'w')
         else:
             out = None
@@ -92,14 +92,14 @@ class Dump:
         classname = '%sObjectStore' % opt['db']
         module = __import__('MiddleKit.Run.%s' % classname, globals(), locals(), [classname])
         pyClass = getattr(module, classname)
-        if opt.has_key('prompt-for-args'):
+        if 'prompt-for-args' in opt:
             sys.stderr.write('Enter %s init args: ' % classname)
             conn = raw_input()
             store = eval('pyClass(%s)' % conn)
         else:
             store = pyClass()
         store.readModelFileNamed(opt['model'])
-        store.dumpObjectStore(out, progress=opt.has_key('show-progress'))
+        store.dumpObjectStore(out, progress='show-progress' in opt)
 
     def usage(self, errorMsg=None):
         progName = os.path.basename(sys.argv[0])
@@ -119,10 +119,10 @@ class Dump:
 
     def options(self, args):
         # Command line dissection
-        if type(args) == type(''):
+        if isinstance(args, basestring):
             args = args.split()
         optPairs, files = getopt(args[1:], 'h', ['help',
-                'show-progress', 'db=', 'model=', 'outfile=', 'prompt-for-args'])
+            'show-progress', 'db=', 'model=', 'outfile=', 'prompt-for-args'])
         if len(optPairs) < 1:
             self.usage('Missing options.')
         if len(files) > 0:
@@ -131,18 +131,18 @@ class Dump:
         # Turn the cmd line optPairs into a dictionary
         opt = {}
         for key, value in optPairs:
-            if len(key) >= 2 and key[:2] == '--':
+            if key.startswith('--'):
                 key = key[2:]
-            elif key[0] == '-':
+            elif key.startswith('-'):
                 key = key[1:]
             opt[key] = value
 
         # Check for required opt, set defaults, etc.
-        if opt.has_key('h') or opt.has_key('help'):
+        if 'h' in opt or 'help' in opt:
             self.usage()
-        if not opt.has_key('db'):
+        if 'db' not in opt:
             self.usage('No database specified.')
-        if not opt.has_key('model'):
+        if 'model' not in opt:
             self.usage('No model specified.')
         return opt
 

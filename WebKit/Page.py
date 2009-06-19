@@ -82,7 +82,7 @@ class Page(HTTPContent):
         * if you want to use a template that generates the entire
           page
         * if you want to send non-HTML content (be sure to
-          call ``self.response().setHeader('Content-type',
+          call ``self.response().setHeader('Content-Type',
           'mime/type')`` in this case).
 
         """

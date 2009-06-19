@@ -1,5 +1,5 @@
 
-connectionPool = 1
+connectionPool = True
 try:
     import psycopg2 as dbi # psycopg2 version 2
     from psycopg2 import Warning, DatabaseError
@@ -10,7 +10,7 @@ except ImportError:
         from psycopg import Warning, DatabaseError
         from psycopg.extensions import QuotedString
     except ImportError:
-        connectionPool = 0
+        connectionPool = False
         import pgdb as dbi # PyGreSQL
         from pgdb import Warning, DatabaseError
         def QuotedString(s):
@@ -28,12 +28,12 @@ class PostgreSQLObjectStore(SQLObjectStore):
     """PostgresObjectStore implements an object store backed by a PostgreSQL database.
 
     The connection arguments passed to __init__ are:
-            - host
-            - user
-            - passwd
-            - port
-            - unix_socket
-            - client_flag
+        - host
+        - user
+        - passwd
+        - port
+        - unix_socket
+        - client_flag
 
     You wouldn't use the 'db' argument, since that is determined by the model.
 
@@ -59,7 +59,7 @@ class PostgreSQLObjectStore(SQLObjectStore):
         def doneWithConnection(self, conn):
             pass
 
-    def augmentDatabaseArgs(self, args, pool=0):
+    def augmentDatabaseArgs(self, args, pool=False):
         if not args.get('database'):
             args['database'] = self._model.sqlDatabaseName()
 

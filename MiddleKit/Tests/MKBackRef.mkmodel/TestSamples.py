@@ -5,5 +5,5 @@ def test(store):
     for n in nodes:
         children = n.children()
         if children:
-            children.sort(lambda a, b: cmp(a.serialNum(), b.serialNum()))
-            assert n.value() == "".join(map(lambda c: c.value(), children))
+            children.sort(key=lambda c: c.serialNum)
+            assert n.value() == ''.join(map(lambda c: c.value(), children))

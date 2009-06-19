@@ -1,7 +1,7 @@
 import re
 
 from ModelObject import ModelObject
-from MiscUtils import NoDefault, StringTypes
+from MiscUtils import NoDefault
 from MiddleDict import MiddleDict
 
 
@@ -22,7 +22,7 @@ class Attr(MiddleDict, ModelObject):
         for key, value in attr.items():
             if key == 'Attribute':
                 key = 'Name'
-            if type(value) in StringTypes and not value.strip():
+            if isinstance(value, basestring) and not value.strip():
                 value = None
             self[key] = value
         name = self['Name']

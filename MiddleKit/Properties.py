@@ -3,10 +3,10 @@ name = 'MiddleKit'
 version = ('X', 'Y', 0)
 
 docs = [
-        {'name': 'Introduction', 'file': 'Intro.html'},
-        {'name': 'Quick Start',  'file': 'QuickStart.html'},
-        {'name': "User's Guide", 'file': 'UsersGuide.html'},
-        {'name': 'To Do',        'file': 'TODO.text'},
+    {'name': 'Introduction', 'file': 'Intro.html'},
+    {'name': 'Quick Start', 'file': 'QuickStart.html'},
+    {'name': "User's Guide", 'file': 'UsersGuide.html'},
+    {'name': 'To Do', 'file': 'TODO.text'},
 ]
 
 status = 'stable'

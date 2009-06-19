@@ -13,7 +13,6 @@ in InstallMixIns().
 
 """
 
-from types import LongType
 from WebUtils.Funcs import htmlEncode
 
 
@@ -48,9 +47,9 @@ class ObjectStore:
         ht = []
         suffix = ('s', '')[len(objs) == 1]
         ht.append('<span class="TablePrefix">%i %s object%s</span>'
-                % (len(objs), adjective, suffix))
+            % (len(objs), adjective, suffix))
         ht.append('<table border="1" cellspacing="0" cellpadding="2"'
-                ' class="ObjectsTable">')
+            ' class="ObjectsTable">')
         if objs:
             klass = objs[0].klass()
             ht.append(klass.htHeadingsRow())
@@ -63,7 +62,7 @@ class ObjectStore:
                 ht.append(obj.htAttrsRow())
         else:
             ht.append('<tr><td class="NoObjectsCell">'
-                    'No %s objects.</td></tr>' % adjective)
+                'No %s objects.</td></tr>' % adjective)
         ht.append('</table>\n')
         return ''.join(ht)
 
@@ -90,27 +89,25 @@ class MiddleObject:
         for attr in self.klass().allAttrs():
             value = getattr(self, '_'+attr.name())
             ht.append('<td class="TableData">%s</td>'
-                    % attr.htValue(value, self))
+                % attr.htValue(value, self))
         ht.append('</tr>\n')
         return ''.join(ht)
 
     def htObjectsInList(self, listName, coalesce=1):
-        list = self.valueForKey(listName)
+        klassList = self.valueForKey(listName)
         # We coalesce the classes together and present in alphabetical order
-        if list is not None and coalesce:
+        if klassList is not None and coalesce:
             klasses = {}
-            for obj in list:
+            for obj in klassList:
                 klassName = obj.klass().name()
-                if klasses.has_key(klassName):
+                if klassName in klasses:
                     klasses[klassName].append(obj)
                 else:
                     klasses[klassName] = [obj]
-            klassNames = klasses.keys()
-            klassNames.sort()
-            list = []
-            for name in klassNames:
-                list.extend(klasses[name])
-        return self.store().htObjectsInList(list, listName)
+            klassList = []
+            for name in sorted(klassNames):
+                klassList.extend(klasses[name])
+        return self.store().htObjectsInList(klassList, listName)
 
 
 class Attr:
@@ -122,13 +119,13 @@ class Attr:
 class ObjRefAttr:
 
     def htValue(self, value, obj):
-        if type(value) is LongType:
+        if isinstance(value, long):
             classSerialNum = (value & 0xFFFFFFFF00000000L) >> 32
             objSerialNum = value & 0xFFFFFFFFL
             klass = obj.store().klassForId(classSerialNum)
             klassName = klass.name()
             return '<a href="BrowseObject?class=%s&serialNum=%i">%s.%i</a>' \
-                    % (klassName, objSerialNum, klassName, objSerialNum)
+                % (klassName, objSerialNum, klassName, objSerialNum)
         else:
             return htmlEncode(str(value))
 
@@ -138,7 +135,7 @@ class ListAttr:
     def htValue(self, value, obj):
         if value is None:
             return '<a href="BrowseList?class=%s&serialNum=%i&attr=%s">list' \
-                    '</a>' % (obj.klass().name(), obj.serialNum(), self.name())
+                '</a>' % (obj.klass().name(), obj.serialNum(), self.name())
 
 
 def InstallMixIns():
@@ -148,19 +145,19 @@ def InstallMixIns():
     names = 'ObjectStore Klass MiddleObject Attr ObjRefAttr ListAttr'.split()
     places = 'Core Run'.split()
     for name in names:
-        mixed = 0
+        mixed = False
         for place in places:
             nameSpace = {}
             try:
                 exec 'from MiddleKit.%s.%s import %s' \
-                        % (place, name, name) in nameSpace
+                    % (place, name, name) in nameSpace
             except ImportError:
                 pass
             else:
                 pyClass = nameSpace[name]
                 mixIn = theGlobals[name]
                 MixIn(pyClass, mixIn)
-                mixed = 1
+                mixed = True
                 continue
         assert mixed, 'Could not mix-in %s.' % name
 

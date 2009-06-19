@@ -36,13 +36,13 @@ variables = {
     }
 ?>
 <div py:for="var in sorted(variables)">
-<h4 py:content="var" />
-<p style="font-size:small" py:content="show(eval(var))" />
-<p py:content="variables[var]" />
+<h4 py:content="var"/>
+<p style="font-size:small" py:content="show(eval(var))"/>
+<p py:content="variables[var]"/>
 </div>
 <h2>Environment</h2>
 <div py:for="key, value in os.environ.items()">
-<h5 py:content="key" />
-<p style="font-size:small" py:content="show(value)" />
+<h5 py:content="key"/>
+<p style="font-size:small" py:content="show(value)"/>
 </div>
 </body>

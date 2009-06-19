@@ -306,7 +306,7 @@ char* parseHeaders( char* data, LPEXTENSION_CONTROL_BLOCK ecb) {
 	char dosend[]="\r\n";
 	char unixend[]="\n";
 	int  nlchar = '\n';
-	char txtct[] = "Content-type:";
+	char txtct[] = "Content-Type:";
 	char txtlocation[]= "Location:";
 	char txtstatus[]= "Status:";
 	char* endptr=NULL;
@@ -484,8 +484,3 @@ DWORD WINAPI HttpExtensionProc( LPEXTENSION_CONTROL_BLOCK ecb) {
 	return HSE_STATUS_SUCCESS;
 
  }
-
-
-
-
-

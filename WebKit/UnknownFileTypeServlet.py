@@ -221,10 +221,10 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
         else:
             mimeType = fileDict['mimeType']
             mimeEncoding = fileDict['mimeEncoding']
-        response.setHeader('Content-type', mimeType)
+        response.setHeader('Content-Type', mimeType)
         response.setHeader('Content-Length', str(fileSize))
         if mimeEncoding:
-            response.setHeader('Content-encoding', mimeEncoding)
+            response.setHeader('Content-Encoding', mimeEncoding)
         if trans.request().method() == 'HEAD':
             f.close()
             return

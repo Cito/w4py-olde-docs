@@ -167,7 +167,7 @@ class CGIWrapper(object):
         """
         badNames = [name for name in names if name not in self._environ]
         if badNames:
-            print 'Content-type: text/html'
+            print 'Content-Type: text/html'
             print
             print docType()
             print '<html><head><title>Error</title></head><body>'

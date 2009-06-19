@@ -48,7 +48,7 @@ def testOther(store, klass, expectedResult):
 
     """
     # Run the test, deleting the specified object and verifying the expected result
-    object, foo, bar = setupTest(store, klass)
+    obj, foo, bar = setupTest(store, klass)
     try:
         runTest(store, klass, foo, expectedResult)
     finally:
@@ -63,9 +63,9 @@ def testSelf(store, klass, expectedResult):
 
     """
     # Run the test, deleting the specified object and verifying the expected result
-    object, foo, bar = setupTest(store, klass)
+    obj, foo, bar = setupTest(store, klass)
     try:
-        runTest(store, klass, object, expectedResult)
+        runTest(store, klass, obj, expectedResult)
     finally:
         cleanupTest(store, klass)
 
@@ -78,7 +78,7 @@ def testSelfList(store, klass, expectedResult):
 
     """
     # Run the test, deleting the specified object and verifying the expected result
-    object, foo, bar = setupListTest(store, klass)
+    obj, foo, bar = setupListTest(store, klass)
     try:
         runTest(store, klass, foo, expectedResult)
     finally:
@@ -94,10 +94,10 @@ def testListUpdate(store, klass, expectedResult):
 
     """
     # Run the test, deleting the specified object and verifying the expected result
-    object, foo, bar = setupListTest(store, klass)
+    obj, foo, bar = setupListTest(store, klass)
     assert len(foo.listOfI()) == 1
     try:
-        runTest(store, klass, object, expectedResult)
+        runTest(store, klass, obj, expectedResult)
         assert len(foo.listOfI()) == 0
     finally:
         cleanupTest(store, klass)
@@ -120,12 +120,12 @@ def setupTest(store, klass):
     store.saveChanges()
 
     # create an instance of klass pointing to Foo
-    object = klass()
-    object.setFoo(foo)
-    store.addObject(object)
+    obj = klass()
+    obj.setFoo(foo)
+    store.addObject(obj)
     store.saveChanges()
 
-    return object, foo, bar
+    return obj, foo, bar
 
 def setupListTest(store, klass):
     # Create a Foo and a Bar, with the Foo pointing to the Bar
@@ -138,11 +138,11 @@ def setupListTest(store, klass):
     store.saveChanges()
 
     # create an instance of klass and put it into the list in foo
-    object = klass()
-    getattr(foo, 'addToListOf%s' % klass.__name__)(object)
+    obj = klass()
+    getattr(foo, 'addToListOf%s' % klass.__name__)(obj)
     store.saveChanges()
 
-    return object, foo, bar
+    return obj, foo, bar
 
 def runTest(store, klass, objectToDelete, expectedResult):
     # Try to delete the specified object, then check that the expected result is what happened

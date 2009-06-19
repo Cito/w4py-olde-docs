@@ -15,7 +15,7 @@ class AnyDateTimeAttr(object):
             out.write('''\
         # have DateTime
         if value is not None:
-            if isinstance(value, type('')):
+            if isinstance(value, basestring):
                 value = DateTime.DateTimeFrom(value)
             if isinstance(value, DateTime.DateTimeDeltaType):
                 # MS SQL Server has no such thing, only DateTime

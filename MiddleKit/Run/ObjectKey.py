@@ -11,19 +11,19 @@ class ObjectKey(object):
     def __init__(self):
         pass
 
-    def initFromObject(self, object):
+    def initFromObject(self, obj):
         """Initialize from object.
 
-        Initializes the key and potentially invokes object.setSerialNum()
+        Initializes the key and potentially invokes obj.setSerialNum()
         if the object does not have one. The key does not maintain a reference
         to either the object or the store.
 
         """
-        self._className = object.__class__.__name__
-        self._serialNum = object.serialNum()
+        self._className = obj.__class__.__name__
+        self._serialNum = obj.serialNum()
         if self._serialNum is 0:
-            self._serialNum = object.store().newSerialNum()
-            object.setSerialNum(self._serialNum)
+            self._serialNum = obj.store().newSerialNum()
+            obj.setSerialNum(self._serialNum)
         return self
 
     def initFromClassNameAndSerialNum(self, className, serialNum):
@@ -38,7 +38,7 @@ class ObjectKey(object):
 
     def __cmp__(self, other):
         result = cmp(self._className, other._className)
-        if result is 0:
+        if result == 0:
             result = cmp(self._serialNum, other._serialNum)
         return result
 

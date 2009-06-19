@@ -14,13 +14,9 @@ class Klasses(object):
 
     def dropTablesSQL(self):
         sql = []
-        names = self.auxiliaryTableNames()[:]
-        names.reverse()
-        for tableName in names:
+        for tableName in reversed(self.auxiliaryTableNames()):
             sql.append('drop table if exists %s;\n' % tableName)
-        klasses = self._model._allKlassesInOrder[:]
-        klasses.reverse()
-        for klass in klasses:
+        for klass in reversed(self._model._allKlassesInOrder):
             sql.append('drop table if exists %s;\n' % klass.name())
         sql.append('\n')
         return ''.join(sql)
@@ -40,10 +36,12 @@ class Klass(object):
     def writePostCreateTable(self, generator, out):
         start = self.setting('StartingSerialNum', None)
         if start:
-            out.write('alter table %s auto_increment=%s;\n' % (self.sqlTableName(), start))
+            out.write('alter table %s auto_increment=%s;\n' % (
+                self.sqlTableName(), start))
 
     def primaryKeySQLDef(self, generator):
-        return '    %s int not null primary key auto_increment,\n' % self.sqlSerialColumnName().ljust(self.maxNameWidth())
+        return '    %s int not null primary key auto_increment,\n' % (
+            self.sqlSerialColumnName().ljust(self.maxNameWidth()),)
 
     def writeIndexSQLDefsInTable(self, wr):
         for attr in self.allAttrs():
@@ -56,10 +54,7 @@ class Klass(object):
 class EnumAttr(object):
 
     def nativeEnumSQLType(self):
-        enums = ['"%s"' % enum for enum in self.enums()]
-        enums = ', '.join(enums)
-        enums = 'enum(%s)' % enums
-        return enums
+        return 'enum(%s)' % ', '.join(['"%s"' % enum for enum in self.enums()])
 
 
 class StringAttr(object):
@@ -73,7 +68,7 @@ class StringAttr(object):
             return 'longtext'
         if max > 255:
             return 'text'
-        if self.has_key('Min') and self['Min'] and int(self['Min']) == max:
+        if self.get('Min', None) and int(self['Min']) == max:
             return 'char(%s)' % max
         else:
             return 'varchar(%s)' % max

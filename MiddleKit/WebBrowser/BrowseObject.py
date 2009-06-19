@@ -10,7 +10,7 @@ class BrowseObject(StorePage):
         obj = self.store().fetchObject(className, serialNum, None)
         if obj is None:
             self.writeln('<p>No object in store for %s.%i.</p>'
-                    % (className, serialNum))
+                % (className, serialNum))
         else:
             wr = self.writeln
             wr('<table border="1">')

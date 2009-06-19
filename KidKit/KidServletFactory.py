@@ -76,10 +76,10 @@ def kidClass(module):
             fragment = response.size() > 0
             if format is None:
                 self._template.write(self._response,
-                        fragment=fragment, output=output)
+                    fragment=fragment, output=output)
             else:
                 self._template.write(self._response,
-                        fragment=fragment, output=output, format=format)
+                    fragment=fragment, output=output, format=format)
 
     setattr(KidServlet, writeMethod, KidServlet.writeTemplate)
     return KidServlet
@@ -152,8 +152,8 @@ class KidServletFactory(ServletFactory):
             classfile = os.path.join(self._cacheDir, classname + ".py")
             if not self._cacheSource:
                 classfile += __debug__ and 'c' or 'o'
-            if not os.path.exists(classfile) \
-                            or os.path.getmtime(classfile) != mtime:
+            if (not os.path.exists(classfile)
+                    or os.path.getmtime(classfile) != mtime):
                 kidFile = KidFile(path)
                 if self._cacheSource:
                     kidFile.dump_source(classfile)

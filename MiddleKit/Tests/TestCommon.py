@@ -4,8 +4,7 @@ This is just a convenience module for the various test modules (TestFoo.py).
 
 """
 
-
-import os, string, sys, time
+import os, sys, time
 import FixPath
 import MiscUtils
 import MiddleKit
@@ -30,7 +29,7 @@ def rmdir(dirname, shouldPrint=1):
 
 
 dbName = 'MySQL'
-    # passed as an cmd line arg to Generate.py, and used to find an object store module
+    # passed as a cmd line arg to Generate.py, and used to find an object store module
 
 storeArgs = {}
     # passed to the object store class

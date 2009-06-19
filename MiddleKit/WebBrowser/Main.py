@@ -1,5 +1,4 @@
 from SitePage import SitePage
-import os, sys
 
 
 class Main(SitePage):

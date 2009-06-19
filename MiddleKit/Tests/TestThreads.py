@@ -1,6 +1,7 @@
-from Test import Test
 import threading
 
+from TestCommon import *
+from Test import Test
 
 class TestThreads(Test):
 
@@ -31,7 +32,7 @@ class TestThreads(Test):
 
     def createStore(self):
         from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
-        self._store = MySQLObjectStore()
+        self._store = MySQLObjectStore(**storeArgs)
         self._store.readModelFileNamed(self._modelName)
 
     def createObjects(self):
@@ -47,7 +48,7 @@ class TestThreads(Test):
         self._store.saveChanges()
         things = self._store.fetchObjectsOfClass('Thing')
         assert len(things) == self._numObjects, \
-                '%i, %i' % (len(things), self._numObjects)
+            '%i, %i' % (len(things), self._numObjects)
 
     def testConcurrentReads(self):
         for numThreads in self._numThreads:
@@ -66,7 +67,7 @@ class TestThreads(Test):
             def run(self):
                 store = self._store
                 for i in range(self._numReads):
-                    #print '%x:%03i' % (id(self), i),
+                    # print '%x:%03i' % (id(self), i),
                     objects = store.fetchObjectsOfClass('Thing')
 
         threads = []
@@ -92,5 +93,6 @@ class TestThreads(Test):
 
 if __name__ == '__main__':
     import sys
+    sys.path.append('WorkDir')
     sys.setcheckinterval(100)
     TestThreads().timedMain()

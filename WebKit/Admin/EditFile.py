@@ -19,7 +19,7 @@ class EditFile(Page):
         env = req.environ()
         field = req.field
 
-        header('Content-type', 'application/x-webkit-edit-file')
+        header('Content-Type', 'application/x-webkit-edit-file')
         header('Content-Disposition', 'inline; filename="WebKit.EditFile"')
 
         # Basic information for editing the file:

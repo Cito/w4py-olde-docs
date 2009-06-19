@@ -1,106 +1,123 @@
 
 /*** Generic stuff ***/
 
-body				{	font-family: Arial, Helvetica, sans-serif;
-						font-size: 9pt;
-						color: black;
-						background-color: white;
-						margin: 0pt;
-						padding: 0pt;
-					}
+body {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+	color: black;
+	background-color: white;
+	margin: 0pt;
+	padding: 0pt;
+}
 
-p					{	font-family: Arial, Helvetica, sans-serif;
-						font-size: 9pt;
-					}
+p {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+}
 
-h4 				{	font-family: Arial, Helvetica, sans-serif;
-						font-size: 10pt;
-						font-weight: bold;
-					}
+h4 {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 10pt;
+	font-weight: bold;
+}
 
-form				{	font-family: Arial, Helvetica, sans-serif;
-						font-size: 9pt;
-					}
+form {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+}
 
-input				{	font-family: Arial, Helvetica, sans-serif;
-						font-size: 9pt;
-					}
+input {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 9pt;
+}
 
 
 /*** Page layout parts ***/
 
-.TitleBar			{	font-family: Tahoma, Arial, Helvetica, sans-serif;
-						font-size: 18pt;
-						font-weight: bold;
-						color: white;
-						background-color: #00A;
-						padding: 2pt 4pt;
-					}
+.TitleBar {
+	font-family: Tahoma, Arial, Helvetica, sans-serif;
+	font-size: 18pt;
+	font-weight: bold;
+	color: white;
+	background-color: #00A;
+	padding: 2pt 4pt;
+}
 
-.TopBar				{	background-color: #CCF;
-					}
+.TopBar{
+	background-color: #CCF;
+}
 
-.SideBar			{	background-color: #EEE;
-						padding: 8pt 4pt;
-					}
+.SideBar {
+	background-color: #EEE;
+	padding: 8pt 4pt;
+}
 
-.ContentWell		{	padding: 4pt 8pt;
-					}
+.ContentWell {
+	padding: 4pt 8pt;
+}
 
 
 /*** Status Bar ***/
 
-.StatusBar			{
-					}
+.StatusBar {
+}
 
-.SelectLink			{
-					}
+.SelectLink {
+}
 
 
 /*** Side Bar **/
 
-.SideBarLink		{
-					}
+.SideBarLink {
+}
 
 
 /*** Text pieces ***/
 
-.Heading			{	font-weight: bold;
-					}
+.Heading {
+	font-weight: bold;
+}
 
-.Help				{	font-family: Times, "Times New Roman", serif;
-					}
+.Help {
+	font-family: Times, "Times New Roman", serif;
+}
 
 
 /*** Class links ***/
 
-.ClassLink			{	font-size: 9pt;
-					}
+.ClassLink {
+	font-size: 9pt;
+}
 
-.CurClassLink		{	text-decoration: none;
-						font-weight: bold;
-						color: black;
-					}
+.CurClassLink {
+	text-decoration: none;
+	font-weight: bold;
+	color: black;
+}
 
 
 /*** Table of data, usually objects ***/
 
-.ObjectsTable		{
-					}
+.ObjectsTable {
+}
 
-.TablePrefix		{	font-size: 9pt;
-						font-weight: bold;
-					}
+.TablePrefix {
+	font-size: 9pt;
+	font-weight: bold;
+}
 
-.NoObjectsCell		{	font-size: 9pt;
-					}
+.NoObjectsCell {
+	font-size: 9pt;
+}
 
-.TableHeading		{	font-size: 9pt;
-						font-weight: bold;
-						background-color: #FFD;
-						vertical-align: bottom;
-						text-align: right;
-					}
+.TableHeading {
+	font-size: 9pt;
+	font-weight: bold;
+	background-color: #FFD;
+	vertical-align: bottom;
+	text-align: right;
+}
 
-.TableData			{	font-size: 9pt;
-					}
+.TableData {
+	font-size: 9pt;
+}

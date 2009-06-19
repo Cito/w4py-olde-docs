@@ -12,16 +12,16 @@ def color(x,y):
 <html xmlns="http://www.w3.org/1999/xhtml"
   xmlns:py="http://purl.org/kid/ns#">
 <head>
-    <title py:content="title" />
+    <title py:content="title"/>
 </head>
 <body bgcolor="black" text="white">
 <table width="100%" height="100%">
     <tr>
         <td align="center" valign="middle">
-            <h1 py:content="title" />
+            <h1 py:content="title"/>
             <table cellspacing="1" cellpadding="2">
                 <tr py:for="y  in range(-150, 150, 5)">
-                    <td py:for="x in range(-250, 100, 5)" bgcolor="${color(x,y)}" />
+                    <td py:for="x in range(-250, 100, 5)" bgcolor="${color(x,y)}"/>
                 </tr>
             </table>
         </td>

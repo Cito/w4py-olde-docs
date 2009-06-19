@@ -1,4 +1,5 @@
 import os
+
 from MiscUtils.Funcs import hostName as HostName
 from SitePage import SitePage
 
@@ -63,4 +64,4 @@ class SelectModel(SitePage):
         prettyName = os.path.split(filename)
         prettyName = '%s - %s' % (prettyName[1], prettyName[0])
         self.writeln('<p><a href="SelectDatabase?modelFilename=%s">%s</a></p>'
-                % (filename, prettyName))
+            % (filename, prettyName))

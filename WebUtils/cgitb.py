@@ -23,8 +23,8 @@ DefaultOptions = {
 
 def breaker():
     return ('<body style="background-color:#F0F0FF">' +
-            '<span style="color:#F0F0FF;font-size:small"> > </font> ' +
-            '</table>' * 5)
+        '<span style="color:#F0F0FF;font-size:small"> > </font> ' +
+        '</table>' * 5)
 
 def html(context=5, options=None):
     if options:
@@ -44,19 +44,19 @@ def html(context=5, options=None):
     <script type="text/javascript" language="JavaScript"><!--
     function tag(s) { return '<'+s+'>'; }
     function popup_repr(title, value) {
-            w = window.open('', '_blank',
-                    'directories=no,height=240,width=480,location=no,menubar=yes,'
-                    +'resizable=yes,scrollbars=yes,status=no,toolbar=no');
-            if (!w) return true;
-            w.document.open();
-            w.document.write(tag('html')+tag('head')
-                    +tag('title')+title+tag('/title')+tag('/head')
-                    +tag('body bgcolor="#ffffff"')+tag('h3')+title+':'+tag('/h3')
-                    +tag('p')+tag('code')+value+tag('/code')+tag('/p')+tag('form')+
-                    tag('input type="button" onClick="window.close()" value="Close"')
-                    +tag('/form')+tag('/body')+tag('/html'));
-            w.document.close();
-            return false;
+        w = window.open('', '_blank',
+            'directories=no,height=240,width=480,location=no,menubar=yes,'
+            +'resizable=yes,scrollbars=yes,status=no,toolbar=no');
+        if (!w) return true;
+        w.document.open();
+        w.document.write(tag('html')+tag('head')
+            +tag('title')+title+tag('/title')+tag('/head')
+            +tag('body bgcolor="#ffffff"')+tag('h3')+title+':'+tag('/h3')
+            +tag('p')+tag('code')+value+tag('/code')+tag('/p')+tag('form')+
+            tag('input type="button" onClick="window.close()" value="Close"')
+            +tag('/form')+tag('/body')+tag('/html'));
+        w.document.close();
+        return false;
     }
     // -->
     </script>
@@ -70,22 +70,22 @@ def html(context=5, options=None):
         else:
             file = 'not found'
         traceback_summary.append('<a href="#%s:%d" style="%s">%s</a>:'
-                '<tt style="font-family:Courier,sans-serif">%s</tt>'
-                % (file.replace('/', '-').replace('\\', '-'), lnum,
-                        opt['header'], os.path.splitext(os.path.basename(file))[0],
-                        ("%5i" % lnum).replace(' ', '&nbsp;')))
+            '<tt style="font-family:Courier,sans-serif">%s</tt>'
+            % (file.replace('/', '-').replace('\\', '-'), lnum,
+                opt['header'], os.path.splitext(os.path.basename(file))[0],
+                ("%5i" % lnum).replace(' ', '&nbsp;')))
 
     head = ('<table width="100%%" style="%s" cellspacing="0" cellpadding="2" border="0">'
-            '<tr><td valign="top" align="left">'
-            '<strong style="font-size:x-large">%s</strong>: %s</td>'
-            '<td rowspan="2" valign="top" align="right">%s</td></tr>'
-            '<tr><td valign="top" bgcolor="#ffffff">\n'
-            '<p style="%s">A problem occurred while running a Python script.</p>'
-            '<p style="%s">Here is the sequence of function calls leading up to'
-            ' the error, with the most recent (innermost) call first.</p>\n'
-            '</td></tr></table>\n'
-            % (opt['header'], etype, escape(str(evalue)),
-            '<br>\n'.join(traceback_summary), opt['default'], opt['default']))
+        '<tr><td valign="top" align="left">'
+        '<strong style="font-size:x-large">%s</strong>: %s</td>'
+        '<td rowspan="2" valign="top" align="right">%s</td></tr>'
+        '<tr><td valign="top" bgcolor="#ffffff">\n'
+        '<p style="%s">A problem occurred while running a Python script.</p>'
+        '<p style="%s">Here is the sequence of function calls leading up to'
+        ' the error, with the most recent (innermost) call first.</p>\n'
+        '</td></tr></table>\n'
+        % (opt['header'], etype, escape(str(evalue)),
+        '<br>\n'.join(traceback_summary), opt['default'], opt['default']))
 
     indent = '<tt><small>%s</small>&nbsp;</tt>' % ('&nbsp;' * 5)
     traceback = []
@@ -97,21 +97,21 @@ def html(context=5, options=None):
         try:
             file_list = file.split('/')
             display_file = '/'.join(
-                    file_list[file_list.index('Webware') + 1:])
+                file_list[file_list.index('Webware') + 1:])
         except ValueError:
             display_file = file
         if display_file[-3:] == '.py':
             display_file = display_file[:-3]
         link = '<a name="%s:%d"></a><a href="file:%s">%s</a>' % (
-                file.replace('/', '-').replace('\\', '-'),
-                lnum, file.replace('\\', '/'), escape(display_file))
+            file.replace('/', '-').replace('\\', '-'),
+            lnum, file.replace('\\', '/'), escape(display_file))
         args, varargs, varkw, locals = inspect.getargvalues(frame)
         if func == '?':
             call = ''
         else:
             call = 'in <strong>%s</strong>' % func + inspect.formatargvalues(
-                    args, varargs, varkw, locals,
-                    formatvalue=lambda value: '=' + html_repr(value))
+                args, varargs, varkw, locals,
+                formatvalue=lambda value: '=' + html_repr(value))
 
         names = []
         dotted = [0, []]
@@ -178,14 +178,14 @@ def html(context=5, options=None):
         if lvals:
             lvals = ', '.join(lvals)
             lvals = indent + '<span style="%s">%s</span><br>\n' % (
-                    opt['code.unaccent'], lvals)
+                opt['code.unaccent'], lvals)
         else:
             lvals = ''
 
         level = ('<br><table width="100%%" style="%s"'
-                ' cellspacing="0" cellpadding="2" border="0">'
-                '<tr><td>%s %s</td></tr></table>'
-                % (opt['subheader'], link, call))
+            ' cellspacing="0" cellpadding="2" border="0">'
+            '<tr><td>%s %s</td></tr></table>'
+            % (opt['subheader'], link, call))
         excerpt = []
         try:
             i = lnum - index
@@ -195,14 +195,14 @@ def html(context=5, options=None):
         for line in lines:
             number = '&nbsp;' * (5-len(str(i))) + str(i)
             number = '<span style="%s">%s</span>' % (
-                    opt['code.unaccent'], number)
+                opt['code.unaccent'], number)
             line = '<tt>%s&nbsp;%s</tt>' % (
                     number, pyhtml.preformat(line))
             if i == lnum:
                 line = ('<table width="100%%" style="%s"'
-                        ' cellspacing="0" cellpadding="0" border="0">'
-                        '<tr><td>%s</td></tr></table>'
-                        % (opt['code.accent'], line))
+                    ' cellspacing="0" cellpadding="0" border="0">'
+                    '<tr><td>%s</td></tr></table>'
+                    % (opt['code.accent'], line))
             excerpt.append('\n' + line)
             if i == lnum:
                 excerpt.append(lvals)
@@ -230,9 +230,9 @@ def html_repr(value):
     if len(enc_value) > html_repr_instance.maxstring:
         plain_value = escape(repr(value))
         return ('%s <a href="#" onClick="return popup_repr('
-                "'Full representation','%s')"
-                '" title="Full representation">(complete)</a>' % (enc_value,
-                escape(plain_value).replace("'", "\\'").replace('"', '&quot;')))
+            "'Full representation','%s')"
+            '" title="Full representation">(complete)</a>' % (enc_value,
+            escape(plain_value).replace("'", "\\'").replace('"', '&quot;')))
     else:
         return enc_value
 

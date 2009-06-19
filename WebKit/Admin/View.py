@@ -19,7 +19,7 @@ class View(AdminSecurity):
             try:
                 response = self.response()
                 response.reset()
-                response.setHeader('Content-type', self.type)
+                response.setHeader('Content-Type', self.type)
                 self.write(self.data)
             except Exception:
                 self.writeError('File cannot be viewed!')

@@ -1,4 +1,4 @@
-"""HTMLForException.py
+"""ExpansiveHTMLForException.py
 
 Create expansive HTML for exceptions using the cgitb module.
 

@@ -1,12 +1,11 @@
 import os
 import sys
-import types
 
 from glob import glob
 from time import asctime, localtime, time
 
 from MiddleKit.Core.ObjRefAttr import objRefJoin
-from MiscUtils import AbstractError, StringTypes, CSVParser
+from MiscUtils import AbstractError, CSVParser
 from CodeGenerator import *
 
 
@@ -59,7 +58,6 @@ class SQLGenerator(CodeGenerator):
     def generate(self, dirname):
         self.requireDir(dirname)
         self.writeInfoFile(os.path.join(dirname, 'Info.text'))
-        print "MODEL=",self._model
         self._model.writeCreateSQL(self, dirname)
         self._model.writeInsertSamplesSQL(self, dirname)
 
@@ -121,17 +119,12 @@ class Model(object):
             wr = file.write
             if 0:
                 # Woops. Our only auxiliary table is _MKClassIds, which we
-                # *don't* want to delete. In the future we will likely
-                # have other aux tables for lists and relationships. When
-                # that happens, we'll need more granularity regarding
-                # aux tables.
-                names = self.auxiliaryTableNames()[:]
-                names.reverse()
-                for tableName in names:
+                # *don't* want to delete. In the future we will likely have
+                # other aux tables for lists and relationships. When that
+                # happens, we'll need more granularity regarding aux tables.
+                for tableName in reversed(self.auxiliaryTableNames()):
                     wr('delete from %s;\n' % tableName)
-            reverseKlasses = allKlasses[:]
-            reverseKlasses.reverse()
-            for klass in reverseKlasses:
+            for klass in reversed(allKlasses):
                 if not klass.isAbstract():
                     wr('delete from %s;\n' % klass.sqlTableName())
             wr('\n')
@@ -207,7 +200,7 @@ class Model(object):
                     elif readColumns:
                         if klass is None:
                             raise SampleError(linenum,
-                                    "Have not yet seen an 'objects' declaration.")
+                                "Have not yet seen an 'objects' declaration.")
                         names = [name for name in fields if name]
                         for name in names:
                             if name == klass.sqlSerialColumnName():
@@ -220,13 +213,13 @@ class Model(object):
                                     refByAttrName = None
                                 else:
                                     parts = [p.strip() for p in parts]
-                                    if len(parts) != 3 \
-                                                    or parts[1].lower() != 'by' \
-                                                    or len(parts[2]) == 0:
+                                    if (len(parts) != 3
+                                            or parts[1].lower() != 'by'
+                                            or len(parts[2]) == 0):
                                         raise SampleError(linenum,
-                                                "Attribute '%s' of class '%s'"
-                                                " is not in format 'foo' or 'foo-by-bar'"
-                                                % (name, klass.name()))
+                                            "Attribute '%s' of class '%s'"
+                                            " is not in format 'foo' or 'foo-by-bar'"
+                                            % (name, klass.name()))
                                     name = parts[0]
                                     refByAttrName = parts[2]
                                     # print '>> refByAttrName:', name, refByAttrName
@@ -236,25 +229,25 @@ class Model(object):
                                     attrs.append(attr)
                                 except KeyError:
                                     raise SampleError(linenum,
-                                            "Class '%s' has no attribute '%s'"
-                                            % (klass.name(), name))
+                                        "Class '%s' has no attribute '%s'"
+                                        % (klass.name(), name))
                                 # error checking for "foo by bar" and set refByAttre
                                 if refByAttrName:
                                     from MiddleKit.Core.ObjRefAttr \
-                                            import ObjRefAttr as ObjRefAttrClass
+                                        import ObjRefAttr as ObjRefAttrClass
                                     if not isinstance(attr, ObjRefAttrClass):
                                         raise SampleError(linenum,
-                                                "Cannot use 'by' feature with non-obj ref attributes."
-                                                " Attr %r of class %r is a %r."
-                                                % (name, klass.name(), attr.__class__.__name__))
+                                            "Cannot use 'by' feature with non-obj ref attributes."
+                                            " Attr %r of class %r is a %r."
+                                            % (name, klass.name(), attr.__class__.__name__))
                                     try:
                                         refByAttr = attr.targetKlass().lookupAttr(refByAttrName)
                                     except KeyError:
                                         raise SampleError(linenum,
-                                                "Attribute %r of class %r has a 'by' of %r,"
-                                                " but no such attribute can be found in target class %r."
-                                                % (name, klass.name(),
-                                                        refByAttrName, attr.targetKlass().name()))
+                                            "Attribute %r of class %r has a 'by' of %r,"
+                                            " but no such attribute can be found in target class %r."
+                                            % (name, klass.name(),
+                                                refByAttrName, attr.targetKlass().name()))
                                     attr.refByAttr = refByAttr
                                 else:
                                     attr.refByAttr = None
@@ -268,26 +261,25 @@ class Model(object):
                     else:
                         if klass is None:
                             raise SampleError(linenum,
-                                    "Have not yet seen an 'objects' declaration.")
+                                "Have not yet seen an 'objects' declaration.")
                         values = fields[:len(attrs)]
                         preinsertSQL = []
-                        i = 0
-                        for attr in attrs:
+                        for i, attr in enumerate(attrs):
                             try:
                                 value = values[i]
                             except IndexError:
                                 if i == 0:
                                     # too early to accept nulls?
                                     raise SampleError(linenum,
-                                            "Couldn't find value for attribute"
-                                            " '%s'\nattrs = %r\nvalues for line = %r"
-                                            % (attr.name(), [a.name() for a in attrs], values))
+                                        "Couldn't find value for attribute"
+                                        " '%s'\nattrs = %r\nvalues for line = %r"
+                                        % (attr.name(), [a.name() for a in attrs], values))
                                 else:
                                     # assume blank
                                     # (Excel sometimes doesn't include all the commas)
                                     value = ''
                             value = attr.sqlForSampleInput(value)
-                            if isinstance(value, types.TupleType):
+                            if isinstance(value, tuple):
                                 # sqlForSampleInput can return a 2 tuple: (presql, sqlValue)
                                 assert len(value) == 2
                                 preinsertSQL.append(value[0])
@@ -297,10 +289,9 @@ class Model(object):
                                 values[i] = value
                             except IndexError:
                                 values.append(value)
-                            i += 1
                         values = ', '.join(values)
                         for stmt in preinsertSQL:
-                            #print '>>', stmt
+                            # print '>>', stmt
                             samples.append(stmt)
                         stmt = 'insert into %s (%s) values (%s);\n' % (tableName, colSql, values)
                         # print '>>', stmt
@@ -321,12 +312,11 @@ class Model(object):
 
     def areFieldsBlank(self, fields):
         """Utility method for writeInsertSamplesSQLForLines()."""
-        if len(fields) == 0:
-            return True
         for field in fields:
             if field:
                 return False
-        return True
+        else:
+            return True
 
     def writePostSamplesSQL(self, generator, output):
         pass
@@ -359,7 +349,7 @@ class Klasses(object):
         The target can be a file or a filename.
 
         """
-        if type(out) in StringTypes:
+        if isinstance(out, basestring):
             out = open(out, 'w')
             close = True
         else:
@@ -400,7 +390,7 @@ class Klasses(object):
             wr(self.useDatabaseSQL(dbName))
             wr(self.dropTablesSQL())
         else:
-            raise Exception('Invalid value for DropStatements setting: %r' % drop)
+            raise ValueError('Invalid value for DropStatements setting: %r' % drop)
 
     def dropDatabaseSQL(self, dbName):
         """Return SQL code that will remove the database with the given name.
@@ -539,7 +529,7 @@ class Klass(object):
 
         """
         return '    %s int not null primary key,\n' \
-                % self.sqlSerialColumnName().ljust(self.maxNameWidth())
+            % self.sqlSerialColumnName().ljust(self.maxNameWidth())
 
     def writeDeletedSQLDef(self, generator, out):
         """Return SQL for deleted timestamp.
@@ -608,15 +598,13 @@ class Attr(object):
         should implement sqlForNonNoneSampleInput() instead.
 
         """
-        input = input.strip()
-        if input == '':
-            input = self.get('Default', '')
+        input = input.strip() or self.get('Default', '')
         if input in (None, 'None', 'none'):
             return self.sqlForNone()
         else:
             s = self.sqlForNonNoneSampleInput(input)
-            assert type(s) in StringTypes + (types.TupleType,), \
-                    '%r, %r, %r' % (s, type(s), self)
+            assert isinstance(s, (basestring, tuple)), \
+                '%r, %r, %r' % (s, type(s), self)
             return s
 
     def sqlForNone(self):
@@ -750,7 +738,7 @@ class IntAttr(object):
         return 'int'
 
     def sqlForNonNoneSampleInput(self, input):
-        if not isinstance(input, types.IntType):
+        if not isinstance(input, int):
             value = str(input)
             if value.endswith('.0'):
                 # numeric values from Excel-based models are always float
@@ -824,7 +812,7 @@ class StringAttr(object):
         value = input
         if value == "''":
             value = ''
-        elif value.find('\\') != -1:
+        elif '\\' in value:
             if 1:
                 # add spaces before and after, to prevent
                 # syntax error if value begins or ends with "
@@ -834,7 +822,7 @@ class StringAttr(object):
                 value = value.replace('\\012', '\\n')
                 return value
         value = repr(value)
-        #print '>> value:', value
+        # print '>> value:', value
         return value
 
 
@@ -889,7 +877,7 @@ class ObjRefAttr(object):
             objIdRef = ''
             if self.get('Ref', None) or (
                     self.setting('GenerateSQLReferencesForObjRefsToSingleClasses', False)
-                        and len(self.targetKlass().subklasses()) == 0):
+                        and not self.targetKlass().subklasses()):
                 if self.get('Ref', None) not in ('0', 0, 0.0, False):
                     objIdRef = self.objIdReferences()
             out.write('    %s %s%s%s%s, /* %s */ \n' % (
@@ -904,7 +892,7 @@ class ObjRefAttr(object):
     def objIdReferences(self):
         targetKlass = self.targetKlass()
         return ' references %s(%s) ' % (
-                targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
+            targetKlass.sqlTableName(), targetKlass.sqlSerialColumnName())
 
     def sqlForNone(self):
         if self.setting('UseBigIntObjRefColumns', False):
@@ -953,10 +941,9 @@ class ObjRefAttr(object):
                 input = input[0]
             else:
                 input = ''
-            parts = input.split('.')
+            parts = input.split('.', 2)
             if len(parts) == 2:
-                className = parts[0]
-                objSerialNum = parts[1]
+                className, objSerialNum = parts
             else:
                 className = self.targetClassName()
                 objSerialNum = input or 'null'
@@ -972,13 +959,13 @@ class ObjRefAttr(object):
 class ListAttr(object):
 
     def sqlType(self):
-        raise Exception('Lists do not have a SQL type.')
+        raise ValueError('Lists do not have a SQL type.')
 
     def hasSQLColumn(self):
         return False
 
     def sqlForSampleInput(self, input):
-        raise Exception('Lists are implicit. They cannot have sample values.')
+        raise ValueError('Lists are implicit. They cannot have sample values.')
 
 
 class EnumAttr(object):
@@ -1008,10 +995,8 @@ class EnumAttr(object):
             out.write('    %s int not null primary key,\n' % valueColName)
             out.write('    %s varchar(255)\n' % nameColName)
             out.write(');\n')
-            i = 0
-            for enum in self.enums():
+            for i, enum in enumerate(self.enums()):
                 out.write("insert into %(tableName)s values (%(i)i, '%(enum)s');\n" % locals())
-                i += 1
             out.write('\n')
 
 

@@ -60,10 +60,8 @@ class Klasses(dict, ModelObject):
             for klass in self._model._allKlassesInOrder:
                 klass.setId(allIds)
         else:
-            id = 1
-            for klass in self._model._allKlassesInOrder:
-                klass.setId(id)
-                id += 1
+            for i, klass in enumerate(self._model._allKlassesInOrder):
+                klass.setId(i+1)
 
 
     ## Accessing ##

@@ -17,9 +17,9 @@ class ObjRefAttr(Attr):
 
     """
 
-    def __init__(self, dict):
-        Attr.__init__(self, dict)
-        self._className = dict['Type']
+    def __init__(self, attr):
+        Attr.__init__(self, attr)
+        self._className = attr['Type']
 
     def targetClassName(self):
         """Return the name of the base class that this obj ref attribute points to."""
@@ -36,7 +36,3 @@ class ObjRefAttr(Attr):
             from Model import ModelError
             raise ModelError('class %s: attr %s: cannot locate target class %s for this obj ref.' % (
                 self.klass().name(), self.name(), self.targetClassName()))
-
-    def className(self):
-        print 'DEPRECATED: ObjRefAttr.className() on 2004-02-27. Use targetClassName() instead.'
-        return self.targetClassName()

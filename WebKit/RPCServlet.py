@@ -52,10 +52,10 @@ class RPCServlet(HTTPServlet):
         """Send a 200 OK response with the given contents."""
         response = trans.response()
         response.setStatus(200, 'OK')
-        response.setHeader('Content-type', contentType)
-        response.setHeader('Content-length', str(len(contents)))
+        response.setHeader('Content-Type', contentType)
+        response.setHeader('Content-Length', str(len(contents)))
         if contentEncoding:
-            response.setHeader('Content-encoding', contentEncoding)
+            response.setHeader('Content-Encoding', contentEncoding)
         response.write(contents)
 
     def handleException(self, transaction):

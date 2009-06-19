@@ -9,13 +9,13 @@ from MiddleKit.Core.Model import Model
 
 def importPyClasses(klasses):
     # See if we can import all of the classes
-    print 'importing classes:', ', '.join(klasses.keys())
-    for klassName in klasses.keys():
+    print 'importing classes:', ', '.join(klasses)
+    for klassName in klasses:
         code = 'from %s import %s\n' % (klassName, klassName)
-        #sys.stdout.write(code)
+        # sys.stdout.write(code)
         results = {}
         exec code in results
-        assert results.has_key(klassName)
+        assert klassName in results
 
 
 def test(modelFilename, configFilename, workDir=workDir, toTestDir='../'):

@@ -32,10 +32,10 @@ class KidExamplePage(ExamplePage):
         self.menuHeading('Other')
         self.menuItem('View source of<br/>%s' % self.title(),
                 self.request().uriWebKitRoot() +
-                        'KidKit/Examples/View?filename=%s'
-                        % os.path.basename(self.request().serverSidePath()))
+                    'KidKit/Examples/View?filename=%s'
+                    % os.path.basename(self.request().serverSidePath()))
         if self.application().hasContext('Documentation'):
             filename = 'Documentation/WebKit.html'
             if os.path.exists(filename):
                 self.menuItem('Local WebKit docs',
-                        self.request().servletPath() + '/' + filename)
+                    self.request().servletPath() + '/' + filename)

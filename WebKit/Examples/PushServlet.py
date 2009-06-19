@@ -34,7 +34,7 @@ class PushServlet(Page):
             sleep(i and 5 or 15)
 
     def initialHeader(self):
-        self.response().setHeader("Content-type",
+        self.response().setHeader("Content-Type",
             "multipart/x-mixed-replace; boundary=" + self._boundary)
 
     def sendBoundary(self):
@@ -44,10 +44,10 @@ class PushServlet(Page):
         self.write("\r\n")
 
     def writeHTML(self, count):
-        self.write("Content-type: text/html\r\n\r\n")
+        self.write("Content-Type: text/html\r\n\r\n")
         wr = self.writeln
         wr('<html><body style="margin:8pt;"><div style='
-                '"background-color:#EEF;padding:8pt 16pt;border:2px solid blue">')
+            '"background-color:#EEF;padding:8pt 16pt;border:2px solid blue">')
         wr('<h1>Pushing Content Demo</h1>')
         if count:
             wr('<h3>This page has been replaced'

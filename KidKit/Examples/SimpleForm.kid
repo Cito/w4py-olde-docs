@@ -16,10 +16,10 @@ fields = servlet.request().fields()
 name = fields.get('name') or 'stranger'
 ?>
 <h1>Kid Form Demo</h1>
-<p>Hello <strong py:content="name" />, how are you?</p>
+<p>Hello <strong py:content="name"/>, how are you?</p>
 <form action="" method="get">
 <p>Enter your name here:</p>
-<p><input type="text" name="name" /></p>
-<p><input type="submit" name="Submit" value="Submit" /></p>
+<p><input type="text" name="name"/></p>
+<p><input type="submit" name="Submit" value="Submit"/></p>
 </form>
 </div>

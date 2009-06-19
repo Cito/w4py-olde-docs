@@ -12,7 +12,6 @@ class Klass(object):
         SuperKlass.writePyImports.im_func(self) # invoke our super generator's method
         # @@ 2000-11-22 ce: the above is pretty hacky;
         # invoking super is the only awkward aspect of mix-ins that hasn't been solved
-        self._pyOut.write('import types\n')
         self._pyOut.write('from MiddleKit.Run.SQLObjectStore import ObjRefError\n\n')
 
 

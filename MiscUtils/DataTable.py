@@ -575,18 +575,18 @@ class DataTable:
     def __getitem__(self, index):
         return self._rows[index]
 
-    def append(self, object):
+    def append(self, obj):
         """Append an object to the table.
 
-        If object is not a TableRecord, then one is created,
+        If obj is not a TableRecord, then one is created,
         passing the object to initialize the TableRecord.
-        Therefore, object can be a TableRecord, list, dictionary or object.
+        Therefore, obj can be a TableRecord, list, dictionary or object.
         See TableRecord for details.
 
         """
-        if not isinstance(object, TableRecord):
-            object = TableRecord(self, object)
-        self._rows.append(object)
+        if not isinstance(obj, TableRecord):
+            obj = TableRecord(self, obj)
+        self._rows.append(obj)
         self._changed = True
 
 
@@ -694,10 +694,10 @@ class TableRecord(object):
 
         Dispatches control to one of the other init methods based on the type
         of values. Values can be one of three things:
-                1. A TableRecord
-                2. A list
-                3. A dictionary
-                4. Any object responding to hasValueForKey() and valueForKey().
+            1. A TableRecord
+            2. A list
+            3. A dictionary
+            4. Any object responding to hasValueForKey() and valueForKey().
 
         """
         self._headings = table.headings()
@@ -742,7 +742,7 @@ class TableRecord(object):
             else:
                 self._values.append(blankValues[heading.type()])
 
-    def initFromObject(self, object):
+    def initFromObject(self, obj):
         """Initialize from object.
 
         The object is expected to response to hasValueForKey(name) and
@@ -755,9 +755,9 @@ class TableRecord(object):
         self._values = []
         for heading in self._headings:
             name = heading.name()
-            if object.hasValueForKey(name):
+            if obj.hasValueForKey(name):
                 self._values.append(heading.valueForRawValue(
-                    object.valueForKey(name)))
+                    obj.valueForKey(name)))
             else:
                 self._values.append(blankValues[heading.type()])
 

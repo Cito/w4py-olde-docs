@@ -51,13 +51,9 @@ class Klasses(object):
 
     def dropTablesSQL(self):
         sql = []
-        names = self.auxiliaryTableNames()[:]
-        names.reverse()
-        for tableName in names:
+        for tableName in reversed(self.auxiliaryTableNames()):
             sql.append('drop table "%s";\n' % tableName)
-        klasses = self._model._allKlassesInOrder[:]
-        klasses.reverse()
-        for klass in klasses:
+        for klass in reversed(self._model._allKlassesInOrder):
             sql.append('drop table "%s";\n' % klass.name())
         sql.append('\n')
         return ''.join(sql)
@@ -93,14 +89,14 @@ class Klass(object):
         for attr in self.allAttrs():
             if attr.get('isIndexed', 0) and attr.hasSQLColumn():
                 wr('create index %s_%s_index on %s (%s);\n'
-                        % (self.sqlTableName(), attr.sqlName(),
-                                self.sqlTableName(), attr.sqlName()))
+                    % (self.sqlTableName(), attr.sqlName(),
+                    self.sqlTableName(), attr.sqlName()))
         wr('\n')
 
 
     def primaryKeySQLDef(self, generator):
-        return "    %s integer not null primary key default nextval('%s'),\n" \
-                % (self.sqlSerialColumnName(), self.seqName())
+        return "    %s integer not null primary key default nextval('%s'),\n" % (
+            self.sqlSerialColumnName(), self.seqName())
 
 
 class StringAttr(object):
@@ -112,7 +108,7 @@ class StringAttr(object):
         max = int(self['Max']) # @@ 2000-11-12 ce: won't need int() after using types
         if max > 255:
             return 'text'
-        if self.has_key('Min') and self['Min'] and int(self['Min']) == max:
+        if self.get('Min', None) and int(self['Min']) == max:
             return 'char(%s)' % max
         else:
             return 'varchar(%s)' % max
@@ -138,9 +134,9 @@ class BoolAttr(object):
                     value = 'TRUE'
             except Exception:
                 pass
-        assert value in ['TRUE', 'FALSE'], \
-                "'%s' is not a valid default for boolean column '%s'" \
-                % (value, self.name())
+        assert value in ['TRUE', 'FALSE'], (
+            "'%s' is not a valid default for boolean column '%s'"
+            % (value, self.name()))
         return value
 
 
