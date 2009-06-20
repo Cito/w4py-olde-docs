@@ -22,7 +22,7 @@ class TestDataTable(unittest.TestCase):
         i = 0
         while i < len(dt):
             match = data[i]
-            self.assertEquals(dt[i].asList(), match,
+            self.assertEqual(dt[i].asList(), match,
                 'For element %d, I expected "%s" but got "%s"'
                 % (i, match, dt[i].asList()))
             i += 1

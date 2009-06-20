@@ -1,44 +1,36 @@
 
 """Generate Python code from PSP templates.
 
-        This module holds the classes that generate the Python code resulting
-        from the PSP template file. As the parser encounters PSP elements,
-        it creates a new Generator object for that type of element.
-        Each of these elements is put into a list maintained by the
-        ParseEventHandler object. When it comes time to output the source code,
-        each generator is called in turn to create its source.
+This module holds the classes that generate the Python code resulting
+from the PSP template file. As the parser encounters PSP elements,
+it creates a new Generator object for that type of element.
+Each of these elements is put into a list maintained by the
+ParseEventHandler object. When it comes time to output the source code,
+each generator is called in turn to create its source.
 
-        (c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
-        Permission to use, copy, modify, and distribute this software and its
-        documentation for any purpose and without fee or royalty is hereby granted,
-        provided that the above copyright notice appear in all copies and that
-        both that copyright notice and this permission notice appear in
-        supporting documentation or portions thereof, including modifications,
-        that you make.
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
 
-        THE AUTHORS DISCLAIM ALL WARRANTIES WITH REGARD TO
-        THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-        FITNESS, IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL,
-        INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
-        FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
-        NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
-        WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
-
-        This software is based in part on work done by the Jakarta group.
+This software is based in part on work done by the Jakarta group.
 
 """
 
 import os
+
 import PSPUtils, BraceConverter
 
-# These are global so that the ParseEventHandler and this module agree:
+# This is global so that the ParseEventHandler and this module agree:
 ResponseObject = 'res'
-AwakeCreated = 0
 
 
-class GenericGenerator:
-    """ Base class for the generators """
+class GenericGenerator(object):
+    """Base class for all the generators"""
 
     def __init__(self, ctxt=None):
         self._ctxt = ctxt
@@ -58,7 +50,8 @@ class ExpressionGenerator(GenericGenerator):
         GenericGenerator.__init__(self)
 
     def generate(self, writer, phase=None):
-        writer.println('res.write(_formatter(' + PSPUtils.removeQuotes(self.chars) + '))')
+        writer.println('res.write(_formatter(%s))'
+            % PSPUtils.removeQuotes(self.chars))
 
 
 class CharDataGenerator(GenericGenerator):
@@ -74,9 +67,11 @@ class CharDataGenerator(GenericGenerator):
         self.chars = chars
 
     def generate(self, writer, phase=None):
-        # Quote any existing backslash so generated Python will not interpret it when running.
+        # Quote any existing backslash so generated Python will not
+        # interpret it when running.
         self.chars = self.chars.replace('\\', r'\\')
-        # Quote any single quotes so it does not get confused with our triple-quotes:
+        # Quote any single quotes so it does not get confused with
+        # our triple-quotes:
         self.chars = self.chars.replace('"', r'\"')
         self.generateChunk(writer)
 
@@ -108,15 +103,15 @@ class ScriptGenerator(GenericGenerator):
                 bc.parseLine(line, writer)
             return
         # Check for whitespace at the beginning and if less than 2 spaces, remove:
-        if self.chars[:1] == ' ' and self.chars[:2] != '  ':
+        if self.chars.startswith(' ') and not self.chars.startswith('  '):
             self.chars = self.chars.lstrip()
         lines = PSPUtils.splitLines(PSPUtils.removeQuotes(self.chars))
         if not lines:
-            return # ignore empty tag
+            return # ignore any empty tag
         # userIndent check
-        if len(lines[-1]) > 0 and lines[-1][-1] == '$':
+        if lines[-1].endswith('$'):
             lastline = lines[-1] = lines[-1][:-1]
-            if lastline == '':
+            if not lastline:
                 lastline = lines[-2] # handle endscript marker on its own line
             count = 0
             while lastline[count].isspace():
@@ -130,12 +125,11 @@ class ScriptGenerator(GenericGenerator):
         writer.printList(lines)
         writer.printChars('\n')
         # Check for a block:
-        # lastline = string.splitfields(PSPUtils.removeQuotes(self.chars), '\n')[-1]
         commentstart = lastline.find('#') # @@ this fails if '#' part of string
-        if commentstart > 0:
+        if commentstart >= 0:
             lastline = lastline[:commentstart]
         blockcheck = lastline.rstrip()
-        if len(blockcheck) > 0 and blockcheck[-1] == ':':
+        if blockcheck.endswith(':'):
             writer.pushIndent()
             writer.println()
             writer._blockcount = writer._blockcount+1
@@ -213,16 +207,12 @@ class MethodGenerator(GenericGenerator):
         writer.printChars('(')
         # self.attrs['params']
         writer.printChars('self')
-        if self.attrs.has_key('params') and self.attrs['params'] != '':
+        if 'params' in self.attrs and self.attrs['params']:
             writer.printChars(', ')
             writer.printChars(self.attrs['params'])
         writer.printChars('):\n')
         if self.attrs['name'] == 'awake':
-            # This is hacky, need better method, but it works.
-            # @@ Maybe I should require a standard parent and do the intPSP call in that awake?
-            global AwakeCreated
-            AwakeCreated = 1
-            # Below indented on 6/1/00, was outside if block:
+            writer._awakeCreated = True
             writer.pushIndent()
             writer.println('self.initPSP()\n')
             writer.popIndent()
@@ -258,14 +248,9 @@ class IncludeGenerator(GenericGenerator):
 
     """
 
-    # _theFunction = """
-    # __pspincludepath = self.transaction().request().urlPathDir() + "%s"
-    # self.transaction().application().includeURL(self.transaction(), __pspincludepath)
-    # """
-    _theFunction = """
-__pspincludepath = "%s"
-self.transaction().application().includeURL(self.transaction(), __pspincludepath)
-"""
+    _theFunction = ('__pspincludepath = "%s"\n'
+        'self.transaction().application().includeURL('
+        'self.transaction(), __pspincludepath)')
 
     def __init__(self, attrs, param, ctxt):
         GenericGenerator.__init__(self, ctxt)
@@ -275,7 +260,7 @@ self.transaction().application().includeURL(self.transaction(), __pspincludepath
 
         self.url = attrs.get('path')
         if self.url is None:
-            raise AttributeError, 'No path attribute in include'
+            raise AttributeError('No path attribute in include')
 
         self.scriptgen = ScriptGenerator(self._theFunction % self.url, None)
 
@@ -301,28 +286,28 @@ class InsertGenerator(GenericGenerator):
 
         self.page = attrs.get('file')
         if not self.page:
-            raise AttributeError, 'No file attribute in include'
+            raise AttributeError('No file attribute in include')
         thepath = self._ctxt.resolveRelativeURI(self.page)
         if not os.path.exists(thepath):
             print self.page
-            raise IOError, 'Invalid included file %r' % thepath
+            raise IOError('Invalid included file %r' % thepath)
         self.page = thepath
 
         self.static = str(attrs.get('static')).lower() in ('true', 'yes', '1')
         if not self.static:
             self.scriptgen = ScriptGenerator("self.__includeFile('%s')"
-                    % thepath.replace('\\', '\\\\'), None)
+                % thepath.replace('\\', '\\\\'), None)
 
     def generate(self, writer, phase=None):
         # JSP does this in the servlet. I'm doing it here because
         # I have triple quotes. Note: res.write statements inflate
         # the size of the resulting classfile when it is cached.
         # Cut down on those by using a single res.write on the whole
-        # file, after escaping any triple-double quotes."""
+        # file, after escaping any triple-double quotes.
         if self.static:
             data = open(self.page).read()
             data = data.replace('"""', r'\"""')
-            writer.println('res.write("""'+data+'""")')
+            writer.println('res.write("""' + data + '""")')
             writer.println()
         else:
             self.scriptgen.generate(writer, phase)

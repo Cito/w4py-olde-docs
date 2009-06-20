@@ -1,5 +1,6 @@
 import os
-from PSP.Examples.PSPExamplePage import PSPExamplePage
+
+from PSPExamplePage import PSPExamplePage
 
 
 class View(PSPExamplePage):
@@ -24,7 +25,7 @@ class View(PSPExamplePage):
             filename = self.request().serverSidePath(basename)
             if not os.path.exists(filename):
                 self.write('<p style="color:red">'
-                        'No such file %r exists</p>' % basename)
+                    'No such file %r exists</p>' % basename)
                 return
             text = open(filename).read()
             text = self.htmlEncode(text)

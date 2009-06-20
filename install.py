@@ -5,9 +5,9 @@
 Webware for Python installer
 
 FUTURE
-        * Look for an install.py in each component directory and run it
-          (there's not a strong need right now).
-        * Use distutils or setuptools instead of our own plugin concept.
+    * Look for an install.py in each component directory and run it
+      (there's not a strong need right now).
+    * Use distutils or setuptools instead of our own plugin concept.
 
 """
 
@@ -67,7 +67,8 @@ class Installer:
 
     ## Running the installation ##
 
-    def run(self, verbose=0, passprompt=1, defaultpass='', keepdocs=0):
+    def run(self, verbose=False,
+            passprompt=True, defaultpass='', keepdocs=False):
         self._verbose = verbose
         self.printMsg = verbose and self._printMsg or self._nop
         log = []
@@ -129,7 +130,7 @@ class Installer:
                 'but Webware may not perform as expected.\n'
                 'Do you wish to continue with the installation?  [yes/no] ')
             return response[:1].upper() == "Y"
-        return 1
+        return True
 
     def checkThreading(self):
         try:
@@ -142,7 +143,7 @@ class Installer:
                 'interpreter that has threading enabled.\n'
                 'Do you wish to continue with the installation? [yes/no] ')
             return response[:1].upper() == "Y"
-        return 1
+        return True
 
     def detectComponents(self):
         print
@@ -151,7 +152,7 @@ class Installer:
             and os.path.isdir(dir), os.listdir(os.curdir))
         dirNames.sort()
         self._maxCompLen = max(map(len, dirNames))
-        oldPyVersion = 0
+        oldPyVersion = False
         column = 0
         for dirName in dirNames:
             propName = dirName + '/Properties.py'
@@ -166,7 +167,7 @@ class Installer:
                     if key not in comp:
                         comp[key] = self._props[key]
                 if sys.version_info[:3] < comp['requiredPyVersion']:
-                    oldPyVersion += 1
+                    oldPyVersion = True
                     print 'no*',
                 else:
                     self._comps.append(comp)
@@ -336,7 +337,7 @@ class Installer:
         open(targetName, 'w').write(result)
 
     def createPySummary(self, filename, dir):
-        """Create a HTML module summary."""
+        """Create an HTML module summary."""
         from DocSupport.PySummary import PySummary
         module = os.path.splitext(os.path.basename(filename))[0]
         targetName = '%s/%s.html' % (dir, module)
@@ -348,7 +349,7 @@ class Installer:
         open(targetName, 'w').write(html)
 
     def createPyDocs(self, filename, dir):
-        """Create a HTML module documentation using pydoc."""
+        """Create an HTML module documentation using pydoc."""
         import pydoc
         package, module = os.path.split(filename)
         module = os.path.splitext(module)[0]
@@ -375,7 +376,7 @@ class Installer:
             self.printMsg(msg)
 
     def createFileList(self, filesDir, docsDir):
-        """Create a HTML list of the source files."""
+        """Create an HTML list of the source files."""
         from DocSupport.FileList import FileList
         name = filesDir.replace('/', '.')
         self.printMsg('Creating file list of %s...' % name)
@@ -392,7 +393,7 @@ class Installer:
             os.chdir(saveDir)
 
     def createClassList(self, filesDir, docsDir):
-        """Create a HTML class hierarchy listing of the source files."""
+        """Create an HTML class hierarchy listing of the source files."""
         from DocSupport.ClassList import ClassList
         name = filesDir.replace('/', '.')
         self.printMsg('Creating class list of %s...' % name)
@@ -404,38 +405,38 @@ class Installer:
             classlist.readFiles(subDir + '*.py')
             targetName = docsDir + '/ClassList.html'
             self.printMsg('Creating %s...' % targetName)
-            classlist.printForWeb(0, '../' + targetName)
+            classlist.printForWeb(False, '../' + targetName)
             targetName = docsDir + '/ClassHierarchy.html'
             self.printMsg('Creating %s...' % targetName)
-            classlist.printForWeb(1, '../' + targetName)
+            classlist.printForWeb(True, '../' + targetName)
         finally:
             os.chdir(saveDir)
 
     def createComponentIndex(self):
-        """Create a HTML component index of Webware itself."""
+        """Create an HTML component index of Webware itself."""
         print 'Creating ComponentIndex.html...'
         ht = ["<% header('Webware Documentation', 'titlebar',"
-                " 'ComponentIndex.css') %>"]
+            " 'ComponentIndex.css') %>"]
         wr = ht.append
         wr('<p>Don\'t know where to start? '
-                'Try <a href="../WebKit/Docs/index.html">WebKit</a>.</p>')
+            'Try <a href="../WebKit/Docs/index.html">WebKit</a>.</p>')
         wr('<table align="center" border="0" '
-                'cellpadding="2" cellspacing="2" width="100%">')
+            'cellpadding="2" cellspacing="2" width="100%">')
         wr('<tr class="ComponentHeadings">'
-                '<th>Component</th><th>Status</th><th>Ver</th>'
-                '<th>Py</th><th>Summary</th></tr>')
+            '<th>Component</th><th>Status</th><th>Ver</th>'
+            '<th>Py</th><th>Summary</th></tr>')
         row = 0
         for comp in self._comps:
             comp['nameAsLink'] = ('<a href='
-                    '"../%(dirname)s/Docs/index.html">%(name)s</a>' % comp)
+                '"../%(dirname)s/Docs/index.html">%(name)s</a>' % comp)
             comp['indexRow'] = row + 1
             wr('<tr valign="top" class="ComponentRow%(indexRow)i">'
-                    '<td class="NameVersionCell">'
-                    '<span class="Name">%(nameAsLink)s</span></td>'
-                    '<td>%(status)s</td>'
-                    '<td><span class="Version">%(versionString)s</span></td>'
-                    '<td>%(requiredPyVersionString)s</td>'
-                    '<td>%(synopsis)s</td></tr>' % comp)
+                '<td class="NameVersionCell">'
+                '<span class="Name">%(nameAsLink)s</span></td>'
+                '<td>%(status)s</td>'
+                '<td><span class="Version">%(versionString)s</span></td>'
+                '<td>%(requiredPyVersionString)s</td>'
+                '<td>%(synopsis)s</td></tr>' % comp)
             row = 1 - row
         wr('</table>')
         wr("<% footer() %>")
@@ -455,7 +456,7 @@ class Installer:
         for comp in self._comps:
             comp['webwareVersion'] = self._props['version']
             comp['webwareVersionString'] = self._props['versionString']
-            # Create 'htDocs' as a HTML fragment corresponding to comp['docs']
+            # Create 'htDocs' as an HTML fragment corresponding to comp['docs']
             ht = []
             for doc in comp['docs']:
                 ht.append(link % (doc['file'], doc['name']))
@@ -470,7 +471,7 @@ class Installer:
                     item = {'dirname': os.path.basename(filename)}
                     filename = item['dirname']
                     ver = filename[
-                            filename.rfind('-') + 1 : filename.rfind('.')]
+                        filename.rfind('-') + 1 : filename.rfind('.')]
                     item['name'] = ver
                     if ver == 'X.Y':
                         item['ver'] = ver.split('.')
@@ -508,12 +509,12 @@ class Installer:
                     docsDirs.append(docsDir)
         for docsDir in docsDirs:
             initFile = docsDir + '/__init__.py'
-            if not os.path.exists(initFile) or 1:
+            if not os.path.exists(initFile):
                 open(initFile, 'w').write(
-                        '# this can be browsed as a Webware context\n')
+                    '# this can be browsed as a Webware context\n')
         # Copy favicon to the default context
         open('WebKit/Examples/favicon.ico', 'wb').write(
-                open('Docs/favicon.ico', 'rb').read())
+            open('Docs/favicon.ico', 'rb').read())
 
     def backupConfigs(self):
         """Copy *.config to *.config.default, if they don't already exist.
@@ -563,14 +564,14 @@ class Installer:
             t = 'WebKit/webkit'
             open(t, 'wb').write(open(s, 'rb').read())
 
-    def compileModules(self, force=0):
+    def compileModules(self, force=False):
         """Compile modules in all installed componentes."""
         from compileall import compile_dir
         print
         print 'Byte compiling all modules...'
         for comp in self._comps:
             dir = comp['dirname']
-            compile_dir(dir, force=force, quiet=1)
+            compile_dir(dir, force=force, quiet=True)
 
     def fixPermissions(self):
         if os.name == 'posix':
@@ -627,17 +628,17 @@ Installation is finished.''' % ((os.sep,)*2)
         return template.split('\n<!-- page content -->\n', 1)
 
     def processHtmlDocFile(self, htmlFile):
-        """Process a HTML file."""
+        """Process an HTML file."""
         txtFile = os.path.splitext(htmlFile)[0] + '.txt'
         if os.path.exists(txtFile):
             # A text file with the same name exists:
             page = open(htmlFile).read()
-            if page.find('<meta name="generator" content="Docutils') > 0 \
-                    and page.find('<h1 class="title">') > 0:
+            if ('<meta name="generator" content="Docutils' in page
+                    and '<h1 class="title">' in page):
                 # This has obvisouly been created with Docutils; modify it
                 # to match style, header and footer of all the other docs.
                 page = page.replace('<h1 class="title">',
-                        '<h1 class="header">')
+                    '<h1 class="header">')
                 page = page.replace('</body>\n</html>', self._htFooter)
                 self.printMsg('Modifying %s...' % htmlFile)
                 open(htmlFile, 'w').write(page)
@@ -701,28 +702,28 @@ def printHelp():
 
 if __name__ == '__main__':
     import getopt
-    verbose = 0
+    verbose = False
     passprompt = defaultpass = keepdocs = None
     try:
         opts, args = getopt.getopt(sys.argv[1:], "hv", ["help", "verbose",
-                "no-password-prompt", "set-password=", "keep-templates"])
+            "no-password-prompt", "set-password=", "keep-templates"])
     except getopt.GetoptError:
         printHelp()
     else:
         for o, a in opts:
             if o in ("-v", "--verbose"):
-                verbose = 1
+                verbose = True
             elif o == "--no-password-prompt":
-                passprompt = 0
+                passprompt = False
             elif o == "--set-password":
                 defaultpass = a
             elif o == '--keep-templates':
-                keepdocs = 1
+                keepdocs = True
             elif o in ("-h", "--help", "h", "help"):
                 printHelp()
                 sys.exit(0)
         if passprompt is None and defaultpass is None:
-            passprompt = 1
+            passprompt = True
 
         Installer().run(verbose=verbose, passprompt=passprompt,
                 defaultpass=defaultpass, keepdocs=keepdocs)

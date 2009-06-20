@@ -92,8 +92,8 @@ class PySummary:
         if self._lines:
             for line in self._lines:
                 type = line.type()
-                if line.text()[:1].lstrip() \
-                        and settings[type][0][:1] == '\n':
+                if (line.text()[:1].lstrip()
+                        and settings[type][0][:1] == '\n'):
                     res.append('\n')
                 res.append(settings[type][0])
                 if span:

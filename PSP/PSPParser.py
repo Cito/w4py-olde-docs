@@ -1,31 +1,21 @@
 """The PSP parser.
 
-        This module handles the actual reading of the characters in the source
-        PSP file and checking it for valid psp tokens. When it finds one,
-        it calls ParseEventHandler with the characters it found.
+This module handles the actual reading of the characters in the source
+PSP file and checking it for valid psp tokens. When it finds one,
+it calls ParseEventHandler with the characters it found.
 
-        (c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
-        Permission to use, copy, modify, and distribute this software and its
-        documentation for any purpose and without fee or royalty is hereby granted,
-        provided that the above copyright notice appear in all copies and that
-        both that copyright notice and this permission notice appear in
-        supporting documentation or portions thereof, including modifications,
-        that you make.
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
 
-        THE AUTHORS DISCLAIM ALL WARRANTIES WITH REGARD TO
-        THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-        FITNESS, IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL,
-        INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
-        FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
-        NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
-        WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
-
-        This software is based in part on work done by the Jakarta group.
+This software is based in part on work done by the Jakarta group.
 
 """
-
-from Generators import *
 
 try:
     from cStringIO import StringIO
@@ -33,37 +23,44 @@ except ImportError:
     from StringIO import StringIO
 
 
-class PSPParserException(Exception):
-    pass
+from PSPUtils import checkAttributes, PSPParserException
 
 
-class PSPParser:
+checklist = []
+
+def checker(method):
+    """Decorator for adding a method to the checklist."""
+    checklist.append(method)
+    return method
+
+
+class PSPParser(object):
     """The main PSP parser class.
 
     The PSPParser class does the actual sniffing through the input file
     looking for anything we're interested in. Basically, it starts by
     looking at the code looking for a '<' symbol. It looks at the code by
-    working with a PSPReader object, which handle the current location in
-    the code. When it finds one, it calls a list of functions, the xxxChecks,
+    working with a PSPReader object, which handles the current location in
+    the code. When it finds one, it calls a list of checker methods,
     asking each if it recognizes the characters as its kind of input.
-    When the check functions look at the characters, if they want it,
+    When the checker methods look at the characters, if they want it,
     they go ahead and gobble it up and set up to create it in the servlet
-    when the time comes.  When they return, they return true if they accept
+    when the time comes. When they return, they return true if they accept
     the character, and the PSPReader object cursor is positioned past the
-    end of the block that the check function accepted.
+    end of the block that the checker method accepted.
 
     """
 
-    checklist = []
+    checklist = checklist # global list of checker methods
 
     def __init__(self, ctxt):
         self._reader = ctxt.getReader()
         self._writer = ctxt.getServletWriter()
         self._handler = None
-        self.cout = StringIO() # This is where we dump straight HTML code that none of the checks want
-        self.tmplStart = 0 # marks the start of HTML code
-        self.tmplStop = 0 #marks the end of HTML code
-        self.currentFile = self._reader.Mark().getFile()
+        self.cout = StringIO() # for dumping HTML that none of the check wants
+        self.tmplStart = None # marks the start of HTML code
+        self.tmplStop = None # marks the end of HTML code
+        self.currentFile = self._reader.mark().getFile()
 
     def setEventHandler(self, handler):
         """Set the handler this parser will use when it finds PSP code."""
@@ -78,279 +75,220 @@ class PSPParser:
         """
         data = self.cout.getvalue()
         self.cout.close()
-        if len(data) > 0: # make sure there's something there
+        if data: # make sure there's something there
             self._handler.handleCharData(start, stop, data)
         self.cout = StringIO()
 
+    @checker
     def commentCheck(self, handler, reader):
         """Comments just get eaten."""
-        OPEN_COMMENT = '<%--'
-        CLOSE_COMMENT = '--%>'
-        if reader.Matches(OPEN_COMMENT):
-            reader.Advance(len(OPEN_COMMENT))
-            if reader.skipUntil(CLOSE_COMMENT) is None:
-                raise PSPParserException, 'Comment not terminated'
+        if reader.matches('<%--'):
+            reader.advance(4)
+            if reader.skipUntil('--%>') is None:
+                raise PSPParserException('Comment not terminated')
             self.flushCharData(self.tmplStart, self.tmplStop)
-            return 1
-        return 0
+            return True
+        return False
 
-    checklist.append(commentCheck) # add this checker to the list that the parse function will call
-
+    @checker
     def checkExpression(self, handler, reader):
-        """Look for "expressions" and handle them"""
-        OPEN_EXPR = '<%='
-        CLOSE_EXPR = '%>'
-        end_open = None
-        attrs = None
-        if not reader.Matches(OPEN_EXPR):
-            return 0
-        reader.Advance(len(OPEN_EXPR)) # eat the opening tag
-        if end_open is not None:
-            attrs = reader.parseTagAttributes()
-            reader.skipSpaces()
-            if not reader.matches(end_open):
-                raise PSPParserException, 'Expression not terminated'
-            reader.Advance(len(end_open))
-            reader.skipSpaces()
-        # below not implemented
-        # PSPUtil.checkAttrs('Expression', attrs, validAttrs)
+        """Look for "expressions" and handle them."""
+        if not reader.matches('<%='):
+            return False
+        reader.advance(3) # eat the opening tag
         reader.peekChar()
         reader.skipSpaces()
-        start = reader.Mark()
-        stop = reader.skipUntil(CLOSE_EXPR)
+        start = reader.mark()
+        stop = reader.skipUntil('%>')
         if stop is None:
-            raise PSPParserException, 'Expression not terminated'
+            raise PSPParserException('Expression not terminated')
         handler.setTemplateInfo(self.tmplStart, self.tmplStop)
-        handler.handleExpression(start, stop, attrs)
-        return 1
+        handler.handleExpression(start, stop, None)
+        return True
 
-    checklist.append(checkExpression)
-
+    @checker
     def checkDirective(self, handler, reader):
-        """Check for directives. I support two right now, page and include."""
-        validDirectives = ['page', 'include']
-        OPEN_DIRECTIVE = r'<%@'
-        CLOSE_DIRECTIVE = r'%>'
-        if not reader.Matches(OPEN_DIRECTIVE):
-            return 0
-        start = reader.Mark()
-        reader.Advance(len(OPEN_DIRECTIVE))
-        match = None
+        """Check for directives; for now we support only page and include."""
+        if not reader.matches('<%@'):
+            return False
+        start = reader.mark()
+        reader.advance(3)
         reader.skipSpaces()
-        for i in validDirectives:
-            if reader.Matches(i):
-                match = i
+        for directive in ('page', 'include', 'taglib'):
+            if reader.matches(directive):
+                match = directive
                 break
-        if match is None:
-            raise PSPParserException, 'Invalid Directive'
-        reader.Advance(len(match))
+        else:
+            raise PSPParserException('Invalid directive')
+        reader.advance(len(match))
         # parse the directive attr:val pair dictionary
         attrs = reader.parseTagAttributes()
-        # not checking for validity yet
-        # if match == 'page':
-        #       PSPUtils.checkAttributes('Page Directive', attrs, pageDvalidAttrs)
-        # elif match == 'include':
-        #       PSPUtils.checkAttributes('Include Directive', attrs, includeDvalidAttrs)
-        # elif match == 'taglib':
-        #       raise NotImplementedError
-        # match close
-        reader.skipSpaces() # skip to where we expect a close tag
-        close = CLOSE_DIRECTIVE
-        if not reader.Matches(close):
-            raise PSPParserException, 'Directive not terminated'
+        if match == 'page':
+            checkAttributes('Page directive', attrs, ([], set([
+                'imports', 'extends', 'method',
+                'isThreadSafe', 'isInstanceSafe',
+                'indentType', 'indentSpaces',
+                'gobbleWhitespace', 'formatter'])))
+        elif match == 'include':
+            checkAttributes('Include directive', attrs, (['file'], []))
         else:
-            reader.Advance(len(close)) #advance past it
-        stop = reader.Mark()
+            raise PSPParserException('%s directive not implemented' % match)
+        reader.skipSpaces() # skip to where we expect a close tag
+        if reader.matches('%>'):
+            reader.advance(2) # advance past it
+        else:
+            raise PSPParserException('Directive not terminated')
+        stop = reader.mark()
         handler.setTemplateInfo(self.tmplStart, self.tmplStop)
         handler.handleDirective(match, start, stop, attrs)
-        return 1
+        return True
 
-    checklist.append(checkDirective)
-
+    @checker
     def checkEndBlock(self, handler, reader):
-        OPEN_SCRIPT = '<%'
-        CLOSE_SCRIPT = '%>'
-        CLOSE_SCRIPT2 = '$%>'
-        CENTER_SCRIPT = 'end'
-        start = reader.Mark()
-        if reader.Matches(OPEN_SCRIPT):
-            reader.Advance(len(OPEN_SCRIPT))
+        """Check for the end of a block."""
+        start = reader.mark()
+        if reader.matches('<%'):
+            reader.advance(2)
             reader.skipSpaces()
-            if reader.Matches(CENTER_SCRIPT):
-                reader.Advance(len(CENTER_SCRIPT))
+            if reader.matches('end'):
+                reader.advance(3)
                 reader.skipSpaces()
-                if reader.Matches(CLOSE_SCRIPT):
-                    reader.Advance(len(CLOSE_SCRIPT))
+                if reader.matches('%>'):
+                    reader.advance(2)
                     handler.setTemplateInfo(self.tmplStart, self.tmplStop)
                     handler.handleEndBlock()
-                    return 1
-                if reader.Matches(CLOSE_SCRIPT2):
-                    reader.Advance(len(CLOSE_SCRIPT2))
+                    return True
+                if reader.matches('$%>'):
+                    reader.advance(3)
                     handler.setTemplateInfo(self.tmplStart, self.tmplStop)
                     handler.handleEndBlock()
-                    print ">>>>Putting a $ at the end of an end tag does nothing, I Say"
-                    return 1
+                    print 'INFO: A $ at the end of an end tag does nothing.'
+                    return True
         # that wasn't it
         reader.reset(start)
-        return 0
+        return False
 
-    checklist.append(checkEndBlock)
-
+    @checker
     def checkScript(self, handler, reader):
         """The main thing we're after. Check for embedded scripts."""
-        OPEN_SCRIPT = '<%'
-        CLOSE_SCRIPT = '%>'
-        attrs = None
-        end_open = None
-        if not reader.Matches(OPEN_SCRIPT):
-            return 0
-        open = OPEN_SCRIPT
-        close = CLOSE_SCRIPT
-        validAttributes = ('name', 'params')
-        reader.Advance(len(open)) # matches advances it
-        if end_open is not None:
-            attrs = reader.parseTagAttributes()
-            reader.skipSpaces()
-            if not reader.Matches(end_open):
-                raise PSPParserException, 'Script not terminated'
-            reader.Advance(len(end_open))
-            reader.skipSpaces()
-            PSPUtils.checkAttributes('Script', attrs, validAttributes)
-        # reader.skipSpaces() # don't skip as spaces may be significant, leave this for the generator
-        start = reader.Mark()
+        if not reader.matches('<%'):
+            return False
+        reader.advance(2)
+        # don't skip as spaces may be significant; leave this for the generator
+        start = reader.mark()
         try:
-            stop = reader.skipUntil(close)
+            stop = reader.skipUntil('%>')
         except EOFError:
             raise EOFError("Reached EOF while looking for ending script tag")
         if stop is None:
-            raise PSPParserException, 'Script not terminated'
+            raise PSPParserException('Script not terminated')
         handler.setTemplateInfo(self.tmplStart, self.tmplStop)
-        handler.handleScript(start, stop, attrs)
-        return 1
+        handler.handleScript(start, stop, None)
+        return True
 
-    checklist.append(checkScript)
-
+    @checker
     def checkScriptFile(self, handler, reader):
         """Check for file level code.
 
-        Check for Python code that should go in the beginning of the generated module.
+        Check for Python code that should go to the top of the generated module.
 
         <psp:file>
-                import xyz
-                print 'hi Mome!'
-                def foo(): return 'foo'
+            import xyz
+            print 'hi Mome!'
+            def foo(): return 'foo'
         </psp:file>
 
         """
-        OPEN_SCRIPT = '<psp:file>'
-        CLOSE_SCRIPT = '</psp:file>'
-        attrs = None
-        if reader.Matches(OPEN_SCRIPT):
-            reader.Advance(len(OPEN_SCRIPT))
-            start = reader.Mark()
-            try:
-                stop = reader.skipUntil(CLOSE_SCRIPT)
-                if stop is None:
-                    raise PSPParserException, 'Script not terminated in %s block' % OPEN_SCRIPT
-            except EOFError:
-                raise EOFError("Reached EOF while looking for ending script tag (%s)" % CLOSE_SCRIPT)
-            handler.setTemplateInfo(self.tmplStart, self.tmplStop)
-            handler.handleScriptFile(start, stop, attrs)
-            return 1
-        return 0
+        if not reader.matches('<psp:file>'):
+            return False
+        reader.advance(10)
+        start = reader.mark()
+        try:
+            stop = reader.skipUntil('</psp:file>')
+            if stop is None:
+                raise PSPParserException(
+                    'Script not terminated in <psp:file> block')
+        except EOFError:
+            raise EOFError('Reached EOF while looking for ending'
+                ' script tag </psp:file>')
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleScriptFile(start, stop, None)
+        return True
 
-    checklist.append(checkScriptFile)
-
+    @checker
     def checkScriptClass(self, handler, reader):
         """Check for class level code.
 
         Check for Python code that should go in the class definition.
 
         <psp:class>
-                def foo(self):
-                        return self.dosomething()
+            def foo(self):
+                    return self.dosomething()
         </psp:class>
 
         """
-        OPEN_SCRIPT = '<psp:class>'
-        CLOSE_SCRIPT = '</psp:class>'
-        attrs = None
-        if reader.Matches(OPEN_SCRIPT):
-            reader.Advance(len(OPEN_SCRIPT))
-            start = reader.Mark()
-            try:
-                stop = reader.skipUntil(CLOSE_SCRIPT)
-                if stop is None:
-                    raise PSPParserException, 'Script not terminated in %s block' % OPEN_SCRIPT
-            except EOFError:
-                raise EOFError("Reached EOF while looking for ending script tag (%s)" % CLOSE_SCRIPT)
-            handler.setTemplateInfo(self.tmplStart, self.tmplStop)
-            handler.handleScriptClass(start, stop, attrs)
-            return 1
-        return 0
+        if not reader.matches('<psp:class>'):
+            return False
+        reader.advance(11)
+        start = reader.mark()
+        try:
+            stop = reader.skipUntil('</psp:class>')
+            if stop is None:
+                raise PSPParserException(
+                    'Script not terminated in <psp:class> block')
+        except EOFError:
+            raise EOFError('Reached EOF while looking for ending'
+                ' script tag </psp:class>')
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleScriptClass(start, stop, None)
+        return True
 
-    checklist.append(checkScriptClass)
-
+    @checker
     def checkMethod(self, handler, reader):
         """Check for class methods defined in the page.
 
-        I only support one format for these,
+        We only support one format for these,
         <psp:method name="xxx" params="xxx,xxx">
-        Then the function BODY, then <psp:method>.
+        Then the function body, then </psp:method>.
 
         """
-        OPEN_METHOD = '<psp:method'
-        # CLOSE_METHOD = '/>'
-        CLOSE_METHOD_2 = '</psp:method>'
-        CLOSE_METHOD_3 = '>'
-        attrs = None
-        # validAttributes = ('name', 'params')
-        if reader.Matches(OPEN_METHOD):
-            start = reader.Mark()
-            reader.Advance(len(OPEN_METHOD))
-            attrs = reader.parseTagAttributes()
-            # PSPUtils.checkAttributes('method', attrs, validAttributes)
-            reader.skipSpaces()
-            if not reader.Matches(CLOSE_METHOD_3):
-                raise PSPParserException, 'Expected method declaration close'
-            reader.Advance(len(CLOSE_METHOD_3))
-            stop = reader.Mark()
-            handler.setTemplateInfo(self.tmplStart, self.tmplStop)
-            handler.handleMethod(start, stop, attrs)
-            start = stop
-            # skip past the close marker, return the point before the close marker
-            stop = reader.skipUntil(CLOSE_METHOD_2)
-            handler.handleMethodEnd(start, stop, attrs)
-            return 1
-        return 0
+        if not reader.matches('<psp:method'):
+            return False
+        start = reader.mark()
+        reader.advance(11)
+        attrs = reader.parseTagAttributes()
+        checkAttributes('method', attrs, (['name'], ['params']))
+        reader.skipSpaces()
+        if not reader.matches('>'):
+            raise PSPParserException('Expected method declaration close')
+        reader.advance(1)
+        stop = reader.mark()
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleMethod(start, stop, attrs)
+        start = stop
+        # skip past the close marker, return the point before the close marker
+        stop = reader.skipUntil('</psp:method>')
+        handler.handleMethodEnd(start, stop, attrs)
+        return True
 
-    checklist.append(checkMethod)
-
+    @checker
     def checkInclude(self, handler, reader):
         """Check for inserting another pages output in this spot."""
-        OPEN_INCLUDE = '<psp:include'
-        # CLOSE_INCLUDE_NO_BODY = "/>"
-        CLOSE_INCLUDE_BODY = ">"
-        # CLOSE_INCLUDE = "</psp:include>"
-        # OPEN_INDIVIDUAL_PARAM = "<psp:param"
-        # CLOSE_INDIVIDUAL_PARAM = "/>"
-        if reader.Matches(OPEN_INCLUDE):
-            param = {}
-            reader.Advance(len(OPEN_INCLUDE))
-            reader.skipSpaces()
-            attrs = reader.parseTagAttributes()
-            #PSPUtils.checkTagAttributes()....
-            reader.skipSpaces()
-            if not reader.Matches(CLOSE_INCLUDE_BODY):
-                raise PSPParserException, 'Include bodies not implemented'
-            reader.Advance(len(CLOSE_INCLUDE_BODY))
-            handler.setTemplateInfo(self.tmplStart, self.tmplStop)
-            handler.handleInclude(attrs, param)
-            return 1
-        return 0
+        if not reader.matches('<psp:include'):
+            return False
+        reader.advance(12)
+        reader.skipSpaces()
+        attrs = reader.parseTagAttributes()
+        checkAttributes('include', attrs, (['path'], []))
+        reader.skipSpaces()
+        if not reader.matches('>'):
+            raise PSPParserException('Include bodies not implemented')
+        reader.advance(1)
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleInclude(attrs, None)
+        return True
 
-    checklist.append(checkInclude)
-
+    @checker
     def checkInsert(self, handler, reader):
         """Check for straight character dumps.
 
@@ -359,59 +297,44 @@ class PSPParser:
         JSP can pull it from another server, servlet, JSP page, etc.
 
         """
-        OPEN_INSERT = '<psp:insert'
-        # CLOSE_INSERT_NO_BODY = "/>"
-        CLOSE_INSERT_BODY = ">"
-        # CLOSE_INSERT = "</psp:insert>"
-        # OPEN_INDIVIDUAL_PARAM = "<psp:param"
-        # CLOSE_INDIVIDUAL_PARAM = "/>"
-        if reader.Matches(OPEN_INSERT):
-            param = {}
-            reader.Advance(len(OPEN_INSERT))
-            reader.skipSpaces()
-            attrs = reader.parseTagAttributes()
-            # PSPUtils.checkTagAttributes()....
-            reader.skipSpaces()
-            if not reader.Matches(CLOSE_INSERT_BODY):
-                raise PSPParserException, 'Insert bodies not implemented'
-            reader.Advance(len(CLOSE_INSERT_BODY))
-            handler.setTemplateInfo(self.tmplStart, self.tmplStop)
-            handler.handleInsert(attrs, param)
-            return 1
-        return 0
+        if not reader.matches('<psp:insert'):
+            return False
+        reader.advance(11)
+        reader.skipSpaces()
+        attrs = reader.parseTagAttributes()
+        checkAttributes('insert', attrs, (['file'], []))
+        reader.skipSpaces()
+        if not reader.matches('>'):
+            raise PSPParserException('Insert bodies not implemented')
+        reader.advance(1)
+        handler.setTemplateInfo(self.tmplStart, self.tmplStop)
+        handler.handleInsert(attrs, None)
+        return True
 
-    checklist.append(checkInsert)
-
-    def parse(self, until=None, accept=None):
+    def parse(self, until=None):
         """Parse the PSP file."""
-        noPspElement = 0
         reader = self._reader
         handler = self._handler
+        noPspElement = False
         while reader.hasMoreInput():
-            # This is for XML style blocks, which I'm not handling yet
-            if until is not None and reader.Matches(until):
+            # This is for XML style blocks, which we're not handling yet:
+            if until and reader.matches(until):
                 return
-            # If the file the reader is working on has changed due to a push or pop,
-            # flush any char data from the old file
-            if not reader.Mark().getFile() == self.currentFile:
+            # If the file the reader is working on has changed due to
+            # a push or pop, flush any char data from the old file:
+            if reader.mark().getFile() != self.currentFile:
                 self.flushCharData(self.tmplStart, self.tmplStop)
-                self.currentFile = reader.Mark().getFile()
-                self.tmplStart = reader.Mark()
-        # in JSP, this is an array of valid tag type to check for,
-        # I'm not using it now, # and I don't think JSP does either
-            if accept:
-                pass
-            accepted = 0
+                self.currentFile = reader.mark().getFile()
+                self.tmplStart = reader.mark()
             for checkfunc in self.checklist:
                 if checkfunc(self, handler, reader):
-                    accepted = 1
-                    noPspElement = 0
+                    noPspElement = False
                     break
-            if not accepted:
+            else:
                 if not noPspElement:
-                    self.tmplStart = reader.Mark()
-                    noPspElement = 1
-                st = reader.nextContent() # skip till the next possible tag
-                self.tmplStop = reader.Mark() # mark the end of HTML data
-                self.cout.write(st) # write out the raw HTML data
-            self.flushCharData(self.tmplStart, self.tmplStop) #dump remaining raw HTML
+                    self.tmplStart = reader.mark()
+                    noPspElement = True
+                s = reader.nextContent() # skip till the next possible tag
+                self.tmplStop = reader.mark() # mark the end of HTML data
+                self.cout.write(s) # write out the raw HTML data
+            self.flushCharData(self.tmplStart, self.tmplStop) # dump the rest

@@ -32,8 +32,10 @@ alltestnames = [
 
     'TaskKit.Tests.Test.makeTestSuite',
 
-    'PSP.Tests.PSPUtilsTest',
-    'PSP.Tests.CompileTest',
+    'PSP.Tests.TestContext',
+    'PSP.Tests.TestUtils',
+    'PSP.Tests.TestBraceConverter',
+    'PSP.Tests.TestCompiler',
 
     'UserKit.Tests.ExampleTest',
     'UserKit.Tests.Test',

@@ -1,33 +1,26 @@
 
 """Event handler for parsing PSP tokens.
 
-        This module is called when the Parser encounters psp tokens.
-        It creates a generator to handle the PSP token. When the PSP
-        source file is fully parsed, this module calls all of the
-        generators in turn to output their source code.
+This module is called when the Parser encounters psp tokens.
+It creates a generator to handle the PSP token. When the PSP
+source file is fully parsed, this module calls all of the
+generators in turn to output their source code.
 
-        (c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
-        Permission to use, copy, modify, and distribute this software and its
-        documentation for any purpose and without fee or royalty is hereby granted,
-        provided that the above copyright notice appear in all copies and that
-        both that copyright notice and this permission notice appear in
-        supporting documentation or portions thereof, including modifications,
-        that you make.
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
 
-        THE AUTHORS DISCLAIM ALL WARRANTIES WITH REGARD TO
-        THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-        FITNESS, IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY SPECIAL,
-        INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
-        FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
-        NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
-        WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
-
-        This software is based in part on work done by the Jakarta group.
+This software is based in part on work done by the Jakarta group.
 
 """
 
 import time
+
 from Generators import * # ResponseObject, plus all the *Generator functions.
 
 
@@ -36,21 +29,21 @@ class ParseEventHandler:
 
     It implements the handling of all the parsing elements.
     Note: This files JSP cousin is called ParseEventListener,
-    I don\'t know why, but Handler seemed more appropriate to me.
+    I don't know why, but Handler seemed more appropriate to me.
 
     """
 
     aspace = ' '
-    defaults = {
-            'BASE_CLASS':' WebKit.Page',
-            'BASE_METHOD': 'writeHTML',
-            'imports': {'filename': 'classes'},
-            'threadSafe': 'no',
-            'instanceSafe': 'yes',
-            'indent': int(4),
-            'gobbleWhitespace': 1,
-            'formatter': 'str'
-    }
+    defaults = dict(
+        BASE_CLASS = 'WebKit.Page',
+        BASE_METHOD = 'writeHTML',
+        imports = dict(filename='classes'),
+        threadSafe = 'no',
+        instanceSafe = 'yes',
+        indent = 4,
+        gobbleWhitespace = True,
+        formatter = 'str'
+    )
 
     def __init__(self, ctxt, parser):
         self._ctxt = ctxt
@@ -79,14 +72,14 @@ class ParseEventHandler:
 
     def handleCharData(self, start, stop, chars):
         """Flush character data into a CharGen."""
-        if chars != '':
+        if chars:
             gen = CharDataGenerator(chars)
             self.addGenerator(gen)
 
     def handleComment(self, start, stop):
         """Comments get swallowed into nothing."""
         self._parser.flushCharData(self.tmplStart, self.tmplStop)
-        return #just eats the comment
+        return # just eats the comment
 
     def handleInclude(self, attrs, param):
         """This is for includes of the form <psp:include ...>
@@ -111,14 +104,14 @@ class ParseEventHandler:
 
     def importHandler(self, imports, start, stop):
         importlist = imports.split(',')
-        for i in importlist:
-            if i.find(':') != -1:
-                module, symbol = i.split(':')[:2]
+        for imp in importlist:
+            if ':' in imp:
+                module, symbol = imp.split(':', 1)
                 self._importedSymbols.append(symbol.strip())
                 implist = "from " + module + " import " + symbol
                 self._imports.append(implist)
             else:
-                self._imports.append('import ' + i.strip())
+                self._imports.append('import ' + imp.strip())
 
     def extendsHandler(self, bc, start, stop):
         """Extends is a page directive.
@@ -129,7 +122,7 @@ class ParseEventHandler:
         The default base class is PSPPage. PSPPage inherits from Page.py.
 
         """
-        self._baseClasses = map(lambda s: s.strip(), bc.split(','))
+        self._baseClasses = [s.strip() for s in bc.split(',')]
 
     def mainMethodHandler(self, method, start, stop):
         """BaseMethod is a page directive.
@@ -142,7 +135,7 @@ class ParseEventHandler:
         """
         self._baseMethod = method
 
-    def threadSafeHandler(self, bool, start, stop):
+    def threadSafeHandler(self, value, start, stop):
         """Handle isThreadSage.
 
         isThreadSafe is a page directive.
@@ -151,9 +144,9 @@ class ParseEventHandler:
         Page.py, isn't thread safe.
 
         """
-        self._threadSafe = bool
+        self._threadSafe = value
 
-    def instanceSafeHandler(self, bool, start, stop):
+    def instanceSafeHandler(self, value, start, stop):
         """Handle isInstanceSafe.
 
         isInstanceSafe tells the Servlet engine whether it is safe
@@ -163,12 +156,12 @@ class ParseEventHandler:
         Saying "no" here hurts performance.
 
         """
-        self._instanceSafe = bool
+        self._instanceSafe = value
 
     def indentTypeHandler(self, type, start, stop):
         """Declare whether tabs are used to indent source code."""
         type = type.lower()
-        if type != "tabs" and type != "spaces" and type != "braces":
+        if type not in ('tabs', 'spaces', 'braces'):
             raise TypeError('Invalid Indentation Type')
         self._writer.setIndentType(type)
 
@@ -179,8 +172,8 @@ class ParseEventHandler:
 
     def gobbleWhitespaceHandler(self, value, start, stop):
         """Declare whether whitespace between script tags are gobble up."""
-        if value.lower() == "no" or value == "0":
-            self._gobbleWhitespace = 0
+        if value.lower() in ('no', 'false', '0'):
+            self._gobbleWhitespace = False
 
     def formatterHandler(self, value, start, stop):
         """Set an alternate formatter function to use instead of str()."""
@@ -204,29 +197,20 @@ class ParseEventHandler:
         self._parser.flushCharData(self.tmplStart, self.tmplStop)
         # big switch
         if directive == 'page':
-            e = attrs.keys()
-            for i in e:
-                if self.directiveHandlers.has_key(i):
-                    self.directiveHandlers[i](self, attrs[i], start, stop)
+            for h in attrs:
+                if h in self.directiveHandlers:
+                    self.directiveHandlers[h](self, attrs[h], start, stop)
                 else:
-                    print i
-                    raise ValueError, 'No page directive handler'
+                    raise ValueError('No page directive handler: %s' % h)
         elif directive == 'include':
+            filename = attrs['file']
+            encoding = attrs.get('encoding', None)
             try:
-                filenm = attrs['file']
-                encoding = attrs['encoding']
-            except KeyError:
-                if filenm is not None:
-                    encoding = None
-                else:
-                    raise KeyError
-            try:
-                self._reader.pushFile(filenm, encoding)
+                self._reader.pushFile(filename, encoding)
             except IOError:
-                raise IOError, 'PSP include file not found'
+                raise IOError('PSP include file not found: %s' % filename)
         else:
-            print directive
-            raise ValueError, 'Invalid directive'
+            raise ValueError('Invalid directive: %s' % directive)
 
     def handleScript(self, start, stop, attrs):
         """Handle scripting elements"""
@@ -269,15 +253,16 @@ class ParseEventHandler:
         pass
 
     def endProcessing(self):
+        encoding = self._ctxt.getPythonFileEncoding()
+        if encoding:
+            # add encoding as a hint for both Python (PEP263) and editors
+            self._writer.println('# -*- coding: %s -*-' % encoding)
         self._writer.println('# Generated automatically by PSP compiler on %s'
-                % time.asctime(time.localtime(time.time())))
-        enc = self._ctxt.getPythonFileEncoding()
-        if enc:
-            self._writer.println('# -*- coding: %s -*-' % enc)
+            % time.asctime(time.localtime(time.time())))
         self._writer.println()
         self.generateHeader()
         self.generateAll('psp:file')
-        self.generateDeclarations() # I'll overwrite this later when I can handle extends
+        self.generateDeclarations() # overwrite this when we can handle extends
         self.generateInitPSP()
         self.generateAll('psp:class')
         self.generateAll('Declarations')
@@ -296,22 +281,15 @@ class ParseEventHandler:
         self.tmplStop = stop
 
     def generateHeader(self):
-        for i in self._imports:
-            self._writer.println(i)
-        # self._writer.println('try:\n')
-        # self._writer.pushIndent()
-        # self._writer.println('from ' + self._baseClass + ' import ' + self._baseClass + '\n')
+        for imp in self._imports:
+            self._writer.println(imp)
         self._writer.println('import WebKit')
         self._writer.println('from WebKit import Page')
         for baseClass in self._baseClasses:
-            if baseClass.find('.') < 0 and baseClass not in self._importedSymbols:
+            if '.' not in baseClass and baseClass not in self._importedSymbols:
                 self._writer.println('import ' + baseClass)
-        # self._writer.popIndent()
-        # self._writer.println('except ImportError:\n')
-        # self._writer.pushIndent()
-        # self._writer.println('pass\n')
-        # self._writer.popIndent()
-        self._writer.println("__orig_file__ = %r" % self._ctxt.getFullPspFileName())
+        self._writer.println("__orig_file__ = %r"
+            % self._ctxt.getFullPspFileName())
 
     def generateDeclarations(self):
         # The PSP "extends" directive allows you to use a shortcut
@@ -324,10 +302,12 @@ class ParseEventHandler:
         self._writer.println('import types')
         self._writer.println('_baseClasses = []')
         for baseClass in self._baseClasses:
-            className = baseClass.split('.')[-1]
-            self._writer.println('if isinstance(%s, types.ModuleType):' % baseClass)
+            className = baseClass.rsplit('.', 1)[-1]
+            self._writer.println(
+                'if isinstance(%s, types.ModuleType):' % baseClass)
             self._writer.pushIndent()
-            self._writer.println('_baseClasses.append(%s.%s)' % (baseClass, className))
+            self._writer.println(
+                '_baseClasses.append(%s.%s)' % (baseClass, className))
             self._writer.popIndent()
             self._writer.println('else:')
             self._writer.pushIndent()
@@ -343,26 +323,25 @@ class ParseEventHandler:
                 self._writer.printChars(',')
             self._writer.printChars('_baseClasses[%d]' % i)
         self._writer.printChars('):')
-        # self._writer.printChars('(' + self._baseClass + '):')
         self._writer.printChars('\n')
         self._writer.pushIndent()
-        self._writer.println('def canBeThreaded(self):') # I Hope to take this out soon!
+        self._writer.println('def canBeThreaded(self):') # sadly, still needed
         self._writer.pushIndent()
-        if self._threadSafe.lower() == 'no':
-            self._writer.println('return 0')
+        if self._threadSafe.lower() in ('no', 'false', '0'):
+            self._writer.println('return False')
         else:
-            self._writer.println('return 1')
+            self._writer.println('return True')
         self._writer.popIndent()
         self._writer.println()
-        self._writer.println('def canBeReused(self):') # I Hope to take this out soon!
+        self._writer.println('def canBeReused(self):') # sadly, still needed
         self._writer.pushIndent()
-        if self._instanceSafe.lower() == 'no':
-            self._writer.println('return 0')
+        if self._instanceSafe.lower() in ('no', 'false', '0'):
+            self._writer.println('return False')
         else:
-            self._writer.println('return 1')
+            self._writer.println('return True')
         self._writer.popIndent()
         self._writer.println()
-        if not AwakeCreated:
+        if not self._writer._awakeCreated:
             self._writer.println('def awake(self, trans):')
             self._writer.pushIndent()
             self._writer.println('for baseclass in self.__class__.__bases__:')
@@ -392,37 +371,35 @@ class ParseEventHandler:
         self._writer.println()
 
     def generateMainMethod(self):
-        # Write the output method that the user requested in with
-        # <%@ page method="WriteHTML"%>
+        # Write the output method requested with <%@ page method=... %>
         self._writer.printIndent()
-        self._writer.printChars('def %s(self, transaction=None):\n' % self._baseMethod)
+        self._writer.printChars(
+            'def %s(self, transaction=None):\n' % self._baseMethod)
         self._writer.pushIndent()
         self._writer.println('"""I take a WebKit.Transaction object."""')
         self._writer.println('trans = self._transaction')
         self._writer.println(ResponseObject + ' = trans.response()')
         self._writer.println('req = trans.request()')
         self._writer.println('self._%s(%s, req, trans)\n'
-                % (self._baseMethod, ResponseObject))
+            % (self._baseMethod, ResponseObject))
         # Put the real output code in a function that doesn't need
         # a 'transaction' for unit tests.
         self._writer.popIndent()
         self._writer.println('def _%s(self, %s, req=None, trans=None):'
-                % (self._baseMethod, ResponseObject))
+            % (self._baseMethod, ResponseObject))
         self._writer.pushIndent()
-        self._writer.println('"""I take a file-like object.  I am useful for unit testing."""')
+        self._writer.println(
+            '"""I take a file-like object. I am useful for unit testing."""')
         self._writer.println('_formatter = %s' % self._formatter)
-        # self._writer.println('app = trans.application()')
 
     def generateFooter(self):
-        # Can't decide if this is in the class or outside.
-        # Guess I'll know when I'm done"""
         self._writer.popIndent()
         self._writer.println('##footer')
 
     def generateAll(self, phase):
-        for i in self._gens:
-            if i.phase == phase:
-                i.generate(self._writer)
+        for gen in self._gens:
+            if gen.phase == phase:
+                gen.generate(self._writer)
 
     def optimizeCharData(self):
         """Optimize the CharData.
@@ -435,10 +412,9 @@ class ParseEventHandler:
         gens = self._gens
         count = 0
         gencount = len(gens)
-
         while count < gencount-1:
-            if isinstance(gens[count], CharDataGenerator) \
-                            and isinstance(gens[count+1], CharDataGenerator):
+            if (isinstance(gens[count], CharDataGenerator)
+                    and isinstance(gens[count+1], CharDataGenerator)):
                 gens[count].mergeData(gens[count+1])
                 gens.remove(gens[count+1])
                 gencount -= 1
@@ -455,18 +431,18 @@ class ParseEventHandler:
         a if/else, try/except etc.
 
         """
-        debug = 0
+        debug = False
         gens = self._gens
         sideClasses = (ScriptGenerator, EndBlockGenerator)
         count = 1
         gencount = len(gens)
         if debug:
-            for i in gens:
-                print "Generator type = %s" % i.__class__
+            for gen in gens:
+                print "Generator type = %s" % gen.__class__
         while count < gencount - 1:
-            if isinstance(gens[count], CharDataGenerator) \
-                            and gens[count+1].__class__ in sideClasses \
-                            and gens[count-1].__class__ in sideClasses:
+            if (isinstance(gens[count], CharDataGenerator)
+                    and gens[count+1].__class__ in sideClasses
+                    and gens[count-1].__class__ in sideClasses):
                 if checkForTextHavingOnlyGivenChars(gens[count].chars):
                     gens.remove(gens[count])
                     gencount -= 1
@@ -485,5 +461,6 @@ def checkForTextHavingOnlyGivenChars(text, ws=None):
     else:
         for char in text:
             if char not in ws:
-                return 0
-        return 1
+                return False
+        else:
+            return True

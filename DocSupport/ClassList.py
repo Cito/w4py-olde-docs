@@ -140,7 +140,7 @@ class ClassList(object):
     def roots(self):
         roots = []
         for klass in self._klasses.values():
-            if len(klass._bases) == 0:
+            if not klass._bases:
                 roots.append(klass)
         return roots
 
@@ -150,7 +150,7 @@ class ClassList(object):
         for klass in roots:
             klass.printList(file=file)
 
-    def printForWeb(self, hierarchic=0, file=sys.stdout):
+    def printForWeb(self, hierarchic=False, file=sys.stdout):
         if isinstance(file, basestring):
             file = open(file, 'w')
             closeFile = True

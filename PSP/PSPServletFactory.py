@@ -1,37 +1,28 @@
 
 """This module handles requests from the application for PSP pages.
 
-        (c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
-        Permission to use, copy, modify, and distribute this software and its
-        documentation for any purpose and without fee or royalty is hereby granted,
-        provided that the above copyright notice appear in all copies and that
-        both that copyright notice and this permission notice appear in
-        supporting documentation or portions thereof, including modifications,
-        that you make.
-
-        THE AUTHORS DISCLAIM ALL WARRANTIES WITH REGARD TO
-        THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-        FITNESS, IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL,
-        INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
-        FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
-        NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
-        WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
 
 """
 
-import os, sys
+import os
+import sys
 from glob import glob
+from string import digits, letters
+
 from WebKit.ServletFactory import ServletFactory
 from PSP import Context, PSPCompiler
 
 
 class PSPServletFactory(ServletFactory):
-    """Servlet Factory for PSP files.
-
-    Very sloppy. Need to come back and do a serious cleanup.
-
-    """
+    """Servlet Factory for PSP files."""
 
     def __init__(self, application):
         ServletFactory.__init__(self, application)
@@ -39,14 +30,13 @@ class PSPServletFactory(ServletFactory):
         sys.path.append(self._cacheDir)
         self._cacheClassFiles = self._cacheClasses
         t = ['_'] * 256
-        from string import digits, letters
         for c in digits + letters:
             t[ord(c)] = c
         self._classNameTrans = ''.join(t)
         setting = application.setting
         self._extensions = setting('ExtensionsForPSP', ['.psp'])
         self._fileEncoding = setting('PSPFileEncoding', None)
-        if setting('ClearPSPCacheOnStart', 0):
+        if setting('ClearPSPCacheOnStart', False):
             self.clearFileCache()
 
     def uniqueness(self):
@@ -88,9 +78,9 @@ class PSPServletFactory(ServletFactory):
 
         """
         module = self.importAsPackage(transaction, filename)
-        assert module.__dict__.has_key(classname), \
-                'Cannot find expected class named %s in %s.' \
-                        % (repr(classname), repr(filename))
+        assert classname in module.__dict__, (
+            'Cannot find expected class named %r in %r.'
+            % (classname, filename))
         theClass = getattr(module, classname)
         return theClass
 
@@ -98,9 +88,9 @@ class PSPServletFactory(ServletFactory):
         classname = self.computeClassName(path)
         classfile = os.path.join(self._cacheDir, classname + ".py")
         mtime = os.path.getmtime(path)
-        if not os.path.exists(classfile) \
-                        or os.path.getmtime(classfile) != mtime:
-            context = Context.PSPCLContext(path, transaction)
+        if (not os.path.exists(classfile)
+                or os.path.getmtime(classfile) != mtime):
+            context = Context.PSPCLContext(path)
             context.setClassName(classname)
             context.setPythonFileName(classfile)
             context.setPythonFileEncoding(self._fileEncoding)

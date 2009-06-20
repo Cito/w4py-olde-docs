@@ -58,7 +58,7 @@ except ImportError:
     from pickle import load, dump
 
 
-class PickleCache:
+class PickleCache(object):
     """Simple abstract base class for PickleCacheReader and PickleCacheWriter."""
 
     _verbose = verbose
@@ -119,8 +119,8 @@ class PickleCacheReader(PickleCache):
                             print 'EOFError - not loading'
                         shouldDeletePickle = True
                     except Exception, exc:
-                        print 'WARNING: %s: %s: %s' % (
-                            self.__class__.__name__, exc.__class__, exc)
+                        print 'WARNING: %s: %s: %s' % (self.__class__.__name__,
+                            exc.__class__.__name__, exc)
                         shouldDeletePickle = True
                     else:
                         file.close()
@@ -158,10 +158,10 @@ class PickleCacheReader(PickleCache):
                 if v:
                     print 'Attempting to remove pickle cache file.'
                 os.remove(picklePath)
-            except OSError, e:
+            except OSError, exc:
                 if v:
                     print 'Failed to remove: %s: %s' % (
-                        e.__class__.__name__, e)
+                        exc.__class__.__name__, exc)
 
         if v:
             print 'Done reading data.'

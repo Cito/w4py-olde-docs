@@ -1,35 +1,26 @@
 
 """Utility class for keeping track of the context.
 
-        A utility class that holds information about the file we are parsing
-        and the environment we are doing it in.
+A utility class that holds information about the file we are parsing
+and the environment we are doing it in.
 
-        (c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
-        Permission to use, copy, modify, and distribute this software and its
-        documentation for any purpose and without fee or royalty is hereby granted,
-        provided that the above copyright notice appear in all copies and that
-        both that copyright notice and this permission notice appear in
-        supporting documentation or portions thereof, including modifications,
-        that you make.
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
 
-        THE AUTHORS DISCLAIM ALL WARRANTIES WITH REGARD TO
-        THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-        FITNESS, IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL,
-        INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
-        FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
-        NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
-        WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
-
-        This software is based in part on work done by the Jakarta group.
+This software is based in part on work done by the Jakarta group.
 
 """
 
 import os
-from ParseEventHandler import *
 
 
-class PSPContext:
+class PSPContext(object):
     """PSPContext is an abstract base class for Context classes.
 
     Holds all the common stuff that various parts of the compilation
@@ -37,9 +28,6 @@ class PSPContext:
     the compiler and the class generator.
 
     """
-
-    def __init__(self):
-        raise NotImplementedError
 
     def getClassPath(self):
         raise NotImplementedError
@@ -62,6 +50,7 @@ class PSPContext:
         """Return the class name including package prefixes.
 
         Won't use this for now.
+
         """
         raise NotImplementedError
 
@@ -73,19 +62,19 @@ class PSPContext:
         """Return the encoding of the file that we are generating."""
         raise NotImplementedError
 
-    def setPSPReader(self):
+    def setPSPReader(self, reader):
         """Set the PSPReader for this context."""
         raise NotImplementedError
 
-    def setServletWriter(self):
+    def setServletWriter(self, writer):
         """Set the PSPWriter instance for this context."""
         raise NotImplementedError
 
-    def setPythonFileName(self):
+    def setPythonFileName(self, name):
         """Set the name of the .py file to generate."""
         raise NotImplementedError
 
-    def setPythonFileEncoding(self):
+    def setPythonFileEncoding(self, encoding):
         """Set the encoding of the .py file to generate."""
         raise NotImplementedError
 
@@ -99,8 +88,8 @@ class PSPCLContext(PSPContext):
 
     """
 
-    def __init__(self, pspfile, trans=None):
-        # self._transactrion = trans # I don't think I need this
+    def __init__(self, pspfile):
+        PSPContext.__init__(self)
         self._baseUri, self._pspfile = os.path.split(pspfile)
         self._fullpath = pspfile
         self._pyFileEncoding = None
@@ -126,9 +115,7 @@ class PSPCLContext(PSPContext):
         return os.path.split(self._pyFileName)[0]
 
     def getServletClassName(self):
-        """Return the class name of the servlet being generated.
-
-        """
+        """Return the class name of the servlet being generated."""
         return self._className
 
     def getFullClassName(self):

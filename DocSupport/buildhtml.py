@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# $Id: buildhtml.py 5019 2007-03-12 21:48:30Z wiemann $
 # Author: David Goodger <goodger@python.org>
 # Copyright: This module has been placed in the public domain.
 
@@ -53,7 +52,7 @@ class SettingsSpec(docutils.SettingsSpec):
         (('Recursively scan subdirectories for files to process. '
           'This is the default.',
           ['--recurse'],
-          {'action': 'store_true', 'default': 1,
+          {'action': 'store_true', 'default': True,
            'validator': frontend.validate_boolean}),
          ('Do not scan subdirectories for files to process.',
           ['--local'], {'dest': 'recurse', 'action': 'store_false'}),
@@ -132,12 +131,12 @@ class Builder:
         """
         for name, publisher in self.publishers.items():
             option_parser = OptionParser(
-                components=publisher.components, read_config_files=1,
+                components=publisher.components, read_config_files=True,
                 usage=usage, description=description)
             publisher.option_parser = option_parser
             publisher.setting_defaults = option_parser.get_default_values()
             frontend.make_paths_absolute(publisher.setting_defaults.__dict__,
-                                         option_parser.relative_path_settings)
+                option_parser.relative_path_settings)
             publisher.config_settings = (
                 option_parser.get_standard_config_settings())
         self.settings_spec = self.publishers[''].option_parser.parse_args(
@@ -165,7 +164,7 @@ class Builder:
         settings.update(self.settings_spec.__dict__, publisher.option_parser)
         return settings
 
-    def run(self, directory=None, recurse=1):
+    def run(self, directory=None, recurse=True):
         recurse = recurse and self.initial_settings.recurse
         if directory:
             self.directories = [directory]
@@ -193,12 +192,10 @@ class Builder:
                 if fnmatch(names[i], pattern):
                     # Modify in place!
                     del names[i]
-        prune = False
         for name in names:
             if name.endswith('.txt'):
-                prune = self.process_txt(directory, name)
-                if prune:
-                    break
+                if self.process_txt(directory, name):
+                    break # prune
         if not recurse:
             del names[:]
 
@@ -209,8 +206,8 @@ class Builder:
             publisher = '.txt'
         settings = self.get_settings(publisher, directory)
         pub_struct = self.publishers[publisher]
-        if settings.prune and (directory in settings.prune):
-            return 1
+        if settings.prune and directory in settings.prune:
+            return True
         settings._source = os.path.normpath(os.path.join(directory, name))
         settings._destination = settings._source[:-4]+'.html'
         if not self.initial_settings.silent:
@@ -225,7 +222,7 @@ class Builder:
                 settings=settings)
         except ApplicationError, error:
             print >>sys.stderr, ('        Error (%s): %s'
-                                 % (error.__class__.__name__, error))
+                % (error.__class__.__name__, error))
 
 
 if __name__ == "__main__":

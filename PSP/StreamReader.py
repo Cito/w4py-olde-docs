@@ -1,85 +1,67 @@
 """This module co-ordinates the reading of the source file.
 
-        It maintains the current position of the parser in the source file.
+It maintains the current position of the parser in the source file.
 
-        (c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
+(c) Copyright by Jay Love, 2000 (mailto:jsliv@jslove.org)
 
-        Permission to use, copy, modify, and distribute this software and its
-        documentation for any purpose and without fee or royalty is hereby granted,
-        provided that the above copyright notice appear in all copies and that
-        both that copyright notice and this permission notice appear in
-        supporting documentation or portions thereof, including modifications,
-        that you make.
+Permission to use, copy, modify, and distribute this software and its
+documentation for any purpose and without fee or royalty is hereby granted,
+provided that the above copyright notice appear in all copies and that
+both that copyright notice and this permission notice appear in
+supporting documentation or portions thereof, including modifications,
+that you make.
 
-        THE AUTHORS DISCLAIM ALL WARRANTIES WITH REGARD TO
-        THIS SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
-        FITNESS, IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL,
-        INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER RESULTING
-        FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT,
-        NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION
-        WITH THE USE OR PERFORMANCE OF THIS SOFTWARE !
-
-        This software is based in part on work done by the Jakarta group.
+This software is based in part on work done by the Jakarta group.
 
 """
 
-from Context import *
-
-import copy
+from copy import copy
 import os
 
+from PSPUtils import PSPParserException
 
-class Mark:
+
+class Mark(object):
     """The Mark class marks a point in an input stream."""
 
-    def __init__(self, reader, fileid=None, stream=None, inBaseDir=None, encoding=None):
+    def __init__(self, reader,
+            fileId=None, stream=None, inBaseDir=None, encoding=None):
 
         if isinstance(reader, StreamReader):
             self.reader = reader
-            self.fileid = fileid
+            self.fileId = fileId
             self.includeStack = []
             self.cursor = 0
             self.stream = stream
             self.baseDir = inBaseDir
             self.encoding = encoding
         else:
-            self = copy.copy(reader)
-        # I think the includeStack will be copied correctly,
-        # but check here for problems: raise Error('clone include stack')
-        # JSP has an equals function, but I don't think I need that,
-        # because of using copy, but maybe I do.
-
-    def getFile(self):
-        return self.reader.getFile(self.fileid)
+            self = copy(reader)
 
     def __str__(self):
-        return self.getFile() + '(' + str(self.line) + str(self.col) + ')'
+        return '%s(%d)' % (self.getFile(), self.cursor)
 
-    def __repr__(self):
-        return self.getFile() + '(' + str(self.col) + ')'
+    def getFile(self):
+        return self.reader.getFile(self.fileId)
 
-    def pushStream(self, infileid, inStream, inBaseDir, inEncoding):
-        self.includeStack.append((self.cursor, self.fileid, self.baseDir, self.encoding, self.stream))
+    def pushStream(self, inFileId, inStream, inBaseDir, inEncoding):
+        self.includeStack.append((self.cursor, self.fileId, self.baseDir,
+            self.encoding, self.stream))
         self.cursor = 0
-        self.fileid = infileid
+        self.fileId = inFileId
+        self.stream = inStream
         self.baseDir = inBaseDir
         self.encoding = inEncoding
-        self.stream = inStream
 
     def popStream(self):
-        if len(self.includeStack) == 0:
-            return 0 # false
-        list = self.includeStack[len(self.includeStack)-1]
-        del self.includeStack[len(self.includeStack)-1]
-        self.cursor = list[0]
-        self.fileid = list[1]
-        self.baseDir = list[2]
-        self.encoding = list[3]
-        self.stream = list[4]
-        return 1 # true
+        if not self.includeStack:
+            return False
+        (self.cursor, self.fileId, self.baseDir,
+            self.encoding, self.stream) = self.includeStack.pop()
+        return True
 
 
-class StreamReader:
+class StreamReader(object):
     """This class handles the PSP source file.
 
     It provides the characters to the other parts of the system.
@@ -90,7 +72,6 @@ class StreamReader:
     def __init__(self, filename, ctxt):
         self._pspfile = filename
         self._ctxt = ctxt
-        self._filehandle = None
         self.sourcefiles = []
         self.current = None
         self.master = None
@@ -98,45 +79,34 @@ class StreamReader:
     def init(self):
         self.pushFile(self._ctxt.getFullPspFileName())
 
-    def registerSourceFile(self, file):
-        self.sourcefiles.append(file)
+    def registerSourceFile(self, filepath):
+        self.sourcefiles.append(filepath)
         return len(self.sourcefiles) - 1
 
-    def pushFile(self, file, encoding=None):
-        assert type(file) == type('')
-        # if type(file) != type(''):
-        # we've got an open file handle - don't think this case exists
-        # Don't know what this master stuff is, but until I do, implement it.
-        # Oh, it's the original file.
+    def pushFile(self, filepath, encoding=None):
+        assert isinstance(filepath, basestring)
         if self.master is None:
             parent = None
-            self.master = file
+            self.master = filepath
         else:
             parent = os.path.split(self.master)[0]
-        isAbsolute = os.path.isabs(file)
+        isAbsolute = os.path.isabs(filepath)
         if parent is not None and not isAbsolute:
-            file = os.path.join(parent, file)
-        fileid = self.registerSourceFile(file)
-        handle = open(file, 'r')
+            filepath = os.path.join(parent, filepath)
+        fileId = self.registerSourceFile(filepath)
+        handle = open(filepath, 'rU')
         stream = handle.read()
         handle.seek(0, 0)
-        lines = handle.readlines()
-        z = 0
-        for i in lines:
-            lines[z] = i.replace('\r\n', '\n').replace('\r', '\n')
-            z += 1
-        stream = ''.join(lines)
-
         if self.current is None:
-            self.current = Mark(self, fileid, stream,
-                    self._ctxt.getBaseUri(), encoding)
+            self.current = Mark(self, fileId, stream,
+                self._ctxt.getBaseUri(), encoding)
         else:
-            self.current.pushStream(fileid, stream,
-                    self._ctxt.getBaseUri(), encoding) # don't use yet
+            self.current.pushStream(fileId, stream,
+                self._ctxt.getBaseUri(), encoding) # don't use yet
 
     def popFile(self):
         if self.current is None:
-            return 0
+            return None
         return self.current.popStream()
 
     def getFile(self, i):
@@ -148,39 +118,39 @@ class StreamReader:
         self.sourcefiles.append(filename)
         return len(self.sourcefiles)
 
-    def Mark(self):
-        return copy.copy(self.current)
+    def mark(self):
+        return copy(self.current)
 
-    def skipUntil(self, st):
+    def skipUntil(self, s):
         """Greedy search.
 
         Return the point before the string, but move reader past it.
 
         """
-        pt = self.current.stream.find(st, self.current.cursor)
-        if pt == -1:
+        new_cursor = self.current.stream.find(s, self.current.cursor)
+        if new_cursor < 0:
             self.current.cursor = len(self.current.stream)
             if self.hasMoreInput():
-                self.popFile() # @@ Should I do this here? 6/1/00
-                self.skipUntil(st)
+                self.popFile()
+                self.skipUntil(s)
             else:
                 raise EOFError
         else:
-            self.current.cursor = pt
-            ret = self.Mark()
-            self.current.cursor += len(st)
-            return ret
+            self.current.cursor = new_cursor
+            mark = self.mark()
+            self.current.cursor += len(s)
+            return mark
 
     def reset(self, mark):
         self.current = mark
 
-    def Matches(self, st):
-        if st == self.current.stream[
-                        self.current.cursor:self.current.cursor+len(st)]:
-            return 1
-        return 0
+    def matches(self, s):
+        if s == self.current.stream[
+                self.current.cursor:self.current.cursor+len(s)]:
+            return True
+        return False
 
-    def Advance(self, length):
+    def advance(self, length):
         """Advance length characters"""
         if length + self.current.cursor <= len(self.current.stream):
             self.current.cursor += length
@@ -188,45 +158,42 @@ class StreamReader:
             prog = len(self.current.stream) - self.current.cursor
             self.current.cursor = len(self.current.stream)
             if self.hasMoreInput():
-                self.Advance(length-prog)
+                self.advance(length - prog)
             else:
                 raise EOFError()
 
     def nextChar(self):
-        if self.hasMoreInput() == 0:
+        if not self.hasMoreInput():
             return -1
-        ch = self.current.stream[self.current.cursor]
-        self.Advance(1)
-        return ch
+        c = self.current.stream[self.current.cursor]
+        self.advance(1)
+        return c
 
     def isSpace(self):
         """No advancing."""
-        return self.current.stream[self.current.cursor] == ' ' \
-                or self.current.stream[self.current.cursor] == '\n'
+        return self.current.stream[self.current.cursor] in (' ', '\n')
 
     def isDelimiter(self):
         if not self.isSpace():
-            ch = self.peekChar()
+            c = self.peekChar()
             # Look for single character work delimiter:
-            if ch == '=' or ch == '\"' or ch == "'" or ch == '/':
-                return 1
+            if c in ('=', '"', "'", '/'):
+                return True
             # Look for end of comment or basic end tag:
-            if ch == '-':
-                mark = self.Mark()
-                ch = self.nextChar()
-                ch2 = self.nextChar()
-                if ch == '>' or (ch == '-' and ch2 == '>'):
+            if c == '-':
+                mark = self.mark()
+                c = self.nextChar()
+                try:
+                    return c == '>' or (c == '-' and self.nextChar() == '>')
+                finally:
                     self.reset(mark)
-                    return 1
-                else:
-                    self.reset(mark)
-                    return 0
         else:
-            return 1
+            return True
 
     def peekChar(self, cnt=1):
         if self.hasMoreInput():
-            return self.current.stream[self.current.cursor:self.current.cursor+cnt]
+            return self.current.stream[
+                self.current.cursor:self.current.cursor+cnt]
         raise EOFError
 
     def skipSpaces(self):
@@ -237,100 +204,97 @@ class StreamReader:
         return i
 
     def getChars(self, start, stop):
-        oldcurr = self.Mark()
+        mark = self.mark()
         self.reset(start)
         chars = self.current.stream[start.cursor:stop.cursor]
-        self.reset(oldcurr)
+        self.reset(mark)
         return chars
 
     def hasMoreInput(self):
         if self.current.cursor >= len(self.current.stream):
             while self.popFile():
                 if self.current.cursor < len(self.current.stream) :
-                    return 1
-            return 0
-        return 1
+                    return True
+            return False
+        return True
 
     def nextContent(self):
         """Find next < char."""
         cur_cursor = self.current.cursor
         self.current.cursor += 1
-        pt = self.current.stream.find('<', self.current.cursor)
-        if pt == -1:
-            self.current.cursor = len(self.current.stream)
-        else:
-            self.current.cursor = pt
-        return self.current.stream[cur_cursor:self.current.cursor]
+        new_cursor = self.current.stream.find('<', self.current.cursor)
+        if new_cursor < 0:
+            new_cursor = len(self.current.stream)
+        self.current.cursor = new_cursor
+        return self.current.stream[cur_cursor:new_cursor]
 
     def parseTagAttributes(self):
         """Parse the attributes at the beginning of a tag."""
         values = {}
         while 1:
             self.skipSpaces()
-            ch = self.peekChar()
-            if ch == '>':
+            c = self.peekChar()
+            if c == '>':
                 return values
-            if ch == '-':
-                mark = self.Mark()
+            if c == '-':
+                mark = self.mark()
                 self.nextChar()
                 try:
                     if self.nextChar() == '-' and self.nextChar() == '>':
                         return values
                 finally:
                     self.reset(mark)
-            elif ch == '%':
-                mark = self.Mark()
+            elif c == '%':
+                mark = self.mark()
                 self.nextChar()
                 try:
-                    ts = self.peekChar()
-                    if ts == '>':
-                        self.reset(mark)
+                    if self.peekChar() == '>':
                         return values
                 finally:
                     self.reset(mark)
-            if ch is None:
+            elif not c:
                 break
             self.parseAttributeValue(values)
-        raise ValueError, 'PSP Error - unterminated attribute'
+        raise PSPParserException('Unterminated attribute')
 
-    def parseAttributeValue(self, valuedict):
+    def parseAttributeValue(self, valueDict):
         self.skipSpaces()
         name = self.parseToken(0)
         self.skipSpaces()
         if self.peekChar() != '=':
-            raise ValueError, 'PSP Error - no attribute value'
+            raise PSPParserException('No attribute value')
         self.nextChar()
         self.skipSpaces()
         value = self.parseToken(1)
         self.skipSpaces()
-        valuedict[name] = value
+        valueDict[name] = value
 
     def parseToken(self, quoted):
         # This may not be quite right:
         buffer = []
         self.skipSpaces()
-        ch = self.peekChar()
+        c = self.peekChar()
         if quoted:
-            if ch == '\"' or ch == "\'":
-                endquote = ch
-                ch = self.nextChar()
-                ch = self.peekChar()
-                while ch is not None and ch != endquote:
-                    ch = self.nextChar()
-                    if ch == '\\':
-                        ch = self.nextChar()
-                    buffer.append(ch)
-                    ch = self.peekChar()
-                if ch is None:
-                    raise ValueError, 'PSP Error - unterminated attribute value'
+            if c in ('"', "'"):
+                endquote = c
+                self.nextChar()
+                c = self.peekChar()
+                while c is not None and c != endquote:
+                    c = self.nextChar()
+                    if c == '\\':
+                        c = self.nextChar()
+                    buffer.append(c)
+                    c = self.peekChar()
+                if c is None:
+                    raise PSPParserException('Unterminated attribute value')
                 self.nextChar()
         else:
             if not self.isDelimiter():
                 while not self.isDelimiter():
-                    ch = self.nextChar()
-                    if ch == '\\':
-                        ch = self.peekChar()
-                        if ch == '\"' or ch == "'" or ch == '>' or ch == '%':
-                            ch = self.nextChar()
-                    buffer.append(ch)
+                    c = self.nextChar()
+                    if c == '\\':
+                        c = self.peekChar()
+                        if c in ('"', "'", '>', '%'):
+                            c = self.nextChar()
+                    buffer.append(c)
         return ''.join(buffer)

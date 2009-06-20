@@ -173,7 +173,7 @@ class AutoToC:
         mindepth = 6
         headings = []
         names = {}
-        names_created = 0
+        names_created = False
         depths = {}
         group = self._heading_pattern.groupindex
         for heading_found in headings_found:
@@ -192,7 +192,7 @@ class AutoToC:
             title = heading_found[group['title'] - 1]
             name = heading_found[group['name'] - 1]
             if name:
-                name_created = 0
+                name_created = False
             else: # no name given
                 name = self._make_name(title) # create one
                 if names.has_key(name): # make sure it is unique
@@ -203,7 +203,7 @@ class AutoToC:
                     names[name] = n
                 else:
                     names[name] = 1
-                names_created = name_created = 1
+                names_created = name_created = True
             heading = Heading(depth, title, name)
             heading._pattern = heading_found[group['pattern'] - 1]
             heading._name_created = name_created

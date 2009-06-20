@@ -134,4 +134,4 @@ self._response.write('<p>I\'m a method. <b style="color:maroon">%s</b></p>' % va
 
 <p><b>That's all, folks.</b></p>
 
-<p><%=  time.ctime(time.time())%></p>
+<p><%= time.ctime()%></p>

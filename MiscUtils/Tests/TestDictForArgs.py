@@ -48,7 +48,7 @@ x=2 y     == {'x': '2', 'y': '1'}
         # print repr(input)
         # sys.stdout.flush()
         result = DictForArgs(input)
-        self.assertEquals(result, output,
+        self.assertEqual(result, output,
                 'Expecting: %s\nGot: %s\n' % (repr(output), repr(result)))
 
     def testNegatives(self):
