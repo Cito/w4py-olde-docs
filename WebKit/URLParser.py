@@ -382,8 +382,8 @@ class _FileParser(URLParser):
             if result is not None:
                 return result
 
-            assert not requestPath or requestPath.startswith('/'), \
-                    "Not what I expected: %s" % repr(requestPath)
+            assert not requestPath or requestPath.startswith('/'), (
+                "Not what I expected: %s" % repr(requestPath))
             if not requestPath or requestPath == '/':
                 return self.parseIndex(trans, requestPath)
 
@@ -399,7 +399,7 @@ class _FileParser(URLParser):
 
             if len(names) > 1:
                 warn("More than one file matches %s in %s: %s"
-                        % (requestPath, self._path, names))
+                    % (requestPath, self._path, names))
                 raise HTTPNotFound("Page is ambiguous")
             elif not names:
                 return self.parseIndex(trans, requestPath)
@@ -472,8 +472,8 @@ class _FileParser(URLParser):
                     dirnames.append(os.path.join(dir, filename))
                 else:
                     filenames.append(os.path.join(dir, filename))
-            elif filename.startswith(fileStart) \
-                            and os.path.splitext(filename)[0] == fileStart:
+            elif (filename.startswith(fileStart)
+                    and os.path.splitext(filename)[0] == fileStart):
                 filenames.append(os.path.join(dir, filename))
         good = dirnames
 
@@ -555,7 +555,7 @@ class _FileParser(URLParser):
                         break
             if len(names) > 1:
                 warn("More than one file matches the index file %s in %s: %s"
-                        % (directoryFile, self._path, names))
+                    % (directoryFile, self._path, names))
                 raise HTTPNotFound("Index page is ambiguous")
             if names:
                 if requestPath and not self._extraPathInfo:

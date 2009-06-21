@@ -51,9 +51,9 @@ class UnknownSerialNumInfo(object):
     """For internal use when archiving objects.
 
     Attrs assigned externally are:
-            sourceObject
-            sourceAttr
-            targetObject
+        sourceObject
+        sourceAttr
+        targetObject
 
     """
 
@@ -81,8 +81,8 @@ class SQLObjectStore(ObjectStore):
 
     TO DO:
 
-        * _sqlEcho should be accessible via a config file setting
-          as stdout, stderr or a filename.
+      * _sqlEcho should be accessible via a config file setting
+        as stdout, stderr or a filename.
 
     For details on DB API 2.0, including the thread safety levels see:
         http://www.python.org/topics/database/DatabaseAPI-2.0.html
@@ -375,7 +375,7 @@ class SQLObjectStore(ObjectStore):
         a specific object. If serialNum is provided, it overrides the clauses.
 
         You should label all arguments other than aClass:
-                objs = store.fetchObjectsOfClass('Foo', clauses='where x<5')
+            objs = store.fetchObjectsOfClass('Foo', clauses='where x<5')
         The reason for labeling is that this method is likely to undergo
         improvements in the future which could include additional arguments.
         No guarantees are made about the order of the arguments except that
@@ -810,7 +810,7 @@ class MiddleObjectMixIn(object):
         """Return SQL update statement.
 
         Returns the SQL update statement of the form:
-                update table set name=value, ... where idName=idValue;
+            update table set name=value, ... where idName=idValue;
         Installed as a method of MiddleObject.
 
         """
@@ -828,9 +828,9 @@ class MiddleObjectMixIn(object):
         """Return SQL delete statement.
 
         Returns the SQL delete statement for MySQL of the form:
-                delete from table where idName=idValue;
+            delete from table where idName=idValue;
         Or if deletion is being marked with a timestamp:
-                update table set deleted=Now();
+            update table set deleted=Now();
         Installed as a method of MiddleObject.
 
         """
@@ -957,9 +957,10 @@ class Attr(object):
         """Return update assignments.
 
         Returns the assignment portion of an UPDATE statement such as:
-                "foo='bar'"
-        Using sqlColumnName() and sqlValue(). Subclasses only need to override this
-        if they have a special need (such as multiple   columns, see ObjRefAttr).
+            "foo='bar'"
+        Using sqlColumnName() and sqlValue(). Subclasses only need to
+        override this if they have a special need (such as multiple columns,
+        see ObjRefAttr).
 
         """
         colName = self.sqlColumnName()
@@ -1046,9 +1047,10 @@ class ObjRefAttr(object):
         """Return update assignments.
 
         Returns the assignment portion of an UPDATE statement such as:
-                "foo='bar'"
-        Using sqlColumnName() and sqlValue(). Subclasses only need to override this
-        if they have a special need (such as multiple columns, see ObjRefAttr).
+            "foo='bar'"
+        Using sqlColumnName() and sqlValue(). Subclasses only need to
+        override this if they have a special need (such as multiple columns,
+        see ObjRefAttr).
 
         """
         if self.setting('UseBigIntObjRefColumns', False):

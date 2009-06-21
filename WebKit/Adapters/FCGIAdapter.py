@@ -26,12 +26,14 @@ put them in another file and include that file in httpd.conf
 
 # I have the file in my cgi-bin directory, but you might as well put it in html.
 # the -host is the port it communicates on
-FastCgiExternalServer ../cgi-bin/FCGIWebKit.py -host localhost:33333 # the path is from the SERVER ROOT
+# the path is from the SERVER ROOT
 
-<Location /FCGIWebKit.py> # or whatever name you chose for the file above
- SetHandler fastcgi-script
- Options ExecCGI FollowSymLinks
-</Location>
+    FastCgiExternalServer ../cgi-bin/FCGIWebKit.py -host localhost:33333
+
+    <Location /FCGIWebKit.py> # or whatever name you chose for the file above
+     SetHandler fastcgi-script
+     Options ExecCGI FollowSymLinks
+    </Location>
 
 You could also take an extension oriented approach in Apache using '.fcgi':
 
@@ -64,15 +66,15 @@ JSL- It's twice as fast as straight CGI
 CHANGES
 
 * 2000-05-08 ce:
-    * Fixed bug in exception handler to send first message to stderr, instead of stdout
-    * Uncommented the line for reading 'adapter.address'
-    * Switched from eval() encoding to marshal.dumps() encoding in accordance with AppServer
-    * Increased rec buffer size from 8KB to 32KB
-    * Removed use of pr() for feeding app server results back to webserver. Figure that's slightly more efficient.
-    * Added notes about how I set this up with Apache to what was already there.
+  * Fixed bug in exception handler to send first message to stderr, instead of stdout
+  * Uncommented the line for reading 'adapter.address'
+  * Switched from eval() encoding to marshal.dumps() encoding in accordance with AppServer
+  * Increased rec buffer size from 8KB to 32KB
+  * Removed use of pr() for feeding app server results back to webserver. Figure that's slightly more efficient.
+  * Added notes about how I set this up with Apache to what was already there.
 
 *2001-03-14 jsl:
-    * Fixed problem with post data
+  * Fixed problem with post data
 
 """
 

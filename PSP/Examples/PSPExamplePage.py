@@ -29,11 +29,11 @@ class PSPExamplePage(ExamplePage):
         self.menuHeading('Other')
         viewPath = self.request().uriWebKitRoot() + "PSP/Examples/View"
         self.menuItem(
-                'View source of<br/>%s' % self.title(),
-                self.request().uriWebKitRoot() + 'PSP/Examples/View?filename=%s' \
-                        % os.path.basename(self.request().serverSidePath()))
+            'View source of<br/>%s' % self.title(),
+            self.request().uriWebKitRoot() + 'PSP/Examples/View?filename=%s'
+                % os.path.basename(self.request().serverSidePath()))
         if self.application().hasContext('Documentation'):
             filename = 'Documentation/WebKit.html'
             if os.path.exists(filename):
                 self.menuItem('Local WebKit docs',
-                        self.request().servletPath() + '/' + filename)
+                    self.request().servletPath() + '/' + filename)

@@ -140,13 +140,13 @@ A simple query mechanism is supported for equality of fields:
 
 COMMON USES
 
-* Programs can keep configuration and other data in simple comma-
-separated text files and use DataTable to access them. For example, a
-web site could read its sidebar links from such a file, thereby allowing
-people who don't know Python (or even HTML) to edit these links without
-having to understand other implementation parts of the site.
+  * Programs can keep configuration and other data in simple comma-
+    separated text files and use DataTable to access them. For example, a
+    web site could read its sidebar links from such a file, thereby allowing
+    people who don't know Python (or even HTML) to edit these links without
+    having to understand other implementation parts of the site.
 
-* Servers can use DataTable to read and write log files.
+  * Servers can use DataTable to read and write log files.
 
 
 FROM THE COMMAND LINE
@@ -154,7 +154,7 @@ FROM THE COMMAND LINE
 The only purpose in invoking DataTable from the command line is to see
 if it will read a file:
 
-> python DataTable.py foo.csv
+  > python DataTable.py foo.csv
 
 The data table is printed to stdout.
 
@@ -173,26 +173,27 @@ See the docstring of PickleCache.py for more information.
 
 MORE DOCS
 
-Some of the methods in this module have worthwhile doc strings to look
-at. See below.
+Some of the methods in this module have worthwhile doc strings to look at.
+See below.
 
 
 TO DO
 
-* Allow callback parameter or setting for parsing CSV records.
-* Perhaps TableRecord should inherit UserList and UserDict and override methods as appropriate...?
-* Better support for datetime.
-* _types and blankValues aren't really packaged, advertised or
-  documented for customization by the user of this module.
-* DataTable:
-    * Parameterize the TextColumn class.
-    * Parameterize the TableRecord class.
-    * More list-like methods such as insert()
-    * writeFileNamed() is flawed: it doesn't write the table column type
-    * Should it inherit from UserList?
-* Add error checking that a column name is not a number (which could
-  cause problems).
-* Look for various @@ tags through out the code.
+  * Allow callback parameter or setting for parsing CSV records.
+  * Perhaps TableRecord should inherit UserList and UserDict and override
+    methods as appropriate...?
+  * Better support for datetime.
+  * _types and blankValues aren't really packaged, advertised or
+    documented for customization by the user of this module.
+  * DataTable:
+      * Parameterize the TextColumn class.
+      * Parameterize the TableRecord class.
+      * More list-like methods such as insert()
+      * writeFileNamed() is flawed: it doesn't write the table column type
+      * Should it inherit from UserList?
+  * Add error checking that a column name is not a number (which could
+    cause problems).
+  * Look for various @@ tags through out the code.
 
 """
 
@@ -505,9 +506,10 @@ class DataTable:
     def writeFile(self, file):
         """Write the table out as a file.
 
-        @@ 2000-07-20 ce: This doesn't write the column types (like :int) back out.
-        @@ 2000-07-21 ce: It's notable that a blank numeric value gets read as zero
-                and written out that way. Also, values None are written as blanks.
+        This doesn't write the column types (like int) back out.
+
+        It's notable that a blank numeric value gets read as zero
+        and written out that way. Also, values None are written as blanks.
 
         """
         # write headings
@@ -720,8 +722,8 @@ class TableRecord(object):
     def initFromSequence(self, values):
         if len(self._headings) < len(values):
             raise DataTableError, ('There are more values than headings.\n'
-                    'headings(%d, %s)\nvalues(%d, %s)' % (len(self._headings),
-                    self._headings, len(values), values))
+                'headings(%d, %s)\nvalues(%d, %s)' % (len(self._headings),
+                self._headings, len(values), values))
         self._values = []
         numHeadings = len(self._headings)
         numValues = len(values)

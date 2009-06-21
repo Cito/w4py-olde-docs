@@ -5,39 +5,39 @@
 editor = 'Vim'
 
 editorCommands = {
-        'Emacs':
-                'gnuclient +%(line)s "%(filename)s"',
-        'Geany':
-                'geany -l %(line)s "%(filename)s"',
-        'Geany (Windows)':
-                r'start %%ProgramFiles%%\Geany\Geany.exe -l %(line)s "%(filename)s"',
-        'gedit':
-                'gedit +%(line)s "%(filename)s"',
-        'jEdit':
-                'jedit "%(filename)s" +line:%(line)s',
-        'jedit (Windows)':
-                'start %%ProgramFiles%%\\jEdit\jedit.jar "%(filename)s" +line:%(line)s',
-        'Kate':
-                'kate -u -l %(line)s "%(filename)s"',
-        'Komodo':
-                'komodo -l %(line)s "%(filename)s"',
-        'Komodo Edit 5 (Windows)':
-                r'start %%ProgramFiles%%\"ActiveState Komodo Edit 5"\komodo.exe -l %(line)s "%(filename)s"',
-        'Komodo IDE 5 (Windows)':
-                r'start %%ProgramFiles%%\"ActiveState Komodo IDE 5"\komodo.exe -l %(line)s "%(filename)s"',
-        'KWrite':
-                'kwrite --line %(line)s "%(filename)s"',
-        'Notepad++ (Windows)':
-                r'start %%ProgramFiles%%\Notepad++\notepad++.exe -n%(line)s "%(filename)s"',
-        'PSPad (Windows)':
-                r'start %%ProgramFiles%%\PSPad\PSPad.exe -%(line)s "%(filename)s"',
-        'SciTE':
-                'scite "%(filename)s" -goto:%(line)s',
-        'SciTE (Windows)':
-                r'start %%ProgramFiles%%\SciTE\SciTE.exe "%(filename)s" -goto:%(line)s',
-        'Vim':
-                'gvim +%(line)s "%(filename)s"',
-        }
+    'Emacs':
+        'gnuclient +%(line)s "%(filename)s"',
+    'Geany':
+        'geany -l %(line)s "%(filename)s"',
+    'Geany (Windows)':
+        r'start %%ProgramFiles%%\Geany\Geany.exe -l %(line)s "%(filename)s"',
+    'gedit':
+        'gedit +%(line)s "%(filename)s"',
+    'jEdit':
+        'jedit "%(filename)s" +line:%(line)s',
+    'jedit (Windows)':
+        'start %%ProgramFiles%%\\jEdit\jedit.jar "%(filename)s" +line:%(line)s',
+    'Kate':
+        'kate -u -l %(line)s "%(filename)s"',
+    'Komodo':
+        'komodo -l %(line)s "%(filename)s"',
+    'Komodo Edit 5 (Windows)':
+        r'start %%ProgramFiles%%\"ActiveState Komodo Edit 5"\komodo.exe -l %(line)s "%(filename)s"',
+    'Komodo IDE 5 (Windows)':
+        r'start %%ProgramFiles%%\"ActiveState Komodo IDE 5"\komodo.exe -l %(line)s "%(filename)s"',
+    'KWrite':
+        'kwrite --line %(line)s "%(filename)s"',
+    'Notepad++ (Windows)':
+        r'start %%ProgramFiles%%\Notepad++\notepad++.exe -n%(line)s "%(filename)s"',
+    'PSPad (Windows)':
+        r'start %%ProgramFiles%%\PSPad\PSPad.exe -%(line)s "%(filename)s"',
+    'SciTE':
+        'scite "%(filename)s" -goto:%(line)s',
+    'SciTE (Windows)':
+        r'start %%ProgramFiles%%\SciTE\SciTE.exe "%(filename)s" -goto:%(line)s',
+    'Vim':
+        'gvim +%(line)s "%(filename)s"',
+    }
 
 defaultCommand = editor + ' +%(line)s "%(filename)s"'
 

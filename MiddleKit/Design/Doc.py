@@ -19,7 +19,7 @@ from WebUtils.Funcs import htmlEncode
 
 class Doc(object):
 
-    sourceStyleSheetFilename = 'GenDocStyles.css'   # exists in MiddleKit/Design/
+    sourceStyleSheetFilename = 'GenDocStyles.css' # exists in MiddleKit/Design/
     destStyleSheetFilename = 'Styles.css'
     otherKeys = 'isDerived Min Max Enums'.split()
 
@@ -45,11 +45,13 @@ class Doc(object):
 
         from MiddleKit.Core.Model import Model
         if modelName:
-            self.model = Model(modelName, havePythonClasses=0)
+            self.model = Model(modelName, havePythonClasses=False)
         else:
-            self.model = Model(classesFilename=classesName, havePythonClasses=0)
+            self.model = Model(classesFilename=classesName,
+                havePythonClasses=False)
 
-        source = os.path.join(os.path.dirname(self.progPath), self.sourceStyleSheetFilename)
+        source = os.path.join(os.path.dirname(self.progPath),
+            self.sourceStyleSheetFilename)
         dest = os.path.join(outDir, self.destStyleSheetFilename)
         shutil.copyfile(source, dest)
 
@@ -71,14 +73,16 @@ class Doc(object):
 <a name=#top></a>
 ''' % self.destStyleSheetFilename)
 
-        wr('<div class="head1">%s Model (MiddleKit)</div>\n' % self.model.name())
+        wr('<div class="head1">%s Model (MiddleKit)</div>\n'
+           % self.model.name())
         wr('Generated on %s <br>\n' % time.asctime())
         wr('From %s <br>\n' % self.model.filename())
 
         wr('<br>\n')
 
         wr('<table border="0" cellpadding="2" cellspacing="2">\n')
-        wr('<tr class="Class"><td class="ClassName" colspan="3">Classes</td></tr>\n')
+        wr('<tr class="Class">'
+           '<td class="ClassName" colspan="3">Classes</td></tr>\n')
         wr('<tr class="AttrTitles"><td class=AttrTitles>In Alpha Order</td>'
            '<td class="AttrTitles">In Inheritance Order</td></tr>\n')
         wr('<tr><td valign=top>\n')
@@ -100,12 +104,12 @@ class Doc(object):
 <table class="Class" cellspacing="2" cellpadding="2">
 <tr class="ClassName">
     <td class="ClassName" colspan="7">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%%">
-                    <tr>
-                            <td class="ClassName">%(name)s</td>
-                            <td class="Top" align="right"><a href="#top">top</a></td>
-                    </tr>
-            </table>
+        <table border="0" cellpadding="0" cellspacing="0" width="100%%">
+            <tr>
+                <td class="ClassName">%(name)s</td>
+                <td class="Top" align="right"><a href="#top">top</a></td>
+            </tr>
+        </table>
     </td>
 </tr>
             ''' % locals())
@@ -115,7 +119,8 @@ class Doc(object):
             # ancestor classes
             wr('<table border="0" cellpadding="3" cellspacing="0">\n')
             if klass.get('isAbstract'):
-                wr('<tr><td valign="top">abstract:</td><td valign="top">yes</td></tr>\n')
+                wr('<tr><td valign="top">abstract:</td>'
+                   '<td valign="top">yes</td></tr>\n')
             wr('<tr><td valign="top">ancestors:</td><td valign="top">')
             ancestor = klass.superklass()
             if ancestor:
@@ -225,7 +230,7 @@ class Doc(object):
         self.parseGenericArgs(args)
         args = self.args
 
-        if args.has_key('otherkeys'):
+        if 'otherkeys' in args:
             self.otherKeys = args['otherkeys']
             if isinstance(self.otherKeys, basestring):
                 self.otherKeys = self.otherKeys.split()
@@ -245,27 +250,31 @@ class Doc(object):
             if len(parts) == 2:
                 values[parts[0].lower()] = valueForString(parts[1])
             else:
-                values[parts[0].lower()] = 1
+                values[parts[0].lower()] = True
         self.args = values
-
 
     def usage(self, errorMsg=None):
         progName = os.path.basename(sys.argv[0])
         if errorMsg:
             print '%s: error: %s' % (progName, errorMsg)
         print '''
-Usage:
-%(progName)s model=FILENAME [outDir=DIRNAME] [moreKeys="foo bar"] [otherKeys="foo bar"]
-%(progName)s classes=FILENAME [outDir=DIRNAME] [moreKeys="foo bar"] [otherKeys="foo bar"]
+USAGE:
+  %(progName)s model=FILENAME [OPTIONS]
+  %(progName)s classes=FILENAME [OPTIONS]
 
-* If outDir is not specified, then the base filename (sans extension) is
-used.
-* GeneratedDocs is appended to the output directory.
-* The Notes column will also include the other keys: isDerived, Min, Max
-and Enums.
-* You can redefine those keys with the otherKeys argument.
-* But more typically, you would use moreKeys to _add_ keys specific to
-your model (i.e., user-defined rather than MiddleKit-defined).
+OPTIONS:
+  [outDir=DIRNAME] [moreKeys="foo bar"] [otherKeys="foo bar"]
+
+NOTES:
+  * If outDir is not specified, then the base filename
+    (sans extension) is used.
+  * GeneratedDocs is appended to the output directory.
+  * The Notes column will also include the other keys:
+    isDerived, Min, Max and Enums.
+  * You can redefine those keys with the otherKeys argument.
+  * But more typically, you would use moreKeys to _add_ keys
+    specific to your model (i.e., user-defined rather than
+    MiddleKit-defined).
 ''' % locals()
         print
         sys.exit(1)

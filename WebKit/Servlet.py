@@ -16,12 +16,12 @@ class Servlet(object):
     so that reuse can occur.
 
     Objects that participate in a transaction include:
-        * Application
-        * Request
-        * Transaction
-        * Session
-        * Servlet
-        * Response
+      * Application
+      * Request
+      * Transaction
+      * Session
+      * Servlet
+      * Response
 
     The awake(), respond() and sleep() methods form a message sandwich.
     Each is passed an instance of Transaction which gives further access
@@ -147,7 +147,7 @@ class Servlet(object):
             if path.startswith('/'):
                 path = path[1:]
             return os.path.normpath(os.path.join(
-                    os.path.dirname(self._serverSidePath), path))
+                os.path.dirname(self._serverSidePath), path))
         else:
             return self._serverSidePath
 

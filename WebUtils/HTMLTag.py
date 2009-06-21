@@ -29,27 +29,27 @@ See the doc string for HTMLTag for examples of what you can do with tags.
 
 CAVEATS
 
-* HTMLReader needs special attention with regards to tags like <p> and <li>
-  which sometimes are closed (</p> </li>) and sometimes not.
-  See its doc string for full information.
+  * HTMLReader needs special attention with regards to tags like <p> and <li>
+    which sometimes are closed (</p> </li>) and sometimes not.
+    See its doc string for full information.
 
-* HTMLReader is picky about the correctness of the HTML you feed it.
-  Again see the class docs for full info.
+  * HTMLReader is picky about the correctness of the HTML you feed it.
+    Again see the class docs for full info.
 
 
 TO DO
 
-* See the TO DO sections for each class.
+  * See the TO DO sections for each class.
 
 
 CREDITS
 
-* I didn't grok how to write an SGMLParser subclass until I read the very
-  small example by Sean McGrath at http://www.digitome.com/html2pyx.py
-  (which I believe is broken for empty tags).
+  * I didn't grok how to write an SGMLParser subclass until I read the very
+    small example by Sean McGrath at http://www.digitome.com/html2pyx.py
+    (which I believe is broken for empty tags).
 
-* Determined what HTML tags are empty by scanning O'Reilly's HTML Pocket
-  Reference.
+  * Determined what HTML tags are empty by scanning O'Reilly's HTML Pocket
+    Reference.
 
 """
 
@@ -94,10 +94,10 @@ class HTMLTag(object):
     """Container class for representing HTML as tag objects.
 
     Tags essentially have 4 major attributes:
-        * name
-        * attributes
-        * children
-        * subtags
+      * name
+      * attributes
+      * children
+      * subtags
 
     Name is simple:
         print tag.name()
@@ -134,14 +134,14 @@ class HTMLTag(object):
 
     TO DO
 
-    * A walker() method for traversing the tag tree.
-    * Search for a subtag with a given name, recursive or not.
-    * Attribute traversal with dotted notation?
-    * Do we need to convert tag names and attribute names to lower case,
-      or does SGMLParser already do that?
-    * Should attribute values be strip()ed?
-      Probably not. SGMLParser probably strips them already unless they
-      really do have spaces as in "  quoted  ". But that's speculation.
+      * A walker() method for traversing the tag tree.
+      * Search for a subtag with a given name, recursive or not.
+      * Attribute traversal with dotted notation?
+      * Do we need to convert tag names and attribute names to lower case,
+        or does SGMLParser already do that?
+      * Should attribute values be strip()ed?
+        Probably not. SGMLParser probably strips them already unless they
+        really do have spaces as in "  quoted  ". But that's speculation.
 
     """
 
@@ -335,11 +335,11 @@ class HTMLReader(SGMLParser):
 
     NOTES
 
-    * Special attention is required regarding tags like <p> and <li> which
-      sometimes are closed and sometimes not. HTMLReader can deal with both
-      situations (closed and not) provided that:
-        * the file doesn't change conventions for a given tag
-        * the reader knows ahead of time what to expect
+      * Special attention is required regarding tags like <p> and <li> which
+        sometimes are closed and sometimes not. HTMLReader can deal with both
+        situations (closed and not) provided that:
+          * the file doesn't change conventions for a given tag
+          * the reader knows ahead of time what to expect
 
     Be default, HTMLReader assumes that <p> and <li> will be closed with </p>
     and </li> as the official HTML spec, as well as upcomer XHTML, encourage
@@ -350,8 +350,7 @@ class HTMLReader(SGMLParser):
         HTMLReader(extraEmptyTags=['p', 'li'])
     or:
         reader.extendEmptyTags(['p', 'li'])
-
-    Or just set them entirely:
+    or just set them entirely:
         HTMLReader(emptyTags=['br', 'hr', 'p'])
         reader.setEmptyTags(['br', 'hr', 'p'])
 
@@ -372,37 +371,38 @@ class HTMLReader(SGMLParser):
 
     Or you could fix the HTML.
 
-    * The reader ignores extra preceding and trailing whitespace by stripping
-      it from strings. I suppose this is a little harsher than reducing spans
-      of preceding and trailing whitespace down to one space, which is what
-      really happens in an HTML browser.
+      * The reader ignores extra preceding and trailing whitespace by stripping
+        it from strings. I suppose this is a little harsher than reducing spans
+        of preceding and trailing whitespace down to one space, which is what
+        really happens in an HTML browser.
 
-    * The reader will not read past the closing </html> tag.
+      * The reader will not read past the closing </html> tag.
 
-    * The reader is picky about the correctness of the HTML you feed it. If tags
-      are not closed, overlap (instead of nest) or left unfinished, an exception
-      is thrown. These include HTMLTagUnbalancedError, HTMLTagIncompleteError
-      and HTMLNotAllowedError which all inherit HTMLTagError.
+      * The reader is picky about the correctness of the HTML you feed it.
+        If tags are not closed, overlap (instead of nest) or left unfinished,
+        an exception is thrown. These include HTMLTagUnbalancedError,
+        HTMLTagIncompleteError and HTMLNotAllowedError which all inherit
+        HTMLTagError.
 
-      This pickiness can be quite useful for the validation of the HTML of your
-      own applications.
+        This pickiness can be quite useful for the validation of the HTML of
+        your own applications.
 
-      I believe it is possible that others kinds of HTML errors could raise
-      exceptions from sgmlib.SGMLParser (from which HTMLReader inherits),
-      although in practice, I have not seen them.
+        I believe it is possible that others kinds of HTML errors could raise
+        exceptions from sgmlib.SGMLParser (from which HTMLReader inherits),
+        although in practice, I have not seen them.
 
 
     TO DO
 
-    * Could the "empty" tag issue be dealt with more sophistication by
-      automatically closing <p> and <li> (e.g., popping them off the _tagStack)
-      when other major tags were encountered such as <p>, <li>, <table>,
-      <center>, etc.?
+      * Could the "empty" tag issue be dealt with more sophistication
+        by automatically closing <p> and <li> (e.g., popping them off
+        the _tagStack) when other major tags were encountered such as
+        <p>, <li>, <table>, <center>, etc.?
 
-    * Readers don't handle processing instructions: <? foobar ?>.
+      * Readers don't handle processing instructions: <? foobar ?>.
 
-    * The tagContainmentConfig class var can certainly be expanded for even
-      better validation.
+      * The tagContainmentConfig class var can certainly be expanded
+        for even better validation.
 
     """
 

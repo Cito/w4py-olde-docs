@@ -153,8 +153,8 @@ def main(args=None):
     args2 = []
     while args:
         arg = args.pop(0)
-        if arg.startswith('--') and \
-                2 < arg.find('.', 2) < arg.find('=', 5):
+        if (arg.startswith('--')
+                and 2 < arg.find('.', 2) < arg.find('=', 5)):
             args2.append(arg)
         else:
             args1.append(arg)
@@ -418,8 +418,8 @@ def main(args=None):
             Profiler.startTime = time()
         # Now start the app server:
         if runProfile:
-            print 'Profiling is on.', \
-                    'See docstring in Profiler.py for more info.'
+            print ('Profiling is on. '
+                'See docstring in Profiler.py for more info.')
             print
             from profile import Profile
             profiler = Profile()

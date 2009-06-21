@@ -25,4 +25,4 @@ class SecureCountVisits(SecurePage):
         if user:
             self.writeln('<p>Authenticated user is <strong>%s</strong>.</p>' % user)
         self.writeln('<p><a href="SecureCountVisits">Revisit this page</a> | '
-                '<a href="SecureCountVisits?logout=1">Logout</a></p>')
+            '<a href="SecureCountVisits?logout=1">Logout</a></p>')

@@ -11,8 +11,8 @@ it into `Transaction`, `HTTPRequest`, `HTTPResponse`, and `Session`.
 Application is a singleton, which belongs to the AppServer. You can get access
 through the Transaction object (`transaction.application()`), or you can do::
 
-        from AppServer import globalAppServer
-        application = globalAppServer.application()
+    from AppServer import globalAppServer
+    application = globalAppServer.application()
 
 Settings for Application are taken from ``Configs/Application.config``,
 which is used for many global settings, even if they aren't closely tied
@@ -185,15 +185,15 @@ class Application(ConfigurableForServerSidePath):
     def initErrorPage(self):
         """Initialize the error page related attributes."""
         dirs = (self._serverSidePath,
-                os.path.dirname(os.path.abspath(__file__)))
+            os.path.dirname(os.path.abspath(__file__)))
         pages = ('error404.html', '404Text.txt')
         for dir in dirs:
             for page in pages:
                 try:
                     self._error404 = open(os.path.join(dir, page)).read()
                     if page != pages[0]:
-                        print 'Deprecation warning: ' \
-                                'Please use %s instead of %s' % pages
+                        print ('Deprecation warning: '
+                            'Please use %s instead of %s' % pages)
                 except Exception:
                     continue
                 else:
@@ -224,8 +224,8 @@ class Application(ConfigurableForServerSidePath):
                 self._sessionPrefix = hostName()
             self._sessionPrefix += '-'
         self._sessionTimeout = self.setting('SessionTimeout')*60
-        self._sessionName = self.setting('SessionName') \
-                or self.defaultConfig()['SessionName']
+        self._sessionName = (self.setting('SessionName')
+            or self.defaultConfig()['SessionName'])
         self._autoPathSessions = self.setting('UseAutomaticPathSessions')
         moduleName = self.setting('SessionModule')
         className = moduleName.split('.')[-1]
@@ -243,7 +243,7 @@ class Application(ConfigurableForServerSidePath):
         if moduleName in ('Dynamic', 'File', 'Memory'):
             moduleName = 'Session%sStore' % moduleName
         self._sessionDir = self.serverSidePath(
-                        self.setting('SessionStoreDir') or 'Sessions')
+            self.setting('SessionStoreDir') or 'Sessions')
         className = moduleName.split('.')[-1]
         try:
             exec 'from %s import %s' % (moduleName, className)
@@ -259,11 +259,11 @@ class Application(ConfigurableForServerSidePath):
     def makeDirs(self):
         """Make sure some standard directories are always available."""
         self._cacheDir = self.serverSidePath(
-                self.setting('CacheDir') or 'Cache')
+            self.setting('CacheDir') or 'Cache')
         self._errorMessagesDir = self.serverSidePath(
-                self.setting('ErrorMessagesDir') or 'ErrorMsgs')
+            self.setting('ErrorMessagesDir') or 'ErrorMsgs')
         for dir in (self.serverSidePath('Logs'),
-                        self._cacheDir, self._errorMessagesDir, self._sessionDir):
+                self._cacheDir, self._errorMessagesDir, self._sessionDir):
             if dir and not os.path.exists(dir):
                 os.makedirs(dir)
 
@@ -276,11 +276,11 @@ class Application(ConfigurableForServerSidePath):
         """
         from MiscUtils.PropertiesObject import PropertiesObject
         props = PropertiesObject(os.path.join(self.webwarePath(),
-                'Properties.py'))
+            'Properties.py'))
         self._webwareVersion = props['version']
         self._webwareVersionString = props['versionString']
         props = PropertiesObject(os.path.join(self.webKitPath(),
-                'Properties.py'))
+            'Properties.py'))
         self._webKitVersion = props['version']
         self._webKitVersionString = props['versionString']
 
@@ -518,7 +518,7 @@ class Application(ConfigurableForServerSidePath):
 
         """
         filename = self.serverSidePath(
-                self.setting('ActivityLogFilename'))
+            self.setting('ActivityLogFilename'))
         if os.path.exists(filename):
             f = open(filename, 'a')
         else:
@@ -700,8 +700,8 @@ class Application(ConfigurableForServerSidePath):
                 trans.response().displayError(err)
             else:
                 # standard error handling
-                if self.setting('EnterDebuggerOnException') \
-                        and sys.stdin.isatty():
+                if (self.setting('EnterDebuggerOnException')
+                        and sys.stdin.isatty()):
                     import pdb
                     pdb.post_mortem(sys.exc_info()[2])
                 self.handleExceptionInTransaction(
@@ -768,14 +768,14 @@ class Application(ConfigurableForServerSidePath):
         # store current request and set the new URL
         request = trans.request()
         request.push(trans.servlet(),
-                self.resolveInternalRelativePath(trans, url))
+            self.resolveInternalRelativePath(trans, url))
         # get new servlet
         servlet = self.rootURLParser().findServletForTransaction(trans)
         trans.setServlet(servlet)
         # call method of included servlet
         if hasattr(servlet, 'runMethodForTransaction'):
             result = servlet.runMethodForTransaction(
-                    trans, method, *args, **kw)
+                trans, method, *args, **kw)
         else:
             servlet.awake(trans)
             result = getattr(servlet, method)(*args, **kw)
@@ -796,7 +796,7 @@ class Application(ConfigurableForServerSidePath):
         # store current request and set the new URL
         request = trans.request()
         request.push(trans.servlet(),
-                self.resolveInternalRelativePath(trans, url))
+            self.resolveInternalRelativePath(trans, url))
         # get new servlet
         servlet = self.rootURLParser().findServletForTransaction(trans)
         trans.setServlet(servlet)
@@ -872,7 +872,7 @@ class Application(ConfigurableForServerSidePath):
         request = trans.request()
         editlink = request.adapterName() + "/Admin/EditFile"
         self._exceptionHandlerClass(self, trans, excInfo,
-                {"editlink": editlink})
+            dict(editlink=editlink))
 
     def rootURLParser(self):
         """Accessor: the Rool URL parser.

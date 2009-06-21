@@ -6,16 +6,16 @@ applications like Webware. The pool of connections is threadsafe regardless
 of whether the used DB-API 2 general has a threadsafety of 1 or 2.
 
 For more information on the DB API, see:
-        http://www.python.org/topics/database/DatabaseAPI-2.0.html
+    http://www.python.org/topics/database/DatabaseAPI-2.0.html
 
 The idea behind DBPool is that it's completely seamless, so once you have
 established your connection, use it just as you would any other DB-API 2
 compliant module. For example:
 
-        import pgdb # import used DB-API 2 module
-        from MiscUtils.DBPool import DBPool
-        dbpool = DBPool(pgdb, 5, host=..., database=..., user=..., ...)
-        db = dbpool.connection()
+    import pgdb # import used DB-API 2 module
+    from MiscUtils.DBPool import DBPool
+    dbpool = DBPool(pgdb, 5, host=..., database=..., user=..., ...)
+    db = dbpool.connection()
 
 Now use "db" exactly as if it were a pgdb connection. It's really
 just a proxy class.
@@ -28,18 +28,18 @@ used in a productive environment. It is really a very simple solution with
 several drawbacks. For instance, pooled database connections which have
 become invalid are not automatically recovered. For a more sophisticated
 solution, please have a look at the DBUtils package:
-        http://www.webwareforpython.org/DBUtils
+    http://www.webwareforpython.org/DBUtils
 
 
 CREDIT
 
-* Contributed by Dan Green.
-* Thread safety bug found by Tom Schwaller.
-* Fixes by Geoff Talvola (thread safety in _threadsafe_get_connection()).
-* Clean up by Chuck Esterbrook.
-* Fix unthreadsafe functions which were leaking, Jay Love.
-* Eli Green's webware-discuss comments were lifted for additional docs.
-* Coding and comment clean-up by Christoph Zwerschke.
+  * Contributed by Dan Green.
+  * Thread safety bug found by Tom Schwaller.
+  * Fixes by Geoff Talvola (thread safety in _threadsafe_get_connection()).
+  * Clean up by Chuck Esterbrook.
+  * Fix unthreadsafe functions which were leaking, Jay Love.
+  * Eli Green's webware-discuss comments were lifted for additional docs.
+  * Coding and comment clean-up by Christoph Zwerschke.
 
 """
 
@@ -56,6 +56,7 @@ class PooledConnection(object):
 
     You don't normally deal with this class directly,
     but use DBPool to get new connections.
+
     """
 
     def __init__(self, pool, con):
@@ -86,7 +87,8 @@ class DBPool(object):
         dbapi: the DB-API 2 compliant module you want to use
         maxconnections: the number of connections cached in the pool
         args, kwargs: the parameters that shall be used to establish
-                the database connections using connect()
+                      the database connections using connect()
+
         """
         try:
             threadsafety = dbapi.threadsafety
@@ -117,7 +119,7 @@ class DBPool(object):
             self.returnConnection = self._threadsafe_return_connection
         else:
             raise NotSupportedError(
-                "Database module threading support cannot be determined.")
+                'Database module threading support cannot be determined.')
         # Establish all database connections (it would be better to
         # only establish a part of them now, and the rest on demand).
         for i in range(maxconnections):
@@ -144,6 +146,7 @@ class DBPool(object):
         back into the queue after they have been used.
         This is done automatically when the connection is closed
         and should never be called explicitly outside of this module.
+
         """
         self._unthreadsafe_add_connection(con)
 
@@ -175,5 +178,6 @@ class DBPool(object):
 
         In this case, the connections always stay in the pool,
         so there is no need to do anything here.
+
         """
         pass

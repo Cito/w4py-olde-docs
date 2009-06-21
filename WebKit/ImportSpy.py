@@ -40,7 +40,7 @@ class ImportSpy(object):
         """Replaces imp.find_module."""
         try:
             self.file, self.filename, self.info = self._imp.find_module(
-                    fullname.split('.')[-1], [self.path])
+                fullname.split('.')[-1], [self.path])
         except ImportError:
             pass
         else:

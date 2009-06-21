@@ -3,16 +3,17 @@ from User import User
 
 
 class RoleUser(User):
-    """
-    RoleUser, in conjunction with Role, provides for role-based users and security.
+    """In conjunction with Role, provides role-based users and security.
 
     See the doc for playsRole() for an example.
 
-    Note that this class plays nicely with both Role and HierRole. e.g., no "HierRoleUser" is needed when making use of HierRoles.
+    Note that this class plays nicely with both Role and HierRole,
+    e.g., no "HierRoleUser" is needed when making use of HierRoles.
 
     See also:
-            * class Role
-            * class HierRole
+      * class Role
+      * class HierRole
+
     """
 
 
@@ -58,8 +59,8 @@ class RoleUser(User):
         """
         Returns 1 if the user plays the given role. More specifically, if any of the user's roles return true for role.playsRole(otherRole), this method returns true.
         The application of this popular method often looks like this:
-                if user.playsRole('admin'):
-                        self.displayAdminMenuItems()
+            if user.playsRole('admin'):
+                self.displayAdminMenuItems()
         """
         if type(roleOrName) is types.StringType:
             roleOrName = self._manager.roleForName(roleOrName)

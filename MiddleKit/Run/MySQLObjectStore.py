@@ -10,21 +10,22 @@ class MySQLObjectStore(SQLObjectStore):
     """MySQLObjectStore implements an object store backed by a MySQL database.
 
     MySQL notes:
-        * MySQL home page: http://www.mysql.com.
-        * MySQL version this was developed and tested with: 3.22.34 & 3.23.27
-        * The platforms developed and tested with include Linux (Mandrake 7.1) and Windows ME.
-        * The MySQL-Python DB API 2.0 module used under the hood is MySQLdb by Andy Dustman.
-            http://dustman.net/andy/python/MySQLdb/
-        * Newer versions of MySQLdb have autocommit switched off by default
+      * MySQL home page: http://www.mysql.com.
+      * MySQL version this was developed and tested with: 3.22.34 & 3.23.27
+      * The platforms developed and tested with include Linux (Mandrake 7.1)
+        and Windows ME.
+      * The MySQL-Python DB API 2.0 module used under the hood is MySQLdb
+        by Andy Dustman: http://dustman.net/andy/python/MySQLdb/.
+      * Newer versions of MySQLdb have autocommit switched off by default.
 
     The connection arguments passed to __init__ are:
-        - host
-        - user
-        - passwd
-        - port
-        - unix_socket
-        - client_flag
-        - autocommit
+      - host
+      - user
+      - passwd
+      - port
+      - unix_socket
+      - client_flag
+      - autocommit
 
     You wouldn't use the 'db' argument, since that is determined by the model.
 
@@ -74,7 +75,7 @@ class MySQLObjectStore(SQLObjectStore):
                 pool._normalConnection = connection
                 pool._autocommit = self._autocommit
                 pool.connection = new.instancemethod(
-                        newConnection, pool, pool.__class__)
+                    newConnection, pool, pool.__class__)
 
     def retrieveLastInsertId(self, conn, cur):
         try:

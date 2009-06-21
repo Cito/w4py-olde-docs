@@ -5,76 +5,95 @@ from User import User
 
 class UserManager:
     """
-    A UserManager manages a set of users including authentication, indexing and persistence. Keep in mind that UserManager is abstract; you will always use one of the concrete subclasses (but please read the rest of this doc string):
-            * UserManagerToFile
-            * UserManagerToMiddleKit
+    A UserManager manages a set of users including authentication,
+    indexing and persistence. Keep in mind that UserManager is abstract;
+    you will always use one of the concrete subclasses (but please read
+    the rest of this doc string):
+      * UserManagerToFile
+      * UserManagerToMiddleKit
 
 
     You can create a user through the manager (preferred):
-            user = manager.createUser(name, password)
+        user = manager.createUser(name, password)
 
     Or directly through the user class:
-            user = RoleUser(manager, name, password)
-            manager.addUser(user)
+        user = RoleUser(manager, name, password)
+        manager.addUser(user)
 
-    The manager tracks users by whether or not they are "active" (e.g., logged in) and indexes them by:
-            * user serial number
-            * external user id
-            * user name
+    The manager tracks users by whether or not they are "active"
+    (e.g., logged in) and indexes them by:
+      * user serial number
+      * external user id
+      * user name
 
     These methods provide access to the users by these keys:
-            def userForSerialNum(self, serialNum, default=NoDefault)
-            def userForExternalId(self, extId, default=NoDefault)
-            def userForName(self, name, default=NoDefault)
+        def userForSerialNum(self, serialNum, default=NoDefault)
+        def userForExternalId(self, extId, default=NoDefault)
+        def userForName(self, name, default=NoDefault)
 
+    UserManager provides convenient methods for iterating through the
+    various users. Each method returns an object that can be used in a
+    for loop and asked for its len():
+        def users(self)
+        def activeUsers(self)
+        def inactiveUsers(self)
 
-    UserManager provides convenient methods for iterating through the various users. Each method returns an object that can be used in a for loop and asked for its len():
-            def users(self)
-            def activeUsers(self)
-            def inactiveUsers(self)
+    You can authenticate a user by passing the user object and attempted
+    password to login(). If the authentication is successful, then login()
+    returns the User, otherwise it returns None:
+        user = mgr.userForExternalId(externalId)
+        if mgr.login(user, password):
+            self.doSomething()
 
+    As a convenience, you can authenticate by passing the serialNum,
+    externalId or name of the user:
+        def loginSerialNum(self, serialNum, password):
+        def loginExternalId(self, externalId, password):
+        def loginName(self, userName, password):
 
-    You can authenticate a user by passing the user object and attempted password to login(). If the authentication is successful, then login() returns the User, otherwise it returns None:
-
-            user = mgr.userForExternalId(externalId)
-            if mgr.login(user, password):
-                    self.doSomething()
-
-    As a convenience, you can authenticate by passing the serialNum, externalId or name of the user:
-
-            def loginSerialNum(self, serialNum, password):
-            def loginExternalId(self, externalId, password):
-            def loginName(self, userName, password):
-
-
-    The user will automatically log out after a period of inactivity (see below), or you can make it happen with:
-            def logout(self, user):
-
+    The user will automatically log out after a period of inactivity
+    (see below), or you can make it happen with:
+        def logout(self, user):
 
     There are three user states that are important to the manager:
-            * modified
-            * cached
-            * authenticated or "active"
+      * modified
+      * cached
+      * authenticated or "active"
 
-    A modified user is one whose data has changed and eventually requires storage to a persistent location. A cached user is a user whose data resides in memory (regardless of the other states). An active user has been authenticated (e.g., their username and password were checked) and has not yet logged out or timed out.
+    A modified user is one whose data has changed and eventually requires
+    storage to a persistent location. A cached user is a user whose data
+    resides in memory (regardless of the other states). An active user
+    has been authenticated (e.g., their username and password were checked)
+    and has not yet logged out or timed out.
 
     The manager keeps three timeouts, expressed in minutes, to:
-            * save modified users after a period of time following the first unsaved modification
-            * push users out of memory after a period of inactivity
-            * deactive (e.g., log out) users after a period of inactivity
+      * save modified users after a period of time following the first
+        unsaved modification
+      * push users out of memory after a period of inactivity
+      * deactive (e.g., log out) users after a period of inactivity
 
-    The methods for managing these values deal with the timeouts as number-of-minutes. The default values and the methods are:
-            * 20  modifiedUserTimeout()  setModifiedUserTimeout()
-            * 20  cachedUserTimeout()    setCachedUserTimeout()
-            * 20  activeUserTimeout()    setActiveUserTimeout()
+    The methods for managing these values deal with the timeouts as
+    number-of-minutes. The default values and the methods are:
+      * 20  modifiedUserTimeout()  setModifiedUserTimeout()
+      * 20  cachedUserTimeout()    setCachedUserTimeout()
+      * 20  activeUserTimeout()    setActiveUserTimeout()
 
-    @@ 2001-02-16 ce: Should we take out "User" in the names of the above 6 methods? Maybe it's redundant.
+    @@ 2001-02-16 ce: Should we take out "User" in the names of the above
+    6 methods? Maybe it's redundant.
 
-    Subclasses of UserManager provide persistence such as to the file system or a MiddleKit store. Subclasses must implement all methods that raise AbstractError's. Subclasses typically override (while still invoking super) addUser().
+    Subclasses of UserManager provide persistence such as to the file
+    system or a MiddleKit store. Subclasses must implement all methods
+    that raise AbstractError's. Subclasses typically override (while still
+    invoking super) addUser().
 
-    Subclasses should ensure "uniqueness" of users. For example, invoking any of the userForSomething() methods repeatedly should always return the same user instance for a given key. Without uniqueness, consistency issues could arise with users that are modified.
+    Subclasses should ensure "uniqueness" of users. For example, invoking
+    any of the userForSomething() methods repeatedly should always return
+    the same user instance for a given key. Without uniqueness, consistency
+    issues could arise with users that are modified.
 
-    Please read the method doc strings and other class documentation to fully understand UserKit.
+    Please read the method doc strings and other class documentation to
+    fully understand UserKit.
+
     """
 
 

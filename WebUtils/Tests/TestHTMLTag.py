@@ -62,8 +62,8 @@ class HTMLTagTest(unittest.TestCase):
 
         # Children and subtags, when both are the same.
         for numFoos, fooAt, foos in [
-                    [html.numChildren, html.childAt, html.children],
-                    [html.numSubtags, html.subtagAt, html.subtags]]:
+                [html.numChildren, html.childAt, html.children],
+                [html.numSubtags, html.subtagAt, html.subtags]]:
             assert numFoos() == 2
             assert len(foos()) == 2
             assert fooAt(0).name() == 'head'

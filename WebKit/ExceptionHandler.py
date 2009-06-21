@@ -43,10 +43,10 @@ class ExceptionHandler(object):
 
     The handler write methods that may be useful are:
 
-    * write
-    * writeTitle
-    * writeDict
-    * writeAttrs
+      * write
+      * writeTitle
+      * writeDict
+      * writeAttrs
 
     Derived classes must not assume that the error occured in a
     transaction.  self._tra may be None for exceptions outside
@@ -270,12 +270,12 @@ class ExceptionHandler(object):
         """Write the traceback.
 
         Writes all the parts of the traceback, invoking:
-        * `writeTraceback`
-        * `writeMiscInfo`
-        * `writeTransaction`
-        * `writeEnvironment`
-        * `writeIds`
-        * `writeFancyTraceback`
+          * `writeTraceback`
+          * `writeMiscInfo`
+          * `writeTransaction`
+          * `writeEnvironment`
+          * `writeIds`
+          * `writeFancyTraceback`
 
         """
         self.writeTraceback()

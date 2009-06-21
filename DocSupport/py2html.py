@@ -32,9 +32,10 @@ info (the part of the URL following the CGI script name) is
 tried. In case no host is given, the host where the CGI script
 lives and HTTP are used.
 
-* Uses Just van Rossum's PyFontify version 0.3 to tag Python scripts.
-  You can get it via his homepage on starship:
-  URL: http://starship.python.net/~just/
+  * Uses Just van Rossum's PyFontify version 0.3 to tag Python scripts.
+    You can get it via his homepage on starship:
+    URL: http://starship.python.net/~just/
+
 """
 __comments__ = """
 
@@ -71,8 +72,8 @@ details, or contact the author. All Rights Reserved.\
 __version__ = '0.8'
 
 __cgifooter__ = ('\n<pre># code highlighted using <a href='
-        '"http://www.lemburg.com/files/python/">py2html.py</a> '
-        'version %s</pre>\n' % __version__)
+    '"http://www.lemburg.com/files/python/">py2html.py</a> '
+    'version %s</pre>\n' % __version__)
 
 import sys, re
 
@@ -114,33 +115,32 @@ def fileio(file, mode='rb', data=None, close=False):
 ### Converter class
 
 class PrettyPrint(object):
-    """ generic Pretty Printer class
+    """Generic Pretty Printer class.
 
-    * supports tagging Python scripts in the following ways:
+      * supports tagging Python scripts in the following ways:
 
-      # format/mode |  color  mono
-      # --------------------------
-      # rawhtml     |    x     x   (HTML without headers, etc.)
-      # html        |    x     x   (a HTML page with HEAD&BODY:)
-      # ansi        |    x     x   (with Ansi-escape sequences)
+        # format/mode |  color  mono
+        # --------------------------
+        # rawhtml     |    x     x   (HTML without headers, etc.)
+        # html        |    x     x   (a HTML page with HEAD&BODY:)
+        # ansi        |    x     x   (with Ansi-escape sequences)
 
-    * interfaces:
+      * interfaces:
 
-       file_filter -- takes two files: input & output (may be stdin/stdout)
-       filter -- takes a string and returns the highlighted version
+         file_filter -- takes two files: input & output (may be stdin/stdout)
+         filter -- takes a string and returns the highlighted version
 
-    * to create an instance use:
+      * to create an instance use:
 
-      c = PrettyPrint(tagfct,format,mode)
+        c = PrettyPrint(tagfct,format,mode)
 
-      where format and mode must be strings according to the
-      above table if you plan to use PyFontify.fontify as
-      tagfct
+        where format and mode must be strings according to the
+        above table if you plan to use PyFontify.fontify as tagfct
 
-    * the tagfct has to take one argument, text, and return a taglist
-      (format: [(id,left,right,sublist),...], where id is the
-      "name" given to the slice left:right in text and sublist is a
-      taglist for tags inside the slice or None)
+      * the tagfct has to take one argument, text, and return a taglist
+        (format: [(id,left,right,sublist),...], where id is the
+        "name" given to the slice left:right in text and sublist is a
+        taglist for tags inside the slice or None)
 
     """
 

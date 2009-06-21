@@ -5,7 +5,7 @@ class Main(SidebarPage):
     """Testing - read TestCases.data and display them.
 
     TO DO
-        * Reload TestCases.data only load when modified (by checking mod date).
+      * Reload TestCases.data only load when modified (by checking mod date).
 
     """
 

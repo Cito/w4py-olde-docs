@@ -227,8 +227,8 @@ class ServletFactory(object):
             # imports of the same module:
             self._importLock.acquire()
             try:
-                if not self._classCache.has_key(path) or \
-                        mtime != self._classCache[path]['mtime']:
+                if (not self._classCache.has_key(path)
+                        or mtime != self._classCache[path]['mtime']):
                     theClass = self.loadClass(transaction, path)
                     if self._cacheClasses:
                         self._classCache[path] = {
@@ -295,8 +295,8 @@ class ServletFactory(object):
         to the servlet pool if necessary.
 
         """
-        if servlet.canBeReused() and not servlet.canBeThreaded() \
-                and self._cacheInstances:
+        if (servlet.canBeReused() and not servlet.canBeThreaded()
+                and self._cacheInstances):
             path = servlet.serverSidePath()
             self._servletPool[path].append(servlet)
 

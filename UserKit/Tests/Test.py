@@ -1,9 +1,9 @@
-"""
-Tests various functions of Users and Roles
+"""Tests various functions of Users and Roles
 
 To run these tests:
-        cd Webware
-        python AllTests.py UserKit.Tests.Test
+    cd Webware
+    python AllTests.py UserKit.Tests.Test
+
 """
 
 import os
@@ -63,11 +63,11 @@ class HierRoleTest(unittest.TestCase):
         # The rest of the words are all the roles it plays
         # (besides itself).
         tests = '''\
-                eggLayer, animal
-                furry, animal
-                snake, eggLayer, animal
-                dog, furry, animal
-                platypus, eggLayer, furry, animal'''
+            eggLayer, animal
+            furry, animal
+            snake, eggLayer, animal
+            dog, furry, animal
+            platypus, eggLayer, furry, animal'''
 
         tests = tests.split('\n')
         tests = [test.split(', ') for test in tests]

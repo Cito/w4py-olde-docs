@@ -9,11 +9,10 @@ from MiddleKit.Run.ObjectStore import UnknownObjectError
 
 
 class UserManagerToMiddleKit(UserManager):
-    """
-    UserManagerToMiddleKit stores the users in a given MiddleKit object store.
+    """UserManagerToMiddleKit stores users in a given MiddleKit object store.
 
-    However, the manager itself does not keep any information there. This might
-    change in the future.
+    However, the manager itself does not keep any information there.
+    This might change in the future.
 
     In your MiddleKit model, your User class should have the attributes: name,
     password and externalId; all of type string. The max len for external id
@@ -21,22 +20,24 @@ class UserManagerToMiddleKit(UserManager):
     name and password have to be required.
 
     Then you must edit User.py so that:
-            * In addition to inheriting GenUser, it also inherits UserKit.User
-            * It invokes both base class' __init__()s
-            * The __init__ takes manager, name and password, and passes them on.
+      * In addition to inheriting GenUser, it also inherits UserKit.User
+      * It invokes both base class' __init__()s
+      * The __init__ takes manager, name and password, and passes them on.
 
             from UserKit.User import User
 
             class User(GenUser, User):
 
-                    def __init__(self, manager=None, name=None, password=None):
-                            GenUser.__init__(self)
-                            User.__init__(self, manager, name, password)
+                def __init__(self, manager=None, name=None, password=None):
+                    GenUser.__init__(self)
+                    User.__init__(self, manager, name, password)
 
-    If your user class is called something other than 'User', then you must pass it to the store:
+    If your user class is called something other than 'User', then you must
+    pass it to the store:
 
-            from MyUser import MyUser
-            userMgr = UserManagerToMiddleKit(userClass=MyUser, store=store)
+        from MyUser import MyUser
+        userMgr = UserManagerToMiddleKit(userClass=MyUser, store=store)
+
     """
 
 

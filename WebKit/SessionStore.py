@@ -30,10 +30,10 @@ class SessionStore(object):
 
     TO DO
 
-    * Should there be a check-in/check-out strategy for sessions to
-      prevent concurrent requests on the same session? If so, that can
-      probably be done at this level (as opposed to pushing the burden
-      on various subclasses).
+      * Should there be a check-in/check-out strategy for sessions to
+        prevent concurrent requests on the same session? If so, that can
+        probably be done at this level (as opposed to pushing the burden
+        on various subclasses).
 
     """
 
@@ -125,8 +125,8 @@ class SessionStore(object):
             except KeyError:
                 pass # session was already deleted by some other thread
             else:
-                if curTime - sess.lastAccessTime() >= sess.timeout() \
-                        or sess.timeout() == 0:
+                if (curTime - sess.lastAccessTime() >= sess.timeout()
+                        or sess.timeout() == 0):
                     try:
                         del self[key]
                     except KeyError:

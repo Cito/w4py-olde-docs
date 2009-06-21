@@ -1,9 +1,9 @@
-"""
-Tests various functions of Users and Roles
+"""Tests various functions of Users and Roles
 
 To run these tests:
-        cd Webware
-        python AllTests.py UserKit.Tests.ExampleTest
+    cd Webware
+    python AllTests.py UserKit.Tests.ExampleTest
+
 """
 
 import os
@@ -50,14 +50,14 @@ class SimpleExampleTest(unittest.TestCase):
         # bad login
         theUser = self._mgr.loginName('foo', 'badpass')
         assert theUser is None, 'loginName() returns null if login failed.'
-        assert not fooUser.isActive(), \
-                'User should NOT be logged in since password was incorrect.'
+        assert not fooUser.isActive(), (
+            'User should NOT be logged in since password was incorrect.')
 
         # good login
         theUser = self._mgr.loginName('foo', 'bar')
         assert theUser.isActive(), 'User should be logged in now'
-        assert theUser == fooUser, \
-                'Should be the same user object, since it is the same user "foo"'
+        assert theUser == fooUser, (
+            'Should be the same user object, since it is the same user "foo"')
 
         # logout
         theUser.logout()
@@ -79,8 +79,8 @@ class SimpleExampleTest(unittest.TestCase):
         # Setup our roles
         customersRole = HierRole('customers', 'Customers of ACME Industries')
         staffRole = HierRole('staff', 'All staff.'
-                ' Staff role includes all permissions of Customers role.',
-                [customersRole])
+            ' Staff role includes all permissions of Customers role.',
+            [customersRole])
 
         # Create a user, add to 'staff' role
         # Note that I encrypt my passwords here so they don't appear
@@ -94,19 +94,19 @@ class SimpleExampleTest(unittest.TestCase):
         # Check user "foo"
         theUser = self._mgr.loginName('foo', sha('bar').hexdigest())
         assert theUser.isActive(), 'User should be logged in now'
-        assert theUser == fooUser, \
-                'Should be the same user object, since it is the same user "foo"'
-        assert theUser.playsRole(staffRole), \
-                'User "foo" should be a member of the staff role.'
-        assert theUser.playsRole(customersRole), 'User "foo" should' \
-                ' also be in customer role, since staff includes customers.'
+        assert theUser == fooUser, (
+            'Should be the same user object, since it is the same user "foo"')
+        assert theUser.playsRole(staffRole), (
+            'User "foo" should be a member of the staff role.')
+        assert theUser.playsRole(customersRole), ('User "foo" should'
+            ' also be in customer role, since staff includes customers.')
 
         # Check user "John"
         theUser = self._mgr.loginName('john', sha('doe').hexdigest())
         assert theUser.isActive(), 'User should be logged in now.'
-        assert theUser == johnUser, \
-                'Should be the same user object, since it is the same user "John".'
-        assert not theUser.playsRole(staffRole), \
-                'John should not be a member of the staff.'
-        assert theUser.playsRole(customersRole), \
-                'John should in customer role.'
+        assert theUser == johnUser, ('Should be the same user object,'
+            ' since it is the same user "John".')
+        assert not theUser.playsRole(staffRole), (
+            'John should not be a member of the staff.')
+        assert theUser.playsRole(customersRole), (
+            'John should play customer role.')

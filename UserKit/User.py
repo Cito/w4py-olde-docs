@@ -38,8 +38,8 @@ class User:
         assert self._manager is None
         from UserManager import UserManager
         assert isinstance(manager, UserManager)
-        assert manager.userForName(self.name(), None) is None, \
-                'There is already a user named %r.' % self.name()
+        assert manager.userForName(self.name(), None) is None, (
+            'There is already a user named %r.' % self.name())
         self._manager = manager
 
     def serialNum(self):

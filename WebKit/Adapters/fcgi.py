@@ -178,7 +178,7 @@ def readPair(s, pos):
         pos += 3
         valueLen = ((valueLen&127)<<24) + (b[0]<<16) + (b[1]<<8) + b[2]
     return (s[pos:pos+nameLen], s[pos+nameLen:pos+nameLen+valueLen],
-            pos + nameLen + valueLen)
+        pos + nameLen + valueLen)
 
 #---------------------------------------------------------------------------
 

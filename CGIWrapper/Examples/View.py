@@ -31,5 +31,5 @@ else:
     print '<h2>%s</h2><hr><pre>%s</pre>' % (filename, contents)
 
 print '''
-        </body>
+    </body>
 </html>'''

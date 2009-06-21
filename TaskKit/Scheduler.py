@@ -268,7 +268,7 @@ class Scheduler(Thread):
         """
 
         handle = (self.delRunning(name)
-                or self.delScheduled(name) or self.delOnDemand(name))
+            or self.delScheduled(name) or self.delOnDemand(name))
         if handle:
             handle.unregister()
         return handle

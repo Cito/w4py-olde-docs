@@ -176,7 +176,7 @@ class Klass(object):
 
         """
         constraintName = cleanConstraintName('PK__%s__%s'
-                % (self.sqlTableName(), self.sqlSerialColumnName()))
+            % (self.sqlTableName(), self.sqlSerialColumnName()))
         return '        %s int constraint [%s] primary key not null identity(1, 1),\n' % (
             self.sqlSerialColumnName().ljust(self.maxNameWidth()), constraintName)
 
@@ -241,7 +241,7 @@ class Attr(object):
         if not self.boolForKey('isUnique'):
             return ''
         return ' constraint [UQ__%s__%s] unique' % (
-                self.klass().name(), self.name())
+            self.klass().name(), self.name())
 
 
 class DateTimeAttr(object):

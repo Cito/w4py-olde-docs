@@ -9,18 +9,19 @@ class Request(Message):
 
     Request is a type of Message that offers the following:
 
-        * A time stamp (indicating when the request was made)
-        * An input stream. @@ 2000-04-30 ce: resolve this
-        * Remote request information (address, name)
-        * Local host information (address, name, port)
-        * A security indicator
+      * A time stamp (indicating when the request was made)
+      * An input stream
+      * Remote request information (address, name)
+      * Local host information (address, name, port)
+      * A security indicator
 
     Request is an abstract class; developers typically use HTTPRequest.
 
     FUTURE
-        * Consider if the local host information should be moved up to Message.
-        * Locales
-        * Secure requests, authentication, etc.
+    
+      * Consider if the local host information should be moved up to Message.
+      * Locales
+      * Secure requests, authentication, etc.
 
     """
 

@@ -356,7 +356,7 @@ class HTTPRequest(Request):
             if path.startswith('/'):
                 path = path[1:]
             return os.path.normpath(os.path.join(
-                    os.path.dirname(self._serverSidePath), path))
+                os.path.dirname(self._serverSidePath), path))
         else:
             return self._serverSidePath
 
@@ -374,7 +374,7 @@ class HTTPRequest(Request):
             if path.startswith('/'):
                 path = path[1:]
             return os.path.normpath(os.path.join(
-                    self._serverSideContextPath, path))
+                self._serverSideContextPath, path))
         else:
             return self._serverSideContextPath
 
@@ -888,11 +888,11 @@ def htmlInfo(info):
     res = ['<table border="1">\n']
     for pair in info:
         value = pair[1]
-        if hasattr(value, 'items') and (type(value) is type({})
+        if hasattr(value, 'items') and (isinstance(value, dict)
                 or hasattr(value, '__getitem__')):
             value = htmlInfo(_infoForDict(value))
         res.append('<tr valign="top"><td>%s</td><td>%s&nbsp;</td></tr>\n'
-                % (pair[0], value))
+            % (pair[0], value))
     res.append('</table>\n')
     return ''.join(res)
 

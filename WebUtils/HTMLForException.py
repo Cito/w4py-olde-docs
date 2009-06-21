@@ -38,14 +38,14 @@ def HTMLForLines(lines, options=None):
         match = fileRE.search(line)
         if match:
             parts = map(htmlEncode, line.split('\n'))
-            parts[0] = '<span style="%s">%s</span>' \
-                % (opt['row.location'], parts[0])
+            parts[0] = '<span style="%s">%s</span>' % (
+                opt['row.location'], parts[0])
             if opt['editlink']:
                 parts[0] = ('%s <a href="%s?filename=%s&amp;line=%s">[edit]</a>'
                     % (parts[0], opt['editlink'], urllib.quote(
                         os.path.abspath(match.group(1))), match.group(2)))
-            parts[1] = '<span style="%s">%s</span>' \
-                    % (opt['row.code'], parts[1])
+            parts[1] = '<span style="%s">%s</span>' % (
+                opt['row.code'], parts[1])
             line = '\n'.join(parts)
             res.append(line)
         else:

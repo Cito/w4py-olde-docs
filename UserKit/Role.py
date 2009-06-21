@@ -2,19 +2,20 @@ from MiscUtils.Funcs import positive_id
 
 
 class Role:
-    """
-    Roles are used in conjuction with RoleUser to provide role-based security.
+    """Used in conjuction with RoleUser to provide role-based security.
+    
     All roles have a name and a description and respond to playsRole().
 
     RoleUser also responds to playsRole() and is the more popular entry point
     for programmers. Application code may then do something along the lines of:
 
     if user.playsRole('admin'):
-            self.displayAdminMenuItems()
+        self.displayAdminMenuItems()
 
     See also:
-            * class HierRole
-            * class RoleUser
+      * class HierRole
+      * class RoleUser
+
     """
 
 
@@ -47,7 +48,7 @@ class Role:
 
     def __repr__(self):
         return '<%s %r instance at %x>' % (
-                self.__class__, self._name, positive_id(self))
+            self.__class__, self._name, positive_id(self))
 
 
     ## The big question ##

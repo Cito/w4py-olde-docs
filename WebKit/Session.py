@@ -33,13 +33,13 @@ class Session(object):
 
     FUTURE
 
-        * invalidate()
-        * Sessions don't actually time out and invalidate themselves.
-        * Should this be called 'HTTPSession'?
-        * Should "numTransactions" be exposed as a method? Should it
-          be common to all transaction objects that do the
-          awake()-respond()-sleep() thing? And should there be an
-          abstract super class to codify that?
+      * invalidate()
+      * Sessions don't actually time out and invalidate themselves.
+      * Should this be called 'HTTPSession'?
+      * Should "numTransactions" be exposed as a method? Should it
+        be common to all transaction objects that do the
+        awake()-respond()-sleep() thing? And should there be an
+        abstract super class to codify that?
 
     """
 

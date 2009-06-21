@@ -34,7 +34,7 @@ class Model(object):
         for klass in self._allKlassesInOrder:
             if hasattr(klass, '_maxSerialNum') and klass._maxSerialNum > 0:
                 output.write("select setval('%s', %d);"
-                        % (klass.seqName(), klass._maxSerialNum))
+                    % (klass.seqName(), klass._maxSerialNum))
 
 
 class Klasses(object):

@@ -223,7 +223,7 @@ class PSPParser(object):
 
         <psp:class>
             def foo(self):
-                    return self.dosomething()
+                return self.dosomething()
         </psp:class>
 
         """

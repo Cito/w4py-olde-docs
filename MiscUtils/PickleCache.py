@@ -108,7 +108,7 @@ class PickleCacheReader(PickleCache):
                 except IOError, e:
                     if v:
                         print 'Cannot open cache file: %s: %s.' % (
-                                e.__class__.__name__, e)
+                            e.__class__.__name__, e)
                 else:
                     try:
                         if v:
@@ -201,7 +201,7 @@ class PickleCacheWriter(PickleCache):
         except IOError, e:
             if v:
                 print 'error. not writing. %s: %s' % (
-                        e.__class__.__name__, e)
+                    e.__class__.__name__, e)
         else:
             while 1:
                 dump(d, file, 1) # 1 = binary format

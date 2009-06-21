@@ -7,7 +7,7 @@ You can safely import * from WebUtils.Funcs if you like.
 
 TO DO
 
-* Document the 'codes' arg of htmlEncode/Decode.
+  * Document the 'codes' arg of htmlEncode/Decode.
 
 """
 

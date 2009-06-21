@@ -7,23 +7,22 @@ class ExamplePage(SidebarPage):
     """WebKit page template class for displaying examples.
 
     The convention for picking up examples from WebKit plug-ins is:
-        * Properties.py must have at least this:
+      * Properties.py must have at least this:
             WebKitConfig = {
-                    'examplePages': [],
+                'examplePages': []
             }
-
-          But usually specifies various pages:
+        But usually specifies various pages:
             WebKitConfig = {
                 'examplesPages': [
                     'foo',
                     'bar',
                 ]
             }
-        * The plug-in must have an Examples/ directory.
-        * That directory must have an index.* or Main.* which
-          inherits from ExamplePage.
-        * The implementation can pass in which case a menu of
-          the pages for that plug-in is written:
+      * The plug-in must have an Examples/ directory.
+      * That directory must have an index.* or Main.* which
+        inherits from ExamplePage.
+      * The implementation can pass in which case a menu of
+        the pages for that plug-in is written:
             # Main.py
             from WebKit.Examples.ExamplePage import ExamplePage
             class Main(ExamplePage):

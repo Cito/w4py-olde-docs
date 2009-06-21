@@ -7,8 +7,7 @@ class KidExamplePage(ExamplePage):
 
     def title(self):
         try:
-            title = os.path.splitext(os.path.basename(
-                    self._orig_file))[0]
+            title = os.path.splitext(os.path.basename(self._orig_file))[0]
         except AttributeError:
             title = 'Kid Example'
         return title
@@ -31,9 +30,9 @@ class KidExamplePage(ExamplePage):
     def writeOtherMenu(self):
         self.menuHeading('Other')
         self.menuItem('View source of<br/>%s' % self.title(),
-                self.request().uriWebKitRoot() +
-                    'KidKit/Examples/View?filename=%s'
-                    % os.path.basename(self.request().serverSidePath()))
+            self.request().uriWebKitRoot() +
+                'KidKit/Examples/View?filename=%s'
+                % os.path.basename(self.request().serverSidePath()))
         if self.application().hasContext('Documentation'):
             filename = 'Documentation/WebKit.html'
             if os.path.exists(filename):

@@ -28,12 +28,12 @@ class PostgreSQLObjectStore(SQLObjectStore):
     """PostgresObjectStore implements an object store backed by a PostgreSQL database.
 
     The connection arguments passed to __init__ are:
-        - host
-        - user
-        - passwd
-        - port
-        - unix_socket
-        - client_flag
+      - host
+      - user
+      - passwd
+      - port
+      - unix_socket
+      - client_flag
 
     You wouldn't use the 'db' argument, since that is determined by the model.
 

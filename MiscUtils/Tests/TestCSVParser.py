@@ -9,7 +9,7 @@ class CSVParserTests(unittest.TestCase):
 
     TO DO
 
-    * Test the different options for parser, see CVSParser.__init__().
+      * Test the different options for parser, see CVSParser.__init__().
 
     """
 

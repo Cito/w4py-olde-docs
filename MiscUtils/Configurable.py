@@ -21,12 +21,11 @@ class Configurable(object):
 
     Subclasses should override:
 
-        * defaultConfig()  to return a dictionary of default settings
-                           such as {'Frequency': 5}
+      * defaultConfig()  to return a dictionary of default settings
+                         such as {'Frequency': 5}
 
-        * configFilename() to return the filename by which users can
-                           override the configuration such as
-                           'Pinger.config'
+      * configFilename() to return the filename by which users can
+                         override the configuration such as 'Pinger.config'
 
     Subclasses typically use the setting() method, for example:
 
@@ -170,10 +169,10 @@ class Configurable(object):
                         del config[name]
         except Exception, e:
             raise ConfigurationError(
-                    'Invalid configuration file, %s (%s).' % (filename, e))
+                'Invalid configuration file, %s (%s).' % (filename, e))
         if not isinstance(config, dict):
             raise ConfigurationError('Invalid type of configuration.'
-                    ' Expecting dictionary, but got %s.' % type(config))
+                ' Expecting dictionary, but got %s.' % type(config))
         return config
 
     def printConfig(self, dest=None):

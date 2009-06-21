@@ -3,8 +3,8 @@ from MiddleKit.Run.MiddleObject import MiddleObject
 
 def assertBazIsObjRef(bar):
     bazAttr = getattr(bar, '_baz')
-    assert isinstance(bazAttr, MiddleObject), \
-            'bazAttr=%r, type(bazAttr)=%r' % (bazAttr, type(bazAttr))
+    assert isinstance(bazAttr, MiddleObject), (
+        'bazAttr=%r, type(bazAttr)=%r' % (bazAttr, type(bazAttr)))
 
 def test(store):
     foos = store.fetchObjectsOfClass('Foo')
@@ -31,5 +31,5 @@ def test(store):
     assertBazIsObjRef(bar)
     if 0:
         bazAttr = getattr(bar, '_baz')
-        assert isinstance(bazAttr, MiddleObject), \
-                'bazAttr=%r, type(bazAttr)=%r' % (bazAttr, type(bazAttr))
+        assert isinstance(bazAttr, MiddleObject), (
+            'bazAttr=%r, type(bazAttr)=%r' % (bazAttr, type(bazAttr)))

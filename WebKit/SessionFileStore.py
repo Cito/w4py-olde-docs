@@ -16,11 +16,11 @@ class SessionFileStore(SessionStore):
     one file per session.
 
     This is useful for various situations:
-        1. Using the OneShot adapter
-        2. Doing development (so that restarting the app server won't
-           lose session information).
-        3. Fault tolerance
-        4. Clustering
+      1. Using the OneShot adapter
+      2. Doing development (so that restarting the app server won't
+         lose session information).
+      3. Fault tolerance
+      4. Clustering
 
     Note that the last two are not yet supported by WebKit.
 

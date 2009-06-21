@@ -37,28 +37,26 @@ def valueForKey(obj, key, default=NoDefault):
     """Get the value of the object named by the given key.
 
     This method returns the value with the following precedence:
-        1. Methods before non-methods
-        2. Attributes before keys (__getitem__)
-        3. Public things before private things
-           (private being denoted by a preceding underscore)
+      1. Methods before non-methods
+      2. Attributes before keys (__getitem__)
+      3. Public things before private things
+         (private being denoted by a preceding underscore)
 
     Suppose key is 'foo', then this method returns one of these:
-        * obj.foo()
-        * obj._foo()
-        * obj.foo
-        * obj._foo
-        * obj['foo']
-        * default # only if specified
+      * obj.foo()
+      * obj._foo()
+      * obj.foo
+      * obj._foo
+      * obj['foo']
+      * default # only if specified
 
     If all of these fail, a ValueForKeyError is raised.
 
-
     NOTES
 
-    * valueForKey() works on dictionaries and dictionary-like objects.
-
-    * See valueForName() which is a more advanced version of this
-      function that allows multiple, qualified keys.
+      * valueForKey() works on dictionaries and dictionary-like objects.
+      * See valueForName() which is a more advanced version of this
+        function that allows multiple, qualified keys.
 
     """
 

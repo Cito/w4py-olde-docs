@@ -16,18 +16,18 @@ class PropertiesObject(dict):
     Also, the top level Webware directory contains a Properties.py.
 
     Component properties are often used for:
-        * generation of documentation
-        * runtime examination of components, especially prior to loading
+      * generation of documentation
+      * runtime examination of components, especially prior to loading
 
     PropertiesObject provides additional keys:
-        * filename - the filename from which the properties were read
-        * versionString - a nicely printable string of the version
-        * requiredPyVersionString - like versionString,
-          but for requiredPyVersion instead
-        * willRun - 1 if the component will run.
-          So far that means having the right Python version.
-        * willNotRunReason - defined only if willRun is 0,
-          contains a readable error message
+      * filename - the filename from which the properties were read
+      * versionString - a nicely printable string of the version
+      * requiredPyVersionString - like versionString,
+        but for requiredPyVersion instead
+      * willRun - 1 if the component will run.
+        So far that means having the right Python version.
+      * willNotRunReason - defined only if willRun is 0,
+        contains a readable error message
 
     Using a PropertiesObject is better than investigating the Properties.py
     file directly, because the rules for determining derived keys and any

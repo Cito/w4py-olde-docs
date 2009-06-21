@@ -197,7 +197,7 @@ def html(context=5, options=None):
             number = '<span style="%s">%s</span>' % (
                 opt['code.unaccent'], number)
             line = '<tt>%s&nbsp;%s</tt>' % (
-                    number, pyhtml.preformat(line))
+                number, pyhtml.preformat(line))
             if i == lnum:
                 line = ('<table width="100%%" style="%s"'
                     ' cellspacing="0" cellpadding="0" border="0">'
@@ -217,8 +217,8 @@ def html(context=5, options=None):
                 continue
             value = html_repr(getattr(evalue, name))
             attribs.append('<br>%s%s&nbsp;= %s\n' % (indent, name, value))
-    return javascript + head + ''.join(traceback) \
-            + exception + ''.join(attribs) + '</p>\n'
+    return (javascript + head + ''.join(traceback)
+        + exception + ''.join(attribs) + '</p>\n')
 
 def handler():
     print breaker()

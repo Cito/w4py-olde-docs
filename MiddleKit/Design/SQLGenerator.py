@@ -24,9 +24,9 @@ class SQLGenerator(CodeGenerator):
     """The MiddleKit SQL Generator class.
 
     This class and its associated mix-ins are responsible for generating:
-        - Create.sql
-        - InsertSample.sql
-        - Info.text
+      - Create.sql
+      - InsertSample.sql
+      - Info.text
 
     A subclass and further mix-ins are required for specific databases
     (since SQL varies from product to product).
@@ -38,17 +38,18 @@ class SQLGenerator(CodeGenerator):
         gen.generate(dirname)
 
     For subclassers:
-        - Subclasses should be named <DATABASE>SQLGenerator where <DATABASE>
-          is the name of the particular database product.
-        - A good example of a custom subclass is MySQLSQLGenerator.py.
-          Be sure to take a look at it.
-        - Candidates for customization include:
-            Klasses
-                dropDatabaseSQL()
-                createDatabaseSQL()
-                useDatabaseSQL()
-            StringAttr
-            EnumAttr
+      - Subclasses should be named <DATABASE>SQLGenerator where <DATABASE>
+        is the name of the particular database product.
+      - A good example of a custom subclass is MySQLSQLGenerator.py.
+        Be sure to take a look at it.
+      - Candidates for customization include:
+          Klasses
+            dropDatabaseSQL()
+            createDatabaseSQL()
+            useDatabaseSQL()
+          StringAttr
+          EnumAttr
+          
     """
 
     def sqlDatabaseName(self):
@@ -186,7 +187,7 @@ class Model(object):
                             klass = self.klass(klassName)
                         except KeyError:
                             raise SampleError(linenum,
-                                    "Class '%s' is not defined" % klassName)
+                                "Class '%s' is not defined" % klassName)
                         samples = self._klassSamples.get(klass, None)
                         if samples is None:
                             samples = self._klassSamples[klass] = []
@@ -654,7 +655,7 @@ class Attr(object):
         else:
             defaultSQL = ''
         out.write('    %s %s%s%s%s' % (name, self.sqlTypeOrOverride(),
-                self.uniqueSQL(), notNullSQL, defaultSQL))
+            self.uniqueSQL(), notNullSQL, defaultSQL))
 
     def writeAuxiliaryCreateTable(self, generator, out):
         # most attribute types have no such beast
@@ -875,9 +876,9 @@ class ObjRefAttr(object):
             # ^ this makes the table a little to easier to work with in some cases
             # (you can often just insert the obj id)
             objIdRef = ''
-            if self.get('Ref', None) or (
-                    self.setting('GenerateSQLReferencesForObjRefsToSingleClasses', False)
-                        and not self.targetKlass().subklasses()):
+            if self.get('Ref', None) or (self.setting(
+                    'GenerateSQLReferencesForObjRefsToSingleClasses', False)
+                    and not self.targetKlass().subklasses()):
                 if self.get('Ref', None) not in ('0', 0, 0.0, False):
                     objIdRef = self.objIdReferences()
             out.write('    %s %s%s%s%s, /* %s */ \n' % (

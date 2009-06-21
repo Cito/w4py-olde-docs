@@ -31,7 +31,7 @@ class AppServerTest(unittest.TestCase):
                 queue.put(line)
         self._queue = Queue()
         self._thread = Thread(target=pullStream,
-                args=(self._output, self._queue))
+            args=(self._output, self._queue))
         self._thread.start()
         self.assertAppServerSays('^WebKit AppServer ')
         self.assertAppServerSays(' Webware for Python.$')

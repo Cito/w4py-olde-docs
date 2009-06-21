@@ -56,7 +56,7 @@ class Klass(object):
         else:
             star = multipleBasesMarker
         file.write(''.join((prefix, indentString*indent,
-                self._name, star, func(self), postfix)) + '\n')
+            self._name, star, func(self), postfix)) + '\n')
         indent += 1
         for klass in self._derived:
             klass.printList(file, indent, indentString, prefix, func, postfix)

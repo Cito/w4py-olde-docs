@@ -47,11 +47,11 @@ class AdminPage:
         self.writeln('''<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-        <title>%s</title>
+    <title>%s</title>
 </head>
 <body %s>
         <table align="center" bgcolor="white"><tr><td>''' % (
-                self.title(), self.bodyTags()))
+            self.title(), self.bodyTags()))
         self.writeBanner()
         self.writeToolbar()
 

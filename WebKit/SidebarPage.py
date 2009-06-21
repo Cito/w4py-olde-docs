@@ -21,8 +21,8 @@ class SidebarPage(Page):
     both inherit from it.
 
     TO DO
-    * More consequent use style sheets; get rid of tables completely.
-    * The header, corner and colors are not easy to customize via subclasses.
+      * More consequent use style sheets; get rid of tables completely.
+      * The header, corner and colors are not easy to customize via subclasses.
 
     """
 

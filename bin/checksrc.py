@@ -14,35 +14,35 @@ including some guidelines not checked for by this utility.
 COMMAND LINE
 
 Running this program from the command line with -h will give you usage/help:
-        > python checksrc.py -h
+  > python checksrc.py -h
 
 Examples:
-        > python checksrc.py
-        > python checksrc.py SomeDir
-        > python checksrc.py -R SomeDir
-        > python checksrc.py . results.text
+  > python checksrc.py
+  > python checksrc.py SomeDir
+  > python checksrc.py -R SomeDir
+  > python checksrc.py . results.text
 
 And often you run it from the Webware directory like so:
-        > cd Webware
-        > python bin/checksrc.py
+  > cd Webware
+  > python bin/checksrc.py
 
 
 AS A MODULE AND CLASS
 
 If you imported this as a module, you would use the CheckSrc class,
 possibly like so:
-        from CheckSrc import CheckSrc
-        CheckSrc().check()
+    from CheckSrc import CheckSrc
+    CheckSrc().check()
 
-        # or:
-        cs = CheckSrc()
-        if cs.readArgs():
-                cs.check()
-
-        # or:
-        cs = CheckSrc()
-        cs.setOutput('results.text')
+    # or:
+    cs = CheckSrc()
+    if cs.readArgs():
         cs.check()
+
+    # or:
+    cs = CheckSrc()
+    cs.setOutput('results.text')
+    cs.check()
 
 And of course, you could subclass CheckSrc() to customize it,
 which is why even command line utils get done with classes
@@ -67,42 +67,42 @@ You can modify the behavior of checksrc.py for a particular directory
 by creating a .checksrc.config file like so:
 
 {
-        'SkipDirs': ['Cache'],
-        'SkipFiles': ['fcgi.py', 'zCookieEngine.py'],
-        'DisableErrors': {
-                'UncapFN': '*',
-                'ExtraUnder': ['MiddleObject'],
-        }
+    'SkipDirs': ['Cache'],
+    'SkipFiles': ['fcgi.py', 'zCookieEngine.py'],
+    'DisableErrors': {
+        'UncapFN': '*',
+        'ExtraUnder': ['MiddleObject'],
+    }
 }
 
 Some notes:
-        * You can specify some or all of the options.
-        * SkipDirs and SkipFiles both require lists of filenames.
-        * DisableError keys are error codes defined by checksrc.py.
-          You can find these out by running checksrc with the
-          -h command line option or checking the source below.
-        * The value for disabling an error:
-                * Can be an individual filename or a list of filenames.
-                * Can be '*' for "all files".
+  * You can specify some or all of the options.
+  * SkipDirs and SkipFiles both require lists of filenames.
+  * DisableError keys are error codes defined by checksrc.py.
+    You can find these out by running checksrc with the
+    -h command line option or checking the source below.
+  * The value for disabling an error:
+      * Can be an individual filename or a list of filenames.
+      * Can be '*' for "all files".
 
 
 RULES
 
-        * File names start with capital letter.
-        * (On POSIX) Files don't contain \r.
-        * Four spaces are used for indentation.
-        * Tabs are not used at all.
-        * Class names start with a capital letter.
-        * Method names start with a lower case letter.
-        * Methods do not start with "get".
-        * Data attributes start with an underscore _,
-          and are followed by a lower case letter
-        * Method and attribute names have no underscores after the first character.
-        * Expressions following if, while and return
-          are not enclosed in parenthesees, ().
-        * Class defs and category comments, ## Like this ##
-          are preceded by 2 blank lines and are followed by one blank line
-          (unless the class implementation is pass).
+  * File names start with capital letter.
+  * (On POSIX) Files don't contain \r.
+  * Four spaces are used for indentation.
+  * Tabs are not used at all.
+  * Class names start with a capital letter.
+  * Method names start with a lower case letter.
+  * Methods do not start with "get".
+  * Data attributes start with an underscore _,
+    and are followed by a lower case letter
+  * Method and attribute names have no underscores after the first character.
+  * Expressions following if, while and return
+    are not enclosed in parenthesees, ().
+  * Class defs and category comments, ## Like this ##
+    are preceded by 2 blank lines and are followed by one blank line
+    (unless the class implementation is pass).
 
 
 FUTURE
@@ -133,46 +133,46 @@ class CheckSrc:
     _maxLineSize = 100
 
     _errors = {
-            'UncapFN':
-                    'Uncapitalized filename.',
-            'CarRet':
-                    'Carriage return \\r found.',
-            'Tab':
-                    'Tab character \\t found.',
-            'LineSize':
-                    'Limit line to a maximum of %d characters.' % _maxLineSize,
-            'WrongIndent':
-                    'Four spaces should be used per indentation level.',
-            'NoBlankLines':
-                    '%(what)s should be preceded by %(separator)s.',
-            'ClassNotCap':
-                    'Class names should start with capital letters.',
-            'MethCap':
-                    'Method name "%(name)s" should start with a lower case letter.',
-            'GetMeth':
-                    'Method name "%(name)s" should not start with "get".',
-            'NoUnderAttr':
-                    'Data attributes should start with an underscore: %(attribute)s.',
-            'NoLowerAttr':
-                    'Data attributes should start with an underscore and then'
-                    ' a lower case letter: %(attribute)s.',
-            'ExtraUnder':
-                    'Attributes and methods should not have underscores past'
-                    ' the first character: %(attribute)s.',
-            'ExtraParens':
-                    'No outer parentheses should be used for "%(keyword)s".',
-            'ObsExpr':
-                    '"%(old)s" is obsolescent, use "%(new)s" instead.',
-            'OpNoSpace':
-                    'Operator "%(op)s" should be padded with one blank.',
-            'CommaNoSpace':
-                    'Commas and semicolons should be followed by a blank.',
-            'PaddedParens':
-                    'Parentheses should not be padded with blanks.',
-            'NoCompStmts':
-                    'Compound statements are generally discouraged.',
-            'AugmStmts':
-                    'Consider using augmented assignment "%(op)s."',
+        'UncapFN':
+            'Uncapitalized filename.',
+        'CarRet':
+            'Carriage return \\r found.',
+        'Tab':
+            'Tab character \\t found.',
+        'LineSize':
+            'Limit line to a maximum of %d characters.' % _maxLineSize,
+        'WrongIndent':
+            'Four spaces should be used per indentation level.',
+        'NoBlankLines':
+            '%(what)s should be preceded by %(separator)s.',
+        'ClassNotCap':
+            'Class names should start with capital letters.',
+        'MethCap':
+            'Method name "%(name)s" should start with a lower case letter.',
+        'GetMeth':
+            'Method name "%(name)s" should not start with "get".',
+        'NoUnderAttr':
+            'Data attributes should start with an underscore: %(attribute)s.',
+        'NoLowerAttr':
+            'Data attributes should start with an underscore and then'
+            ' a lower case letter: %(attribute)s.',
+        'ExtraUnder':
+            'Attributes and methods should not have underscores past'
+            ' the first character: %(attribute)s.',
+        'ExtraParens':
+            'No outer parentheses should be used for "%(keyword)s".',
+        'ObsExpr':
+            '"%(old)s" is obsolescent, use "%(new)s" instead.',
+        'OpNoSpace':
+            'Operator "%(op)s" should be padded with one blank.',
+        'CommaNoSpace':
+            'Commas and semicolons should be followed by a blank.',
+        'PaddedParens':
+            'Parentheses should not be padded with blanks.',
+        'NoCompStmts':
+            'Compound statements are generally discouraged.',
+        'AugmStmts':
+            'Consider using augmented assignment "%(op)s."',
     }
 
     def __init__(self):
@@ -305,7 +305,7 @@ Error codes and their messages:
         wr('\n')
 
         wr('.checksrc.config options include SkipDirs, SkipFiles and DisableErrors.\n'
-                'See the checksrc.py doc string for more info.\n')
+            'See the checksrc.py doc string for more info.\n')
 
 
     ## Printing, errors, etc. ##
@@ -329,8 +329,8 @@ Error codes and their messages:
         """
         # Implement the DisableErrors option
         disableNames = self.setting('DisableErrors', {}).get(msgCode, [])
-        if '*' in disableNames or self._fileName in disableNames \
-                        or os.path.splitext(self._fileName)[0] in disableNames:
+        if ('*' in disableNames or self._fileName in disableNames
+                or os.path.splitext(self._fileName)[0] in disableNames):
             return
         if not self._printedDir:
             self.printDir()
@@ -444,9 +444,9 @@ Error codes and their messages:
 
         skipFiles = self.setting('SkipFiles', [])
         for name in names:
-            if len(name) > 2 and name[-3:] == '.py' \
-                            and name not in skipFiles \
-                            and os.path.splitext(name)[0] not in skipFiles:
+            if (len(name) > 2 and name[-3:] == '.py'
+                    and name not in skipFiles
+                    and os.path.splitext(name)[0] not in skipFiles):
                 try:
                     self.checkFile(dirName, name)
                 except CheckSrcError:
@@ -542,8 +542,8 @@ Error codes and their messages:
             if index2 != -1 and (index == -1 or index2 < index):
                 index = index2
             if index3 != -1 and (index == -1 or index3 < index):
-                if line[index3+1:index3+2] == '#' \
-                                and not line[:index3].rstrip():
+                if (line[index3+1:index3+2] == '#'
+                        and not line[:index3].rstrip()):
                     # keep category comments
                     line = line[:index3+2]
                 else:
@@ -565,13 +565,13 @@ Error codes and their messages:
             what = 'Category comments'
             separator = 'two blank lines'
         elif (line.startswith('class ') and self._blankLines < 2
-                        and not line.endswith('Exception):')
-                        and not line.endswith('Error):')
-                        and not line.endswith('pass')):
+                and not line.endswith('Exception):')
+                and not line.endswith('Error):')
+                and not line.endswith('pass')):
             what = 'Class definitions'
             separator = 'two blank lines'
         elif (line.startswith('def ') and self._blankLines < 1
-                        and not line.endswith('pass')):
+                and not line.endswith('pass')):
             what = 'Function definitions'
             separator = 'one blank line'
         else:
@@ -612,9 +612,9 @@ Error codes and their messages:
 
     def checkExtraParens(self, parts, line):
         if (len(parts) > 1 and self._exprKeywords.has_key(parts[0])
-                        and parts[1][0] == '('
-                        and parts[-1].replace(':', '').rstrip()[-1:] == ')'
-                        and not line.count(')') < line.count('(')):
+                and parts[1][0] == '('
+                and parts[-1].replace(':', '').rstrip()[-1:] == ')'
+                and not line.count(')') < line.count('(')):
             keyword = parts[0]
             self.error('ExtraParens', locals())
 
@@ -624,7 +624,7 @@ Error codes and their messages:
 
     def checkCompStmts(self, parts, line):
         if (len(parts) > 1 and self._blockKeywords.has_key(parts[0])
-                        and line.find(': ') != -1 and line[-1] != ':'):
+                and line.find(': ') != -1 and line[-1] != ':'):
             self.error('NoCompStmts')
         else:
             index = line.find(';')
@@ -661,18 +661,18 @@ Error codes and their messages:
                     inner = attribute[1:]
                 else:
                     inner = attribute
-            if inner.find('_') >= 0 \
-                            and not self._allowedAttrNames.has_key(inner):
+            if (inner.find('_') >= 0
+                    and not self._allowedAttrNames.has_key(inner)):
                 self.error('ExtraUnder', locals())
 
     # Assignment operators
     _assignRE = re.compile(
-            r'^[^\(]*?[^\s=<>!\+\-\*/%&\^\|](\s*)=[^\s=](\s*)')
+        r'^[^\(]*?[^\s=<>!\+\-\*/%&\^\|](\s*)=[^\s=](\s*)')
     # Strict comparison Operators
     _compareRE = re.compile(r'(\s*)(<|>)[^\s=<>](\s*)')
     # Other comparison Operators and augmented assignments
     _augmentRE = re.compile(
-            r'(\s*)(=|<|>|!|\+|-|\*|/|%|\*\*|>>|<<|&|\^|\|)=(\s*)')
+        r'(\s*)(=|<|>|!|\+|-|\*|/|%|\*\*|>>|<<|&|\^|\|)=(\s*)')
 
     def checkOperators(self, line):
         if line.find('<>') != -1:
@@ -694,9 +694,8 @@ Error codes and their messages:
         _augmOp[k] = None
 
     def checkAugmStmts(self, parts):
-        if len(parts) > 4 and parts[1] == '=' \
-                        and parts[0] == parts[2] \
-                        and self._augmOp.has_key(parts[3]):
+        if (len(parts) > 4 and parts[1] == '='
+                and parts[0] == parts[2] and parts[3] in self._augmOp):
             self.error('AugmStmts', {'op': parts[3] + '='})
 
     # Commas and semicolons not followed by a blank

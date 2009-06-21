@@ -71,7 +71,7 @@ class ModSnakeAdapter(Adapter):
 
         directives = dict(
             WebwareAddress = (mod_snake.RSRC_CONF,mod_snake.TAKE1,
-                    self.cmd_WebwareAddress),
+                self.cmd_WebwareAddress),
             WebwareChunkSize = (mod_snake.RSRC_CONF,mod_snake.TAKE1,
                 self.cmd_WebwareChunkSize),
         )

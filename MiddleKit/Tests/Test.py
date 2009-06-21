@@ -48,7 +48,7 @@ class Test:
                 if self.canRun():
                     # support multiple config files for testing
                     configFilenames = glob(os.path.join(
-                            self._modelName, 'Settings*.config'))
+                        self._modelName, 'Settings*.config'))
                     if configFilenames:
                         configFilenames = [os.path.basename(p) for p in configFilenames]
                     else:

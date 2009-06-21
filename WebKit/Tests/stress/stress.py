@@ -6,9 +6,9 @@ By Chuck Esterbrook
 Mods by Jay Love
 
 Purpose: Hit the WebKit AppServer with lots of a requests in order to:
-    * Test for memory leaks
-    * Test concurrency
-    * Investigate performance
+  * Test for memory leaks
+  * Test concurrency
+  * Investigate performance
 
 This stress test skips the web server and the WebKit adapter, so it's not
 useful for measuring absolute performance. However, after making a
@@ -17,8 +17,8 @@ see the relative difference in performance (although still somewhat
 unrealistic).
 
 To run:
-    > stress.py  -OR-
-    > python stress.py
+  > stress.py  -OR-
+  > python stress.py
 
 This will give you the usage (and examples) which is:
     stress.py numRequests [minParallelRequests [maxParallelRequests [delay]]]

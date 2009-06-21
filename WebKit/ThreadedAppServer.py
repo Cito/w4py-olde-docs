@@ -361,7 +361,7 @@ class ThreadedAppServer(AppServer):
                 # block for timeout seconds waiting for connections
                 try:
                     input, output, exc = select.select(
-                            self._sockets.values(), [], [], timeout)
+                        self._sockets.values(), [], [], timeout)
                 except select.error, e:
                     if e[0] not in self._ignoreErrnos:
                         raise
@@ -474,7 +474,7 @@ class ThreadedAppServer(AppServer):
                 and self._threadCount < self._maxServerThreads):
             # Running low: double thread count
             n = min(self._threadCount,
-                    self._maxServerThreads - self._threadCount)
+                self._maxServerThreads - self._threadCount)
             if debug:
                 print "Adding %s threads" % n
             for i in range(n):
@@ -1035,7 +1035,7 @@ class TASStreamOut(ASStreamOut):
             while sent < reslen:
                 try:
                     sent += self._socket.send(
-                         self._buffer[sent:sent+bufferSize])
+                        self._buffer[sent:sent+bufferSize])
                 except socket.error, e:
                     if debug or e[0] not in self._ignoreErrnos:
                         print "StreamOut Error:", e
@@ -1269,7 +1269,7 @@ def run(workDir=None):
             except SystemExit, e:
                 print
                 print "Exiting AppServer%s." % (
-                        e[0] == 3 and ' for reload' or '')
+                    e[0] == 3 and ' for reload' or '')
                 exitStatus = e[0]
             except KeyboardInterrupt:
                 print
@@ -1343,7 +1343,7 @@ try:
         print
         for threadID, frame in items:
             print "Thread ID: %d (reference count = %d)" % (
-                    threadID, sys.getrefcount(frame))
+                threadID, sys.getrefcount(frame))
             print ''.join(traceback.format_list(traceback.extract_stack(frame)))
         items.sort()
         print "-" * 79

@@ -25,11 +25,11 @@ class CSVParser:
     """Parser for CSV files.
 
     Parses CSV files including all subtleties such as:
-        * commas in fields
-        * double quotes in fields
-        * embedded newlines in fields
-            - Examples of programs that produce such beasts include
-              MySQL and Excel
+      * commas in fields
+      * double quotes in fields
+      * embedded newlines in fields
+          - Examples of programs that produce such beasts include
+            MySQL and Excel
 
     For a higher-level, friendlier CSV class with many conveniences,
     see DataTable (which uses this class for its parsing).
@@ -60,13 +60,13 @@ class CSVParser:
         """Create a new CSV parser.
 
         allowComments: If true (the default), then comment lines using
-                the Python comment marker are allowed.
+                       the Python comment marker are allowed.
         stripWhitespace: If true (the default), then left and right whitespace
-                is stripped off from all fields.
+                         is stripped off from all fields.
         fieldSep: Defines the field separator string (a comma by default).
         autoReset: If true (the default), recover from errors automatically.
         doubleQuote: If true (the default), assume quotes in fields are
-                escaped by appearing doubled.
+                     escaped by appearing doubled.
 
         """
         # settings

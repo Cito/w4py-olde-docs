@@ -76,14 +76,11 @@ class Page(HTTPContent):
         and `writeBody`.
 
         You will want to override this method if:
-        * you want to format the entire HTML page yourself
-        * if you want to send an HTML page that has already
-          been generated
-        * if you want to use a template that generates the entire
-          page
-        * if you want to send non-HTML content (be sure to
-          call ``self.response().setHeader('Content-Type',
-          'mime/type')`` in this case).
+          * you want to format the entire HTML page yourself
+          * if you want to send an HTML page that has already been generated
+          * if you want to use a template that generates the entire page
+          * if you want to send non-HTML content; in this case, be sure to call
+            self.response().setHeader('Content-Type', 'mime/type').
 
         """
         self.writeDocType()

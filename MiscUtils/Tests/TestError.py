@@ -62,7 +62,7 @@ class TestError(unittest.TestCase):
         err = Error(None, '', {'a': 5}, b='.')
         self.assertEqual('ERROR: ', str(err))
         self.assertEqual("ERROR(object=None; message=''; data={'a': 5, 'b': '.'})",
-                repr(err).replace("{'b': '.', 'a': 5}", "{'a': 5, 'b': '.'}"))
+            repr(err).replace("{'b': '.', 'a': 5}", "{'a': 5, 'b': '.'}"))
         assert err.keys() in [['a', 'b'], ['b', 'a']]
         assert isinstance(err['a'], int)
         assert isinstance(err['b'], str)

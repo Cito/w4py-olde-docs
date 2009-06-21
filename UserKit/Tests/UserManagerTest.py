@@ -1,11 +1,12 @@
-"""
-This module tests UserManagers in different permutations.
+"""This module tests UserManagers in different permutations.
+
 UserManagers can save their data to files, or to a MiddleKit database.
 For MiddleKit, the database can be MySQL, PostgreSQL and MSSQL.
 
 To run these tests:
-        cd Webware
-        python AllTests.py UserKit.Tests.UserManagerTest.makeTestSuite
+    cd Webware
+    python AllTests.py UserKit.Tests.UserManagerTest.makeTestSuite
+
 """
 
 import os, sys
@@ -42,11 +43,12 @@ class UserManagerTest(unittest.TestCase):
         from UserKit.User import User
         class SubUser(User): pass
         mgr.setUserClass(SubUser)
-        assert mgr.userClass() == SubUser, \
-                "We should be able to set a custom user class."
+        assert mgr.userClass() == SubUser, (
+            "We should be able to set a custom user class.")
         class Poser: pass
-        self.assertRaises(Exception, mgr.setUserClass, Poser), \
-                "Setting a customer user class that doesn't extend UserKit.User should fail."
+        self.assertRaises(Exception, mgr.setUserClass, Poser), (
+            "Setting a customer user class that doesn't extend UserKit.User"
+            " should fail.")
 
     def tearDown(self):
         self._mgr.shutDown()
@@ -201,15 +203,16 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
             # @@ 2001-02-18 ce: woops: hard coding MySQL
 
             args = 'Generate.py --db MySQL --model %s --outdir %s' % (
-                    modelFileName, generationDir)
+                modelFileName, generationDir)
             Generate().main(args.split())
 
             create_sql = os.path.join(generationDir, 'GeneratedSQL', 'Create.sql')
 
-            assert os.path.exists(create_sql), \
-                    'The generation process should create some SQL files.'
-            assert os.path.exists(os.path.join(generationDir, 'UserForMKTest.py')), \
-                    'The generation process should create some Python files.'
+            assert os.path.exists(create_sql), (
+                'The generation process should create some SQL files.')
+            assert os.path.exists(os.path.join(generationDir,
+                'UserForMKTest.py')), ('The generation process'
+                    ' should create some Python files.')
 
             self._mysqlTestInfo = AllTests.config().setting('mysqlTestInfo')
             # _log.info('mysqlTestInfo=%s', self._mysqlTestInfo)
@@ -220,8 +223,8 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
             mysqlClientName = os.path.basename(self._mysqlClient)
             assert mysqlClientName == 'mysql' or mysqlClientName == 'mysql.exe'
             self._mysqlClient = ' '.join([self._mysqlClient] + ['--%s="%s"'
-                    % (p.replace('passwd', 'password'), v) for (p ,v)
-                            in self._mysqlTestInfo['DatabaseArgs'].items() if v])
+                % (p.replace('passwd', 'password'), v) for (p ,v)
+                    in self._mysqlTestInfo['DatabaseArgs'].items() if v])
             executeSqlCmd = '%s < %s' % (self._mysqlClient, create_sql)
 
             # _log.debug('running: %s', executeSqlCmd)
@@ -323,7 +326,7 @@ class RoleUserManagerToMiddleKitTest(UserManagerToMiddleKitTest):
 
 def makeTestSuite():
     testClasses = [
-            UserManagerTest, UserManagerToFileTest, RoleUserManagerToFileTest]
+        UserManagerTest, UserManagerToFileTest, RoleUserManagerToFileTest]
 
     # See if AllTests.conf has been configured for MySQL
     if AllTests.config().setting('hasMysql'):

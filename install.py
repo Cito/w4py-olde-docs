@@ -5,9 +5,10 @@
 Webware for Python installer
 
 FUTURE
-    * Look for an install.py in each component directory and run it
-      (there's not a strong need right now).
-    * Use distutils or setuptools instead of our own plugin concept.
+
+  * Look for an install.py in each component directory and run it
+    (there's not a strong need right now).
+  * Use distutils or setuptools instead of our own plugin concept.
 
 """
 
@@ -228,7 +229,7 @@ class Installer:
         else: # keyword arguments style
             pattern = "(AdminPassword\\s*=)\\s*['\"].*?['\"]"
         repl = "\g<1> '%s'" % password.replace( # escape critical characters
-                '\\', '\\\\\\\\').replace("'", "\\\\'").replace('%', '\\\\045')
+            '\\', '\\\\\\\\').replace("'", "\\\\'").replace('%', '\\\\045')
         from re import subn
         data, count = subn(pattern, repl, data)
         if count != 1:
@@ -545,12 +546,11 @@ class Installer:
             print
             print 'Copying start script...',
             ex = os.path.exists
-            if ex('/etc/rc.status') and \
-                    ex('/sbin/startproc') and \
-                    ex('/sbin/killproc'):
+            if (ex('/etc/rc.status')
+                    and ex('/sbin/startproc') and ex('/sbin/killproc')):
                 s = 'SuSE'
-            elif ex('/etc/init.d/functions') or \
-                    ex('/etc/rc.d/init.d/functions'):
+            elif (ex('/etc/init.d/functions')
+                    or ex('/etc/rc.d/init.d/functions')):
                 s = 'RedHat'
             elif ex('/sbin/start-stop-daemon'):
                 s = 'Debian'
@@ -675,7 +675,7 @@ Installation is finished.''' % ((os.sep,)*2)
                 css.append(s)
             if style:
                 css.extend(('<style type="text/css">',
-                        '<!--', style, '-->', '</style>'))
+                    '<!--', style, '-->', '</style>'))
             css = '\n'.join(css)
             return scope['htHeader'] % locals()
 
@@ -726,4 +726,4 @@ if __name__ == '__main__':
             passprompt = True
 
         Installer().run(verbose=verbose, passprompt=passprompt,
-                defaultpass=defaultpass, keepdocs=keepdocs)
+            defaultpass=defaultpass, keepdocs=keepdocs)

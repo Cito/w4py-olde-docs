@@ -95,9 +95,9 @@ serviceName = 'WebKit'
 serviceDisplayName = 'WebKit Application Server'
 
 # The service descrpition:
-serviceDescription = "This is the threaded application server" \
-        " that belongs to the WebKit package" \
-        " of the Webware for Python web framework."
+serviceDescription = ("This is the threaded application server"
+    " that belongs to the WebKit package"
+    " of the Webware for Python web framework.")
 
 # Sequence of service names on which this depends:
 serviceDeps = []
@@ -206,10 +206,10 @@ class AppServerService(win32serviceutil.ServiceFramework):
                 # Import the AppServer:
                 appServer = self._appServer
                 appServerModule = __import__('WebKit.' + appServer,
-                        None, None, appServer)
+                    None, None, appServer)
                 if self._runProfile:
-                    print 'Profiling is on.', \
-                            'See docstring in Profiler.py for more info.'
+                    print ('Profiling is on. '
+                        'See docstring in Profiler.py for more info.')
                     print
                 self._server = getattr(appServerModule, appServer)(workDir)
                 sys.stdout = sys.stderr = log # in case this has been reset

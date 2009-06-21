@@ -149,10 +149,10 @@ def PyDictForArgs(s):
     """Build dictionary from arguments.
 
     Takes an input such as:
-                    x=3
-                    name="foo"
-                    first='john'; last='doe'
-                    list=[1, 2, 3]; name='foo'
+        x=3
+        name="foo"
+        first='john'; last='doe'
+        list=[1, 2, 3]; name='foo'
 
     And returns a dictionary representing the same.
 
@@ -192,9 +192,9 @@ def ExpandDictWithExtras(d, key='Extras', delKey=True, dictForArgs=DictForArgs):
     """Return a dictionary with the 'Extras' column expanded by DictForArgs().
 
     For example, given:
-            {'Name': 'foo', 'Extras': 'x=1 y=2'}
+        {'Name': 'foo', 'Extras': 'x=1 y=2'}
     The return value is:
-            {'Name': 'foo', 'x': '1', 'y': '2'}
+        {'Name': 'foo', 'x': '1', 'y': '2'}
     The key argument controls what key in the dictionary is used to hold
     the extra arguments. The delKey argument controls whether that key and
     its corresponding value are retained.

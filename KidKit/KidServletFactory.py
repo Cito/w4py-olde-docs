@@ -10,11 +10,11 @@ it separately (see http://www.kid-templating.org for more information).
 
 CREDITS:
 
-* Kid has been developed by Ryan Tomayko (rtomayko<at>gmail.com).
-* KidKit was contributed by Winston Wolff (winstonw<at>stratolab.com).
-  Based on the Cheetah servlet factory. No caching, fixed servlet hook.
-* Improved version contributed by Christoph Zwerschke (cito<at>online.de).
-  Based on the PSP servlet factory. Supports caching and servlet hooks.
+  * Kid has been developed by Ryan Tomayko (rtomayko<at>gmail.com).
+  * KidKit was contributed by Winston Wolff (winstonw<at>stratolab.com).
+    Based on the Cheetah servlet factory. No caching, fixed servlet hook.
+  * Improved version contributed by Christoph Zwerschke (cito<at>online.de).
+    Based on the PSP servlet factory. Supports caching and servlet hooks.
 
 """
 

@@ -110,8 +110,8 @@ Usage:
     python HTTPServer.py [OPTIONS]
 Options:
     -p PORT     Port to connect to (default: 80)
-    -h HOST     Host to server from (for computers with multiple
-                            interfaces, default 127.0.0.1)
+    -h HOST     Host to server from
+                (for computers with multiple interfaces, default 127.0.0.1)
     -d          Run as daemon
 """
 

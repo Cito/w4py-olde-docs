@@ -39,7 +39,7 @@ class StorePage(SitePage):
                 sys.path.insert(1, extraDir)
             req = self.request()
             self._store = MySQLObjectStore(host=req.value('host'),
-                    user=req.value('user'), passwd=req.value('password'))
+                user=req.value('user'), passwd=req.value('password'))
             self._store.readModelFileNamed(modelFilename)
             self._store.connect()
             recentModels = self.request().cookie('recentModels', [])
@@ -75,7 +75,7 @@ class StorePage(SitePage):
             urlName = self.urlEncode(name)
             style = name == curClassName and 'CurClassLink' or 'ClassLink'
             self.writeln('<p><a href="BrowseObjects?class=%s" class"=%s">'
-                    '%s</a></p>' % (name, style, urlName))
+                '%s</a></p>' % (name, style, urlName))
 
     def writeContent(self):
         self.writeln('<p>Woops. Forgot to override writeContent().</p>')

@@ -35,22 +35,22 @@ it is considered as a Python expression to be evaluated. If
 if the equals sign is missing, pytp will automatically find
 out whether it is a Python expression or a Python statement.
 
-* If it is a Python expression:
-  - The expression will be evaluated and processed
-    recursively as follows:
-    * It if is a dictionary,
-      use the sorted list of items on separate lines.
-    * If it is any other iterable,
-      use the list of items on separate lines.
-    * Otherwise,
-      use the conversion of the result to a string.
-  - The processed result will be inserted in the output
-    instead of the processing instruction.
-* If it is a block of Python statements:
-  - The statements will be executed.
-  - Everything that is printed to standard output during
-    execution will be inserted in the output instead of
-    the processing instruction.
+  * If it is a Python expression:
+    - The expression will be evaluated and processed
+      recursively as follows:
+      * It if is a dictionary,
+        use the sorted list of items on separate lines.
+      * If it is any other iterable,
+        use the list of items on separate lines.
+      * Otherwise,
+        use the conversion of the result to a string.
+    - The processed result will be inserted in the output
+      instead of the processing instruction.
+  * If it is a block of Python statements:
+    - The statements will be executed.
+    - Everything that is printed to standard output during
+      execution will be inserted in the output instead of
+      the processing instruction.
 
 
 DOWNLOAD
@@ -60,9 +60,9 @@ You can download the latest version from the SVN repository
 (http://svn.w4py.org/Webware/trunk/DocSupport/pytp.py).
 
 Note: Similar template processors have been written by:
-* Christopher A. Craig (http://www.ccraig.org/software/pyhp/)
-* David McNab (http://www.freenet.org.nz/python/pyweb/docs/pyhp.html)
-* Alex Martelli (http://aspn.activestate.com/ASPN/Python/Cookbook/Recipe/52305)
+  * Christopher A. Craig (http://www.ccraig.org/software/pyhp/)
+  * David McNab (http://www.freenet.org.nz/python/pyweb/docs/pyhp.html)
+  * Alex Martelli (http://aspn.activestate.com/ASPN/Python/Cookbook/Recipe/52305)
 
 
 COPYRIGHT
@@ -214,7 +214,7 @@ class PyTP:
                             break
         if ind is not None or ind != 0: # remove indentation
             lines[1:] = [line[:ind].lstrip() + line[ind:]
-                    for line in lines[1:]]
+                for line in lines[1:]]
         block = '\n'.join(lines) + '\n'
         if lines[0] and not lines[0][0] == '#':
             # the first line contains code

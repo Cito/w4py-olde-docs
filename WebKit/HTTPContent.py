@@ -103,7 +103,7 @@ class HTTPContent(HTTPServlet):
             for action in self.actions():
                 name = prefix + action
                 if req.hasField(name) or (req.hasField(name + '.x')
-                                and req.hasField(name + '.y')):
+                        and req.hasField(name + '.y')):
                     self.handleAction(action)
                     return
             # If no action was found, run the default:
@@ -319,7 +319,7 @@ class HTTPContent(HTTPServlet):
 
         """
         return self.application().callMethodOfServlet(
-                self.transaction(), url, method, *args, **kwargs)
+            self.transaction(), url, method, *args, **kwargs)
 
     def endResponse(self):
         """End response.

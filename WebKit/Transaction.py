@@ -10,12 +10,12 @@ class Transaction(object):
 
     A transaction serves as:
 
-        * A container for all objects involved in the transaction.
-          The objects include application, request, response, session
-          and servlet.
+      * A container for all objects involved in the transaction.
+        The objects include application, request, response, session
+        and servlet.
 
-        * A message dissemination point. The messages include awake(),
-          respond() and sleep().
+      * A message dissemination point. The messages include awake(),
+        respond() and sleep().
 
     When first created, a transaction has no session. However, it will
     create or retrieve one upon being asked for session().

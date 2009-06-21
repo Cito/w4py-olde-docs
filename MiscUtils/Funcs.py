@@ -84,8 +84,8 @@ def excstr(e):
 
     The string will be in the format that Python normally outputs
     in interactive shells and such:
-            <ExceptionName>: <message>
-            AttributeError: 'object' object has no attribute 'bar'
+        <ExceptionName>: <message>
+        AttributeError: 'object' object has no attribute 'bar'
     Neither str(e) nor repr(e) do that.
 
     """

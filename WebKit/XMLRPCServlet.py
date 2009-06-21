@@ -54,7 +54,7 @@ class XMLRPCServlet(RPCServlet):
                     response = (response,)
             except xmlrpclib.Fault, fault:
                 response = xmlrpclib.dumps(fault, encoding=encoding,
-                        allow_none=self.allow_none)
+                    allow_none=self.allow_none)
                 self.sendOK('text/xml', response, transaction)
                 self.handleException(transaction)
             except Exception, e:

@@ -12,35 +12,35 @@ careful and read also the ReleaseProcedures.html.
 If setVersion is True, then the version information is updated
 in various files as follows:
 
-        Properties.py files version information is set, replacing the
-        version setting and releaseDate setting.
+    Properties.py files version information is set, replacing the
+    version setting and releaseDate setting.
 
-        *.html files version information is set by searching for a
-        comment tag surrounding both version and release date and replacing
-        the version and release date information respectively.
+    *.html files version information is set by searching for a
+    comment tag surrounding both version and release date and replacing
+    the version and release date information respectively.
 
-        *.txt files version is set by matching
-                :Version:
-                :Released:
-        tags at the beginning of the line. This is designed for the
-        reStructured text documents. Note that reStructured text
-        HTML files will need to be re-generated after processing.
+    *.txt files version is set by matching
+        :Version:
+        :Released:
+    tags at the beginning of the line. This is designed for the
+    reStructured text documents. Note that reStructured text
+    HTML files will need to be re-generated after processing.
 
-        The version in ReleaseNotes-X.Y.phtml is not set (this will be
-        done by the installer), but they are renamed to the current version.
-        If possible, this is done with "svn move". Exception: If no new notes
-        have been written (i.e. ReleaseNotes-X.Y same as ReleaseNotesTemplate),
-        they will not be saved, but deleted, if possible, using "svn delete."
+    The version in ReleaseNotes-X.Y.phtml is not set (this will be
+    done by the installer), but they are renamed to the current version.
+    If possible, this is done with "svn move". Exception: If no new notes
+    have been written (i.e. ReleaseNotes-X.Y same as ReleaseNotesTemplate),
+    they will not be saved, but deleted, if possible, using "svn delete."
 
 If newRelease is True, then a new relase is prepared as follows:
 
-        The version in ReleaseNotes-X.Y.phtml files is set, and they
-        are renamed to the current version if they are not empty.
+    The version in ReleaseNotes-X.Y.phtml files is set, and they
+    are renamed to the current version if they are not empty.
 
-        New ReleaseNotes-X.y.phtml files are created from the
-        ReleaseNotesTemplates.phtml files instead.
+    New ReleaseNotes-X.y.phtml files are created from the
+    ReleaseNotesTemplates.phtml files instead.
 
-        If possible, "svn move" and "svn add" will be used.
+    If possible, "svn move" and "svn add" will be used.
 
 Note that this script will not automatically peform a "svn commit"
 so you can always revert when something goes wrong.
@@ -131,9 +131,9 @@ propReplace.add(r"(releaseDate\s*=)\s*.*", r"\g<1> %s" % repr(releaseDate))
 
 htmlReplace = Replacer()
 htmlReplace.add(r"<!--\s*version\s*-->[^<]*<!--\s*/version\s*-->",
-                r"<!-- version --> %s <!-- /version -->" % po['versionString'])
+    r"<!-- version --> %s <!-- /version -->" % po['versionString'])
 htmlReplace.add(r"<!--\s*relDate\s*-->[^<]*<!--\s*/relDate\s*-->",
-                r"<!-- relDate --> %s <!-- /relDate -->" % po['releaseDate'])
+    r"<!-- relDate --> %s <!-- /relDate -->" % po['releaseDate'])
 
 rstReplace = Replacer()
 rstReplace.add(r"^:Version:.*$", ":Version: %s" % po['versionString'])
@@ -141,15 +141,15 @@ rstReplace.add(r"^:Released:.*$", ":Released: %s" % po['releaseDate'])
 
 phtmlReplace = Replacer()
 phtmlReplace.add(r"(<%.*)' \+ versionString \+ '(.*%>)",
-                r"\g<1>%s\g<2>" % po['versionString'])
+    r"\g<1>%s\g<2>" % po['versionString'])
 phtmlReplace.add(r"<% versionString %>", po['versionString'])
 phtmlReplace.add(r"<% releaseDate %>", po['releaseDate'])
 
 twillReplace = Replacer()
 twillReplace.add(r"^setglobal version .*$",
-                r"setglobal version %s" % po['versionString'])
+    r"setglobal version %s" % po['versionString'])
 twillReplace.add(r"^setglobal date .*$",
-                r"setglobal date %s" % po['releaseDate'])
+    r"setglobal date %s" % po['releaseDate'])
 twillReplace.add(r"^# if release ", '')
 
 if setVersion:

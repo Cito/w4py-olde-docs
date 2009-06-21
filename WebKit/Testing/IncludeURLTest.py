@@ -73,7 +73,7 @@ class IncludeURLTest(Page):
 
     def writeStatus(self):
         self.writeln('<h4>Request Status of <tt>%s</tt>:</h4>'
-                % self.__class__.__name__)
+            % self.__class__.__name__)
         w = self.w
         req = self.request()
         env = req._environ

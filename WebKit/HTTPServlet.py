@@ -17,7 +17,7 @@ class HTTPServlet(Servlet):
     See also: Servlet
 
     FUTURE
-            * Document methods (take hints from Java HTTPServlet documentation)
+      * Document methods (take hints from Java HTTPServlet documentation)
 
     """
 
@@ -47,13 +47,13 @@ class HTTPServlet(Servlet):
             lm = self.lastModified(trans)
             if lm:
                 lm = time.strftime('%a, %d %b %Y %H:%M:%S GMT',
-                        time.gmtime(lm))
+                    time.gmtime(lm))
                 trans.response().setHeader('Last-Modified', lm)
                 ifModifiedSince = request.environ().get(
-                        'HTTP_IF_MODIFIED_SINCE', None)
+                    'HTTP_IF_MODIFIED_SINCE', None)
                 if not ifModifiedSince:
                     ifModifiedSince = request.environ().get(
-                            'If-Modified-Since', None)
+                        'If-Modified-Since', None)
                 if ifModifiedSince and ifModifiedSince.split(';')[0] == lm:
                     trans.response().setStatus(304, 'Not Modified')
                     # print "304", request.serverSidePath()

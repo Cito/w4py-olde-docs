@@ -89,10 +89,10 @@ class ObjectStore(ModelUser):
     """The object store.
 
     NOT IMPLEMENTED:
-        * revertChanges()
+      * revertChanges()
 
     FUTURE
-        * expanded fetch
+      * expanded fetch
 
     """
 

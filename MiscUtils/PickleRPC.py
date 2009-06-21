@@ -101,9 +101,9 @@ class ResponseError(Error):
     """Unhandled exceptions raised when the server was computing a response.
 
     These will indicate errors such as:
-        * exception in the actual target method on the server
-        * malformed responses
-        * non "200 OK" status code responses
+      * exception in the actual target method on the server
+      * malformed responses
+      * non "200 OK" status code responses
 
     """
 
@@ -247,8 +247,8 @@ class Server:
             compressed = False
 
         response = self._transport.request(self._host, self._handler, request,
-                verbose=self._verbose, binary=self._binary, compressed=compressed,
-                acceptCompressedResponse=self._acceptCompressedResponse)
+            verbose=self._verbose, binary=self._binary, compressed=compressed,
+            acceptCompressedResponse=self._acceptCompressedResponse)
 
         return response
 
@@ -316,14 +316,14 @@ class Transport(SafeUnpickler):
         self.send_host(h, host)
         self.send_user_agent(h)
         self.send_content(h, request_body,
-                binary, compressed, acceptCompressedResponse)
+            binary, compressed, acceptCompressedResponse)
 
         response = h.getresponse()
         h.headers, h.file = response.msg, response.fp
 
         if response.status != 200:
             raise ProtocolError(host + handler,
-                    response.status, response.reason, h.headers)
+                response.status, response.reason, h.headers)
 
         self.verbose = verbose
 
@@ -366,8 +366,8 @@ class Transport(SafeUnpickler):
             binary=False, compressed=False, acceptCompressedResponse=False):
         """Send content."""
         connection.putheader('Content-Type',
-                binary and 'application/x-python-binary-pickled-dict'
-                    or 'text/x-python-pickled-dict')
+            binary and 'application/x-python-binary-pickled-dict'
+                or 'text/x-python-pickled-dict')
         connection.putheader('Content-Length', str(len(request_body)))
         if compressed:
             connection.putheader('Content-Encoding', 'x-gzip')

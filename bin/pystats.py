@@ -5,11 +5,11 @@
 
 Reports stats for various aspects of Python source including:
 
-        # of files
-        # of bytes
-        # of lines
-        # of methods/functions
-        # of classes
+  - number of files
+  - number of bytes
+  - number of lines
+  - number of methods/functions
+  - number of classes
 
 You can think of this as a UNIX "wc" on steroids (that also works on any
 Python platform).
@@ -19,10 +19,10 @@ USAGE
 
 From the command line:
 
-        > cd Webware
-        > python bin/pystats.py
-        > python bin/pystats.py -h
-        > python bin/pystats.py -s
+  > cd Webware
+  > python bin/pystats.py
+  > python bin/pystats.py -h
+  > python bin/pystats.py -s
 
 
 CAVEATS
@@ -42,8 +42,8 @@ The extensions accepted are hard coded to .py .psp and .cgi.
 MISC
 
 To check the results of pystats, you can use these UNIX commands for comparison:
-        > rm -rf WebKit/Cache
-        > wc *.py */*.py */*/*.py */*/*.psp */*.cgi
+  > rm -rf WebKit/Cache
+  > wc *.py */*.py */*/*.py */*/*.psp */*.cgi
 
 
 FUTURE

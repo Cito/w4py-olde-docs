@@ -97,7 +97,7 @@ class HTTPResponse(Response):
           'NOW': this is the same as trying to delete it, but it
             doesn't really seem to work in IE
           'ONCLOSE': the default behavior for cookies (expires when
-                     the browser closes)
+            the browser closes)
           'NEVER': some time in the far, far future.
           integer: a timestamp value
           tuple: a tuple, as created by the time module

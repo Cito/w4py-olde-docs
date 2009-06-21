@@ -5,16 +5,16 @@ WebKit. It's intended for internal use, not for modules outside the WebKit.
 
 Typically usage is::
 
-        from Common import *
+    from Common import *
 
 The globals provided are:
-* the modules: `os`, `sys`, `time`
-* the class `StringIO`
-* the package `WebUtils`
-* the exception class `AbstractError` that methods of abstract classes can raise
-* the singleton `NoDefault`  for initializing default arguments
-* the functions valueForKey, valueForName for accessing named attributes
-* the method `asclocaltime` for building time stamps in log files
+  * the modules: `os`, `sys`, `time`
+  * the class `StringIO`
+  * the package `WebUtils`
+  * the exception class `AbstractError` that methods of abstract classes can raise
+  * the singleton `NoDefault`  for initializing default arguments
+  * the functions valueForKey, valueForName for accessing named attributes
+  * the method `asclocaltime` for building time stamps in log files
 
 """
 

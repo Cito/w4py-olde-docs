@@ -57,7 +57,7 @@ class ReleaseHelper:
 
         This is used when a tag name is specified on the command line, like
 
-                > bin/ReleaseHelper.py tag=Release-0.9b3
+          > bin/ReleaseHelper.py tag=Release-0.9b3
 
         This will export the SVN files tagged with Release-0_9b3 and build the
         tarball Webware-0.9b3.tar.gz in your parent directory.

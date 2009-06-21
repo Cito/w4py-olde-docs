@@ -35,7 +35,7 @@ class TestPickleCache(unittest.TestCase):
             self.writePickle()
             # test 2: correctness
             assert readPickleCache(sourcePath) == data, \
-                    repr(readPickleCache(sourcePath))
+                repr(readPickleCache(sourcePath))
             # test 3: wrong pickle version
             assert readPickleCache(sourcePath, pickleVersion=2) is None
             self.writePickle() # restore

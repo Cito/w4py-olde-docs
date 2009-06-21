@@ -6,16 +6,16 @@ Contributed to Webware for Python by Jay Love.
 
 This module is intended to provide additional assurance that the
 AppServer continues running at all times. This module will be
-reponsible for starting the AppServer, and monitoring its health. It
-does that by periodically sending a status check message to the
+reponsible for starting the AppServer, and monitoring its health.
+It does that by periodically sending a status check message to the
 AppServer to ensure that it is responding. If it finds that the
 AppServer does not respond within a specified time, it will start a
 new copy of the AppServer, after killing the previous process.
 
 Use::
 
-    $ python Monitor.py start
-    $ python Monitor.py stop
+  $ python Monitor.py start
+  $ python Monitor.py stop
 
 The default AppServer specified below will be used, or you can list
 the AppServer you would like after ``start``.
@@ -46,13 +46,13 @@ maxStartTime = 120
 """Module global:
 
 `defaultServer`:
-    default ``"ThreadedAppServer"``. The type of AppServer to start up
-    (as listed in ``Launch.py``)
+    default ``"ThreadedAppServer"``. The type of AppServer
+    to start up (as listed in ``Launch.py``)
 `monitorInterval`:
     default 10. Seconds between checks.
 `maxStartTime`:
-    default 120. Seconds to wait for AppServer to start before killing
-    it and trying again.
+    default 120. Seconds to wait for AppServer to start
+    before killing it and trying again.
 
 """
 
@@ -260,17 +260,17 @@ def usage():
 This module serves as a watcher for the AppServer process.
 The required command line argument is one of:
 
-start: Starts the monitor and default appserver
+  start: Starts the monitor and default appserver.
 
-stop:  Stops the currently running Monitor process and the AppServer
-   if is running. This is the only way to stop the process other
-   than hunting down the individual process ID's and killing them.
+  stop: Stops the currently running Monitor process and the AppServer
+        if is running. This is the only way to stop the process other
+        than hunting down the individual process ID's and killing them.
 
 Optional arguments:
 
 "AppServer": The AppServer class to use (currently only ThreadedAppServer)
 daemon:      If "daemon" is specified, the Monitor will run
-         as a background process.
+             as a background process.
 
 """
 

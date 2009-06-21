@@ -36,13 +36,13 @@ class TestFuncs(unittest.TestCase):
             source = eval(tests[i])
             result = eval(tests[i+1])
             #print '%r yields %r' % (source, result)
-            assert commas(source) == result, \
-                    '%r %r' % (commas(source), result)
+            assert commas(source) == result, (
+                '%r %r' % (commas(source), result))
             # Now try the source as a string instead of a number:
             source = eval("'%s'" % tests[i])
             #print '%r yields %r' % (source, result)
-            assert commas(source) == result, \
-                    '%r %r' % (commas(source), result)
+            assert commas(source) == result, (
+                '%r %r' % (commas(source), result))
             i += 2
 
     def testLocalIP(self):
@@ -50,8 +50,9 @@ class TestFuncs(unittest.TestCase):
         assert ip and not ip.startswith('127.')
         assert localIP() == ip # second invocation
         assert localIP(useCache=None) == ip
-        assert localIP(remote=None, useCache=None) == ip, \
-            'See if this works: localIP(remote=None). If this fails, dont worry.'
+        assert localIP(remote=None, useCache=None) == ip, (
+            'See if this works: localIP(remote=None).'
+            ' If this fails, dont worry.')
         assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80),
             useCache=None) == ip # not existing remote address
 
@@ -60,8 +61,8 @@ class TestFuncs(unittest.TestCase):
         # exceptions are thrown, and do a little type checking on the
         # return type.
         host = hostName()
-        assert host is None or isinstance(host, str), \
-            'host type = %s, host = %s' % (type(host), repr(host))
+        assert host is None or isinstance(host, str), (
+            'host type = %s, host = %s' % (type(host), repr(host)))
 
     def testSafeDescription(self):
         sd = safeDescription
@@ -75,13 +76,13 @@ class TestFuncs(unittest.TestCase):
         s = s.replace("<type 'string'>", "<type 'str'>")
         assert s == "what='x' class=<type 'str'>", s
         f = Foo()
-        assert sd(f).find('%s.Foo' % __name__) != -1, sd(f)
+        assert ('%s.Foo' % __name__) in sd(f), sd(f)
 
         # new object type:
         class Bar(object):
             pass
         b = Bar()
-        assert sd(b).find('%s.Bar' % __name__) != -1, sd(b)
+        assert ('%s.Bar' % __name__) in sd(b), sd(b)
 
         # okay now test that safeDescription eats exceptions from repr():
         class Baz:
@@ -97,7 +98,7 @@ class TestFuncs(unittest.TestCase):
                 'exceptions.KeyError')
         except Exception:
             s = 'failure: should not get exception'
-        assert s.find("(exception from repr(x): exceptions.KeyError: bogus)") != -1, s
+        assert "(exception from repr(x): exceptions.KeyError: bogus)" in s, s
 
     def testUniqueId(self):
 
@@ -147,15 +148,15 @@ class TestFuncs(unittest.TestCase):
 
         evalCases = [s.strip() for s in evalCases.strip().splitlines()]
         for case in evalCases:
-            assert valueForString(case) == eval(case), \
-                'case=%r, valueForString()=%r, eval()=%r' \
-                     % (case, valueForString(case), eval(case))
+            assert valueForString(case) == eval(case), (
+                'case=%r, valueForString()=%r, eval()=%r'
+                % (case, valueForString(case), eval(case)))
 
         stringCases = [s.strip() for s in stringCases.strip().splitlines()]
         for case in stringCases:
-            assert valueForString(case) == case, \
-                'case=%r, valueForString()=%r' \
-                    % (case, valueForString(case))
+            assert valueForString(case) == case, (
+                'case=%r, valueForString()=%r'
+                % (case, valueForString(case)))
 
     def testWordWrap(self):
         # an example with some spaces and newlines
@@ -172,8 +173,8 @@ ceremony!\""""
         for margin in range(20, 200, 20):
             s = wordWrap(msg, margin)
             for line in s.splitlines():
-                assert len(line) <= margin, \
-                    'len=%i, margin=%i, line=%r' % (len(line), margin, line)
+                assert len(line) <= margin, (
+                    'len=%i, margin=%i, line=%r' % (len(line), margin, line))
 
 
 if __name__ == '__main__':
