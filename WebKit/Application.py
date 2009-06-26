@@ -158,7 +158,7 @@ class Application(ConfigurableForServerSidePath):
 
         self._shutDownHandlers = []
 
-        # Initialize TaskManager:
+        # Initialize task manager:
         if self._server.isPersistent():
             from TaskKit.Scheduler import Scheduler
             self._taskManager = Scheduler(1, exceptionHandler=self.handleException)

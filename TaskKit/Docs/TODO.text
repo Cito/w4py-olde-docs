@@ -23,7 +23,7 @@ TO DO
 
 <tests>
 
-    [ ] make tests that cover all methods and features
+    [ ] Make tests that cover all methods and features
 
 </tests>
 
@@ -31,7 +31,7 @@ TO DO
 
 <docs>
 
-    [ ] Doc strings for all the major methods.
+    [ ] Better doc strings for all the major methods.
 
     [ ] User's Guide
 

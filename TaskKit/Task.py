@@ -1,7 +1,9 @@
+"""Base class for tasks."""
+
 from MiscUtils import AbstractError
 
 
-class Task:
+class Task(object):
     """Abstract base class from which you have to derive your own tasks."""
 
     def __init__(self):
@@ -16,7 +18,7 @@ class Task:
         if a task should stop.
 
         """
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
 
     ## Utility method ##

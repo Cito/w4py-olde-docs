@@ -1,4 +1,5 @@
-import os, sys
+import os
+import sys
 from time import time, localtime, sleep
 
 sys.path.insert(1, os.path.abspath(os.path.join(os.pardir, os.pardir)))
@@ -13,10 +14,11 @@ class SimpleTask(Task):
         if self.proceed():
             print self.name(), time()
             # print "Increasing period"
-            # self.handle().setPeriod(self.handle().period()+2)
+            # self.handle().setPeriod(self.handle().period() + 2)
         else:
             print "Should not proceed", self.name()
-            print "proceed for %s=%s, isRunning=%s" % (self.name(), self.proceed(), self._handle._isRunning)
+            print "proceed for %s=%s, isRunning=%s" % (
+                self.name(), self.proceed(), self._handle._isRunning)
 
 
 class LongTask(Task):
@@ -24,12 +26,14 @@ class LongTask(Task):
     def run(self):
         while 1:
             sleep(2)
-            print "proceed for %s=%s, isRunning=%s" % (self.name(), self.proceed(), self._handle._isRunning)
+            print "proceed for %s=%s, isRunning=%s" % (
+                self.name(), self.proceed(), self._handle._isRunning)
             if self.proceed():
                 print ">>", self.name(), time()
             else:
                 print "Should not proceed:", self.name()
                 return
+
 
 def main():
     scheduler = Scheduler()
@@ -48,7 +52,8 @@ def main():
     scheduler.unregisterTask('SimpleTask1')
     sleep(2)
     print "Waiting one minute for 'DailyTask'"
-    scheduler.addDailyAction(localtime(time())[3], localtime(time())[4]+1, SimpleTask(), "DailyTask")
+    scheduler.addDailyAction(
+        localtime()[3], localtime()[4]+1, SimpleTask(), "DailyTask")
     sleep(62)
     print "Calling stop"
     scheduler.stop()

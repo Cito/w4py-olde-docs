@@ -1,5 +1,5 @@
 
-"""This is the TaskManager Python package.
+"""This is the task manager Python package.
 
 It provides a system for running any number of predefined tasks in separate
 threads in an organized and controlled manner.
@@ -16,18 +16,18 @@ tasks to be run.
 
 
 from threading import Thread, Event
-from time import time
+from time import localtime, time
 
 from TaskHandler import TaskHandler
 
 
 class Scheduler(Thread):
-    """The top level class of the TaskManager system.
+    """The top level class of the task manager system.
 
     The Scheduler is a thread that handles organizing and running tasks.
-    The Scheduler class should be instantiated to start a TaskManager sessions.
-    Its start method should be called to start the TaskManager.
-    Its stop method should be called to end the TaskManager session.
+    The Scheduler class should be instantiated to start a task manager session.
+    Its start method should be called to start the task manager.
+    Its stop method should be called to end the task manager session.
 
     """
 
@@ -66,6 +66,7 @@ class Scheduler(Thread):
     ## Attributes ##
 
     def runningTasks(self):
+        """Return all running tasks."""
         return self._running
 
     def running(self, name, default=None):
@@ -92,7 +93,7 @@ class Scheduler(Thread):
     def delRunning(self, name):
         """Delete a task from the running list.
 
-        Used Internally.
+        Used internally.
 
         """
         try:
@@ -103,6 +104,7 @@ class Scheduler(Thread):
             return None
 
     def scheduledTasks(self):
+        """Return all scheduled tasks."""
         return self._scheduled
 
     def scheduled(self, name, default=None):
@@ -111,7 +113,7 @@ class Scheduler(Thread):
 
     def hasScheduled(self, name):
         """Checks whether task with given name is in the scheduled list."""
-        return self._scheduled.has_key(name)
+        return name in self._scheduled
 
     def setScheduled(self, handle):
         """Add the given task to the scheduled list."""
@@ -119,14 +121,10 @@ class Scheduler(Thread):
 
     def delScheduled(self, name):
         """Delete a task with the given name from the scheduled list."""
-        try:
-            handle = self._scheduled[name]
-            del self._scheduled[name]
-            return handle
-        except Exception:
-            return None
+        return self._scheduled.pop(name, None)
 
     def onDemandTasks(self):
+        """Return all on demand tasks."""
         return self._onDemand
 
     def onDemand(self, name, default=None):
@@ -134,29 +132,27 @@ class Scheduler(Thread):
         return self._onDemand.get(name, default)
 
     def hasOnDemand(self, name):
-        """Checks whether task with given name is in the onDemand list."""
-        return self._onDemand.has_key(name)
+        """Checks whether task with given name is in the on demand list."""
+        return name in self._onDemand
 
     def setOnDemand(self, handle):
-        """Add the given task to the onDemand list."""
+        """Add the given task to the on demand list."""
         self._onDemand[handle.name()] = handle
 
     def delOnDemand(self, name):
-        """Delete a task with the given name from the onDemand list."""
-        try:
-            handle = self._onDemand[name]
-            del self._onDemand[name]
-            return handle
-        except Exception:
-            return None
+        """Delete a task with the given name from the on demand list."""
+        return self._onDemand.pop(name, None)
 
     def nextTime(self):
+        """Get next execution time."""
         return self._nextTime
 
     def setNextTime(self, time):
+        """Set next execution time."""
         self._nextTime = time
 
     def isRunning(self):
+        """Check whether thread is running."""
         return self._isRunning
 
 
@@ -198,8 +194,7 @@ class Scheduler(Thread):
         difficult function, though. Particularly without mxDateTime.
 
         """
-        import time
-        current = time.localtime(time.time())
+        current = localtime()
         currHour = current[3]
         currMin = current[4]
 
@@ -233,7 +228,7 @@ class Scheduler(Thread):
                 minuteDifference = 0
 
         delay = (minuteDifference + (hourDifference * 60)) * 60
-        self.addPeriodicAction(time.time()+delay, 24*60*60, task, name)
+        self.addPeriodicAction(time()+delay, 24*60*60, task, name)
 
     def addPeriodicAction(self, start, period, task, name):
         """Add a task to be run periodically.
@@ -332,7 +327,7 @@ class Scheduler(Thread):
 
     def stopAllTasks(self):
         """Terminate all running tasks."""
-        for i in self._running.keys():
+        for i in self._running:
             self.stopTask(i)
 
     def disableTask(self, name):
@@ -437,6 +432,7 @@ class Scheduler(Thread):
             self._exceptionHandler()
 
     def notify(self):
+        """Wake up scheduler by sending a notify even."""
         self._notifyEvent.set()
 
     def start(self):

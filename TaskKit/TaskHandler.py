@@ -3,7 +3,7 @@ from time import time
 from threading import Thread
 
 
-class TaskHandler:
+class TaskHandler(object):
     """The task handler.
 
     While the Task class only knows what task to perform with the run()-method,
