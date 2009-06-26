@@ -1,9 +1,11 @@
+"""The basic Role class."""
+
 from MiscUtils.Funcs import positive_id
 
 
-class Role:
+class Role(object):
     """Used in conjuction with RoleUser to provide role-based security.
-    
+
     All roles have a name and a description and respond to playsRole().
 
     RoleUser also responds to playsRole() and is the more popular entry point
@@ -24,6 +26,9 @@ class Role:
     def __init__(self, name, description=None):
         self._name = name
         self._description = description
+
+    def __str__(self):
+        return self.name()
 
 
     ## Attributes ##

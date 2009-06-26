@@ -1,12 +1,16 @@
+"""The RoleUserManager mixin."""
+
 from RoleUser import RoleUser
 from Role import Role
 from MiscUtils import NoDefault
 
 
-class RoleUserManagerMixIn:
-    """
-    RoleUserManagerMixIn adds the functionality of keeping a dictionary mapping
+class RoleUserManagerMixIn(object):
+    """Mixin class for mapping names to roles.
+
+    This mixin adds the functionality of keeping a dictionary mapping
     names to role instances. Several accessor methods are provided for this.
+
     """
 
 
@@ -17,10 +21,7 @@ class RoleUserManagerMixIn:
         self.initUserClass()
 
     def initUserClass(self):
-        """
-        Invoked by __init__ to set the default user class to
-        RoleUser.
-        """
+        """Invoked by __init__ to set the default user class to RoleUser."""
         self.setUserClass(RoleUser)
 
 
@@ -29,7 +30,7 @@ class RoleUserManagerMixIn:
     def addRole(self, role):
         assert isinstance(role, Role)
         name = role.name()
-        assert not self._roles.has_key(name)
+        assert name not in self._roles
         self._roles[name] = role
 
     def role(self, name, default=NoDefault):
@@ -39,7 +40,7 @@ class RoleUserManagerMixIn:
             return self._roles.get(name, default)
 
     def hasRole(self, name):
-        return self._roles.has_key(name)
+        return name in self._roles
 
     def delRole(self, name):
         del self._roles[name]

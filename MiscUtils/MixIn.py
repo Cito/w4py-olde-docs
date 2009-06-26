@@ -43,7 +43,7 @@ def MixIn(pyClass, mixInClass, makeAncestor=False, mixInSuperMethods=False):
 
         class MyMixInClass:
         def foo(self):
-            MyMixInClass.mixInSuperFoo(self)        # call the original method
+            MyMixInClass.mixInSuperFoo(self) # call the original method
             # now do whatever you want
 
     """
@@ -64,12 +64,6 @@ def MixIn(pyClass, mixInClass, makeAncestor=False, mixInSuperMethods=False):
         if mixIns is None:
             mixIns = []
             setattr(pyClass, attrName, mixIns)
-
-        # Make sure we haven't done this before (Er, woops.
-        # Turns out we like to mix-in more than once sometimes.)
-        # assert not mixInClass in mixIns, \
-        # 'pyClass = %r, mixInClass = %r, mixIns = %r' % (
-        # pyClass, mixInClass, mixIns)
 
         # Record our deed for future inspection
         mixIns.append(mixInClass)

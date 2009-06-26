@@ -1,32 +1,37 @@
-from UserManager import UserManager
-from MiscUtils import NoDefault
+"""The UserManagerToFile class."""
+
 import os
 from glob import glob
+try:
+    from cPickle import load, dump
+except ImportError:
+    from pickle import load, dump
+
+from MiscUtils import NoDefault
+from MiscUtils.MixIn import MixIn
+
 from User import User
+from UserManager import UserManager
 
 
 class UserManagerToFile(UserManager):
-    """
-    When using this user manager, make sure you invoke setUserDir() and that
-    this directory is writeable by your application. It will contain 1 file per
-    user with the user's serial number as the main filename and an extension of
-    '.user'.
+    """User manager storing user data in the file system.
 
-    The default user directory is the current working directory, but relying on
-    the current directory is often a bad practice.
-    """
+    When using this user manager, make sure you invoke setUserDir()
+    and that this directory is writeable by your application.
+    It will contain one file per user with the user's serial number
+    as the main filename and an extension of '.user'.
 
-    _baseOfUserManagerToFile = UserManager
+    The default user directory is the current working directory,
+    but relying on the current directory is often a bad practice.
+
+    """
 
 
     ## Init ##
 
     def __init__(self, userClass=None):
-        self._baseOfUserManagerToFile.__init__(self, userClass=None)
-        try:
-            from cPickle import load, dump
-        except ImportError:
-            from pickle import load, dump
+        super(UserManagerToFile, self).__init__(userClass=None)
         self.setEncoderDecoder(dump, load)
         self.setUserDir(os.getcwd())
         self.initNextSerialNum()
@@ -42,27 +47,25 @@ class UserManagerToFile(UserManager):
             self._nextSerialNum = 1
 
 
-    ## WebKit integration ##
-
-    def wasInstalled(self, owner):
-        self._baseOfUserManagerToFile.wasInstalled(self, owner)
-        self.setUserDir(owner.serverSidePath('Users'))
-        self.initNextSerialNum()
-
-
     ## File storage specifics ##
 
     def userDir(self):
         return self._userDir
 
     def setUserDir(self, userDir):
-        """ Sets the directory where user information is stored. You should strongly consider invoking initNextSerialNum() afterwards. """
+        """Set the directory where user information is stored.
+
+        You should strongly consider invoking initNextSerialNum() afterwards.
+
+        """
         self._userDir = userDir
 
     def loadUser(self, serialNum, default=NoDefault):
-        """
-        Loads the user with the given serial number from disk.
-        If there is no such user, a KeyError will be raised unless a default value was passed, in which case that value is returned.
+        """Load the user with the given serial number from disk.
+
+        If there is no such user, a KeyError will be raised unless
+        a default value was passed, in which case that value is returned.
+
         """
         filename = str(serialNum) + '.user'
         filename = os.path.join(self.userDir(), filename)
@@ -75,31 +78,26 @@ class UserManagerToFile(UserManager):
             return user
         else:
             if default is NoDefault:
-                raise KeyError, serialNum
+                raise KeyError(serialNum)
             else:
                 return default
 
     def scanSerialNums(self):
+        """Return a list of all the serial numbers of users found on disk.
+
+        Serial numbers are always integers.
+
         """
-        Returns a list of all the serial numbers of users found on disk. Serial numbers are always integers.
-        """
-        chopIndex = -len('.user')
-        nums = glob(os.path.join(self.userDir(), '*.user'))
-        nums = [num[:chopIndex] for num in nums]
-        nums = [os.path.basename(num) for num in nums]
-        nums = [int(num) for num in nums]
-        return nums
+        return [int(os.path.basename(num[:-5]))
+            for num in glob(os.path.join(self.userDir(), '*.user'))]
 
 
     ## UserManager customizations ##
 
     def setUserClass(self, userClass):
-        """ Overridden to mix in UserMixIn to the class that is passed in. """
-        # cz: doing so with MiscUtils.Mixin lead to errors later
-        # when pickling the user, so I'm doing it this way now:
-        if UserMixIn not in userClass.__bases__:
-            userClass.__bases__ += (UserMixIn,)
-        self._baseOfUserManagerToFile.setUserClass(self, userClass)
+        """Overridden to mix in UserMixIn to the class that is passed in."""
+        MixIn(userClass, UserMixIn)
+        super(UserManagerToFile, self).setUserClass(userClass)
 
 
     ## UserManager concrete methods ##
@@ -111,8 +109,9 @@ class UserManagerToFile(UserManager):
 
     def addUser(self, user):
         assert isinstance(user, User)
-        user._serialNum = self.nextSerialNum()
-        self._baseOfUserManagerToFile.addUser(self, user)
+        user.setSerialNum(self.nextSerialNum())
+        user.externalId() # set unique id
+        super(UserManagerToFile, self).addUser(user)
         user.save()
 
     def userForSerialNum(self, serialNum, default=NoDefault):
@@ -129,7 +128,7 @@ class UserManagerToFile(UserManager):
             if user.externalId() == externalId:
                 return user
         if default is NoDefault:
-            raise KeyError, externalId
+            raise KeyError(externalId)
         else:
             return default
 
@@ -141,7 +140,7 @@ class UserManagerToFile(UserManager):
             if user.name() == name:
                 return user
         if default is NoDefault:
-            raise KeyError, name
+            raise KeyError(name)
         else:
             return default
 
@@ -168,10 +167,11 @@ class UserManagerToFile(UserManager):
         self._decoder = decoder
 
 
-class UserMixIn:
+class UserMixIn(object):
 
     def filename(self):
-        return os.path.join(self.manager().userDir(), str(self.serialNum())) + '.user'
+        return os.path.join(self.manager().userDir(),
+            str(self.serialNum())) + '.user'
 
     def save(self):
         file = open(self.filename(), 'w')
@@ -179,7 +179,7 @@ class UserMixIn:
         file.close()
 
 
-class _UserList:
+class _UserList(object):
 
     def __init__(self, mgr, filterFunc=None):
         self._mgr = mgr
@@ -196,7 +196,7 @@ class _UserList:
 
     def __getitem__(self, index):
         if index >= self._count:
-            raise IndexError
+            raise IndexError(index)
         if self._data:
             # We have the data directly. Just return it
             return self._data[index]
@@ -204,7 +204,7 @@ class _UserList:
             # We have a list of the serial numbers.
             # Get the user from the manager via the cache or loading
             serialNum = self._serialNums[index]
-            if self._mgr._cachedUsersBySerialNum.has_key(serialNum):
+            if serialNum in self._mgr._cachedUsersBySerialNum:
                 return self._mgr._cachedUsersBySerialNum[serialNum]
             else:
                 return self._mgr.loadUser(self._serialNums[index])

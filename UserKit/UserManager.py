@@ -1,17 +1,18 @@
-import types
-from MiscUtils import NoDefault
+"""The abstract UserManager class."""
+
+from MiscUtils import AbstractError, NoDefault
 from User import User
 
 
-class UserManager:
-    """
+class UserManager(object):
+    """The base class for all user manager classes.
+
     A UserManager manages a set of users including authentication,
     indexing and persistence. Keep in mind that UserManager is abstract;
     you will always use one of the concrete subclasses (but please read
-    the rest of this doc string):
+    the rest of this docstring):
       * UserManagerToFile
       * UserManagerToMiddleKit
-
 
     You can create a user through the manager (preferred):
         user = manager.createUser(name, password)
@@ -78,9 +79,6 @@ class UserManager:
       * 20  cachedUserTimeout()    setCachedUserTimeout()
       * 20  activeUserTimeout()    setActiveUserTimeout()
 
-    @@ 2001-02-16 ce: Should we take out "User" in the names of the above
-    6 methods? Maybe it's redundant.
-
     Subclasses of UserManager provide persistence such as to the file
     system or a MiddleKit store. Subclasses must implement all methods
     that raise AbstractError's. Subclasses typically override (while still
@@ -91,7 +89,7 @@ class UserManager:
     the same user instance for a given key. Without uniqueness, consistency
     issues could arise with users that are modified.
 
-    Please read the method doc strings and other class documentation to
+    Please read the method docstrings and other class documentation to
     fully understand UserKit.
 
     """
@@ -112,22 +110,32 @@ class UserManager:
         self._numActive = 0
 
     def shutDown(self):
-        """ Performs any tasks necessary to shut down the user manager. Subclasses may override and must invoke super as their *last* step. """
+        """Perform any tasks necessary to shut down the user manager.
+
+        Subclasses may override and must invoke super as their *last* step.
+
+        """
         pass
 
 
     ## Settings ##
 
     def userClass(self):
-        """ Returns the userClass, which is used by createUser. The default value is UserKit.User.User. """
+        """Return the userClass, which is used by createUser.
+
+        The default value is UserKit.User.User.
+
+        """
         if self._userClass is None:
-            from User import User
             self.setUserClass(User)
         return self._userClass
 
     def setUserClass(self, userClass):
-        """ Sets the userClass, which cannot be None and must inherit from User. See also: userClass(). """
-        from User import User
+        """Set the userClass, which cannot be None and must inherit from User.
+
+        See also: userClass().
+
+        """
         assert issubclass(userClass, User)
         self._userClass = userClass
 
@@ -153,11 +161,14 @@ class UserManager:
     ## Basic user access ##
 
     def createUser(self, name, password, userClass=None):
-        """
-        Returns a newly created user that is added to the manager. If userClass is not specified, the manager's default user class is instantiated.
-        This not imply that the user is logged in.
+        """Return a newly created user that is added to the manager.
+
+        If userClass is not specified, the manager's default user class
+        is instantiated. This not imply that the user is logged in.
         This method invokes self.addUser().
+
         See also: userClass(), setUserClass()
+
         """
         if userClass is None:
             userClass = self.userClass()
@@ -168,50 +179,62 @@ class UserManager:
     def addUser(self, user):
         assert isinstance(user, User)
         self._cachedUsers.append(user)
-        assert not self._cachedUsersBySerialNum.has_key(user.serialNum())
+        assert user.serialNum() not in self._cachedUsersBySerialNum
         self._cachedUsersBySerialNum[user.serialNum()] = user
 
     def userForSerialNum(self, serialNum, default=NoDefault):
-        """ Returns the user with the given serialNum, pulling that user record into memory if needed. """
-        raise AbstractError, self.__class__
+        """Return the user with the given serialNum.
+
+        The user record is pulled into memory if needed.
+
+        """
+        raise AbstractError(self.__class__)
 
     def userForExternalId(self, externalId, default=NoDefault):
-        """ Returns the user with the given external id, pulling that user record into memory if needed. """
-        raise AbstractError, self.__class__
+        """Return the user with the given external id.
+
+        The user record is pulled into memory if needed.
+
+        """
+        raise AbstractError(self.__class__)
 
     def userForName(self, name, default=NoDefault):
-        """ Returns the user with the given name, pulling that user record into memory if needed. """
-        raise AbstractError, self.__class__
+        """Return the user with the given name.
+
+        The user record is pulled into memory if needed.
+
+        """
+        raise AbstractError(self.__class__)
 
     def users(self):
-        """ Returns a list of all users (regardless of login status). """
-        raise AbstractError, self.__class__
+        """Return a list of all users (regardless of login status)."""
+        raise AbstractError(self.__class__)
 
     def numActiveUsers(self):
-        """ Returns the number of active users, e.g., users that are logged in. """
+        """Return the number of active users, e.g., users that are logged in."""
         return self._numActive
 
     def activeUsers(self):
-        """ Returns a list of all active users. """
-        raise AbstractError, self.__class__
+        """Return a list of all active users."""
+        raise AbstractError(self.__class__)
 
     def inactiveUsers(self):
-        raise AbstractError, self.__class__
+        raise AbstractError(self.__class__)
 
 
     ## Logging in and out ##
 
     def login(self, user, password):
-        """ Returns the user if the login is successful, otherwise returns None. """
+        """Return the user if the login is successful, otherwise return None."""
         assert isinstance(user, User)
-        result = user.login(password, fromMgr=1)
+        result = user.login(password, fromMgr=True)
         if result:
             self._numActive += 1
         return result
 
     def logout(self, user):
         assert isinstance(user, User)
-        user.logout(fromMgr=1)
+        user.logout(fromMgr=True)
         self._numActive -= 1
 
     def loginSerialNum(self, serialNum, password):
@@ -239,9 +262,14 @@ class UserManager:
     ## Cached ##
 
     def clearCache(self):
-        """
-        Clears the cache of the manager. Use with extreme caution. If your program maintains a reference to a user object, but the manager loads in a new copy later on, then consistency problems could occur.
+        """Clear the cache of the manager.
+
+        Use with extreme caution. If your program maintains a reference
+        to a user object, but the manager loads in a new copy later on,
+        then consistency problems could occur.
+
         The most popular use of this method is in the regression test suite.
+
         """
         self._cachedUsers = []
         self._cachedUsersBySerialNum = {}

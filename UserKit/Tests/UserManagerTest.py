@@ -3,26 +3,26 @@
 UserManagers can save their data to files, or to a MiddleKit database.
 For MiddleKit, the database can be MySQL, PostgreSQL and MSSQL.
 
-To run these tests:
-    cd Webware
-    python AllTests.py UserKit.Tests.UserManagerTest.makeTestSuite
-
 """
 
-import os, sys
+import os
+import sys
 import logging
 import unittest
 import shutil
 
-import UserKit
-import AllTests
-
 _log = logging.getLogger(__name__)
 
-TEST_CODE_DIR = os.path.dirname(__file__) # e.g. ".../Webware/UserKit/Tests"
+testDir = os.path.dirname(os.path.abspath(__file__))
+webwarePath = os.path.dirname(os.path.dirname(testDir))
+if sys.path[0] != webwarePath:
+    sys.path.insert(0, webwarePath)
+
+import AllTests
 
 
 class UserManagerTest(unittest.TestCase):
+    """Tests for the base UserManager class."""
 
     def setUp(self):
         from UserKit.UserManager import UserManager
@@ -41,11 +41,13 @@ class UserManagerTest(unittest.TestCase):
     def checkUserClass(self):
         mgr = self._mgr
         from UserKit.User import User
-        class SubUser(User): pass
+        class SubUser(User):
+            pass
         mgr.setUserClass(SubUser)
         assert mgr.userClass() == SubUser, (
             "We should be able to set a custom user class.")
-        class Poser: pass
+        class Poser(object):
+            pass
         self.assertRaises(Exception, mgr.setUserClass, Poser), (
             "Setting a customer user class that doesn't extend UserKit.User"
             " should fail.")
@@ -56,10 +58,12 @@ class UserManagerTest(unittest.TestCase):
 
 
 class _UserManagerToSomewhereTest(UserManagerTest):
-    """
+    """Common tests for all UserManager subclasses.
+
     This abstract class provides some tests that all user managers should pass.
     Subclasses are responsible for overriding setUp() and tearDown() for which
     they should invoke super.
+
     """
 
     def setUp(self):
@@ -121,11 +125,10 @@ class _UserManagerToSomewhereTest(UserManagerTest):
         assert user
         assert user.password() == 'bar'
 
-        if 0: # @@ 2001-04-15 ce: doesn't work yet
-            mgr.clearCache()
-            user = self._mgr.userForExternalId(externalId)
-            assert user
-            assert user.password() == 'bar'
+        mgr.clearCache()
+        user = self._mgr.userForExternalId(externalId)
+        assert user
+        assert user.password() == 'bar'
 
         mgr.clearCache()
         user = self._mgr.userForName('foo')
@@ -157,6 +160,7 @@ class _UserManagerToSomewhereTest(UserManagerTest):
 
 
 class UserManagerToFileTest(_UserManagerToSomewhereTest):
+    """Tests for the UserManagerToFile class."""
 
     def setUp(self):
         _UserManagerToSomewhereTest.setUp(self)
@@ -179,6 +183,7 @@ class UserManagerToFileTest(_UserManagerToSomewhereTest):
 
 
 class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
+    """Tests for the UserManagerToMiddleKit class."""
 
     def write(self, text):
         self._output.append(text)
@@ -196,8 +201,8 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 
             generator = Generate()
 
-            modelFileName = os.path.join(TEST_CODE_DIR, 'UserManagerTest.mkmodel')
-            generationDir = os.path.join(TEST_CODE_DIR, 'mk_MySQL')
+            modelFileName = os.path.join(testDir, 'UserManagerTest.mkmodel')
+            generationDir = os.path.join(testDir, 'mk_MySQL')
 
             # _log.debug('model: %s',modelFileName)
             # @@ 2001-02-18 ce: woops: hard coding MySQL
@@ -231,7 +236,7 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
             f = os.popen(executeSqlCmd)
             self._output.append(f.read())
             if f.close():
-                raise OSError, 'Error running: %s' % executeSqlCmd
+                raise OSError('Error running: %s' % executeSqlCmd)
 
             # Create store, and connect to database
 
@@ -245,9 +250,9 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
             from UserKit.Tests.mk_MySQL.UserForMKTest import UserForMKTest
             assert issubclass(UserForMKTest, MiddleObject)
             from UserKit.User import User
-            if User not in UserForMKTest.__bases__:
+            if not issubclass(UserForMKTest, User):
                 UserForMKTest.__bases__ += (User,)
-            assert issubclass(UserForMKTest, MiddleObject)
+                assert issubclass(UserForMKTest, (MiddleObject, User))
 
             def __init__(self, manager, name, password):
                 base1 = self.__class__.__bases__[0]
@@ -280,7 +285,7 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 
         try:
             # clean out generated files
-            path = os.path.join(TEST_CODE_DIR, 'mk_MySQL')
+            path = os.path.join(testDir, 'mk_MySQL')
             if os.path.exists(path):
                 shutil.rmtree(path, ignore_errors=1)
 
@@ -295,7 +300,7 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
             f = os.popen(executeSqlCmd)
             self._output.append(f.read())
             if f.close():
-                raise OSError, 'Error running: %s' % executeSqlCmd
+                raise OSError('Error running: %s' % executeSqlCmd)
 
         except Exception:
             sys.stdout, sys.stderr = self._stdout, self._stderr
@@ -309,6 +314,7 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 
 
 class RoleUserManagerToFileTest(UserManagerToFileTest):
+    """Tests for the RoleUserManagerToFile class."""
 
     def setUp(self):
         UserManagerToFileTest.setUp(self)
@@ -318,6 +324,7 @@ class RoleUserManagerToFileTest(UserManagerToFileTest):
 
 
 class RoleUserManagerToMiddleKitTest(UserManagerToMiddleKitTest):
+    """Tests for the RoleUserManagerToMiddleKit class."""
 
     def userManagerClass(self):
         from UserKit.RoleUserManagerToMiddleKit import RoleUserManagerToMiddleKit
@@ -342,3 +349,13 @@ def makeTestSuite():
     make = unittest.makeSuite
     tests = [unittest.makeSuite(klass) for klass in testClasses]
     return unittest.TestSuite(tests)
+
+
+def main():
+    suite = makeTestSuite()
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
+
+
+if __name__ == '__main__':
+    main()

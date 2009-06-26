@@ -1,23 +1,23 @@
-from MiscUtils import NoDefault
+"""The basic User class."""
+
+from time import time
+
 from MiscUtils.Funcs import uniqueId
-import time
 
 
-class User:
-    """
-    @@ 2001-02-19 ce: docs
-    """
+class User(object):
+    """The base class for a UserKit User."""
 
 
     ## Init ##
 
     def __init__(self, manager=None, name=None, password=None):
-        self._creationTime = time.time()
+        self._creationTime = time()
 
         self._manager = None
         self._name = None
         self._password = None
-        self._isActive = 0
+        self._isActive = False
         self._externalId = None
 
         if name is not None:
@@ -26,6 +26,9 @@ class User:
             self.setManager(manager)
         if password is not None:
             self.setPassword(password)
+
+    def __str__(self):
+        return self.name()
 
 
     ## Attributes ##
@@ -45,9 +48,11 @@ class User:
     def serialNum(self):
         return self._serialNum
 
+    def setSerialNum(self, serialNum):
+        self._serialNum = serialNum
+
     def externalId(self):
         if self._externalId is None:
-            from time import localtime, time
             self._externalId = uniqueId(self)
         return self._externalId
 
@@ -66,9 +71,8 @@ class User:
 
     def setPassword(self, password):
         self._password = password
-        # @@ 2001-02-15 ce: should we make some attempt to
-        # cryptify the password so it's not real obvious
-        # when inspecting memory?
+        # @@ 2001-02-15 ce: should we make some attempt to cryptify
+        # the password so it's not real obvious when inspecting memory?
 
     def isActive(self):
         return self._isActive
@@ -93,8 +97,8 @@ class User:
             return self.manager().login(self, password)
         else:
             if password == self.password():
-                self._isActive = 1
-                self._lastLoginTime = self._lastAccessTime = time.time()
+                self._isActive = True
+                self._lastLoginTime = self._lastAccessTime = time()
                 return self
             else:
                 if self._isActive:
@@ -103,17 +107,17 @@ class User:
                     self.logout()
                 return None
 
-    def logout(self, fromMgr=0):
-        if not fromMgr:
+    def logout(self, fromMgr=False):
+        if fromMgr:
+            self._isActive = False
+            self._lastLogoutTime = time()
+        else:
             # Our manager needs to know about this
             # So make sure we go through him
             self.manager().logout(self)
-        else:
-            self._isActive = 0
-            self._lastLogoutTime = time.time()
 
 
     ## Notifications ##
 
     def wasAccessed(self):
-        self._lastAccessTime = time.time()
+        self._lastAccessTime = time()

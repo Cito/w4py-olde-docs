@@ -1,11 +1,10 @@
-"""
-UserManagerToMiddleKit.py
-"""
+"""The UserManagerToMiddleKit class."""
+
+from MiscUtils import NoDefault
+from MiscUtils.Funcs import uniqueId
+from MiddleKit.Run.ObjectStore import UnknownObjectError
 
 from UserManager import UserManager
-from MiscUtils import NoDefault
-import os
-from MiddleKit.Run.ObjectStore import UnknownObjectError
 
 
 class UserManagerToMiddleKit(UserManager):
@@ -14,10 +13,11 @@ class UserManagerToMiddleKit(UserManager):
     However, the manager itself does not keep any information there.
     This might change in the future.
 
-    In your MiddleKit model, your User class should have the attributes: name,
-    password and externalId; all of type string. The max len for external id
-    should be at least 14. You can decide what you like for the others. Only
-    name and password have to be required.
+    In your MiddleKit model, your User class should have the attributes:
+    name, password and externalId; all of type string.
+    The max len for external id should be at least 14.
+    You can decide what you like for the others.
+    Only name and password have to be required.
 
     Then you must edit User.py so that:
       * In addition to inheriting GenUser, it also inherits UserKit.User
@@ -44,9 +44,6 @@ class UserManagerToMiddleKit(UserManager):
     ## Init ##
 
     def __init__(self, userClass=None, store=None, useSQL=None):
-        """
-        @@ 2001-02-18 ce: docs
-        """
         # If no userClass was specified, try to pull 'User'
         # out of the object model.
         if userClass is None:
@@ -55,9 +52,9 @@ class UserManagerToMiddleKit(UserManager):
         UserManager.__init__(self, userClass)
 
         if store is None:
-            from MiddleKit.ObjectStore.Store import Store
-            store = Store
-        assert store, 'MiddleKit store is None.'
+            from MiddleKit.Run.ObjectStore import ObjectStore
+            store = ObjectStore
+        assert store, 'No MiddleKit store.'
         self._store = store
 
         # If the user didn't say whether or not to useSQL, then
@@ -73,7 +70,7 @@ class UserManagerToMiddleKit(UserManager):
         # integrity of accessors like users().
         # @@ 2001-02-18 ce: But perhaps that's a problem because
         # manager is not a MiddleKit object...
-        self._saveNewUsers = 1
+        self._saveNewUsers = True
 
 
     ## MiddleKit specifics ##
@@ -82,7 +79,7 @@ class UserManagerToMiddleKit(UserManager):
         try:
             user = self._store.fetchObject(self._userClass, serialNum, default)
         except UnknownObjectError:
-            raise KeyError, serialNum
+            raise KeyError(serialNum)
         if user is default:
             return default
         else:
@@ -94,7 +91,7 @@ class UserManagerToMiddleKit(UserManager):
     ## UserManager customizations ##
 
     def setUserClass(self, userClass):
-        """ Overridden to verify that our userClass is really a MiddleObject. """
+        """Overridden to verify that our userClass is really a MiddleObject."""
         from MiddleKit.Run.MiddleObject import MiddleObject
         assert issubclass(userClass, MiddleObject)
         UserManager.setUserClass(self, userClass)
@@ -103,6 +100,8 @@ class UserManagerToMiddleKit(UserManager):
     ## UserManager concrete methods ##
 
     def addUser(self, user):
+        if user.externalId() is None:
+            user.setExternalId(uniqueId(user))
         self._store.addObject(user)
         if self._saveNewUsers:
             self._store.saveChanges()
@@ -119,7 +118,8 @@ class UserManagerToMiddleKit(UserManager):
             if user.externalId() == externalId:
                 return user
         if self._useSQL:
-            users = self._store.fetchObjectsOfClass(self._userClass, clauses='where externalId=%r' % externalId)
+            users = self._store.fetchObjectsOfClass(self._userClass,
+                clauses='where externalId=%r' % externalId)
             if users:
                 assert len(users) == 1
                 return users[0]
@@ -128,7 +128,7 @@ class UserManagerToMiddleKit(UserManager):
                 if user.externalId() == externalId:
                     return user
         if default is NoDefault:
-            raise KeyError, externalId
+            raise KeyError(externalId)
         else:
             return default
 
@@ -137,7 +137,8 @@ class UserManagerToMiddleKit(UserManager):
             if user.name() == name:
                 return user
         if self._useSQL:
-            users = self._store.fetchObjectsOfClass(self._userClass, clauses='where name=%r' % name)
+            users = self._store.fetchObjectsOfClass(
+                self._userClass, clauses='where name=%r' % name)
             if users:
                 assert len(users) == 1
                 return users[0]
@@ -146,7 +147,7 @@ class UserManagerToMiddleKit(UserManager):
                 if user.name() == name:
                     return user
         if default is NoDefault:
-            raise KeyError, name
+            raise KeyError(name)
         else:
             return default
 
@@ -156,7 +157,7 @@ class UserManagerToMiddleKit(UserManager):
     def activeUsers(self):
         # @@ 2001-02-17 ce: this ultimately does a fetch every time,
         # which sucks if we already have the user in memory.
-        # this is really an MK issue regarding caching of objects
+        # This is really an MK issue regarding caching of objects
         # and perhaps a SQL database issue as well.
         return [user for user in self.users() if user.isActive()]
 

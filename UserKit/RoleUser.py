@@ -1,4 +1,5 @@
-import types
+"""The RoleUser class."""
+
 from User import User
 
 
@@ -28,19 +29,30 @@ class RoleUser(User):
     ## Accessing roles ##
 
     def roles(self):
-        """ Returns a direct list of the user's roles. Do not modify. """
+        """Return a direct list of the user's roles.
+
+        Do not modify.
+
+        """
         return self._roles
 
     def setRoles(self, listOfRoles):
-        """
-        Sets all the roles for the user. Each role in the list may be a valid role name or a Role object.
+        """Set all the roles for the user.
+
+        Each role in the list may be a valid role name or a Role object.
+
         Implementation note: depends on addRoles().
+
         """
         self._roles = []
         self.addRoles(listOfRoles)
 
     def addRoles(self, listOfRoles):
-        """ Adds additional roles for the user. Each role in the list may be a valid role name or a Role object. """
+        """Add additional roles for the user.
+
+        Each role in the list may be a valid role name or a Role object.
+
+        """
         start = len(self._roles)
         self._roles.extend(listOfRoles)
 
@@ -49,22 +61,27 @@ class RoleUser(User):
         numRoles = len(self._roles)
         while index < numRoles:
             role = self._roles[index]
-            if type(role) is types.StringType:
+            if isinstance(role, basestring):
                 role = self._manager.roleForName(role)
                 self._roles[index] = role
             self._rolesByName[role.name()] = role
             index += 1
 
     def playsRole(self, roleOrName):
-        """
-        Returns 1 if the user plays the given role. More specifically, if any of the user's roles return true for role.playsRole(otherRole), this method returns true.
+        """Check whether the user plays the given role.
+
+        More specifically, if any of the user's roles return true for
+        role.playsRole(otherRole), this method returns True.
+
         The application of this popular method often looks like this:
             if user.playsRole('admin'):
                 self.displayAdminMenuItems()
+
         """
-        if type(roleOrName) is types.StringType:
+        if isinstance(roleOrName, basestring):
             roleOrName = self._manager.roleForName(roleOrName)
         for role in self._roles:
             if role.playsRole(roleOrName):
-                return 1
-        return 0
+                return True
+        else:
+            return False

@@ -1,18 +1,14 @@
-"""Tests various functions of Users and Roles
-
-To run these tests:
-    cd Webware
-    python AllTests.py UserKit.Tests.ExampleTest
-
-"""
+"""Tests various functions of Users and Roles by running example code."""
 
 import os
+import sys
 import shutil
 import unittest
 
-import UserKit
-
-TEST_CODE_DIR = os.path.dirname(__file__) # e.g. ".../Webware/UserKit/Tests"
+testDir = os.path.dirname(os.path.abspath(__file__))
+webwarePath = os.path.dirname(os.path.dirname(testDir))
+if sys.path[0] != webwarePath:
+    sys.path.insert(0, webwarePath)
 
 
 class SimpleExampleTest(unittest.TestCase):
@@ -21,10 +17,10 @@ class SimpleExampleTest(unittest.TestCase):
     def setUpDataDir(self, userManager):
         """Make a folder for UserManager data."""
 
-        self._userDataDir = os.path.join(TEST_CODE_DIR, 'Users')
+        self._userDataDir = os.path.join(testDir, 'Users')
 
         if os.path.exists(self._userDataDir):
-            shutil.rmtree(self._userDataDir, ignore_errors=1)
+            shutil.rmtree(self._userDataDir, ignore_errors=True)
         os.mkdir(self._userDataDir)
 
         userManager.setUserDir(self._userDataDir)
@@ -33,13 +29,12 @@ class SimpleExampleTest(unittest.TestCase):
 
         # Remove our test folder for UserManager data
         if os.path.exists(self._userDataDir):
-            shutil.rmtree(self._userDataDir, ignore_errors=1)
+            shutil.rmtree(self._userDataDir, ignore_errors=True)
         self._mgr = None
 
 
     def testUsersNoRoles(self):
         from UserKit.UserManagerToFile import UserManagerToFile
-        from UserKit.HierRole import HierRole
 
         self._mgr = UserManagerToFile()
         self.setUpDataDir(self._mgr)
@@ -110,3 +105,7 @@ class SimpleExampleTest(unittest.TestCase):
             'John should not be a member of the staff.')
         assert theUser.playsRole(customersRole), (
             'John should play customer role.')
+
+
+if __name__ == '__main__':
+    unittest.main()

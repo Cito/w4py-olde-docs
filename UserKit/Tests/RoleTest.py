@@ -1,20 +1,17 @@
-"""Tests various functions of Users and Roles
-
-To run these tests:
-    cd Webware
-    python AllTests.py UserKit.Tests.Test
-
-"""
+"""Unittests for the Role classes."""
 
 import os
+import sys
 import unittest
 
-import UserKit
-
-TEST_CODE_DIR = os.path.dirname(__file__) # e.g. ".../Webware/UserKit/Tests"
+testDir = os.path.dirname(os.path.abspath(__file__))
+webwarePath = os.path.dirname(os.path.dirname(testDir))
+if sys.path[0] != webwarePath:
+    sys.path.insert(0, webwarePath)
 
 
 class BasicRoleTest(unittest.TestCase):
+    """Tests for the basic role class."""
 
     def roleClasses(self):
         """Return a list of all Role classes for testing."""
@@ -43,15 +40,16 @@ class BasicRoleTest(unittest.TestCase):
 
 
 class HierRoleTest(unittest.TestCase):
+    """Tests for the hierarchical role class."""
 
     def testHierRole(self):
         from UserKit.HierRole import HierRole as hr
-        animal    = hr('animal')
-        eggLayer  = hr('eggLayer', None, [animal])
-        furry     = hr('furry', None, [animal])
-        snake     = hr('snake', None, [eggLayer])
-        dog       = hr('dog', None, [furry])
-        platypus  = hr('platypus', None, [eggLayer, furry])
+        animal = hr('animal')
+        eggLayer = hr('eggLayer', None, [animal])
+        furry = hr('furry', None, [animal])
+        snake = hr('snake', None, [eggLayer])
+        dog = hr('dog', None, [furry])
+        platypus = hr('platypus', None, [eggLayer, furry])
         vegetable = hr('vegetable')
 
         roles = locals()
@@ -59,9 +57,8 @@ class HierRoleTest(unittest.TestCase):
         del roles['self']
 
         # The tests below are one per line.
-        # The first word is the role name.
-        # The rest of the words are all the roles it plays
-        # (besides itself).
+        # The first word is the role name. The rest of the words
+        # are all the roles it plays (besides itself).
         tests = '''\
             eggLayer, animal
             furry, animal
@@ -69,8 +66,7 @@ class HierRoleTest(unittest.TestCase):
             dog, furry, animal
             platypus, eggLayer, furry, animal'''
 
-        tests = tests.split('\n')
-        tests = [test.split(', ') for test in tests]
+        tests = [test.split(', ') for test in tests.splitlines()]
 
         # Strip names
         # Can we use a compounded/nested list comprehension for this?
@@ -90,10 +86,14 @@ class HierRoleTest(unittest.TestCase):
                 playsRole = roles[name]
                 assert role.playsRole(playsRole)
 
-            # Now test that the role does NOT play any of the other
-            # roles not listed
+            # Now test that the role does NOT play
+            # any of the other roles not listed
             otherRoles = roles.copy()
             for name in test:
                 del otherRoles[name]
             for name in otherRoles.keys():
                 assert not role.playsRole(roles[name])
+
+
+if __name__ == '__main__':
+    unittest.main()
