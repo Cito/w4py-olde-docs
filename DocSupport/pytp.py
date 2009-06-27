@@ -38,7 +38,7 @@ out whether it is a Python expression or a Python statement.
   * If it is a Python expression:
     - The expression will be evaluated and processed
       recursively as follows:
-      * It if is a dictionary,
+      * If it is a dictionary,
         use the sorted list of items on separate lines.
       * If it is any other iterable,
         use the list of items on separate lines.
@@ -72,7 +72,7 @@ Licensed under the Open Software License version 2.1.
 
 """
 
-__version__ = '0.1'
+__version__ = '0.2'
 __revision__ = "$Revision$"
 __date__ = "$Date$"
 
@@ -84,7 +84,7 @@ except ImportError:
     from StringIO import StringIO
 
 
-class PyTP:
+class PyTP(object):
     """A very simple Python Template Processor.
 
     Provides only one method process().

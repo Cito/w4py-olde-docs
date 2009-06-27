@@ -45,7 +45,7 @@ Licensed under the Open Software License version 2.1.
 
 """
 
-__version__ = '0.1'
+__version__ = '0.2'
 __revision__ = "$Revision$"
 __date__ = "$Date$"
 
@@ -53,7 +53,7 @@ __date__ = "$Date$"
 import sys, re
 
 
-class ToC:
+class ToC(object):
     """Auxiliary class representing a table of contents."""
 
     def __init__(self,
@@ -72,36 +72,29 @@ class ToC:
         if self._title:
             toc.append('\n<h%d>%s</h%d>' % (mindepth, self._title, mindepth))
         maxdepth = self._depth
-        depth = mindepth - 1
-        entries = {}
+        curdepth = mindepth - 1
+        level = 0
         for heading in headings[self._skip:]:
-            if heading._depth < mindepth or heading._depth > maxdepth:
-                continue
-            while depth < heading._depth:
-                toc.append('\n<ul>')
-                depth += 1
-                entries[depth] = 0
-            while depth > heading._depth:
-                if entries[depth]:
-                    toc.append('</li>')
-                toc.append('\n</ul>')
-                depth -= 1
-            if entries[depth]:
-                toc.append('</li>')
-            else:
-                entries[depth] = 1
-            toc.append('\n<li>')
-            toc.append(heading.make_entry())
-        while depth >= mindepth:
-            if entries[depth]:
-                toc.append('</li>')
-            toc.append('\n</ul>')
-            depth -= 1
+            depth = heading._depth
+            if depth != curdepth:
+                if not mindepth <= depth <= maxdepth:
+                    continue
+                if depth > curdepth:
+                    toc.append('\n<ul>')
+                    level += 1
+                elif level > 0:
+                    toc.append('</li>\n</ul>')
+                    level -= 1
+                curdepth = depth
+            toc.append('\n<li>' + heading.make_entry())
+        while level > 0:
+            toc.append('</li>\n</ul>')
+            level -= 1
         toc.append('\n</div>')
         return ''.join(toc)
 
 
-class Heading:
+class Heading(object):
     """Auxiliary class representing a heading."""
 
     def __init__(self, depth, title, name):
@@ -119,7 +112,7 @@ class Heading:
             return self._title
 
 
-class AutoToC:
+class AutoToC(object):
     """Main class for automatic creation of table(s) of contents.
 
     Provides only one method process().
@@ -185,7 +178,7 @@ class AutoToC:
                 continue
             # get min depth with at least 2 headings
             if depth < mindepth:
-                if depths.has_key(depth):
+                if depth in depths:
                     mindepth = depth
                 else:
                     depths[depth] = 1
@@ -195,9 +188,9 @@ class AutoToC:
                 name_created = False
             else: # no name given
                 name = self._make_name(title) # create one
-                if names.has_key(name): # make sure it is unique
+                if name in names: # make sure it is unique
                     n = names[name] + 1
-                    while names.has_key('%s-%d' % (name, n)):
+                    while '%s-%d' % (name, n) in names:
                         n += 1
                     name = '%s-%d' % (name, n)
                     names[name] = n
