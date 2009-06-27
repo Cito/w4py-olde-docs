@@ -359,7 +359,8 @@ class SQLObjectStore(ObjectStore):
             assert count == 1
             return objects[0]
 
-    def fetchObjectsOfClass(self, aClass, clauses='', isDeep=True, refreshAttrs=True, serialNum=None):
+    def fetchObjectsOfClass(self, aClass,
+            clauses='', isDeep=True, refreshAttrs=True, serialNum=None):
         """Fetch a list of objects of a specific class.
 
         The list may be empty if no objects are found.
@@ -390,7 +391,8 @@ class SQLObjectStore(ObjectStore):
         deepObjs = []
         if isDeep:
             for subklass in klass.subklasses():
-                deepObjs.extend(self.fetchObjectsOfClass(subklass, clauses, isDeep, refreshAttrs, serialNum))
+                deepObjs.extend(self.fetchObjectsOfClass(
+                    subklass, clauses, isDeep, refreshAttrs, serialNum))
 
         # Now get objects of this exact class
         objs = []
@@ -398,7 +400,7 @@ class SQLObjectStore(ObjectStore):
             fetchSQLStart = klass.fetchSQLStart()
             className = klass.name()
             if serialNum is not None:
-                serialNum = int(serialNum) # make sure it's a valid int (suppose it came in as a string: 'foo')
+                serialNum = int(serialNum) # make sure it's a valid int
                 clauses = 'where %s=%d' % (klass.sqlSerialColumnName(), serialNum)
             if self._markDeletes:
                 clauses = self.addDeletedToClauses(clauses)
@@ -1041,7 +1043,7 @@ class ObjRefAttr(object):
             if self.setting('UseBigIntObjRefColumns', False):
                 return str(value.sqlObjRef())
             else:
-                return (str(value.klass().id()), str(value.serialNum()))
+                return str(value.klass().id()), str(value.serialNum())
 
     def sqlUpdateExpr(self, value):
         """Return update assignments.

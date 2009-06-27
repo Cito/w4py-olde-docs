@@ -60,7 +60,6 @@ def transform(params):
         hostname = params['hostname'].split(':', 1)[0]
         sambapath = r'\\%s\root' % hostname
         filename = os.path.join(sambapath, filename)
-        del params['filename']
         params['filename'] = filename
     return params
 
@@ -72,8 +71,7 @@ def openFile(params):
 
 def parseFile(filename):
     """Parse the WebKit EditFile."""
-    file = open(filename)
-    openFile(message_from_file(file))
+    openFile(message_from_file(open(filename)))
 
 if __name__ == '__main__':
     parseFile(sys.argv[1])

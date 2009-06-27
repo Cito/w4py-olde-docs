@@ -101,12 +101,12 @@ x=5 'y'=6
 
     def testExpandDictWithExtras(self):
         d = {'Name': 'foo', 'Extras': 'x=1 y=2'}
-        result =  ExpandDictWithExtras(d)
+        result = ExpandDictWithExtras(d)
         assert result == {'Name': 'foo', 'x': '1', 'y': '2'}
         d = {'Name': 'foo', 'bar': 'z = 3'}
-        result =  ExpandDictWithExtras(d)
+        result = ExpandDictWithExtras(d)
         assert result == d
-        result =  ExpandDictWithExtras(d, key='bar', delKey=False)
+        result = ExpandDictWithExtras(d, key='bar', delKey=False)
         assert result == {'Name': 'foo', 'bar': 'z = 3', 'z': '3'}
 
 

@@ -74,7 +74,7 @@ class Doc(object):
 ''' % self.destStyleSheetFilename)
 
         wr('<div class="head1">%s Model (MiddleKit)</div>\n'
-           % self.model.name())
+            % self.model.name())
         wr('Generated on %s <br>\n' % time.asctime())
         wr('From %s <br>\n' % self.model.filename())
 
@@ -82,9 +82,9 @@ class Doc(object):
 
         wr('<table border="0" cellpadding="2" cellspacing="2">\n')
         wr('<tr class="Class">'
-           '<td class="ClassName" colspan="3">Classes</td></tr>\n')
+            '<td class="ClassName" colspan="3">Classes</td></tr>\n')
         wr('<tr class="AttrTitles"><td class=AttrTitles>In Alpha Order</td>'
-           '<td class="AttrTitles">In Inheritance Order</td></tr>\n')
+            '<td class="AttrTitles">In Inheritance Order</td></tr>\n')
         wr('<tr><td valign=top>\n')
         klasses = self.model.allKlassesInOrder()[:]
         klasses.sort(lambda a, b: cmp(a.name().lower(), b.name().lower()))
@@ -120,7 +120,7 @@ class Doc(object):
             wr('<table border="0" cellpadding="3" cellspacing="0">\n')
             if klass.get('isAbstract'):
                 wr('<tr><td valign="top">abstract:</td>'
-                   '<td valign="top">yes</td></tr>\n')
+                    '<td valign="top">yes</td></tr>\n')
             wr('<tr><td valign="top">ancestors:</td><td valign="top">')
             ancestor = klass.superklass()
             if ancestor:

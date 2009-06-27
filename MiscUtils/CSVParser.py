@@ -5,16 +5,11 @@ A parser for CSV files.
 """
 
 # The states of the parser
-StartRecord        = 0
-StartField         = 1
-InField            = 2
-QuoteInField       = 3
-InQuotedField      = 4
-QuoteInQuotedField = 5
-EndQuotedField     = 6
+(StartRecord, StartField, InField, QuoteInField,
+InQuotedField, QuoteInQuotedField, EndQuotedField) = range(7)
 
 # State handlers can return Finished to terminate parsing early
-Finished           = 10
+Finished = 10
 
 
 class ParseError(Exception):

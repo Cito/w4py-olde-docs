@@ -3,13 +3,14 @@ import threading
 from TestCommon import *
 from Test import Test
 
+
 class TestThreads(Test):
 
     def __init__(self):
         Test.__init__(self)
         self._numObjects = 64
         self._numThreads = [1, 2, 4, 8, 16, 32]
-        self._numReads   = 32
+        self._numReads = 32
 
     def timedMain(self):
         import time

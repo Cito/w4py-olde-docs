@@ -55,15 +55,19 @@ class Generate:
         progName = os.path.basename(sys.argv[0])
         if errorMsg:
             print '%s: error: %s' % (progName, errorMsg)
-        print 'Usage: %s --db DBNAME --model FILENAME [--sql] [--py] [--config FILENAME] [--outdir DIRNAME]' % progName
-        print '       %s -h | --help' % progName
-        print
-        print '       * Known databases include: %s' % ', '.join(self.databases())
-        print '       * If neither --sql nor --py are specified, both are generated.'
-        print '       * If --outdir is not specified, then the base filename (sans extension) is used.'
-        print '       * --config lets you specify a different config filename inside the model.'
-        print '         This is mostly useful for the regression test suite.'
-        print
+            print
+        print '''\
+Usage: %s --db DBNAME --model FILENAME \\
+           [--sql] [--py] [--config FILENAME] [--outdir DIRNAME]
+       %s -h | --help
+
+    * Known databases include: %s.
+    * If neither --sql nor --py are specified, both are generated.
+    * If --outdir is not specified,
+      then the base filename (sans extension) is used.
+    * --config lets you specify a different config filename inside the model.
+      This is mostly useful for the regression test suite.
+'''  % (progName, progName, ', '.join(self.databases()))
         sys.exit(1)
 
     def options(self, args):

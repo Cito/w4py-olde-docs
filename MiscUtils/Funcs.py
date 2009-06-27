@@ -272,10 +272,10 @@ def timestamp(numSecs=None):
     """
     if numSecs is None:
         numSecs = time.time()
-    tuple     = time.localtime(numSecs)[:6]
-    pretty    = '%4i-%02i-%02i %02i:%02i:%02i' % tuple
+    tuple = time.localtime(numSecs)[:6]
+    pretty = '%4i-%02i-%02i %02i:%02i:%02i' % tuple
     condensed = '%4i%02i%02i%02i%02i%02i' % tuple
-    dashed    = '%4i-%02i-%02i-%02i-%02i-%02i' % tuple
+    dashed = '%4i-%02i-%02i-%02i-%02i-%02i' % tuple
     return locals()
 
 

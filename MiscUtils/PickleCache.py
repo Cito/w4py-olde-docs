@@ -224,6 +224,6 @@ class PickleCacheWriter(PickleCache):
 
 # Define module level convenience functions:
 _reader = PickleCacheReader()
-readPickleCache  = _reader.read
+readPickleCache = _reader.read
 _writer = PickleCacheWriter()
 writePickleCache = _writer.write

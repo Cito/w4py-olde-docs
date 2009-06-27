@@ -10,11 +10,10 @@ See the CGIWrapper.html documentation for more information.
 
 # We first record the starting time, in case we're being run as a CGI script.
 from time import time, localtime, asctime
-serverStartTime  = time()
+serverStartTime = time()
 
 # Some imports
 import cgi, os, sys, traceback
-from types import ClassType, DictType, FloatType
 from random import randint
 try:
     from cStringIO import StringIO
@@ -118,7 +117,7 @@ class CGIWrapper(object):
             config = f.read()
             config = eval('dict(%s)' % config)
             f.close()
-            assert isinstance(config, DictType)
+            assert isinstance(config, dict)
             return config
 
     def config(self):
@@ -231,8 +230,9 @@ class CGIWrapper(object):
         values = []
         for column in self.setting('ScriptLogColumns'):
             value = valueForName(self, column)
-            if isinstance(value, FloatType):
-                value = '%0.4f' % value # might need more flexibility in the future
+            if isinstance(value, float):
+                # might need more flexibility in the future
+                value = '%0.4f' % value
             else:
                 value = str(value)
             values.append(value)
@@ -257,17 +257,18 @@ class CGIWrapper(object):
         self._scriptEndTime = time()
         self.logExceptionToConsole()
         self.reset()
-        print self.htmlErrorPage(showDebugInfo=self.setting('ShowDebugInfoOnErrors'))
+        print self.htmlErrorPage(
+            showDebugInfo=self.setting('ShowDebugInfoOnErrors'))
         fullErrorMsg = None
         if self.setting('SaveErrorMessages'):
-            fullErrorMsg = self.htmlErrorPage(showDebugInfo=1)
+            fullErrorMsg = self.htmlErrorPage(showDebugInfo=True)
             filename = self.saveHTMLErrorPage(fullErrorMsg)
         else:
             filename = ''
         self.logExceptionToDisk(filename)
         if self.setting('EmailErrors'):
             if fullErrorMsg is None:
-                fullErrorMsg = self.htmlErrorPage(showDebugInfo=1)
+                fullErrorMsg = self.htmlErrorPage(showDebugInfo=True)
             self.emailException(fullErrorMsg)
 
     def logExceptionToConsole(self, stderr=sys.stderr):
@@ -279,7 +280,8 @@ class CGIWrapper(object):
 
         """
         # stderr logging
-        stderr.write('[%s] [error] CGI Wrapper: Error while executing script %s\n' % (
+        stderr.write('[%s] [error] CGI Wrapper:'
+            ' Error while executing script %s\n' % (
             asctime(localtime(self._scriptEndTime)), self._scriptPathname))
         traceback.print_exc(file=stderr)
 
@@ -291,7 +293,8 @@ class CGIWrapper(object):
         Currently resets headers and deletes cookies, if present.
 
         """
-        # Set headers to basic text/html. We don't want stray headers from a script that failed.
+        # Set headers to basic text/html. We don't want stray headers
+        # from a script that failed.
         self._headers = self.makeHeaders()
         # Get rid of cookies, too
         if 'cookies' in self._namespace:
@@ -300,8 +303,8 @@ class CGIWrapper(object):
     def htmlErrorPage(self, showDebugInfo=True):
         """Return an HTML page explaining that there is an error.
 
-        There could be more options in the future so using named arguments
-        (e.g., 'showDebugInfo=1') is recommended. Invoked by handleException().
+        There could be more options in the future, so using named arguments
+        (e.g. showDebugInfo=False) is recommended. Invoked by handleException().
 
         """
         html = ['''%s
@@ -387,16 +390,16 @@ class CGIWrapper(object):
         if not excInfo:
             excInfo = sys.exc_info()
         err, msg = excInfo[:2]
-        if isinstance(err, ClassType):
-            err, msg = err.__name__, str(msg)
-        else: # string exception
+        if isinstance(err, basestring): # string exception
             err, msg = '', str(msg or err)
+        else:
+            err, msg = err.__name__, str(msg)
         logline = (asctime(localtime(self._scriptEndTime)),
             os.path.split(self._scriptPathname)[1], self._scriptPathname,
             err, msg, errorMsgFilename or '')
         def fixElement(element):
             element = str(element)
-            if element.find(',') >= 0 or element.find('"') >= 0:
+            if ',' in element or '"' in element:
                 element = element.replace('"', '""')
                 element = '"%s"' % element
             return element

@@ -66,12 +66,12 @@ version = ('X', 'Y', 0)
 releaseDate = '@@/@@/@@'
 
 # Set Version info in files (should not be done on the trunk):
-setVersion = 1
+setVersion = True
 # Prepare a new release (this should be done on the trunk):
-newRelease = 0
+newRelease = False
 
 # Verbose output (output unchanged files also):
-verbose = 0
+verbose = False
 
 from glob import glob
 import os, sys, re

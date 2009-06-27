@@ -118,7 +118,8 @@ class MiddleObject(object):
 
             self._mk_initing = False
             self._mk_inStore = True
-            self._mk_changed = False # setting the values above will have caused this to be set; clear it now
+            # setting the values above will cause _mk_changed to be set
+            self._mk_changed = False # clear it now
         finally:
             self._mk_cacheLock.release()
         return self

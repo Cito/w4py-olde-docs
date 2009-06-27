@@ -27,8 +27,8 @@ def InstallInWebKit(appServer):
 
         # Set references to the COM initialize and uninitialize functions
         appServer._initCOM = pythoncom.COINIT_MULTITHREADED
-        appServer.initCOM  = pythoncom.CoInitializeEx
-        appServer.closeCOM  = pythoncom.CoUninitialize
+        appServer.initCOM = pythoncom.CoInitializeEx
+        appServer.closeCOM = pythoncom.CoUninitialize
 
         # Monkey-patch this instance of the appServer
 

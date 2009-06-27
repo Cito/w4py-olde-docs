@@ -197,4 +197,5 @@ class Klasses(dict, ModelObject):
             print klass
 
     def debugString(self):
-        return '<%s 0x%x model=%r>' % (self.__class__.__name__, id(self), getattr(self, '_model', '(none)'))
+        return '<%s 0x%x model=%r>' % (self.__class__.__name__,
+            id(self), getattr(self, '_model', '(none)'))

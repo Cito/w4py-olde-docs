@@ -452,7 +452,7 @@ class HTMLReader(SGMLParser):
         use the root tag.
 
         """
-        self._rootTag  = None
+        self._rootTag = None
         self._tagStack = []
         self._finished = False
         self.reset()

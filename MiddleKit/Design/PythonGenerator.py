@@ -205,7 +205,8 @@ class Attr(object):
         self.writePyGet(out)
         self.writePySet(out)
         if self.setting('AccessorStyle', 'methods') == 'properties':
-            out.write('\n\n    %s = property(%s, %s)\n\n' % (self.name(), self.pyGetName(), self.pySetName()))
+            out.write('\n\n    %s = property(%s, %s)\n\n' % (
+                self.name(), self.pyGetName(), self.pySetName()))
 
     def writePyGet(self, out):
         out.write('''
@@ -396,7 +397,8 @@ class EnumAttr(object):
 ''' % locals())
             if self.setting('AccessorStyle', 'methods') == 'properties':
                 out.write('\n\n    %(name)sString = property(%(getName)sString,'
-                    ' "Returns the string form of %(name)s (instead of the integer value).")\n\n' % locals())
+                    ' "Returns the string form of %(name)s'
+                    ' (instead of the integer value).")\n\n' % locals())
 
     def writePySetChecks(self, out):
         Attr.writePySetChecks.im_func(self, out)

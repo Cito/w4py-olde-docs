@@ -49,16 +49,17 @@ which is why even command line utils get done with classes
 (rather than collections of functions and nekkid code).
 
 You can also setDirectory(), setOutput() setRecurse() and setVerbose()
-the defaults of which are '.', sys.stdout, 1 and 0.
+the defaults of which are '.', sys.stdout, True and False.
 
 
 CAVEATS
 
 Note that checksrc.py takes a line oriented approach. Since it does not
 actually properly parse Python code, it can be fooled in some cases.
-Therefore, it's possible to get false alarms. While we could implement
-a full parser to close the gap, doing so would be labor intensive with
-little pay off. So we live with a few false alarms.
+Therefore, it's possible to get false alarms. However, most of these are
+created by triple quoted strings which we remove before checking the file.
+While we could implement a full parser to close the gap, doing so would be
+labor intensive with little pay off. So we live with a few false alarms.
 
 
 CONFIG FILES
@@ -96,7 +97,7 @@ RULES
   * Method names start with a lower case letter.
   * Methods do not start with "get".
   * Data attributes start with an underscore _,
-    and are followed by a lower case letter
+    and are followed by a lower case letter.
   * Method and attribute names have no underscores after the first character.
   * Expressions following if, while and return
     are not enclosed in parenthesees, ().
@@ -118,7 +119,6 @@ Consider using the parser or tokenize modules of the standard library.
 
 
 import re, sys, os
-from types import StringType
 
 
 class NoDefault:
@@ -188,9 +188,10 @@ class CheckSrc:
 
         # Set default options
         self.setDirectory('.')
+        self.setWithDir(False)
         self.setOutput(sys.stdout)
-        self.setRecurse(1)
-        self.setVerbose(0)
+        self.setRecurse(True)
+        self.setVerbose(False)
 
 
     ## Options ##
@@ -202,6 +203,13 @@ class CheckSrc:
         """Sets the directory that checking starts in."""
         self._directory = dir
 
+    def withDir(self):
+        return self._withDir
+
+    def setWithDir(self, flag):
+        """Set whether or not to print directories separately."""
+        self._withDir = flag
+
     def output(self):
         return self._out
 
@@ -212,12 +220,12 @@ class CheckSrc:
         a string which is a filename used for one invocation of check().
 
         """
-        if type(output) is StringType:
+        if isinstance(output, basestring):
             self._out = open(output, 'w')
-            self._shouldClose = 1
+            self._shouldClose = True
         else:
             self._out = output
-            self._shouldClose = 0
+            self._shouldClose = False
 
     def recurse(self):
         return self._recurse
@@ -233,6 +241,7 @@ class CheckSrc:
         """Set whether or not to print extra information during check.
 
         For instance, print every directory and file name scanned.
+
         """
         self._verbose = flag
 
@@ -243,68 +252,71 @@ class CheckSrc:
         """Read a list of arguments in command line style (e.g., sys.argv).
 
         You can pass your own args if you like, otherwise sys.argv is used.
-        Returns 1 on success; 0 otherwise.
+        Returns True on success; False otherwise.
 
         """
-        setDir = setOut = 0
+        setDir = setOut = False
         for arg in args[1:]:
             if arg == '-h' or arg == '--help':
                 self.usage()
-                return 0
+                return False
+            elif arg == '-d':
+                self.setWithDir(True)
+            elif arg == '-D':
+                self.setWithDir(False)
             elif arg == '-r':
-                self.setRecurse(1)
+                self.setRecurse(True)
             elif arg == '-R':
-                self.setRecurse(0)
+                self.setRecurse(False)
             elif arg == '-v':
-                self.setVerbose(1)
+                self.setVerbose(True)
             elif arg == '-V':
-                self.setVerbose(0)
+                self.setVerbose(False)
             elif arg[0] == '-':
                 self.usage()
-                return 0
+                return False
             else:
                 if not setDir:
                     self.setDirectory(arg)
-                    setDir = 1
+                    setDir = True
                 elif not setOut:
                     self.setOutput(arg)
-                    setOut = 1
+                    setOut = True
                 else:
                     self.write('Error: %s\n' % repr(arg))
                     self.usage()
-                    return 0
-        return 1
+                    return False
+        return True
 
     def usage(self):
         progName = sys.argv[0]
-        wr = self.write
-        wr('Usage: %s [options] [startingDir [outputFilename]]\n' % progName)
-        wr('''       -h --help = help
--r -R = recurse, do not recurse. default -r
--v -V = verbose, not verbose. default -V
+        self.write('''Usage: %s [options] [startingDir [outputFilename]]
 
-Examples:
-> python checksrc.py
-> python checksrc.py SomeDir
-> python checksrc.py -R SomeDir
-> python checksrc.py . results.text
+    -h --help = help
+    -d -D = show dirs with files, show dirs separately (default -D)
+    -r -R = recurse, do not recurse (default -r)
+    -v -V = verbose, not verbose (default -V)
+
+    Examples:
+    > python checksrc.py
+    > python checksrc.py SomeDir
+    > python checksrc.py -R SomeDir
+    > python checksrc.py . results.text
 
 Error codes and their messages:
-''')
+''' % progName)
 
         # Print a list of error codes and their messages
-        keys = self._errorCodes[:]
-        keys.sort()
+        keys = sorted(self._errorCodes)
         maxLen = 0
         for key in keys:
             if len(key) > maxLen:
                 maxLen = len(key)
         for key in keys:
             paddedKey = key.ljust(maxLen)
-            wr('  %s = %s\n' % (paddedKey, self._errors[key.lower()]))
-        wr('\n')
-
-        wr('.checksrc.config options include SkipDirs, SkipFiles and DisableErrors.\n'
+            self.write('  %s = %s\n' % (paddedKey, self._errors[key.lower()]))
+        self.write('\n.checksrc.config options include'
+            ' SkipDirs, SkipFiles and DisableErrors.\n'
             'See the checksrc.py doc string for more info.\n')
 
 
@@ -332,7 +344,7 @@ Error codes and their messages:
         if ('*' in disableNames or self._fileName in disableNames
                 or os.path.splitext(self._fileName)[0] in disableNames):
             return
-        if not self._printedDir:
+        if not self._withDir and not self._printedDir:
             self.printDir()
         msg = self._errors[msgCode.lower()]
         if args is not NoDefault:
@@ -357,6 +369,8 @@ Error codes and their messages:
         """
         s = ''
         if self._fileName is not None:
+            if self._withDir:
+                s += self._dirName + os.sep
             s += self._fileName
             if self._lineNum is not None:
                 s += ':' + str(self._lineNum)
@@ -369,7 +383,7 @@ Error codes and their messages:
     def printDir(self):
         """Self utility method to print the directory being processed."""
         self.write('\n', self._dirName, '\n')
-        self._printedDir = 1
+        self._printedDir = True
 
 
     ## Configuration ##
@@ -381,19 +395,18 @@ Error codes and their messages:
         except IOError:
             return
         try:
-            dict = eval(contents)
+            config = eval(contents)
         except Exception:
             self.fatalError('Invalid config file at %s.' % filename)
         # For DisableErrors, we expect a dictionary keyed by error codes.
         # For each code, we allow a value that is either a string or a list.
         # But for ease-of-use purposes, we now convert single strings to
         # lists containing the string.
-        de = dict.get('DisableErrors', None)
-        if de:
-            for key, value in de.items():
-                if type(value) is StringType:
-                    de[key] = [value]
-        self._config = dict
+        d = config.get('DisableErrors') or {}
+        for key, value in d.items():
+            if isinstance(value, basestring):
+                d[key] = [value]
+        self._config = config
 
     def setting(self, name, default=NoDefault):
         if default is NoDefault:
@@ -425,7 +438,7 @@ Error codes and their messages:
         self._fileName = None
         self._lineNum = None
         self._charNum = None
-        self._printedDir = 0
+        self._printedDir = False
 
         if self._verbose:
             self.printDir()
@@ -436,21 +449,26 @@ Error codes and their messages:
         skipDirs = self.setting('SkipDirs', [])
         for dir in skipDirs:
             try:
-                index = names.index(dir)
+                names.remove(dir)
             except ValueError:
-                continue
-            print '>> skipping', dir
-            del names[index]
+                pass
+            else:
+                print '>> skipping', dir
 
         skipFiles = self.setting('SkipFiles', [])
         for name in names:
-            if (len(name) > 2 and name[-3:] == '.py'
-                    and name not in skipFiles
+            if (name.endswith('.py') and name not in skipFiles
                     and os.path.splitext(name)[0] not in skipFiles):
                 try:
                     self.checkFile(dirName, name)
                 except CheckSrcError:
                     pass
+
+    _tripleQuotesRe = re.compile('""".*?"""'+ "|'''.*?'''", re.DOTALL)
+
+    def removeTripeQuotedStrings(self, contents):
+        return self._tripleQuotesRe.sub(
+            lambda s: '"""%s"""' % ('\n' * s.group(0).count('\n')), contents)
 
     def checkFile(self, dirName, name):
         self._fileName = name
@@ -463,7 +481,8 @@ Error codes and their messages:
         contents = open(filename, 'rb').read()
         self.checkFileContents(contents)
 
-        lines = open(filename).readlines()
+        contents = open(filename).read()
+        lines = self.removeTripeQuotedStrings(contents).splitlines()
         self.checkFileLines(lines)
 
     def checkFilename(self, filename):
@@ -471,9 +490,8 @@ Error codes and their messages:
             self.error('UncapFN')
 
     def checkFileContents(self, contents):
-        if os.name == 'posix':
-            if '\r' in contents:
-                self.error('CarRet')
+        if os.name == 'posix' and '\r' in contents:
+            self.error('CarRet')
 
     def checkFileLines(self, lines):
         self._lineNum = 1
@@ -493,7 +511,7 @@ Error codes and their messages:
                 indent = line[:len(line) - len(lineleft)]
                 line = lineleft
                 parts = line.split()
-                self.checkBlankLines(line)
+                self.checkBlankLines(line, indent)
                 self.checkCompStmts(parts, line)
                 self.checkAugmStmts(parts)
                 self.checkClassName(parts)
@@ -516,61 +534,63 @@ Error codes and their messages:
 
     def clearStrings(self, line):
         """Return line with all quoted strings cleared."""
-        index = 0
+        pos = 0
         quote = self._inMLS
-        while index != -1:
+        while pos >= 0:
             if quote:
-                index2 = index
+                pos2 = pos
                 while 1:
-                    index2 = line.find(quote, index2)
-                    if index2 > 0 and line[index2 - 1] == '\\':
-                        index2 += 1
+                    pos2 = line.find(quote, pos2)
+                    if pos2 > 0 and line[pos2 - 1] == '\\':
+                        pos2 += 1
                         continue
                     break
-                if index2 == -1:
-                    if index < len(line):
-                        line = line[:index] + '...'
+                if pos2 >= 0:
+                    if pos < len(line):
+                        line = line[:pos] + '...'
                     break
-                if index < index2:
-                    line = line[:index] + '...' + line[index2:]
-                    index += 3
-                index += len(quote)
+                if pos < pos2:
+                    line = line[:pos] + '...' + line[pos2:]
+                    pos += 3
+                pos += len(quote)
                 quote = None
-            index3 = line.find('#', index)
-            index2 = line.find("'", index)
-            index = line.find('"', index)
-            if index2 != -1 and (index == -1 or index2 < index):
-                index = index2
-            if index3 != -1 and (index == -1 or index3 < index):
-                if (line[index3+1:index3+2] == '#'
-                        and not line[:index3].rstrip()):
+            pos3 = line.find('#', pos)
+            pos2 = line.find("'", pos)
+            pos = line.find('"', pos)
+            if pos2 >= 0 and (pos == -1 or pos2 < pos):
+                pos = pos2
+            if pos3 >= 0 and (pos == -1 or pos3 < pos):
+                if (line[pos3+1:pos3+2] == '#'
+                        and not line[:pos3].rstrip()):
                     # keep category comments
-                    line = line[:index3+2]
+                    line = line[:pos3+2]
                 else:
                     # remove any other comment
-                    line = line[:index3].rstrip()
+                    line = line[:pos3].rstrip()
                 break
-            if index != -1:
-                quote = line[index]
-                if line[index:index+3] == quote*3:
+            if pos >= 0:
+                quote = line[pos]
+                if line[pos:pos+3] == quote*3:
                     quote *= 3
-                index += len(quote)
+                pos += len(quote)
         if quote and len(quote) < 3:
             quote = None
         self._inMLS = quote
         return line
 
-    def checkBlankLines(self, line):
-        if line.startswith('##') and self._blankLines < 2:
+    def checkBlankLines(self, line, indent):
+        blankLines = self._blankLines
+        minLines = 1 - len(indent)/4
+        if line.startswith('##') and blankLines < minLines + 1:
             what = 'Category comments'
             separator = 'two blank lines'
-        elif (line.startswith('class ') and self._blankLines < 2
+        elif (line.startswith('class ') and blankLines < minLines + 1
                 and not line.endswith('Exception):')
                 and not line.endswith('Error):')
                 and not line.endswith('pass')):
             what = 'Class definitions'
             separator = 'two blank lines'
-        elif (line.startswith('def ') and self._blankLines < 1
+        elif (line.startswith('def ') and blankLines < minLines
                 and not line.endswith('pass')):
             what = 'Function definitions'
             separator = 'one blank line'
@@ -588,17 +608,16 @@ Error codes and their messages:
 
     def checkClassName(self, parts):
         if 'class' in parts: # e.g. if 'class' is a standalone word
-            index = parts.index('class')
-            if index == 0: # e.g. if start of the line
+            if parts[0] == 'class': # e.g. if start of the line
                 name = parts[1]
                 if name and name[0] != name[0].upper():
                     self.error('ClassNotCap')
 
     def checkMethodName(self, parts, indent):
         if 'def' in parts: # e.g. if 'def' is a standalone word
-            index = parts.index('def')
-            if index == 0 and indent:
-                # e.g. if start of the line, and indented (indicating method and not function)
+            if parts[0] == 'def' and indent:
+                # e.g. if start of the line, and indented
+                # (indicating method and not function)
                 name = parts[1]
                 name = name[:name.find('(')]
                 if name and name[0] != name[0].lower():
@@ -606,38 +625,31 @@ Error codes and their messages:
                 if len(name) > 3 and name[:3].lower() == 'get':
                     self.error('GetMeth', locals())
 
-    _exprKeywords = {}
-    for k in 'assert for if return while with yield'.split():
-        _exprKeywords[k] = None
+    _exprKeywords = set('assert for if return while with yield'.split())
 
     def checkExtraParens(self, parts, line):
-        if (len(parts) > 1 and self._exprKeywords.has_key(parts[0])
-                and parts[1][0] == '('
-                and parts[-1].replace(':', '').rstrip()[-1:] == ')'
+        if (len(parts) > 1 and parts[0] in self._exprKeywords
+                and parts[1].startswith('(')
+                and parts[-1].replace(':', '').rstrip().endswith(')')
                 and not line.count(')') < line.count('(')):
             keyword = parts[0]
             self.error('ExtraParens', locals())
 
-    _blockKeywords = {}
-    for k in 'if elif else: try: except: while for with'.split():
-        _blockKeywords[k] = None
+    _blockKeywords = set('if elif else: try: except: while for with'.split())
 
     def checkCompStmts(self, parts, line):
-        if (len(parts) > 1 and self._blockKeywords.has_key(parts[0])
-                and line.find(': ') != -1 and line[-1] != ':'):
+        if (len(parts) > 1 and parts[0] in self._blockKeywords
+                and ': ' in line and not line.endswith(':')):
             self.error('NoCompStmts')
         else:
-            index = line.find(';')
-            if index != -1:
-                if line.find('"') < index and line.find("'") < index:
-                    self.error('NoCompStmts')
+            pos = line.find(';')
+            if pos >= 0 and line.find('"') < pos and line.find("'") < pos:
+                self.error('NoCompStmts')
 
     # Any kind of access of self
     _accessRE = re.compile(r'self\.(\w+)\s*(\(?)')
     # Irregular but allowed attribute names
-    _allowedAttrNames = {}
-    for k in 'assert_ has_key'.split():
-        _allowedAttrNames[k] = None
+    _allowedAttrNames = set(('assert_', 'has_key'))
 
     def checkAttrNames(self, line):
         for match in self._accessRE.findall(line):
@@ -648,50 +660,43 @@ Error codes and their messages:
                     # Attribute names that are data (and not methods)
                     # should start with an underscore.
                     self.error('NoUnderAttr', locals())
-                elif attribute[-2:] != '__' and not attribute[1:2].islower():
+                elif not (attribute.endswith('__') or attribute[1:2].islower()):
                     # The underscore should be followed by a lower case letter.
                     self.error('NoLowerAttr', locals())
             # Attribute names should have no underscores after the first one.
-            if len(attribute) > 2 and attribute[:2] == '__':
+            if len(attribute) > 2 and attribute.startswith('__'):
                 inner = attribute[2:]
-                if len(inner) > 2 and inner[-2:] == '__':
+                if inner.endswith('__'):
                     inner = inner[:-2]
             else:
-                if len(attribute) > 1 and attribute[0] == '_':
+                if len(attribute) > 1 and attribute.startswith('_'):
                     inner = attribute[1:]
                 else:
                     inner = attribute
-            if (inner.find('_') >= 0
-                    and not self._allowedAttrNames.has_key(inner)):
+            if '_' in inner and not inner in self._allowedAttrNames:
                 self.error('ExtraUnder', locals())
 
-    # Assignment operators
+    # Assignment operators and augmented assignments
     _assignRE = re.compile(
-        r'^[^\(]*?[^\s=<>!\+\-\*/%&\^\|](\s*)=[^\s=](\s*)')
-    # Strict comparison Operators
-    _compareRE = re.compile(r'(\s*)(<|>)[^\s=<>](\s*)')
-    # Other comparison Operators and augmented assignments
-    _augmentRE = re.compile(
-        r'(\s*)(=|<|>|!|\+|-|\*|/|%|\*\*|>>|<<|&|\^|\|)=(\s*)')
+        r'[^<>!=\s](\s*)(\+|\-|\*|/|//|%|\*\*|>>|<<|&|\^|\|)?=(\s*)[^=\s]')
+    # Comparison Operators
+    _compareRE = re.compile(
+        r'[^<>!=\'\"\s](\s*)(<|>|==|>=|<=|<>|!=)(\s*)[^<>=\s]')
 
     def checkOperators(self, line):
-        if line.find('<>') != -1:
+        if '<>' in line:
             self.error('ObsExpr', {'old': '<>', 'new': '!='})
         for match in self._assignRE.findall(line):
-            if match[0] != ' ' or match[1] != ' ':
-                if not line.count(')') > line.count('('):
-                    self.error('OpNoSpace', {'op': '='})
+            if not match[0] and not match[1] and not match[2]:
+                continue # allow this style for keyword arguments
+            if match[0] != ' ' or match[2] != ' ':
+                self.error('OpNoSpace', {'op': match[1] + '='})
         for match in self._compareRE.findall(line):
             if match[0] != ' ' or match[2] != ' ':
                 self.error('OpNoSpace', {'op': match[1]})
-        for match in self._augmentRE.findall(line):
-            if match[0] != ' ' or match[2] != ' ':
-                self.error('OpNoSpace', {'op': match[1] + '='})
 
     # Augmented assignment operators
-    _augmOp = {}
-    for k in '+ - * / % ** >> << & ^ |'.split():
-        _augmOp[k] = None
+    _augmOp = set('+ - * / % ** >> << & ^ |'.split())
 
     def checkAugmStmts(self, parts):
         if (len(parts) > 4 and parts[1] == '='
@@ -724,6 +729,6 @@ class _DummyWriter:
 
 
 if __name__ == '__main__':
-    cs = CheckSrc()
-    if cs.readArgs():
-        cs.check()
+    checkSrc = CheckSrc()
+    if checkSrc.readArgs():
+        checkSrc.check()

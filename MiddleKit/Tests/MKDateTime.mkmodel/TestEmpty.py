@@ -65,8 +65,8 @@ def testMXDateTime(store):
     from mx.DateTime import DateTimeFrom, TimeFrom
     print 'Testing with mx.DateTime module.'
 
-    d  = DateTimeFrom('2001-06-07')
-    t  = TimeFrom('12:42')
+    d = DateTimeFrom('2001-06-07')
+    t = TimeFrom('12:42')
     dt = DateTimeFrom('2001-06-07 12:42')
 
     f = Foo()
@@ -76,8 +76,8 @@ def testMXDateTime(store):
 
     storeFoo(store, f)
 
-    d  = DateTimeFrom('2002-11-11')
-    t  = TimeFrom('16:04')
+    d = DateTimeFrom('2002-11-11')
+    t = TimeFrom('16:04')
     dt = DateTimeFrom('2002-11-11 16:04')
 
     f.setD(d)

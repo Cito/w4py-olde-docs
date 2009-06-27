@@ -267,10 +267,12 @@ class ObjectStore(ModelUser):
         if v:
             if superobject:
                 cascadeString = 'cascade-'
-                dueTo = ' due to deletion of %s.%i' % (superobject.klass().name(), superobject.serialNum())
+                dueTo = ' due to deletion of %s.%i' % (
+                    superobject.klass().name(), superobject.serialNum())
             else:
                 cascadeString = dueTo = ''
-            print 'checking %sdelete of %s.%d%s' % (cascadeString, obj.klass().name(), obj.serialNum(), dueTo)
+            print 'checking %sdelete of %s.%d%s' % (
+                cascadeString, obj.klass().name(), obj.serialNum(), dueTo)
 
         objectsToDel[id(obj)] = obj
 

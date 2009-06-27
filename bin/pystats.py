@@ -36,7 +36,7 @@ believe should be counted as part of the stats.
 
 Number of bytes is a little low on Windows where \r\n is counted just as \n.
 
-The extensions accepted are hard coded to .py .psp and .cgi.
+The extensions accepted are hard coded to .py, .psp and .cgi.
 
 
 MISC
@@ -68,33 +68,32 @@ Provide command line option to change extensions.
 import os
 import re
 import sys
-from UserDict import UserDict
 
 
-class Stats(UserDict):
+class Stats(dict):
 
     _statNames = 'files bytes lines funcs classes'.split()
 
-    def __init__(self, dict=None):
-        UserDict.__init__(self, dict)
-        if dict is None:
+    def __init__(self, data=None):
+        if data:
+            super(Stats, self).__init__(data)
+        else:
+            super(Stats, self).__init__()
             for name in self._statNames:
                 self[name] = 0
 
-    def __add__(self, stats):
-        result = self.__class__()
+    def __iadd__(self, other):
         for name in self._statNames:
-            result[name] = self[name] + stats[name]
-        return result
+            self[name] += other[name]
+        return self
 
     def copy(self):
         """Return a real copy/duplicate of the receiver.
 
-        Note that userDict.copy() will do so,
-        but subclassOfUserDict.copy() does not.
+        This is needed because dict.copy() returns a dict.
 
         """
-        return self.__class__(self.data)
+        return self.__class__(self)
 
     def write(self, file=sys.stdout):
         for name in self._statNames:
@@ -108,16 +107,16 @@ class Stats(UserDict):
         file.write('\n')
 
 
-class StatsNode:
+class StatsNode(object):
 
     classDefRE = re.compile(r'^[\t ]*class[\t ]+[\w]+[\t ]*[(:]{1,1}', re.MULTILINE)
-    funcDefRE  = re.compile(r'^[\t ]*def[\t ]+[\w]+[\t ]*\(', re.MULTILINE)
+    funcDefRE = re.compile(r'^[\t ]*def[\t ]+[\w]+[\t ]*\(', re.MULTILINE)
 
     def __init__(self, name):
-        self._name       = name
-        self._subNodes   = {}      # map directory names to StatsNodes
-        self._stats      = Stats() # stats for files just in this dir (no subdirs)
-        self._totalStats = None    # stats for all files, recursively in subdirs
+        self._name = name
+        self._subNodes = {} # map directory names to StatsNodes
+        self._stats = Stats() # stats for files just in this dir (no subdirs)
+        self._totalStats = None # stats for all files, recursively in subdirs
 
     def name(self):
         return self._name
@@ -128,7 +127,7 @@ class StatsNode:
             node.computeTotal()
             self._totalStats += node._totalStats
 
-    def processDir(self, dirName, extensions, recurse=1):
+    def processDir(self, dirName, extensions, recurse=True):
         exceptions = (os.curdir, os.pardir, 'CVS', '.svn')
         names = os.listdir(dirName)
         for name in names:
@@ -147,9 +146,7 @@ class StatsNode:
     def processFile(self, pathname, ext=None):
         if ext is None:
             ext = os.path.splitext(pathname)[1]
-
         contents = open(pathname).read()
-
         stats = self._stats
         stats['bytes'] += len(contents)
         stats['lines'] += contents.count('\n')
@@ -157,23 +154,21 @@ class StatsNode:
         stats['classes'] += len(self.classDefRE.findall(contents))
         stats['files'] += 1
 
-    def write(self, file=sys.stdout, recurse=1, indent=0, indenter='  '):
+    def write(self, file=sys.stdout, recurse=True, indent=0, indenter='  '):
         if indent == 0:
             self._stats.writeHeaders(25, file)
         spacer = indenter * indent
         name = self._name.ljust(25-len(spacer))
-        file.write(spacer+name)
+        file.write(spacer + name)
         self._totalStats.write(file)
         file.write('\n')
         if recurse:
             indent += 1
-            keys = self._subNodes.keys()
-            keys.sort()
-            for key in keys:
+            for key in sorted(self._subNodes):
                 self._subNodes[key].write(file, recurse, indent, indenter)
 
 
-class PyStats:
+class PyStats(object):
 
 
     ## Init ##
@@ -185,8 +180,8 @@ class PyStats:
         # Set default options
         self.setDirectory('.')
         self.setExtensions(['.py', '.psp', '.cgi'])
-        self.setRecurse(1)
-        self.setShowSummary(0)
+        self.setRecurse(True)
+        self.setShowSummary(False)
 
 
     ## Options ##
@@ -221,17 +216,16 @@ class PyStats:
     ## Command line use ##
 
     def usage(self):
-        progName = sys.argv[0]
-        wr = sys.stdout.write
-        wr('Usage: %s [options] [startingDir]\n' % progName)
-        wr('''       -h --help = help
--r -R = recurse, do not recurse. default -r
--s -S = show summary, do not show summary. default -S
-Examples:
-> python pystats.py
-> python pystats.py SomeDir
-> python pystats.py -R SomeDir
-''')
+        print '''Usage: %s [options] [startingDir]
+
+    -h --help = help
+    -r -R = recurse, do not recurse (default -r)
+    -s -S = show summary, do not show summary (default -S)
+
+    Examples:
+    > python pystats.py
+    > python pystats.py SomeDir
+    > python pystats.py -R SomeDir''' % sys.argv[0]
 
     def main(self, args=sys.argv):
         if self.readArgs(args):
@@ -241,21 +235,21 @@ Examples:
         for arg in args[1:]:
             if arg == '-h' or arg == '--help':
                 self.usage()
-                return 0
+                return False
             elif arg == '-r':
-                self.setRecurse(1)
+                self.setRecurse(True)
             elif arg == '-R':
-                self.setRecurse(0)
+                self.setRecurse(False)
             elif arg == '-s':
-                self.setShowSummary(1)
+                self.setShowSummary(True)
             elif arg == '-S':
-                self.setShowSummary(0)
+                self.setShowSummary(False)
             elif arg[0] == '-':
                 self.usage()
-                return 0
+                return False
             else:
                 self.setDirectory(arg)
-        return 1
+        return True
 
 
     ## Running ##

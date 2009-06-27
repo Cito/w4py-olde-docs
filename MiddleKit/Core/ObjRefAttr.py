@@ -7,7 +7,7 @@ def objRefJoin(klassId, serialNum):
 
 def objRefSplit(objRef):
     """Return a tuple with (klassId, serialNum) given the 64-bit (e.g., long type) objRef."""
-    return ((objRef & 0xFFFFFFFF00000000L) >> 32, objRef & 0xFFFFFFFFL)
+    return (objRef & 0xFFFFFFFF00000000L) >> 32, objRef & 0xFFFFFFFFL
 
 
 class ObjRefAttr(Attr):
@@ -34,5 +34,6 @@ class ObjRefAttr(Attr):
         self._targetKlass = self.model().klass(self.targetClassName(), None)
         if not self._targetKlass:
             from Model import ModelError
-            raise ModelError('class %s: attr %s: cannot locate target class %s for this obj ref.' % (
+            raise ModelError('class %s: attr %s:'
+                'cannot locate target class %s for this obj ref.' % (
                 self.klass().name(), self.name(), self.targetClassName()))

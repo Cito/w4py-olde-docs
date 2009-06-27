@@ -41,7 +41,8 @@ class DumpCSV(AdminSecurity):
             self.writeln('<tr>')
             colIndex = 0
             for value in row:
-                if colIndex < self._numCols: # for those cases where a row has more columns that the header row.
+                if colIndex < self._numCols:
+                    # for those cases where a row has more columns that the header row.
                     self.writeln('<td>',
                         self.cellContents(rowIndex, colIndex, value), '</td>')
                 colIndex += 1

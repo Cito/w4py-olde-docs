@@ -49,7 +49,7 @@ class SQLGenerator(CodeGenerator):
             useDatabaseSQL()
           StringAttr
           EnumAttr
-          
+
     """
 
     def sqlDatabaseName(self):
@@ -244,10 +244,9 @@ class Model(object):
                                     try:
                                         refByAttr = attr.targetKlass().lookupAttr(refByAttrName)
                                     except KeyError:
-                                        raise SampleError(linenum,
-                                            "Attribute %r of class %r has a 'by' of %r,"
-                                            " but no such attribute can be found in target class %r."
-                                            % (name, klass.name(),
+                                        raise SampleError(linenum, "Attribute %r of class %r"
+                                            " has a 'by' of %r, but no such attribute can be"
+                                            " found in target class %r." % (name, klass.name(),
                                                 refByAttrName, attr.targetKlass().name()))
                                     attr.refByAttr = refByAttr
                                 else:
@@ -627,19 +626,8 @@ class Attr(object):
             else:
                 out.write('    /* %(Name)s %(Type)s - not a SQL column */' % self)
         except Exception:
-            bar = '*'*78
-            print
-            print bar
-            print 'exception for attribute:'
+            print 'Exception for attribute:'
             print '%s.%s' % (self.klass().name(), self.name())
-            print
-            try:
-                from pprint import pprint
-                pprint(self.data)
-            except Exception:
-                pass
-            print bar
-            print
             raise
 
     def writeRealCreateSQLColumn(self, generator, out):

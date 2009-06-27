@@ -13,14 +13,14 @@ class View(AdminSecurity):
     """
 
     def defaultAction(self):
-        self.data = self.type = None
+        self._data = self._type = None
         self.writeHTML()
-        if self.data and self.type:
+        if self._data and self._type:
             try:
                 response = self.response()
                 response.reset()
-                response.setHeader('Content-Type', self.type)
-                self.write(self.data)
+                response.setHeader('Content-Type', self._type)
+                self.write(self._data)
             except Exception:
                 self.writeError('File cannot be viewed!')
 
@@ -38,9 +38,9 @@ class View(AdminSecurity):
             self.writeError('The requested file %r does not exist'
                 ' in the server side directory.' % fn)
             return
-        self.type = 'text/%s' % (splitext(fn)[1] in ('.htm', '.html')
+        self._type = 'text/%s' % (splitext(fn)[1] in ('.htm', '.html')
             and 'html' or 'plain')
         try:
-            self.data = open(fn).read()
+            self._data = open(fn).read()
         except Exception:
             self.writeError('The requested file %r cannot be read.' % fn)

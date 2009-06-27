@@ -64,9 +64,9 @@ class MakeAppWorkDir:
 
     """
 
-    def __init__(self, webwareDir, workDir, verbose=1, osType=None,
+    def __init__(self, webwareDir, workDir, verbose=True, osType=None,
             contextName='MyContext', contextDir='', libraryDirs=None,
-            cvsIgnore=0, uid=None, gid=None):
+            cvsIgnore=False, uid=None, gid=None):
         """Initializer for MakeAppWorkDir.
 
         Pass in at least the Webware directory and the target working
@@ -161,13 +161,13 @@ class MakeAppWorkDir:
             if name == 'AppServer':
                 if self._osType == 'nt':
                     name += '.bat'
-                chmod = 1
+                chmod = True
             elif name == 'webkit':
                 if self._osType != 'posix':
                     continue
-                chmod = 1
+                chmod = True
             else:
-                chmod = 0
+                chmod = False
             newname = os.path.join(self._workDir, os.path.basename(name))
             if os.path.exists(newname):
                 self.msg("\t%s already exists." % newname)
@@ -277,7 +277,7 @@ class MakeAppWorkDir:
             'Application.config')
         self.msg("\t%s" % filename)
         content = open(filename).readlines()
-        output  = open(filename, 'w')
+        output = open(filename, 'w')
         foundContext = 0
         for line in content:
             if line.startswith("Contexts[%r] = %r\n"
@@ -306,12 +306,12 @@ class MakeAppWorkDir:
             'Sessions': '[a-zA-Z0-9]*',
             self._contextName: '*.pyc\n*.pyo'
         }
-        foundFiles = 0
+        foundFiles = False
         for dir, contents in files.items():
             filename = os.path.join(self._workDir,
                 dir, '.cvsignore')
             if os.path.exists(filename):
-                foundFiles += 1
+                foundFiles = True
             else:
                 f = open(filename, 'w')
                 f.write(contents)
@@ -385,7 +385,7 @@ launcherScripts = { # launcher scripts with adjusted parameters
 workDir = None
 webwareDir = %(webwareDir)r
 libraryDirs = %(libraryDirs)r
-runProfile = 0
+runProfile = False
 logFile = None
 pidFile = None
 user = %(user)r
@@ -417,7 +417,7 @@ if __name__ == '__main__':
 workDir = None
 webwareDir = %(webwareDir)r
 libraryDirs = %(libraryDirs)r
-runProfile = 0
+runProfile = False
 logFile = None
 appServer = 'ThreadedAppServer'
 serviceName = 'WebKit'
@@ -525,7 +525,7 @@ def main(args=None):
         elif opt in ('-l', '--library'):
             libraryDirs.append(arg)
         elif opt in ('-i', '--cvsignore'):
-            cvsIgnore = 1
+            cvsIgnore = True
         elif opt in ('-u', '--user'):
             user = arg
         elif opt in ('-g', '--group'):
@@ -582,7 +582,7 @@ def main(args=None):
         scriptName = 'MakeAppWorkDir.py'
     binDir = os.path.dirname(os.path.abspath(scriptName))
     webwareDir = os.path.abspath(os.path.join(binDir, os.pardir))
-    mawd = MakeAppWorkDir(webwareDir, workDir, 1, None,
+    mawd = MakeAppWorkDir(webwareDir, workDir, True, None,
         contextName, contextDir, libraryDirs, cvsIgnore, uid, gid)
     mawd.buildWorkDir() # go!
 

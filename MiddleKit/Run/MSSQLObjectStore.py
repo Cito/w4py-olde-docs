@@ -61,9 +61,10 @@ class MSSQLObjectStore(SQLObjectStore):
         args = self._dbArgs.copy()
         if args.get('DriverConnect'):
             # @@ problem here is that clear_auto_commit can't be set to zero
-            # example: storeArgs = {'DriverConnect': 'DRIVER=SQL Server;UID=echuck;Trusted_Connection=Yes;WSID=ALIEN;SERVER=ALIEN'}
+            # example: storeArgs = {'DriverConnect': 'DRIVER=SQL Server;'
+            # 'UID=echuck;Trusted_Connection=Yes;WSID=ALIEN;SERVER=ALIEN'}
             # ODBC driver connection keywords are documented here:
-            # http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbcsql/od_odbc_d_4x4k.asp
+            # http://msdn.microsoft.com/de-de/library/ms131421.aspx
             s = args['DriverConnect']
             if 'DATABASE=' not in s:
                 if not s.endswith(';'):

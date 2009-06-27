@@ -120,8 +120,10 @@ class PropertiesObject(dict):
 
     def checkRequiredPyVersion(self):
         if tuple(sys.version_info) < tuple(self['requiredPyVersion']):
-            raise WillNotRunError('Required Python version is %s, but actual version is %s.' % (
-                '.'.join(map(str, self['requiredPyVersion'])), '.'.join(map(str, sys.version_info))))
+            raise WillNotRunError('Required Python version is %s,'
+                ' but actual version is %s.' % (
+                '.'.join(map(str, self['requiredPyVersion'])),
+                '.'.join(map(str, sys.version_info))))
 
     def checkRequiredOpSys(self):
         requiredOpSys = self.get('requiredOpSys')
@@ -130,7 +132,8 @@ class PropertiesObject(dict):
             if isinstance(requiredOpSys, basestring):
                 requiredOpSys = [requiredOpSys]
             if not os.name in requiredOpSys:
-                raise WillNotRunError('Required operating system is %s, but actual operating system is %s.' % (
+                raise WillNotRunError('Required operating system is %s,'
+                    ' but actual operating system is %s.' % (
                     '/'.join(requiredOpSys), os.name))
 
     def checkDeniedOpSys(self):
@@ -140,7 +143,8 @@ class PropertiesObject(dict):
             if isinstance(deniedOpSys, basestring):
                 deniedOpSys = [deniedOpSys]
             if os.name in deniedOpSys:
-                raise WillNotRunError('Will not run on operating system %s and actual operating system is %s.' % (
+                raise WillNotRunError('Will not run on operating system %s'
+                    ' and actual operating system is %s.' % (
                     '/'.join(deniedOpSys), os.name))
 
     def checkRequiredSoftware(self):

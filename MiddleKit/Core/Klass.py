@@ -29,7 +29,8 @@ class Klass(MiddleDict, ModelObject):
         self._attrsByName = {}
         self._superklass = None
         self._subklasses = []
-        self._pyClass = False   # False means never computed. None would mean computed, but not found.
+        # False means never computed; None would mean computed, but not found:
+        self._pyClass = False
         self._backObjRefAttrs = None
         self._allAttrs = None
         if rawDict is not None:

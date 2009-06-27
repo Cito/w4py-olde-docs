@@ -94,14 +94,11 @@ class ReleaseHelper:
         if os.path.exists(target):
             print "There is incomplete ReleaseHelper data in:", target
             print "Please remove this directory."
-            return 1
+            return
 
         cleanup = [target]
 
-        if tag:
-            source = '%s/%s' % (url, tag)
-        else:
-            source = '.'
+        source = tag and '%s/%s' % (url, tag) or '.'
 
         try:
             self.run('svn export -q %s %s' % (source, target))

@@ -18,10 +18,10 @@ def _SyntaxError(s):
     raise DictForArgsError('Syntax error: %r' % s)
 
 
-_nameRE   = re.compile(r'\w+')
+_nameRE = re.compile(r'\w+')
 _equalsRE = re.compile(r'\=')
 _stringRE = re.compile(r'''"[^"]+"|'[^']+'|\S+''')
-_whiteRE  = re.compile(r'\s+')
+_whiteRE = re.compile(r'\s+')
 
 _REs = [_nameRE, _equalsRE, _stringRE, _whiteRE]
 
@@ -61,8 +61,8 @@ def DictForArgs(s):
 
     verbose = False
     matches = []
-    start   = 0
-    sLen    = len(s)
+    start = 0
+    sLen = len(s)
 
     if verbose:
         print '>> DictForArgs(%s)' % repr(s)
