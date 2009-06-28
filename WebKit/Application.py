@@ -388,7 +388,7 @@ class Application(ConfigurableForServerSidePath):
 
     def hasSession(self, sessionId):
         """Check whether session `sessionId` exists."""
-        return self._sessions.has_key(sessionId)
+        return sessionId in self._sessions
 
     def sessions(self):
         """A dictionary of all the session objects."""
@@ -542,8 +542,6 @@ class Application(ConfigurableForServerSidePath):
             values.append(value)
         f.write(','.join(values) + '\n')
         f.close()
-        for k in objects.keys():
-            objects[k] = None
 
 
     ## Request Dispatching ##
@@ -667,9 +665,9 @@ class Application(ConfigurableForServerSidePath):
                 if isHTTPException and not url:
                     # get custom error page for status code
                     code = err.code()
-                    if self._errorPage.has_key(code):
+                    if code in self._errorPage:
                         url = self._errorPage[code]
-                if not url or urls.has_key(url):
+                if not url or url in urls:
                     # If there is no custom error page configured,
                     # or we get into a circular chain of error pages,
                     # then we fall back to standard error handling.
@@ -842,7 +840,7 @@ class Application(ConfigurableForServerSidePath):
 
     def errorPage(self, errorClass):
         """Get the error page url corresponding to an error class."""
-        if self._errorPage.has_key(errorClass.__name__):
+        if errorClass.__name__ in self._errorPage:
             return self._errorPage[errorClass.__name__]
         if errorClass is not Exception:
             for errorClass in errorClass.__bases__:
@@ -885,7 +883,7 @@ class Application(ConfigurableForServerSidePath):
 
     def hasContext(self, name):
         """Checks whether context `name` exist."""
-        return self._rootURLParser._contexts.has_key(name)
+        return name in self._rootURLParser._contexts
 
     def addContext(self, name, path):
         """Add a context by named `name`, rooted at `path`.
@@ -936,7 +934,7 @@ class Application(ConfigurableForServerSidePath):
                 env = request.environ()
                 request._pathInfo = env['PATH_INFO'] = '/'.join(p)
                 for v in ('REQUEST_URI', 'PATH_TRANSLATED'):
-                    if env.has_key(v):
+                    if v in env:
                         env[v] = env[v].replace(s, '', 1)
             else:
                 request._pathSID = None

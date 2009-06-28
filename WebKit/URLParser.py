@@ -134,7 +134,7 @@ class ContextParser(URLParser):
                         break
                 else: # if not available, refuse the tempatation to guess
                     raise KeyError("No default context has been specified.")
-        if self._contexts.has_key(defaultContext):
+        if defaultContext in self._contexts:
             self._defaultContext = defaultContext
         else:
             for name, dir in self._contexts.items():
@@ -164,7 +164,7 @@ class ContextParser(URLParser):
         for name, path in contexts.items():
             if name != 'default':
                 contextDirs[self.absContextPath(path)] = name
-        if contexts.has_key(dest):
+        if dest in contexts:
             # The default context refers to another context,
             # not a unique context.  Return the name of that context.
             return dest
@@ -197,7 +197,7 @@ class ContextParser(URLParser):
         try:
             importAsName = name
             localDir, packageName = os.path.split(dir)
-            if sys.modules.has_key(importAsName):
+            if importAsName in sys.modules:
                 mod = sys.modules[importAsName]
             else:
                 try:
@@ -294,7 +294,7 @@ class ContextParser(URLParser):
             parts = []
             while context:
                 contextName = '/'.join(context)
-                if self._contexts.has_key(contextName):
+                if contextName in self._contexts:
                     break
                 parts.insert(0, context.pop())
             if context:
@@ -572,12 +572,11 @@ class _FileParser(URLParser):
         for context, dir in self._app.contexts().items():
             if dir == path:
                 # avoid reloading of the context package
-                return sys.modules[context]
+                return sys.modules.get(context)
         name = 'WebKit_Cache_' + _moduleNameRE.sub('_', path)
         try:
             file, path, desc = self._imp.find_module('__init__', [path])
-            module = self._imp.load_module(name, file, path, desc)
-            return module
+            return self._imp.load_module(name, file, path, desc)
         except (ImportError, TypeError):
             pass
 
@@ -673,16 +672,16 @@ class _FileParser(URLParser):
             except ValueError:
                 nextPart = requestPath[1:]
                 restPath = ''
-            if mod.urlRedirect.has_key(nextPart):
+            if nextPart in mod.urlRedirect:
                 redirTo = mod.urlRedirect[nextPart]
                 redirPath = restPath
-            elif mod.urlRedirect.has_key(''):
+            elif '' in mod.urlRedirect:
                 redirTo = mod.urlRedirect['']
                 redirPath = restPath
             else:
                 redirTo = None
             if redirTo:
-                if type(redirTo) is type(""):
+                if isinstance(redirTo, basestring):
                     fpp = FileParser(os.path.join(self._path, redirTo))
                 else:
                     fpp = redirTo

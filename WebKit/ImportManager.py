@@ -16,32 +16,6 @@ import imp
 from Common import *
 
 
-class ImportLock:
-    """Lock for multi-threaded imports.
-
-    Provides a lock for protecting against concurrent imports. This is
-    necessary because WebKit is multithreaded and uses its own import hook.
-
-    This class abstracts the difference between using the Python interpreter's
-    global import lock, and using our own RLock. The global lock is the correct
-    solution, but is only available in Python since version 2.2.3. If it's not
-    available, we fall back to using an RLock (which is not as good, but better
-    than nothing).
-
-    """
-
-    def __init__(self):
-        """Create the lock.
-
-        Aliases the `acquire` and `release` methods to
-        `imp.acquire_lock` and `imp.release_lock` (if available),
-        or to acquire and release our own RLock.
-
-        """
-        self.acquire = imp.acquire_lock
-        self.release = imp.release_lock
-
-
 class ImportManager(object):
     """The import manager.
 
@@ -65,10 +39,10 @@ class ImportManager(object):
         """Replaces imp.load_module."""
         try:
             try:
-                self._lock.acquire()
+                imp.acquire_lock()
                 mod = imp.load_module(name, file, filename, info)
             finally:
-                self._lock.release()
+                imp.release_lock()
                 if file:
                     file.close()
             self.recordModule(mod)
@@ -98,7 +72,7 @@ class ImportManager(object):
             # Update list of files of imported modules
             moduleNames = []
             for modname in sys.modules:
-                if not self._moduleFiles.has_key(modname):
+                if modname not in self._moduleFiles:
                     moduleNames.append(modname)
             if moduleNames:
                 self.recordModules(moduleNames)
@@ -126,13 +100,13 @@ class ImportManager(object):
     def recordModule(self, mod, isfile=os.path.isfile):
         """Record a module."""
         modname = getattr(mod, '__name__', None)
-        if not modname or not sys.modules.has_key(modname):
+        if not modname or modname not in sys.modules:
             return
         fileList = self._fileList
         # __orig_file__ is used for PSP, Kid and Cheetah templates; we want
         # to record the source filenames, not the auto-generated modules:
         f = getattr(mod, '__orig_file__', None)
-        if f and not fileList.has_key(f):
+        if f and f not in fileList:
             try:
                 if isfile(f):
                     self.watchFile(f, modname)
@@ -140,7 +114,7 @@ class ImportManager(object):
                 pass
         else:
             f = getattr(mod, '__file__', None)
-            if f and not fileList.has_key(f):
+            if f and f not in fileList:
                 # record the .py file corresponding to each .pyc or .pyo
                 if f[-4:].lower() in ('.pyc', '.pyo'):
                     f = f[:-1]
