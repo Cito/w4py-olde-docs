@@ -30,7 +30,6 @@ class ImportManager(object):
         """Create import hook."""
         assert not self._imp, "Only one instance of ImportManager is possible."
         self._imp = True
-        self._lock = ImportLock()
         self._fileList = {}
         self._moduleFiles = {}
         self._notifyHook = None
