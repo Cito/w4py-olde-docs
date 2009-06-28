@@ -213,11 +213,13 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
         if fileDict is None:
             if debug:
                 print '>> not found in cache'
-            fileType = guess_type(filename, 0)
-            mimeType = fileType[0]
-            mimeEncoding = fileType[1]
+            try:
+                mimeType, mimeEncoding = guess_type(filename, False)
+            except Exception:
+                mimeType = None
             if mimeType is None:
                 mimeType = 'application/octet-stream'
+                mimeEncoding = None
         else:
             mimeType = fileDict['mimeType']
             mimeEncoding = fileDict['mimeEncoding']
