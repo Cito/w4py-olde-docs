@@ -564,14 +564,15 @@ class Installer:
             t = 'WebKit/webkit'
             open(t, 'wb').write(open(s, 'rb').read())
 
-    def compileModules(self, force=False):
+    def compileModules(self, force=True):
         """Compile modules in all installed componentes."""
         from compileall import compile_dir
         print
         print 'Byte compiling all modules...'
+        ddir = os.path.abspath('WebKit')
         for comp in self._comps:
             dir = comp['dirname']
-            compile_dir(dir, force=force, quiet=True)
+            compile_dir(dir, ddir=ddir, force=force, quiet=True)
 
     def fixPermissions(self):
         if os.name == 'posix':
