@@ -407,11 +407,9 @@ def _test():
                 if req.env.has_key('CONTENT_LENGTH'):
                     cl = int(req.env['CONTENT_LENGTH'])
                     doc.append('<br><b>POST data (%d):</b><br><pre>' % cl)
-                    keys = fs.keys()
-                    keys.sort()
-                    for k in keys:
+                    for k in sorted(fs):
                         val = fs[k]
-                        if type(val) == type([]):
+                        if isinstance(val, list):
                             doc.append('    <b>%-15s :</b>  %s\n' % (k, val))
                         else:
                             doc.append('    <b>%-15s :</b>  %s\n' % (k, val.value))

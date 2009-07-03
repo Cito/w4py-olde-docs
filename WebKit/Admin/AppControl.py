@@ -57,7 +57,7 @@ class AppControl(AdminSecurity):
                 ' Use "Clear Cache" to clean out any servlets'
                 ' in this condition.<p>')
             reloadnames = req.field("reloads", None)
-            if not type(reloadnames) == type([]):
+            if not isinstance(reloadnames, list):
                 reloadnames = [reloadnames]
             wr('<p>')
             for n in reloadnames:

@@ -98,7 +98,7 @@ HTML_XMLNS = ' xmlns="http://www.w3.org/1999/xhtml"'
 ### Helpers
 
 def fileio(file, mode='rb', data=None, close=False):
-    if type(file) == type(''):
+    if isinstance(file, basestring):
         f = open(file, mode)
         close = True
     else:
@@ -162,7 +162,7 @@ class PrettyPrint(object):
     def file_filter(self, infile, outfile):
         self.set_mode()
         text = fileio(infile, 'r')
-        if type(infile) == type('') and self.title == '':
+        if isinstance(infile, basestring) and not self.title:
             self.title = infile
         fileio(outfile, 'w', self.filter(text))
 
@@ -340,9 +340,9 @@ def addsplits(splits, text, formats, taglist):
         except KeyError:
             # print >>sys.stderr, 'No format for %s specified\n' % repr(id)
             pre, post = '',''
-        if type(pre) != type(''):
+        if not isinstance(pre, basestring):
             pre = pre(text[left:right])
-        if type(post) != type(''):
+        if not isinstance(post, basestring):
             post = post(text[left:right])
         # len(splits) is a dummy used to make sorting stable
         splits.append((left, len(splits), pre))

@@ -20,13 +20,12 @@ class Introspect(ExamplePage):
         self.writeln('</table>')
 
     def pair(self, key, value):
-        valueType = type(value)
-        if valueType is type([])  or  valueType is type(()):
+        if isinstance(value, (list, tuple)):
             value = ', '.join(map(str, value))
         self.writeln('<tr valign="top"><td>%s</td><td>%s</td></tr>'
             % (key, self.htmlEncode(str(value))))
 
     def list(self, codeString):
-        list = eval(codeString)
-        assert type(list) is type([])  or  type(list) is type(())
-        self.pair(codeString, list)
+        value = eval(codeString)
+        assert isinstance(value, (list, tuple))
+        self.pair(codeString, value)

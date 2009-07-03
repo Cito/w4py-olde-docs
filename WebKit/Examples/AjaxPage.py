@@ -127,7 +127,7 @@ class AjaxPage(BaseClass):
         if req.hasField('_call_'):
             call = req.field('_call_')
             args = req.field('_', [])
-            if type(args) != type([]):
+            if not isinstance(args, list):
                 args = [args]
             if self._clientPolling and self._responseTimeout:
                 startTime = time.time()

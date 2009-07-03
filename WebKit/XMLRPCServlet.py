@@ -50,7 +50,7 @@ class XMLRPCServlet(RPCServlet):
                     response = self.exposedMethods()[params[0]]
                 else:
                     response = self.call(method, *params)
-                if type(response) != type(()):
+                if not isinstance(response, tuple):
                     response = (response,)
             except xmlrpclib.Fault, fault:
                 response = xmlrpclib.dumps(fault, encoding=encoding,

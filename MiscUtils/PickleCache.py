@@ -50,7 +50,6 @@ verbose = False
 import os
 import sys
 import time
-from types import DictType
 from pprint import pprint
 try:
     from cPickle import load, dump

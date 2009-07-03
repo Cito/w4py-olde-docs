@@ -1,6 +1,5 @@
 import sys
 import unittest
-import types
 
 import FixPath
 from MiscUtils.NamedValueAccess import (

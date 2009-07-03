@@ -895,7 +895,7 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
             print "       You can only connect to", self._serverAddress[1], \
                 "via an adapter like mod_webkit or wkcgi."
             return None
-        if type(dictLength) != type(1):
+        if not isinstance(dictLength, int):
             self._sock.close()
             raise ProtocolError("Invalid AppServer protocol")
         chunk = ''

@@ -78,7 +78,7 @@ class ThreadControl(AdminSecurity):
             killIDs = field('longIDs', None) or []
         else:
             killIDs = []
-        if type(killIDs) != type([]):
+        if not isinstance(killIDs, list):
             killIDs = [killIDs]
         try:
             killIDs = map(int, killIDs)

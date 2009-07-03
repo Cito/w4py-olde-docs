@@ -91,18 +91,18 @@ class PySummary:
         res.append(settings['file'][0] % locals())
         if self._lines:
             for line in self._lines:
-                type = line.type()
+                lineType = line.type()
                 if (line.text()[:1].lstrip()
-                        and settings[type][0][:1] == '\n'):
+                        and settings[lineType][0][:1] == '\n'):
                     res.append('\n')
-                res.append(settings[type][0])
+                res.append(settings[lineType][0])
                 if span:
-                    res.append('<span class="line_%s">' % type)
+                    res.append('<span class="line_%s">' % lineType)
                 res.append(getattr(line, format)()) # e.g., line.format()
                 if span:
                     res.append('</span>')
                 res.append('\n')
-                res.append(settings[type][1])
+                res.append(settings[lineType][1])
         else:
             res.append('# No classes or functions defined in this module.')
         res.append('\n')

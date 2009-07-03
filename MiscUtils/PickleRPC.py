@@ -211,15 +211,15 @@ class Server:
         """Establish a "logical" server connection."""
         # get the url
         import urllib
-        type, uri = urllib.splittype(uri)
-        if type not in ('http', 'https'):
+        typ, uri = urllib.splittype(uri)
+        if typ not in ('http', 'https'):
             raise IOError, 'unsupported Pickle-RPC protocol'
         self._host, self._handler = urllib.splithost(uri)
         if not self._handler:
             self._handler = '/PickleRPC'
 
         if transport is None:
-            transport = (type == 'https' and SafeTransport or Transport)()
+            transport = (typ == 'https' and SafeTransport or Transport)()
         self._transport = transport
 
         self._verbose = verbose

@@ -117,7 +117,7 @@ class Klass(MiddleDict, ModelObject):
             for attr in attrs:
                 if not attr.get('isDerived', False):
                     allDataAttrs.append(attr)
-                    if isinstance(attr, ObjRefAttr) or isinstance(attr, ListAttr):
+                    if isinstance(attr, (ObjRefAttr, ListAttr)):
                         allDataRefAttrs.append(attr)
 
         self._allAttrs = allAttrs

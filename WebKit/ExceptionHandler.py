@@ -2,7 +2,6 @@
 
 import traceback, poplib, smtplib
 from os import pathsep
-from types import ClassType, DictType, ListType
 from random import randint
 
 try:
@@ -468,10 +467,10 @@ class ExceptionHandler(object):
         if not self.setting('LogErrors'):
             return
         err, msg = self._exc[:2]
-        if isinstance(err, ClassType):
-            err, msg = err.__name__, str(msg)
-        else: # string exception
+        if isinstance(err, basestring): # string exception
             err, msg = '', str(msg or err)
+        else:
+            err, msg = err.__name__, str(msg)
         logline = (asclocaltime(self._time),
             self.basicServletName(), self.servletPathname(),
             err, msg, errorMsgFilename or '')
@@ -513,7 +512,7 @@ class ExceptionHandler(object):
             + ' %s: %s' % sys.exc_info()[:2]
         add_header = Message and message.add_header or writer.addheader
         for h, v in headers.items():
-            if isinstance(v, ListType):
+            if isinstance(v, (list, tuple)):
                 v = ','.join(v)
             add_header(h, v)
 
@@ -674,7 +673,7 @@ class ExceptionHandler(object):
         This is a utility method for `writeAttrs`.
 
         """
-        if isinstance(value, DictType):
+        if isinstance(value, dict):
             return htmlForDict(value, addSpace=self._addSpace,
                 filterValueCallBack=self.filterDictValue,
                 maxValueLength=self._maxValueLength)

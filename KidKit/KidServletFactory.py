@@ -44,7 +44,7 @@ def kidClass(module):
         hook = module.hook
     except AttributeError:
         hook = defaultHook
-    assert type(hook) == type(defaultHook)
+    assert type(hook) is type(defaultHook)
     ServletClass = hook.im_class
     assert issubclass(ServletClass, Servlet)
     writeMethod = hook.__name__
