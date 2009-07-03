@@ -250,7 +250,7 @@ class AppServer(ConfigurableForServerSidePath):
         return self._plugIns
 
     def plugIn(self, name, default=NoDefault):
-        """ Return the plug-in with the given name. """
+        """Return the plug-in with the given name."""
         # @@ 2001-04-25 ce: linear search. yuck.
         # Plus we should guarantee plug-in name uniqueness anyway
         for plugin in self._plugIns:

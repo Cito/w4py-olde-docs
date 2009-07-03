@@ -363,7 +363,7 @@ class Application(ConfigurableForServerSidePath):
         return self._webwareVersionString
 
     def webKitVersion(self):
-        """ Return the WebKit version as a tuple."""
+        """Return the WebKit version as a tuple."""
         # @@ 2003-03 ib: This is synced with Webware now, should be removed
         # because redundant (and not that useful anyway)
         return self._webKitVersion

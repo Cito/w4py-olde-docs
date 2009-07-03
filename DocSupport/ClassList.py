@@ -110,7 +110,7 @@ class ClassList(object):
         names = map(lambda part: part.strip(), names)
         # get rid of empty strings
         names = filter(None, names)
-        # special case:  class foo(fi): pass
+        # special case: class foo(fi): pass
         if names[-1] == 'pass':
             del names[-1]
         # check for weirdos

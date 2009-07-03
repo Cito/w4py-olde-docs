@@ -35,11 +35,11 @@ class Message(object):
     ## Content ##
 
     def contentLength(self):
-        """ Returns the length of the message body or -1 if not known. """
+        """Return the length of the message body or -1 if not known."""
         return -1
 
     def contentType(self):
-        """ Returns the MIME type of the message body or None if not known. """
+        """Return the MIME type of the message body or None if not known."""
         return None
 
 
@@ -79,7 +79,7 @@ class Message(object):
         self._args.clear()
 
     def argNames(self):
-        """ Returns a list of argument names. """
+        """Return a list of argument names."""
         return self._args.keys()
 
 
