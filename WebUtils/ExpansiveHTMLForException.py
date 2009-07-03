@@ -1,10 +1,10 @@
 """ExpansiveHTMLForException.py
 
-Create expansive HTML for exceptions using the cgitb module.
+Create expansive HTML for exceptions using the CGITraceback module.
 
 """
 
-from WebUtils import cgitb
+from WebUtils import CGITraceback
 
 
 HTMLForExceptionOptions = {
@@ -23,4 +23,4 @@ def ExpansiveHTMLForException(context=5, options=None):
         opt.update(options)
     else:
         opt = HTMLForExceptionOptions
-    return cgitb.html(context=context, options=opt)
+    return CGITraceback.html(context=context, options=opt)

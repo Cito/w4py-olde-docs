@@ -404,7 +404,7 @@ class ExceptionHandler(object):
         self.writeDict(osIdDict(), ('Name', 'Value'))
 
     def writeFancyTraceback(self):
-        """Output a fancy traceback, using cgitb."""
+        """Output a fancy traceback, using CGITraceback."""
         if self.setting('IncludeFancyTraceback'):
             self.writeTitle('Fancy Traceback')
             try:

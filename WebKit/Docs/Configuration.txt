@@ -280,8 +280,9 @@ Errors
     If True, then display a fancy, detailed traceback at the end of
     the error page.  It will include the values of local variables in
     the traceback.  This makes use of a modified version of ``cgitb.py``
-    which is included with Webware.  The `original version`__ was
-    written by Ka-Ping Yee.  Default: ``False`` (off).
+    which is included with Webware as ``CGITraceback.py``.
+    The `original version`__ was written by Ka-Ping Yee.
+    Default: ``False`` (off).
 
     __ http://web.lfw.org/python/
 

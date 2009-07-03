@@ -1,14 +1,17 @@
 """More comprehensive traceback formatting for Python scripts.
 
-By Ka-Ping Yee <ping@lfw.org> http://web.lfw.org/python/
+Original version know as cgitb written By Ka-Ping Yee <ping@lfw.org>
 Modified for Webware by Ian Bicking <ianb@colorstudy.com>
 
 """
 
-import inspect, keyword, linecache, pydoc, os, sys, tokenize, types
+import inspect, keyword, linecache, pydoc, os, sys, tokenize
+from types import MethodType
+
 
 pyhtml = pydoc.html
 escape = pyhtml.escape
+
 
 DefaultOptions = {
     'table': 'background-color:#F0F0F0',
@@ -21,10 +24,12 @@ DefaultOptions = {
     'code.unaccent': 'color:#999999;font-size:10pt',
 }
 
+
 def breaker():
     return ('<body style="background-color:#F0F0FF">' +
         '<span style="color:#F0F0FF;font-size:small"> > </font> ' +
         '</table>' * 5)
+
 
 def html(context=5, options=None):
     if options:
@@ -34,7 +39,7 @@ def html(context=5, options=None):
         opt = DefaultOptions
 
     etype, evalue = sys.exc_info()[:2]
-    if isinstance(etype, types.ClassType):
+    if not isinstance(etype, basestring):
         etype = etype.__name__
     inspect_trace = inspect.trace(context)
     inspect_trace.reverse()
@@ -141,10 +146,10 @@ def html(context=5, options=None):
             pass
         lvals = []
         for name in names:
-            if isinstance(name, types.ListType):
-                if locals.has_key(name[0]) or frame.f_globals.has_key(name[0]):
+            if isinstance(name, list):
+                if name[0] in locals or name[0] in frame.f_globals:
                     name_list, name = name, name[0]
-                    if locals.has_key(name_list[0]):
+                    if name_list[0] in locals:
                         value = locals[name_list[0]]
                     else:
                         value = frame.f_globals[name_list[0]]
@@ -157,18 +162,18 @@ def html(context=5, options=None):
                             name += '.' + '(unknown: %s)' % subname
                             break
                     name = '<strong>%s</strong>' % name
-                    if isinstance(value, types.MethodType):
+                    if isinstance(value, MethodType):
                         value = None
                     else:
                         value = html_repr(value)
             elif name in frame.f_code.co_varnames:
-                if locals.has_key(name):
+                if name in locals:
                     value = html_repr(locals[name])
                 else:
                     value = '<em>undefined</em>'
                 name = '<strong>%s</strong>' % name
             else:
-                if frame.f_globals.has_key(name):
+                if name in frame.f_globals:
                     value = html_repr(frame.f_globals[name])
                 else:
                     value = '<em>undefined</em>'
@@ -220,9 +225,11 @@ def html(context=5, options=None):
     return (javascript + head + ''.join(traceback)
         + exception + ''.join(attribs) + '</p>\n')
 
+
 def handler():
     print breaker()
     print html()
+
 
 def html_repr(value):
     html_repr_instance = pyhtml._repr_instance
@@ -235,9 +242,3 @@ def html_repr(value):
             escape(plain_value).replace("'", "\\'").replace('"', '&quot;')))
     else:
         return enc_value
-
-if __name__ == '__main__':
-    try:
-        import tester
-    except ImportError:
-        handler()
