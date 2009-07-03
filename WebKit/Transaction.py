@@ -1,8 +1,7 @@
 """The Transaction container."""
 
+import sys
 import traceback
-
-from Common import *
 
 
 class Transaction(object):
@@ -176,12 +175,10 @@ class Transaction(object):
         This method should be invoked when the entire transaction is
         finished with. Currently, this is invoked by AppServer. This method
         removes references to the different objects in the transaction,
-        breaking cyclic reference chains and allowing either older versions
-        of Python to collect garbage, or newer versions to collect it faster.
+        breaking cyclic reference chains and speeding up garbage collection.
 
         """
         for name in self.__dict__.keys(): # needs keys() since dict changes
-            attr = getattr(self,  name)
             delattr(self, name)
 
 

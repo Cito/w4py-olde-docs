@@ -18,15 +18,17 @@ When started, the app server records its pid in appserver.pid.
 
 """
 
-import threading, Queue, select, socket, errno, traceback
-from marshal import dumps, loads
-from threading import Lock, Thread, Event
+import os
+import sys
+import traceback
 
-from Common import *
+from time import time
+
+from MiscUtils import StringIO
+from MiscUtils.Funcs import asclocaltime
+
 import AppServer as AppServerModule
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
-from MiscUtils.Funcs import timestamp
-from WebUtils import Funcs
 
 
 debug = False
@@ -46,7 +48,7 @@ class CgiPlusAppServer(AppServer):
 
         # temporaire
         from WebKit import Profiler
-        Profiler.startTime = time.time()
+        Profiler.startTime = time()
         self.readyForRequests()
 
     def addInputHandler(self, handlerClass):
@@ -76,7 +78,7 @@ class CgiPlusAppServer(AppServer):
             # init environment cgi variables
             os.environ = environ_ini.copy()
             wasd.init_environ()
-            print >>sys.__stdout__, "Script-Control: X-stream-mode"
+            print >> sys.__stdout__, "Script-Control: X-stream-mode"
             self._requestID += 1
             self._app._sessions.cleanStaleSessions()
             self.handler = handler = self._handler(self)
@@ -186,7 +188,6 @@ def run(workDir=None):
                 if not doesRunHandleExceptions:
                     raise
                 if not isinstance(e, SystemExit):
-                    import traceback
                     traceback.print_exc(file=sys.stderr)
                 print
                 print "Exiting AppServer"
@@ -195,15 +196,16 @@ def run(workDir=None):
                         server.initiateShutdown()
                 # if we're here as a result of exit() being called,
                 # exit with that return code.
-                if isinstance(e,SystemExit):
+                if isinstance(e, SystemExit):
                     sys.exit(e)
         finally:
             AppServerModule.globalAppServer = None
     sys.exit()
 
 
+# Signal handlers
+
 def shutDown(arg1, arg2):
-    global server
     print "Shutdown Called", asclocaltime()
     if server:
         server.initiateShutdown()
@@ -214,9 +216,11 @@ import signal
 signal.signal(signal.SIGINT, shutDown)
 signal.signal(signal.SIGTERM, shutDown)
 
-usage = re.search('\n.* arguments:\n\n(.*\n)*?\n', __doc__).group(0)
+
+# Command line interface
 
 import re
+usage = re.search('\n.* arguments:\n\n(.*\n)*?\n', __doc__).group(0)
 settingRE = re.compile(r'^--([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
 from MiscUtils import Configurable
 
@@ -224,18 +228,18 @@ def main(args):
     function = run
     workDir = None
     sys.stdout = StringIO()
-    for i in args[:]:
-        if settingRE.match(i):
-            match = settingRE.match(i)
+    for arg in args[:]:
+        if settingRE.match(arg):
+            match = settingRE.match(arg)
             name = match.group(1)
-            value = i[match.end():]
+            value = arg[match.end():]
             Configurable.addCommandLineSetting(name, value)
-        elif i == "stop":
+        elif arg == "stop":
             function = AppServerModule.stop
-        elif i == "start":
+        elif arg == "start":
             pass
-        elif i[:8] == "workdir=":
-            workDir = i[8:]
+        elif arg[:8] == "workdir=":
+            workDir = arg[8:]
         else:
             print usage
 

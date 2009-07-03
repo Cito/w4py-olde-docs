@@ -1,9 +1,13 @@
 """HTTP requests"""
 
-import cgi, traceback
+import cgi
+import os
+import sys
+import traceback
 from operator import itemgetter
+from time import time
 
-from Common import *
+from MiscUtils import NoDefault
 from WebUtils import FieldStorage
 from WebKit.Cookie import CookieEngine
 Cookie = CookieEngine.SimpleCookie
@@ -44,7 +48,7 @@ class HTTPRequest(Request):
         else:
             # If there's no dictionary, we pretend we're a CGI script
             # and see what happens...
-            self._time = time.time()
+            self._time = time()
             self._environ = os.environ.copy()
             self._input = None
             self._fields = cgi.FieldStorage(keep_blank_values=True)

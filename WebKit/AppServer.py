@@ -22,9 +22,13 @@ vague -- both are global singletons and both handle dispatching requests.
 
 """
 
+import os
+import sys
+from time import time
 from threading import Thread, Event
 
-from Common import *
+from MiscUtils import AbstractError, NoDefault
+from MiscUtils.Funcs import asclocaltime
 from Application import Application
 from ImportManager import ImportManager
 from PlugIn import PlugIn
@@ -65,7 +69,7 @@ class AppServer(ConfigurableForServerSidePath):
 
         """
         self._running = 0
-        self._startTime = time.time()
+        self._startTime = time()
 
         global globalAppServer
         if globalAppServer:
@@ -92,7 +96,8 @@ class AppServer(ConfigurableForServerSidePath):
         self.checkForInstall()
         self.config() # cache the config
         self.printStartUpMessage()
-        sys.setcheckinterval(self.setting('CheckInterval'))
+        if self.setting('CheckInterval') is not None:
+            sys.setcheckinterval(self.setting('CheckInterval'))
         self._app = self.createApplication()
         self.loadPlugIns()
 
@@ -131,7 +136,7 @@ class AppServer(ConfigurableForServerSidePath):
         """
         if Profiler.startTime is None:
             Profiler.startTime = self._startTime
-        Profiler.readyTime = time.time()
+        Profiler.readyTime = time()
         Profiler.readyDuration = Profiler.readyTime - Profiler.startTime
         print "Ready (%.2f seconds after launch)." % Profiler.readyDuration
         print
@@ -187,7 +192,7 @@ class AppServer(ConfigurableForServerSidePath):
                 # You might also considering having a page/servlet
                 # that lets you dump the stats on demand.
                 print 'AppServer ran for %0.2f seconds.' % (
-                    time.time() - Profiler.startTime)
+                    time() - Profiler.startTime)
             print "AppServer has been shutdown."
             sys.stdout.flush()
             sys.stderr.flush()

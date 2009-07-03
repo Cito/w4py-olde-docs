@@ -1,4 +1,4 @@
-from WebKit.Common import asclocaltime
+from MiscUtils.Funcs import asclocaltime
 from ExamplePage import ExamplePage
 
 

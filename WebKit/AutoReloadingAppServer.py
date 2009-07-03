@@ -13,10 +13,13 @@ in seconds can be set with `AutoReloadPollInterval` in AppServer.config.
 
 """
 
-import select, errno
+import os
+import sys
+import errno
+import select
+from time import sleep
 from threading import Thread
 
-from Common import *
 from AppServer import AppServer
 
 
@@ -309,7 +312,7 @@ class AutoReloadingAppServer(AppServer):
 
         """
         while self._runFileMonitor:
-            time.sleep(self._pollInterval)
+            sleep(self._pollInterval)
             f = self._imp.updatedFile()
             if f:
                 print '*** The file', f, 'has changed.'

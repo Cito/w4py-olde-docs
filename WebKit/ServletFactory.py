@@ -1,9 +1,13 @@
 """Servlet factory template."""
 
-from keyword import iskeyword
+import os
+import sys
 import threading
 
-from Common import *
+from keyword import iskeyword
+
+from MiscUtils import AbstractError
+
 from Servlet import Servlet
 
 debug = False

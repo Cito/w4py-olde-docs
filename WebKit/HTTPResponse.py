@@ -1,15 +1,18 @@
+"""HTTP responses"""
 
-from Common import *
+from time import time, gmtime, strftime
 
 # time.gmtime() no longer returns a tuple, and there is no globally defined
 # type for this at the moment.
-TimeTupleType = type(time.gmtime(0))
+TimeTupleType = type(gmtime(0))
+
+from MiscUtils import mxDateTime as DateTime
+from MiscUtils import NoDefault
+from MiscUtils.DateInterval import timeDecode
 
 from Response import Response
 from Cookie import Cookie
 from HTTPExceptions import HTTPException, HTTPServerError
-from MiscUtils import mxDateTime as DateTime
-from MiscUtils.DateInterval import timeDecode
 
 debug = False
 
@@ -120,15 +123,15 @@ class HTTPResponse(Response):
                 cookie.delete()
                 return
             elif t == 'NEVER':
-                t = time.gmtime()
+                t = gmtime()
                 t = (t[0] + 10,) + t[1:]
             elif t.startswith('+'):
-                t = time.time() + timeDecode(t[1:])
+                t = time() + timeDecode(t[1:])
         if t:
             if isinstance(t, (int, long, float)):
-                t = time.gmtime(t)
+                t = gmtime(t)
             if isinstance(t, (tuple, TimeTupleType)):
-                t = time.strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
+                t = strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
             if DateTime:
                 if isinstance(t, (DateTime.DateTimeDeltaType,
                         DateTime.RelativeDateTime)):
@@ -428,12 +431,11 @@ class HTTPResponse(Response):
         merge them into our headers.
 
         """
-        linesep = "\n"
-        lines = headerstr.split("\n")
+        lines = headerstr.splitlines()
         for line in lines:
-            sep = line.find(":")
-            if sep:
-                self.setHeader(line[:sep], line[sep+1:].rstrip())
+            header = line.split(':', 1)
+            if len(header) > 1:
+                self.setHeader(header[0], header[1].rstrip())
 
 
     ## Exception reporting ##

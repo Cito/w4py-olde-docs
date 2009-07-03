@@ -1,6 +1,7 @@
 from math import sin, pi
 
-from WebKit.Common import *
+from MiscUtils import StringIO
+from MiscUtils.Funcs import asclocaltime
 from ExamplePage import ExamplePage
 
 try: # GD module
@@ -35,13 +36,12 @@ colors = (255, 255, 255), (0, 0, 0), (0, 0, 255), (255, 0, 0)
 white, black, blue, red = range(4)
 
 
-class Drawing:
+class Drawing(object):
     """Simple wrapper class for drawing the example image."""
 
     if gdImage:
 
         def __init__(self):
-            global white, black, blue, red
             self._image = gdImage((X, Y))
             self._color = map(self._image.colorAllocate, colors)
             self._font = gdFontLarge

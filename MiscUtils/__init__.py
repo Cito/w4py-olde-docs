@@ -11,23 +11,12 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-import time
-
 try:
     import mx.DateTime as mxDateTime
 except ImportError:
     mxDateTime = None
 
 import datetime as nativeDateTime
-
-
-def asclocaltime(t=None):
-    """Return a readable string of the current, local time.
-
-    Useful for time stamps in log files.
-
-    """
-    return time.asctime(time.localtime(t))
 
 
 class AbstractError(NotImplementedError):

@@ -1,4 +1,8 @@
-from Common import *
+"""A general session store."""
+
+from time import time
+
+from MiscUtils import AbstractError
 
 
 class SessionStore(object):
@@ -118,7 +122,7 @@ class SessionStore(object):
         sessions that have exceeded their lifetime.
 
         """
-        curTime = time.time()
+        curTime = time()
         for key in self.keys():
             try:
                 sess = self[key]

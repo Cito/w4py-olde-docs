@@ -1,8 +1,12 @@
 """Exception handling."""
 
-import traceback, poplib, smtplib
-from os import pathsep
+import os
+import sys
+import poplib
+import smtplib
+import traceback
 from random import randint
+from time import time, localtime
 
 try:
     from email.message import Message
@@ -11,7 +15,8 @@ except ImportError: # Python < 2.5
     from email.Message import Message
     from email.Utils import formatdate
 
-from Common import *
+from MiscUtils import StringIO
+from MiscUtils.Funcs import asclocaltime
 from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict, htmlEncode
 
@@ -80,7 +85,7 @@ class ExceptionHandler(object):
         _hideValuesForFields.extend(['application', 'uri',
             'http_accept', 'userid'])
     _hiddenString = '*** hidden ***'
-    _addSpace = {'PATH': pathsep, 'CLASSPATH': pathsep,
+    _addSpace = {'PATH': os.pathsep, 'CLASSPATH': os.pathsep,
         'HTTP_ACCEPT': ',', 'HTTP_ACCEPT_CHARSET': ',',
         'HTTP_ACCEPT_ENCODING': ',', 'HTTP_ACCEPT_LANGUAGE': ','}
     _docType = ('<!DOCTYPE HTML PUBLIC'
@@ -129,8 +134,8 @@ class ExceptionHandler(object):
         # Cache MaxValueLengthInExceptionReport for speed
         self._maxValueLength = self.setting('MaxValueLengthInExceptionReport')
 
-        # exception occurance time. (overridden by response.endTime())
-        self._time = time.time()
+        # exception occurance time (overridden by response.endTime())
+        self._time = time()
 
         # Get to work
         self.work()
@@ -452,7 +457,7 @@ class ExceptionHandler(object):
         # Note: Using the timestamp and a random number is a poor technique
         # for filename uniqueness, but it is fast and good enough in practice.
         return 'Error-%s-%s-%06d.html' % (self.basicServletName(),
-            '-'.join(map(lambda x: '%02d' % x, time.localtime(self._time)[:6])),
+            '-'.join(map(lambda x: '%02d' % x, localtime(self._time)[:6])),
             randint(0, 999999))
 
     def logExceptionToDisk(self, errorMsgFilename=None):

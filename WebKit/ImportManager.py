@@ -12,8 +12,8 @@ ImportSpy can be suppressed with the``UseImportSpy`` setting.
 """
 
 import imp
-
-from Common import *
+import os
+import sys
 
 
 class ImportManager(object):
@@ -128,7 +128,7 @@ class ImportManager(object):
     def recordModules(self, moduleNames=None):
         """Record a list of modules (or all modules)."""
         if moduleNames is None:
-            moduleNames = sys.modules.keys()
+            moduleNames = sys.modules
         for modname in moduleNames:
             mod = sys.modules[modname]
             self.recordModule(mod)
@@ -149,37 +149,34 @@ class ImportManager(object):
             newmtime = getmtime(filename)
         except OSError:
             return True
-        if mtime < newmtime:
-            fileList[filename] = newmtime
-            for modname, modfile in self._moduleFiles.items():
-                if modfile == filename:
-                    break
-            else:
-                return True # it's not a module, we must reload
-            mod = sys.modules.get(modname, None)
-            if not mod or not getattr(mod, '__donotreload__', None):
-                return True # it's a module that needs to be reloaded
-        return False
+        if mtime >= newmtime:
+            return False
+        fileList[filename] = newmtime
+        for modname, modfile in self._moduleFiles.iteritems():
+            if modfile == filename:
+                mod = sys.modules.get(modname)
+                return not mod or not getattr(mod, '__donotreload__', False)
+        return True # it's not a module, we must reload
 
     def updatedFile(self, update=True, getmtime=os.path.getmtime):
         """Check whether one of the files has been updated."""
         fileList = self.fileList(update)
-        for filename, mtime in fileList.items():
+        for filename, mtime in fileList.iteritems():
             try:
                 newmtime = getmtime(filename)
             except OSError:
                 return filename
-            if mtime < newmtime:
-                fileList[filename] = newmtime
-                for modname, modfile in self._moduleFiles.items():
-                    if modfile == filename:
+            if mtime >= newmtime:
+                continue
+            fileList[filename] = newmtime
+            for modname, modfile in self._moduleFiles.iteritems():
+                if modfile == filename:
+                    mod = sys.modules.get(modname)
+                    if mod or getattr(mod, '__donotreload__', None):
                         break
-                else:
-                    return filename # it's not a module, we must reload
-                mod = sys.modules.get(modname, None)
-                if not mod or not getattr(mod, '__donotreload__', None):
                     return filename # it's a module that needs to be reloaded
-        return False
+            else:
+                return filename # it's not a module, we must reload
 
     def delModules(self, includePythonModules=False, excludePrefixes=None):
         """Delete imported modules.
@@ -190,9 +187,8 @@ class ImportManager(object):
 
         """
         moduleFiles = self._moduleFiles
-        moduleNames = moduleFiles.keys()
         fileList = self._fileList
-        for modname in moduleNames:
+        for modname in moduleFiles:
             if modname == __name__:
                 continue
             filename = self._moduleFiles[modname]

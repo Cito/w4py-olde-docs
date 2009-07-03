@@ -1,5 +1,9 @@
-from Common import *
-from MiscUtils.Funcs import excstr
+"""Abstract servlets"""
+
+import os
+
+from MiscUtils import AbstractError
+from MiscUtils.Funcs import asclocaltime, excstr
 
 
 class Servlet(object):

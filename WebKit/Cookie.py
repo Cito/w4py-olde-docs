@@ -1,4 +1,6 @@
-from Common import *
+import imp
+import os
+import sys
 
 from MiscUtils.Funcs import positive_id
 
@@ -7,11 +9,10 @@ from MiscUtils.Funcs import positive_id
 # So we'll strip out anything from the path that might cause us to import
 # from the WebKit directory, then import Cookie using that restricted path
 # -- that ought to ensure that we're using Python's module.
-import imp
 path = []
 thisDir = os.path.abspath(os.path.dirname(__file__))
 for dir in sys.path:
-    if not dir or dir == '.':
+    if not dir or dir == os.curdir:
         continue
     if os.path.abspath(dir) == thisDir:
         continue

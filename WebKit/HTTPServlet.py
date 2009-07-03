@@ -1,4 +1,7 @@
-from Common import *
+"""HTTP servlets"""
+
+from time import gmtime, strftime
+
 from Servlet import Servlet
 
 
@@ -46,8 +49,7 @@ class HTTPServlet(Servlet):
         if httpMethodName in ('GET', 'HEAD'):
             lm = self.lastModified(trans)
             if lm:
-                lm = time.strftime('%a, %d %b %Y %H:%M:%S GMT',
-                    time.gmtime(lm))
+                lm = strftime('%a, %d %b %Y %H:%M:%S GMT', gmtime(lm))
                 trans.response().setHeader('Last-Modified', lm)
                 ifModifiedSince = request.environ().get(
                     'HTTP_IF_MODIFIED_SINCE', None)

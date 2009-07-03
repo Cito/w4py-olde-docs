@@ -1,6 +1,14 @@
-import mimetools
+"""CGIPlusServer"""
 
-from Common import *
+import os
+
+try:
+    from cStringIO import StringIO
+except ImportError:
+    from StringIO import StringIO
+
+from time import time
+
 from WebKit.CgiPlusAppServer import Handler, CPASStreamOut
 
 
@@ -106,7 +114,7 @@ class CgiPlusAppServerHandler(Handler, CgiPlusHandler):
 
     def doTransaction(self, env, myInput):
         streamOut = CPASStreamOut(os.sys.__stdout__)
-        requestDict = dict(format='CGI', time=time.time(), environ=env,
+        requestDict = dict(format='CGI', time=time(), environ=env,
             input=StringIO(myInput), requestID=self._requestID)
         self.dispatchRawRequest(requestDict, streamOut)
         self.processResponse(streamOut._buffer)
@@ -114,6 +122,6 @@ class CgiPlusAppServerHandler(Handler, CgiPlusHandler):
     def dispatchRawRequest(self, requestDict, streamOut):
         transaction = self._server._app.dispatchRawRequest(requestDict, streamOut)
         streamOut.close()
-        transaction._application=None
+        transaction._application = None
         transaction.die()
         del transaction

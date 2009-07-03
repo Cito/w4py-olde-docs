@@ -4,7 +4,7 @@ A very general (dumb) message class.
 
 """
 
-from Common import *
+from MiscUtils import NoDefault
 
 
 class Message(object):

@@ -20,7 +20,11 @@ to the Application object itself.
 
 """
 
-from Common import *
+import os
+import sys
+
+from MiscUtils import NoDefault
+from MiscUtils.NamedValueAccess import valueForName
 from ConfigurableForServerSidePath import ConfigurableForServerSidePath
 from ExceptionHandler import ExceptionHandler
 from HTTPRequest import HTTPRequest
@@ -298,11 +302,11 @@ class Application(ConfigurableForServerSidePath):
         if self._sessionTimeout:
             tm = self.taskManager()
             if tm:
+                from time import time
                 from Tasks import SessionTask
-                import time
                 task = SessionTask.SessionTask(self._sessions)
                 sweepinterval = self._sessionTimeout/10
-                tm.addPeriodicAction(time.time() + sweepinterval,
+                tm.addPeriodicAction(time() + sweepinterval,
                     sweepinterval, task, "SessionSweeper")
                 print "Session sweeper has started."
 

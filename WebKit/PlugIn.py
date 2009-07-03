@@ -1,4 +1,6 @@
-from Common import *
+import os
+import sys
+
 from MiscUtils.PropertiesObject import PropertiesObject
 
 

@@ -17,11 +17,7 @@ This software is based in part on work done by the Jakarta group.
 
 """
 
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
+from MiscUtils import StringIO
 
 from PSPUtils import checkAttributes, PSPParserException
 

@@ -22,9 +22,18 @@ When started, the app server records its pid in appserver.pid.
 
 """
 
-import threading, Queue, select, socket, errno, traceback
-from threading import Thread, currentThread
+import errno
+import os
+import select
+import socket
+import sys
+import threading
+import traceback
+import Queue
+
 from marshal import dumps, loads
+from threading import Thread, currentThread
+from time import time, localtime, sleep
 
 try:
     from ctypes import pythonapi, py_object
@@ -35,13 +44,14 @@ try:
 except (TypeError, AttributeError):
     PyThreadState_SetAsyncExc = None
 
-from Common import *
+from MiscUtils.Funcs import asclocaltime
+from WebUtils.Funcs import requestURI
+
 import AppServer as AppServerModule
 from PidFile import ProcessRunning
 from AutoReloadingAppServer import AutoReloadingAppServer as AppServer
 from ASStreamOut import ASStreamOut, ConnectionAbortedError
 from HTTPExceptions import HTTPServiceUnavailable
-from WebUtils.Funcs import requestURI
 
 debug = False
 
@@ -244,7 +254,7 @@ class ThreadedAppServer(AppServer):
             self.readyForRequests()
 
             if maxRequestTime:
-                self._checkRequestTime = time.time() + maxRequestTime
+                self._checkRequestTime = time() + maxRequestTime
         except:
             AppServer.initiateShutdown(self)
             raise
@@ -585,7 +595,7 @@ class ThreadedAppServer(AppServer):
         """
         if self._checkRequestTime is None:
             return
-        currentTime = time.time()
+        currentTime = time()
         if currentTime > self._checkRequestTime:
             if debug:
                 print "Checking for long-running requests"
@@ -662,7 +672,7 @@ class ThreadedAppServer(AppServer):
                 while t._abortHandler is handler:
                     # this handler is to be aborted,
                     # so don't handle another request now
-                    time.sleep(0.1)
+                    sleep(0.1)
         finally:
             try:
                 del self._threadHandler[t]
@@ -709,7 +719,7 @@ class ThreadedAppServer(AppServer):
             for i in range(30): # wait at most 3 seconds for shutdown
                 if self._running < 2:
                     break
-                time.sleep(0.1)
+                sleep(0.1)
         if self._sockets:
             # Close all sockets now:
             for sock in self._sockets.values():
@@ -926,13 +936,13 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
         """
         requestDict = requestDict or {}
         requestID = self._requestID
-        requestTime = requestDict.get('time') or time.time()
+        requestTime = requestDict.get('time') or time()
         requestDict['requestID'] = requestID
         requestDict['time'] = requestTime
         # The request object is stored for tracking/debugging purposes.
         self._requestDict = requestDict
         if self._verbose:
-            requestTime = time.localtime(requestTime)[:6]
+            requestTime = localtime(requestTime)[:6]
             env = requestDict.get('environ')
             uri = env and requestURI(env) or '-'
             print '%5d  %4d-%02d-%02d %02d:%02d:%02d  %s' % (
@@ -947,7 +957,7 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
         if self._verbose:
             requestDict = self._requestDict
             requestID = requestDict['requestID']
-            duration = round((time.time() - requestDict['time'])*1000)
+            duration = round((time() - requestDict['time'])*1000)
             env = requestDict.get('environ')
             if not error:
                 error = env and requestURI(env) or '-'
@@ -1183,7 +1193,7 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
                 environ[items[i]] = items[i+1]
         except IndexError:
             raise ProtocolError('Malformed SCGI headers')
-        return dict(format='CGI', time=time.time(), environ=environ)
+        return dict(format='CGI', time=time(), environ=environ)
 
 
 # Determines whether the main look should run in another thread.
@@ -1251,7 +1261,7 @@ def run(workDir=None):
                     try:
                         while server._running > 1:
                             try:
-                                time.sleep(1) # wait for interrupt
+                                sleep(1) # wait for interrupt
                             except Exception:
                                 if server._running < 3:
                                     raise # shutdown
@@ -1303,6 +1313,7 @@ def run(workDir=None):
     sys.stderr.flush()
     os.chdir = _chdir # allow use of os.chdir() again
     return exitStatus
+
 
 # Signal handlers
 
@@ -1391,6 +1402,8 @@ if threadDump:
         SIGBREAK = None
 
 
+# Command line interface
+
 import re
 settingRE = re.compile(r'^(?:--)?([a-zA-Z][a-zA-Z0-9]*\.[a-zA-Z][a-zA-Z0-9]*)=')
 from MiscUtils import Configurable
@@ -1407,20 +1420,20 @@ def main(args):
     function = run
     daemon = False
     workDir = None
-    for a in args[:]:
-        if settingRE.match(a):
-            match = settingRE.match(a)
+    for arg in args[:]:
+        if settingRE.match(arg):
+            match = settingRE.match(arg)
             name = match.group(1)
-            value = a[match.end():]
+            value = arg[match.end():]
             Configurable.addCommandLineSetting(name, value)
-        elif a == "stop":
+        elif arg == "stop":
             function = AppServerModule.stop
-        elif a == "daemon":
+        elif arg == "daemon":
             daemon = True
-        elif a == "start":
+        elif arg == "start":
             pass
-        elif a[:8] == "workdir=":
-            workDir = a[8:]
+        elif arg[:8] == "workdir=":
+            workDir = arg[8:]
         else:
             print usage
             return

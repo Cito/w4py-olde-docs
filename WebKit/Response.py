@@ -1,6 +1,9 @@
 """An abstract response"""
 
-from Common import *
+from time import time
+
+from MiscUtils import AbstractError
+
 from Message import Message
 
 
@@ -15,7 +18,7 @@ class Response(Message):
     Response is an abstract class; developers typically use HTTPResponse.
 
     FUTURE
-    
+
       * Consider implementing the buffer/flush logic here
         including buffer size.
       * Also, consider then having a method that doesn't allow
@@ -45,7 +48,7 @@ class Response(Message):
         application for those responses that never deliver due to an error.
 
         """
-        self._endTime = time.time()
+        self._endTime = time()
 
 
     ## Output ##

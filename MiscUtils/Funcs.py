@@ -252,6 +252,15 @@ def safeDescription(x, what='what'):
         return '%s=%s type=%s' % (what, xRepr, cRepr)
 
 
+def asclocaltime(t=None):
+    """Return a readable string of the current, local time.
+
+    Useful for time stamps in log files.
+
+    """
+    return time.asctime(time.localtime(t))
+
+
 def timestamp(numSecs=None):
     """Return a dictionary whose keys give different versions of the timestamp.
 

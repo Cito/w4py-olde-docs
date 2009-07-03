@@ -1,6 +1,5 @@
 """Content producing HTTP servlet."""
 
-from Common import *
 from HTTPServlet import HTTPServlet
 from WebUtils import Funcs
 from Application import EndResponse

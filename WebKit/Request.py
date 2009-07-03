@@ -1,6 +1,7 @@
 """An abstract request"""
 
-from Common import *
+from MiscUtils import AbstractError
+from MiscUtils.Funcs import asclocaltime
 from Message import Message
 
 
@@ -18,7 +19,7 @@ class Request(Message):
     Request is an abstract class; developers typically use HTTPRequest.
 
     FUTURE
-    
+
       * Consider if the local host information should be moved up to Message.
       * Locales
       * Secure requests, authentication, etc.

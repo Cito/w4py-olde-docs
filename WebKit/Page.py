@@ -1,9 +1,7 @@
 """The standard web page template."""
 
-from Common import *
 from WebUtils import Funcs
-from HTTPContent import HTTPContent, HTTPContentError
-from Application import EndResponse
+from HTTPContent import HTTPContent
 
 
 class Page(HTTPContent):
