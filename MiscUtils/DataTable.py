@@ -45,8 +45,7 @@ COLUMNS
 Column headings can have a type specification like so:
     name, age:int, zip:int
 
-Possible types include string, int, float and datetime. However,
-datetime is not well supported right now.
+Possible types include string, int, float and datetime.
 
 String is assumed if no type is specified but you can set that
 assumption when you create the table:
@@ -57,7 +56,7 @@ Using types like int and float will cause DataTable to actually
 convert the string values (perhaps read from a file) to these types
 so that you can use them in natural operations. For example:
 
-    if row['age']>120:
+    if row['age'] > 120:
         self.flagData(row, 'age looks high')
 
 As you can see, each row can be accessed as a dictionary with keys
@@ -180,20 +179,19 @@ See below.
 TO DO
 
   * Allow callback parameter or setting for parsing CSV records.
-  * Perhaps TableRecord should inherit UserList and UserDict and override
-    methods as appropriate...?
-  * Better support for datetime.
-  * _types and blankValues aren't really packaged, advertised or
+  * Perhaps TableRecord should inherit list and dict and override
+    methods as appropriate?
+  * _types and _blankValues aren't really packaged, advertised or
     documented for customization by the user of this module.
   * DataTable:
       * Parameterize the TextColumn class.
       * Parameterize the TableRecord class.
       * More list-like methods such as insert()
       * writeFileNamed() is flawed: it doesn't write the table column type
-      * Should it inherit from UserList?
+      * Should it inherit from list?
   * Add error checking that a column name is not a number (which could
     cause problems).
-  * Look for various @@ tags through out the code.
+  * Reading Excel sheets with xlrd, not only with win32com.
 
 """
 
@@ -201,29 +199,43 @@ TO DO
 import os
 import sys
 
-from types import *
+from datetime import date, datetime, time, timedelta, tzinfo
+from decimal import Decimal
 
 from CSVParser import CSVParser
 from CSVJoiner import joinCSVFields
 from Funcs import positive_id
-from MiscUtils import NoDefault, mxDateTime
+from MiscUtils import NoDefault
 
 
-## Types ##
-
-DateTimeType = "<custom-type 'datetime'>"
-ObjectType = "<type 'Object'>"
+## Types and blank Values ##
 
 _types = {
-    'string':   StringType,
-    'int':      IntType,
-    'bool':     IntType,
-    'long':     LongType,
-    'decimal':  FloatType,
-    'float':    FloatType,
-    'datetime': DateTimeType,
-    'date':     DateTimeType,
-    'object':   ObjectType
+    'str': str,
+    'string': str,
+    'unicode': unicode,
+    'basestring': basestring,
+    'int': int,
+    'bool': bool,
+    'long': long,
+    'decimal': Decimal,
+    'float': float,
+    'date': date,
+    'datetime': datetime,
+    'time': time,
+    'timedelta': timedelta,
+    'tzinfo': tzinfo
+}
+
+_blankValues = {
+    str: '',
+    unicode: u'',
+    basestring: '',
+    bool: False,
+    int: 0,
+    long: 0L,
+    float: 0.0,
+    Decimal: Decimal('0')
 }
 
 
@@ -243,10 +255,10 @@ def canReadExcel():
 
 
 class DataTableError(Exception):
-    pass
+    """Data table error."""
 
 
-class TableColumn:
+class TableColumn(object):
     """Representation of a table column.
 
     A table column represents a column of the table including name and type.
@@ -256,17 +268,17 @@ class TableColumn:
     """
 
     def __init__(self, spec):
+        """Initialize the table column.
 
-        # spec is a string such as 'name' or 'name:type'
-        fields = spec.split(':', 2)
-        if len(fields) > 2:
-            raise DataTableError('Invalid column spec %r' % spec)
-        self._name = fields[0]
+        The spec parameter is a string such as 'name' or 'name:type'.
 
-        if len(fields) == 1:
-            self._type = None
+        """
+        if ':' not in spec:
+            name, type = spec, None
         else:
-            self.setType(fields[1])
+            name, type = spec.split(':', 1)
+        self._name = name
+        self.setType(type)
 
     def name(self):
         return self._name
@@ -281,14 +293,14 @@ class TableColumn:
         whose types were not specified.
 
         """
-        if type is None:
-            self._type = None
-        else:
+        if type:
             try:
                 self._type = _types[type.lower()]
             except Exception:
                 raise DataTableError(
                     'Unknown type %r. types=%r' % (type, _types.keys()))
+        else:
+            self._type = None
 
     def __repr__(self):
         return '<%s %r with %r at %x>' % (self.__class__.__name__,
@@ -300,7 +312,7 @@ class TableColumn:
 
     ## Utilities ##
 
-    def valueForRawValue(self, rawValue):
+    def valueForRawValue(self, value):
         """Set correct type for raw value.
 
         The rawValue is typically a string or value already of the appropriate
@@ -309,36 +321,22 @@ class TableColumn:
         ints and floats are floats).
 
         """
-        # @@ 2000-07-23 ce: an if-else ladder?
-        # perhaps these should be dispatched messages or a class hier
-        if self._type is StringType:
-            value = str(rawValue)
-        elif self._type is IntType:
-            if rawValue == '':
-                value = 0
-            else:
-                value = int(rawValue)
-        elif self._type is LongType:
-            if rawValue == '':
-                value = 0
-            else:
-                value = long(rawValue)
-        elif self._type is FloatType:
-            if rawValue == '':
-                value = 0.0
-            else:
-                value = float(rawValue)
-        elif self._type is DateTimeType:
-            value = mxDateTime.DateTimeFrom(rawValue)
-        elif self._type is ObjectType:
-            value = rawValue
-        else:
-            # no type set, leave values as they are
-            value = rawValue
+        if self._type:
+            if isinstance(value, unicode) and self._type is str:
+                return value.encode('utf-8')
+            elif isinstance(value, str) and self._type is unicode:
+                try:
+                    return value.decode('utf-8')
+                except UnicodeDecodeError:
+                    return value.decode('latin-1')
+            elif value == '' and self._type in (int, long, float, Decimal):
+                value = '0'
+            if not isinstance(value, self._type):
+                value = self._type(value)
         return value
 
 
-class DataTable:
+class DataTable(object):
     """Representation of a data table.
 
     See the doc string for this module.
@@ -354,7 +352,7 @@ class DataTable:
             allowComments=True, stripWhite=True,
             defaultType=None, usePickleCache=None):
         if usePickleCache is None:
-            self._usePickleCache = self._usePickleCache # grab class-level attr
+            self._usePickleCache = self._usePickleCache
         else:
             self._usePickleCache = usePickleCache
         if defaultType and defaultType not in _types:
@@ -365,7 +363,7 @@ class DataTable:
         self._headings = []
         self._rows = []
         if filenameOrHeadings:
-            if type(filenameOrHeadings) is StringType:
+            if isinstance(filenameOrHeadings, basestring):
                 self.readFileNamed(filenameOrHeadings, delimiter, allowComments, stripWhite)
             else:
                 self.setHeadings(filenameOrHeadings)
@@ -406,7 +404,7 @@ class DataTable:
     def readLines(self, lines, delimiter=',',
             allowComments=True, stripWhite=True):
         if self._defaultType is None:
-            self._defaultType = 'string'
+            self._defaultType = 'str'
         haveReadHeadings = False
         parse = CSVParser(fieldSep=delimiter, allowComments=allowComments,
             stripWhitespace=stripWhite).parse
@@ -421,10 +419,11 @@ class DataTable:
                     self.setHeadings(values)
                     haveReadHeadings = True
         if values is None:
-            raise DataTableError, "Unfinished multiline record."
+            raise DataTableError("Unfinished multiline record.")
         return self
 
-    def canReadExcel(self):
+    @staticmethod
+    def canReadExcel():
         return canReadExcel()
 
     def readExcel(self, worksheet=1, row=1, column=1):
@@ -439,7 +438,7 @@ class DataTable:
             # determine max column
             numCols = 1
             while 1:
-                if sh.Cells(row, numCols).Value in [None, '']:
+                if sh.Cells(row, numCols).Value in (None, ''):
                     numCols -= 1
                     break
                 numCols += 1
@@ -465,20 +464,17 @@ class DataTable:
                 except KeyError:
                     # woops. read buffer is out of fresh rows
                     valuesRows = sh.Range('A%i:%s%i' % (rowNum, maxCol,
-                        rowNum+numRowsToReadPerCall-1)).Value
+                        rowNum + numRowsToReadPerCall - 1)).Value
                     valuesBuffer.clear()
                     j = rowNum
                     for valuesRow in valuesRows:
                         valuesBuffer[j] = valuesRow
                         j += 1
                     values = valuesBuffer[rowNum]
-                # non-"buffered" version, one row at a time:
-                # values = sh.Range('A%i:%s%i' % (rowNum, maxCol,
-                # rowNum)).Value[0]
                 values = [strip(v) for v in values]
                 nonEmpty = [v for v in values if v]
                 if nonEmpty:
-                    if values[0] not in ('#', u'#'):
+                    if values[0] != '#':
                         if haveReadHeadings:
                             row = TableRecord(self, values)
                             self._rows.append(row)
@@ -520,6 +516,8 @@ class DataTable:
             # So that None gets written as a blank and everything else as a string
             if item is None:
                 return ''
+            elif isinstance(item, unicode):
+                return item.encode('utf-8')
             else:
                 return str(item)
 
@@ -537,12 +535,12 @@ class DataTable:
     ## Headings ##
 
     def heading(self, index):
-        if type(index) is StringType:
+        if isinstance(index, basestring):
             index = self._nameToIndexMap[index]
         return self._headings[index]
 
     def hasHeading(self, name):
-        return self._nameToIndexMap.has_key(name)
+        return name in self._nameToIndexMap
 
     def numHeadings(self):
         return len(self._headings)
@@ -594,17 +592,14 @@ class DataTable:
 
     ## Queries ##
 
-    def recordsEqualTo(self, dict):
+    def recordsEqualTo(self, record):
         records = []
-        keys = dict.keys()
-        for record in self._rows:
-            matches = True
-            for key in keys:
-                if record[key] != dict[key]:
-                    matches = False
+        for row in self._rows:
+            for key in row:
+                if record[key] != row[key]:
                     break
-            if matches:
-                records.append(record)
+            else:
+                records.append(row)
         return records
 
 
@@ -618,12 +613,10 @@ class DataTable:
         s.append(', '.join(map(str, self._headings)))
         s.append('\n')
         # Records
-        i = 0
-        for row in self._rows:
+        for i, row in enumerate(self._rows):
             s.append('%3d. ' % i)
             s.append(', '.join(map(str, row)))
             s.append('\n')
-            i += 1
         return ''.join(s)
 
 
@@ -637,10 +630,10 @@ class DataTable:
         (such as a name, serial number, etc.).
 
         """
-        d = {}
+        content = {}
         for row in self:
-            d[row[key]] = row
-        return d
+            content[row[key]] = row
+        return content
 
 
     ## Misc access ##
@@ -673,25 +666,13 @@ class DataTable:
         self._nameToIndexMap = map
 
 
-# @@ 2000-07-20 ce: perhaps for each type we could specify a function
-# to convert from string values to the values of the type.
-
-blankValues = {
-    StringType:   '',
-    IntType:      0,
-    FloatType:    0.0,
-    DateTimeType: '',
-    None:         None,
-}
-
-
 class TableRecord(object):
     """Representation of a table record."""
 
 
     ## Init ##
 
-    def __init__(self, table, values=None):
+    def __init__(self, table, values=None, headings=None):
         """Initialize table record.
 
         Dispatches control to one of the other init methods based on the type
@@ -702,26 +683,25 @@ class TableRecord(object):
             4. Any object responding to hasValueForKey() and valueForKey().
 
         """
-        self._headings = table.headings()
+        if headings is None:
+            self._headings = table.headings()
+        else:
+            self._headings = headings
         self._nameToIndexMap = table.nameToIndexMap()
-        # @@ 2000-07-20 ce: Take out the headings arg to the init method
-        # since we have an attribute for that
-
         if values is not None:
-            valuesType = type(values)
-            if valuesType is ListType  or  valuesType is TupleType:
-                # @@ 2000-07-20 ce: check for required attributes instead
+            if isinstance(values, (list, tuple)):
                 self.initFromSequence(values)
-            elif valuesType is DictType:
+            elif isinstance(values, dict):
                 self.initFromDict(values)
-            elif valuesType is InstanceType:
-                self.initFromObject(values)
             else:
-                raise DataTableError, 'Unknown type for values %s.' % valuesType
+                try:
+                    self.initFromObject(values)
+                except AttributeError:
+                    raise DataTableError('Unknown type for values %r.' % values)
 
     def initFromSequence(self, values):
         if len(self._headings) < len(values):
-            raise DataTableError, ('There are more values than headings.\n'
+            raise DataTableError('There are more values than headings.\n'
                 'headings(%d, %s)\nvalues(%d, %s)' % (len(self._headings),
                 self._headings, len(values), values))
         self._values = []
@@ -731,18 +711,18 @@ class TableRecord(object):
         for i in range(numHeadings):
             heading = self._headings[i]
             if i >= numValues:
-                self._values.append(blankValues[heading.type()])
+                self._values.append(_blankValues.get(heading.type()))
             else:
                 self._values.append(heading.valueForRawValue(values[i]))
 
-    def initFromDict(self, dict):
+    def initFromDict(self, values):
         self._values = []
         for heading in self._headings:
             name = heading.name()
-            if dict.has_key(name):
-                self._values.append(heading.valueForRawValue(dict[name]))
+            if name in values:
+                self._values.append(heading.valueForRawValue(values[name]))
             else:
-                self._values.append(blankValues[heading.type()])
+                self._values.append(_blankValues.get(heading.type()))
 
     def initFromObject(self, obj):
         """Initialize from object.
@@ -761,7 +741,7 @@ class TableRecord(object):
                 self._values.append(heading.valueForRawValue(
                     obj.valueForKey(name)))
             else:
-                self._values.append(blankValues[heading.type()])
+                self._values.append(_blankValues.get(heading.type()))
 
 
     ## Accessing like a sequence or dictionary ##
@@ -793,6 +773,10 @@ class TableRecord(object):
 
     def __repr__(self):
         return '%s' % self._values
+
+    def __iter__(self):
+        for value in self._values:
+            yield value
 
     def get(self, key, default=None):
         index = self._nameToIndexMap.get(key, None)
@@ -830,11 +814,11 @@ class TableRecord(object):
 
     def asDict(self):
         """Return a dictionary whose key-values match the table record."""
-        dict = {}
+        record = {}
         nameToIndexMap = self._nameToIndexMap
-        for key in nameToIndexMap.keys():
-            dict[key] = self._values[nameToIndexMap[key]]
-        return dict
+        for key in nameToIndexMap:
+            record[key] = self._values[nameToIndexMap[key]]
+        return record
 
 
     ## valueForFoo() family ##

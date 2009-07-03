@@ -4,7 +4,7 @@ from types import ClassType
 
 from weakref import WeakValueDictionary
 
-from MiscUtils import NoDefault, StringTypes
+from MiscUtils import NoDefault
 from MiscUtils.Funcs import safeDescription
 from ObjectKey import ObjectKey
 from MiddleKit.Core.ModelUser import ModelUser
@@ -163,10 +163,10 @@ class ObjectStore(ModelUser):
             return self.objectForClassAndSerial(a, b, c)
 
     def objectForClassAndSerial(self, klass, serialNum, default=NoDefault):
-        if isinstance(klass, (type, ClassType)):
-            klass = klass.__name__
-        elif isinstance(klass, BaseKlass):
+        if isinstance(klass, BaseKlass):
             klass = klass.name()
+        elif isinstance(klass, (type, ClassType)):
+            klass = klass.__name__
         else:
             assert isinstance(klass, str)
         key = ObjectKey().initFromClassNameAndSerialNum(klass, serialNum)

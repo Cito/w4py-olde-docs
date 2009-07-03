@@ -18,8 +18,6 @@ except ImportError:
 
 import datetime as nativeDateTime
 
-from types import StringTypes
-
 
 class AbstractError(NotImplementedError):
     """Abstract method error.
