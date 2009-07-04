@@ -1,5 +1,6 @@
+import datetime
 import time
-from MiscUtils import mxDateTime as DateTime
+
 from WebKit.SidebarPage import SidebarPage
 
 
@@ -11,15 +12,11 @@ cookieValues = [
     ('oneWeek', '+1w'),
     ('oneHourAndHalf', '+ 1h 30m'),
     ('timeIntTenSec', time.time() + 10),
-    ('tupleOneYear', (time.localtime(time.time())[0] + 1,) + time.localtime(time.time())[1:]),
-    ]
+    ('tupleOneYear', (time.localtime()[0] + 1,) + time.localtime()[1:]),
+    ('dt1day', datetime.datetime() + datetime.timedelta(1)),
+    ('dt2min', datetime.timedelta(minutes=2))
+]
 
-if DateTime:
-    cookieValues.extend([
-        ('dt2004', DateTime.DateTime(2004)),
-        ('dt2min', DateTime.TimeDelta(minutes=2)),
-        ('dt4minRelative', DateTime.RelativeDateTime(minutes=4)),
-        ])
 
 cookieIndex = 1
 

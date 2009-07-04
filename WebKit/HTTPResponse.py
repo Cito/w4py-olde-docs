@@ -1,14 +1,11 @@
 """HTTP responses"""
 
-from time import time, gmtime, strftime
+from datetime import datetime, timedelta
+from time import time, gmtime, strftime, struct_time
 
-# time.gmtime() no longer returns a tuple, and there is no globally defined
-# type for this at the moment.
-TimeTupleType = type(gmtime(0))
-
-from MiscUtils import mxDateTime as DateTime
 from MiscUtils import NoDefault
 from MiscUtils.DateInterval import timeDecode
+from MiscUtils.Funcs import localTimeDelta
 
 from Response import Response
 from Cookie import Cookie
@@ -103,12 +100,12 @@ class HTTPResponse(Response):
             the browser closes)
           'NEVER': some time in the far, far future.
           integer: a timestamp value
-          tuple: a tuple, as created by the time module
-          DateTime: an mxDateTime object for the time (assumed to
-            be *local*, not GMT time)
-          DateTimeDelta: a interval from the present, e.g.,
-            DateTime.DateTimeDelta(month=1) (1 month in the future)
-            '+...': a time in the future, '...' should be something like
+          tuple or struct_time: a tuple, as created by the time module
+          datetime: a datetime.datetime object for the time (if without
+            time zone, assumed to be *local*, not GMT time)
+          timedelta: a duration counted from the present, e.g.,
+            datetime.timedelta(days=14) (2 weeks in the future)
+          '+...': a time in the future, '...' should be something like
             1w (1 week), 3h46m (3:45), etc.  You can use y (year),
             b (month), w (week), d (day), h (hour), m (minute),
             s (second). This is done by the MiscUtils.DateInterval.
@@ -130,15 +127,16 @@ class HTTPResponse(Response):
         if t:
             if isinstance(t, (int, long, float)):
                 t = gmtime(t)
-            if isinstance(t, (tuple, TimeTupleType)):
+            if isinstance(t, (tuple, struct_time)):
                 t = strftime("%a, %d-%b-%Y %H:%M:%S GMT", t)
-            if DateTime:
-                if isinstance(t, (DateTime.DateTimeDeltaType,
-                        DateTime.RelativeDateTime)):
-                    t = DateTime.now() + t
-                if isinstance(t, DateTime.DateTimeType):
-                    t -= t.gmtoffset()
-                    t = t.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
+            if isinstance(t, timedelta):
+                t = datetime.now() + t
+            if isinstance(t, datetime):
+                d = t.utcoffset()
+                if d is None:
+                    d = localTimeDelta()
+                t -= d
+                t = t.strftime("%a, %d-%b-%Y %H:%M:%S GMT")
             cookie.setExpires(t)
         if path:
             cookie.setPath(path)

@@ -26,7 +26,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
     language independence. Some of us don't mind that last one.  ;-)
 
     Conveniences over XML-RPC include the use of all of the following:
-      * Any pickle-able Python type (mx.DateTime for example)
+      * Any pickle-able Python type (datetime for example)
       * Python instances (aka objects)
       * None
       * Longs that are outside the 32-bit int boundaries

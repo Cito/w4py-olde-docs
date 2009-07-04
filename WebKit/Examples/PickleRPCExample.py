@@ -29,13 +29,3 @@ class PickleRPCExample(PickleRPCServlet):
 
     def divide(self, *args):
         return reduce(operator.div, args)
-
-    def allowedGlobals(self):
-        """List of allowed globals.
-
-        This allows you to pass in mx.DateTime objects. See SafeUnpickler in
-        MiscUtils.PickleRPC for more details. You are only allowed
-        to unpickle classes that are specifically listed here.
-        
-        """
-        return [('mx.DateTime', '_DT')]
