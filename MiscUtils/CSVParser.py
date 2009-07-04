@@ -238,7 +238,7 @@ class CSVParser:
             self._state = StartRecord
         else:
             self._hadParseError = True # illegal
-            raise ParseError, '%s expected after "' % self._fieldSep
+            raise ParseError('%s expected after "' % self._fieldSep)
 
     def endQuotedField(self, c):
         if c == self._fieldSep: # seen closing " on quoted field
@@ -247,7 +247,7 @@ class CSVParser:
             self._state = StartRecord # end of line
         else:
             self._hadParseError = True
-            raise ParseError, '%s expected after "' % self._fieldSep
+            raise ParseError('%s expected after "' % self._fieldSep)
 
     def saveField(self):
         self._fields.append(''.join(self._field))

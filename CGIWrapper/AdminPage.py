@@ -67,7 +67,7 @@ class AdminPage:
 </html>''')
 
     def title(self):
-        raise NotImplementedError, 'Should be overridden in a subclass'
+        raise NotImplementedError('Should be overridden in a subclass')
 
     def bodyTags(self):
         return 'text="black" bgcolor="#555555"'

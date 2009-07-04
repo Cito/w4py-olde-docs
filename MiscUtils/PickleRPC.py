@@ -168,7 +168,7 @@ class SafeUnpickler:
     def findGlobal(self, module, klass):
         """Find class name."""
         if (module, klass) not in self.allowedGlobals():
-            raise UnpicklingError("For security reasons, you can\'t unpickle" \
+            raise UnpicklingError("For security reasons, you can\'t unpickle"
                 " objects from module %s with type %s." % (module, klass))
         globals = {}
         exec 'from %s import %s as theClass' % (module, klass) in globals
@@ -213,7 +213,7 @@ class Server:
         import urllib
         typ, uri = urllib.splittype(uri)
         if typ not in ('http', 'https'):
-            raise IOError, 'unsupported Pickle-RPC protocol'
+            raise IOError('unsupported Pickle-RPC protocol')
         self._host, self._handler = urllib.splithost(uri)
         if not self._handler:
             self._handler = '/PickleRPC'
@@ -258,7 +258,8 @@ class Server:
         elif 'requestError' in d:
             raise RequestError(d['requestError'])
         else:
-            raise RequestError('Response does not have a value, expection or requestError.')
+            raise RequestError(
+                'Response does not have a value, expection or requestError.')
 
     def __repr__(self):
         return '<%s for %s%s>' % (self.__class__.__name__, self._host, self._handler)
