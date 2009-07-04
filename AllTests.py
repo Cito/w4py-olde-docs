@@ -38,7 +38,7 @@ alltestnames = [
     'PSP.Tests.TestCompiler',
 
     'UserKit.Tests.ExampleTest',
-    'UserKit.Tests.Test',
+    'UserKit.Tests.RoleTest',
     'UserKit.Tests.UserManagerTest.makeTestSuite',
 
 ]
