@@ -7,8 +7,6 @@ Copyright (c) 1999-2002 Ng Pheng Siong. All rights reserved.
 
 """
 
-import sys
-
 from MiscUtils import StringIO
 from PickleRPC import Transport
 from M2Crypto import SSL, httpslib, m2urllib
@@ -28,12 +26,7 @@ class M2Transport(Transport):
 
     def make_connection(self, host):
         _host, _port = m2urllib.splitport(host)
-        if sys.version[0] == '2':
-            return httpslib.HTTPS(_host, int(_port), ssl_context=self.ssl_ctx)
-        elif sys.version[:3] == '1.5':
-            return httpslib.HTTPS(self.ssl_ctx, _host, int(_port))
-        else:
-            raise RuntimeError, 'unsupported Python version'
+        return httpslib.HTTPS(_host, int(_port), ssl_context=self.ssl_ctx)
 
     # @@ workarounds below are necessary because M2Crypto seems to
     # return from fileobject.read() early!  So we have to call it

@@ -4,19 +4,14 @@ import sys
 
 from MiscUtils.Funcs import positive_id
 
-# Import Python's standard Cookie module as as CookieEngine.
+# Import Python's standard Cookie module as CookieEngine.
 # We have to do some work since it has the same name as we do.
 # So we'll strip out anything from the path that might cause us to import
 # from the WebKit directory, then import Cookie using that restricted path
 # -- that ought to ensure that we're using Python's module.
-path = []
 thisDir = os.path.abspath(os.path.dirname(__file__))
-for dir in sys.path:
-    if not dir or dir == os.curdir:
-        continue
-    if os.path.abspath(dir) == thisDir:
-        continue
-    path.append(dir)
+path = [dir for dir in sys.path
+    if dir and dir != os.curdir and os.path.abspath(dir) != thisDir]
 file, pathname, description = imp.find_module('Cookie', path)
 try:
     CookieEngine = imp.load_module('Cookie', file, pathname, description)

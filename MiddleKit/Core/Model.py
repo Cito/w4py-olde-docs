@@ -40,9 +40,7 @@ class Model(Configurable):
 
     """
 
-    pickleVersion = 1
-        # increment this if a non-compatible change is made in Klasses,
-        # Klass or Attr
+    pickleProtocol = -1 # highest protocol available
 
     def __init__(self,
             filename=None, classesFilename=None, configFilename=None,
@@ -124,13 +122,15 @@ class Model(Configurable):
         shouldUseCache = self.setting('UsePickledClassesCache', False)
         if shouldUseCache:
             from MiscUtils.PickleCache import readPickleCache, writePickleCache
-            data = readPickleCache(path, pickleVersion=1, source='MiddleKit')
+            data = readPickleCache(path,
+                pickleProtocol=self.pickleProtocol, source='MiddleKit')
 
         # read the regular file if necessary
         if data is None:
             self.klasses().read(path)
             if shouldUseCache:
-                writePickleCache(self._klasses, path, pickleVersion=1, source='MiddleKit')
+                writePickleCache(self._klasses, path,
+                    pickleProtocol=self.pickleProtocol, source='MiddleKit')
         else:
             self._klasses = data
             self._klasses._model = self

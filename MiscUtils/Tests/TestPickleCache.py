@@ -27,7 +27,7 @@ class TestPickleCache(unittest.TestCase):
         sourcePath = self._sourcePath = os.path.join(progDir, 'foo.dict')
         picklePath = self._picklePath = PickleCache().picklePath(sourcePath)
         self.remove(picklePath) # make sure we're clean
-        data = self._data = {'x': 1}
+        data = self._data = dict(x=1)
         self.writeSource()
         try:
             # test 1: no pickle cache yet
@@ -37,7 +37,7 @@ class TestPickleCache(unittest.TestCase):
             assert readPickleCache(sourcePath) == data, \
                 repr(readPickleCache(sourcePath))
             # test 3: wrong pickle version
-            assert readPickleCache(sourcePath, pickleVersion=2) is None
+            assert readPickleCache(sourcePath, pickleProtocol=1) is None
             self.writePickle() # restore
             # test 4: wrong data source
             assert readPickleCache(sourcePath, source='notTest') is None
@@ -45,8 +45,8 @@ class TestPickleCache(unittest.TestCase):
             # test 5: wrong Python version
             try:
                 saveVersion = sys.version_info
-                sys.version_info = (sys.version_info[0] + 1,) \
-                    + sys.version_info[1:]
+                sys.version_info = (
+                    sys.version_info[0] + 1,) + sys.version_info[1:]
                 assert readPickleCache(sourcePath) is None
                 self.writePickle() # restore
             finally:
@@ -77,7 +77,7 @@ class TestPickleCache(unittest.TestCase):
 
     def writePickle(self):
         assert not os.path.exists(self._picklePath)
-        writePickleCache(self._data, self._sourcePath, pickleVersion=1, source='test')
+        writePickleCache(self._data, self._sourcePath, source='test')
         assert os.path.exists(self._picklePath)
 
 

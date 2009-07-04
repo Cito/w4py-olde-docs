@@ -78,7 +78,7 @@ here: http://manatee.mojam.com/~skip/python/
 
 """
 
-__version__ = 1   # version of PickleRPC protocol
+__version__ = 1 # PickleRPC protocol version (not the pickle protocol used)
 
 try:
     from cPickle import dumps, Unpickler, UnpicklingError
@@ -230,16 +230,13 @@ class Server:
     def _request(self, methodName, args, keywords):
         """Call a method on the remote server."""
         request = {
-            'version':    1,
+            'version':    __version__,
             'action':     'call',
             'methodName': methodName,
             'args':       args,
             'keywords':   keywords,
         }
-        if self._binary:
-            request = dumps(request, 1)
-        else:
-            request = dumps(request)
+        request = dumps(request, self._binary and -1 or 0)
         if zlib is not None and self._compressRequest and len(request) > 1000:
             request = zlib.compress(request, 1)
             compressed = True

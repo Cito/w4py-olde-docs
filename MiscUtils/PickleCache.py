@@ -49,12 +49,12 @@ verbose = False
 
 import os
 import sys
-import time
+from time import sleep
 from pprint import pprint
 try:
-    from cPickle import load, dump
+    from cPickle import load, dump, HIGHEST_PROTOCOL as maxPickleProtocol
 except ImportError:
-    from pickle import load, dump
+    from pickle import load, dump, HIGHEST_PROTOCOL as maxPickleProtocol
 
 
 class PickleCache(object):
@@ -68,7 +68,8 @@ class PickleCache(object):
 
 class PickleCacheReader(PickleCache):
 
-    def read(self, filename, pickleVersion=1, source=None, verbose=None):
+    def read(self, filename,
+            pickleProtocol=None, source=None, verbose=None):
         """Read data from pickle cache.
 
         Returns the data from the pickle cache version of the filename,
@@ -77,6 +78,8 @@ class PickleCacheReader(PickleCache):
         the original file is read.
 
         """
+        if pickleProtocol is None or pickleProtocol < 0:
+            pickleProtocol = maxPickleProtocol
         if verbose is None:
             v = self._verbose
         else:
@@ -126,17 +129,17 @@ class PickleCacheReader(PickleCache):
                         if v:
                             print 'Finished reading.'
                         assert isinstance(d, dict), 'type=%r dict=%r' % (type(d), d)
-                        for key in ('source', 'data', 'pickle version', 'python version'):
+                        for key in ('source', 'data', 'pickle protocol', 'python version'):
                             assert key in d, key
                         if source and d['source'] != source:
                             if v:
                                 print 'Not from required source (%s): %s.' % (
                                     source, d['source'])
                             shouldDeletePickle = True
-                        elif d['pickle version'] != pickleVersion:
+                        elif d['pickle protocol'] != pickleProtocol:
                             if v:
-                                print 'Pickle version (%i) does not match expected (%i).' % (
-                                    d['pickle version'], pickleVersion)
+                                print 'Pickle protocol (%i) does not match expected (%i).' % (
+                                    d['pickle protocol'], pickleProtocol)
                             shouldDeletePickle = True
                         elif d['python version'] != sys.version_info:
                             if v:
@@ -173,7 +176,10 @@ class PickleCacheWriter(PickleCache):
 
     _writeSleepInterval = 0.1
 
-    def write(self, data, filename, pickleVersion=1, source=None, verbose=None):
+    def write(self, data, filename,
+            pickleProtocol=None, source=None, verbose=None):
+        if pickleProtocol is None or pickleProtocol < 0:
+            pickleProtocol = maxPickleProtocol
         if verbose is None:
             v = self._verbose
         else:
@@ -187,7 +193,7 @@ class PickleCacheWriter(PickleCache):
         d = {
             'source': source,
             'python version': sys.version_info,
-            'pickle version': pickleVersion,
+            'pickle protocol': pickleProtocol,
             'data': data,
         }
         if v > 1:
@@ -196,23 +202,23 @@ class PickleCacheWriter(PickleCache):
         try:
             if v:
                 print 'About to open for write %r.' % picklePath
-            file = open(picklePath, 'wb')
+            pickleFile = open(picklePath, 'wb')
         except IOError, e:
             if v:
                 print 'error. not writing. %s: %s' % (
                     e.__class__.__name__, e)
         else:
             while 1:
-                dump(d, file, 1) # 1 = binary format
-                file.close()
+                dump(d, pickleFile, pickleProtocol)
+                pickleFile.close()
                 # Make sure the cache has a newer timestamp, otherwise the cache
                 # will just get ignored and rewritten next time.
                 if os.path.getmtime(picklePath) == sourceTimestamp:
                     if v:
-                        print 'Timestamps are identical,' \
-                            ' sleeping %0.2f seconds.' % self._writeSleepInterval
-                    time.sleep(self._writeSleepInterval)
-                    file = open(picklePath, 'w')
+                        print ('Timestamps are identical, sleeping'
+                            ' %0.2f seconds.' % self._writeSleepInterval)
+                    sleep(self._writeSleepInterval)
+                    pickleFile = open(picklePath, 'wb')
                 else:
                     break
 

@@ -148,10 +148,10 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
         response['timeResponded'] = time()
         if self.useBinaryPickle():
             contentType = 'application/x-python-binary-pickled-dict'
-            response = dumps(response, 1)
+            response = dumps(response, -1)
         else:
             contentType = 'text/x-python-pickled-dict'
-            response = dumps(response)
+            response = dumps(response, 0)
 
         # Get list of accepted encodings
         try:

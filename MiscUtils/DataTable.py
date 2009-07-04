@@ -377,7 +377,7 @@ class DataTable(object):
         data = None
         if self._usePickleCache:
             from PickleCache import readPickleCache, writePickleCache
-            data = readPickleCache(filename, pickleVersion=1, source='MiscUtils.DataTable')
+            data = readPickleCache(filename, source='MiscUtils.DataTable')
         if data is None:
             if self._filename.lower().endswith('.xls'):
                 self.readExcel(worksheet, row, column)
@@ -386,7 +386,7 @@ class DataTable(object):
                 self.readFile(file, delimiter, allowComments, stripWhite)
                 file.close()
             if self._usePickleCache:
-                writePickleCache(self, filename, pickleVersion=1, source='MiscUtils.DataTable')
+                writePickleCache(self, filename, source='MiscUtils.DataTable')
         else:
             self.__dict__ = data.__dict__
         return self
