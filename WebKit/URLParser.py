@@ -776,7 +776,7 @@ class URLParameterParser(URLParser):
         return hook.parse(trans, '/'.join(result))
 
 
-class ServletFactoryManagerClass:
+class ServletFactoryManagerClass(object):
     """Manage servlet factories.
 
     This singleton (called `ServletFactoryManager`) collects and manages

@@ -9,7 +9,7 @@ class ConnectionAbortedError(Exception):
     """Connection aborted error"""
 
 
-class ASStreamOut:
+class ASStreamOut(object):
     """This is a response stream to the client.
 
     The key attributes of this class are:

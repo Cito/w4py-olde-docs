@@ -11,7 +11,7 @@ def removePidFile(pidfile):
     pidfile.remove()
 
 
-class PidFile:
+class PidFile(object):
 
     def __init__(self, path):
         self._path = path

@@ -229,7 +229,8 @@ def isFCGI():
 _init = None
 _sock = None
 
-class FCGI:
+class FCGI(object):
+
     def __init__(self):
         self.haveFinished = False
         if _init is None:
@@ -321,7 +322,7 @@ class FCGI:
 
     def Finish(self, status=0):
         if not self.haveFinished:
-            self.haveFinished = 1
+            self.haveFinished = True
 
             self.err.seek(0, 0)
             self.out.seek(0, 0)

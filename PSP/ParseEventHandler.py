@@ -24,7 +24,7 @@ import time
 from Generators import * # ResponseObject, plus all the *Generator functions.
 
 
-class ParseEventHandler:
+class ParseEventHandler(object):
     """This is a key class.
 
     It implements the handling of all the parsing elements.

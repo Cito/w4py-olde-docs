@@ -152,7 +152,7 @@ class DebugApplication(Application):
         raise
 
 
-class DummyRequestQueue:
+class DummyRequestQueue(object):
     """This is a dummy replacement for the request queue.
 
     It merely executes handlers as soon as they are "pushed".

@@ -9,7 +9,7 @@ import FixPath
 from MiscUtils.DataTable import DataTable
 
 
-class BenchDataTable:
+class BenchDataTable(object):
 
     def __init__(self, profile=False, runTestSuite=True):
         self._shouldProfile = profile

@@ -31,7 +31,7 @@ class AbstractError(NotImplementedError):
 
         from MiscUtils import AbstractError
 
-        class Foo:
+        class Foo(object):
             def bar(self):
                 raise AbstractError(self.__class__)
 

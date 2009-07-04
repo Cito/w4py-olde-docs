@@ -138,7 +138,7 @@ class InvalidContentTypeError(ResponseError):
     __str__ = __repr__
 
 
-class SafeUnpickler:
+class SafeUnpickler(object):
     """Safe unpickler.
 
     For security reasons, we don't want to allow just anyone to unpickle
@@ -190,7 +190,7 @@ class SafeUnpickler:
 # xmlrpclib classes below either as base classes or mix-ins?
 
 
-class Server:
+class Server(object):
     """uri [,options] -> a logical connection to an XML-RPC server
 
     uri is the connection point on the server, given as
@@ -278,7 +278,7 @@ class Server:
 ServerProxy = Server # be like xmlrpclib for those who might guess or expect it
 
 
-class _Method:
+class _Method(object):
     """Some magic to bind a Pickle-RPC method to an RPC server.
 
     Supports "nested" methods (e.g. examples.getStateName).

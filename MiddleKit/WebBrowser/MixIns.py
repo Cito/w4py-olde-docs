@@ -27,7 +27,7 @@ def splitWords(s):
     return ''.join(res)
 
 
-class ObjectStore:
+class ObjectStore(object):
 
     def htObjectsOfClassNamed(self, className):
         objs = self.fetchObjectsOfClass(className)
@@ -67,7 +67,7 @@ class ObjectStore:
         return ''.join(ht)
 
 
-class Klass:
+class Klass(object):
 
     def htHeadingsRow(self):
         ht = ['<tr>']
@@ -80,7 +80,7 @@ class Klass:
         return ''.join(ht)
 
 
-class MiddleObject:
+class MiddleObject(object):
 
     def htAttrsRow(self):
         ht = ['<tr>']
@@ -110,13 +110,13 @@ class MiddleObject:
         return self.store().htObjectsInList(klassList, listName)
 
 
-class Attr:
+class Attr(object):
 
     def htValue(self, value, obj):
         return htmlEncode(str(value))
 
 
-class ObjRefAttr:
+class ObjRefAttr(object):
 
     def htValue(self, value, obj):
         if isinstance(value, long):
@@ -130,7 +130,7 @@ class ObjRefAttr:
             return htmlEncode(str(value))
 
 
-class ListAttr:
+class ListAttr(object):
 
     def htValue(self, value, obj):
         if value is None:

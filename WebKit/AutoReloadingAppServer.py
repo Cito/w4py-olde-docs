@@ -50,7 +50,7 @@ def getFAM(modules):
                 fam, 'WatchMonitor') and hasattr(fam, 'GAMChanged'):
 
 
-            class FAM:
+            class FAM(object):
                 """Simple File Alteration Monitor based on python-gamin"""
 
                 def name(self):
@@ -97,7 +97,7 @@ def getFAM(modules):
                 fam, 'open') and hasattr(fam, 'Changed'):
 
 
-            class FAM:
+            class FAM(object):
                 """Simple File Alteration Monitor based on python-fam"""
 
                 def name(self):

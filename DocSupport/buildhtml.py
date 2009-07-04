@@ -94,14 +94,14 @@ class OptionParser(frontend.OptionParser):
         return source, destination
 
 
-class Struct:
+class Struct(object):
     """Store data attributes for dotted-attribute access."""
 
     def __init__(self, **keywordargs):
         self.__dict__.update(keywordargs)
 
 
-class Builder:
+class Builder(object):
     """Build HTML files."""
 
     def __init__(self):

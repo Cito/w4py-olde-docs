@@ -9,7 +9,7 @@ import FixPath
 from MiscUtils.CSVParser import CSVParser
 
 
-class BenchCSVParser:
+class BenchCSVParser(object):
 
     def __init__(self, profile=0, runTestSuite=1):
         self.parse = CSVParser().parse

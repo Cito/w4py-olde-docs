@@ -17,7 +17,7 @@ class RunError(Exception):
     """
 
 
-class Test:
+class Test(object):
 
 
     ## Init ##

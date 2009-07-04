@@ -4,11 +4,8 @@ import FixPath
 from MiscUtils.Funcs import *
 
 
-class Foo: # used in testSafeDescription() below
-    pass
-
-
 class TestFuncs(unittest.TestCase):
+    """Unit tests for the functions in MiscUtils.Funcs."""
 
     def testCommas(self):
         testSpec = '''
@@ -75,30 +72,27 @@ class TestFuncs(unittest.TestCase):
         s = sd('x').replace('type=', 'class=')
         s = s.replace("<type 'string'>", "<type 'str'>")
         assert s == "what='x' class=<type 'str'>", s
-        f = Foo()
-        assert ('%s.Foo' % __name__) in sd(f), sd(f)
 
-        # new object type:
-        class Bar(object):
+        class OldStyle:
             pass
-        b = Bar()
-        assert ('%s.Bar' % __name__) in sd(b), sd(b)
+        old = OldStyle()
+        assert ('%s.OldStyle' % __name__) in sd(old), sd(old)
+
+        class NewStyle(object):
+            pass
+        new = NewStyle()
+        assert ('%s.NewStyle' % __name__) in sd(new), sd(new)
 
         # okay now test that safeDescription eats exceptions from repr():
-        class Baz:
+        class Bogus(object):
             def __repr__(self):
                 raise KeyError('bogus')
-        b = Baz()
+        b = Bogus()
         try:
             s = sd(b)
-            s = s.replace("'bogus'", 'bogus') # new style
-            s = s.replace("<class 'exceptions.KeyError'>", # new style
-                'exceptions.KeyError')
-            s = s.replace("<type 'exceptions.KeyError'>", # even newer style
-                'exceptions.KeyError')
         except Exception:
-            s = 'failure: should not get exception'
-        assert "(exception from repr(x): exceptions.KeyError: bogus)" in s, s
+            s = 'failure: should not throw exception'
+        assert "(exception from repr(obj): KeyError: 'bogus')" in s, s
 
     def testUniqueId(self):
 

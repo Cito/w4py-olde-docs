@@ -206,20 +206,21 @@ def positive_id(obj):
     return result
 
 
-def _descExc(reprOfWhat, e):
+def _descExc(reprOfWhat, err):
     """Return a description of an exception.
 
     This is a private function for use by safeDescription().
 
     """
     try:
-        return '(exception from repr(%s): %s: %s)' % (reprOfWhat, e.__class__, e)
+        return '(exception from repr(%s): %s: %s)' % (
+            reprOfWhat, err.__class__.__name__, err)
     except Exception:
         return '(exception from repr(%s))' % reprOfWhat
 
 
-def safeDescription(x, what='what'):
-    """Return the repr() of x and its class (or type) for help in debugging.
+def safeDescription(obj, what='what'):
+    """Return the repr() of obj and its class (or type) for help in debugging.
 
     A major benefit here is that exceptions from repr() are consumed.
     This is important in places like "assert" where you don't want
@@ -235,20 +236,20 @@ def safeDescription(x, what='what'):
 
     """
     try:
-        xRepr = repr(x)
+        xRepr = repr(obj)
     except Exception, e:
-        xRepr = _descExc('x', e)
-    if hasattr(x, '__class__'):
+        xRepr = _descExc('obj', e)
+    if hasattr(obj, '__class__'):
         try:
-            cRepr = repr(x.__class__)
+            cRepr = repr(obj.__class__)
         except Exception, e:
-            cRepr = _descExc('x.__class__', e)
+            cRepr = _descExc('obj.__class__', e)
         return '%s=%s class=%s' % (what, xRepr, cRepr)
     else:
         try:
-            cRepr = repr(type(x))
+            cRepr = repr(type(obj))
         except Exception, e:
-            cRepr = _descExc('type(x)', e)
+            cRepr = _descExc('type(obj)', e)
         return '%s=%s type=%s' % (what, xRepr, cRepr)
 
 

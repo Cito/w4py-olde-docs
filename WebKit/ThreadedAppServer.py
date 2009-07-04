@@ -806,7 +806,7 @@ class ThreadedAppServer(AppServer):
             self.setting('AddressFiles') % handlerClass.protocolName)
 
 
-class Handler:
+class Handler(object):
     """A very general socket handler.
 
     Handler is an abstract superclass -- specific protocol implementations

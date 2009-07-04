@@ -21,7 +21,7 @@ from MiscUtils import StringIO
 from MiscUtils.PropertiesObject import PropertiesObject
 
 
-class OutputCatcher:
+class OutputCatcher(object):
     """Auxiliary class for logging output."""
 
     def __init__(self, output, log):
@@ -35,7 +35,7 @@ class OutputCatcher:
             self._log.append(stuff)
 
 
-class Installer:
+class Installer(object):
     """Install Webware.
 
     The _comps attribute is a list of components,

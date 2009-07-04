@@ -70,7 +70,7 @@ FixPathForMiddleKit()
 import MiddleKit
 
 
-class Dump:
+class Dump(object):
 
     def databases(self):
         return ['MSSQL', 'MySQL', 'PostgreSQL'] # @@ 2000-10-19 ce: should build this dynamically

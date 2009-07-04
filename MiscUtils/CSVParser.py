@@ -16,7 +16,7 @@ class ParseError(Exception):
     """CSV file parse error."""
 
 
-class CSVParser:
+class CSVParser(object):
     """Parser for CSV files.
 
     Parses CSV files including all subtleties such as:

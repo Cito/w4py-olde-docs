@@ -121,11 +121,12 @@ Consider using the parser or tokenize modules of the standard library.
 import re, sys, os
 
 
-class NoDefault:
-    pass
+class NoDefault(object):
+    """Singleton for parameters with no default."""
 
 
-class CheckSrc:
+class CheckSrc(object):
+    """The source checker."""
 
 
     ## Init ##
@@ -719,10 +720,11 @@ Error codes and their messages:
 
 
 class CheckSrcError(Exception):
-    pass
+    """Source check error."""
 
 
-class _DummyWriter:
+class _DummyWriter(object):
+    """Dummy writer ignoring everything written."""
 
     def write(self, msg):
         pass

@@ -26,7 +26,7 @@ def test(store):
     from Foo import Foo
     from Bar import Bar
 
-    class Blarg:
+    class Blarg(object):
         pass
     blarg = Blarg() # a dummy object, incompatible with everything
 

@@ -21,8 +21,8 @@ from WebUtils.HTMLForException import HTMLForException
 from WebUtils.Funcs import htmlForDict, htmlEncode
 
 
-class Singleton:
-    pass
+class Singleton(object):
+    """A singleton object."""
 
 
 class ExceptionHandler(object):

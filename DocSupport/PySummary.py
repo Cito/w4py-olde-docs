@@ -11,7 +11,7 @@ methods with a given name. The default prefix for denoting a category is ##.
 import os
 
 
-class PySummary:
+class PySummary(object):
 
 
     ## Init ##
@@ -128,7 +128,7 @@ class PySummary:
         self._html = None
 
 
-class Line:
+class Line(object):
 
     def __init__(self, type, contents):
         self._type = type

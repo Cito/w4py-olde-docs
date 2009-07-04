@@ -20,7 +20,7 @@ from PSPParser import PSPParser
 from ParseEventHandler import ParseEventHandler
 
 
-class Compiler:
+class Compiler(object):
     """The main compilation class-"""
 
     def __init__(self, context):

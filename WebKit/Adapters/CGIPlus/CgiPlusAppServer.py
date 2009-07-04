@@ -103,7 +103,7 @@ class CgiPlusAppServer(AppServer):
         AppServer.shutDown(self)
 
 
-class Handler:
+class Handler(object):
 
     def __init__(self, server):
         self._server = server

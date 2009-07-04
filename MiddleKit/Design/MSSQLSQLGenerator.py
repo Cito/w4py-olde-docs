@@ -262,10 +262,9 @@ class TimeAttr(object):
         return 'DateTime'
 
 
-class BoolAttr:
+class BoolAttr(object):
 
     def sqlType(self):
-        # @@
         return 'bit'
 
 

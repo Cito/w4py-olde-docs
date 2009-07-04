@@ -48,7 +48,7 @@ WorkDir:
 import sys, os, stat, glob, shutil
 
 
-class MakeAppWorkDir:
+class MakeAppWorkDir(object):
     """Make a new application runtime directory for Webware.
 
     This class breaks down the steps needed to create a new runtime

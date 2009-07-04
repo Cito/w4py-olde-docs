@@ -29,7 +29,7 @@ import re
 import sys
 
 
-class BraceConverter:
+class BraceConverter(object):
 
     CSKIP = re.compile("(^[^\"'{}:#]+)")
     COLONBRACE = re.compile(":\s*{\s*([^\s].*)?$")

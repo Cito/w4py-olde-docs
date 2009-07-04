@@ -12,7 +12,7 @@ from time import time
 from WebKit.CgiPlusAppServer import Handler, CPASStreamOut
 
 
-class CgiPlusHandler:
+class CgiPlusHandler(object):
     """Handle incoming requests.
 
     Recreated with every request. Abstract base class.

@@ -85,7 +85,7 @@ os.chdir(webwarePath)
 from MiscUtils.PropertiesObject import PropertiesObject
 
 
-class Replacer:
+class Replacer(object):
     """Class to handle substitutions in a file."""
 
     def __init__(self, *args):

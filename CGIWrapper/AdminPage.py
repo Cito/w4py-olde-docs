@@ -1,6 +1,6 @@
 
 
-class AdminPage:
+class AdminPage(object):
     """AdminPage
 
     This is the abstract superclass of all CGI Wrapper administration CGI

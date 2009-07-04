@@ -41,7 +41,7 @@ def MixIn(pyClass, mixInClass, makeAncestor=False, mixInSuperMethods=False):
     be able to call the original or "parent" method from the mixed-in method.
     This is done like so:
 
-        class MyMixInClass:
+        class MyMixInClass(object):
         def foo(self):
             MyMixInClass.mixInSuperFoo(self) # call the original method
             # now do whatever you want

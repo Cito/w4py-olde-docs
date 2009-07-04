@@ -44,7 +44,7 @@ For more information, see the Release Procedures in the Webware docs.
 import os, sys, time
 
 
-class ReleaseHelper:
+class ReleaseHelper(object):
 
     def main(self):
         self.writeHello()
