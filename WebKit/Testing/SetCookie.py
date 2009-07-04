@@ -13,7 +13,7 @@ cookieValues = [
     ('oneHourAndHalf', '+ 1h 30m'),
     ('timeIntTenSec', time.time() + 10),
     ('tupleOneYear', (time.localtime()[0] + 1,) + time.localtime()[1:]),
-    ('dt1day', datetime.datetime() + datetime.timedelta(1)),
+    ('dt1day', datetime.datetime.now() + datetime.timedelta(1)),
     ('dt2min', datetime.timedelta(minutes=2))
 ]
 

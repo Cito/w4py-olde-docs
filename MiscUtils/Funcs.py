@@ -7,7 +7,9 @@ Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else
 import os
 import random
 import sys
+import datetime
 import time
+import datetime
 
 from struct import calcsize
 
@@ -262,7 +264,7 @@ def asclocaltime(t=None):
     return time.asctime(time.localtime(t))
 
 
-def timestamp(numSecs=None):
+def timestamp(t=None):
     """Return a dictionary whose keys give different versions of the timestamp.
 
     The dictionary will contain the following timestamp versions:
@@ -280,13 +282,19 @@ def timestamp(numSecs=None):
     formats are generally more appropriate for filenames.
 
     """
-    if numSecs is None:
-        numSecs = time.time()
-    tuple = time.localtime(numSecs)[:6]
+    tuple = time.localtime(t)[:6]
     pretty = '%4i-%02i-%02i %02i:%02i:%02i' % tuple
     condensed = '%4i%02i%02i%02i%02i%02i' % tuple
     dashed = '%4i-%02i-%02i-%02i-%02i-%02i' % tuple
     return locals()
+
+
+def localTimeDelta(t=None):
+    """Return timedelta of local zone from GMT."""
+    if t is None:
+        t = time.time()
+    dt =datetime.datetime
+    return dt.fromtimestamp(t) - dt.utcfromtimestamp(t)
 
 
 def uniqueId(forObject=None, sha=False):
