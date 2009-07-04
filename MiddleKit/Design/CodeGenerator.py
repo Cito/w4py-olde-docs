@@ -29,10 +29,11 @@ Make sure all three goals are met:
 
 import os
 import sys
-from time import asctime, localtime, time
 
 from MiscUtils import AbstractError
 from MiscUtils.Configurable import Configurable
+from MiscUtils.Funcs import asclocaltime
+
 from MiddleKit.Core.ModelUser import ModelUser
 
 
@@ -58,7 +59,7 @@ class CodeGenerator(ModelUser):
 
     def writeInfoItems(self, file):
         wr = self.writeInfoItem
-        wr(file, 'Date', asctime(localtime(time())))
+        wr(file, 'Date', asclocaltime())
         wr(file, 'Python ver', sys.version)
         wr(file, 'Op Sys', os.name)
         wr(file, 'Platform', sys.platform)

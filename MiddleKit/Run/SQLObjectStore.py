@@ -1100,7 +1100,7 @@ class AnyDateTimeAttr(object):
 class DateAttr(object):
 
     def sqlForNonNone(self, value):
-        # We often get "YYYY-MM-DD HH:MM:SS" from mx's DateTime
+        # We often get "YYYY-MM-DD HH:MM:SS" from datetime
         # so we split on space and take the first value to
         # work around that. This works fine with Python's
         # date class (does no harm).

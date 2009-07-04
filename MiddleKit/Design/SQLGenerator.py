@@ -2,10 +2,11 @@ import os
 import sys
 
 from glob import glob
-from time import asctime, localtime, time
+
+from MiscUtils import AbstractError, CSVParser
+from MiscUtils.Funcs import asclocaltime
 
 from MiddleKit.Core.ObjRefAttr import objRefJoin
-from MiscUtils import AbstractError, CSVParser
 from CodeGenerator import *
 
 
@@ -365,7 +366,7 @@ class Klasses(object):
         wr = out.write
         kv = self.writeKeyValue
         wr('/*\nStart of generated SQL.\n\n')
-        kv(out, 'Date', asctime(localtime(time())))
+        kv(out, 'Date', asclocaltime())
         kv(out, 'Python ver', sys.version)
         kv(out, 'Op Sys', os.name)
         kv(out, 'Platform', sys.platform)
@@ -542,9 +543,9 @@ class Klass(object):
         row = {'Attribute': 'deleted', 'Type': 'DateTime'}
         # create a "DateTimeAttr", so that the correct database type is used
         # depending on the backend database.
-        datetime = generator.model().coreClass('DateTimeAttr')(row)
-        datetime.setKlass(self)
-        datetime.writeCreateSQL(generator, out)
+        dateTimeAttr = generator.model().coreClass('DateTimeAttr')(row)
+        dateTimeAttr.setKlass(self)
+        dateTimeAttr.writeCreateSQL(generator, out)
 
     def maxNameWidth(self):
         return 30 # @@ 2000-09-15 ce: Ack! Duplicated from Attr class below

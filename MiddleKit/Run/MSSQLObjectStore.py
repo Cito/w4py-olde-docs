@@ -1,3 +1,5 @@
+import datetime
+
 from mx import ODBC # DR: 07-12-02 The ODBC.Windows module is flawed
 
 from SQLObjectStore import SQLObjectStore
@@ -97,9 +99,8 @@ class MSSQLObjectStore(SQLObjectStore):
         return ODBC.Windows
 
     def filterDateTimeDelta(self, dtd):
-        from mx import DateTime
-        if isinstance(dtd, DateTime.DateTimeDeltaType):
-            dtd = DateTime.DateTime(1900, 1, 1) + dtd
+        if isinstance(dtd, datetime.timedelta):
+            dtd = datetime.datetime(1970, 1, 1) + dtd
         return dtd
 
     def sqlNowCall(self):

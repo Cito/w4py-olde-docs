@@ -7,6 +7,11 @@ from MiscUtils.DateParser import *
 
 class TestDateTimeParser(unittest.TestCase):
 
+    def testReturnType(self):
+        from datetime import datetime
+        assert type(parseDateTime(
+            'Mon Jul 21 02:56:20 1969')) is datetime
+
     def assertParses(self, s):
         assert parseDateTime(s).isoformat() == '1969-07-21T02:56:20'
 
@@ -46,6 +51,11 @@ class TestDateTimeParser(unittest.TestCase):
 
 class TestDateParser(unittest.TestCase):
 
+    def testReturnType(self):
+        from datetime import date
+        assert type(parseDate(
+            'Mon Jul 21 02:56:20 1969')) is date
+
     def assertParses(self, s):
         assert parseDate(s).isoformat() == '1969-07-21'
 
@@ -71,6 +81,11 @@ class TestDateParser(unittest.TestCase):
 
 
 class TestTimeParser(unittest.TestCase):
+
+    def testReturnType(self):
+        from datetime import time
+        assert type(parseTime(
+            'Mon Jul 21 02:56:20 1969')) is time
 
     def assertParses(self, s):
         assert parseTime(s).isoformat() == '02:56:20'

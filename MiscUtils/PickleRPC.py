@@ -159,8 +159,8 @@ class SafeUnpickler(object):
         classes that you want to allow to be unpickled.
 
         Example:
-            return [('mx.DateTime', '_DT')]
-        allows mx.DateTime instances to be unpickled.
+            return [('datetime', 'date')]
+        allows datetime.date instances to be unpickled.
 
         """
         return []

@@ -13,6 +13,7 @@ def check(err):
     assert isinstance(err['b'], str)
     print
 
+
 def test():
     err = Error(None, None)
     print 'str: ', err

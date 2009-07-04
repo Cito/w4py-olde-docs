@@ -1,19 +1,11 @@
+import datetime
+
 from Foo import Foo
 
 
 def test(store):
-    try:
-        import datetime
-        testNativeDateTime(store)
-    except ImportError:
-        pass
-
-    try:
-        from mx import DateTime
-        testMXDateTime(store)
-    except ImportError:
-        pass
-
+    testStrings(store)
+    testDateTime(store)
     testNone(store)
 
 
@@ -34,9 +26,8 @@ def testStrings(store):
     store.saveChanges()
 
 
-def testNativeDateTime(store):
-    import datetime
-    print 'Testing with the native datetime module.'
+def testDateTime(store):
+    print 'Testing with the datetime module.'
 
     d = datetime.date(2001, 6, 7)
     t = datetime.time(12, 42)
@@ -56,40 +47,6 @@ def testNativeDateTime(store):
     f.setD(d)
     f.setT(t)
     f.setDt(dt)
-
-    store.saveChanges()
-
-
-def testMXDateTime(store):
-    import mx
-    from mx.DateTime import DateTimeFrom, TimeFrom
-    print 'Testing with mx.DateTime module.'
-
-    d = DateTimeFrom('2001-06-07')
-    t = TimeFrom('12:42')
-    dt = DateTimeFrom('2001-06-07 12:42')
-
-    f = Foo()
-    f.setD(d)
-    f.setT(t)
-    f.setDt(dt)
-
-    storeFoo(store, f)
-
-    d = DateTimeFrom('2002-11-11')
-    t = TimeFrom('16:04')
-    dt = DateTimeFrom('2002-11-11 16:04')
-
-    f.setD(d)
-    f.setT(t)
-    f.setDt(dt)
-
-    store.saveChanges()
-
-    # test parsing of strings, a convenience feature when using mx.DateTime:
-    f.setD('2002-11-11')
-    f.setT('16:04')
-    f.setDt('2002-11-11 16:04')
 
     store.saveChanges()
 

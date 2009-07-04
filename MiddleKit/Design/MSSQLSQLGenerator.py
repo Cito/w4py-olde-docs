@@ -1,6 +1,7 @@
 import os
 import sys
-from time import asctime, localtime, time
+
+from MiscUtils.Funcs import asclocaltime
 
 from SQLGenerator import SQLGenerator
 
@@ -130,7 +131,7 @@ name varchar(100)
         wr = out.write
         kv = self.writeKeyValue
         wr('/*\nStart of generated SQL.\n\n')
-        kv(out, 'Date', asctime(localtime(time())))
+        kv(out, 'Date', asclocaltime())
         kv(out, 'Python ver', sys.version)
         kv(out, 'Op Sys', os.name)
         kv(out, 'Platform', sys.platform)

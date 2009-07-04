@@ -11,13 +11,6 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-try:
-    import mx.DateTime as mxDateTime
-except ImportError:
-    mxDateTime = None
-
-import datetime as nativeDateTime
-
 
 class AbstractError(NotImplementedError):
     """Abstract method error.

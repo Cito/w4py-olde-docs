@@ -89,39 +89,7 @@
 
 <a name="DT_DateTime"></a><h3>Date and time types</h3>
 
-<p>MiddleKit supports types of date, time and datetime. With a default Python installation and MiddleKit, these are expressed as Python strings such as <code>'2001-02-27'</code>. If you have installed the <a href="http://www.lemburg.com/files/python/mxDateTime.html">mxDateTime</a> package, then these values will be expressed as instances of DateTime and DateTimeDelta.</p>
-
-<p>With a default Python installation and MiddleKit, you can pass strings:</p>
-
-<table border="1" align="center" cellpadding="2" cellspacing="0">
-  <tr>
-    <th colspan="4" align="center">Date/Time Types</th>
-  </tr>
-  <tr>
-    <th>MiddleKit</th>
-    <th>Python</th>
-    <th>MySQL</th>
-    <th>Notes</th>
-  </tr>
-  <tr>
-    <td>datetime</td>
-    <td>string/DateTime</td>
-    <td>datetime</td>
-    <td>&nbsp;</td>
-  </tr>
-  <tr>
-    <td>date</td>
-    <td>string/DateTime</td>
-    <td>datetime</td>
-    <td>&nbsp;</td>
-  </tr>
-  <tr>
-    <td>time</td>
-    <td>string/DateTimeDelta</td>
-    <td>time</td>
-    <td>&nbsp;</td>
-  </tr>
-</table>
+<p>MiddleKit supports types of date, time and datetime (as available in the Python standard library).</p>
 
 
 <a name="DT_Enums"></a><h3>Enumerations</h3>
@@ -129,7 +97,6 @@
 <p>Enumerations are provided through the <span class="name">enum</span> type which is directly supported in MySQL. In Python, these enumerations are kept as case sensitive strings. The object model must specify the valid values of the enumeration. While that be done via a column named "Enums", this is more frequently specified in the "Extras" column, where less common attribute specs are usually placed:</p>
 
 <p class="center"><code>Enums='red, green, blue'</code></p>
-
 
 
 <a name="DT_ObjRef"></a><h3>Object references</h3>
