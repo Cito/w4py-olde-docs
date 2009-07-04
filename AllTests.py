@@ -19,13 +19,14 @@ alltestnames = [
 
     'WebUtils.Tests.TestHTMLTag.makeTestSuite',
 
-    'MiscUtils.Tests.TestCSVParser.CSVParserTests',
+    'MiscUtils.Tests.TestCSVParser',
     'MiscUtils.Tests.TestNamedValueAccess.makeTestSuite',
-    'MiscUtils.Tests.TestError.TestError',
-    'MiscUtils.Tests.TestFuncs.TestFuncs',
-    'MiscUtils.Tests.TestPickleCache.TestPickleCache',
-    'MiscUtils.Tests.TestDataTable.TestDataTable',
-    'MiscUtils.Tests.TestDateInterval.TestDateInterval',
+    'MiscUtils.Tests.TestError',
+    'MiscUtils.Tests.TestFuncs',
+    'MiscUtils.Tests.TestPickleCache',
+    'MiscUtils.Tests.TestDataTable',
+    'MiscUtils.Tests.TestDateInterval',
+    'MiscUtils.Tests.TestDateParser',
     'MiscUtils.Tests.TestDictForArgs',
 
     'WebKit.Tests.Basic.Test',
