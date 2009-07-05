@@ -43,7 +43,7 @@ class CGIAdapter(Adapter):
                 msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 
             myInput = ''
-            if os.environ.has_key('CONTENT_LENGTH'):
+            if 'CONTENT_LENGTH' in os.environ:
                 length = int(os.environ['CONTENT_LENGTH'])
                 myInput += sys.stdin.read(length)
 

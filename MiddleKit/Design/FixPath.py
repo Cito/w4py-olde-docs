@@ -9,7 +9,7 @@ def FixPathForMiddleKit(verbose=0):
     """
     v = verbose
     import os, sys
-    if globals().has_key('__file__'):
+    if '__file__' in globals():
         # We were imported as a module
         location = __file__
         if v:

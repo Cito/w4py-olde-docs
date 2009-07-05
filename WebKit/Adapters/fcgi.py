@@ -135,7 +135,7 @@ class Record(object):
 
         elif self.recType == FCGI_GET_VALUES or self.recType == FCGI_PARAMS:
             content = ""
-            for i in self.values.keys():
+            for i in self.values:
                 content += writePair(i, self.values[i])
 
         elif self.recType == FCGI_END_REQUEST:
@@ -208,8 +208,8 @@ def HandleManTypes(r, conn):
             'FCGI_MAX_REQS':   FCGI_MAX_REQS,
             'FCGI_MPXS_CONNS': FCGI_MPXS_CONNS
         }
-        for i in r.values.keys():
-            if vars.has_key(i):
+        for i in r.values:
+            if i in vars:
                 v[i] = vars[i]
         r.values = vars
         r.writeRecord(conn)
@@ -241,7 +241,7 @@ class FCGI(object):
                 sys.stdin, sys.stdout, sys.stderr, os.environ
             return
 
-        if os.environ.has_key('FCGI_WEB_SERVER_ADDRS'):
+        if 'FCGI_WEB_SERVER_ADDRS' in os.environ:
             good_addrs = os.environ['FCGI_WEB_SERVER_ADDRS'].split(',')
             good_addrs = map(good_addrs.strip()) # remove whitespace
         else:
@@ -296,7 +296,7 @@ class FCGI(object):
                 if r.content == "":
                     remaining -= 1
                 else:
-                    for i in r.values.keys():
+                    for i in r.values:
                         self.env[i] = r.values[i]
 
             elif r.recType == FCGI_STDIN:
@@ -357,7 +357,7 @@ class FCGI(object):
 
     def getFieldStorage(self):
         method = 'GET'
-        if self.env.has_key('REQUEST_METHOD'):
+        if 'REQUEST_METHOD' in self.env:
             method = self.env['REQUEST_METHOD'].upper()
         return cgi.FieldStorage(fp=method != 'GET' and self.inp or None,
             environ=self.env, keep_blank_values=1)
@@ -405,7 +405,7 @@ def _test():
                 doc.append('<H2>FCGI TestApp</H2><P>')
                 doc.append('<b>request count</b> = %d<br>' % counter)
                 doc.append('<b>pid</b> = %s<br>' % os.getpid())
-                if req.env.has_key('CONTENT_LENGTH'):
+                if 'CONTENT_LENGTH' in req.env:
                     cl = int(req.env['CONTENT_LENGTH'])
                     doc.append('<br><b>POST data (%d):</b><br><pre>' % cl)
                     for k in sorted(fs):

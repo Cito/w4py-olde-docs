@@ -183,7 +183,7 @@ class AjaxPage(BaseClass):
             # Set the timeout until the next time this method is called
             # by the client, using the Javascript wait variable:
             cmd = ['wait=%s' % self.clientPollingInterval()]
-            if self._responseQueue.has_key(sid): # add in other commands
+            if sid in self._responseQueue: # add in other commands
                 cmd.extend(map(str, self._responseQueue[sid]))
                 self._responseQueue[sid] = []
             cmd = ';'.join(cmd) + ';'

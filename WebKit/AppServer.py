@@ -424,7 +424,7 @@ def kill(pid):
 def stop(*args, **kw):
     """Stop the AppServer (which may be in a different process)."""
     print "Stopping the AppServer..."
-    if kw.has_key('workDir'):
+    if 'workDir' in kw:
         # app directory
         pidfile = os.path.join(kw['workDir'], "appserver.pid")
     else:

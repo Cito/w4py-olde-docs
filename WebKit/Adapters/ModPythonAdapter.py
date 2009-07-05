@@ -74,7 +74,7 @@ class ModPythonAdapter(Adapter):
             env = dict(env)
 
             # Fix up the path
-            if not env.has_key('PATH_INFO'):
+            if 'PATH_INFO' not in env:
                 env['PATH_INFO'] = req.path_info
 
             # Communicate with the app server

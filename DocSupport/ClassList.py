@@ -129,7 +129,7 @@ class ClassList(object):
             print names
         # create the klasses as needed
         for name in names:
-            if not self._klasses.has_key(name):
+            if name not in self._klasses:
                 self._klasses[name] = Klass(name)
         # connect them
         klass = self._klasses[names[0]]

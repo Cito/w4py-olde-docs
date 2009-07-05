@@ -117,7 +117,7 @@ numRequests
   <li> <code>server_side_path</code></li>
 </ol>
 
-<p>Python itself uses all three styles (<code>has_key</code>, <code>getattr</code>, <code>isSet</code>), but Webware uses only the first which is more readable than the second and easier to type that the third.</p>
+<p>Python itself uses all three styles (<code>isSet</code>, <code>getattr</code>, <code>has_key</code>), but Webware uses only the first which is more readable than the second and easier to type that the third.</p>
 
 <p>This rule also applies to class names such as <code>HTTPRequest</code> and <code>ServletFactory</code>.</p>
 
@@ -135,7 +135,7 @@ numRequests
 <% def convention(dict):
     results = []
     for key in ['what', 'why', 'examples', 'negatives', 'exceptions']:
-        if not dict.has_key(key):
+        if key not in dict:
             continue
         value = dict[key]
         if key in ('examples', 'negatives', 'exceptions'):
@@ -191,7 +191,7 @@ def transaction(self):
 ## Values ##
 
 def hasValue(self, name):
-    return self._fields.has_key(name) or self._cookies.has_key(name)''',
+    return name in self._fields or name in self._cookies''',
 'exceptions': 'No category comment is added when the class implementation is <code>pass</code>.'}) %>
 <%= convention({'what': 'Use docstrings and the <a href="http://www.python.org/dev/peps/pep-0257.html">PEP 257</a> conventions.',
 'why': 'This allows for creating appropriate code documentation automatically. Please note that in the past, this has not been heeded very well. But as the project matures and grows, the docstrings should be improved.',

@@ -786,7 +786,7 @@ class TableRecord(object):
             return self._values[index]
 
     def has_key(self, key):
-        return self._nameToIndexMap.has_key(key)
+        return key in self
 
     def keys(self):
         return self._nameToIndexMap.keys()
@@ -796,9 +796,19 @@ class TableRecord(object):
 
     def items(self):
         items = []
-        for key in self.keys():
+        for key in self._nameToIndexMap:
             items.append((key, self[key]))
         return items
+
+    def iterkeys(self):
+        return iter(self._nameToIndexMap)
+
+    def itervalues(self):
+        return iter(self)
+
+    def iteritems(self):
+        for key in self.self._nameToIndexMap:
+            yield key, self[key]
 
 
     ## Additional access ##

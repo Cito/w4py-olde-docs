@@ -9,7 +9,7 @@ print '''%s
         <h1>Webware View CGI Source</h1>
 ''' % wrapper.docType()
 
-if not fields.has_key('filename'):
+if 'filename' not in fields:
     print '<p>No filename specified.</p>'
 else:
     if 'tabSize' in fields:

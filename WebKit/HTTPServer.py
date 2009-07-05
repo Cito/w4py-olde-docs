@@ -28,21 +28,16 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
         """
         self.server_version = 'Webware/' + self._server.version()
         env = {}
-        if self.headers.has_key('Content-Type'):
-            env['CONTENT_TYPE'] = self.headers['Content-Type']
-            del self.headers['Content-Type']
-        if self.headers.has_key('Content-Length'):
-            env['CONTENT_LENGTH'] = self.headers['Content-Length']
-            del self.headers['Content-Length']
-        key = 'If-Modified-Since'
-        if self.headers.has_key(key):
-            env[key] = self.headers[key]
-            del self.headers[key]
+        for header in ('Content-Type', 'Content-Length', 'If-Modified-Since'):
+            # unfortunately, self.headers has no pop() method
+            if header in self.headers:
+                env[header.upper().replace('-', '_')] = self.headers[header]
+                del self.headers[header]
         self.headersToEnviron(self.headers, env)
         env['REMOTE_ADDR'], env['REMOTE_PORT'] = map(str, self.client_address)
         env['REQUEST_METHOD'] = self.command
         path = self.path
-        if path.find('?') != -1:
+        if '?' in path:
             env['REQUEST_URI'], env['QUERY_STRING'] = path.split('?', 1)
         else:
             env['REQUEST_URI'] = path
@@ -70,7 +65,7 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
 
         """
         for header, value in headers.items():
-            env['HTTP_%s' % (header.upper().replace('-', '_'))] = value
+            env['HTTP_%s' % header.upper().replace('-', '_')] = value
         return env
 
     def processResponse(self, data):

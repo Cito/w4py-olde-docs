@@ -70,7 +70,7 @@ class Message(object):
         self._args[name] = value
 
     def hasArg(self, name):
-        return self._args.has_key(name)
+        return name in self._args
 
     def deleteArg(self, name):
         del self._args[name]

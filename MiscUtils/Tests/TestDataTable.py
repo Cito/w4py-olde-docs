@@ -54,7 +54,6 @@ class Record(object):
         return self.record.get(key, default)
 
 
-
 class TestDataTable(unittest.TestCase):
 
     def _testSource(self, name, src, headings, data):

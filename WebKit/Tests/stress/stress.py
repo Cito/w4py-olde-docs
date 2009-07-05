@@ -137,7 +137,7 @@ def stress(maxRequests,
     # from when the raw requests were captured
     for dict in requestDicts:
         environ = dict['environ']
-        if environ.has_key('HTTP_COOKIE'):
+        if 'HTTP_COOKIE' in environ:
             del environ['HTTP_COOKIE']
     requestCount = len(requestFilenames)
     if maxParallelRequests < minParallelRequests:

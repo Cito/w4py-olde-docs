@@ -80,7 +80,7 @@ class PidFile(object):
                 import win32api
             except ImportError:
                 pass
-            if sys.modules.has_key('win32api'):
+            if 'win32api' in sys.modules:
                 return win32api.GetCurrentProcessId()
         return None
 

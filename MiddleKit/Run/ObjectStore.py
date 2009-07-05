@@ -235,7 +235,7 @@ class ObjectStore(ModelUser):
 
         # detaches
         for obj, attr in detaches:
-            if not objectsToDel.has_key(id(obj)):
+            if id(obj) not in objectsToDel:
                 obj.setValueForAttr(attr, None)
 
         # process final list of objects

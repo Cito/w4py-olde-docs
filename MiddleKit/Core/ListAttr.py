@@ -45,7 +45,7 @@ class ListAttr(Attr):
                 % (self.klass().name(), self.name(), self.className()))
 
         # Compute self._backRefAttr.
-        if self.has_key('BackRefAttr'):
+        if 'BackRefAttr' in self:
             backRefName = self['BackRefAttr']
         else:
             backRefName = self.klass().name()

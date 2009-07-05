@@ -225,13 +225,13 @@ class ServletFactory(object):
         # Do we need to import/reimport the class
         # because the file changed on disk or isn't in cache?
         mtime = os.path.getmtime(path)
-        if not self._classCache.has_key(path) or \
-                mtime != self._classCache[path]['mtime']:
+        if (path not in self._classCache
+                or mtime != self._classCache[path]['mtime']):
             # Use a lock to prevent multiple simultaneous
             # imports of the same module:
             self._importLock.acquire()
             try:
-                if (not self._classCache.has_key(path)
+                if (path not in self._classCache
                         or mtime != self._classCache[path]['mtime']):
                     theClass = self.loadClass(transaction, path)
                     if self._cacheClasses:
@@ -247,7 +247,7 @@ class ServletFactory(object):
         # Try to find a cached servlet of the correct class.
         # (Outdated servlets may have been returned to the pool after a new
         # class was imported, but we don't want to use an outdated servlet.)
-        if self._threadsafeServletCache.has_key(path):
+        if path in self._threadsafeServletCache:
             servlet = self._threadsafeServletCache[path]
             if servlet.__class__ is theClass:
                 return servlet
@@ -267,7 +267,7 @@ class ServletFactory(object):
         self._importLock.acquire()
         try:
             mtime = os.path.getmtime(path)
-            if not self._classCache.has_key(path):
+            if path not in self._classCache:
                 self._classCache[path] = {
                     'mtime': mtime,
                     'class': self.loadClass(transaction, path)}

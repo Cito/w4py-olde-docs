@@ -247,7 +247,7 @@ class Klass(MiddleDict, ModelObject):
         return self._attrsList
 
     def hasAttr(self, name):
-        return self._attrsByName.has_key(name)
+        return name in self._attrsByName
 
     def attr(self, name, default=NoDefault):
         """Return the attribute with the given name.

@@ -318,17 +318,11 @@ if __name__ == '__main__':
         cfg = eval(cfgfile, cfg)
     else:
         exec cfgfile in cfg
-    if not cfg.has_key('EnableMonitor') or not cfg['EnableMonitor']:
+    if not cfg.get('EnableMonitor'):
         print "Monitoring has not been enabled in AppServer.config!"
         sys.exit()
-    if cfg.has_key('Host'):
-        host = cfg['Host']
-    else:
-        host = '127.0.0.1'
-    if cfg.has_key('MonitorPort'):
-        port = cfg['MonitorPort']
-    else:
-        port = 8085
+    host = cfg.get('Host', '127.0.0.1')
+    port = cfg.get('MonitorPort', 8085)
     addr = (host, port)
 
     if 'stop' in args:

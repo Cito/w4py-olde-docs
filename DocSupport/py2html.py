@@ -382,7 +382,7 @@ def main(cmdline):
     options = []
     optvalues = {}
     for opt in cmdline[1:]:
-        if opt[0] == '-':
+        if opt.startswith('-'):
             if ':' in opt:
                 k, v = tuple(opt.split(':', 1))
                 optvalues[k] = v
@@ -472,15 +472,15 @@ URL: http://starship.python.net/~just/
         print __doc__
         sys.exit()
 
-    if len(files) == 0:
+    if not files:
         # Turn URL processing on
-        c.replace_URLs = 1
+        c.replace_URLs = True
         # Try CGI processing...
         import cgi, urllib, urlparse, os
         form = cgi.FieldStorage()
-        if not form.has_key('script'):
+        if 'script' not in form:
             # Ok, then try pathinfo
-            if not os.environ.has_key('PATH_INFO'):
+            if 'PATH_INFO' not in os.environ:
                 if INPUT_FORM:
                     redirect_to(INPUT_FORM)
                 else:
@@ -495,10 +495,7 @@ URL: http://starship.python.net/~just/
         scheme, host, path, params, query, frag = urlparse.urlparse(url)
         if not host:
             scheme = 'http'
-            if os.environ.has_key('HTTP_HOST'):
-                host = os.environ['HTTP_HOST']
-            else:
-                host = 'localhost'
+            host = os.environ.get('HTTP_HOST', 'localhost')
             url = urlparse.urlunparse((scheme, host, path, params, query, frag))
         #print url; sys.exit()
         network = urllib.URLopener()

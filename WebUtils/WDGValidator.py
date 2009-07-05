@@ -57,10 +57,10 @@ def validateHTML(html):
 
     goodColors = ['#d0d0d0', '#e0e0e0']
     badColor = '#ffd0d0'
-    lines = html.splitlines(1)
+    lines = html.splitlines(True)
     i = 1
     for line in lines:
-        if errorLines.has_key(i):
+        if i in errorLines:
             result.write('<tr style="background-color: %s">'
                 '<td rowspan="2">%d</td><td>%s</td></tr>\n'
                 % (badColor, i, encodeWithIndentation(errorLines[i])))

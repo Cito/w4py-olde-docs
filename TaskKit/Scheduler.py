@@ -80,7 +80,7 @@ class Scheduler(Thread):
 
     def hasRunning(self, name):
         """Check to see if a task with the given name is currently running."""
-        return self._running.has_key(name)
+        return name in self._running
 
     def setRunning(self, handle):
         """Add a task to the running dictionary.

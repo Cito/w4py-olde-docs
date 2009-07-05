@@ -215,7 +215,7 @@ def addCommandLineSetting(name, value):
     """
     configName, settingName = name.split('.', 1)
     value = valueForString(value)
-    if not _settings.has_key(configName):
+    if configName not in _settings:
         _settings[configName] = {}
     _settings[configName][settingName] = value
 

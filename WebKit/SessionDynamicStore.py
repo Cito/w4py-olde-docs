@@ -84,7 +84,7 @@ class SessionDynamicStore(SessionStore):
         except KeyError:
             self._lock.acquire()
             try:
-                if self._fileStore.has_key(key):
+                if key in self._fileStore:
                     self.moveToMemory(key)
                 # let it raise a KeyError otherwise
                 return self._memoryStore[key]

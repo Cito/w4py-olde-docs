@@ -34,7 +34,7 @@ class CgiPlusHandler(object):
         """
         myInput = ''
         self._discardOutput = False
-        if self.env.has_key('CONTENT_LENGTH'):
+        if 'CONTENT_LENGTH' in self.env:
             length = int(self.env['CONTENT_LENGTH'])
             if length > 0:
                 myInput += self.rfile.read(length)
@@ -59,23 +59,15 @@ class CgiPlusHandler(object):
         we need to add a Status header ourselves.
 
         """
-        if headers.has_key('Location'):
-            if not headers.has_key('Status'):
+        if 'Location' in headers:
+            if 'Status' not in headers:
                 headers['Status'] = '301 Moved Temporarily'
 
     def sendStatus(self, headers):
-        if not headers.has_key('Status'):
-            status = "200 OK"
-        else:
-            status = headers['Status']
-            del headers['Status']
-        pos = status.find(' ')
-        if pos < 0:
-            code = int(status)
-            message = ''
-        else:
-            code = int(status[:pos])
-            message = status[pos:].strip()
+        status = headers.pop('Status', '200 OK')
+        status = status.split(None, 1)
+        code = int(status[0])
+        message = len(status) > 1 and status[1].rstrip() or ''
         self.wfile.write("Status: %d %s\n" % (code, message))
 
     def sendHeaders(self, headers):

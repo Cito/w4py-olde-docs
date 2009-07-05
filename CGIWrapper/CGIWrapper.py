@@ -440,7 +440,7 @@ class CGIWrapper(object):
     def serve(self, environ=os.environ):
         """Serve a request."""
         # Record the time
-        if globals().has_key('isMain'):
+        if 'isMain' in globals():
             self._serverStartTime = serverStartTime
         else:
             self._serverStartTime = time()
@@ -551,7 +551,7 @@ class CGIWrapper(object):
         headers = StringIO()
         for header, value in self._headers.items():
             headers.write("%s: %s\n" % (header, value))
-        if self._namespace.has_key('cookies'):
+        if 'cookies' in self._namespace:
             headers.write(str(self._namespace['cookies']))
         headers.write('\n')
 

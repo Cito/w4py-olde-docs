@@ -38,7 +38,7 @@ class HTTPRequest(Request):
                 keep_blank_values=True, strict_parsing=False)
             self._fields.parse_qs()
             self._cookies = Cookie()
-            if self._environ.has_key('HTTP_COOKIE'):
+            if 'HTTP_COOKIE' in self._environ:
                 # Protect the loading of cookies with an exception handler,
                 # because MSIE cookies sometimes can break the cookie module.
                 try:
@@ -71,7 +71,7 @@ class HTTPRequest(Request):
             f.close()
 
         # Get adapter, servlet path and query string
-        self._absolutepath = env.has_key('WK_ABSOLUTE') # set by adapter
+        self._absolutepath = 'WK_ABSOLUTE' in env # set by adapter
         if self._absolutepath:
             # this is set when the servlet is a webserver file that shall
             # be handled without context (e.g. when the psp-handler is used)
@@ -84,7 +84,7 @@ class HTTPRequest(Request):
             self._pathInfo = env.get('PATH_INFO', '')
             self._extraURLPath = '' # will be determined later
         self._queryString = env.get('QUERY_STRING', '')
-        if env.has_key('REQUEST_URI'):
+        if 'REQUEST_URI' in env:
             self._uri = env['REQUEST_URI']
             # correct servletPath if there was a redirection
             if not (self._uri + '/').startswith(self._servletPath + '/'):
@@ -93,7 +93,7 @@ class HTTPRequest(Request):
         else:
             # REQUEST_URI isn't actually part of the CGI standard and some
             # web servers like IIS don't set it (as of 8/22/2000).
-            if env.has_key('SCRIPT_URL'):
+            if 'SCRIPT_URL' in env:
                 self._uri = self._environ['SCRIPT_URL']
                 # correct servletPath if there was a redirection
                 if not (self._uri + '/').startswith(self._servletPath + '/'):
@@ -171,14 +171,14 @@ class HTTPRequest(Request):
         Use this method when you're field/cookie agnostic.
 
         """
-        if self._fields.has_key(name):
+        if name in self._fields:
             return self._fields[name]
         else:
             return self.cookie(name, default)
 
     def hasValue(self, name):
         """Check whether there is a value with the given name."""
-        return self._fields.has_key(name) or self._cookies.has_key(name)
+        return name in self._fields or name in self._cookies
 
     def extraURLPath(self):
         """Return additional path components in the URL.
@@ -202,7 +202,7 @@ class HTTPRequest(Request):
             return self._fields.get(name, default)
 
     def hasField(self, name):
-        return self._fields.has_key(name)
+        return name in self._fields
 
     def fields(self):
         return self._fields
@@ -225,7 +225,7 @@ class HTTPRequest(Request):
 
     def hasCookie(self, name):
         """Return whether a cookie with the given name exists."""
-        return self._cookies.has_key(name)
+        return name in self._cookies
 
     def cookies(self):
         """Return a dict of all cookies the client sent with this request."""
@@ -434,9 +434,9 @@ class HTTPRequest(Request):
     def hostAndPort(self):
         """Return the hostname and port part from the URL of this request."""
         env = self._environ
-        if env.has_key('HTTP_HOST'):
+        if 'HTTP_HOST' in env:
             return env['HTTP_HOST']
-        elif env.has_key('SERVER_NAME'):
+        elif 'SERVER_NAME' in env:
             return env['SERVER_NAME']
         else:
             host = env.get('SERVER_ADDR', '') or 'localhost'
@@ -457,7 +457,7 @@ class HTTPRequest(Request):
         i.e. http://www.my.own.host.com:8080/WebKit/TestPage.py
 
         """
-        if canonical and self._environ.has_key('SCRIPT_URI'):
+        if canonical and 'SCRIPT_URI' in environ:
             return self._environ['SCRIPT_URI']
         else:
             return '%s://%s%s' % (
@@ -483,7 +483,7 @@ class HTTPRequest(Request):
         Same as serverURL, but without scheme and host.
 
         """
-        if self._environ.has_key('SCRIPT_URL'):
+        if 'SCRIPT_URL' in self._environ:
             return self._environ['SCRIPT_URL']
         else:
             return self._servletPath + self._pathInfo

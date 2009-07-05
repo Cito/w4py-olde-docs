@@ -147,7 +147,7 @@ class Model(Configurable):
         for model in models:
             for klass in model.klasses().klassesInOrder():
                 name = klass.name()
-                if byName.has_key(name):
+                if name in byName:
                     for i in range(len(inOrder)):
                         if inOrder[i].name() == name:
                             inOrder[i] = klass
@@ -175,7 +175,7 @@ class Model(Configurable):
         for filename in parentFilenames:
             filename = os.path.abspath(os.path.join(
                 os.path.dirname(self._filename), filename))
-            if self._allModelsByFilename.has_key(filename):
+            if filename in self._allModelsByFilename:
                 model = self._allModelsByFilename[filename]
                 assert model != self._rootModel
             else:

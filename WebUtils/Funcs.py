@@ -82,7 +82,7 @@ def htmlForDict(d, addSpace=None, filterValueCallBack=None,
         html.append('</th></tr>\n')
     for key in keys:
         value = d[key]
-        if addSpace and addSpace.has_key(key):
+        if addSpace and key in addSpace:
             target = addSpace[key]
             value = (target + ' ').join(value.split(target))
         if filterValueCallBack:

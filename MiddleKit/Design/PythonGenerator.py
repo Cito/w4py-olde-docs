@@ -173,7 +173,7 @@ class Attr(object):
 
     def defaultValue(self):
         """Return the default value as a legal Pythonic value."""
-        if self.has_key('Default'):
+        if 'Default' in self:
             default = self['Default']
             if isinstance(default, basestring):
                 default = default.strip()

@@ -40,7 +40,7 @@ def test(filename, configFilename, pyFilename, deleteData):
         # Run the test
         results = {}
         execfile(pyFilename, results)
-        assert results.has_key('test'), 'No test defined in %s.' % filename
+        assert 'test' in results, 'No test defined in %s.' % filename
         results['test'](store)
     finally:
         os.chdir(curDir)

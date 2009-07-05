@@ -65,7 +65,7 @@ class LRWPAdapter(Adapter):
                 self.request = self.lrwp.acceptRequest()
                 # Read input from request object
                 self.myInput = ''
-                if self.request.env.has_key('CONTENT_LENGTH'):
+                if 'CONTENT_LENGTH' in self.request.env:
                     length = int(self.request.env['CONTENT_LENGTH'])
                     self.myInput = self.myInput + self.request.inp.read(length)
                 # Fix environment variables due to the way Xitami reports them under LRWP

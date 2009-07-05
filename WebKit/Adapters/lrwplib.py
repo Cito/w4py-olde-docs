@@ -63,7 +63,7 @@ class Request(object):
 
     def getFieldStorage(self):
         method = 'POST'
-        if self.env.has_key('REQUEST_METHOD'):
+        if 'REQUEST_METHOD' in self.env:
             method = self.env['REQUEST_METHOD'].upper()
         return cgi.FieldStorage(fp=method != 'GET' and self.inp or None,
             environ=self.env, keep_blank_values=1)

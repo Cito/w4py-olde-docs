@@ -51,14 +51,11 @@ class HTTPServlet(Servlet):
             if lm:
                 lm = strftime('%a, %d %b %Y %H:%M:%S GMT', gmtime(lm))
                 trans.response().setHeader('Last-Modified', lm)
-                ifModifiedSince = request.environ().get(
-                    'HTTP_IF_MODIFIED_SINCE', None)
-                if not ifModifiedSince:
-                    ifModifiedSince = request.environ().get(
-                        'If-Modified-Since', None)
+                ifModifiedSince = request.environ(
+                    ).get('HTTP_IF_MODIFIED_SINCE') or request.environ(
+                    ).get('IF_MODIFIED_SINCE')
                 if ifModifiedSince and ifModifiedSince.split(';')[0] == lm:
                     trans.response().setStatus(304, 'Not Modified')
-                    # print "304", request.serverSidePath()
                     return
         method = self._methodForRequestType.get(httpMethodName, None)
         if not method:

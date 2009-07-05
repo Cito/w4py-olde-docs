@@ -89,7 +89,7 @@ def htCache(factory):
             % (id(path['full']), path['base'], path['dir']))
         record = cache[path['full']].copy()
         record['path'] = path['full']
-        if factory._threadsafeServletCache.has_key(path['full']):
+        if path['full'] in factory._threadsafeServletCache:
             record['instances'] = 'one servlet instance (threadsafe)'
         else:
             record['instances'] = ('free reusable servlets: %d'
