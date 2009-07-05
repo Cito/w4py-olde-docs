@@ -457,7 +457,7 @@ class _FileParser(URLParser):
             A list of extensions, ordered by priority.
 
         """
-        if baseName.find('*') != -1:
+        if '*' in baseName:
             return []
 
         fileStart = os.path.basename(baseName)
@@ -767,7 +767,7 @@ class URLParameterParser(URLParser):
         result = []
         req = trans.request()
         for part in parts:
-            if part.find('=') != -1:
+            if '=' in part:
                 name, value = part.split('=', 1)
                 if not req.hasField(name):
                     req.setField(name, value)

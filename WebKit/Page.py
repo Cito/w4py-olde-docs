@@ -299,7 +299,7 @@ class Page(HTTPContent):
         """
         # don't bother validating if the servlet has redirected
         status = self.response().header('status', None)
-        if status and status.find('Redirect') != -1:
+        if status and 'Redirect' in status:
             return
         response = self.response().rawResponse()
         contents = response['contents'] + closingTags

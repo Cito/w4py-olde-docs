@@ -481,7 +481,7 @@ class ExceptionHandler(object):
             err, msg, errorMsgFilename or '')
         def fixElement(element):
             element = str(element)
-            if element.find(',') >= 0 or element.find('"') >= 0:
+            if ',' in element or '"' in element.find('"'):
                 element = element.replace('"', '""')
                 element = '"%s"' % element
             return element

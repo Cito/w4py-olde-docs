@@ -210,7 +210,7 @@ class HTTPAuthenticationRequired(HTTPException):
     def __init__(self, realm=None, *args):
         if not realm:
             realm = 'Password required'
-        assert realm.find('"') == -1, 'Realm must not contain "'
+        assert '"' not in realm, 'Realm must not contain quotation marks'
         self._realm = realm
         HTTPException.__init__(self, *args)
 

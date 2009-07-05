@@ -103,7 +103,7 @@ class OneShotAdapter(Adapter):
                 # show the contents of the console,
                 # but only if we are serving up an HTML file
                 endheaders = response.find("\r\n\r\n")
-                if endheaders is None:
+                if endheaders < 0:
                     endheaders = response.find("\n\n")
                 if not endheaders:
                     print "No Headers Found"

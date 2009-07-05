@@ -47,7 +47,7 @@ def FixPathForMiddleKit(verbose=0):
             what = 'middlekit'
         else:
             what = 'MiddleKit'
-        if location.find(what) != -1:
+        if what in location:
             if v:
                 print 'MiddleKit in location'
             index = location.index(what)

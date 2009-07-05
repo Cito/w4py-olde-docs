@@ -17,7 +17,7 @@ def joinCSVFields(fields):
     newFields = []
     for field in fields:
         assert isinstance(field, basestring)
-        if field.find('"') != -1:
+        if '"' in field:
             newField = '"%s"' % field.replace('"', '""')
         elif ',' in field or '\n' in field or '\r' in field:
             newField = '"%s"' % field

@@ -82,14 +82,14 @@ class CSVParserTests(unittest.TestCase):
             ('''a,"Enums='b, c'"''', ['a', "Enums='b, c'"]),
         ]
         for input, output in tests:
-            if input.find('\n') == -1:
+            if '\n' in input:
                 # single line
                 result = self.parse(input)
-                assert result == output, '\ninput=%r\nresult=%r\noutput=%r'\
-                    % (input, result, output)
+                assert result == output, ('\ninput=%r\nresult=%r\noutput=%r'
+                    % (input, result, output))
                 result = self.parse(input+'\n')
-                assert result == output, '\ninput=%r\nresult=%r\noutput=%r' \
-                    % (input, result, output)
+                assert result == output, ('\ninput=%r\nresult=%r\noutput=%r'
+                    % (input, result, output))
             else:
                 # multiple lines
                 gotFields = False
@@ -99,8 +99,8 @@ class CSVParserTests(unittest.TestCase):
                     if result is not None:
                         gotFields = True
                 assert gotFields
-                assert result == output, '\ninput=%r\nresult=%r\noutput=%r' \
-                    % (input, result, output)
+                assert result == output, ('\ninput=%r\nresult=%r\noutput=%r'
+                    % (input, result, output))
 
 
 def main():

@@ -46,8 +46,8 @@ class AppServerTest(unittest.TestCase):
             data = urlopen('http://localhost:8080').read()
         except IOError:
             data = '<h2>Could not read page.</h2>'
-        assert data.find('<h1>Welcome to Webware!</h1>') > 0
-        assert data.find('<h2>Test passed.</h2>') > 0
+        assert '<h1>Welcome to Webware!</h1>' in data
+        assert '<h2>Test passed.</h2>' in data
 
     def workDir(self):
         raise NotImplementedError("Subclasses must implement this method.")
@@ -100,6 +100,6 @@ class AppServerTest(unittest.TestCase):
             data = urlopen('http://localhost:8080/stop').read()
         except IOError:
             data = '<h2>Could not read page.</h2>'
-        assert data.find('<h2>The AppServer has been stopped.</h2>') > 0
+        assert '<h2>The AppServer has been stopped.</h2>' in data
         self.assertAppServerSays('^AppServer has been shutdown.$')
         self._output = None

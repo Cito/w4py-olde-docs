@@ -102,7 +102,7 @@ class ClassList(object):
     def readLine(self, line, filename=None, lineNum=None):
         # strip comments
         comment = line.find('#')
-        if comment != -1:
+        if comment >= 0:
             line = line[:comment]
         # split into words
         names = self._splitter.split(line[5:])
