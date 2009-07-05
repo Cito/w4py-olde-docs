@@ -569,10 +569,9 @@ class Installer(object):
         from compileall import compile_dir
         print
         print 'Byte compiling all modules...'
-        ddir = os.path.abspath('WebKit')
         for comp in self._comps:
-            dir = comp['dirname']
-            compile_dir(dir, ddir=ddir, force=force, quiet=True)
+            dir = os.path.abspath(comp['dirname'])
+            compile_dir(dir, force=force, quiet=True)
 
     def fixPermissions(self):
         if os.name == 'posix':
