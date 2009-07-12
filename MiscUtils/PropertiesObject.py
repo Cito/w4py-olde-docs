@@ -69,7 +69,7 @@ class PropertiesObject(dict):
 
     def cleanPrivateItems(self):
         """Remove items whose keys start with a double underscore, such as __builtins__."""
-        for key in self.keys():
+        for key in self.keys(): # must use keys() because dict is changed
             if key.startswith('__'):
                 del self[key]
 

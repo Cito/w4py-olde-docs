@@ -259,9 +259,7 @@ def _test():
         doc.append('<br><b>post data:</b> %s<br>' % (req.inp.read(),))
 
         doc.append('<P><HR><P><pre>')
-        keys = req.env.keys()
-        keys.sort()
-        for k in keys:
+        for k in sorted(req.env):
             doc.append('<b>%-20s :</b>  %s\n' % (k, req.env[k]))
         doc.append('\n</pre><P><HR>\n')
         doc.append('</BODY></HTML>\n')

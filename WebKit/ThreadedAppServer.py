@@ -737,7 +737,7 @@ class ThreadedAppServer(AppServer):
         for i in range(self._threadCount):
             self._requestQueue.put(None)
         if self._canAbortRequest:
-            for t in self._threadHandler.keys():
+            for t in self._threadHandler:
                 t.abort(ServerShutDownError)
         for t in self._threadPool:
             try:
@@ -755,7 +755,7 @@ class ThreadedAppServer(AppServer):
         Here's where we do that.
 
         """
-        for host, port in self._sockets.keys():
+        for host, port in self._sockets:
             if host == '0.0.0.0':
                 # Can't connect to 0.0.0.0; use 127.0.0.1 instead
                 host = '127.0.0.1'

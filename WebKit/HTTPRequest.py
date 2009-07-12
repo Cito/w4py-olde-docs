@@ -62,9 +62,7 @@ class HTTPRequest(Request):
             save = sys.stdout
             sys.stdout = f
             print '>> env for request:'
-            keys = env.keys()
-            keys.sort()
-            for key in keys:
+            for key in sorted(env):
                 print '%s: %s' % (repr(key), repr(env[key]))
             print
             sys.stdout = save
@@ -106,37 +104,33 @@ class HTTPRequest(Request):
 
         # We use the cgi module to get the fields,
         # but then change them into an ordinary dictionary of values:
+        fields = {}
         try:
-            keys = self._fields.keys()
+            fieldKeys = self._fields.keys()
         except TypeError:
-            # This can happen if, for example, the request is an XML-RPC request,
-            # not a regular POST from an HTML form. In that case we just create
-            # an empty set of fields.
-            keys = []
-        d = {}
-        for key in keys:
-            value = self._fields[key]
-            if not isinstance(value, list):
-                if value.filename:
-                    if debug:
-                        print "Uploaded File Found"
-                else: # i.e., if we don't have a list,
-                    # we have one of those cgi.MiniFieldStorage objects.
-                    value = value.value # get its value.
-            else:
-                value = map(lambda miniFieldStorage: miniFieldStorage.value,
-                    value) # extract those value's
-            d[key] = value
-
-        self._fieldStorage = self._fields
-        self._fields = d
+            # This can happen if we do not have a a regular POST
+            # from an HTML form, but, for example, an XML-RPC request.
+            pass
+        else:
+            for key in fieldKeys:
+                value = self._fields[key]
+                if isinstance(value, list):
+                    # we have a list of cgi.MiniFieldStorage objects
+                    value = [item.value for item in value]
+                else:
+                    if value.filename:
+                        if debug:
+                            print "Uploaded file found"
+                    else: # i.e., if we don't have a list,
+                        # we have one of those cgi.MiniFieldStorage objects
+                        value = value.value # get its value
+                fields[key] = value
+        self._fieldStorage, self._fields = self._fields, fields
 
         # We use Tim O'Malley's Cookie class to get the cookies,
         # but then change them into an ordinary dictionary of values
-        d = {}
-        for key in self._cookies.keys():
-            d[key] = self._cookies[key].value
-        self._cookies = d
+        self._cookies = dict(
+            (key, self._cookies[key].value) for key in self._cookies)
 
         self._contextName = None
         self._serverSidePath = self._serverSideContextPath = None
@@ -146,7 +140,7 @@ class HTTPRequest(Request):
         self._pathInfo = self.pathInfo()
 
         if debug:
-            print "Done setting up request, found keys %r" % self._fields.keys()
+            print "Done setting up request, found keys %r" % fieldKeys
 
 
     ## Security ##

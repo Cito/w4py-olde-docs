@@ -1,12 +1,11 @@
 """Session store using files."""
 
 import os
-from glob import glob
 import threading
 
-from SessionStore import SessionStore
+from MiscUtils import NoDefault
 
-debug = False
+from SessionStore import SessionStore
 
 
 class SessionFileStore(SessionStore):
@@ -26,70 +25,72 @@ class SessionFileStore(SessionStore):
 
     """
 
+    _extension = '.ses'
 
     ## Init ##
 
-    def __init__(self, app):
+    def __init__(self, app, restoreFiles=True):
+        """Initialize the session file store.
+
+        If restoreFiles is true, and sessions have been saved to file,
+        the store will be initialized from these files.
+
+        """
         SessionStore.__init__(self, app)
         self._sessionDir = app._sessionDir
         self._lock = threading.RLock()
+        if not restoreFiles:
+            self.clear()
 
 
     ## Access ##
 
     def __len__(self):
-        if debug:
-            print '>> len', len(self.keys())
+        """Return the number of sessions in the store."""
         return len(self.keys())
 
     def __getitem__(self, key):
-        if debug:
-            print '>> get (%s)' % key
+        """Get a session item, loading it from the session file."""
         filename = self.filenameForKey(key)
         self._lock.acquire()
         try:
             try:
-                file = open(filename, 'rb')
+                sessionFile = open(filename, 'rb')
             except IOError:
-                raise KeyError(key)
+                raise KeyError(key) # session file not found
             try:
                 try:
-                    item = self.decoder()(file)
+                    item = self.decoder()(sessionFile)
                 finally:
-                    file.close()
-            except Exception: # session can't be unpickled
-                os.remove(filename) # remove session file
+                    sessionFile.close()
+            except Exception:
                 print "Error loading session from disk:", key
                 self.application().handleException()
+                try: # remove the session file because it is corrupt
+                    os.remove(filename)
+                except Exception:
+                    pass
                 raise KeyError(key)
         finally:
             self._lock.release()
         return item
 
-    def __setitem__(self, key, item):
-        # @@ 2001-11-12 ce: It's still possible that two threads are updating
-        # the same session as the same time (due to the user having two windows
-        # open) in which case one will clobber the results of the other!
-        # Probably need file locking to solve this.
-        # @@ 2001-11-16 gat: In order to avoid sessions clobering each other,
-        # you'd have to lock the file for the entire time that the servlet is
-        # manipulating the session, which would block any other servlets from
-        # using that session. Doesn't seem like a great solution to me.
-        if debug:
-            print '>> setitem(%s, %s)' % (key, item)
+    def __setitem__(self, key, value):
+        """Set a session item, saving it to a session file."""
         filename = self.filenameForKey(key)
         self._lock.acquire()
         try:
             try:
-                file = open(filename, 'wb')
+                sessionFile = open(filename, 'wb')
                 try:
                     try:
-                        self.encoder()(item, file)
+                        self.encoder()(value, sessionFile)
                     finally:
-                        file.close()
+                        sessionFile.close()
                 except Exception:
-                    os.remove(filename) # remove file because it is corrupt
-                    raise
+                    # remove the session file because it is corrupt
+                    os.remove(filename)
+                    raise # raise original exception
             except Exception: # error pickling the session
                 print "Error saving session to disk:", key
                 self.application().handleException()
@@ -97,43 +98,50 @@ class SessionFileStore(SessionStore):
             self._lock.release()
 
     def __delitem__(self, key):
+        """Delete a session item, removing its session file."""
         filename = self.filenameForKey(key)
         if not os.path.exists(filename):
             raise KeyError(key)
-        sess = self[key]
-        if not sess.isExpired():
-            sess.expiring()
-        os.remove(filename)
+        session = self[key]
+        if not session.isExpired():
+            session.expiring()
+        try:
+            os.remove(filename)
+        except Exception:
+            pass
 
     def __contains__(self, key):
+        """Check whether the session store has a file for the given key."""
         return os.path.exists(self.filenameForKey(key))
 
+    def __iter__(self):
+        """Return an iterator over the stored session keys."""
+        ext = self._extension
+        pos = -len(ext)
+        # note that iglob is slower here, since it's based on listdir
+        for filename in os.listdir(self._sessionDir):
+            if filename.endswith(ext):
+                yield filename[:pos]
+
     def removeKey(self, key):
+        """Remove the session file for the given key."""
         filename = self.filenameForKey(key)
         try:
             os.remove(filename)
         except Exception:
             pass
 
-    def has_key(self, key):
-        return key in self
-
     def keys(self):
-        start = len(self._sessionDir) + 1
-        end = -len('.ses')
-        keys = glob(os.path.join(self._sessionDir, '*.ses'))
-        keys = map(lambda key, start=start, end=end: key[start:end], keys)
-        if debug:
-            print '>> keys =', keys
-        return keys
+        """Return a list with the keys of all the stored sessions."""
+        return [key for key in self]
 
     def clear(self):
-        for filename in glob(os.path.join(self._sessionDir, '*.ses')):
-            os.remove(filename)
+        """Clear the session file store, removing all of the session files."""
+        for key in self:
+            self.removeKey(key)
 
-    def setdefault(self, key, default):
-        if debug:
-            print '>> setdefault (%s, %s)' % (key, default)
+    def setdefault(self, key, default=None):
+        """Return value if key available, else default (also setting it)."""
         self._lock.acquire()
         try:
             try:
@@ -144,18 +152,36 @@ class SessionFileStore(SessionStore):
         finally:
             self._lock.release()
 
+    def pop(self, key, default=NoDefault):
+        """Return value if key available, else default (also remove key)."""
+        self._lock.acquire()
+        try:
+            if default is NoDefault:
+                value = self[key]
+                self.removeKey(key)
+                return value
+            elif key in self:
+                return self[key]
+            else:
+                return default
+        finally:
+            self._lock.release()
+
 
     ## Application support ##
 
     def storeSession(self, session):
+        """Save session, writing it to the session file now."""
         key = session.identifier()
         self[key] = session
 
     def storeAllSessions(self):
-        pass
+        """Permanently save all sessions in the store."""
+        pass # sessions have all been saved to files already
 
 
     ## Self utility ##
 
     def filenameForKey(self, key):
-        return os.path.join(self._sessionDir, '%s.ses' % key)
+        """Return the name of the session file for the given key."""
+        return os.path.join(self._sessionDir, key + self._extension)

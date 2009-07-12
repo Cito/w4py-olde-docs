@@ -244,7 +244,7 @@ class Application(ConfigurableForServerSidePath):
                 " from module '%s'" % (className, moduleName)
             self._sessionClass = None
         moduleName = self.setting('SessionStore')
-        if moduleName in ('Dynamic', 'File', 'Memory'):
+        if moduleName in ('Dynamic', 'File', 'Memory', 'Shelve'):
             moduleName = 'Session%sStore' % moduleName
         self._sessionDir = self.serverSidePath(
             self.setting('SessionStoreDir') or 'Sessions')
@@ -433,14 +433,14 @@ class Application(ConfigurableForServerSidePath):
 
     def createSessionWithID(self, trans, sessionID):
         """Create a session object with our session ID."""
-        sess = self._sessionClass(trans, sessionID)
+        session = self._sessionClass(trans, sessionID)
         # Replace the session if it didn't already exist,
         # otherwise we just throw it away.  setdefault is an atomic
         # operation so this guarantees that 2 different
         # copies of the session with the same ID never get placed into
         # the session store, even if multiple threads are calling
         # this method simultaneously.
-        trans.application()._sessions.setdefault(sessionID, sess)
+        trans.application()._sessions.setdefault(sessionID, session)
 
     def sessionTimeout(self, trans):
         """Get the timeout (in seconds) for a user session.

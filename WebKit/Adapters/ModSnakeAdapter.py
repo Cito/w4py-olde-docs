@@ -66,7 +66,7 @@ class ModSnakeAdapter(Adapter):
             content_handler = self.content_handler,
         )
 
-        for hook in hooks.keys():
+        for hook in hooks:
             module.add_hook(hook, hooks[hook])
 
         directives = dict(

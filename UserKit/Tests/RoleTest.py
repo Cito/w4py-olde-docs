@@ -91,7 +91,7 @@ class HierRoleTest(unittest.TestCase):
             otherRoles = roles.copy()
             for name in test:
                 del otherRoles[name]
-            for name in otherRoles.keys():
+            for name in otherRoles:
                 assert not role.playsRole(roles[name])
 
 

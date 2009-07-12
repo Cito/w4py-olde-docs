@@ -6,14 +6,13 @@ even in a POST request.
 
 """
 
-
 import cgi, os, urllib
 
 
 class FieldStorage(cgi.FieldStorage):
 
     def __init__(self, fp=None, headers=None, outerboundary="",
-            environ=os.environ, keep_blank_values=0, strict_parsing=0):
+            environ=os.environ, keep_blank_values=False, strict_parsing=False):
         self._environ = environ
         cgi.FieldStorage.__init__(self, fp, headers, outerboundary,
             environ, keep_blank_values, strict_parsing)
@@ -23,7 +22,7 @@ class FieldStorage(cgi.FieldStorage):
         method = self._environ.get('REQUEST_METHOD', '').upper()
         if method in ('GET', 'HEAD'):
             return # bail because cgi.FieldStorage already did this
-        qs = self._environ.get('QUERY_STRING', None)
+        qs = self._environ.get('QUERY_STRING')
         if not qs:
             return # bail if no query string
 
@@ -43,7 +42,7 @@ class FieldStorage(cgi.FieldStorage):
                     r[name] = [value]
 
         # Only append values that aren't already in the FieldStorage's keys;
-        # This makes POSTed vars override vars on the query string
+        # this makes POSTed vars override vars on the query string.
         if not self.list:
             # This makes sure self.keys() are available, even
             # when valid POST data wasn't encountered.

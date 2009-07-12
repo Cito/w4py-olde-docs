@@ -164,7 +164,7 @@ class Configurable(object):
             else:
                 exec contents in evalContext
                 config = evalContext
-                for name in config.keys():
+                for name in config.keys(): # keys() since dict is changed
                     if name.startswith('_'):
                         del config[name]
         except Exception, e:
@@ -184,10 +184,8 @@ class Configurable(object):
         """
         if dest is None:
             dest = sys.stdout
-        keys = self.config().keys()
-        keys.sort()
-        width = max(map(len, keys))
-        for key in keys:
+        width = max(map(len, self.config()))
+        for key in sorted(self.config()):
             dest.write('%s = %s\n'
                 % (key.ljust(width), str(self.setting(key))))
         dest.write('\n')

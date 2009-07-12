@@ -1,8 +1,18 @@
 """A general session store."""
 
+try:
+    from cPickle import load, dump, HIGHEST_PROTOCOL as maxPickleProtocol
+except ImportError:
+    from pickle import load, dump, HIGHEST_PROTOCOL as maxPickleProtocol
+
 from time import time
 
 from MiscUtils import AbstractError
+
+
+def dumpWithHighestProtocol(obj, f):
+    """Same as pickle.dump, but by default with the highest protocol."""
+    return dump(obj, f, maxPickleProtocol)
 
 
 class SessionStore(object):
@@ -12,7 +22,7 @@ class SessionStore(object):
     store session state. This class is abstract and it's up to the
     concrete subclass to implement several key methods that determine
     how sessions are stored (such as in memory, on disk or in a
-    database).
+    database). We assume that session keys are always strings.
 
     Subclasses often encode sessions for storage somewhere. In light
     of that, this class also defines methods encoder(), decoder() and
@@ -45,74 +55,139 @@ class SessionStore(object):
     ## Init ##
 
     def __init__(self, app):
-        """Subclasses must invoke super."""
+        """Initialize the session store.
+
+        Subclasses must invoke super.
+
+        """
         self._app = app
-        try:
-            import cPickle as pickle
-        except ImportError:
-            import pickle
-        if hasattr(pickle, 'HIGHEST_PROTOCOL'):
-            def dumpWithHighestProtocol(obj, f,
-                    proto=pickle.HIGHEST_PROTOCOL, dump=pickle.dump):
-                return dump(obj, f, proto)
-            self._encoder = dumpWithHighestProtocol
-        else:
-            self._encoder = pickle.dump
-        self._decoder = pickle.load
+
+        self._encoder = dumpWithHighestProtocol
+        self._decoder = load
 
 
     ## Access ##
 
     def application(self):
+        """Return the application owning the session store."""
         return self._app
 
 
     ## Dictionary-style access ##
 
     def __len__(self):
+        """Return the number of sessions in the store.
+
+        Subclasses must implement this method.
+
+        """
         raise AbstractError(self.__class__)
 
     def __getitem__(self, key):
+        """Get a session item from the store.
+
+        Subclasses must implement this method.
+
+        """
         raise AbstractError(self.__class__)
 
+    def __setitem__(self, key, value):
+        """Set a session item, saving it to the store.
 
-    def __setitem__(self, key, item):
+        Subclasses must implement this method.
+
+        """
         raise AbstractError(self.__class__)
 
     def __delitem__(self, key):
-        """Delete an item.
+        """Delete a session item from the store.
 
         Subclasses are responsible for expiring the session as well.
         Something along the lines of:
-            sess = self[key]
-            if not sess.isExpired():
-                sess.expiring()
+            session = self[key]
+            if not session.isExpired():
+                session.expiring()
 
         """
         raise AbstractError(self.__class__)
 
     def __contains__(self, key):
+        """Check whether the session store has a given key.
+
+        Subclasses must implement this method.
+
+        """
+        raise AbstractError(self.__class__)
+
+    def __iter__(self):
+        """Return an iterator over the stored session keys.
+
+        Subclasses must implement this method.
+
+        """
         raise AbstractError(self.__class__)
 
     def has_key(self, key):
+        """"Check whether the session store has a given key."""
         return key in self
 
     def keys(self):
+        """Return a list with the keys of all the stored sessions.
+
+        Subclasses must implement this method.
+
+        """
         raise AbstractError(self.__class__)
+
+    def iterkeys(self):
+        """Return an iterator over the stored session keys."""
+        return iter(self)
 
     def clear(self):
+        """Clear the session store, removing all of its items.
+
+        Subclasses must implement this method.
+
+        """
         raise AbstractError(self.__class__)
 
-    def setdefault(self, key, default):
+    def setdefault(self, key, default=None):
+        """Return value if key available, else default (also setting it).
+
+        Subclasses must implement this method.
+
+        """
+        raise AbstractError(self.__class__)
+
+    def pop(self, key, default=None):
+        """Return value if key available, else default (also remove key).
+
+        Subclasses must implement this method.
+
+        """
         raise AbstractError(self.__class__)
 
 
     ## Application support ##
 
     def storeSession(self, session):
+        """Save potentially changed session in the store.
+
+        Used at the end of transactions.
+
+        Subclasses must implement this method.
+
+        """
         raise AbstractError(self.__class__)
 
     def storeAllSessions(self):
+        """Permanently save all sessions in the store.
+
+        Used when the application server is shut down.
+
+        Subclasses must implement this method.
+
+        """
         raise AbstractError(self.__class__)
 
     def cleanStaleSessions(self, task=None):
@@ -123,58 +198,83 @@ class SessionStore(object):
 
         """
         curTime = time()
-        for key in self.keys():
+        keys = []
+        for key in self:
             try:
-                sess = self[key]
+                session = self[key]
             except KeyError:
                 pass # session was already deleted by some other thread
             else:
-                if (curTime - sess.lastAccessTime() >= sess.timeout()
-                        or sess.timeout() == 0):
-                    try:
-                        del self[key]
-                    except KeyError:
-                        pass # already deleted by some other thread
+                if (curTime - session.lastAccessTime() >= session.timeout()
+                        or session.timeout() == 0):
+                    keys.append(key)
+        for key in keys:
+            try:
+                del self[key]
+            except KeyError:
+                pass # already deleted by some other thread
 
 
     ## Convenience methods ##
 
-    def items(self):
-        itms = []
-        for k in self.keys():
-            try:
-                itms.append((k, self[k]))
-            except KeyError:
-                # since we aren't using a lock here, some keys
-                # could be already deleted again during this loop
-                pass
-        return itms
-
-    def values(self):
-        vals = []
-        for k in self.keys():
-            try:
-                vals.append(self[k])
-            except KeyError:
-                pass
-        return vals
-
     def get(self, key, default=None):
+        """Return value if key available, else return the default."""
         try:
             return self[key]
         except KeyError:
             return default
 
+    def items(self):
+        """Return a list with the (key, value) pairs for all sessions."""
+        items = []
+        for key in self:
+            try:
+                items.append((key, self[key]))
+            except KeyError:
+                # since we aren't using a lock here, some keys
+                # could be already deleted again during this loop
+                pass
+        return items
+
+    def values(self):
+        """Return a list with the values of all stored sessions."""
+        values = []
+        for key in self:
+            try:
+                values.append(self[key])
+            except KeyError:
+                pass
+        return values
+
+    def iteritems(self):
+        """Return an iterator over the (key, value) pairs for all sessions."""
+        for key in self:
+            try:
+                yield key, self[key]
+            except KeyError:
+                pass
+
+    def itervalues(self):
+        """Return an iterator over the stored values of all sessions."""
+        for key in self:
+            try:
+                yield self[key]
+            except KeyError:
+                pass
+
 
     ## Encoder/decoder ##
 
     def encoder(self):
+        """Return the value serializer for the store."""
         return self._encoder
 
     def decoder(self):
+        """Return the value deserializer for the store."""
         return self._decoder
 
     def setEncoderDecoder(self, encoder, decoder):
+        """Set the serializer and deserializer for the store."""
         self._encoder = encoder
         self._decoder = decoder
 
@@ -182,4 +282,5 @@ class SessionStore(object):
     ## As a string ##
 
     def __repr__(self):
+        """Return string representation of the store like a dictionary."""
         return repr(dict(self.items()))

@@ -242,9 +242,7 @@ class HTMLTag(object):
     def __repr__(self):
         r = ['<', self._name]
         if self._attrs:
-            keys = self._attrs.keys()
-            keys.sort()
-            for key in keys:
+            for key in sorted(self._attrs):
                 r.extend([' ', key, '="', self._attrs[key], '"'])
         r.append('>')
         if self._lineNumber or self._isClosed:

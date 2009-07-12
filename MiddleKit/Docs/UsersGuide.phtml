@@ -532,9 +532,7 @@ store = MySQLObjectStore(db='foobar', user='prog', passwd='asdklfj')
 <p>The attributes are instances of MiddleKit.Core.Attr (or one of its subclasses such as ObjRefAttr) which inherits from MiddleDict and acquires additional methods from mix-ins located in MiddleKit.Design and MiddleKit.Run. Since attributes are essentially dictionaries, you can treat them like so, although if you modify them you are asking for serious trouble.</p>
 
 <pre class="py">for attr in obj.klass().allAttrs():
-  keys = attr.keys()
-  keys.sort()
-  print '%s: %s' % (attr.name(), keys)
+  print '%s: %s' % (attr.name(), sorted(attr))
 </pre>
 
 <p>If you had asked the klass for its attrs() instead of allAttrs(), you would have missed out on attributes that were inherited.</p>

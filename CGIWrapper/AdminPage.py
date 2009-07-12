@@ -14,7 +14,7 @@ class AdminPage(object):
     ## Init ##
 
     def __init__(self, vars):
-        for name in vars.keys():
+        for name in vars:
             setattr(self, '_' + name, vars[name])
         self._vars = vars
 

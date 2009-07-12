@@ -421,7 +421,7 @@ class CGIWrapper(object):
             excInfo = sys.exc_info()
         headers = self.setting('ErrorEmailHeaders')
         msg = []
-        for key in headers.keys():
+        for key in headers:
             if key != 'From' and key != 'To':
                 msg.append('%s: %s\n' % (key, headers[key]))
         msg.append('\n')

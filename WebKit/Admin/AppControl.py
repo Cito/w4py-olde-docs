@@ -24,10 +24,8 @@ class AppControl(AdminSecurity):
 </tr><tr>
 <td><input type="submit" name="action" value="Reload"></td>
 <td>Reload the selected Python modules. Be careful!</td></tr>''')
-            modnames = sys.modules.keys()
-            modnames.sort()
             wr('<tr><td></td><td>')
-            for n in modnames:
+            for n in sorted(sys.modules):
                 m = sys.modules[n]
                 if (not n.endswith('__init__') and not hasattr(m, '__path__')
                         and not hasattr(m, '__orig_file__')):

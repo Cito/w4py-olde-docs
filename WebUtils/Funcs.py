@@ -71,8 +71,6 @@ def htmlForDict(d, addSpace=None, filterValueCallBack=None,
     """Return an HTML string with a table where each row is a key-value pair."""
     if not d:
         return ''
-    keys = d.keys()
-    keys.sort()
     # A really great (er, bad) example of hardcoding.  :-)
     html = ['<table class="NiceTable">\n']
     if topHeading:
@@ -80,7 +78,7 @@ def htmlForDict(d, addSpace=None, filterValueCallBack=None,
         html.append((isinstance(topHeading, tuple)
             and '>%s</th><th>%s' or ' colspan="2">%s') % topHeading)
         html.append('</th></tr>\n')
-    for key in keys:
+    for key in sorted(d):
         value = d[key]
         if addSpace and key in addSpace:
             target = addSpace[key]

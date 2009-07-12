@@ -118,7 +118,7 @@ class ContextParser(URLParser):
         if not defaultContext:
             # If no default context has been specified, and there is a unique
             # context not built into Webware, use it as the default context.
-            for name in contexts.keys():
+            for name in contexts:
                 if name.endswith('/Docs') or name in (
                         'Admin', 'Docs', 'Examples',  'MKBrowser', 'Testing'):
                     continue

@@ -82,7 +82,7 @@ class CSVParserTests(unittest.TestCase):
             ('''a,"Enums='b, c'"''', ['a', "Enums='b, c'"]),
         ]
         for input, output in tests:
-            if '\n' in input:
+            if '\n' not in input:
                 # single line
                 result = self.parse(input)
                 assert result == output, ('\ninput=%r\nresult=%r\noutput=%r'

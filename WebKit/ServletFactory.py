@@ -311,12 +311,11 @@ class ServletFactory(object):
         into the cache (this may be a problem).
 
         """
-        # @@ ib 07-2003: I'm unsure how well this works.
         self._importLock.acquire()
         self._classCache = {}
         # We can't just delete all the lists, because returning
         # servlets expect it to exist.
-        for key in self._servletPool.keys():
+        for key in self._servletPool:
             self._servletPool[key] = []
         self._threadsafeServletCache = {}
         self._importLock.release()

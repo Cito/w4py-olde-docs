@@ -182,9 +182,7 @@ class MakeAppWorkDir(object):
             import grp
             group = grp.getgrgid(gid)[0]
         executable = sys.executable
-        scriptNames = launcherScripts.keys()
-        scriptNames.sort()
-        for name in scriptNames:
+        for name in sorted(launcherScripts):
             if name.endswith('Service.py') and self._osType != 'nt':
                 continue
             newname = os.path.join(workDir, name)
@@ -213,9 +211,7 @@ class MakeAppWorkDir(object):
             configDir = contextDir
         if not os.path.exists(contextDir):
             os.makedirs(contextDir)
-        contextNames = exampleContext.keys()
-        contextNames.sort()
-        for name in contextNames:
+        for name in sorted(exampleContext):
             filename = os.path.join(contextDir, name)
             if not os.path.exists(filename):
                 self.msg("\t%s" % filename)
@@ -352,9 +348,7 @@ which you can get to from here:</p>
 <ul>''' % self.request().serverSidePath()))
         servletPath = self.request().servletPath()
         contextName = self.request().contextName()
-        ctxs = self.application().contexts().keys()
-        ctxs.sort()
-        for ctx in ctxs:
+        for ctx in sorted(self.application().contexts()):
             if ctx in ('default', contextName) or '/' in ctx:
                 continue
             self.writeln('<li><a href="%s/%s/">%s</a></li>'

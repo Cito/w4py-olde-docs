@@ -17,14 +17,14 @@ class ListBox(ExamplePage):
 
     def awake(self, transaction):
         ExamplePage.awake(self, transaction)
-        sess = self.session()
-        if sess.hasValue('vars'):
-            self._vars = sess.value('vars')
+        session = self.session()
+        if session.hasValue('vars'):
+            self._vars = session.value('vars')
         else:
             self._vars = dict(items = [],
                 height = 10, width = 250,
                 newCount = 1, formCount = 1)
-            sess.setValue('vars', self._vars)
+            session.setValue('vars', self._vars)
         self._error = None
 
     def writeContent(self):

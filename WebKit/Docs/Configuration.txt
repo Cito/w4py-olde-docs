@@ -121,19 +121,21 @@ which files are hidden, and some of how those files get chosen.
     something else.  Default: ``Session``
 ``SessionStore``:
     This setting determines which of the three session stores is used
-    by the application: ``File``, ``Dynamic`` or ``Memory``.  The
-    ``File`` store always gets sessions from disk and puts them back
+    by the application: ``Dynamic``, ``File``, ``Memory`` or ```Shelve``.
+    The ``File`` store always gets sessions from disk and puts them back
     when finished.  ``Memory`` always keeps all sessions in memory,
     but will periodically back them up to disk.  ``Dynamic`` is a good
     cross between the two, which pushes excessive or inactive sessions
-    out to disk.  You can choose your own session store module as well.
-    Default: ``Dynamic``.
+    out to disk.  ``Shelve`` stores the sessions in a database file
+    using the Python ``shelve`` module.  You can choose your own session
+    store module as well.  Default: ``Dynamic``.
 ``SessionStoreDir``:
-    If ``SessionStore`` is set to ``File`` or ``Dynamic``, then this
-    setting determines the directory where the files for the individual
-    sessions will be stored.  The path is interpreted as relative to the
-    working directory (or WebKit path, if you're not using a working
-    directory), or you can specify an absolute path.  Default: ``Sessions``.
+    If ``SessionStore`` is set to ``File``, ``Dynamic`` or ``Shelve``,
+    then this setting determines the directory where the files for the
+    individual sessions or the shelve database will be stored.  The path
+    is interpreted as relative to the working directory (or WebKit path,
+    if you're not using a working directory), or you can specify an
+    absolute path.  Default: ``Sessions``.
 ``SessionTimeout``:
     Determines the amount of time (expressed in minutes) that passes
     before a user's session will timeout.  When a session times out,

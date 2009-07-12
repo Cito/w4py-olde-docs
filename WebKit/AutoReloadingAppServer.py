@@ -329,7 +329,7 @@ class AutoReloadingAppServer(AppServer):
             print 'Restarting AppServer...'
             self.shouldRestart()
             return
-        for f in self._imp.fileList().keys():
+        for f in self._imp.fileList():
             self.monitorNewModule(f)
         self._imp.notifyOfNewFiles(self.monitorNewModule)
         # Create a pipe so that this thread can be notified when the

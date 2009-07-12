@@ -2,6 +2,8 @@
 
 import time, threading
 
+from MiscUtils import NoDefault
+
 from SessionStore import SessionStore
 import SessionMemoryStore, SessionFileStore
 
@@ -9,7 +11,7 @@ debug = False
 
 
 class SessionDynamicStore(SessionStore):
-    """Stores the session in Memory and Files.
+    """Stores the session in memory and in files.
 
     This can be used either in a persistent app server or a cgi framework.
 
@@ -17,15 +19,15 @@ class SessionDynamicStore(SessionStore):
     to 'Dynamic'. Other variables which can be set in Application.config are:
 
     'MaxDynamicMemorySessions', which sets the maximum number of sessions
-    that can be in the Memory SessionStore at one time. Default is 10,000.
+    that can be in memory at one time. Default is 10,000.
 
     'DynamicSessionTimeout', which sets the default time for a session to stay
     in memory with no activity. Default is 15 minutes. When specifying this in
     Application.config, use minutes.
 
-    One-shot session (usually created by crawler bots) aren't moved to FileStore
-    on periodical clean-up. They are still saved on SessionStore shutdown. This
-    reduces the number of files in the Sessions directory.
+    One-shot sessions (usually created by crawler bots) aren't moved to
+    FileStore on periodical clean-up. They are still saved on SessionStore
+    shutdown. This reduces the number of files in the Sessions directory.
 
     """
 
@@ -33,20 +35,19 @@ class SessionDynamicStore(SessionStore):
     ## Init ##
 
     def __init__(self, app):
-        # Create both a file store and a memory store
+        """Create both a file and a memory store."""
         SessionStore.__init__(self, app)
         self._fileStore = SessionFileStore.SessionFileStore(app)
-        self._memoryStore = SessionMemoryStore.SessionMemoryStore(
-            app, restoreFiles=False)
-        self._memoryStore.clear() # fileStore will have the files on disk
+        self._memoryStore = SessionMemoryStore.SessionMemoryStore(app,
+            restoreFiles=False) # session files are read on demand
 
         # moveToFileInterval specifies after what period of time
-        # a session is automatically moved to file
+        # in seconds a session is automatically moved to a file
         self._moveToFileInterval = self.application().setting(
             'DynamicSessionTimeout', 15) * 60
 
         # maxDynamicMemorySessions is what the user actually sets
-        # in Application.config
+        # in Application.config, the maximum number of in memory sessions
         self._maxDynamicMemorySessions = self.application().setting(
             'MaxDynamicMemorySessions', 10000)
 
@@ -69,6 +70,7 @@ class SessionDynamicStore(SessionStore):
     ## Access ##
 
     def __len__(self):
+        """Return the number of sessions in the store."""
         self._lock.acquire()
         try:
             return len(self._memoryStore) + len(self._fileStore)
@@ -76,6 +78,7 @@ class SessionDynamicStore(SessionStore):
             self._lock.release()
 
     def __getitem__(self, key):
+        """Get a session item from the store."""
         # First try to grab the session from the memory store without locking,
         # for efficiency. Only if that fails do we acquire the lock and look
         # in the file store.
@@ -92,9 +95,13 @@ class SessionDynamicStore(SessionStore):
                 self._lock.release()
 
     def __setitem__(self, key, item):
+        """Set a sessing item, saving it to the memory store for now."""
         self._memoryStore[key] = item
 
     def __delitem__(self, key):
+        """Delete a session item from the memory and the file store."""
+        if key not in self:
+            raise KeyError(key)
         self._lock.acquire()
         try:
             try:
@@ -109,6 +116,7 @@ class SessionDynamicStore(SessionStore):
             self._lock.release()
 
     def __contains__(self, key):
+        """Check whether the session store has a given key."""
         # First try to find the session in the memory store without locking,
         # for efficiency.  Only if that fails do we acquire the lock and
         # look in the file store.
@@ -120,10 +128,13 @@ class SessionDynamicStore(SessionStore):
         finally:
             self._lock.release()
 
-    def has_key(self, key):
-        return key in self
+    def __iter__(self):
+        """Return an iterator over the stored session keys."""
+        # since we must be consistent, we cannot chain the iterators
+        return iter(self.keys())
 
     def keys(self):
+        """Return a list with all keys of all the stored sessions."""
         self._lock.acquire()
         try:
             return self._memoryStore.keys() + self._fileStore.keys()
@@ -131,6 +142,7 @@ class SessionDynamicStore(SessionStore):
             self._lock.release()
 
     def clear(self):
+        """Clear the session store in memory and remove all session files."""
         self._lock.acquire()
         try:
             self._memoryStore.clear()
@@ -138,7 +150,8 @@ class SessionDynamicStore(SessionStore):
         finally:
             self._lock.release()
 
-    def setdefault(self, key, default):
+    def setdefault(self, key, default=None):
+        """Return value if key available, else default (also setting it)."""
         self._lock.acquire()
         try:
             try:
@@ -149,43 +162,70 @@ class SessionDynamicStore(SessionStore):
         finally:
             self._lock.release()
 
+    def pop(self, key, default=NoDefault):
+        """Return value if key available, else default (also remove key)."""
+        self._lock.acquire()
+        try:
+            try:
+                return self._memoryStore.pop(key)
+            except Exception:
+                if default is NoDefault:
+                    return self._fileStore.pop(key)
+                else:
+                    return self._fileStore.pop(key, default)
+        finally:
+            self._lock.release()
+
     def moveToMemory(self, key):
+        """Move the value for a session from file to memory."""
         self._lock.acquire()
         try:
             if debug:
                 print ">> Moving %s to Memory" % key
-            self._memoryStore[key] = self._fileStore[key]
-            self._fileStore.removeKey(key)
+            self._memoryStore[key] = self._fileStore.pop(key)
         finally:
             self._lock.release()
 
     def moveToFile(self, key):
+        """Move the value for a session from memory to file."""
         self._lock.acquire()
         try:
             if debug:
                 print ">> Moving %s to File" % key
-            self._fileStore[key] = self._memoryStore[key]
-            del self._memoryStore[key]
+            self._fileStore[key] = self._memoryStore.pop(key)
         finally:
             self._lock.release()
 
     def setEncoderDecoder(self, encoder, decoder):
-        # @@ 2002-11-26 jdh: # propogate the encoder/decoder to the
-        # underlying SessionFileStore
-        self._fileStore.setEncoderDecoder(encoder, decoder)
+        """Set the serializer and deserializer for the store."""
         SessionStore.setEncoderDecoder(self, encoder, decoder)
+        self._fileStore.setEncoderDecoder(encoder, decoder)
 
 
     ## Application support ##
 
     def storeSession(self, session):
-        pass
-
-    def storeAllSessions(self):
+        """Save potentially changed session in the store."""
+        key = session.identifier()
         self._lock.acquire()
         try:
-            for i in self._memoryStore.keys():
-                self.moveToFile(i)
+            if key in self:
+                if key in self._memoryStore:
+                    if self._memoryStore[key] is not session:
+                        self._memoryStore[key] = session
+                else:
+                    self._fileStore[key] = session
+            else:
+                self[key] = session
+        finally:
+            self._lock.release()
+
+    def storeAllSessions(self):
+        """Permanently save all sessions in the store."""
+        self._lock.acquire()
+        try:
+            for key in self._memoryStore.keys():
+                self.moveToFile(key)
         finally:
             self._lock.release()
 
@@ -239,15 +279,21 @@ class SessionDynamicStore(SessionStore):
 
         now = time.time()
 
-        delta = now - self._moveToFileInterval
-        for i in self._memoryStore.keys():
+        moveToFileTime = now - self._moveToFileInterval
+        keys = []
+        for key in self._memoryStore:
             try:
-                if self._memoryStore[i].lastAccessTime() < delta:
-                    if self._memoryStore[i].isNew():
+                if self._memoryStore[key].lastAccessTime() < moveToFileTime:
+                    if self._memoryStore[key].isNew():
                         if debug:
-                            print "trashing one-shot session", i
+                            print "trashing one-shot session", key
                     else:
-                        self.moveToFile(i)
+                        keys.append(key)
+            except KeyError:
+                pass
+        for key in keys:
+            try:
+                self.moveToFile(key)
             except KeyError:
                 pass
 
@@ -256,9 +302,10 @@ class SessionDynamicStore(SessionStore):
             excess = len(self._memoryStore) - self._maxDynamicMemorySessions
             if debug:
                 print excess, "sessions beyond the limit"
-            for i in keys[:excess]:
+            keys = keys[:excess]
+            for key in keys:
                 try:
-                    self.moveToFile(i)
+                    self.moveToFile(key)
                 except KeyError:
                     pass
 
@@ -269,9 +316,8 @@ class SessionDynamicStore(SessionStore):
 
     def memoryKeysInAccessTimeOrder(self):
         """Return memory store's keys in ascending order of last access time."""
-        # This sorting technique is faster than using a comparison function.
         accessTimeAndKeys = []
-        for key in self._memoryStore.keys():
+        for key in self._memoryStore:
             try:
                 accessTimeAndKeys.append(
                     (self._memoryStore[key].lastAccessTime(), key))

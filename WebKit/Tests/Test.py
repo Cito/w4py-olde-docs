@@ -7,7 +7,7 @@ import FixPath
 
 # list the tests explicitly, so that they can be order from most basic
 # functionality to more complex.
-suites = ['Basic.Test']
+suites = ['Basic.Test', 'SessionStoreTest']
 
 # To run specific test cases, pass one or more names of package/module names
 # on the command line which contain the test cases to be run.

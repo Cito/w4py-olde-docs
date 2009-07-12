@@ -51,8 +51,7 @@ def htCache(factory):
     html = []
     wr = html.append
     cache = factory._classCache
-    keys = cache.keys()
-    keys.sort()
+    keys = sorted(cache)
     wr('<p>Uniqueness: %s</p>' % factory.uniqueness())
     wr('<p>Extensions: %s</p>' % ', '.join(map(repr, factory.extensions())))
     wr('<p>Unique paths in the servlet cache: <strong>%d</strong>'
@@ -101,9 +100,7 @@ def htCache(factory):
 def htRecord(record):
     html = []
     wr = html.append
-    keys = record.keys()
-    keys.sort()
-    for key in keys:
+    for key in sorted(record):
         htKey = htmlEncode(key)
         # determine the HTML for the value
         value = record[key]
