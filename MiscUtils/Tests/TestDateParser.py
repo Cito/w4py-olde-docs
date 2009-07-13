@@ -5,6 +5,16 @@ import FixPath
 from MiscUtils.DateParser import *
 
 
+# To simplify testing, monkey-patch mx.DateTime
+# so that its RangeErrors are also ValueErrors:
+try:
+    from mx.DateTime import RangeError
+except ImportError:
+    pass
+else:
+    RangeError.__bases__ += (ValueError,)
+
+
 class TestDateTimeParser(unittest.TestCase):
 
     def testReturnType(self):

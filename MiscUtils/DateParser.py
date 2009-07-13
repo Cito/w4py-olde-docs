@@ -32,7 +32,7 @@ except ImportError: # dateutil not available
             try:
                 return datetime.fromtimestamp(t)
             except Exception: # out of range for timestamp values
-                return datetime(*t.timetuple()[:6])
+                return datetime(*t.tuple()[:6])
 
     except ImportError: # mx.DateTime not available
 
