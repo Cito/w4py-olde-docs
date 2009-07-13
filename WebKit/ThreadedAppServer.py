@@ -1335,34 +1335,35 @@ def shutDown(signum, frame):
         print "No running app server was found."
 
 try:
+    currentFrames = sys._current_frames
+except AttributeError: # Python < 2.5
     # Use the threadframe module for dumping thread stack frames:
     # http://www.majid.info/mylos/stories/2004/06/10/threadframe.html
-    import threadframe
+    try:
+        import threadframe
+    except ImportError: # threadframe module not installed
+        currentFrames = None
+    else:
+        currentFrames = threadframe.dict
 
-    def threadDump(signum, frame):
-        """Signal handler for dumping thread stack frames to stdout."""
-        print
-        print "App server has been signaled to attempt a thread dump."
-        print
-        print "Thread stack frame dump at", asclocaltime()
-        sys.stdout.flush()
-        frames = threadframe.dict()
-        items = frames.items()
-        items.sort()
-        print
-        print "-" * 79
-        print
-        for threadID, frame in items:
-            print "Thread ID: %d (reference count = %d)" % (
-                threadID, sys.getrefcount(frame))
-            print ''.join(traceback.format_list(traceback.extract_stack(frame)))
-        items.sort()
-        print "-" * 79
-        sys.stdout.flush()
-
-except ImportError:
-    # threadframe module not available
-    threadDump = None
+def threadDump(signum, frame):
+    """Signal handler for dumping thread stack frames to stdout."""
+    print
+    print "App server has been signaled to attempt a thread dump."
+    print
+    print "Thread stack frame dump at", asclocaltime()
+    sys.stdout.flush()
+    frames = currentFrames()
+    print
+    print "-" * 79
+    print
+    for threadID in sorted(frames):
+        frame = frames[threadID]
+        print "Thread ID: %d (reference count = %d)" % (
+            threadID, sys.getrefcount(frame))
+        print ''.join(traceback.format_list(traceback.extract_stack(frame)))
+    print "-" * 79
+    sys.stdout.flush()
 
 import signal
 
@@ -1385,7 +1386,7 @@ try:
 except AttributeError:
     SIGINT = None
 
-if threadDump:
+if currentFrames:
 
     # Signals for creating a thread dump
 
@@ -1420,7 +1421,7 @@ def main(args):
     function = run
     daemon = False
     workDir = None
-    for arg in args[:]:
+    for arg in args:
         if settingRE.match(arg):
             match = settingRE.match(arg)
             name = match.group(1)
