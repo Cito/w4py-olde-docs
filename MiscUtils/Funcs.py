@@ -120,7 +120,7 @@ def hostName():
 
     """
     for name in ['HOST', 'HOSTNAME', 'host', 'hostname']:
-        hostName = os.environ.get(name, None)
+        hostName = os.environ.get(name)
         if hostName:
             break
     if not hostName:

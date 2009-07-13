@@ -779,7 +779,7 @@ class TableRecord(object):
             yield value
 
     def get(self, key, default=None):
-        index = self._nameToIndexMap.get(key, None)
+        index = self._nameToIndexMap.get(key)
         if index is None:
             return default
         else:

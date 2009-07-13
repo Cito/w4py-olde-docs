@@ -189,7 +189,7 @@ class Model(object):
                         except KeyError:
                             raise SampleError(linenum,
                                 "Class '%s' is not defined" % klassName)
-                        samples = self._klassSamples.get(klass, None)
+                        samples = self._klassSamples.get(klass)
                         if samples is None:
                             samples = self._klassSamples[klass] = []
                             samples.append('\n\n/* %s */\n\n' % klass.name())
@@ -654,9 +654,9 @@ class Attr(object):
         return ''
 
     def createDefaultSQL(self):
-        default = self.get('SQLDefault', None)
+        default = self.get('SQLDefault')
         if default is None:
-            default = self.get('Default', None)
+            default = self.get('Default')
             if default is not None:
                 default = self.sqlForSampleInput(str(default))
         if default:
@@ -766,16 +766,16 @@ class DecimalAttr(object):
     def sqlType(self):
         # the keys 'Precision' and 'Scale' are used because all the
         # SQL docs I read say:  decimal(precision, scale)
-        precision = self.get('Precision', None)
+        precision = self.get('Precision')
         if precision is None:
             # the following setting is for backwards compatibility
             if self.klass().klasses()._model.setting('UseMaxForDecimalPrecision', False):
-                precision = self.get('Max', None)
+                precision = self.get('Max')
                 if not precision:
                     precision = None
             if precision is None:
                 precision = 11
-        scale = self.get('Scale', None)
+        scale = self.get('Scale')
         if scale is None:
             scale = self.get('numDecimalPlaces', 3)
         return 'decimal(%s,%s)' % (precision, scale)
@@ -842,7 +842,7 @@ class ObjRefAttr(object):
         if self.setting('UseBigIntObjRefColumns', False):
             # the old technique of having both the class id and the obj id in one 64 bit reference
             name = self.sqlName().ljust(self.maxNameWidth())
-            if self.get('Ref', None):
+            if self.get('Ref'):
                 refs = ' references %(Type)s(%(Type)sId)' % self
             else:
                 refs = ''
@@ -865,10 +865,10 @@ class ObjRefAttr(object):
             # ^ this makes the table a little to easier to work with in some cases
             # (you can often just insert the obj id)
             objIdRef = ''
-            if self.get('Ref', None) or (self.setting(
+            if self.get('Ref') or (self.setting(
                     'GenerateSQLReferencesForObjRefsToSingleClasses', False)
                     and not self.targetKlass().subklasses()):
-                if self.get('Ref', None) not in ('0', 0, 0.0, False):
+                if self.get('Ref') not in ('0', 0, 0.0, False):
                     objIdRef = self.objIdReferences()
             out.write('    %s %s%s%s%s, /* %s */ \n' % (
                 classIdName, self.sqlTypeOrOverride(), notNull, classIdDefault,

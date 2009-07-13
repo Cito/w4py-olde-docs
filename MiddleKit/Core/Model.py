@@ -240,7 +240,7 @@ class Model(Configurable):
         or the custom set of classes that were passed in via initialization.
 
         """
-        pyClass = self._coreClasses.get(className, None)
+        pyClass = self._coreClasses.get(className)
         if pyClass is None:
             results = {}
             exec 'import MiddleKit.Core.%s as module'% className in results
@@ -277,7 +277,7 @@ class Model(Configurable):
 
         """
         for model in self._searchOrder:
-            klass = model.klasses().get(name, None)
+            klass = model.klasses().get(name)
             if klass:
                 return klass
         if default is NoDefault:
@@ -351,7 +351,7 @@ class Model(Configurable):
         just ask it for klass.pyClass().
 
         """
-        pyClass = self._pyClassForName.get(name, None)
+        pyClass = self._pyClassForName.get(name)
         if pyClass is None:
             results = {}
             pkg = self.setting('Package', '')

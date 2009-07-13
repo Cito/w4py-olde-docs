@@ -80,7 +80,7 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
             response = dict(timeReceived=trans.request().time())
             try:
                 try:
-                    encoding = request.environ().get('HTTP_CONTENT_ENCODING', None)
+                    encoding = request.environ().get('HTTP_CONTENT_ENCODING')
                     if encoding == 'x-gzip':
                         if zlib is not None:
                             try:

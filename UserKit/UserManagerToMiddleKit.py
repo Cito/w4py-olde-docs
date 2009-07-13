@@ -108,7 +108,7 @@ class UserManagerToMiddleKit(UserManager):
         UserManager.addUser(self, user)
 
     def userForSerialNum(self, id, default=NoDefault):
-        user = self._cachedUsersBySerialNum.get(id, None)
+        user = self._cachedUsersBySerialNum.get(id)
         if user is not None:
             return user
         return self.loadUser(id, default)

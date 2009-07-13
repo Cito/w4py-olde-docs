@@ -79,7 +79,7 @@ password,password
         # the user can click through immediately.
         # Otherwise, the click goes back to the same page with
         # the fields filled out so that the user can enter the password.
-        if db.get('password', None):
+        if db.get('password'):
             self.write('<p><a href="BrowseClasses?%s">%s</a>'
                 ' (password included)' % (args, title))
         else:

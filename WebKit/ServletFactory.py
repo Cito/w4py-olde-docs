@@ -178,7 +178,7 @@ class ServletFactory(object):
         if debug:
             print __file__, fullModuleName, moduleName, directory
         if not forceReload:
-            module = sys.modules.get(fullModuleName, None)
+            module = sys.modules.get(fullModuleName)
             if module is not None:
                 return module
         fp = None

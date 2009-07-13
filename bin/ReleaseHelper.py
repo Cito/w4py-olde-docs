@@ -69,8 +69,8 @@ class ReleaseHelper(object):
         """
 
         url = self._args.get('url', ' http://svn.w4py.org/Webware/tags')
-        tag = self._args.get('tag', None)
-        pkg = self._args.get('pkg', None)
+        tag = self._args.get('tag')
+        pkg = self._args.get('pkg')
         pkgType = pkg == 'zip' and 'zip archive' or 'tarball'
         if tag:
             print "Creating %s from tag %s ..." % (pkgType, tag)
@@ -111,7 +111,7 @@ class ReleaseHelper(object):
             if not os.path.exists(propertiesFile):
                 self.error('Properties.py not found.')
             props = PropertiesObject(propertiesFile)
-            if props.get('name', None) != 'Webware for Python':
+            if props.get('name') != 'Webware for Python':
                 self.error('This is not a Webware package.')
             ver = props['versionString']
 

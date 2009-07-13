@@ -117,7 +117,7 @@ class PlugIn(object):
         """Add a context for the documentation."""
         app = self._appServer.application()
         if app.hasContext('Docs'):
-            self._docs = self._properties.get('docs', None) or None
+            self._docs = self._properties.get('docs') or None
             if self.hasDocs():
                 docsPath = self.serverSidePath('Docs')
                 assert os.path.exists(docsPath), \
@@ -137,7 +137,7 @@ class PlugIn(object):
         app = self._appServer.application()
         if app.hasContext('Examples'):
             config = self._properties.get('WebKitConfig', {})
-            self._examplePages = config.get('examplePages', None) or None
+            self._examplePages = config.get('examplePages') or None
             if self.hasExamplePages():
                 examplesPath = self.serverSidePath('Examples')
                 assert os.path.exists(examplesPath), \

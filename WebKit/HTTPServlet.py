@@ -57,7 +57,7 @@ class HTTPServlet(Servlet):
                 if ims and ims.split(';')[0] == lm:
                     trans.response().setStatus(304, 'Not Modified')
                     return
-        method = self._methodForRequestType.get(httpMethodName, None)
+        method = self._methodForRequestType.get(httpMethodName)
         if not method:
             methName = 'respondTo' + httpMethodName.capitalize()
             method = getattr(self, methName, self.notImplemented)

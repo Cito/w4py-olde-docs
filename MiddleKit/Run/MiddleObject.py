@@ -468,7 +468,7 @@ class MiddleObject(object):
         return method(value)
 
     def valueForAttr(self, attr, default=NoDefault):
-        getMethod = self.klass()._getMethods.get(attr.name(), None)
+        getMethod = self.klass()._getMethods.get(attr.name())
         if getMethod is None:
             pyGetName = attr.pyGetName()
             getMethod = getattr(self.klass().pyClass(), pyGetName, None)

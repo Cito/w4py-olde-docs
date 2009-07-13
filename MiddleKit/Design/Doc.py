@@ -29,9 +29,9 @@ class Doc(object):
         self.otherKeys = self.otherKeys # pick up class level value
         self.parseArgs(args)
 
-        modelName = self.args.get('model', None)
+        modelName = self.args.get('model')
         if not modelName:
-            classesName = self.args.get('classes', None)
+            classesName = self.args.get('classes')
             if not classesName:
                 self.usage('No model or classes file specified.')
 

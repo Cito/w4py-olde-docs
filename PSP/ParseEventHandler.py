@@ -204,7 +204,7 @@ class ParseEventHandler(object):
                     raise ValueError('No page directive handler: %s' % h)
         elif directive == 'include':
             filename = attrs['file']
-            encoding = attrs.get('encoding', None)
+            encoding = attrs.get('encoding')
             try:
                 self._reader.pushFile(filename, encoding)
             except IOError:

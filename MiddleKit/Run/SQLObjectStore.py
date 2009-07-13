@@ -409,7 +409,7 @@ class SQLObjectStore(ObjectStore):
                 for row in cur.fetchall():
                     serialNum = row[0]
                     key = ObjectKey().initFromClassNameAndSerialNum(className, serialNum)
-                    obj = self._objects.get(key, None)
+                    obj = self._objects.get(key)
                     if obj is None:
                         pyClass = klass.pyClass()
                         obj = pyClass()
@@ -583,7 +583,7 @@ class SQLObjectStore(ObjectStore):
             # Check if we already have this in memory first
             key = ObjectKey()
             key.initFromClassNameAndSerialNum(klass.name(), serialNum)
-            obj = self._objects.get(key, None)
+            obj = self._objects.get(key)
             if obj:
                 return obj
 
@@ -619,7 +619,7 @@ class SQLObjectStore(ObjectStore):
             # return whether we have this object in memory
             key = ObjectKey()
             key.initFromClassNameAndSerialNum(klass.name(), serialNum)
-            return self._objects.get(key, None)
+            return self._objects.get(key)
 
     def objRefZeroSerialNum(self, objRef):
         """Raise serial number zero error.

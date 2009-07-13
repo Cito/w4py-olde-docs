@@ -319,7 +319,7 @@ class HTMLTag(object):
         tagWithMatchingAttr() (e.g., sans underscore) is more commonly used.
 
         """
-        if self._attrs.get(name, None) == value:
+        if self._attrs.get(name) == value:
             return self
         for tag in self._subtags:
             matchingTag = tag._tagWithMatchingAttr(name, value)

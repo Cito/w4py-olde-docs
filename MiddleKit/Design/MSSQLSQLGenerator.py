@@ -333,7 +333,7 @@ class ObjRefAttr(object):
 
     def sqlType(self):
         if self.setting('UseBigIntObjRefColumns', False):
-            if self.get('Ref', None):
+            if self.get('Ref'):
                 return ('bigint constraint %s foreign key'
                     ' references %(Type)s(%(Type)sId) ' % self)
             else:

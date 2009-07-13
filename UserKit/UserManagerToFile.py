@@ -115,7 +115,7 @@ class UserManagerToFile(UserManager):
         user.save()
 
     def userForSerialNum(self, serialNum, default=NoDefault):
-        user = self._cachedUsersBySerialNum.get(serialNum, None)
+        user = self._cachedUsersBySerialNum.get(serialNum)
         if user is not None:
             return user
         return self.loadUser(serialNum, default)

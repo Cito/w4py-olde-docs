@@ -504,7 +504,7 @@ class Installer(object):
         # Place an __init__.py file in every Docs directory
         docsDirs = ['Docs']
         for comp in self._comps:
-            if comp.get('docs', None):
+            if comp.get('docs'):
                 docsDir = comp['dirname'] + '/Docs'
                 if os.path.isdir(docsDir):
                     docsDirs.append(docsDir)

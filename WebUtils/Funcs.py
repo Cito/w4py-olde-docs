@@ -105,9 +105,9 @@ def requestURI(env):
     from SCRIPT_URL, SCRIPT_NAME, PATH_INFO and QUERY_STRING.
 
     """
-    uri = env.get('REQUEST_URI', None)
+    uri = env.get('REQUEST_URI')
     if uri is None:
-        uri = env.get('SCRIPT_URL', None)
+        uri = env.get('SCRIPT_URL')
         if uri is None:
             uri = env.get('SCRIPT_NAME', '') + env.get('PATH_INFO', '')
         query = env.get('QUERY_STRING', '')
