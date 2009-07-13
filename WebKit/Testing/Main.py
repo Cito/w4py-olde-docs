@@ -67,7 +67,7 @@ class Main(SidebarPage):
         return self.readContent(file.read())
 
     def readContent(self, content):
-        lines = map(lambda line: line.strip(), content.split('\n'))
+        lines = [line.strip() for line in content.splitlines()]
         lineNum = 1
         cases = []
         urls = []

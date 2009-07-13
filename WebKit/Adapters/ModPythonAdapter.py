@@ -179,7 +179,7 @@ class ModPythonAdapter(Adapter):
             if name.lower() == 'content-type':
                 req.content_type = value
             if name.lower() == 'status':
-                req.status = int(value.lstrip().split(' ', 1)[0])
+                req.status = int(value.lstrip().split(None, 1)[0])
         req.send_http_header()
         req.write(headerData[headerend+4:])
         self.setDoneHeader(1)

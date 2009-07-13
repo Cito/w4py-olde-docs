@@ -46,9 +46,7 @@ class FileList(object):
         name = self._name
         title = 'File List of %s' % name
         file.write('%s\n%s\n\n' % (title, '='*len(title)))
-        files = self._files
-        files.sort(lambda a, b: cmp(a.lower(), b.lower()))
-        for filename in files:
+        for filename in sorted(self._files, key=lambda f: f.lower()):
             file.write(filename + '\n')
         file.write('\n')
         if closeFile:
@@ -88,9 +86,7 @@ td { background-color: #EEF; }
 ''' % (title, title, other))
         file.write('<tr><th>Source File</th>'
             '<th>Source</th><th>Doc</th><th>Summary</th></tr>\n')
-        files = self._files
-        files.sort(lambda a, b: cmp(a.lower(), b.lower()))
-        for filename in files:
+        for filename in sorted(self._files, key=lambda f: f.lower()):
             file.write('<tr><td>%s</td></tr>\n' % self.links(filename))
         file.write('''</table>
 </div></body>

@@ -299,7 +299,7 @@ class Main(Page):
         col = 0 # will be 0 for the left and 1 for the right column
         filenames = os.listdir(picsDir)
         # We'll sort the files, case-insensitive
-        filenames.sort(lambda a, b: cmp(a.lower(), b.lower()))
+        filenames.sort(key=lambda filename: filename.lower())
         for filename in filenames:
             if not col: # left column
                 self.write('&lt;tr style=&quot;text-align:center&quot;&gt;')

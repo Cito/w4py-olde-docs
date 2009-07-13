@@ -21,8 +21,8 @@ class ServletCache(AdminSecurity):
         return 'Servlet Cache'
 
     def writeContent(self):
-        factories = filter(lambda f: f._classCache,
-            ServletFactoryManager._factories)
+        factories = [factory for factory in ServletFactoryManager._factories
+            if factory._classCache]
         req = self.request()
         wr = self.writeln
         if len(factories) > 1:

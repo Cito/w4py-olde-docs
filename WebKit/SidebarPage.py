@@ -202,7 +202,7 @@ table.NiceTable th a:link, table.NiceTable th a:visited {
         self.menuItem('WebKit ' + app.webKitVersionString())
         self.menuItem('Webware ' + app.webwareVersionString())
         from sys import version
-        self.menuItem('Python ' + version.split(' ', 1)[0])
+        self.menuItem('Python ' + version.split(None, 1)[0])
 
     def writeContent(self):
         self.writeln('Woops, someone forgot to override writeContent().')

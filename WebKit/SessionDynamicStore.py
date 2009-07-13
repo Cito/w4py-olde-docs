@@ -1,6 +1,8 @@
 """Session store using memory and files."""
 
-import time, threading
+import time
+import threading
+from operator import itemgetter
 
 from MiscUtils import NoDefault
 
@@ -323,5 +325,4 @@ class SessionDynamicStore(SessionStore):
                     (self._memoryStore[key].lastAccessTime(), key))
             except KeyError:
                 pass
-        accessTimeAndKeys.sort()
-        return [key for accessTime, key in accessTimeAndKeys]
+        return map(itemgetter(1), sorted(accessTimeAndKeys))

@@ -96,10 +96,8 @@ style="width:%(width)dpt;text-align:center">
                 indices = map(int, indices) # convert strings to ints
             except ValueError:
                 indices = []
-            indices.sort() # sort...
-            indices.reverse() # in reverse order
             # remove the objects:
-            for index in indices:
+            for index in sorted(indices, reverse=True):
                 del self._vars['items'][index]
         else:
             self._error = 'You must select a row to delete.'

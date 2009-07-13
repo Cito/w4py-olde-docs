@@ -37,7 +37,7 @@ def HTMLForLines(lines, options=None):
     for line in lines:
         match = fileRE.search(line)
         if match:
-            parts = map(htmlEncode, line.split('\n'))
+            parts = map(htmlEncode, line.splitlines())
             parts[0] = '<span style="%s">%s</span>' % (
                 opt['row.location'], parts[0])
             if opt['editlink']:

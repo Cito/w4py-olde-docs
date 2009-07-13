@@ -94,7 +94,7 @@ class ServletWriter(object):
             self.println('## from ' + str(start))
             self.println('## from ' + str(stop))
         if chars:
-            lines = chars.split('\n')
+            lines = chars.splitlines()
             for line in lines:
                 self._filehandle.write(self.indent(''))
                 self._filehandle.write('##')

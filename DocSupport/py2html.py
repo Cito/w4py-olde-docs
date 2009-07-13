@@ -316,10 +316,9 @@ padding: 3pt; }
         addsplits(splits, pytext, self.formats, taglist)
 
         # do splitting & inserting
-        splits.sort()
         s = []
         li = 0
-        for ri, dummy, insert in splits:
+        for ri, dummy, insert in sorted(splits):
             if ri > li:
                 s.append(pytext[li:ri])
             s.append(insert)

@@ -64,7 +64,7 @@ def charWrap(s, width, hanging=0):
         return s
     assert hanging < width
     hanging = ' ' * hanging
-    lines = s.split('\n')
+    lines = s.splitlines()
     i = 0
     while i < len(lines):
         s = lines[i]
@@ -107,7 +107,7 @@ def wordWrap(s, width=78):
     """
     return reduce(lambda line, word, width=width: "%s%s%s" % (
         line, ' \n'[(len(line[line.rfind('\n')+1:]) + len(word) >= width)],
-        word), s.split(' '))
+        word), s.split())
 
 
 def hostName():

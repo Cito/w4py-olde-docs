@@ -457,7 +457,7 @@ class HTMLReader(SGMLParser):
         self._lineNumber = 1
         self.computeTagContainmentConfig()
         try:
-            for line in string.split('\n'):
+            for line in string.splitlines():
                 self.feed(line + '\n')
                 self._lineNumber += 1
             self.close()

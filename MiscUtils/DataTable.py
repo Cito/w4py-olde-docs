@@ -398,7 +398,7 @@ class DataTable(object):
 
     def readString(self, string, delimiter=',',
             allowComments=True, stripWhite=True):
-        return self.readLines(string.split('\n'), delimiter,
+        return self.readLines(string.splitlines(), delimiter,
             allowComments, stripWhite)
 
     def readLines(self, lines, delimiter=',',

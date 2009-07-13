@@ -298,17 +298,15 @@ class AppServer(ConfigurableForServerSidePath):
         See the docs in `WebKit.PlugIn` for more info.
 
         """
-        plugIns = self.setting('PlugIns')
-        plugIns = map(lambda path, ssp=self.serverSidePath: ssp(path), plugIns)
+        plugIns = [self.serverSidePath(path)
+            for path in self.setting('PlugIns')]
 
         # Scan each directory named in the PlugInDirs list.
         # If those directories contain Python packages (that don't have
         # a "dontload" file) then add them to the plugs in list.
         for plugInDir in self.setting('PlugInDirs'):
             plugInDir = self.serverSidePath(plugInDir)
-            fileNames = os.listdir(plugInDir)
-            fileNames.sort()
-            for filename in fileNames:
+            for filename in sorted(os.listdir(plugInDir)):
                 filename = os.path.normpath(os.path.join(plugInDir, filename))
                 if (os.path.isdir(filename)
                         and os.path.exists(os.path.join(filename, '__init__.py'))

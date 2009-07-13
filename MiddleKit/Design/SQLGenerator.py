@@ -183,7 +183,7 @@ class Model(object):
                     elif fields[0] and str(fields[0])[0] == '#':
                         pass
                     elif fields[0].lower().endswith(' objects'):
-                        klassName = fields[0].split()[0]
+                        klassName = fields[0].split(None, 1)[0]
                         try:
                             klass = self.klass(klassName)
                         except KeyError:
@@ -210,7 +210,7 @@ class Model(object):
                             else:
                                 # support "foo by bar"
                                 name = name.strip()
-                                parts = name.split(' ')
+                                parts = name.split()
                                 if len(parts) == 1:
                                     refByAttrName = None
                                 else:
@@ -925,7 +925,7 @@ class ObjRefAttr(object):
             # so more work is needed in its SQL generator
         else:
             # the de facto technique of <serialnum> or <class name>.<serial num>
-            input = input.split()
+            input = input.split(None, 1)
             # this gets rid of the sample value comment described above
             if input:
                 input = input[0]

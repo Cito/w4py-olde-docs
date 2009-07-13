@@ -86,18 +86,17 @@ class Doc(object):
         wr('<tr class="AttrTitles"><td class=AttrTitles>In Alpha Order</td>'
             '<td class="AttrTitles">In Inheritance Order</td></tr>\n')
         wr('<tr><td valign=top>\n')
-        klasses = self.model.allKlassesInOrder()[:]
-        klasses.sort(lambda a, b: cmp(a.name().lower(), b.name().lower()))
-        for klass in klasses:
+        klasses = self.model.allKlassesInOrder()
+        for klass in sorted(klasses, key=lambda klass: klass.name().lower()):
             name = klass.name()
             wr('<a href="#%s">%s</a><br>\n' % (name, name))
         wr('<td valign="top">')
-        for klass in self.model.allKlassesInOrder():
+        for klass in klasses:
             if not klass.superklass():
                 self.writeKlassLinkAndRecurse(wr, klass)
         wr('</table>\n')
 
-        for klass in self.model.allKlassesInOrder():
+        for klass in klasses:
             name = klass.name()
             wr('''
 <a name="%(name)s"></a>

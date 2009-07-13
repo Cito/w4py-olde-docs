@@ -145,6 +145,6 @@ class ModSnakeAdapter(Adapter):
             if field == 'content-type':
                 req.content_type = header[1]
             elif field == 'status':
-                req.status = int(header[1].lstrip().split(' ', 1)[0])
+                req.status = int(header[1].lstrip().split(None, 1)[0])
         req.send_http_header()
         req.rwrite(respdict[headerend+2:])

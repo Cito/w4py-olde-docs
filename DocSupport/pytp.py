@@ -174,7 +174,7 @@ class PyTP(object):
         """Output a Python object reasonably as string."""
         output = []
         if hasattr(something, 'items'):
-            items = something.items
+            items = something.items()
             try:
                 items.sort()
             except Exception:
@@ -186,11 +186,6 @@ class PyTP(object):
         else:
             if something is not None:
                 output.append(str(something))
-        while hasattr(something, 'next'):
-            something = something.next
-            if something is None:
-                break
-            output.append(self._output(something))
         return '\n'.join(output)
 
     def _errmsg(self, error, line, code):

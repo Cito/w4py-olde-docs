@@ -16,6 +16,7 @@ FUTURE
 import os
 import sys
 from glob import glob
+from operator import itemgetter
 
 from MiscUtils import StringIO
 from MiscUtils.PropertiesObject import PropertiesObject
@@ -149,13 +150,12 @@ class Installer(object):
     def detectComponents(self):
         print
         print 'Scanning for components...'
-        dirNames = filter(lambda dir: not dir.startswith('.')
-            and os.path.isdir(dir), os.listdir(os.curdir))
-        dirNames.sort()
+        dirNames = [dir for dir in os.listdir(os.curdir)
+            if not dir.startswith('.') and os.path.isdir(dir)]
         self._maxCompLen = max(map(len, dirNames))
         oldPyVersion = False
         column = 0
-        for dirName in dirNames:
+        for dirName in sorted(dirNames):
             propName = dirName + '/Properties.py'
             try:
                 print dirName.ljust(self._maxCompLen, '.'),
@@ -185,7 +185,7 @@ class Installer(object):
             print
         if oldPyVersion:
             print "* some components require a newer Python version"
-        self._comps.sort(lambda a, b: cmp(a['name'], b['name']))
+        self._comps.sort(key=itemgetter('name'))
 
     def setupWebKitPassword(self, prompt, defpass):
         """Setup a password for WebKit Application server."""
@@ -469,7 +469,7 @@ class Installer(object):
             if files:
                 releaseNotes = []
                 for filename in files:
-                    item = {'dirname': os.path.basename(filename)}
+                    item = dict(dirname=os.path.basename(filename))
                     filename = item['dirname']
                     ver = filename[
                         filename.rfind('-') + 1 : filename.rfind('.')]
@@ -483,7 +483,7 @@ class Installer(object):
                         if i:
                             item['ver'] = map(int, ver[:i].split('.'))
                     releaseNotes.append(item)
-                releaseNotes.sort(lambda a, b: cmp(b['ver'], a['ver']))
+                releaseNotes.sort(key=itemgetter('ver'), reverse=True)
                 for item in releaseNotes:
                     ht.append(link % (item['dirname'], item['name']))
             else:
@@ -610,7 +610,7 @@ Installation is finished.''' % ((os.sep,)*2)
 
     def printKeyValue(self, key, value):
         """Print a key/value pair."""
-        value = value.split('\n')
+        value = value.splitlines()
         v = value.pop(0)
         print '%12s: %s' % (key, v)
         for v in value:

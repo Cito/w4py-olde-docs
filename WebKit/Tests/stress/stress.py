@@ -99,7 +99,7 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
             if not data.startswith('Status: '):
                 raise ValueError
             status = data.split('\n', 1)[0]
-            code = int(status.split()[1])
+            code = int(status.split(None, 1)[-1])
         except Exception:
             status = 'no status'
             code = 0

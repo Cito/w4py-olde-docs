@@ -9,6 +9,7 @@ A quick, hacky script to contruct a class hierarchy list from a set of Python fi
 
 import os, re, sys
 from glob import glob
+from operator import attrgetter
 
 
 def EmptyString(klass):
@@ -146,8 +147,7 @@ class ClassList(object):
 
     def printList(self, file=sys.stdout):
         roots = self.roots()
-        roots.sort(lambda a, b: cmp(a._name, b._name))
-        for klass in roots:
+        for klass in sorted(roots, key=attrgetter('_name')):
             klass.printList(file=file)
 
     def printForWeb(self, hierarchic=False, file=sys.stdout):
@@ -190,8 +190,7 @@ td { background-color: #EEF; }
             classes = self.roots()
         else:
             classes = self._klasses.values()
-        classes.sort(lambda a, b: cmp(a._name, b._name))
-        for klass in classes:
+        for klass in sorted(classes, key=attrgetter('_name')):
             if hierarchic:
                 klass.printList(file=file, prefix='<tr><td>',
                     indentString='&nbsp;'*6,

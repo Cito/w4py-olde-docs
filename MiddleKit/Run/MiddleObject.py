@@ -353,9 +353,8 @@ class MiddleObject(object):
             out = sys.stdout
         out.write('%s %x\n' % (self.__class__.__name__, id(self)))
         keys = dir(self)
-        keys.sort()
         keyWidth = max([len(key) for key in keys])
-        for key in keys:
+        for key in sorted(keys):
             if verbose:
                 dump = True
             else:
@@ -460,9 +459,8 @@ class MiddleObject(object):
             pySetName = attr.pySetName()
             method = getattr(self, pySetName, None)
         if method is None:
-            attrs = [attr.name() for attr in self.klass().allAttrs()]
-            attrs.sort()
-            attrs = ','.join(attrs)
+            attrs = ','.join(sorted(
+                attr.name() for attr in self.klass().allAttrs()))
             raise LookupError('%s, class=%s, all attrs=%s'
                 % (attrName, self.__class__, attrs))
         return method(value)
