@@ -188,23 +188,15 @@ class Application(ConfigurableForServerSidePath):
 
     def initErrorPage(self):
         """Initialize the error page related attributes."""
-        dirs = (self._serverSidePath,
-            os.path.dirname(os.path.abspath(__file__)))
-        pages = ('error404.html', '404Text.txt')
-        for dir in dirs:
-            for page in pages:
-                try:
-                    self._error404 = open(os.path.join(dir, page)).read()
-                    if page != pages[0]:
-                        print ('Deprecation warning: '
-                            'Please use %s instead of %s' % pages)
-                except Exception:
-                    continue
-                else:
-                    break
-            else:
+        for dir in (self._serverSidePath,
+                os.path.dirname(os.path.abspath(__file__))):
+            error404file = os.path.join(dir, 'error404.html')
+            try:
+                self._error404 = open(error404file).read()
+            except Exception:
                 continue
-            break
+            else:
+                break
         else:
             self._error404 = None
         urls = self.setting('ErrorPage') or None
