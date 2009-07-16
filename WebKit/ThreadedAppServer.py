@@ -781,22 +781,7 @@ class ThreadedAppServer(AppServer):
             return self._addr[settingPrefix]
         except KeyError:
             host = self.setting(settingPrefix + 'Host', self.setting('Host'))
-            if settingPrefix == 'Adapter':
-                # jdh 2004-12-01:
-                # 'Port' has been renamed to 'AdapterPort'. However, we don't
-                # want the the default AdapterPort in DefaultConfig above to
-                # be used if a user still has 'Port' in their config file.
-                # So for now, we prefer the 'Port' setting if it exists.
-                # After a few releases we can remove this special case.
-                port = self.setting('Port', None)
-                if port is None:
-                    port = self.setting(settingPrefix + 'Port')
-                else:
-                    print ("WARNING: The 'Port' setting"
-                        " has been renamed to 'AdapterPort'.")
-                    print "Please update your AppServer.config file."
-            else:
-                port = self.setting(settingPrefix + 'Port')
+            port = self.setting(settingPrefix + 'Port')
             self._addr[settingPrefix] = (host, port)
             return self._addr[settingPrefix]
 
