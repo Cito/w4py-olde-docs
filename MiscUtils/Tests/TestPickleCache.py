@@ -8,9 +8,9 @@ from MiscUtils.PickleCache import *
 # the directory that this file is in:
 progPath = os.path.join(os.getcwd(), __file__)
 progDir = os.path.dirname(progPath)
-assert os.path.basename(progDir) == 'Tests' and \
-    os.path.basename(os.path.dirname(progDir)) == 'MiscUtils', \
-    'Test needs to run in Tests/MiscUtils.'
+assert (os.path.basename(progDir) == 'Tests'
+    and os.path.basename(os.path.dirname(progDir)) == 'MiscUtils'), (
+    'Test needs to run in Tests/MiscUtils.')
 
 
 class TestPickleCache(unittest.TestCase):

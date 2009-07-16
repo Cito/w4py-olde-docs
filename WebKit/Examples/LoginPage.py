@@ -9,8 +9,8 @@ class LoginPage(ExamplePage):
         return 'Log In'
 
     def htBodyArgs(self):
-        return ExamplePage.htBodyArgs(self) + \
-            ' onload="document.loginform.username.focus();"' % locals()
+        return (ExamplePage.htBodyArgs(self)
+            + ' onload="document.loginform.username.focus();"' % locals())
 
     def writeContent(self):
         self.writeln('<div style="margin-left:auto;margin-right:auto;width:20em">'

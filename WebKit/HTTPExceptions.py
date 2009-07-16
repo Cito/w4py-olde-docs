@@ -161,8 +161,8 @@ class HTTPMovedPermanently(HTTPException):
         return {'Location': self.location()}
 
     def description(self):
-        return 'The resource you are accessing has been moved to' \
-            ' <a href="%s">%s</a>' % ((htmlEncode(self.location()),)*2)
+        return ('The resource you are accessing has been moved to'
+            ' <a href="%s">%s</a>' % ((htmlEncode(self.location()),)*2))
 
 
 class HTTPTemporaryRedirect(HTTPMovedPermanently):

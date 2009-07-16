@@ -335,13 +335,13 @@ class ExceptionHandler(object):
                                 value = value()
                             value = self.repr(value)
                         except Exception, e:
-                            value = '(exception during method call: %s: %s)' \
-                                % (e.__class__.__name__, e)
+                            value = ('(exception during method call:'
+                                ' %s: %s)' % (e.__class__.__name__, e))
                 else:
                     value = self.repr(value)
             except Exception, e:
-                value = '(exception during value processing: %s: %s)' \
-                    % (e.__class__.__name__, e)
+                value = ('(exception during value processing:'
+                    ' %s: %s)' % (e.__class__.__name__, e))
             attrs[name] = value
         self.writeDict(attrs, ('Attribute', 'Value'), True)
 
@@ -513,8 +513,8 @@ class ExceptionHandler(object):
         headers = self.setting('ErrorEmailHeaders').copy()
         headers['Date'] = formatdate()
         headers['Mime-Version'] = '1.0'
-        headers['Subject'] = headers.get('Subject', '[WebKit Error]') \
-            + ' %s: %s' % sys.exc_info()[:2]
+        headers['Subject'] = headers.get('Subject',
+            '[WebKit Error]') + ' %s: %s' % sys.exc_info()[:2]
         add_header = Message and message.add_header or writer.addheader
         for h, v in headers.items():
             if isinstance(v, (list, tuple)):

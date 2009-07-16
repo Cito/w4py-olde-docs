@@ -127,7 +127,7 @@ class ModSnakeAdapter(Adapter):
 
         env["GATEWAY_INTERFACE"] = mod_snake.get_version()
 
-        response = self.transactWithAppServer(env, strdata.getvalue(), \
+        response = self.transactWithAppServer(env, strdata.getvalue(),
             per_svr[PER_SVR_ADDRESS], per_svr[PER_SVR_PORT])
 
         self.respond( request, response)

@@ -131,8 +131,8 @@ class InvalidContentTypeError(ResponseError):
 
     def __repr__(self):
         content = self.content
-        return '%s: Content type is not text/x-python-pickled-dict\n' \
-            ' headers = %s\ncontent =\n%s' % (
+        return ('%s: Content type is not text/x-python-pickled-dict\n'
+            ' headers = %s\ncontent =\n%s') % (
                 self.__class__.__name__, self.headers, content)
 
     __str__ = __repr__

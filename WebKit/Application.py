@@ -240,8 +240,8 @@ class Application(ConfigurableForServerSidePath):
                 raise ImportError
             self._sessionClass = klass
         except ImportError:
-            print "ERROR: Could not import Session class '%s'" \
-                " from module '%s'" % (className, moduleName)
+            print ("ERROR: Could not import Session class '%s'"
+                " from module '%s'" % (className, moduleName))
             self._sessionClass = None
         moduleName = self.setting('SessionStore')
         if moduleName in ('Dynamic', 'File', 'Memory', 'Shelve'):
@@ -256,8 +256,8 @@ class Application(ConfigurableForServerSidePath):
                 raise ImportError
             self._sessions = klass(self)
         except ImportError:
-            print "ERROR: Could not import SessionStore class '%s'" \
-                " from module '%s'" % (className, moduleName)
+            print ("ERROR: Could not import SessionStore class '%s'"
+                " from module '%s'" % (className, moduleName))
             self._sessions = None
 
     def makeDirs(self):
@@ -985,8 +985,8 @@ class Application(ConfigurableForServerSidePath):
             request.pathInfo(), request.extraURLPath() or '',
             request.queryString() and '?' + request.queryString() or '')
         if self.setting('Debug')['Sessions']:
-            print '>> [sessions] handling UseAutomaticPathSessions, ' \
-                'redirecting to', url
+            print ('>> [sessions] handling UseAutomaticPathSessions, '
+                'redirecting to', url)
         trans.response().sendRedirect(url)
         raise EndResponse
 
@@ -1004,7 +1004,7 @@ class Application(ConfigurableForServerSidePath):
             request.pathInfo(), request.extraURLPath() or '',
             request.queryString() and '?' + request.queryString() or '')
         if self.setting('Debug')['Sessions']:
-            print ">> [sessions] handling unnecessary path session, ' \
-                'redirecting to", url
+            print ('>> [sessions] handling unnecessary path session, '
+                'redirecting to', url)
         trans.response().sendRedirect(url)
         raise EndResponse

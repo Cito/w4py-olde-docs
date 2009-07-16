@@ -226,8 +226,8 @@ class ThreadedAppServer(AppServer):
 
             maxRequestTime = self.setting('MaxRequestTime') or None
             if maxRequestTime and not self._canAbortRequest:
-                print "Warning: MaxRequestTime setting ineffective" \
-                    " (cannot abort requests)"
+                print ("Warning: MaxRequestTime setting ineffective"
+                    " (cannot abort requests)")
                 maxRequestTime = None
             self._maxRequestTime = maxRequestTime
             self._checkRequestTime = None
@@ -792,8 +792,8 @@ class ThreadedAppServer(AppServer):
                 if port is None:
                     port = self.setting(settingPrefix + 'Port')
                 else:
-                    print "WARNING:", \
-                        "The 'Port' setting has been renamed to 'AdapterPort'."
+                    print ("WARNING: The 'Port' setting"
+                        " has been renamed to 'AdapterPort'.")
                     print "Please update your AppServer.config file."
             else:
                 port = self.setting(settingPrefix + 'Port')
@@ -902,8 +902,8 @@ Error: Invalid AppServer protocol.\r
 Sorry, I don't speak HTTP. You must connect via an adapter.\r
 See the Troubleshooting section of the WebKit Install Guide.\r''')
             self._sock.close()
-            print "       You can only connect to", self._serverAddress[1], \
-                "via an adapter like mod_webkit or wkcgi."
+            print ("       You can only connect to %s via an adapter"
+                " like mod_webkit or wkcgi." % self._serverAddress[1])
             return None
         if not isinstance(dictLength, int):
             self._sock.close()
@@ -1170,8 +1170,8 @@ Error: Invalid AppServer protocol.\r
 Sorry, I don't speak HTTP. You must connect via an SCGI adapter.\r
 See the Troubleshooting section of the WebKit Install Guide.\r''')
             self._sock.close()
-            print "       You can only connect to", self._serverAddress[1], \
-                "via an adapter like mod_scgi or pyscgi."
+            print ("       You can only connect to %s via an adapter"
+                " like mod_scgi or pyscgi." % self._serverAddress[1])
             return None
         chunk = ''
         missing = dictLength
@@ -1217,9 +1217,9 @@ _chdir = os.chdir
 
 def chdir(path, force=False):
     """Execute os.chdir() with safety provision."""
-    assert force, \
-        "You cannot reliably use os.chdir() in a threaded environment.\n" \
-        + 16*" " + "Set force=True if you want to do it anway (using a lock)."
+    assert force, (
+        "You cannot reliably use os.chdir() in a threaded environment.\n"
+        + 16*" " + "Set force=True if you want to do it anway (using a lock).")
     _chdir(path)
 
 

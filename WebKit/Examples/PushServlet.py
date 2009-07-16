@@ -15,8 +15,8 @@ class PushServlet(Page):
 
     """
 
-    _boundary = "if-you-see-this-your-browser-does-not-support" \
-        "-multipart/x-mixed-replace"
+    _boundary = ("if-you-see-this-your-browser-does-not-support"
+        "-multipart/x-mixed-replace")
 
     def respond(self, transaction):
         # this isn't necessary, but it's here as an example:

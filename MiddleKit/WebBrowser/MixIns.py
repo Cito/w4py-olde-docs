@@ -124,8 +124,8 @@ class ObjRefAttr(object):
             objSerialNum = value & 0xFFFFFFFFL
             klass = obj.store().klassForId(classSerialNum)
             klassName = klass.name()
-            return '<a href="BrowseObject?class=%s&serialNum=%i">%s.%i</a>' \
-                % (klassName, objSerialNum, klassName, objSerialNum)
+            return ('<a href="BrowseObject?class=%s&serialNum=%i">%s.%i</a>'
+                % (klassName, objSerialNum, klassName, objSerialNum))
         else:
             return htmlEncode(str(value))
 
@@ -134,8 +134,8 @@ class ListAttr(object):
 
     def htValue(self, value, obj):
         if value is None:
-            return '<a href="BrowseList?class=%s&serialNum=%i&attr=%s">list' \
-                '</a>' % (obj.klass().name(), obj.serialNum(), self.name())
+            return ('<a href="BrowseList?class=%s&serialNum=%i&attr=%s">list'
+                '</a>' % (obj.klass().name(), obj.serialNum(), self.name()))
 
 
 def InstallMixIns():
@@ -149,8 +149,8 @@ def InstallMixIns():
         for place in places:
             nameSpace = {}
             try:
-                exec 'from MiddleKit.%s.%s import %s' \
-                    % (place, name, name) in nameSpace
+                exec 'from MiddleKit.%s.%s import %s' % (
+                    place, name, name) in nameSpace
             except ImportError:
                 pass
             else:

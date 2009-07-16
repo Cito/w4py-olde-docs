@@ -73,8 +73,8 @@ class Colors(ExamplePage):
             self._color = textcolor(r, g, b)
         except Exception:
             self._color = 'black'
-        return 'text="black" bgcolor="%s" style="background-color:%s"' \
-            % ((self._bgcolor,)*2)
+        return ('text="black" bgcolor="%s" style="background-color:%s"'
+            % ((self._bgcolor,)*2))
 
     def writeContent(self):
         """Write the actual content of the page."""

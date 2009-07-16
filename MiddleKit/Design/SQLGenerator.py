@@ -529,8 +529,8 @@ class Klass(object):
         and often ljust()s it by self.maxNameWidth().
 
         """
-        return '    %s int not null primary key,\n' \
-            % self.sqlSerialColumnName().ljust(self.maxNameWidth())
+        return ('    %s int not null primary key,\n'
+            % self.sqlSerialColumnName().ljust(self.maxNameWidth()))
 
     def writeDeletedSQLDef(self, generator, out):
         """Return SQL for deleted timestamp.

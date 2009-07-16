@@ -67,8 +67,8 @@ class JSONRPCServlet(HTTPContent):
         data = simplejson.dumps(
             {'id': self._id, 'result': data})
         if not self._allowEval:
-            data = 'throw new Error' \
-                '("Direct evaluation not allowed");\n/*%s*/' % (data,)
+            data = ('throw new Error'
+                '("Direct evaluation not allowed");\n/*%s*/' % (data,))
         self.write(data)
 
     def jsonCall(self):

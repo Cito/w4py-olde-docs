@@ -120,9 +120,9 @@ class PlugIn(object):
             self._docs = self._properties.get('docs') or None
             if self.hasDocs():
                 docsPath = self.serverSidePath('Docs')
-                assert os.path.exists(docsPath), \
-                    'Plug-in %s says it has documentation, ' \
-                    'but there is no Docs/ subdir.' % self._name
+                assert os.path.exists(docsPath), (
+                    'Plug-in %s says it has documentation, '
+                    'but there is no Docs/ subdir.' % self._name)
                 if os.path.exists(os.path.join(docsPath, '__init__.py')):
                     ctxName = self._name + '/Docs'
                     if not app.hasContext(ctxName):
@@ -140,9 +140,9 @@ class PlugIn(object):
             self._examplePages = config.get('examplePages') or None
             if self.hasExamplePages():
                 examplesPath = self.serverSidePath('Examples')
-                assert os.path.exists(examplesPath), \
-                    'Plug-in %s says it has example pages, ' \
-                    'but there is no Examples/ subdir.' % self._name
+                assert os.path.exists(examplesPath), (
+                    'Plug-in %s says it has example pages, '
+                    'but there is no Examples/ subdir.' % self._name)
                 if os.path.exists(os.path.join(examplesPath, '__init__.py')):
                     ctxName = self._name + '/Examples'
                     if not app.hasContext(ctxName):
