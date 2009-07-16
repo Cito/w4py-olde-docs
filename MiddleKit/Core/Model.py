@@ -140,8 +140,7 @@ class Model(Configurable):
 
     def awakeFromRead(self):
         # create containers for all klasses, uniqued by name
-        models = list(self._searchOrder)
-        models.reverse()
+        models = reversed(self._searchOrder)
         byName = {}
         inOrder = []
         for model in models:
@@ -190,18 +189,13 @@ class Model(Configurable):
         searchOrder = self.allModelsDepthFirstLeftRight()
 
         # remove duplicates:
-        indexes = range(len(searchOrder))
-        indexes.reverse()
-        for i in indexes:
-            if i < len(searchOrder):
-                model = searchOrder[i]
-                j = 0
-                while j < i:
-                    if searchOrder[j] is model:
-                        del searchOrder[j]
-                        i -= 1
-                    else:
-                        j += 1
+        searchSet = set()
+        for i in reversed(range(len(searchOrder))):
+            model = searchOrder[i]
+            if model in searchSet:
+                del searchOrder[i]
+            else:
+                searchSet.add(model)
 
         self._searchOrder = searchOrder
 

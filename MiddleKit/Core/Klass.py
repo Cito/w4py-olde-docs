@@ -101,11 +101,9 @@ class Klass(MiddleDict, ModelObject):
 
         klass = self
         klasses = []
-        while 1:
+        while klass:
             klasses.append(klass)
             klass = klass.superklass()
-            if klass is None:
-                break
         klasses.reverse()
 
         allAttrs = []

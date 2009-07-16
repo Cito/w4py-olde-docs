@@ -41,8 +41,7 @@ def html(context=5, options=None):
     etype, evalue = sys.exc_info()[:2]
     if not isinstance(etype, basestring):
         etype = etype.__name__
-    inspect_trace = inspect.trace(context)
-    inspect_trace.reverse()
+    inspect_trace = reversed(inspect.trace(context))
 
     pyver = 'Python ' + sys.version.split()[0] + '<br>' + sys.executable
     javascript = """
