@@ -39,6 +39,10 @@ class PostgreSQLObjectStore(SQLObjectStore):
 
     """
 
+    def augmentDatabaseArgs(self, args, pool=False):
+        if not args.get('database'):
+            args['database'] = self._model.sqlDatabaseName()
+
     def newConnection(self):
         args = self._dbArgs.copy()
         self.augmentDatabaseArgs(args)
@@ -50,7 +54,7 @@ class PostgreSQLObjectStore(SQLObjectStore):
         # its own connection pooling internally, so DBPool is unnecessary.
 
         def setting(self, name, default=NoDefault):
-            if connectionPool and name == 'SQLConnectionPoolSize':
+            if name == 'SQLConnectionPoolSize':
                 return 0
             return SQLObjectStore.setting(self, name, default)
 
@@ -59,19 +63,15 @@ class PostgreSQLObjectStore(SQLObjectStore):
         def doneWithConnection(self, conn):
             pass
 
-    def augmentDatabaseArgs(self, args, pool=False):
-        if not args.get('database'):
-            args['database'] = self._model.sqlDatabaseName()
-
     def newCursorForConnection(self, conn, dictMode=False):
         return conn.cursor()
 
     def retrieveNextInsertId(self, klass):
         seqname = "%s_%s_seq" % (klass.name(), klass.sqlSerialColumnName())
         conn, curs = self.executeSQL("select nextval('%s')" % seqname)
-        id = curs.fetchone()[0]
-        assert id, "Didn't get next id value from sequence"
-        return id
+        value = curs.fetchone()[0]
+        assert value, "Didn't get next id value from sequence"
+        return value
 
     def dbapiModule(self):
         return dbi

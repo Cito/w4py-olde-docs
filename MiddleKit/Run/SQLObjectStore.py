@@ -102,7 +102,7 @@ class SQLObjectStore(ObjectStore):
         self._commited = False
         self._sqlEcho = None
         self._sqlCount = 0
-        self._pool = None   # an optional DBPool
+        self._pool = None # an optional DBPool
 
     def modelWasSet(self):
         """Perform additional set up of the store after the model is set.
@@ -143,7 +143,6 @@ class SQLObjectStore(ObjectStore):
 
         # Connect
         self.connect()
-
 
     def setUpSQLEcho(self):
         """Set up the SQL echoing/logging for the store.
@@ -1100,15 +1099,9 @@ class AnyDateTimeAttr(object):
 class DateAttr(object):
 
     def sqlForNonNone(self, value):
-        # We often get "YYYY-MM-DD HH:MM:SS" from datetime
-        # so we split on space and take the first value to
-        # work around that. This works fine with Python's
-        # date class (does no harm).
-        if 0:
-            print
-            print '>> type of value =', type(value)
-            print '>> value = %r' % value
-            print
+        # We often get "YYYY-MM-DD HH:MM:SS" from datetime, so we split
+        # on space and take the first value to work around that.
+        # This works fine with Python's date class (does no harm).
         if not isinstance(value, basestring):
             value = str(value).split(None, 1)[0]
         return "'%s'" % value

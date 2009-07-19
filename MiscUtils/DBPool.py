@@ -132,15 +132,15 @@ class DBPool(object):
     # not to this class which should be threadsafe in any case.
 
     def _unthreadsafe_get_connection(self):
-        """"Get a connection from the pool."""
+        """Get a connection from the pool."""
         return PooledConnection(self, self._queue.get())
 
     def _unthreadsafe_add_connection(self, con):
-        """"Add a connection to the pool."""
+        """Add a connection to the pool."""
         self._queue.put(con)
 
     def _unthreadsafe_return_connection(self, con):
-        """"Return a connection to the pool.
+        """Return a connection to the pool.
 
         In this case, the connections need to be put
         back into the queue after they have been used.
@@ -156,7 +156,7 @@ class DBPool(object):
     # This may lead to problems if you use transactions.
 
     def _threadsafe_get_connection(self):
-        """"Get a connection from the pool."""
+        """Get a connection from the pool."""
         self._lock.acquire()
         try:
             next = self._nextCon

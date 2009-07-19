@@ -127,19 +127,21 @@ class Test(object):
         self.run('python TestDesign.py %s %s' % (
             self._modelName, self._configFilename))
 
-    def createDatabase(self):
-        filename = workDir + '/GeneratedSQL/Create.sql'
+    def executeFile(self, filename):
         filename = os.path.normpath(filename)
-        cmd = '%s < %s' % (sqlCommand, filename)
-        self.run(cmd)
+        if os.path.exists(filename):
+            if '%s' in sqlCommand:
+                cmd = sqlCommand % filename
+            else:
+                cmd = '%s < %s' % (sqlCommand, filename)
+            self.run(cmd)
+
+    def createDatabase(self):
+        self.executeFile(workDir + '/GeneratedSQL/Create.sql')
 
     def insertSamples(self):
         self.createDatabase()
-        filename = workDir + '/GeneratedSQL/InsertSamples.sql'
-        filename = os.path.normpath(filename)
-        if os.path.exists(filename):
-            cmd = '%s < %s' % (sqlCommand, filename)
-            self.run(cmd)
+        self.executeFile(workDir + '/GeneratedSQL/InsertSamples.sql')
 
     def printInfo(self):
         print

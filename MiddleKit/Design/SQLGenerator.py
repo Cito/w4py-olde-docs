@@ -560,7 +560,7 @@ class Klass(object):
         pass
 
     def writeIndexSQLDefsAfterTable(self, wr):
-        """"Return SQL for creating indexes after table.
+        """Return SQL for creating indexes after table.
 
         Subclasses should override this or writeIndexSQLDefsInTable,
         or no indexes will be created.

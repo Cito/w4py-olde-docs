@@ -21,31 +21,30 @@ Or you can run a few:
 Run all tests like this:
 > python Test.py
 
-Here is another example config file for a fresh MySQL installation on
-Windows:
+Here is another example config file for a fresh MySQL installation on Windows:
 
 # LocalConfig.py
 dbName = 'MySQL'
 storeArgs = {'user': 'root'}
-sqlClient = r'"C:\Program Files\MySQL\MySQL Server 4.1\bin\mysql" '
-  # typical MySQL 3.x: sqlClient = 'C:\\mysql\\bin\\mysql -u root'
+sqlClient = r'"C:\Program Files\MySQL\MySQL Server 5.0\bin\mysql" '
 sqlCommand = sqlClient + '-u root'
 sqlVersionCommand = sqlClient + '--version'
 # end
 
-You can see what databases are supported by looking in the MiddleKit/Run
-directory. At the time I write this they are MySQL, PostgreSQL and MSSQL.
-
-Here is a Microsoft SQL Server config using trusted authentication:
+Here is a config file fo a fresh Microsoft SQL Server EXpress 2008
+installation on the local hsot using trusted authentication:
 
 # LocalConfig.py
 dbName = 'MSSQL'
-storeArgs = {'dsn': 'LocalServer', 'clear_auto_commit': 0}
-sqlCommand = r'"C:\Program Files\Microsoft SQL Server\80\Tools\Binn\isql" -E'
-sqlVersionCommand = None
+server = r'localhost\sqlexpress'
+storeArgs = {'driver': '{SQL Server Native Client 10.0}',
+  'server': server, 'Trusted_Connection': 'yes'}
+sqlCommand = 'sqlcmd -E -S %s -i "%%s"' % server
+sqlVersionCommand = 'sqlcmd -E -S %s -Q"select @@version" -h-1' % server
 # end
 
-
+You can see what databases are supported by looking in the MiddleKit/Run
+directory. At the time I write this they are MySQL, PostgreSQL and MSSQL.
 
 If you are creating a new test model, here are some additional notes for you:
 

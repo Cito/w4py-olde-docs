@@ -35,12 +35,12 @@ class MySQLObjectStore(SQLObjectStore):
     """
 
     def __init__(self, **kwargs):
-        try:
-            self._autocommit = kwargs['autocommit']
-            del kwargs['autocommit']
-        except KeyError:
-            self._autocommit = False
+        self._autocommit = kwargs.pop('autocommit', False)
         SQLObjectStore.__init__(self, **kwargs)
+
+    def augmentDatabaseArgs(self, args, pool=False):
+        if not args.get('db'):
+            args['db'] = self._model.sqlDatabaseName()
 
     def newConnection(self):
         kwargs = self._dbArgs.copy()
@@ -91,10 +91,6 @@ class MySQLObjectStore(SQLObjectStore):
 
     def dbapiModule(self):
         return MySQLdb
-
-    def augmentDatabaseArgs(self, args, pool=False):
-        if not args.get('db'):
-            args['db'] = self._model.sqlDatabaseName()
 
     def _executeSQL(self, cur, sql):
         try:

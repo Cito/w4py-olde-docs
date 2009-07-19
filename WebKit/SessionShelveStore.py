@@ -118,7 +118,7 @@ class SessionShelveStore(SessionStore):
         self._store.close()
 
     def cleanStaleSessions(self, task=None):
-        """"Clean stale sessions."""
+        """Clean stale sessions."""
         SessionStore.cleanStaleSessions(self, task)
         self.intervalSweep()
 

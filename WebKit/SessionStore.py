@@ -128,7 +128,7 @@ class SessionStore(object):
         raise AbstractError(self.__class__)
 
     def has_key(self, key):
-        """"Check whether the session store has a given key."""
+        """Check whether the session store has a given key."""
         return key in self
 
     def keys(self):

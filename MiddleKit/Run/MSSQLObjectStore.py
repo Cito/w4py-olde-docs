@@ -1,102 +1,65 @@
 import datetime
 
-from mx import ODBC # DR: 07-12-02 The ODBC.Windows module is flawed
+import pyodbc
 
 from SQLObjectStore import SQLObjectStore
 
-ODBC.Windows.threadsafety = ODBC.Windows.threadlevel
-# mx.ODBC.Windows has a threadlevel, not a threadsafety,
-# even though DBABI2.0 says its threadsafety
-# (http://www.python.org/topics/database/DatabaseAPI-2.0.html)
 
 
 class MSSQLObjectStore(SQLObjectStore):
-    _threadSafety = ODBC.Windows.threadsafety
     """MSSQLObjectStore implements an object store backed by a MSSQL database.
 
-    mx.ODBC is required, which in turn requires mx BASE:
-    http://egenix.com/files/python/
+    pyodbc is required which you can get from here:
+    http://code.google.com/p/pyodbc/
 
     Example creation:
         from MiddleKit.Run.MSSQLObjectStore import MSSQLObjectStore
-        store = MSSQLObjectStore(dsn='LocalServer', clear_auto_commit=0)
+        store = MSSQLObjectStore(driver='{SQL Server}', server='localhost',
+            database='test', uid='me', pwd='me2')
 
-    As usual, the keyword args are passed through to the DB API connect()
-    function.
+    ODBC driver connection keywords are documented here:
+    http://msdn.microsoft.com/de-de/library/ms131421.aspx
 
-    Interesting notes from mx.ODBC docs:
-    - - -
-    If you have troubles with multiple cursors on connections to MS SQL
-    Server the MS Knowledge Base Article INF: Multiple Active Microsoft
-    SQL Server Statements has some valuable information for you. It
-    seems that you'll have to force the usage of server side cursors
-    to be able to execute multiple statements on a single connection to
-    MS SQL Server. According to the article this is done by setting the
-    connection option SQL.CURSOR_TYPE to e.g. SQL.CURSOR_DYNAMIC:
+    See alsO: http://www.connectionstrings.com
 
-        dbc.setconnectoption(SQL.CURSOR_TYPE, SQL.CURSOR_DYNAMIC)
+    MSSQL defaults to autocommit on. If you want it off, set autocommit=False.
 
-    - - -
     """
 
-    def dbapiConnect(self):
-        """Return a DB API 2.0 connection.
+    def __init__(self, **kwargs):
+        self._autocommit = kwargs.get('autocommit', True)
+        SQLObjectStore.__init__(self, **kwargs)
 
-        This is a utility method invoked by connect(). Subclasses should
-        implement this, making use of self._dbArgs (a dictionary specifying
-        host, username, etc.). Subclass responsibility.
-
-        MSSQL 2000 defaults to autocommit ON (at least mine does)
-        If you want it off, do not send any arg for clear_auto_commit or set it to 1
-        # self._db = ODBC.Windows.Connect(dsn='myDSN',clear_auto_commit=0)
-
-        """
-        return ODBC.Windows.Connect(**self._dbArgs)
-
-    def retrieveLastInsertId(self, conn, cur):
-        conn, cur = self.executeSQL('select @@IDENTITY', conn)
-        value = int(cur.fetchone()[0])
-        self.doneWithConnection(conn)
-        return value
+    def augmentDatabaseArgs(self, args, pool=False):
+        if 'database' not in [arg.lower() for arg in args]:
+            arg = args.get('ConnectionString')
+            if not arg or 'database=' not in arg.lower():
+                args['database'] = self._model.sqlDatabaseName()
 
     def newConnection(self):
+        """Return a DB API 2.0 connection."""
         args = self._dbArgs.copy()
-        if args.get('DriverConnect'):
-            # @@ problem here is that clear_auto_commit can't be set to zero
-            # example: storeArgs = {'DriverConnect': 'DRIVER=SQL Server;'
-            # 'UID=echuck;Trusted_Connection=Yes;WSID=ALIEN;SERVER=ALIEN'}
-            # ODBC driver connection keywords are documented here:
-            # http://msdn.microsoft.com/de-de/library/ms131421.aspx
-            s = args['DriverConnect']
-            if 'DATABASE=' not in s:
-                if not s.endswith(';'):
-                    s += ';'
-                s += 'DATABASE=' + self._model.sqlDatabaseName()
-            # print '>> connection string=%r' % s
-            conn = self.dbapiModule().DriverConnect(s)
-        else:
-            # extract the database arg if it was provided
-            if 'database' in args:
-                database = args['database']
-                del args['database']
-            else:
-                database = None
-            conn = self.dbapiModule().connect(**args)
-            cur = conn.cursor()
-            try:
-                db = database or self._model.sqlDatabaseName()
-                sql = 'use ' + db + ';'
-                # print '>> use string=%r' % sql
-                cur.execute(sql)
-            except Exception, e:
-                if e.args[0] != '01000':
-                    # ('01000', 5701, "[Microsoft][ODBC SQL Server Driver]"
-                    # "[SQL Server]Changed database context to 'MKList'.", 4612)
-                    raise
-        return conn
+        self.augmentDatabaseArgs(args)
+        arg = args.get('ConnectionString')
+        arg = arg and [arg] or []
+        return self.dbapiModule().connect(*arg, **args)
+
+    def setting(self, name, default=NoDefault):
+        if name == 'SQLConnectionPoolSize':
+            return 0 # pyodbc comes already with pooling
+        return SQLObjectStore.setting(self, name, default)
 
     def dbapiModule(self):
-        return ODBC.Windows
+        return pyodbc
+
+    def retrieveLastInsertId(self, conn, cur):
+        newConn, cur = self.executeSQL('select @@IDENTITY', conn)
+        try:
+            value = int(cur.fetchone()[0])
+        finally:
+            if newConn and not conn:
+                self.doneWithConnection(newConn)
+        return value
 
     def filterDateTimeDelta(self, dtd):
         if isinstance(dtd, datetime.timedelta):
@@ -127,7 +90,8 @@ class ObjRefAttr(object):
     def sqlColumnName(self):
         if not self._sqlColumnName:
             if self.setting('UseBigIntObjRefColumns', False):
-                self._sqlColumnName = '[' + self.name() + 'Id' + ']' # old way: one 64 bit column
+                # old way: one 64 bit column
+                self._sqlColumnName = '[' + self.name() + 'Id' + ']'
             else:
                 # new way: 2 int columns for class id and obj id
                 self._sqlColumnName = '[%s],[%s]' % self.sqlColumnNames()
@@ -137,6 +101,4 @@ class ObjRefAttr(object):
 class StringAttr(object):
 
     def sqlForNonNone(self, value):
-        # do the right thing
-        value = value.replace("'", "''")
-        return "'" + value + "'"
+        return "'%s'" % value.replace("'", "''") # do the right thing
