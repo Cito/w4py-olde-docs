@@ -41,7 +41,7 @@ def html(context=5, options=None):
     etype, evalue = sys.exc_info()[:2]
     if not isinstance(etype, basestring):
         etype = etype.__name__
-    inspect_trace = reversed(inspect.trace(context))
+    inspect_trace = inspect.trace(context)
 
     pyver = 'Python ' + sys.version.split()[0] + '<br>' + sys.executable
     javascript = """
@@ -68,7 +68,7 @@ def html(context=5, options=None):
 
     traceback_summary = []
 
-    for frame, file, lnum, func, lines, index in inspect_trace:
+    for frame, file, lnum, func, lines, index in reversed(inspect_trace):
         if file:
             file = os.path.abspath(file)
         else:
@@ -93,7 +93,7 @@ def html(context=5, options=None):
 
     indent = '<tt><small>%s</small>&nbsp;</tt>' % ('&nbsp;' * 5)
     traceback = []
-    for frame, file, lnum, func, lines, index in inspect_trace:
+    for frame, file, lnum, func, lines, index in reversed(inspect_trace):
         if file:
             file = os.path.abspath(file)
         else:

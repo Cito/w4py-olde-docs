@@ -140,10 +140,9 @@ class Model(Configurable):
 
     def awakeFromRead(self):
         # create containers for all klasses, uniqued by name
-        models = reversed(self._searchOrder)
         byName = {}
         inOrder = []
-        for model in models:
+        for model in reversed(self._searchOrder):
             for klass in model.klasses().klassesInOrder():
                 name = klass.name()
                 if name in byName:
