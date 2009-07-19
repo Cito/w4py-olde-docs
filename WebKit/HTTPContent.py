@@ -270,7 +270,8 @@ class HTTPContent(HTTPServlet):
         """
         return name
 
-    def urlEncode(self, s):
+    @staticmethod
+    def urlEncode(s):
         """Quotes special characters using the % substitutions.
 
         This method does the same as the `urllib.quote_plus()` function.
@@ -278,7 +279,8 @@ class HTTPContent(HTTPServlet):
         """
         return Funcs.urlEncode(s) # we could also use urllib.quote
 
-    def urlDecode(self, s):
+    @staticmethod
+    def urlDecode(s):
         """Turn special % characters into actual characters.
 
         This method does the same as the `urllib.unquote_plus()` function.
@@ -309,7 +311,8 @@ class HTTPContent(HTTPServlet):
         """
         self.application().includeURL(self.transaction(), url)
 
-    def callMethodOfServlet(self, url, method, *args, **kwargs):
+    @staticmethod
+    def callMethodOfServlet(url, method, *args, **kwargs):
         """Call a method of another servlet.
 
         See `Application.callMethodOfServlet` for details.

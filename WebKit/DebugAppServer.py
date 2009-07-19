@@ -162,7 +162,8 @@ class DummyRequestQueue(object):
 
     ## Overridden methods ##
 
-    def put(self, handler):
+    @staticmethod
+    def put(handler):
         handler.handleRequest()
         handler.close()
 

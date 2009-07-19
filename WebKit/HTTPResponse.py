@@ -35,6 +35,13 @@ class HTTPResponse(Response):
         self._cookies = {}
 
 
+    ## Protocol ##
+
+    def protocol(self):
+        """Return the name and version of the protocol."""
+        return self._transaction.request().protocol()
+
+
     ## Headers ##
 
     def header(self, name, default=NoDefault):

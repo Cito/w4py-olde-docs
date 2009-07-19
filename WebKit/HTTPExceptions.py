@@ -217,12 +217,8 @@ class HTTPAuthenticationRequired(HTTPException):
     def headers(self):
         return {'WWW-Authenticate': 'Basic realm="%s"' % self._realm}
 
-# This is for wording mistakes. I'm unsure about their benefit.
+# This is for wording mistakes:
 HTTPAuthorizationRequired = HTTPAuthenticationRequired
-"""
-There is also an alias `HTTPAuthorizationRequired`, as it is hard
-to distinguish between these two names.
-"""
 
 
 class HTTPSessionExpired(HTTPException):

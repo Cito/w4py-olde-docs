@@ -96,7 +96,8 @@ class Request(Message):
         """
         raise AbstractError(self.__class__)
 
-    def localName(self):
+    @staticmethod
+    def localName():
         """Get local name.
 
         Returns the fully qualified name of the local host (e.g., the server)
@@ -117,7 +118,8 @@ class Request(Message):
 
     ## Security ##
 
-    def isSecure(self):
+    @staticmethod
+    def isSecure():
         """Check whether this is a secure channel.
 
         Returns true if request was made using a secure channel,

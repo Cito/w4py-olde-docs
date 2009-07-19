@@ -64,10 +64,12 @@ class HTTPServlet(Servlet):
             self._methodForRequestType[httpMethodName] = method
         method(trans)
 
-    def notImplemented(self, trans):
+    @staticmethod
+    def notImplemented(trans):
         trans.response().setStatus(501, 'Not Implemented')
 
-    def lastModified(self, trans):
+    @staticmethod
+    def lastModified(trans):
         """Get time of last modification.
 
         Return this object's Last-Modified time (as a float),

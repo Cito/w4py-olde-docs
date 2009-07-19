@@ -49,15 +49,19 @@ class Transaction(object):
     ## Access ##
 
     def application(self):
+        """Get the corresponding application."""
         return self._application
 
     def request(self):
+        """Get the corresponding request."""
         return self._request
 
     def response(self):
+        """Get the corresponding response."""
         return self._response
 
     def setResponse(self, response):
+        """Set the corresponding response."""
         self._response = response
 
     def hasSession(self):
@@ -79,6 +83,7 @@ class Transaction(object):
         return self._session
 
     def setSession(self, session):
+        """Set the session for the transaction."""
         self._session = session
 
     def servlet(self):
@@ -90,6 +95,7 @@ class Transaction(object):
         return self._servlet
 
     def setServlet(self, servlet):
+        """Set the servlet for processing the transaction."""
         self._servlet = servlet
         if servlet and self._request:
             servlet._serverSidePath = self._request.serverSidePath()
@@ -136,6 +142,7 @@ class Transaction(object):
         self._nested += 1
 
     def respond(self):
+        """Respond to the request."""
         if self._session:
             self._session.respond(self)
         self._servlet.respond(self)
@@ -188,6 +195,7 @@ class Transaction(object):
         'application request response session servlet'.split()
 
     def writeExceptionReport(self, handler):
+        """Write extra information to the exception report."""
         handler.writeTitle(self.__class__.__name__)
         handler.writeAttrs(self, self._exceptionReportAttrNames)
 

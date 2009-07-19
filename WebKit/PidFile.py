@@ -49,7 +49,8 @@ class PidFile(object):
         # If the process crashes, though, the pid file will be left behind.
         atexit.register(removePidFile, self)
 
-    def pidRunning(self, pid):
+    @staticmethod
+    def pidRunning(pid):
         if os.name == 'posix':
             try:
                 os.kill(pid, 0)
@@ -72,7 +73,8 @@ class PidFile(object):
                 pass # couldn't import win32 modules
             return True
 
-    def currentPID(self):
+    @staticmethod
+    def currentPID():
         if os.name == 'posix':
             return os.getpid()
         else:

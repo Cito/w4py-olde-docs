@@ -234,7 +234,6 @@ def shutDown(signum, frame):
     sys.stderr.flush()
     return False
 
-import signal
 signal.signal(signal.SIGINT, shutDown)
 signal.signal(signal.SIGTERM, shutDown)
 

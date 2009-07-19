@@ -56,7 +56,9 @@ class JSONRPCServlet(HTTPContent):
         actions.append('jsonCall')
         return actions
 
-    def exposedMethods(self):
+    @staticmethod
+    def exposedMethods():
+        """Return a list or a set of all exposed RPC methods."""
         return []
 
     def writeError(self, msg):

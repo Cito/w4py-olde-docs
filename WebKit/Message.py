@@ -34,26 +34,28 @@ class Message(object):
 
     ## Content ##
 
-    def contentLength(self):
+    @staticmethod
+    def contentLength():
         """Return the length of the message body or -1 if not known."""
         return -1
 
-    def contentType(self):
+    @staticmethod
+    def contentType():
         """Return the MIME type of the message body or None if not known."""
         return None
 
 
     ## Protocol ##
 
-    def protocol(self):
-        """Return the protocol-
+    @staticmethod
+    def protocol():
+        """Return the protocol.
 
         Returns the name and version of the protocol the message uses
         in the form protocol/majorVersion.minorVersion, for example, HTTP/1.1.
 
         """
-        # @@ 2000-04-09 ce: Move this down into HTTPSomething subclasses
-        return 'HTTP/1.0'
+        return None
 
 
     ## Arguments ##

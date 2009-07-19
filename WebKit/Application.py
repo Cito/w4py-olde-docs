@@ -360,8 +360,6 @@ class Application(ConfigurableForServerSidePath):
 
     def webKitVersion(self):
         """Return the WebKit version as a tuple."""
-        # @@ 2003-03 ib: This is synced with Webware now, should be removed
-        # because redundant (and not that useful anyway)
         return self._webKitVersion
 
     def webKitVersionString(self):
@@ -498,9 +496,9 @@ class Application(ConfigurableForServerSidePath):
         """The Path of the ``Webware/WebKit/`` directory."""
         return self._server.webKitPath()
 
-    def name(self):
+    @staticmethod
+    def name():
         """The name by which this was started. Usually `AppServer`."""
-        # @@ 2003-03 ib: unconfirmed
         return sys.argv[0]
 
 
@@ -584,7 +582,8 @@ class Application(ConfigurableForServerSidePath):
             request.clearTransaction()
         return trans
 
-    def createRequestForDict(self, requestDict):
+    @staticmethod
+    def createRequestForDict(requestDict):
         """Create request object for a given dictionary.
 
         Create a request object (subclass of `Request`) given the raw
@@ -701,7 +700,8 @@ class Application(ConfigurableForServerSidePath):
                 self.handleExceptionInTransaction(
                     sys.exc_info(), trans)
 
-    def runTransactionViaServlet(self, servlet, trans):
+    @staticmethod
+    def runTransactionViaServlet(servlet, trans):
         """Execute the transaction using the servlet.
 
         This is the `awake`/`respond`/`sleep` sequence of calls, or if
@@ -806,7 +806,8 @@ class Application(ConfigurableForServerSidePath):
         # restore current request
         trans.setServlet(request.pop())
 
-    def resolveInternalRelativePath(self, trans, url):
+    @staticmethod
+    def resolveInternalRelativePath(trans, url):
         """Return the absolute internal path.
 
         Given a URL, return the absolute internal URL.
@@ -830,7 +831,8 @@ class Application(ConfigurableForServerSidePath):
                 parts.append(part)
         return '/'.join(parts)
 
-    def returnServlet(self, servlet):
+    @staticmethod
+    def returnServlet(servlet):
         """Return the servlet to its pool."""
         servlet.close()
 
@@ -893,7 +895,8 @@ class Application(ConfigurableForServerSidePath):
         """
         self._rootURLParser.addContext(name, path)
 
-    def addServletFactory(self, factory):
+    @staticmethod
+    def addServletFactory(factory):
         """Add a ServletFactory.
 
         Delegated to the `URLParser.ServletFactoryManager` singleton.
@@ -905,11 +908,20 @@ class Application(ConfigurableForServerSidePath):
         """Return a dictionary of context-name: context-path."""
         return self._rootURLParser._contexts
 
-    def writeExceptionReport(self, handler):
-        # @@ 2003-02 ib: does anyone care?
-        pass
+    _exceptionReportAttrNames = ['webwareVersion', 'webwarePath',
+        'serverSidePath', 'contexts']
 
-    def removePathSession(self, trans):
+    def writeExceptionReport(self, handler):
+        """Write extra information to the exception report.
+
+        See `WebKit.ExceptionHandler` for more information.
+
+        """
+        handler.writeTitle(self.__class__.__name__)
+        handler.writeAttrs(self, self._exceptionReportAttrNames)
+
+    @staticmethod
+    def removePathSession(trans):
         """Remove a possible session identifier from the path."""
         request = trans.request()
         # Try to get automatic path session:

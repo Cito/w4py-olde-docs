@@ -32,7 +32,8 @@ class Page(HTTPContent):
 
     ## Generating results ##
 
-    def title(self):
+    @classmethod
+    def title(cls):
         """The page title.
 
         Subclasses often override this method to provide a custom title.
@@ -41,7 +42,7 @@ class Page(HTTPContent):
         and at least informative.
 
         """
-        return self.__class__.__name__
+        return cls.__name__
 
     def htTitle(self):
         """The page title as HTML.
@@ -53,7 +54,8 @@ class Page(HTTPContent):
         """
         return self.title()
 
-    def htBodyArgs(self):
+    @staticmethod
+    def htBodyArgs():
         """The atrributes for the <body> element.
 
         Returns the arguments used for the HTML <body> tag.
@@ -105,8 +107,6 @@ class Page(HTTPContent):
         http://www.htmlhelp.com/tools/validator/doctype.html
 
         """
-        # @@ sgd-2003-01-29 - restored the 4.01 transitional as
-        # per discussions on the mailing list for the 0.8 release.
         self.writeln('<!DOCTYPE HTML PUBLIC'
             ' "-//W3C//DTD HTML 4.01 Transitional//EN"'
             ' "http://www.w3.org/TR/html4/loose.dtd">')
@@ -252,7 +252,8 @@ class Page(HTTPContent):
 
     ## Convenience Methods ##
 
-    def htmlEncode(self, s):
+    @staticmethod
+    def htmlEncode(s):
         """HTML encode special characters.
         Alias for `WebUtils.Funcs.htmlEncode`, quotes the special characters
         &, <, >, and \"
@@ -260,7 +261,8 @@ class Page(HTTPContent):
         """
         return Funcs.htmlEncode(s)
 
-    def htmlDecode(self, s):
+    @staticmethod
+    def htmlDecode(s):
         """HTML decode special characters.
 
         Alias for `WebUtils.Funcs.htmlDecode`. Decodes HTML entities.

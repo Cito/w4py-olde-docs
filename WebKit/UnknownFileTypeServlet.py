@@ -126,7 +126,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
     def canBeReused(self):
         return self.setting('ReuseServlets')
 
-    def validTechniques(self):
+    @staticmethod
+    def validTechniques():
         return ['serveContent', 'redirectSansAdapter']
 
     def respondToGet(self, trans):
@@ -156,7 +157,8 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
         # @@ 2001-01-25 ce: See doc string for why this might be a bad idea.
         self.respondToGet(trans)
 
-    def redirectSansAdapter(self, trans):
+    @staticmethod
+    def redirectSansAdapter(trans):
         """Redirect to web server.
 
         Sends a redirect to a URL that doesn't contain the adapter name.

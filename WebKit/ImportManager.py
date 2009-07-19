@@ -53,7 +53,8 @@ class ImportManager(object):
             raise
         return mod
 
-    def find_module(self, name, path=None):
+    @staticmethod
+    def find_module(name, path=None):
         """Replaces imp.find_module."""
         return imp.find_module(name, path)
 

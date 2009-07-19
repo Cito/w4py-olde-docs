@@ -174,6 +174,13 @@ class PickleRPCServlet(RPCServlet, SafeUnpickler):
             contentEncoding = None
         self.sendOK(contentType, response, trans, contentEncoding)
 
-    def useBinaryPickle(self):
-        """Override this to return 0 to use the less-efficient text pickling format."""
+    @staticmethod
+    def useBinaryPickle():
+        """Determine whether binary pickling format shall be used.
+
+        When this returns True, the highest available binary pickling format
+        will be used. Override this to return False to use the less-efficient
+        text pickling format.
+
+        """
         return True

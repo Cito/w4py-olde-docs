@@ -39,8 +39,8 @@ __version__ = "0.4"
 
 import re, keyword
 
-# Build up a regular expression which will match anything
-# interesting, including multi-line triple-quoted strings.
+# Build up a regular expression which will match anything interesting,
+# including multi-line triple-quoted strings.
 commentPat = "#.*"
 
 pat = "q[^\q\n]*(\\\\[\000-\377][^\q\n]*)*q"
@@ -68,11 +68,9 @@ qqq
 pat = ''.join(pat.split()) # get rid of whitespace
 tripleQuotePat = pat.replace("q", "'") + "|" + pat.replace('q', '"')
 
-# Build up a regular expression which matches all and only
-# Python keywords. This will let us skip the uninteresting
-# identifier references.
-# nonKeyPat identifies characters which may legally precede
-# a keyword pattern.
+# Build up a regular expression which matches all and only Python keywords.
+# This will let us skip the uninteresting identifier references.
+# nonKeyPat identifies characters which may legally precede a keyword pattern.
 nonKeyPat = "(^|[^a-zA-Z0-9_.\"'])"
 keywordsPat = '|'.join(keyword.kwlist)
 keyPat = nonKeyPat + "(" + keywordsPat + ")" + nonKeyPat
@@ -80,8 +78,9 @@ keyPat = nonKeyPat + "(" + keywordsPat + ")" + nonKeyPat
 matchPat = keyPat + "|" + commentPat + "|" + tripleQuotePat + "|" + quotePat
 matchRE = re.compile(matchPat)
 
-idKeyPat = "[ \t]*[A-Za-z_][A-Za-z_0-9.]*" # Ident w. leading whitespace.
+idKeyPat = "[ \t]*[A-Za-z_][A-Za-z_0-9.]*" # ident with leading whitespace
 idRE = re.compile(idKeyPat)
+
 
 def fontify(pytext, searchfrom=0, searchto=None):
     if searchto is None:
@@ -99,35 +98,35 @@ def fontify(pytext, searchfrom=0, searchto=None):
         matchObject = matchRE.search(pytext, end)
         if not matchObject:
             break
-        (start, end) = matchObject.span()
+        start, end = matchObject.span()
         match = matchObject.group(0)
         c = match[0]
         if c not in "#'\"":
             # Must have matched a keyword.
-            if start != searchfrom:
-                # there's still a redundant char before and after it, strip!
+            if start == searchfrom:
+                # this is the first keyword in the text
+                match = match[:-1] # only a space at the end
+            else:
+                # there's still a redundant char before and after it
                 match = match[1:-1]
                 start += 1
-            else:
-                # this is the first keyword in the text.
-                # Only a space at the end.
-                match = match[:-1]
             end -= 1
             tags.append((keywordTag, start, end, None))
-            # If this was a defining keyword, look ahead to the
-            # following identifier.
-            if match in ["def", "class"]:
+            # If this was a defining keyword,
+            # look ahead to the following identifier.
+            if match in ('def', 'class'):
                 idMatchObject = idRE.search(pytext, end)
                 if idMatchObject:
-                    (start, end) = idMatchObject.span()
+                    start, end = idMatchObject.span()
                     match = idMatchObject.group(0)
-                    tags.append(((match == 'def')
-                        and functionTag or classTag, start, end, None))
+                    tags.append((match == 'def' and functionTag or classTag,
+                        start, end, None))
         elif c == "#":
             tags.append((commentTag, start, end, None))
         else:
             tags.append((stringTag, start, end, None))
     return tags
+
 
 def test(path):
     f = open(path)
@@ -135,4 +134,4 @@ def test(path):
     f.close()
     tags = fontify(text)
     for tag, start, end, sublist in tags:
-        print tag, `text[start:end]`, start, end
+        print tag, repr(text[start:end]), start, end

@@ -755,7 +755,8 @@ class URLParameterParser(URLParser):
         """Delegates to `parseHook`."""
         return self.parseHook(trans, requestPath, self._fileParser)
 
-    def parseHook(self, trans, requestPath, hook):
+    @staticmethod
+    def parseHook(trans, requestPath, hook):
         """Munges the path.
 
         The `hook` is the FileParser object that originally called this --

@@ -143,6 +143,13 @@ class HTTPRequest(Request):
             print "Done setting up request, found keys %r" % fieldKeys
 
 
+    ## Protocol ##
+
+    def protocol(self):
+        """Return the name and version of the protocol."""
+        return self._environ.get('SERVER_PROTOCOL', 'HTTP/1.0')
+
+
     ## Security ##
 
     def isSecure(self):

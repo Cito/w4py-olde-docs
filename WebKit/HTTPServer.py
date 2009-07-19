@@ -1,6 +1,6 @@
 """HTTP servlets"""
 
-import os, socket, time, errno
+import os, socket, errno
 import BaseHTTPServer
 
 from ThreadedAppServer import Handler
@@ -57,7 +57,8 @@ class HTTPHandler(BaseHTTPServer.BaseHTTPRequestHandler):
     do_MKCOL = do_COPY = do_MOVE = handleRequest
     do_PROPFIND = handleRequest
 
-    def headersToEnviron(self, headers, env):
+    @staticmethod
+    def headersToEnviron(headers, env):
         """Convert headers to environment variables.
 
         Use a simple heuristic to convert all the headers to

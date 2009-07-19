@@ -144,7 +144,8 @@ table.NiceTable th a:link, table.NiceTable th a:visited {
     def writeSidebar(self):
         self.writeWebKitSidebarSections()
 
-    def cornerTitle(self):
+    @staticmethod
+    def cornerTitle():
         return ''
 
 

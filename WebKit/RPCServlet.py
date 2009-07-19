@@ -19,7 +19,8 @@ class RPCServlet(HTTPServlet):
         else:
             raise NotImplementedError(methodName)
 
-    def exposedMethods(self):
+    @staticmethod
+    def exposedMethods():
         """Get exposed methods.
 
         Subclasses should return a list of methods that will be exposed
@@ -48,7 +49,8 @@ class RPCServlet(HTTPServlet):
             result = ''.join(traceback.format_exception(*sys.exc_info()))
         return result
 
-    def sendOK(self, contentType, contents, trans, contentEncoding=None):
+    @staticmethod
+    def sendOK(contentType, contents, trans, contentEncoding=None):
         """Send a 200 OK response with the given contents."""
         response = trans.response()
         response.setStatus(200, 'OK')
@@ -58,7 +60,8 @@ class RPCServlet(HTTPServlet):
             response.setHeader('Content-Encoding', contentEncoding)
         response.write(contents)
 
-    def handleException(self, transaction):
+    @staticmethod
+    def handleException(transaction):
         """Handle exception.
 
         If ReportRPCExceptionsInWebKit is set to True, then flush the response
@@ -75,13 +78,19 @@ class RPCServlet(HTTPServlet):
                 sys.exc_info(), transaction)
 
     def transaction(self):
-        # most uses of RPC will not need this
+        """Get the corresponding transaction.
+
+        Most uses of RPC will not need this.
+
+        """
         return self._transaction
 
     def awake(self, transaction):
+        """Begin transaction."""
         HTTPServlet.awake(self, transaction)
         self._transaction = transaction
 
     def sleep(self, transaction):
+        """End transaction."""
         self._transaction = None
         HTTPServlet.sleep(self, transaction)

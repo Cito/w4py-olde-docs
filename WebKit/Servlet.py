@@ -57,7 +57,8 @@ class Servlet(object):
 
     ## Request-response cycles ##
 
-    def runTransaction(self, trans):
+    @staticmethod
+    def runTransaction(trans):
         try:
             trans.awake()
             trans.respond()
@@ -117,7 +118,8 @@ class Servlet(object):
 
     ## Abilities ##
 
-    def canBeThreaded(self):
+    @staticmethod
+    def canBeThreaded():
         """Return whether the servlet can be multithreaded.
 
         This value should not change during the lifetime of the object.
@@ -127,7 +129,8 @@ class Servlet(object):
         """
         return False
 
-    def canBeReused(self):
+    @staticmethod
+    def canBeReused():
         """Returns whether a single servlet instance can be reused.
 
         The default is True, but subclasses con override to return False.

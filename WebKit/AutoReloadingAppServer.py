@@ -53,7 +53,8 @@ def getFAM(modules):
             class FAM(object):
                 """Simple File Alteration Monitor based on python-gamin"""
 
-                def name(self):
+                @staticmethod
+                def name():
                     return "python-gamin"
 
                 def __init__(self):
@@ -100,7 +101,8 @@ def getFAM(modules):
             class FAM(object):
                 """Simple File Alteration Monitor based on python-fam"""
 
-                def name(self):
+                @staticmethod
+                def name():
                     return "python-fam"
 
                 def __init__(self):
@@ -269,7 +271,8 @@ class AutoReloadingAppServer(AppServer):
         if self._shouldRestart:
             self.restart()
 
-    def restart(self):
+    @staticmethod
+    def restart():
         """Do the actual restart.
 
         Call `shouldRestart` from outside the class.
