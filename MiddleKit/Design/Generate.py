@@ -16,20 +16,8 @@ if sys.platform == 'win32':
     # perhaps this is caused by the recent incorporation of win32all (via DataTable)?
     sys.stderr = sys.stdout
 
-def findDatabases():
-    """Build list of all supported database engines."""
-    databases = set()
-    for filename in os.listdir(os.path.dirname(__file__)):
-        if filename.endswith('SQLGenerator.py'):
-            filename = filename[:-15]
-            if filename:
-                databases.add(filename)
-    return sorted(databases)
-
 
 class Generate(object):
-
-    _databases = findDatabases()
 
     def databases(self):
         """Return a list with the names of the supported database engines."""
