@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+"""Run MiddleKit test script."""
+
 from TestCommon import *
 import MiddleKit.Run
 
@@ -8,7 +10,7 @@ def test(filename, configFilename, pyFilename, deleteData):
     curDir = os.getcwd()
     os.chdir(workDir)
     try:
-        filename = '../'+filename
+        filename = '../' + filename
 
         if os.path.splitext(filename)[1] == '':
             filename += '.mkmodel'
@@ -46,7 +48,7 @@ def test(filename, configFilename, pyFilename, deleteData):
         os.chdir(curDir)
 
 def usage():
-    print 'TestRun.py <model> <config file> <py file> [delete=0|1]'
+    print 'TestRun.py <model> <config file> <py file> [delete=no|yes]'
     print
     sys.exit(1)
 
@@ -57,18 +59,13 @@ def main():
     modelFilename = sys.argv[1]
     configFilename = sys.argv[2]
     pyFilename = sys.argv[3]
-    deleteData = 1
+    deleteData = True
     if len(sys.argv) > 4:
         delArg = sys.argv[4]
         parts = delArg.split('=')
         if len(parts) != 2 or parts[0] != 'delete':
             usage()
-        try:
-            deleteData = int(parts[1])
-        except Exception:
-            usage()
-    elif len(sys.argv) > 4:
-        usage()
+        deleteData = parts[1].lower() in ('yes', 'true', '1')
 
     test(modelFilename, configFilename, pyFilename, deleteData)
 

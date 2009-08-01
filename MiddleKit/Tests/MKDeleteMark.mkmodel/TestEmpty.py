@@ -162,7 +162,7 @@ def runTest(store, klass, objectToDelete, expectedResult):
 
 def cleanupTest(store, klass):
     # Clean out all leftover objects
-    store.clear()
+    store.discardEverything()
     store.executeSQLTransaction(['delete from Foo;', 'delete from Bar;',
         'delete from %s;' % klass.__name__])
     print

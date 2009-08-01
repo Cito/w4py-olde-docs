@@ -119,13 +119,6 @@ class Model(object):
 
             # delete the existing data
             wr = file.write
-            if 0:
-                # Woops. Our only auxiliary table is _MKClassIds, which we
-                # *don't* want to delete. In the future we will likely have
-                # other aux tables for lists and relationships. When that
-                # happens, we'll need more granularity regarding aux tables.
-                for tableName in reversed(self.auxiliaryTableNames()):
-                    wr('delete from %s;\n' % tableName)
             for klass in reversed(allKlasses):
                 if not klass.isAbstract():
                     wr('delete from %s;\n' % klass.sqlTableName())
@@ -988,6 +981,7 @@ class EnumAttr(object):
             for i, enum in enumerate(self.enums()):
                 out.write("insert into %(tableName)s values (%(i)i, '%(enum)s');\n" % locals())
             out.write('\n')
+            self.model().klasses().auxiliaryTableNames().append(tableName)
 
 
     ## Settings ##

@@ -17,7 +17,7 @@ TO DO
 
 <overview>
 
-MiddleKit is a production quality Python package with a comprehensive regression test suite and several production apps. It supports MySQL, PostgreSQL and Microsoft SQL Server.
+MiddleKit is a production quality Python package with a comprehensive regression test suite and several production apps. It supports MySQL, PostgreSQL, Microsoft SQL Server and SQLite.
 
 * Here's on overview of what's missing:
     * Support for other databases especially:

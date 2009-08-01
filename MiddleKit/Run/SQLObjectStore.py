@@ -252,7 +252,6 @@ class SQLObjectStore(ObjectStore):
         # @@ ... sort here for dependency order
         for obj in self._newObjects.items(allThreads):
             self._insertObject(obj, unknownSerialNums)
-
         conn = None
         try:
             for unknownInfo in unknownSerialNums:
@@ -307,10 +306,9 @@ class SQLObjectStore(ObjectStore):
 
         This id is typically a 32-bit int. Used by commitInserts() to get
         the correct serial number for the last inserted object.
-        Subclass responsibility.
 
         """
-        raise AbstractError(self.__class__)
+        return cur.lastrowid
 
     def commitUpdates(self, allThreads=False):
         conn = None
@@ -329,6 +327,7 @@ class SQLObjectStore(ObjectStore):
             for obj in self._deletedObjects.items(allThreads):
                 sql = obj.sqlDeleteStmt()
                 conn, cur = self.executeSQL(sql, conn)
+                conn.commit()
         finally:
             self.doneWithConnection(conn)
         self._deletedObjects.clear(allThreads)
@@ -499,6 +498,21 @@ class SQLObjectStore(ObjectStore):
                 raise
         return connection
 
+    def executeSQLScript(self, sql, connection=None):
+        """Execute the given SQL script.
+
+        This uses the nonstandard executescript() method as provided
+        by the PySQLite adapter.
+
+        """
+        sql = str(sql).strip()
+        if not connection:
+            connection = self.newConnection()
+        if not hasattr(connection, 'executescript'):
+            raise AttributeError(
+                'Script execution not supported by database adapter.')
+        return connection.executescript(sql)
+
     def setSQLEcho(self, file):
         """Set a file to echo sql statements to, as sent through executeSQL().
 
@@ -539,7 +553,21 @@ class SQLObjectStore(ObjectStore):
         return conn, cursor
 
     def threadSafety(self):
+        """Return the threadsafety of the DB API module."""
         return self.dbapiModule().threadsafety
+
+    def dbapiVersion(self):
+        """Return the version of the DB API module."""
+        module = self.dbapiModule()
+        return '%s %s' % (module.__name__, module.version)
+
+    def dbVersion(self):
+        """Return the database version.
+
+        Subclass responsibility.
+
+        """
+        raise AbstractError(self.__class__)
 
     def addDeletedToClauses(self, clauses):
         """Modify the given set of clauses so that it filters out records with non-NULL deleted field."""
@@ -656,7 +684,8 @@ class SQLObjectStore(ObjectStore):
         return dtd
 
     def sqlNowCall(self):
-        return 'Now()'
+        """Get current DateTime."""
+        return 'CURRENT_TIMESTAMP'
 
 
     ## Self util ##

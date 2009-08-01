@@ -113,12 +113,13 @@ class Test(object):
             self.createDatabase()
 
     def testSamples(self):
-        self.testRun('TestSamples.py', deleteData=0)
+        self.testRun('TestSamples.py', deleteData=False)
 
     def testRun(self, pyFile, deleteData):
         if os.path.exists(os.path.join(self._modelName, pyFile)):
             print '%s:' % pyFile
-            self.run('python TestRun.py %s %s %s delete=%i' % (
+            deleteData = deleteData and 'yes' or 'no'
+            self.run('python TestRun.py %s %s %s delete=%s' % (
                 self._modelName, self._configFilename, pyFile, deleteData))
         else:
             print 'NO %s TO TEST.' % pyFile

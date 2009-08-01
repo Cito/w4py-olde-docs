@@ -109,7 +109,7 @@ class ObjectStore(ModelUser):
         ModelUser.modelWasSet(self)
         self._threaded = self.setting('Threaded')
         if self._threaded:
-            self._hasChanges = {} # keep track on a per-thread basis
+            self._hasChanges = set() # keep track on a per-thread basis
             self._newObjects = PerThreadList()
             self._deletedObjects = PerThreadList()
             self._changedObjects = PerThreadDict()
@@ -358,20 +358,20 @@ class ObjectStore(ModelUser):
         """Return whether the current thread has changes to be committed."""
         if self._threaded:
             threadid = thread.get_ident()
-            return self._hasChanges.get(threadid, False)
+            return threadid in self._hasChanges
         else:
             return self._hasChanges
 
     def hasChanges(self):
         """Return whether any thread has changes to be committed."""
         if self._threaded:
-            return True in self._hasChanges.values()
+            return bool(self._hasChanges)
         return self._hasChanges
 
     def willChange(self):
         if self._threaded:
             threadid = thread.get_ident()
-            self._hasChanges[threadid] = True
+            self._hasChanges.add(threadid)
         else:
             self._hasChanges = True
 
@@ -385,7 +385,10 @@ class ObjectStore(ModelUser):
         self.commitDeletions(allThreads=True)
         self.commitInserts(allThreads=True)
         self.commitUpdates(allThreads=True)
-        self._hasChanges = {}
+        if self._threaded:
+            self._hasChanges = set()
+        else:
+            self._hasChanges = False
 
     def saveChanges(self):
         """Commit object changes to the object store.
@@ -398,7 +401,7 @@ class ObjectStore(ModelUser):
         self.commitInserts()
         self.commitUpdates()
         if self._threaded:
-            self._hasChanges[thread.get_ident()] = False
+            self._hasChanges.discard(thread.get_ident())
         else:
             self._hasChanges = False
 
@@ -493,7 +496,7 @@ class ObjectStore(ModelUser):
 
         """
         if self._threaded:
-            self._hasChanges = {}
+            self._hasChanges = set()
         else:
             self._hasChanges = False
         self._objects = self.emptyObjectCache()

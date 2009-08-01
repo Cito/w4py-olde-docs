@@ -73,9 +73,11 @@ import MiddleKit
 class Dump(object):
 
     def databases(self):
-        return ['MSSQL', 'MySQL', 'PostgreSQL'] # @@ 2000-10-19 ce: should build this dynamically
+        """Return a list with the names of the supported database engines."""
+        return ['MSSQL', 'MySQL', 'PostgreSQL', 'SQLite']
 
     def main(self, args=sys.argv):
+        """Main method."""
         opt = self.options(args)
 
         if 'outfile' in opt:
@@ -102,6 +104,7 @@ class Dump(object):
         store.dumpObjectStore(out, progress='show-progress' in opt)
 
     def usage(self, errorMsg=None):
+        """Print usage information."""
         progName = os.path.basename(sys.argv[0])
         if errorMsg:
             print '%s: error: %s' % (progName, errorMsg)
@@ -118,6 +121,7 @@ class Dump(object):
         sys.exit(1)
 
     def options(self, args):
+        """Get command line options."""
         # Command line dissection
         if isinstance(args, basestring):
             args = args.split()

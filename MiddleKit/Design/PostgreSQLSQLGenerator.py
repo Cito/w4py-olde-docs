@@ -82,7 +82,7 @@ class Klass(object):
         return '%s_%s_seq' % (self.sqlTableName(), self.sqlSerialColumnName())
 
     def writeIndexSQLDefs(self, wr):
-        # in postgres, indices must be created with 'create index' commands
+        # in PostgreSQL, indices must be created with 'create index' commands
         pass
 
     def writePgSQLIndexDefs(self, wr):
@@ -92,7 +92,6 @@ class Klass(object):
                     % (self.sqlTableName(), attr.sqlName(),
                     self.sqlTableName(), attr.sqlName()))
         wr('\n')
-
 
     def primaryKeySQLDef(self, generator):
         return "    %s integer not null primary key default nextval('%s'),\n" % (
@@ -153,7 +152,6 @@ class DateTimeAttr(object):
 class ObjRefAttr(object):
 
     def sqlType(self):
-        # @@ 2001-02-04 ce: Is this standard SQL? If so, it can be moved up.
         return 'bigint /* %s */' % self['Type']
 
 

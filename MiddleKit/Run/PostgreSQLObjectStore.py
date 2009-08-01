@@ -99,6 +99,9 @@ class PostgreSQLObjectStore(SQLObjectStore):
     def sqlCaseInsensitiveLike(self, a, b):
         return "%s ilike %s" % (a, b)
 
+    def sqlNowCall(self):
+        return 'now()'
+
 
 class StringAttr(object):
 

@@ -1,7 +1,7 @@
 """This module tests UserManagers in different permutations.
 
 UserManagers can save their data to files, or to a MiddleKit database.
-For MiddleKit, the database can be MySQL, PostgreSQL and MSSQL.
+For MiddleKit, the database can be MySQL, PostgreSQL, MSSQL or SQLite.
 
 """
 

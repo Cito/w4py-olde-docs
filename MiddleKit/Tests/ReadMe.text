@@ -43,8 +43,18 @@ sqlCommand = 'sqlcmd -E -S %s -i "%%s"' % server
 sqlVersionCommand = 'sqlcmd -E -S %s -Q"select @@version" -h-1' % server
 # end
 
+You can use the following config file to make use of the SQLite database
+which is particularly useful for testing purposes:
+
+# LocalConfig.py
+dbName = 'SQLite'
+storeArgs = {'database': 'test.db'}
+sqlCommand = 'python ExecuteScript.py "%s"'
+sqlVersionCommand = 'python ExecuteScript.py --version'
+# end
+
 You can see what databases are supported by looking in the MiddleKit/Run
-directory. At the time I write this they are MySQL, PostgreSQL and MSSQL.
+directory. At the time I write this they are MySQL, PostgreSQL, MSSQL and SQLite.
 
 If you are creating a new test model, here are some additional notes for you:
 

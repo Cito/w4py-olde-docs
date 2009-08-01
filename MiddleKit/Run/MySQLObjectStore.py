@@ -95,9 +95,13 @@ class MySQLObjectStore(SQLObjectStore):
     def _executeSQL(self, cur, sql):
         try:
             cur.execute(sql)
-        except MySQLdb.Warning, e:
+        except MySQLdb.Warning:
             if not self.setting('IgnoreSQLWarnings', False):
                 raise
+
+    def sqlNowCall(self):
+        return 'NOW()'
+
 
 # Mixins
 

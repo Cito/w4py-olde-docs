@@ -90,7 +90,7 @@ class ModelUser(object):
                             print '>> mixing %s into %s' % (generatorThing, baseClass)
                         assert isinstance(baseClass, type)
                         assert isinstance(generatorThing, type)
-                        MixIn(baseClass, generatorThing, mixInSuperMethods=1)
+                        MixIn(baseClass, generatorThing, mixInSuperMethods=True)
 
 
     ## Warning ##

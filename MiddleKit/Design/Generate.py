@@ -16,13 +16,27 @@ if sys.platform == 'win32':
     # perhaps this is caused by the recent incorporation of win32all (via DataTable)?
     sys.stderr = sys.stdout
 
+def findDatabases():
+    """Build list of all supported database engines."""
+    databases = set()
+    for filename in os.listdir(os.path.dirname(__file__)):
+        if filename.endswith('SQLGenerator.py'):
+            filename = filename[:-15]
+            if filename:
+                databases.add(filename)
+    return sorted(databases)
+
 
 class Generate(object):
 
+    _databases = findDatabases()
+
     def databases(self):
-        return ['MSSQL', 'MySQL', 'PostgreSQL'] # @@ 2000-10-19 ce: should build this dynamically
+        """Return a list with the names of the supported database engines."""
+        return ['MSSQL', 'MySQL', 'PostgreSQL', 'SQLite']
 
     def main(self, args=sys.argv):
+        """Main method."""
         opt = self.options(args)
 
         # Make or check the output directory
@@ -52,6 +66,7 @@ class Generate(object):
         model.printWarnings()
 
     def usage(self, errorMsg=None):
+        """Print usage information."""
         progName = os.path.basename(sys.argv[0])
         if errorMsg:
             print '%s: error: %s' % (progName, errorMsg)
@@ -71,6 +86,7 @@ Usage: %s --db DBNAME --model FILENAME \\
         sys.exit(1)
 
     def options(self, args):
+        """Get command line options."""
         # Command line dissection
         if isinstance(args, basestring):
             args = args.split()
