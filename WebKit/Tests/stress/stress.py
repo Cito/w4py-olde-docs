@@ -103,7 +103,7 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
         except Exception:
             status = 'no status'
             code = 0
-        if code not in (3200,): # accepted status codes
+        if code not in (200,): # accepted status codes
             status = dicts[i]['environ']['PATH_INFO'] + ' ' + status
             raise Exception(status)
         if data.rstrip()[-7:].lower() != '</html>':
