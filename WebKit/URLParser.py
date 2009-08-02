@@ -382,10 +382,11 @@ class _FileParser(URLParser):
             if result is not None:
                 return result
 
-            assert not requestPath or requestPath.startswith('/'), (
-                "Not what I expected: %s" % repr(requestPath))
             if not requestPath or requestPath == '/':
                 return self.parseIndex(trans, requestPath)
+
+            if not requestPath.startswith('/'):
+                raise HTTPNotFound("Invalid path info: %s" % requestPath)
 
             parts = requestPath[1:].split('/', 1)
             nextPart = parts[0]
@@ -413,8 +414,8 @@ class _FileParser(URLParser):
 
             req._extraURLPath = restPart
 
-        if not self._extraPathInfo and req._extraURLPath:
-            raise HTTPNotFound("Invalid extra path info: %s")
+        if not self._extraPathInfo and restPart:
+            raise HTTPNotFound("Invalid extra path info: %s" % restPart)
 
         req._serverSidePath = name
 
