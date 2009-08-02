@@ -96,14 +96,14 @@ def request(names, dicts, host, port, count, delay=0, slowconn=0):
         # process response
         # sys.stdout.write(data)
         try:
-            if not data.startswith('Status: '):
+            if not data.startswith('Status:'):
                 raise ValueError
-            status = data.split('\n', 1)[0]
-            code = int(status.split(None, 1)[-1])
+            status = data[7:].split('\n', 1)[0].strip()
+            code = int(status.split(None, 1)[0])
         except Exception:
             status = 'no status'
             code = 0
-        if code not in (200,): # accepted status codes
+        if code not in (3200,): # accepted status codes
             status = dicts[i]['environ']['PATH_INFO'] + ' ' + status
             raise Exception(status)
         if data.rstrip()[-7:].lower() != '</html>':
