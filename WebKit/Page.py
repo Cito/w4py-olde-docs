@@ -32,8 +32,7 @@ class Page(HTTPContent):
 
     ## Generating results ##
 
-    @classmethod
-    def title(cls):
+    def title(self):
         """The page title.
 
         Subclasses often override this method to provide a custom title.
@@ -42,7 +41,7 @@ class Page(HTTPContent):
         and at least informative.
 
         """
-        return cls.__name__
+        return self.__class__.__name__
 
     def htTitle(self):
         """The page title as HTML.
@@ -54,8 +53,7 @@ class Page(HTTPContent):
         """
         return self.title()
 
-    @staticmethod
-    def htBodyArgs():
+    def htBodyArgs(self):
         """The atrributes for the <body> element.
 
         Returns the arguments used for the HTML <body> tag.
