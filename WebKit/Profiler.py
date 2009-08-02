@@ -3,8 +3,8 @@
 Stores some values related to performance.
 These are usually set by Launch.py or AppServer.py.
 
-To get profiling going, locate the "runProfile = 0" line towards the top
-of WebKit/Launch.py and change the "0" to a "1", or start the Launch.py
+To get profiling going, locate the "runProfile = False" line towards the top
+of WebKit/Launch.py and change the "False" to "True", or start the Launch.py
 script with the --run-profile option. When the app server shuts down it
 will write a profiling report "profile.pstats" in the directory containing
 the Launch.py script which can be quickly examined from the command line:

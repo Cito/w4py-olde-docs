@@ -77,9 +77,9 @@ webwareDir = None
 # that you want to include into the search path for modules:
 libraryDirs = []
 
-# To get profiling going, set runProfile = 1 (see also
+# To get profiling going, set runProfile = True (see also
 # the description in the docstring of Profiler.py):
-runProfile = 0
+runProfile = False
 
 # The path to the log file, if you want to redirect the
 # standard output and standard error to a log file:
