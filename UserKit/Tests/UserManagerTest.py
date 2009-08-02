@@ -1,7 +1,8 @@
 """This module tests UserManagers in different permutations.
 
 UserManagers can save their data to files, or to a MiddleKit database.
-For MiddleKit, the database can be MySQL, PostgreSQL, MSSQL or SQLite.
+For MiddleKit, the database can be MySQL, PostgreSQL, MSSQL or SQLite,
+but we test only with the SQLite database.
 
 """
 
@@ -171,14 +172,14 @@ class UserManagerToFileTest(_UserManagerToSomewhereTest):
     def setUpUserDir(self, mgr):
         path = 'Users'
         if os.path.exists(path):
-            shutil.rmtree(path, ignore_errors=1)
+            shutil.rmtree(path, ignore_errors=True)
         os.mkdir(path)
         mgr.setUserDir(path)
 
     def tearDown(self):
         path = 'Users'
         if os.path.exists(path):
-            shutil.rmtree(path, ignore_errors=1)
+            shutil.rmtree(path, ignore_errors=True)
         _UserManagerToSomewhereTest.tearDown(self)
 
 
@@ -190,64 +191,42 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
 
     def setUp(self):
         _UserManagerToSomewhereTest.setUp(self)
+        self._mgr = self._store = None
 
         self._output = []
         self._stdout, self._stderr = sys.stdout, sys.stderr
         sys.stdout = sys.stderr = self
         try:
-
             # Generate Python and SQL from our test MiddleKit Model
             from MiddleKit.Design.Generate import Generate
 
             generator = Generate()
-
             modelFileName = os.path.join(testDir, 'UserManagerTest.mkmodel')
-            generationDir = os.path.join(testDir, 'mk_MySQL')
 
-            # _log.debug('model: %s',modelFileName)
-            # @@ 2001-02-18 ce: woops: hard coding MySQL
-
-            args = 'Generate.py --db MySQL --model %s --outdir %s' % (
+            # We test only with SQLite for ease of setup
+            generationDir = os.path.join(testDir, 'mk_SQLite')
+            args = 'Generate.py --db SQLite --model %s --outdir %s' % (
                 modelFileName, generationDir)
             Generate().main(args.split())
+            createScript = os.path.join(generationDir, 'GeneratedSQL', 'Create.sql')
 
-            create_sql = os.path.join(generationDir, 'GeneratedSQL', 'Create.sql')
-
-            assert os.path.exists(create_sql), (
+            assert os.path.exists(createScript), (
                 'The generation process should create some SQL files.')
             assert os.path.exists(os.path.join(generationDir,
                 'UserForMKTest.py')), ('The generation process'
                     ' should create some Python files.')
 
-            self._mysqlTestInfo = AllTests.config().setting('mysqlTestInfo')
-            # _log.info('mysqlTestInfo=%s', self._mysqlTestInfo)
+            from MiddleKit.Run.SQLiteObjectStore import SQLiteObjectStore
 
-            # Create our test database using info from AllTests.config
-
-            self._mysqlClient = self._mysqlTestInfo['mysqlClient']
-            mysqlClientName = os.path.basename(self._mysqlClient)
-            assert mysqlClientName == 'mysql' or mysqlClientName == 'mysql.exe'
-            self._mysqlClient = ' '.join([self._mysqlClient] + ['--%s="%s"'
-                % (p.replace('passwd', 'password'), v) for (p, v)
-                    in self._mysqlTestInfo['DatabaseArgs'].items() if v])
-            executeSqlCmd = '%s < %s' % (self._mysqlClient, create_sql)
-
-            # _log.debug('running: %s', executeSqlCmd)
-            f = os.popen(executeSqlCmd)
-            self._output.append(f.read())
-            if f.close():
-                raise OSError('Error running: %s' % executeSqlCmd)
-
-            # Create store, and connect to database
-
-            from MiddleKit.Run.MySQLObjectStore import MySQLObjectStore
-
-            store = MySQLObjectStore(**self._mysqlTestInfo['DatabaseArgs'])
-            store.readModelFileNamed(modelFileName)
+            # Create store and connect to database
+            databaseFile = os.path.join(generationDir, 'test.db')
+            self._store = SQLiteObjectStore(database=databaseFile)
+            self._store.executeSQLScript(open(createScript).read())
+            self._store.readModelFileNamed(modelFileName)
 
             from MiddleKit.Run.MiddleObject import MiddleObject
             from UserKit.UserManagerToMiddleKit import UserManagerToMiddleKit
-            from UserKit.Tests.mk_MySQL.UserForMKTest import UserForMKTest
+            from UserKit.Tests.mk_SQLite.UserForMKTest import UserForMKTest
             assert issubclass(UserForMKTest, MiddleObject)
             from UserKit.User import User
             if not issubclass(UserForMKTest, User):
@@ -258,10 +237,12 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
                 base1 = self.__class__.__bases__[0]
                 base2 = self.__class__.__bases__[1]
                 base1.__init__(self)
-                base2.__init__(self, manager=manager, name=name, password=password)
+                base2.__init__(self,
+                    manager=manager, name=name, password=password)
 
             UserForMKTest.__init__ = __init__
-            self._mgr = self.userManagerClass()(userClass=UserForMKTest, store=store)
+            self._mgr = self.userManagerClass()(
+                userClass=UserForMKTest, store=self._store)
 
         except Exception:
             sys.stdout, sys.stderr = self._stdout, self._stderr
@@ -282,26 +263,20 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
         self._output = []
         self._stdout, self._stderr = sys.stdout, sys.stderr
         sys.stdout = sys.stderr = self
-
         try:
+            # close user manager and object store
+            if self._mgr:
+                self._mgr.shutDown()
+                self._mgr = None
+            if self._store:
+                self._store.discardEverything()
+                if self._store._connected:
+                    self._store._connection.close()
+                self._store = None
             # clean out generated files
-            path = os.path.join(testDir, 'mk_MySQL')
+            path = os.path.join(testDir, 'mk_SQLite')
             if os.path.exists(path):
-                shutil.rmtree(path, ignore_errors=1)
-
-            # Drop tables from database
-            sqlDropTables = "drop table UserForMKTest, _MKClassIds"
-
-            db = self._mysqlTestInfo['database']
-
-            executeSqlCmd = '%s %s -e "%s"' % (self._mysqlClient, db, sqlDropTables)
-
-            # _log.debug('running: %s', executeSqlCmd)
-            f = os.popen(executeSqlCmd)
-            self._output.append(f.read())
-            if f.close():
-                raise OSError('Error running: %s' % executeSqlCmd)
-
+                shutil.rmtree(path, ignore_errors=True)
         except Exception:
             sys.stdout, sys.stderr = self._stdout, self._stderr
             print "Error in %s.SetUp." % self.__class__.__name__
@@ -333,20 +308,8 @@ class RoleUserManagerToMiddleKitTest(UserManagerToMiddleKitTest):
 
 def makeTestSuite():
     testClasses = [
-        UserManagerTest, UserManagerToFileTest, RoleUserManagerToFileTest]
-
-    # See if AllTests.conf has been configured for MySQL
-    if AllTests.config().setting('hasMysql'):
-        mysqlTestInfo = AllTests.config().setting('mysqlTestInfo')
-        _log.info('Adding MySQL tests for UserKit.')
-        # Add paths for MySQL-python driver
-        numBadPaths = AllTests.checkAndAddPaths(mysqlTestInfo['extraSysPath'])
-        # Add the tests that require MySQL
-        testClasses.extend([UserManagerToMiddleKitTest, RoleUserManagerToMiddleKitTest])
-    else:
-        _log.info('Skipping MySQL tests. MySQL is not configured in AllTests.config.')
-
-    make = unittest.makeSuite
+        UserManagerTest, UserManagerToFileTest, RoleUserManagerToFileTest,
+        UserManagerToMiddleKitTest, RoleUserManagerToMiddleKitTest]
     tests = [unittest.makeSuite(klass) for klass in testClasses]
     return unittest.TestSuite(tests)
 
