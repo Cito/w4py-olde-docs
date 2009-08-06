@@ -44,6 +44,17 @@ try:
 except (TypeError, AttributeError):
     PyThreadState_SetAsyncExc = None
 
+try:
+    import fcntl
+    F_GETFD, F_SETFD = fcntl.F_SETFD, fcntl.F_SETFD
+except (ImportError, AttributeError): # not Unix
+    fcntl = None
+else:
+    try:
+        FD_CLOEXEC = fcntl.FD_CLOEXEC
+    except AttributeError: # not always defined
+        FD_CLOEXEC = 1
+
 from MiscUtils.Funcs import asclocaltime
 from WebUtils.Funcs import requestURI
 
@@ -169,6 +180,14 @@ class WorkerThread(Thread):
         return ret
 
 
+def setCloseOnExecFlag(fd):
+    """Set flag for file descriptor not to be inherited by child processes."""
+    try:
+        fcntl.fcntl(fd, F_SETFD, fcntl.fcntl(fd, F_GETFD) | FD_CLOEXEC)
+    except IOError:
+        pass
+
+
 class ThreadedAppServer(AppServer):
     """Threaded Application Server.
 
@@ -281,6 +300,8 @@ class ThreadedAppServer(AppServer):
         try:
             sock.bind(serverAddress)
             sock.listen(1024)
+            if fcntl:
+                setCloseOnExecFlag(sock.fileno())
         except Exception:
             print "Error: Can not listen for %s on %s" % (
                 handlerClass.settingPrefix, str(serverAddress))
