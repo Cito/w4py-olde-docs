@@ -117,7 +117,6 @@ class ModPythonAdapter(Adapter):
             self.handleException(req)
         return apache.OK
 
-
     def typehandler(self, req):
         """Type handler.
 

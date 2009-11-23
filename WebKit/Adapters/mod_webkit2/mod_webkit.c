@@ -4,7 +4,7 @@
 * Author: Jay Love (jsliv@jslove.org)                         *
 **************************************************************/
 
-#define VERSION_COMPONENT "mod_webkit2/1.0"
+#define VERSION_COMPONENT "mod_webkit2/1.1"
 
 #include "mod_webkit.h"
 #include "http_config.h"
@@ -87,7 +87,7 @@ static const char *handle_wkserver(cmd_parms *cmd, void *mconfig,
     if (word2 != NULL) cfg->port = (apr_port_t)atoi(word2);
     err = apr_sockaddr_info_get(&apraddr,
         (char*)apr_pstrdup(cmd->server->process->pool, cfg->host),
-        APR_UNSPEC, cfg->port, 0, cmd->server->process->pool);
+        APR_INET, cfg->port, 0, cmd->server->process->pool);
     cfg->apraddr = apraddr;
     if (err != APR_SUCCESS)
         log_error("Couldn't resolve hostname for WebKit Server", cmd->server);
@@ -183,7 +183,7 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
     header = (char **)apr_array_push(cfg->passheaders);
     *header = "If-Modified-Since";
 
-    rv = apr_sockaddr_info_get(&apraddr, cfg->host, APR_UNSPEC, cfg->port, 0, p);
+    rv = apr_sockaddr_info_get(&apraddr, cfg->host, APR_INET, cfg->port, 0, p);
     /*
      * Now fill in the defaults.  If there are any `parent' configuration
      * records, they'll get merged as part of a separate callback.
