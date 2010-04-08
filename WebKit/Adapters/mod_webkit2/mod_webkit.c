@@ -570,7 +570,7 @@ static int webkit_handler(request_rec *r)
     /* end dictionary */
     w_byte(TYPE_NULL, whole_dict);
 
-    length = whole_dict->ptr - whole_dict->str;
+    length = (long)(whole_dict->ptr - whole_dict->str);
 
     write_integer((int)length, int_dict);
 

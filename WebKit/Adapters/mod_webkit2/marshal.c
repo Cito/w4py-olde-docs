@@ -17,8 +17,8 @@ static char* expand_memory(WFILE* p, long add)
 
     //log_message("Expanding Memory",p->r);
 
-    currsize = p->end - p->str;
-    if (add == 0) add = 4096;
+    currsize = (long)(p->end - p->str);
+    if (add <= 0) add = 4096;
 
     newsize = currsize + add;
 
@@ -42,8 +42,8 @@ void insert_data(WFILE* dest, WFILE* src)
 
     //log_message("inserting data", dest->r);
 
-    src_len = src->ptr - src->str;
-    dest_avail = dest->end - dest->ptr;
+    src_len = (long)(src->ptr - src->str);
+    dest_avail = (long)(dest->end - dest->ptr);
     len_need = src_len - dest_avail;
     if (len_need > 0) {  // potential off by one here
     expand_memory(dest, len_need+2);
