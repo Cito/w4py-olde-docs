@@ -179,7 +179,7 @@ class AppServerService(win32serviceutil.ServiceFramework):
                 # Remove the package component in the name of this module,
                 # because otherwise the package path will be used for imports:
                 global __name__, __package__
-                __name__ = __name__.split('.')[-1]
+                __name__ = __name__.rsplit('.', 1)[-1]
                 __package__ = None
                 # Check the validity of the Webware directory:
                 sysPath = sys.path # memorize the standard Python search path

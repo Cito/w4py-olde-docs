@@ -342,7 +342,7 @@ class ObjRefAttr(object):
             return 'int'
 
     def classIdReferences(self):
-        classIdName = self.sqlName().split(',')[0]
+        classIdName = self.sqlName().split(',', 1)[0]
         constraintName = cleanConstraintName('FK__%s__%s___MKClassIds__id'
             % (self.containingKlass.sqlTableName(), classIdName))
         return ' constraint [%s] references _MKClassIds' % constraintName

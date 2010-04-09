@@ -54,7 +54,7 @@ class HTTPServlet(Servlet):
                 ims = request.environ(
                     ).get('HTTP_IF_MODIFIED_SINCE') or request.environ(
                     ).get('IF_MODIFIED_SINCE')
-                if ims and ims.split(';')[0] == lm:
+                if ims and ims.split(';', 1)[0] == lm:
                     trans.response().setStatus(304, 'Not Modified')
                     return
         method = self._methodForRequestType.get(httpMethodName)

@@ -1122,7 +1122,7 @@ class AnyDateTimeAttr(object):
 
     def sqlForNonNone(self, value):
         # Chop off the milliseconds -- SQL databases seem to dislike that.
-        return "'%s'" % str(value).split('.')[0]
+        return "'%s'" % str(value).split('.', 1)[0]
 
 
 class DateAttr(object):

@@ -43,7 +43,7 @@ def html(context=5, options=None):
         etype = etype.__name__
     inspect_trace = inspect.trace(context)
 
-    pyver = 'Python ' + sys.version.split()[0] + '<br>' + sys.executable
+    pyver = 'Python ' + sys.version.split(None, 1)[0] + '<br>' + sys.executable
     javascript = """
     <script type="text/javascript" language="JavaScript"><!--
     function tag(s) { return '<'+s+'>'; }

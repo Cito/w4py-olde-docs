@@ -218,9 +218,9 @@ class HTTPContent(HTTPServlet):
     def actions(self):
         """The allowed actions.
 
-        Returns a list of method names that are allowable
-        actions from HTML forms. The default implementation
-        returns [].  See `_respond` for more about actions.
+        Returns a list or a set of method names that are allowable
+        actions from HTML forms. The default implementation returns [].
+        See `_respond` for more about actions.
 
         """
         return []
@@ -230,9 +230,8 @@ class HTTPContent(HTTPServlet):
 
         Invoked by self prior to invoking a action method.
         The `actionName` is passed to this method,
-        although it seems a generally bad idea to rely on
-        this. However, it's still provided just in case you
-        need that hook.
+        although it seems a generally bad idea to rely on this.
+        However, it's still provided just in case you need that hook.
 
         By default this does nothing.
         """
@@ -242,12 +241,11 @@ class HTTPContent(HTTPServlet):
         """Things to do after action.
 
         Invoked by self after invoking a action method.
-        Subclasses may override to
-        customize and may or may not invoke super as they see
-        fit. The `actionName` is passed to this method,
-        although it seems a generally bad idea to rely on
-        this. However, it's still provided just in case you
-        need that hook.
+        Subclasses may override to customize and may or may not
+        invoke super as they see fit.
+        The `actionName` is passed to this method,
+        although it seems a generally bad idea to rely on this.
+        However, it's still provided just in case you need that hook.
 
         By default this does nothing.
 

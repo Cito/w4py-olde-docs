@@ -251,7 +251,7 @@ def main(args=None):
     # If this module is inside a package, make it a standalone module,
     # because otherwise the package path will be used for imports, too:
     global __name__, __package__
-    name = __name__.split('.')[-1]
+    name = __name__.rsplit('.', 1)[-1]
     if name != __name__:
         sys.modules[name] = sys.modules[__name__]
         del sys.modules[__name__]

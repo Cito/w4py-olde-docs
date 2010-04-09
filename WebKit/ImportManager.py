@@ -64,7 +64,6 @@ class ImportManager(object):
             from ImportSpy import activate
             activate(self)
             self._spy = True
-        return self._spy
 
     def fileList(self, update=True):
         """Return the list of tracked files."""
@@ -173,7 +172,7 @@ class ImportManager(object):
             for modname, modfile in self._moduleFiles.iteritems():
                 if modfile == filename:
                     mod = sys.modules.get(modname)
-                    if mod or getattr(mod, '__donotreload__', None):
+                    if mod and getattr(mod, '__donotreload__', False):
                         break
                     return filename # it's a module that needs to be reloaded
             else:

@@ -14,7 +14,7 @@ installed, then the need for reloading can be monitored very effectively
 with the use of ImportSpy. Otherwise, ImportSpy will not have much benefit.
 
 Note that ImportSpy is based on the new import hooks of Python described
-in PEP 302, It is possible to suppress the use of ImportSpy by setting
+in PEP 302. It is possible to suppress the use of ImportSpy by setting
 `UseImportSpy` in AppServer.config to False.
 
 """
@@ -40,7 +40,7 @@ class ImportSpy(object):
         """Replaces imp.find_module."""
         try:
             self.file, self.filename, self.info = self._imp.find_module(
-                fullname.split('.')[-1], [self.path])
+                fullname.rsplit('.', 1)[-1], [self.path])
         except ImportError:
             pass
         else:

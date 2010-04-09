@@ -224,7 +224,7 @@ class Application(ConfigurableForServerSidePath):
             or self.defaultConfig()['SessionName'])
         self._autoPathSessions = self.setting('UseAutomaticPathSessions')
         moduleName = self.setting('SessionModule')
-        className = moduleName.split('.')[-1]
+        className = moduleName.rsplit('.', 1)[-1]
         try:
             exec 'from %s import %s' % (moduleName, className)
             klass = locals()[className]
@@ -240,7 +240,7 @@ class Application(ConfigurableForServerSidePath):
             moduleName = 'Session%sStore' % moduleName
         self._sessionDir = self.serverSidePath(
             self.setting('SessionStoreDir') or 'Sessions')
-        className = moduleName.split('.')[-1]
+        className = moduleName.rsplit('.', 1)[-1]
         try:
             exec 'from %s import %s' % (moduleName, className)
             klass = locals()[className]
