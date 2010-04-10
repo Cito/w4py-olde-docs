@@ -81,11 +81,14 @@ class PidFile(object):
         return None
 
     @staticmethod
-    def killPID(pid):
+    def killPID(pid, sig=None):
         """Kill the process with the given pid."""
         try:
-            os.kill(pid)
-        except AttributeError:
+            if sig is None:
+                from signal import SIGTERM
+                sig = SIGTERM
+            os.kill(pid, sig)
+        except (AttributeError, ImportError):
             if win32api:
                 handle = win32api.OpenProcess(1, False, pid)
                 win32api.TerminateProcess(handle, -1)
