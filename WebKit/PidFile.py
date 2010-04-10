@@ -80,7 +80,7 @@ class PidFile(object):
         return None
 
     @staticmethod
-    def killPID(self, pid):
+    def killPID(pid):
         """Kill the process with the given pid."""
         try:
             os.kill(pid)
