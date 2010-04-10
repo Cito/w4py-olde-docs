@@ -38,6 +38,7 @@ class PSPServletFactory(ServletFactory):
         self._fileEncoding = setting('PSPFileEncoding', None)
         if setting('ClearPSPCacheOnStart', False):
             self.clearFileCache()
+        self._recordFile = application._imp.recordFile
 
     def uniqueness(self):
         return 'file'
@@ -95,10 +96,13 @@ class PSPServletFactory(ServletFactory):
             context.setPythonFileName(classfile)
             context.setPythonFileEncoding(self._fileEncoding)
             clc = PSPCompiler.Compiler(context)
-            clc.compile()
+            sourcefiles = clc.compile()
             # Set the modification time of the compiled file
             # to be the same as the source file;
             # that's how we'll know if it needs to be recompiled:
             os.utime(classfile, (os.path.getatime(classfile), mtime))
+            # Record all included files so we can spot any changes:
+            for sourcefile in sourcefiles:
+                self._recordFile(sourcefile)
         theClass = self.loadClassFromFile(transaction, classfile, classname)
         return theClass

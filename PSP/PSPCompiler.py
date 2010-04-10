@@ -21,12 +21,13 @@ from ParseEventHandler import ParseEventHandler
 
 
 class Compiler(object):
-    """The main compilation class-"""
+    """The main compilation class."""
 
     def __init__(self, context):
         self._ctxt = context
 
     def compile(self):
+        """Compile the PSP context and return a list of all source files."""
         reader = StreamReader(self._ctxt.getPspFileName(), self._ctxt)
         reader.init()
         writer = ServletWriter(self._ctxt)
@@ -37,5 +38,7 @@ class Compiler(object):
         parser.setEventHandler(handler)
         handler.beginProcessing()
         parser.parse()
+        sourcefiles = set(reader.sourcefiles)
         handler.endProcessing()
         writer.close()
+        return sourcefiles

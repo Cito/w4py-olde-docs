@@ -213,7 +213,7 @@ class StreamReader(object):
     def hasMoreInput(self):
         if self.current.cursor >= len(self.current.stream):
             while self.popFile():
-                if self.current.cursor < len(self.current.stream) :
+                if self.current.cursor < len(self.current.stream):
                     return True
             return False
         return True

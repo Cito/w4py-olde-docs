@@ -82,7 +82,7 @@ class PSPContext(object):
 class PSPCLContext(PSPContext):
     """A context for command line compilation.
 
-    Currently used for both cammand line and PSPServletEngine compilation.
+    Currently used for both command line and PSPServletEngine compilation.
     This class provides all the information necessary during the parsing
     and page generation steps of the PSP compilation process.
 
@@ -109,7 +109,7 @@ class PSPCLContext(PSPContext):
         """Provide directory to dump PSP source file to.
 
         I am probably doing this in reverse order at the moment.
-        I should start with this and get the python filename from it.
+        I should start with this and get the Python filename from it.
 
         """
         return os.path.split(self._pyFileName)[0]
@@ -158,7 +158,7 @@ class PSPCLContext(PSPContext):
         """Set the encoding of the .py file to generate."""
         self._pyFileEncoding = encoding
 
-    def setClassName(self , name):
+    def setClassName(self, name):
         """Set the class name to create."""
         self._className = name
 
