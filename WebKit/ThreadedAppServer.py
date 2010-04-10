@@ -79,6 +79,7 @@ defaultConfig = dict(
     StartServerThreads = 10, # initial number of server threads
     MinServerThreads = 5, # minimum number
     MaxServerThreads = 20, # maxium number
+    UseDaemonThreads = True, # use daemonic worker threads
     MaxRequestTime = 300, # maximum request execution time in seconds
     RequestQueueSize = 0, # means twice the maximum number of threads
     RequestBufferSize = 8*1024, # 8 kBytes
@@ -231,6 +232,7 @@ class ThreadedAppServer(AppServer):
             threadCount = self.setting('StartServerThreads')
             self._maxServerThreads = self.setting('MaxServerThreads')
             self._minServerThreads = self.setting('MinServerThreads')
+            self._useDaemonThreads = self.setting('UseDaemonThreads')
             self._requestQueueSize = self.setting('RequestQueueSize')
             if not self._requestQueueSize:
                 # if not set, make queue size twice the max number of threads
@@ -319,7 +321,7 @@ class ThreadedAppServer(AppServer):
             print "Warning: %s already exists" % adrFile
             try:
                 os.unlink(adrFile)
-            except OSError: # we cannot remove the file
+            except (AttributeError, OSError): # we cannot remove the file
                 if open(adrFile).read() == adrStr:
                     return # same content, so never mind
                 else:
@@ -529,6 +531,8 @@ class ThreadedAppServer(AppServer):
             print "Spawning new thread"
         t = WorkerThread(target=self.threadloop)
         t._processing = False
+        if self._useDaemonThreads:
+            t.setDaemon(True)
         t.start()
         self._threadPool.append(t)
         self._threadCount += 1
@@ -558,7 +562,7 @@ class ThreadedAppServer(AppServer):
             # of the threads we want gone may not yet be gone.
             # But we'll pick them up later -- they'll wait.
             if not t.isAlive():
-                t.join() # Don't need a timeout, it isn't alive
+                t.join() # don't need a timeout, it isn't alive
                 self._threadPool.remove(t)
                 if debug:
                     print "Thread absorbed, real threadCount =", len(self._threadPool)
@@ -752,19 +756,54 @@ class ThreadedAppServer(AppServer):
                 if os.path.exists(adrFile):
                     try:
                         os.unlink(adrFile)
-                    except OSError:
+                    except (AttributeError, OSError):
                         print "Warning: Could not remove", adrFile
         # Tell all threads to end:
         for i in range(self._threadCount):
             self._requestQueue.put(None)
-        if self._canAbortRequest:
-            for t in self._threadHandler:
-                t.abort(ServerShutDownError)
+        # Join all threads:
+        closeTime = time() + 3
         for t in self._threadPool:
+            timeout = max(0.1, closeTime - time())
             try:
-                t.join()
+                t.join(timeout)
             except Exception:
                 pass
+        # Check whether all threads have ended:
+        for t in self._threadPool:
+            if t.isAlive():
+                if debug:
+                    print "Hanging worker thread", t.threadID()
+                running = True
+                break
+        else:
+            running = False
+        if running and self._canAbortRequest:
+            # Abort all remaining threads:
+            print "Aborting hanging worker threads..."
+            for t in self._threadPool:
+                if t.isAlive():
+                    t.abort(ServerShutDownError)
+            # Join remaining threads:
+            closeTime = time() + 3
+            for t in self._threadPool:
+                if t.isAlive():
+                    timeout = max(0.1, closeTime - time())
+                    try:
+                        t.join(timeout)
+                    except Exception:
+                        pass
+            # Check whether remaining threads have ended:
+            for t in self._threadPool:
+                if t.isAlive():
+                    if debug:
+                        print "Warning: Could not abort thread", t.threadID()
+                    else:
+                        print "Warning: Could not abort all worker threads"
+                    break
+            else:
+                print "Hanging worker threads have been aborted."
+                running = False
         # Call super's shutdown:
         AppServer.shutDown(self)
 

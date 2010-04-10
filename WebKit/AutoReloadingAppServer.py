@@ -189,7 +189,6 @@ class AutoReloadingAppServer(AppServer):
         This is done in addition to the normal shutdown procedure.
 
         """
-        print 'Stopping AutoReload Monitor...'
         self.deactivateAutoReload()
         AppServer.shutDown(self)
 
@@ -231,11 +230,13 @@ class AutoReloadingAppServer(AppServer):
             self._runFileMonitor = True
             self._fileMonitorThread = t = Thread(target=target)
             t.setName('AutoReloadMonitor')
+            t.setDaemon(True)
             t.start()
 
     def deactivateAutoReload(self):
         """Stop the monitor thread."""
         if self._fileMonitorThread:
+            print 'Stopping AutoReload Monitor...'
             if self._runFileMonitor:
                 self._runFileMonitor = False
                 if self._fam:
@@ -246,7 +247,7 @@ class AutoReloadingAppServer(AppServer):
                         os.close(self._pipe[1])
             sys.stdout.flush()
             try:
-                self._fileMonitorThread.join()
+                self._fileMonitorThread.join(min(3, 1.5 * self._pollInterval))
             except Exception:
                 pass
             if self._fam:

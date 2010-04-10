@@ -187,6 +187,7 @@ class AppServer(ConfigurableForServerSidePath):
             del self._app
             if self._pidFile:
                 self._pidFile.remove() # remove the pid file
+            del self._pidFile
             if Profiler.profiler:
                 # The profile stats will be dumped by Launch.py.
                 # You might also considering having a page/servlet
@@ -406,39 +407,27 @@ def main():
         del server
         sys.exit()
 
-def kill(pid):
-    """Kill a process."""
-    try:
-        from signal import SIGTERM
-        os.kill(pid, SIGTERM)
-    except Exception:
-        if os.name == 'nt':
-            import win32api
-            handle = win32api.OpenProcess(1, 0, pid)
-            win32api.TerminateProcess(handle, 0)
-        else:
-            raise
-
 def stop(*args, **kw):
     """Stop the AppServer (which may be in a different process)."""
     print "Stopping the AppServer..."
-    if 'workDir' in kw:
-        # app directory
-        pidfile = os.path.join(kw['workDir'], "appserver.pid")
+    workDir = kw.get('workDir')
+    if workDir:
+        pidfile = None
     else:
-        # pidfile is in WebKit directory
-        pidfile = os.path.join(os.path.dirname(__file__), "appserver.pid")
+        if globalAppServer:
+            pidfile = globalAppServer._pidFile
+        else:
+            pidfile = None
+        if not pidfile:
+            workDir = os.path.dirname(__file__)
+    if not pidfile:
+        pidfile = PidFile(os.path.join(workDir, 'appserver.pid'), create=0)
     try:
-        pid = int(open(pidfile).read())
+        pidfile.kill()
     except Exception:
-        print "Cannot read process id from pidfile."
-    else:
-        try:
-            kill(pid)
-        except Exception:
-            from traceback import print_exc
-            print_exc(1)
-            print "WebKit cannot terminate the running process."
+        from traceback import print_exc
+        print_exc(1)
+        print "WebKit cannot terminate the running process."
 
 if __name__ == '__main__':
     main()

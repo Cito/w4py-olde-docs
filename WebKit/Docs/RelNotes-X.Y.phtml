@@ -14,7 +14,11 @@
 
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
-  <li>...</li>
+  <li>All worker threads are now tagged as daemon threads by default,
+  thereby allowing the app server to quit even if some of them cannot
+  be told to quit their work. This can be changed via the new
+  <span class="filename">AppServer.config</span> setting
+  <code>UseDaemonThreads</span>.</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>

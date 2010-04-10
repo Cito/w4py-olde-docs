@@ -2,98 +2,132 @@ import os
 import sys
 import atexit
 
+if os.name == 'nt':
+    try:
+        import win32api
+    except ImportError:
+        try:
+            import ctypes
+            win32api = ctypes.windll.kernel32
+        except (AttributeError, ImportError):
+            win32api = None
+else:
+    win32api = None
+
 
 class ProcessRunning(Exception):
-    pass
-
-
-def removePidFile(pidfile):
-    pidfile.remove()
+    """Error when creating pid file for already running process."""
 
 
 class PidFile(object):
+    """Process id file management."""
 
-    def __init__(self, path):
+    def __init__(self, path, create=True):
+        """Create a pid file with the given path for the current process."""
         self._path = path
-        self._createdPID = False
+        self._created = False
+        self._pid = None
         if os.path.exists(path):
             try:
-                pid = int(open(path).read())
+                self._pid = int(open(path).read())
+                if self._pid <= 1:
+                    self._pid = None
+                    raise ValueError
             except (IOError, ValueError, TypeError):
                 # Can't open file or read PID from file.
-                # File is probably invalid or stale, so try to delete it.
-                pid = None
-                print ("%s is invalid or cannot be opened; "
-                    "attempting to remove it." % path)
-                os.unlink(path) # should we catch errors here?
+                # File is probably  invalid or stale, so try to delete it.
+                print ("%s is invalid or cannot be opened;"
+                    " attempting to remove it." % path)
+                self.remove(stale=True)
             else:
-                if self.pidRunning(pid):
-                    raise ProcessRunning()
+                if self.pidRunning(self._pid):
+                    if create:
+                        raise ProcessRunning()
                 else:
                     print "%s is stale; removing." % path
-                    try:
-                        os.unlink(path)
-                    except OSError:
-                        # maybe the other process has just quit
-                        # and has removed the file.
-                        pass # try continuing...
-
-        pidfile = open(path, 'w')
-        pidfile.write(str(self.currentPID()))
-        pidfile.close()
-
-        self._createdPID = True
-
-        # Delete the pid file when python exits, so that the pid file is
-        # removed if the process exits abnormally.
-        # If the process crashes, though, the pid file will be left behind.
-        atexit.register(removePidFile, self)
+                    self.remove(stale=True)
+        if create:
+            self._pid = self.currentPID()
+            if self._pid is not None:
+                self.write()
+                # Delete the pid file when Python exits, so that the pid file
+                # is removed if the process exits abnormally. If the process
+                # crashes, though, the pid file will be left behind.
+                atexit.register(self.remove)
 
     @staticmethod
     def pidRunning(pid):
-        if os.name == 'posix':
-            try:
-                os.kill(pid, 0)
-            except OSError, e:
-                if e.errno == 3: # No such process
+        """Check whether process with given pid is running."""
+        try:
+            os.kill(pid, 0)
+        except OSError, e:
+            if e.errno == 3: # No such process
+                return False
+        except AttributeError:
+            if win32api:
+                if not win32api.OpenProcess(1024, False, pid):
                     return False
-            return True
-        else:
-            try:
-                import win32api
-                import win32con
-                import pywintypes
-                try:
-                    win32api.OpenProcess(
-                        win32con.PROCESS_QUERY_INFORMATION, 0, pid)
-                except pywintypes.error, e:
-                    if e[0] == 87: # returned when process does not exist
-                        return False
-            except ImportError:
-                pass # couldn't import win32 modules
-            return True
+        return True
 
     @staticmethod
     def currentPID():
-        if os.name == 'posix':
+        """Get the current process id."""
+        try:
             return os.getpid()
-        else:
-            try:
-                import win32api
-            except ImportError:
-                pass
-            if 'win32api' in sys.modules:
+        except AttributeError:
+            if win32api:
                 return win32api.GetCurrentProcessId()
         return None
 
+    @staticmethod
+    def killPID(self, pid):
+        """Kill the process with the given pid."""
+        try:
+            os.kill(pid)
+        except AttributeError:
+            if win32api:
+                handle = win32api.OpenProcess(1, False, pid)
+                win32api.TerminateProcess(handle, -1)
+                win32api.CloseHandle(handle)
+
+    def pid(self):
+        """Return our process id."""
+        return self._pid
+
+    def running(self):
+        """Check whether our process is running."""
+        return self.pidRunning(self._pid)
+
+    def kill(self):
+        """Kill our process."""
+        if self._pid is None:
+            return
+        return self.killPID(self._pid)
+
     def __del__(self):
+        """Remove pid file together with our instance."""
         self.remove()
 
-    def remove(self):
-        # Only remove the file if we created it. Otherwise attempting to start
-        # a second process will remove the file created by the first.
-        if self._createdPID:
+    def remove(self, stale=False):
+        """Remove our pid file."""
+        if not stale:
+            if not self._created:
+                # Only remove the file if we created it. Otherwise starting
+                # a second process will remove the file created by the first.
+                return
+            stale = os.path.exists(self._path)
+        if stale:
             try:
                 os.unlink(self._path)
             except (AttributeError, OSError):
                 pass
+        self._created = False # remove only once
+
+    def write(self):
+        """Write our pid file."""
+        if self._created:
+            return
+        pidfile = open(self._path, 'w')
+        pidfile.write(str(self._pid))
+        pidfile.close()
+        self._created = True # write only one

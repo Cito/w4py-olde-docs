@@ -504,6 +504,10 @@ AppServer.config
     and therefore, the maximum number of concurrent requests that can
     be served.  Unless you have a serious load on a high end machine,
     the default is generally sufficient.  Default: ``20``.
+``UseDaemonThreads``:
+    If True, make all worker threads daemon threads. This allows the
+    server to finish even when some of the worker threads cannot be
+    told to finish their work.  Default: ``True``.
 ``MaxRequestTime``:
     This setting controls automatic cancelation of long-running requests.
     All worker threads executing requests longer than ``MaxRequestTime``
