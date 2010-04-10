@@ -323,7 +323,7 @@ class AutoReloadingAppServer(AppServer):
                 print 'Restarting AppServer...'
                 self.shouldRestart()
 
-    def fileMonitorThreadLoopFAM(self, getmtime=os.path.getmtime):
+    def fileMonitorThreadLoopFAM(self):
         """Monitoring thread loop, but using the FAM library."""
         # For all of the modules which have _already_ been loaded,
         # we check to see if they've already been modified:

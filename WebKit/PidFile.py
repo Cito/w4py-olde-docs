@@ -1,5 +1,6 @@
+"""Process id file management"""
+
 import os
-import sys
 import atexit
 
 if os.name == 'nt':
