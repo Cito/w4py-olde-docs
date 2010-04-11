@@ -41,13 +41,13 @@ class Klasses(dict, ModelObject):
         because in __init__, a different set of attribute classes can be passed in.
 
         """
-        map = {}
+        typemap = {}
         names = 'bool int long float string enum date time list ObjRef decimal'
         names = names.split()
         for name in names:
-            map[name] = name.capitalize() + 'Attr'
-        map['datetime'] = 'DateTimeAttr'
-        self._typeNamesToAttrClassNames = map
+            typemap[name] = name.capitalize() + 'Attr'
+        typemap['datetime'] = 'DateTimeAttr'
+        self._typeNamesToAttrClassNames = typemap
 
     def assignClassIds(self, generator):
         if self.setting('UseHashForClassIds', False):

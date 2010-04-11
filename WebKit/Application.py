@@ -236,7 +236,7 @@ class Application(ConfigurableForServerSidePath):
                 " from module '%s'" % (className, moduleName))
             self._sessionClass = None
         moduleName = self.setting('SessionStore')
-        if moduleName in ('Dynamic', 'File', 'Memory', 'Shelve'):
+        if moduleName in ('Dynamic', 'File', 'Memcached', 'Memory', 'Shelve'):
             moduleName = 'Session%sStore' % moduleName
         self._sessionDir = self.serverSidePath(
             self.setting('SessionStoreDir') or 'Sessions')
@@ -247,9 +247,9 @@ class Application(ConfigurableForServerSidePath):
             if not isinstance(klass, type):
                 raise ImportError
             self._sessions = klass(self)
-        except ImportError:
+        except ImportError, err:
             print ("ERROR: Could not import SessionStore class '%s'"
-                " from module '%s'" % (className, moduleName))
+                " from module '%s':\n%s" % (className, moduleName, err))
             self._sessions = None
 
     def makeDirs(self):

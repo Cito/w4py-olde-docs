@@ -1,5 +1,6 @@
 import os
 import unittest
+from copy import copy
 from time import time
 
 from MiscUtils import StringIO
@@ -8,6 +9,7 @@ from WebKit.SessionMemoryStore import SessionMemoryStore
 from WebKit.SessionFileStore import SessionFileStore
 from WebKit.SessionDynamicStore import SessionDynamicStore
 from WebKit.SessionShelveStore import SessionShelveStore
+from WebKit.SessionMemcachedStore import SessionMemcachedStore
 
 
 class Application(object):
@@ -68,6 +70,48 @@ class Session(object):
         return self._lastAccessTime
 
 
+class Memcache(object):
+    """Mock memcache."""
+
+    def __init__(self):
+        self._data = dict()
+        self._connected = False
+
+    def Client(self, servers, debug=0, pickleProtocol=0):
+        self._connected = True
+        return self
+
+    def set(self, key, val, time=0):
+        if self._connected:
+            if val is not None:
+                self._data[key] = val
+            return 1
+        else:
+            return 0
+
+    def get(self, key):
+        if self._connected:
+            return copy(self._data.get(key))
+
+    def incr(self, key, delta=1):
+        if self._connected:
+            val = self._data[key]
+            val += delta
+            self._data[key] = val
+            return val
+
+    def delete(self, key, time=0):
+        if self._connected:
+            if key in self._data:
+                del self._data[key]
+            return 1
+        else:
+            return 0
+
+    def disconnect_all(self):
+        self._connected = False
+
+
 class SessionStoreTest(unittest.TestCase):
 
     _storeclass = SessionStore
@@ -115,6 +159,7 @@ class SessionMemoryStoreTest(SessionStoreTest):
         for n in range(7):
             session = Session(n)
             self._store[session.identifier()] = session
+            assert not session.isExpired()
 
     def tearDown(self):
         self._store.clear()
@@ -318,3 +363,65 @@ class SessionShelveStoreTest(SessionMemoryStoreTest):
         self.assertEqual(len(store), 1)
         assert 'foo-3' in store
         assert 'foo-0' not in store and 'foo-6' not in store
+
+
+class SessionMemcachedStoreTest(SessionMemoryStoreTest):
+
+    _storeclass = SessionMemcachedStore
+
+    import WebKit.SessionMemcachedStore as _module
+    _module.memcache = Memcache()
+
+    def setUp(self):
+        SessionMemoryStoreTest.setUp(self)
+        self.setOnIteration()
+
+    def setOnIteration(self, onIteration=None):
+        self._store._onIteration = onIteration
+
+    def testLen(self):
+        self.assertEqual(len(self._store), 0)
+        self.setOnIteration('Error')
+        self.assertRaises(NotImplementedError, len, self._store)
+
+    def testIter(self):
+        keys = [key for key in self._store]
+        self.assertEqual(keys, [])
+        self.setOnIteration('Error')
+        keys = lambda:  [key for key in self._store]
+        self.assertRaises(NotImplementedError, keys)
+
+    def testKeys(self):
+        keys = self._store.keys()
+        self.assertEqual(keys, [])
+        self.setOnIteration('Error')
+        self.assertRaises(NotImplementedError, self._store.keys)
+
+    def testItems(self):
+        items = self._store.items()
+        self.assertEqual(items, [])
+        self.setOnIteration('Error')
+        self.assertRaises(NotImplementedError, self._store.items)
+
+    def testIterItems(self):
+        items =  [key for key in self._store.iteritems()]
+        self.assertEqual(items, [])
+        self.setOnIteration('Error')
+        items = lambda:  [key for key in self._store.iteritems()]
+        self.assertRaises(NotImplementedError, items)
+
+    def testValues(self):
+        values = self._store.values()
+        self.assertEqual(values, [])
+        self.setOnIteration('Error')
+        self.assertRaises(NotImplementedError, self._store.values)
+
+    def testIterValues(self):
+        values = [key for key in self._store.itervalues()]
+        self.assertEqual(values, [])
+        self.setOnIteration('Error')
+        values = lambda:  [key for key in self._store.values()]
+        self.assertRaises(NotImplementedError, values)
+
+    def testCleanStaleSessions(self):
+        self._store.cleanStaleSessions()
