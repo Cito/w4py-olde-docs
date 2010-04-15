@@ -20,7 +20,8 @@ class Application(object):
     def setting(self, key, default=None):
         return dict(
             DynamicSessionTimeout=1,
-            MaxDynamicMemorySessions=3
+            MaxDynamicMemorySessions=3,
+            MemcachedOnIteration=None,
         ).get(key, default)
 
     def handleException(self):
@@ -376,6 +377,10 @@ class SessionMemcachedStoreTest(SessionMemoryStoreTest):
         SessionMemoryStoreTest.setUp(self)
         self.setOnIteration()
 
+    def tearDown(self):
+        self.setOnIteration()
+        SessionMemoryStoreTest.tearDown(self)
+
     def setOnIteration(self, onIteration=None):
         self._store._onIteration = onIteration
 
@@ -422,6 +427,11 @@ class SessionMemcachedStoreTest(SessionMemoryStoreTest):
         self.setOnIteration('Error')
         values = lambda:  [key for key in self._store.values()]
         self.assertRaises(NotImplementedError, values)
+
+    def testClear(self):
+        self._store.clear()
+        self.setOnIteration('Error')
+        self.assertRaises(NotImplementedError, self._store.clear)
 
     def testCleanStaleSessions(self):
         self._store.cleanStaleSessions()

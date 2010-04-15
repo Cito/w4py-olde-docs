@@ -27,21 +27,32 @@ class SessionMemcachedStore(SessionStore):
     In clustering configurations with concurrent writes for the same
     session(s) the last writer will always overwrite the session.
 
+    The keys are prefixed with a configurable namespace, allowing you to
+    store other data in the same Memcached system.
+
     Cleaning/timing out of sessions is performed by Memcached itself
     since no one app server can know about the existence of all sessions or
     the last access for a given session. Besides it is built in Memcached
     functionality. Consequently, correct sizing of Memcached is necessary
     to hold all user's session data.
 
-    The keys are prefixed with a configurable namespace, allowing you to
-    store other data in the same Memcached system.
+    Due to the way Memcached works, methods requiring access to the keys
+    or for clearing the store do not work. You can configure whether you
+    want to ignore such calls or raise an error in this case. By default,
+    you will get a warning. It would be possible to emulate these functions
+    by storing additional data in the memcache, such as a namespace counter
+    or the number or even the full list of keys. However, if you are using
+    more than one app server instance, this would require fetching that data
+    every time, since we cannot know whether another instance changed it.
+    So we refrained from doing such sophisticated trickery and instead kept
+    the implementation intentionally very simple and fast.
 
     You need to install python-memcached to be able to use this module:
     http://www.tummy.com/Community/software/python-memcached/
     You also need a Memcached server: http://memcached.org
 
     Contributed by Steve Schwarz, March 2010.
-    Improvements by Christoph Zwerschke, April 2010.
+    Small improvements by Christoph Zwerschke, April 2010.
 
     """
 
@@ -61,9 +72,6 @@ class SessionMemcachedStore(SessionStore):
         # you can add an integer counter for expiration
         self._namespace = app.setting(
             'MemcachedNamespace', 'WebwareSession') or ''
-        if self._namespace:
-            self._namespace += '_'
-        self._useCounter = app.setting('MemcachedCounter', True)
 
         # when trying to iterate over the Memcached store,
         # you can trigger an error or a warning
@@ -71,12 +79,6 @@ class SessionMemcachedStore(SessionStore):
 
         self._client = memcache.Client(self._servers,
             debug=debug, pickleProtocol=maxPickleProtocol)
-
-        try:
-            self._counter = self.getCounter()
-        except ValueError, exc:
-            print "Warning: Could not get memcache counter: %s" % exc
-            self._useCounter = None
 
 
     ## Access ##
@@ -177,21 +179,20 @@ class SessionMemcachedStore(SessionStore):
     def clear(self):
         """Clear the session store, removing all of its items.
 
-        Not really supported by Memcached (keys expire automatically),
-        but we emulate this by incrementing our namespace counter.
+        Not supported by Memcached. We could emulate this by incrementing
+        an additional namespace counter, but then we would need to fetch
+        the current counter from the memcache before every access in order
+        to keep different app server instances in sync.
 
         """
         if debug:
             print ">> clear()"
-        if self._useCounter:
-            self._counter = self.incrCounter()
-        else:
-            if self._onIteration:
-                err = 'Set MemcachedCounter to allow expiring the whole store.'
-                if self._onIteration == 'Error':
-                    raise NotImplementedError(err)
-                else:
-                    warn(err)
+        if self._onIteration:
+            err = 'Memcached does not support clearing the store.'
+            if self._onIteration == 'Error':
+                raise NotImplementedError(err)
+            else:
+                warn(err)
 
     def setdefault(self, key, default=None):
         """Return value if key available, else default (also setting it)."""
@@ -254,38 +255,4 @@ class SessionMemcachedStore(SessionStore):
 
     def mcKey(self, key):
         """Create the real key with namespace to be used with Memcached."""
-        if self._useCounter:
-            return '%s%d_%s' % (self._namespace, self._counter, key)
-        else:
-            return '%s%s' % (self._namespace, key)
-
-    def counterKey(self):
-        """Create the key used for the namespace counter."""
-        return '%s0_NamespaceCounter' % self._namespace
-
-    def getCounter(self):
-        """Get the current Memcached namespace counter."""
-        if self._useCounter:
-            counterKey = self.counterKey()
-            counter = self._client.get(counterKey)
-            if counter is None:
-                self.setCounter(1)
-                counter = self._client.get(counterKey)
-                if counter != 1:
-                    raise ValueError("Could not reset memcache counter")
-            if debug:
-                print ">> counter() = %d" % counter
-            return counter
-
-    def setCounter(self, counter):
-        """Set a new Memcached namespace counter."""
-        if self._useCounter:
-            if debug:
-                print ">> setcounter(%d)" % counter
-            if self._client.set(self.counterKey(), counter, time=0):
-                raise ValueError("Could not set memcache counter")
-
-    def incrCounter(self):
-        """Increment the Memcached namespace counter."""
-        if self._useCounter:
-            return self._client.incr(self.counterKey())
+        return self._namespace + key

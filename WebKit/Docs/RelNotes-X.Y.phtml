@@ -19,6 +19,12 @@
   be told to quit their work. This can be changed via the new
   <span class="filename">AppServer.config</span> setting
   <code>UseDaemonThreads</span>.</li>
+  <li>Two new session store classes have been added,
+  <code>SessionShelveStore</code> (using the shelve module) and
+  <code>SessionMemcachedStore</code> (using python-memcached).
+  The latter one is very useful if you want to share Webware sessions
+  between different app server instances. You can activate and configure
+  the new classes in <span class="filename">Application.config</span>.</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>

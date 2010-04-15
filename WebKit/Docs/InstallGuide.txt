@@ -721,8 +721,8 @@ Sessions
 
 WebKit provides a Session utility class for storing data on the server
 side that relates to an individual user's session with your site.  The
-``SessionStore`` setting determines where the data is stored and can
-currently be set to ``Dynamic``, ``File``, ``Memory`` or ``Shelve``.
+``SessionStore`` setting determines where the data is stored and can currently
+be set to ``Dynamic``, ``File``, ``Memcached``, ``Memory`` or ``Shelve``.
 
 Storing to the Dynamic session store is the fastest solution and is
 the default.  This session storage method keeps the most recently used
@@ -736,7 +736,16 @@ that can be in memory at any one time.  ``DynamicSessionTimeout``
 specifies after what period of time sessions will be moved from memory
 to file.  (Note: this setting is unrelated to the ``SessionTimeout``
 setting below.  Sessions which are moved to disk by the Dynamic
-Session store are not deleted).
+Session store are not deleted).  Alternatively to the Dynamic store,
+you can try out the Shelve session store which stores the sessions
+in a database file using the Python shelve module.
+
+If you are using more than one AppServer for load-balancing, the
+Memcached store will be interesting for you. Using the python-memcached
+interface, it is able to connect to a Memcached system and store all the
+session data there.  This allows user requests to be freely moved from one
+AppServer to another while keeping their sessions, because they are all
+connected to the same memcache.
 
 Storing to files is provided mainly in support of the OneShot
 adapter.  It may also prove useful in the future in support of load
