@@ -152,7 +152,9 @@ class ImportManager(object):
         if mtime >= newmtime:
             return False
         fileList[filename] = newmtime
-        for modname, modfile in self._moduleFiles.iteritems():
+        # Note that the file list could be changed while running this
+        # method in a monitor thread, so we don't use iteritems() here:
+        for modname, modfile in self._moduleFiles.items():
             if modfile == filename:
                 mod = sys.modules.get(modname)
                 return not mod or not getattr(mod, '__donotreload__', False)
@@ -161,7 +163,7 @@ class ImportManager(object):
     def updatedFile(self, update=True, getmtime=os.path.getmtime):
         """Check whether one of the files has been updated."""
         fileList = self.fileList(update)
-        for filename, mtime in fileList.iteritems():
+        for filename, mtime in fileList.items():
             try:
                 newmtime = getmtime(filename)
             except OSError:
@@ -169,7 +171,7 @@ class ImportManager(object):
             if mtime >= newmtime:
                 continue
             fileList[filename] = newmtime
-            for modname, modfile in self._moduleFiles.iteritems():
+            for modname, modfile in self._moduleFiles.items():
                 if modfile == filename:
                     mod = sys.modules.get(modname)
                     if mod and getattr(mod, '__donotreload__', False):
