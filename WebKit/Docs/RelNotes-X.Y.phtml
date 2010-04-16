@@ -14,6 +14,11 @@
 
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
+  <li>In <span class="filename">WebKit/Adapters</span> you find a new adapter
+  <span class="filename">WSGIAdapter.py</span> allowing any WSGI compliant
+  webserver to communicate with the Webware application server. You can use
+  it straight away as WSGI application script file for
+  <a href="http://code.google.com/p/modwsgi/">mod_wsgi</a>.</li>
   <li>All worker threads are now tagged as daemon threads by default,
   thereby allowing the app server to quit even if some of them cannot
   be told to quit their work. This can be changed via the new

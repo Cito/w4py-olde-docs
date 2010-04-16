@@ -178,7 +178,7 @@ class Configurable(object):
     def printConfig(self, dest=None):
         """Print the configuration to the given destination.
 
-        The default destionation is stdout. A fixed with font is assumed
+        The default destination is stdout. A fixed with font is assumed
         for aligning the values to start at the same column.
 
         """

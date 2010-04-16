@@ -360,8 +360,10 @@ still very fast.
 
 All the adapters:
 
-* wkcgi_, C-based CGI script
+* wkcgi_ (C-based CGI script)
 * mod_webkit_ (fastest!)
+* mod_scgi_ (equally fast, not included with Webware)
+* mod_wsgi_ (with the WSGIAdapter)
 * AOLServer_
 * LRWP_ (Xitami)
 
@@ -369,12 +371,35 @@ These adapters are not really recommended:
 
 * `Python CGI Adapter`_
 * FastCGI_
-* mod_python_
-* mod_snake_
+* mod_python_ (with the ModPythonAdapter)
+* mod_snake_ (with the ModSnakeAdapter)
 * ISAPI_ (*alpha*, for IIS)
 * OneShot_ (unusual to use, sometimes buggy)
 
 
+.. _mod_wsgi:
+.. _`WSGI Adapter`:
+
+WSGI-based Adapters
+-------------------
+
+WSGI is a standard interface between web servers and Python web applications
+that is described PEP333__.  It was invented much later than Webware and uses
+a very different approach from Webware and its WebKit architecture.  Since it
+has been widely adapted as a Python standard in the last years, Webware now
+comes with an adapter that serves as an interface between any WSGI compliant
+webserver and the Webware application server.  For Apache, the mod_wsgi__
+module by Graham Dumpleton provides such an WSGI compliant interface.  If the
+module is properly configured, this can be a solution nearly as fast as using
+the native mod_webkit_ adapter.  Please see the documentation of mod_wsgi for
+details.  You can use ``WebKit/Adapters/WSGIAdapter.py`` as the so called WSGI
+application script file for mod_wsgi.
+
+__ http://www.python.org/dev/peps/pep-0333/
+__ http://code.google.com/p/modwsgi/
+
+
+.. _mod_scgi:
 .. _`SCGI Connector`:
 
 SCGI-based Adapters
@@ -386,8 +411,10 @@ You can activate the SCGI connector, i.e. an WebKit app server listener
 for SCGI connections, with the ``AppServer.config`` setting ``EnableSCGI``.
 The port can be specified with the setting ``SCGIPort`` and will be ``8084``
 by default (SCGI often uses port 4000 or 9999, you may want to change that).
-Support for SCGI has been built into Webware only recently and may not be
-so sophisticated as the standard WebKit adapter.
+The SCGI connector is actually very similar to the original Webware connector,
+but since Webware predates the SCGI protocol, it was added only later as an
+alternative that has not been in wide use. However, with mod_scgi, it is one
+of the fastest solutions for serving Webware applications.
 
 __ http://www.mems-exchange.org/software/scgi/
 
@@ -484,7 +511,8 @@ It is relatively easy to install, but you probably will need administrator
 or root access to the machine.
 
 The source code and a README file describing how to configure, build and
-install mod_webkit as a DSO module for Apache 2.2 are located in the ``Webware/WebKit/Adapters/mod_webkit2`` directory.  You can also find an
+install mod_webkit as a DSO module for Apache 2.2 are located in the
+``Webware/WebKit/Adapters/mod_webkit2`` directory.  You can also find an
 older version for Apache 1.3 in ``Webware/WebKit/Adapters/mod_webkit1``,
 but in the following we are assuming you are using Apache 2.2.
 
@@ -527,8 +555,10 @@ Windows Installation
 ^^^^^^^^^^^^^^^^^^^^
 
 Copy ``WebKit/Adapters/mod_webkit2/mod_webkit.dll`` into your Apache 2.2
-module directory (usually located at ``C:\Program Files\Apache Software Foundation\Apache2.2\modules\mod_webkit.so``).  You should also change
-the extension of the file to ``.so`` according to the Apache convention.
+module directory (usually located at
+``C:\Program Files\Apache Software Foundation\Apache2.2\modules\mod_webkit.so``).
+You should also change the extension of the file to ``.so`` according
+to the Apache convention.
 
 Edit ``httpd.conf`` to include the line::
 
