@@ -55,8 +55,8 @@ bufsize = 32*1024
 
 class ModPythonAdapter(Adapter):
 
-    def __init__(self, host, port, webkitdir):
-        Adapter.__init__(self, webkitdir)
+    def __init__(self, host, port, webKitDir):
+        Adapter.__init__(self, webKitDir)
         self.host = host
         self.port = port
 
@@ -245,8 +245,8 @@ if os.name == 'nt':
 
     class WinModPythonAdapter(OriginalModPythonAdapter):
 
-        def __init__(self, host, port, webkitdir):
-            OriginalModPythonAdapter.__init__(self, host, port, webkitdir)
+        def __init__(self, host, port, webKitDir):
+            OriginalModPythonAdapter.__init__(self, host, port, webKitDir)
             self._threadSafeStorage = {}
 
         def threadSafeValue(self, name):

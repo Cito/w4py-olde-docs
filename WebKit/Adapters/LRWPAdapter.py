@@ -36,8 +36,8 @@ webKitDir = os.path.join(webwareDir, 'WebKit')
 
 class LRWPAdapter(Adapter):
 
-    def __init__(self, webkitdir):
-        Adapter.__init__(self, webkitdir)
+    def __init__(self, webKitDir=webKitDir):
+        Adapter.__init__(self, webKitDir)
         if sys.platform == 'win32':
             import msvcrt
             msvcrt.setmode(sys.stdout.fileno(), os.O_BINARY)

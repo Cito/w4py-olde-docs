@@ -1,6 +1,9 @@
 """OneShotAdapter.py
 
-This is a special version of the CGIAdapter that doesn't require a persistent AppServer process. This is mostly useful during development when repeated changes to classes forces the developer to restart the app server to make the changes take effect.
+This is a special version of the CGIAdapter that doesn't require a persistent
+AppServer process. This is mostly useful during development when repeated
+changes to classes forces the developer to restart the app server to make
+the changes take effect.
 
 An example, URL:
 
@@ -9,26 +12,12 @@ An example, URL:
 """
 
 import sys, os, time
-
-# 2000-08-07 ce: For accuracy purposes,
-# we want to record the timestamp as early as possible:
-_timestamp = time.time()
-
-# 2000-08-07 ce: We have to reassign sys.stdout *immediately* because it's
-# referred to as a default parameter value in Configurable.py which happens
-# to be our ancestor class as well as the ancestor class of AppServer and
-# Application. The Configurable method that uses sys.stdout for a default
-# parameter value must not execute before we rewire sys.stdout. Tricky, tricky.
-# 2000-12-04 ce: Couldn't this be fixed by Configurable taking None as the
-# default and then using sys.stdout if arg==None?
 try:
     from cStringIO import StringIO
 except ImportError:
     from StringIO import StringIO
-_real_stdout = sys.stdout
-sys.stdout = _console = StringIO() # to capture the console output of the application
 
-from Adapter import *
+from WebKit.Adapters.Adapter import Adapter
 from MiscUtils.Funcs import charWrap
 from WebUtils.Funcs import htmlEncode
 
@@ -46,6 +35,11 @@ class OneShotAdapter(Adapter):
 
     def run(self):
 
+        timestamp = time.time() # start time
+
+        # to capture the console output of the application
+        stdout, sys.stdout = sys.stdout, StringIO()
+
         try:
 
             # MS Windows: no special translation of end-of-lines
@@ -54,7 +48,7 @@ class OneShotAdapter(Adapter):
                 msvcrt.setmode(sys.stdin.fileno(), os.O_BINARY)
 
             requestDict = dict(
-                format='CGI', time=_timestamp,
+                format='CGI', time=timestamp,
                 # ce: a little tricky. We use marshal which only works
                 # on built-in types, so we need environ's dictionary:
                 environ=os.environ.data, input=sys.stdin)
@@ -82,7 +76,7 @@ class OneShotAdapter(Adapter):
 
             print "AppServer run time %.2f seconds" % (time.time() - Profiler.startTime)
 
-            sys.stdout = _real_stdout
+            sys.stdout = stdout
 
             # MS Windows: no special translation of end-of-lines
             if os.name == 'nt':
@@ -127,7 +121,7 @@ class OneShotAdapter(Adapter):
                 % (time.asctime(time.localtime(time.time()))))
             sys.stderr.write('Python exception:\n')
             traceback.print_exc(file=sys.stderr)
-            sys.stdout = _real_stdout
+            sys.stdout = stdout
             output = ''.join(traceback.format_exception(*sys.exc_info()))
             output = htmlEncode(output)
             sys.stdout.write('''Content-Type: text/html\n
@@ -150,7 +144,6 @@ class OneShotAdapter(Adapter):
 
 def main(webKitDir=None):
     if webKitDir is None:
-        import os
         webKitDir = os.path.dirname(os.getcwd())
     try:
         OneShotAdapter(webKitDir).run()

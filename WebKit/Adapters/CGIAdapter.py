@@ -54,9 +54,10 @@ class CGIAdapter(Adapter):
             # open('counter.text', 'w').write(str(counter))
             # open('rr-%02d.rr' % counter, 'w').write(str(dict))
 
-            host, port = open(os.path.join(self._webKitDir, 'adapter.address')).read().split(':', 1)
-            if os.name == 'nt' and host == '': # MS Windows doesn't like a blank host name
-                host = 'localhost'
+            host, port = open(os.path.join(self._webKitDir,
+                'adapter.address')).read().split(':', 1)
+            if os.name == 'nt' and not host:
+                host = 'localhost' # MS Windows doesn't like a blank host name
             port = int(port)
 
             response = self.transactWithAppServer(os.environ.data, myInput, host, port)
