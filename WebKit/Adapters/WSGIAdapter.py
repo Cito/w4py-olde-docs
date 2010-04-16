@@ -13,6 +13,10 @@ Contributed to Webware for Python by Christoph Zwerschke, 04/2010.
 
 """
 
+# If you used the MakeAppWorkDir.py script to make a separate
+# application working directory, specify it here:
+workDir = None
+
 # If the Webware installation is located somewhere else,
 # then set the webwareDir variable to point to it here:
 webwareDir = None
@@ -25,29 +29,14 @@ if not webwareDir:
 sys.path.insert(0, webwareDir)
 webKitDir = os.path.join(webwareDir, 'WebKit')
 sys.path.insert(0, webKitDir)
+if not workDir:
+    workDir = webKitDir
 
 from WebKit.Adapters.Adapter import Adapter
 
 
 class WSGIAdapter(Adapter):
     """WSGI application interfacing to the Webware application server."""
-
-    def __init__(self, webKitDir=webKitDir):
-        """Create a new WSGI Adapter in the given WebKit directory."""
-        Adapter.__init__(self, webKitDir)
-        try:
-            host, port = open(os.path.join(self._webKitDir,
-                'adapter.address')).read().split(':', 1)
-        except Exception:
-            host = port = None
-        else:
-            if os.name == 'nt' and not host:
-                host = 'localhost' # MS Windows doesn't like a blank host name
-            try:
-                port = int(port)
-            except ValueError:
-                port = None
-        self._host, self._port = host, port
 
     def __call__(self, environ, start_response):
         """The actual WSGI application."""
@@ -72,8 +61,7 @@ class WSGIAdapter(Adapter):
             environ = dict(item for item in environ.iteritems()
                 if isinstance(item[1], (bool, int, long, float,
                     str, unicode, tuple, list, set, frozenset, dict)))
-            response = self.getChunksFromAppServer(
-                environ, inp or '', self._host, self._port)
+            response = self.getChunksFromAppServer(environ, inp or '')
             header = []
             for chunk in response:
                 if header is None:
@@ -97,6 +85,6 @@ class WSGIAdapter(Adapter):
 
 # Create one WSGI application instance:
 
-wsgiAdapter = WSGIAdapter()
+wsgiAdapter = WSGIAdapter(workDir)
 
 application = wsgiAdapter # the name expected by mod_wsgi
