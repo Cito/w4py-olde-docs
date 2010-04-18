@@ -69,7 +69,7 @@ ceremony!\""""
             for line in s.splitlines():
                 self.assertTrue(len(line) <= margin,
                     'len=%i, margin=%i, line=%r' % (len(line), margin, line))
-            self.assertEquals(msg.split(), s.split())
+            self.assertEqual(msg.split(), s.split())
 
     def testExcstr(self):
         self.assertEqual(excstr(None), None)

@@ -48,7 +48,7 @@ class TestError(unittest.TestCase):
         self.assertEqual('ERROR: test', str(err))
         # Should produce something like:
         # "ERROR(object=<function test at 0x74f70>; message='test'; data={})"
-        self.assert_(repr(err).endswith("; message='test'; data={})"))
+        self.assertTrue(repr(err).endswith("; message='test'; data={})"))
 
     def testValueDict(self):
         err = Error(None, '', a=5, b='.')
