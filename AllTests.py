@@ -14,6 +14,7 @@ Usage:
 
 alltestnames = [
 
+    'WebUtils.Tests.TestFuncs',
     'WebUtils.Tests.TestHTMLTag.makeTestSuite',
 
     'MiscUtils.Tests.TestCSVParser',
@@ -26,6 +27,7 @@ alltestnames = [
     'MiscUtils.Tests.TestDateParser',
     'MiscUtils.Tests.TestDictForArgs',
 
+    'WebKit.Tests.SessionStoreTest',
     'WebKit.Tests.Basic.Test',
 
     'TaskKit.Tests.Test.makeTestSuite',

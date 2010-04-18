@@ -1,7 +1,9 @@
 import os
+import sys
 import unittest
-from copy import copy
 from time import time
+
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
 from MiscUtils import StringIO
 from WebKit.SessionStore import SessionStore
@@ -69,48 +71,6 @@ class Session(object):
 
     def lastAccessTime(self):
         return self._lastAccessTime
-
-
-class Memcache(object):
-    """Mock memcache."""
-
-    def __init__(self):
-        self._data = dict()
-        self._connected = False
-
-    def Client(self, servers, debug=0, pickleProtocol=0):
-        self._connected = True
-        return self
-
-    def set(self, key, val, time=0):
-        if self._connected:
-            if val is not None:
-                self._data[key] = val
-            return 1
-        else:
-            return 0
-
-    def get(self, key):
-        if self._connected:
-            return copy(self._data.get(key))
-
-    def incr(self, key, delta=1):
-        if self._connected:
-            val = self._data[key]
-            val += delta
-            self._data[key] = val
-            return val
-
-    def delete(self, key, time=0):
-        if self._connected:
-            if key in self._data:
-                del self._data[key]
-            return 1
-        else:
-            return 0
-
-    def disconnect_all(self):
-        self._connected = False
 
 
 class SessionStoreTest(unittest.TestCase):
@@ -369,9 +329,6 @@ class SessionShelveStoreTest(SessionMemoryStoreTest):
 class SessionMemcachedStoreTest(SessionMemoryStoreTest):
 
     _storeclass = SessionMemcachedStore
-
-    import WebKit.SessionMemcachedStore as _module
-    _module.memcache = Memcache()
 
     def setUp(self):
         SessionMemoryStoreTest.setUp(self)
