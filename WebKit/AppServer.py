@@ -233,7 +233,7 @@ class AppServer(ConfigurableForServerSidePath):
         """Invoked by __init__, prints a little intro."""
         print 'WebKit AppServer', self.version()
         print 'Part of Webware for Python.'
-        print 'Copyright 1999-2009 by Chuck Esterbrook. All Rights Reserved.'
+        print 'Copyright 1999-2010 by Chuck Esterbrook. All Rights Reserved.'
         print 'WebKit and Webware are open source.'
         print 'Please visit: http://www.webwareforpython.org'
         print

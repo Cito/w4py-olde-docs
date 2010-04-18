@@ -250,7 +250,7 @@ follow "Copyright et al"
 title "Webware Copyright et al"
 find '<h1 class="titlebar">Webware Copyright et al</h1>'
 find "<h2>Copyright</h2>"
-find 'Copyright &copy; 1999-2009 by Chuck Esterbrook.'
+find 'Copyright &copy; 1999-2010 by Chuck Esterbrook.'
 find "<h2>License</h2>"
 back
 
