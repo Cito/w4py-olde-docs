@@ -53,7 +53,7 @@ Major Items
   Webware convention of using tabs, but most naming conventions cannot
   be changed so easily without breaking the API.
 
-* Think about a migration path towards Pyhon 3.
+* Think about a migration path towards Pyhon 3, check code with 2to3 tool.
 
 * Use distutils/setuptools instead of our own installer, use Python eggs
   instead of our own plug-in concept.

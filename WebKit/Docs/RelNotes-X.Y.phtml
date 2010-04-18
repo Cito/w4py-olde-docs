@@ -23,18 +23,27 @@
   thereby allowing the app server to quit even if some of them cannot
   be told to quit their work. This can be changed via the new
   <span class="filename">AppServer.config</span> setting
-  <code>UseDaemonThreads</span>.</li>
+  <code>UseDaemonThreads</code>.</li>
   <li>Two new session store classes have been added,
   <code>SessionShelveStore</code> (using the shelve module) and
   <code>SessionMemcachedStore</code> (using python-memcached).
   The latter one is very useful if you want to share Webware sessions
   between different app server instances. You can activate and configure
   the new classes in <span class="filename">Application.config</span>.</li>
+  <li>A mod_webkit binary for Apache 2 64bit on Windows is now included.</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
 <ul>
-  <li>...</li>
+  <li>Made the mimetype guessing a bit more robust.</li>
+  <li>Instead of <code>mx.DateTime</code> types, we now use the native
+  datetime types for cookie expiration in <code>HTTPResponse</code>.</li>
+  <li>We now set the close-on-exec-flag on the ThreadedAppServer socket
+  (as suggested by Justin Akehurst).</li>
+  <li>The mod_webkit2 adapter would interpret the WKServer host address as IPv6,
+  but later created the socket connection with IPv4 even if it was an IPv6
+  address. Fixed this so that the WKServer address is always interpreted as IPv4.
+  The ThreadedAppServer only listens on an IPv4 socket anyway.</li>
 </ul>
 
 <a name="Security"></a><h2>Security</h2>
@@ -44,13 +53,39 @@
 
 <a name="MinorChanges"></a><h2>Minor API Changes</h2>
 <ul>
-  <li>...</li>
+  <li>We are now only using new-style classes in our code base.</li>
+  <li>The internal <code>asclocaltime</code> function has been from
+  <code>WebKit.Common</code> to <code>MiscUtils</code>.</li>
 </ul>
 
 <a name="Bugfixes"></a><h2>Bugfixes</h2>
 <ul>
   <li>The mod_webkit2 adapter interpreted the WKServer host address as
   IPv6 in newer Linux versions and then was unable to connect.</li>
+  <li>Thread dumps now work with Python > 2.4 (and the threadframe module
+  isn't necessary here any more).</li>
+  <li>For some kinds of bad URLs, the URLParser raised an AssertionError
+  instead of HTTPNotFound.</li>
+</ul>
+
+<a name="Deprecations"></a><h2>Deprecations</h2>
+<ul>
+  <li>The methods and objects which have been marked as deprecated
+  in version 1.0 and modules that are now  available in the standard library
+  have been removed in Webware for Python 1.1, particularly:
+  <code>HTTPRequest.ServerSideDir</code>, <code>HTTPRequest.relativePath</code>,
+  <code>HTTPRequest.servletFilePath</code> and <code>HTTPResponse.addHeader</code>.
+  Removed support for the <code>404Text.txt</code> file name (it is called
+  <code>error404.html</code> now) and the <code>Port</code> setting (which is
+  <code>AdapterPort</code> now).</li>
+  <li>The <code>Object</code> root class for WebKit objects has gone.
+  It made things unnecessary complicated and did not contribute much
+  functionality besides named value access which hardly anyone was uning
+  and has now been removed anyway.</li>
+  <li>The internal <code>WebKit.Common</code> module is also gone. It was
+  mostly used for creating backward compatibility with old Python versions
+  which is now not necessary any more. Also, wild card imports (as in
+  <code>from Common import *</code>) are considered bad practice.</li>
 </ul>
 
 <% footer() %>
