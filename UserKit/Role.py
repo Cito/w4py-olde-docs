@@ -1,6 +1,6 @@
 """The basic Role class."""
 
-from MiscUtils.Funcs import positive_id
+from MiscUtils.Funcs import positiveId
 
 
 class Role(object):
@@ -53,7 +53,7 @@ class Role(object):
 
     def __repr__(self):
         return '<%s %r instance at %x>' % (
-            self.__class__, self._name, positive_id(self))
+            self.__class__, self._name, positiveId(self))
 
 
     ## The big question ##

@@ -96,9 +96,9 @@ ceremony!\""""
             useCache=None), ip) # not existing remote address
 
     def testPositiveId(self):
-        # About all we can do is invoke positive_id()
+        # About all we can do is invoke positiveId()
         # to see that no exceptions are thrown and the result is positive.
-        self.assertTrue(positive_id(self) > 0)
+        self.assertTrue(positiveId(self) > 0)
 
     def testSafeDescription(self):
         sd = safeDescription

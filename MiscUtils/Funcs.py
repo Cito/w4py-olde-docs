@@ -24,7 +24,7 @@ except ImportError: # Python < 2.5
 
 __all__ = [
     'commas', 'charWrap', 'wordWrap', 'excstr', 'hostName', 'localIP',
-    'positive_id', 'safeDescription', 'asclocaltime', 'timestamp',
+    'positiveId', 'safeDescription', 'asclocaltime', 'timestamp',
     'localTimeDelta', 'uniqueId', 'valueForString']
 
 
@@ -186,7 +186,7 @@ def localIP(remote=('www.yahoo.com', 80), useCache=True):
 # Addresses can "look negative" on some boxes, some of the time.
 # If you feed a "negative address" to an %x format, modern Python
 # versions will display it as signed. So when you want to produce
-# an address, use positive_id() to obtain it.
+# an address, use positiveId() to obtain it.
 # _address_mask is 2**(number_of_bits_in_a_native_pointer).
 # Adding this to a negative address gives a positive int with the same
 # hex representation as the significant bits in the original.
@@ -194,7 +194,7 @@ def localIP(remote=('www.yahoo.com', 80), useCache=True):
 
 _address_mask = 256L ** calcsize('P')
 
-def positive_id(obj):
+def positiveId(obj):
     """Return id(obj) as a non-negative integer."""
     result = id(obj)
     if result < 0:

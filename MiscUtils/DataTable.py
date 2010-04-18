@@ -204,7 +204,7 @@ from decimal import Decimal
 
 from CSVParser import CSVParser
 from CSVJoiner import joinCSVFields
-from Funcs import positive_id
+from Funcs import positiveId
 from MiscUtils import NoDefault
 
 
@@ -304,7 +304,7 @@ class TableColumn(object):
 
     def __repr__(self):
         return '<%s %r with %r at %x>' % (self.__class__.__name__,
-            self._name, self._type, positive_id(self))
+            self._name, self._type, positiveId(self))
 
     def __str__(self):
         return self._name

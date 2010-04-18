@@ -2,7 +2,7 @@ import imp
 import os
 import sys
 
-from MiscUtils.Funcs import positive_id
+from MiscUtils.Funcs import positiveId
 
 # Import Python's standard Cookie module as CookieEngine.
 # We have to do some work since it has the same name as we do.
@@ -73,7 +73,7 @@ class Cookie(object):
     def __repr__(self):
         return ('%s(id=0x%x, name=%r, domain=%r, '
             'path=%r, value=%r, expires=%r, maxAge=%r)' % (
-            self.__class__.__name__, positive_id(self),
+            self.__class__.__name__, positiveId(self),
             self.name(), self.domain(),
             self.path(), self.value(), self.expires(), self.maxAge()))
 
