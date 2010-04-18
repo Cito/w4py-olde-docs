@@ -1,6 +1,6 @@
 /*
 	Default cascading style sheet for the HTML output of Docutils.
-	Written by David Goodger. Version as of Docutils 0.5.
+	Written by David Goodger. Version as of Docutils 0.6.
 	This stylesheet has been placed in the public domain.
 */
 
@@ -134,11 +134,28 @@ h2.subtitle {
 hr.docutils {
 	width: 75% }
 
-img.align-left {
-	clear: left }
+img.align-left, .figure.align-left{
+	clear: left ;
+	float: left ;
+	margin-right: 1em }
 
-img.align-right {
-	clear: right }
+img.align-right, .figure.align-right {
+	clear: right ;
+	float: right ;
+	margin-left: 1em }
+
+.align-left {
+	text-align: left }
+
+.align-center {
+	clear: both ;
+	text-align: center }
+
+.align-right {
+	text-align: right }
+
+div.align-right {
+	text-align: left }
 
 ol.simple, ul.simple {
 	margin-bottom: 1em }
@@ -193,8 +210,7 @@ p.topic-title {
 pre.address {
 	margin-bottom: 0;
 	margin-top: 0;
-	font-family: serif;
-	font-size: 100% }
+	font: inherit }
 
 pre.literal-block, pre.doctest-block {
 	margin-left: 2em;

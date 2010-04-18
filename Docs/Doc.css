@@ -64,7 +64,7 @@ h1.titlebar {
 	color: white;
 	background-color: #025;
 }
-h1.header {
+h1.title, h1.header {
 	padding: 4pt;
 	margin-bottom: 12pt;
 	text-align: center;

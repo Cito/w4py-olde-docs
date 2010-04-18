@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
 <title>Developing Webware</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="developing-webware">
-<h1 class="header">Developing Webware</h1>
+<h1 class="title">Developing Webware</h1>
 
 <p>This document should outline the details you need to understand
 Webware and WebKit internals, and assist in becoming a more advanced
@@ -21,20 +21,20 @@ in the <a class="reference external" href="../../Docs/StyleGuidelines.html">Webw
 <div class="section" id="creating-plugins">
 <h1>Creating Plugins</h1>
 <p>Each plugin is a Python Package.  WebKit finds plugins using the
-<tt class="docutils literal"><span class="pre">PlugIns</span></tt> and <tt class="docutils literal"><span class="pre">PluginDirs</span></tt> -- see <a class="reference external" href="Configuration.html#appserver-config">Configuration</a>.  See also the
-<a class="reference external" href="http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000">Python tutorial on packages</a> and the <tt class="docutils literal"><span class="pre">PlugIn.py</span></tt> doc string.</p>
-<p>A plug-in must have <tt class="docutils literal"><span class="pre">__init__.py</span></tt> and <tt class="docutils literal"><span class="pre">Properties.py</span></tt> files.
-You can disable a specific plug-in by placing a <tt class="docutils literal"><span class="pre">dontload</span></tt> file in it.</p>
-<p><tt class="docutils literal"><span class="pre">__init.py__</span></tt> must contain a function like:</p>
+<tt class="docutils literal">PlugIns</tt> and <tt class="docutils literal">PluginDirs</tt> -- see <a class="reference external" href="Configuration.html#appserver-config">Configuration</a>.  See also the
+<a class="reference external" href="http://www.python.org/doc/current/tut/node8.html#SECTION008400000000000000000">Python tutorial on packages</a> and the <tt class="docutils literal">PlugIn.py</tt> doc string.</p>
+<p>A plug-in must have <tt class="docutils literal">__init__.py</tt> and <tt class="docutils literal">Properties.py</tt> files.
+You can disable a specific plug-in by placing a <tt class="docutils literal">dontload</tt> file in it.</p>
+<p><tt class="docutils literal">__init.py__</tt> must contain a function like:</p>
 <pre class="literal-block">
 def InstallInWebKit(appServer):
     pass
 </pre>
 <p>The function doesn't need to do anything, but this gives it the
 opportunity to do something with the AppServer -- for instance, the
-PSP plugin uses AppServer.addServletFactory to add a handler for <tt class="docutils literal"><span class="pre">.psp</span></tt>
+PSP plugin uses AppServer.addServletFactory to add a handler for <tt class="docutils literal">.psp</tt>
 files.</p>
-<p>The <tt class="docutils literal"><span class="pre">Properties.py</span></tt> file should contain a number of assignments:</p>
+<p>The <tt class="docutils literal">Properties.py</tt> file should contain a number of assignments:</p>
 <pre class="literal-block">
 name = &quot;Plugin name&quot;
 version = (1, 0, 0)
@@ -56,17 +56,14 @@ def willRunFunc():
     else:
         return None
 </pre>
-<p>The documents (e.g. <tt class="docutils literal"><span class="pre">QuickStart.html</span></tt>) should be located in a <tt class="docutils literal"><span class="pre">Docs/</span></tt>
-subdirectory.  The example pages go in an <tt class="docutils literal"><span class="pre">Examples/</span></tt> subdirectory.</p>
-<p>A plugin who's <tt class="docutils literal"><span class="pre">requiredPyVersion</span></tt> or <tt class="docutils literal"><span class="pre">requiredOpSys</span></tt> aren't satisfied will
-simply be ignored.  <tt class="docutils literal"><span class="pre">requiredOpSys</span></tt> should be something returned by
-<tt class="docutils literal"><span class="pre">os.name</span></tt>, like <tt class="docutils literal"><span class="pre">posix</span></tt> or <tt class="docutils literal"><span class="pre">nt</span></tt>.  Or you can define a function
-<tt class="docutils literal"><span class="pre">willRunFunc</span></tt> to test.  If there aren't requirements you can leave these
+<p>The documents (e.g. <tt class="docutils literal">QuickStart.html</tt>) should be located in a <tt class="docutils literal">Docs/</tt>
+subdirectory.  The example pages go in an <tt class="docutils literal">Examples/</tt> subdirectory.</p>
+<p>A plugin who's <tt class="docutils literal">requiredPyVersion</tt> or <tt class="docutils literal">requiredOpSys</tt> aren't satisfied will
+simply be ignored.  <tt class="docutils literal">requiredOpSys</tt> should be something returned by
+<tt class="docutils literal">os.name</tt>, like <tt class="docutils literal">posix</tt> or <tt class="docutils literal">nt</tt>.  Or you can define a function
+<tt class="docutils literal">willRunFunc</tt> to test.  If there aren't requirements you can leave these
 variables and functions out.</p>
 </div>
-</div>
-<div class="footer">
-Webware for Python (<a href="http://www.webwareforpython.org">www.webwareforpython.org</a>)
 </div>
 </body>
 </html>

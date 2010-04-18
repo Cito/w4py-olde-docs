@@ -10,8 +10,7 @@ Webware for Python
 Warning
 =======
 
-This document is mostly outdated and out of touch with development.
-You can find better information about known bugs and future work
+You can find more information about known bugs and future work
 in the Wiki__ and in the `SourceForge tracker systems`__,
 both accessible from the `Webware Home Page`__.
 The SourceForge task manager is currently not used since these systems should
@@ -49,16 +48,21 @@ To Do
 Major Items
 ~~~~~~~~~~~
 
-* Make use of the new Python features like new-style classes, properties,
-  sets, decorators, generator expressions, isinstace(tuple) etc. and get
-  rid of old garbage and workarounds for old Python versions.
-  Think about a migration path towards Pyhon 3.0.
+* Some of our old style guidelines are in conflict with newer Python
+  conventions (PEP8, properties etc.). We have already changed the
+  Webware convention of using tabs, but most naming conventions cannot
+  be changed so easily without breaking the API.
+
+* Think about a migration path towards Pyhon 3.
 
 * Use distutils/setuptools instead of our own installer, use Python eggs
   instead of our own plug-in concept.
 
-* The installer could try building and/or installing mod_webkit and wkcgi
+* The installer should try building and/or installing mod_webkit and wkcgi
   automatically.
+
+* Use Sphinx instead of our own tools in DocSupport, use reStructuredText
+  as the format for all docs and maybe also for the docstrings.
 
 * Separate more clearly and systematically which messages are printed to
   stdout and which to stderr.
@@ -66,17 +70,12 @@ Major Items
 * Make use of the logging module (so far it is only used with unit testing)
   instead of conditional print statements with "debug" and "verbose" flags.
 
-* CheckSource.py: A program to check the source code conventions.
-
 * Role-based security and user-authentication.  Goal is to eliminate,
   as much as possible, developer-written security logic.
   This should be provided by the WebKit and be configurable.
 
-* Write a custom adaptor for Apache, Netscape, MS, etc.
-
-* Distribution and load balancing.
-
-* Fault tolerance.
+* Better support and documentation for distribution, load balancing and
+  fault tolerance.
 
 * More sophisticated admin tools including password protection,
   clearing logs, displaying a maximum of information at a time, etc.
@@ -91,6 +90,8 @@ Major Items
   unicode strings to output.  So far, Webware works best if you use ordinary
   strings with a consistent encoding throughout the whole application.
 
+* Integrate support for i18n and l10n.
+
 * Plug-ins:
 
   * In ExamplePage, automatically support examples of any plug-in
@@ -104,7 +105,7 @@ General
 * Hunt down: ``@@`` tags (which signify "To Be Done"s), ``FUTURE`` items
   in class doc strings, ``NotImplementedErrors``, ``--`` tags
 
-* Code clean up.
+* Code clean up. Use bin/checksrc and pylint.
 
 * Right now, if the Application itself (as opposed to Servlets) throws
   an exception, it doesn't get captured nicely.  However, it is displayed
@@ -141,15 +142,15 @@ Testing
 Docs
 ~~~~
 
+* Use Sphinx instead of our own tools in DocSupport, use reStructuredText
+  as the format for all docs and maybe also for the docstrings.
+
 * Add a Getting Started Guide and a screencast.
 
 * Beef up the User's Guide and Tutorial.
 
 * User's Guide: Create a caching section to discuss the virtues of doing so
   (the Color example became 12 X faster on the server side).
-
-* Use better tools such as DocUtils, Epydoc or Sphinx for creating the
-  documentation, instead of our tools in the DocSupport folder.
 
 
 Food for thought, considerations, reviews
@@ -161,7 +162,8 @@ Food for thought, considerations, reviews
 * Consider adding a simple helper lib for generating HTML
   (such as SimpleHTMLGen) to the WebUtils package.
 
-* Support `WSGI <http://www.python.org/dev/peps/pep-0333/>`__.
+* Better support for `WSGI <http://www.python.org/dev/peps/pep-0333/>`__.
+  Currently we only have the WSGIAdapter interfacing to the app server.
 
 * Consider this statement from the FastCGI docs:
   "Redirects are handled similar to CGI. Location headers with values
@@ -184,8 +186,9 @@ Food for thought, considerations, reviews
   this would go away with a new one-process-per-application architecture.)
 
 * The ThreadedAppServer is not optimal for multiprocessor systems and modern
-  multi-core CPUs, due to the Python GIL (but maybe this will be solved by
-  the "unladen swallow" project).
+  multi-core CPUs, due to the Python GIL. On Python 2.x, the GIL implementation
+  is particularly bad. Check whether we need to build something new such as
+  a MultiprocessAppServer, or use existing app server or tools such as Twisted.
 
 
 Check out
@@ -204,17 +207,7 @@ Check out
 
 * http://www.zope.org/Members/jim/Info/IPC8/AcquisitionAlgebra/index.html
 
+* http://wsgi.org
+
 * FastCGI related: http://www.tfarmbruster.com/fcgi_sa.htm
 
-
-Down the road
-~~~~~~~~~~~~~
-
-* Multi-language support/localization (e.g., vend data to clients
-  in their preferred written language)
-
-* Consider CORBA standard RMI-IIOP and its potential interaction with WebKit.
-  This technology has been marked for inclusion in J2EE.  I imagine the idea
-  might be that an app server could be used by more than just web browsers.
-  e.g., it could be used programmatically
-  (in a more natural way than simulating a web client).

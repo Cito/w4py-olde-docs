@@ -2,13 +2,13 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
 <title>Beginner Tutorial</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
 <body>
 <div class="document" id="beginner-tutorial">
-<h1 class="header">Beginner Tutorial</h1>
+<h1 class="title">Beginner Tutorial</h1>
 
 <p>Webware for Python</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -65,10 +65,10 @@ $ python /path/to/Webware/bin/MakeAppWorkDir.py -c Context -l Lib \
 <p>You'll now have a directory WebwareTest in your home directory (or of course
 you can put it in some other location). Inside this directory will be several
 subdirectories and a couple files. The only file we'll worry about is
-<tt class="docutils literal"><span class="pre">AppServer</span></tt> (or <tt class="docutils literal"><span class="pre">AppServer.bat</span></tt> if you're on Windows). The directories of
-interest are <tt class="docutils literal"><span class="pre">Context</span></tt> (that you specified with <tt class="docutils literal"><span class="pre">-C</span> <span class="pre">context</span></tt>) where you'll
-be putting your servlets; <tt class="docutils literal"><span class="pre">Configs</span></tt> that holds some configuration files;
-and <tt class="docutils literal"><span class="pre">Lib</span></tt> where you can put your non-servlet code.</p>
+<tt class="docutils literal">AppServer</tt> (or <tt class="docutils literal">AppServer.bat</tt> if you're on Windows). The directories of
+interest are <tt class="docutils literal">Context</tt> (that you specified with <tt class="docutils literal"><span class="pre">-C</span> context</tt>) where you'll
+be putting your servlets; <tt class="docutils literal">Configs</tt> that holds some configuration files;
+and <tt class="docutils literal">Lib</tt> where you can put your non-servlet code.</p>
 <p>For more information about the working directory and setting up the file
 structure for your application, see <a class="reference external" href="ApplicationDevelopment.html">Application Development</a>.</p>
 </div>
@@ -77,7 +77,7 @@ structure for your application, see <a class="reference external" href="Applicat
 <p>For the most part the configuration is fine, but we'll make a couple changes to
 make it easier to develop. For more information on configuration see the
 <a class="reference external" href="Configuration.html">Configuration Guide</a>.</p>
-<p>In the file <tt class="docutils literal"><span class="pre">AppServer.config</span></tt>, change this line:</p>
+<p>In the file <tt class="docutils literal">AppServer.config</tt>, change this line:</p>
 <pre class="literal-block">
 # Original (default setting):
     AutoReload = False
@@ -104,14 +104,14 @@ application in a production environment).</p>
 <h1>Creating and Understanding the Servlet</h1>
 <p>Webware's core concept for serving pages is the <em>servlet</em>. This is a class that
 creates a response given a request.</p>
-<p>The core classes to understanding the servlet are <tt class="docutils literal"><span class="pre">Servlet</span></tt>, <tt class="docutils literal"><span class="pre">HTTPServlet</span></tt>,
-and <tt class="docutils literal"><span class="pre">Page</span></tt>. Also of interest would be the request (<tt class="docutils literal"><span class="pre">Request</span></tt> and
-<tt class="docutils literal"><span class="pre">HTTPRequest</span></tt>) and the response (<tt class="docutils literal"><span class="pre">Response</span></tt> and <tt class="docutils literal"><span class="pre">HTTPResponse</span></tt>)
--- the <tt class="docutils literal"><span class="pre">HTTP-</span></tt> versions of these classes are more interesting.
-There is also a <tt class="docutils literal"><span class="pre">Transaction</span></tt> object, which is solely a container for the
+<p>The core classes to understanding the servlet are <tt class="docutils literal">Servlet</tt>, <tt class="docutils literal">HTTPServlet</tt>,
+and <tt class="docutils literal">Page</tt>. Also of interest would be the request (<tt class="docutils literal">Request</tt> and
+<tt class="docutils literal">HTTPRequest</tt>) and the response (<tt class="docutils literal">Response</tt> and <tt class="docutils literal">HTTPResponse</tt>)
+-- the <tt class="docutils literal">HTTP-</tt> versions of these classes are more interesting.
+There is also a <tt class="docutils literal">Transaction</tt> object, which is solely a container for the
 request and response.</p>
 <p>While there are several levels you can work on while creating your servlet,
-in this tutorial we will work solely with subclassing the <tt class="docutils literal"><span class="pre">Page</span></tt> class.
+in this tutorial we will work solely with subclassing the <tt class="docutils literal">Page</tt> class.
 This class defines a more high-level interface, appropriate for generating HTML
 (though it can be used with any content type). It also provides a number of
 convenience methods.</p>
@@ -133,49 +133,49 @@ class MyServlet(Page):
     def writeContent(self):
         self.write('Hello world!')
 </pre>
-<p>This would be placed in <tt class="docutils literal"><span class="pre">MyServlet.py</span></tt>.
-Webware will create a pool of <tt class="docutils literal"><span class="pre">MyServlet</span></tt> instances, which will be reused.
-Servlets &quot;write&quot; the text of the response (like <tt class="docutils literal"><span class="pre">self.write(&quot;some</span> <span class="pre">text&quot;)</span></tt>).
+<p>This would be placed in <tt class="docutils literal">MyServlet.py</tt>.
+Webware will create a pool of <tt class="docutils literal">MyServlet</tt> instances, which will be reused.
+Servlets &quot;write&quot; the text of the response (like <tt class="docutils literal"><span class="pre">self.write(&quot;some</span> text&quot;)</tt>).
 Webware calls the servlet like this:</p>
 <ul class="simple">
 <li>An unused servlet is taken from the pool, or another servlet is created.</li>
-<li><tt class="docutils literal"><span class="pre">awake(transaction)</span></tt> is called. This is a good place to set up data for
+<li><tt class="docutils literal">awake(transaction)</tt> is called. This is a good place to set up data for
 your servlet. You can put information in instance variables for use later
 on. But be warned -- those instance variables will hang around potentially
-for a long time if you don't delete them later (in <tt class="docutils literal"><span class="pre">sleep</span></tt>).</li>
+for a long time if you don't delete them later (in <tt class="docutils literal">sleep</tt>).</li>
 <li>Several low-level methods are called, which Page isolates you from. We will
 ignore these.</li>
-<li><tt class="docutils literal"><span class="pre">writeHTML()</span></tt> is called. <tt class="docutils literal"><span class="pre">Page</span></tt> implements this just fine, but you can
+<li><tt class="docutils literal">writeHTML()</tt> is called. <tt class="docutils literal">Page</tt> implements this just fine, but you can
 override it if you want total control, or if you want to output something
 other than HTML.</li>
-<li><tt class="docutils literal"><span class="pre">writeDocType()</span></tt> would write something like
-<tt class="docutils literal"><span class="pre">&lt;!DOCTYPE</span> <span class="pre">HTML</span> <span class="pre">PUBLIC</span> <span class="pre">&quot;-//W3C//DTD</span> <span class="pre">HTML</span> <span class="pre">4.01</span> <span class="pre">Transitional//EN&quot;</span>
+<li><tt class="docutils literal">writeDocType()</tt> would write something like
+<tt class="docutils literal">&lt;!DOCTYPE HTML PUBLIC <span class="pre">&quot;-//W3C//DTD</span> HTML 4.01 <span class="pre">Transitional//EN&quot;</span>
 <span class="pre">&quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</span></tt></li>
-<li>The &lt;head&gt; section of the page is written. <tt class="docutils literal"><span class="pre">title()</span></tt> gives the title, and
+<li>The &lt;head&gt; section of the page is written. <tt class="docutils literal">title()</tt> gives the title, and
 you probably want to override it.</li>
-<li><tt class="docutils literal"><span class="pre">writeStyleSheet()</span></tt> is called, if you want to write that or anything else
+<li><tt class="docutils literal">writeStyleSheet()</tt> is called, if you want to write that or anything else
 in the &lt;head&gt; section.</li>
-<li>The &lt;body&gt; tag is written. Have <tt class="docutils literal"><span class="pre">htBodyArgs()</span></tt> return anything you want in
+<li>The &lt;body&gt; tag is written. Have <tt class="docutils literal">htBodyArgs()</tt> return anything you want in
 the &lt;body&gt; tag (like <tt class="docutils literal"><span class="pre">onLoad=&quot;loadImages()&quot;</span></tt>).</li>
-<li><tt class="docutils literal"><span class="pre">writeBodyParts()</span></tt> is called, which you may want to override if you want
+<li><tt class="docutils literal">writeBodyParts()</tt> is called, which you may want to override if you want
 to create a template for other servlets.</li>
-<li><tt class="docutils literal"><span class="pre">writeContent()</span></tt> should write the main content for the page. This is where
+<li><tt class="docutils literal">writeContent()</tt> should write the main content for the page. This is where
 you do most of your display work.</li>
 <li>The response is packaged up, the headers put on the front, cookies handled,
 and it's sent to the browser. This is all done for you.</li>
-<li><tt class="docutils literal"><span class="pre">sleep(transaction)</span></tt> is called. This is where you should clean up anything
+<li><tt class="docutils literal">sleep(transaction)</tt> is called. This is where you should clean up anything
 you might have set up earlier -- open files, open database connections, etc.
-Often it's empty. Note that <tt class="docutils literal"><span class="pre">sleep()</span></tt> is called even if an exception was
+Often it's empty. Note that <tt class="docutils literal">sleep()</tt> is called even if an exception was
 raised at any point in the servlet processing, so it should (if necessary)
 check that each resource was in fact acquired before trying to release it.</li>
 <li>The servlet is placed back into the pool, to be used again. This only happens
 after the transaction is complete -- the servlet won't get reused any earlier.</li>
 </ul>
 <p>You only have to override the portions that you want to. It is not uncommon to
-only override the <tt class="docutils literal"><span class="pre">writeContent()</span></tt> method in a servlet, for instance.</p>
-<p>You'll notice a file <tt class="docutils literal"><span class="pre">context/Main.py</span></tt> in your working directory. You can look
+only override the <tt class="docutils literal">writeContent()</tt> method in a servlet, for instance.</p>
+<p>You'll notice a file <tt class="docutils literal">context/Main.py</tt> in your working directory. You can look
 at it to get a feel for what a servlet might look like. (As an aside, a servlet
-called <tt class="docutils literal"><span class="pre">Main</span></tt> or <tt class="docutils literal"><span class="pre">index</span></tt> will be used analogous to the <tt class="docutils literal"><span class="pre">index.html</span></tt> file).
+called <tt class="docutils literal">Main</tt> or <tt class="docutils literal">index</tt> will be used analogous to the <tt class="docutils literal">index.html</tt> file).
 You can look at it for a place to start experimenting, but here we'll work on
 developing an entire (small) application, introducing the other concepts as we
 go along.</p>
@@ -190,15 +190,15 @@ create thumbnails.</p>
 <p>We'll develop the application in two iterations.</p>
 <div class="section" id="iteration-1-displaying-files">
 <h2>Iteration 1: Displaying Files</h2>
-<p>For simplicity, we will store image files in a subdirectory <tt class="docutils literal"><span class="pre">Pics</span></tt> of the
-default context directory <tt class="docutils literal"><span class="pre">WebwareTest/Context</span></tt> and let the AppServer deliver
-the files. In a production environment, you would place the <tt class="docutils literal"><span class="pre">Pics</span></tt> directory
+<p>For simplicity, we will store image files in a subdirectory <tt class="docutils literal">Pics</tt> of the
+default context directory <tt class="docutils literal">WebwareTest/Context</tt> and let the AppServer deliver
+the files. In a production environment, you would place the <tt class="docutils literal">Pics</tt> directory
 outside of the context and let the web server deliver the files directly.</p>
 <p>For the first iteration, we'll display files that you upload by hand to
-the <tt class="docutils literal"><span class="pre">Pics</span></tt> directory.</p>
-<p>We do this with two servlets -- one servlet <tt class="docutils literal"><span class="pre">Main.py</span></tt> to show the entire
-album, and another <tt class="docutils literal"><span class="pre">View.py</span></tt> for individual pictures. Place these two servlets
-in the default context directory. First, <tt class="docutils literal"><span class="pre">Main.py</span></tt>:</p>
+the <tt class="docutils literal">Pics</tt> directory.</p>
+<p>We do this with two servlets -- one servlet <tt class="docutils literal">Main.py</tt> to show the entire
+album, and another <tt class="docutils literal">View.py</tt> for individual pictures. Place these two servlets
+in the default context directory. First, <tt class="docutils literal">Main.py</tt>:</p>
 <pre class="literal-block">
 from WebKit.Page import Page # the base class for web pages
 import os
@@ -231,10 +231,10 @@ class Main(Page):
                 '&lt;img src=&quot;Pics/%s&quot; width=&quot;%i&quot; height=&quot;%i&quot;&gt;&lt;/a&gt;&lt;/p&gt;'
                 % (url, url, x, y))
 </pre>
-<p>The servlet <tt class="docutils literal"><span class="pre">View</span></tt> takes one URL parameter of <tt class="docutils literal"><span class="pre">filename</span></tt>. You can get
+<p>The servlet <tt class="docutils literal">View</tt> takes one URL parameter of <tt class="docutils literal">filename</tt>. You can get
 the value of a URL parameter like <tt class="docutils literal"><span class="pre">self.request().field('filename')</span></tt> or,
 if you want a default value, you can use <tt class="docutils literal"><span class="pre">self.request().field('filename',</span>
-<span class="pre">defaultValue)</span></tt>. In the likely case you don't want to write <tt class="docutils literal"><span class="pre">self.request()</span></tt>
+defaultValue)</tt>. In the likely case you don't want to write <tt class="docutils literal">self.request()</tt>
 before retrieving each value, do:</p>
 <pre class="literal-block">
 req = self.request()
@@ -244,7 +244,7 @@ self.write(req.field('username'))
 field = self.request().field
 self.write(field('username'))
 </pre>
-<p>So here is our complete <tt class="docutils literal"><span class="pre">View</span></tt> servlet:</p>
+<p>So here is our complete <tt class="docutils literal">View</tt> servlet:</p>
 <pre class="literal-block">
 from WebKit.Page import Page
 import os
@@ -275,7 +275,7 @@ class View(Page):
 through a web interface. Along the way we'll add thumbnail generation using
 PIL, and slighly improve the image index.</p>
 <p>We'll generate thumbnails kind of on demand, so you can still upload files
-manually -- thumbnails will be put in the directory <tt class="docutils literal"><span class="pre">Thumbs</span></tt> and have <tt class="docutils literal"><span class="pre">-tn</span></tt>
+manually -- thumbnails will be put in the directory <tt class="docutils literal">Thumbs</tt> and have <tt class="docutils literal"><span class="pre">-tn</span></tt>
 appended to the name just to avoid confusion:</p>
 <pre class="literal-block">
 from WebKit.Page import Page # the base page class
@@ -328,9 +328,9 @@ class Main(Page):
         self.write('&lt;p style=&quot;text-align:center&quot;&gt;'
             '&lt;a href=&quot;Upload&quot;&gt;Upload an image&lt;/a&gt;&lt;/p&gt;')
 </pre>
-<p>The <tt class="docutils literal"><span class="pre">View</span></tt> servlet we'll leave just like it was.</p>
-<p>We'll add an <tt class="docutils literal"><span class="pre">Upload</span></tt> servlet. Notice we use <tt class="docutils literal"><span class="pre">enctype=&quot;multipart/form-data&quot;</span></tt>
-in the <tt class="docutils literal"><span class="pre">&lt;form&gt;</span></tt> tag -- this is an HTMLism for file uploading (otherwise
+<p>The <tt class="docutils literal">View</tt> servlet we'll leave just like it was.</p>
+<p>We'll add an <tt class="docutils literal">Upload</tt> servlet. Notice we use <tt class="docutils literal"><span class="pre">enctype=&quot;multipart/form-data&quot;</span></tt>
+in the <tt class="docutils literal">&lt;form&gt;</tt> tag -- this is an HTMLism for file uploading (otherwise
 you'll just get the filename and not the file contents). Finally, when the form
 is finished and we have uploaded the image, we redirect them to the viewing
 page by using <tt class="docutils literal"><span class="pre">self.response().sendRedirect(url)</span></tt>:</p>
@@ -365,9 +365,6 @@ class Upload(Page):
 </pre>
 </div>
 </div>
-</div>
-<div class="footer">
-Webware for Python (<a href="http://www.webwareforpython.org">www.webwareforpython.org</a>)
 </div>
 </body>
 </html>
