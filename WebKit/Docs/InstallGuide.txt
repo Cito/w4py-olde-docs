@@ -76,7 +76,7 @@ Python
 ------
 
 Webware of course requires Python. It has been tested with Python
-version ranging from 2.4 to 2.6.  For older Python versions, you can
+version ranging from 2.4 to 2.7.  For older Python versions, you can
 still use the Webware 1.0 branch.  If you get an error message about
 the version, you're probably unwittingly running the wrong version
 of Python.  Change the ``AppServer`` or ``AppServer.bat`` scripts,
