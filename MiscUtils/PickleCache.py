@@ -56,6 +56,9 @@ try:
 except ImportError:
     from pickle import load, dump, HIGHEST_PROTOCOL as maxPickleProtocol
 
+# force version_info into a simple tuple in Python >= 2.7
+versionInfo = tuple(sys.version_info)
+
 
 class PickleCache(object):
     """Simple abstract base class for PickleCacheReader and PickleCacheWriter."""
@@ -141,10 +144,10 @@ class PickleCacheReader(PickleCache):
                                 print 'Pickle protocol (%i) does not match expected (%i).' % (
                                     d['pickle protocol'], pickleProtocol)
                             shouldDeletePickle = True
-                        elif d['python version'] != sys.version_info:
+                        elif d['python version'] != versionInfo:
                             if v:
                                 print 'Python version %s does not match current %s.' % (
-                                    d['python version'], sys.version_info)
+                                    d['python version'], versionInfo)
                             shouldDeletePickle = True
                         else:
                             if v:
@@ -192,7 +195,7 @@ class PickleCacheWriter(PickleCache):
         picklePath = self.picklePath(filename)
         d = {
             'source': source,
-            'python version': sys.version_info,
+            'python version': versionInfo,
             'pickle protocol': pickleProtocol,
             'data': data,
         }
