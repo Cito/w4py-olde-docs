@@ -1,6 +1,8 @@
-"""Funcs.py
+"""MiscUtils.Funcs
 
-Funcs.py, a member of MiscUtils, holds functions that don't fit in anywhere else.
+This module holds functions that don't fit in anywhere else.
+
+You can safely import * from MiscUtils.Funcs if you like.
 
 """
 
@@ -10,6 +12,7 @@ import sys
 import datetime
 import time
 import datetime
+import textwrap
 
 from struct import calcsize
 
@@ -18,6 +21,11 @@ try:
 except ImportError: # Python < 2.5
     from md5 import new as md5
     from sha import new as sha1
+
+__all__ = [
+    'commas', 'charWrap', 'wordWrap', 'excstr', 'hostName', 'localIP',
+    'positive_id', 'safeDescription', 'asclocaltime', 'timestamp',
+    'localTimeDelta', 'uniqueId', 'valueForString']
 
 
 def commas(number):
@@ -62,23 +70,24 @@ def charWrap(s, width, hanging=0):
     """
     if not s:
         return s
-    assert hanging < width
+    if hanging < 0 or width < 1 or hanging >= width:
+        raise ValueError("Invalid width or indentation")
     hanging = ' ' * hanging
     lines = s.splitlines()
     i = 0
     while i < len(lines):
         s = lines[i]
         while len(s) > width:
-            t = s[width:]
-            s = s[:width]
-            lines[i] = s
+            lines[i], s = s[:width].rstrip(), hanging + s[width:].lstrip()
             i += 1
-            lines.insert(i, None)
-            s = hanging + t
-        else:
-            lines[i] = s
+            lines.insert(i, s)
         i += 1
     return '\n'.join(lines)
+
+
+def wordWrap(s, width=78):
+    """Return a version of the string word wrapped to the given width."""
+    return textwrap.fill(s, width)
 
 
 def excstr(e):
@@ -94,20 +103,6 @@ def excstr(e):
     if e is None:
         return None
     return '%s: %s' % (e.__class__.__name__, e)
-
-
-def wordWrap(s, width=78):
-    """Return a version of the string word wrapped to the given width.
-
-    Respects existing newlines in the string.
-
-    Taken from:
-    http://aspn.activestate.com/ASPN/Cookbook/Python/Recipe/148061
-
-    """
-    return reduce(lambda line, word, width=width: "%s%s%s" % (
-        line, ' \n'[(len(line[line.rfind('\n')+1:]) + len(word) >= width)],
-        word), s.split())
 
 
 def hostName():
@@ -188,11 +183,11 @@ def localIP(remote=('www.yahoo.com', 80), useCache=True):
     return _localIP
 
 
-# Addresses can "look negative" on some boxes, some of the time. If you
-# feed a "negative address" to an %x format, Python 2.3 displays it as
-# unsigned, but produces a FutureWarning, because Python 2.4 will display
-# it as signed. So when you want to prodce an address, use positive_id()
-# to obtain it. _address_mask is 2**(number_of_bits_in_a_native_pointer).
+# Addresses can "look negative" on some boxes, some of the time.
+# If you feed a "negative address" to an %x format, modern Python
+# versions will display it as signed. So when you want to produce
+# an address, use positive_id() to obtain it.
+# _address_mask is 2**(number_of_bits_in_a_native_pointer).
 # Adding this to a negative address gives a positive int with the same
 # hex representation as the significant bits in the original.
 # This idea and code were taken from ZODB (http://svn.zope.org).
@@ -219,7 +214,6 @@ def _descExc(reprOfWhat, err):
             reprOfWhat, err.__class__.__name__, err)
     except Exception:
         return '(exception from repr(%s))' % reprOfWhat
-
 
 def safeDescription(obj, what='what'):
     """Return the repr() of obj and its class (or type) for help in debugging.
@@ -268,7 +262,6 @@ def timestamp(t=None):
     """Return a dictionary whose keys give different versions of the timestamp.
 
     The dictionary will contain the following timestamp versions:
-        'numSecs': the number of seconds
         'tuple': (year, month, day, hour, min, sec)
         'pretty': 'YYYY-MM-DD HH:MM:SS'
         'condensed': 'YYYYMMDDHHMMSS'
@@ -282,18 +275,18 @@ def timestamp(t=None):
     formats are generally more appropriate for filenames.
 
     """
-    tuple = time.localtime(t)[:6]
-    pretty = '%4i-%02i-%02i %02i:%02i:%02i' % tuple
-    condensed = '%4i%02i%02i%02i%02i%02i' % tuple
-    dashed = '%4i-%02i-%02i-%02i-%02i-%02i' % tuple
-    return locals()
+    t = time.localtime(t)[:6]
+    return dict(tuple=t,
+        pretty='%4i-%02i-%02i %02i:%02i:%02i' % t,
+        condensed='%4i%02i%02i%02i%02i%02i' % t,
+        dashed='%4i-%02i-%02i-%02i-%02i-%02i' % t)
 
 
 def localTimeDelta(t=None):
     """Return timedelta of local zone from GMT."""
     if t is None:
         t = time.time()
-    dt =datetime.datetime
+    dt = datetime.datetime
     return dt.fromtimestamp(t) - dt.utcfromtimestamp(t)
 
 

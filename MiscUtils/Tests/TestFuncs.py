@@ -1,3 +1,4 @@
+import time
 import unittest
 
 import FixPath
@@ -33,55 +34,93 @@ class TestFuncs(unittest.TestCase):
             source = eval(tests[i])
             result = eval(tests[i+1])
             #print '%r yields %r' % (source, result)
-            assert commas(source) == result, (
-                '%r %r' % (commas(source), result))
+            self.assertEqual(commas(source), result)
             # Now try the source as a string instead of a number:
             source = eval("'%s'" % tests[i])
             #print '%r yields %r' % (source, result)
-            assert commas(source) == result, (
-                '%r %r' % (commas(source), result))
+            self.assertEqual(commas(source), result)
             i += 2
+
+    def testCharWrap(self):
+        self.assertEqual(charWrap("""
+            Sparse is better than dense.
+            Readability counts.""", 34, 16), """
+            Sparse is better than
+                dense.
+            Readability counts.""")
+
+    def testWordWrap(self):
+        # an example with some spaces and newlines
+        msg = """Arthur:  "The Lady of the Lake, her arm clad in the purest \
+shimmering samite, held aloft Excalibur from the bosom of the water, \
+signifying by Divine Providence that I, Arthur, was to carry \
+Excalibur. That is why I am your king!"
+
+Dennis:  "Listen. Strange women lying in ponds distributing swords is \
+no basis for a system of government. Supreme executive power derives \
+from a mandate from the masses, not from some farcical aquatic \
+ceremony!\""""
+
+        for margin in range(20, 200, 29):
+            if margin == 78:
+                s = wordWrap(msg)
+            else:
+                s = wordWrap(msg, margin)
+            for line in s.splitlines():
+                self.assertTrue(len(line) <= margin,
+                    'len=%i, margin=%i, line=%r' % (len(line), margin, line))
+            self.assertEquals(msg.split(), s.split())
+
+    def testExcstr(self):
+        self.assertEqual(excstr(None), None)
+        self.assertEqual(excstr(ValueError('Kawoom!')),
+            'ValueError: Kawoom!')
+
+    def testHostName(self):
+        # About all we can do is invoke hostName() to see that no exceptions
+        # are thrown, and do a little type checking on the return type.
+        host = hostName()
+        self.assertTrue(host is None or isinstance(host, str),
+            'host type = %s, host = %s' % (type(host), repr(host)))
 
     def testLocalIP(self):
         ip = localIP()
-        assert ip and not ip.startswith('127.')
-        assert localIP() == ip # second invocation
-        assert localIP(useCache=None) == ip
-        assert localIP(remote=None, useCache=None) == ip, (
+        self.assertTrue(ip and not ip.startswith('127.'))
+        self.assertEqual(localIP(), ip) # second invocation
+        self.assertEqual(localIP(useCache=None), ip)
+        self.assertEqual(localIP(remote=None, useCache=None), ip,
             'See if this works: localIP(remote=None).'
             ' If this fails, dont worry.')
-        assert localIP(remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80),
-            useCache=None) == ip # not existing remote address
+        self.assertEqual(localIP(
+            remote=('www.aslkdjsfliasdfoivnoiedndfgncvb.com', 80),
+            useCache=None), ip) # not existing remote address
 
-    def testHostName(self):
-        # About all we can do is invoke hostName() to see that no
-        # exceptions are thrown, and do a little type checking on the
-        # return type.
-        host = hostName()
-        assert host is None or isinstance(host, str), (
-            'host type = %s, host = %s' % (type(host), repr(host)))
+    def testPositiveId(self):
+        # About all we can do is invoke positive_id()
+        # to see that no exceptions are thrown and the result is positive.
+        self.assertTrue(positive_id(self) > 0)
 
     def testSafeDescription(self):
         sd = safeDescription
 
         # basics:
         s = sd(1).replace('type=', 'class=')
-        assert s == "what=1 class=<type 'int'>", s
+        self.assertEqual(s, "what=1 class=<type 'int'>")
         s = sd(1, 'x').replace('type=', 'class=')
-        assert s == "x=1 class=<type 'int'>", s
+        self.assertEqual(s, "x=1 class=<type 'int'>")
         s = sd('x').replace('type=', 'class=')
         s = s.replace("<type 'string'>", "<type 'str'>")
-        assert s == "what='x' class=<type 'str'>", s
+        self.assertEqual(s, "what='x' class=<type 'str'>")
 
         class OldStyle:
             pass
         old = OldStyle()
-        assert ('%s.OldStyle' % __name__) in sd(old), sd(old)
+        self.assertTrue('%s.OldStyle' % __name__ in sd(old))
 
         class NewStyle(object):
             pass
         new = NewStyle()
-        assert ('%s.NewStyle' % __name__) in sd(new), sd(new)
+        self.assertTrue('%s.NewStyle' % __name__ in sd(new))
 
         # okay now test that safeDescription eats exceptions from repr():
         class Bogus(object):
@@ -92,16 +131,49 @@ class TestFuncs(unittest.TestCase):
             s = sd(b)
         except Exception:
             s = 'failure: should not throw exception'
-        assert "(exception from repr(obj): KeyError: 'bogus')" in s, s
+        self.assertTrue("(exception from repr(obj): KeyError: 'bogus')" in s)
+
+    def testAsclocaltime(self):
+        self.assertEqual(len(asclocaltime()), 24)
+        t = time.time()
+        self.assertEqual(asclocaltime(t), time.asctime(time.localtime(t)))
+
+    def testTimestamp(self):
+        d = timestamp()
+        self.assertTrue(isinstance(d, dict))
+        self.assertEqual(','.join(sorted(d)), 'condensed,dashed,pretty,tuple')
+        self.assertEqual(len(d['tuple']), 6)
+        self.assertEqual(len(d['condensed']), 14)
+        self.assertEqual(len(d['pretty']), 19)
+        self.assertEqual(len(d['dashed']), 19)
+        t = time.time()
+        d = timestamp(t)
+        t = time.localtime(t)[:6]
+        self.assertEqual(d['tuple'], t)
+        self.assertEqual(d['condensed'], '%4i%02i%02i%02i%02i%02i' % t)
+        self.assertEqual(d['condensed'],
+            d['pretty'].replace('-', '').replace(':', '').replace(' ', ''))
+        self.assertEqual(d['condensed'], d['dashed'].replace('-', ''))
+
+    def testLocalTimeDelta(self):
+        # we only check if the result is a multiple of one hour
+        d = localTimeDelta()
+        self.assertEqual(d.microseconds, 0)
+        self.assertEqual(d.seconds % 3600, 0)
+        self.assertEqual(d.days, 0)
+        d = localTimeDelta(time.time())
+        self.assertEqual(d.microseconds, 0)
+        self.assertEqual(d.seconds % 3600, 0)
+        self.assertEqual(d.days, 0)
 
     def testUniqueId(self):
 
         def checkId(i, sha, past):
-            assert isinstance(i, str)
-            assert len(i) == (sha and 40 or 32)
+            self.assertTrue(isinstance(i, str), type(i))
+            self.assertEqual(len(i), sha and 40 or 32)
             for c in i:
-                assert c in '0123456789abcdef'
-            assert i not in past
+                self.assertTrue(c in '0123456789abcdef')
+            self.assertTrue(i not in past)
             past[i] = i
 
         for sha in (False, True):
@@ -142,33 +214,15 @@ class TestFuncs(unittest.TestCase):
 
         evalCases = [s.strip() for s in evalCases.strip().splitlines()]
         for case in evalCases:
-            assert valueForString(case) == eval(case), (
+            self.assertEqual(valueForString(case), eval(case),
                 'case=%r, valueForString()=%r, eval()=%r'
                 % (case, valueForString(case), eval(case)))
 
         stringCases = [s.strip() for s in stringCases.strip().splitlines()]
         for case in stringCases:
-            assert valueForString(case) == case, (
+            self.assertEqual(valueForString(case), case,
                 'case=%r, valueForString()=%r'
                 % (case, valueForString(case)))
-
-    def testWordWrap(self):
-        # an example with some spaces and newlines
-        msg = """Arthur:  "The Lady of the Lake, her arm clad in the purest \
-shimmering samite, held aloft Excalibur from the bosom of the water, \
-signifying by Divine Providence that I, Arthur, was to carry \
-Excalibur. That is why I am your king!"
-
-Dennis:  "Listen. Strange women lying in ponds distributing swords is \
-no basis for a system of government. Supreme executive power derives \
-from a mandate from the masses, not from some farcical aquatic \
-ceremony!\""""
-
-        for margin in range(20, 200, 20):
-            s = wordWrap(msg, margin)
-            for line in s.splitlines():
-                assert len(line) <= margin, (
-                    'len=%i, margin=%i, line=%r' % (len(line), margin, line))
 
 
 if __name__ == '__main__':

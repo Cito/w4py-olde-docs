@@ -1,136 +1,126 @@
 #!/usr/bin/env python
-"""
-TestFuncs.py
-Webware for Python
 
-This tests the performace of utility functions in WebUtils
-vs. their standard Python alternatives.
+import os
+import sys
+import unittest
 
-"""
+sys.path.insert(1, os.path.abspath('../..'))
 
-import os, string, sys, time
-sys.path.insert(1, os.path.abspath(os.pardir))
-from Funcs import *
-import urllib
+from WebUtils import Funcs
 
-allChars = string.join(map(chr, range(256)), '')
 
-URLEncodeTests = [
-    'NothingIsChangedTest',
-    'This test has spaces',
-    'This test      has     tabs',
-    'This:test:has:colons',
-    ' boundary      ',
-    allChars
-]
+class TestFuncs(unittest.TestCase):
 
-URLDecodeTests = [
-    '%3E and %A7',
-    '%3e and %a7',
-    '& and + and -',
-    'illegal %3g?',
-    'illegal %x1?',
-    '1 % 2 %% 3 %%%4 %%20'
-]
+    def testHtmlEncode(self):
+        f = Funcs.htmlEncode
+        self.assertEqual(f('"1 < 2 & 2 > 1"'),
+            '&quot;1 &lt; 2 &amp; 2 &gt; 1&quot;')
+        self.assertEqual(f('quarks & co', (('&', 'and'),)),
+            'quarks and co')
+        self.assertEqual(f(None), '-')
+        class T(object):
+            @staticmethod
+            def html():
+                return 'bazong!'
+        t = T()
+        self.assertEqual(f(t), 'bazong!')
+        t.html = 'bazz!'
+        self.assertEqual(f(t), 'bazz!')
 
-def TestURLEncode():
-    print 'Test URLEncode'
-    for test in URLEncodeTests:
-        if urlEncode(test) == urllib.quote_plus(test, '/'):
-            print '  Passed test'
-        else:
-            print '  Failed test!'
-            print '    string     = (%s)' % test
-            print '    urlEncode  = (%s)' % urlEncode(test)
-            print '    quote_plus = (%s)' % urllib.quote_plus(test, '/')
-    print
+    def testHtmlEncodeStr(self):
+        f = Funcs.htmlEncodeStr
+        self.assertEqual(f('"1 < 2 & 2 > 1"'),
+            '&quot;1 &lt; 2 &amp; 2 &gt; 1&quot;')
+        self.assertEqual(f('quarks & co', (('&', 'and'),)),
+            'quarks and co')
 
-def TestURLDecode():
-    print 'Test URLDecode'
-    for test in URLDecodeTests:
-        if urlDecode(test) == urllib.unquote_plus(test):
-            print '  Passed test'
-        else:
-            print '  Failed test!'
-            print '    string       = (%s)' % test
-            print '    urlDecode    = (%s)' % urlDecode(test)
-            print '    unquote_plus = (%s)' % urllib.unquote_plus(test)
-    print
+    def testHtmlDecode(self):
+        f = Funcs.htmlDecode
+        self.assertEqual(f('&quot;1 &lt; 2 &amp; 2 &gt; 1&quot;'),
+            '"1 < 2 & 2 > 1"')
+        self.assertEqual(f('quarks and co', (('&', 'and'),)),
+            'quarks & co')
 
-def TestEncodeAndDecode(encodeFunc, decodeFunc, tests):
-    print 'Test %s and %s' % (encodeFunc.__name__, decodeFunc.__name__)
-    for test in tests:
-        if decodeFunc(encodeFunc(test)) == test:
-            print '  Passed test'
-        else:
-            print '  Failed test!'
-            print '    string  = (%s)' % test
-            print '    encoded = (%s)' % encodeFunc(test)
-            print '    decoded = (%s)' % decodeFunc(encodeFunc(test))
-    print
+    def testHtmlRoundTrip(self):
+        t = '<test>\n\t"1 < 2 & 2 > 1"\n</test>'
+        self.assertEqual(Funcs.htmlDecode(Funcs.htmlEncode(t)), t)
 
-def TestURLEncodeAndDecode():
-    TestEncodeAndDecode(urlEncode, urlDecode, URLEncodeTests)
+    def testUrlEncode(self):
+        f = Funcs.urlEncode
+        self.assertEqual(f('"hello, world!"'), '%22hello%2C+world%21%22')
 
-def Benchmark(func, tests, metacount=500, count=20):
-    start = time.time()
-    for majorLoop in xrange(metacount):
-        for test in tests:
-            for minorLoop in xrange(count):
-                func(test)
-    stop = time.time()
-    return stop - start
+    def testUrlDecode(self):
+        f = Funcs.urlDecode
+        self.assertEqual(f('%22hello%2C+world%21%22'), '"hello, world!"')
 
-def BenchmarkURLEncode():
-    print 'Benchmark urlEncode() vs. quote_plus()'
-    tests = URLEncodeTests + map(urlEncode, URLEncodeTests)
-    t1 = Benchmark(urllib.quote_plus, tests)
-    t2 = Benchmark(urlEncode, tests)
-    print '  quote_plus()   = %6.2f secs' % t1
-    print '  urlEncode()    = %6.2f secs' % t2
-    print '  diff           = %6.2f secs' % (t2 - t1)
-    print '  diff %%         = %6.2f %%' % ((t2 - t1) / t1 * 100.0)
-    print '  factor         = %6.2f X' % (t1/t2)
-    print
+    def testUrlRoundTrip(self):
+        t = '<test>\n\t"50% = 50,50?"\n</test>'
+        self.assertEqual(Funcs.urlDecode(Funcs.urlEncode(t)), t)
 
-def BenchmarkURLDecode():
-    print 'Benchmark urlDecode() vs. unquote_plus()'
-    tests = map(urlEncode, URLEncodeTests) + URLDecodeTests
-    t1 = Benchmark(urllib.unquote_plus, tests)
-    t2 = Benchmark(urlDecode, tests)
-    print '  unquote_plus() = %6.2f secs' % t1
-    print '  urlDecode()    = %6.2f secs' % t2
-    print '  diff           = %6.2f secs' % (t2 - t1)
-    print '  diff %%         = %6.2f %%' % ((t2 - t1) / t1 * 100.0)
-    print '  factor         = %6.2f X' % (t1/t2)
-    print
+    def testHtmlDorDict(self):
+        f = Funcs.htmlForDict
+        self.assertEqual(f(dict(foo='bar', answer=42)),
+            '<table class="NiceTable">\n'
+            '<tr><th align="left">answer</th><td>42</td></tr>\n'
+            '<tr><th align="left">foo</th><td>bar</td></tr>\n'
+            '</table>')
+        self.assertEqual(f(dict(foo='ba,zong', bar='ka;woom'),
+                addSpace=dict(foo=',', bar=';')),
+            '<table class="NiceTable">\n'
+            '<tr><th align="left">bar</th><td>ka; woom</td></tr>\n'
+            '<tr><th align="left">foo</th><td>ba, zong</td></tr>\n'
+            '</table>')
+        self.assertEqual(f(dict(foo='barbarabarbarabarbarabarbara'),
+                maxValueLength=12),
+            '<table class="NiceTable">\n'
+            '<tr><th align="left">foo</th><td>barbaraba...</td></tr>\n'
+            '</table>')
+        self.assertEqual(f(dict(foo='zing', bar='zang'),
+                filterValueCallBack=lambda v, k, d:
+                    k == 'bar' and 'zung' or v),
+            '<table class="NiceTable">\n'
+            '<tr><th align="left">bar</th><td>zung</td></tr>\n'
+            '<tr><th align="left">foo</th><td>zing</td></tr>\n'
+            '</table>')
+        self.assertEqual(f(dict(foo='bar'), topHeading='twinkle'),
+            '<table class="NiceTable">\n'
+            '<tr class="TopHeading"><th colspan="2">twinkle</th></tr>\n'
+            '<tr><th align="left">foo</th><td>bar</td></tr>\n'
+            '</table>')
+        self.assertEqual(f(dict(foo='bar'), topHeading=('key', 'value')),
+            '<table class="NiceTable">\n'
+            '<tr class="TopHeading"><th>key</th><th>value</th></tr>\n'
+            '<tr><th align="left">foo</th><td>bar</td></tr>\n'
+            '</table>')
+        self.assertEqual(f({'a & b': 'c & d'}),
+            '<table class="NiceTable">\n'
+            '<tr><th align="left">a &amp; b</th><td>c &amp; d</td></tr>\n'
+            '</table>')
+        self.assertEqual(f({'a & b': 'c &amp; d'}, isEncoded=True),
+            '<table class="NiceTable">\n'
+            '<tr><th align="left">a &amp; b</th><td>c &amp; d</td></tr>\n'
+            '</table>')
 
-HTMLEncodeTests = [
-    'Nothing special.',
-    'Put your HTML tags in <brackets>.',
-    'a & b & c',
-    'A \n newline',
-    'A newline \n x < y < z \n <tag>&<tag>'
-]
+    def testRequestURI(self):
+        f = Funcs.requestURI
+        self.assertEqual(f(dict(REQUEST_URI='http://w4py.org')),
+            'http://w4py.org')
+        self.assertEqual(f(dict(SCRIPT_URL='http://w4py.org',
+            QUERY_STRING='foo=bar')), 'http://w4py.org?foo=bar')
+        self.assertEqual(f(dict(SCRIPT_NAME='/test',
+            QUERY_STRING='foo=bar')), '/test?foo=bar')
 
-def TestHTMLEncodeAndDecode():
-    TestEncodeAndDecode(htmlEncode, htmlDecode, HTMLEncodeTests)
+    def testNormURL(self):
+        f = Funcs.normURL
+        self.assertEqual(f('foo/bar'), 'foo/bar')
+        self.assertEqual(f('/foo/bar'), '/foo/bar')
+        self.assertEqual(f('foo/bar/'), 'foo/bar/')
+        self.assertEqual(f('/foo/bar/../baz/../biz/./'), '/foo/biz/')
+        self.assertEqual(f('/foo/bar/baz/biz/../../../'), '/foo/')
+        self.assertEqual(f('/foo/./././././././'), '/foo/')
+        self.assertEqual(f('/foo/../../../'), '/')
+        self.assertEqual(f('foo///bar'), 'foo/bar')
 
 
 if __name__ == '__main__':
-
-    # To remove allChars, change to 'if 1:'
-    # (With allChars, we look really good - URLEncode() is 6 X faster.
-    # However, it's not a realistic case; reality is 2 X faster,
-    # and with newer Python versions, we don't look so good any more).
-    if 0:
-        del URLEncodeTests[-1]
-
-    # run tests
-    TestURLEncode()
-    TestURLDecode()
-    TestURLEncodeAndDecode()
-    BenchmarkURLEncode()
-    BenchmarkURLDecode()
-
-    TestHTMLEncodeAndDecode()
+    unittest.main()

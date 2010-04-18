@@ -5,11 +5,11 @@ in HTML and web development.
 
 You can safely import * from WebUtils.Funcs if you like.
 
-TO DO
-
-  * Document the 'codes' arg of htmlEncode/Decode.
-
 """
+
+__all__ = [
+    'htmlEncode', 'htmlEncodeStr', 'htmlDecode', 'urlEncode', 'urlDecode',
+    'htmlForDict', 'requestURI', 'normURL']
 
 
 htmlForNone = '-' # used by htmlEncode
@@ -26,6 +26,11 @@ htmlCodesReversed = tuple(reversed(htmlCodes))
 
 
 def htmlEncode(what, codes=htmlCodes):
+    """Return the HTML encoded version of the given object.
+
+    The optional 'codes' parameter allows passing custom translations.
+
+    """
     if what is None:
         return htmlForNone
     if hasattr(what, 'html'):
@@ -44,6 +49,8 @@ def htmlEncodeStr(s, codes=htmlCodes):
 
     This is useful to display a plain ASCII text string on a web page.
 
+    The optional 'codes' parameter allows passing custom translations.
+
     """
     for c, e in codes:
         s = s.replace(c, e)
@@ -55,6 +62,8 @@ def htmlDecode(s, codes=htmlCodesReversed):
 
     This does NOT remove normal HTML tags like <p>.
     It is the inverse of htmlEncode().
+
+    The optional 'codes' parameter allows passing custom translations.
 
     """
     for c, e in codes:
@@ -88,7 +97,7 @@ def htmlForDict(d, addSpace=None, filterValueCallBack=None,
         if maxValueLength and not isEncoded:
             value = str(value)
             if len(value) > maxValueLength:
-                value = value[:maxValueLength] + '...'
+                value = value[:maxValueLength-3] + '...'
         key = htmlEncode(key)
         if not isEncoded:
             value = htmlEncode(value)
