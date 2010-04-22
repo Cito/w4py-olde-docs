@@ -98,15 +98,15 @@ defaultConfig = dict(
     UseCascadingExtensions = True,
     ExtensionCascadeOrder = ['.py', '.psp', '.kid', '.html'],
     ExtraPathInfo = True,
-    ExtensionsToIgnore = [
+    ExtensionsToIgnore = set([
         '.pyc', '.pyo', '.tmpl', '.bak', '.py_bak',
         '.py~', '.psp~', '.kid~', '.html~', '.tmpl~'
-        ],
+        ]),
     ExtensionsToServe = [],
-    FilesToHide = [
+    FilesToHide = set([
         '.*', '*~', '*.bak', '*.py_bak', '*.tmpl',
         '*.pyc', '*.pyo', '__init__.*', '*.config'
-        ],
+        ]),
     FilesToServe = [],
     UnknownFileTypes = dict(
         ReuseServlets = True,
