@@ -84,10 +84,10 @@ which files are hidden, and some of how those files get chosen.
     This is the list of extensions for files to be parsed as PSP.
     Default: ``['.psp']``.
 ``ExtensionsToIgnore``:
-    This is a list of extensions that WebKit will ignore when
+    This is a list or set of extensions that WebKit will ignore when
     autodetecting extensions.  Note that this does not prevent WebKit
     from serving such a file if the extension is given explicitly in a
-    URL.  Default: ``['.pyc', '.pyo', '.py~', '.bak']``.
+    URL.  Default: ``set(['.pyc', '.pyo', '.py~', '.bak'])``.
 ``ExtensionsToServe``:
     This is a list of extensions that WebKit will use exclusively when
     autodetecting extensions.  Note that this does not prevent WebKit
@@ -106,10 +106,10 @@ which files are hidden, and some of how those files get chosen.
     that this will have no effect if the extension is given in the
     URL.  Default: ``[".psp", ".py", ".html"]``.
 ``FilesToHide``:
-    File patters to protect from browsing.  This affects all requests,
-    and these files cannot be retrieved even when the extension is
-    given explicitly.  Default: ``[".*", "*~", "*bak", "*.tmpl",
-    "*.pyc", "*.pyo", "*.config"]``.
+    A list or set of file patterns to protect from browsing.  This affects
+    all requests, and these files cannot be retrieved even when the extension
+    is given explicitly.  Default: ``set([".*", "*~", "*bak", "*.tmpl",
+    "*.pyc", "*.pyo", "*.config"])``.
 ``FilesToServe``:
     File patterns to serve from exclusively.  If the file being served
     for a particulary request does not match one of these patterns an
@@ -508,6 +508,16 @@ AppServer.config
     If True, then additional messages are printed while the AppServer
     runs, most notably information about each request such as size and
     response time.  Default: ``True``.
+``SilentURIs``:
+    If ``Verbose`` is set to True, then you can use this setting to specify
+    URIs for which you don't want to print any messages in the output of the
+    AppServer.  The value is expected to be a regular expression that is
+    compared to the request URI.  For instance, if you want to suppress output
+    for images, JavaScript and CSS files, you can set ``SilentURIs`` to
+    ``'\.(gif|jpg|jpeg|png|js|css)$'`` (though we do not recommend serving
+    static files with Webware; it's much more performant to deliver them
+    directly from the Apache server).  If set to ``None``, messages will be
+    printed for all requests handled by Webware.  Default: ``None``
 ``StartServerThreads``:
     The number of threads in the request handler thread pool that will
     be created when the application server starts.  Default: ``10``.

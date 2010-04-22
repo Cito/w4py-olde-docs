@@ -877,6 +877,7 @@ class Handler(object):
         self._server = server
         self._serverAddress = serverAddress
         self._verbose = server._verbose
+        self._silentURIs = server._silentURIs
 
     def activate(self, sock, requestID):
         """Activate the handler for processing the request.
@@ -987,11 +988,13 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
         # The request object is stored for tracking/debugging purposes.
         self._requestDict = requestDict
         if self._verbose:
-            requestTime = localtime(requestTime)[:6]
             env = requestDict.get('environ')
             uri = env and requestURI(env) or '-'
-            print '%5d  %4d-%02d-%02d %02d:%02d:%02d  %s' % (
-                (requestID,) + requestTime + (uri,))
+            if not self._silentURIs or not self._silentURIs.search(uri):
+                requestDict['verbose'] = True
+                requestTime = localtime(requestTime)[:6]
+                print '%5d  %4d-%02d-%02d %02d:%02d:%02d  %s' % (
+                    (requestID,) + requestTime + (uri,))
 
     def endRequest(self, error=None):
         """Track end of a raw request.
@@ -1001,13 +1004,14 @@ See the Troubleshooting section of the WebKit Install Guide.\r''')
         """
         if self._verbose:
             requestDict = self._requestDict
-            requestID = requestDict['requestID']
-            duration = round((time() - requestDict['time'])*1000)
-            env = requestDict.get('environ')
-            if not error:
-                error = env and requestURI(env) or '-'
-            print '%5d  %14.0f msec  %s\n' % (
-                requestID, duration, error)
+            if requestDict.get('verbose'):
+                requestID = requestDict['requestID']
+                duration = round((time() - requestDict['time'])*1000)
+                if not error:
+                    env = requestDict.get('environ')
+                    error = env and requestURI(env) or '-'
+                print '%5d  %14.0f msec  %s\n' % (
+                    requestID, duration, error)
 
 
 class MonitorHandler(Handler):

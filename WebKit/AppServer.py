@@ -39,6 +39,7 @@ import Profiler
 defaultConfig = dict(
     PrintConfigAtStartUp = True,
     Verbose = True,
+    SilentURIs = None,
     PlugIns = [],
     PlugInDirs = [],
     CheckInterval = 100,
@@ -90,6 +91,13 @@ class AppServer(ConfigurableForServerSidePath):
         self.recordPID()
 
         self._verbose = self.setting('Verbose')
+        if self._verbose:
+            self._silentURIs = self.setting('SilentURIs')
+            if self._silentURIs:
+                import re
+                self._silentURIs = re.compile(self._silentURIs)
+        else:
+            self._silentURIs = None
         self._plugIns = []
         self._requestID = 0
 
