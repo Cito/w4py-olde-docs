@@ -35,14 +35,26 @@ if not workDir:
 from WebKit.Adapters.Adapter import Adapter
 
 
+class StdErr(object):
+    """Auxiliary store for temporary redirection of sys.stderr."""
+    def __init__(self, stderr):
+        if stderr:
+            self.stderr, sys.stderr = sys.stderr, stderr
+        else:
+            self.stderr = None
+    def close(self):
+        if self.stderr:
+            self.stderr, sys.stderr = None, self.stderr
+    def __del__(self):
+        self.close()
+
+
 class WSGIAdapter(Adapter):
     """WSGI application interfacing to the Webware application server."""
 
     def __call__(self, environ, start_response):
         """The actual WSGI application."""
-        errors = environ.get('wsgi.errors', None)
-        if errors is not None:
-            errors, sys.stderr = sys.stderr, errors
+        err = StdErr(environ.get('wsgi.errors', None))
         try:
             inp = environ.get('wsgi.input', None)
             if inp is not None:
@@ -78,9 +90,16 @@ class WSGIAdapter(Adapter):
                         header = None
                         if chunk:
                             yield chunk
-        finally:
-            if errors is not None:
-                sys.stderr = errors
+        except:
+            # This is a workaround for Python 2.4 which does not allow a
+            # yield statement to live in a try block with a finally clause.
+            # Note that this also works if the generator is simply abandoned
+            # even though Python 2.4 does not raise a GeneratorExit, because
+            # if the generator is deleted, the local variable err also gets
+            # deleted and its close() method will be called by its destructor.
+            err.close()
+        else:
+            err.close()
 
 
 # Create one WSGI application instance:
