@@ -98,6 +98,7 @@ class WSGIAdapter(Adapter):
             # if the generator is deleted, the local variable err also gets
             # deleted and its close() method will be called by its destructor.
             err.close()
+            raise # re-raise the original exception
         else:
             err.close()
 
