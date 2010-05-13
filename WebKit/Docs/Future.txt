@@ -55,8 +55,8 @@ Major Items
 
 * Think about a migration path towards Pyhon 3, check code with 2to3 tool.
 
-* Use distutils/setuptools instead of our own installer, use Python eggs
-  instead of our own plug-in concept.
+* Use Distutils/setuptools/Distribute instead of our own installer, use
+  Python eggs and maybe namespace packages instead of our own plug-in concept.
 
 * The installer should try building and/or installing mod_webkit and wkcgi
   automatically.
@@ -151,6 +151,9 @@ Docs
 
 * User's Guide: Create a caching section to discuss the virtues of doing so
   (the Color example became 12 X faster on the server side).
+
+* Clean up the Wiki, removing all the obsolete cruft and summarizing
+  everything that is still useful, moving it to the Sphinx documentation.
 
 
 Food for thought, considerations, reviews
