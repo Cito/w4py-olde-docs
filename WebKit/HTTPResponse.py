@@ -268,6 +268,23 @@ class HTTPResponse(Response):
         if autoFlush is true, the responseStream will flush itself automatically
         from now on.
 
+        Caveat: Some webservers, especially on Win, will still buffer the output
+        from your servlet until it terminates before transmitting the results
+        to the browser. Also, server modules for Apache like mod_deflate or
+        mod_gzip may do buffering of their own that will cause flush() to not
+        result in data being sent immediately to the client. You can prevent
+        this by setting a no-gzip note in the Apache configuration, e.g.
+
+           SetEnvIf Request_URI ^/wk/MyServlet no-gzip=1
+
+        Even the browser may buffer its input before displaying it. For example,
+        Netscape buffered text until it received an end-of-line or the beginning
+        of a tag, and it didn't render tables until the end tag of the outermost
+        table was seen. Some Firefox add-ons also buffer response data before it
+        gets rendered. Some versions of MSIE will only start to display the page
+        after they have received 256 bytes of output, so you may need to send
+        extra whitespace before flushing to get MSIE to display the page.
+
         """
         if not self._committed:
             self.commit()
