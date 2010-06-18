@@ -181,7 +181,6 @@ class ServletFactory(object):
             module = sys.modules.get(fullModuleName)
             if module is not None:
                 return module
-        fp = None
         if isPackageDir:
             # check if __init__.py is in the directory
             packageDir = os.path.join(directory, moduleName)
