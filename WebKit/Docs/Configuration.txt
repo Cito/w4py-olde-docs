@@ -269,6 +269,18 @@ Caching
     persist from one AppServer run to the next.  If you have PSPs that
     take a long time to compile, this can give a speedup.  Default:
     ``False`` (cache will persist).
+``ReloadServletClasses``:
+    During development of an application, servlet classes will be changed
+    very frequently.  The AutoReload mechanism could be used to detect such
+    changes and to reload modules with changed servlet classes, but it would
+    cause an app server restart every time a servlet class is changed.  So
+    by default, modules with servlet classes are reloaded without restarting
+    the server.  This can potentially cause problems when other modules are
+    dependent on the reloaded module because the dependent modules will not
+    be reloaded.  To allow reloading only using the AutoReload mechanism,
+    you can set ``ReloadServletClasses`` to ``False`` in such cases.  Default:
+    ``True`` (quick and dirty reloading).
+
 
 Errors
 ------

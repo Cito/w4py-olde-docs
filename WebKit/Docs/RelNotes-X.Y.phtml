@@ -25,6 +25,15 @@
   <code>SilentURIs</code> you can specify request URIs for which you don't
   want messages with request info to be printed in the server output.
   By default, as earlier, all requests will appear in the server output.</li>
+  <li>Changes in servlet classes are not picked up using the AutoReload
+  mechanism; the corresponding modules are simply reloaded. However, this can
+  cause problems when other modules are dependent on the reloaded modules,
+  e.g. by inheriting from the reloaded servlet class. For such cases,
+  the new <span class="filename">Application.config</span> setting
+  <code>ReloadServletClasses</code>, when set to <code>False</code>, can be
+  used to suppress reloading of servlet classes and utilizing the AutoReload
+  mechanism for reloading the servlet classes instead (Bug 3016673 reported
+  by Patrick Gendron).</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>

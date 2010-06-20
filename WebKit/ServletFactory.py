@@ -45,6 +45,7 @@ class ServletFactory(object):
         self._imp = self._app._imp
         self._cacheClasses = self._app.setting("CacheServletClasses", True)
         self._cacheInstances = self._app.setting("CacheServletInstances", True)
+        self._reloadClasses = self._app.setting("ReloadServletClasses", True)
         # All caches are keyed on the path.
         # _classCache caches the servlet classes, in dictionaries
         # with keys 'mtime' and 'class'.  'mtime' is the
@@ -122,16 +123,13 @@ class ServletFactory(object):
         # and give it a unique name:
         if not fullname or not path.startswith(contextPath):
             remainder = serverSidePathToImport
-            fullmodname = remainder.replace(
+            fullname = remainder.replace(
                 '\\', '_').replace('/', '_').replace('.', '_')
-            if debug:
-                print __file__, ", fullmodname =", fullmodname
-            modname = os.path.splitext(os.path.basename(
+            name = os.path.splitext(os.path.basename(
                 serverSidePathToImport))[0]
-            fp, pathname, stuff = self._imp.find_module(modname,
-                [os.path.dirname(serverSidePathToImport)])
-            module = self._imp.load_module(fullmodname, fp, pathname, stuff)
-            module.__donotreload__ = True
+            moduleDir = os.path.dirname(serverSidePathToImport)
+            module = self._importModuleFromDirectory(fullname, name,
+                moduleDir, forceReload=self._reloadClasses)
             return module
 
         # First, we'll import the context's package.
@@ -158,7 +156,7 @@ class ServletFactory(object):
         name = os.path.splitext(moduleFileName)[0]
         fullname = '%s.%s' % (fullname, name)
         module = self._importModuleFromDirectory(fullname, name,
-            moduleDir, forceReload=True)
+            moduleDir, forceReload=self._reloadClasses)
         return module
 
     def _importModuleFromDirectory(self, fullModuleName, moduleName,
@@ -177,10 +175,9 @@ class ServletFactory(object):
         """
         if debug:
             print __file__, fullModuleName, moduleName, directory
-        if not forceReload:
-            module = sys.modules.get(fullModuleName)
-            if module is not None:
-                return module
+        module = sys.modules.get(fullModuleName)
+        if module is not None and not forceReload:
+            return module
         if isPackageDir:
             # check if __init__.py is in the directory
             packageDir = os.path.join(directory, moduleName)
@@ -195,7 +192,7 @@ class ServletFactory(object):
                 file.close()
         fp, pathname, stuff = self._imp.find_module(moduleName, [directory])
         module = self._imp.load_module(fullModuleName, fp, pathname, stuff)
-        module.__donotreload__ = True
+        module.__donotreload__ = self._reloadClasses
         return module
 
     def loadClass(self, transaction, path):
