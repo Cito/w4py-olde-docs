@@ -12,6 +12,14 @@ from ServletFactory import ServletFactory
 debug = 0
 
 
+try:
+    from mimetypes import init as init_mimetypes
+except ImportError:
+    pass
+else: # workaround for Python issue #5853
+    init_mimetypes()
+
+
 class UnknownFileTypeServletFactory(ServletFactory):
     """The servlet factory for unknown file types.
 
@@ -215,13 +223,9 @@ class UnknownFileTypeServlet(HTTPServlet, Configurable):
         if fileDict is None:
             if debug:
                 print '>> not found in cache'
-            try:
-                mimeType, mimeEncoding = guess_type(filename, False)
-            except Exception:
-                mimeType = None
+            mimeType, mimeEncoding = guess_type(filename, False)
             if mimeType is None:
-                mimeType = 'application/octet-stream'
-                mimeEncoding = None
+                mimeType, mimeEncoding = 'application/octet-stream', None
         else:
             mimeType = fileDict['mimeType']
             mimeEncoding = fileDict['mimeEncoding']
