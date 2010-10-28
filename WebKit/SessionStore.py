@@ -205,9 +205,13 @@ class SessionStore(object):
             except KeyError:
                 pass # session was already deleted by some other thread
             else:
-                if (curTime - session.lastAccessTime() >= session.timeout()
-                        or session.timeout() == 0):
-                    keys.append(key)
+                try:
+                    timeout = session.timeout()
+                    if timeout is not None and (timeout == 0
+                            or curTime >= session.lastAccessTime() + timeout):
+                        keys.append(key)
+                except AttributeError:
+                    raise ValueError('Not a Session object: %r' % session)
         for key in keys:
             try:
                 del self[key]
