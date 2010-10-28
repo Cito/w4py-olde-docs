@@ -333,9 +333,12 @@ class AutoReloadingAppServer(AppServer):
             print 'Restarting AppServer...'
             self.shouldRestart()
             return
-        for f in self._imp.fileList():
-            self.monitorNewModule(f)
+        files = self._imp.fileList().keys()
+        # Monitor all modules which will be loaded from now on
         self._imp.notifyOfNewFiles(self.monitorNewModule)
+        # Monitor all modules which have already been loaded
+        for f in files: # note that files cannot change during this loop
+            self.monitorNewModule(f)
         # Create a pipe so that this thread can be notified when the
         # server is shutdown. We use a pipe because it needs to be an object
         # which will wake up the call to 'select':
