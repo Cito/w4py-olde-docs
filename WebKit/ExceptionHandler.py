@@ -101,7 +101,7 @@ class ExceptionHandler(object):
 
         ExceptionHandler instances are created anew for each exception.
         Instantiating ExceptionHandler completes the process --
-        the caller need not     do anything else.
+        the caller need not do anything else.
 
         """
         # Keep references to the objects

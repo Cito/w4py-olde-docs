@@ -322,7 +322,7 @@ class Application(ConfigurableForServerSidePath):
             shutDownHandler()
         del self._shutDownHandlers
 
-        print "Application has been succesfully shutdown."
+        print "Application has been successfully shutdown."
 
     def addShutDownHandler(self, func):
         """Add a shutdown handler.
@@ -866,7 +866,8 @@ class Application(ConfigurableForServerSidePath):
 
         """
         request = trans.request()
-        editlink = request.adapterName() + "/Admin/EditFile"
+        editlink = (self.setting('IncludeEditLink')
+            and request.adapterName() + "/Admin/EditFile" or None)
         self._exceptionHandlerClass(self, trans, excInfo,
             dict(editlink=editlink))
 
