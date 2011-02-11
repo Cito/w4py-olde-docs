@@ -62,12 +62,16 @@ class PidFile(object):
         try:
             os.kill(pid, 0)
         except OSError, e:
-            if e.errno == 3: # No such process
+            if e.errno == 3: # no such process
                 return False
         except AttributeError:
             if win32api:
-                if not win32api.OpenProcess(1024, False, pid):
-                    return False
+                try:
+                    if not win32api.OpenProcess(1024, False, pid):
+                        return False
+                except win32api.error, e:
+                    if e.winerror == 87: # wrong parameter (no such process)
+                        return False
         return True
 
     @staticmethod
