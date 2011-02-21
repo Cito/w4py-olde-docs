@@ -38,14 +38,17 @@ def getFAM(modules):
     python-fam (_fam): http://python-fam.sourceforge.net
 
     """
+    global fam
+
     for module in modules:
-        global fam
+
         try:
             fam = __import__(module)
         except ImportError:
             fam = None
         if not fam:
             continue
+
         if hasattr(fam, 'GAM_CONNECT') and hasattr(
                 fam, 'WatchMonitor') and hasattr(fam, 'GAMChanged'):
 
@@ -60,12 +63,14 @@ def getFAM(modules):
                 def __init__(self):
                     """Initialize and start monitoring."""
                     self._mon = fam.WatchMonitor()
-                    self._watchlist = []
+                    self._files = []
+                    self._fileset = set()
 
                 def close(self):
                     """Stop monitoring and close."""
-                    for filepath in self._watchlist:
-                        self._mon.stop_watch(filepath)
+                    while self._files:
+                        self._mon.stop_watch(self._files.pop())
+                    self._fileset = set()
                     self._mon.disconnect()
 
                 def fd(self):
@@ -74,8 +79,10 @@ def getFAM(modules):
 
                 def monitorFile(self, filepath):
                     """Monitor one file."""
-                    self._mon.watch_file(filepath, self.callback)
-                    self._watchlist.append(filepath)
+                    if filepath not in self._fileset:
+                        self._mon.watch_file(filepath, self.callback)
+                        self._files.append(filepath)
+                        self._fileset.add(filepath)
 
                 def pending(self):
                     """Check whether an event is pending."""
@@ -93,7 +100,6 @@ def getFAM(modules):
                         fam.GAMCreated: 'created', fam.GAMMoved: 'moved',
                         fam.GAMDeleted: 'deleted'}.get(event)
 
-            break
         elif hasattr(fam, 'FAMConnection') and hasattr(
                 fam, 'open') and hasattr(fam, 'Changed'):
 
@@ -109,11 +115,13 @@ def getFAM(modules):
                     """Initialize and start monitoring."""
                     self._fc = fam.open()
                     self._requests = []
+                    self._fileset = set()
 
                 def close(self):
                     """Stop monitoring and close."""
-                    for request in self._requests:
-                        request.cancelMonitor()
+                    while self._requests:
+                        self._requests.pop().cancelMonitor()
+                    self._fileset = set()
                     self._fc.close()
 
                 def fd(self):
@@ -122,7 +130,10 @@ def getFAM(modules):
 
                 def monitorFile(self, filepath):
                     """Monitor one file."""
-                    self._requests.append(self._fc.monitorFile(filepath, None))
+                    if filepath not in self._fileset:
+                        self._requests.append(
+                                self._fc.monitorFile(filepath, None))
+                        self._fileset.add(filepath)
 
                 def pending(self):
                     """Check whether an event is pending."""
@@ -138,11 +149,16 @@ def getFAM(modules):
                         fam.Deleted: 'deleted'}.get(event.code)
                     return changed, event.filename
 
-            break
-    else:
-        FAM = None
-    if FAM:
-        return FAM()
+        else:
+            FAM = None
+
+        if FAM:
+            try:
+                return FAM()
+            except Exception, e:
+                print "Error loading %s: %s" % (FAM.name(), str(e))
+            FAM = None
+        fam = None
 
 
 class AutoReloadingAppServer(AppServer):
@@ -213,7 +229,7 @@ class AutoReloadingAppServer(AppServer):
                     self._fam = getFAM(famModules)
                     self._pipe = None
                 except Exception, e:
-                    print "Error loading FAM:", str(e)
+                    print "Error loading FAM: %" % str(e)
                     self._fam = None
                 if not self._fam:
                     print 'FAM not available, fall back to polling.'
