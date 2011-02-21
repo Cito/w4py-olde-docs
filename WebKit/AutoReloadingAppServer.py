@@ -27,13 +27,14 @@ defaultConfig = dict(
     AutoReload = False,
     AutoReloadPollInterval = 1, # in seconds
     UseImportSpy = True,
-    UseFAMModules = 'gamin _fam')
+    UseFAMModules = 'pyinotify gamin _fam')
 
 
 def getFAM(modules):
     """Get FAM object based on the modules specified.
 
     Currently supported are
+    pyinotify: http://github.com/seb-m/pyinotify
     python-gamin (gamin): http://www.gnome.org/~veillard/gamin/
     python-fam (_fam): http://python-fam.sourceforge.net
 
@@ -49,7 +50,64 @@ def getFAM(modules):
         if not fam:
             continue
 
-        if hasattr(fam, 'GAM_CONNECT') and hasattr(
+        if hasattr(fam, 'WatchManager') and hasattr(
+                fam, 'Notifier') and hasattr(fam, 'IN_MODIFY'):
+
+
+            class FAM(object):
+                """Simple File Alteration Monitor based on pyinotify"""
+
+                @staticmethod
+                def name():
+                    return "pyinotify"
+
+                def __init__(self):
+                    """Initialize and start monitoring."""
+                    self._wm = fam.WatchManager()
+                    self._mask = fam.IN_MODIFY | fam.IN_CREATE
+                    self._notifier = fam.Notifier(
+                        self._wm, self.callback, timeout=0)
+                    self._files = set()
+                    self._queue = []
+
+                def close(self):
+                    """Stop monitoring and close."""
+                    self._files = set()
+                    self._notifier.stop()
+
+                def fd(self):
+                    """Get file descriptor for monitor."""
+                    return self._wm.get_fd()
+
+                def monitorFile(self, filepath):
+                    """Monitor one file."""
+                    if filepath not in self._files:
+                        self._wm.add_watch(filepath, self._mask)
+                        self._files.add(filepath)
+
+                def pending(self):
+                    """Check whether an event is pending."""
+                    if not self._queue:
+                        if self._notifier.check_events():
+                            self._notifier.read_events()
+                        self._notifier.process_events()
+                    return self._queue
+
+                def nextFile(self):
+                    """Get next file and return whether it has changed."""
+                    return self._queue.pop(0)
+
+                def callback(self, event):
+                    """Callback function for the Notifier."""
+                    self._queue.append(({fam.IN_MODIFY: 'changed',
+                        fam.IN_CREATE: 'created',
+                        fam.IN_MOVE_SELF: 'moved',
+                        fam.IN_DELETE_SELF: 'deleted',
+                        fam.IN_IGNORED: 'changed'}.get(event.mask),
+                        event.pathname))
+
+
+        elif hasattr(fam, 'GAM_CONNECT') and hasattr(
                 fam, 'WatchMonitor') and hasattr(fam, 'GAMChanged'):
 
 
