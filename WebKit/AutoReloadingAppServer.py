@@ -63,14 +63,15 @@ def getFAM(modules):
                 def __init__(self):
                     """Initialize and start monitoring."""
                     self._mon = fam.WatchMonitor()
-                    self._files = []
-                    self._fileset = set()
+                    self._watchlist = []
+                    self._files = set()
 
                 def close(self):
                     """Stop monitoring and close."""
-                    while self._files:
-                        self._mon.stop_watch(self._files.pop())
-                    self._fileset = set()
+                    watchlist = self._watchlist
+                    while watchlist:
+                        self._mon.stop_watch(watchlist.pop())
+                    self._files = set()
                     self._mon.disconnect()
 
                 def fd(self):
@@ -79,10 +80,10 @@ def getFAM(modules):
 
                 def monitorFile(self, filepath):
                     """Monitor one file."""
-                    if filepath not in self._fileset:
+                    if filepath not in self._files:
                         self._mon.watch_file(filepath, self.callback)
-                        self._files.append(filepath)
-                        self._fileset.add(filepath)
+                        self._watchlist.append(filepath)
+                        self._files.add(filepath)
 
                 def pending(self):
                     """Check whether an event is pending."""
@@ -115,13 +116,14 @@ def getFAM(modules):
                     """Initialize and start monitoring."""
                     self._fc = fam.open()
                     self._requests = []
-                    self._fileset = set()
+                    self._files = set()
 
                 def close(self):
                     """Stop monitoring and close."""
-                    while self._requests:
-                        self._requests.pop().cancelMonitor()
-                    self._fileset = set()
+                    requests = self._requests
+                    while requests:
+                        requests.pop().cancelMonitor()
+                    self._files = set()
                     self._fc.close()
 
                 def fd(self):
@@ -130,10 +132,10 @@ def getFAM(modules):
 
                 def monitorFile(self, filepath):
                     """Monitor one file."""
-                    if filepath not in self._fileset:
+                    if filepath not in self._files:
                         self._requests.append(
                                 self._fc.monitorFile(filepath, None))
-                        self._fileset.add(filepath)
+                        self._files.add(filepath)
 
                 def pending(self):
                     """Check whether an event is pending."""
