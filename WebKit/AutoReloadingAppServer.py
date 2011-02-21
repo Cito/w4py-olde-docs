@@ -47,6 +47,9 @@ def getFAM(modules):
             fam = __import__(module)
         except ImportError:
             fam = None
+        except Exception, e:
+            print "Error loading %s: %s" % (module, str(e))
+            fam = None
         if not fam:
             continue
 
@@ -216,7 +219,7 @@ def getFAM(modules):
             try:
                 return FAM()
             except Exception, e:
-                print "Error loading %s: %s" % (FAM.name(), str(e))
+                print "Error starting %s: %s" % (FAM.name(), str(e))
             FAM = None
         fam = None
 
@@ -289,7 +292,7 @@ class AutoReloadingAppServer(AppServer):
                     self._fam = getFAM(famModules)
                     self._pipe = None
                 except Exception, e:
-                    print "Error loading FAM: %" % str(e)
+                    print "Error loading FAM: %s" % str(e)
                     self._fam = None
                 if not self._fam:
                     print 'FAM not available, fall back to polling.'
