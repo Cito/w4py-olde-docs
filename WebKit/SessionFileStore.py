@@ -60,7 +60,7 @@ class SessionFileStore(SessionStore):
                 raise KeyError(key) # session file not found
             try:
                 try:
-                    item = self.decoder()(sessionFile)
+                    value = self.decoder()(sessionFile)
                 finally:
                     sessionFile.close()
             except Exception:
@@ -73,29 +73,35 @@ class SessionFileStore(SessionStore):
                 raise KeyError(key)
         finally:
             self._lock.release()
-        return item
+        return value
 
     def __setitem__(self, key, value):
         """Set a session item, saving it to a session file."""
-        filename = self.filenameForKey(key)
-        self._lock.acquire()
-        try:
+        dirty = value.isDirty()
+        if self._alwaysSave or dirty:
+            filename = self.filenameForKey(key)
+            self._lock.acquire()
             try:
-                sessionFile = open(filename, 'wb')
+                if dirty:
+                    value.setDirty(False)
                 try:
+                    sessionFile = open(filename, 'wb')
                     try:
-                        self.encoder()(value, sessionFile)
-                    finally:
-                        sessionFile.close()
-                except Exception:
-                    # remove the session file because it is corrupt
-                    os.remove(filename)
-                    raise # raise original exception
-            except Exception: # error pickling the session
-                print "Error saving session to disk:", key
-                self.application().handleException()
-        finally:
-            self._lock.release()
+                        try:
+                            self.encoder()(value, sessionFile)
+                        finally:
+                            sessionFile.close()
+                    except Exception:
+                        # remove the session file because it is corrupt
+                        os.remove(filename)
+                        raise # raise original exception
+                except Exception: # error pickling the session
+                    if dirty:
+                        value.setDirty()
+                    print "Error saving session to disk:", key
+                    self.application().handleException()
+            finally:
+                self._lock.release()
 
     def __delitem__(self, key):
         """Delete a session item, removing its session file."""
@@ -172,8 +178,8 @@ class SessionFileStore(SessionStore):
 
     def storeSession(self, session):
         """Save session, writing it to the session file now."""
-        key = session.identifier()
-        self[key] = session
+        if self._alwaysSave or session.isDirty():
+            self[session.identifier()] = session
 
     def storeAllSessions(self):
         """Permanently save all sessions in the store."""

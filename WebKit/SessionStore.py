@@ -61,7 +61,7 @@ class SessionStore(object):
 
         """
         self._app = app
-
+        self._alwaysSave = app._alwaysSaveSessions
         self._encoder = dumpWithHighestProtocol
         self._decoder = load
 

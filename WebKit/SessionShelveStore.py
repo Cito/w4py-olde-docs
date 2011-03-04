@@ -48,11 +48,20 @@ class SessionShelveStore(SessionStore):
     def __setitem__(self, key, value):
         """Set a session item, writing it to the store."""
         # concurrent write access is not supported
-        self._lock.acquire()
-        try:
-            self._store[key] = value
-        finally:
-            self._lock.release()
+        dirty = value.isDirty()
+        if self._alwaysSave or dirty:
+            self._lock.acquire()
+            try:
+                if dirty:
+                    value.setDirty(False)
+                try:
+                    self._store[key] = value
+                except Exception:
+                    if dirty:
+                        value.setDirty()
+                    raise # raise original exception
+            finally:
+                self._lock.release()
 
     def __delitem__(self, key):
         """Delete a session item from the store."""

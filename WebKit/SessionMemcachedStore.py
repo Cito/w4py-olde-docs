@@ -107,18 +107,24 @@ class SessionMemcachedStore(SessionStore):
             raise KeyError(key)
         return value
 
-    def __setitem__(self, key, item):
+    def __setitem__(self, key, value):
         """Set a session item, writing it to the store."""
         if debug:
-            print ">> setitem(%s, %s)" % (key, item)
-        try:
-            if not self._client.set(self.mcKey(key), item,
-                    time=self._sessionTimeout):
-                raise ValueError("Setting value in the memcache failed.")
-        except Exception, exc:
-            # Not able to store the session is a failure
-            print "Error saving session '%s' to memcache: %s" % (key, exc)
-            self.application().handleException()
+            print ">> setitem(%s, %s)" % (key, value)
+        dirty = value.isDirty()
+        if self._alwaysSave or dirty:
+            if dirty:
+                value.setDirty(False)
+            try:
+                if not self._client.set(self.mcKey(key), value,
+                        time=self._sessionTimeout):
+                    raise ValueError("Setting value in the memcache failed.")
+            except Exception, exc:
+                if dirty:
+                    value.setDirty()
+                # Not able to store the session is a failure
+                print "Error saving session '%s' to memcache: %s" % (key, exc)
+                self.application().handleException()
 
     def __delitem__(self, key):
         """Delete a session item from the store.

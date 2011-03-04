@@ -156,6 +156,15 @@ which files are hidden, and some of how those files get chosen.
     Determines the amount of time (expressed in minutes) that passes
     before a user's session will timeout.  When a session times out,
     all data associated with that session is lost.  Default: ``60``.
+``AlwaysSaveSessions``:
+    If False, then sessions will only be saved if they have been changed.
+    This is more performant and avoids problems with concurrent requests
+    made by the same user if sessions are not shared between these requests,
+    as is the case for session stores other than ``Memory`` or ``Dynamic``.
+    Note that in this case the last access time is not saved either, so
+    sessions may time out if they are not altered. You can call ``setDirty()``
+    on sessions to force saving unaltered sessions in this case.  If True,
+    then sessions will always be saved.  Default: ``True``.
 ``IgnoreInvalidSession``:
     If False, then an error message will be returned to the user if
     the user's session has timed out or doesn't exist.  If True, then

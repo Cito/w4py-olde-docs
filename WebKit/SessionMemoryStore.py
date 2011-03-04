@@ -47,6 +47,7 @@ class SessionMemoryStore(SessionStore):
 
     def __setitem__(self, key, value):
         """Set a session item, saving it to the store."""
+        value.setDirty(False)
         self._store[key] = value
 
     def __delitem__(self, key):
@@ -90,9 +91,10 @@ class SessionMemoryStore(SessionStore):
 
     def storeSession(self, session):
         """Save already potentially changed session in the store."""
-        key = session.identifier()
-        if key not in self or self[key] is not session:
-            self[key] = session
+        if self._alwaysSave or session.isDirty():
+            key = session.identifier()
+            if key not in self or self[key] is not session:
+                self[key] = session
 
     def storeAllSessions(self):
         """Permanently save all sessions in the store."""

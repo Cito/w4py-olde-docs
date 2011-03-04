@@ -96,9 +96,10 @@ class SessionDynamicStore(SessionStore):
             finally:
                 self._lock.release()
 
-    def __setitem__(self, key, item):
+    def __setitem__(self, key, value):
         """Set a sessing item, saving it to the memory store for now."""
-        self._memoryStore[key] = item
+        value.setDirty(False)
+        self._memoryStore[key] = value
 
     def __delitem__(self, key):
         """Delete a session item from the memory and the file store."""
@@ -208,19 +209,20 @@ class SessionDynamicStore(SessionStore):
 
     def storeSession(self, session):
         """Save potentially changed session in the store."""
-        key = session.identifier()
-        self._lock.acquire()
-        try:
-            if key in self:
-                if key in self._memoryStore:
-                    if self._memoryStore[key] is not session:
-                        self._memoryStore[key] = session
+        if self._alwaysSave or session.isDirty():
+            key = session.identifier()
+            self._lock.acquire()
+            try:
+                if key in self:
+                    if key in self._memoryStore:
+                        if self._memoryStore[key] is not session:
+                            self._memoryStore[key] = session
+                    else:
+                        self._fileStore[key] = session
                 else:
-                    self._fileStore[key] = session
-            else:
-                self[key] = session
-        finally:
-            self._lock.release()
+                    self[key] = session
+            finally:
+                self._lock.release()
 
     def storeAllSessions(self):
         """Permanently save all sessions in the store."""

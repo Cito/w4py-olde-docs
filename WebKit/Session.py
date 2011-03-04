@@ -49,7 +49,7 @@ class Session(object):
 
     def __init__(self, trans, identifier=None):
         self._lastAccessTime = self._creationTime = time()
-        self._isExpired = False
+        self._isExpired = self._dirty = False
         self._numTrans = 0
         self._values = {}
         app = trans.application()
@@ -106,6 +106,14 @@ class Session(object):
         """
         return self._identifier
 
+    def isDirty(self):
+        """Check whether the session is dirty (has unsaved changes)."""
+        return self._dirty
+
+    def setDirty(self, dirty=True):
+        """Set the dirty status of the session."""
+        self._dirty = dirty
+
     def isExpired(self):
         """Check whether the session has been previously expired.
 
@@ -137,6 +145,7 @@ class Session(object):
         """
         self._lastAccessTime = 0
         self._values = {}
+        self._dirty = False
         self._timeout = 0
 
 
@@ -153,9 +162,11 @@ class Session(object):
 
     def setValue(self, name, value):
         self._values[name] = value
+        self._dirty = True
 
     def delValue(self, name):
         del self._values[name]
+        self._dirty = True
 
     def values(self):
         return self._values
@@ -233,7 +244,7 @@ class Session(object):
     ## Exception reports ##
 
     _exceptionReportAttrNames = \
-        'lastAccessTime isExpired numTrans timeout values'.split()
+        'isDirty isExpired lastAccessTime numTrans timeout values'.split()
 
     def writeExceptionReport(self, handler):
         handler.writeTitle(self.__class__.__name__)
