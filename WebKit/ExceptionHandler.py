@@ -535,7 +535,6 @@ class ExceptionHandler(object):
             body.close()
             message.attach(part)
             part = Message()
-            add_header = part.add_header
             # now add htmlErrMsg
             part.add_header('Content-Transfer-Encoding', '7bit')
             part.add_header('Content-Description',
