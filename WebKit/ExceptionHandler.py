@@ -499,15 +499,11 @@ class ExceptionHandler(object):
     def emailException(self, htmlErrMsg):
         """Email the exception.
 
-        Emails the exception, either as an attachment,
-        or in the body of the mail.
+        Send the exception via mail, either as an attachment,
+        or as the body of the mail.
 
         """
-        if Message:
-            message = Message()
-        else:
-            message = StringIO()
-            writer = MimeWriter(message)
+        message = Message()
 
         # Construct the message headers
         headers = self.setting('ErrorEmailHeaders').copy()
@@ -515,11 +511,10 @@ class ExceptionHandler(object):
         headers['Mime-Version'] = '1.0'
         headers['Subject'] = headers.get('Subject',
             '[WebKit Error]') + ' %s: %s' % sys.exc_info()[:2]
-        add_header = Message and message.add_header or writer.addheader
         for h, v in headers.items():
             if isinstance(v, (list, tuple)):
                 v = ','.join(v)
-            add_header(h, v)
+            message.add_header(h, v)
 
         # Construct the message body
         if self.setting('EmailErrorReportAsAttachment'):
@@ -530,48 +525,29 @@ class ExceptionHandler(object):
                 ' the full HTML error report from WebKit is attached.\n\n'
                     % (self.servletPathname(),
                         asclocaltime(self._time), self._time))
-            if Message:
-                message.set_type('multipart/mixed')
-                part = Message()
-                part.set_type('text/plain')
-                body = StringIO()
-                body.write(text)
-                traceback.print_exc(file=body)
-                part.set_payload(body.getvalue())
-                body.close()
-                message.attach(part)
-                part = Message()
-                add_header = part.add_header
-            else:
-                writer.startmultipartbody('mixed')
-                part = writer.nextpart()
-                body = part.startbody('text/plain')
-                body.write(text)
-                traceback.print_exc(file=body)
-                part = writer.nextpart()
-                add_header = part.addheader
+            message.set_type('multipart/mixed')
+            part = Message()
+            part.set_type('text/plain')
+            body = StringIO()
+            body.write(text)
+            traceback.print_exc(file=body)
+            part.set_payload(body.getvalue())
+            body.close()
+            message.attach(part)
+            part = Message()
+            add_header = part.add_header
             # now add htmlErrMsg
-            add_header('Content-Transfer-Encoding', '7bit')
-            add_header('Content-Description',
+            part.add_header('Content-Transfer-Encoding', '7bit')
+            part.add_header('Content-Description',
                 'HTML version of WebKit error message')
-            if Message:
-                add_header('Content-Disposition',
-                    'attachment', filename='WebKitErrorMsg.html')
-                part.set_type('text/html')
-                part.set_payload(htmlErrMsg)
-                message.attach(part)
-            else:
-                body = part.startbody('text/html; name=WebKitErrorMsg.html')
-                body.write(htmlErrMsg)
-                writer.lastpart()
+            part.add_header('Content-Disposition',
+                'attachment', filename='WebKitErrorMsg.html')
+            part.set_type('text/html')
+            part.set_payload(htmlErrMsg)
+            message.attach(part)
         else:
-            if Message:
-                message.set_type('text/html')
-                message.set_payload(htmlErrMsg, 'us-ascii')
-            else:
-                writer.addheader('Content-Type', 'text/html; charset=us-ascii')
-                body = writer.startbody('text/html')
-                body.write(htmlErrMsg)
+            message.set_type('text/html')
+            message.set_payload(htmlErrMsg, 'us-ascii')
 
         # Send the message
         server = self.setting('ErrorEmailServer')
@@ -625,11 +601,7 @@ class ExceptionHandler(object):
                 server.starttls()
                 server.ehlo()
             server.login(user, passwd)
-        if Message:
-            body = message.as_string()
-        else:
-            body = message.getvalue()
-            message.close()
+        body = message.as_string()
         server.sendmail(headers['From'], headers['To'], body)
         try:
             server.quit()
@@ -741,7 +713,6 @@ table.NiceTable table.NiceTable th {
 }
 -->
 </style>''')
-
 
 def htTitle(name):
     """Format a `name` as a section title."""
