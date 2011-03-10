@@ -592,20 +592,22 @@ class ExceptionHandler(object):
             server = smtplib.SMTP(server, port)
         else:
             server = smtplib.SMTP(server)
-        server.set_debuglevel(0)
-        if user and passwd and not popserver:
-            # SMTP-AUTH
-            server.ehlo()
-            if server.has_extn('starttls'):
-                server.starttls()
-                server.ehlo()
-            server.login(user, passwd)
-        body = message.as_string()
-        server.sendmail(headers['From'], headers['To'], body)
         try:
-            server.quit()
-        except Exception:
-            pass
+            server.set_debuglevel(0)
+            if user and passwd and not popserver:
+                # SMTP-AUTH
+                server.ehlo()
+                if server.has_extn('starttls'):
+                    server.starttls()
+                    server.ehlo()
+                server.login(user, passwd)
+            body = message.as_string()
+            server.sendmail(headers['From'], headers['To'], body)
+        finally:
+            try:
+                server.quit()
+            except Exception:
+                pass
 
 
     ## Filtering ##
