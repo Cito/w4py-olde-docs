@@ -36,7 +36,6 @@ class HTTPRequest(Request):
             self._fields = FieldStorage.FieldStorage(
                 self._input, environ=self._environ,
                 keep_blank_values=True, strict_parsing=False)
-            self._fields.parse_qs()
             self._cookies = Cookie()
             if 'HTTP_COOKIE' in self._environ:
                 # Protect the loading of cookies with an exception handler,

@@ -10,22 +10,36 @@ import cgi, os, urllib
 
 
 class FieldStorage(cgi.FieldStorage):
+    """Modified FieldStorage class for POST requests with query strings.
 
-    def __init__(self, fp=None, headers=None, outerboundary="",
+    Parameters in the query string which have not been sent via POST are
+    appended to the field list. This is different from the behavior of
+    Python versions before 2.6 which completely ignored the query string in
+    POST request, but it's also different from the behavior of the later Python
+    versions which append values from the query string to values sent via POST
+    for parameters with the same name. With other words, our FieldStorage class
+    overrides the query string parameters with the parameters sent via POST.
+
+    """
+
+    def __init__(self, fp=None, headers=None, outerboundary='',
             environ=os.environ, keep_blank_values=False, strict_parsing=False):
-        self._environ = environ
-        cgi.FieldStorage.__init__(self, fp, headers, outerboundary,
-            environ, keep_blank_values, strict_parsing)
+        method = environ.get('REQUEST_METHOD', 'GET').upper()
+        qs_on_post = method not in ('GET', 'HEAD') and environ.get(
+            'QUERY_STRING', None) or None
+        if qs_on_post:
+            environ['QUERY_STRING'] = ''
+        try:
+            cgi.FieldStorage.__init__(self, fp, headers, outerboundary,
+                environ, keep_blank_values, strict_parsing)
+        finally:
+            if qs_on_post:
+                environ['QUERY_STRING'] = qs_on_post
+        if qs_on_post:
+            self.add_qs(qs_on_post)
 
-    def parse_qs(self):
-        """Explicitly parse the query string, even if it's a POST request."""
-        method = self._environ.get('REQUEST_METHOD', '').upper()
-        if method in ('GET', 'HEAD'):
-            return # bail because cgi.FieldStorage already did this
-        qs = self._environ.get('QUERY_STRING')
-        if not qs:
-            return # bail if no query string
-
+    def add_qs(self, qs):
+        """Add all non-existing parameters from the given query string."""
         r = {}
         for name_value in qs.split('&'):
             nv = name_value.split('=', 2)
@@ -40,14 +54,13 @@ class FieldStorage(cgi.FieldStorage):
                     r[name].append(value)
                 else:
                     r[name] = [value]
-
-        # Only append values that aren't already in the FieldStorage's keys;
-        # this makes POSTed vars override vars on the query string.
-        if not self.list:
+        if self.list is None:
             # This makes sure self.keys() are available, even
             # when valid POST data wasn't encountered.
             self.list = []
         for key in r:
             if key not in self:
+                # Only append values that aren't already the FieldStorage;
+                # this makes POSTed vars override vars on the query string.
                 for value in r[key]:
                     self.list.append(cgi.MiniFieldStorage(key, value))

@@ -10,23 +10,23 @@
 /Welcome.py \
 /Examples/Welcome \
 /Examples/ \
-/Examples/Welcome.py   --> Show /Examples/Welcome
+/Examples/Welcome.py --> Show /Examples/Welcome
 /Admin/ \
 /Admin/Main --> Show admin pages
 
 # Redirects
-                       --> Redirect to /
-/Admin                 --> Redirect to /Admin/
-/Examples              --> Redirect to /Examples/
+ --> Redirect to /
+/Admin --> Redirect to /Admin/
+/Examples --> Redirect to /Examples/
 
 # Display files
 /Testing/Dir/File.html --> Display the file
 /Testing/Dir \
-/Testing/Dir/          --> Display the index file
+/Testing/Dir/ --> Display the index file
 
 # Bad: Slashes after files
 /Welcome/ \
-/Examples/Welcome/     --> Error 404: Not Found<br>if ExtraPathInfo is not set
+/Examples/Welcome/ --> Error 404: Not Found<br>if ExtraPathInfo is not set
 
 # Bad: Unknown URLs (wrong name, slashes after files)
 /BadURL \
@@ -51,6 +51,9 @@
 /Testing/Forward1 --> Forward1Target
 /Testing/Forward2 --> Dir/Forward2Target
 /Testing/Dir/Forward3 --> Forward3Target
+
+# Fields
+/Testing/FieldStorage --> Test of WebUtils.FieldStorage
 
 # Cookies
 /Testing/SetCookie --> Test of HTTPResponse.setCookie

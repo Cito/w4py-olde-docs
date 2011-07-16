@@ -160,6 +160,19 @@ find "<h2><tt>Forward3Target</tt></h2>"
 notfind "Test cases"
 back
 
+go FieldStorage
+code 200
+title FieldStorage
+find "FieldStorage class can be tested here"
+find "press the button"
+notfind "Test cases"
+submit
+find "Everything ok"
+find "FieldStorage works as expected"
+follow "Back to the test cases overview."
+code 200
+find "Test cases"
+
 go SetCookie
 code 200
 title SetCookie

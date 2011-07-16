@@ -64,6 +64,14 @@
   isn't necessary here any more).</li>
   <li>For some kinds of bad URLs, the URLParser raised an AssertionError
   instead of HTTPNotFound.</li>
+  <li>The modified <code>FieldStorage</code> class used by WebKit did not work
+  as before with Python 2.6 and newer. These versions already add query string
+  parameters to the fields passed via POST, but differently to how we did this
+  before. In WebKit, POST parameters used to completely override query string
+  parameters, the values were not appended to possibly existing values in the
+  query string. In order to stay compatible and because it seems to be more
+  reasonable, we restored the old behavior even for newer versions of Python
+  (thanks to Fionn Behrens for bringing this up).</li>
 </ul>
 
 <a name="Deprecations"></a><h2>Deprecations</h2>
