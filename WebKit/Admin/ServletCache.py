@@ -21,10 +21,14 @@ class ServletCache(AdminSecurity):
         return 'Servlet Cache'
 
     def writeContent(self):
+        wr = self.writeln
         factories = [factory for factory in ServletFactoryManager._factories
             if factory._classCache]
-        req = self.request()
-        wr = self.writeln
+        if not factories:
+            wr('<h4>No caching servlet factories found.</h4>')
+            wr('<p>Caching can be activated by setting'
+                ' <code>CacheServletClasses = True</code>.</p>')
+            return
         if len(factories) > 1:
             factories.sort()
             wr('<h3>Servlet Factories:</h3>')
@@ -33,6 +37,7 @@ class ServletCache(AdminSecurity):
                 wr('<tr><td><a href="#%s">%s</a></td></tr>'
                     % ((factory.name(),)*2))
             wr('</table>')
+        req = self.request()
         wr('<form action="ServletCache" method="post">')
         for factory in factories:
             name = factory.name()
