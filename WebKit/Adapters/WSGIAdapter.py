@@ -4,10 +4,12 @@
 
 This is the WSGI Adapter for the WebKit AppServer.
 
-This script expects to find a file in its directory called
-'adapter.address' that specifies the address of the app server.
-If the address file is not found, the address is taken from
-the configuration file called 'WSGIAdapter.config'.
+The socket address of the WebKit AppServer can be specified
+with the Host and AdapterPort settings in the configuration file
+called 'WSGIAdapter.config' (default is localhost on port 8086).
+
+Note that this adapter script and the AppServer must be running
+with marshal-compatible Python versions (check marshal.version).
 
 Contributed to Webware for Python by Christoph Zwerschke, 04/2010.
 
