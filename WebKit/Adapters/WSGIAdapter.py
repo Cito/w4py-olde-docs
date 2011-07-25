@@ -7,7 +7,7 @@ This is the WSGI Adapter for the WebKit AppServer.
 This script expects to find a file in its directory called
 'adapter.address' that specifies the address of the app server.
 If the address file is not found, the address is taken from
-the configuration file called 'WSGIAdapter.conf'.
+the configuration file called 'WSGIAdapter.config'.
 
 Contributed to Webware for Python by Christoph Zwerschke, 04/2010.
 
