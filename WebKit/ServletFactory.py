@@ -122,9 +122,10 @@ class ServletFactory(object):
         # There is no context, so import the module standalone
         # and give it a unique name:
         if not fullname or not path.startswith(contextPath):
-            remainder = serverSidePathToImport
-            fullname = remainder.replace(
-                '\\', '_').replace('/', '_').replace('.', '_')
+            fullname = serverSidePathToImport
+            if os.sep != '/':
+                fullname = fullname.replace(os.sep, '_')
+            fullname = fullname.replace('/', '_').replace('.', '_')
             name = os.path.splitext(os.path.basename(
                 serverSidePathToImport))[0]
             moduleDir = os.path.dirname(serverSidePathToImport)
@@ -133,13 +134,19 @@ class ServletFactory(object):
             return module
 
         # First, we'll import the context's package.
+        fullname = request.contextName()
+        if os.sep != '/':
+            fullname = fullname.replace(os.sep, '_')
+        fullname = fullname.replace('/', '_')
         directory, contextDirName = os.path.split(contextPath)
         self._importModuleFromDirectory(fullname, contextDirName,
             directory, isPackageDir=True)
         directory = contextPath
 
         # Now we'll break up the rest of the path into components.
-        remainder = path[len(contextPath)+1:].replace('\\', '/')
+        remainder = path[len(contextPath)+1:]
+        if os.sep != '/':
+            remainder = remainder.replace(os.sep, '/')
         remainder = remainder.split('/')
 
         # Import all subpackages of the context package
