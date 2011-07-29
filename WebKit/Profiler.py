@@ -12,6 +12,9 @@ the Launch.py script which can be quickly examined from the command line:
     $ cd Webware
     $ bin/printprof.py WebKit/profile.pstats
 
+Using the RunSnakeRun (http://www.vrplumber.com/programming/runsnakerun/)
+GUI utility you can even visualize the data in the profile.pstats file.
+
 You might also wish to dump the profiling stats on demand (as in, by
 clicking or reloading a URL for that purpose). Read further for details.
 
@@ -43,20 +46,22 @@ readyDuration
 
 profiler = startTime = readyTime = readyDuration = None
 
-# Convenience
+
+## Convenience ##
 
 statsFilename = 'profile.pstats'
+
 
 def runCall(func, *args, **kwargs):
     return profiler.runcall(func, *args, **kwargs)
 
+
 def dumpStats(file=statsFilename):
     profiler.dump_stats(file)
 
+
 def reset():
-    """
-    Invoked by DebugAppServer in support of AutoReload.
-    """
+    """Invoked by DebugAppServer in support of AutoReload."""
     global startTime
     import time
     startTime = time.time()

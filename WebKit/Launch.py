@@ -421,7 +421,10 @@ def main(args=None):
             print ('Profiling is on. '
                 'See docstring in Profiler.py for more info.')
             print
-            from profile import Profile
+            try:
+                from cProfile import Profile
+            except ImportError:
+                from profile import Profile
             profiler = Profile()
             Profiler.profiler = profiler
             errorlevel = Profiler.runCall(launchWebKit, *args)

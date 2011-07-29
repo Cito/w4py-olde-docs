@@ -3,7 +3,10 @@
 import sys
 import time
 from glob import glob
-from profile import Profile
+try:
+    from cProfile import Profile
+except ImportError:
+    from profile import Profile
 
 import FixPath
 from MiscUtils.CSVParser import CSVParser

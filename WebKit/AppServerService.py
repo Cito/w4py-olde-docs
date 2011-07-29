@@ -216,7 +216,10 @@ class AppServerService(win32serviceutil.ServiceFramework):
                 print
                 sys.stdout.flush()
                 if self._runProfile:
-                    from profile import Profile
+                    try:
+                        from cProfile import Profile
+                    except ImportError:
+                        from profile import Profile
                     profiler = Profile()
                     Profiler.profiler = profiler
                     sys.stdout.flush()

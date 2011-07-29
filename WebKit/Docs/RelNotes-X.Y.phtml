@@ -47,6 +47,10 @@
   but later created the socket connection with IPv4 even if it was an IPv6
   address. Fixed this so that the WKServer address is always interpreted as IPv4.
   The ThreadedAppServer only listens on an IPv4 socket anyway.</li>
+  <li>If the AppServer is launched with <code>runProfile = False</code>
+  (see <span class="filename">Profiler.py</span> for details), then the
+  profiling will be done with the <code>cProfile</code> module instead of
+  the <code>profile</code> module if possible (Python 2.5 and later).</li>
 </ul>
 
 <a name="MinorChanges"></a><h2>Minor API Changes</h2>
@@ -60,8 +64,8 @@
 <ul>
   <li>The mod_webkit2 adapter interpreted the WKServer host address as
   IPv6 in newer Linux versions and then was unable to connect.</li>
-  <li>Thread dumps now work with Python > 2.4 (and the threadframe module
-  isn't necessary here any more).</li>
+  <li>Thread dumps now work with Python 2.5 and later (and the threadframe
+  module isn't necessary here any more).</li>
   <li>For some kinds of bad URLs, the URLParser raised an AssertionError
   instead of HTTPNotFound.</li>
   <li>The modified <code>FieldStorage</code> class used by WebKit did not work
