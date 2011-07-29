@@ -134,7 +134,6 @@ class ServletFactory(object):
             return module
 
         # First, we'll import the context's package.
-        fullname = request.contextName()
         if os.sep != '/':
             fullname = fullname.replace(os.sep, '_')
         fullname = fullname.replace('/', '_')
