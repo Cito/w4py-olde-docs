@@ -18,6 +18,7 @@ class Application(object):
     """Mock application."""
 
     _sessionDir = 'SessionStoreTestDir'
+    _alwaysSaveSessions = True
 
     def setting(self, key, default=None):
         return dict(
@@ -38,7 +39,7 @@ class Session(object):
     def __init__(self, identifier=7, value=None):
         self._identifier = 'foo-%d' % identifier
         self._data = dict(bar=value or identifier*6)
-        self._expired = False
+        self._expired = self._dirty = False
         self._timeout = 1800
         self._lastAccessTime = time() - identifier*400
         self._isNew = True
@@ -49,6 +50,12 @@ class Session(object):
     def expiring(self):
         self._expired = True
         Session._last_expired = self._identifier
+
+    def isDirty(self):
+        return self._dirty
+
+    def setDirty(self, dirty=True):
+        self._dirty = dirty
 
     def isExpired(self):
         return self._expired
