@@ -9,6 +9,20 @@
   <code>WebUtils.cgitb</code> to <code>WebUtils.CGITraceback</code>.</li>
 </ul>
 
+<a name="Bugfixes"></a><h2>Bugfixes</h2>
+<ul>
+  <li>The modified <code>FieldStorage</code> class did not work as before with
+  Python 2.6 and newer. These Python versions already add query string parameters
+  to the fields passed via POST, but differently to how we did this before.
+  POST parameters used to completely override query string parameters, the values
+  were not appended to possibly existing values in the query string. In order
+  to stay compatible and because it seems to be more reasonable, we restored the
+  old behavior even for newer versions of Python (thanks to Fionn Behrens for
+  bringing this up).</li>
+  <li>Fixed a problem with FAM when files were imported while the thread loop
+  was initialized.</li>
+</ul>
+
 <a name="Deprecations"></a><h2>Deprecations</h2>
 <ul>
   <li>The methods and objects which have been marked as deprecated

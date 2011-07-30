@@ -34,6 +34,9 @@
   used to suppress reloading of servlet classes and utilizing the AutoReload
   mechanism for reloading the servlet classes instead (Bug 3016673 reported
   by Patrick Gendron).</li>
+  <li>A new setting <code>AlwaysSaveSessions</code> has been introduced that
+  can be set to <code>False</code> in order to avoid saving unaltered sessions
+  (as suggested by Steve Schwarz).</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
@@ -51,6 +54,14 @@
   (see <span class="filename">Profiler.py</span> for details), then the
   profiling will be done with the <code>cProfile</code> module instead of
   the <code>profile</code> module if possible (Python 2.5 and later).</li>
+  <li>The <code>Sessionstore.cleanStaleSessions()</code> method has been
+  made a bit more robust.</li>
+  <li>In the <code>AutoReloadingAppServer</code>, we do not add files more
+  than once to the watchlist any more. If a FAM module cannot be initialized,
+  we try to use the alternative FAM modules. Besides <code>python-fam</code>
+  and <code>python-gamin</code>, we now support <code>pyinotify</code>.</li>
+  <li>Slashes in module names (from nested contexts) are now replaced
+  with underscores, to make PSP and KidKit work with PyPy as well.</li>
 </ul>
 
 <a name="MinorChanges"></a><h2>Minor API Changes</h2>
@@ -69,13 +80,19 @@
   <li>For some kinds of bad URLs, the URLParser raised an AssertionError
   instead of HTTPNotFound.</li>
   <li>The modified <code>FieldStorage</code> class used by WebKit did not work
-  as before with Python 2.6 and newer. These versions already add query string
-  parameters to the fields passed via POST, but differently to how we did this
-  before. In WebKit, POST parameters used to completely override query string
-  parameters, the values were not appended to possibly existing values in the
-  query string. In order to stay compatible and because it seems to be more
-  reasonable, we restored the old behavior even for newer versions of Python
-  (thanks to Fionn Behrens for bringing this up).</li>
+  as before with Python 2.6 and newer. These Python versions already add query
+  string parameters to the fields passed via POST, but differently to how we
+  did this before. In WebKit, POST parameters used to completely override query
+  string parameters, the values were not appended to possibly existing values
+  in the query string. In order to stay compatible and because it seems to be
+  more reasonable, we restored the old behavior even for newer versions of
+  Python (thanks to Fionn Behrens for bringing this up).</li>
+  <li>Fixed a problem with FAM when files were imported while the thread loop
+  was initialized.</li>
+  <li>The <code>IncludeEditLink</code> setting had always been ignored
+  (assumed to be True).</li>.
+  <li>The <code>ServletCache</code> page in the admin context did not show
+  anything when caching was not activated.</li>
 </ul>
 
 <a name="Deprecations"></a><h2>Deprecations</h2>
