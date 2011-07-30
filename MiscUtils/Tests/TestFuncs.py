@@ -85,7 +85,8 @@ ceremony!\""""
 
     def testLocalIP(self):
         ip = localIP()
-        self.assertTrue(ip and not ip.startswith('127.'))
+        self.assertTrue(ip)
+        self.assertFalse(ip.startswith('127.'))
         self.assertEqual(localIP(), ip) # second invocation
         self.assertEqual(localIP(useCache=None), ip)
         self.assertEqual(localIP(remote=None, useCache=None), ip,
@@ -173,7 +174,7 @@ ceremony!\""""
             self.assertEqual(len(i), sha and 40 or 32)
             for c in i:
                 self.assertTrue(c in '0123456789abcdef')
-            self.assertTrue(i not in past)
+            self.assertFalse(i in past)
             past[i] = i
 
         for sha in (False, True):

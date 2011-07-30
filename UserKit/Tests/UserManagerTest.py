@@ -33,11 +33,11 @@ class UserManagerTest(unittest.TestCase):
         mgr = self._mgr
         value = 5.1
         mgr.setModifiedUserTimeout(value)
-        assert mgr.modifiedUserTimeout() == value
+        self.assertEqual(mgr.modifiedUserTimeout(), value)
         mgr.setCachedUserTimeout(value)
-        assert mgr.cachedUserTimeout() == value
+        self.assertEqual(mgr.cachedUserTimeout(), value)
         mgr.setActiveUserTimeout(value)
-        assert mgr.activeUserTimeout() == value
+        self.assertEqual(mgr.activeUserTimeout(), value)
 
     def checkUserClass(self):
         mgr = self._mgr
@@ -45,7 +45,7 @@ class UserManagerTest(unittest.TestCase):
         class SubUser(User):
             pass
         mgr.setUserClass(SubUser)
-        assert mgr.userClass() == SubUser, (
+        self.assertEqual(mgr.userClass(), SubUser,
             "We should be able to set a custom user class.")
         class Poser(object):
             pass
@@ -76,81 +76,82 @@ class _UserManagerToSomewhereTest(UserManagerTest):
     def testBasics(self):
         mgr = self._mgr
         user = self._user = mgr.createUser('foo', 'bar')
-        assert user.manager() == mgr
-        assert user.name() == 'foo'
-        assert user.password() == 'bar'
-        assert not user.isActive()
-        assert mgr.userForSerialNum(user.serialNum()) == user
-        assert mgr.userForExternalId(user.externalId()) == user
-        assert mgr.userForName(user.name()) == user
+        self.assertEqual(user.manager(), mgr)
+        self.assertEqual(user.name(), 'foo')
+        self.assertEqual(user.password(), 'bar')
+        self.assertFalse(user.isActive())
+        self.assertEqual(mgr.userForSerialNum(user.serialNum()), user)
+        self.assertEqual(mgr.userForExternalId(user.externalId()), user)
+        self.assertEqual(mgr.userForName(user.name()), user)
         externalId = user.externalId() # for use later in testing
 
         users = mgr.users()
-        assert len(users) == 1
-        assert users[0] == user, 'users[0]=%r, user=%r' % (users[0], user)
-        assert len(mgr.activeUsers()) == 0
-        assert len(mgr.inactiveUsers()) == 1
+        self.assertEqual(len(users), 1)
+        self.assertEqual(users[0], user,
+            'users[0]=%r, user=%r' % (users[0], user))
+        self.assertEqual(len(mgr.activeUsers()), 0)
+        self.assertEqual(len(mgr.inactiveUsers()), 1)
 
         # login
         user2 = mgr.login(user, 'bar')
-        assert user == user2
-        assert user.isActive()
-        assert len(mgr.activeUsers()) == 1
-        assert len(mgr.inactiveUsers()) == 0
+        self.assertEqual(user, user2)
+        self.assertTrue(user.isActive())
+        self.assertEqual(len(mgr.activeUsers()), 1)
+        self.assertEqual(len(mgr.inactiveUsers()), 0)
 
         # logout
         user.logout()
-        assert not user.isActive()
-        assert mgr.numActiveUsers() == 0
+        self.assertFalse(user.isActive())
+        self.assertEqual(mgr.numActiveUsers(), 0)
 
         # login via user
         result = user.login('bar')
-        assert result == user
-        assert user.isActive()
-        assert mgr.numActiveUsers() == 1
+        self.assertEqual(result, user)
+        self.assertTrue(user.isActive())
+        self.assertEqual(mgr.numActiveUsers(), 1)
 
         # logout via user
         user.logout()
-        assert not user.isActive()
-        assert mgr.numActiveUsers() == 0
+        self.assertFalse(user.isActive())
+        self.assertEqual(mgr.numActiveUsers(), 0)
 
         # login a 2nd time, but with bad password
         user.login('bar')
         user.login('rab')
-        assert not user.isActive()
-        assert mgr.numActiveUsers() == 0
+        self.assertFalse(user.isActive())
+        self.assertEqual(mgr.numActiveUsers(), 0)
 
         # Check that we can access the user when he is not cached
         mgr.clearCache()
         user = mgr.userForSerialNum(1)
-        assert user
-        assert user.password() == 'bar'
+        self.assertTrue(user)
+        self.assertEqual(user.password(), 'bar')
 
         mgr.clearCache()
         user = self._mgr.userForExternalId(externalId)
-        assert user
-        assert user.password() == 'bar'
+        self.assertTrue(user)
+        self.assertEqual(user.password(), 'bar')
 
         mgr.clearCache()
         user = self._mgr.userForName('foo')
-        assert user
-        assert user.password() == 'bar'
+        self.assertTrue(user)
+        self.assertEqual(user.password(), 'bar')
 
     def testUserAccess(self):
         mgr = self._mgr
         user = mgr.createUser('foo', 'bar')
 
-        assert mgr.userForSerialNum(user.serialNum()) == user
-        assert mgr.userForExternalId(user.externalId()) == user
-        assert mgr.userForName(user.name()) == user
+        self.assertEqual(mgr.userForSerialNum(user.serialNum()), user)
+        self.assertEqual(mgr.userForExternalId(user.externalId()), user)
+        self.assertEqual(mgr.userForName(user.name()), user)
 
         self.assertRaises(KeyError, mgr.userForSerialNum, 1000)
         self.assertRaises(KeyError, mgr.userForExternalId, 'asdf')
         self.assertRaises(KeyError, mgr.userForName, 'asdf')
 
-        assert mgr.userForSerialNum(1000, 1) == 1
-        assert mgr.userForExternalId('asdf', 1) == 1
-        assert mgr.userForName('asdf', 1) == 1
+        self.assertEqual(mgr.userForSerialNum(1000, 1), 1)
+        self.assertEqual(mgr.userForExternalId('asdf', 1), 1)
+        self.assertEqual(mgr.userForName('asdf', 1), 1)
 
     def testDuplicateUser(self):
         mgr = self._mgr
@@ -210,10 +211,10 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
             Generate().main(args.split())
             createScript = os.path.join(generationDir, 'GeneratedSQL', 'Create.sql')
 
-            assert os.path.exists(createScript), (
+            self.assertTrue(os.path.exists(createScript),
                 'The generation process should create some SQL files.')
-            assert os.path.exists(os.path.join(generationDir,
-                'UserForMKTest.py')), ('The generation process'
+            self.assertTrue(os.path.exists(os.path.join(generationDir,
+                'UserForMKTest.py')), 'The generation process'
                     ' should create some Python files.')
 
             from MiddleKit.Run.SQLiteObjectStore import SQLiteObjectStore
@@ -227,11 +228,11 @@ class UserManagerToMiddleKitTest(_UserManagerToSomewhereTest):
             from MiddleKit.Run.MiddleObject import MiddleObject
             from UserKit.UserManagerToMiddleKit import UserManagerToMiddleKit
             from UserKit.Tests.mk_SQLite.UserForMKTest import UserForMKTest
-            assert issubclass(UserForMKTest, MiddleObject)
+            self.assertTrue(issubclass(UserForMKTest, MiddleObject))
             from UserKit.User import User
             if not issubclass(UserForMKTest, User):
                 UserForMKTest.__bases__ += (User,)
-                assert issubclass(UserForMKTest, (MiddleObject, User))
+                self.assertTrue(issubclass(UserForMKTest, (MiddleObject, User)))
 
             def __init__(self, manager, name, password):
                 base1 = self.__class__.__bases__[0]

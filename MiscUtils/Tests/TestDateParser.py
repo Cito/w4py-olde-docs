@@ -19,11 +19,11 @@ class TestDateTimeParser(unittest.TestCase):
 
     def testReturnType(self):
         from datetime import datetime
-        assert type(parseDateTime(
-            'Mon Jul 21 02:56:20 1969')) is datetime
+        self.assertTrue(type(parseDateTime(
+            'Mon Jul 21 02:56:20 1969')) is datetime)
 
     def assertParses(self, s):
-        assert parseDateTime(s).isoformat() == '1969-07-21T02:56:20'
+        self.assertEqual(parseDateTime(s).isoformat(), '1969-07-21T02:56:20')
 
     def testDefaultFormat(self):
         self.assertParses('Mon Jul 21 02:56:20 1969')
@@ -63,11 +63,11 @@ class TestDateParser(unittest.TestCase):
 
     def testReturnType(self):
         from datetime import date
-        assert type(parseDate(
-            'Mon Jul 21 02:56:20 1969')) is date
+        self.assertTrue(type(parseDate(
+            'Mon Jul 21 02:56:20 1969')) is date)
 
     def assertParses(self, s):
-        assert parseDate(s).isoformat() == '1969-07-21'
+        self.assertEqual(parseDate(s).isoformat(), '1969-07-21')
 
     def testDefaultFormat(self):
         self.assertParses('Mon Jul 21 02:56:20 1969')
@@ -94,11 +94,11 @@ class TestTimeParser(unittest.TestCase):
 
     def testReturnType(self):
         from datetime import time
-        assert type(parseTime(
-            'Mon Jul 21 02:56:20 1969')) is time
+        self.assertTrue(type(parseTime(
+            'Mon Jul 21 02:56:20 1969')) is time)
 
     def assertParses(self, s):
-        assert parseTime(s).isoformat() == '02:56:20'
+        self.assertEqual(parseTime(s).isoformat(), '02:56:20')
 
     def testDefaultFormat(self):
         self.assertParses('Mon Jul 21 02:56:20 1969')

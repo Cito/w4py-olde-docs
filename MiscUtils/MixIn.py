@@ -47,8 +47,8 @@ def MixIn(pyClass, mixInClass, makeAncestor=False, mixInSuperMethods=False):
             # now do whatever you want
 
     """
-    assert mixInClass is not pyClass, \
-        'mixInClass = %r, pyClass = %r' % (mixInClass, pyClass)
+    assert mixInClass is not pyClass, (
+        'mixInClass = %r, pyClass = %r' % (mixInClass, pyClass))
     if makeAncestor:
         if mixInClass not in pyClass.__bases__:
             pyClass.__bases__ = (mixInClass,) + pyClass.__bases__

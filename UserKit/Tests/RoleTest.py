@@ -26,17 +26,17 @@ class BasicRoleTest(unittest.TestCase):
 
     def checkRoleClass(self, roleClass):
         role = roleClass('foo', 'bar')
-        assert role.name() == 'foo'
-        assert role.description() == 'bar'
-        assert str(role) == 'foo'
+        self.assertEqual(role.name(), 'foo')
+        self.assertEqual(role.description(), 'bar')
+        self.assertEqual(str(role), 'foo')
 
         role.setName('x')
-        assert role.name() == 'x'
+        self.assertEqual(role.name(), 'x')
 
         role.setDescription('y')
-        assert role.description() == 'y'
+        self.assertEqual(role.description(), 'y')
 
-        assert role.playsRole(role)
+        self.assertTrue(role.playsRole(role))
 
 
 class HierRoleTest(unittest.TestCase):
@@ -79,12 +79,12 @@ class HierRoleTest(unittest.TestCase):
         # Now let's actually do some testing...
         for test in tests:
             role = roles[test[0]]
-            assert role.playsRole(role)
+            self.assertTrue(role.playsRole(role))
 
             # Test that the role plays all the roles listed
             for name in test[1:]:
                 playsRole = roles[name]
-                assert role.playsRole(playsRole)
+                self.assertTrue(role.playsRole(playsRole))
 
             # Now test that the role does NOT play
             # any of the other roles not listed
@@ -92,7 +92,7 @@ class HierRoleTest(unittest.TestCase):
             for name in test:
                 del otherRoles[name]
             for name in otherRoles:
-                assert not role.playsRole(roles[name])
+                self.assertFalse(role.playsRole(roles[name]))
 
 
 if __name__ == '__main__':

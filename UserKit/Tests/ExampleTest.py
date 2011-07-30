@@ -44,20 +44,22 @@ class SimpleExampleTest(unittest.TestCase):
 
         # bad login
         theUser = self._mgr.loginName('foo', 'badpass')
-        assert theUser is None, 'loginName() returns null if login failed.'
-        assert not fooUser.isActive(), (
+        self.assertTrue(theUser is None,
+            'loginName() returns null if login failed.')
+        self.assertFalse(fooUser.isActive(),
             'User should NOT be logged in since password was incorrect.')
 
         # good login
         theUser = self._mgr.loginName('foo', 'bar')
-        assert theUser.isActive(), 'User should be logged in now'
-        assert theUser == fooUser, (
+        self.assertTrue(theUser.isActive(), 'User should be logged in now')
+        self.assertEqual(theUser, fooUser,
             'Should be the same user object, since it is the same user "foo"')
 
         # logout
         theUser.logout()
-        assert not theUser.isActive(), 'User should no longer be active.'
-        assert self._mgr.numActiveUsers() == 0
+        self.assertFalse(theUser.isActive(),
+            'User should no longer be active.')
+        self.assertEqual(self._mgr.numActiveUsers(), 0)
 
 
     def testUsersAndRoles(self):
@@ -88,22 +90,22 @@ class SimpleExampleTest(unittest.TestCase):
 
         # Check user "foo"
         theUser = self._mgr.loginName('foo', sha('bar').hexdigest())
-        assert theUser.isActive(), 'User should be logged in now'
-        assert theUser == fooUser, (
+        self.assertTrue(theUser.isActive(), 'User should be logged in now')
+        self.assertEqual(theUser, fooUser,
             'Should be the same user object, since it is the same user "foo"')
-        assert theUser.playsRole(staffRole), (
+        self.assertTrue(theUser.playsRole(staffRole),
             'User "foo" should be a member of the staff role.')
-        assert theUser.playsRole(customersRole), ('User "foo" should'
+        self.assertTrue(theUser.playsRole(customersRole), 'User "foo" should'
             ' also be in customer role, since staff includes customers.')
 
         # Check user "John"
         theUser = self._mgr.loginName('john', sha('doe').hexdigest())
-        assert theUser.isActive(), 'User should be logged in now.'
-        assert theUser == johnUser, ('Should be the same user object,'
+        self.assertTrue(theUser.isActive(), 'User should be logged in now.')
+        self.assertEqual(theUser, johnUser, 'Should be the same user object,'
             ' since it is the same user "John".')
-        assert not theUser.playsRole(staffRole), (
+        self.assertFalse(theUser.playsRole(staffRole),
             'John should not be a member of the staff.')
-        assert theUser.playsRole(customersRole), (
+        self.assertTrue(theUser.playsRole(customersRole),
             'John should play customer role.')
 
 

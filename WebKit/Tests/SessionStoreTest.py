@@ -99,19 +99,19 @@ class SessionStoreTest(unittest.TestCase):
         self._store.encoder()(session, buffer)
         output = buffer.getvalue()
         buffer.close()
-        assert isinstance(output, str)
+        self.assertTrue(isinstance(output, str))
         buffer = StringIO(output)
         output = self._store.decoder()(buffer)
         buffer.close()
-        assert type(output) is type(session)
+        self.assertTrue(type(output) is type(session))
         self.assertEqual(output._data, session._data)
 
     def testSetEncoderDecoder(self):
         encoder = lambda obj, f: f.write(str(obj))
         decoder = lambda f: eval(f.read())
         self._store.setEncoderDecoder(encoder, decoder)
-        assert self._store.encoder() == encoder
-        assert self._store.decoder() == decoder
+        self.assertEqual(self._store.encoder(), encoder)
+        self.assertEqual(self._store.decoder(), decoder)
 
 
 class SessionMemoryStoreTest(SessionStoreTest):
@@ -127,7 +127,7 @@ class SessionMemoryStoreTest(SessionStoreTest):
         for n in range(7):
             session = Session(n)
             self._store[session.identifier()] = session
-            assert not session.isExpired()
+            self.assertFalse(session.isExpired())
 
     def tearDown(self):
         self._store.clear()
@@ -154,7 +154,7 @@ class SessionMemoryStoreTest(SessionStoreTest):
 
     def testDelItem(self):
         del self._store['foo-3']
-        assert 'foo-3' not in self._store
+        self.assertFalse('foo-3' in self._store)
         self.assertEqual(Session._last_expired, 'foo-3')
         try:
             self._store['foo-3']
@@ -164,10 +164,11 @@ class SessionMemoryStoreTest(SessionStoreTest):
 
     def testContains(self):
         store = self._store
-        assert 'foo-0' in store and 'foo-3' in store and 'foo-6' in store
-        assert 'foo' not in store
-        assert '0' not in store and '3' not in store and '6' not in store
-        assert 'foo-7' not in store
+        self.assertTrue('foo-0' in store
+            and 'foo-3' in store and 'foo-6' in store)
+        self.assertFalse('foo' in store)
+        self.assertFalse('0' in store or '3' in store or '6' in store)
+        self.assertFalse('foo-7' in store)
 
     def testIter(self):
         keys = set()
@@ -177,13 +178,14 @@ class SessionMemoryStoreTest(SessionStoreTest):
 
     def testKeys(self):
         keys = self._store.keys()
-        assert isinstance(keys, list)
+        self.assertTrue(isinstance(keys, list))
         self.assertEqual(set(keys), set('foo-%d' % n  for n in range(7)))
 
     def testClear(self):
         store = self._store
         store.clear()
-        assert not ('foo-0' in store or 'foo-3' in store or 'foo-6' in store)
+        self.assertFalse('foo-0' in store
+            or 'foo-3' in store or 'foo-6' in store)
 
     def testSetDefault(self):
         store = self._store
@@ -196,12 +198,12 @@ class SessionMemoryStoreTest(SessionStoreTest):
     def testPop(self):
         store = self._store
         session = self._store['foo-3']
-        assert not session.isExpired()
+        self.assertFalse(session.isExpired())
         self.assertEqual(store.pop('foo-3').bar(), 18)
         self.assertRaises(KeyError, store.pop, 'foo-3')
         self.assertEqual(store.pop('foo-3', Session()).bar(), 42)
         self.assertRaises(KeyError, store.pop, 'foo-3')
-        assert not session.isExpired()
+        self.assertFalse(session.isExpired())
 
     def testGet(self):
         self.assertEqual(self._store.get('foo-4').bar(), 24)
@@ -228,46 +230,46 @@ class SessionMemoryStoreTest(SessionStoreTest):
 
     def testItems(self):
         items = self._store.items()
-        assert isinstance(items, list)
+        self.assertTrue(isinstance(items, list))
         self.assertEqual(len(items), 7)
-        assert isinstance(items[4], tuple)
+        self.assertTrue(isinstance(items[4], tuple))
         self.assertEqual(len(items[4]), 2)
         self.assertEqual(dict(items)['foo-3'].bar(), 18)
 
     def testIterItems(self):
         items = self._store.iteritems()
-        assert not isinstance(items, list)
+        self.assertFalse(isinstance(items, list))
         items = list(items)
-        assert isinstance(items[4], tuple)
+        self.assertTrue(isinstance(items[4], tuple))
         self.assertEqual(len(items[4]), 2)
         self.assertEqual(dict(items)['foo-3'].bar(), 18)
 
     def testValues(self):
         values = self._store.values()
-        assert isinstance(values, list)
+        self.assertTrue(isinstance(values, list))
         self.assertEqual(len(values), 7)
         value = values[4]
-        assert isinstance(value, Session)
+        self.assertTrue(isinstance(value, Session))
         self.assertEqual(self._store[value.identifier()].bar(), value.bar())
 
     def testIterValues(self):
         values = self._store.itervalues()
-        assert not isinstance(values, list)
+        self.assertFalse(isinstance(values, list))
         values = list(values)
         self.assertEqual(len(values), 7)
         value = values[4]
-        assert isinstance(value, Session)
+        self.assertTrue(isinstance(value, Session))
         self.assertEqual(self._store[value.identifier()].bar(), value.bar())
 
     def testCleanStaleSessions(self):
         store = self._store
         self.assertEqual(len(store), 7)
-        assert 'foo-0' in store and 'foo-4' in store
-        assert 'foo-5' in store and 'foo-6' in store
+        self.assertTrue('foo-0' in store and 'foo-4' in store)
+        self.assertTrue('foo-5' in store and 'foo-6' in store)
         store.cleanStaleSessions()
         self.assertEqual(len(store), 5)
-        assert 'foo-0' in store and 'foo-4' in store
-        assert not ('foo-5' in store or 'foo-6' in store)
+        self.assertTrue('foo-0' in store and 'foo-4' in store)
+        self.assertFalse('foo-5' in store or 'foo-6' in store)
 
 
 class SessionFileStoreTest(SessionMemoryStoreTest):
@@ -278,19 +280,19 @@ class SessionFileStoreTest(SessionMemoryStoreTest):
         app = self._app
         store = SessionMemoryStore(app)
         self.assertEqual(len(store), 7)
-        assert 'foo-0' in store and 'foo-6' in store
+        self.assertTrue('foo-0' in store and 'foo-6' in store)
         store = SessionMemoryStore(app, restoreFiles=False)
         self.assertEqual(len(store), 0)
-        assert 'foo-0' not in store and 'foo-6' not in store
+        self.assertFalse('foo-0' in store or 'foo-6' in store)
 
     def testFileStoreRestoreFiles(self):
         app = self._app
         store = SessionFileStore(app)
         self.assertEqual(len(store), 7)
-        assert 'foo-0' in store and 'foo-6' in store
+        self.assertTrue('foo-0' in store and 'foo-6' in store)
         store = SessionFileStore(app, restoreFiles=False)
         self.assertEqual(len(store), 0)
-        assert 'foo-0' not in store and 'foo-6' not in store
+        self.assertFalse('foo-0' in store or 'foo-6' in store)
 
 
 class SessionDynamicStoreTest(SessionMemoryStoreTest):
@@ -306,8 +308,8 @@ class SessionDynamicStoreTest(SessionMemoryStoreTest):
         SessionMemoryStoreTest.testCleanStaleSessions(self)
         self.assertEqual(len(memoryStore), 3)
         self.assertEqual(len(fileStore), 2)
-        assert 'foo-0' in memoryStore and 'foo-2' in memoryStore
-        assert 'foo-3' in fileStore and 'foo-4' in fileStore
+        self.assertTrue('foo-0' in memoryStore and 'foo-2' in memoryStore)
+        self.assertTrue('foo-3' in fileStore and 'foo-4' in fileStore)
 
 
 class SessionShelveStoreTest(SessionMemoryStoreTest):
@@ -320,17 +322,17 @@ class SessionShelveStoreTest(SessionMemoryStoreTest):
         store = SessionShelveStore(app)
         self.assertEqual(len(store), 7)
         session = store['foo-3']
-        assert 'foo-0' in store and 'foo-6' in store
+        self.assertTrue('foo-0' in store and 'foo-6' in store)
         store = SessionShelveStore(app,
             restoreFiles=False, filename='Session.Store2')
         self.assertEqual(len(store), 0)
-        assert 'foo-0' not in store and 'foo-6' not in store
+        self.assertFalse('foo-0' in store or 'foo-6' in store)
         store['foo-3'] = session
         store.storeAllSessions()
         store = SessionShelveStore(app, filename='Session.Store2')
         self.assertEqual(len(store), 1)
-        assert 'foo-3' in store
-        assert 'foo-0' not in store and 'foo-6' not in store
+        self.assertTrue('foo-3' in store)
+        self.assertFalse('foo-0' in store or 'foo-6' in store)
 
 
 class SessionMemcachedStoreTest(SessionMemoryStoreTest):

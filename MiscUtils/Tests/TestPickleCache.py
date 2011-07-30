@@ -3,7 +3,7 @@ import time
 import unittest
 
 import FixPath
-from MiscUtils.PickleCache import *
+from MiscUtils import PickleCache as pc
 
 # the directory that this file is in:
 progPath = os.path.join(os.getcwd(), __file__)
@@ -25,31 +25,30 @@ class TestPickleCache(unittest.TestCase):
 
     def oneIterTest(self):
         sourcePath = self._sourcePath = os.path.join(progDir, 'foo.dict')
-        picklePath = self._picklePath = PickleCache().picklePath(sourcePath)
+        picklePath = self._picklePath = pc.PickleCache().picklePath(sourcePath)
         self.remove(picklePath) # make sure we're clean
         data = self._data = dict(x=1)
         self.writeSource()
         try:
             # test 1: no pickle cache yet
-            self.assertTrue(readPickleCache(sourcePath) is None)
+            self.assertTrue(pc.readPickleCache(sourcePath) is None)
             self.writePickle()
             # test 2: correctness
-            self.assertEqual(readPickleCache(sourcePath), data)
+            self.assertEqual(pc.readPickleCache(sourcePath), data)
             # test 3: wrong pickle version
             self.assertTrue(
-                readPickleCache(sourcePath, pickleProtocol=1) is None)
+                pc.readPickleCache(sourcePath, pickleProtocol=1) is None)
             self.writePickle() # restore
             # test 4: wrong data source
             self.assertTrue(
-                readPickleCache(sourcePath, source='notTest') is None)
+                pc.readPickleCache(sourcePath, source='notTest') is None)
             self.writePickle() # restore
             # test 5: wrong Python version
-            from MiscUtils import PickleCache as pc
             v = list(pc.versionInfo)
             v[-1] += 1 # increment serial number
             v, pc.versionInfo = pc.versionInfo, tuple(v)
             try:
-                self.assertTrue(readPickleCache(sourcePath) is None)
+                self.assertTrue(pc.readPickleCache(sourcePath) is None)
                 self.writePickle() # restore
             finally:
                 pc.versionInfo = v
@@ -60,7 +59,7 @@ class TestPickleCache(unittest.TestCase):
             # (see the comment in the docstring of PickleCache.py)
             time.sleep(2)
             self.writeSource()
-            self.assertTrue(readPickleCache(sourcePath) is None)
+            self.assertTrue(pc.readPickleCache(sourcePath) is None)
             self.writePickle() # restore
         finally:
             self.remove(sourcePath)
@@ -78,8 +77,8 @@ class TestPickleCache(unittest.TestCase):
         f.close()
 
     def writePickle(self):
-        self.assertTrue(not os.path.exists(self._picklePath))
-        writePickleCache(self._data, self._sourcePath, source='test')
+        self.assertFalse(os.path.exists(self._picklePath))
+        pc.writePickleCache(self._data, self._sourcePath, source='test')
         self.assertTrue(os.path.exists(self._picklePath))
 
 

@@ -101,12 +101,12 @@ class LookupTest(NamedValueAccessTest):
         for obj in self.objs:
 
             value = func(obj, 'foo')
-            assert value == 1, 'value = %r, obj = %r' % (value, obj)
+            self.assertEqual(value, 1, 'value = %r, obj = %r' % (value, obj))
 
             self.assertRaises(NamedValueAccessError, func, obj, 'bar')
 
             value = func(obj, 'bar', 2)
-            assert value == 2, 'value = %r, obj = %r' % (value, obj)
+            self.assertEqual(value, 2, 'value = %r, obj = %r' % (value, obj))
 
     def checkBasicAccessRepeated(self):
         """Just repeat checkBasicAccess multiple times to check stability."""
@@ -137,7 +137,7 @@ class ValueForNameTest(LookupTest):
         # test the links
         for i in range(len(objs)):
             name = 'nextObject.' * i + 'foo'
-            assert self.lookup(objs[0], name) == 1
+            self.assertEqual(self.lookup(objs[0], name), 1)
 
     def checkDicts(self):
         d = {'origin': {'x': 1, 'y': 2},
@@ -145,14 +145,14 @@ class ValueForNameTest(LookupTest):
         obj = self.objs[0]
         obj.rect = d
 
-        assert self.lookup(d, 'origin.x') == 1
-        assert self.lookup(obj, 'rect.origin.x')
+        self.assertEqual(self.lookup(d, 'origin.x'), 1)
+        self.assertTrue(self.lookup(obj, 'rect.origin.x'))
 
         self.assertRaises(NamedValueAccessError, self.lookup, d, 'bar')
         self.assertRaises(NamedValueAccessError, self.lookup, obj,  'bar')
 
-        assert self.lookup(d, 'bar', 2) == 2
-        assert self.lookup(obj, 'rect.bar', 2) == 2
+        self.assertEqual(self.lookup(d, 'bar', 2), 2)
+        self.assertEqual(self.lookup(obj, 'rect.bar', 2), 2)
 
 
 def makeTestSuite():

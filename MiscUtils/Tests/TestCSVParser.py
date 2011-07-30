@@ -85,21 +85,24 @@ class CSVParserTests(unittest.TestCase):
             if '\n' not in input:
                 # single line
                 result = self.parse(input)
-                assert result == output, ('\ninput=%r\nresult=%r\noutput=%r'
+                self.assertEqual(result, output,
+                    '\ninput=%r\nresult=%r\noutput=%r'
                     % (input, result, output))
                 result = self.parse(input+'\n')
-                assert result == output, ('\ninput=%r\nresult=%r\noutput=%r'
+                self.assertEqual(result, output,
+                    '\ninput=%r\nresult=%r\noutput=%r'
                     % (input, result, output))
             else:
                 # multiple lines
                 gotFields = False
                 for line in input.splitlines():
-                    assert not gotFields
+                    self.assertFalse(gotFields)
                     result = self.parse(line)
                     if result is not None:
                         gotFields = True
-                assert gotFields
-                assert result == output, ('\ninput=%r\nresult=%r\noutput=%r'
+                self.assertTrue(gotFields)
+                self.assertEqual(result, output,
+                    '\ninput=%r\nresult=%r\noutput=%r'
                     % (input, result, output))
 
 

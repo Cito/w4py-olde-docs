@@ -11,13 +11,13 @@ class TestTableColumn(unittest.TestCase):
 
     def testWithType(self):
         tc = TableColumn('foo:int')
-        assert tc.name() == 'foo'
-        assert tc.type() is int
+        self.assertEqual(tc.name(), 'foo')
+        self.assertTrue(tc.type() is int)
 
     def testWithoutType(self):
         tc = TableColumn('bar')
-        assert tc.name() == 'bar'
-        assert tc.type() is None
+        self.assertEqual(tc.name(), 'bar')
+        self.assertTrue(tc.type() is None)
 
     def testWrongSpec(self):
         self.assertRaises(DataTableError, TableColumn, 'foo:bar')
@@ -25,21 +25,21 @@ class TestTableColumn(unittest.TestCase):
 
     def testValueForRawValue(self):
         tc = TableColumn('foo:int')
-        assert tc.valueForRawValue('') == 0
-        assert tc.valueForRawValue('1') == 1
-        assert tc.valueForRawValue(2) == 2
-        assert tc.valueForRawValue(2.5) == 2
+        self.assertEqual(tc.valueForRawValue(''), 0)
+        self.assertEqual(tc.valueForRawValue('1'), 1)
+        self.assertEqual(tc.valueForRawValue(2), 2)
+        self.assertEqual(tc.valueForRawValue(2.5), 2)
         tc = TableColumn('bar:str')
-        assert tc.valueForRawValue('') == ''
-        assert tc.valueForRawValue('1') == '1'
-        assert tc.valueForRawValue(2) == '2'
-        assert tc.valueForRawValue('x') == 'x'
+        self.assertEqual(tc.valueForRawValue(''), '')
+        self.assertEqual(tc.valueForRawValue('1'), '1')
+        self.assertEqual( tc.valueForRawValue(2), '2')
+        self.assertEqual( tc.valueForRawValue('x'), 'x')
         tc = TableColumn('bar:float')
-        assert tc.valueForRawValue('') == 0.0
-        assert tc.valueForRawValue('1') == 1.0
-        assert tc.valueForRawValue('1.5') == 1.5
-        assert tc.valueForRawValue(2.5) == 2.5
-        assert tc.valueForRawValue(3) == 3.0
+        self.assertEqual(tc.valueForRawValue(''), 0.0)
+        self.assertEqual(tc.valueForRawValue('1'), 1.0)
+        self.assertEqual(tc.valueForRawValue('1.5'), 1.5)
+        self.assertEqual(tc.valueForRawValue(2.5), 2.5)
+        self.assertEqual(tc.valueForRawValue(3), 3.0)
 
 
 class Record(object):
@@ -61,7 +61,7 @@ class TestDataTable(unittest.TestCase):
         dt = DataTable()
         lines = src.splitlines()
         dt.readLines(lines)
-        assert [col.name() for col in dt.headings()] == headings
+        self.assertEqual([col.name() for col in dt.headings()], headings)
         for i, values in enumerate(dt):
             match = data[i]
             self.assertEqual(values.asList(), match,
@@ -101,14 +101,15 @@ class TestDataTable(unittest.TestCase):
         t.append(b)
         t.append(c)
         t.append(d)
-        assert t[-4]['name'] == 'John'
-        assert t[-3]['name'] == 'Mary'
-        assert t[-2]['name'] == 'Fred'
-        assert t[-1]['name'] == 'Wilma'
-        assert t[-4].asDict() == {'name': 'John', 'age': 26, 'rating': 7.25}
-        assert t[-3].asList() == b
-        assert t[-2].asDict() == c
-        assert t[-1].asList() == ['Wilma', 27, 9.5]
+        self.assertEqual(t[-4]['name'], 'John')
+        self.assertEqual(t[-3]['name'], 'Mary')
+        self.assertEqual(t[-2]['name'], 'Fred')
+        self.assertEqual(t[-1]['name'], 'Wilma')
+        self.assertEqual(t[-4].asDict(),
+            {'name': 'John', 'age': 26, 'rating': 7.25})
+        self.assertEqual(t[-3].asList(), b)
+        self.assertEqual(t[-2].asDict(), c)
+        self.assertEqual(t[-1].asList(), ['Wilma', 27, 9.5])
 
         # Printing
         # print t
@@ -124,13 +125,13 @@ Wilma,27,9.5
         out = StringIO()
         t.writeFile(out)
         results = out.getvalue()
-        assert results == answer, '\n%r\n%r\n' % (results, answer)
+        self.assertEqual(results, answer, '\n%r\n%r\n' % (results, answer))
 
         # Accessing rows
         for row in t:
-            assert row['name'] == row[0]
-            assert row['age'] == row[1]
-            assert row['rating'] == row[2]
+            self.assertEqual(row['name'], row[0])
+            self.assertEqual(row['age'], row[1])
+            self.assertEqual(row['rating'], row[2])
             for item in row:
                 pass
 
@@ -139,7 +140,7 @@ Wilma,27,9.5
         t.setHeadings(list('xyz'))
         t.append([1, 2, 3])
         t.append([4, 5, 6])
-        assert t[0]['x'] - t[1]['z'] == -5
+        self.assertEqual(t[0]['x'] - t[1]['z'], -5)
 
     def testBasics(self):
         # Basics
@@ -232,7 +233,7 @@ Class,Attribute,Type,Extras
             # print 'Testing Excel...'
             xlsfile = os.path.join(os.path.dirname(__file__), 'Sample3.xls')
             t = DataTable(xlsfile)
-            assert t[0][0] == 1.0, t[0]
+            self.assertEqual(t[0][0], 1.0, t[0])
 
 
 if __name__ == '__main__':
