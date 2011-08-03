@@ -193,12 +193,13 @@ Test the released tarball, preferably under Unix and also under Windows.
 
 <pre>
 [ ] Publish for download from the SourceForge files section:
-    * Go to the <a href="https://sourceforge.net/projects/webware/develop">Webware Project Develop</a> page
+    * Go to the <a href="https://sourceforge.net/projects/webware/">Webware Project</a> page
       at SourceForge and log in with your developer account.
-    * Select 'File Manager' from the 'Project Admin' menu.
-    * Create a folder for the new release and upload the .tar and .zip files
+    * Select 'Files' from the menu bar.
+    * Create a folder for the new release and upload the .tar.gz and .zip files
       using the web interface.
-    * Click the gear icon to set the properties. Make it the default download.
+    * Click the info button next to the uploaded files and set these files
+      as default downloads for Windows (.zip) and all others (.tar.gz).
     * Review the trove categorization and update if necessary:
       - Select 'Project settings' from the 'Project Admin' menu.
       - Click 'Edit Trove Categorization'.
@@ -246,13 +247,13 @@ Test the released tarball, preferably under Unix and also under Windows.
       Make sure you install this from the tarball.
 
     * Copy the tarball to your SourceForge account.
-      > scp Webware-VER.tar.gz $USER@webware.sf.net:
+      > scp Webware-VER.tar.gz $USER@web.sf.net:
 
     * Login to the SourceForge account.
-      > ssh $USER@webware.sf.net
+      > ssh -t $USER,webware@shell.sf.net
 
     * Extract the Webware folder and create a symbolic link to it:
-      > cd /home/groups/w/we/webware/htdocs/
+      > cd /home/project-web/webware/htdocs/
       > rm Webware
       > tar -xzf ~/Webware-VER.tar.gz
       > ln -s Webware-VER Webware
@@ -324,9 +325,8 @@ Announce on mailing lists:
         - Make custom message focused on MiddleKit
 
 Update:
-    [ ] <a href="http://wiki.python.org/moin/WebProgramming">Web Programming in Python</a>
+    [ ] <a href="http://wiki.python.org/moin/WebFrameworks">Web Frameworks for Python</a>
     [ ] <a href="http://www.python.org/pypi/Webware%20for%20Python/">PyPI</a> (aka "Cheese Shop")
-    [ ] <a href="http://py.vaults.ca">Vaults of Parnassus</a> (currently out of order)
     [ ] <a href="http://freshmeat.net">freshmeat.net</a>
 
 [ ] Review/search for other places where the announcement can be made.
@@ -351,14 +351,13 @@ Update:
     * Make sure the release notes have been copied properly.
 
 [ ] Check that the following were updated:
-    [ ] <a href="http://py.vaults.ca">Vaults of Parnassus</a> (currently out of order)
     [ ] <a href="http://freshmeat.net">freshmeat.net</a>
 
 [ ] Look for follow up messages on <a href="news:comp.lang.python">comp.lang.python</a>
 
-[ ] Test drive the <a href="http://webware.sf.net">home page</a>, <a href="https://sf.net/project/admin/?group_id=4866">project page</a> and <a href="https://sf.net/project/showfiles.php?group_id=4866">download</a>.
+[ ] Test drive the <a href="http://webware.sf.net">home page</a>, <a href="https://sourceforge.net/projects/webware/">project page</a> and <a href="https://sourceforge.net/projects/webware/files/">download</a>.
 
-[ ] Check the <a href="https://sf.net/project/showfiles.php?group_id=4866">download counter</a> and <a href="https://sf.net/project/stats/?group_id=4866">activity statistics</a> on SourceForge.
+[ ] Check the <a href="https://sourceforge.net/projects/webware/files/Webware/stats/timeline">download counter</a> and <a href="https://sf.net/project/stats/?group_id=4866">activity statistics</a> on SourceForge.
 </pre>
 
 <% footer() %>
