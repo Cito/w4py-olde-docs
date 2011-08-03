@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.8: http://docutils.sourceforge.net/" />
 <title>Future Work</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
@@ -53,8 +53,8 @@ conventions (PEP8, properties etc.). We have already changed the
 Webware convention of using tabs, but most naming conventions cannot
 be changed so easily without breaking the API.</li>
 <li>Think about a migration path towards Pyhon 3, check code with 2to3 tool.</li>
-<li>Use distutils/setuptools instead of our own installer, use Python eggs
-instead of our own plug-in concept.</li>
+<li>Use Distutils/setuptools/Distribute instead of our own installer, use
+Python eggs and maybe namespace packages instead of our own plug-in concept.</li>
 <li>The installer should try building and/or installing mod_webkit and wkcgi
 automatically.</li>
 <li>Use Sphinx instead of our own tools in DocSupport, use reStructuredText
@@ -127,6 +127,8 @@ as the format for all docs and maybe also for the docstrings.</li>
 <li>Beef up the User's Guide and Tutorial.</li>
 <li>User's Guide: Create a caching section to discuss the virtues of doing so
 (the Color example became 12 X faster on the server side).</li>
+<li>Clean up the Wiki, removing all the obsolete cruft and summarizing
+everything that is still useful, moving it to the Sphinx documentation.</li>
 </ul>
 </div>
 <div class="section" id="food-for-thought-considerations-reviews">

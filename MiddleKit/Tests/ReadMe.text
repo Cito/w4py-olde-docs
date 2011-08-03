@@ -31,8 +31,8 @@ sqlCommand = sqlClient + '-u root'
 sqlVersionCommand = sqlClient + '--version'
 # end
 
-Here is a config file fo a fresh Microsoft SQL Server EXpress 2008
-installation on the local hsot using trusted authentication:
+Here is a config file for a fresh Microsoft SQL Server Express 2008
+installation on the local host using trusted authentication:
 
 # LocalConfig.py
 dbName = 'MSSQL'

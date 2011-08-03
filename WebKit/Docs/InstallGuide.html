@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.8: http://docutils.sourceforge.net/" />
 <title>WebKit Install Guide</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
@@ -143,7 +143,9 @@ version ranging from 2.4 to 2.7.  For older Python versions, you can
 still use the Webware 1.0 branch.  If you get an error message about
 the version, you're probably unwittingly running the wrong version
 of Python.  Change the <tt class="docutils literal">AppServer</tt> or <tt class="docutils literal">AppServer.bat</tt> scripts,
-giving the full path to the correct Python interpreter.</p>
+giving the full path to the correct Python interpreter.  You can also
+try running Webware with PyPy.  The AppServer should work with PyPy 1.5,
+but this has not been thoroughly tested and seems to be less performant.</p>
 <p>Your installation of Python must be multi-threaded.  It's not entirely
 uncommon for third party web host providers to leave this disabled in
 Python because they don't expect that it's needed or for compatibility
@@ -316,7 +318,7 @@ directories of your Webware applications.</p>
 Mozilla.  The web server will be something like Apache or IIS.
 And finally, the app server will be WebKit, i.e. a Python process
 running the WebKit modules and your custom servlets.</p>
-<div align="center" class="align-center"><img alt="Architecture.gif" class="align-center" src="Architecture.gif" /></div>
+<img alt="Architecture.gif" class="align-center" src="Architecture.gif" />
 <p>The chronological order of events goes from top to bottom and then
 back up to top.  In other words, the browser makes a request to the web
 server which in turn makes a request to the app server.  The response

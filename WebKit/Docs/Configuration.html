@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.6: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.8: http://docutils.sourceforge.net/" />
 <title>Configuration Guide</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
@@ -103,10 +103,10 @@ Default: <tt class="docutils literal"><span class="pre">['.kid']</span></tt>.</d
 <dd>This is the list of extensions for files to be parsed as PSP.
 Default: <tt class="docutils literal"><span class="pre">['.psp']</span></tt>.</dd>
 <dt><tt class="docutils literal">ExtensionsToIgnore</tt>:</dt>
-<dd>This is a list of extensions that WebKit will ignore when
+<dd>This is a list or set of extensions that WebKit will ignore when
 autodetecting extensions.  Note that this does not prevent WebKit
 from serving such a file if the extension is given explicitly in a
-URL.  Default: <tt class="docutils literal"><span class="pre">['.pyc',</span> '.pyo', <span class="pre">'.py~',</span> '.bak']</tt>.</dd>
+URL.  Default: <tt class="docutils literal"><span class="pre">set(['.pyc',</span> '.pyo', <span class="pre">'.py~',</span> <span class="pre">'.bak'])</span></tt>.</dd>
 <dt><tt class="docutils literal">ExtensionsToServe</tt>:</dt>
 <dd>This is a list of extensions that WebKit will use exclusively when
 autodetecting extensions.  Note that this does not prevent WebKit
@@ -125,10 +125,10 @@ of the same basename but different extensions are available.  Note
 that this will have no effect if the extension is given in the
 URL.  Default: <tt class="docutils literal"><span class="pre">[&quot;.psp&quot;,</span> &quot;.py&quot;, &quot;.html&quot;]</tt>.</dd>
 <dt><tt class="docutils literal">FilesToHide</tt>:</dt>
-<dd>File patters to protect from browsing.  This affects all requests,
-and these files cannot be retrieved even when the extension is
-given explicitly.  Default: <tt class="docutils literal"><span class="pre">[&quot;.*&quot;,</span> <span class="pre">&quot;*~&quot;,</span> &quot;*bak&quot;, <span class="pre">&quot;*.tmpl&quot;,</span>
-<span class="pre">&quot;*.pyc&quot;,</span> <span class="pre">&quot;*.pyo&quot;,</span> <span class="pre">&quot;*.config&quot;]</span></tt>.</dd>
+<dd>A list or set of file patterns to protect from browsing.  This affects
+all requests, and these files cannot be retrieved even when the extension
+is given explicitly.  Default: <tt class="docutils literal"><span class="pre">set([&quot;.*&quot;,</span> <span class="pre">&quot;*~&quot;,</span> &quot;*bak&quot;, <span class="pre">&quot;*.tmpl&quot;,</span>
+<span class="pre">&quot;*.pyc&quot;,</span> <span class="pre">&quot;*.pyo&quot;,</span> <span class="pre">&quot;*.config&quot;])</span></tt>.</dd>
 <dt><tt class="docutils literal">FilesToServe</tt>:</dt>
 <dd>File patterns to serve from exclusively.  If the file being served
 for a particulary request does not match one of these patterns an
@@ -175,6 +175,15 @@ absolute path.  Default: <tt class="docutils literal">Sessions</tt>.</dd>
 <dd>Determines the amount of time (expressed in minutes) that passes
 before a user's session will timeout.  When a session times out,
 all data associated with that session is lost.  Default: <tt class="docutils literal">60</tt>.</dd>
+<dt><tt class="docutils literal">AlwaysSaveSessions</tt>:</dt>
+<dd>If False, then sessions will only be saved if they have been changed.
+This is more performant and avoids problems with concurrent requests
+made by the same user if sessions are not shared between these requests,
+as is the case for session stores other than <tt class="docutils literal">Memory</tt> or <tt class="docutils literal">Dynamic</tt>.
+Note that in this case the last access time is not saved either, so
+sessions may time out if they are not altered. You can call <tt class="docutils literal">setDirty()</tt>
+on sessions to force saving unaltered sessions in this case.  If True,
+then sessions will always be saved.  Default: <tt class="docutils literal">True</tt>.</dd>
 <dt><tt class="docutils literal">IgnoreInvalidSession</tt>:</dt>
 <dd>If False, then an error message will be returned to the user if
 the user's session has timed out or doesn't exist.  If True, then
@@ -285,6 +294,17 @@ directory), or you can specify an absolute path.  Default: <tt class="docutils l
 persist from one AppServer run to the next.  If you have PSPs that
 take a long time to compile, this can give a speedup.  Default:
 <tt class="docutils literal">False</tt> (cache will persist).</dd>
+<dt><tt class="docutils literal">ReloadServletClasses</tt>:</dt>
+<dd>During development of an application, servlet classes will be changed
+very frequently.  The AutoReload mechanism could be used to detect such
+changes and to reload modules with changed servlet classes, but it would
+cause an app server restart every time a servlet class is changed.  So
+by default, modules with servlet classes are reloaded without restarting
+the server.  This can potentially cause problems when other modules are
+dependent on the reloaded module because the dependent modules will not
+be reloaded.  To allow reloading only using the AutoReload mechanism,
+you can set <tt class="docutils literal">ReloadServletClasses</tt> to <tt class="docutils literal">False</tt> in such cases.  Default:
+<tt class="docutils literal">True</tt> (quick and dirty reloading).</dd>
 </dl>
 </div>
 <div class="section" id="errors">
@@ -526,6 +546,16 @@ You must add a directory to the list for every plug-in you use --
 <dd>If True, then additional messages are printed while the AppServer
 runs, most notably information about each request such as size and
 response time.  Default: <tt class="docutils literal">True</tt>.</dd>
+<dt><tt class="docutils literal">SilentURIs</tt>:</dt>
+<dd>If <tt class="docutils literal">Verbose</tt> is set to True, then you can use this setting to specify
+URIs for which you don't want to print any messages in the output of the
+AppServer.  The value is expected to be a regular expression that is
+compared to the request URI.  For instance, if you want to suppress output
+for images, JavaScript and CSS files, you can set <tt class="docutils literal">SilentURIs</tt> to
+<tt class="docutils literal"><span class="pre">'\.(gif|jpg|jpeg|png|js|css)$'</span></tt> (though we do not recommend serving
+static files with Webware; it's much more performant to deliver them
+directly from the Apache server).  If set to <tt class="docutils literal">None</tt>, messages will be
+printed for all requests handled by Webware.  Default: <tt class="docutils literal">None</tt></dd>
 <dt><tt class="docutils literal">StartServerThreads</tt>:</dt>
 <dd>The number of threads in the request handler thread pool that will
 be created when the application server starts.  Default: <tt class="docutils literal">10</tt>.</dd>
