@@ -2,33 +2,39 @@
 
 <p><% name %> version <% versionString %> released on <% releaseDate %></p>
 
+<a name="Introduction"></a><h2>Introduction</h2>
+<ul>
+  <li>...</li>
+</ul>
+
+<a name="MajorChanges"></a><h2>Major Changes</h2>
+<ul>
+  <li>...</li>
+</ul>
+
 <a name="NewFeatures"></a><h2>New Features</h2>
 <ul>
-  <li>Added support for SQLite to MiddleKit.</li>
+  <li>...</li>
 </ul>
 
 <a name="Improvements"></a><h2>Improvements and Refinements</h2>
 <ul>
-  <li>SQL Server support in MiddleKit now done via pyodbc, because mxODBC is
-  a commercial product, while pyodbc is free and open source. Tested with
-  SQL Server 2008.</li>
+  <li>...</li>
+</ul>
+
+<a name="Security"></a><h2>Security</h2>
+<ul>
+  <li>...</li>
 </ul>
 
 <a name="MinorChanges"></a><h2>Minor API Changes</h2>
 <ul>
-  <li>We are now only using new-style classes.</li>
+  <li>...</li>
 </ul>
 
-<a name="Deprecations"></a><h2>Deprecations</h2>
+<a name="Bugfixes"></a><h2>Bugfixes</h2>
 <ul>
-  <li>The <code>_get</code> and <code>_set</code> methods of
-  <code>MiddleObject</code> have been deprecated in favor of
-  <code>valueForKey</code> and <code>setValueForKey</code>.</li>
-  <li>MiddleKit now does not support <code>mxDateTime</code> types any more,
-  only the native datetime types. However, if python-dateutil is not installed,
-  Webware will still use <code>mxDateTime</code> internally for string parsing
-  (but the results will be <code>datetime</code> anyway). This makes the whole
-  datetime handling much clearer and easier maintainable.</li>
+  <li>...</li>
 </ul>
 
 <% footer() %>
