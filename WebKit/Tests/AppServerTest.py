@@ -46,7 +46,8 @@ class AppServerTest(unittest.TestCase):
             data = urlopen('http://localhost:8080').read()
         except IOError:
             data = '<h2>Could not read page.</h2>'
-        self.assertTrue('<h1>Welcome to Webware!</h1>' in data)
+        self.assertTrue('<h1>Welcome to Webware!</h1>' in data,
+            'Built-in HTTP server failure. Anything using port 8080 already?')
         self.assertTrue('<h2>Test passed.</h2>' in data)
 
     def workDir(self):
