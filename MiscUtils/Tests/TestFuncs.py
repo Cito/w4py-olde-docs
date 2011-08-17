@@ -157,15 +157,14 @@ ceremony!\""""
         self.assertEqual(d['condensed'], d['dashed'].replace('-', ''))
 
     def testLocalTimeDelta(self):
-        # we only check if the result is a multiple of one hour
         d = localTimeDelta()
         self.assertEqual(d.microseconds, 0)
         self.assertEqual(d.seconds % 3600, 0)
-        self.assertEqual(d.days, 0)
+        self.assertTrue(-1 <= d.days < 1)
         d = localTimeDelta(time.time())
         self.assertEqual(d.microseconds, 0)
         self.assertEqual(d.seconds % 3600, 0)
-        self.assertEqual(d.days, 0)
+        self.assertTrue(-1 <= d.days < 1)
 
     def testUniqueId(self):
 
