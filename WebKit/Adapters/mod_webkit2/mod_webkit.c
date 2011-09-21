@@ -190,7 +190,7 @@ static void *webkit_create_dir_config(apr_pool_t *p, char *dirspec)
      */
 
     if (rv != APR_SUCCESS){
-      log_error("couldn't resolve WKServer address", NULL);
+      log_error("Couldn't resolve WKServer address", NULL);
     }
 
     cfg->apraddr = apraddr;
@@ -234,7 +234,7 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
     log_debug("In wksock_open", r);
 
     if (cfg->apraddr == NULL) {
-      log_error("No Valid Host Configured", r->server);
+      log_error("No valid host configured", r->server);
       return NULL;
     }
     if ((rv = apr_socket_create(&aprsock, AF_INET, SOCK_STREAM,
@@ -242,7 +242,7 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
             APR_PROTO_TCP,
 #endif
             r->pool)) != APR_SUCCESS) {
-        log_error("Failure creating socket for appserver connection", r->server);
+        log_error("Failure creating socket for AppServer connection", r->server);
         return NULL;
     }
 
@@ -259,6 +259,11 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
     /* Check if we connected */
     if (rv != APR_SUCCESS) {
         apr_socket_close(aprsock);
+        if (rv) {
+            char sbuf[256];
+            if (apr_strerror(rv, sbuf, siezof(sbuf)))
+                log_error(sbuf, r->server);
+        }
         log_error("Can not open socket connection to WebKit AppServer", r->server);
         return NULL;
     }
@@ -315,7 +320,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     const char *location;
     char sbuf[MAX_STRING_LEN];
 
-    log_debug("In transact_with_appserver", r);
+    log_debug("in transact_with_appserver", r);
 
     aprsock = wksock_open(r, cfg->addr, cfg->port, cfg);
     if (aprsock == NULL) return 1;
@@ -415,7 +420,7 @@ static int transact_with_app_server(request_rec *r, wkcfg* cfg, WFILE* whole_dic
     APR_BRIGADE_INSERT_TAIL(bb, b);
 
     if ((ret = ap_scan_script_header_err_brigade(r, bb, sbuf)) != OK) {
-      log_error("the Appserver provided an invalid response", r->server);
+      log_error("The AppServer provided an invalid response", r->server);
       //return;
     }
     sprintf(sbuf, "Status: %i", r->status);
@@ -478,11 +483,11 @@ static int webkit_handler(request_rec *r)
     if (strcmp(r->handler, "webkit-handler"))
         return DECLINED;
 
-    log_debug("In webkit_handler", r);
+    log_debug("in webkit_handler", r);
 
     cfg =  ap_get_module_config(r->per_dir_config, &webkit_module);
     if (cfg == NULL) {
-        log_debug("No cfg", r);
+        log_debug("no cfg", r);
         cfg = (wkcfg*)webkit_create_dir_config(r->pool, "/");
     }
 
@@ -550,7 +555,7 @@ static int webkit_handler(request_rec *r)
 
     w_byte(TYPE_NULL, env_dict);
     /* end dictionary */
-    log_debug("Built env dictionary", r);
+    log_debug("built env dictionary", r);
 
     /* We can start building the full dictionary now */
     w_byte(TYPE_DICT, whole_dict);
@@ -582,7 +587,7 @@ static int webkit_handler(request_rec *r)
         if (result == 0) {
             return OK;
         } else if (result == 2) {
-            log_error("error transacting with app server -- giving up.", r->server);
+            log_error("Error transacting with app server -- giving up", r->server);
             return HTTP_INTERNAL_SERVER_ERROR;
         }
         sprintf(msgbuf,
@@ -591,7 +596,7 @@ static int webkit_handler(request_rec *r)
         log_error(msgbuf, r->server);
         apr_sleep(cfg->retrydelay * APR_USEC_PER_SEC);
     }
-    log_error("timed out trying to connect to appserver -- giving up.", r->server);
+    log_error("Timed out trying to connect to appserver -- giving up", r->server);
     return HTTP_INTERNAL_SERVER_ERROR;
 }
 
@@ -603,7 +608,7 @@ static int psp_handler(request_rec *r) {
     if (strcmp(r->handler, "psp-handler"))
         return DECLINED;
 
-    log_debug("In psp_handler", r);
+    log_debug("in psp_handler", r);
 
     r->handler = (char*)apr_pstrdup(r->pool, "webkit-handler");
     apr_table_add(r->subprocess_env, "WK_ABSOLUTE", "1");
