@@ -20,6 +20,9 @@ class FieldStorage(cgi.FieldStorage):
     for parameters with the same name. With other words, our FieldStorage class
     overrides the query string parameters with the parameters sent via POST.
 
+    As recommended by W3C in section B.2.2 of the HTML 4.01 specification,
+    we also support use of ';' in place of '&' as separator in query strings.
+
     """
 
     def __init__(self, fp=None, headers=None, outerboundary='',
@@ -42,18 +45,19 @@ class FieldStorage(cgi.FieldStorage):
         """Add all non-existing parameters from the given query string."""
         r = {}
         for name_value in qs.split('&'):
-            nv = name_value.split('=', 2)
-            if len(nv) != 2:
-                if self.strict_parsing:
-                    raise ValueError('bad query field: %r' % (name_value,))
-                continue
-            name = urllib.unquote(nv[0].replace('+', ' '))
-            value = urllib.unquote(nv[1].replace('+', ' '))
-            if len(value) or self.keep_blank_values:
-                if name in r:
-                    r[name].append(value)
-                else:
-                    r[name] = [value]
+            for name_value in name_value.split(';'):
+                nv = name_value.split('=', 2)
+                if len(nv) != 2:
+                    if self.strict_parsing:
+                        raise ValueError('bad query field: %r' % (name_value,))
+                    continue
+                name = urllib.unquote(nv[0].replace('+', ' '))
+                value = urllib.unquote(nv[1].replace('+', ' '))
+                if len(value) or self.keep_blank_values:
+                    if name in r:
+                        r[name].append(value)
+                    else:
+                        r[name] = [value]
         if self.list is None:
             # This makes sure self.keys() are available, even
             # when valid POST data wasn't encountered.
