@@ -98,12 +98,11 @@ class IncludeURLTest(Page):
 
     def cmos(self, url, method, desc):
         app = self.application()
-        trans = self.transaction()
         self.writeln('<p>Calling'
             ' <tt>callMethodOfServlet(t, "%s", "%s")</tt>:</p>'
             '<p>%s</p>' % (url, method, desc))
         self.write('<div style="margin-left:2em">')
-        ret = app.callMethodOfServlet(trans, url, method)
+        ret = self.callMethodOfServlet(url, method)
         self.write('</div>')
         self.writeln('<p><tt>callMethodOfServlet</tt> returned %s.</p>'
             % (ret is not None and '<tt>%s</tt>'

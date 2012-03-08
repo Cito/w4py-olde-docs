@@ -309,8 +309,7 @@ class HTTPContent(HTTPServlet):
         """
         self.application().includeURL(self.transaction(), url)
 
-    @staticmethod
-    def callMethodOfServlet(url, method, *args, **kwargs):
+    def callMethodOfServlet(self, url, method, *args, **kwargs):
         """Call a method of another servlet.
 
         See `Application.callMethodOfServlet` for details.
@@ -321,7 +320,8 @@ class HTTPContent(HTTPServlet):
         return self.application().callMethodOfServlet(
             self.transaction(), url, method, *args, **kwargs)
 
-    def endResponse(self):
+    @staticmethod
+    def endResponse():
         """End response.
 
         When this method is called during `awake` or `respond`,
