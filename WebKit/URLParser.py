@@ -429,11 +429,56 @@ class _FileParser(URLParser):
         which is less ambiguous; though if you ask for file.html,
         and file.html.py exists, that file will be returned.
 
-        If more than one file is returned for the basename, you'll
-        get a 404.
+        The files are filtered according to the settings ``FilesToHide``,
+        ``FilesToServe``, ``ExtensionsToIgnore`` and ``ExtensionsToServe``.
+        See the shouldServeFile() method for details on these settings.
 
-        Some settings are used to control this.  All settings are
-        in ``Application.config``:
+        All files that start with the given base name are returned
+        as a list. When the base name itself is part of the list or
+        when extensions are prioritized and such an extension is found
+        in the list, then the list will be reduced to only that entry.
+
+        Some settings are used to control the prioritization of filenames.
+        All settings are in ``Application.config``:
+
+        UseCascadingExtensions:
+            If true, then extensions will be prioritized.  So if
+            extension ``.tmpl`` shows up in ExtensionCascadeOrder
+            before ``.html``, then even if filenames with both
+            extensions exist, only the .tmpl file will be returned.
+        ExtensionCascadeOrder:
+            A list of extensions, ordered by priority.
+
+        """
+        if '*' in baseName:
+            return []
+
+        fileStart = os.path.basename(baseName)
+        dirName = os.path.dirname(baseName)
+        filenames = []
+        for filename in os.listdir(dirName):
+            if filename.startswith('.'):
+                continue
+            elif filename == fileStart:
+                if self.shouldServeFile(filename):
+                    return [os.path.join(dirName, filename)]
+            elif (filename.startswith(fileStart)
+                    and os.path.splitext(filename)[0] == fileStart):
+                if self.shouldServeFile(filename):
+                    filenames.append(os.path.join(dirName, filename))
+
+        if self._useCascading and len(filenames) > 1:
+            for extension in self._cascadeOrder:
+                if baseName + extension in filenames:
+                    return [baseName + extension]
+
+        return filenames
+
+    def shouldServeFile(self, filename):
+        """Check if the file with the given filename should be served.
+
+        Some settings are used to control the filtering of filenames.
+        All settings are in ``Application.config``:
 
         FilesToHide:
             These files will be ignored, and even given a full
@@ -449,69 +494,23 @@ class _FileParser(URLParser):
         ExtensionsToServe:
             If set, only files with these extensions will be
             served.  Like FilesToServe, only doesn't use globs.
-        UseCascadingExtensions:
-            If true, then extensions will be prioritized.  So if
-            extension ``.tmpl`` shows up in ExtensionCascadeOrder
-            before ``.html``, then even if filenames with both
-            extensions exist, only the .tmpl file will be returned.
-        ExtensionCascadeOrder:
-            A list of extensions, ordered by priority.
 
         """
-        if '*' in baseName:
-            return []
-
-        fileStart = os.path.basename(baseName)
-        dir = os.path.dirname(baseName)
-        filenames = []
-        dirnames = []
-        for filename in os.listdir(dir):
-            if filename.startswith('.'):
-                continue
-            elif filename == fileStart:
-                if os.path.isdir(os.path.join(dir, filename)):
-                    dirnames.append(os.path.join(dir, filename))
-                else:
-                    filenames.append(os.path.join(dir, filename))
-            elif (filename.startswith(fileStart)
-                    and os.path.splitext(filename)[0] == fileStart):
-                filenames.append(os.path.join(dir, filename))
-        good = dirnames
-
-        # Here's where all the settings (except cascading) come into play --
-        # we filter the possible files based on settings here:
-        for filename in filenames:
-            ext = os.path.splitext(filename)[1]
-            shortFilename = os.path.basename(filename)
-            if ext in self._toIgnore and filename != baseName:
-                continue
-            if self._toServe and ext not in self._toServe:
-                continue
-            shouldServe = True
-            for regex in self._filesToHideRegexes:
-                if regex.match(shortFilename):
-                    shouldServe = False
+        ext = os.path.splitext(filename)[1]
+        if ext in self._toIgnore:
+            return False
+        if self._toServe and ext not in self._toServe:
+            return False
+        for regex in self._filesToHideRegexes:
+            if regex.match(filename):
+                return False
+        if self._filesToServeRegexes:
+            for regex in self._filesToServeRegexes:
+                if regex.match(filename):
                     break
-            if not shouldServe:
-                continue
-            if self._filesToServeRegexes:
-                shouldServe = False
-                for regex in self._filesToServeRegexes:
-                    if regex.match(shortFilename):
-                        shouldServe = True
-                        break
-                if not shouldServe:
-                    continue
-            good.append(filename)
-
-        if self._useCascading and len(good) > 1:
-            actualExtension = os.path.splitext(baseName)[1]
-            for extension in self._cascadeOrder:
-                if (baseName + extension in good
-                        or extension == actualExtension):
-                    return [baseName + extension]
-
-        return good
+            else:
+                return False
+        return True
 
     def parseIndex(self, trans, requestPath):
         """Return index servlet.
