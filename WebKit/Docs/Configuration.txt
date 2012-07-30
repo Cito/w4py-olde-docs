@@ -403,7 +403,7 @@ Errors
     you are not creating loops.  In an ``HTTPNotFound`` error page, the servlet
     needs to determine the erroneous URI with ``self.request().previousURI()``,
     since the ``uri()`` method returns the URI of the current servlet, which
-    in the error page itself.  When a custom error page is displayed, the
+    is the error page itself.  When a custom error page is displayed, the
     standard error handler will not be called.  So if you want to generate
     an error email or saved error report, you must do so explicitly in your
     error page servlet.  Default: ``None`` (no custom error page).
