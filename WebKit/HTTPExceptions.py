@@ -166,7 +166,7 @@ class HTTPMovedPermanently(HTTPException):
 
 
 class HTTPTemporaryRedirect(HTTPMovedPermanently):
-    """HTTPExcecption "temporary tedirect" subclass.
+    """HTTPExcecption "temporary redirect" subclass.
 
     Like HTTPMovedPermanently, except the redirect is only valid for this
     request. Internally identical to HTTPMovedPermanently, except with a
