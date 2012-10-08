@@ -1305,6 +1305,7 @@ def run(workDir=None):
                         except SystemExit, e:
                             exitStatus = e[0]
                     # Run the server thread
+                    server._running = 2
                     t = Thread(target=_windowsmainloop)
                     t.start()
                     try:
