@@ -36,9 +36,9 @@ from threading import Thread, currentThread
 from time import time, localtime, sleep
 
 try:
-    from ctypes import pythonapi, py_object
+    from ctypes import pythonapi, c_long, py_object
 except ImportError:
-    py_object = pythonapi = None
+    py_object = c_long = pythonapi = None
 try:
     PyThreadState_SetAsyncExc = pythonapi.PyThreadState_SetAsyncExc
 except (TypeError, AttributeError):
@@ -166,11 +166,12 @@ class WorkerThread(Thread):
         if debug:
             print "Worker thread id is", threadID
         try:
-            ret = PyThreadState_SetAsyncExc(threadID, py_object(exception))
+            ret = PyThreadState_SetAsyncExc(
+                c_long(threadID), py_object(exception))
             # If it returns a number greater than one, we're in trouble,
             # and should call it again with exc=NULL to revert the effect
             if ret > 1:
-                PyThreadState_SetAsyncExc(threadID, 0)
+                PyThreadState_SetAsyncExc(c_long(threadID), py_object())
         except Exception:
             ret = -1
         if debug:
