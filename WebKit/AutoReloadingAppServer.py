@@ -429,6 +429,8 @@ class AutoReloadingAppServer(AppServer):
                 # we receive word that we should shutdown (via the pipe).
                 select.select(*fds)
             except select.error, e:
+                if not self._runFileMonitor:
+                    break
                 if e[0] == errno.EINTR:
                     continue
                 else:
