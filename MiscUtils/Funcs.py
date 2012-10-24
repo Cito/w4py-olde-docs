@@ -8,10 +8,8 @@ You can safely import * from MiscUtils.Funcs if you like.
 
 import os
 import random
-import sys
 import datetime
 import time
-import datetime
 import textwrap
 
 from struct import calcsize
