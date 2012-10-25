@@ -300,6 +300,7 @@ class AutoReloadingAppServer(AppServer):
                 self._fam = None
             print 'AutoReload Monitor started,',
             if self._fam:
+                self._pollInterval = 0
                 print 'using %s.' % self._fam.name()
                 target = self.fileMonitorThreadLoopFAM
             else:
@@ -325,10 +326,14 @@ class AutoReloadingAppServer(AppServer):
                         os.write(self._pipe[1], 'stop')
                         os.close(self._pipe[1])
             sys.stdout.flush()
-            try:
-                self._fileMonitorThread.join(min(3, 1.5 * self._pollInterval))
-            except Exception:
-                pass
+            if self._fileMonitorThread.isAlive():
+                try:
+                    self._fileMonitorThread.join(
+                        max(3, 1.5 * self._pollInterval))
+                    if self._fileMonitorThread.isAlive():
+                        raise RuntimeError
+                except Exception:
+                    print 'Could not stop the AutoReload Monitor thread.'
             if self._fam:
                 if self._pipe:
                     os.close(self._pipe[0])
