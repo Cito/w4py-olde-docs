@@ -285,7 +285,7 @@ class SessionDynamicStore(SessionStore):
 
         moveToFileTime = now - self._moveToFileInterval
         keys = []
-        for key in self._memoryStore:
+        for key in self._memoryStore.keys():
             try:
                 if self._memoryStore[key].lastAccessTime() < moveToFileTime:
                     if self._memoryStore[key].isNew():
