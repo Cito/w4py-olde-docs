@@ -199,7 +199,7 @@ class SessionStore(object):
         """
         curTime = time()
         keys = []
-        for key in self:
+        for key in self.keys():
             try:
                 session = self[key]
             except KeyError:
