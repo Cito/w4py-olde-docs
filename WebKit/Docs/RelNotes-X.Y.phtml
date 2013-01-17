@@ -37,7 +37,9 @@
 
 <a name="Bugfixes"></a><h2>Bugfixes</h2>
 <ul>
-  <li>...</li>
+  <li><code>HTTPRequest.serverPath()</code> did not work properly when
+  <code>SCRIPT_URL</code> was not set by the webserver and the request had
+  been forwarded (bug reported by Adam Smith).</li>
 </ul>
 
 <% footer() %>

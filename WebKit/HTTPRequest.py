@@ -453,7 +453,7 @@ class HTTPRequest(Request):
             return host
 
     def serverURL(self, canonical=False):
-        """Return the full internet path to this request.
+        """Return the full Internet path to this request.
 
         This is the URL that was actually received by the webserver
         before any rewriting took place. If canonical is set to true,
@@ -470,7 +470,7 @@ class HTTPRequest(Request):
                 self.scheme(), self.hostAndPort(), self.serverPath())
 
     def serverURLDir(self):
-        """Return the directory of the URL in full internet form.
+        """Return the directory of the URL in full Internet form.
 
         Same as serverURL, but removes the actual page.
 
@@ -490,9 +490,14 @@ class HTTPRequest(Request):
 
         """
         if 'SCRIPT_URL' in self._environ:
-            return self._environ['SCRIPT_URL']
+            path = self._environ['SCRIPT_URL']
         else:
-            return self._servletPath + self._pathInfo
+            path = self._servletPath
+            if not self._absolutepath and self._stack:
+                path += self._stack[0][1]
+            else:
+                path += self._pathInfo
+        return path
 
     def serverPathDir(self):
         """Return the directory of the webserver URL path.

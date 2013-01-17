@@ -7,7 +7,7 @@ class DebugPage(Page):
         _evars = ('PATH_INFO', 'REQUEST_URI', 'SCRIPT_NAME')
         _pvars = ('urlPath', 'previousURLPaths',
             'adapterName', 'servletPath', 'contextName',
-            'serverSidePath', 'serverSideContextPath',
+            'serverPath', 'serverSidePath', 'serverSideContextPath',
             'extraURLPath')
         req = self.request()
         env = req._environ
