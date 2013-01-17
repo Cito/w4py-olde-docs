@@ -126,7 +126,7 @@ class HTTPRequest(Request):
                     value = value[0]
                     if value.filename:
                         if debug:
-                            print "Uploaded file found:", item.filename
+                            print "Uploaded file found:", value.filename
                     else:
                         value = value.value
                 fields[key] = value
@@ -145,7 +145,7 @@ class HTTPRequest(Request):
         self._pathInfo = self.pathInfo()
 
         if debug:
-            print "Done setting up request, found keys %r" % fieldKeys
+            print "Done setting up request, found keys %r" % fields.keys()
 
 
     ## Protocol ##
@@ -463,7 +463,7 @@ class HTTPRequest(Request):
         i.e. http://www.my.own.host.com:8080/WebKit/TestPage.py
 
         """
-        if canonical and 'SCRIPT_URI' in environ:
+        if canonical and 'SCRIPT_URI' in self._environ:
             return self._environ['SCRIPT_URI']
         else:
             return '%s://%s%s' % (
