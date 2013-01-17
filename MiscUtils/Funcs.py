@@ -46,7 +46,7 @@ def commas(number):
         i = len(number)
     while 1:
         i -= 3
-        if i <= 0 or number[i-1] == '-':
+        if i <= 0 or number[i - 1] == '-':
             break
         number.insert(i, ',')
     return ''.join(number)
@@ -212,6 +212,7 @@ def _descExc(reprOfWhat, err):
             reprOfWhat, err.__class__.__name__, err)
     except Exception:
         return '(exception from repr(%s))' % reprOfWhat
+
 
 def safeDescription(obj, what='what'):
     """Return the repr() of obj and its class (or type) for help in debugging.

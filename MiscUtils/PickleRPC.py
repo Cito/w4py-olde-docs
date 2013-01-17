@@ -170,9 +170,9 @@ class SafeUnpickler(object):
         if (module, klass) not in self.allowedGlobals():
             raise UnpicklingError("For security reasons, you can\'t unpickle"
                 " objects from module %s with type %s." % (module, klass))
-        globals = {}
-        exec 'from %s import %s as theClass' % (module, klass) in globals
-        return globals['theClass']
+        g = {}
+        exec 'from %s import %s as theClass' % (module, klass) in g
+        return g['theClass']
 
     def load(self, file):
         """Unpickle a file."""
@@ -181,7 +181,7 @@ class SafeUnpickler(object):
         return safeUnpickler.load()
 
     def loads(self, str):
-        """Unpicle a string."""
+        """Unpickle a string."""
         return self.load(StringIO(str))
 
 

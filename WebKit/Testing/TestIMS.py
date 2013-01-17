@@ -30,7 +30,7 @@ class TestIMS(SidebarPage):
             and httplib.HTTPSConnection or httplib.HTTPConnection)
         servletPath = self.request().servletPath()
         self.write('<h2>Test If-Modified-Since support in Webware</h2>')
-        # pick a static file which is served up by Webwares UnknownFileHandler
+        # pick a static file which is served up by Webware's UnknownFileHandler
         self.runTest('%s/PSP/Examples/psplogo.png' % servletPath)
 
     def runTest(self, path):

@@ -38,10 +38,10 @@ class Session(object):
 
     def __init__(self, identifier=7, value=None):
         self._identifier = 'foo-%d' % identifier
-        self._data = dict(bar=value or identifier*6)
+        self._data = dict(bar=value or identifier * 6)
         self._expired = self._dirty = False
         self._timeout = 1800
-        self._lastAccessTime = time() - identifier*400
+        self._lastAccessTime = time() - identifier * 400
         self._isNew = True
 
     def identifier(self):
@@ -95,14 +95,14 @@ class SessionStoreTest(unittest.TestCase):
 
     def testEncodeDecode(self):
         session = Session()
-        buffer = StringIO()
-        self._store.encoder()(session, buffer)
-        output = buffer.getvalue()
-        buffer.close()
+        s = StringIO()
+        self._store.encoder()(session, s)
+        output = s.getvalue()
+        s.close()
         self.assertTrue(isinstance(output, str))
-        buffer = StringIO(output)
-        output = self._store.decoder()(buffer)
-        buffer.close()
+        s = StringIO(output)
+        output = self._store.decoder()(s)
+        s.close()
         self.assertTrue(type(output) is type(session))
         self.assertEqual(output._data, session._data)
 
@@ -119,9 +119,9 @@ class SessionMemoryStoreTest(SessionStoreTest):
     _storeclass = SessionMemoryStore
 
     def setUp(self):
-        dir = self._app._sessionDir
-        if not os.path.exists(dir):
-            os.mkdir(dir)
+        d = self._app._sessionDir
+        if not os.path.exists(d):
+            os.mkdir(d)
         SessionStoreTest.setUp(self)
         self._store.clear()
         for n in range(7):
@@ -132,10 +132,10 @@ class SessionMemoryStoreTest(SessionStoreTest):
     def tearDown(self):
         self._store.clear()
         self._store.storeAllSessions()
-        dir = self._app._sessionDir
-        for filename in os.listdir(dir):
-            os.remove(os.path.join(dir, filename))
-        os.rmdir(dir)
+        d = self._app._sessionDir
+        for filename in os.listdir(d):
+            os.remove(os.path.join(d, filename))
+        os.rmdir(d)
         SessionStoreTest.tearDown(self)
 
     def testLen(self):
@@ -375,7 +375,7 @@ class SessionMemcachedStoreTest(SessionMemoryStoreTest):
         self.assertRaises(NotImplementedError, self._store.items)
 
     def testIterItems(self):
-        items =  [key for key in self._store.iteritems()]
+        items = [key for key in self._store.iteritems()]
         self.assertEqual(items, [])
         self.setOnIteration('Error')
         items = lambda:  [key for key in self._store.iteritems()]

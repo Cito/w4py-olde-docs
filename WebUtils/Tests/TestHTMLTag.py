@@ -72,8 +72,8 @@ class HTMLTagTest(unittest.TestCase):
         body = html.subtagAt(1)
         p = body.subtagAt(0)
         self.assertEqual(p.name(), 'p')
-        self.assertEqual( p.numChildren(), 3)
-        self.assertEqual( p.numSubtags(), 1)
+        self.assertEqual(p.numChildren(), 3)
+        self.assertEqual(p.numSubtags(), 1)
 
     def checkMatchingAttr(self):
         html = HTMLReader().readString(self._html)
