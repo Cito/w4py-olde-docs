@@ -4,7 +4,7 @@ import cgi
 import os
 import sys
 import traceback
-from operator import itemgetter
+from operator import attrgetter, itemgetter
 from time import time
 
 from MiscUtils import NoDefault
@@ -103,19 +103,20 @@ class HTTPRequest(Request):
 
         # We use the cgi module to get the fields,
         # but then change them into an ordinary dictionary of values:
-        fields = {}
+        fieldStorage, fields = self._fields, {}
         try:
-            fieldKeys = self._fields.keys()
+            fieldKeys = fieldStorage.keys()
         except TypeError:
             # This can happen if we do not have a a regular POST
             # from an HTML form, but, for example, an XML-RPC request.
             pass
         else:
+            getValue = attrgetter('value')
             for key in fieldKeys:
-                value = self._fields[key]
+                value = fieldStorage[key]
                 if isinstance(value, list):
                     # we have a list of cgi.MiniFieldStorage objects
-                    value = [item.value for item in value]
+                    value = map(getValue, value)
                 else:
                     if value.filename:
                         if debug:
@@ -124,7 +125,7 @@ class HTTPRequest(Request):
                         # we have one of those cgi.MiniFieldStorage objects
                         value = value.value # get its value
                 fields[key] = value
-        self._fieldStorage, self._fields = self._fields, fields
+        self._fieldStorage, self._fields = fieldStorage, fields
 
         # We use Tim O'Malley's Cookie class to get the cookies,
         # but then change them into an ordinary dictionary of values
