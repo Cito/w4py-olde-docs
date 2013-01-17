@@ -105,25 +105,30 @@ class HTTPRequest(Request):
         # but then change them into an ordinary dictionary of values:
         fieldStorage, fields = self._fields, {}
         try:
-            fieldKeys = fieldStorage.keys()
-        except TypeError:
+            # Avoid accessing fieldStorage as dict; that would be very slow
+            # as it always iterates over all items to find a certain key.
+            # Instead, iterate directly over the items of the internal list.
+            fieldItems = fieldStorage.list
+        except AttributeError:
             # This can happen if we do not have a a regular POST
             # from an HTML form, but, for example, an XML-RPC request.
-            pass
-        else:
+            fieldItems = None
+            if debug:
+                print "Cannot get fieldstorage list."
+        if fieldItems:
+            for value in fieldItems:
+                fields.setdefault(value.name, []).append(value)
             getValue = attrgetter('value')
-            for key in fieldKeys:
-                value = fieldStorage[key]
-                if isinstance(value, list):
-                    # we have a list of cgi.MiniFieldStorage objects
+            for key, value in fields.iteritems():
+                if len(value) > 1:
                     value = map(getValue, value)
                 else:
+                    value = value[0]
                     if value.filename:
                         if debug:
-                            print "Uploaded file found"
-                    else: # i.e., if we don't have a list,
-                        # we have one of those cgi.MiniFieldStorage objects
-                        value = value.value # get its value
+                            print "Uploaded file found:", item.filename
+                    else:
+                        value = value.value
                 fields[key] = value
         self._fieldStorage, self._fields = fieldStorage, fields
 
