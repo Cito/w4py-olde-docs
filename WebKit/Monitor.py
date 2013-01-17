@@ -6,7 +6,7 @@ Contributed to Webware for Python by Jay Love.
 
 This module is intended to provide additional assurance that the
 AppServer continues running at all times. This module will be
-reponsible for starting the AppServer, and monitoring its health.
+responsible for starting the AppServer, and monitoring its health.
 It does that by periodically sending a status check message to the
 AppServer to ensure that it is responding. If it finds that the
 AppServer does not respond within a specified time, it will start a
@@ -34,7 +34,7 @@ To stop the processes, run ``Monitor.py stop``.
 
 # It should be possible on both Unix and Windows to monitor the AppServer
 # process in 2 ways:
-# 1) The method used here, ie can it service requests?
+# 1) The method used here, i.e. can it service requests?
 # 2) is the process still running?
 
 # Combining these with a timer lends itself to load balancing of some kind.
@@ -85,22 +85,25 @@ def createServer(setupPath=0):
     exec code
     main(['start'])
 
+
 def startupCheck():
     """Make sure the AppServer starts up correctly."""
-    count = 0
-    print "Waiting for start..."
-    time.sleep(monitorInterval/2) # give the server a chance to start
-    while 1:
-        if checkServer(False):
-            break
-        count += monitorInterval
-        if count > maxStartTime:
-            print "Couldn't start AppServer."
-            print "Killing AppServer..."
-            os.kill(srvpid, signal.SIGKILL)
-            sys.exit(1)
+    if os.name == 'posix':
         print "Waiting for start..."
-        time.sleep(monitorInterval)
+        time.sleep(monitorInterval / 2) # give the server a chance to start
+        count = 0
+        while 1:
+            if checkServer(False):
+                break
+            count += monitorInterval
+            if count > maxStartTime:
+                print "Couldn't start AppServer."
+                print "Killing AppServer..."
+                os.kill(srvpid, signal.SIGKILL)
+                sys.exit(1)
+            print "Waiting for start..."
+            time.sleep(monitorInterval)
+
 
 def startServer(killcurrent=True):
     """Start the AppServer.
@@ -123,6 +126,7 @@ def startServer(killcurrent=True):
         if srvpid == 0:
             createServer(not killcurrent)
             sys.exit()
+
 
 def checkServer(restart=True):
     """Send a check request to the AppServer.
@@ -155,6 +159,7 @@ def checkServer(restart=True):
         else:
             return False
 
+
 def main(args):
     """The main loop.
 
@@ -166,11 +171,11 @@ def main(args):
     global running
     running = True
 
-    file = open("monitor.pid", "w")
+    f = open('monitor.pid', 'w')
     if os.name == 'posix':
-        file.write(str(os.getpid()))
-    file.flush()
-    file.close()
+        f.write(str(os.getpid()))
+    f.flush()
+    f.close()
     startServer(False)
     try:
         startupCheck()

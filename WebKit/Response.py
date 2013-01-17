@@ -22,7 +22,7 @@ class Response(Message):
       * Consider implementing the buffer/flush logic here
         including buffer size.
       * Also, consider then having a method that doesn't allow
-        committment until the end.
+        commitment until the end.
 
     """
 
