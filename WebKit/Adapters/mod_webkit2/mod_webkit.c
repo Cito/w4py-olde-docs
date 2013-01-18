@@ -261,7 +261,7 @@ static apr_socket_t* wksock_open(request_rec *r, unsigned long address, int port
         apr_socket_close(aprsock);
         if (rv) {
             char sbuf[256];
-            if (apr_strerror(rv, sbuf, siezof(sbuf)))
+            if (apr_strerror(rv, sbuf, sizeof(sbuf)))
                 log_error(sbuf, r->server);
         }
         log_error("Can not open socket connection to WebKit AppServer", r->server);

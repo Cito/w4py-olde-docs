@@ -34,7 +34,7 @@ httpd.conf to load the module.
 
 To build and install on Microsoft Windows, you can use the make.bat batch file
 with the free Microsoft Visual C++ Toolkit 2003 and Microsoft Windows Server
-2003 R2 Platform SDK. For your convenience, a pre-compiled mod_webkit.dll for
+2003 R2 Platform SDK. For your convenience, a pre-compiled mod_webkit.so for
 32bit Windows XP is already included in this directory, so you can just place
 it into your Apache modules directory under the name mod_webkit.so.
 
