@@ -150,7 +150,7 @@ Test the current version before releasing it:
 
 <h2>Create the tarball to be released</h2>
 
-<pre>
+<pre>svn c
 Note: This must be done on Unix. Otherwise, Posix permissions may get
 lost and you may get problems with wrong EOL characters.
 
@@ -217,13 +217,13 @@ Test the released tarball, preferably under Unix and also under Windows.
 <h2>Update Home Page</h2>
 
 <pre>
-[ ] Update <a href="http://webware.sf.net">webware.sf.net</a>:
+[ ] Update <a href="http://webware.sourceforge.net">webware.sourceforge.net</a>:
 
     * Updates to that home page should go through CVS at SourceForge.
       In general you should not be editing files directly on the HomePage
       site because that site only has read-only access to CVS.
 
-    * Note that the <a href="http://webware.sf.net">webware.sf.net</a> home page is not really used any more.
+    * Note that the <a href="http://webware.sourceforge.net">webware.sourceforge.net</a> home page is not really used any more.
       The index page is redirected via .htaccess to <a href="http://www.w4py.org">www.w4py.org</a>
       (nevertheless, the site is still available and can still be
       accessed as <a href="http://webware.sourceforge.net/oldsite/">http://webware.sourceforge.net/oldsite/</a>).
@@ -242,15 +242,15 @@ Test the released tarball, preferably under Unix and also under Windows.
       * Checkin the updated version:
         > cvs ci
 
-    * We should still copy and install Webware in the <a href="http://webware.sf.net">webware.sf.net</a>
+    * We should still copy and install Webware in the <a href="http://webware.sourceforge.net">webware.sourceforge.net</a>
       web page directory so the documentation can be browsed online there.
       Make sure you install this from the tarball.
 
     * Copy the tarball to your SourceForge account.
-      > scp Webware-VER.tar.gz $USER@web.sf.net:
+      > scp Webware-VER.tar.gz $USER@web.sourceforge.net:
 
     * Login to the SourceForge account.
-      > ssh -t $USER,webware@shell.sf.net
+      > ssh -t $USER,webware@shell.sourceforge.net
 
     * Extract the Webware folder and create a symbolic link to it:
       > cd /home/project-web/webware/htdocs/
@@ -268,11 +268,11 @@ Test the released tarball, preferably under Unix and also under Windows.
       > cvs -q up -dP
 
     * Verify that the home page changes are correct by browsing to
-      <a href="http://webware.sf.net">Webware.sf.net</a> and double-checking
+      <a href="http://webware.sourceforge.net">Webware.sourceforge.net</a> and double-checking
       all of the updated links, including the download link.
-      Also check <a href="http://webware.sf.net/Webware/Docs/">Webware.sf.net/Webware/Docs/</a>.
+      Also check <a href="http://webware.sourceforge.net/Webware/Docs/">Webware.sourceforge.net/Webware/Docs/</a>.
 
-    * Add a news item to the <a href="http://sf.net/projects/webware/">Webware Project Page</a> at SourceForge.
+    * Add a news item to the <a href="https://sourceforge.net/projects/webware/">Webware Project Page</a> at SourceForge.
 
 [ ] Update <a href="http://www.w4py.org">www.w4py.org</a>:
 
@@ -303,9 +303,9 @@ Test the released tarball, preferably under Unix and also under Windows.
     Use the previous releases as examples.
 
     For pre-releases, just the following:
-      * To: <a href="webware-discuss@lists.sf.net">webware-discuss@lists.sf.net</a>
-      * http://prdownloads.sf.net/webware/Webware-VER.tar.gz
-      * Report all problems to webware-discuss@lists.sf.net.
+      * To: <a href="webware-discuss@lists.sourceforge.net">webware-discuss@lists.sourceforge.net</a>
+      * http://prdownloads.lists.sourceforge.net/webware/Webware-VER.tar.gz
+      * Report all problems to webware-discuss@lists.lists.sourceforge.net.
         Please include all appropriate version numbers including Webware,
         Python, web server, op sys, browser, database, etc. If running
         the app server, please specify flavor (eg, ThreadedAppServer)
@@ -319,7 +319,7 @@ Announce on mailing lists:
         (or post to <a href="news:comp.lang.python">comp.lang.python</a>)
     [ ] <a href="mailto:python-announce@python.org">python-announce@python.org</a>
         (or post to <a href="news:comp.lang.python.announce">comp.lang.python.announce</a>)
-    [ ] <a href="mailto:webware-announce@lists.sf.net">webware-announce@lists.sf.net</a>
+    [ ] <a href="mailto:webware-announce@lists.sourceforge.net">webware-announce@lists.sourceforge.net</a>
     [ ] <a href="mailto:db-sig@python.org">db-sig@python.org</a>
         - Only if MiddleKit was updated
         - Make custom message focused on MiddleKit
@@ -327,7 +327,7 @@ Announce on mailing lists:
 Update:
     [ ] <a href="http://wiki.python.org/moin/WebFrameworks">Web Frameworks for Python</a>
     [ ] <a href="http://www.python.org/pypi/Webware%20for%20Python/">PyPI</a> (aka "Cheese Shop")
-    [ ] <a href="http://freshmeat.net">freshmeat.net</a>
+    [ ] <a href="http://freecode.com">free(code)</a>
 
 [ ] Review/search for other places where the announcement can be made.
 </pre>
@@ -351,11 +351,11 @@ Update:
     * Make sure the release notes have been copied properly.
 
 [ ] Check that the following were updated:
-    [ ] <a href="http://freshmeat.net">freshmeat.net</a>
+    [ ] <a href="http://freecode.com">free(code)</a>
 
 [ ] Look for follow up messages on <a href="news:comp.lang.python">comp.lang.python</a>
 
-[ ] Test drive the <a href="http://webware.sf.net">home page</a>, <a href="https://sourceforge.net/projects/webware/">project page</a> and <a href="https://sourceforge.net/projects/webware/files/">download</a>.
+[ ] Test drive the <a href="http://webware.sourceforge.net">home page</a>, <a href="https://sourceforge.net/projects/webware/">project page</a> and <a href="https://sourceforge.net/projects/webware/files/">download</a>.
 
 [ ] Check the <a href="https://sourceforge.net/projects/webware/files/Webware/stats/timeline">download counter</a> and <a href="https://sf.net/project/stats/?group_id=4866">activity statistics</a> on SourceForge.
 </pre>
