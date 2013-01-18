@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<meta name="generator" content="Docutils 0.8: http://docutils.sourceforge.net/" />
+<meta name="generator" content="Docutils 0.10: http://docutils.sourceforge.net/" />
 <title>Configuration Guide</title>
 <link rel="stylesheet" href="../../Docs/Doc.css" type="text/css" />
 </head>
@@ -418,7 +418,7 @@ You can even forward from one error page to another error page unless
 you are not creating loops.  In an <tt class="docutils literal">HTTPNotFound</tt> error page, the servlet
 needs to determine the erroneous URI with <tt class="docutils literal"><span class="pre">self.request().previousURI()</span></tt>,
 since the <tt class="docutils literal">uri()</tt> method returns the URI of the current servlet, which
-in the error page itself.  When a custom error page is displayed, the
+is the error page itself.  When a custom error page is displayed, the
 standard error handler will not be called.  So if you want to generate
 an error email or saved error report, you must do so explicitly in your
 error page servlet.  Default: <tt class="docutils literal">None</tt> (no custom error page).</p>
