@@ -35,26 +35,12 @@ load-plugins=
 
 [MESSAGES CONTROL]
 
-# Enable only checker(s) with the given id(s). This option conflict with the
-# disable-checker option
-#enable-checker=
-
-# Enable all checker(s) except those with the given id(s). This option conflict
-# with the disable-checker option
-#disable-checker=
-
-# Enable all messages in the listed categories.
-#enable-msg-cat=
-
-# Disable all messages in the listed categories.
-#disable-msg-cat=
-
 # Enable the message(s) with the given id(s).
-#enable-msg=
+#enable=
 
 # Disable the message(s) with the given id(s).
-#disable-msg=
-disable-msg=W0122,W0142,W0201,W0212,W0223,W0403,W0603,W0613,W0614,W0621,W0622,W0703
+#disable=
+disable=exec-statement,star-args,attribute-defined-outside-init,protected-access,abstract-method,relative-import,global-statement,unused-argument,unused-wildcard-import,redefined-outer-name,redefined-builtin,broad-except
 
 
 [REPORTS]
@@ -85,12 +71,6 @@ evaluation=10.0 - ((float(5 * error + warning + refactor + convention) / stateme
 # evaluation report (R0004).
 comment=no
 
-# Enable the report(s) with the given id(s).
-#enable-report=
-
-# Disable the report(s) with the given id(s).
-#disable-report=
-
 
 # checks for :
 # * doc strings
@@ -107,9 +87,13 @@ comment=no
 # Required attributes for module, separated by a comma
 required-attributes=
 
-# Regular expression which should only match functions or classes name which do
-# not require a docstring
+# Regular expression which should only match function or class names that do
+# not require a docstring.
 no-docstring-rgx=__.*__
+
+# Minimum line length for functions/classes that require docstrings, shorter
+# ones are exempt.
+docstring-min-length=-1
 
 # Regular expression which should only match correct module names
 module-rgx=(([a-z_][a-z0-9_]*)|([A-Z][a-zA-Z0-9]+))$
@@ -187,7 +171,7 @@ acquired-members=REQUEST,acl_users,aq_parent
 init-import=no
 
 # A regular expression matching names used for dummy variables (i.e. not used).
-dummy-variables-rgx=_|dummy
+dummy-variables-rgx=_$|dummy
 
 # List of additional names supposed to be defined in builtins. Remember that
 # you should avoid to define new builtins when possible.
@@ -230,8 +214,8 @@ max-locals=30
 max-returns=6
 
 # Maximum number of branch for function / method body
-#max-branchs=12
-max-branchs=30
+#max-branches=12
+max-branches=30
 
 # Maximum number of statements in function / method body
 #max-statements=50
@@ -289,6 +273,9 @@ int-import-graph=
 # Maximum number of characters on a single line.
 #max-line-length=80
 max-line-length=100
+
+# Regexp for a line that is allowed to be longer than the limit.
+ignore-long-lines=^\s*(# )?<?https?://\S+>?$
 
 # Maximum number of lines in a module
 #max-module-lines=1000
