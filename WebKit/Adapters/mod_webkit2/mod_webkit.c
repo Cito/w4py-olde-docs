@@ -52,7 +52,7 @@ typedef struct wkcfg {
 } wkcfg;
 
 /* Use to log errors */
-#define log_error(message, server) ap_log_error(APLOG_MARK, APLOG_ERR, 0, server, message)
+#define log_error(message, server) ap_log_error(APLOG_MARK, APLOG_ERR, 0, server, "%s", message)
 
 /*
  * Declare ourselves so the configuration routines can find and know us.
@@ -63,7 +63,7 @@ module AP_MODULE_DECLARE_DATA webkit_module;
 /* A quick debug logging function, only prints if LogLevel=debug */
 #if 0 /* 1 to enable */
 int log_debug(char* msg, request_rec* r) {
-    ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, msg);
+    ap_log_error(APLOG_MARK, APLOG_DEBUG, 0, r->server, "%s", msg);
     return 0;
 }
 #else
