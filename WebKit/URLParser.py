@@ -211,7 +211,9 @@ class ContextParser(URLParser):
                     # to add the __init__.py file. So we try to create one:
                     if os.path.exists(dir):
                         f = os.path.join(dir, '__init__.py')
-                        if not os.path.exists(f):
+                        if (not os.path.exists(f)
+                                and not os.path.exists(f + 'c')
+                                and not os.path.exists(f + 'o')):
                             print ("Creating __init__.py file"
                                 " for context '%s'" % name)
                             try:
