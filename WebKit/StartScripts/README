@@ -9,7 +9,7 @@ Note that these scripts also serve as kill scripts for stopping the app server.
 Windows user should use the AppServerService script instead.
 
 Refer to the documentation of your Unix version for instructions how to install
-such start scripts on your system. For instance, on SuSE Linux, you would copy
+such start scripts on your system. For instance, on SUSE Linux, you would copy
 the start script to /etc/init.d and enable it with the insserv command. Other
 Unix systems may use a different folder for start scripts or you will have to
 set symbolic links manually to enable the script.

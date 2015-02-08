@@ -1039,7 +1039,7 @@ working directory.
 
 In order to start WebKit at boot time, copy this script to the system
 folder that is destined for start scripts, which is usually ``/etc/init.d/``
-(e.g. for SuSE or Debian Linux or Solaris) or ``/etc/rc.d/init.d/`` (e.g. for
+(e.g. for SUSE or Debian Linux or Solaris) or ``/etc/rc.d/init.d/`` (e.g. for
 RedHat or Mandrake Linux).  Instead of copying the script, you can also make
 a symbolic link refering to the script located in your working directory.
 If you do this, the script will be able to determine the location of the
@@ -1124,7 +1124,7 @@ is ``/etc/init.d/webkit``, you would create the symbolic links like that::
 
 Some systems also provide a command line tool for this purpose, which will
 depend on the flavor of Unix you are using.  For instance, you will use
-``insserv`` on SuSE Linux, ``chkconfig`` for RedHat (Fedora),
+``insserv`` on SUSE Linux, ``chkconfig`` for RedHat (Fedora),
 ``update-rc.d`` for Debian (Ubuntu) or ``rc-update`` for Gentoo.
 
 Take care to launch the script after your web server and database and other

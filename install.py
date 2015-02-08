@@ -548,7 +548,7 @@ class Installer(object):
             ex = os.path.exists
             if (ex('/etc/rc.status')
                     and ex('/sbin/startproc') and ex('/sbin/killproc')):
-                s = 'SuSE'
+                s = 'SUSE'
             elif (ex('/etc/init.d/functions')
                     or ex('/etc/rc.d/init.d/functions')):
                 s = 'RedHat'

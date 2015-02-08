@@ -16,26 +16,29 @@
 
 # If you store this script in your Webware working directory
 # and create a symlink to it as /etc/init.d/webkit_appname,
-# it will try to guess your configuration parameters. You can
-# make changes either directly here or you can also override
-# the configuration in the Launch.py script.
+# it will try to guess your configuration parameters. Otherwise
+# you need to hard code the path to the working directory here.
+# You can make changes either directly here in the start script or
+# you can also override the configuration in the Launch.py script.
 
-# The name of your Webware application:
-APP_NAME=`basename "$0"`
-
-# The location of the start sript:
-if [ -h "$0" ]; then
+# The location and name of the start sript:
+START_SCRIPT="$0"
+APP_NAME=`basename "$START_SCRIPT"`
+if [ -h "$START_SCRIPT" ]; then
     # Get the target file if start script is given as a link:
-    START_SCRIPT=`echo "import os;p='$0'
+    START_SCRIPT=`echo "import os;p='$START_SCRIPT'
 while os.path.islink(p):
     p = os.path.join(os.path.dirname(p), os.readlink(p))
 print p" | python`
-else
-    START_SCRIPT="$0"
 fi
 
-# The working directory or path to WebKit:
+# The location of the working directory:
 WORK_DIR=`dirname "$START_SCRIPT"`
+if [ "$WORK_DIR" = "/etc/init.d" ]; then
+    # Put hard coded path to working directory here:
+    WORK_DIR="."
+fi
+
 # Make sure to have the absolute path:
 test -d "$WORK_DIR" || exit 5
 WORK_DIR=`cd "$WORK_DIR" 2>/dev/null && pwd`
