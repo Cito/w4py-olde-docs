@@ -179,6 +179,7 @@ class Scheduler(Thread):
             handle.reset(time(), 0, task, True)
         else:
             handle = TaskHandler(self, time(), 0, task, name)
+        handle.setOnDemand()
         self.setOnDemand(handle)
 
     def addDailyAction(self, hour, minute, task, name):

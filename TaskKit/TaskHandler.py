@@ -29,7 +29,7 @@ class TaskHandler(object):
         self._reregister = True
         self._rerun = False
         self._period = abs(period)
-
+        self._isOnDemand = False
 
     ## Scheduling ##
 
@@ -93,7 +93,10 @@ class TaskHandler(object):
 
     def isOnDemand(self):
         """Return True if this task is not scheduled for periodic execution."""
-        return self._period == 0
+        return self._isOnDemand
+
+    def setOnDemand(self, onDemand=True):
+        self._isOnDemand = bool(onDemand)
 
     def runOnCompletion(self):
         """Request that this task be re-run after its current completion.
