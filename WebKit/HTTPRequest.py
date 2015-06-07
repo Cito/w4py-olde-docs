@@ -116,20 +116,16 @@ class HTTPRequest(Request):
             if debug:
                 print "Cannot get fieldstorage list."
         if fieldItems:
-            for value in fieldItems:
-                fields.setdefault(value.name, []).append(value)
-            getValue = attrgetter('value')
-            for key, value in fields.iteritems():
-                if len(value) > 1:
-                    value = map(getValue, value)
+            for item in fieldItems:
+                if item.filename:
+                    if debug:
+                        print "Uploaded file found:", item.filename
+                    fields.setdefault(item.name, []).append(item)
                 else:
-                    value = value[0]
-                    if value.filename:
-                        if debug:
-                            print "Uploaded file found:", value.filename
-                    else:
-                        value = value.value
-                fields[key] = value
+                    fields.setdefault(item.name, []).append(item.value)
+            for key, value in fields.iteritems():
+                if len(value) == 1:
+                    fields[key] = value[0]
         self._fieldStorage, self._fields = fieldStorage, fields
 
         # We use Tim O'Malley's Cookie class to get the cookies,
